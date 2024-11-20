@@ -10,6 +10,7 @@ use FluxErp\Providers\EventServiceProvider;
 use FluxErp\Providers\MorphMapServiceProvider;
 use FluxErp\Providers\SanctumServiceProvider;
 use FluxErp\Providers\ViewServiceProvider;
+use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Laravel\Scout\ScoutServiceProvider;
@@ -32,9 +33,30 @@ use function Orchestra\Testbench\package_path;
 
 abstract class TestCase extends BaseTestCase
 {
-    use CreatesApplication, DatabaseTransactions;
+    use DatabaseTransactions;
+    use CreatesApplication {
+        CreatesApplication::createApplication as createBaseApplication;
+    }
 
     protected $loadEnvironmentVariables = true;
+
+    public function createApplication(): Application
+    {
+        $app = $this->createBaseApplication();
+
+        // copy the schema from the package to the testbench skeleton
+        if (! file_exists(database_path('migrations/schema'))) {
+            mkdir(database_path('migrations/schema'), recursive: true);
+        }
+        if (! file_exists(database_path('migrations/schema/mysql-schema.sql'))) {
+            copy(
+                __DIR__ . '/../database/schema/mysql-schema.sql',
+                database_path('migrations/schema/mysql-schema.sql')
+            );
+        }
+
+        return $app;
+    }
 
     protected function setUp(): void
     {
@@ -44,12 +66,6 @@ abstract class TestCase extends BaseTestCase
         }
 
         parent::setUp();
-        // copy the schema from the package to the testbench skeleton
-        copy(__DIR__ . '/../../database/schema/mysql-schema.sql', database_path('migrations'));
-
-        if (! file_exists(public_path('flux'))) {
-            symlink(package_path('public'), public_path('flux'));
-        }
     }
 
     public function getPackageProviders($app): array
