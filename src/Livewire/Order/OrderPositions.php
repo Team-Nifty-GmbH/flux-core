@@ -308,11 +308,12 @@ class OrderPositions extends OrderPositionList
     #[Renderless]
     public function addOrderPosition(): bool
     {
+        $this->orderPosition->is_net = $this->order->getPriceList()->is_net;
         $this->orderPosition->order_id = $this->order->id;
 
         try {
             $this->orderPosition->save();
-        } catch (ValidationException $e) {
+        } catch (UnauthorizedException|ValidationException $e) {
             exception_to_notifications($e, $this);
 
             return false;

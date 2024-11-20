@@ -13,7 +13,9 @@ use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
+use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
+use FluxErp\Models\Product;
 use FluxErp\Models\VatRate;
 use FluxErp\Tests\Livewire\BaseSetup;
 use Livewire\Livewire;
@@ -21,6 +23,8 @@ use Livewire\Livewire;
 class OrderPositionsTest extends BaseSetup
 {
     protected string $livewireComponent = OrderPositions::class;
+
+    protected OrderForm $orderForm;
 
     protected function setUp(): void
     {
@@ -36,8 +40,6 @@ class OrderPositionsTest extends BaseSetup
             'client_id' => $this->dbClient->id,
             'contact_id' => $contact->id,
         ]);
-
-        $currency = Currency::factory()->create();
 
         $language = Language::factory()->create();
 
@@ -80,24 +82,22 @@ class OrderPositionsTest extends BaseSetup
             ]);
 
         $this->order->calculatePrices()->save();
+
+        $this->orderForm = new OrderForm(Livewire::new(OrderPositions::class), 'order');
+        $this->orderForm->fill($this->order);
     }
 
     public function test_renders_successfully()
     {
-        $form = new OrderForm(Livewire::new(OrderPositions::class), 'order');
-        $form->fill($this->order);
-
-        Livewire::test(OrderPositions::class, ['order' => $form])
+        Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
             ->assertStatus(200);
     }
 
     public function test_can_delete_order_position()
     {
         $orderPosition = $this->order->orderPositions->first();
-        $form = new OrderForm(Livewire::new(OrderPositions::class), 'order');
-        $form->fill($this->order);
 
-        Livewire::test(OrderPositions::class, ['order' => $form])
+        Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
             ->call('editOrderPosition', $orderPosition->id)
             ->assertStatus(200)
             ->assertHasNoErrors()
@@ -117,10 +117,7 @@ class OrderPositionsTest extends BaseSetup
 
     public function test_recalculate_prices()
     {
-        $form = new OrderForm(Livewire::new(OrderPositions::class), 'order');
-        $form->fill($this->order);
-
-        Livewire::test(OrderPositions::class, ['order' => $form])
+        Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
             ->set('selected', ['*'])
             ->call('recalculateOrderPositions')
             ->assertStatus(200)
@@ -132,10 +129,7 @@ class OrderPositionsTest extends BaseSetup
 
     public function test_can_show_related_columns()
     {
-        $form = new OrderForm(Livewire::new(OrderPositions::class), 'order');
-        $form->fill($this->order);
-
-        $component = Livewire::test(OrderPositions::class, ['order' => $form]);
+        $component = Livewire::test(OrderPositions::class, ['order' => $this->orderForm]);
 
         $component->set('enabledCols', array_merge($component->get('enabledCols'), ['order.uuid']))
             ->call('loadData')
@@ -145,5 +139,43 @@ class OrderPositionsTest extends BaseSetup
         $this->assertContains('order.uuid', $component->get('enabledCols'));
         $this->assertArrayHasKey('order.uuid', $component->get('data.data.0'));
         $this->assertEquals($this->order->uuid, $component->get('data.data.0')['order.uuid']);
+    }
+
+    public function test_quick_add_order_position()
+    {
+        PriceList::query()
+            ->where('is_default', true)
+            ->update(['is_default' => false]);
+        $product = Product::factory()
+            ->for(VatRate::factory())
+            ->has(
+                Price::factory()
+                    ->for(
+                        PriceList::factory()->state([
+                            'is_default' => true,
+                            'is_net' => false,
+                        ])
+                    ),
+                'prices'
+            )
+            ->create();
+        $this->order->update(['price_list_id' => $product->prices->first()->price_list_id]);
+        $orderPositionCount = $this->order->orderPositions()->count();
+
+        Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
+            ->set('orderPosition.product_id', $product->id)
+            ->call('quickAdd')
+            ->assertStatus(200)
+            ->assertHasNoErrors()
+            ->assertReturned(true);
+
+        $this->assertEquals($orderPositionCount + 1, $this->order->orderPositions()->count());
+        $newOrderPosition = $this->order->orderPositions()->where('product_id', $product->id)->first();
+        $productNetPrice = $product->prices->first()->getNet($product->vatRate->rate_percentage);
+        $productGrossPrice = $product->prices->first()->getGross($product->vatRate->rate_percentage);
+
+        $this->assertNotEquals($productNetPrice, $productGrossPrice);
+        $this->assertEquals($productNetPrice, $newOrderPosition->unit_net_price);
+        $this->assertEquals($productGrossPrice, $newOrderPosition->unit_gross_price);
     }
 }
