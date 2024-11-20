@@ -9,12 +9,14 @@ class CreateUsersTable extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->char('uuid', 36);
+            $table->char('uuid', 36)->after('id');
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('uuid');
+        });
     }
 }
