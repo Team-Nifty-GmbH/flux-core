@@ -30,7 +30,7 @@ class DashboardTest extends BaseSetup
             public function render(): string
             {
                 return <<<'blade'
-                    <div id='sample-component'>Hello from sample component</div>
+                    <div id="sample-component">Hello from sample component</div>
                 blade;
             }
 
@@ -47,7 +47,7 @@ class DashboardTest extends BaseSetup
             public function render(): string
             {
                 return <<<'blade'
-                    <div id='sample-component-2'>Hello from sample component 2</div>
+                    <div id="sample-component-2">Hello from sample component 2</div>
                 blade;
             }
 
