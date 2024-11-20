@@ -32,6 +32,9 @@
                             {{ trim(($address->firstname ?? '') . ' ' . ($address->lastname ?? '')) }}
                         </div>
                         <div>
+                            {{ $address->addition ?? '' }}
+                        </div>
+                        <div>
                             {{ $address->street ?? '' }}
                         </div>
                         <div>
