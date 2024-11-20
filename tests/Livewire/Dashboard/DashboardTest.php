@@ -176,7 +176,7 @@ class DashboardTest extends BaseSetup
             ->test(Dashboard::class)
             ->call('saveWidgets', [
                 [
-                    'id' => 'f1346af5-6958-4b1c-8305-726ede2e3259',
+                    'id' => Str::uuid(),
                     'height' => 2,
                     'width' => 2,
                     'order_column' => 0,
