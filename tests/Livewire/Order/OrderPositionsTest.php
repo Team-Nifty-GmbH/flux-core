@@ -143,27 +143,30 @@ class OrderPositionsTest extends BaseSetup
 
     public function test_quick_add_order_position()
     {
-        PriceList::query()
-            ->where('is_default', true)
-            ->update(['is_default' => false]);
+        $this->order->priceList->update(['is_net' => false]);
         $product = Product::factory()
             ->for(VatRate::factory())
             ->has(
-                Price::factory()
-                    ->for(
-                        PriceList::factory()->state([
-                            'is_default' => true,
-                            'is_net' => false,
-                        ])
-                    ),
+                Price::factory()->state(['price_list_id' => $this->order->price_list_id]),
                 'prices'
             )
             ->create();
-        $this->order->update(['price_list_id' => $product->prices->first()->price_list_id]);
         $orderPositionCount = $this->order->orderPositions()->count();
+        /** @var Price $productPrice */
+        $productPrice = $product->prices->first();
 
         Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
             ->set('orderPosition.product_id', $product->id)
+            ->call('changedProductId', $product->id)
+            ->assertSet(
+                'orderPosition.unit_price',
+                $grossPrice = $productPrice->getGross($product->vatRate->rate_percentage)
+            )
+            ->assertNotSet(
+                'orderPosition.unit_price',
+                $netPrice = $productPrice->getNet($product->vatRate->rate_percentage)
+            )
+            ->assertSet('orderPosition.is_net', false)
             ->call('quickAdd')
             ->assertStatus(200)
             ->assertHasNoErrors()
@@ -171,11 +174,9 @@ class OrderPositionsTest extends BaseSetup
 
         $this->assertEquals($orderPositionCount + 1, $this->order->orderPositions()->count());
         $newOrderPosition = $this->order->orderPositions()->where('product_id', $product->id)->first();
-        $productNetPrice = $product->prices->first()->getNet($product->vatRate->rate_percentage);
-        $productGrossPrice = $product->prices->first()->getGross($product->vatRate->rate_percentage);
 
-        $this->assertNotEquals($productNetPrice, $productGrossPrice);
-        $this->assertEquals($productNetPrice, $newOrderPosition->unit_net_price);
-        $this->assertEquals($productGrossPrice, $newOrderPosition->unit_gross_price);
+        $this->assertNotEquals($netPrice, $grossPrice);
+        $this->assertEquals($netPrice, $newOrderPosition->unit_net_price);
+        $this->assertEquals($grossPrice, $newOrderPosition->unit_gross_price);
     }
 }
