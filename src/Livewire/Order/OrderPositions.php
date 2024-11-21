@@ -292,7 +292,9 @@ class OrderPositions extends OrderPositionList
     #[Renderless]
     public function editOrderPosition(?OrderPosition $orderPosition = null): void
     {
-        $this->orderPosition->fill($orderPosition);
+        if ($orderPosition->exists) {
+            $this->orderPosition->fill($orderPosition);
+        }
 
         $this->js(<<<'JS'
             $openModal('edit-order-position');
@@ -303,12 +305,17 @@ class OrderPositions extends OrderPositionList
     public function changedProductId(Product $product): void
     {
         $this->orderPosition->fillFromProduct($product);
+        $this->orderPosition->is_net = $this->order->getPriceList()->is_net;
+        $this->orderPosition->unit_price = PriceHelper::make($this->orderPosition->getProduct())
+            ->setPriceList($this->order->getPriceList())
+            ->setContact($this->order->getContact())
+            ->price()
+            ?->price ?? 0;
     }
 
     #[Renderless]
     public function addOrderPosition(): bool
     {
-        $this->orderPosition->is_net = $this->order->getPriceList()->is_net;
         $this->orderPosition->order_id = $this->order->id;
 
         try {
@@ -350,13 +357,6 @@ class OrderPositions extends OrderPositionList
     public function quickAdd(): bool
     {
         $this->orderPosition->fillFromProduct();
-
-        $this->orderPosition->unit_price = PriceHelper::make($this->orderPosition->getProduct())
-            ->setPriceList($this->order->getPriceList())
-            ->setContact($this->order->getContact())
-            ->price()
-            ?->price
-            ?? 0;
 
         return $this->addOrderPosition();
     }
