@@ -609,6 +609,7 @@ class FluxServiceProvider extends ServiceProvider
                 Menu::register(route: 'settings.scheduling');
                 Menu::register(route: 'settings.queue-monitor');
                 Menu::register(route: 'settings.plugins');
+                Menu::register(route: 'settings.search');
             }
         );
     }
