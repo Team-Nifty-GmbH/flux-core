@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\Forms;
 
 use FluxErp\Actions\OrderPosition\CreateOrderPosition;
+use FluxErp\Actions\OrderPosition\DeleteOrderPosition;
 use FluxErp\Actions\OrderPosition\UpdateOrderPosition;
 use FluxErp\Models\Product;
 use FluxErp\Models\Warehouse;
@@ -105,6 +106,7 @@ class OrderPositionForm extends FluxForm
         return [
             'create' => CreateOrderPosition::class,
             'update' => UpdateOrderPosition::class,
+            'delete' => DeleteOrderPosition::class,
         ];
     }
 
@@ -121,13 +123,13 @@ class OrderPositionForm extends FluxForm
 
         $this->vat_rate_id = $this->product->vat_rate_id;
         $this->name = $this->product->name;
-        $this->description = $this->product->description;
         $this->product_number = $this->product->product_number;
         $this->ean_code = $this->product->ean;
         $this->unit_gram_weight = $this->product->weight_gram;
         $this->purchase_price = $this->product->purchasePrice($this->amount)?->price ?? 0;
 
         $this->warehouse_id ??= Warehouse::default()?->id;
+        $this->description ??= $this->product->description;
     }
 
     public function getProduct(): Product

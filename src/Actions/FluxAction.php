@@ -73,6 +73,10 @@ abstract class FluxAction
 
     public static function canPerformAction(bool $throwException = true): bool
     {
+        if (! static::hasPermission()) {
+            return true;
+        }
+
         try {
             resolve_static(
                 Permission::class,
@@ -177,6 +181,18 @@ abstract class FluxAction
     public function mergeRules(array $rules): static
     {
         $this->rules = array_merge($this->rules, $rules);
+
+        return $this;
+    }
+
+    public function addRules(array $rules): static
+    {
+        foreach ($rules as $key => $value) {
+            data_set($this->rules, $key, array_merge(
+                Arr::wrap(data_get($this->rules, $key, [])),
+                Arr::wrap($value)
+            ));
+        }
 
         return $this;
     }

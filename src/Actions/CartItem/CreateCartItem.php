@@ -12,6 +12,12 @@ use FluxErp\Rulesets\CartItem\CreateCartItemRuleset;
 
 class CreateCartItem extends FluxAction
 {
+    protected ?Cart $cart;
+
+    protected ?Product $product = null;
+
+    protected static bool $hasPermission = false;
+
     protected function getRulesets(): string|array
     {
         return CreateCartItemRuleset::class;
@@ -26,34 +32,36 @@ class CreateCartItem extends FluxAction
     {
         $this->data['amount'] ??= 1;
 
-        $product = null;
-        if ($productId = data_get($this->data, 'product_id')) {
-            $product = Product::query()
-                ->whereKey($productId)
-                ->first(['vat_rate_id', 'name']);
-            $this->data['vat_rate_id'] ??= $product?->vat_rate_id;
-            $this->data['name'] ??= $product?->name;
-        }
-
-        $cart = resolve_static(Cart::class, 'query')
-            ->with('authenticatable')
-            ->whereKey($this->data['cart_id'])
-            ->sole();
-
-        if (
-            $cart->authenticatable instanceof Address
-            && ! data_get($this->data, 'price')
-            && $product
-        ) {
-            $this->data['price'] = PriceHelper::make($product)
-                ->setContact($cart->authenticatable->contact)
-                ->price()
-                ->price;
-        }
-
         $cartItem = app(CartItem::class, ['attributes' => $this->data]);
         $cartItem->save();
 
         return $cartItem->fresh();
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->cart = resolve_static(Cart::class, 'query')
+            ->with('authenticatable')
+            ->whereKey(data_get($this->data, 'cart_id'))
+            ->first();
+
+        if ($productId = data_get($this->data, 'product_id')) {
+            $this->product = Product::query()
+                ->whereKey($productId)
+                ->first(['vat_rate_id', 'name']);
+            $this->data['vat_rate_id'] ??= $this->product?->vat_rate_id;
+            $this->data['name'] ??= $this->product?->name;
+        }
+
+        if (
+            $this->cart?->authenticatable instanceof Address
+            && is_null(data_get($this->data, 'price'))
+            && $this->product
+        ) {
+            $this->data['price'] = PriceHelper::make($this->product)
+                ->setContact($this->cart->authenticatable->contact)
+                ->price()
+                ?->price;
+        }
     }
 }

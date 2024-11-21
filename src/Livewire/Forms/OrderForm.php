@@ -151,6 +151,8 @@ class OrderForm extends FluxForm
     #[Locked]
     public bool $hasContactDeliveryLock = false;
 
+    protected PriceList $priceList;
+
     protected function getActions(): array
     {
         return [
@@ -168,6 +170,7 @@ class OrderForm extends FluxForm
                 'parent',
                 'orderType:id,order_type_enum',
                 'contact:id,has_delivery_lock',
+                'currency:id,symbol',
             ]);
             $values = array_merge(
                 $values->toArray(),
@@ -222,7 +225,7 @@ class OrderForm extends FluxForm
 
     public function getPriceList(): ?PriceList
     {
-        return resolve_static(PriceList::class, 'query')
+        return $this->priceList = resolve_static(PriceList::class, 'query')
             ->whereKey($this->price_list_id)
             ->first([
                 'id',

@@ -58,6 +58,7 @@ class OrderPositions extends OrderPositionList
         return array_merge(
             parent::getListeners(),
             [
+                'create-tasks' => 'createTasks',
                 'order:add-products' => 'addProducts',
             ]
         );
@@ -228,44 +229,25 @@ class OrderPositions extends OrderPositionList
         );
     }
 
-    protected function getResultFromQuery(Builder $query): array
+    protected function itemToArray($item): array
     {
-        $returnKeys = $this->getReturnKeys();
-        $tree = $query->addSelect(
-            array_filter(
-                $returnKeys,
-                fn (string $key) => ! in_array(
-                    $key,
-                    [
-                        'href',
-                        'depth',
-                        'has_children',
-                        'unit_price',
-                        'alternative_tag',
-                        'indentation',
-                    ]
-                )
-            )
-        )
-            ->get()
-            ->toArray();
+        $item = parent::itemToArray($item);
 
-        foreach ($tree as &$item) {
-            $item = Arr::only(Arr::dot($item), $returnKeys);
-            $item['indentation'] = '';
-            $item['unit_price'] = $item['is_net'] ? ($item['unit_net_price'] ?? 0) : ($item['unit_gross_price'] ?? 0);
-            $item['alternative_tag'] = $item['is_alternative'] ? __('Alternative') : '';
+        $item['indentation'] = '';
+        $item['unit_price'] = data_get($item, 'is_net')
+            ? data_get($item, 'unit_net_price', 0)
+            : data_get($item, 'unit_gross_price', 0);
+        $item['alternative_tag'] = data_get($item, 'is_alternative') ? __('Alternative') : '';
 
-            if (($depth = str_word_count($item['slug_position'], 0, '.')) > 0) {
-                $indent = $depth * 20;
-                $item['indentation'] = <<<HTML
+        if (($depth = str_word_count(data_get($item, 'slug_position', ''), 0, '.')) > 0) {
+            $indent = $depth * 20;
+            $item['indentation'] = <<<HTML
                     <div class="text-right indent-icon" style="width:{$indent}px;">
                     </div>
                     HTML;
-            }
         }
 
-        return $tree;
+        return $item;
     }
 
     #[Renderless]
@@ -310,11 +292,25 @@ class OrderPositions extends OrderPositionList
     #[Renderless]
     public function editOrderPosition(?OrderPosition $orderPosition = null): void
     {
-        $this->orderPosition->fill($orderPosition);
+        if ($orderPosition->exists) {
+            $this->orderPosition->fill($orderPosition);
+        }
 
         $this->js(<<<'JS'
             $openModal('edit-order-position');
         JS);
+    }
+
+    #[Renderless]
+    public function changedProductId(Product $product): void
+    {
+        $this->orderPosition->fillFromProduct($product);
+        $this->orderPosition->is_net = $this->order->getPriceList()->is_net;
+        $this->orderPosition->unit_price = PriceHelper::make($this->orderPosition->getProduct())
+            ->setPriceList($this->order->getPriceList())
+            ->setContact($this->order->getContact())
+            ->price()
+            ?->price ?? 0;
     }
 
     #[Renderless]
@@ -324,7 +320,7 @@ class OrderPositions extends OrderPositionList
 
         try {
             $this->orderPosition->save();
-        } catch (ValidationException $e) {
+        } catch (UnauthorizedException|ValidationException $e) {
             exception_to_notifications($e, $this);
 
             return false;
@@ -362,13 +358,6 @@ class OrderPositions extends OrderPositionList
     {
         $this->orderPosition->fillFromProduct();
 
-        $this->orderPosition->unit_price = PriceHelper::make($this->orderPosition->getProduct())
-            ->setPriceList($this->order->getPriceList())
-            ->setContact($this->order->getContact())
-            ->price()
-            ?->price
-            ?? 0;
-
         return $this->addOrderPosition();
     }
 
@@ -401,6 +390,7 @@ class OrderPositions extends OrderPositionList
         }
 
         $this->loadData();
+        $this->recalculateOrderTotals();
 
         $this->orderPosition->reset();
     }
@@ -423,6 +413,23 @@ class OrderPositions extends OrderPositionList
         $this->recalculateOrderTotals();
 
         $this->reset('selected');
+    }
+
+    #[Renderless]
+    public function deleteOrderPosition(): bool
+    {
+        try {
+            $this->orderPosition->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+        $this->recalculateOrderTotals();
+
+        return true;
     }
 
     protected function recalculateOrderTotals(): void

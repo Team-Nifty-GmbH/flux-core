@@ -15,14 +15,16 @@ class ActiveTaskTimes extends ValueList
             ->with(['user:id,name', 'contact:id,invoice_address_id', 'contact.invoiceAddress'])
             ->get();
 
-        $this->items = $query->map(fn ($item) => [
+        $this->items = $query->map(fn (WorkTime $item) => [
             'id' => $item->id,
-            'label' => $item->name . ' (' . $item->contact->invoiceAddress->getLabel() . ')',
+            'label' => $item->name
+                . ' (' . $item->contact?->invoiceAddress?->getLabel() ?? __('No customer') . ')',
             'subLabel' => $item->user?->name,
             'value' => $item->started_at
                 ->locale(app()->getLocale())
                 ->timezone(auth()->user()?->timezone ?? config('app.timezone'))
                 ->isoFormat('L LT'),
-        ])->toArray();
+        ])
+            ->toArray();
     }
 }
