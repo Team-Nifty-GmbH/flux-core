@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (Schema::hasTable('form_builder_responses')) {
+        if (Schema::hasTable('form_builder_sections')) {
             return;
         }
 
