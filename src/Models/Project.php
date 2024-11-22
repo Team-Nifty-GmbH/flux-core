@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use FluxErp\Casts\TimeDuration;
+use FluxErp\Contracts\Calendarable;
 use FluxErp\States\Project\ProjectState;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
@@ -15,15 +16,17 @@ use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SoftDeletes;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 use Spatie\ModelStates\HasStates;
 use Spatie\Tags\HasTags;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 
-class Project extends FluxModel implements InteractsWithDataTables
+class Project extends FluxModel implements Calendarable, InteractsWithDataTables
 {
     use BroadcastsEvents, Commentable, Filterable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes,
         HasPackageFactory, HasSerialNumberRange, HasStates, HasTags, HasUserModification, HasUuid, LogsActivity,
@@ -122,5 +125,58 @@ class Project extends FluxModel implements InteractsWithDataTables
         if ($this->order) {
             $this->order->calculateMargin()->save();
         }
+    }
+
+    public static function toCalendar(): array
+    {
+        return [
+            'id' => Str::uuid()->toString(),
+            'modelType' => morph_alias(static::class),
+            'name' => __('Projects'),
+            'color' => '#813d9c',
+            'resourceEditable' => false,
+            'hasRepeatableEvents' => false,
+            'isPublic' => false,
+            'isShared' => false,
+            'permission' => 'owner',
+            'group' => 'my',
+            'isVirtual' => true,
+        ];
+    }
+
+    public function toCalendarEvent(): array
+    {
+        return [
+            'id' => $this->id,
+            'calendar_type' => $this->getMorphClass(),
+            'title' => $this->name,
+            'start' => ($this->start_date ?? $this->created_at)->toDateTimeString(),
+            'end' => $this->end_date?->endOfDay()->toDateTimeString(),
+            'status' => $this->state::$name,
+            'invited' => [],
+            'description' => $this->description,
+            'extendedProps' => [
+                'appendTitle' => $this->state->badge(),
+            ],
+            'allDay' => true,
+            'is_editable' => true,
+            'is_invited' => null,
+            'is_public' => false,
+            'is_repeatable' => false,
+        ];
+    }
+
+    public static function fromCalendarEvent(array $event): Model
+    {
+        $project = new static();
+        $project->forceFill([
+            'id' => $event['id'],
+            'name' => $event['title'],
+            'start_date' => $event['start'],
+            'end_date' => $event['end'],
+            'description' => $event['description'],
+        ]);
+
+        return $project;
     }
 }
