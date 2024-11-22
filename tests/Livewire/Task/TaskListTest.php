@@ -3,6 +3,7 @@
 namespace FluxErp\Tests\Livewire\Task;
 
 use FluxErp\Livewire\Task\TaskList;
+use FluxErp\Models\Task;
 use FluxErp\Tests\Livewire\BaseSetup;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Str;
@@ -41,6 +42,10 @@ class TaskListTest extends BaseSetup
             'due_date' => $taskDueDate,
             'start_date' => $taskStartDate,
             'priority' => 1,
+        ]);
+        $this->assertDatabaseHas('task_user', [
+            'user_id' => $this->user->id,
+            'task_id' => Task::query()->where('name', $taskName)->value('id'),
         ]);
     }
 }
