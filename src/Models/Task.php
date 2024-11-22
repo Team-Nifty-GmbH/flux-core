@@ -172,7 +172,7 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
             ],
             'allDay' => false,
             'is_editable' => true,
-            'is_invited' => null,
+            'is_invited' => false,
             'is_public' => false,
             'is_repeatable' => false,
         ];
