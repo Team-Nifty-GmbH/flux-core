@@ -59,7 +59,6 @@ class TicketTypeEditTest extends TestCase
 
         Livewire::test(TicketTypeEdit::class)
             ->call('show', $ticketType->toArray())
-            ->set('ticketType.name', $ticketTypeName = Str::uuid())
             ->call('delete')
             ->assertHasNoErrors()
             ->assertDispatchedTo(

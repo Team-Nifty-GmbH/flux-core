@@ -89,9 +89,7 @@ class OrderProject extends Component
         }
 
         $id = $this->form->id;
-        $this->js(<<<JS
-            \$wire.\$parent.createTasks($id);
-        JS);
+        $this->dispatch('create-tasks', $id)->to('order.order-positions');
 
         return true;
     }

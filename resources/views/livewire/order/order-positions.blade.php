@@ -136,6 +136,7 @@
                                     <x-select
                                         class="pb-4"
                                         :label="__('Product')"
+                                        x-on:selected="$wire.changedProductId($event.detail.id)"
                                         wire:model="orderPosition.product_id"
                                         option-value="id"
                                         option-label="label"
