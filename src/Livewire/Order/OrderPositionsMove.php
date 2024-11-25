@@ -3,20 +3,27 @@
 namespace FluxErp\Livewire\Order;
 
 use FluxErp\Livewire\Forms\OrderForm;
+use FluxErp\Models\OrderPosition;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\View\View;
 use Livewire\Attributes\Modelable;
+use Livewire\Component;
 
-class OrderPositionsMove extends OrderPositions
+class OrderPositionsMove extends Component
 {
     #[Modelable]
     public OrderForm $form;
 
-    public array $orderPositions = [];
-
     public string $view = 'flux::livewire.order.order-positions-move';
 
-    public function getBuilder(Builder $builder): Builder
+    public function render(): View
     {
-        return $builder->where('order_id', $this->form->id);
+        return view('flux::livewire.order.order-positions-move', [
+            'orderPositions' => resolve_static(OrderPosition::class, 'query')
+                ->where('order_id', $this->form->id)
+                ->whereNull('parent_id')
+                ->with('children')
+                ->get(),
+        ]);
     }
 }
