@@ -48,7 +48,7 @@ class CreateCartItem extends FluxAction
         if ($productId = data_get($this->data, 'product_id')) {
             $this->product = Product::query()
                 ->whereKey($productId)
-                ->first(['vat_rate_id', 'name']);
+                ->first(['id', 'vat_rate_id', 'name']);
             $this->data['vat_rate_id'] ??= $this->product?->vat_rate_id;
             $this->data['name'] ??= $this->product?->name;
         }
