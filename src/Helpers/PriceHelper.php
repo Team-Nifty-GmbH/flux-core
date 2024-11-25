@@ -36,8 +36,8 @@ class PriceHelper
 
     public function __construct(Product $product)
     {
-        if (! $product->getKey() || ! $product->vat_rate_id) {
-            throw new InvalidArgumentException('Product must have an id and a vat rate id');
+        if (! $product->getKey()) {
+            throw new InvalidArgumentException('Product must have an id');
         }
 
         $product->loadMissing(['categories:id', 'vatRate:id,rate_percentage']);
