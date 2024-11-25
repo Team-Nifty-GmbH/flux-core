@@ -14,6 +14,7 @@ use FluxErp\Support\Calculation\Rounding;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Traits\Conditionable;
+use InvalidArgumentException;
 
 class PriceHelper
 {
@@ -35,6 +36,11 @@ class PriceHelper
 
     public function __construct(Product $product)
     {
+        if (! $product->getKey() || ! $product->vat_rate_id) {
+            throw new InvalidArgumentException('Product must have an id and a vat rate id');
+        }
+
+        $product->loadMissing(['categories:id', 'vatRate:id,rate_percentage']);
         $this->product = $product;
     }
 
@@ -107,7 +113,7 @@ class PriceHelper
         $this->timestamp = $this->timestamp ?? Carbon::now()->toDateTimeString();
 
         $this->price = $this->priceList?->prices()
-            ->where('product_id', $this->product->id)
+            ->where('product_id', $this->product->getKey())
             ->first();
 
         if (! $this->price && $this->priceList?->parent) {
@@ -121,14 +127,14 @@ class PriceHelper
 
         if (! $this->price) {
             $this->price = $this->contact?->priceList?->prices()
-                ->where('product_id', $this->product->id)
+                ->where('product_id', $this->product->getKey())
                 ->first();
         }
 
         if (! $this->price && $this->useDefault) {
             $this->priceList = PriceList::default();
             $this->price = resolve_static(Price::class, 'query')
-                ->where('product_id', $this->product->id)
+                ->where('product_id', $this->product->getKey())
                 ->whereRelation('priceList', 'is_default', true)
                 ->first();
 
@@ -180,7 +186,7 @@ class PriceHelper
                     return $query
                         ->where(
                             fn (Builder $query) => $query->where('model_type', app(Product::class)->getMorphClass())
-                                ->where('model_id', $this->product->id))
+                                ->where('model_id', $this->product->getKey()))
                         ->orWhere(
                             fn (Builder $query) => $query->where('model_type', app(Category::class)->getMorphClass())
                                 ->whereIntegerInRaw(
@@ -216,7 +222,7 @@ class PriceHelper
                         return $query
                             ->where(
                                 fn (Builder $query) => $query->where('model_type', app(Product::class)->getMorphClass())
-                                    ->where('model_id', $this->product->id))
+                                    ->where('model_id', $this->product->getKey()))
                             ->orWhere(
                                 fn (Builder $query) => $query
                                     ->where('model_type', app(Category::class)->getMorphClass())
@@ -337,7 +343,7 @@ class PriceHelper
             ->first();
 
         $price = $priceList->parent?->prices()
-            ->where('product_id', $this->product->id)
+            ->where('product_id', $this->product->getKey())
             ->first();
 
         // If price was found, apply all the discounts in reverse order
@@ -404,7 +410,7 @@ class PriceHelper
         }
 
         $parentPrice = $priceList->parent?->prices()
-            ->where('product_id', $this->product->id)
+            ->where('product_id', $this->product->getKey())
             ->first();
 
         if ($priceList->parent) {
