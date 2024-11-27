@@ -87,19 +87,19 @@
                                         option-description="number"
                                         wire:model.number="orderPosition.ledger_account_id"
                                         :async-data="[
-                                        'api' => route('search', \FluxErp\Models\LedgerAccount::class),
-                                        'params' => [
-                                            'where' => [
-                                                [
-                                                    'ledger_account_type_enum',
-                                                    '=',
-                                                    $order->isPurchase
-                                                        ? \FluxErp\Enums\LedgerAccountTypeEnum::Expense
-                                                        : \FluxErp\Enums\LedgerAccountTypeEnum::Revenue,
-                                                ],
+                                            'api' => route('search', \FluxErp\Models\LedgerAccount::class),
+                                            'params' => [
+                                                'where' => [
+                                                    [
+                                                        'ledger_account_type_enum',
+                                                        '=',
+                                                        $order->isPurchase
+                                                            ? \FluxErp\Enums\LedgerAccountTypeEnum::Expense
+                                                            : \FluxErp\Enums\LedgerAccountTypeEnum::Revenue,
+                                                    ],
+                                                ]
                                             ]
-                                        ]
-                                    ]"
+                                        ]"
                                     />
                                 @show
                             </div>
