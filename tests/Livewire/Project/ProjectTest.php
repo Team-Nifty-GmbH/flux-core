@@ -14,7 +14,7 @@ class ProjectTest extends BaseSetup
 
     private Project $project;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

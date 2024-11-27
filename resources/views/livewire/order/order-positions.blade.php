@@ -66,7 +66,13 @@
                                         wire:model="orderPosition.purchase_price"
                                         x-on:change="$el.value = parseNumber($el.value)"
                                     />
-                                    <x-input type="number" :label="__('Discount')" wire:model="orderPosition.discount_percentage" />
+                                    <x-input
+                                        prefix="%"
+                                        type="number"
+                                        :label="__('Discount')"
+                                        wire:model="orderPosition.discount_percentage"
+                                        x-on:change="$el.value = parseNumber($el.value)"
+                                    />
                                     <x-select
                                         :options="$vatRates"
                                         option-value="id"

@@ -17,7 +17,7 @@ class AddressesTest extends BaseSetup
 
     private AddressForm $addressForm;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

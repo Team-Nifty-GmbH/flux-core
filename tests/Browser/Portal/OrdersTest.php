@@ -21,7 +21,7 @@ class OrdersTest extends PortalDuskTestCase
 
     public Collection $orders;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

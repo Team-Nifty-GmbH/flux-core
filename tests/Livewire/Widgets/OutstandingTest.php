@@ -11,7 +11,7 @@ class OutstandingTest extends TestCase
 {
     protected string $livewireComponent = Outstanding::class;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
