@@ -19,7 +19,7 @@ class DashboardTest extends BaseSetup
 
     public array $components = [];
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

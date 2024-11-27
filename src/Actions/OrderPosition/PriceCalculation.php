@@ -147,7 +147,7 @@ class PriceCalculation
             }
         }
 
-        if (! $discounts && ($data['discount_percentage'] ?? false)) {
+        if (! $discounts && ! is_null(data_get($data, 'discount_percentage'))) {
             $discountedPrice = discount($discountedPrice, $data['discount_percentage']);
         }
 

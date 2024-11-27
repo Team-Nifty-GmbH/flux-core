@@ -11,7 +11,7 @@ class ActiveTaskTimesTest extends BaseSetup
 {
     protected string $livewireComponent = ActiveTaskTimes::class;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

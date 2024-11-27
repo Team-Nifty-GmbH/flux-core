@@ -20,7 +20,7 @@ class CheckoutTest extends BaseSetup
 
     private PaymentType $paymentType;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

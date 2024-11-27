@@ -14,7 +14,7 @@ class TaskTest extends BaseSetup
 
     private Task $task;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
