@@ -40,13 +40,19 @@ class OrderPositions extends OrderPositionList
 
     public ?bool $isSearchable = false;
 
-    public bool $isFilterable = false;
-
     public array $sortable = [];
 
     public OrderPositionForm $orderPosition;
 
     protected string $view = 'flux::livewire.order.order-positions';
+
+    public function mount(): void
+    {
+        $this->filters = [];
+        $this->page = 1;
+
+        parent::mount();
+    }
 
     public function getBuilder(Builder $builder): Builder
     {
