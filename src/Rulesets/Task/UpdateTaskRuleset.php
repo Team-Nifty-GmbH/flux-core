@@ -52,6 +52,7 @@ class UpdateTaskRuleset extends FluxRuleset
             parent::getRules(),
             resolve_static(UserRuleset::class, 'getRules'),
             resolve_static(OrderPositionRuleset::class, 'getRules'),
+            resolve_static(CategoryRuleset::class, 'getRules'),
             resolve_static(TagRuleset::class, 'getRules')
         );
     }
