@@ -56,7 +56,9 @@ class InitLanguages extends Command
                         ->where('language_code', $jsonLanguage['language_code'])
                         ->firstOrNew();
 
-                    if (! $language->exists) {
+                    if (! resolve_static(Language::class, 'query')
+                        ->where('name', $jsonLanguage['name'])
+                        ->exists()) {
                         $language->fill($jsonLanguage);
                         $language->save();
                     }
