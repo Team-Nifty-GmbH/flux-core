@@ -197,6 +197,10 @@ class Order extends Component
                 ->label(__('Order positions'))
                 ->isLivewireComponent()
                 ->wireModel('order'),
+            TabButton::make('order.order-positions-move')
+                ->label(__('Order positions'))
+                ->isLivewireComponent()
+                ->wireModel('order'),
             TabButton::make('order.attachments')
                 ->label(__('Attachments'))
                 ->isLivewireComponent()
