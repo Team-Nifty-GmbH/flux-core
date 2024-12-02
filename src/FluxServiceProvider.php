@@ -26,6 +26,7 @@ use FluxErp\Models\Category;
 use FluxErp\Models\Client;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\Order;
+use FluxErp\Models\OrderType;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Product;
 use FluxErp\Models\Project;
@@ -519,7 +520,15 @@ class FluxServiceProvider extends ServiceProvider
             icon: 'briefcase',
             label: 'Orders',
             closure: function () {
-                Menu::register(route: 'orders.orders');
+                foreach (resolve_static(OrderType::class, 'query')->get(['id', 'name']) as $orderType) {
+                    Menu::register(
+                        route: 'orders.order-type',
+                        label: $orderType->name,
+                        params: ['orderType' => $orderType->id],
+                        path: 'orders.children.order-type-' . $orderType->id
+                    );
+                }
+                Menu::register(route: 'orders.orders', label: __('All orders'));
                 Menu::register(route: 'orders.order-positions');
             }
         );
