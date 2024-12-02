@@ -4,18 +4,19 @@ namespace Tests\Feature\Livewire\Order;
 
 use FluxErp\Livewire\Order\OrderListByOrderType;
 use FluxErp\Models\OrderType;
+use FluxErp\Tests\Livewire\BaseSetup;
 use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
-class OrderListByOrderTypeTest extends TestCase
+class OrderListByOrderTypeTest extends BaseSetup
 {
-    protected string $livewireComponent = OrderListByOrderType::class;
-
     public function test_renders_successfully()
     {
-        $orderType = OrderType::factory()->create();
+        $orderType = OrderType::factory()->create([
+            'client_id' => $this->dbClient->id,
+        ]);
 
-        Livewire::test($this->livewireComponent, ['orderType' => $orderType->id])
+        Livewire::test(OrderListByOrderType::class, ['orderType' => $orderType->id])
             ->assertStatus(200);
     }
 }
