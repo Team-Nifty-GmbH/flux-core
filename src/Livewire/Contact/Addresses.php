@@ -10,6 +10,7 @@ use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\ContactOrigin;
 use FluxErp\Models\Permission;
+use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -20,7 +21,6 @@ use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use WireUi\Traits\Actions;
 
 class Addresses extends Component
 {

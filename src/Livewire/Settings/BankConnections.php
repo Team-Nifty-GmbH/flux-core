@@ -7,10 +7,10 @@ use FluxErp\Livewire\Forms\BankConnectionForm;
 use FluxErp\Models\BankConnection;
 use FluxErp\Models\Currency;
 use FluxErp\Models\LedgerAccount;
+use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
-use WireUi\Traits\Actions;
 
 class BankConnections extends BankConnectionList
 {

@@ -8,12 +8,12 @@ use FluxErp\Models\Client;
 use FluxErp\Rulesets\Setting\CreateSettingRuleset;
 use FluxErp\Rulesets\Setting\UpdateSettingRuleset;
 use FluxErp\Services\SettingService;
+use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Arr;
 use Livewire\Component;
-use WireUi\Traits\Actions;
 
 class CustomerPortal extends Component
 {

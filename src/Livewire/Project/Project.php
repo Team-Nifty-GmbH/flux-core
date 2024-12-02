@@ -6,13 +6,13 @@ use FluxErp\Actions\Project\DeleteProject;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Forms\ProjectForm;
 use FluxErp\Models\Project as ProjectModel;
+use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
-use WireUi\Traits\Actions;
 
 class Project extends Component
 {

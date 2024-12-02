@@ -8,10 +8,10 @@ use FluxErp\Actions\Unit\UpdateUnit;
 use FluxErp\Livewire\DataTables\UnitList;
 use FluxErp\Livewire\Forms\UnitForm;
 use FluxErp\Models\Unit;
+use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
-use WireUi\Traits\Actions;
 
 class Units extends UnitList
 {

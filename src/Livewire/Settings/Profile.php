@@ -6,6 +6,7 @@ use FluxErp\Actions\NotificationSetting\UpdateNotificationSetting;
 use FluxErp\Actions\User\UpdateUser;
 use FluxErp\Models\Language;
 use FluxErp\Models\User;
+use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -13,7 +14,6 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use WireUi\Traits\Actions;
 
 class Profile extends Component
 {

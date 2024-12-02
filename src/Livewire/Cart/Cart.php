@@ -8,6 +8,7 @@ use FluxErp\Actions\CartItem\DeleteCartItem;
 use FluxErp\Actions\CartItem\UpdateCartItem;
 use FluxErp\Models\Cart as CartModel;
 use FluxErp\Models\CartItem;
+use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -19,7 +20,6 @@ use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use WireUi\Traits\Actions;
 
 #[Lazy]
 class Cart extends Component

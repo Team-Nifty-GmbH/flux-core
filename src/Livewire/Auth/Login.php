@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Auth;
 
+use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\Auth\PasswordBroker;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -11,7 +12,6 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Session;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
-use WireUi\Traits\Actions;
 
 class Login extends Component
 {

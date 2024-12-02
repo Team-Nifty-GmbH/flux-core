@@ -5,6 +5,7 @@ namespace FluxErp\Livewire;
 use FluxErp\Livewire\Forms\WorkTimeForm;
 use FluxErp\Models\WorkTime as WorkTimeModel;
 use FluxErp\Models\WorkTimeType;
+use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Trackable;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -16,7 +17,6 @@ use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Spatie\ModelInfo\ModelInfo;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use WireUi\Traits\Actions;
 
 class WorkTime extends Component
 {

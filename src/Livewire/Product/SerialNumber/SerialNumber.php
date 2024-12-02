@@ -6,13 +6,13 @@ use FluxErp\Actions\SerialNumber\UpdateSerialNumber;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Forms\SerialNumberForm;
 use FluxErp\Models\SerialNumber as SerialNumberModel;
+use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
-use WireUi\Traits\Actions;
 
 class SerialNumber extends Component
 {

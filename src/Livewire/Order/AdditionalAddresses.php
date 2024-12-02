@@ -3,12 +3,12 @@
 namespace FluxErp\Livewire\Order;
 
 use FluxErp\Livewire\Forms\OrderAddressesForm;
+use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Livewire\Attributes\Lazy;
 use Livewire\Component;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use WireUi\Traits\Actions;
 
 #[Lazy]
 class AdditionalAddresses extends Component

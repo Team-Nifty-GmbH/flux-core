@@ -8,6 +8,7 @@ use FluxErp\Actions\Plugins\Uninstall;
 use FluxErp\Actions\Plugins\Update;
 use FluxErp\Actions\Plugins\Upload;
 use FluxErp\Livewire\Forms\MediaUploadForm;
+use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\View\View;
 use Illuminate\Process\Exceptions\ProcessFailedException;
 use Illuminate\Support\Arr;
@@ -21,7 +22,6 @@ use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use WireUi\Traits\Actions;
 
 #[Lazy]
 class Plugins extends Component

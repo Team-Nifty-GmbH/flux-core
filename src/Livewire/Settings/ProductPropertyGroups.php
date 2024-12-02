@@ -9,12 +9,12 @@ use FluxErp\Enums\PropertyTypeEnum;
 use FluxErp\Livewire\DataTables\ProductPropertyGroupList;
 use FluxErp\Livewire\Forms\ProductPropertyGroupForm;
 use FluxErp\Models\ProductPropertyGroup;
+use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
-use WireUi\Traits\Actions;
 
 class ProductPropertyGroups extends ProductPropertyGroupList
 {

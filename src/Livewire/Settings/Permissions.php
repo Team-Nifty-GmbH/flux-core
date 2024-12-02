@@ -8,10 +8,10 @@ use FluxErp\Actions\Role\UpdateRole;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Role;
 use FluxErp\Models\User;
+use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\View\View;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
-use WireUi\Traits\Actions;
 
 class Permissions extends Component
 {

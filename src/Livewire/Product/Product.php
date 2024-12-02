@@ -16,6 +16,7 @@ use FluxErp\Models\ProductCrossSelling;
 use FluxErp\Models\ProductProperty;
 use FluxErp\Models\ProductPropertyGroup;
 use FluxErp\Models\VatRate;
+use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -30,7 +31,6 @@ use Livewire\Component;
 use Livewire\Features\SupportPageComponents\PageComponentConfig;
 use Livewire\Features\SupportPageComponents\SupportPageComponents;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use WireUi\Traits\Actions;
 
 class Product extends Component
 {

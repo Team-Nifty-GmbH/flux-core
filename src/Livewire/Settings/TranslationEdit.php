@@ -10,10 +10,10 @@ use FluxErp\Rules\UniqueInFieldDependence;
 use FluxErp\Rulesets\Translation\CreateTranslationRuleset;
 use FluxErp\Rulesets\Translation\UpdateTranslationRuleset;
 use FluxErp\Services\TranslationService;
+use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Arr;
 use Livewire\Component;
-use WireUi\Traits\Actions;
 
 class TranslationEdit extends Component
 {
