@@ -316,4 +316,38 @@ class OrderTest extends BaseSetup
             ->assertStatus(200)
             ->assertViewIs('flux::livewire.order.subscription');
     }
+
+    public function test_can_add_discount()
+    {
+        $totalGrossPrice = $this->order->total_gross_price;
+        $totalNetPrice = $this->order->total_net_price;
+
+        Livewire::test(OrderView::class, ['id' => $this->order->id])
+            ->assertSet('order.discounts', [])
+            ->call('editDiscount')
+            ->assertStatus(200)
+            ->assertHasNoErrors()
+            ->assertExecutesJs(<<<'JS'
+                $openModal('edit-discount');
+            JS)
+            ->assertSet('discount.is_percentage', true)
+            ->set('discount.name', $discountName = Str::uuid()->toString())
+            ->set('discount.discount', 10)
+            ->call('saveDiscount')
+            ->assertStatus(200)
+            ->assertHasNoErrors()
+            ->assertNotSet('order.discounts', []);
+
+        $this->assertDatabaseHas(
+            'discounts',
+            [
+                'model_type' => 'order',
+                'model_id' => $this->order->id,
+                'name' => $discountName,
+                'discount' => bcdiv(10, 100),
+                'order_column' => 1,
+                'is_percentage' => 1,
+            ]
+        );
+    }
 }

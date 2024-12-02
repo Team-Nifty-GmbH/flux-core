@@ -80,6 +80,15 @@
                                         :label="__('Vat rate')"
                                         wire:model.live="orderPosition.vat_rate_id"
                                     />
+                                    <template x-for="discount in $wire.orderPosition.discounts">
+                                        <x-input
+                                            prefix="%"
+                                            type="number"
+                                            :label="__('Discount')"
+                                            x-model="discount.discount"
+                                            x-on:change="$el.value = parseNumber($el.value)"
+                                        />
+                                    </template>
                                     <x-select
                                         :label="__('Ledger Account')"
                                         option-value="id"
@@ -132,6 +141,29 @@
                                 :label="__('Save')"
                         />
                     </div>
+                </div>
+            </x-slot:footer>
+        </x-card>
+    </x-modal>
+    <x-modal name="add-discount">
+        <x-card>
+            <div class="flex flex-col gap-4">
+                <x-input
+                    prefix="%"
+                    type="number"
+                    :label="__('Discount')"
+                    wire:model="orderPosition.discount_percentage"
+                    x-on:change="$el.value = parseNumber($el.value)"
+                />
+            </div>
+            <x-slot:footer>
+                <div class="flex justify-end gap-x-4">
+                    <x-button flat :label="__('Cancel')" x-on:click="close" />
+                    <x-button
+                        primary
+                        wire:click="addDiscount().then((success) => {if(success) close();})"
+                        :label="__('Save')"
+                    />
                 </div>
             </x-slot:footer>
         </x-card>

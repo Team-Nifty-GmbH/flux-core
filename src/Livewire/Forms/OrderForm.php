@@ -11,6 +11,7 @@ use FluxErp\Models\Contact;
 use FluxErp\Models\Order;
 use FluxErp\Models\PriceList;
 use FluxErp\Support\Livewire\Attributes\ExcludeFromActionData;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Livewire\Attributes\Locked;
 
 class OrderForm extends FluxForm
@@ -67,6 +68,10 @@ class OrderForm extends FluxForm
 
     public ?string $total_base_gross_price = null;
 
+    public ?string $total_base_discounted_net_price = null;
+
+    public ?string $total_base_discounted_gross_price = null;
+
     #[ExcludeFromActionData]
     public ?float $gross_profit = 0;
 
@@ -79,7 +84,15 @@ class OrderForm extends FluxForm
 
     public ?array $total_vats = null;
 
-    public ?float $balance = null;
+    public ?string $total_discount_currency = null;
+
+    public ?string $total_discount_percentage = null;
+
+    public ?string $total_position_discount_currency = null;
+
+    public ?string $total_position_discount_percentage = null;
+
+    public ?string $balance = null;
 
     public ?int $payment_reminder_days_1 = null;
 
@@ -139,6 +152,8 @@ class OrderForm extends FluxForm
 
     public array $users = [];
 
+    public array $discounts = [];
+
     #[Locked]
     public ?array $invoice = null;
 
@@ -171,6 +186,18 @@ class OrderForm extends FluxForm
                 'orderType:id,order_type_enum',
                 'contact:id,has_delivery_lock',
                 'currency:id,symbol',
+                'discounts' => fn (MorphMany $query) => $query->ordered()
+                    ->select([
+                        'id',
+                        'name',
+                        'model_type',
+                        'model_id',
+                        'discount',
+                        'discount_percentage',
+                        'discount_currency',
+                        'order_column',
+                        'is_percentage',
+                    ]),
             ]);
             $values = array_merge(
                 $values->toArray(),

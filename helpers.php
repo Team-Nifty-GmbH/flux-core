@@ -186,6 +186,10 @@ if (! function_exists('discount')) {
 if (! function_exists('diff_percentage')) {
     function diff_percentage(string $old, string $new): string
     {
+        if (bccomp($old, 0) === 0) {
+            return '0';
+        }
+
         return bcround(bcdiv(bcsub($old, $new, 9), $old, 9), 4);
     }
 }

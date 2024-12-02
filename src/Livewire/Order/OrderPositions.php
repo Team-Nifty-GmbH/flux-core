@@ -42,16 +42,21 @@ class OrderPositions extends OrderPositionList
 
     public array $sortable = [];
 
+    public int $perPage = 100;
+
     public OrderPositionForm $orderPosition;
+
+    public ?string $cacheKey = 'order.order-positions';
 
     protected string $view = 'flux::livewire.order.order-positions';
 
     public function mount(): void
     {
+        parent::mount();
+
         $this->filters = [];
         $this->page = 1;
-
-        parent::mount();
+        $this->selected = [];
     }
 
     public function getBuilder(Builder $builder): Builder
@@ -133,16 +138,11 @@ class OrderPositions extends OrderPositionList
     {
         return [
             DataTableButton::make()
-                ->label(__('Delete'))
-                ->icon('trash')
-                ->color('negative')
-                ->when(fn () => resolve_static(DeleteOrderPosition::class, 'canPerformAction', [false])
+                ->label(__('Add discount'))
+                ->when(fn () => resolve_static(UpdateOrderPosition::class, 'canPerformAction', [false])
                     && ! $this->order->is_locked
                 )
-                ->attributes([
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Order positions')]),
-                    'wire:click' => 'deleteSelectedOrderPositions(); showSelectedActions = false;',
-                ]),
+                ->xOnClick('$openModal(\'add-discount\')'),
             DataTableButton::make()
                 ->label(__('Create tasks'))
                 ->when(fn () => resolve_static(CreateTask::class, 'canPerformAction', [false]))
@@ -157,6 +157,17 @@ class OrderPositions extends OrderPositionList
                         'Recalculate prices|Are you sure you want to recalculate the prices?|Cancel|Confirm'
                     ),
                     'wire:click' => 'recalculateOrderPositions(); showSelectedActions = false;',
+                ]),
+            DataTableButton::make()
+                ->label(__('Delete'))
+                ->icon('trash')
+                ->color('negative')
+                ->when(fn () => resolve_static(DeleteOrderPosition::class, 'canPerformAction', [false])
+                    && ! $this->order->is_locked
+                )
+                ->attributes([
+                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Order positions')]),
+                    'wire:click' => 'deleteSelectedOrderPositions(); showSelectedActions = false;',
                 ]),
         ];
     }

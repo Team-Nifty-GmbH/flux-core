@@ -15,7 +15,7 @@
                     'method' => 'POST',
                 ]"
                 option-value="id"
-                option-label="name"
+                option-label="label"
             />
         </div>
         @canAction(\FluxErp\Actions\Project\CreateProject::class)
