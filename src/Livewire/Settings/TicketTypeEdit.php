@@ -7,6 +7,7 @@ use FluxErp\Actions\TicketType\UpdateTicketType;
 use FluxErp\Livewire\Forms\TicketTypeForm;
 use FluxErp\Models\Role;
 use FluxErp\Models\TicketType;
+use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
@@ -14,7 +15,6 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use WireUi\Traits\Actions;
 
 class TicketTypeEdit extends Component
 {

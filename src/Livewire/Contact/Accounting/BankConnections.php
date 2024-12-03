@@ -8,12 +8,12 @@ use FluxErp\Actions\ContactBankConnection\UpdateContactBankConnection;
 use FluxErp\Livewire\DataTables\ContactBankConnectionList as BaseContactBankConnectionList;
 use FluxErp\Livewire\Forms\ContactBankConnectionForm;
 use FluxErp\Models\ContactBankConnection;
+use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Modelable;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
-use WireUi\Traits\Actions;
 
 class BankConnections extends BaseContactBankConnectionList
 {

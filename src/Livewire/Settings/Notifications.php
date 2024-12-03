@@ -4,13 +4,13 @@ namespace FluxErp\Livewire\Settings;
 
 use FluxErp\Models\NotificationSetting;
 use FluxErp\Services\NotificationSettingsService;
+use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Arr;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
-use WireUi\Traits\Actions;
 
 class Notifications extends Component
 {

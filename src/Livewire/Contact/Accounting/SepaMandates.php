@@ -13,6 +13,7 @@ use FluxErp\Livewire\Forms\SepaMandateForm;
 use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\Media;
 use FluxErp\Models\SepaMandate;
+use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\CreatesDocuments;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Database\Eloquent\Builder;
@@ -22,7 +23,6 @@ use Livewire\Attributes\Renderless;
 use Spatie\MediaLibrary\Support\MediaStream;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
-use WireUi\Traits\Actions;
 
 class SepaMandates extends SepaMandateList
 {

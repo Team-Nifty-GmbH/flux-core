@@ -9,12 +9,12 @@ use FluxErp\Livewire\DataTables\CategoryList;
 use FluxErp\Livewire\Forms\CategoryForm;
 use FluxErp\Models\Category;
 use FluxErp\Traits\Categorizable;
+use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
-use WireUi\Traits\Actions;
 
 class Categories extends CategoryList
 {

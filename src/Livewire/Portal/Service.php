@@ -5,12 +5,12 @@ namespace FluxErp\Livewire\Portal;
 use FluxErp\Actions\Ticket\CreateTicket;
 use FluxErp\Models\SerialNumber;
 use FluxErp\Models\Ticket;
+use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithAddressAuth;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
 use Livewire\Component;
-use WireUi\Traits\Actions;
 
 class Service extends Component
 {

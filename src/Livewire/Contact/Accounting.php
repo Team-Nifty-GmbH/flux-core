@@ -4,13 +4,13 @@ namespace FluxErp\Livewire\Contact;
 
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Forms\ContactForm;
+use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
 use Livewire\Attributes\Modelable;
 use Livewire\Component;
-use WireUi\Traits\Actions;
 
 class Accounting extends Component
 {

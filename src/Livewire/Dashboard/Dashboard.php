@@ -2,12 +2,12 @@
 
 namespace FluxErp\Livewire\Dashboard;
 
+use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\RendersWidgets;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
-use WireUi\Traits\Actions;
 
 class Dashboard extends Component
 {

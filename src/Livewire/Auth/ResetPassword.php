@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\Auth;
 
 use FluxErp\Actions\User\UpdateUser;
+use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\ValidationException;
@@ -10,7 +11,6 @@ use Illuminate\View\View;
 use Livewire\Attributes\Rule;
 use Livewire\Attributes\Url;
 use Livewire\Component;
-use WireUi\Traits\Actions;
 
 class ResetPassword extends Component
 {

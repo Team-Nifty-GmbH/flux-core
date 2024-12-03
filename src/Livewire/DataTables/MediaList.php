@@ -5,13 +5,13 @@ namespace FluxErp\Livewire\DataTables;
 use FluxErp\Actions\Media\DeleteMedia;
 use FluxErp\Livewire\Forms\MediaForm;
 use FluxErp\Models\Media;
+use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
-use WireUi\Traits\Actions;
 
 class MediaList extends BaseDataTable
 {

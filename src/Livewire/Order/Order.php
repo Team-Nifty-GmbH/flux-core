@@ -28,6 +28,7 @@ use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Schedule;
+use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\CreatesDocuments;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Support\Str;
@@ -41,7 +42,6 @@ use Livewire\Component;
 use Spatie\MediaLibrary\Support\MediaStream;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
-use WireUi\Traits\Actions;
 
 class Order extends Component
 {

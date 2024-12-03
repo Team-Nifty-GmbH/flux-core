@@ -5,10 +5,10 @@ namespace FluxErp\Livewire\Settings;
 use FluxErp\Livewire\DataTables\CurrencyList;
 use FluxErp\Livewire\Forms\CurrencyForm;
 use FluxErp\Models\Currency;
+use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
-use WireUi\Traits\Actions;
 
 class Currencies extends CurrencyList
 {

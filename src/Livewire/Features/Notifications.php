@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\Features;
 
 use FluxErp\Models\Notification;
+use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -10,7 +11,6 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
-use WireUi\Traits\Actions;
 
 class Notifications extends Component
 {

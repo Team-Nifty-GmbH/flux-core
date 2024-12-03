@@ -2,12 +2,12 @@
 
 namespace FluxErp\Livewire\Settings;
 
+use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 use Livewire\WithPagination;
-use WireUi\Traits\Actions;
 
 class Users extends Component
 {
