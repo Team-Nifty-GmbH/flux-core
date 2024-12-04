@@ -80,15 +80,6 @@
                                         :label="__('Vat rate')"
                                         wire:model.live="orderPosition.vat_rate_id"
                                     />
-                                    <template x-for="discount in $wire.orderPosition.discounts">
-                                        <x-input
-                                            prefix="%"
-                                            type="number"
-                                            :label="__('Discount')"
-                                            x-model="discount.discount"
-                                            x-on:change="$el.value = parseNumber($el.value)"
-                                        />
-                                    </template>
                                     <x-select
                                         :label="__('Ledger Account')"
                                         option-value="id"
