@@ -66,6 +66,8 @@ class ExistsWithForeign implements DataAwareRule, InvokableRule
                 ->first();
             if (! $record) {
                 $fail('validation.exists')->translate();
+
+                return;
             }
 
             $foreignAttributeValue = $record->{$this->foreignAttribute};
