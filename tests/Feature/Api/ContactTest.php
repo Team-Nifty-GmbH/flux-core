@@ -8,6 +8,7 @@ use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
+use FluxErp\Models\PriceList;
 use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -163,7 +164,7 @@ class ContactTest extends BaseSetup
         $this->assertEquals($contact['client_id'], $dbContact->client_id);
         $this->assertEquals($contact['customer_number'], $dbContact->customer_number);
         $this->assertEquals(PaymentType::default()?->id, $dbContact->payment_type_id);
-        $this->assertNull($dbContact->price_list_id);
+        $this->assertEquals(PriceList::default()?->id, $dbContact->price_list_id);
         $this->assertNotNull($dbContact->creditor_number);
         $this->assertNull($dbContact->payment_target_days);
         $this->assertNull($dbContact->payment_reminder_days_1);

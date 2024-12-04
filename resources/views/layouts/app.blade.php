@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-@props(['navigation' => request()->get('no-navigation', false)])
+@props(['navigation' => request()->boolean('no-navigation')])
 <html @class([
         'sort-scrollbar',
         'h-full',

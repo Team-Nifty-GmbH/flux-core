@@ -3,6 +3,8 @@
 namespace FluxErp\Livewire\Order;
 
 use Exception;
+use FluxErp\Actions\Discount\DeleteDiscount;
+use FluxErp\Actions\Discount\UpdateDiscount;
 use FluxErp\Actions\Order\DeleteOrder;
 use FluxErp\Actions\Order\ReplicateOrder;
 use FluxErp\Actions\Order\ToggleLock;
@@ -13,6 +15,7 @@ use FluxErp\Enums\FrequenciesEnum;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Invokable\ProcessSubscriptionOrder;
+use FluxErp\Livewire\Forms\DiscountForm;
 use FluxErp\Livewire\Forms\OrderForm;
 use FluxErp\Livewire\Forms\OrderReplicateForm;
 use FluxErp\Livewire\Forms\ScheduleForm;
@@ -20,6 +23,7 @@ use FluxErp\Models\Address;
 use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\ContactBankConnection;
+use FluxErp\Models\Discount;
 use FluxErp\Models\Language;
 use FluxErp\Models\Media;
 use FluxErp\Models\Order as OrderModel;
@@ -31,6 +35,7 @@ use FluxErp\Models\Schedule;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\CreatesDocuments;
 use FluxErp\Traits\Livewire\WithTabs;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -51,6 +56,8 @@ class Order extends Component
     public string $view = 'flux::livewire.order.order';
 
     public OrderForm $order;
+
+    public DiscountForm $discount;
 
     public OrderReplicateForm $replicateOrder;
 
@@ -280,6 +287,79 @@ class Order extends Component
         }
 
         $this->fetchOrder($this->order->id);
+    }
+
+    #[Renderless]
+    public function deleteDiscount(Discount $discount): void
+    {
+        try {
+            DeleteDiscount::make(['id' => $discount->id])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->recalculateOrderTotals();
+        $this->fetchOrder($this->order->id);
+    }
+
+    #[Renderless]
+    public function editDiscount(Discount $discount): void
+    {
+        $this->discount->reset();
+        $this->discount->fill($discount);
+
+        $this->js(<<<'JS'
+            $openModal('edit-discount');
+        JS);
+    }
+
+    #[Renderless]
+    public function saveDiscount(): bool
+    {
+        $this->discount->model_type = morph_alias(OrderModel::class);
+        $this->discount->model_id = $this->order->id;
+
+        try {
+            $this->discount->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->discount->reset();
+        $this->recalculateOrderTotals();
+        $this->fetchOrder($this->order->id);
+
+        return true;
+    }
+
+    #[Renderless]
+    public function reOrderDiscount(Discount $discount, int $index): bool
+    {
+        try {
+            UpdateDiscount::make([
+                'id' => $discount->id,
+                'order_column' => $index + 1,
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->recalculateOrderTotals();
+        $this->fetchOrder($this->order->id);
+
+        return true;
     }
 
     #[Renderless]
@@ -562,13 +642,25 @@ class Order extends Component
         $order = resolve_static(OrderModel::class, 'query')
             ->whereKey($id)
             ->with([
-                'priceList:id,name,is_net',
                 'addresses',
                 'client:id,name',
                 'contact.media',
                 'contact.contactBankConnections:id,contact_id,iban',
                 'currency:id,iso,name,symbol',
+                'discounts' => fn (MorphMany $query) => $query->ordered()
+                    ->select([
+                        'id',
+                        'name',
+                        'model_type',
+                        'model_id',
+                        'discount',
+                        'discount_percentage',
+                        'discount_flat',
+                        'order_column',
+                        'is_percentage',
+                    ]),
                 'orderType:id,name,mail_subject,mail_body,print_layouts,order_type_enum',
+                'priceList:id,name,is_net',
             ])
             ->firstOrFail()
             ->append('avatar_url');

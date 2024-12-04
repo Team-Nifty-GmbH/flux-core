@@ -49,6 +49,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Spatie\MediaLibrary\HasMedia;
@@ -174,14 +175,21 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
             'shipping_costs_gross_price' => Money::class,
             'shipping_costs_vat_price' => Money::class,
             'shipping_costs_vat_rate_percentage' => Percentage::class,
-            'total_base_gross_price' => Money::class,
             'total_base_net_price' => Money::class,
+            'total_base_gross_price' => Money::class,
+            'total_base_discounted_net_price' => Money::class,
+            'total_base_discounted_gross_price' => Money::class,
+            'gross_profit' => Money::class,
             'total_purchase_price' => Money::class,
             'total_cost' => Money::class,
             'margin' => Money::class,
-            'total_gross_price' => Money::class,
             'total_net_price' => Money::class,
+            'total_gross_price' => Money::class,
             'total_vats' => 'array',
+            'total_discount_percentage' => Percentage::class,
+            'total_discount_flat' => Money::class,
+            'total_position_discount_percentage' => Percentage::class,
+            'total_position_discount_flat' => Money::class,
             'balance' => Money::class,
             'payment_reminder_next_date' => 'date',
             'payment_texts' => 'array',
@@ -284,6 +292,11 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);
+    }
+
+    public function discounts(): MorphMany
+    {
+        return $this->morphMany(Discount::class, 'model');
     }
 
     public function language(): BelongsTo
@@ -477,8 +490,10 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
 
     public function calculatePrices(): static
     {
-        return $this->calculateTotalGrossPrice()
+        return $this
             ->calculateTotalNetPrice()
+            ->calculateDiscounts()
+            ->calculateTotalGrossPrice()
             ->calculateMargin()
             ->calculateTotalVats();
     }
@@ -492,14 +507,18 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
             ->where('is_alternative', false)
             ->sum('total_base_gross_price');
 
-        $this->total_gross_price = bcround(
-            bcadd($totalGross, $this->shipping_costs_gross_price ?: 0, 9),
-            2
+        $this->total_gross_price = discount(
+            bcround(
+                bcadd($totalGross, $this->shipping_costs_gross_price ?: 0, 9),
+                2
+            ),
+            $this->total_discount_percentage
         );
         $this->total_base_gross_price = bcround(
             bcadd($totalBaseGross, $this->shipping_costs_gross_price ?: 0, 9),
             2
         );
+        $this->total_base_discounted_gross_price = $this->total_gross_price;
 
         return $this;
     }
@@ -521,6 +540,45 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
             bcadd($totalBaseNet, $this->shipping_costs_net_price ?: 0, 9),
             2
         );
+        $this->total_base_discounted_net_price = $this->total_net_price;
+
+        $this->total_position_discount_percentage = diff_percentage(
+            $this->total_base_net_price,
+            $this->total_net_price
+        );
+        $this->total_position_discount_flat = bcsub(
+            $this->total_base_net_price,
+            $this->total_net_price,
+            9
+        );
+
+        return $this;
+    }
+
+    public function calculateDiscounts(): static
+    {
+        $this->total_net_price = $this->discounts()
+            ->ordered()
+            ->get(['id', 'discount', 'is_percentage'])
+            ->reduce(
+                function (string|float|int $previous, Discount $discount): string|float|int
+                {
+                    $new = $discount->is_percentage
+                        ? discount($previous, $discount->discount)
+                        : bcsub($previous, $discount->discount, 9);
+
+                    $discount->update([
+                        'discount_percentage' => diff_percentage($previous, $new),
+                        'discount_flat' => bcsub($previous, $new, 9),
+                    ]);
+
+                    return $new;
+                },
+                $this->total_net_price ?? 0
+            );
+
+        $this->total_discount_percentage = diff_percentage($this->total_base_net_price, $this->total_net_price);
+        $this->total_discount_flat = bcsub($this->total_base_net_price, $this->total_net_price, 9);
 
         return $this;
     }
@@ -534,6 +592,17 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
             ->selectRaw('sum(vat_price) as total_vat_price, sum(total_net_price) as total_net_price, vat_rate_percentage')
             ->get()
             ->map(function (OrderPosition $item) {
+                if ($this->total_discount_percentage) {
+                    $item->total_net_price = discount(
+                        $item->total_net_price,
+                        $this->total_discount_percentage
+                    );
+                    $item->total_vat_price = discount(
+                        $item->total_vat_price,
+                        $this->total_discount_percentage
+                    );
+                }
+
                 return $item->only(
                     [
                         'vat_rate_percentage',
