@@ -119,6 +119,11 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
         return $this->belongsTo(Currency::class);
     }
 
+    public function dashboards(): MorphMany
+    {
+        return $this->morphMany(Dashboard::class, 'authenticatable');
+    }
+
     public function favorites(): MorphMany
     {
         return $this->morphMany(Favorite::class, 'authenticatable');

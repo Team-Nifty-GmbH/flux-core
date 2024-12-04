@@ -561,8 +561,7 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
             ->ordered()
             ->get(['id', 'discount', 'is_percentage'])
             ->reduce(
-                function (string|float|int $previous, Discount $discount): string|float|int
-                {
+                function (string|float|int $previous, Discount $discount): string|float|int {
                     $new = $discount->is_percentage
                         ? discount($previous, $discount->discount)
                         : bcsub($previous, $discount->discount, 9);
