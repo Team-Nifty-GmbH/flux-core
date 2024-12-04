@@ -6,13 +6,13 @@ use FluxErp\Livewire\Forms\ProjectForm;
 use FluxErp\Models\Order;
 use FluxErp\Models\Project;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Livewire\Attributes\Lazy;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use WireUi\Traits\Actions;
 
 #[Lazy]
 class OrderProject extends Component
@@ -89,9 +89,7 @@ class OrderProject extends Component
         }
 
         $id = $this->form->id;
-        $this->js(<<<JS
-            \$wire.\$parent.createTasks($id);
-        JS);
+        $this->dispatch('create-tasks', $id)->to('order.order-positions');
 
         return true;
     }

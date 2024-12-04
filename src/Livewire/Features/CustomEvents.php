@@ -2,11 +2,11 @@
 
 namespace FluxErp\Livewire\Features;
 
+use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Event;
 use Livewire\Component;
-use WireUi\Traits\Actions;
 
 /**
  * @deprecated

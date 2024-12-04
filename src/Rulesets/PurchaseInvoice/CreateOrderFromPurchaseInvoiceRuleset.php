@@ -25,6 +25,12 @@ class CreateOrderFromPurchaseInvoiceRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => PurchaseInvoice::class]),
             ],
+            'approval_user_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => User::class])
+                    ->where('is_active', true),
+            ],
             'client_id' => [
                 'required',
                 'integer',
@@ -43,7 +49,8 @@ class CreateOrderFromPurchaseInvoiceRuleset extends FluxRuleset
             'lay_out_user_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => User::class])->where('is_active', true),
+                app(ModelExists::class, ['model' => User::class])
+                    ->where('is_active', true),
             ],
             'order_type_id' => [
                 'required',

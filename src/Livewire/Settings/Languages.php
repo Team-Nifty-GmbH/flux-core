@@ -5,10 +5,10 @@ namespace FluxErp\Livewire\Settings;
 use FluxErp\Livewire\DataTables\LanguageList;
 use FluxErp\Livewire\Forms\LanguageForm;
 use FluxErp\Models\Language;
+use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
-use WireUi\Traits\Actions;
 
 class Languages extends LanguageList
 {

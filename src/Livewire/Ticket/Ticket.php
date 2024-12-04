@@ -10,12 +10,12 @@ use FluxErp\Models\Address;
 use FluxErp\Models\Ticket as TicketModel;
 use FluxErp\Models\TicketType;
 use FluxErp\Models\User;
+use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Component;
 use Livewire\Features\SupportRedirects\Redirector;
-use WireUi\Traits\Actions;
 
 class Ticket extends Component
 {

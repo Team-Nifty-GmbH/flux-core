@@ -4,13 +4,17 @@ namespace FluxErp\Tests\Livewire\Portal\Shop;
 
 use FluxErp\Livewire\Portal\Shop\Cart;
 use FluxErp\Models\Currency;
+use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
-use FluxErp\Tests\TestCase;
+use FluxErp\Models\Product;
+use FluxErp\Models\VatRate;
+use FluxErp\Tests\Livewire\BaseSetup;
+use Illuminate\Database\Eloquent\Collection;
 use Livewire\Livewire;
 
-class CartTest extends TestCase
+class CartTest extends BaseSetup
 {
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -26,5 +30,41 @@ class CartTest extends TestCase
     {
         Livewire::test(Cart::class)
             ->assertStatus(200);
+    }
+
+    public function test_can_add_cart_item()
+    {
+        /** @var Collection $products */
+        $products = Product::factory()
+            ->count(2)
+            ->hasAttached($this->dbClient, relationship: 'clients')
+            ->for(VatRate::factory(), relationship: 'vatRate')
+            ->has(
+                Price::factory()
+                    ->for(PriceList::factory()->state(['is_default' => true])),
+                relationship: 'prices'
+            )
+            ->create();
+
+        Livewire::test(Cart::class)
+            ->fireEvent('cart:add', $products->first()->id)
+            ->assertStatus(200)
+            ->assertHasNoErrors()
+            ->assertWireuiNotification(icon: 'success')
+            ->assertCount('cart.cartItems', 1)
+            ->fireEvent('cart:add', [$products->get(1)->id])
+            ->assertStatus(200)
+            ->assertHasNoErrors()
+            ->assertWireuiNotification(icon: 'success')
+            ->assertCount('cart.cartItems', 2)
+            ->fireEvent('cart:add', ['id' => $products->get(1)->id, 'amount' => 2])
+            ->assertStatus(200)
+            ->assertHasNoErrors()
+            ->assertWireuiNotification(icon: 'success')
+            ->assertCount('cart.cartItems', 2)
+            ->assertSet('cart.cartItems.1.amount', 3)
+            ->assertStatus(200)
+            ->assertHasNoErrors()
+            ->assertWireuiNotification(icon: 'success');
     }
 }

@@ -8,18 +8,19 @@ use FluxErp\Livewire\Forms\ContactForm;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Tests\Livewire\BaseSetup;
+use Illuminate\Support\Str;
 use Livewire\Livewire;
 
 class AddressesTest extends BaseSetup
 {
-    public function test_renders_successfully()
-    {
-        Livewire::test(Addresses::class)
-            ->assertStatus(200);
-    }
+    private ContactForm $contactForm;
 
-    public function test_switch_tabs()
+    private AddressForm $addressForm;
+
+    protected function setUp(): void
     {
+        parent::setUp();
+
         $contact = Contact::factory()->create([
             'client_id' => $this->dbClient->id,
         ]);
@@ -31,14 +32,23 @@ class AddressesTest extends BaseSetup
             'is_delivery_address' => true,
         ]);
 
-        $contactForm = new ContactForm(Livewire::new(Addresses::class), 'contact');
-        $contactForm->fill($contact);
+        $this->contactForm = new ContactForm(Livewire::new(Addresses::class), 'contact');
+        $this->contactForm->fill($contact);
 
-        $addressForm = new AddressForm(Livewire::new(Addresses::class), 'address');
-        $addressForm->fill($address);
+        $this->addressForm = new AddressForm(Livewire::new(Addresses::class), 'address');
+        $this->addressForm->fill($address);
+    }
 
+    public function test_renders_successfully()
+    {
+        Livewire::test(Addresses::class)
+            ->assertStatus(200);
+    }
+
+    public function test_switch_tabs()
+    {
         $component = Livewire::actingAs($this->user)
-            ->test(Addresses::class, ['contact' => $contactForm, 'address' => $addressForm]);
+            ->test(Addresses::class, ['contact' => $this->contactForm, 'address' => $this->addressForm]);
 
         foreach (Livewire::new(Addresses::class)->getTabs() as $tab) {
             $component
@@ -49,5 +59,20 @@ class AddressesTest extends BaseSetup
                 $component->assertSeeLivewire($tab->component);
             }
         }
+    }
+
+    public function test_can_save_address()
+    {
+        Livewire::actingAs($this->user)
+            ->test(Addresses::class, ['contact' => $this->contactForm, 'address' => $this->addressForm])
+            ->set('address.street', $street = Str::uuid())
+            ->set('edit', true)
+            ->call('save')
+            ->assertStatus(200)
+            ->assertHasNoErrors()
+            ->assertSet('address.street', $street)
+            ->assertSet('edit', false);
+
+        $this->assertDatabaseHas('addresses', ['id' => $this->addressForm->id, 'street' => $street]);
     }
 }

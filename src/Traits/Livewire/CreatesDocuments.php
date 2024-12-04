@@ -18,7 +18,6 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\Support\MediaStream;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use WireUi\Traits\Actions;
 
 trait CreatesDocuments
 {

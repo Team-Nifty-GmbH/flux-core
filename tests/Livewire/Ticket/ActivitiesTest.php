@@ -11,7 +11,7 @@ class ActivitiesTest extends BaseSetup
 {
     private Ticket $ticket;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

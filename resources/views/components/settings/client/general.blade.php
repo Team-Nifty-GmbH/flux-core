@@ -33,19 +33,19 @@
                 <x-toggle :label="__('Is Default')" wire:model="client.is_default"/>
             </div>
             <div>
-                <x-table>
+                <x-flux::table>
                     <x-slot:header>
-                        <x-table.head-cell>
+                        <x-flux::table.head-cell>
                             {{ __('Days') }}
-                        </x-table.head-cell>
-                        <x-table.head-cell>
+                        </x-flux::table.head-cell>
+                        <x-flux::table.head-cell>
                             {{ __('Start') }}
-                        </x-table.head-cell>
-                        <x-table.head-cell>
+                        </x-flux::table.head-cell>
+                        <x-flux::table.head-cell>
                             {{ __('End') }}
-                        </x-table.head-cell>
-                        <x-table.head-cell>
-                        </x-table.head-cell>
+                        </x-flux::table.head-cell>
+                        <x-flux::table.head-cell>
+                        </x-flux::table.head-cell>
                     </x-slot:header>
                     <template x-for="(hours, index) in $wire.client.opening_hours">
                         <tr>
@@ -63,7 +63,7 @@
                             </td>
                         </tr>
                     </template>
-                </x-table>
+                </x-flux::table>
                 <div class="flex w-full justify-center">
                     <div class="pt-4">
                         <x-button primary x-on:click="$wire.client.opening_hours.push({})">

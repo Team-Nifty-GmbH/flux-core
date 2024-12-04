@@ -6,13 +6,13 @@ use FluxErp\Helpers\Helper;
 use FluxErp\Livewire\Forms\AdditionalColumnForm;
 use FluxErp\Rules\AvailableValidationRule;
 use FluxErp\Traits\HasAdditionalColumns;
+use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use WireUi\Traits\Actions;
 
 class AdditionalColumnEdit extends Component
 {
@@ -68,6 +68,13 @@ class AdditionalColumnEdit extends Component
 
     public function show(array $additionalColumn = []): void
     {
+        $additionalColumn['values'] ??= [];
+        $additionalColumn['validations'] ??= [];
+        $additionalColumn['field_type'] ??= 'text';
+        $additionalColumn['is_translatable'] ??= false;
+        $additionalColumn['is_customer_editable'] ??= false;
+        $additionalColumn['is_frontend_visible'] ??= true;
+
         $this->additionalColumn->reset();
         $this->additionalColumn->fill($additionalColumn);
 
@@ -98,7 +105,7 @@ class AdditionalColumnEdit extends Component
         }
 
         $this->notification()->success(__('Additional Column saved successful.'));
-        $this->dispatch('closeModal');
+        $this->dispatch('closeModal', $this->additionalColumn->toArray());
     }
 
     #[Renderless]

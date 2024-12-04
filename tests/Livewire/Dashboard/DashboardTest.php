@@ -9,6 +9,7 @@ use FluxErp\Models\Widget;
 use FluxErp\Tests\Livewire\BaseSetup;
 use FluxErp\Traits\Widgetable;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\Livewire;
 
@@ -18,7 +19,7 @@ class DashboardTest extends BaseSetup
 
     public array $components = [];
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -166,5 +167,29 @@ class DashboardTest extends BaseSetup
             ->test(Dashboard::class)
             ->assertDontSee('Hello from sample component')
             ->assertDontSeeLivewire('sample-component');
+    }
+
+    public function test_can_add_widget()
+    {
+        Livewire::withoutLazyLoading()
+            ->actingAs($this->user, 'web')
+            ->test(Dashboard::class)
+            ->call('saveWidgets', [
+                [
+                    'id' => Str::uuid(),
+                    'height' => 2,
+                    'width' => 2,
+                    'order_column' => 0,
+                    'order_row' => 0,
+                    'component_name' => $componentName = Str::uuid(),
+                ],
+            ])
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseHas('widgets', [
+            'widgetable_type' => morph_alias(User::class),
+            'widgetable_id' => $this->user->id,
+            'component_name' => $componentName,
+        ]);
     }
 }

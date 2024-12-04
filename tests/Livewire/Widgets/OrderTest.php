@@ -22,7 +22,7 @@ class OrderTest extends BaseSetup
 
     private Order $order;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

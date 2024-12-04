@@ -7,6 +7,7 @@ use FluxErp\Actions\CartItem\UpdateCartItem;
 use FluxErp\Livewire\Forms\CartForm;
 use FluxErp\Models\Cart;
 use FluxErp\Models\CartItem;
+use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -14,7 +15,6 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
-use WireUi\Traits\Actions;
 
 class WatchlistCard extends Component
 {

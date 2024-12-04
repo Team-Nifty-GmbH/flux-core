@@ -5,6 +5,7 @@ namespace FluxErp\Livewire\Features\Calendar;
 use FluxErp\Livewire\Forms\CalendarForm;
 use FluxErp\Models\Calendar;
 use FluxErp\Traits\HasCalendarEvents;
+use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
@@ -13,7 +14,6 @@ use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\Calendar\Livewire\CalendarOverview as TallCalendarOverview;
 use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
-use WireUi\Traits\Actions;
 
 class CalendarOverview extends TallCalendarOverview
 {

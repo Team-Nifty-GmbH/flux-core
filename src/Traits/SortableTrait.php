@@ -27,6 +27,27 @@ trait SortableTrait
                 $model->moveToPosition($newPosition);
             }
         });
+
+        static::deleted(function (Model $model) {
+            $orderColumn = $model->determineOrderColumnName();
+            $orderValue = $model->$orderColumn;
+
+            $model->buildSortQuery()
+                ->where($orderColumn, '>', $orderValue)
+                ->decrement($orderColumn);
+        });
+
+        if (in_array(\Illuminate\Database\Eloquent\SoftDeletes::class, class_uses_recursive(static::class))) {
+            static::restored(function (Model $model) {
+                $orderColumn = $model->determineOrderColumnName();
+                $orderValue = $model->$orderColumn;
+
+                $model->buildSortQuery()
+                    ->where($orderColumn, '>=', $orderValue)
+                    ->whereKeyNot($model->getKey())
+                    ->increment($orderColumn);
+            });
+        }
     }
 
     protected function setIsSorted(bool $isSorted = true): static

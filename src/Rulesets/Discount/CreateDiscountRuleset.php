@@ -25,10 +25,11 @@ class CreateDiscountRuleset extends FluxRuleset
                 'integer',
                 app(MorphExists::class),
             ],
+            'name' => 'nullable|string',
             'discount' => 'required|numeric',
             'from' => 'nullable|date_format:Y-m-d H:i:s',
             'till' => 'nullable|date_format:Y-m-d H:i:s',
-            'sort_number' => 'integer|min:0',
+            'order_column' => 'nullable|integer|min:1',
             'is_percentage' => 'required|boolean',
         ];
     }

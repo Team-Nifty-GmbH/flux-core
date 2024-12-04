@@ -26,7 +26,7 @@ class OrderTest extends BaseSetup
 
     private OrderType $orderType;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -293,5 +293,61 @@ class OrderTest extends BaseSetup
         $this->assertEquals($this->order->id, $replicatedOrder->parent_id);
         $this->assertNotEquals($replicatedOrder->order_number, $this->order->order_number);
         $this->assertNotEquals($replicatedOrder->uuid, $this->order->uuid);
+    }
+
+    public function test_can_render_subscription_order()
+    {
+        $orderType = OrderType::factory()->create([
+            'client_id' => $this->dbClient->id,
+            'order_type_enum' => OrderTypeEnum::Subscription,
+            'is_active' => true,
+            'is_hidden' => false,
+        ]);
+        $this->order->update([
+            'order_type_id' => $orderType->id,
+            'is_locked' => true,
+            'invoice_number' => Str::uuid(),
+        ]);
+
+        Livewire::test(OrderView::class, ['id' => $this->order->id])
+            ->assertStatus(200)
+            ->assertViewIs('flux::livewire.order.subscription')
+            ->set('schedule.cron.parameters.basic.1', 1)
+            ->assertStatus(200)
+            ->assertViewIs('flux::livewire.order.subscription');
+    }
+
+    public function test_can_add_discount()
+    {
+        $totalGrossPrice = $this->order->total_gross_price;
+        $totalNetPrice = $this->order->total_net_price;
+
+        Livewire::test(OrderView::class, ['id' => $this->order->id])
+            ->assertSet('order.discounts', [])
+            ->call('editDiscount')
+            ->assertStatus(200)
+            ->assertHasNoErrors()
+            ->assertExecutesJs(<<<'JS'
+                $openModal('edit-discount');
+            JS)
+            ->assertSet('discount.is_percentage', true)
+            ->set('discount.name', $discountName = Str::uuid()->toString())
+            ->set('discount.discount', 10)
+            ->call('saveDiscount')
+            ->assertStatus(200)
+            ->assertHasNoErrors()
+            ->assertNotSet('order.discounts', []);
+
+        $this->assertDatabaseHas(
+            'discounts',
+            [
+                'model_type' => 'order',
+                'model_id' => $this->order->id,
+                'name' => $discountName,
+                'discount' => bcdiv(10, 100),
+                'order_column' => 1,
+                'is_percentage' => 1,
+            ]
+        );
     }
 }

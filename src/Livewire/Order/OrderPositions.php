@@ -40,13 +40,24 @@ class OrderPositions extends OrderPositionList
 
     public ?bool $isSearchable = false;
 
-    public bool $isFilterable = false;
-
     public array $sortable = [];
+
+    public int $perPage = 100;
 
     public OrderPositionForm $orderPosition;
 
+    public ?string $cacheKey = 'order.order-positions';
+
     protected string $view = 'flux::livewire.order.order-positions';
+
+    public function mount(): void
+    {
+        parent::mount();
+
+        $this->filters = [];
+        $this->page = 1;
+        $this->selected = [];
+    }
 
     public function getBuilder(Builder $builder): Builder
     {
@@ -58,6 +69,7 @@ class OrderPositions extends OrderPositionList
         return array_merge(
             parent::getListeners(),
             [
+                'create-tasks' => 'createTasks',
                 'order:add-products' => 'addProducts',
             ]
         );
@@ -126,17 +138,6 @@ class OrderPositions extends OrderPositionList
     {
         return [
             DataTableButton::make()
-                ->label(__('Delete'))
-                ->icon('trash')
-                ->color('negative')
-                ->when(fn () => resolve_static(DeleteOrderPosition::class, 'canPerformAction', [false])
-                    && ! $this->order->is_locked
-                )
-                ->attributes([
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Order positions')]),
-                    'wire:click' => 'deleteSelectedOrderPositions(); showSelectedActions = false;',
-                ]),
-            DataTableButton::make()
                 ->label(__('Create tasks'))
                 ->when(fn () => resolve_static(CreateTask::class, 'canPerformAction', [false]))
                 ->xOnClick('$openModal(\'create-tasks\')'),
@@ -150,6 +151,17 @@ class OrderPositions extends OrderPositionList
                         'Recalculate prices|Are you sure you want to recalculate the prices?|Cancel|Confirm'
                     ),
                     'wire:click' => 'recalculateOrderPositions(); showSelectedActions = false;',
+                ]),
+            DataTableButton::make()
+                ->label(__('Delete'))
+                ->icon('trash')
+                ->color('negative')
+                ->when(fn () => resolve_static(DeleteOrderPosition::class, 'canPerformAction', [false])
+                    && ! $this->order->is_locked
+                )
+                ->attributes([
+                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Order positions')]),
+                    'wire:click' => 'deleteSelectedOrderPositions(); showSelectedActions = false;',
                 ]),
         ];
     }
@@ -228,44 +240,25 @@ class OrderPositions extends OrderPositionList
         );
     }
 
-    protected function getResultFromQuery(Builder $query): array
+    protected function itemToArray($item): array
     {
-        $returnKeys = $this->getReturnKeys();
-        $tree = $query->addSelect(
-            array_filter(
-                $returnKeys,
-                fn (string $key) => ! in_array(
-                    $key,
-                    [
-                        'href',
-                        'depth',
-                        'has_children',
-                        'unit_price',
-                        'alternative_tag',
-                        'indentation',
-                    ]
-                )
-            )
-        )
-            ->get()
-            ->toArray();
+        $item = parent::itemToArray($item);
 
-        foreach ($tree as &$item) {
-            $item = Arr::only(Arr::dot($item), $returnKeys);
-            $item['indentation'] = '';
-            $item['unit_price'] = $item['is_net'] ? ($item['unit_net_price'] ?? 0) : ($item['unit_gross_price'] ?? 0);
-            $item['alternative_tag'] = $item['is_alternative'] ? __('Alternative') : '';
+        $item['indentation'] = '';
+        $item['unit_price'] = data_get($item, 'is_net')
+            ? data_get($item, 'unit_net_price', 0)
+            : data_get($item, 'unit_gross_price', 0);
+        $item['alternative_tag'] = data_get($item, 'is_alternative') ? __('Alternative') : '';
 
-            if (($depth = str_word_count($item['slug_position'], 0, '.')) > 0) {
-                $indent = $depth * 20;
-                $item['indentation'] = <<<HTML
+        if (($depth = str_word_count(data_get($item, 'slug_position', ''), 0, '.')) > 0) {
+            $indent = $depth * 20;
+            $item['indentation'] = <<<HTML
                     <div class="text-right indent-icon" style="width:{$indent}px;">
                     </div>
                     HTML;
-            }
         }
 
-        return $tree;
+        return $item;
     }
 
     #[Renderless]
@@ -310,7 +303,9 @@ class OrderPositions extends OrderPositionList
     #[Renderless]
     public function editOrderPosition(?OrderPosition $orderPosition = null): void
     {
-        $this->orderPosition->fill($orderPosition);
+        if ($orderPosition->exists) {
+            $this->orderPosition->fill($orderPosition);
+        }
 
         $this->js(<<<'JS'
             $openModal('edit-order-position');
@@ -321,6 +316,12 @@ class OrderPositions extends OrderPositionList
     public function changedProductId(Product $product): void
     {
         $this->orderPosition->fillFromProduct($product);
+        $this->orderPosition->is_net = $this->order->getPriceList()->is_net;
+        $this->orderPosition->unit_price = PriceHelper::make($this->orderPosition->getProduct())
+            ->setPriceList($this->order->getPriceList())
+            ->setContact($this->order->getContact())
+            ->price()
+            ?->price ?? 0;
     }
 
     #[Renderless]
@@ -330,7 +331,7 @@ class OrderPositions extends OrderPositionList
 
         try {
             $this->orderPosition->save();
-        } catch (ValidationException $e) {
+        } catch (UnauthorizedException|ValidationException $e) {
             exception_to_notifications($e, $this);
 
             return false;
@@ -367,13 +368,6 @@ class OrderPositions extends OrderPositionList
     public function quickAdd(): bool
     {
         $this->orderPosition->fillFromProduct();
-
-        $this->orderPosition->unit_price = PriceHelper::make($this->orderPosition->getProduct())
-            ->setPriceList($this->order->getPriceList())
-            ->setContact($this->order->getContact())
-            ->price()
-            ?->price
-            ?? 0;
 
         return $this->addOrderPosition();
     }

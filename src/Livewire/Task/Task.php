@@ -7,6 +7,7 @@ use FluxErp\Actions\Task\DeleteTask;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Forms\TaskForm;
 use FluxErp\Models\Task as TaskModel;
+use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -16,7 +17,6 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use WireUi\Traits\Actions;
 
 class Task extends Component
 {

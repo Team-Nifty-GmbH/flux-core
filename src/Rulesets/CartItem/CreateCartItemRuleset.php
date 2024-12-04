@@ -40,7 +40,6 @@ class CreateCartItemRuleset extends FluxRuleset
                 app(Numeric::class, ['min' => 1]),
             ],
             'price' => [
-                'nullable',
                 app(Numeric::class),
             ],
             'order_column' => [

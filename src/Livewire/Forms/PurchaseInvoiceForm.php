@@ -18,6 +18,8 @@ class PurchaseInvoiceForm extends FluxForm
     #[Locked]
     public ?int $id = null;
 
+    public ?int $approval_user_id = null;
+
     public ?int $client_id = null;
 
     public ?int $contact_id = null;

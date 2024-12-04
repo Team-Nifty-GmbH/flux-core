@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Features;
 
 use FluxErp\Livewire\Forms\TaskForm;
 use FluxErp\Models\Task;
+use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -12,7 +13,6 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use WireUi\Traits\Actions;
 
 class CreateTaskModal extends Component
 {

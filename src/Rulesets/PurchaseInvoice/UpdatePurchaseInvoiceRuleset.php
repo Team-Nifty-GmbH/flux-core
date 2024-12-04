@@ -26,6 +26,12 @@ class UpdatePurchaseInvoiceRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => PurchaseInvoice::class]),
             ],
+            'approval_user_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => User::class])
+                    ->where('is_active', true),
+            ],
             'client_id' => [
                 'nullable',
                 'integer',
@@ -72,6 +78,7 @@ class UpdatePurchaseInvoiceRuleset extends FluxRuleset
             parent::getRules(),
             resolve_static(BankConnectionRuleset::class, 'getRules'),
             resolve_static(PurchaseInvoicePositionRuleset::class, 'getRules'),
+            resolve_static(TagRuleset::class, 'getRules'),
             [
                 'purchase_invoice_positions.*.id' => [
                     'integer',

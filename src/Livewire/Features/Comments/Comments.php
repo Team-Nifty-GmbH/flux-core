@@ -8,6 +8,7 @@ use FluxErp\Actions\Comment\UpdateComment;
 use FluxErp\Models\Comment;
 use FluxErp\Models\Role;
 use FluxErp\Models\User;
+use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -18,7 +19,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 use Livewire\WithPagination;
-use WireUi\Traits\Actions;
 
 class Comments extends Component
 {

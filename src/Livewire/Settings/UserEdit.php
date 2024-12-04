@@ -15,6 +15,7 @@ use FluxErp\Models\Permission;
 use FluxErp\Models\Role;
 use FluxErp\Models\User;
 use FluxErp\Rulesets\User\CreateUserRuleset;
+use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -22,7 +23,6 @@ use Illuminate\Support\Arr;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Spatie\Permission\Exceptions\RoleDoesNotExist;
-use WireUi\Traits\Actions;
 
 class UserEdit extends Component
 {

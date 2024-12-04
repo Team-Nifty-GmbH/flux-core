@@ -7,13 +7,13 @@ use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\TicketType;
 use FluxErp\Rulesets\Ticket\CreateTicketRuleset;
+use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
-use WireUi\Traits\Actions;
 
 class TicketCreate extends Component
 {

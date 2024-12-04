@@ -110,6 +110,15 @@ class OrderPositionForm extends FluxForm
         ];
     }
 
+    public function fill($values): void
+    {
+        parent::fill($values);
+
+        $this->discount_percentage = ! is_null($this->discount_percentage)
+            ? bcmul($this->discount_percentage, 100)
+            : null;
+    }
+
     public function fillFromProduct(?Product $product = null): void
     {
         if ($product instanceof Product) {
@@ -135,5 +144,15 @@ class OrderPositionForm extends FluxForm
     public function getProduct(): Product
     {
         return $this->product;
+    }
+
+    public function toActionData(): array
+    {
+        $data = parent::toActionData();
+        $data['discount_percentage'] = ! is_null($this->discount_percentage)
+            ? bcdiv($this->discount_percentage, 100)
+            : null;
+
+        return $data;
     }
 }

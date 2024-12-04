@@ -30,6 +30,7 @@ use FluxErp\Livewire\Mail\Mail;
 use FluxErp\Livewire\Media\Media as MediaGrid;
 use FluxErp\Livewire\Order\Order;
 use FluxErp\Livewire\Order\OrderList;
+use FluxErp\Livewire\Order\OrderListByOrderType;
 use FluxErp\Livewire\Product\Product;
 use FluxErp\Livewire\Product\ProductList;
 use FluxErp\Livewire\Product\SerialNumber\SerialNumber;
@@ -64,6 +65,7 @@ use FluxErp\Livewire\Settings\Profile;
 use FluxErp\Livewire\Settings\QueueMonitor;
 use FluxErp\Livewire\Settings\Scheduling;
 use FluxErp\Livewire\Settings\SerialNumberRanges;
+use FluxErp\Livewire\Settings\Tags;
 use FluxErp\Livewire\Settings\TicketTypes;
 use FluxErp\Livewire\Settings\Translations;
 use FluxErp\Livewire\Settings\Units;
@@ -124,6 +126,7 @@ Route::middleware('web')
                 Route::name('orders.')->prefix('orders')
                     ->group(function () {
                         Route::get('/list', OrderList::class)->name('orders');
+                        Route::get('/list/{orderType}', OrderListByOrderType::class)->name('order-type');
                         Route::get('/order-positions/list', OrderPositionList::class)->name('order-positions');
                         Route::get('/{id}', Order::class)->where('id', '[0-9]+')->name('id');
                     });
@@ -163,6 +166,7 @@ Route::middleware('web')
                         Route::get('/address-types', AddressTypes::class)->name('address-types');
                         Route::get('/contact-origins', ContactOrigins::class)->name('contact-origins');
                         Route::get('/categories', Categories::class)->name('categories');
+                        Route::get('/tags', Tags::class)->name('tags');
                         Route::get('/product-option-groups', ProductOptionGroups::class)->name('product-option-groups');
                         Route::get('/product-properties', ProductPropertyGroups::class)->name('product-properties');
                         Route::get('/clients', Clients::class)->name('clients');

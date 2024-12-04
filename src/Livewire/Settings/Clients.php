@@ -12,6 +12,7 @@ use FluxErp\Models\BankConnection;
 use FluxErp\Models\Client;
 use FluxErp\Models\Country;
 use FluxErp\Models\Scopes\UserClientScope;
+use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
@@ -19,7 +20,6 @@ use Livewire\Attributes\Renderless;
 use Livewire\WithFileUploads;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
-use WireUi\Traits\Actions;
 
 class Clients extends ClientList
 {

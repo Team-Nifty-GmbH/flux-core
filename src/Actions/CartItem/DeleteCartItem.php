@@ -8,6 +8,8 @@ use FluxErp\Rulesets\CartItem\DeleteCartItemRuleset;
 
 class DeleteCartItem extends FluxAction
 {
+    protected static bool $hasPermission = false;
+
     protected function getRulesets(): string|array
     {
         return DeleteCartItemRuleset::class;

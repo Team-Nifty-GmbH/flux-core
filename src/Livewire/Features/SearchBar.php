@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\Features;
 
 use Exception;
+use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Scout\Searchable;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -14,7 +15,6 @@ use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Livewire\WithPagination;
 use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
-use WireUi\Traits\Actions;
 
 class SearchBar extends Component
 {

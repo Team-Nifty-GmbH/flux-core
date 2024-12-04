@@ -8,10 +8,10 @@ use FluxErp\Actions\VatRate\UpdateVatRate;
 use FluxErp\Livewire\DataTables\VatRateList;
 use FluxErp\Livewire\Forms\VatRateForm;
 use FluxErp\Models\VatRate;
+use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
-use WireUi\Traits\Actions;
 
 class VatRates extends VatRateList
 {

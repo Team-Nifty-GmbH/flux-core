@@ -20,9 +20,9 @@ class CreateTag extends FluxAction
 
     public function performAction(): Tag
     {
-        $stockPosting = app(Tag::class, ['attributes' => $this->data]);
-        $stockPosting->save();
+        $tag = app(Tag::class, ['attributes' => $this->data]);
+        $tag->save();
 
-        return $stockPosting->fresh();
+        return $tag->fresh();
     }
 }

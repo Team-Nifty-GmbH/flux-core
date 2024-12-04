@@ -15,7 +15,7 @@ class RoleTest extends BaseSetup
 
     private array $permissions;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -245,7 +245,7 @@ class RoleTest extends BaseSetup
 
     public function test_delete_role_super_admin()
     {
-        $role = Role::create(['name' => 'Super Admin']);
+        $role = Role::findOrCreate('Super Admin');
 
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);

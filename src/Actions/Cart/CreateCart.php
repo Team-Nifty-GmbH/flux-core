@@ -11,6 +11,8 @@ use FluxErp\Rulesets\Cart\CreateCartRuleset;
 
 class CreateCart extends FluxAction
 {
+    protected static bool $hasPermission = false;
+
     protected function getRulesets(): string|array
     {
         return CreateCartRuleset::class;

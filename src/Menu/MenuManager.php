@@ -27,13 +27,17 @@ class MenuManager
         string|Route $route,
         ?string $icon = null,
         ?string $label = null,
-        ?int $order = null): void
-    {
+        ?int $order = null,
+        ?array $params = null,
+        ?string $path = null
+    ): void {
         $this->registered[] = [
             'route' => $route,
             'icon' => $icon,
             'label' => $label,
             'order' => $order,
+            'params' => $params,
+            'path' => $path,
         ];
     }
 
@@ -101,7 +105,8 @@ class MenuManager
             $guard = array_shift($guards);
             $guard = str_replace('auth:', '', $guard);
 
-            $path = str_contains($routeName, '.') && ! str_ends_with($routeName, '.')
+            $path = data_get($item, 'path');
+            $path ??= str_contains($routeName, '.') && ! str_ends_with($routeName, '.')
                 ? Str::beforeLast($routeName, '.') . '.children.' . Str::afterLast($routeName, '.')
                 : (str_ends_with($routeName, '.') ? rtrim($routeName, '.') : $routeName);
 
@@ -109,9 +114,7 @@ class MenuManager
                 data_get($this->resolved, $path) ?? [],
                 [
                     'label' => $label ?? Str::afterLast($path, '.'),
-                    'uri' => filter_var($resolvedRoute->uri(), FILTER_VALIDATE_URL)
-                        ? $resolvedRoute->uri()
-                        : Str::of($resolvedRoute->uri())->start('/')->toString(),
+                    'uri' => app('url')->toRoute($resolvedRoute, data_get($item, 'params', []), true),
                     'icon' => $icon,
                     'route_name' => $routeName,
                     'guard' => $guard ?: null,

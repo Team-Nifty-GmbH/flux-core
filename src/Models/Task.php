@@ -145,7 +145,7 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
             'id' => Str::uuid()->toString(),
             'modelType' => morph_alias(static::class),
             'name' => __('Tasks'),
-            'color' => '#813d9c',
+            'color' => '#877ae6',
             'resourceEditable' => false,
             'hasRepeatableEvents' => false,
             'isPublic' => false,
@@ -167,10 +167,12 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
             'status' => $this->state::$name,
             'invited' => [],
             'description' => $this->description,
-            'extendedProps' => null,
+            'extendedProps' => [
+                'appendTitle' => $this->state->badge(),
+            ],
             'allDay' => false,
             'is_editable' => true,
-            'is_invited' => null,
+            'is_invited' => false,
             'is_public' => false,
             'is_repeatable' => false,
         ];
