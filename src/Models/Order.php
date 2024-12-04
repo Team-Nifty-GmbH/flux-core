@@ -557,20 +557,25 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
 
     public function calculateDiscounts(): static
     {
-        $previous = $this->total_net_price;
-        foreach ($this->discounts()->ordered()->get(['id', 'discount', 'is_percentage']) as $discount) {
-            $new = $discount->is_percentage
-                ? discount($previous, $discount->discount)
-                : bcsub($previous, $discount->discount, 9);
-            $discount->update([
-                'discount_percentage' => diff_percentage($previous, $new),
-                'discount_flat' => bcsub($previous, $new, 9),
-            ]);
+        $this->total_net_price = $this->discounts()
+            ->ordered()
+            ->get(['id', 'discount', 'is_percentage'])
+            ->reduce(
+                function (string|float|int $previous, Discount $discount): string|float|int
+                {
+                    $new = $discount->is_percentage
+                        ? discount($previous, $discount->discount)
+                        : bcsub($previous, $discount->discount, 9);
 
-            $previous = $new;
-        }
+                    $discount->update([
+                        'discount_percentage' => diff_percentage($previous, $new),
+                        'discount_flat' => bcsub($previous, $new, 9),
+                    ]);
 
-        $this->total_net_price = $previous;
+                    return $new;
+                },
+                $this->total_net_price ?? 0
+            );
 
         $this->total_discount_percentage = diff_percentage($this->total_base_net_price, $this->total_net_price);
         $this->total_discount_flat = bcsub($this->total_base_net_price, $this->total_net_price, 9);
