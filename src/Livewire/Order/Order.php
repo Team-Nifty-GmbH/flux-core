@@ -655,7 +655,7 @@ class Order extends Component
                         'model_id',
                         'discount',
                         'discount_percentage',
-                        'discount_currency',
+                        'discount_flat',
                         'order_column',
                         'is_percentage',
                     ]),

@@ -31,7 +31,7 @@ class Discount extends FluxModel implements Sortable
     {
         return [
             'discount_percentage' => Percentage::class,
-            'discount_currency' => Money::class,
+            'discount_flat' => Money::class,
             'is_percentage' => 'boolean',
         ];
     }

@@ -187,9 +187,9 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
             'total_gross_price' => Money::class,
             'total_vats' => 'array',
             'total_discount_percentage' => Percentage::class,
-            'total_discount_currency' => Money::class,
+            'total_discount_flat' => Money::class,
             'total_position_discount_percentage' => Percentage::class,
-            'total_position_discount_currency' => Money::class,
+            'total_position_discount_flat' => Money::class,
             'balance' => Money::class,
             'payment_reminder_next_date' => 'date',
             'payment_texts' => 'array',
@@ -546,7 +546,7 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
             $this->total_base_net_price,
             $this->total_net_price
         );
-        $this->total_position_discount_currency = bcsub(
+        $this->total_position_discount_flat = bcsub(
             $this->total_base_net_price,
             $this->total_net_price,
             9
@@ -558,13 +558,13 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
     public function calculateDiscounts(): static
     {
         $previous = $this->total_net_price;
-        foreach ($this->discounts()->ordered()->get() as $discount) {
+        foreach ($this->discounts()->ordered()->get(['id', 'discount', 'is_percentage']) as $discount) {
             $new = $discount->is_percentage
                 ? discount($previous, $discount->discount)
                 : bcsub($previous, $discount->discount, 9);
             $discount->update([
                 'discount_percentage' => diff_percentage($previous, $new),
-                'discount_currency' => bcsub($previous, $new, 9),
+                'discount_flat' => bcsub($previous, $new, 9),
             ]);
 
             $previous = $new;
@@ -573,7 +573,7 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
         $this->total_net_price = $previous;
 
         $this->total_discount_percentage = diff_percentage($this->total_base_net_price, $this->total_net_price);
-        $this->total_discount_currency = bcsub($this->total_base_net_price, $this->total_net_price, 9);
+        $this->total_discount_flat = bcsub($this->total_base_net_price, $this->total_net_price, 9);
 
         return $this;
     }

@@ -19,14 +19,14 @@ return new class() extends Migration
             $table->decimal('total_discount_percentage', 40, 10)
                 ->nullable()
                 ->after('total_vats');
-            $table->decimal('total_discount_currency', 40, 10)
+            $table->decimal('total_discount_flat', 40, 10)
                 ->nullable()
                 ->after('total_discount_percentage');
 
             $table->decimal('total_position_discount_percentage', 40, 10)
                 ->nullable()
-                ->after('total_discount_currency');
-            $table->decimal('total_position_discount_currency', 40, 10)
+                ->after('total_discount_flat');
+            $table->decimal('total_position_discount_flat', 40, 10)
                 ->nullable()
                 ->after('total_position_discount_percentage');
         });
@@ -37,11 +37,11 @@ return new class() extends Migration
         Schema::table('orders', function (Blueprint $table) {
             $table->dropColumn([
                 'total_discount_percentage',
-                'total_discount_currency',
+                'total_discount_flat',
                 'total_base_discounted_gross_price',
                 'total_base_discounted_net_price',
                 'total_position_discount_percentage',
-                'total_position_discount_currency',
+                'total_position_discount_flat',
             ]);
         });
     }

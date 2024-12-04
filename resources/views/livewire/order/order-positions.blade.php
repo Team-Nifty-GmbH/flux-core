@@ -145,29 +145,6 @@
             </x-slot:footer>
         </x-card>
     </x-modal>
-    <x-modal name="add-discount">
-        <x-card>
-            <div class="flex flex-col gap-4">
-                <x-input
-                    prefix="%"
-                    type="number"
-                    :label="__('Discount')"
-                    wire:model="orderPosition.discount_percentage"
-                    x-on:change="$el.value = parseNumber($el.value)"
-                />
-            </div>
-            <x-slot:footer>
-                <div class="flex justify-end gap-x-4">
-                    <x-button flat :label="__('Cancel')" x-on:click="close" />
-                    <x-button
-                        primary
-                        wire:click="addDiscount().then((success) => {if(success) close();})"
-                        :label="__('Save')"
-                    />
-                </div>
-            </x-slot:footer>
-        </x-card>
-    </x-modal>
     <div class="w-full xl:space-x-6">
         <div class="ml:p-10 relative min-h-full space-y-6">
             <div>

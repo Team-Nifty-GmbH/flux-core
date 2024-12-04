@@ -27,7 +27,7 @@ class DiscountForm extends FluxForm
     public ?string $discount_percentage = null;
 
     #[ExcludeFromActionData, Locked]
-    public ?string $discount_currency = null;
+    public ?string $discount_flat = null;
 
     public ?int $order_column = null;
 

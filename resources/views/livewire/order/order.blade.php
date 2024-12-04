@@ -708,7 +708,7 @@
                                                 </span>
                                             </div>
                                             <div>
-                                                <span x-html="formatters.coloredMoney(($wire.order.total_position_discount_currency ?? 0) * -1)">
+                                                <span x-html="formatters.coloredMoney(($wire.order.total_position_discount_flat ?? 0) * -1)">
                                                 </span>
                                             </div>
                                         </div>
@@ -744,7 +744,7 @@
                                                         </div>
                                                     </div>
                                                     <div>
-                                                        <span x-html="formatters.coloredMoney((discount.discount_currency ?? 0) * -1)">
+                                                        <span x-html="formatters.coloredMoney((discount.discount_flat ?? 0) * -1)">
                                                         </span>
                                                     </div>
                                                 </div>
@@ -762,7 +762,7 @@
                                             <span x-html="formatters.percentage($wire.order.total_discount_percentage ?? 0)">
                                         </div>
                                         <div>
-                                            <span x-html="formatters.coloredMoney(($wire.order.total_discount_currency ?? 0) * -1)">
+                                            <span x-html="formatters.coloredMoney(($wire.order.total_discount_flat ?? 0) * -1)">
                                             </span>
                                         </div>
                                     </div>

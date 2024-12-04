@@ -84,11 +84,11 @@ class OrderForm extends FluxForm
 
     public ?array $total_vats = null;
 
-    public ?string $total_discount_currency = null;
+    public ?string $total_discount_flat = null;
 
     public ?string $total_discount_percentage = null;
 
-    public ?string $total_position_discount_currency = null;
+    public ?string $total_position_discount_flat = null;
 
     public ?string $total_position_discount_percentage = null;
 
@@ -194,7 +194,7 @@ class OrderForm extends FluxForm
                         'model_id',
                         'discount',
                         'discount_percentage',
-                        'discount_currency',
+                        'discount_flat',
                         'order_column',
                         'is_percentage',
                     ]),

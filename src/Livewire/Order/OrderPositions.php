@@ -138,12 +138,6 @@ class OrderPositions extends OrderPositionList
     {
         return [
             DataTableButton::make()
-                ->label(__('Add discount'))
-                ->when(fn () => resolve_static(UpdateOrderPosition::class, 'canPerformAction', [false])
-                    && ! $this->order->is_locked
-                )
-                ->xOnClick('$openModal(\'add-discount\')'),
-            DataTableButton::make()
                 ->label(__('Create tasks'))
                 ->when(fn () => resolve_static(CreateTask::class, 'canPerformAction', [false]))
                 ->xOnClick('$openModal(\'create-tasks\')'),

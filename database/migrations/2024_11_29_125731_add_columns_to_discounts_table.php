@@ -11,7 +11,7 @@ return new class() extends Migration
         Schema::table('discounts', function (Blueprint $table) {
             $table->string('name')->nullable()->after('model_id');
             $table->decimal('discount_percentage', 40, 10)->nullable()->after('discount');
-            $table->decimal('discount_currency', 40, 10)->nullable()->after('discount_percentage');
+            $table->decimal('discount_flat', 40, 10)->nullable()->after('discount_percentage');
 
             $table->renameColumn('sort_number', 'order_column');
         });
@@ -22,7 +22,7 @@ return new class() extends Migration
         Schema::table('discounts', function (Blueprint $table) {
             $table->renameColumn('order_column', 'sort_number');
 
-            $table->dropColumn(['name', 'order_column', 'discount_percentage', 'discount_currency']);
+            $table->dropColumn(['name', 'order_column', 'discount_percentage', 'discount_flat']);
         });
     }
 };
