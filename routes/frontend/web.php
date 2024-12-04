@@ -30,6 +30,7 @@ use FluxErp\Livewire\Mail\Mail;
 use FluxErp\Livewire\Media\Media as MediaGrid;
 use FluxErp\Livewire\Order\Order;
 use FluxErp\Livewire\Order\OrderList;
+use FluxErp\Livewire\Order\OrderListByOrderType;
 use FluxErp\Livewire\Product\Product;
 use FluxErp\Livewire\Product\ProductList;
 use FluxErp\Livewire\Product\SerialNumber\SerialNumber;
@@ -125,6 +126,7 @@ Route::middleware('web')
                 Route::name('orders.')->prefix('orders')
                     ->group(function () {
                         Route::get('/list', OrderList::class)->name('orders');
+                        Route::get('/list/{orderType}', OrderListByOrderType::class)->name('order-type');
                         Route::get('/order-positions/list', OrderPositionList::class)->name('order-positions');
                         Route::get('/{id}', Order::class)->where('id', '[0-9]+')->name('id');
                     });

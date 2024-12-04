@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Order;
 
+use FluxErp\Actions\Order\CreateOrder;
 use FluxErp\Actions\Order\DeleteOrder;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Livewire\Forms\OrderForm;
@@ -31,6 +32,8 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
 
     public OrderForm $order;
 
+    public ?int $orderType = null;
+
     protected function getTableActions(): array
     {
         return [
@@ -38,6 +41,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
                 ->color('primary')
                 ->label(__('New order'))
                 ->icon('plus')
+                ->when(resolve_static(CreateOrder::class, 'canPerformAction', [false]))
                 ->attributes([
                     'x-on:click' => "\$openModal('create-order')",
                 ]),
