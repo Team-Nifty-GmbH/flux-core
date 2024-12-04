@@ -2,11 +2,11 @@
 
 namespace FluxErp\Livewire\Features;
 
+use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\RendersWidgets;
 use Illuminate\View\View;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
-use WireUi\Traits\Actions;
 
 class Dashboard extends Component
 {

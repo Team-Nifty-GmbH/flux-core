@@ -1,6 +1,6 @@
 @use('FluxErp\Enums\TimeFrameEnum')
 <div class="flex flex-col md:flex-row gap-1.5">
-    <div x-cloak x-show="!editGrid" class="flex flex-col md:flex-row gap-1.5 items-center text-sm">
+    <div x-cloak x-show="! editGrid" class="flex flex-col md:flex-row gap-1.5 items-center text-sm">
         <x-select
             class="p-2"
             :options="TimeFrameEnum::valuesLocalized()"
@@ -17,32 +17,34 @@
         </div>
     </div>
     <div class="flex flex-col md:flex-row gap-1.5 items-center">
-        <x-button
-            x-cloak
-            x-show="!editGrid"
-            x-on:click="isLoading ? pendingMessage : editGridMode(true)"
-            icon="pencil"
-            class="flex-shrink-0"
-        />
-        <div x-cloak x-show="editGrid" class="flex gap-1.5">
+        @canAction(\FluxErp\Actions\Dashboard\UpdateDashboard::class)
             <x-button
-                x-on:click="$openModal('widget-list')"
-                class="flex-shrink-0"
-                :label="__('Add')"
-            />
-            <x-button
-                primary
-                x-on:click="isLoading ? pendingMessage : save"
-                :label="__('Save')"
+                x-cloak
+                x-show="!editGrid"
+                x-on:click="isLoading ? pendingMessage : editGridMode(true)"
+                icon="pencil"
                 class="flex-shrink-0"
             />
-            <x-button
-                negative
-                wire:flux-confirm.icon.error="{{ __('wire:confirm.cancel.dashboard-edit') }}"
-                wire:click="resetWidgets().then(() => {reInit().disable(); isLoading = false; editGridMode(false);})"
-                class="flex-shrink-0"
-                :label="__('Cancel')"
-            />
-        </div>
+            <div x-cloak x-show="editGrid" class="flex gap-1.5">
+                <x-button
+                    x-on:click="$openModal('widget-list')"
+                    class="flex-shrink-0"
+                    :label="__('Add')"
+                />
+                <x-button
+                    primary
+                    x-on:click="isLoading ? pendingMessage : save"
+                    :label="__('Save')"
+                    class="flex-shrink-0"
+                />
+                <x-button
+                    negative
+                    wire:flux-confirm.icon.error="{{ __('wire:confirm.cancel.dashboard-edit') }}"
+                    wire:click="resetWidgets().then(() => {reInit().disable(); isLoading = false; editGridMode(false);})"
+                    class="flex-shrink-0"
+                    :label="__('Cancel')"
+                />
+            </div>
+        @endCanAction
     </div>
 </div>

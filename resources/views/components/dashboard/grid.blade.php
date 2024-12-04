@@ -1,11 +1,11 @@
 <div class="grid-stack">
     @forelse($this->widgets as $widget)
         <div class="grid-stack-item rounded-lg relative z-0"
-             gs-id="{{$widget['id']}}"
-             gs-w="{{$widget['width']}}"
-             gs-h="{{$widget['height']}}"
-             gs-x="{{$widget['order_column']}}"
-             gs-y="{{$widget['order_row']}}"
+             gs-id="{{ $widget['id'] }}"
+             gs-w="{{ $widget['width'] }}"
+             gs-h="{{ $widget['height'] }}"
+             gs-x="{{ $widget['order_column'] }}"
+             gs-y="{{ $widget['order_row'] }}"
         >
             <div class="grid-stack-item-content"
                  x-bind:class="editGrid ? 'border-4 border-primary-500' : ''"
@@ -14,7 +14,7 @@
                     <x-button.circle
                         x-cloak
                         x-show="editGrid"
-                        x-on:click="isLoading ? pendingMessage : removeWidget('{{$widget['id']}}')"
+                        x-on:click="isLoading ? pendingMessage : removeWidget('{{ $widget['id'] }}')"
                         class="shadow-md w-4 h-4 text-gray-400 cursor-pointer" icon="trash" negative />
                 </div>
                 <div

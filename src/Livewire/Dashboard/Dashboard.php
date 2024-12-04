@@ -10,6 +10,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use WireUi\Traits\Actions;
@@ -18,6 +19,7 @@ class Dashboard extends Component
 {
     use Actions;
 
+    #[Url(except: null, nullable: true)]
     public ?int $dashboardId = null;
 
     public array $dashboards = [];
@@ -47,6 +49,11 @@ class Dashboard extends Component
     public function render(): View|Factory|Application
     {
         return view('flux::livewire.dashboard.dashboard');
+    }
+
+    public function selectDashboard(DashboardModel $dashboard): void
+    {
+        $this->dashboardId = $dashboard->id;
     }
 
     #[Renderless]

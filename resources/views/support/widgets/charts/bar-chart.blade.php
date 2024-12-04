@@ -27,10 +27,10 @@
 @if($showTotals)
     @section('chart')
         <div class="px-6">
-            <div class="md:flex flex-wrap gap-12 w-full rounded h-20">
+            <div class="md:flex overflow-x-auto soft-scrollbar gap-12 w-full rounded h-20">
                 <template x-for="seriesData in livewireOptions.series?.filter((series) => ! series.hideFromTotals)">
                     <div class="flex flex-col gap-2">
-                        <div class="font-semibold text-lg" x-text="seriesData.name"></div>
+                        <div class="font-semibold truncate text-lg " x-text="seriesData.name"></div>
                         <div class="flex gap-2">
                             <div
                                 class="font-bold text-2xl"

@@ -3,7 +3,9 @@
         <x-card>
             <div class="flex flex-col gap-4">
                 @canAction(\FluxErp\Actions\Dashboard\CreateDashboard::class)
-                    <x-toggle :label="__('Create my own dashboard')" wire:model="dashboardForm.createOwn"/>
+                    <div x-cloak x-show="$wire.publicDashboards.length > 0">
+                        <x-toggle :label="__('Create my own dashboard')" wire:model="dashboardForm.createOwn"/>
+                    </div>
                 @endCanAction
                 <div class="flex flex-col gap-4" x-cloak x-show="$wire.dashboardForm.createOwn">
                     <x-input :label="__('Name')" wire:model="dashboardForm.name" />
@@ -74,7 +76,7 @@
                             x-sort:item="dashboard.id"
                             flat
                             class="border-b-2 border-b-transparent focus:!ring-0 focus:!ring-offset-0"
-                            x-on:click="edit ? $wire.edit(dashboard.id) : $wire.$set('dashboardId', dashboard.id, true)"
+                            x-on:click="edit ? $wire.edit(dashboard.id) : $wire.selectDashboard(dashboard.id)"
                             x-bind:class="{'!border-b-primary-600 rounded-b-none': $wire.dashboardId === dashboard.id }"
                         >
                             <x-slot:label>

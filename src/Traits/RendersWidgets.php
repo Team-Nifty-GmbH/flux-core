@@ -81,12 +81,15 @@ trait RendersWidgets
                 ->widgets()
                 ->updateOrCreate(
                     [
-                        'id' => $widget['id'],
+                        'id' => is_numeric($widget['id']) ? $widget['id'] : null,
                         'dashboard_id' => $this->dashboardId,
                     ],
-                    array_merge(
-                        $widget,
-                        ['dashboard_id' => $this->dashboardId]
+                    Arr::except(
+                        array_merge(
+                            $widget,
+                            ['dashboard_id' => $this->dashboardId]
+                        ),
+                        'id'
                     )
                 );
             $widget['id'] = $savedWidget->id;
