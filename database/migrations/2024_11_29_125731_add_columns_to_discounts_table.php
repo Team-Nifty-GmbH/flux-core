@@ -28,7 +28,6 @@ return new class() extends Migration
 
             $table->dropColumn([
                 'name',
-                'order_column',
                 'discount_percentage',
                 'discount_flat',
             ]);
