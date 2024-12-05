@@ -28,6 +28,14 @@ trait SortableTrait
             }
         });
 
+        static::deleting(function (Model $model) {
+            $orderColumn = $model->determineOrderColumnName();
+
+            if (! $model->hasAttribute($orderColumn)) {
+                $model->$orderColumn = $model->newModelQuery()->whereKey($model->getKey())->value($orderColumn);
+            }
+        });
+
         static::deleted(function (Model $model) {
             $orderColumn = $model->determineOrderColumnName();
             $orderValue = $model->$orderColumn;

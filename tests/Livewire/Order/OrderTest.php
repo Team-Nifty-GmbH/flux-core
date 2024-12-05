@@ -319,9 +319,6 @@ class OrderTest extends BaseSetup
 
     public function test_can_add_discount()
     {
-        $totalGrossPrice = $this->order->total_gross_price;
-        $totalNetPrice = $this->order->total_net_price;
-
         Livewire::test(OrderView::class, ['id' => $this->order->id])
             ->assertSet('order.discounts', [])
             ->call('editDiscount')
@@ -349,5 +346,17 @@ class OrderTest extends BaseSetup
                 'is_percentage' => 1,
             ]
         );
+    }
+
+    public function test_can_delete_order()
+    {
+        Livewire::test(OrderView::class, ['id' => $this->order->id])
+            ->call('delete')
+            ->assertStatus(200)
+            ->assertHasNoErrors()
+            ->assertRedirectToRoute('orders.orders');
+
+        $this->assertSoftDeleted('orders', ['id' => $this->order->id]);
+        $this->assertSoftDeleted('order_positions', ['order_id' => $this->order->id]);
     }
 }
