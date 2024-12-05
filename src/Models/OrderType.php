@@ -32,6 +32,7 @@ class OrderType extends FluxModel
             'order_type_enum' => OrderTypeEnum::class,
             'is_active' => 'boolean',
             'is_hidden' => 'boolean',
+            'is_visible_in_sidebar' => 'boolean',
         ];
     }
 

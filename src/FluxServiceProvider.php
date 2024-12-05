@@ -130,11 +130,11 @@ class FluxServiceProvider extends ServiceProvider
         Blade::component('flux::components.calendar.event-edit', 'tall-calendar::event-edit');
         Blade::component('flux::components.calendar.calendar-list', 'tall-calendar::calendar-list');
 
-        if (static::$registerFluxRoutes && ! $this->app->runningInConsole()) {
+        if (static::$registerFluxRoutes && (! $this->app->runningInConsole() || $this->app->runningUnitTests())) {
             $this->bootFluxMenu();
         }
 
-        if (static::$registerPortalRoutes && ! $this->app->runningInConsole()) {
+        if (static::$registerPortalRoutes && (! $this->app->runningInConsole() || $this->app->runningUnitTests())) {
             $this->bootPortalMenu();
         }
 
@@ -520,7 +520,11 @@ class FluxServiceProvider extends ServiceProvider
             icon: 'briefcase',
             label: 'Orders',
             closure: function () {
-                foreach (resolve_static(OrderType::class, 'query')->get(['id', 'name']) as $orderType) {
+                foreach (resolve_static(OrderType::class, 'query')
+                    ->where('is_visible_in_sidebar', true)
+                    ->where('is_active', true)
+                    ->get(['id', 'name']) as $orderType
+                ) {
                     Menu::register(
                         route: 'orders.order-type',
                         label: $orderType->name,

@@ -34,6 +34,8 @@ class OrderTypeForm extends FluxForm
 
     public bool $is_hidden = false;
 
+    public bool $is_visible_in_sidebar = true;
+
     public function fill($values): void
     {
         parent::fill($values);

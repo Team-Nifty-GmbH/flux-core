@@ -38,6 +38,7 @@ class CreateOrderTypeRuleset extends FluxRuleset
             ],
             'is_active' => 'boolean',
             'is_hidden' => 'boolean',
+            'is_visible_in_sidebar' => 'boolean',
         ];
     }
 }
