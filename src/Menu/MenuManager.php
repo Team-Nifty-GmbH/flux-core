@@ -135,6 +135,13 @@ class MenuManager
         unset($this->resolved[$name]);
     }
 
+    public function clear(): void
+    {
+        $this->resolved = [];
+        $this->registered = [];
+        $this->registeredGroups = [];
+    }
+
     public function all(): array
     {
         $this->resolve();

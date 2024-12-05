@@ -35,6 +35,7 @@ class UpdateOrderTypeRuleset extends FluxRuleset
             'reserve_stock_print_layouts.*' => 'required|string',
             'is_active' => 'boolean',
             'is_hidden' => 'boolean',
+            'is_visible_in_sidebar' => 'boolean',
         ];
     }
 }
