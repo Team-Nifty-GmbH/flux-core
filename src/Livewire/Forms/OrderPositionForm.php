@@ -128,6 +128,11 @@ class OrderPositionForm extends FluxForm
         $product ??= resolve_static(Product::class, 'query')
             ->whereKey($this->product_id)
             ->first();
+
+        if (! $product) {
+            return;
+        }
+
         $this->product = $product;
 
         $this->vat_rate_id = $this->product->vat_rate_id;
