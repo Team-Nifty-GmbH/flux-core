@@ -143,7 +143,7 @@
                 @section('order-positions-footer-card')
                     <div x-show="! $wire.order.is_locked" x-cloak class="sticky bottom-6 pt-6">
                         <x-card>
-                            <form class="flex gap-4" x-trap x-on:submit.prevent="$wire.quickAdd().then(() => Alpine.$data($el.querySelector('[x-data]')).toggle())">
+                            <form class="flex gap-4" x-on:submit.prevent="$wire.quickAdd().then(() => Alpine.$data($el.querySelector('[x-data]')).toggle())">
                                 <div class="flex gap-4 w-full">
                                     @section('order-positions-footer-card.inputs')
                                         <x-select

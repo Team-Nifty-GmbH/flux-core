@@ -144,9 +144,9 @@ abstract class FluxAction
         return $this;
     }
 
-    public function getData(?string $key = null): mixed
+    public function getData(?string $key = null, mixed $default = null): mixed
     {
-        return $key ? data_get($this->data, $key) : $this->data;
+        return $key ? data_get($this->data, $key, $default) : $this->data;
     }
 
     /**
