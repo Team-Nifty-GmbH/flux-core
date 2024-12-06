@@ -152,6 +152,7 @@ class UpdateAddress extends FluxAction
             if ($address->password
                 && array_key_exists('password', $this->data)
                 && ! is_null(data_get($this->data, 'password'))
+                && ! data_get($this->data, 'password')
             ) {
                 $errors += [
                     'password' => [__('Unable to clear password while \'can_login\' = \'true\'')],

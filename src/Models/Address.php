@@ -292,6 +292,16 @@ class Address extends FluxAuthenticatable implements HasLocalePreference, HasMed
             ->withPivot('address_type_id');
     }
 
+    public function ordersDeliveryAddress(): HasMany
+    {
+        return $this->hasMany(Order::class, 'address_delivery_id');
+    }
+
+    public function ordersInvoiceAddress(): HasMany
+    {
+        return $this->hasMany(Order::class, 'address_invoice_id');
+    }
+
     public function priceList(): HasOneThrough
     {
         return $this->hasOneThrough(
