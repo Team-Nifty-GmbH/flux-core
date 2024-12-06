@@ -9,8 +9,9 @@ on:
 jobs:
   laravel:
     name: Laravel ${{ matrix.laravel }} (PHP ${{ matrix.php-versions }}) - ${{ matrix.browser }}
-    runs-on: flux
+    runs-on: self-hosted
     env:
+      HOME: /github/home
       DB_DATABASE: testing
       DB_USERNAME: root
       DB_PASSWORD: password

@@ -142,65 +142,73 @@
                 @include('tall-datatables::livewire.data-table')
                 @section('order-positions-footer-card')
                     <div x-show="! $wire.order.is_locked" x-cloak class="sticky bottom-6 pt-6">
-                        <x-card class="flex gap-4">
-                            <div class="flex gap-4 max-w-md w-full">
-                                @section('order-positions-footer-card.inputs')
-                                    <x-select
-                                        class="pb-4"
-                                        :label="__('Product')"
-                                        x-on:selected="$wire.changedProductId($event.detail.id)"
-                                        wire:model="orderPosition.product_id"
-                                        option-value="id"
-                                        option-label="label"
-                                        option-description="product_number"
-                                        :clearable="false"
-                                        :template="[
-                                            'name'   => 'user-option',
-                                        ]"
-                                        :async-data="[
-                                            'api' => route('search', \FluxErp\Models\Product::class),
-                                            'params' => [
-                                                'whereDoesntHave' => 'children',
-                                                'fields' => ['id', 'name', 'product_number'],
-                                                'with' => 'media',
-                                            ]
-                                        ]"
-                                    />
-                                    <div
-                                        x-transition
-                                        x-cloak
-                                        x-ref="quickAddAmount"
-                                        x-show="$wire.orderPosition.product_id"
-                                    >
-                                        <x-inputs.number
-                                            :label="__('Amount')"
-                                            wire:model="orderPosition.amount"
-                                            wire:keyup.enter="quickAdd()"
+                        <x-card>
+                            <form class="flex gap-4" x-trap x-on:submit.prevent="$wire.quickAdd().then(() => Alpine.$data($el.querySelector('[x-data]')).toggle())">
+                                <div class="flex gap-4 w-full">
+                                    @section('order-positions-footer-card.inputs')
+                                        <x-select
+                                            class="pb-4"
+                                            :label="__('Product')"
+                                            x-on:selected="$wire.changedProductId($event.detail.id).then(() => {
+                                                const input = $refs.quickAddAmount.querySelector('input');
+                                                input.focus();
+                                                input.select();
+                                            })"
+                                            wire:model="orderPosition.product_id"
+                                            option-value="id"
+                                            option-label="label"
+                                            option-description="product_number"
+                                            :clearable="false"
+                                            :template="[
+                                                'name'   => 'user-option',
+                                            ]"
+                                            :async-data="[
+                                                'api' => route('search', \FluxErp\Models\Product::class),
+                                                'params' => [
+                                                    'whereDoesntHave' => 'children',
+                                                    'fields' => ['id', 'name', 'product_number'],
+                                                    'with' => 'media',
+                                                ]
+                                            ]"
                                         />
-                                    </div>
-                                @show
-                            </div>
-                            <div class="flex gap-1.5 items-center pt-2">
-                                @section('order-positions-footer-card.buttons')
-                                    <div x-transition x-cloak x-show="$wire.orderPosition.product_id">
-                                        <x-button
-                                            positive
-                                            icon="plus"
-                                            :label="__('Quick add')"
-                                            wire:click="quickAdd()"
-                                        />
-                                    </div>
-                                    <div>
-                                        <x-button
+                                        <div
+                                            x-transition
+                                            x-cloak
+                                            x-ref="quickAddAmount"
+                                            x-show="$wire.orderPosition.product_id"
+                                            class="min-w-28"
+                                        >
+                                            <x-inputs.number
+                                                :label="__('Amount')"
+                                                wire:model="orderPosition.amount"
+                                            />
+                                        </div>
+                                    @show
+                                </div>
+                                <div class="flex gap-1.5 items-center pt-2">
+                                    @section('order-positions-footer-card.buttons')
+                                        <div x-transition x-cloak x-show="$wire.orderPosition.product_id">
+                                            <x-button
+                                                class="whitespace-nowrap"
+                                                positive
+                                                icon="plus"
+                                                :label="__('Quick add')"
+                                                type="submit"
+                                            />
+                                        </div>
+                                        <div>
+                                            <x-button
+                                                class="whitespace-nowrap"
                                                 :label="__('Add Detailed')"
                                                 primary
                                                 icon="pencil"
                                                 x-ref="addPosition"
                                                 wire:click="editOrderPosition().then(() => $openModal('edit-order-position'))"
-                                        />
-                                    </div>
-                                @show
-                            </div>
+                                            />
+                                        </div>
+                                    @show
+                                </div>
+                            </form>
                         </x-card>
                     </div>
                 @show
