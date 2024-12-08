@@ -10,10 +10,9 @@ use Illuminate\Validation\ValidationException;
 
 class CreateProject extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreateProjectRuleset::class, 'getRules');
+        return CreateProjectRuleset::class;
     }
 
     public static function models(): array

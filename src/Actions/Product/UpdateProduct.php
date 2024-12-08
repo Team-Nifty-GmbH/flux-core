@@ -20,10 +20,9 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateProduct extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdateProductRuleset::class, 'getRules');
+        return UpdateProductRuleset::class;
     }
 
     public static function models(): array

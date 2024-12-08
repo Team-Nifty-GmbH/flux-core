@@ -9,15 +9,16 @@ use FluxErp\Actions\PurchaseInvoicePosition\UpdatePurchaseInvoicePosition;
 use FluxErp\Helpers\Helper;
 use FluxErp\Models\Order;
 use FluxErp\Models\PurchaseInvoice;
+use FluxErp\Models\Tag;
 use FluxErp\Rulesets\PurchaseInvoice\UpdatePurchaseInvoiceRuleset;
+use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 
 class UpdatePurchaseInvoice extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdatePurchaseInvoiceRuleset::class, 'getRules');
+        return UpdatePurchaseInvoiceRuleset::class;
     }
 
     public static function models(): array
@@ -27,6 +28,7 @@ class UpdatePurchaseInvoice extends FluxAction
 
     public function performAction(): PurchaseInvoice
     {
+        $tags = Arr::pull($this->data, 'tags');
         $positions = data_get($this->data, 'purchase_invoice_positions');
         $purchaseInvoice = resolve_static(PurchaseInvoice::class, 'query')
             ->whereKey($this->data['id'])
@@ -44,6 +46,12 @@ class UpdatePurchaseInvoice extends FluxAction
                 createAction: CreatePurchaseInvoicePosition::class,
                 updateAction: UpdatePurchaseInvoicePosition::class,
                 deleteAction: DeletePurchaseInvoicePosition::class
+            );
+        }
+
+        if (! is_null($tags)) {
+            $purchaseInvoice->syncTags(
+                resolve_static(Tag::class, 'query')->whereIntegerInRaw('id', $tags)->get()
             );
         }
 

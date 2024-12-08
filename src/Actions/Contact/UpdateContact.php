@@ -13,10 +13,9 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateContact extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdateContactRuleset::class, 'getRules');
+        return UpdateContactRuleset::class;
     }
 
     public static function models(): array
@@ -101,7 +100,7 @@ class UpdateContact extends FluxAction
 
         $clientPaymentTypeExists = resolve_static(PaymentType::class, 'query')
             ->whereKey($this->data['payment_type_id'])
-            ->where('client_id', $this->data['client_id'])
+            ->whereRelation('clients', 'id', $this->data['client_id'])
             ->exists();
 
         if (! $clientPaymentTypeExists) {

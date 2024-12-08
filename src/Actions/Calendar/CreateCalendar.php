@@ -9,10 +9,9 @@ use Illuminate\Support\Arr;
 
 class CreateCalendar extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreateCalendarRuleset::class, 'getRules');
+        return CreateCalendarRuleset::class;
     }
 
     public static function models(): array

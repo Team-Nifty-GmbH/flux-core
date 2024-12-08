@@ -3,23 +3,24 @@
 namespace FluxErp\Livewire\Settings;
 
 use FluxErp\Actions\TicketType\CreateTicketType;
-use FluxErp\Actions\TicketType\DeleteTicketType;
 use FluxErp\Actions\TicketType\UpdateTicketType;
+use FluxErp\Livewire\Forms\TicketTypeForm;
 use FluxErp\Models\Role;
 use FluxErp\Models\TicketType;
-use FluxErp\Rulesets\TicketType\CreateTicketTypeRuleset;
-use FluxErp\Services\TicketTypeService;
+use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Renderless;
 use Livewire\Component;
-use WireUi\Traits\Actions;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class TicketTypeEdit extends Component
 {
     use Actions;
 
-    public array $ticketType;
+    public TicketTypeForm $ticketType;
 
     public array $models;
 
@@ -42,11 +43,6 @@ class TicketTypeEdit extends Component
 
     public function mount(): void
     {
-        $this->ticketType = array_fill_keys(
-            array_keys(resolve_static(CreateTicketTypeRuleset::class, 'getRules')),
-            null
-        );
-
         $this->models = model_info_all()
             ->unique('morphClass')
             ->map(fn ($modelInfo) => [
@@ -69,67 +65,47 @@ class TicketTypeEdit extends Component
 
     public function show(array $ticketType = []): void
     {
-        $this->ticketType = $ticketType ?:
-            array_fill_keys(
-                array_keys(resolve_static(CreateTicketTypeRuleset::class, 'getRules')),
-                null
-            );
+        $this->ticketType->reset();
+        $this->ticketType->fill($ticketType);
 
-        unset($this->ticketType['uuid']);
+        $this->isNew = ! $this->ticketType->id;
 
-        $this->isNew = ! array_key_exists('id', $this->ticketType);
-
-        $this->ticketType['roles'] = $this->isNew ? [] : resolve_static(TicketType::class, 'query')
-            ->join('role_ticket_type AS rtt', 'ticket_types.id', '=', 'rtt.ticket_type_id')
-            ->whereKey($this->ticketType['id'])
-            ->pluck('rtt.role_id')
-            ->toArray();
+        $this->ticketType->roles = $this->isNew
+            ? []
+            : resolve_static(TicketType::class, 'query')
+                ->join('role_ticket_type AS rtt', 'ticket_types.id', '=', 'rtt.ticket_type_id')
+                ->whereKey($this->ticketType->id)
+                ->pluck('rtt.role_id')
+                ->toArray();
     }
 
+    #[Renderless]
     public function save(): void
     {
-        if (($this->isNew && ! user_can('api.ticket-types.{id}.post')) ||
-            (! $this->isNew && ! user_can('api.ticket-types.{id}.put'))
-        ) {
-            $this->notification()->error(
-                __('insufficient permissions'),
-                __('You have not the rights to modify this record')
-            );
+        try {
+            $this->ticketType->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
 
             return;
         }
 
-        $validated = $this->validate();
-
-        $ticketTypeService = app(TicketTypeService::class);
-        $response = $ticketTypeService->{$this->isNew ? 'create' : 'update'}($validated['ticketType']);
-
-        if (! $this->isNew && $response['status'] > 299) {
-            $this->notification()->error(
-                implode(',', array_keys($response['errors'])),
-                implode(', ', Arr::dot($response['errors']))
-            );
-
-            return;
-        }
-
-        $this->notification()->success(__('Ticket type saved successful.'));
-
-        $ticketType = $this->isNew ? $response->toArray() : $response['data']->toArray();
-
-        $this->skipRender();
-        $this->dispatch('closeModal', $ticketType)->to('settings.ticket-types');
+        $this->notification()->success(__('Ticket Type saved successful.'));
+        $this->dispatch('closeModal', $this->ticketType)->to('settings.ticket-types');
     }
 
+    #[Renderless]
     public function delete(): void
     {
-        if (! resolve_static(DeleteTicketType::class, 'canPerformAction', [false])) {
+        $ticketType = ['id' => $this->ticketType->id];
+        try {
+            $this->ticketType->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
             return;
         }
 
-        (new TicketTypeService())->delete($this->ticketType['id']);
-
-        $this->skipRender();
-        $this->dispatch('closeModal', $this->ticketType, true)->to('settings.ticket-types');
+        $this->dispatch('closeModal', $ticketType, true)->to('settings.ticket-types');
     }
 }

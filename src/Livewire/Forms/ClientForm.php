@@ -14,6 +14,8 @@ class ClientForm extends FluxForm
 
     public ?int $country_id = null;
 
+    public ?int $commission_credit_note_order_type_id = null;
+
     public ?string $name = null;
 
     public ?string $client_code = null;

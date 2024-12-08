@@ -9,10 +9,10 @@ use FluxErp\Livewire\DataTables\PaymentTypeList;
 use FluxErp\Livewire\Forms\PaymentTypeForm;
 use FluxErp\Models\Client;
 use FluxErp\Models\PaymentType;
+use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
-use WireUi\Traits\Actions;
 
 class PaymentTypes extends PaymentTypeList
 {

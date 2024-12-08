@@ -2,18 +2,80 @@
 
 namespace FluxErp\Traits;
 
+use Illuminate\Database\Eloquent\Model;
 use Spatie\EloquentSortable\SortableTrait as BaseSortableTrait;
 
 trait SortableTrait
 {
-    use BaseSortableTrait;
+    private bool $isSorted = false;
+
+    use BaseSortableTrait {
+        BaseSortableTrait::bootSortableTrait as bootParentSortableTrait;
+    }
+
+    protected static function bootSortableTrait(): void
+    {
+        static::bootParentSortableTrait();
+
+        static::saving(function (Model $model) {
+            $orderColumn = $model->determineOrderColumnName();
+
+            if ($model->isDirty($orderColumn) && ! $model->getIsSorted() && $model->exists) {
+                $newPosition = $model->$orderColumn ?? $model->getHighestOrderNumber() + 1;
+                $model->$orderColumn = $model->getRawOriginal($orderColumn);
+
+                $model->moveToPosition($newPosition);
+            }
+        });
+
+        static::deleting(function (Model $model) {
+            $orderColumn = $model->determineOrderColumnName();
+
+            if (! $model->hasAttribute($orderColumn)) {
+                $model->$orderColumn = $model->newModelQuery()->whereKey($model->getKey())->value($orderColumn);
+            }
+        });
+
+        static::deleted(function (Model $model) {
+            $orderColumn = $model->determineOrderColumnName();
+            $orderValue = $model->$orderColumn;
+
+            $model->buildSortQuery()
+                ->where($orderColumn, '>', $orderValue)
+                ->decrement($orderColumn);
+        });
+
+        if (in_array(\Illuminate\Database\Eloquent\SoftDeletes::class, class_uses_recursive(static::class))) {
+            static::restored(function (Model $model) {
+                $orderColumn = $model->determineOrderColumnName();
+                $orderValue = $model->$orderColumn;
+
+                $model->buildSortQuery()
+                    ->where($orderColumn, '>=', $orderValue)
+                    ->whereKeyNot($model->getKey())
+                    ->increment($orderColumn);
+            });
+        }
+    }
+
+    protected function setIsSorted(bool $isSorted = true): static
+    {
+        $this->isSorted = $isSorted;
+
+        return $this;
+    }
+
+    public function getIsSorted(): bool
+    {
+        return $this->isSorted;
+    }
 
     public function moveToPosition(int $newPosition): static
     {
         $orderColumnName = $this->determineOrderColumnName();
 
         $maxOrder = $this->getHighestOrderNumber();
-        $currentOrder = $this->$orderColumnName;
+        $currentOrder = $this->$orderColumnName ?? $maxOrder + 1;
         $newPosition = max(1, min($newPosition, $maxOrder)); // Ensure the new position is valid
 
         if ($currentOrder === $newPosition) {
@@ -36,7 +98,7 @@ trait SortableTrait
 
         // Set the model's order column to the new position
         $this->$orderColumnName = $newPosition;
-        $this->save();
+        $this->setIsSorted()->save();
 
         return $this;
     }

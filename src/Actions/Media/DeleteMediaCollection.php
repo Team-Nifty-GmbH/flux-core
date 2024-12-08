@@ -8,10 +8,9 @@ use FluxErp\Rulesets\Media\DeleteMediaCollectionRuleset;
 
 class DeleteMediaCollection extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(DeleteMediaCollectionRuleset::class, 'getRules');
+        return DeleteMediaCollectionRuleset::class;
     }
 
     public static function models(): array

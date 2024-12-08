@@ -3,8 +3,11 @@
 namespace FluxErp\Livewire\Forms;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Support\Livewire\Attributes\ExcludeFromActionData;
 use Illuminate\Database\Eloquent\Model;
+use Livewire\Drawer\Utils;
 use Livewire\Form as BaseForm;
+use ReflectionProperty;
 
 abstract class FluxForm extends BaseForm
 {
@@ -18,12 +21,21 @@ abstract class FluxForm extends BaseForm
 
     protected function makeAction(string $name, ?array $data = null): FluxAction
     {
-        return $this->getActions()[$name]::make($data ?? $this->toArray());
+        return $this->getActions()[$name]::make($data ?? $this->toActionData());
     }
 
     protected function getKey(): string
     {
         return 'id';
+    }
+
+    public function toActionData(): array
+    {
+        return Utils::getPublicProperties(
+            $this,
+            fn (ReflectionProperty $property) => collect($property->getAttributes())
+                ->doesntContain(fn ($attribute) => $attribute->getName() === ExcludeFromActionData::class)
+        );
     }
 
     public function getActionResult(): mixed
@@ -99,10 +111,12 @@ abstract class FluxForm extends BaseForm
         parent::validate(
             array_intersect_key(
                 array_merge(
-                    $this->makeAction($this->{$this->getKey()} ? 'update' : 'create')->getRules(),
+                    $this->makeAction($this->{$this->getKey()} ? 'update' : 'create')
+                        ->setRulesFromRulesets()
+                        ->getRules(),
                     $rules ?? []
                 ),
-                $this->toArray()
+                $this->toActionData()
             ),
             $messages,
             $attributes
@@ -117,7 +131,7 @@ abstract class FluxForm extends BaseForm
                     $this->makeAction('delete')->getRules(),
                     $rules ?? []
                 ),
-                $this->toArray()
+                $this->toActionData()
             ),
             $messages,
             $attributes

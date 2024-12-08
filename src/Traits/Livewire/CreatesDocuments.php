@@ -18,7 +18,6 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\Support\MediaStream;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use WireUi\Traits\Actions;
 
 trait CreatesDocuments
 {
@@ -100,7 +99,7 @@ trait CreatesDocuments
     #[Renderless]
     public function openPreview(string $printView, string $modelType, int|string $modelId): void
     {
-        if (! in_array($printView, $this->getPrintLayouts())) {
+        if (! in_array($printView, array_keys($this->getPrintLayouts()))) {
             throw new \InvalidArgumentException('Invalid print view');
         }
 

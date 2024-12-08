@@ -10,10 +10,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class UpdateCart extends FluxAction
 {
-    protected function boot(array $data): void
+    protected static bool $hasPermission = false;
+
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdateCartRuleset::class, 'getRules');
+        return UpdateCartRuleset::class;
     }
 
     public static function models(): array

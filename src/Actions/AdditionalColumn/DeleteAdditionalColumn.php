@@ -8,10 +8,9 @@ use FluxErp\Rulesets\AdditionalColumn\DeleteAdditionalColumnRuleset;
 
 class DeleteAdditionalColumn extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(DeleteAdditionalColumnRuleset::class, 'getRules');
+        return DeleteAdditionalColumnRuleset::class;
     }
 
     public static function models(): array

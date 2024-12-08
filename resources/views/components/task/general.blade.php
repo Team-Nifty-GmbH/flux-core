@@ -58,6 +58,28 @@
         />
         <x-inputs.number x-bind:readonly="!edit" :label="__('Priority')" wire:model="task.priority" min="0" />
         <x-textarea x-bind:readonly="!edit" wire:model="task.description" label="{{ __('Description') }}" />
+        <div>
+            <x-select
+                :label="__('Categories')"
+                wire:model="task.categories"
+                multiselect
+                option-value="id"
+                option-label="label"
+                :async-data="[
+                    'api' => route('search', \FluxErp\Models\Category::class),
+                    'method' => 'POST',
+                    'params' => [
+                        'where' => [
+                            [
+                                'model_type',
+                                '=',
+                                morph_alias(\FluxErp\Models\Task::class),
+                            ],
+                        ],
+                    ],
+                ]"
+            />
+        </div>
         <x-select
             :label="__('Assigned')"
             option-value="id"

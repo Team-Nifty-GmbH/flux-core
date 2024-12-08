@@ -8,11 +8,9 @@ use FluxErp\Rulesets\CommissionRate\CreateCommissionRateRuleset;
 
 class CreateCommissionRate extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-
-        $this->rules = resolve_static(CreateCommissionRateRuleset::class, 'getRules');
+        return CreateCommissionRateRuleset::class;
     }
 
     public static function models(): array

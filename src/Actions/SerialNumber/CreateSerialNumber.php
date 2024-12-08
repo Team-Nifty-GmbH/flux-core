@@ -9,10 +9,9 @@ use Illuminate\Support\Arr;
 
 class CreateSerialNumber extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreateSerialNumberRuleset::class, 'getRules');
+        return CreateSerialNumberRuleset::class;
     }
 
     public static function models(): array

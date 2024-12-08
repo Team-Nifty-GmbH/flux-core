@@ -35,7 +35,7 @@ class TicketTypes extends Component
     public function mount(): void
     {
         $this->dbTicketTypes = resolve_static(TicketType::class, 'query')
-            ->orderBy('name->' . app()->getLocale(), 'ASC')
+            ->orderBy('name')
             ->get(['id', 'name', 'model_type'])
             ->toArray();
 
@@ -50,7 +50,7 @@ class TicketTypes extends Component
             $additionalColumns = resolve_static(AdditionalColumn::class, 'query')
                 ->where('model_type', morph_alias(TicketType::class))
                 ->where('model_id', $ticketType['id'])
-                ->orderBy('name', 'ASC')
+                ->orderBy('name')
                 ->get([
                     'id',
                     'name',

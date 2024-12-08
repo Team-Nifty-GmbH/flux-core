@@ -65,7 +65,13 @@ trait RendersWidgets
 
         // create new widgets, update existing widgets
         foreach ($this->widgets as &$widget) {
-            $savedWidget = auth()->user()->widgets()->updateOrCreate(['id' => $widget['id']], $widget);
+            $savedWidget = auth()
+                ->user()
+                ->widgets()
+                ->updateOrCreate(
+                    ['id' => is_numeric($widget['id']) ? $widget['id'] : null],
+                    Arr::except($widget, 'id')
+                );
             $widget['id'] = $savedWidget->id;
         }
 
@@ -94,13 +100,15 @@ trait RendersWidgets
                 $name = $widget['component_name'];
 
                 try {
-                    $permissionExists = resolve_static(
-                        Permission::class,
-                        'findByName',
-                        [
-                            'name' => 'widget.' . $name,
-                        ]
-                    )->exists;
+                    $permissionExists = ! is_null(
+                        resolve_static(
+                            Permission::class,
+                            'findByName',
+                            [
+                                'name' => 'widget.' . $name,
+                            ]
+                        )
+                    );
                 } catch (PermissionDoesNotExist) {
                     $permissionExists = false;
                 }

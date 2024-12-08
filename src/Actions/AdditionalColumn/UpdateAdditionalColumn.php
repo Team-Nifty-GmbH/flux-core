@@ -10,10 +10,9 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateAdditionalColumn extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdateAdditionalColumnRuleset::class, 'getRules');
+        return UpdateAdditionalColumnRuleset::class;
     }
 
     public static function models(): array

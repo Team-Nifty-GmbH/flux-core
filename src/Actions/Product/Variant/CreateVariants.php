@@ -12,10 +12,9 @@ use Illuminate\Database\Eloquent\Collection;
 
 class CreateVariants extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreateVariantsRuleset::class, 'getRules');
+        return CreateVariantsRuleset::class;
     }
 
     public static function models(): array

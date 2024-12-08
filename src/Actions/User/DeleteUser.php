@@ -10,10 +10,9 @@ use Illuminate\Validation\ValidationException;
 
 class DeleteUser extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(DeleteUserRuleset::class, 'getRules');
+        return DeleteUserRuleset::class;
     }
 
     public static function models(): array

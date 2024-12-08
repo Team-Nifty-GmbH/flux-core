@@ -6,13 +6,12 @@ use FluxErp\Actions\Cart\CreateCart;
 use FluxErp\Actions\CartItem\CreateCartItem;
 use FluxErp\Actions\CartItem\DeleteCartItem;
 use FluxErp\Actions\CartItem\UpdateCartItem;
-use FluxErp\Helpers\PriceHelper;
-use FluxErp\Models\Address;
 use FluxErp\Models\Cart as CartModel;
 use FluxErp\Models\CartItem;
-use FluxErp\Models\Product;
+use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
@@ -20,8 +19,7 @@ use Livewire\Attributes\Lazy;
 use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
-use Throwable;
-use WireUi\Traits\Actions;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 
 #[Lazy]
 class Cart extends Component
@@ -65,57 +63,17 @@ class Cart extends Component
 
     public function add(array|int $products): void
     {
-        $products = Arr::wrap(is_array($products) && ! array_is_list($products) ? [$products] : $products);
+        try {
+            $this->cart()->addItems($products);
+        } catch (UnauthorizedException|ValidationException $e) {
+            exception_to_notifications($e, $this);
 
-        foreach ($products as $product) {
-            $productModel = null;
-            if ($productId = is_array($product) ? data_get($product, 'id') : $product) {
-                $productModel = resolve_static(Product::class, 'query')
-                    ->whereKey($productId)
-                    ->first();
-            }
-
-            try {
-                $data = [
-                    'cart_id' => $this->cart()->id,
-                    'product_id' => data_get($product, 'id', $productModel?->id),
-                    'name' => data_get($product, 'name', $productModel?->name),
-                    'amount' => $product['amount'] ?? 1,
-                    'price' => $product['price']
-                        ?? PriceHelper::make($productModel)
-                            ->when(
-                                auth()->user() instanceof Address,
-                                fn ($price) => $price->setContact(auth()->user()->contact)
-                            )
-                            ->price()
-                            ->price,
-                ];
-            } catch (Throwable) {
-                continue;
-            }
-
-            // check if a product with the same id is already in the cart
-            if ($cartItem = $this->cart()->cartItems()->where('product_id', $productId)->first()) {
-                $data['id'] = $cartItem->id;
-                $data['amount'] = bcadd($cartItem->amount, $data['amount']);
-
-                $action = UpdateCartItem::make($data);
-            } else {
-                $action = CreateCartItem::make($data);
-            }
-
-            try {
-                $action->validate()->execute();
-            } catch (ValidationException $e) {
-                exception_to_notifications($e, $this);
-
-                return;
-            }
-
-            unset($this->cart);
+            return;
         }
 
-        $this->notification()->success(count($products) > 1
+        unset($this->cart);
+
+        $this->notification()->success(count(Arr::wrap($products)) > 1
             ? __('Products added to cart')
             : __('Product added to cart')
         );
@@ -199,7 +157,7 @@ class Cart extends Component
     {
         $this->dispatch(
             'order:add-products',
-            $this->cart()->cartItems()->select(['product_id', 'amount'])->get()->toArray()
+            $this->cart()->cartItems()->select(['product_id', 'amount', 'order_column'])->ordered()->get()->toArray()
         );
     }
 
@@ -211,7 +169,17 @@ class Cart extends Component
 
         $this->add(
             resolve_static(CartModel::class, 'query')
-                ->with('cartItems:id,cart_id,product_id,vat_rate_id,amount')
+                ->with([
+                    'cartItems' => fn (HasMany $query) => $query->ordered()
+                        ->select([
+                            'id',
+                            'cart_id',
+                            'product_id',
+                            'vat_rate_id',
+                            'amount',
+                            'order_column',
+                        ]),
+                ])
                 ->whereKey($this->loadWatchlist)
                 ->first()
                 ->cartItems

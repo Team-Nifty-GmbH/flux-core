@@ -13,7 +13,7 @@ class CartItemFactory extends Factory
     {
         return [
             'name' => $this->faker->name,
-            'amount' => $this->faker->randomNumber(2),
+            'amount' => $this->faker->randomDigitNotZero(),
             'price' => $this->faker->randomFloat(2),
             'total_net' => $this->faker->randomFloat(2),
             'total_gross' => $this->faker->randomFloat(2),

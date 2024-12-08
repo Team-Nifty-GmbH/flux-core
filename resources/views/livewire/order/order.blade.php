@@ -219,6 +219,43 @@
                 </x-slot:footer>
             </x-card>
         </x-modal>
+        <x-modal name="edit-discount" x-on:open="$focus.first()" x-trap="show" x-on:keyup.enter="$wire.saveDiscount().then((success) => {if(success) close();})">
+            <x-card>
+                <div class="flex flex-col gap-4">
+                    <x-input wire:model="discount.name" :label="__('Name')" />
+                    <div x-cloak x-show="$wire.discount.is_percentage">
+                        <x-input
+                            prefix="%"
+                            type="number"
+                            x-on:focus=""
+                            :label="__('Discount')"
+                            wire:model="discount.discount"
+                            x-on:change="$el.value = parseNumber($el.value)"
+                        />
+                    </div>
+                    <div x-cloak x-show="! $wire.discount.is_percentage">
+                        <x-input
+                            :prefix="data_get($order, 'currency.symbol')"
+                            type="number"
+                            :label="__('Discount')"
+                            wire:model="discount.discount"
+                            x-on:change="$el.value = parseNumber($el.value)"
+                        />
+                    </div>
+                    <x-toggle wire:model="discount.is_percentage" :label="__('Is Percentage')" />
+                </div>
+                <x-slot:footer>
+                    <div class="flex justify-end gap-1.5">
+                        <x-button :label="__('Cancel')" x-on:click="close"/>
+                        <x-button
+                            primary
+                            :label="__('Save')"
+                            wire:click="saveDiscount().then((success) => {if(success) close();})"
+                        />
+                    </div>
+                </x-slot:footer>
+            </x-card>
+        </x-modal>
     @show
     <div
         class="mx-auto md:flex md:items-center md:justify-between md:space-x-5">
@@ -262,6 +299,14 @@
                                         rounded
                                     />
                             @endswitch
+                        @endif
+
+                        @if($order->hasContactDeliveryLock)
+                            <x-badge
+                                :label="__('Has Delivery Lock')"
+                                negative
+                                rounded
+                            />
                         @endif
                     </div>
                 </h1>
@@ -603,7 +648,6 @@
                 </div>
             </section>
         </x-slot:prepend>
-        @includeWhen($tab === 'order.order-positions', 'flux::livewire.order.order-positions')
         <x-slot:append>
             <section class="relative basis-2/12" wire:ignore>
                 <div class="sticky top-6 space-y-6">
@@ -645,26 +689,6 @@
                         <x-card>
                             <div class="text-sm">
                                 @section('content.right.summary')
-                                    @section('content.right.summary.profit')
-                                        <div class="flex justify-between p-2.5">
-                                            <div>
-                                                {{ __('Margin') }}
-                                            </div>
-                                            <div>
-                                                <span x-html="formatters.coloredMoney($wire.order.margin ?? 0)">
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <div class="flex justify-between p-2.5">
-                                            <div>
-                                                {{ __('Gross Profit') }}
-                                            </div>
-                                            <div>
-                                                <span x-html="formatters.coloredMoney($wire.order.gross_profit ?? 0)">
-                                                </span>
-                                            </div>
-                                        </div>
-                                    @show
                                     <div x-cloak x-show="$wire.order.total_net_price !== ($wire.order.total_base_net_price ?? '0.0000000000')">
                                         <div class="flex justify-between p-2.5">
                                             <div>
@@ -675,14 +699,71 @@
                                                 </span>
                                             </div>
                                         </div>
-                                        <div class="flex justify-between p-2.5">
+                                        <div class="flex justify-between p-2.5" x-cloak x-show="$wire.order.total_position_discount_percentage != 0">
                                             <div>
-                                                {{ __('Discount') }}
-                                            </div>
-                                            <div>
-                                                <span x-html="formatters.coloredMoney(($wire.order.total_net_price - $wire.order.total_base_net_price) ?? 0)">
+                                                <span>
+                                                    {{ __('Position discounts') }}
+                                                </span>
+                                                <span x-html="formatters.percentage($wire.order.total_position_discount_percentage ?? 0)">
                                                 </span>
                                             </div>
+                                            <div>
+                                                <span x-html="formatters.coloredMoney(($wire.order.total_position_discount_flat ?? 0) * -1)">
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="flex justify-between p-2.5" x-cloak x-show="$wire.order.total_position_discount_percentage != 0">
+                                            <div>
+                                                <span>
+                                                    {{ __('Sum net discounted') }}
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <span x-html="formatters.coloredMoney($wire.order.total_base_discounted_net_price ?? 0)">
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div x-sort="$wire.reOrderDiscount($item, $position)">
+                                            <template x-for="discount in $wire.order.discounts" :key="`${discount.id}-${discount.order_column}`">
+                                                <div class="flex justify-between p-2.5 items-center cursor-ns-resize" x-sort:item="discount.id">
+                                                    <div class="flex gap-1.5 items-center">
+                                                        @if (! $order->is_locked || ! resolve_static(\FluxErp\Actions\Discount\DeleteDiscount::class, 'canPerformAction', [false]))
+                                                            <div>
+                                                                <x-button.circle
+                                                                    negative
+                                                                    icon="x"
+                                                                    2xs
+                                                                    wire:click="deleteDiscount(discount.id)"
+                                                                    wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => 'Discount']) }}"
+                                                                />
+                                                            </div>
+                                                        @endif
+                                                        <div>
+                                                            <span x-html="discount.name"></span>
+                                                            <span x-html="formatters.percentage(discount.discount_percentage ?? 0)"></span>
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <span x-html="formatters.coloredMoney((discount.discount_flat ?? 0) * -1)">
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                    @if (! $order->is_locked || ! resolve_static(\FluxErp\Actions\Discount\CreateDiscount::class, 'canPerformAction', [false]))
+                                        <div class="w-full">
+                                            <x-button class="w-full" wire:click="editDiscount()" :label="__('Add discount')" />
+                                        </div>
+                                    @endif
+                                    <div class="flex justify-between p-2.5 opacity-50" x-cloak x-show="($wire.order.total_discount_percentage ?? 0) != 0">
+                                        <div>
+                                            <span>{{ __('Total discount') }}</span>
+                                            <span x-html="formatters.percentage($wire.order.total_discount_percentage ?? 0)">
+                                        </div>
+                                        <div>
+                                            <span x-html="formatters.coloredMoney(($wire.order.total_discount_flat ?? 0) * -1)">
+                                            </span>
                                         </div>
                                     </div>
                                     <div class="flex justify-between p-2.5">
@@ -717,7 +798,7 @@
                                             </span>
                                         </div>
                                     </div>
-                                    <div class="dark:bg-secondary-700 flex justify-between bg-gray-50 p-2.5">
+                                    <div class="dark:bg-secondary-700 flex justify-between bg-gray-50 p-2.5 opacity-50">
                                         <div>
                                             {{ __('Balance') }}
                                         </div>
@@ -726,6 +807,27 @@
                                             </span>
                                         </div>
                                     </div>
+                                    @section('content.right.summary.profit')
+                                        <hr />
+                                        <div class="flex justify-between p-2.5">
+                                            <div>
+                                                {{ __('Margin') }}
+                                            </div>
+                                            <div>
+                                                <span x-html="formatters.coloredMoney($wire.order.margin ?? 0)">
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="flex justify-between p-2.5">
+                                            <div>
+                                                {{ __('Gross Profit') }}
+                                            </div>
+                                            <div>
+                                                <span x-html="formatters.coloredMoney($wire.order.gross_profit ?? 0)">
+                                                </span>
+                                            </div>
+                                        </div>
+                                    @show
                                 @show
                             </div>
                         </x-card>

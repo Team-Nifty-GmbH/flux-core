@@ -9,11 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class UpdateUserClients extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-
-        $this->rules = resolve_static(UpdateUserClientsRuleset::class, 'getRules');
+        return UpdateUserClientsRuleset::class;
     }
 
     public static function name(): string

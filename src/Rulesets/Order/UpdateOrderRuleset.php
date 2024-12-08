@@ -97,7 +97,8 @@ class UpdateOrderRuleset extends FluxRuleset
                 'integer',
                 app(ExistsWithForeign::class, [
                     'foreignAttribute' => 'client_id',
-                    'table' => 'payment_types',
+                    'table' => 'client_payment_type',
+                    'column' => 'payment_type_id',
                     'baseTable' => 'orders',
                 ]),
             ],

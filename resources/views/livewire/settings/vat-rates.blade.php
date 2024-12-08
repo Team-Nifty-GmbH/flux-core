@@ -4,6 +4,7 @@
             <x-input wire:model="vatRate.name" :label="__('Name')" />
             <x-inputs.number wire:model="vatRate.rate_percentage_frontend" :label="__('Rate Percentage')" />
             <x-flux::editor wire:model="vatRate.footer_text" :label="__('Footer Text')" />
+            <x-toggle wire:model.boolean="vatRate.is_default" :label="__('Is Default')"/>
         </div>
         <x-slot:footer>
             <div class="flex justify-between gap-x-4">

@@ -3,15 +3,13 @@
 namespace FluxErp\Livewire\Forms;
 
 use FluxErp\Actions\OrderPosition\CreateOrderPosition;
-use FluxErp\Actions\OrderPosition\PriceCalculation;
+use FluxErp\Actions\OrderPosition\DeleteOrderPosition;
 use FluxErp\Actions\OrderPosition\UpdateOrderPosition;
 use FluxErp\Models\Product;
-use FluxErp\Models\VatRate;
 use FluxErp\Models\Warehouse;
 use Livewire\Attributes\Locked;
-use Livewire\Form;
 
-class OrderPositionForm extends Form
+class OrderPositionForm extends FluxForm
 {
     #[Locked]
     public ?int $id = null;
@@ -23,6 +21,8 @@ class OrderPositionForm extends Form
     public ?int $order_id = null;
 
     public ?int $origin_position_id = null;
+
+    public ?int $parent_id = null;
 
     public ?int $price_id = null;
 
@@ -99,58 +99,65 @@ class OrderPositionForm extends Form
 
     public ?string $alternative_tag = null;
 
-    public function save(): void
+    protected Product $product;
+
+    protected function getActions(): array
     {
-        $action = $this->id
-            ? UpdateOrderPosition::make($this->toArray())
-            : CreateOrderPosition::make($this->toArray());
-
-        $response = $action->checkPermission()->validate()->execute();
-
-        $this->fill($response);
+        return [
+            'create' => CreateOrderPosition::class,
+            'update' => UpdateOrderPosition::class,
+            'delete' => DeleteOrderPosition::class,
+        ];
     }
 
-    public function fillFormProduct(?Product $product = null): void
+    public function fill($values): void
+    {
+        parent::fill($values);
+
+        $this->discount_percentage = ! is_null($this->discount_percentage)
+            ? bcmul($this->discount_percentage, 100)
+            : null;
+    }
+
+    public function fillFromProduct(?Product $product = null): void
     {
         if ($product instanceof Product) {
             $this->product_id = $product->id;
         }
 
-        $product = $product ?: resolve_static(Product::class, 'query')
+        $product ??= resolve_static(Product::class, 'query')
             ->whereKey($this->product_id)
             ->first();
 
-        $this->vat_rate_id = $product->vat_rate_id;
-        $this->name = $product->name;
-        $this->description = $product->description;
-        $this->product_number = $product->product_number;
-        $this->ean_code = $product->ean;
-        $this->unit_gram_weight = $product->weight_gram;
-        $this->purchase_price = $product->purchasePrice($this->amount)?->price ?? 0;
+        if (! $product) {
+            return;
+        }
 
-        $this->calculate();
+        $this->product = $product;
+
+        $this->vat_rate_id = $this->product->vat_rate_id;
+        $this->name = $this->product->name;
+        $this->product_number = $this->product->product_number;
+        $this->ean_code = $this->product->ean;
+        $this->unit_gram_weight = $this->product->weight_gram;
+        $this->purchase_price = $this->product->purchasePrice($this->amount)?->price ?? 0;
 
         $this->warehouse_id ??= Warehouse::default()?->id;
+        $this->description ??= $this->product->description;
     }
 
-    public function validate($rules = null, $messages = [], $attributes = []): void
+    public function getProduct(): Product
     {
-        $action = $this->id
-            ? UpdateOrderPosition::make($this->toArray())
-            : CreateOrderPosition::make($this->toArray());
-
-        $action->validate();
+        return $this->product;
     }
 
-    public function calculate(): void
+    public function toActionData(): array
     {
-        $this->vat_rate_percentage = resolve_static(VatRate::class, 'query')
-            ->whereKey($this->vat_rate_id)
-            ->value('rate_percentage');
+        $data = parent::toActionData();
+        $data['discount_percentage'] = ! is_null($this->discount_percentage)
+            ? bcdiv($this->discount_percentage, 100)
+            : null;
 
-        PriceCalculation::fill($this, [
-            'vat_rate_percentage' => $this->vat_rate_percentage,
-            'discount_percentage' => $this->discount_percentage,
-        ]);
+        return $data;
     }
 }

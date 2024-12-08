@@ -8,10 +8,9 @@ use FluxErp\Rulesets\VatRate\DeleteVatRateRuleset;
 
 class DeleteVatRate extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(DeleteVatRateRuleset::class, 'getRules');
+        return DeleteVatRateRuleset::class;
     }
 
     public static function models(): array

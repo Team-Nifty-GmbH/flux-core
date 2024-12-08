@@ -15,13 +15,15 @@
         <x-card :title="__('New Order')">
             <section>
                 <div class="space-y-2.5 divide-y divide-secondary-200">
-                    <x-select
-                        :options="$orderTypes"
-                        option-label="name"
-                        option-value="id"
-                        :label="__('Order type')"
-                        wire:model="order.order_type_id"
-                    />
+                    @if(! $orderType ?? true)
+                        <x-select
+                            :options="$orderTypes"
+                            option-label="name"
+                            option-value="id"
+                            :label="__('Order type')"
+                            wire:model="order.order_type_id"
+                        />
+                    @endif
                     <div class="pt-4">
                         <x-select
                             :label="__('Contact')"

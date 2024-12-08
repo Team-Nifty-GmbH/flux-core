@@ -10,9 +10,9 @@ use FluxErp\Models\Category;
 use FluxErp\Models\CommissionRate;
 use FluxErp\Models\Product;
 use FluxErp\Rulesets\CommissionRate\CreateCommissionRateRuleset;
+use FluxErp\Traits\Livewire\Actions;
 use Livewire\Attributes\Locked;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
-use WireUi\Traits\Actions;
 
 class CommissionRates extends BaseDataTable
 {

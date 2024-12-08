@@ -2,9 +2,7 @@
 
 namespace FluxErp\Rulesets\PaymentType;
 
-use FluxErp\Models\Client;
 use FluxErp\Models\PaymentType;
-use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\FluxRuleset;
 
@@ -16,11 +14,6 @@ class CreatePaymentTypeRuleset extends FluxRuleset
     {
         return [
             'uuid' => 'nullable|string|uuid|unique:payment_types,uuid',
-            'client_id' => [
-                'required',
-                'integer',
-                app(ModelExists::class, ['model' => Client::class]),
-            ],
             'name' => 'required|string',
             'description' => 'string|nullable',
             'payment_reminder_days_1' => 'integer|nullable',
@@ -41,5 +34,14 @@ class CreatePaymentTypeRuleset extends FluxRuleset
             'is_sales' => 'boolean',
             'requires_manual_transfer' => 'boolean',
         ];
+    }
+
+    public static function getRules(): array
+    {
+        return array_merge(
+            parent::getRules(),
+            resolve_static(ClientRuleset::class, 'getRules'),
+            ['clients' => 'required|array'],
+        );
     }
 }

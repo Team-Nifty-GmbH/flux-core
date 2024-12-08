@@ -10,12 +10,12 @@ use FluxErp\Livewire\Forms\SerialNumberRangeForm;
 use FluxErp\Models\Client;
 use FluxErp\Models\SerialNumberRange;
 use FluxErp\Traits\HasSerialNumberRange;
+use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Spatie\ModelInfo\ModelInfo;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
-use WireUi\Traits\Actions;
 
 class SerialNumberRanges extends SerialNumberRangeList
 {

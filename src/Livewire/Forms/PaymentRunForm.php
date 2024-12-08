@@ -25,6 +25,8 @@ class PaymentRunForm extends FluxForm
 
     public ?bool $is_instant_payment = false;
 
+    public string $direct_debit_type = 'BASIC';
+
     #[Locked]
     public array $orders = [];
 

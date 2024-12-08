@@ -7,6 +7,7 @@ use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Forms\ContactForm;
 use FluxErp\Models\Contact as ContactModel;
 use FluxErp\Models\Media;
+use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\CreatesDocuments;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use FluxErp\Traits\Livewire\WithTabs;
@@ -19,7 +20,6 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Spatie\MediaLibrary\Support\MediaStream;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use WireUi\Traits\Actions;
 
 class Contact extends Component
 {

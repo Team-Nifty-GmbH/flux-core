@@ -7,15 +7,16 @@ use FluxErp\Actions\Task\DeleteTask;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Forms\TaskForm;
 use FluxErp\Models\Task as TaskModel;
+use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use WireUi\Traits\Actions;
 
 class Task extends Component
 {
@@ -43,12 +44,15 @@ class Task extends Component
             )
         );
 
-        $this->availableStates = app(TaskModel::class)->getStatesFor('state')->map(function ($state) {
-            return [
-                'label' => __(ucfirst(str_replace('_', ' ', $state))),
-                'name' => $state,
-            ];
-        })->toArray();
+        $this->availableStates = app(TaskModel::class)
+            ->getStatesFor('state')
+            ->map(function ($state) {
+                return [
+                    'label' => __(Str::headline($state)),
+                    'name' => $state,
+                ];
+            })
+            ->toArray();
     }
 
     public function render(): View|Factory|Application

@@ -9,10 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class UpdateVatRate extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdateVatRateRuleset::class, 'getRules');
+        return UpdateVatRateRuleset::class;
     }
 
     public static function models(): array
@@ -30,5 +29,17 @@ class UpdateVatRate extends FluxAction
         $vatRate->save();
 
         return $vatRate->withoutRelations()->fresh();
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if (($this->data['is_default'] ?? false)
+            && ! resolve_static(VatRate::class, 'query')
+                ->whereKeyNot($this->data['id'] ?? 0)
+                ->where('is_default', true)
+                ->exists()
+        ) {
+            $this->rules['is_default'] .= '|accepted';
+        }
     }
 }

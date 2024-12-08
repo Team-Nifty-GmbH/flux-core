@@ -2,6 +2,8 @@
 
 namespace FluxErp\Livewire\Features;
 
+use Exception;
+use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Scout\Searchable;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -9,9 +11,10 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
+use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Livewire\WithPagination;
-use WireUi\Traits\Actions;
+use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 
 class SearchBar extends Component
 {
@@ -20,10 +23,6 @@ class SearchBar extends Component
     public string $search = '';
 
     public array|string $searchModel = '';
-
-    public ?string $searchResultComponent;
-
-    public string $onClick = '';
 
     public bool $show = false;
 
@@ -37,8 +36,17 @@ class SearchBar extends Component
     {
         if ($this->searchModel === '') {
             $this->searchModel = model_info_all()
-                ->filter(fn ($model) => in_array(Searchable::class, $model->traits->toArray()))
-                ->map(fn ($model) => $model->class)
+                ->filter(fn (ModelInfo $modelInfo) => in_array(
+                    Searchable::class,
+                    class_uses_recursive($modelInfo->class)
+                )
+                    && method_exists($modelInfo->class, 'detailRoute')
+                    && (
+                        method_exists($modelInfo->class, 'getLabel')
+                        || ! is_null($modelInfo->attribute('name'))
+                    )
+                )
+                ->map(fn ($modelInfo) => $modelInfo->class)
                 ->toArray();
         }
 
@@ -62,8 +70,9 @@ class SearchBar extends Component
                 $return = [];
                 foreach ($this->searchModel as $model) {
                     try {
-                        $result = app($model)->search($this->search)
+                        $result = resolve_static($model, 'search', ['query' => $this->search])
                             ->toEloquentBuilder()
+                            ->latest()
                             ->limit(5)
                             ->get()
                             ->filter(fn ($item) => $item->detailRoute())
@@ -77,7 +86,7 @@ class SearchBar extends Component
                         if (count($result)) {
                             $return[$model] = collect($result)->toArray();
                         }
-                    } catch (\Exception $e) {
+                    } catch (Exception) {
                         // ignore
                     }
 
@@ -88,7 +97,8 @@ class SearchBar extends Component
 
                 $this->return = $return;
             } else {
-                $result = app($this->searchModel)->search($this->search)->paginate();
+                $result = resolve_static($this->searchModel, 'search', ['query' => $this->search])
+                    ->paginate();
 
                 if ($this->load && $result && $result instanceof LengthAwarePaginator) {
                     $result->load($this->load);
@@ -104,10 +114,11 @@ class SearchBar extends Component
         $this->skipRender();
     }
 
+    #[Renderless]
     public function showDetail(string $model, int $id): void
     {
-        /** @var \Illuminate\Database\Eloquent\Model $model */
-        $modelInstance = app($model)->query()->whereKey($id)->first();
+        /** @var Model $model */
+        $modelInstance = resolve_static($model, 'query')->whereKey($id)->first();
 
         if (! $modelInstance) {
             $this->notification()->error(__('Record not found'));

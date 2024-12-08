@@ -230,6 +230,7 @@ class Address extends FluxAuthenticatable implements HasLocalePreference, HasMed
             fn () => array_filter([
                 $this->company,
                 trim($this->firstname . ' ' . $this->lastname),
+                $this->addition,
                 $this->street,
                 trim($this->country?->iso_alpha2 . ' ' . $this->zip . ' ' . $this->city),
                 $this->country?->name,
@@ -289,6 +290,16 @@ class Address extends FluxAuthenticatable implements HasLocalePreference, HasMed
     {
         return $this->belongsToMany(Order::class, 'address_address_type_order')
             ->withPivot('address_type_id');
+    }
+
+    public function ordersDeliveryAddress(): HasMany
+    {
+        return $this->hasMany(Order::class, 'address_delivery_id');
+    }
+
+    public function ordersInvoiceAddress(): HasMany
+    {
+        return $this->hasMany(Order::class, 'address_invoice_id');
     }
 
     public function priceList(): HasOneThrough

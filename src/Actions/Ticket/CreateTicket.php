@@ -17,10 +17,9 @@ use Illuminate\Support\Facades\Validator;
 
 class CreateTicket extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreateTicketRuleset::class, 'getRules');
+        return CreateTicketRuleset::class;
     }
 
     public static function models(): array

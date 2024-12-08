@@ -8,6 +8,7 @@ use Illuminate\Support\Traits\Macroable;
 use InvalidArgumentException;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use ReflectionClass;
 
 class ActionManager
 {
@@ -94,7 +95,11 @@ class ActionManager
                     : '';
                 $class = $namespace . '\\' . $subNameSpace . $file->getBasename('.php');
 
-                if (! class_exists($class) || ! is_a($class, FluxAction::class, true)) {
+                if (
+                    ! class_exists($class)
+                    || ! is_a($class, FluxAction::class, true)
+                    || (new ReflectionClass($class))->isAbstract()
+                ) {
                     continue;
                 }
 

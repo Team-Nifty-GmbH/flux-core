@@ -15,10 +15,9 @@ class ReplaceMedia extends FluxAction
 {
     protected bool $force = false;
 
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(ReplaceMediaRuleset::class, 'getRules');
+        return ReplaceMediaRuleset::class;
     }
 
     public static function models(): array

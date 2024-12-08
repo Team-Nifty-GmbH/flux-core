@@ -3,6 +3,7 @@
 namespace FluxErp\Models\Pivots;
 
 use FluxErp\Models\CalendarEvent;
+use FluxErp\Traits\ResolvesRelationsThroughContainer;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphPivot;
@@ -11,7 +12,7 @@ use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class CalendarEventInvite extends MorphPivot
 {
-    use BroadcastsEvents;
+    use BroadcastsEvents, ResolvesRelationsThroughContainer;
 
     protected $table = 'calendar_event_invites';
 

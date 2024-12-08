@@ -14,7 +14,7 @@ class CommentsTest extends BaseSetup
 
     private Product $product;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Features;
 
 use FluxErp\Livewire\Forms\MediaUploadForm;
 use FluxErp\Models\Media;
+use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use FluxErp\View\Printing\PrintableView;
 use Illuminate\Database\Eloquent\Model;
@@ -17,7 +18,6 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Ramsey\Uuid\Uuid;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use WireUi\Traits\Actions;
 
 class SignaturePublicLink extends Component
 {

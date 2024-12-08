@@ -11,10 +11,9 @@ use Illuminate\Validation\ValidationException;
 
 class CreateSepaMandate extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreateSepaMandateRuleset::class, 'getRules');
+        return CreateSepaMandateRuleset::class;
     }
 
     public static function models(): array

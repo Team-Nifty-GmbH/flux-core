@@ -7,10 +7,10 @@ use FluxErp\Actions\Warehouse\UpdateWarehouse;
 use FluxErp\Livewire\DataTables\WarehouseList;
 use FluxErp\Livewire\Forms\WarehouseForm;
 use FluxErp\Models\Warehouse;
+use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
-use WireUi\Traits\Actions;
 
 class Warehouses extends WarehouseList
 {

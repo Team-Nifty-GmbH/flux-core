@@ -50,7 +50,10 @@ class Category extends FluxModel implements InteractsWithDataTables, Sortable
     public static function booted(): void
     {
         model_info_all()
-            ->filter(fn (ModelInfo $modelInfo) => $modelInfo->traits->contains(Categorizable::class))
+            ->filter(fn (ModelInfo $modelInfo) => in_array(
+                Categorizable::class,
+                class_uses_recursive($modelInfo->class)
+            ))
             ->each(function (ModelInfo $modelInfo) {
                 $relationName = Str::of(class_basename($modelInfo->class))->camel()->plural()->toString();
 

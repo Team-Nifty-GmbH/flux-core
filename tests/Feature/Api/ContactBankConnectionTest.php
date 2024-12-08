@@ -267,7 +267,7 @@ class ContactBankConnectionTest extends BaseSetup
         $this->assertTrue($this->user->is($bankConnection->getDeletedBy()));
     }
 
-    public function test_delete_contact_bank_connection_bankConnection_not_found()
+    public function test_delete_contact_bank_connection_bank_connection_not_found()
     {
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);

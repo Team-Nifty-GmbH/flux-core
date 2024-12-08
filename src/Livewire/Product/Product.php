@@ -9,12 +9,14 @@ use FluxErp\Helpers\PriceHelper;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Forms\ProductForm;
 use FluxErp\Models\Contact;
+use FluxErp\Models\Pivots\ProductBundleProduct;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product as ProductModel;
 use FluxErp\Models\ProductCrossSelling;
 use FluxErp\Models\ProductProperty;
 use FluxErp\Models\ProductPropertyGroup;
 use FluxErp\Models\VatRate;
+use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -29,7 +31,6 @@ use Livewire\Component;
 use Livewire\Features\SupportPageComponents\PageComponentConfig;
 use Livewire\Features\SupportPageComponents\SupportPageComponents;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use WireUi\Traits\Actions;
 
 class Product extends Component
 {
@@ -226,6 +227,14 @@ class Product extends Component
                     $productProperty['value']
                 );
             }
+        }
+
+        if ($this->product->is_bundle) {
+            $this->product->bundle_products = resolve_static(ProductBundleProduct::class, 'query')
+                ->where('product_id', $this->product->id)
+                ->get(['id', 'bundle_product_id', 'count'])
+                ->map(fn ($item) => ['id' => $item->bundle_product_id, 'count' => $item->count])
+                ->toArray();
         }
 
         try {

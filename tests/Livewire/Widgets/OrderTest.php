@@ -22,16 +22,16 @@ class OrderTest extends BaseSetup
 
     private Order $order;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
         $contact = Contact::factory()->create([
-            'client_id' => $this->dbClient,
+            'client_id' => $this->dbClient->id,
         ]);
 
         $address = Address::factory()->create([
-            'client_id' => $this->dbClient,
+            'client_id' => $this->dbClient->id,
             'contact_id' => $contact->id,
         ]);
 
@@ -40,18 +40,18 @@ class OrderTest extends BaseSetup
         $language = Language::factory()->create();
 
         $orderType = OrderType::factory()->create([
-            'client_id' => $this->dbClient,
+            'client_id' => $this->dbClient->id,
             'order_type_enum' => OrderTypeEnum::Order,
         ]);
 
-        $paymentType = PaymentType::factory()->create([
-            'client_id' => $this->dbClient,
-        ]);
+        $paymentType = PaymentType::factory()
+            ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+            ->create();
 
         $priceList = PriceList::factory()->create();
 
         $this->order = Order::factory()->create([
-            'client_id' => $this->dbClient,
+            'client_id' => $this->dbClient->id,
             'language_id' => $language->id,
             'order_type_id' => $orderType->id,
             'payment_type_id' => $paymentType->id,

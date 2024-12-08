@@ -20,10 +20,9 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateAddress extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdateAddressRuleset::class, 'getRules');
+        return UpdateAddressRuleset::class;
     }
 
     public static function models(): array
@@ -152,7 +151,8 @@ class UpdateAddress extends FluxAction
 
             if ($address->password
                 && array_key_exists('password', $this->data)
-                && ! $this->data['password']
+                && ! is_null(data_get($this->data, 'password'))
+                && ! data_get($this->data, 'password')
             ) {
                 $errors += [
                     'password' => [__('Unable to clear password while \'can_login\' = \'true\'')],

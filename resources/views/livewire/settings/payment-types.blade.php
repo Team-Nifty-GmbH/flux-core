@@ -8,17 +8,15 @@
             <x-toggle wire:model.boolean="paymentType.is_sales" :label="__('Is Sales')" />
             <x-toggle wire:model.boolean="paymentType.is_direct_debit" :label="__('Is Direct Debit')" />
             <x-toggle wire:model.boolean="paymentType.requires_manual_transfer" :label="__('Requires Manual Transfer')" />
-            <div x-cloak x-show="! $wire.paymentType.id">
-                <x-select
-                    :label="__('Client')"
-                    :options="$clients"
-                    option-value="id"
-                    option-label="name"
-                    :clearable="false"
-                    autocomplete="off"
-                    wire:model="paymentType.client_id"
-                />
-            </div>
+            <x-select
+                :label="__('Client')"
+                :options="$clients"
+                option-value="id"
+                option-label="name"
+                multiselect
+                autocomplete="off"
+                wire:model="paymentType.clients"
+            />
             <x-inputs.number wire:model="paymentType.payment_reminder_days_1" :label="__('Payment Reminder Days 1')" />
             <x-inputs.number wire:model="paymentType.payment_reminder_days_2" :label="__('Payment Reminder Days 2')" />
             <x-inputs.number wire:model="paymentType.payment_reminder_days_3" :label="__('Payment Reminder Days 3')" />

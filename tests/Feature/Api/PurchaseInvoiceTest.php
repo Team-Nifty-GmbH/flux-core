@@ -55,11 +55,13 @@ class PurchaseInvoiceTest extends BaseSetup
 
         $this->clients = Client::factory()->count(2)->create();
 
-        $this->paymentTypes = PaymentType::factory()->count(2)->create([
-            'client_id' => $this->dbClient->id,
-            'is_active' => true,
-            'is_purchase' => true,
-        ]);
+        $this->paymentTypes = PaymentType::factory()
+            ->count(2)
+            ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+            ->create([
+                'is_active' => true,
+                'is_purchase' => true,
+            ]);
 
         $this->contacts = Contact::factory()->count(2)
             ->has(Address::factory()->set('client_id', $this->dbClient->id))

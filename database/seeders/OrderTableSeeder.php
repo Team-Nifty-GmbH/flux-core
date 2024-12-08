@@ -29,6 +29,7 @@ class OrderTableSeeder extends Seeder
         foreach ($clients as $client) {
             $contacts = Contact::query()
                 ->with('addresses')
+                ->where('has_delivery_lock', false)
                 ->where('client_id', $client->id)
                 ->get(['id']);
 
@@ -37,7 +38,7 @@ class OrderTableSeeder extends Seeder
                 ->get(['id']);
 
             $paymentTypes = PaymentType::query()
-                ->where('client_id', $client->id)
+                ->whereRelation('clients', 'id', $client->id)
                 ->get(['id']);
 
             $orders = Order::query()
@@ -52,23 +53,24 @@ class OrderTableSeeder extends Seeder
                 $currency = $currencies->random();
                 $contact = $contacts->random();
 
-                $order = Order::factory()->create([
-                    'address_invoice_id' => $contact->addresses->random()->id,
-                    'address_delivery_id' => $contact->addresses->random()->id,
-                    'agent_id' => faker()->boolean(40) ? $users->random()->id : null,
-                    'parent_id' => rand(0, 1) ? null : $parentId,
-                    'client_id' => $client->id,
-                    'currency_id' => $currency->id,
-                    'language_id' => $languages->random()->id,
-                    'order_type_id' => $orderType->id,
-                    'price_list_id' => $priceLists->random()->id,
-                    'delivery_type_id' => rand(0, 10),
-                    'logistics_id' => rand(0, 10),
-                    'payment_type_id' => $paymentType->id,
-                    'tax_exemption_id' => rand(0, 10),
-                    'delivery_state' => $orderModel->getStatesFor('delivery_state')->random(),
-                    'payment_state' => $orderModel->getStatesFor('payment_state')->random(),
-                ]);
+                $order = Order::factory()
+                    ->create([
+                        'address_invoice_id' => $contact->addresses->random()->id,
+                        'address_delivery_id' => $contact->addresses->random()->id,
+                        'agent_id' => faker()->boolean(40) ? $users->random()->id : null,
+                        'parent_id' => rand(0, 1) ? null : $parentId,
+                        'client_id' => $client->id,
+                        'currency_id' => $currency->id,
+                        'language_id' => $languages->random()->id,
+                        'order_type_id' => $orderType->id,
+                        'price_list_id' => $priceLists->random()->id,
+                        'delivery_type_id' => rand(0, 10),
+                        'logistics_id' => rand(0, 10),
+                        'payment_type_id' => $paymentType->id,
+                        'tax_exemption_id' => rand(0, 10),
+                        'delivery_state' => $orderModel->getStatesFor('delivery_state')->random(),
+                        'payment_state' => $orderModel->getStatesFor('payment_state')->random(),
+                    ]);
 
                 if ($order->is_locked) {
                     Transaction::factory()->create([
@@ -76,8 +78,8 @@ class OrderTableSeeder extends Seeder
                         'currency_id' => $currency->id,
                         'order_id' => $order->id,
                         'amount' => faker()->boolean(80)
-                            ? $order->total_gross_price
-                            : $order->total_gross_price - rand(1, $order->total_gross_price),
+                            ? $order->total_gross_price ?? 0
+                            : ($order->total_gross_price ?? 0) - rand(1, $order->total_gross_price ?? 0),
                     ]);
 
                     $order->setAttribute(

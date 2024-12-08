@@ -103,6 +103,8 @@ class ViewServiceProvider extends ServiceProvider
         $views[] = __DIR__ . '/../../resources/views/printing';
         $this->loadViewsFrom($views, 'print');
 
+        $this->loadViewsFrom(__DIR__ . '/../../resources/views/vendor/wireui', 'wireui');
+
         View::composer('*', function () {
             Currency::default() && Number::useCurrency(Currency::default()->iso);
 

@@ -9,6 +9,7 @@ use FluxErp\Models\Client;
 use FluxErp\Models\Media;
 use FluxErp\Models\Order;
 use FluxErp\Models\PurchaseInvoice;
+use FluxErp\Models\Tag;
 use FluxErp\Rulesets\PurchaseInvoice\CreatePurchaseInvoiceRuleset;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
@@ -16,10 +17,9 @@ use Illuminate\Validation\ValidationException;
 
 class CreatePurchaseInvoice extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreatePurchaseInvoiceRuleset::class, 'getRules');
+        return CreatePurchaseInvoiceRuleset::class;
     }
 
     public static function models(): array
@@ -29,6 +29,7 @@ class CreatePurchaseInvoice extends FluxAction
 
     public function performAction(): PurchaseInvoice
     {
+        $tags = Arr::pull($this->data, 'tags');
         $file = Arr::pull($this->data, 'media');
         $positions = Arr::pull($this->data, 'purchase_invoice_positions', []);
         $this->data['invoice_date'] = data_get($this->data, 'invoice_date') ?? now()->format('Y-m-d');
@@ -61,6 +62,12 @@ class CreatePurchaseInvoice extends FluxAction
 
         $purchaseInvoice->media_id = $media->id;
         $purchaseInvoice->save();
+
+        if ($tags) {
+            $purchaseInvoice->attachTags(
+                resolve_static(Tag::class, 'query')->whereIntegerInRaw('id', $tags)->get()
+            );
+        }
 
         return $purchaseInvoice->fresh();
     }

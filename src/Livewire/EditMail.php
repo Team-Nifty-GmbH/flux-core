@@ -5,6 +5,7 @@ namespace FluxErp\Livewire;
 use FluxErp\Livewire\Forms\CommunicationForm;
 use FluxErp\Mail\GenericMail;
 use FluxErp\Models\Media;
+use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
@@ -17,7 +18,6 @@ use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use WireUi\Traits\Actions;
 
 class EditMail extends Component
 {

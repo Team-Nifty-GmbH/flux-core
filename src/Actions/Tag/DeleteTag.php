@@ -8,10 +8,9 @@ use FluxErp\Rulesets\Tag\DeleteTagRuleset;
 
 class DeleteTag extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(DeleteTagRuleset::class, 'getRules');
+        return DeleteTagRuleset::class;
     }
 
     public static function models(): array

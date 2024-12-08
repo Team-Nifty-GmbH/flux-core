@@ -2,6 +2,7 @@
 
 namespace FluxErp\Tests;
 
+use Barryvdh\DomPDF\ServiceProvider;
 use Dotenv\Dotenv;
 use FluxErp\FluxServiceProvider;
 use FluxErp\Providers\BindingServiceProvider;
@@ -73,6 +74,7 @@ abstract class TestCase extends BaseTestCase
             WebPushServiceProvider::class,
             MorphMapServiceProvider::class,
             EventServiceProvider::class,
+            ServiceProvider::class,
         ];
     }
 

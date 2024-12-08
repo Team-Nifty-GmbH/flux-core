@@ -10,10 +10,10 @@ use FluxErp\Livewire\Forms\OrderTypeForm;
 use FluxErp\Models\Client;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
+use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
-use WireUi\Traits\Actions;
 
 class OrderTypes extends OrderTypeList
 {

@@ -51,12 +51,9 @@ class AddressTest extends BaseSetup
             'is_default' => true,
         ]);
 
-        $paymentTypes = PaymentType::factory()->count(2)->create([
-            'client_id' => $dbClients[0]->id,
-        ]);
-        $paymentTypes[] = PaymentType::factory()->create([
-            'client_id' => $dbClients[1]->id,
-        ]);
+        $paymentTypes = PaymentType::factory()->count(3)->create();
+        $dbClients[0]->paymentTypes()->attach([$paymentTypes[0]->id, $paymentTypes[1]->id]);
+        $dbClients[1]->paymentTypes()->attach($paymentTypes[2]->id);
 
         $this->contacts = Contact::factory()->count(2)->create([
             'client_id' => $dbClients[0]->id,
@@ -249,7 +246,7 @@ class AddressTest extends BaseSetup
             'mailbox' => Str::random(),
             'latitude' => 37.88953,
             'longitude' => 41.12802,
-            'zip' => Str::random(),
+            'zip' => 123456,
             'city' => Str::random(),
             'street' => Str::random(),
             'url' => Str::random(),
@@ -301,6 +298,7 @@ class AddressTest extends BaseSetup
         $address = [
             'client_id' => $this->addresses[2]->client_id,
             'contact_id' => ++$this->addresses[3]->contact_id,
+            'zip' => -123456,
         ];
 
         $this->user->givePermissionTo($this->permissions['create']);
@@ -308,6 +306,11 @@ class AddressTest extends BaseSetup
 
         $response = $this->actingAs($this->user)->post('/api/addresses', $address);
         $response->assertStatus(422);
+
+        $response->assertJsonValidationErrors([
+            'contact_id',
+            'zip',
+        ]);
     }
 
     public function test_update_address()

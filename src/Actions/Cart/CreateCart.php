@@ -11,10 +11,11 @@ use FluxErp\Rulesets\Cart\CreateCartRuleset;
 
 class CreateCart extends FluxAction
 {
-    protected function boot(array $data): void
+    protected static bool $hasPermission = false;
+
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreateCartRuleset::class, 'getRules');
+        return CreateCartRuleset::class;
     }
 
     public static function models(): array

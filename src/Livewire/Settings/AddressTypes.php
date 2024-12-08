@@ -9,10 +9,10 @@ use FluxErp\Livewire\DataTables\AddressTypeList;
 use FluxErp\Livewire\Forms\AddressTypeForm;
 use FluxErp\Models\AddressType;
 use FluxErp\Models\Client;
+use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Validation\UnauthorizedException;
 use Illuminate\Validation\ValidationException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
-use WireUi\Traits\Actions;
 
 class AddressTypes extends AddressTypeList
 {

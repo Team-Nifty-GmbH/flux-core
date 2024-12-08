@@ -18,7 +18,7 @@ class SerialNumberTest extends TestCase
 
     private SerialNumber $serialNumber;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

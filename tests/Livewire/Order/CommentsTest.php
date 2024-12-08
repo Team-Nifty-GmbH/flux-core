@@ -22,7 +22,7 @@ class CommentsTest extends BaseSetup
 
     private Order $order;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -44,9 +44,9 @@ class CommentsTest extends BaseSetup
             'order_type_enum' => OrderTypeEnum::Order,
         ]);
 
-        $paymentType = PaymentType::factory()->create([
-            'client_id' => $this->dbClient->id,
-        ]);
+        $paymentType = PaymentType::factory()
+            ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+            ->create();
 
         $priceList = PriceList::factory()->create();
 

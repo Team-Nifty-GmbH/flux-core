@@ -6,6 +6,7 @@ use FluxErp\Actions\Media\DeleteMedia;
 use FluxErp\Actions\Media\DeleteMediaCollection;
 use FluxErp\Actions\Media\UpdateMedia;
 use FluxErp\Models\Media as MediaModel;
+use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -17,7 +18,6 @@ use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use WireUi\Traits\Actions;
 
 class FolderTree extends Component
 {

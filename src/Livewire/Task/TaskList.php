@@ -5,13 +5,15 @@ namespace FluxErp\Livewire\Task;
 use FluxErp\Livewire\DataTables\TaskList as BaseTaskList;
 use FluxErp\Livewire\Forms\TaskForm;
 use FluxErp\Models\Task;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class TaskList extends BaseTaskList
 {
-    protected string $view = 'flux::livewire.task.task-list';
+    protected ?string $includeBefore = 'flux::livewire.task.task-list';
 
     public TaskForm $task;
 
@@ -26,12 +28,15 @@ class TaskList extends BaseTaskList
             null
         );
 
-        $this->availableStates = app(Task::class)->getStatesFor('state')->map(function ($state) {
-            return [
-                'label' => __(ucfirst(str_replace('_', ' ', $state))),
-                'name' => $state,
-            ];
-        })->toArray();
+        $this->availableStates = app(Task::class)
+            ->getStatesFor('state')
+            ->map(function ($state) {
+                return [
+                    'label' => __(Str::headline($state)),
+                    'name' => $state,
+                ];
+            })
+            ->toArray();
     }
 
     protected function getTableActions(): array
@@ -46,6 +51,7 @@ class TaskList extends BaseTaskList
         ];
     }
 
+    #[Renderless]
     public function save(): bool
     {
         try {
@@ -61,6 +67,7 @@ class TaskList extends BaseTaskList
         return true;
     }
 
+    #[Renderless]
     public function resetForm(): void
     {
         $this->task->reset();
@@ -68,7 +75,7 @@ class TaskList extends BaseTaskList
             resolve_static(Task::class, 'additionalColumnsQuery')->pluck('name')?->toArray() ?? [],
             null
         );
-
-        $this->skipRender();
+        $this->task->responsible_user_id ??= auth()?->id();
+        $this->task->users = array_filter([auth()?->id()]);
     }
 }

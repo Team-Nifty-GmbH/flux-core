@@ -8,6 +8,7 @@ use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
+use FluxErp\Models\PriceList;
 use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -31,16 +32,12 @@ class ContactTest extends BaseSetup
 
         $dbClients = Client::factory()->count(2)->create();
 
-        $this->paymentTypes = PaymentType::factory()->count(2)->create([
-            'client_id' => $dbClients[0]->id,
+        $this->paymentTypes = PaymentType::factory()->count(3)->create([
             'is_active' => true,
             'is_sales' => true,
         ]);
-        $this->paymentTypes[] = PaymentType::factory()->create([
-            'client_id' => $dbClients[1]->id,
-            'is_active' => true,
-            'is_sales' => true,
-        ]);
+        $dbClients[0]->paymentTypes()->attach([$this->paymentTypes[0]->id, $this->paymentTypes[1]->id]);
+        $dbClients[1]->paymentTypes()->attach($this->paymentTypes[2]->id);
 
         $this->contacts = Contact::factory()->count(2)->create([
             'client_id' => $dbClients[0]->id,
@@ -167,7 +164,7 @@ class ContactTest extends BaseSetup
         $this->assertEquals($contact['client_id'], $dbContact->client_id);
         $this->assertEquals($contact['customer_number'], $dbContact->customer_number);
         $this->assertEquals(PaymentType::default()?->id, $dbContact->payment_type_id);
-        $this->assertNull($dbContact->price_list_id);
+        $this->assertEquals(PriceList::default()?->id, $dbContact->price_list_id);
         $this->assertNotNull($dbContact->creditor_number);
         $this->assertNull($dbContact->payment_target_days);
         $this->assertNull($dbContact->payment_reminder_days_1);

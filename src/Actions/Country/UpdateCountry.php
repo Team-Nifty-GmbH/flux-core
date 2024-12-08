@@ -11,10 +11,9 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateCountry extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdateCountryRuleset::class, 'getRules');
+        return UpdateCountryRuleset::class;
     }
 
     public static function models(): array

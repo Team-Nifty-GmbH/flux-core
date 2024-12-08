@@ -6,13 +6,13 @@ use FluxErp\Actions\Address\CreateAddress;
 use FluxErp\Actions\Address\UpdateAddress;
 use FluxErp\Models\Address;
 use FluxErp\Models\Permission;
+use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Validation\UnauthorizedException;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
-use WireUi\Traits\Actions;
 
 class Profile extends Component
 {

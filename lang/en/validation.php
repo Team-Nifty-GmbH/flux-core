@@ -142,6 +142,8 @@ return [
     ],
     'starts_with' => 'The :attribute must start with one of the following: :values.',
     'string' => 'The :attribute must be a string.',
+    'string_or_integer' => 'The :attribute must be a string or an integer.',
+    'string_or_integer_unsigned' => 'The :attribute must be a string or an unsigned integer.',
     'timezone' => 'The :attribute must be a valid timezone.',
     'ulid' => 'The :attribute field must be a valid ULID.',
     'unique' => 'The :attribute has already been taken.',

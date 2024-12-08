@@ -8,10 +8,10 @@ use FluxErp\Actions\WorkTimeType\UpdateWorkTimeType;
 use FluxErp\Livewire\DataTables\WorkTimeTypeList;
 use FluxErp\Livewire\Forms\WorkTimeTypeForm;
 use FluxErp\Models\WorkTimeType;
+use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
-use WireUi\Traits\Actions;
 
 class WorkTimeTypes extends WorkTimeTypeList
 {

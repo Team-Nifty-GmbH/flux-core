@@ -9,10 +9,9 @@ use Illuminate\Support\Facades\Validator;
 
 class CreateAddressType extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(CreateAddressTypeRuleset::class, 'getRules');
+        return CreateAddressTypeRuleset::class;
     }
 
     public static function models(): array

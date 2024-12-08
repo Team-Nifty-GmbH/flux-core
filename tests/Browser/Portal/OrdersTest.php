@@ -21,7 +21,7 @@ class OrdersTest extends PortalDuskTestCase
 
     public Collection $orders;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -44,9 +44,9 @@ class OrdersTest extends PortalDuskTestCase
             'order_type_enum' => OrderTypeEnum::Order,
         ]);
 
-        $paymentType = PaymentType::factory()->create([
-            'client_id' => $this->dbClient->id,
-        ]);
+        $paymentType = PaymentType::factory()
+            ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+            ->create();
 
         $addresses = Address::factory()->count(2)->create([
             'client_id' => $this->dbClient->id,

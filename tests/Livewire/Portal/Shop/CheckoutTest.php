@@ -20,7 +20,7 @@ class CheckoutTest extends BaseSetup
 
     private PaymentType $paymentType;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -36,12 +36,13 @@ class CheckoutTest extends BaseSetup
             'order_type_enum' => OrderTypeEnum::Order,
             'is_active' => true,
         ]);
-        $this->paymentType = PaymentType::factory()->create([
-            'client_id' => $this->dbClient->id,
-            'is_active' => true,
-            'is_sales' => true,
-            'is_default' => true,
-        ]);
+        $this->paymentType = PaymentType::factory()
+            ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+            ->create([
+                'is_active' => true,
+                'is_sales' => true,
+                'is_default' => true,
+            ]);
     }
 
     public function test_renders_successfully()

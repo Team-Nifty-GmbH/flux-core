@@ -10,10 +10,9 @@ use Illuminate\Support\Arr;
 
 class UpdateLockedOrder extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-        $this->rules = resolve_static(UpdateLockedOrderRuleset::class, 'getRules');
+        return UpdateLockedOrderRuleset::class;
     }
 
     public static function description(): ?string

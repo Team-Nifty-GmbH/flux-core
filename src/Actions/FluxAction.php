@@ -3,11 +3,13 @@
 namespace FluxErp\Actions;
 
 use FluxErp\Models\Permission;
+use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\Traits\Makeable;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Events\NullDispatcher;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -71,6 +73,10 @@ abstract class FluxAction
 
     public static function canPerformAction(bool $throwException = true): bool
     {
+        if (! static::hasPermission()) {
+            return true;
+        }
+
         try {
             resolve_static(
                 Permission::class,
@@ -143,6 +149,23 @@ abstract class FluxAction
         return $key ? data_get($this->data, $key) : $this->data;
     }
 
+    /**
+     * @return class-string<FluxRuleset>|array<int, class-string<FluxRuleset>>
+     */
+    protected function getRulesets(): string|array
+    {
+        return [];
+    }
+
+    public function setRulesFromRulesets(): static
+    {
+        foreach (Arr::wrap($this->getRulesets()) as $ruleset) {
+            $this->mergeRules(resolve_static($ruleset, 'getRules'));
+        }
+
+        return $this;
+    }
+
     public function setRules(array $rules): static
     {
         $this->rules = $rules;
@@ -158,6 +181,18 @@ abstract class FluxAction
     public function mergeRules(array $rules): static
     {
         $this->rules = array_merge($this->rules, $rules);
+
+        return $this;
+    }
+
+    public function addRules(array $rules): static
+    {
+        foreach ($rules as $key => $value) {
+            data_set($this->rules, $key, array_merge(
+                Arr::wrap(data_get($this->rules, $key, [])),
+                Arr::wrap($value)
+            ));
+        }
 
         return $this;
     }
@@ -191,6 +226,10 @@ abstract class FluxAction
 
     final public function validate(): static
     {
+        if (! $this->rules) {
+            $this->setRulesFromRulesets();
+        }
+
         $this->fireActionEvent(event: 'preparingForValidation');
         $this->prepareForValidation();
 
@@ -210,7 +249,7 @@ abstract class FluxAction
 
     protected function validateData(): void
     {
-        $this->data = Validator::validate($this->data, $this->rules);
+        $this->data = Validator::validate($this->data, $this->getRules());
     }
 
     final public function when(callable|bool $condition, callable $callback): static

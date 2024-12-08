@@ -26,6 +26,7 @@ use FluxErp\Models\Category;
 use FluxErp\Models\Client;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\Order;
+use FluxErp\Models\OrderType;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Product;
 use FluxErp\Models\Project;
@@ -64,6 +65,7 @@ use Laravel\Scout\Builder;
 use Livewire\Component;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
+use PHPUnit\Framework\Assert;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use RegexIterator;
@@ -128,11 +130,11 @@ class FluxServiceProvider extends ServiceProvider
         Blade::component('flux::components.calendar.event-edit', 'tall-calendar::event-edit');
         Blade::component('flux::components.calendar.calendar-list', 'tall-calendar::calendar-list');
 
-        if (static::$registerFluxRoutes && ! $this->app->runningInConsole()) {
+        if (static::$registerFluxRoutes && (! $this->app->runningInConsole() || $this->app->runningUnitTests())) {
             $this->bootFluxMenu();
         }
 
-        if (static::$registerPortalRoutes && ! $this->app->runningInConsole()) {
+        if (static::$registerPortalRoutes && (! $this->app->runningInConsole() || $this->app->runningUnitTests())) {
             $this->bootPortalMenu();
         }
 
@@ -210,21 +212,41 @@ class FluxServiceProvider extends ServiceProvider
                 });
         }
 
-        if (! Testable::hasMacro('assertWireuiNotification') && $this->app->runningUnitTests()) {
-            Testable::macro('assertWireuiNotification',
-                function (?string $title = null, ?string $icon = null, ?string $description = null) {
-                    $this->assertDispatched(
-                        'wireui:notification',
-                        function (string $eventName, array $params) use ($title, $icon, $description) {
-                            $options = data_get($params, '0.options');
+        if ($this->app->runningUnitTests()) {
+            if (! Testable::hasMacro('assertWireuiNotification')) {
+                Testable::macro(
+                    'assertWireuiNotification',
+                    function (?string $title = null, ?string $icon = null, ?string $description = null) {
+                        $this->assertDispatched(
+                            'wireui:notification',
+                            function (string $eventName, array $params) use ($title, $icon, $description) {
+                                $options = data_get($params, '0.options');
 
-                            return array_key_exists('componentId', $params[0])
-                                && (is_null($icon) || data_get($options, 'icon') === $icon)
-                                && (is_null($title) || data_get($options, 'title') === $title)
-                                && (is_null($description) || data_get($options, 'description') === $description);
-                        }
-                    );
-                });
+                                return array_key_exists('componentId', $params[0])
+                                    && (is_null($icon) || data_get($options, 'icon') === $icon)
+                                    && (is_null($title) || data_get($options, 'title') === $title)
+                                    && (is_null($description) || data_get($options, 'description') === $description);
+                            }
+                        );
+
+                        return $this;
+                    }
+                );
+            }
+
+            if (! Testable::hasMacro('assertExecutesJs')) {
+                Testable::macro(
+                    'assertExecutesJs',
+                    function (string $js) {
+                        Assert::assertStringContainsString(
+                            $js,
+                            implode(' ', data_get($this->lastState->getEffects(), 'xjs', []))
+                        );
+
+                        return $this;
+                    }
+                );
+            }
         }
 
         Route::macro('getPermissionName',
@@ -498,7 +520,19 @@ class FluxServiceProvider extends ServiceProvider
             icon: 'briefcase',
             label: 'Orders',
             closure: function () {
-                Menu::register(route: 'orders.orders');
+                foreach (resolve_static(OrderType::class, 'query')
+                    ->where('is_visible_in_sidebar', true)
+                    ->where('is_active', true)
+                    ->get(['id', 'name']) as $orderType
+                ) {
+                    Menu::register(
+                        route: 'orders.order-type',
+                        label: $orderType->name,
+                        params: ['orderType' => $orderType->id],
+                        path: 'orders.children.order-type-' . $orderType->id
+                    );
+                }
+                Menu::register(route: 'orders.orders', label: __('All orders'));
                 Menu::register(route: 'orders.order-positions');
             }
         );
@@ -558,6 +592,7 @@ class FluxServiceProvider extends ServiceProvider
                 Menu::register(route: 'settings.address-types');
                 Menu::register(route: 'settings.contact-origins');
                 Menu::register(route: 'settings.categories');
+                Menu::register(route: 'settings.tags');
                 Menu::register(route: 'settings.product-option-groups');
                 Menu::register(route: 'settings.product-properties');
                 Menu::register(route: 'settings.clients');

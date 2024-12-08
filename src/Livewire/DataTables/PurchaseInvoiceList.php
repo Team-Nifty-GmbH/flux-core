@@ -33,6 +33,8 @@ class PurchaseInvoiceList extends BaseDataTable
     public array $enabledCols = [
         'url',
         'media.file_name',
+        'contact.invoice_address.name',
+        'tags.name',
     ];
 
     public array $formatters = [
@@ -106,7 +108,9 @@ class PurchaseInvoiceList extends BaseDataTable
                 'orderTypes' => resolve_static(OrderType::class, 'query')
                     ->whereIn('order_type_enum', $purchaseOrderTypes)
                     ->pluck('name', 'id'),
-                'paymentTypes' => resolve_static(PaymentType::class, 'query')->where('is_purchase', true)->pluck('name', 'id'),
+                'paymentTypes' => resolve_static(PaymentType::class, 'query')
+                    ->where('is_purchase', true)
+                    ->pluck('name', 'id'),
                 'vatRates' => resolve_static(VatRate::class, 'query')->pluck('name', 'id'),
             ]
         );
@@ -208,9 +212,18 @@ class PurchaseInvoiceList extends BaseDataTable
     #[Renderless]
     public function fillFromSelectedContact(Contact $contact): void
     {
+        $bankConnection = $contact->contactBankConnections()->latest()->first();
+        $this->purchaseInvoiceForm->approval_user_id ??= $contact->approval_user_id;
         $this->purchaseInvoiceForm->payment_type_id ??= $contact->purchase_payment_type_id ?? $contact->payment_type_id;
         $this->purchaseInvoiceForm->currency_id = $contact->currency_id ?? Currency::default()?->id;
         $this->purchaseInvoiceForm->client_id = $contact->client_id;
+
+        $this->purchaseInvoiceForm->lay_out_user_id = null;
+        $this->purchaseInvoiceForm->account_holder = $bankConnection?->account_holder;
+        $this->purchaseInvoiceForm->bank_name = $bankConnection?->bank_name;
+        $this->purchaseInvoiceForm->bic = $bankConnection?->bic;
+        $this->purchaseInvoiceForm->iban = $bankConnection?->iban;
+
         $this->purchaseInvoiceForm->findMostUsedLedgerAccountId();
     }
 }

@@ -10,13 +10,13 @@ use FluxErp\Facades\Repeatable;
 use FluxErp\Livewire\DataTables\ScheduleList;
 use FluxErp\Livewire\Forms\ScheduleForm;
 use FluxErp\Models\Schedule;
+use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
-use WireUi\Traits\Actions;
 
 class Scheduling extends ScheduleList
 {
