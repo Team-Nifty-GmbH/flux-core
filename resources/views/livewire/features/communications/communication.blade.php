@@ -41,8 +41,8 @@
     modelId: null
 }">
     {!! $this->renderCreateDocumentsModal() !!}
-    <x-modal name="edit-communication" max-width="5xl">
-        <x-card :title="__('Edit Communication')" class="flex flex-col gap-4">
+    <x-modal name="edit-communication" width="5xl">
+        <x-card :title="__('Edit Communication')" class="flex flex-col gap-4 w-full">
             <div>
                 <x-select
                     :clearable="false"
@@ -58,7 +58,7 @@
                 <template x-for="(model, index) in $wire.communication.communicatables">
                     <x-badge flat primary cl>
                         <x-slot name="prepend" class="p-0.5">
-                            <x-button.circle
+                            <x-mini-button rounded
                                 x-cloak
                                 x-show="model.href"
                                 xs
@@ -81,7 +81,7 @@
                                 x-on:click="$wire.communication.communicatables.splice(index, 1)"
                             >
                                 <x-icon
-                                    name="x"
+                                    name="x-mark"
                                     class="size-4"
                                 />
                             </button>
@@ -155,7 +155,7 @@
                                     x-on:click="$wire.communication.to.splice($wire.communication.to.indexOf(to), 1)"
                                 >
                                     <x-icon
-                                        name="x"
+                                        name="x-mark"
                                         class="w-4 h-4"
                                     />
                                 </button>
@@ -188,7 +188,7 @@
                                     x-on:click="$wire.communication.cc.splice($wire.communication.cc.indexOf(to), 1)"
                                 >
                                     <x-icon
-                                        name="x"
+                                        name="x-mark"
                                         class="w-4 h-4"
                                     />
                                 </button>
@@ -221,7 +221,7 @@
                                     x-on:click="$wire.communication.bcc.splice($wire.communication.bcc.indexOf(to), 1)"
                                 >
                                     <x-icon
-                                        name="x"
+                                        name="x-mark"
                                         class="w-4 h-4"
                                     />
                                 </button>

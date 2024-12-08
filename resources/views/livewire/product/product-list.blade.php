@@ -1,6 +1,6 @@
 <div x-data="{edit: true}">
     <x-modal name="create-product">
-        <x-card :title="__('New Product')">
+        <x-card class="w-full" :title="__('New Product')">
             <section class="flex flex-col gap-4">
                 <x-input wire:model="product.product_number" :label="__('Product Number')" :placeholder="__('Leave empty to generate a new :attribute.', ['attribute' => __('Product Number')])" />
                 <div x-show="$wire.productTypes.length" x-cloak>

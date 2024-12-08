@@ -4,7 +4,7 @@
     @can('action.contact.create')
         @section('modals')
             <x-modal name="new-contact">
-                <x-card>
+                <x-card class="w-full">
                     <x-select
                         wire:model="contact.client_id"
                         label="{{ __('Client') }}"
@@ -25,7 +25,7 @@
                             </div>
                             <div
                                 class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
-                                <x-label :label="__('Salutation')" for="{{ md5('contact.main_address.salutation') }}" />
+                                <x-label :text="__('Salutation')" for="{{ md5('contact.main_address.salutation') }}" />
                                 <div class="col-span-2 w-full">
                                     <x-select
                                         :options="SalutationEnum::valuesLocalized()"
@@ -177,7 +177,7 @@
             >
                 <x-card class="w-full">
                     <x-slot:action>
-                        <x-button.circle wire:click="$set('showMap', false, true)" icon="x" />
+                        <x-mini-button rounded wire:click="$set('showMap', false, true)" icon="x-mark" />
                     </x-slot:action>
                     <div x-intersect.once="onChange()">
                         <div id="map" class="h-96 min-w-96"></div>

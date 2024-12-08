@@ -23,7 +23,7 @@
             <div class="grid grid-cols-2 gap-4">
                 <div class="grid grid-cols-1 gap-2">
                     <div>
-                        <x-label :label="__('Start color')" />
+                        <x-label :text="__('Start color')" />
                         <input class="w-full" type="color" x-on:change="calculateBackground()" wire:model="setting.settings.nav.background.start" />
                     </div>
                     <div>
@@ -31,7 +31,7 @@
                         <input class="w-full" type="range" x-on:change="calculateBackground()" min="0" max="360" wire:model.live="setting.settings.nav.background.angle" />
                     </div>
                     <div>
-                        <x-label :label="__('End color')" />
+                        <x-label :text="__('End color')" />
                         <input class="w-full" type="color" x-on:change="calculateBackground()" wire:model="setting.settings.nav.background.end" />
                     </div>
                 </div>
@@ -40,15 +40,15 @@
             </div>
             <div class="m-2 w-full border"></div>
             <div>
-                <x-label :label="__('Active menu item')" />
+                <x-label :text="__('Active menu item')" />
                 <input class="w-full" type="color" wire:model="setting.settings.nav.active_item" />
             </div>
             <div class="mt-4">
-                <x-label :label="__('Hover menu item')" />
+                <x-label :text="__('Hover menu item')" />
                 <input class="w-full" type="color" wire:model="setting.settings.nav.hover_item" />
             </div>
             <div class="mt-4">
-                <x-inputs.number min="12" max="48" step="2" :label="__('Icon size')" wire:model="setting.settings.nav.icon_size" />
+                <x-number min="12" max="48" step="2" :label="__('Icon size')" wire:model="setting.settings.nav.icon_size" />
             </div>
         </x-card>
         <x-card :title="__('Append links')">
@@ -65,12 +65,12 @@
                             <x-input x-model="link.icon" :label="__('Icon')"/>
                             <x-input x-model="link.uri" :label="__('URL')" placeholder="your-website.com" />
                             <div class="ml-1 flex h-full items-center sm:col-span-1">
-                                <x-button.circle negative icon="trash" x-on:click="setting.settings.nav.append_links.splice(index,1)" />
+                                <x-mini-button rounded negative icon="trash" x-on:click="setting.settings.nav.append_links.splice(index,1)" />
                             </div>
                         </div>
                     </template>
                 <div class="sm:col-span-6">
-                    <x-button.circle class="mr-2" primary icon="plus" x-on:click="setting.settings.nav.append_links.push({children: []})" />
+                    <x-mini-button rounded class="mr-2" primary icon="plus" x-on:click="setting.settings.nav.append_links.push({children: []})" />
                 </div>
             </div>
         </x-card>

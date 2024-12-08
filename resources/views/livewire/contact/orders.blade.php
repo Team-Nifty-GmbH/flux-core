@@ -3,7 +3,7 @@
     }"
 >
     <x-modal name="create-order">
-        <x-card :title="__('New Order')">
+        <x-card class="w-full" :title="__('New Order')">
             <section>
                 <div class="space-y-2.5 divide-y divide-secondary-200">
                     <x-select

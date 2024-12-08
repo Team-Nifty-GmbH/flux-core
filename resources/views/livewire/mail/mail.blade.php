@@ -26,8 +26,8 @@
         }
     }"
 >
-   <x-modal max-width="7xl" name="show-mail">
-      <x-card class="flex flex-col gap-4">
+   <x-modal width="7xl" name="show-mail">
+      <x-card class="flex flex-col gap-4 w-full">
          <div class="flex">
             <div class="grow">
                <div class="font-semibold" x-text="$wire.mailMessage.from"></div>

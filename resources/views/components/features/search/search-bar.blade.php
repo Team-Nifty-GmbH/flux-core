@@ -1,7 +1,7 @@
 <div x-data="{show: @entangle('show').live}">
     {{ $prepend ?? '' }}
     <div x-on:click.outside="show = false" x-on:keydown.escape.window="show = false">
-        <x-input :label="__('Products')" icon="search" x-on:click="show = true"
+        <x-input :label="__('Products')" icon="magnifying-glass" x-on:click="show = true"
                  onclick="this.setSelectionRange(0, this.value.length)"
                  placeholder="{{ __('Enter a search phrase…') }}" wire:model.live="search"/>
         <div>
@@ -18,7 +18,7 @@
                         {{ $attributes->merge(['wire:click'  => '', 'x-on:click' => '']) }} component="{{ $searchResultComponent }}"/>
                 </template>
                 <div class="flex w-full items-center justify-center pb-3 text-gray-500" x-show="!results">
-                    <x-heroicons name="magnifying-glass" class="h-4 w-4"/>
+                    <x-icon name="magnifying-glass" class="h-4 w-4"/>
                     <span>
                         {{ __('No results…') }}
                     </span>

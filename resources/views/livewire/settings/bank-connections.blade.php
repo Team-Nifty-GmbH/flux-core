@@ -7,7 +7,7 @@
         <x-input x-bind:disabled="$wire.bankConnection.id" wire:model="bankConnection.iban" :label="__('IBAN')"/>
         <x-input wire:model="bankConnection.bic" :label="__('BIC')"/>
         <x-input wire:model="bankConnection.bank_name" :label="__('Bank Name')"/>
-        <x-inputs.number wire:model="bankConnection.credit_limit" :label="__('Credit Limit')" :min="0" step="1"/>
+        <x-number wire:model="bankConnection.credit_limit" :label="__('Credit Limit')" :min="0" step="1"/>
         <x-toggle wire:model="bankConnection.is_active" :label="__('Active')"/>
         <x-slot:footer>
             <div class="w-full flex justify-end gap-4">

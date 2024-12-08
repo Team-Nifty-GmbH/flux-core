@@ -56,7 +56,7 @@
             formatters="formatter.state"
             available="availableStates"
         />
-        <x-inputs.number x-bind:readonly="!edit" :label="__('Priority')" wire:model="task.priority" min="0" />
+        <x-number x-bind:readonly="!edit" :label="__('Priority')" wire:model="task.priority" min="0" />
         <x-textarea x-bind:readonly="!edit" wire:model="task.description" label="{{ __('Description') }}" />
         <div>
             <x-select
@@ -128,7 +128,7 @@
                 </x-slot:beforeOptions>
             </x-select>
         </div>
-        <x-inputs.number x-bind:readonly="!edit" :label="__('Budget')" wire:model="task.budget" step="0.01" />
+        <x-number x-bind:readonly="!edit" :label="__('Budget')" wire:model="task.budget" step="0.01" />
         <x-input x-bind:readonly="!edit"
                  :label="__('Time Budget')"
                  wire:model.blur="task.time_budget"

@@ -87,7 +87,7 @@
                         class="grid grid-cols-2 w-full gap-4"
                         x-data="{amount: 1}"
                     >
-                        <x-inputs.number step="1" x-model="amount"/>
+                        <x-number step="1" x-model="amount"/>
                         <x-button x-on:click="$wire.dispatch('cart:add', {products: {id: $wire.productForm.id, name: $wire.productForm.name, price: $wire.productForm.price, amount: amount}})" primary class="w-full" :label="__('Add to cart')" />
                     </div>
                 @endcan

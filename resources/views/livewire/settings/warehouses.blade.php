@@ -1,5 +1,5 @@
 <x-modal name="edit-warehouse">
-    <x-card>
+    <x-card class="w-full">
         <div class="flex flex-col gap-4">
             <x-input wire:model="warehouse.name" :label="__('Name')" />
             <x-toggle wire:model.boolean="warehouse.is_default" :label="__('Is Default')" />

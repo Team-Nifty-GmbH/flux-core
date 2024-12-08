@@ -7,7 +7,7 @@
 }">
     @section('modals')
         <x-modal name="edit-category" x-on:open="setCategorySearch()">
-            <x-card :title="$category->id ? __('Edit Category') : __('Create Category')">
+            <x-card class="w-full" :title="$category->id ? __('Edit Category') : __('Create Category')">
                 <div class="flex flex-col gap-4">
                     @section('modals.edit-category.content')
                         <x-input wire:model="category.name" :label="__('Name')"></x-input>

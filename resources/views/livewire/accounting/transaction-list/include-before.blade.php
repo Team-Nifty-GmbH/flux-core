@@ -1,6 +1,6 @@
 @extends('flux::livewire.transactions.transactions')
-<x-modal name="assign-order" max-width="7xl">
-    <x-card>
+<x-modal name="assign-order" width="7xl">
+    <x-card class="w-full">
         <div class="grid grid-cols-2 gap-1.5">
             <div class="flex flex-col gap-1.5">
                 <x-select
@@ -18,7 +18,7 @@
                 <x-input readonly wire:model="transactionForm.counterpart_iban" :label="__('Counterpart IBAN')"/>
                 <x-input readonly wire:model="transactionForm.counterpart_bank_name" :label="__('Counterpart Bank Name')"/>
                 <x-textarea readonly wire:model="transactionForm.purpose" :label="__('Purpose')"/>
-                <x-inputs.number readonly step="0.01" wire:model="transactionForm.amount" :label="__('Amount')"/>
+                <x-number readonly step="0.01" wire:model="transactionForm.amount" :label="__('Amount')"/>
             </div>
             <div class="overflow-auto">
                 <template x-for="(child, index) in $wire.transactionForm.children">
@@ -34,7 +34,7 @@
                             </div>
                         </x-slot:sub-value>
                         <x-slot:actions>
-                            <x-inputs.number x-model="child.amount" step="0.01" />
+                            <x-number x-model="child.amount" step="0.01" />
                             <x-button negative icon="trash" x-on:click="$wire.transactionForm.children.splice(index, 1); $wire.recalculateDifference();"/>
                         </x-slot:actions>
                     </x-flux::list-item>
