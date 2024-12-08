@@ -293,6 +293,12 @@ class OrderTest extends BaseSetup
         $this->assertEquals($this->order->id, $replicatedOrder->parent_id);
         $this->assertNotEquals($replicatedOrder->order_number, $this->order->order_number);
         $this->assertNotEquals($replicatedOrder->uuid, $this->order->uuid);
+        $this->assertEquals(
+            0,
+            $replicatedOrder->orderPositions()
+                ->whereNotNull('origin_position_id')
+                ->count()
+        );
     }
 
     public function test_can_render_subscription_order()

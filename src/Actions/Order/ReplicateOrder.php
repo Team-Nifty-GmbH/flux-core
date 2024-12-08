@@ -4,8 +4,10 @@ namespace FluxErp\Actions\Order;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\OrderPosition\CreateOrderPosition;
+use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
+use FluxErp\Models\OrderType;
 use FluxErp\Rulesets\Order\ReplicateOrderRuleset;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -26,6 +28,10 @@ class ReplicateOrder extends FluxAction
     public function performAction(): Order
     {
         $getOrderPositionsFromOrigin = is_null(data_get($this->data, 'order_positions'));
+
+        $orderTypeEnum = resolve_static(OrderType::class, 'query')
+            ->whereKey($this->getData('order_type_id'))
+            ->value('order_type_enum');
 
         $originalOrder = resolve_static(Order::class, 'query')
             ->whereKey($this->data['id'])
@@ -87,24 +93,31 @@ class ReplicateOrder extends FluxAction
                 ->where('is_bundle_position', false)
                 ->orderBy('slug_position')
                 ->get()
-                ->map(function (OrderPosition $orderPosition) use ($replicateOrderPositions) {
+                ->map(function (OrderPosition $orderPosition) use ($replicateOrderPositions, $orderTypeEnum) {
                     $position = $replicateOrderPositions->first(fn ($item) => $item['id'] === $orderPosition->id);
 
-                    $orderPosition->origin_position_id = $orderPosition->id;
+                    if (in_array($orderTypeEnum, [OrderTypeEnum::SplitOrder, OrderTypeEnum::Retoure])) {
+                        $orderPosition->origin_position_id = $orderPosition->id;
+                    }
+
                     $orderPosition->amount = $position['amount'];
 
                     return $orderPosition;
                 })
                 ->toArray();
         } else {
-            $orderPositions = array_map(
-                function ($position) {
-                    $position['origin_position_id'] = $position['id'];
+            if (in_array($orderTypeEnum, [OrderTypeEnum::SplitOrder, OrderTypeEnum::Retoure])) {
+                $orderPositions = array_map(
+                    function ($position) {
+                        $position['origin_position_id'] = $position['id'];
 
-                    return $position;
-                },
-                $originalOrder['order_positions'] ?? []
-            );
+                        return $position;
+                    },
+                    $originalOrder['order_positions'] ?? []
+                );
+            } else {
+                $orderPositions = $originalOrder['order_positions'] ?? [];
+            }
         }
 
         $newOrderPositions = collect();
