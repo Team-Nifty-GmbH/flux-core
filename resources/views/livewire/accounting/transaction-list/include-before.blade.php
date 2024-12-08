@@ -1,6 +1,6 @@
 @extends('flux::livewire.transactions.transactions')
-<x-modal name="assign-order" max-width="7xl">
-    <x-card>
+<x-modal name="assign-order" width="7xl">
+    <x-card class="w-full">
         <div class="grid grid-cols-2 gap-1.5">
             <div class="flex flex-col gap-1.5">
                 <x-select

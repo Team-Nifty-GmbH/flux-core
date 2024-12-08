@@ -10,8 +10,8 @@
             @include('tall-datatables::livewire.data-table')
         </div>
     </div>
-    <x-modal max-width="6xl" name="edit-client">
-        <x-card>
+    <x-modal width="6xl" name="edit-client">
+        <x-card class="w-full">
             <x-flux::tabs
                 :$tabs
                 wire:model="tab"

@@ -17,8 +17,8 @@
         }
     }
 }">
-    <x-modal max-width="7xl" name="edit-mail" x-on:close="$wire.clear()">
-        <x-card class="flex flex-col gap-4">
+    <x-modal width="7xl" name="edit-mail" x-on:close="$wire.clear()">
+        <x-card class="flex flex-col gap-4 w-full">
             <div class="flex flex-col gap-1.5">
                 <x-label>{{ __('To') }}</x-label>
                 <div class="flex gap-1" x-cloak x-show="! $wire.multiple">

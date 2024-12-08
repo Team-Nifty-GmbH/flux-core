@@ -1,5 +1,5 @@
 <x-modal name="edit-payment-type">
-    <x-card>
+    <x-card class="w-full">
         <div class="flex flex-col gap-4">
             <x-input wire:model="paymentType.name" :label="__('Name')" />
             <x-toggle wire:model.boolean="paymentType.is_active" :label="__('Is Active')" />

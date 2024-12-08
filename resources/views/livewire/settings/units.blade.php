@@ -1,7 +1,7 @@
 <div class="p-6">
     <div class="font-semibold text-2xl">
         <x-modal name="edit-unit">
-            <x-card>
+            <x-card class="w-full">
                 <div class="flex flex-col gap-4">
                     <x-input wire:model="unit.name" :label="__('Name')" />
                     <x-input wire:model="unit.abbreviation" :label="__('Unit Abbreviation')" />

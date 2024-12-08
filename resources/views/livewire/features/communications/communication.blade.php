@@ -41,8 +41,8 @@
     modelId: null
 }">
     {!! $this->renderCreateDocumentsModal() !!}
-    <x-modal name="edit-communication" max-width="5xl">
-        <x-card :title="__('Edit Communication')" class="flex flex-col gap-4">
+    <x-modal name="edit-communication" width="5xl">
+        <x-card :title="__('Edit Communication')" class="flex flex-col gap-4 w-full">
             <div>
                 <x-select
                     :clearable="false"

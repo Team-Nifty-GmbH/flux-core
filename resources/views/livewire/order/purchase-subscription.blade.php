@@ -2,7 +2,7 @@
 @section('modals')
     @parent
     <x-modal name="edit-schedule">
-        <x-card :title="__('Edit Schedule')">
+        <x-card class="w-full" :title="__('Edit Schedule')">
             <div class="flex flex-col gap-1.5">
                 <x-select
                     :label="__('Order type')"

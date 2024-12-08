@@ -27,7 +27,7 @@
             </div>
             <x-modal
                 name="detail-modal"
-                max-width="7xl"
+                width="7xl"
                 x-on:close="$el.querySelector('iframe').src = 'data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E'"
             >
                 <div
@@ -42,7 +42,7 @@
                         }
                     }"
                 >
-                    <x-card class="grid h-screen">
+                    <x-card class="h-screen w-full flex flex-col">
                         <iframe class="object-contain" height="100%" width="100%" id="detail-modal-iframe" src="data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E">
                         </iframe>
                         <x-slot:footer>

@@ -1,4 +1,4 @@
-<x-card>
+<x-card class="w-full">
     <div class="flex flex-col gap-4">
         @canAction(\FluxErp\Actions\Project\CreateProject::class)
             <x-toggle

@@ -50,7 +50,7 @@
                 </li>
             @endforeach
         </ul>
-        <x-modal-card max-width="sm" blur :title="$selectedRole['name'] ?? ''" wire:model="showToggleUsers">
+        <x-modal-card width="sm" blur :title="$selectedRole['name'] ?? ''" wire:model="showToggleUsers">
             <div class="space-y-6">
                 @foreach($users as $user)
                     <div class="flex">
@@ -71,7 +71,7 @@
             </x-slot>
         </x-modal-card>
 
-        <x-modal-card max-width="md" blur :title="$selectedRole['name'] ?? __('New Role')"
+        <x-modal-card width="md" blur :title="$selectedRole['name'] ?? __('New Role')"
                       wire:model="showTogglePermissions">
             <div class="space-y-6">
                 <x-input wire:model="selectedRole.name" :label="__('Name')"/>
@@ -82,7 +82,7 @@
                     wire:model="selectedRole.guard_name"
                 />
                 <div>
-                    <x-label :label="__('Permissions')"/>
+                    <x-label :text="__('Permissions')"/>
                     <x-input wire:model.live.debounce.500ms="searchPermission" icon="magnifying-glass"/>
                     <div class="max-h-96 space-y-6 overflow-y-auto">
                         @foreach($permissions as $permission)

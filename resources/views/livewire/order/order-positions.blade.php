@@ -1,6 +1,6 @@
 <div wire:ignore>
-    <x-modal max-width="6xl" name="edit-order-position" x-on:close="$wire.resetOrderPosition()">
-        <x-card>
+    <x-modal width="6xl" name="edit-order-position" x-on:close="$wire.resetOrderPosition()">
+        <x-card class="w-full">
             @section('order-position-detail-modal.content')
                 <div class="relative">
                     <x-flux::spinner  wire:target="position"/>

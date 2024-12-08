@@ -24,6 +24,10 @@
 }
 
 @layer components {
+    button.bg-white {
+        @apply border border-secondary-200;
+    }
+
     .indent-icon {
         @apply after:content-['↳'];
     }

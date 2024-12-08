@@ -1,5 +1,5 @@
 <x-modal name="edit-serial-number-range">
-    <x-card>
+    <x-card class="w-full">
         <div class="flex flex-col gap-4">
             <div class="flex flex-col gap-4" x-cloak x-show="! $wire.serialNumberRange.id">
                 <x-select

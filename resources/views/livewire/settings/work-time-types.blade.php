@@ -1,5 +1,5 @@
 <x-modal name="edit-work-time-type">
-    <x-card>
+    <x-card class="w-full">
         <div class="flex flex-col gap-4">
             <x-input wire:model="workTimeType.name" :label="__('Name')" />
             <x-toggle wire:model="workTimeType.is_billable" :label="__('Is Billable')" />

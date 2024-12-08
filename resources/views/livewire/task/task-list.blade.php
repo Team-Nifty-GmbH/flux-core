@@ -1,6 +1,6 @@
 <div id="new-task-modal" x-data="{edit: true}">
     <x-modal x-on:new-task.window="$wire.resetForm().then(() => open())">
-        <x-card>
+        <x-card class="w-full">
             <div class="space-y-8 divide-y divide-gray-200"
                 x-data="{
                     formatter: @js(resolve_static(\FluxErp\Models\Task::class, 'typeScriptAttributes'))

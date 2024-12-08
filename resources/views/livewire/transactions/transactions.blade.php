@@ -1,5 +1,5 @@
-<x-modal name="transaction-details" max-width="6xl">
-    <x-card class="flex flex-col gap-3">
+<x-modal name="transaction-details" width="6xl">
+    <x-card class="flex flex-col gap-3 w-full">
         <x-select
             :label="__('Bank Connection')"
             wire:model="transactionForm.bank_connection_id"

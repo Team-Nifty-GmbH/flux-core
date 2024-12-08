@@ -159,8 +159,8 @@
     </x-card>
     <x-card class="space-y-2.5 bg-gray-50 dark:bg-secondary-700" :title="__('Product Properties')">
         @section('product-properties')
-            <x-modal name="edit-product-properties-modal" max-width="6xl">
-                <x-card :title="__('Edit Product Properties')" x-data="{productPropertyGroup: null}">
+            <x-modal name="edit-product-properties-modal" width="6xl">
+                <x-card class="w-full" :title="__('Edit Product Properties')" x-data="{productPropertyGroup: null}">
                     <div class="flex gap-4"
                          x-on:data-table-row-clicked="$wire.loadProductProperties($event.detail.id ?? $event.detail.record.id); productPropertyGroup = $event.detail.record ?? $event.detail;"
                     >

@@ -1,6 +1,6 @@
 <div class="flex flex-col gap-4 text-gray-900 dark:text-gray-50">
-    <x-modal max-width="7xl" name="terms-and-conditions">
-        <x-card>
+    <x-modal width="7xl" name="terms-and-conditions">
+        <x-card class="w-full">
             <div id="terms-and-conditions">
             </div>
         </x-card>

@@ -1,5 +1,5 @@
 <x-modal name="edit-mail-folders">
-    <x-card class="bg-gray-50">
+    <x-card class="bg-gray-50 w-full">
         <div class="grid grid-cols-2 gap-4"
              x-data="{
                         ...folderTree(),
@@ -52,7 +52,7 @@
     </x-card>
 </x-modal>
 <x-modal name="edit-mail-account">
-    <x-card>
+    <x-card class="w-full">
         <x-slot:title>
             {{ __('Edit Mail Account') }}
         </x-slot:title>

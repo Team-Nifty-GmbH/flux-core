@@ -1,6 +1,6 @@
 <x-modal name="edit-payment-reminder-text">
     <x-card
-        class="flex flex-col gap-4"
+        class="flex flex-col gap-4 w-full"
         x-data="{
             addReceiver($event, type) {
                 let value = $event.target.value;

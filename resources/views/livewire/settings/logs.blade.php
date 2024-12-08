@@ -8,7 +8,7 @@
             Alpine.$data($el.querySelector('[wireui-modal]')).open();
         }
     )">
-    <x-modal>
+    <x-modal class="w-full">
         <x-card>
             <div class="py-3 px-6 w-full flex justify-between">
                 <span x-text="formatters.datetime(log?.created_at)"></span>

@@ -1,5 +1,5 @@
 <x-modal wire:model="editModal">
-    <x-card :title="$selectedLanguage->id ?? false ? __('Edit Language') : __('Create Language')">
+    <x-card class="w-full" :title="$selectedLanguage->id ?? false ? __('Edit Language') : __('Create Language')">
         <div class="space-y-8 divide-y divide-gray-200">
             <div class="space-y-8 divide-y divide-gray-200">
                 <div>

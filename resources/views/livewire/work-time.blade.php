@@ -4,7 +4,7 @@
     x-init.once="load()"
 >
     <x-modal name="work-time" persistent="true" x-on:close="$wire.resetWorkTime()">
-        <x-card class="flex flex-col gap-4">
+        <x-card class="flex flex-col gap-4 w-full">
             <x-select :label="__('Work Time Type')"
                       :options="$workTimeTypes"
                       wire:model="workTime.work_time_type_id"
@@ -99,38 +99,41 @@
          x-anchor.bottom-end.offset.5="$refs.button"
          class="z-10"
     >
-        <x-card id="active-work-times" class="flex flex-col gap-4 max-w-md" :title="__('Active Work Times')">
+        <x-card id="active-work-times" :title="__('Active Work Times')">
             <x-slot:action>
                 <x-mini-button rounded xs x-on:click="open = false" icon="x-mark" />
             </x-slot:action>
-            <div class="flex w-full gap-1.5">
-                <x-button class="w-full" x-show="! $wire.dailyWorkTime.id" positive :label="__('Start Workday')" x-on:click="$wire.toggleWorkDay(true)" />
-                <x-button class="w-1/2" x-show="$wire.dailyWorkTime.id" negative :label="__('End Workday')" x-on:click="stopWorkDay()" />
-                <x-button class="w-1/2" x-show="$wire.dailyWorkTime.id && ! $wire.dailyWorkTimePause.id" warning :label="__('Pause')" x-on:click="$wire.togglePauseWorkDay(true)" />
-                <x-button class="w-1/2" x-show="$wire.dailyWorkTime.id && $wire.dailyWorkTimePause.id" positive :label="__('Continue')" x-on:click="$wire.togglePauseWorkDay(false)" />
-            </div>
-            <x-button x-show="$wire.dailyWorkTime.id" positive :label="__('Record new working hours')" x-on:click="$openModal('work-time')" />
-            <template x-for="workTime in activeWorkTimes">
-                <div class="rounded-md p-1.5 flex flex-col gap-1.5">
-                    <div class="flex justify-between w-full">
-                        <div class="flex flex-col w-full">
-                            <div class="text-gray-500 dark:text-gray-400 truncate" x-text="workTime.name"></div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400" x-text="workTime.work_time_type?.name"></div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400" x-text="formatters.datetime(workTime.started_at)"></div>
-                            <x-badge primary>
-                                <div x-bind:data-id="workTime.id" x-init="$el.innerText = msTimeToString(calculateTime(workTime))">
-                                </div>
-                            </x-badge>
+            <div class="flex flex-col gap-4 max-w-md">
+
+                <div class="flex w-full gap-1.5">
+                    <x-button class="w-full" x-show="! $wire.dailyWorkTime.id" positive :label="__('Start Workday')" x-on:click="$wire.toggleWorkDay(true)" />
+                    <x-button class="w-1/2" x-show="$wire.dailyWorkTime.id" negative :label="__('End Workday')" x-on:click="stopWorkDay()" />
+                    <x-button class="w-1/2" x-show="$wire.dailyWorkTime.id && ! $wire.dailyWorkTimePause.id" warning :label="__('Pause')" x-on:click="$wire.togglePauseWorkDay(true)" />
+                    <x-button class="w-1/2" x-show="$wire.dailyWorkTime.id && $wire.dailyWorkTimePause.id" positive :label="__('Continue')" x-on:click="$wire.togglePauseWorkDay(false)" />
+                </div>
+                <x-button class="w-full" x-show="$wire.dailyWorkTime.id" positive :label="__('Record new working hours')" x-on:click="$openModal('work-time')" />
+                <template x-for="workTime in activeWorkTimes">
+                    <div class="rounded-md p-1.5 flex flex-col gap-1.5">
+                        <div class="flex justify-between w-full">
+                            <div class="flex flex-col w-full">
+                                <div class="text-gray-500 dark:text-gray-400 truncate" x-text="workTime.name"></div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400" x-text="workTime.work_time_type?.name"></div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400" x-text="formatters.datetime(workTime.started_at)"></div>
+                                <x-badge primary>
+                                    <div x-bind:data-id="workTime.id" x-init="$el.innerText = msTimeToString(calculateTime(workTime))">
+                                    </div>
+                                </x-badge>
+                            </div>
+                        </div>
+                        <div class="flex justify-end gap-x-4">
+                            <x-button class="w-1/2" x-show="! workTime.ended_at" warning icon="pause" :label="__('Pause')" x-on:click="pauseWorkTime(workTime)" />
+                            <x-button class="w-1/2" x-show="workTime.ended_at" positive icon="play" :label="__('Continue')" x-on:click="continueWorkTime(workTime)" />
+                            <x-button class="w-1/2" negative icon="stop" :label="__('Stop')" x-on:click="stopWorkTime(workTime)" />
+                            <x-button class="flex-none" primary icon="pencil" wire:click="edit(workTime.id)" />
                         </div>
                     </div>
-                    <div class="flex justify-end gap-x-4">
-                        <x-button class="w-1/2" x-show="! workTime.ended_at" warning icon="pause" :label="__('Pause')" x-on:click="pauseWorkTime(workTime)" />
-                        <x-button class="w-1/2" x-show="workTime.ended_at" positive icon="play" :label="__('Continue')" x-on:click="continueWorkTime(workTime)" />
-                        <x-button class="w-1/2" negative icon="stop" :label="__('Stop')" x-on:click="stopWorkTime(workTime)" />
-                        <x-button class="flex-none" primary icon="pencil" wire:click="edit(workTime.id)" />
-                    </div>
-                </div>
-            </template>
+                </template>
+            </div>
         </x-card>
     </div>
 </div>

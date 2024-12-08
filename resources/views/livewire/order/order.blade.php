@@ -17,7 +17,7 @@
             </x-modal>
         @endCanAction
         <x-modal name="replicate-order">
-            <x-card>
+            <x-card class="w-full">
                 <section x-data="{
                     updateContactId(id) {
                         Alpine.$data(
@@ -166,8 +166,8 @@
                 </x-slot:footer>
             </x-card>
         </x-modal>
-        <x-modal name="create-child-order" max-width="7xl">
-            <x-card>
+        <x-modal name="create-child-order" width="7xl">
+            <x-card class="w-full">
                 <div class="grid grid-cols-2 gap-1.5">
                     <div class="flex flex-col gap-1.5">
                         <x-select
@@ -220,7 +220,7 @@
             </x-card>
         </x-modal>
         <x-modal name="edit-discount" x-on:open="$focus.first()" x-trap="show" x-on:keyup.enter="$wire.saveDiscount().then((success) => {if(success) close();})">
-            <x-card>
+            <x-card class="w-full">
                 <div class="flex flex-col gap-4">
                     <x-input wire:model="discount.name" :label="__('Name')" />
                     <div x-cloak x-show="$wire.discount.is_percentage">

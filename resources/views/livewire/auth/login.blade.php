@@ -7,7 +7,7 @@
             <div class="mt-6">
                 @section('password-reset-dialog')
                     <x-modal name="password-reset">
-                        <x-card :title="__('Reset password')">
+                        <x-card class="w-full" :title="__('Reset password')">
                             <x-input wire:model="email" :label="__('Email')" name="reset-email" type="email" required/>
                             <x-slot:footer>
                                 <x-button wire:click="resetPassword()" primary class="w-full" :label="__('Reset password')" x-on:click="close()"></x-button>

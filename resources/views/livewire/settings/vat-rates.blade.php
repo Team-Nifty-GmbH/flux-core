@@ -1,5 +1,5 @@
 <x-modal name="edit-vat-rate">
-    <x-card>
+    <x-card class="w-full">
         <div class="flex flex-col gap-4">
             <x-input wire:model="vatRate.name" :label="__('Name')" />
             <x-number wire:model="vatRate.rate_percentage_frontend" :label="__('Rate Percentage')" />
