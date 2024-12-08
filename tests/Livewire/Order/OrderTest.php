@@ -296,7 +296,7 @@ class OrderTest extends BaseSetup
         $this->assertEquals(
             0,
             $replicatedOrder->orderPositions()
-                ->whereNotNull('order_position_id')
+                ->whereNotNull('origin_position_id')
                 ->count()
         );
     }

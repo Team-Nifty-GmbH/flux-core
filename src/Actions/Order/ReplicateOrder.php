@@ -96,7 +96,7 @@ class ReplicateOrder extends FluxAction
                 ->map(function (OrderPosition $orderPosition) use ($replicateOrderPositions, $orderTypeEnum) {
                     $position = $replicateOrderPositions->first(fn ($item) => $item['id'] === $orderPosition->id);
 
-                    if ($orderTypeEnum === OrderTypeEnum::SplitOrder) {
+                    if (in_array($orderTypeEnum, [OrderTypeEnum::SplitOrder, OrderTypeEnum::Retoure])) {
                         $orderPosition->origin_position_id = $orderPosition->id;
                     }
 
@@ -106,7 +106,7 @@ class ReplicateOrder extends FluxAction
                 })
                 ->toArray();
         } else {
-            if ($orderTypeEnum === OrderTypeEnum::SplitOrder) {
+            if (in_array($orderTypeEnum, [OrderTypeEnum::SplitOrder, OrderTypeEnum::Retoure])) {
                 $orderPositions = array_map(
                     function ($position) {
                         $position['origin_position_id'] = $position['id'];
