@@ -2,7 +2,7 @@
 
 namespace FluxErp\Traits\Livewire;
 
-use WireUi\Traits\Actions as BaseActions;
+use WireUi\Traits\WireUiActions as BaseActions;
 
 trait Actions
 {
