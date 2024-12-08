@@ -65,12 +65,12 @@
                             <x-input x-model="link.icon" :label="__('Icon')"/>
                             <x-input x-model="link.uri" :label="__('URL')" placeholder="your-website.com" />
                             <div class="ml-1 flex h-full items-center sm:col-span-1">
-                                <x-mini-button negative icon="trash" x-on:click="setting.settings.nav.append_links.splice(index,1)" />
+                                <x-mini-button rounded negative icon="trash" x-on:click="setting.settings.nav.append_links.splice(index,1)" />
                             </div>
                         </div>
                     </template>
                 <div class="sm:col-span-6">
-                    <x-mini-button class="mr-2" primary icon="plus" x-on:click="setting.settings.nav.append_links.push({children: []})" />
+                    <x-mini-button rounded class="mr-2" primary icon="plus" x-on:click="setting.settings.nav.append_links.push({children: []})" />
                 </div>
             </div>
         </x-card>

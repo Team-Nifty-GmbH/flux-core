@@ -285,7 +285,7 @@
                 >
                     <x-select.option value="accepted">
                         <div>
-                            <x-mini-button
+                            <x-mini-button rounded
                                 disabled
                                 positive
                                 xs
@@ -296,7 +296,7 @@
                     </x-select.option>
                     <x-select.option :label="__('Declined')" value="declined">
                         <div>
-                            <x-mini-button
+                            <x-mini-button rounded
                                 disabled
                                 negative
                                 xs
@@ -307,7 +307,7 @@
                     </x-select.option>
                     <x-select.option :label="__('Maybe')" value="maybe">
                         <div>
-                            <x-mini-button
+                            <x-mini-button rounded
                                 disabled
                                 warning
                                 xs
@@ -323,34 +323,34 @@
                     <x-label for="invite" :label="__('Invites')" />
                     <template x-for="invited in $wire.calendarEvent.invited">
                         <div class="flex gap-1.5">
-                            <x-mini-button
+                            <x-mini-button rounded
                                 negative
                                 xs
                                 icon="trash"
                                 x-bind:disabled="! $wire.calendarEvent.is_editable ?? false"
                                 x-on:click="$wire.calendarEvent.invited.splice($wire.calendarEvent.invited.indexOf(invited), 1)"
                             />
-                            <x-mini-button
+                            <x-mini-button rounded
                                 x-show="invited.pivot?.status === 'accepted'"
                                 disabled
                                 positive
                                 xs
                                 icon="check"
                             />
-                            <x-mini-button
+                            <x-mini-button rounded
                                 x-show="invited.pivot?.status === 'declined'"
                                 disabled
                                 negative
                                 xs
                                 icon="x-mark" />
-                            <x-mini-button
+                            <x-mini-button rounded
                                 x-show="invited.pivot?.status === 'maybe'"
                                 disabled
                                 warning
                                 xs
                                 label="?"
                             />
-                            <x-mini-button
+                            <x-mini-button rounded
                                 x-show="invited.pivot?.status !== 'accepted' && invited.pivot?.status !== 'declined' && invited.pivot?.status !== 'maybe'"
                                 disabled
                                 secondary

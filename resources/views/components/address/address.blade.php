@@ -111,7 +111,7 @@
                         <div class="absolute inset-y-0 left-0 flex items-center p-0.5">
                             <x-button
                                 class="h-full rounded-l-md"
-                                icon="mail"
+                                icon="envelope"
                                 primary
                                 flat
                                 squared
@@ -150,7 +150,7 @@
                             <div class="absolute inset-y-0 left-0 flex items-center p-0.5">
                                 <x-button
                                     class="h-full rounded-l-md"
-                                    icon="globe"
+                                    icon="globe-alt"
                                     primary
                                     flat
                                     squared

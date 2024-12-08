@@ -19,7 +19,7 @@
                 <template x-for="(channelValue, index) in notificationChannel.channel_value">
                     <div class="flex">
                         <div class="flex items-center pr-1.5 transition-all">
-                            <x-mini-button 2xs negative label="-" x-on:click.prevent="_.pull(notificationChannel.channel_value, channelValue)"></x-mini-button>
+                            <x-mini-button rounded 2xs negative label="-" x-on:click.prevent="_.pull(notificationChannel.channel_value, channelValue)"></x-mini-button>
                         </div>
                         <div class="w-full">
                             <x-input class="flex-grow" x-model="notificationChannel.channel_value[index]">
@@ -27,7 +27,7 @@
                         </div>
                     </div>
                 </template>
-                <x-mini-button 2xs positive label="+" x-on:click="notificationChannel.channel_value.push(null)"/>
+                <x-mini-button rounded 2xs positive label="+" x-on:click="notificationChannel.channel_value.push(null)"/>
             </div>
         </template>
         <x-slot name="footer">

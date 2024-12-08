@@ -8,9 +8,6 @@ use Illuminate\View\Compilers\BladeCompiler;
 use Illuminate\View\ComponentAttributeBag;
 use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use WireUi\Components\Button\Base;
-use WireUi\Facades\WireUi;
-use WireUi\View\Components\Button;
 
 class TabButton implements Htmlable
 {

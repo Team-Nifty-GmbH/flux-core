@@ -24,15 +24,16 @@
     x-on:keydown.escape.window="show = false"
     class="relative flex-1"
 >
-    <x-input shadowless
-         autocomplete="off"
-         icon="magnifying-glass"
-         class="w-full border-0"
-         x-on:click="show = true"
-         x-on:keydown="show = true"
-         x-on:keydown.enter="show = false"
-         wire:model.live.debounce.500ms="search"
-         placeholder="{{ __('Search everywhere...') }}"
+    <x-input
+        shadowless
+        autocomplete="off"
+        icon="magnifying-glass"
+        class="w-full border-0"
+        x-on:click="show = true"
+        x-on:keydown="show = true"
+        x-on:keydown.enter="show = false"
+        wire:model.live.debounce.500ms="search"
+        placeholder="{{ __('Search everywhere...') }}"
     />
     <div class="absolute z-[9] w-full pt-6" x-show="show" x-transition x-cloak>
         <x-card class="relative !px-0 !py-0 pb-2">

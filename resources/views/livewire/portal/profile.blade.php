@@ -186,7 +186,7 @@
                             <div class="grid grid-cols-3">
                                 <div class="flex items-center">
                                     <div class="flex items-center pr-1.5 transition-all">
-                                        <x-mini-button 2xs negative label="-" x-on:click.prevent="removeContactOption(index, key)"></x-mini-button>
+                                        <x-mini-button rounded 2xs negative label="-" x-on:click.prevent="removeContactOption(index, key)"></x-mini-button>
                                     </div>
                                     <div class="pr-1.5">
                                         <x-checkbox
@@ -209,7 +209,7 @@
                         </template>
                     </div>
                     <div class="flex space-x-2 pt-5 transition-all">
-                        <x-mini-button 2xs positive label="+" x-on:click.prevent="contactOptions[key].push({type: key, label: key, address_id: address.id})" />
+                        <x-mini-button rounded 2xs positive label="+" x-on:click.prevent="contactOptions[key].push({type: key, label: key, address_id: address.id})" />
                         <div class="text-sm">
                             <span x-text="key"></span>
                         </div>

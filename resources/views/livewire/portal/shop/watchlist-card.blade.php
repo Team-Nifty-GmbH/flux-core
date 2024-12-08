@@ -23,7 +23,7 @@
                 @if($cartForm->isUserOwned()) x-sort:item="{{ $cartFormItem['cart_item_id'] }}" @endif
             >
                 @if($cartForm->isUserOwned())
-                    <x-mini-button
+                    <x-mini-button rounded
                         xs
                         negative
                         icon="x-mark"

@@ -40,7 +40,7 @@
                             <x-button
                                 x-on:click="$refs.link{{ implode('', array_map('ucfirst', explode('-', $label))) }}.select(); document.execCommand('copy');"
                                 class="h-full rounded-r-md"
-                                icon="clipboard-copy"
+                                icon="clipboard-document
                                 primary
                                 squared
                             />

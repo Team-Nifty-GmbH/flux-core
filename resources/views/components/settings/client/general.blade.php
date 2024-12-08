@@ -59,7 +59,7 @@
                                 <x-input type="time" x-model="hours.end"/>
                             </td>
                             <td>
-                                <x-mini-button icon="trash" negative sm x-on:click="$wire.client.opening_hours.splice(index, 1)"/>
+                                <x-mini-button rounded icon="trash" negative sm x-on:click="$wire.client.opening_hours.splice(index, 1)"/>
                             </td>
                         </tr>
                     </template>

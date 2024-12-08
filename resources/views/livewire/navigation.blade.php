@@ -66,22 +66,24 @@
         <div class="pb-4 md:pt-4 md:pr-8 md:pl-28">
             @if($showSearchBar)
                 <div>
-                    <x-card class="flex w-full gap-2">
-                        <x-button
-                            class="block md:hidden"
-                            icon="bars-3"
-                            primary
-                            x-on:click="showMenu(true)"
-                        />
-                        <livewire:features.search-bar />
-                        <div class="flex gap-1.5" wire:ignore>
-                            @canAction(\FluxErp\Actions\Cart\CreateCart::class)
-                                <livewire:cart.cart />
-                            @endCanAction
-                            @canAction(\FluxErp\Actions\WorkTime\CreateWorkTime::class)
-                                <livewire:work-time lazy />
-                            @endCanAction
-                            <livewire:features.notifications lazy />
+                    <x-card>
+                        <div class="flex w-full gap-2">
+                            <x-button
+                                class="block md:hidden"
+                                icon="bars-3"
+                                primary
+                                x-on:click="showMenu(true)"
+                            />
+                            <livewire:features.search-bar />
+                            <div class="flex gap-1.5" wire:ignore>
+                                @canAction(\FluxErp\Actions\Cart\CreateCart::class)
+                                    <livewire:cart.cart />
+                                @endCanAction
+                                @canAction(\FluxErp\Actions\WorkTime\CreateWorkTime::class)
+                                    <livewire:work-time lazy />
+                                @endCanAction
+                                <livewire:features.notifications lazy />
+                            </div>
                         </div>
                     </x-card>
                 </div>
@@ -217,7 +219,7 @@
                                         <div class="truncate text-sm text-white"> {{ $favorite['name'] }} </div>
                                     </a>
                                     <div class="truncate" x-show="menuOpen" x-transition x-cloak>
-                                        <x-mini-button
+                                        <x-mini-button rounded
                                             xs
                                             negative
                                             icon="trash"

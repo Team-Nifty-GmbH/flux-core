@@ -482,7 +482,7 @@
                     @section('general-card')
                         <x-card :title="__('Additional Addresses')" class="!px-0 !py-0">
                             <x-slot:action>
-                                <x-mini-button
+                                <x-mini-button rounded
                                     class="transition-transform"
                                     x-bind:class="showAdditionalAddresses && '-rotate-90'"
                                     icon="chevron-left"
@@ -495,7 +495,7 @@
                         </x-card>
                         <x-card :title="__('Order Informations')" class="!px-0 !py-0">
                             <x-slot:action>
-                                <x-mini-button
+                                <x-mini-button rounded
                                     class="transition-transform"
                                     x-bind:class="showOrderInformations && '-rotate-90'"
                                     icon="chevron-left"
@@ -729,7 +729,7 @@
                                                     <div class="flex gap-1.5 items-center">
                                                         @if (! $order->is_locked || ! resolve_static(\FluxErp\Actions\Discount\DeleteDiscount::class, 'canPerformAction', [false]))
                                                             <div>
-                                                                <x-mini-button
+                                                                <x-mini-button rounded
                                                                     negative
                                                                     icon="x-mark"
                                                                     2xs

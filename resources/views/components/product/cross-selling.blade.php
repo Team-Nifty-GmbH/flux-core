@@ -54,7 +54,7 @@
                             </div>
                             <span x-text="product.name"></span>
                             <div x-show="productCrossSelling.products.length > 1 && edit" x-transition>
-                                <x-mini-button icon="trash" negative x-on:click="productCrossSelling.products.splice(productIndex, 1)" />
+                                <x-mini-button rounded icon="trash" negative x-on:click="productCrossSelling.products.splice(productIndex, 1)" />
                             </div>
                         </div>
                     </template>

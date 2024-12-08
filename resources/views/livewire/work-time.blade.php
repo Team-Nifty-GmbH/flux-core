@@ -101,7 +101,7 @@
     >
         <x-card id="active-work-times" class="flex flex-col gap-4 max-w-md" :title="__('Active Work Times')">
             <x-slot:action>
-                <x-mini-button xs x-on:click="open = false" icon="x-mark" />
+                <x-mini-button rounded xs x-on:click="open = false" icon="x-mark" />
             </x-slot:action>
             <div class="flex w-full gap-1.5">
                 <x-button class="w-full" x-show="! $wire.dailyWorkTime.id" positive :label="__('Start Workday')" x-on:click="$wire.toggleWorkDay(true)" />

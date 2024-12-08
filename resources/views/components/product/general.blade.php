@@ -80,12 +80,12 @@
                 </x-number>
                 <x-number x-bind:readonly="!edit" label="{{ __('Selling unit') }}" wire:model.number="product.selling_unit">
                     <x-slot:cornerHint>
-                        <x-mini-button xs label="?" x-on:mouseover="$el._tippy ? $el._tippy.show() : tippy($el, {content: document.getElementById('unit-price-tooltip').content})" />
+                        <x-mini-button rounded xs label="?" x-on:mouseover="$el._tippy ? $el._tippy.show() : tippy($el, {content: document.getElementById('unit-price-tooltip').content})" />
                     </x-slot:cornerHint>
                 </x-number>
                 <x-number x-bind:readonly="!edit" label="{{ __('Basic unit') }}" wire:model.number="product.basic_unit">
                     <x-slot:cornerHint>
-                        <x-mini-button xs label="?" x-on:mouseover="$el._tippy ? $el._tippy.show() : tippy($el, {content: document.getElementById('unit-price-tooltip').content})" />
+                        <x-mini-button rounded xs label="?" x-on:mouseover="$el._tippy ? $el._tippy.show() : tippy($el, {content: document.getElementById('unit-price-tooltip').content})" />
                     </x-slot:cornerHint>
                 </x-number>
             </div>

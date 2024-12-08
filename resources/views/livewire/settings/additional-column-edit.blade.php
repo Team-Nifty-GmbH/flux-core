@@ -59,14 +59,14 @@
                                  wire:model="additionalColumn.values"/>
                     </div>
                     <div class="sm:col-span-6">
-                        <x-mini-button class="mr-2" primary icon="plus" wire:click="addEntry" />
+                        <x-mini-button rounded class="mr-2" primary icon="plus" wire:click="addEntry" />
                     </div>
                     @foreach($additionalColumn->values ?? [] as $index => $value)
                         <div class="sm:col-span-5">
                             <x-input wire:model.live="additionalColumn.values.{{$index}}" />
                         </div>
                         <div class="ml-1 flex sm:col-span-1">
-                            <x-mini-button negative icon="trash" wire:click="removeEntry({{$index}})" />
+                            <x-mini-button rounded negative icon="trash" wire:click="removeEntry({{$index}})" />
                         </div>
                     @endforeach
                 </div>

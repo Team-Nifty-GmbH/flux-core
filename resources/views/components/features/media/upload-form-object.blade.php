@@ -100,7 +100,7 @@
                             <span class="w-0 flex-1 truncate pl-1" x-text="file.name"></span>
                         </div>
                         <div x-cloak x-show="file.id">
-                            <x-button primary icon="download" wire:click="download(file.id)" />
+                            <x-button primary icon="arrow-down-tray" wire:click="download(file.id)" />
                         </div>
                         <div class="flex flex-shrink-0 px-4">
                             <x-button negative x-on:click="file.shouldDelete = true" :label="__('Delete')" />

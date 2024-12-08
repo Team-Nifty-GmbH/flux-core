@@ -58,7 +58,7 @@
                 <template x-for="(model, index) in $wire.communication.communicatables">
                     <x-badge flat primary cl>
                         <x-slot name="prepend" class="p-0.5">
-                            <x-mini-button
+                            <x-mini-button rounded
                                 x-cloak
                                 x-show="model.href"
                                 xs
