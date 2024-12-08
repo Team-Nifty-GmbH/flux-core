@@ -2,7 +2,7 @@
     class="py-6"
     x-on:data-table-row-clicked="$wire.show($event.detail.id); $wire.dispatchTo('features.commission-rates', 'setUserId', [$event.detail.id])"
 >
-    <x-modal.card max-width="6xl" x-on:close="$wire.closeModal()" z-index="z-30" wire:model="showUserModal" :title="$userId ? __('Edit User') : __('Create User')">
+    <x-modal-card max-width="6xl" x-on:close="$wire.closeModal()" z-index="z-30" wire:model="showUserModal" :title="$userId ? __('Edit User') : __('Create User')">
         <livewire:settings.user-edit/>
         <x-slot name="footer">
             <div x-data="{userId: $wire.entangle('userId')}" class="w-full">
@@ -38,7 +38,7 @@
                 </div>
             </div>
         </x-slot>
-    </x-modal.card>
+    </x-modal-card>
     <div class="px-4 sm:px-6 lg:px-8">
         <div class="mb-6 sm:flex sm:items-center">
             <div class="sm:flex-auto">

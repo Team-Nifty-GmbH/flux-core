@@ -243,7 +243,7 @@
                                         :label="__('Name')"
                                     />
                                     <div class="flex flex-col md:flex-row gap-1.5">
-                                        <x-inputs.number
+                                        <x-number
                                             step="0.01"
                                             x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
                                             x-on:keyup="recalculatePrices(position, $event)"
@@ -261,14 +261,14 @@
                                                 x-init="$el.value = position.vat_rate_id; fillSelectedFromInputValue();"
                                             />
                                         </div>
-                                        <x-inputs.number
+                                        <x-number
                                             step="0.01"
                                             x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
                                             x-on:keyup="recalculatePrices(position, $event)"
                                             x-model.number="position.unit_price"
                                             :label="__('Unit Price')"
                                         />
-                                        <x-inputs.number
+                                        <x-number
                                             step="0.01"
                                             x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
                                             x-on:keyup="recalculatePrices(position, $event)"

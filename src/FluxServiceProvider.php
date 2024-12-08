@@ -315,14 +315,6 @@ class FluxServiceProvider extends ServiceProvider
         config(['auth' => require __DIR__ . '/../config/auth.php']);
         config(['activitylog.activitymodel' => resolve_static(Activity::class, 'class')]);
         config(['logging' => array_merge_recursive(config('logging'), require __DIR__ . '/../config/logging.php')]);
-        config(['wireui.heroicons.alias' => 'heroicons']);
-        config(['wireui.modal' => [
-            'zIndex' => env('WIREUI_MODAL_Z_INDEX', 'z-20'),
-            'maxWidth' => env('WIREUI_MODAL_MAX_WIDTH', '2xl'),
-            'spacing' => env('WIREUI_MODAL_SPACING', 'p-4'),
-            'align' => env('WIREUI_MODAL_ALIGN', 'start'),
-            'blur' => env('WIREUI_MODAL_BLUR', false),
-        ]]);
         config(['media-library.media_downloader' => MediaLibraryDownloader::class]);
         config([
             'scout.meilisearch.index-settings' => [

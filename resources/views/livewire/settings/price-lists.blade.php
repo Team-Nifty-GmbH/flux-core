@@ -22,7 +22,7 @@
                                     option-label="name"
                                 />
                                 <div x-show="$wire.priceList.parent_id > 0" class="grid grid-cols-1 gap-y-6">
-                                    <x-inputs.number wire:model.number="priceList.discount.discount" :label="__('Discount')"/>
+                                    <x-number wire:model.number="priceList.discount.discount" :label="__('Discount')"/>
                                     <x-toggle wire:model.boolean="priceList.discount.is_percentage" lg :label="__('Is Percentage')"/>
                                 </div>
                                 <x-input wire:model="priceList.price_list_code" :label="__('Code')"/>
@@ -41,13 +41,13 @@
                             option-key-value
                         />
                         <div x-show="$wire.priceList.rounding_method_enum !== 'none'">
-                            <x-inputs.number
+                            <x-number
                                 wire:model.number="priceList.rounding_precision"
                                 :label="__('Rounding Precision')"
                             />
                         </div>
                         <div x-show="['nearest', 'end'].includes($wire.priceList.rounding_method_enum)">
-                            <x-inputs.number
+                            <x-number
                                 wire:model.number="priceList.rounding_number"
                                 :label="__('Rounding Number')"
                                 min="0"
@@ -80,7 +80,7 @@
                                     </td>
                                     <td>
                                         <div class="flex justify-center">
-                                            <x-inputs.number x-model.number="productCategory.discounts[0].discount"
+                                            <x-number x-model.number="productCategory.discounts[0].discount"
                                                      :disabled="! ($priceList->id ? resolve_static(\FluxErp\Actions\PriceList\UpdatePriceList::class, 'canPerformAction', [false]) : resolve_static(\FluxErp\Actions\Discount\CreateDiscount::class, 'canPerformAction', [false]))"
                                             />
                                         </div>
@@ -125,7 +125,7 @@
                                     />
                                 </div>
                                 <div>
-                                    <x-inputs.number wire:model.number="newCategoryDiscount.discount"/>
+                                    <x-number wire:model.number="newCategoryDiscount.discount"/>
                                 </div>
                                 <div class="mt-2">
                                     <x-checkbox wire:model.boolean="newCategoryDiscount.is_percentage"/>

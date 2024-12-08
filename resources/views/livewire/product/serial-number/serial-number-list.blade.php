@@ -23,7 +23,7 @@
             <x-input wire:model="stockPosting.serial_number.serial_number" :label="__('Serial Number')" />
             <x-input wire:model="stockPosting.serial_number.supplier_serial_number" :label="__('Supplier Serial Number')" />
             <x-toggle wire:model="stockPosting.serial_number.use_supplier_serial_number" :label="__('Use Supplier Serial Number')" />
-            <x-inputs.number wire:model="stockPosting.purchase_price" :label="__('Purchase Price')" />
+            <x-number wire:model="stockPosting.purchase_price" :label="__('Purchase Price')" />
             <x-select
                 :label="__('Address')"
                 wire:model="stockPosting.address.id"
@@ -39,7 +39,7 @@
                     ]
                 ]"
             />
-            <x-inputs.number wire:model="stockPosting.address.quantity" :label="__('Quantity')" />
+            <x-number wire:model="stockPosting.address.quantity" :label="__('Quantity')" />
         </div>
         <x-slot:footer>
             <div class="flex justify-end gap-1.5">

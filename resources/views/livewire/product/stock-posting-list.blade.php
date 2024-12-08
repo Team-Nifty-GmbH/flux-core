@@ -8,8 +8,8 @@
                 :options="$warehouses"
                 option-key-value
             />
-            <x-inputs.number wire:model="stockPosting.posting" :label="__('Posting')" />
-            <x-inputs.number wire:model="stockPosting.purchase_price" :label="__('Purchase Price')" />
+            <x-number wire:model="stockPosting.posting" :label="__('Posting')" />
+            <x-number wire:model="stockPosting.purchase_price" :label="__('Purchase Price')" />
             <x-textarea wire:model="stockPosting.description" :label="__('Description')" />
             @if($hasSerialNumbers)
                 <hr />

@@ -65,9 +65,9 @@
                         <x-select.option value="nntp">{{ __('NNTP') }}</x-select.option>
                     </x-select>
                     <x-input x-bind:disabled="$wire.mailAccount.id" wire:model="mailAccount.email" :label="__('Email')" />
-                    <x-inputs.password wire:model="mailAccount.password" :label="__('Password')" />
+                    <x-password wire:model="mailAccount.password" :label="__('Password')" />
                     <x-input wire:model="mailAccount.host" :label="__('Host')" />
-                    <x-inputs.number wire:model="mailAccount.port" :label="__('Port')" />
+                    <x-number wire:model="mailAccount.port" :label="__('Port')" />
                     <x-select :label="__('Encryption')" wire:model="mailAccount.encryption">
                         <x-select.option value="ssl">{{ __('SSL') }}</x-select.option>
                         <x-select.option value="tls">{{ __('TLS') }}</x-select.option>
@@ -85,9 +85,9 @@
             <x-card :title="__('SMTP Settings')">
                 <div class="flex flex-col gap-4">
                     <x-input wire:model="mailAccount.smtp_email" :label="__('Email')" />
-                    <x-inputs.password wire:model="mailAccount.smtp_password" :label="__('Password')" />
+                    <x-password wire:model="mailAccount.smtp_password" :label="__('Password')" />
                     <x-input wire:model="mailAccount.smtp_host" :label="__('Host')" />
-                    <x-inputs.number wire:model="mailAccount.smtp_port" :label="__('Port')" />
+                    <x-number wire:model="mailAccount.smtp_port" :label="__('Port')" />
                     <x-select :label="__('Encryption')" wire:model="mailAccount.smtp_encryption">
                         <x-select.option value="ssl">{{ __('SSL') }}</x-select.option>
                         <x-select.option value="tls">{{ __('TLS') }}</x-select.option>

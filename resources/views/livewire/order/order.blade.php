@@ -191,7 +191,7 @@
                                     </div>
                                 </x-slot:sub-value>
                                 <x-slot:actions>
-                                    <x-inputs.number x-model.number="position.amount" min="0" />
+                                    <x-number x-model.number="position.amount" min="0" />
                                     <x-button
                                         negative
                                         icon="trash"
@@ -265,8 +265,8 @@
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">
                     <div class="flex gap-1.5">
                         <div @canAction(\FluxErp\Actions\Order\ToggleLock::class) wire:click="toggleLock()" class="cursor-pointer" wire:flux-confirm.icon.warning="{{  __('Change order lock state') }}|{{ __('Manually locking or unlocking orders can have unexpected side effects.<br><br>Are you Sure?') }}|{{ __('Cancel') }}|{{ __('Continue') }}" @endCanAction>
-                            <x-heroicons x-cloak x-show="$wire.order.is_locked" variant="solid" name="lock-closed" />
-                            <x-heroicons x-cloak x-show="! $wire.order.is_locked" variant="solid" name="lock-open" />
+                            <x-icon x-cloak x-show="$wire.order.is_locked" variant="solid" name="lock-closed" />
+                            <x-icon x-cloak x-show="! $wire.order.is_locked" variant="solid" name="lock-open" />
                         </div>
                         <div>
                             <div>
@@ -311,7 +311,7 @@
                     </div>
                 </h1>
                 <a wire:navigate class="flex gap-1.5 font-semibold opacity-40 dark:text-gray-200" x-bind:href="$wire.order.parent?.url" x-cloak x-show="$wire.order.parent?.url">
-                    <x-heroicons name="link" class="w-4 h-4" />
+                    <x-icon name="link" class="w-4 h-4" />
                     <span x-text="$wire.order.parent?.label"></span>
                 </a>
             </div>
@@ -482,7 +482,7 @@
                     @section('general-card')
                         <x-card :title="__('Additional Addresses')" class="!px-0 !py-0">
                             <x-slot:action>
-                                <x-button.circle
+                                <x-mini-button
                                     class="transition-transform"
                                     x-bind:class="showAdditionalAddresses && '-rotate-90'"
                                     icon="chevron-left"
@@ -495,7 +495,7 @@
                         </x-card>
                         <x-card :title="__('Order Informations')" class="!px-0 !py-0">
                             <x-slot:action>
-                                <x-button.circle
+                                <x-mini-button
                                     class="transition-transform"
                                     x-bind:class="showOrderInformations && '-rotate-90'"
                                     icon="chevron-left"
@@ -666,7 +666,7 @@
                                         <div class="dropdown-full-w">
                                             <x-dropdown width="w-full">
                                                 <x-slot name="trigger">
-                                                    <x-button class="w-full" icon="search">
+                                                    <x-button class="w-full" icon="magnifying-glass">
                                                         {{ __('Preview') }}
                                                     </x-button>
                                                 </x-slot>
@@ -729,9 +729,9 @@
                                                     <div class="flex gap-1.5 items-center">
                                                         @if (! $order->is_locked || ! resolve_static(\FluxErp\Actions\Discount\DeleteDiscount::class, 'canPerformAction', [false]))
                                                             <div>
-                                                                <x-button.circle
+                                                                <x-mini-button
                                                                     negative
-                                                                    icon="x"
+                                                                    icon="x-mark"
                                                                     2xs
                                                                     wire:click="deleteDiscount(discount.id)"
                                                                     wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => 'Discount']) }}"

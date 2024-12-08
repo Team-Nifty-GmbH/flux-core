@@ -37,7 +37,7 @@
                                     x-bind:disabled="$wire.multiple"
                                 >
                                     <x-icon
-                                        name="x"
+                                        name="x-mark"
                                         class="w-4 h-4"
                                     />
                                 </button>
@@ -70,7 +70,7 @@
                                     x-on:click="$wire.mailMessage.cc.splice($wire.mailMessage.cc.indexOf(to), 1)"
                                 >
                                     <x-icon
-                                        name="x"
+                                        name="x-mark"
                                         class="w-4 h-4"
                                     />
                                 </button>
@@ -97,7 +97,7 @@
                                     x-on:click="$wire.mailMessage.bcc.splice($wire.mailMessage.bcc.indexOf(to), 1)"
                                 >
                                     <x-icon
-                                        name="x"
+                                        name="x-mark"
                                         class="w-4 h-4"
                                     />
                                 </button>
@@ -134,7 +134,7 @@
                                 </x-slot:label>
                                 <x-slot:append>
                                     <button type="button" x-on:click.prevent="$wire.mailMessage.attachments.splice($wire.mailMessage.attachments.indexOf(file), 1)">
-                                        <x-icon name="x" class="w-4 h-4"/>
+                                        <x-icon name="x-mark" class="w-4 h-4"/>
                                     </button>
                                 </x-slot:append>
                             </x-badge>

@@ -1,6 +1,6 @@
 <form wire:submit="addVatRate(); $refs.name.focus();" class="flex flex-col gap-4">
     <x-input x-ref="name" autofocus :label="__('Name')" placeholder="e.g. Standard…" wire:model="vatRateForm.name"/>
-    <x-inputs.number wire:model="vatRateForm.rate_percentage_frontend" :label="__('Rate Percentage')" />
+    <x-number wire:model="vatRateForm.rate_percentage_frontend" :label="__('Rate Percentage')" />
     <x-button primary :label="__('Add')" type="submit"/>
 </form>
 <x-error name="vatRates" />

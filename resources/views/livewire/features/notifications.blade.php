@@ -15,7 +15,7 @@
          x-on:click.away="$wire.showNotifications = false"
     >
         <div>
-            <x-button.circle
+            <x-mini-button
                 primary
                 icon="bell"
                 x-on:click="
@@ -52,7 +52,7 @@
             <div class="flex h-full flex-col justify-between">
                 <div>
                     <div class="flex justify-end p-2.5">
-                        <x-button.circle secondary icon="x" x-on:click.prevent="$wire.showNotifications = false, notifications = []" />
+                        <x-mini-button secondary icon="x-mark" x-on:click.prevent="$wire.showNotifications = false, notifications = []" />
                     </div>
                     <div class="space-y-3 p-6">
                         <template x-for="notification in notifications">
@@ -153,7 +153,7 @@
                                                 <x-dynamic-component
                                                     :component="WireUi::component('icon')"
                                                     class="h-5 w-5"
-                                                    name="x"
+                                                    name="x-mark"
                                                 />
                                             </button>
                                         </div>

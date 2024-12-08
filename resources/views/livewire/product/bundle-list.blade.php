@@ -28,7 +28,7 @@
                         ]
                     ]"
                 />
-                <x-inputs.number
+                <x-number
                     wire:model="productBundleProductForm.count"
                     :label="__('Count')"
                     :min="0.01"

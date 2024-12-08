@@ -48,7 +48,7 @@
                         formatters="formatter.state"
                         available="availableStates"
                     />
-                    <x-inputs.number :label="__('Priority')" wire:model="task.priority" min="0" />
+                    <x-number :label="__('Priority')" wire:model="task.priority" min="0" />
                     <x-textarea wire:model="task.description" label="{{ __('Description') }}" />
                     <x-select
                         :label="__('Categories')"
@@ -88,7 +88,7 @@
                             ]
                         ]"
                     />
-                    <x-inputs.number :label="__('Budget')" wire:model="task.budget" step="0.01" />
+                    <x-number :label="__('Budget')" wire:model="task.budget" step="0.01" />
                     <x-input
                         :label="__('Time Budget')"
                         wire:model.blur="task.time_budget"

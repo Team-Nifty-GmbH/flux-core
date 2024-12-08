@@ -37,11 +37,11 @@
                     <x-checkbox wire:model="selectedCalendar.isPublic" :label="__('Public')"/>
                     <x-card :title="__('Custom Properties')">
                         <div class="flex flex-col gap-4">
-                            <x-button.circle class="mr-2" primary icon="plus" wire:click="addCustomProperty" />
+                            <x-mini-button class="mr-2" primary icon="plus" wire:click="addCustomProperty" />
                             @foreach($selectedCalendar['customProperties'] ?? [] as $index => $customProperty)
                                 <div class="flex gap-x-4">
                                     <div class="pt-6">
-                                        <x-button.circle negative icon="trash" wire:click="removeCustomProperty({{ $index }})" />
+                                        <x-mini-button negative icon="trash" wire:click="removeCustomProperty({{ $index }})" />
                                     </div>
                                     <div class="max-w-sm">
                                         <x-select

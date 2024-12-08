@@ -177,7 +177,7 @@
             >
                 <x-card class="w-full">
                     <x-slot:action>
-                        <x-button.circle wire:click="$set('showMap', false, true)" icon="x" />
+                        <x-mini-button wire:click="$set('showMap', false, true)" icon="x-mark" />
                     </x-slot:action>
                     <div x-intersect.once="onChange()">
                         <div id="map" class="h-96 min-w-96"></div>

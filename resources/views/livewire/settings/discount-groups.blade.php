@@ -44,7 +44,7 @@
     }
 }">
     <div id="edit-window">
-        <x-modal.card :title="__('Manage discount group')">
+        <x-modal-card :title="__('Manage discount group')">
             <div class="flex flex-col gap-4">
                 <x-input x-model="discountGroup.name" label="{{ __('Name') }}" />
                 <x-toggle x-model="discountGroup.is_active" label="{{ __('Is Active') }}" />
@@ -77,7 +77,7 @@
                     <x-button primary class="mr-2" x-on:click="saveItem()">{{ __('Save') }}</x-button>
                 </div>
             </x-slot:footer>
-        </x-modal.card>
+        </x-modal-card>
     </div>
     <livewire:data-tables.settings.discount-group-list />
 </div>

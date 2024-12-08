@@ -115,7 +115,7 @@
                     <x-label>
                         {{ __('Repeat every') }}
                     </x-label>
-                    <x-inputs.number wire:model="calendarEvent.interval" :min="1" x-bind:disabled="! $wire.calendarEvent.is_editable ?? false" />
+                    <x-number wire:model="calendarEvent.interval" :min="1" x-bind:disabled="! $wire.calendarEvent.is_editable ?? false" />
                     <x-select
                         x-on:selected="$wire.calendarEvent.unit = $event.detail.value"
                         x-init="$watch('$wire.calendarEvent.unit', (value) => {
@@ -264,7 +264,7 @@
                         x-on:change="$wire.calendarEvent.repeat_end = dayjs($event.target.value).format('YYYY-MM-DD')"
                     />
                     <x-radio :label="__('After amount of events')" value="recurrences" x-model="$wire.calendarEvent.repeat_radio" x-bind:disabled="! $wire.calendarEvent.is_editable ?? false" />
-                    <x-inputs.number x-model="$wire.calendarEvent.recurrences" x-bind:disabled="(! $wire.calendarEvent.is_editable ?? false) || $wire.calendarEvent.repeat_radio !== 'recurrences'" />
+                    <x-number x-model="$wire.calendarEvent.recurrences" x-bind:disabled="(! $wire.calendarEvent.is_editable ?? false) || $wire.calendarEvent.repeat_radio !== 'recurrences'" />
                 </div>
             </div>
         @show
@@ -285,7 +285,7 @@
                 >
                     <x-select.option value="accepted">
                         <div>
-                            <x-button.circle
+                            <x-mini-button
                                 disabled
                                 positive
                                 xs
@@ -296,18 +296,18 @@
                     </x-select.option>
                     <x-select.option :label="__('Declined')" value="declined">
                         <div>
-                            <x-button.circle
+                            <x-mini-button
                                 disabled
                                 negative
                                 xs
-                                icon="x"
+                                icon="x-mark"
                             />
                             {{__('Declined')}}
                         </div>
                     </x-select.option>
                     <x-select.option :label="__('Maybe')" value="maybe">
                         <div>
-                            <x-button.circle
+                            <x-mini-button
                                 disabled
                                 warning
                                 xs
@@ -323,34 +323,34 @@
                     <x-label for="invite" :label="__('Invites')" />
                     <template x-for="invited in $wire.calendarEvent.invited">
                         <div class="flex gap-1.5">
-                            <x-button.circle
+                            <x-mini-button
                                 negative
                                 xs
                                 icon="trash"
                                 x-bind:disabled="! $wire.calendarEvent.is_editable ?? false"
                                 x-on:click="$wire.calendarEvent.invited.splice($wire.calendarEvent.invited.indexOf(invited), 1)"
                             />
-                            <x-button.circle
+                            <x-mini-button
                                 x-show="invited.pivot?.status === 'accepted'"
                                 disabled
                                 positive
                                 xs
                                 icon="check"
                             />
-                            <x-button.circle
+                            <x-mini-button
                                 x-show="invited.pivot?.status === 'declined'"
                                 disabled
                                 negative
                                 xs
-                                icon="x" />
-                            <x-button.circle
+                                icon="x-mark" />
+                            <x-mini-button
                                 x-show="invited.pivot?.status === 'maybe'"
                                 disabled
                                 warning
                                 xs
                                 label="?"
                             />
-                            <x-button.circle
+                            <x-mini-button
                                 x-show="invited.pivot?.status !== 'accepted' && invited.pivot?.status !== 'declined' && invited.pivot?.status !== 'maybe'"
                                 disabled
                                 secondary

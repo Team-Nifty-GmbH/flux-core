@@ -42,7 +42,7 @@
                         </div>
                     </div>
                 </template>
-                <x-inputs.number x-bind:readonly="!edit" label="{{ __('Length') }}" wire:model.number="product.dimension_length_mm">
+                <x-number x-bind:readonly="!edit" label="{{ __('Length') }}" wire:model.number="product.dimension_length_mm">
                     <x-slot:cornerHint>
                         <div class="flex gap-1.5 items-center">
                             <div class="text-secondary-400">
@@ -50,8 +50,8 @@
                             </div>
                         </div>
                     </x-slot:cornerHint>
-                </x-inputs.number>
-                <x-inputs.number x-bind:readonly="!edit" label="{{ __('Width') }}" wire:model.number="product.dimension_width_mm">
+                </x-number>
+                <x-number x-bind:readonly="!edit" label="{{ __('Width') }}" wire:model.number="product.dimension_width_mm">
                     <x-slot:cornerHint>
                         <div class="flex gap-1.5 items-center">
                             <div class="text-secondary-400">
@@ -59,8 +59,8 @@
                             </div>
                         </div>
                     </x-slot:cornerHint>
-                </x-inputs.number>
-                <x-inputs.number x-bind:readonly="!edit" label="{{ __('Height') }}" wire:model.number="product.dimension_height_mm">
+                </x-number>
+                <x-number x-bind:readonly="!edit" label="{{ __('Height') }}" wire:model.number="product.dimension_height_mm">
                     <x-slot:cornerHint>
                         <div class="flex gap-1.5 items-center">
                             <div class="text-secondary-400">
@@ -68,8 +68,8 @@
                             </div>
                         </div>
                     </x-slot:cornerHint>
-                </x-inputs.number>
-                <x-inputs.number x-bind:readonly="!edit" label="{{ __('Weight') }}" wire:model.number="product.weight_gram">
+                </x-number>
+                <x-number x-bind:readonly="!edit" label="{{ __('Weight') }}" wire:model.number="product.weight_gram">
                     <x-slot:cornerHint>
                         <div class="flex gap-1.5 items-center">
                             <div class="text-secondary-400">
@@ -77,17 +77,17 @@
                             </div>
                         </div>
                     </x-slot:cornerHint>
-                </x-inputs.number>
-                <x-inputs.number x-bind:readonly="!edit" label="{{ __('Selling unit') }}" wire:model.number="product.selling_unit">
+                </x-number>
+                <x-number x-bind:readonly="!edit" label="{{ __('Selling unit') }}" wire:model.number="product.selling_unit">
                     <x-slot:cornerHint>
-                        <x-button.circle xs label="?" x-on:mouseover="$el._tippy ? $el._tippy.show() : tippy($el, {content: document.getElementById('unit-price-tooltip').content})" />
+                        <x-mini-button xs label="?" x-on:mouseover="$el._tippy ? $el._tippy.show() : tippy($el, {content: document.getElementById('unit-price-tooltip').content})" />
                     </x-slot:cornerHint>
-                </x-inputs.number>
-                <x-inputs.number x-bind:readonly="!edit" label="{{ __('Basic unit') }}" wire:model.number="product.basic_unit">
+                </x-number>
+                <x-number x-bind:readonly="!edit" label="{{ __('Basic unit') }}" wire:model.number="product.basic_unit">
                     <x-slot:cornerHint>
-                        <x-button.circle xs label="?" x-on:mouseover="$el._tippy ? $el._tippy.show() : tippy($el, {content: document.getElementById('unit-price-tooltip').content})" />
+                        <x-mini-button xs label="?" x-on:mouseover="$el._tippy ? $el._tippy.show() : tippy($el, {content: document.getElementById('unit-price-tooltip').content})" />
                     </x-slot:cornerHint>
-                </x-inputs.number>
+                </x-number>
             </div>
         @show
     </x-card>
@@ -274,7 +274,7 @@
                     </x-slot:sub-value>
                     <x-slot:actions>
                         <x-input x-bind:disabled="! edit" x-model="supplier.manufacturer_product_number" :label="__('Manufacturer product number')" />
-                        <x-inputs.number x-bind:disabled="! edit" x-model="supplier.purchase_price" :label="__('Purchase Price')" step="0.01" />
+                        <x-number x-bind:disabled="! edit" x-model="supplier.purchase_price" :label="__('Purchase Price')" step="0.01" />
                         <div class="mt-6">
                             <x-button
                                 negative

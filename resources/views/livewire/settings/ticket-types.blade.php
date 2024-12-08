@@ -64,7 +64,7 @@
         </div>
     </div>
 
-    <x-modal.card z-index="z-30" wire:model="showTicketTypeModal" :title="$ticketTypeIndex === -1 ? __('Create Ticket Type') : __('Edit Ticket Type')">
+    <x-modal-card z-index="z-30" wire:model="showTicketTypeModal" :title="$ticketTypeIndex === -1 ? __('Create Ticket Type') : __('Edit Ticket Type')">
         <livewire:settings.ticket-type-edit/>
         <x-slot name="footer">
             <div x-data="{ticketTypeIndex: @entangle('ticketTypeIndex')}" class="w-full">
@@ -93,9 +93,9 @@
                 </div>
             </div>
         </x-slot>
-    </x-modal.card>
+    </x-modal-card>
 
-    <x-modal.card z-index="z-30" wire:model="showAdditionalColumnModal" :title="$additionalColumnIndex === -1 ? __('Create Additional Column') : __('Edit Additional Column')">
+    <x-modal-card z-index="z-30" wire:model="showAdditionalColumnModal" :title="$additionalColumnIndex === -1 ? __('Create Additional Column') : __('Edit Additional Column')">
         <livewire:settings.additional-column-edit/>
         <x-slot name="footer">
             <div x-data="{additionalColumnIndex: @entangle('additionalColumnIndex')}" class="w-full">
@@ -125,5 +125,5 @@
                 </div>
             </div>
         </x-slot>
-    </x-modal.card>
+    </x-modal-card>
 </div>

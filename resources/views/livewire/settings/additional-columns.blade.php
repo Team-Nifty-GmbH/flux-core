@@ -1,4 +1,4 @@
-<x-modal.card z-index="z-30" wire:model="showAdditionalColumnModal" :title="$create ? __('Create Additional Column') : __('Edit Additional Column')">
+<x-modal-card z-index="z-30" wire:model="showAdditionalColumnModal" :title="$create ? __('Create Additional Column') : __('Edit Additional Column')">
     <livewire:settings.additional-column-edit/>
     <x-slot name="footer">
         <div x-data="{create: $wire.entangle('create')}" class="w-full">
@@ -20,4 +20,4 @@
             </div>
         </div>
     </x-slot>
-</x-modal.card>
+</x-modal-card>

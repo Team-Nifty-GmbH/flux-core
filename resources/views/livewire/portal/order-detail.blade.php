@@ -18,7 +18,7 @@
      class="dark:text-white"
      x-on:data-table-record-selected="selected = Alpine.$data(document.getElementById('order-position-table').querySelector('[tall-datatable]')).selected"
 >
-    <x-modal.card id="detail-modal" wire:model="detailModal">
+    <x-modal-card id="detail-modal" wire:model="detailModal">
         @section('product-modal.content')
             <div class="grid grid-cols-3 gap-5">
                 <div class="col-span-1">
@@ -59,9 +59,9 @@
                 @show
             </div>
         @show
-    </x-modal.card>
+    </x-modal-card>
     <div id="new-ticket-modal">
-        <x-modal.card :title="__('New Ticket')">
+        <x-modal-card :title="__('New Ticket')">
             <livewire:portal.ticket.ticket-create :model-type="\FluxErp\Models\Order::class" :model-id="$order['id']"/>
             <x-slot name="footer">
                 <div class="w-full">
@@ -73,7 +73,7 @@
                     </div>
                 </div>
             </x-slot>
-        </x-modal.card>
+        </x-modal-card>
     </div>
     <h2 class="text-base font-bold uppercase">
         {{ __('Order details') }}

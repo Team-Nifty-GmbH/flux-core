@@ -178,7 +178,7 @@
                                             x-show="$wire.orderPosition.product_id"
                                             class="min-w-28"
                                         >
-                                            <x-inputs.number
+                                            <x-number
                                                 :label="__('Amount')"
                                                 wire:model="orderPosition.amount"
                                             />

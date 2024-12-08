@@ -7,7 +7,7 @@
             </div>
             <div class="mt-6 sm:ml-16">
                 <div class="flex items-center py-3">
-                    <x-input spinner icon="search" placeholder="{{ __('Search…') }}" wire:model.live="search" />
+                    <x-input spinner icon="magnifying-glass" placeholder="{{ __('Search…') }}" wire:model.live="search" />
                 </div>
             </div>
             <div class="sm:ml-16">
@@ -58,7 +58,7 @@
         </div>
     </div>
 
-    <x-modal.card z-index="z-30" wire:model="showTranslationModal" :title="$index === -1 ? __('Create Translation') : __('Edit Translation')">
+    <x-modal-card z-index="z-30" wire:model="showTranslationModal" :title="$index === -1 ? __('Create Translation') : __('Edit Translation')">
         <livewire:settings.translation-edit/>
         <x-slot name="footer">
             <div x-data="{index: @entangle('index')}" class="w-full">
@@ -87,5 +87,5 @@
                 </div>
             </div>
         </x-slot>
-    </x-modal.card>
+    </x-modal-card>
 </div>

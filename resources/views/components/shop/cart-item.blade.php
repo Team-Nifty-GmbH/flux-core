@@ -1,6 +1,6 @@
 <div class="flex flex-col gap-1 dark:text-gray-50">
     <div class="w-full flex justify-end">
-        <x-button.circle xs icon="x" negative wire:click="remove({{ $cartItem->id }})"/>
+        <x-mini-button xs icon="x-mark" negative wire:click="remove({{ $cartItem->id }})"/>
     </div>
     <div class="flex justify-start gap-2">
         <x-avatar squared :src="($cartItem->product->coverMedia ?? $cartItem->product->parent?->coverMedia)?->getUrl('thumb')" class="w-12 h-12 object-cover rounded-lg"/>

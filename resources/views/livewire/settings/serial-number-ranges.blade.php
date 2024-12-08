@@ -18,8 +18,8 @@
                 />
             </div>
             <x-input wire:model="serialNumberRange.type" :label="__('Type')" />
-            <x-inputs.number x-cloak x-show="$wire.serialNumberRange.id" step="1" min="0" wire:model.number="serialNumberRange.current_number" :label="__('Current Number')" />
-            <x-inputs.number step="1" min="1" wire:model.number="serialNumberRange.length" :label="__('Length')" />
+            <x-number x-cloak x-show="$wire.serialNumberRange.id" step="1" min="0" wire:model.number="serialNumberRange.current_number" :label="__('Current Number')" />
+            <x-number step="1" min="1" wire:model.number="serialNumberRange.length" :label="__('Length')" />
             <x-input wire:model="serialNumberRange.prefix" :label="__('Prefix')" />
             <x-input wire:model="serialNumberRange.suffix" :label="__('Suffix')" />
             <x-textarea wire:model="serialNumberRange.description" :label="__('Description')" />

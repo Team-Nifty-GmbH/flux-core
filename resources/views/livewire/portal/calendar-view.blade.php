@@ -16,11 +16,11 @@
     }
 @endsection
 @section('calendar-event-modal')
-    <x-modal.card :title="__('Edit Event')" x-on:close="this.calendarEventItemProxy = {};">
+    <x-modal-card :title="__('Edit Event')" x-on:close="this.calendarEventItemProxy = {};">
         <x-tall-calendar::event-edit />
         <x-button :label="__('Attend')" positive x-on:click="attendEvent()" x-show="calendarEvent.id && !calendarEvent.is_attending" />
         <x-button :label="__('Not attend')" x-on:click="notAttendEvent()" negative x-show="calendarEvent.id && calendarEvent.is_attending" />
-    </x-modal.card>
+    </x-modal-card>
 @endsection
 @section('calendar-list')
     <x-tall-calendar::calendar-list group="public" />

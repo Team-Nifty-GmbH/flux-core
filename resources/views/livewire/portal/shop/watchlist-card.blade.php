@@ -23,10 +23,10 @@
                 @if($cartForm->isUserOwned()) x-sort:item="{{ $cartFormItem['cart_item_id'] }}" @endif
             >
                 @if($cartForm->isUserOwned())
-                    <x-button.circle
+                    <x-mini-button
                         xs
                         negative
-                        icon="x"
+                        icon="x-mark"
                         wire:click="removeProduct({{ $cartFormItem['id'] }})"
                         class="absolute right-2 top-2 h-4 w-4 z-10"
                     />

@@ -1,5 +1,5 @@
 <div>
-    <x-modal.card z-index="z-30" wire:model="showTicketModal" :title="__('New Ticket')">
+    <x-modal-card z-index="z-30" wire:model="showTicketModal" :title="__('New Ticket')">
         <livewire:portal.ticket.ticket-create/>
         <x-slot name="footer">
             <div class="w-full">
@@ -11,7 +11,7 @@
                 </div>
             </div>
         </x-slot>
-    </x-modal.card>
+    </x-modal-card>
     <div class="dark:text-white">
         <h2 class="text-base font-bold uppercase">
             {{ __('Welcome') }}

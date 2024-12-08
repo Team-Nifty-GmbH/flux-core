@@ -53,7 +53,7 @@
             </div>
             <x-slot:action>
                 <div class="flex gap-1.5">
-                    <x-button.circle
+                    <x-mini-button
                         icon="trash"
                         wire:click="delete({{ $address['address_id'] }})"
                         negative

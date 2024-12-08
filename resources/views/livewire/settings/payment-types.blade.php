@@ -17,12 +17,12 @@
                 autocomplete="off"
                 wire:model="paymentType.clients"
             />
-            <x-inputs.number wire:model="paymentType.payment_reminder_days_1" :label="__('Payment Reminder Days 1')" />
-            <x-inputs.number wire:model="paymentType.payment_reminder_days_2" :label="__('Payment Reminder Days 2')" />
-            <x-inputs.number wire:model="paymentType.payment_reminder_days_3" :label="__('Payment Reminder Days 3')" />
-            <x-inputs.number wire:model="paymentType.payment_target" :label="__('Payment Target')" />
-            <x-inputs.number wire:model="paymentType.payment_discount_target" :label="__('Payment Discount Target')" />
-            <x-inputs.number wire:model="paymentType.payment_discount_percentage" :label="__('Payment Discount Percentage')" />
+            <x-number wire:model="paymentType.payment_reminder_days_1" :label="__('Payment Reminder Days 1')" />
+            <x-number wire:model="paymentType.payment_reminder_days_2" :label="__('Payment Reminder Days 2')" />
+            <x-number wire:model="paymentType.payment_reminder_days_3" :label="__('Payment Reminder Days 3')" />
+            <x-number wire:model="paymentType.payment_target" :label="__('Payment Target')" />
+            <x-number wire:model="paymentType.payment_discount_target" :label="__('Payment Discount Target')" />
+            <x-number wire:model="paymentType.payment_discount_percentage" :label="__('Payment Discount Percentage')" />
             <x-flux::editor wire:model="paymentType.description" :label="__('Description')" />
         </div>
         <x-slot:footer>

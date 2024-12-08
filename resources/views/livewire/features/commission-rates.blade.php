@@ -6,7 +6,7 @@
     }"
     x-on:data-table-row-clicked="$wire.show($event.detail.id)"
 >
-    <x-modal.card z-index="z-30" wire:model="showModal" :title="$create ? __('Create Commission Rate') : __('Edit Commission Rate')">
+    <x-modal-card z-index="z-30" wire:model="showModal" :title="$create ? __('Create Commission Rate') : __('Edit Commission Rate')">
         <div class="space-y-8 divide-y divide-gray-200">
             <div class="space-y-8 divide-y divide-gray-200">
                 <div>
@@ -60,7 +60,7 @@
                             />
                         </div>
                         <div class="sm:col-span-6">
-                            <x-inputs.number label="{{ __('Commission Rate (in %)') }}"
+                            <x-number label="{{ __('Commission Rate (in %)') }}"
                                              placeholder="{{ __('Commission Rate') }}"
                                              wire:model="commissionRate.commission_rate"
                                              step="0.01"
@@ -102,7 +102,7 @@
                 </div>
             </div>
         </x-slot>
-    </x-modal.card>
+    </x-modal-card>
 
     @include('tall-datatables::livewire.data-table')
 </div>

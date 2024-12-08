@@ -11,7 +11,7 @@
                  x-bind:class="editGrid ? 'border-4 border-primary-500' : ''"
             >
                 <div class="absolute top-2 right-2 z-10">
-                    <x-button.circle
+                    <x-mini-button
                         x-cloak
                         x-show="editGrid"
                         x-on:click="isLoading ? pendingMessage : removeWidget('{{$widget['id']}}')"

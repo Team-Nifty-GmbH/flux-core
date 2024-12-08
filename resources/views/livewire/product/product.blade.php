@@ -11,8 +11,8 @@
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">
                     <div class="flex">
-                        <x-heroicons x-cloak x-show="$wire.product.is_locked" variant="solid" name="lock-closed" />
-                        <x-heroicons x-cloak x-show="! $wire.product.is_locked" variant="solid" name="lock-open" />
+                        <x-icon x-cloak x-show="$wire.product.is_locked" variant="solid" name="lock-closed" />
+                        <x-icon x-cloak x-show="! $wire.product.is_locked" variant="solid" name="lock-open" />
                         <div class="pl-2">
                             <span x-text="$wire.product.name">
                             </span>
@@ -22,7 +22,7 @@
                     </div>
                 </h1>
                 <a wire:navigate class="flex gap-1.5 font-semibold opacity-40 dark:text-gray-200" x-bind:href="$wire.product.parent?.url" x-cloak x-show="$wire.product.parent?.url">
-                    <x-heroicons name="link" class="w-4 h-4" />
+                    <x-icon name="link" class="w-4 h-4" />
                     <span x-text="$wire.product.parent?.label">
                     </span>
                 </a>
