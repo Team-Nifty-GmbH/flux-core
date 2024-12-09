@@ -303,6 +303,7 @@ class OrderPositions extends OrderPositionList
     #[Renderless]
     public function editOrderPosition(?OrderPosition $orderPosition = null): void
     {
+        $this->orderPosition->is_net = $this->order->getPriceList()->is_net;
         if ($orderPosition->exists) {
             $this->orderPosition->fill($orderPosition);
         }
