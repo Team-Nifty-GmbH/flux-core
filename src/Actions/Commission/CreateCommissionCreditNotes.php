@@ -2,6 +2,7 @@
 
 namespace FluxErp\Actions\Commission;
 
+use FluxErp\Actions\DispatchableFluxAction;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Order\CreateOrder;
 use FluxErp\Actions\OrderPosition\CreateOrderPosition;
@@ -19,17 +20,15 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Validation\ValidationException;
 
-class CreateCommissionCreditNotes extends FluxAction
+class CreateCommissionCreditNotes extends DispatchableFluxAction
 {
     protected array $agents = [];
 
     protected ?int $vatRateId = null;
 
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
-
-        $this->rules = resolve_static(CreateCommissionCreditNotesRuleset::class, 'getRules');
+        return CreateCommissionCreditNotesRuleset::class;
     }
 
     public static function models(): array
