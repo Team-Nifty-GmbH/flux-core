@@ -1,6 +1,6 @@
 <div id="new-task-modal" x-data="{edit: true}">
     <x-modal x-on:new-task.window="$wire.resetForm().then(() => open())">
-        <x-card>
+        <x-card class="w-full">
             <div class="space-y-8 divide-y divide-gray-200"
                 x-data="{
                     formatter: @js(resolve_static(\FluxErp\Models\Task::class, 'typeScriptAttributes'))
@@ -47,7 +47,7 @@
                         formatters="formatter.state"
                         available="availableStates"
                     />
-                    <x-inputs.number :label="__('Priority')" wire:model="task.priority" min="0" />
+                    <x-number :label="__('Priority')" wire:model="task.priority" min="0" />
                     <x-textarea wire:model="task.description" label="{{ __('Description') }}" />
                     <x-select
                         :label="__('Categories')"
@@ -87,7 +87,7 @@
                             ]
                         ]"
                     />
-                    <x-inputs.number :label="__('Budget')" wire:model="task.budget" step="0.01" />
+                    <x-number :label="__('Budget')" wire:model="task.budget" step="0.01" />
                     <x-input
                         :label="__('Time Budget')"
                         wire:model.blur="task.time_budget"

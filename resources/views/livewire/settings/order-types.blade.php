@@ -1,5 +1,5 @@
 <x-modal name="edit-order-type">
-    <x-card>
+    <x-card class="w-full">
         <div class="space-y-8 divide-y divide-gray-200">
             <div>
                 <div class="mt-6 grid grid-cols-1 sm:grid-cols-6">

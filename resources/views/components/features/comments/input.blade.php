@@ -42,7 +42,7 @@
                                 </x-slot:label>
                                 <x-slot:append class="relative flex items-center w-2 h-2">
                                     <button x-on:click="removeUpload(i)" type="button">
-                                        <x-icon name="x" class="w-4 h-4" />
+                                        <x-icon name="x-mark" class="w-4 h-4" />
                                     </button>
                                 </x-slot:append>
                             </x-badge>

@@ -24,6 +24,10 @@
 }
 
 @layer components {
+    button.outline-none:not([class*="bg-"]):not([data-tab-name]) {
+        @apply border border-slate-300;
+    }
+
     .indent-icon {
         @apply after:content-['↳'];
     }

@@ -1,6 +1,6 @@
 <div>
     <x-modal name="edit-project" x-on:create-project.window="$wire.resetForm(); open();">
-        <x-card>
+        <x-card class="w-full">
             <div x-data="{edit: true, formatter: @js(resolve_static(\FluxErp\Models\Project::class, 'typeScriptAttributes'))}">
                 <x-project.edit/>
             </div>

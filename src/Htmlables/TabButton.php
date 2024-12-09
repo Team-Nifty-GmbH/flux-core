@@ -8,7 +8,6 @@ use Illuminate\View\Compilers\BladeCompiler;
 use Illuminate\View\ComponentAttributeBag;
 use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use WireUi\View\Components\Button;
 
 class TabButton implements Htmlable
 {
@@ -18,8 +17,6 @@ class TabButton implements Htmlable
         string $component,
         bool $rounded = false,
         bool $squared = false,
-        bool $outline = false,
-        bool $flat = true,
         bool $full = false,
         ?string $color = null,
         ?string $size = null,
@@ -37,8 +34,6 @@ class TabButton implements Htmlable
             component: $component,
             rounded: $rounded,
             squared: $squared,
-            outline: $outline,
-            flat: $flat,
             full: $full,
             color: $color,
             size: $size,
@@ -123,33 +118,43 @@ class TabButton implements Htmlable
             return null;
         }
 
+        $config = config('wireui.components.button');
+        $buttonClass = data_get($config, 'class');
         $this->label = is_null($this->label) ? '' : $this->label;
-        $button = new Button(
-            rounded: $this->rounded,
-            squared: $this->squared,
-            outline: $this->outline,
-            flat: $this->flat,
-            full: $this->full,
-            color: $this->color,
-            size: $this->size,
-            label: $this->label,
-            icon: $this->icon,
-            rightIcon: $this->rightIcon,
-            spinner: $this->spinner,
-            loadingDelay: $this->loadingDelay,
-            href: $this->href,
-        );
-        $button->attributes = new ComponentAttributeBag(
-            array_merge([
-                'wire:loading.attr' => 'readonly',
-                'class' => 'border-b-2 border-b-transparent focus:!ring-0 focus:!ring-offset-0',
-                'x-bind:class' => "{'!border-b-primary-600 rounded-b-none': tab === '{$this->component}'}",
-                'data-tab-name' => $this->component,
-                'x-on:click.prevent' => 'tabButtonClicked($el)',
-            ], $this->attributes)
-        );
 
-        return BladeCompiler::renderComponent($button);
+        $button = new $buttonClass();
+        $button->attributes = (new ComponentAttributeBag(
+            array_merge(
+                [
+                    'wire:loading.attr' => 'readonly',
+                    'class' => 'border-b-2 border-b-transparent focus:!ring-0 focus:!ring-offset-0',
+                    'x-bind:class' => "{'!border-b-primary-600 rounded-b-none': tab === '{$this->component}'}",
+                    'data-tab-name' => $this->component,
+                    'x-on:click.prevent' => 'tabButtonClicked($el)',
+                ],
+                $this->attributes
+            )
+        ))
+            ->merge(
+                array_filter(
+                    [
+                        'rounded' => $this->rounded,
+                        'squared' => $this->squared,
+                        'full' => $this->full,
+                        'color' => $this->color,
+                        'size' => $this->size,
+                        'rightIcon' => $this->rightIcon,
+                        'spinner' => $this->spinner,
+                        'loadingDelay' => $this->loadingDelay,
+                        'href' => $this->href,
+                        'label' => $this->label,
+                        'icon' => $this->icon,
+                    ],
+                    fn ($value) => ! is_null($value)
+                )
+            );
+
+        return BladeCompiler::renderComponent($button->withName(data_get($config, 'alias')));
     }
 
     public function isLivewireComponent(bool $isLivewireComponent = true): static
@@ -183,20 +188,6 @@ class TabButton implements Htmlable
     public function squared(bool $squared = true): static
     {
         $this->squared = $squared;
-
-        return $this;
-    }
-
-    public function outline(bool $outline = true): static
-    {
-        $this->outline = $outline;
-
-        return $this;
-    }
-
-    public function flat(bool $flat = true): static
-    {
-        $this->flat = $flat;
 
         return $this;
     }

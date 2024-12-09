@@ -17,9 +17,9 @@
                 ]"
             />
             <x-checkbox wire:model.live="order.is_confirmed" :label="__('Confirmed')" :disabled="auth()->user()?->id !== $order->approval_user_id" />
-            <x-inputs.number min="1" step="1" wire:model="order.payment_target" :label="__('Payment target')" :disabled="$order->is_locked" class="w-full"/>
-            <x-inputs.number min="1" step="1" wire:model="order.payment_discount_target" :label="__('Payment discount target')" :disabled="$order->is_locked" class="w-full"/>
-            <x-inputs.number step="0.01" min="0.01" max="99.99" wire:model="order.payment_discount_percent" :label="__('Payment discount')" :disabled="$order->is_locked" class="w-full"/>
+            <x-number min="1" step="1" wire:model="order.payment_target" :label="__('Payment target')" :disabled="$order->is_locked" class="w-full"/>
+            <x-number min="1" step="1" wire:model="order.payment_discount_target" :label="__('Payment discount target')" :disabled="$order->is_locked" class="w-full"/>
+            <x-number step="0.01" min="0.01" max="99.99" wire:model="order.payment_discount_percent" :label="__('Payment discount')" :disabled="$order->is_locked" class="w-full"/>
         </div>
     </x-card>
     @parent

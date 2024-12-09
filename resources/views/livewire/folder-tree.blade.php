@@ -306,7 +306,7 @@
                                 <x-button
                                     x-on:click="$refs.originalLink.select(); document.execCommand('copy');"
                                     class="h-full rounded-r-md"
-                                    icon="clipboard-copy"
+                                    icon="clipboard-document"
                                     primary
                                     squared
                                 />

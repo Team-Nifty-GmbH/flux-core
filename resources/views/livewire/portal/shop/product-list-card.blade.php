@@ -55,9 +55,9 @@
             @can(route_to_permission('portal.checkout'))
                 <div class="flex items-center mt-4 gap-1.5">
                     @if($cartItemId)
-                        <x-inputs.number step="1" wire:model.live="productForm.amount" />
+                        <x-number step="1" wire:model.live="productForm.amount" />
                     @else
-                        <x-inputs.number step="1" wire:model="productForm.amount" />
+                        <x-number step="1" wire:model="productForm.amount" />
                     @endif
                     <x-button
                         x-on:click="$wire.$dispatch('cart:add', {products: {id: $wire.productForm.id, amount: $wire.productForm.amount}})"

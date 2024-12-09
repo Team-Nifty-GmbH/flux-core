@@ -67,7 +67,7 @@
                    for="file-upload"
             >
                 <div class="pb-3">
-                    <x-heroicons name="arrow-up-on-square" class="h-12 w-12" />
+                    <x-icon name="arrow-up-on-square" class="h-12 w-12" />
                 </div>
                 <p>{{ __('Click here to select files to upload') }}</p>
                 <em class="italic text-slate-400">{{ __('(Or drag files to the page)') }}</em>

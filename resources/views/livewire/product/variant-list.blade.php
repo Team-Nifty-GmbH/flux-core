@@ -1,6 +1,6 @@
 <div x-data="{productOptionGroup: null}">
-    <x-modal name="generate-variants-modal" max-width="6xl">
-        <x-card :title="__('Edit Variants')">
+    <x-modal name="generate-variants-modal" width="6xl">
+        <x-card :title="__('Edit Variants')" class="w-full">
             <div x-transition x-show="! Object.values($wire.variants).length > 0">
                 <div class="flex gap-4" x-on:data-table-row-clicked="$wire.loadOptions($event.detail.id ?? $event.detail.record.id); productOptionGroup = $event.detail.record ?? $event.detail;">
                     <div class="flex-grow">

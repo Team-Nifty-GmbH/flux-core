@@ -1,6 +1,6 @@
 <div>
     <x-modal name="edit-bundle-product-modal">
-        <x-card :title="__('Edit Bundle Product')">
+        <x-card class="w-full" :title="__('Edit Bundle Product')">
             <div class="flex flex-col gap-1.5">
                 <x-select
                     class="pb-4"
@@ -28,7 +28,7 @@
                         ]
                     ]"
                 />
-                <x-inputs.number
+                <x-number
                     wire:model="productBundleProductForm.count"
                     :label="__('Count')"
                     :min="0.01"

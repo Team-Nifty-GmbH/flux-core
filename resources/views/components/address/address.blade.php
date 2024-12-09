@@ -7,13 +7,13 @@
 <div class="table w-full table-auto gap-1.5" x-ref="address">
     @section('contact')
         <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
-            <x-label :label="__('Company')" for="{{ md5('address.company') }}" />
+            <x-label :text="__('Company')" for="{{ md5('address.company') }}" />
             <div class="col-span-2 w-full">
                 <x-input x-bind:readonly="!$wire.edit" wire:model="address.company"/>
             </div>
         </div>
         <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
-            <x-label :label="__('Department')" for="{{ md5('address.department') }}" />
+            <x-label :text="__('Department')" for="{{ md5('address.department') }}" />
             <div class="col-span-2 w-full">
                 <x-input x-bind:readonly="!$wire.edit" wire:model="address.department" />
             </div>
@@ -25,7 +25,7 @@
             </div>
         </div>
         <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
-            <x-label :label="__('Salutation')" for="{{ md5('address.salutation') }}" />
+            <x-label :text="__('Salutation')" for="{{ md5('address.salutation') }}" />
             <div class="col-span-2 w-full">
                 <x-select
                     :options="SalutationEnum::valuesLocalized()"
@@ -36,25 +36,25 @@
             </div>
         </div>
         <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
-            <x-label :label="__('Title')" for="{{ md5('address.title') }}" />
+            <x-label :text="__('Title')" for="{{ md5('address.title') }}" />
             <div class="col-span-2">
                 <x-input x-bind:readonly="!$wire.edit" wire:model="address.title" />
             </div>
         </div>
         <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
-            <x-label :label="__('Firstname')" for="{{ md5('address.firstname') }}" />
+            <x-label :text="__('Firstname')" for="{{ md5('address.firstname') }}" />
             <div class="col-span-2">
                 <x-input x-bind:readonly="!$wire.edit" wire:model="address.firstname" />
             </div>
         </div>
         <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
-            <x-label :label="__('Lastname')" for="{{ md5('address.lastname') }}" />
+            <x-label :text="__('Lastname')" for="{{ md5('address.lastname') }}" />
             <div class="col-span-2">
                 <x-input x-bind:readonly="!$wire.edit" wire:model="address.lastname" />
             </div>
         </div>
         <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
-            <x-label :label="__('Addition')" for="{{ md5('address.addition') }}" />
+            <x-label :text="__('Addition')" for="{{ md5('address.addition') }}" />
             <div class="col-span-2">
                 <x-input x-bind:readonly="!$wire.edit" wire:model="address.addition" />
             </div>
@@ -62,13 +62,13 @@
     @show
     @section('address')
         <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
-            <x-label :label="__('Street')" for="{{ md5('address.street') }}" />
+            <x-label :text="__('Street')" for="{{ md5('address.street') }}" />
             <div class="col-span-2">
                 <x-input x-bind:readonly="!$wire.edit" wire:model="address.street" />
             </div>
         </div>
         <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
-            <x-label :label="__('Country')" for="{{ md5('address.country_id') }}" />
+            <x-label :text="__('Country')" for="{{ md5('address.country_id') }}" />
             <div class="col-span-2">
                 <x-select x-bind:readonly="!$wire.edit"
                           wire:model="address.country_id"
@@ -79,7 +79,7 @@
             </div>
         </div>
         <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
-            <x-label :label="__('Zip / City')" for="postal-code" />
+            <x-label :text="__('Zip / City')" for="postal-code" />
             <div class="mt-1 w-full items-center space-x-2 sm:col-span-2 sm:mt-0 sm:flex sm:space-x-2">
                 <div class="flex-none">
                     <x-input x-bind:readonly="!$wire.edit" wire:model="address.zip" />
@@ -93,7 +93,7 @@
     @section('contact-channels')
         @if(! $onlyPostal)
             <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
-                <x-label :label="__('Date Of Birth')" for="{{ md5('address.date_of_birth') }}" />
+                <x-label :text="__('Date Of Birth')" for="{{ md5('address.date_of_birth') }}" />
                 <div class="col-span-2">
                     <x-datetime-picker
                         wire:model="address.date_of_birth"
@@ -104,65 +104,59 @@
             </div>
         @endif
         <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
-            <x-label :label="__('Email')" for="{{ md5('address.email_primary') }}" />
+            <x-label :text="__('Email')" for="{{ md5('address.email_primary') }}" />
             <div class="col-span-2">
-                <x-input x-bind:readonly="!$wire.edit" class="pl-12" wire:model="address.email_primary">
+                <x-input x-bind:readonly="!$wire.edit" wire:model="address.email_primary">
                     <x-slot:prepend>
-                        <div class="absolute inset-y-0 left-0 flex items-center p-0.5">
-                            <x-button
-                                class="h-full rounded-l-md"
-                                icon="mail"
-                                primary
-                                flat
-                                squared
-                                x-on:click.prevent="window.open('mailto:' + $wire.address.email_primary)"
-                            />
-                        </div>
+                        <x-button
+                            class="h-full rounded-l-md"
+                            icon="envelope"
+                            primary
+                            flat
+                            squared
+                            x-on:click.prevent="window.open('mailto:' + $wire.address.email_primary)"
+                        />
                     </x-slot:prepend>
                 </x-input>
             </div>
         </div>
         <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
-            <x-label :label="__('Phone')" for="{{ md5('address.phone') }}" />
+            <x-label :text="__('Phone')" for="{{ md5('address.phone') }}" />
             <div class="col-span-2">
-                <x-input x-bind:readonly="!$wire.edit" class="pl-12" wire:model="address.phone">
+                <x-input x-bind:readonly="!$wire.edit" wire:model="address.phone">
                     <x-slot:prepend>
-                        <div class="absolute inset-y-0 left-0 flex items-center p-0.5">
-                            <x-button
-                                class="h-full rounded-l-md"
-                                icon="phone"
-                                primary
-                                flat
-                                squared
-                                x-on:click.prevent="window.open('tel:' + $wire.address.phone)"
-                            />
-                        </div>
+                        <x-button
+                            class="h-full rounded-l-md"
+                            icon="phone"
+                            primary
+                            flat
+                            squared
+                            x-on:click.prevent="window.open('tel:' + $wire.address.phone)"
+                        />
                     </x-slot:prepend>
                 </x-input>
             </div>
         </div>
         @if(! $onlyPostal)
             <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
-                <x-label :label="__('URL')" for="{{ md5('address.url') }}" />
+                <x-label :text="__('URL')" for="{{ md5('address.url') }}" />
                 <div class="col-span-2">
-                    <x-input x-bind:readonly="!$wire.edit" class="pl-12" wire:model="address.url">
+                    <x-input x-bind:readonly="!$wire.edit" wire:model="address.url">
                         <x-slot:prepend>
-                            <div class="absolute inset-y-0 left-0 flex items-center p-0.5">
-                                <x-button
-                                    class="h-full rounded-l-md"
-                                    icon="globe"
-                                    primary
-                                    flat
-                                    squared
-                                    x-on:click.prevent="window.open('//' + $wire.address.url)"
-                                />
-                            </div>
+                            <x-button
+                                class="h-full rounded-l-md"
+                                icon="globe-alt"
+                                primary
+                                flat
+                                squared
+                                x-on:click.prevent="window.open('//' + $wire.address.url)"
+                            />
                         </x-slot:prepend>
                     </x-input>
                 </div>
             </div>
             <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
-                <x-label :label="__('Language')" for="{{ md5('address.language_id') }}" />
+                <x-label :text="__('Language')" for="{{ md5('address.language_id') }}" />
                 <div class="col-span-2">
                     <x-select x-bind:disabled="!$wire.edit"
                               wire:model="address.language_id"
@@ -173,7 +167,7 @@
                 </div>
             </div>
             <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
-                <x-label :label="__('Tags')" for="{{ md5('address.tags') }}" />
+                <x-label :text="__('Tags')" for="{{ md5('address.tags') }}" />
                 <div class="col-span-2">
                     <x-select
                         multiselect
@@ -198,7 +192,7 @@
                     >
                         <x-slot:beforeOptions>
                             <div class="px-1">
-                                <x-button positive full :label="__('Add')" wire:click="addTag($promptValue())" wire:flux-confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}" />
+                                <x-button positive full :text="__('Add')" wire:click="addTag($promptValue())" wire:flux-confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}" />
                             </div>
                         </x-slot:beforeOptions>
                     </x-select>
@@ -227,30 +221,61 @@
             <div class="flex flex-col gap-1.5" x-data="{edit: $wire.entangle('edit')}">
                 <template x-for="(contactOption, index) in $wire.address.contact_options">
                     <div class="flex gap-1.5 items-center">
-                        <div>
-                            <x-native-select
-                                x-bind:readonly="!edit"
-                                x-bind:class="! edit && 'border-none bg-transparent shadow-none'"
-                                x-model="contactOption.type"
-                                :options="[
-                                    ['label' => __('Email'), 'value' => 'email'],
-                                    ['label' => __('Phone'), 'value' => 'phone'],
-                                    ['label' => __('Website'), 'value' => 'website'],
-                                ]"
-                                option-label="label"
-                                option-value="value"
-                                :clearable="false"
-                            />
-                        </div>
+                        <x-native-select
+                            x-bind:readonly="!edit"
+                            x-bind:class="! edit && 'border-none bg-transparent shadow-none'"
+                            x-model="contactOption.type"
+                            :options="[
+                                ['label' => __('Email'), 'value' => 'email'],
+                                ['label' => __('Phone'), 'value' => 'phone'],
+                                ['label' => __('Website'), 'value' => 'website'],
+                            ]"
+                            option-label="label"
+                            option-value="value"
+                            :clearable="false"
+                        />
                         <x-input x-model="contactOption.label" :placeholder="__('Label')" x-bind:disabled="!edit" x-bind:class="! edit && 'border-none bg-transparent shadow-none'"/>
-                        <x-input x-model="contactOption.value" :placeholder="__('Value')" x-bind:disabled="!edit" x-bind:class="! edit && 'border-none bg-transparent shadow-none'"/>
+                        <x-input x-model="contactOption.value" :placeholder="__('Value')" x-bind:disabled="!edit" x-bind:class="! edit && 'border-none bg-transparent shadow-none'">
+                            <x-slot:prepend>
+                                <x-button
+                                    x-cloak
+                                    x-show="contactOption.type === 'phone'"
+                                    class="h-full rounded-l-md"
+                                    icon="phone"
+                                    primary
+                                    flat
+                                    squared
+                                    x-on:click.prevent="window.open('tel:' + contactOption.value)"
+                                />
+                                <x-button
+                                    x-cloak
+                                    x-show="contactOption.type === 'email'"
+                                    class="h-full rounded-l-md"
+                                    icon="envelope"
+                                    primary
+                                    flat
+                                    squared
+                                    x-on:click.prevent="window.open('mailto:' + contactOption.value)"
+                                />
+                                <x-button
+                                    x-cloak
+                                    x-show="contactOption.type === 'website'"
+                                    class="h-full rounded-l-md"
+                                    icon="globe-alt"
+                                    primary
+                                    flat
+                                    squared
+                                    x-on:click.prevent="window.open('//' + contactOption.value)"
+                                />
+                            </x-slot:prepend>
+                        </x-input>
                         <div x-transition x-show="edit">
                             <x-button icon="trash" negative x-on:click.prevent="$wire.address.contact_options.splice(index, 1)" x-bind:disabled="!edit"/>
                         </div>
                     </div>
                 </template>
                 <div x-transition x-show="edit">
-                    <x-button icon="plus" :label="__('Add')" primary x-on:click.prevent="$wire.address.contact_options.push({type: 'email'})" x-bind:disabled="!edit"/>
+                    <x-button icon="plus" :text="__('Add')" primary x-on:click.prevent="$wire.address.contact_options.push({type: 'email'})" x-bind:disabled="!edit"/>
                 </div>
             </div>
         @show

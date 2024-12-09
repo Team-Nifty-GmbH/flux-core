@@ -1,5 +1,5 @@
 <x-modal name="edit-ledger-account">
-    <x-card>
+    <x-card class="w-full">
         <div class="flex flex-col gap-4">
             <x-input wire:model="ledgerAccount.name" :label="__('Name')" />
             <x-input wire:model="ledgerAccount.number" :label="__('Number')" />

@@ -16,8 +16,8 @@
         </x-dialog>
     @endif
     @if(resolve_static(\FluxErp\Actions\Plugins\Update::class, 'canPerformAction', [false]))
-        <x-modal name="update" max-width="7xl">
-            <x-card>
+        <x-modal name="update" width="7xl">
+            <x-card class="w-full">
                 <x-slot:title>
                     <span>{{ __('Update') }}</span>
                     <span x-text="$wire.update.package"></span>
@@ -33,8 +33,8 @@
             </x-card>
         </x-modal>
     @endif
-    <x-modal name="more" max-width="7xl">
-        <x-card>
+    <x-modal name="more" width="7xl">
+        <x-card class="w-full">
             <div class="prose max-w-full" x-html="$wire.readme"></div>
             <x-slot:footer>
                 <div class="flex justify-end gap-1.5 items-center">
@@ -44,8 +44,8 @@
         </x-card>
     </x-modal>
     @if(resolve_static(\FluxErp\Actions\Plugins\Install::class, 'canPerformAction', [false]))
-        <x-modal name="install" max-width="7xl">
-            <x-card :title="__('Install packages')">
+        <x-modal name="install" width="7xl">
+            <x-card :title="__('Install packages')" class="w-full">
                 <div class="flex flex-col gap-4">
                     <x-flux::features.media.upload-form-object wire:model="file" :multiple="true" accept=".zip,.rar,.7zip">
                         <x-slot:footer>
