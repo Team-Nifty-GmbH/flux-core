@@ -666,7 +666,7 @@
                                         <div class="dropdown-full-w">
                                             <x-dropdown width="w-full">
                                                 <x-slot name="trigger">
-                                                    <x-button class="w-full" icon="magnifying-glass">
+                                                    <x-button with-outline class="w-full" icon="magnifying-glass">
                                                         {{ __('Preview') }}
                                                     </x-button>
                                                 </x-slot>

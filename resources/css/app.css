@@ -24,8 +24,8 @@
 }
 
 @layer components {
-    button.bg-white {
-        @apply border border-secondary-200;
+    button.outline-none:not([class*="bg-"]):not([data-tab-name]) {
+        @apply border border-slate-300;
     }
 
     .indent-icon {

@@ -208,10 +208,10 @@
         </h3>
         <hr class="py-2" />
         <div class="flex flex-col gap-1.5">
-            <x-toggle :text="__('Active')" x-bind:disabled="!$wire.edit" wire:model="address.is_active"/>
-            <x-toggle :text="__('Main Address')" x-bind:disabled="!$wire.edit || $wire.address.is_main_address" wire:model="address.is_main_address"/>
-            <x-toggle :text="__('Delivery Address')" x-bind:disabled="!$wire.edit || $wire.address.is_delivery_address" wire:model="address.is_delivery_address"/>
-            <x-toggle :text="__('Invoice Address')" x-bind:disabled="!$wire.edit || $wire.address.is_invoice_address" wire:model="address.is_invoice_address"/>
+            <x-toggle :label="__('Active')" x-bind:disabled="!$wire.edit" wire:model="address.is_active"/>
+            <x-toggle :label="__('Main Address')" x-bind:disabled="!$wire.edit || $wire.address.is_main_address" wire:model="address.is_main_address"/>
+            <x-toggle :label="__('Delivery Address')" x-bind:disabled="!$wire.edit || $wire.address.is_delivery_address" wire:model="address.is_delivery_address"/>
+            <x-toggle :label="__('Invoice Address')" x-bind:disabled="!$wire.edit || $wire.address.is_invoice_address" wire:model="address.is_invoice_address"/>
         </div>
         <h3 class="pt-12 text-lg font-medium leading-6 text-gray-900 dark:text-gray-50">
             {{ __('Contact options') }}
@@ -221,23 +221,54 @@
             <div class="flex flex-col gap-1.5" x-data="{edit: $wire.entangle('edit')}">
                 <template x-for="(contactOption, index) in $wire.address.contact_options">
                     <div class="flex gap-1.5 items-center">
-                        <div>
-                            <x-native-select
-                                x-bind:readonly="!edit"
-                                x-bind:class="! edit && 'border-none bg-transparent shadow-none'"
-                                x-model="contactOption.type"
-                                :options="[
-                                    ['label' => __('Email'), 'value' => 'email'],
-                                    ['label' => __('Phone'), 'value' => 'phone'],
-                                    ['label' => __('Website'), 'value' => 'website'],
-                                ]"
-                                option-label="label"
-                                option-value="value"
-                                :clearable="false"
-                            />
-                        </div>
+                        <x-native-select
+                            x-bind:readonly="!edit"
+                            x-bind:class="! edit && 'border-none bg-transparent shadow-none'"
+                            x-model="contactOption.type"
+                            :options="[
+                                ['label' => __('Email'), 'value' => 'email'],
+                                ['label' => __('Phone'), 'value' => 'phone'],
+                                ['label' => __('Website'), 'value' => 'website'],
+                            ]"
+                            option-label="label"
+                            option-value="value"
+                            :clearable="false"
+                        />
                         <x-input x-model="contactOption.label" :placeholder="__('Label')" x-bind:disabled="!edit" x-bind:class="! edit && 'border-none bg-transparent shadow-none'"/>
-                        <x-input x-model="contactOption.value" :placeholder="__('Value')" x-bind:disabled="!edit" x-bind:class="! edit && 'border-none bg-transparent shadow-none'"/>
+                        <x-input x-model="contactOption.value" :placeholder="__('Value')" x-bind:disabled="!edit" x-bind:class="! edit && 'border-none bg-transparent shadow-none'">
+                            <x-slot:prepend>
+                                <x-button
+                                    x-cloak
+                                    x-show="contactOption.type === 'phone'"
+                                    class="h-full rounded-l-md"
+                                    icon="phone"
+                                    primary
+                                    flat
+                                    squared
+                                    x-on:click.prevent="window.open('tel:' + contactOption.value)"
+                                />
+                                <x-button
+                                    x-cloak
+                                    x-show="contactOption.type === 'email'"
+                                    class="h-full rounded-l-md"
+                                    icon="envelope"
+                                    primary
+                                    flat
+                                    squared
+                                    x-on:click.prevent="window.open('mailto:' + contactOption.value)"
+                                />
+                                <x-button
+                                    x-cloak
+                                    x-show="contactOption.type === 'website'"
+                                    class="h-full rounded-l-md"
+                                    icon="globe-alt"
+                                    primary
+                                    flat
+                                    squared
+                                    x-on:click.prevent="window.open('//' + contactOption.value)"
+                                />
+                            </x-slot:prepend>
+                        </x-input>
                         <div x-transition x-show="edit">
                             <x-button icon="trash" negative x-on:click.prevent="$wire.address.contact_options.splice(index, 1)" x-bind:disabled="!edit"/>
                         </div>

@@ -318,8 +318,8 @@ class FluxServiceProvider extends ServiceProvider
         config(['activitylog.activitymodel' => resolve_static(Activity::class, 'class')]);
         config(['logging' => array_merge_recursive(config('logging'), require __DIR__ . '/../config/logging.php')]);
         config(['media-library.media_downloader' => MediaLibraryDownloader::class]);
-        config(['wireui.button' => WireUiConfig::button(['default.color' => Color::WHITE])]);
-        config(['wireui.mini-button' => WireUiConfig::miniButton(['default.color' => Color::SECONDARY])]);
+        config(['wireui.button' => WireUiConfig::button(['default.color' => Color::NONE])]);
+        config(['wireui.mini-button' => WireUiConfig::miniButton(['default.color' => Color::NONE])]);
         config([
             'scout.meilisearch.index-settings' => [
                 resolve_static(Address::class, 'class') => [

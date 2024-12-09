@@ -17,8 +17,6 @@ class TabButton implements Htmlable
         string $component,
         bool $rounded = false,
         bool $squared = false,
-        bool $outline = false,
-        bool $flat = true,
         bool $full = false,
         ?string $color = null,
         ?string $size = null,
@@ -36,8 +34,6 @@ class TabButton implements Htmlable
             component: $component,
             rounded: $rounded,
             squared: $squared,
-            outline: $outline,
-            flat: $flat,
             full: $full,
             color: $color,
             size: $size,
@@ -146,15 +142,13 @@ class TabButton implements Htmlable
                         'squared' => $this->squared,
                         'full' => $this->full,
                         'color' => $this->color,
-                        'flat' => $this->flat,
-                        'outline' => $this->outline,
                         'size' => $this->size,
-                        'label' => $this->label,
-                        'icon' => $this->icon,
                         'rightIcon' => $this->rightIcon,
                         'spinner' => $this->spinner,
                         'loadingDelay' => $this->loadingDelay,
                         'href' => $this->href,
+                        'label' => $this->label,
+                        'icon' => $this->icon,
                     ],
                     fn ($value) => ! is_null($value)
                 )
@@ -194,20 +188,6 @@ class TabButton implements Htmlable
     public function squared(bool $squared = true): static
     {
         $this->squared = $squared;
-
-        return $this;
-    }
-
-    public function outline(bool $outline = true): static
-    {
-        $this->outline = $outline;
-
-        return $this;
-    }
-
-    public function flat(bool $flat = true): static
-    {
-        $this->flat = $flat;
 
         return $this;
     }
