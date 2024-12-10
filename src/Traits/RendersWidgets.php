@@ -5,6 +5,7 @@ namespace FluxErp\Traits;
 use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Facades\Widget;
 use FluxErp\Models\Permission;
+use FluxErp\Models\Widget as WidgetModel;
 use FluxErp\Traits\Livewire\EnsureUsedInLivewire;
 use Illuminate\Support\Arr;
 use Livewire\Attributes\Computed;
@@ -46,7 +47,12 @@ trait RendersWidgets
     #[Renderless]
     public function widgets(): void
     {
-        $this->widgets = $this->filterWidgets(auth()->user()->widgets()->get()->toArray());
+        $this->widgets = $this->filterWidgets(
+            resolve_static(WidgetModel::class, 'query')
+                ->where('widgetable_type', auth()->user()->getMorphClass())
+                ->where('widgetable_id', auth()->id())
+                ->where('dashboard_id', $this->dashboardId)
+                ->get()->toArray());
     }
 
     #[Renderless]
@@ -61,7 +67,12 @@ trait RendersWidgets
         $this->widgets = $widgets;
 
         $existingItemIds = array_filter(Arr::pluck($this->widgets, 'id'), 'is_numeric');
-        auth()->user()->widgets()->whereNotIn('id', $existingItemIds)->delete();
+        auth()
+            ->user()
+            ->widgets()
+            ->whereNotIn('id', $existingItemIds)
+            ->where('dashboard_id', $this->dashboardId)
+            ->delete();
 
         // create new widgets, update existing widgets
         foreach ($this->widgets as &$widget) {
@@ -69,8 +80,17 @@ trait RendersWidgets
                 ->user()
                 ->widgets()
                 ->updateOrCreate(
-                    ['id' => is_numeric($widget['id']) ? $widget['id'] : null],
-                    Arr::except($widget, 'id')
+                    [
+                        'id' => is_numeric($widget['id']) ? $widget['id'] : null,
+                        'dashboard_id' => $this->dashboardId,
+                    ],
+                    Arr::except(
+                        array_merge(
+                            $widget,
+                            ['dashboard_id' => $this->dashboardId]
+                        ),
+                        'id'
+                    )
                 );
             $widget['id'] = $savedWidget->id;
         }
