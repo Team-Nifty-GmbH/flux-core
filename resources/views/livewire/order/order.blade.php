@@ -432,7 +432,9 @@
                             <div class="text-sm">
                                 <div x-text="$wire.order.address_invoice.company">
                                 </div>
-                                <div x-text="($wire.order.address_invoice.firstname + ' ' + $wire.order.address_invoice.lastname).trim()">
+                                <div x-text="$wire.order.address_invoice.addition">
+                                </div>
+                                <div x-text="(($wire.order.address_invoice?.firstname || '').trim() + ' ' + ($wire.order.address_invoice?.lastname || '').trim()).trim()"></div>
                                 </div>
                                 <div x-text="$wire.order.address_invoice.street">
                                 </div>
@@ -470,7 +472,9 @@
                             <div class="text-sm" x-bind:class="$wire.order.address_delivery_id === $wire.order.address_invoice_id && 'hidden'">
                                 <div x-text="$wire.order.address_delivery?.company">
                                 </div>
-                                <div x-text="(($wire.order.address_delivery?.firstname ?? '') + ' ' + ($wire.order.address_delivery?.lastname ?? '')).trim()">
+                                <div x-text="$wire.order.address_delivery?.addition">
+                                </div>
+                                <div x-text="(($wire.order.address_delivery?.firstname || '').trim() + ' ' + ($wire.order.address_delivery?.lastname || '').trim()).trim()"></div>
                                 </div>
                                 <div x-text="$wire.order.address_delivery?.street">
                                 </div>
