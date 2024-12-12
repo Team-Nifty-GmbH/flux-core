@@ -4,6 +4,7 @@ namespace FluxErp\Rulesets\Role;
 
 use FluxErp\Models\Permission;
 use FluxErp\Models\Role;
+use FluxErp\Models\User;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
 
@@ -25,6 +26,12 @@ class UpdateRoleRuleset extends FluxRuleset
                 'required',
                 'integer',
                 app(ModelExists::class, ['model' => Permission::class]),
+            ],
+            'users' => 'nullable|array',
+            'users.*' => [
+                'required',
+                'integer',
+                app(ModelExists::class, ['model' => User::class]),
             ],
         ];
     }

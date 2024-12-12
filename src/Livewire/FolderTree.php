@@ -100,7 +100,7 @@ class FolderTree extends Component
     }
 
     #[Renderless]
-    public function validateOnDemand(string $fileId, string $collectionName): bool
+    public function validateOnDemand(string $fileId, ?string $collectionName = null): bool
     {
         // find the index of the file in the files array - which invokes the validation
         $index = array_search($fileId, array_map(function ($item) {
@@ -111,21 +111,23 @@ class FolderTree extends Component
             return false;
         }
 
-        try {
-            $this->validate($this->getRulesSingleFile($index, $collectionName));
-        } catch (ValidationException $e) {
-            // Handle the validation exception
-            exception_to_notifications($e, $this);
+        if (! is_null($collectionName)) {
+            try {
+                $this->validate($this->getRulesSingleFile($index, $collectionName));
+            } catch (ValidationException $e) {
+                exception_to_notifications($e, $this);
 
-            return false;
+                return false;
+            }
         }
 
         return true;
     }
 
     #[Renderless]
-    public function submitFiles(string $collection, array $tempFileNames): bool
+    public function submitFiles(array|string $collection, array $tempFileNames): bool
     {
+        $collection = is_string($collection) ? $collection : implode('.', $collection);
         // set the folder name
         $this->collection = $collection;
         // filter out files array by deleted files on front end
@@ -258,8 +260,14 @@ class FolderTree extends Component
         return true;
     }
 
-    public function deleteCollection(string $collection): void
+    public function deleteCollection(string|array|null $collection = null): void
     {
+        if (! $collection) {
+            return;
+        }
+
+        $collection = is_array($collection) ? implode('.', $collection) : $collection;
+
         try {
             DeleteMediaCollection::make([
                 'model_type' => morph_alias($this->modelType),

@@ -5,145 +5,140 @@ namespace FluxErp\Livewire\Settings;
 use FluxErp\Actions\Role\CreateRole;
 use FluxErp\Actions\Role\DeleteRole;
 use FluxErp\Actions\Role\UpdateRole;
+use FluxErp\Livewire\DataTables\RoleList;
+use FluxErp\Livewire\Forms\RoleForm;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Role;
 use FluxErp\Models\User;
-use FluxErp\Traits\Livewire\Actions;
-use Illuminate\Contracts\View\View;
+use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
-use Livewire\Component;
+use Livewire\Attributes\Renderless;
+use Spatie\Permission\Exceptions\UnauthorizedException;
+use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
-class Permissions extends Component
+class Permissions extends RoleList
 {
-    use Actions;
+    public ?string $includeBefore = 'flux::livewire.settings.permissions';
 
-    public array $roles;
+    public RoleForm $roleForm;
 
-    public array $permissions = [];
-
-    public string $searchPermission = '';
-
-    public array $guards = [];
-
-    public bool $showTogglePermissions = false;
-
-    public bool $showToggleUsers = false;
-
-    public ?array $selectedRole;
-
-    public array $rolesHasPermissions;
-
-    public array $users;
-
-    public array $usersHasSelectedRole;
-
-    public array $selectedUsers = [];
-
-    public function boot(): void
+    #[Renderless]
+    public function getPermissionTree()
     {
-        $this->roles = resolve_static(Role::class, 'query')
-            ->orderBy('name')
-            ->get()
+        $permissions = Permission::query()
+            ->where('guard_name', 'web')
+            ->pluck('id', 'name')
             ->toArray();
 
-        $this->users = resolve_static(User::class, 'query')
-            ->where('is_active', true)
-            ->get()
-            ->toArray();
-
-        $this->guards = array_keys(config('auth.guards'));
+        return Arr::undotToTree($permissions);
     }
 
-    public function render(): View
+    protected function getViewData(): array
     {
-        return view('flux::livewire.settings.permissions');
+        return array_merge(
+            parent::getViewData(),
+            [
+                'guards' => array_keys(config('auth.guards')),
+                'users' => resolve_static(User::class, 'query')
+                    ->get(['id', 'name'])
+                    ->toArray(),
+            ]
+        );
     }
 
-    public function updatedSearchPermission(): void
+    protected function getTableActions(): array
     {
-        $this->getPermissions();
+        return [
+            DataTableButton::make()
+                ->label(__('Create'))
+                ->color('primary')
+                ->icon('plus')
+                ->attributes([
+                    'wire:click' => 'edit()',
+                ])
+                ->when(resolve_static(CreateRole::class, 'canPerformAction', [false])),
+        ];
     }
 
-    public function togglePermissions(Role $role): void
+    protected function getRowActions(): array
     {
-        $this->reset('searchPermission');
-        $this->selectedRole = $role->toArray();
-        $this->selectedRole['permissions'] = $role->permissions->pluck('id')->toArray();
-        $this->getPermissions();
-
-        $this->showTogglePermissions = true;
+        return [
+            DataTableButton::make()
+                ->label(__('Edit permissions'))
+                ->color('primary')
+                ->attributes([
+                    'wire:click' => 'edit(record.id)',
+                ])
+                ->when(resolve_static(UpdateRole::class, 'canPerformAction', [false])),
+            DataTableButton::make()
+                ->label(__('Assign users'))
+                ->color('primary')
+                ->attributes([
+                    'wire:click' => 'editUsers(record.id)',
+                ])
+                ->when(resolve_static(UpdateRole::class, 'canPerformAction', [false])),
+            DataTableButton::make()
+                ->label(__('Delete'))
+                ->color('negative')
+                ->attributes([
+                    'x-cloak',
+                    'x-show' => 'record.name !== \'Super Admin\'',
+                    'wire:click' => 'delete(record.id)',
+                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Role')]),
+                ])
+                ->when(resolve_static(DeleteRole::class, 'canPerformAction', [false])),
+        ];
     }
 
-    public function getPermissions(): void
+    #[Renderless]
+    public function editUsers(Role $role): void
     {
-        $query = $this->searchPermission
-            ? resolve_static(Permission::class, 'search', ['query' => $this->searchPermission])
-            : resolve_static(Permission::class, 'query');
-
-        $this->permissions = data_get($query
-            ->where('guard_name', $this->selectedRole['guard_name'])
-            ->orderBy('name')
-            ->paginate(999)
-            ->toArray(), 'data', []);
+        $this->edit($role, 'edit-role-users');
     }
 
-    public function saveTogglePermissions(): void
+    #[Renderless]
+    public function edit(?Role $role, string $modal = 'edit-role-permissions'): void
     {
-        $action = ($this->selectedRole['id'] ?? false) ? UpdateRole::class : CreateRole::class;
-        try {
-            $role = $action::make($this->selectedRole)
-                ->checkPermission()
-                ->validate()
-                ->execute();
-        } catch (\Exception $e) {
-            exception_to_notifications($e, $this);
+        $this->roleForm->reset();
+        $this->roleForm->fill($role);
 
-            return;
-        }
-
-        if ($action === CreateRole::class) {
-            $this->roles[] = $role->toArray();
-        }
-
-        $this->showTogglePermissions = false;
+        $this->js(<<<JS
+            \$openModal('$modal');
+        JS);
     }
 
-    public function toggleUsers(int $roleId): void
-    {
-        $this->showToggleUsers = true;
-        $role = resolve_static(Role::class, 'query')
-            ->whereKey($roleId)
-            ->first();
-
-        $userHasPermissionOnRole = $role->users;
-        $this->selectedUsers = $userHasPermissionOnRole->pluck('id')->toArray();
-        $this->selectedRole = $role->toArray();
-    }
-
-    public function saveToggleUsers(): void
-    {
-        $role = resolve_static(Role::class, 'query')
-            ->whereKey($this->selectedRole['id'])
-            ->first();
-
-        $role->users()?->sync($this->selectedUsers);
-        $this->showToggleUsers = false;
-    }
-
-    public function delete(int $roleId): void
+    #[Renderless]
+    public function save(): bool
     {
         try {
-            DeleteRole::make(['id' => $roleId])->validate()->execute();
-
-            $key = array_search($roleId, array_column($this->roles, 'id'));
-
-            if ($key !== false) {
-                unset($this->roles[$key]);
-            }
-        } catch (ValidationException $e) {
+            $this->roleForm->save();
+        } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
+
+            return false;
         }
 
-        $this->showTogglePermissions = false;
+        $this->loadData();
+
+        return true;
+    }
+
+    #[Renderless]
+    public function delete(Role $role): bool
+    {
+        $this->roleForm->reset();
+        $this->roleForm->fill($role);
+
+        try {
+            $this->roleForm->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
     }
 }

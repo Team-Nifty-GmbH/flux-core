@@ -1,4 +1,4 @@
-import folderTree from './components/folder-tree';
+import folders from './components/folders';
 import setupEditor from './components/tiptap';
 import workTime from './components/work-time.js';
 import dashboard from './components/dashboard';
@@ -6,9 +6,9 @@ import notifications from './components/wireui/notifications';
 import signature from './components/signature-pad.js';
 import addressMap from "./components/address-map";
 import filePond from "./components/file-pond";
+import templateOutlet from './components/template-outlet';
 import sort from '@alpinejs/sort';
 
-window.folderTree = folderTree;
 window.setupEditor = setupEditor;
 window.workTime = workTime;
 window.dashboard = dashboard;
@@ -30,6 +30,9 @@ Alpine.directive('currency', (el, { expression }, { evaluate }) => {
 Alpine.directive('percentage', (el, { expression }, { evaluate }) => {
     el.innerText = formatters.percentage(evaluate(expression));
 })
+
+Alpine.directive('template-outlet', templateOutlet);
+Alpine.data('folder_tree', folders);
 
 document.addEventListener(
     'livewire:navigated',
