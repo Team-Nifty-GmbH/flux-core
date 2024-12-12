@@ -3,7 +3,6 @@
 namespace FluxErp\Actions\Commission;
 
 use FluxErp\Actions\DispatchableFluxAction;
-use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Order\CreateOrder;
 use FluxErp\Actions\OrderPosition\CreateOrderPosition;
 use FluxErp\Enums\OrderTypeEnum;
