@@ -434,11 +434,11 @@
                                 </div>
                                 <div x-text="$wire.order.address_invoice.addition">
                                 </div>
-                                <div x-text="(($wire.order.address_invoice?.firstname || '').trim() + ' ' + ($wire.order.address_invoice?.lastname || '').trim()).trim()"></div>
+                                <div x-text="(($wire.order.address_invoice?.firstname || '').trim() + ' ' + ($wire.order.address_invoice?.lastname || '').trim()).trim()">
                                 </div>
                                 <div x-text="$wire.order.address_invoice.street">
                                 </div>
-                                <div x-text="($wire.order.address_invoice.zip + ' ' + $wire.order.address_invoice.city).trim()">
+                                <div x-text="(($wire.order.address_invoice?.zip || '').trim() + ' ' + ($wire.order.address_invoice?.city || '').trim()).trim()">
                                 </div>
                             </div>
                         </x-card>
@@ -474,11 +474,11 @@
                                 </div>
                                 <div x-text="$wire.order.address_delivery?.addition">
                                 </div>
-                                <div x-text="(($wire.order.address_delivery?.firstname || '').trim() + ' ' + ($wire.order.address_delivery?.lastname || '').trim()).trim()"></div>
+                                <div x-text="(($wire.order.address_delivery?.firstname || '').trim() + ' ' + ($wire.order.address_delivery?.lastname || '').trim()).trim()">
                                 </div>
                                 <div x-text="$wire.order.address_delivery?.street">
                                 </div>
-                                <div x-text="(($wire.order.address_delivery?.zip ?? '') + ' ' + ($wire.order.address_delivery?.city ?? '')).trim()">
+                                <div x-text="(($wire.order.address_invoice?.zip || '').trim() + ' ' + ($wire.order.address_invoice?.city || '').trim()).trim()">
                                 </div>
                             </div>
                         </x-card>
