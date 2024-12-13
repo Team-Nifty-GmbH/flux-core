@@ -2,6 +2,9 @@
 
 namespace FluxErp\Enums\Traits;
 
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
+
 trait EnumTrait
 {
     public static function values(): array
@@ -24,5 +27,13 @@ trait EnumTrait
         );
 
         return array_shift($values);
+    }
+
+    public static function toArray(): array
+    {
+        return Arr::mapWithKeys(
+            array_column(self::cases(), 'value'),
+            fn ($value) => [$value => __(Str::headline($value))],
+        );
     }
 }
