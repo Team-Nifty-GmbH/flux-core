@@ -4,6 +4,7 @@ namespace FluxErp\Traits\Livewire;
 
 use FluxErp\Actions\Media\UploadMedia;
 use FluxErp\Models\Media;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads as WithFileUploadsBase;
@@ -32,12 +33,13 @@ trait WithFileUploads
         return response()->download($mediaItem->getPath(), $mediaItem->file_name);
     }
 
-    public function downloadCollection(string $collection): ?BinaryFileResponse
+    public function downloadCollection(array|string $collection): ?BinaryFileResponse
     {
+        $collection = is_array($collection) ? implode('.', $collection) : $collection;
         $media = resolve_static(Media::class, 'query')
             ->where('collection_name', 'like', $collection . '%')
             ->when($this->modelType ?? false,
-                fn ($query) => $query->where('model_type', $this->modelType)
+                fn (Builder $query) => $query->where('model_type', morph_alias($this->modelType))
                     ->when(
                         $this->modelId ?? false,
                         fn ($query) => $query->where('model_id', $this->modelId)

@@ -53,6 +53,34 @@ window.parseNumber = function (number) {
     return trimmedNumber + '.00';
 }
 
+window.fileSizeHumanReadable = function (sizeBytes) {
+    if (sizeBytes === null || sizeBytes === undefined) {
+        return null;
+    }
+
+    const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
+
+    if (sizeBytes <= 0) {
+        return '0B';
+    }
+
+    let i = 0;
+    while (sizeBytes >= 1024 && i < units.length - 1) {
+        sizeBytes /= 1024;
+        i++;
+    }
+
+    const sizeStr = sizeBytes.toFixed(2);
+
+    if (sizeStr.endsWith('.00')) {
+        return sizeStr.slice(0, -3) + units[i];
+    } else if (sizeStr.endsWith('0')) {
+        return sizeStr.slice(0, -1) + units[i];
+    }
+
+    return sizeStr + units[i];
+}
+
 window.$openDetailModal = (url, hideNavigation = true) => {
     let urlObj = new URL(url);
     urlObj.searchParams.set('no-navigation', hideNavigation === true ? 'true' : 'false');

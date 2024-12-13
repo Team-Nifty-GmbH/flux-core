@@ -1,32 +1,16 @@
 <x-modal name="edit-mail-folders">
     <x-card class="bg-gray-50">
-        <div class="grid grid-cols-2 gap-4"
-             x-data="{
-                        ...folderTree(),
-                        levels: $wire.entangle('folders'),
-                        selectable: false,
-                        select(event, level) {
-                           if (level) {
-                              $wire.editMailFolder(level.id);
-                              const current = document.querySelector('#mail-folders [selected]');
-                              current?.classList.remove('bg-primary-500', 'text-white');
-                              current?.removeAttribute('selected');
-
-                              event.target.parentNode.classList.add('bg-primary-500', 'text-white');
-                              event.target.parentNode.setAttribute('selected', true);
-                           }
-                        }
-                    }"
-        >
-            <x-card id="mail-folders">
-                <div class="flex flex-col gap-1.5">
-                    <ul class="flex flex-col gap-1" wire:ignore>
-                        <template x-for="(level, i) in levels">
-                            <li x-html="renderLevel(level, i)"></li>
-                        </template>
-                    </ul>
-                    <x-button spinner="syncFolders" class="w-full" primary :label="__('Sync folders')" wire:click="syncFolders($wire.mailAccount.id)"/>
-                </div>
+        <div class="grid grid-cols-2 gap-4">
+            <x-card id="mail-folders" x-on:folder-tree-select="$wire.editMailFolder($event.detail.id)">
+                <x-flux::checkbox-tree
+                    tree="$wire.folders"
+                    name-attribute="name"
+                    children-attribute="children"
+                >
+                    <x-slot:afterTree>
+                        <x-button spinner="syncFolders" class="w-full" primary :label="__('Sync folders')" wire:click="syncFolders($wire.mailAccount.id)"/>
+                    </x-slot:afterTree>
+                </x-flux::checkbox-tree>
             </x-card>
             <div x-show="$wire.mailFolder.id" x-transition>
                 <x-card>

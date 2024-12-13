@@ -14,6 +14,7 @@
         "@fullcalendar/interaction": "^6.1.10",
         "@fullcalendar/list": "^6.1.11",
         "@fullcalendar/timegrid": "^6.1.10",
+        "@phosphor-icons/web": "^2.1.1",
         "@tailwindcss/forms": "^0.5.7",
         "@tailwindcss/typography": "^0.5.10",
         "@tiptap/core": "^2.3.1",
@@ -46,6 +47,6 @@
         "tailwindcss": "^3.4.0",
         "tippy.js": "^6.3.7",
         "uuid": "^10.0.0",
-        "vite": "^5.2.11"
+        "vite": "^6.0.3"
     }
 }

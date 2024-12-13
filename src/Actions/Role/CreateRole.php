@@ -23,8 +23,12 @@ class CreateRole extends FluxAction
     {
         $role = resolve_static(Role::class, 'create', [$this->data]);
 
-        if ($this->data['permissions'] ?? false) {
-            $role->givePermissionTo($this->data['permissions']);
+        if ($permissions = $this->getData('permissions')) {
+            $role->givePermissionTo($permissions);
+        }
+
+        if ($users = $this->getData('users')) {
+            $role->users()->attach($users);
         }
 
         return $role->fresh()->load('permissions');
