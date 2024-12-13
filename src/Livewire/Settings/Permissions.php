@@ -22,6 +22,8 @@ class Permissions extends RoleList
 
     public RoleForm $roleForm;
 
+    public array $permissions = [];
+
     #[Renderless]
     public function getPermissionTree()
     {
@@ -101,6 +103,7 @@ class Permissions extends RoleList
     {
         $this->roleForm->reset();
         $this->roleForm->fill($role);
+        $this->permissions = $this->getPermissionTree();
 
         $this->js(<<<JS
             \$openModal('$modal');

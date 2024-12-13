@@ -38,7 +38,7 @@
                     <x-flux::checkbox-tree
                         wire:model="$entangle('roleForm.permissions')"
                         selectable="true"
-                        tree="$wire.getPermissionTree()"
+                        tree="$wire.permissions"
                         name-attribute="label"
                     />
                 </div>
