@@ -127,7 +127,7 @@ class FolderTree extends Component
     #[Renderless]
     public function submitFiles(array|string $collection, array $tempFileNames): bool
     {
-        $collection = is_string($collection) ? $collection : implode('.', $collection);
+        $collection = is_array($collection) ? implode('.', $collection) : $collection;
         // set the folder name
         $this->collection = $collection;
         // filter out files array by deleted files on front end

@@ -23,12 +23,15 @@
     <x-card>
         <div class="space-y-6">
             <x-input wire:model="roleForm.name" :label="__('Name')"/>
-            <x-select
-                :label="__('Guard')"
-                :disabled="$roleForm->id ?? false"
-                :options="$guards"
-                wire:model="roleForm.guard_name"
-            />
+            <div x-bind:class="$wire.roleForm.id && 'pointer-events-none'">
+                <x-select
+                    :label="__('Guard')"
+                    :disabled="$roleForm->id ?? false"
+                    :options="$guards"
+                    wire:model="roleForm.guard_name"
+                    x-bind:readonly="$wire.roleForm.id"
+                />
+            </div>
             <div>
                 <x-label :label="__('Permissions')"/>
                 <div x-show="$wire.roleForm.name !== 'Super Admin'" x-cloak>

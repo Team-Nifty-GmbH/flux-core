@@ -1,3 +1,5 @@
+import {v4 as uuidv4} from 'uuid';
+
 export default function folders(
     getTreePromise,
     property = null,
@@ -113,7 +115,10 @@ export default function folders(
             return anyChecked && !allChecked;
         },
         updateParentStates(node) {
-            if (!node.parent) return;
+            if (!node.parent) {
+                return;
+            }
+
             const parent = node.parent;
             const childIds = parent.children.map(child => child.id);
             const selectedChildren = childIds.filter(id => this.checked.includes(id));
@@ -170,7 +175,7 @@ export default function folders(
             this.unselect();
         },
         addFolder(node = null, attributes = {}) {
-            let id = Math.random().toString(36).substr(2, 9);
+            let id = uuidv4();
             let target = node ? node.children : this.tree;
 
             if (node) {

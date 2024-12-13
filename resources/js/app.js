@@ -55,7 +55,7 @@ window.parseNumber = function (number) {
 
 window.fileSizeHumanReadable = function (sizeBytes) {
     if (sizeBytes === null || sizeBytes === undefined) {
-        return null
+        return null;
     }
 
     const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];

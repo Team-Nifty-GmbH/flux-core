@@ -7,9 +7,8 @@ export default function(element, metadata, framework) {
     // Clone the template and get the root node - this is the node that we will
     // inject into the DOM.
     const clone = templateRef.content
-        .cloneNode( true )
-        .firstElementChild
-    ;
+        .cloneNode(true)
+        .firstElementChild;
     // CAUTION: The following logic ASSUMES that the template-outlet directive has
     // an "x-data" scope binding on it. If it didn't we would have to change the
     // logic. But, I don't think Alpine.js has mechanics to solve this use-case
@@ -26,7 +25,7 @@ export default function(element, metadata, framework) {
     // Instead of leaving the template in the DOM, we're going to swap the
     // template with a comment hook. This isn't necessary; but, I think it leaves
     // the DOM more pleasant looking.
-    let domHook = document.createComment(` Template outlet hook (${ metadata.expression }) with bindings (${ element.getAttribute( "x-data" ) }). `);
+    let domHook = document.createComment(` Template outlet hook (${metadata.expression}) with bindings (${element.getAttribute("x-data")}). `);
     domHook._template_outlet_ref = templateRef;
     domHook._template_outlet_clone = clone;
     // Swap the template-outlet element with the hook and clone.
@@ -37,11 +36,11 @@ export default function(element, metadata, framework) {
     // destroyTree() to have explicitly setup and teardowm DOM node bindings.
     Alpine.mutateDom(
         function pauseMutationObserver() {
-            element.after( domHook );
-            domHook.after( clone );
-            Alpine.initTree( clone );
+            element.after(domHook);
+            domHook.after(clone);
+            Alpine.initTree(clone);
             element.remove();
-            Alpine.destroyTree( element );
+            Alpine.destroyTree(element);
         }
     );
 }

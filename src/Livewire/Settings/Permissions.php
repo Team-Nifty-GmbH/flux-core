@@ -26,7 +26,7 @@ class Permissions extends RoleList
     public function getPermissionTree()
     {
         $permissions = Permission::query()
-            ->where('guard_name', 'web')
+            ->where('guard_name', $this->roleForm->guard_name)
             ->pluck('id', 'name')
             ->toArray();
 

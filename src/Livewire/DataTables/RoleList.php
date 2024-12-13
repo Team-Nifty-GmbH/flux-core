@@ -3,10 +3,9 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\Role;
-use TeamNiftyGmbH\DataTable\DataTable;
 use TeamNiftyGmbH\DataTable\Traits\HasEloquentListeners;
 
-class RoleList extends DataTable
+class RoleList extends BaseDataTable
 {
     use HasEloquentListeners;
 
