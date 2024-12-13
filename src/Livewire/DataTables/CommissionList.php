@@ -3,7 +3,6 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Actions\Commission\CreateCommissionCreditNotes;
-use FluxErp\Jobs\Accounting\CreateCommissionCreditNotesJob;
 use FluxErp\Models\Commission;
 use Illuminate\Validation\UnauthorizedException;
 use Illuminate\Validation\ValidationException;
@@ -56,7 +55,8 @@ class CommissionList extends BaseDataTable
         try {
             CreateCommissionCreditNotes::make(['commissions' => $selected])
                 ->checkPermission()
-                ->validate();
+                ->validate()
+                ->executeAsync();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
@@ -64,7 +64,6 @@ class CommissionList extends BaseDataTable
         }
 
         $this->selected = [];
-        CreateCommissionCreditNotesJob::dispatch(['commissions' => $selected]);
 
         return true;
     }
