@@ -108,7 +108,10 @@ export default function folders(
             return (node.children || []).every(child => this.isChecked(child));
         },
         isIndeterminate(node) {
-            if (this.isLeaf(node)) return false; // Leaf nodes can't be indeterminate
+            if (this.isLeaf(node)) {
+                return false; // Leaf nodes can't be indeterminate
+            }
+
             const childStates = (node.children || []).map(child => this.isChecked(child) || this.isIndeterminate(child));
             const allChecked = childStates.every(state => state);
             const anyChecked = childStates.some(state => state);
