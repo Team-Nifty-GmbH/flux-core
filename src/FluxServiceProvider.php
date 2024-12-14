@@ -57,8 +57,10 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Route as RouteFacade;
+use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 use Laravel\Sanctum\Http\Middleware\CheckAbilities;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use Laravel\Scout\Builder;
@@ -240,6 +242,33 @@ class FluxServiceProvider extends ServiceProvider
                     return (new LengthAwarePaginator(
                         $this->forPage($page, $perPage), $this->count(), $perPage, $page, $options))
                         ->withPath($urlParams ? dirname(url()->full()) . $urlParams : url()->full());
+                });
+        }
+
+        if (! Number::hasMacro('fromFileSizeToBytes')) {
+            Number::macro('fromFileSizeToBytes',
+                function (string $size) {
+                    $units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
+                    preg_match('/^(\d+)([A-Z]{1,2})$/i', trim($size), $matches);
+
+                    if (count($matches) !== 3) {
+                        throw new InvalidArgumentException("Invalid size format: $size");
+                    }
+
+                    $numericPart = $matches[1];
+                    $unit = strtoupper($matches[2]);
+
+                    if (strlen($unit) === 1) {
+                        $unit .= 'B';
+                    }
+
+                    $power = array_search($unit, $units);
+
+                    if ($power === false) {
+                        throw new InvalidArgumentException("Invalid size unit provided: $unit");
+                    }
+
+                    return bcmul($numericPart, bcpow('1024', $power), 0);
                 });
         }
 
