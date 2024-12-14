@@ -103,7 +103,7 @@ class FluxCalendar extends CalendarComponent
             $result = $result->toCalendarEvent();
         } else {
             try {
-                $attributes['extended_props'] = array_values(data_get($attributes, 'customProperties'));
+                $attributes['extended_props'] = array_values(data_get($attributes, 'customProperties', []));
                 $this->event->reset();
                 $this->event->fill($attributes);
                 $this->event->original_start = data_get($this->oldCalendarEvent, 'start');

@@ -7,21 +7,21 @@
             >
                 <x-slot:afterTree>
                     @canAction(\FluxErp\Actions\Media\UploadMedia::class)
-                        <x-button
-                            class="w-full whitespace-nowrap my-2"
-                            :label="__('Add folder')"
-                            x-on:click="addFolder(null, {
+                    <x-button
+                        class="w-full whitespace-nowrap my-2"
+                        :label="__('Add folder')"
+                        x-on:click="addFolder(null, {
                                 is_static: false,
                                 is_new: true,
                                 collection_name: 'new_folder',
                                 name: '{{ __('New folder') }}',
                                 children: [],
                             })"
-                        />
+                    />
                     @endCanAction
                 </x-slot:afterTree>
                 <div class="w-1/2 flex flex-col gap-3"
-                    x-data="{
+                     x-data="{
                         ...filePond(
                             $wire,
                             $refs.upload,
@@ -107,18 +107,18 @@
                             }
                         }
                     }"
-                    x-on:folder-tree-select.window="treeSelect($event.detail)"
+                     x-on:folder-tree-select.window="treeSelect($event.detail)"
                 >
                     <div x-ref="upload" x-show="! selection.file_name && selected" class="flex flex-col gap-3" x-cloak>
                         <div>
                             @canAction(\FluxErp\Actions\Media\DeleteMediaCollection::class)
-                                <x-button
-                                    x-cloak
-                                    x-show="! selected?.is_static"
-                                    :label="__('Delete')"
-                                    negative
-                                    wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Folder')]) }}"
-                                    wire:click="deleteCollection(getNodePath('collection_name')).then(() => {
+                            <x-button
+                                x-cloak
+                                x-show="! selected?.is_static"
+                                :label="__('Delete')"
+                                negative
+                                wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Folder')]) }}"
+                                wire:click="deleteCollection(getNodePath('collection_name')).then(() => {
                                             try {
                                                     selected = null;
                                                     removeNode(selection.id);
@@ -126,14 +126,14 @@
                                                     console.error(error);
                                                 }
                                             })"
-                                />
+                            />
                             @endCanAction
                             @canAction(\FluxErp\Actions\Media\UploadMedia::class)
-                                <x-button
-                                    x-cloak
-                                    x-show="multipleFileUpload && !readOnly"
-                                    :label="__('Add folder')"
-                                    x-on:click="addFolder(
+                            <x-button
+                                x-cloak
+                                x-show="multipleFileUpload && !readOnly"
+                                :label="__('Add folder')"
+                                x-on:click="addFolder(
                                         selected,
                                         {
                                             is_static: false,
@@ -143,7 +143,7 @@
                                             children: [],
                                         }
                                     )"
-                                />
+                            />
                             @endCanAction
                             <x-button
                                 spinner
@@ -152,37 +152,37 @@
                             />
                         </div>
                         @canAction(\FluxErp\Actions\Media\UpdateMedia::class)
-                            <div class="flex flex-col space-y-3 md:flex-row  md:space-x-3 items-end justify-end">
-                                <div class="md:flex-1 w-full p-0">
-                                    <x-input
-                                        class="flex-1"
-                                        x-bind:disabled="selected?.is_static"
-                                        :label="__('Name')"
-                                        x-model="selection.name"
-                                    />
-                                </div>
-                                <x-button
-                                    x-cloak
-                                    x-show="! selected?.is_static"
-                                    primary
-                                    :label="__('Save')"
-                                    x-on:click="saveFolder()"
+                        <div class="flex flex-col space-y-3 md:flex-row  md:space-x-3 items-end justify-end">
+                            <div class="md:flex-1 w-full p-0">
+                                <x-input
+                                    class="flex-1"
+                                    x-bind:disabled="selected?.is_static"
+                                    :label="__('Name')"
+                                    x-model="selection.name"
                                 />
                             </div>
+                            <x-button
+                                x-cloak
+                                x-show="! selected?.is_static"
+                                primary
+                                :label="__('Save')"
+                                x-on:click="saveFolder()"
+                            />
+                        </div>
                         @endCanAction
                         @canAction(\FluxErp\Actions\Media\UploadMedia::class)
-                            <div class="flex flex-col items-end">
-                                <div class="w-full mb-4">
-                                    <input x-init="loadFilePond(countChildren)" id="filepond-drop" type="file"/>
-                                </div>
-                                <x-button
-                                    x-cloak
-                                    x-show="tempFilesId.length !== 0 && isLoadingFiles.length === 0"
-                                    :label="__('Save')"
-                                    primary
-                                    x-on:click="submitFiles(getNodePath(null, 'collection_name'), uploadSuccess)"
-                                />
+                        <div class="flex flex-col items-end">
+                            <div class="w-full mb-4">
+                                <input x-init="loadFilePond(countChildren)" id="filepond-drop" type="file"/>
                             </div>
+                            <x-button
+                                x-cloak
+                                x-show="tempFilesId.length !== 0 && isLoadingFiles.length === 0"
+                                :label="__('Save')"
+                                primary
+                                x-on:click="submitFiles(selected.collection_name ?? getNodePath(null, 'collection_name'), uploadSuccess)"
+                            />
+                        </div>
                         @endCanAction
                     </div>
                     <div x-show="selection.file_name && selected" x-cloak class="flex flex-col gap-3">
@@ -207,33 +207,33 @@
                         </div>
                         <div class="flex flex-col gap-1.5">
                             @canAction(\FluxErp\Actions\Media\UploadMedia::class)
-                                <x-input :label="__('Name')" disabled x-model="selection.name"/>
-                                <x-input :label="__('Path')" disabled x-model="selection.collection_name"/>
-                                <x-input :label="__('File type')" disabled x-bind:value="selection.file_name?.split('.').pop()"/>
-                                <x-input :label="__('MIME-Type')" disabled x-bind:value="selection.mime_type"/>
-                                <x-input :label="__('Size')" disabled x-bind:value="window.fileSizeHumanReadable(selection?.size)"/>
-                                <x-input :label="__('File')" disabled x-bind:value="selection.file_name"/>
-                                <x-input :label="__('Disk')" disabled x-bind:value="selection.disk"/>
-                                <x-input
-                                    x-show="selection?.disk === 'public'"
-                                    :label="__('Link')"
-                                    readonly
-                                    x-ref="originalLink"
-                                    type="text"
-                                    x-bind:value="selection.original_url"
-                                >
-                                    <x-slot:append>
-                                        <div class="absolute inset-y-0 right-0 flex items-center p-0.5">
-                                            <x-button
-                                                x-on:click="$refs.originalLink.select(); document.execCommand('copy');"
-                                                class="h-full rounded-r-md"
-                                                icon="clipboard-copy"
-                                                primary
-                                                squared
-                                            />
-                                        </div>
-                                    </x-slot:append>
-                                </x-input>
+                            <x-input :label="__('Name')" disabled x-model="selection.name"/>
+                            <x-input :label="__('Path')" disabled x-model="selection.collection_name"/>
+                            <x-input :label="__('File type')" disabled x-bind:value="selection.file_name?.split('.').pop()"/>
+                            <x-input :label="__('MIME-Type')" disabled x-bind:value="selection.mime_type"/>
+                            <x-input :label="__('Size')" disabled x-bind:value="window.fileSizeHumanReadable(selection?.size)"/>
+                            <x-input :label="__('File')" disabled x-bind:value="selection.file_name"/>
+                            <x-input :label="__('Disk')" disabled x-bind:value="selection.disk"/>
+                            <x-input
+                                x-show="selection?.disk === 'public'"
+                                :label="__('Link')"
+                                readonly
+                                x-ref="originalLink"
+                                type="text"
+                                x-bind:value="selection.original_url"
+                            >
+                                <x-slot:append>
+                                    <div class="absolute inset-y-0 right-0 flex items-center p-0.5">
+                                        <x-button
+                                            x-on:click="$refs.originalLink.select(); document.execCommand('copy');"
+                                            class="h-full rounded-r-md"
+                                            icon="clipboard-copy"
+                                            primary
+                                            squared
+                                        />
+                                    </div>
+                                </x-slot:append>
+                            </x-input>
                             @endCanAction
                             <object
                                 class="object-contain"

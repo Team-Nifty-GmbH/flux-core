@@ -12,6 +12,8 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Number;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
@@ -78,12 +80,26 @@ class FolderTree extends Component
             'acceptsMimeTypes'
         );
 
-        // merge the validation rules
+        $uploadRules = config('livewire.temporary_file_upload.rules')
+            ?? 'file|max:' . min(
+                (int) Number::fromFileSizeToBytes(ini_get('upload_max_filesize')),
+                (int) Number::fromFileSizeToBytes(ini_get('post_max_size')),
+            );
+
+        if (is_array($uploadRules)) {
+            $uploadRules = Arr::prepend($uploadRules, 'required');
+            if ($mimeTypes) {
+                $uploadRules['mimetypes'] = implode(',', $mimeTypes);
+            }
+        } else {
+            $uploadRules = Str::start($uploadRules, 'required|');
+            if ($mimeTypes) {
+                $uploadRules .= '|mimetypes:' . implode(',', $mimeTypes);
+            }
+        }
+
         return [
-            'files.' . $index => 'required|' . (config('livewire.temporary_file_upload.rules') ?? 'file|max:12288')
-                . (! is_null($mimeTypes) ?
-                    '|mimetypes:' . implode(',', $mimeTypes) : ''
-                ),
+            'files.' . $index => $uploadRules,
         ];
     }
 
