@@ -144,6 +144,7 @@ class FolderTree extends Component
     public function submitFiles(array|string $collection, array $tempFileNames): bool
     {
         $collection = is_array($collection) ? implode('.', $collection) : $collection;
+
         // set the folder name
         $this->collection = $collection;
         // filter out files array by deleted files on front end
@@ -232,9 +233,11 @@ class FolderTree extends Component
         return ($item['file_name'] ?? false) ? $this->saveFile($item) : $this->saveFolder($item);
     }
 
+    #[Renderless]
     public function saveFolder(array $collection): true
     {
         $newCollectionName = explode('.', $collection['collection_name']);
+
         array_pop($newCollectionName);
         $newCollectionName[] = Str::of($collection['name'])
             ->ascii(config('app.locale'))
@@ -246,18 +249,52 @@ class FolderTree extends Component
             ->first();
 
         resolve_static(MediaModel::class, 'query')
-            ->where('model_type', app($this->modelType)->getMorphClass())
+            ->where('model_type', morph_alias($this->modelType))
             ->where('model_id', $this->modelId)
             ->where('collection_name', 'LIKE', $collection['collection_name'] . '%')
             ->get()
             ->each(function (MediaModel $media) use ($newCollectionName, $model, $collection) {
                 $collectionName = $media->collection_name;
-                $collectionName = str_replace($collection['collection_name'], $newCollectionName, $collectionName);
+                $collectionName = Str::replaceFirst($collection['collection_name'], $newCollectionName, $collectionName);
 
                 $media->move($model, $collectionName);
             });
 
         return true;
+    }
+
+    #[Renderless]
+    public function moveItem(string $mediaId, array|string $targetCollectionName): void
+    {
+        $targetCollectionName = is_array($targetCollectionName)
+            ? implode('.', $targetCollectionName)
+            : $targetCollectionName;
+        $model = resolve_static($this->modelType, 'query')
+            ->whereKey($this->modelId)
+            ->first();
+
+        if (! is_numeric($mediaId)) {
+            resolve_static(MediaModel::class, 'query')
+                ->where('model_type', morph_alias($this->modelType))
+                ->where('model_id', $this->modelId)
+                ->where('collection_name', 'LIKE', $mediaId . '%')
+                ->get()
+                ->each(function (MediaModel $media) use ($mediaId, $targetCollectionName, $model) {
+                    $collectionName = $media->collection_name;
+                    $collectionName = Str::replaceFirst(Str::beforeLast($mediaId, '.'), $targetCollectionName, $collectionName);
+
+                    $media->move($model, $collectionName);
+                });
+        } else {
+            resolve_static(MediaModel::class, 'query')
+                ->where('model_type', morph_alias($this->modelType))
+                ->where('model_id', $this->modelId)
+                ->with('model')
+                ->whereKey($mediaId)
+                ->first()
+                ->move($model, $targetCollectionName);
+        }
+
     }
 
     public function delete(MediaModel $media): bool
