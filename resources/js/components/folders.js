@@ -31,7 +31,7 @@ export default function folders(
                 });
             }
         },
-        async refresh(folders = null) {
+        async refresh() {
             this.tree = [];
             try {
                 this.tree = await getTreePromise;

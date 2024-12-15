@@ -1,5 +1,6 @@
 @props([
     'selectable' => false,
+    'sortable' => false,
     'tree' => null,
     'nameAttribute' => 'label',
     'childrenAttribute' => 'children',
@@ -10,7 +11,7 @@
     }
 @endphp
 <div
-    {{ $attributes->except(['wire:model', 'x-model']) }}
+    {{ $attributes->except(['wire:model', 'x-model', 'moved', 'nameAttribute', 'childrenAttribute', 'x-sort:item']) }}
     x-data="folder_tree(
         {{ $tree }},
         '{{ $tree }}',
@@ -42,7 +43,8 @@
     <!-- Recursive Template -->
     <div x-ref="treeNodeTemplate">
         <template>
-            <div class="tree__node flex flex-col pl-1.5">
+            <!-- this is the root level elements only -->
+            <li>
                 <div
                     class="flex items-center cursor-pointer space-x-2 px-1.5 -ml-3 rounded text-sm text-gray-700 dark:text-gray-50 select-none"
                     x-on:click="toggleSelect(node)"
@@ -65,19 +67,39 @@
                     <i class="ph text-base" x-bind:class="node[childrenAttribute] ? (isOpen(node) ? 'ph-folder-open' : 'ph-folder') : 'ph-file'"></i>
                     <div class="whitespace-nowrap" x-html="node[nameAttribute]"></div>
                 </div>
-                <ul
-                    x-show="isOpen(node) && node[childrenAttribute]?.length"
-                    class="tree__children pl-4 border-l border-gray-200 dark:border-slate-500">
-                    <template x-for="childNode in node[childrenAttribute] ?? []" :key="childNode.id">
-                        <li>
-                            <template
-                                x-template-outlet="$refs.treeNodeTemplate.querySelector('template')"
-                                x-data="{ node: childNode, parent: node }">
-                            </template>
-                        </li>
-                    </template>
-                </ul>
-            </div>
+                <template x-if="node[childrenAttribute]?.length">
+                    <ul
+                        @if($sortable)
+                            x-sort="(item, position) => {{{ $attributes->get('moved', 'null') }}}"
+                            x-sort:group="folder-tree"
+                        @endif
+                        x-show="isOpen(node) && node[childrenAttribute]?.length"
+                        class="tree__children pl-4 border-l border-gray-200 dark:border-slate-500">
+                        @if($sortable)
+                            <li></li>
+                        @endif
+                        <template x-for="childNode in node[childrenAttribute] ?? []" :key="childNode.id">
+                            <!-- these are the lower levels -->
+                            <li
+                                data-child-node
+                                class="tree__node flex flex-col pl-1.5"
+                                @if($attributes->has('x-sort:item'))
+                                    x-sort:item="{{ $attributes->get('x-sort:item') }}"
+                                    x-bind:data-id="{{ $attributes->get('x-sort:item') }}"
+                                @else
+                                    x-sort:item="childNode.id"
+                                    x-bind:data-id="childNode.id"
+                                @endif
+                            >
+                                <template
+                                    x-template-outlet="$refs.treeNodeTemplate.querySelector('template')"
+                                    x-data="{node: childNode, parent: node}">
+                                </template>
+                            </li>
+                        </template>
+                    </ul>
+                </template>
+            </li>
         </template>
     </div>
     {{ $footer ?? null }}
