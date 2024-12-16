@@ -1,46 +1,58 @@
 <div>
-    <form class="space-y-5">
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <x-input :label="__('Firstname')" wire:model="user.firstname"/>
-            <x-input :label="__('Lastname')" wire:model="user.lastname"/>
-            <x-input :label="__('Email')" wire:model="user.email"/>
-            <x-input :label="__('Phone')" wire:model="user.phone"/>
-            <x-input :label="__('User code')" wire:model="user.user_code"/>
-            <x-inputs.number
-                :prefix="\FluxErp\Models\Currency::default()?->symbol"
-                :label="__('Cost Per Hour')"
-                wire:model="user.cost_per_hour"
-            />
-        </div>
-        <x-select
-            wire:model="user.language_id"
-            :label="__('Language')"
-            :options="$languages"
-            option-label="name"
-            option-value="id"
-        />
-        <x-select
-            wire:model="user.timezone"
-            :label="__('Timezone')"
-            :options="timezone_identifiers_list()"
-        />
-        <x-select
-            wire:model="user.parent_id"
-            :label="__('Parent')"
-            :options="$users"
-            option-label="name"
-            option-value="id"
-            option-description="email"
-        />
-        <x-checkbox :label="__('Active')" wire:model="user.is_active"/>
-        <x-inputs.password :label="__('New password')" wire:model="user.password"/>
-        <x-inputs.password :label="__('Repeat password')" wire:model="user.password_confirmation"/>
-        <x-input wire:model="user.account_holder" :label="__('Account Holder')"/>
-        <x-input wire:model="user.iban" :label="__('IBAN')"/>
-        <x-input wire:model="user.bic" :label="__('BIC')"/>
-        <x-input wire:model="user.bank_name" :label="__('Bank Name')"/>
-        <x-select :options="$mailAccounts" option-label="email" option-value="id" multiselect :label="__('Mail Accounts')" wire:model="user.mail_accounts" />
-    </form>
+    @section('user-edit')
+        <form class="space-y-5">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                @section('user-edit.personal-data')
+                    <x-input :label="__('Firstname')" wire:model="user.firstname"/>
+                    <x-input :label="__('Lastname')" wire:model="user.lastname"/>
+                    <x-input :label="__('Email')" wire:model="user.email"/>
+                    <x-input :label="__('Phone')" wire:model="user.phone"/>
+                    <x-input :label="__('User code')" wire:model="user.user_code"/>
+                    <x-inputs.number
+                        :prefix="\FluxErp\Models\Currency::default()?->symbol"
+                        :label="__('Cost Per Hour')"
+                        wire:model="user.cost_per_hour"
+                    />
+                @show
+            </div>
+            @section('user-edit.selects')
+                <x-select
+                    wire:model="user.language_id"
+                    :label="__('Language')"
+                    :options="$languages"
+                    option-label="name"
+                    option-value="id"
+                />
+                <x-select
+                    wire:model="user.timezone"
+                    :label="__('Timezone')"
+                    :options="timezone_identifiers_list()"
+                />
+                <x-select
+                    wire:model="user.parent_id"
+                    :label="__('Parent')"
+                    :options="$users"
+                    option-label="name"
+                    option-value="id"
+                    option-description="email"
+                />
+            @show
+            @section('user-edit.attributes')
+                <x-checkbox :label="__('Active')" wire:model="user.is_active"/>
+                <x-inputs.password :label="__('New password')" wire:model="user.password"/>
+                <x-inputs.password :label="__('Repeat password')" wire:model="user.password_confirmation"/>
+            @show
+            @section('user-edit.bank-connection')
+                <x-input wire:model="user.account_holder" :label="__('Account Holder')"/>
+                <x-input wire:model="user.iban" :label="__('IBAN')"/>
+                <x-input wire:model="user.bic" :label="__('BIC')"/>
+                <x-input wire:model="user.bank_name" :label="__('Bank Name')"/>
+            @show
+            @section('user-edit.mail-accounts')
+                <x-select :options="$mailAccounts" option-label="email" option-value="id" multiselect :label="__('Mail Accounts')" wire:model="user.mail_accounts" />
+            @show
+        </form>
+    @show
     <div class="border-b border-gray-200" x-data="{active: 'roles', user: $wire.entangle('user')}">
         <nav class="mt-2 -mb-px flex space-x-8 pb-5" aria-label="Tabs">
             <div x-on:click="active = 'roles'"
