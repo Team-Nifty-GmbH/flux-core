@@ -32,8 +32,8 @@
                     option-label="name"
                     option-value="id"
                 />
-                <x-input type="password" :label="__('New password')" wire:model="user.password"/>
-                <x-input type="password" :label="__('Repeat password')" wire:model="user.password_confirmation"/>
+                <x-inputs.password :label="__('New password')" wire:model="user.password"/>
+                <x-inputs.password :label="__('Repeat password')" wire:model="user.password_confirmation"/>
             </form>
         @show
         @section('profile.notifications')
