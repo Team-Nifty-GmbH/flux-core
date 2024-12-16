@@ -48,7 +48,9 @@
                 <x-input wire:model="user.bic" :label="__('BIC')"/>
                 <x-input wire:model="user.bank_name" :label="__('Bank Name')"/>
             @show
-            <x-select :options="$mailAccounts" option-label="email" option-value="id" multiselect :label="__('Mail Accounts')" wire:model="user.mail_accounts" />
+            @section('user-edit.mail-accounts')
+                <x-select :options="$mailAccounts" option-label="email" option-value="id" multiselect :label="__('Mail Accounts')" wire:model="user.mail_accounts" />
+            @show
         </form>
     @show
     <div class="border-b border-gray-200" x-data="{active: 'roles', user: $wire.entangle('user')}">
