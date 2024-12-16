@@ -6,60 +6,67 @@
         notificationSettings: $wire.entangle('notificationSettings'),
         }"
 >
-    <form class="space-y-5">
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div class="w-full md:flex md:space-x-6">
-                <label for="avatar" style="cursor: pointer">
-                    <x-avatar class="m-auto" size="w-24 h-24" src="{{ $avatar }}"/>
-                </label>
-                <input type="file" accept="image/*" id="avatar" class="hidden" wire:model.live="avatar"/>
-                <div class="w-full space-y-5">
-                    <x-input :label="__('Firstname')" wire:model="user.firstname"/>
-                    <x-input :label="__('Lastname')" wire:model="user.lastname"/>
+    @section('profile')
+        @section('profile.form')
+            <form class="space-y-5">
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div class="w-full md:flex md:space-x-6">
+                        <label for="avatar" style="cursor: pointer">
+                            <x-avatar class="m-auto" size="w-24 h-24" src="{{ $avatar }}"/>
+                        </label>
+                        <input type="file" accept="image/*" id="avatar" class="hidden" wire:model.live="avatar"/>
+                        <div class="w-full space-y-5">
+                            <x-input :label="__('Firstname')" wire:model="user.firstname"/>
+                            <x-input :label="__('Lastname')" wire:model="user.lastname"/>
+                        </div>
+                    </div>
+                    <div class="space-y-5">
+                        <x-input :label="__('Email')" wire:model="user.email"/>
+                        <x-input :label="__('User code')" wire:model="user.user_code"/>
+                    </div>
                 </div>
-            </div>
-            <div class="space-y-5">
-                <x-input :label="__('Email')" wire:model="user.email"/>
-                <x-input :label="__('User code')" wire:model="user.user_code"/>
-            </div>
-        </div>
-        <x-select
-            wire:model="user.language_id"
-            :label="__('Language')"
-            :options="$languages"
-            option-label="name"
-            option-value="id"
-        />
-        <x-input type="password" :label="__('New password')" wire:model="user.password"/>
-        <x-input type="password" :label="__('Repeat password')" wire:model="user.password_confirmation"/>
-    </form>
-    <x-table>
-        <x-slot name="title">
-            <h2 class="pt-6 dark:text-white">{{ __('Notifications') }}</h2>
-            <x-button primary x-on:click="initSW()">{{ __('Activate Web Push') }}</x-button>
-        </x-slot>
-        <x-slot name="header">
-                <th>{{ __('Notification') }}</th>
-                <template x-for="(notificationChannel, name) in notificationChannels">
-                    <th class="text-left">
-                        <div x-text="name"/>
-                    </th>
-                </template>
-        </x-slot>
-        @foreach($notificationSettings as $notificationName => $notification)
-            <tr>
-                <td>
-                    <div>{{ $notificationName }}</div>
-                </td>
-                @foreach($notification as $channel => $channelSettings)
-                    <td>
-                        <x-checkbox
-                            wire:model.live="notificationSettings.{{ $notificationName }}.{{ $channel }}.is_active"
-                        />
-                    </td>
+                <x-select
+                    wire:model="user.language_id"
+                    :label="__('Language')"
+                    :options="$languages"
+                    option-label="name"
+                    option-value="id"
+                />
+                <x-input type="password" :label="__('New password')" wire:model="user.password"/>
+                <x-input type="password" :label="__('Repeat password')" wire:model="user.password_confirmation"/>
+            </form>
+        @show
+        @section('profile.notifications')
+            <x-flux::table>
+                <x-slot:title>
+                    <h2 class="pt-6 dark:text-white">{{ __('Notifications') }}</h2>
+                    <x-button primary x-on:click="initSW()">{{ __('Activate Web Push') }}</x-button>
+                </x-slot:title>
+                <x-slot:header>
+                        <th>{{ __('Notification') }}</th>
+                        <template x-for="(notificationChannel, name) in notificationChannels">
+                            <th class="text-left">
+                                <div x-text="name"/>
+                            </th>
+                        </template>
+                </x-slot:header>
+                @foreach($notificationSettings as $notificationName => $notification)
+                    <tr>
+                        <td>
+                            <div>{{ $notificationName }}</div>
+                        </td>
+                        @foreach($notification as $channel => $channelSettings)
+                            <td>
+                                <x-checkbox
+                                    wire:model.live="notificationSettings.{{ $notificationName }}.{{ $channel }}.is_active"
+                                />
+                            </td>
+                        @endforeach
+                    </tr>
                 @endforeach
-        @endforeach
-    </x-table>
+            </x-flux::table>
+        @show
+    @show
     <div class="flex justify-end space-x-5 pt-5">
         <x-button :label="__('Cancel')" x-on:click="window.history.back()"/>
         <x-button primary :label="__('Save')" wire:click="save"/>
