@@ -64,6 +64,7 @@ use FluxErp\Livewire\Settings\ProductPropertyGroups;
 use FluxErp\Livewire\Settings\Profile;
 use FluxErp\Livewire\Settings\QueueMonitor;
 use FluxErp\Livewire\Settings\Scheduling;
+use FluxErp\Livewire\Settings\Search;
 use FluxErp\Livewire\Settings\SerialNumberRanges;
 use FluxErp\Livewire\Settings\Tags;
 use FluxErp\Livewire\Settings\TicketTypes;
@@ -197,10 +198,9 @@ Route::middleware('web')
                         Route::get('/serial-number-ranges', SerialNumberRanges::class)
                             ->name('serial-number-ranges');
                         Route::get('/scheduling', Scheduling::class)->name('scheduling');
-                        Route::get('/queue-monitor', QueueMonitor::class)
-                            ->name('queue-monitor');
-                        Route::get('/plugins', Plugins::class)
-                            ->name('plugins');
+                        Route::get('/queue-monitor', QueueMonitor::class)->name('queue-monitor');
+                        Route::get('/plugins', Plugins::class)->name('plugins');
+                        Route::get('/search', Search::class)->name('search');
                     });
 
                 Route::get('/media', MediaGrid::class)
