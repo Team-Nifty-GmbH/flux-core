@@ -50,6 +50,11 @@ class CreateTask extends FluxAction
         return $task->fresh();
     }
 
+    protected function prepareForValidation(): void
+    {
+        $this->data['priority'] ??= 0;
+    }
+
     protected function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
