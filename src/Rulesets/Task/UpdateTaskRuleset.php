@@ -36,7 +36,7 @@ class UpdateTaskRuleset extends FluxRuleset
             'description' => 'string|nullable',
             'start_date' => 'present|date|nullable',
             'due_date' => 'present|date|nullable|after_or_equal:start_date',
-            'priority' => 'integer|nullable|min:0',
+            'priority' => 'sometimes|required|integer|min:0',
             'state' => [
                 'string',
                 ValidStateRule::make(TaskState::class),
