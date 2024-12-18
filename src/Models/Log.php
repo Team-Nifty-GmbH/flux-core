@@ -2,12 +2,11 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Traits\BroadcastsEvents;
 use Illuminate\Database\Eloquent\MassPrunable;
 
 class Log extends FluxModel
 {
-    use BroadcastsEvents, MassPrunable;
+    use MassPrunable;
 
     protected $guarded = [
         'id',

@@ -3,14 +3,11 @@
 namespace FluxErp\Models\Pivots;
 
 use FluxErp\Models\Product;
-use FluxErp\Traits\BroadcastsEvents;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ProductBundleProduct extends FluxPivot
 {
-    use BroadcastsEvents;
-
     protected $table = 'product_bundle_product';
 
     public $timestamps = false;

@@ -5,7 +5,6 @@ namespace FluxErp\Models;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\CommunicationTypeEnum;
 use FluxErp\Models\Pivots\Communicatable;
-use FluxErp\Traits\BroadcastsEvents;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
@@ -29,7 +28,7 @@ use Spatie\Tags\HasTags;
 
 class Communication extends FluxModel implements HasMedia, OffersPrinting
 {
-    use BroadcastsEvents, HasPackageFactory, HasTags, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity,
+    use HasPackageFactory, HasTags, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity,
         Printable, Searchable, SoftDeletes;
 
     protected $guarded = [

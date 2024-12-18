@@ -4,13 +4,10 @@ namespace FluxErp\Models\Pivots;
 
 use FluxErp\Models\Order;
 use FluxErp\Models\Schedule;
-use FluxErp\Traits\BroadcastsEvents;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OrderSchedule extends FluxPivot
 {
-    use BroadcastsEvents;
-
     protected $table = 'order_schedule';
 
     public $timestamps = false;

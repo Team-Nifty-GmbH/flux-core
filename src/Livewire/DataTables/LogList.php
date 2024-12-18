@@ -5,12 +5,9 @@ namespace FluxErp\Livewire\DataTables;
 use FluxErp\Models\Log;
 use Illuminate\Support\Str;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
-use TeamNiftyGmbH\DataTable\Traits\HasEloquentListeners;
 
 class LogList extends BaseDataTable
 {
-    use HasEloquentListeners;
-
     protected string $model = Log::class;
 
     public array $enabledCols = [

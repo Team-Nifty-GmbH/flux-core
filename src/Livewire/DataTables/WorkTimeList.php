@@ -19,12 +19,9 @@ use Livewire\Attributes\Renderless;
 use Spatie\ModelInfo\ModelInfo;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
-use TeamNiftyGmbH\DataTable\Traits\HasEloquentListeners;
 
 class WorkTimeList extends BaseDataTable
 {
-    use HasEloquentListeners;
-
     protected string $model = WorkTime::class;
 
     protected ?string $includeBefore = 'flux::livewire.datatables.work-time-list.include-before';

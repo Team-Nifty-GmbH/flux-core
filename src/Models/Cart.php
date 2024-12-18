@@ -7,7 +7,6 @@ use FluxErp\Actions\CartItem\UpdateCartItem;
 use FluxErp\Actions\Order\CreateOrder;
 use FluxErp\Actions\OrderPosition\CreateOrderPosition;
 use FluxErp\Helpers\PriceHelper;
-use FluxErp\Traits\BroadcastsEvents;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
@@ -22,7 +21,7 @@ use Illuminate\Support\Collection;
 
 class Cart extends FluxModel
 {
-    use BroadcastsEvents, HasPackageFactory, HasUuid, SoftDeletes;
+    use HasPackageFactory, HasUuid, SoftDeletes;
 
     protected $guarded = [
         'id',
@@ -79,11 +78,6 @@ class Cart extends FluxModel
                     ]
                 );
             });
-    }
-
-    public function broadcastWith(): array
-    {
-        return ['id' => $this->id];
     }
 
     public function addItems(array|int $products): static

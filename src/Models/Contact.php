@@ -5,7 +5,6 @@ namespace FluxErp\Models;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Models\Pivots\ContactDiscount;
 use FluxErp\Models\Pivots\ContactDiscountGroup;
-use FluxErp\Traits\BroadcastsEvents;
 use FluxErp\Traits\Categorizable;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Communicatable;
@@ -35,7 +34,7 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, OffersPrinting
 {
-    use BroadcastsEvents, Categorizable, Commentable, Communicatable, Filterable, HasAdditionalColumns,
+    use Categorizable, Commentable, Communicatable, Filterable, HasAdditionalColumns,
         HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasSerialNumberRange, HasUserModification,
         HasUuid, InteractsWithMedia, Lockable, LogsActivity, Printable, SoftDeletes;
 
@@ -228,17 +227,6 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
             ->sortByDesc('discount')
             ->unique(fn ($item) => $item->model_id . $item->model_type . $item->is_percentage)
             ->values();
-    }
-
-    /**
-     * Get the data to broadcast for the model.
-     */
-    public function broadcastWith(string $event): array
-    {
-        return match ($event) {
-            'deleted' => ['model' => $this],
-            default => ['model' => $this->load('addresses')]
-        };
     }
 
     public function registerMediaCollections(): void

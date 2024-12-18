@@ -3,7 +3,6 @@
 namespace FluxErp\Models;
 
 use FluxErp\Casts\Money;
-use FluxErp\Traits\BroadcastsEvents;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
@@ -18,7 +17,7 @@ use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 
 class Transaction extends FluxModel implements InteractsWithDataTables
 {
-    use BroadcastsEvents, HasFrontendAttributes, HasPackageFactory, HasUserModification, HasUuid, LogsActivity,
+    use HasFrontendAttributes, HasPackageFactory, HasUserModification, HasUuid, LogsActivity,
         Searchable, SoftDeletes;
 
     protected $guarded = [

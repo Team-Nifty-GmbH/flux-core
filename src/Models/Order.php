@@ -17,7 +17,6 @@ use FluxErp\States\Order\PaymentState\PartialPaid;
 use FluxErp\States\Order\PaymentState\PaymentState;
 use FluxErp\Support\Calculation\Rounding;
 use FluxErp\Support\Collection\OrderCollection;
-use FluxErp\Traits\BroadcastsEvents;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Communicatable;
 use FluxErp\Traits\Filterable;
@@ -58,7 +57,7 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Order extends FluxModel implements HasMedia, InteractsWithDataTables, OffersPrinting
 {
-    use BroadcastsEvents, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasClientAssignment,
+    use Commentable, Communicatable, Filterable, HasAdditionalColumns, HasClientAssignment,
         HasCustomEvents, HasFrontendAttributes, HasPackageFactory, HasRelatedModel, HasSerialNumberRange, HasStates,
         HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable, Searchable, SoftDeletes, Trackable {
             Printable::resolvePrintViews as protected printableResolvePrintViews;

@@ -12,7 +12,6 @@ use FluxErp\Notifications\QueueMonitor\Job\JobStartedNotification;
 use FluxErp\States\QueueMonitor\Failed;
 use FluxErp\States\QueueMonitor\QueueMonitorState;
 use FluxErp\States\QueueMonitor\Succeeded;
-use FluxErp\Traits\BroadcastsEvents;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\MonitorsQueue;
 use Illuminate\Database\Eloquent\Builder;
@@ -29,7 +28,7 @@ use Throwable;
 
 class QueueMonitor extends FluxModel
 {
-    use BroadcastsEvents, HasFrontendAttributes, HasStates, MassPrunable;
+    use HasFrontendAttributes, HasStates, MassPrunable;
 
     protected $guarded = [
         'id',

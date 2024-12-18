@@ -3,7 +3,6 @@
 namespace FluxErp\Models;
 
 use FluxErp\Support\Calculation\Rounding;
-use FluxErp\Traits\BroadcastsEvents;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUuid;
@@ -13,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class WorkTime extends FluxModel
 {
-    use BroadcastsEvents, Filterable, HasPackageFactory, HasUuid, SoftDeletes;
+    use Filterable, HasPackageFactory, HasUuid, SoftDeletes;
 
     protected $guarded = [
         'id',

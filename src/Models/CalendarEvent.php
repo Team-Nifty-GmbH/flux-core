@@ -3,7 +3,6 @@
 namespace FluxErp\Models;
 
 use FluxErp\Models\Pivots\CalendarEventInvite;
-use FluxErp\Traits\BroadcastsEvents;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\InteractsWithMedia;
 use FluxErp\Traits\LogsActivity;
@@ -16,7 +15,7 @@ use TeamNiftyGmbH\Calendar\Models\CalendarEvent as BaseCalendarEvent;
 
 class CalendarEvent extends BaseCalendarEvent implements HasMedia
 {
-    use BroadcastsEvents, HasUserModification, InteractsWithMedia, LogsActivity, ResolvesRelationsThroughContainer;
+    use HasUserModification, InteractsWithMedia, LogsActivity, ResolvesRelationsThroughContainer;
 
     protected $guarded = [
         'id',

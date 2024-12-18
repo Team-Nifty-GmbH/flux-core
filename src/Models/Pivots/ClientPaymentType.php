@@ -4,14 +4,11 @@ namespace FluxErp\Models\Pivots;
 
 use FluxErp\Models\Client;
 use FluxErp\Models\PaymentType;
-use FluxErp\Traits\BroadcastsEvents;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ClientPaymentType extends FluxPivot
 {
-    use BroadcastsEvents;
-
     protected $table = 'client_payment_type';
 
     public $timestamps = false;

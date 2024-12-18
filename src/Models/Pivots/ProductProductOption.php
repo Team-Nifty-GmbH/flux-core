@@ -4,14 +4,11 @@ namespace FluxErp\Models\Pivots;
 
 use FluxErp\Models\Product;
 use FluxErp\Models\ProductOption;
-use FluxErp\Traits\BroadcastsEvents;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ProductProductOption extends FluxPivot
 {
-    use BroadcastsEvents;
-
     protected $table = 'product_product_option';
 
     public $timestamps = false;

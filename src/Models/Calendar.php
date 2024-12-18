@@ -2,7 +2,6 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Traits\BroadcastsEvents;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\ResolvesRelationsThroughContainer;
@@ -12,7 +11,7 @@ use TeamNiftyGmbH\Calendar\Models\Calendar as BaseCalendar;
 
 class Calendar extends BaseCalendar
 {
-    use BroadcastsEvents, HasUserModification, LogsActivity, ResolvesRelationsThroughContainer;
+    use HasUserModification, LogsActivity, ResolvesRelationsThroughContainer;
 
     protected $guarded = [
         'id',

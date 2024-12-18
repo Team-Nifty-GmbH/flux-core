@@ -4,7 +4,6 @@ namespace FluxErp\Models;
 
 use FluxErp\Casts\Money;
 use FluxErp\States\Ticket\TicketState;
-use FluxErp\Traits\BroadcastsEvents;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
@@ -30,7 +29,7 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables
 {
-    use BroadcastsEvents, Commentable, Filterable, HasAdditionalColumns, HasCustomEvents, HasFrontendAttributes,
+    use Commentable, Filterable, HasAdditionalColumns, HasCustomEvents, HasFrontendAttributes,
         HasPackageFactory, HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification, HasUuid,
         InteractsWithMedia, LogsActivity, Searchable, SoftDeletes, Trackable;
 

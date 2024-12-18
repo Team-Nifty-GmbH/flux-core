@@ -6,7 +6,6 @@ use FluxErp\Casts\Money;
 use FluxErp\Casts\TimeDuration;
 use FluxErp\Contracts\Calendarable;
 use FluxErp\States\Task\TaskState;
-use FluxErp\Traits\BroadcastsEvents;
 use FluxErp\Traits\Categorizable;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
@@ -33,7 +32,7 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDataTables
 {
-    use BroadcastsEvents, Categorizable, Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes,
+    use Categorizable, Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes,
         HasPackageFactory, HasStates, HasTags, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity,
         Searchable, SoftDeletes, Trackable;
 

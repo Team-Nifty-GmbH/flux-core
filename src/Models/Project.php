@@ -5,7 +5,6 @@ namespace FluxErp\Models;
 use FluxErp\Casts\TimeDuration;
 use FluxErp\Contracts\Calendarable;
 use FluxErp\States\Project\ProjectState;
-use FluxErp\Traits\BroadcastsEvents;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
@@ -28,7 +27,7 @@ use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 
 class Project extends FluxModel implements Calendarable, InteractsWithDataTables
 {
-    use BroadcastsEvents, Commentable, Filterable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes,
+    use Commentable, Filterable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes,
         HasPackageFactory, HasSerialNumberRange, HasStates, HasTags, HasUserModification, HasUuid, LogsActivity,
         Searchable, SoftDeletes;
 
