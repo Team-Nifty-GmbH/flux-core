@@ -11,6 +11,7 @@ use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 
@@ -44,12 +45,15 @@ class Project extends Component
             )
         );
 
-        $this->availableStates = app(ProjectModel::class)->getStatesFor('state')->map(function ($state) {
-            return [
-                'label' => __(ucfirst(str_replace('_', ' ', $state))),
-                'name' => $state,
-            ];
-        })->toArray();
+        $this->availableStates = app(ProjectModel::class)
+            ->getStatesFor('state')
+            ->map(function (string $state) {
+                return [
+                    'label' => __(Str::headline($state)),
+                    'name' => $state,
+                ];
+            })
+            ->toArray();
     }
 
     public function render(): View|Factory|Application

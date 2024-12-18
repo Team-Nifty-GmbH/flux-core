@@ -9,7 +9,7 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::table('addresses', function (Blueprint $table) {
-            $table->string('advertising_state')->default('open')->after('contact_id');
+            $table->string('advertising_state')->default('open')->after('password');
         });
     }
 

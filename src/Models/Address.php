@@ -204,8 +204,8 @@ class Address extends FluxAuthenticatable implements HasLocalePreference, HasMed
     protected function casts(): array
     {
         return [
-            'advertising_state' => AdvertisingState::class,
             'date_of_birth' => 'date',
+            'advertising_state' => AdvertisingState::class,
             'has_formal_salutation' => 'boolean',
             'is_main_address' => 'boolean',
             'is_invoice_address' => 'boolean',

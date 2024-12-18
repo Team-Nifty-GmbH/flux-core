@@ -15,6 +15,7 @@ use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Modelable;
 use Livewire\Attributes\Renderless;
@@ -48,7 +49,7 @@ class Addresses extends Component
             ->getStatesFor('advertising_state')
             ->map(function (string $state) {
                 return [
-                    'label' => __(ucfirst(str_replace('_', ' ', $state))),
+                    'label' => __(Str::headline($state)),
                     'name' => $state,
                 ];
             })
