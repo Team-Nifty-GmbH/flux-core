@@ -3,11 +3,10 @@
 namespace FluxErp\States\Order;
 
 use FluxErp\States\State;
-use Illuminate\Contracts\Support\Arrayable;
 use Spatie\ModelStates\StateConfig;
 use TeamNiftyGmbH\DataTable\Contracts\HasFrontendFormatter;
 
-abstract class OrderState extends State implements Arrayable, HasFrontendFormatter
+abstract class OrderState extends State implements HasFrontendFormatter
 {
     abstract public function color(): string;
 
@@ -84,10 +83,5 @@ abstract class OrderState extends State implements Arrayable, HasFrontendFormatt
             self::getStateMapping()
                 ->map(fn ($key) => (new $key(''))->color()),
         ];
-    }
-
-    public function toArray(): array|string
-    {
-        return $this->__toString();
     }
 }
