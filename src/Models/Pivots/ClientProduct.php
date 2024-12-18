@@ -4,9 +4,9 @@ namespace FluxErp\Models\Pivots;
 
 use FluxErp\Models\Client;
 use FluxErp\Models\Product;
+use FluxErp\Traits\BroadcastsEvents;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class ClientProduct extends FluxPivot
 {

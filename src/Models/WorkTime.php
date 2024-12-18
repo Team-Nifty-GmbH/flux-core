@@ -3,13 +3,13 @@
 namespace FluxErp\Models;
 
 use FluxErp\Support\Calculation\Rounding;
+use FluxErp\Traits\BroadcastsEvents;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class WorkTime extends FluxModel
 {

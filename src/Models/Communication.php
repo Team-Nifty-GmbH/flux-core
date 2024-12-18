@@ -5,6 +5,7 @@ namespace FluxErp\Models;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\CommunicationTypeEnum;
 use FluxErp\Models\Pivots\Communicatable;
+use FluxErp\Traits\BroadcastsEvents;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
@@ -25,7 +26,6 @@ use InvalidArgumentException;
 use Meilisearch\Endpoints\Indexes;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\Tags\HasTags;
-use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Communication extends FluxModel implements HasMedia, OffersPrinting
 {

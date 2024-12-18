@@ -3,11 +3,11 @@
 namespace FluxErp\Models;
 
 use FluxErp\Enums\RepeatableTypeEnum;
+use FluxErp\Traits\BroadcastsEvents;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Schedule extends FluxModel
 {

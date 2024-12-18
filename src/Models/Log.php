@@ -2,8 +2,8 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Traits\BroadcastsEvents;
 use Illuminate\Database\Eloquent\MassPrunable;
-use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Log extends FluxModel
 {

@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use FluxErp\Models\Pivots\CalendarEventInvite;
+use FluxErp\Traits\BroadcastsEvents;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\InteractsWithMedia;
 use FluxErp\Traits\LogsActivity;
@@ -12,7 +13,6 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Arr;
 use Spatie\MediaLibrary\HasMedia;
 use TeamNiftyGmbH\Calendar\Models\CalendarEvent as BaseCalendarEvent;
-use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class CalendarEvent extends BaseCalendarEvent implements HasMedia
 {
