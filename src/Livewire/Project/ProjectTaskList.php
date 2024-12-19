@@ -9,6 +9,7 @@ use FluxErp\Livewire\Forms\TaskForm;
 use FluxErp\Models\Task;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithTabs;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -41,9 +42,9 @@ class ProjectTaskList extends BaseTaskList
         );
 
         $this->availableStates = app(Task::class)->getStatesFor('state')
-            ->map(function ($state) {
+            ->map(function (string $state) {
                 return [
-                    'label' => __(ucfirst(str_replace('_', ' ', $state))),
+                    'label' => __(Str::headline($state)),
                     'name' => $state,
                 ];
             })

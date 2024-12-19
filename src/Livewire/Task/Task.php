@@ -46,7 +46,7 @@ class Task extends Component
 
         $this->availableStates = app(TaskModel::class)
             ->getStatesFor('state')
-            ->map(function ($state) {
+            ->map(function (string $state) {
                 return [
                     'label' => __(Str::headline($state)),
                     'name' => $state,

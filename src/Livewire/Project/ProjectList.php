@@ -6,6 +6,7 @@ use FluxErp\Actions\Project\CreateProject;
 use FluxErp\Livewire\DataTables\ProjectList as BaseProjectList;
 use FluxErp\Livewire\Forms\ProjectForm;
 use FluxErp\Models\Project;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -28,12 +29,15 @@ class ProjectList extends BaseProjectList
             null
         );
 
-        $this->availableStates = app(Project::class)->getStatesFor('state')->map(function ($state) {
-            return [
-                'label' => __(ucfirst(str_replace('_', ' ', $state))),
-                'name' => $state,
-            ];
-        })->toArray();
+        $this->availableStates = app(Project::class)
+            ->getStatesFor('state')
+            ->map(function (string $state) {
+                return [
+                    'label' => __(Str::headline($state)),
+                    'name' => $state,
+                ];
+            })
+            ->toArray();
     }
 
     protected function getTableActions(): array
