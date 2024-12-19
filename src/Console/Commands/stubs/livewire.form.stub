@@ -1,0 +1,18 @@
+<?php
+
+namespace DummyNamespace;
+
+use FluxErp\Livewire\Forms\FluxForm;
+use Livewire\Attributes\Locked;
+{{ imports }}
+
+class DummyClass extends FluxForm
+{
+    #[Locked]
+    public ?int $id = null;
+
+    protected function getActions(): array
+    {
+        return [{{ actions }}];
+    }
+}
