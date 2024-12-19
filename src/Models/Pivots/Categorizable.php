@@ -7,11 +7,10 @@ use FluxErp\Traits\ResolvesRelationsThroughContainer;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphPivot;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Categorizable extends MorphPivot
 {
-    use BroadcastsEvents, ResolvesRelationsThroughContainer;
+    use ResolvesRelationsThroughContainer;
 
     protected $table = 'categorizables';
 

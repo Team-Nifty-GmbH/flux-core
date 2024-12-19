@@ -24,12 +24,11 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Log;
 use Spatie\ModelStates\HasStates;
-use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 use Throwable;
 
 class QueueMonitor extends FluxModel
 {
-    use BroadcastsEvents, HasFrontendAttributes, HasStates, MassPrunable;
+    use HasFrontendAttributes, HasStates, MassPrunable;
 
     protected $guarded = [
         'id',

@@ -7,7 +7,9 @@ use FluxErp\Models\Country;
 use FluxErp\Models\Language;
 use FluxErp\Rules\ExistsWithForeign;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rules\ValidStateRule;
 use FluxErp\Rulesets\FluxRuleset;
+use FluxErp\States\Address\AdvertisingState;
 
 class UpdateAddressRuleset extends FluxRuleset
 {
@@ -38,6 +40,10 @@ class UpdateAddressRuleset extends FluxRuleset
                 'integer',
                 'nullable',
                 app(ModelExists::class, ['model' => Language::class]),
+            ],
+            'advertising_state' => [
+                'string',
+                ValidStateRule::make(AdvertisingState::class),
             ],
             'date_of_birth' => 'date|nullable',
             'department' => 'string|nullable',

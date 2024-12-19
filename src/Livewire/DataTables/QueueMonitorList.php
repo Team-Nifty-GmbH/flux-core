@@ -3,13 +3,9 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\QueueMonitor;
-use TeamNiftyGmbH\DataTable\DataTable;
-use TeamNiftyGmbH\DataTable\Traits\HasEloquentListeners;
 
-class QueueMonitorList extends DataTable
+class QueueMonitorList extends BaseDataTable
 {
-    use HasEloquentListeners;
-
     protected string $model = QueueMonitor::class;
 
     public array $enabledCols = [

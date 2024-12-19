@@ -6,12 +6,9 @@ use FluxErp\Models\Client;
 use FluxErp\Models\Product;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class ClientProduct extends FluxPivot
 {
-    use BroadcastsEvents;
-
     protected $table = 'client_product';
 
     public $timestamps = false;

@@ -15,6 +15,7 @@ use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Modelable;
 use Livewire\Attributes\Renderless;
@@ -40,8 +41,20 @@ class Addresses extends Component
 
     public bool $edit = false;
 
+    public array $availableStates = [];
+
     public function mount(): void
     {
+        $this->availableStates = app(Address::class)
+            ->getStatesFor('advertising_state')
+            ->map(function (string $state) {
+                return [
+                    'label' => __(Str::headline($state)),
+                    'name' => $state,
+                ];
+            })
+            ->toArray();
+
         $this->loadAddresses();
 
         $this->address->fill(
@@ -221,30 +234,48 @@ class Addresses extends Component
                 ->label(__('Address')),
             TabButton::make('address.comments')
                 ->label(__('Comments'))
-                ->attributes(['x-show' => '$wire.address.id'])
+                ->attributes([
+                    'x-cloak',
+                    'x-show' => '$wire.address.id',
+                ])
                 ->isLivewireComponent()
                 ->wireModel('address.id'),
             TabButton::make('address.attachments')
                 ->label(__('Attachments'))
-                ->attributes(['x-show' => '$wire.address.id'])
+                ->attributes([
+                    'x-cloak',
+                    'x-show' => '$wire.address.id',
+                ])
                 ->isLivewireComponent()
                 ->wireModel('address.id'),
             TabButton::make('address.communication')
                 ->label(__('Communication'))
-                ->attributes(['x-show' => '$wire.address.id'])
+                ->attributes([
+                    'x-cloak',
+                    'x-show' => '$wire.address.id',
+                ])
                 ->isLivewireComponent()
                 ->wireModel('address.id'),
             TabButton::make('address.tasks')
                 ->label(__('Tasks'))
-                ->attributes(['x-show' => '$wire.address.id'])
+                ->attributes([
+                    'x-cloak',
+                    'x-show' => '$wire.address.id',
+                ])
                 ->isLivewireComponent()
                 ->wireModel('address.id'),
             TabButton::make('address.permissions')
                 ->label(__('Permissions'))
-                ->attributes(['x-show' => '$wire.address.id']),
+                ->attributes([
+                    'x-cloak',
+                    'x-show' => '$wire.address.id',
+                ]),
             TabButton::make('address.activities')
                 ->label(__('Activities'))
-                ->attributes(['x-show' => '$wire.address.id'])
+                ->attributes([
+                    'x-cloak',
+                    'x-show' => '$wire.address.id',
+                ])
                 ->isLivewireComponent()
                 ->wireModel('address.id'),
         ];

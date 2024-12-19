@@ -73,7 +73,7 @@
             </x-card>
         @show
     </div>
-    <div class="w-full">
+    <div class="w-full" x-data="{formatter: @js(resolve_static(\FluxErp\Models\Address::class, 'typeScriptAttributes'))}">
         <x-card :title="__('Details')">
             <x-slot:action>
                 <div class="flex gap-1.5">

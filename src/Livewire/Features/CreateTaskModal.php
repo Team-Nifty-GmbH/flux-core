@@ -35,7 +35,7 @@ class CreateTaskModal extends Component
 
         $this->availableStates = app(Task::class)
             ->getStatesFor('state')
-            ->map(function ($state) {
+            ->map(function (string $state) {
                 return [
                     'label' => __(Str::headline($state)),
                     'name' => $state,

@@ -8,11 +8,10 @@ use FluxErp\Traits\ResolvesRelationsThroughContainer;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use TeamNiftyGmbH\Calendar\Models\Calendar as BaseCalendar;
-use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Calendar extends BaseCalendar
 {
-    use BroadcastsEvents, HasUserModification, LogsActivity, ResolvesRelationsThroughContainer;
+    use HasUserModification, LogsActivity, ResolvesRelationsThroughContainer;
 
     protected $guarded = [
         'id',

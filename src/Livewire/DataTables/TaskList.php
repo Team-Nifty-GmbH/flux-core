@@ -4,12 +4,9 @@ namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\Task;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
-use TeamNiftyGmbH\DataTable\Traits\HasEloquentListeners;
 
 class TaskList extends BaseDataTable
 {
-    use HasEloquentListeners;
-
     protected string $model = Task::class;
 
     public bool $showFilterInputs = true;
