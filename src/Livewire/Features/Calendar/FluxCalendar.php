@@ -32,14 +32,10 @@ class FluxCalendar extends CalendarComponent
 
     protected string $view = 'flux::livewire.features.calendar.flux-calendar';
 
-    protected $listeners = ['calendar-view-did-mount' => 'storeViewSettings'];
-
-    public function storeViewSettings(array $view): void
-    {
-        $this->storeSettings([
-            'initialView' => data_get($view, 'type'),
-        ]);
-    }
+    protected $listeners = [
+        'calendar-view-did-mount' => 'storeViewSettings',
+        'calendar-toggle-event-source' => 'toggleEventSource',
+    ];
 
     protected function getCacheKey(): string
     {
@@ -47,10 +43,36 @@ class FluxCalendar extends CalendarComponent
     }
 
     #[Renderless]
-    public function storeSettings(array $data): void
+    public function toggleEventSource(array ...$activeCalendars): void
+    {
+        $this->storeSettings(array_column($activeCalendars, 'publicId'), 'activeCalendars');
+    }
+
+    #[Renderless]
+    public function storeViewSettings(array $view): void
+    {
+        $this->storeSettings(data_get($view, 'type'), 'initialView');
+    }
+
+    #[Renderless]
+    public function storeSettings(mixed $data, ?string $setPath = null): void
     {
         if (! in_array(HasCalendarUserSettings::class, class_uses_recursive(auth()->user()))) {
             return;
+        }
+
+        $currentData = auth()->user()->getCalendarSettings(static::class)->value('settings') ?? [];
+
+        if (! is_null($setPath)) {
+            data_set($currentData, $setPath, $data);
+            $setData = $currentData;
+        } else {
+            $setData = Arr::undot(
+                array_merge(
+                    Arr::dot($currentData),
+                    Arr::dot($data)
+                )
+            );
         }
 
         auth()->user()
@@ -61,12 +83,7 @@ class FluxCalendar extends CalendarComponent
                     'component' => static::class,
                 ],
                 [
-                    'settings' => Arr::undot(
-                        array_merge(
-                            Arr::dot(auth()->user()->getCalendarSettings(static::class)->value('settings') ?? []),
-                            Arr::dot($data)
-                        )
-                    ),
+                    'settings' => $setData,
                 ]
             );
     }

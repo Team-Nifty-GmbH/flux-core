@@ -144,7 +144,7 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
     public static function toCalendar(): array
     {
         return [
-            'id' => Str::uuid()->toString(),
+            'id' => Str::of(static::class)->replace('\\', '.'),
             'modelType' => morph_alias(static::class),
             'name' => __('Tasks'),
             'color' => '#877ae6',
@@ -184,11 +184,11 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
     {
         $task = new static();
         $task->forceFill([
-            'id' => $event['id'],
-            'name' => $event['title'],
-            'start_date' => $event['start'],
-            'due_date' => $event['end'],
-            'description' => $event['description'],
+            'id' => data_get($event, 'id'),
+            'name' => data_get($event, 'title'),
+            'start_date' => data_get($event, 'start'),
+            'due_date' => data_get($event, 'end'),
+            'description' => data_get($event, 'description'),
         ]);
 
         return $task;

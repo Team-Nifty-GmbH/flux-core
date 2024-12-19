@@ -132,7 +132,7 @@ class Project extends FluxModel implements Calendarable, InteractsWithDataTables
     public static function toCalendar(): array
     {
         return [
-            'id' => Str::uuid()->toString(),
+            'id' => Str::of(static::class)->replace('\\', '.'),
             'modelType' => morph_alias(static::class),
             'name' => __('Projects'),
             'color' => '#813d9c',
@@ -172,11 +172,11 @@ class Project extends FluxModel implements Calendarable, InteractsWithDataTables
     {
         $project = new static();
         $project->forceFill([
-            'id' => $event['id'],
-            'name' => $event['title'],
-            'start_date' => $event['start'],
-            'end_date' => $event['end'],
-            'description' => $event['description'],
+            'id' => data_get($event, 'id'),
+            'name' => data_get($event, 'title'),
+            'start_date' => data_get($event, 'start'),
+            'end_date' => data_get($event, 'end'),
+            'description' => data_get($event, 'description'),
         ]);
 
         return $project;
