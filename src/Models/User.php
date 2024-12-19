@@ -35,12 +35,11 @@ use Spatie\MediaLibrary\MediaCollections\File;
 use Spatie\Permission\Traits\HasRoles;
 use TeamNiftyGmbH\Calendar\Traits\HasCalendars;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
-use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 use TeamNiftyGmbH\DataTable\Traits\HasDatatableUserSettings;
 
 class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia, InteractsWithDataTables
 {
-    use BroadcastsEvents, CacheModelQueries, Commentable, Filterable, HasCalendars, HasCalendarUserSettings, HasCart,
+    use CacheModelQueries, Commentable, Filterable, HasCalendars, HasCalendarUserSettings, HasCart,
         HasDatatableUserSettings, HasFrontendAttributes, HasPackageFactory, HasPushSubscriptions, HasRoles, HasUserModification,
         HasUuid, HasWidgets, InteractsWithMedia, MonitorsQueue, Notifiable, Searchable, SoftDeletes;
 

@@ -204,6 +204,19 @@
                     </x-select>
                 </div>
             </div>
+            <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+                <x-label :label="__('Advertising State')" for="{{ md5('address.advertising_state') }}" />
+                <div class="col-span-2">
+                    <x-flux::state
+                        x-bind:class="!$wire.edit && 'pointer-events-none'"
+                        class="w-full"
+                        align="left"
+                        wire:model="address.advertising_state"
+                        formatters="formatter.advertising_state"
+                        available="availableStates"
+                    />
+                </div>
+            </div>
         @endif
     @show
 </div>
@@ -214,7 +227,11 @@
         </h3>
         <hr class="py-2" />
         <div class="flex flex-col gap-1.5">
-            <x-toggle :label="__('Active')" x-bind:disabled="!$wire.edit" wire:model="address.is_active"/>
+            <x-toggle
+                :label="__('Active')"
+                x-bind:disabled="!$wire.edit"
+                wire:model="address.is_active"
+            />
             <x-toggle :label="__('Main Address')" x-bind:disabled="!$wire.edit || $wire.address.is_main_address" wire:model="address.is_main_address"/>
             <x-toggle :label="__('Delivery Address')" x-bind:disabled="!$wire.edit || $wire.address.is_delivery_address" wire:model="address.is_delivery_address"/>
             <x-toggle :label="__('Invoice Address')" x-bind:disabled="!$wire.edit || $wire.address.is_invoice_address" wire:model="address.is_invoice_address"/>

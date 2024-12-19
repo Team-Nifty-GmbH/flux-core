@@ -5,12 +5,9 @@ namespace FluxErp\Models\Pivots;
 use FluxErp\Models\Order;
 use FluxErp\Models\Schedule;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class OrderSchedule extends FluxPivot
 {
-    use BroadcastsEvents;
-
     protected $table = 'order_schedule';
 
     public $timestamps = false;

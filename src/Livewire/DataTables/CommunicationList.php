@@ -4,12 +4,9 @@ namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Models\Communication;
 use Illuminate\Support\Str;
-use TeamNiftyGmbH\DataTable\Traits\HasEloquentListeners;
 
 class CommunicationList extends BaseDataTable
 {
-    use HasEloquentListeners;
-
     protected string $model = Communication::class;
 
     public array $enabledCols = [

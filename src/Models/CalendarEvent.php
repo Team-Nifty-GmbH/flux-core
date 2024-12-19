@@ -12,11 +12,10 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Arr;
 use Spatie\MediaLibrary\HasMedia;
 use TeamNiftyGmbH\Calendar\Models\CalendarEvent as BaseCalendarEvent;
-use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class CalendarEvent extends BaseCalendarEvent implements HasMedia
 {
-    use BroadcastsEvents, HasUserModification, InteractsWithMedia, LogsActivity, ResolvesRelationsThroughContainer;
+    use HasUserModification, InteractsWithMedia, LogsActivity, ResolvesRelationsThroughContainer;
 
     protected $guarded = [
         'id',

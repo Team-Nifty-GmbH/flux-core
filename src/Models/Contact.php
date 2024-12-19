@@ -24,7 +24,6 @@ use FluxErp\Traits\SoftDeletes;
 use FluxErp\View\Printing\Contact\BalanceStatement;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -32,11 +31,10 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\File;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
-use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, OffersPrinting
 {
-    use BroadcastsEvents, Categorizable, Commentable, Communicatable, Filterable, HasAdditionalColumns,
+    use Categorizable, Commentable, Communicatable, Filterable, HasAdditionalColumns,
         HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasSerialNumberRange, HasUserModification,
         HasUuid, InteractsWithMedia, Lockable, LogsActivity, Printable, SoftDeletes;
 
@@ -229,17 +227,6 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
             ->sortByDesc('discount')
             ->unique(fn ($item) => $item->model_id . $item->model_type . $item->is_percentage)
             ->values();
-    }
-
-    /**
-     * Get the data to broadcast for the model.
-     */
-    public function broadcastWith(string $event): array
-    {
-        return match ($event) {
-            'deleted' => ['model' => $this],
-            default => ['model' => $this->load('addresses')]
-        };
     }
 
     public function registerMediaCollections(): void

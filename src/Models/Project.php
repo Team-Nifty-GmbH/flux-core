@@ -25,12 +25,11 @@ use Illuminate\Support\Str;
 use Spatie\ModelStates\HasStates;
 use Spatie\Tags\HasTags;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
-use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 
 class Project extends FluxModel implements Calendarable, InteractsWithDataTables
 {
-    use BroadcastsEvents, Commentable, Filterable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes,
+    use Commentable, Filterable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes,
         HasPackageFactory, HasSerialNumberRange, HasStates, HasTags, HasUserModification, HasUuid, LogsActivity,
         Searchable, SoftDeletes;
 

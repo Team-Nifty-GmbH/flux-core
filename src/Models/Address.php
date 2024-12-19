@@ -6,7 +6,9 @@ use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\SalutationEnum;
 use FluxErp\Mail\MagicLoginLink;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
+use FluxErp\States\Address\AdvertisingState;
 use FluxErp\Support\Collection\AddressCollection;
+use FluxErp\Traits\BroadcastsEvents;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Communicatable;
 use FluxErp\Traits\Filterable;
@@ -43,17 +45,18 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Illuminate\Validation\UnauthorizedException;
 use Spatie\MediaLibrary\HasMedia;
+use Spatie\ModelStates\HasStates;
 use Spatie\Permission\Traits\HasRoles;
 use Spatie\Tags\HasTags;
 use TeamNiftyGmbH\Calendar\Traits\HasCalendars;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
-use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Address extends FluxAuthenticatable implements HasLocalePreference, HasMedia, InteractsWithDataTables, OffersPrinting
 {
     use BroadcastsEvents, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasCalendars, HasCart,
-        HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasRoles, HasTags, HasUserModification, HasUuid,
-        InteractsWithMedia, Lockable, LogsActivity, MonitorsQueue, Notifiable, Printable, Searchable, SoftDeletes;
+        HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasRoles, HasStates, HasTags,
+        HasUserModification, HasUuid, InteractsWithMedia, Lockable, LogsActivity, MonitorsQueue, Notifiable, Printable,
+        Searchable, SoftDeletes;
 
     protected $hidden = [
         'password',
@@ -202,6 +205,7 @@ class Address extends FluxAuthenticatable implements HasLocalePreference, HasMed
     {
         return [
             'date_of_birth' => 'date',
+            'advertising_state' => AdvertisingState::class,
             'has_formal_salutation' => 'boolean',
             'is_main_address' => 'boolean',
             'is_invoice_address' => 'boolean',

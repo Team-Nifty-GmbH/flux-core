@@ -13,12 +13,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Auth;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
-use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 
 class Transaction extends FluxModel implements InteractsWithDataTables
 {
-    use BroadcastsEvents, HasFrontendAttributes, HasPackageFactory, HasUserModification, HasUuid, LogsActivity,
+    use HasFrontendAttributes, HasPackageFactory, HasUserModification, HasUuid, LogsActivity,
         Searchable, SoftDeletes;
 
     protected $guarded = [

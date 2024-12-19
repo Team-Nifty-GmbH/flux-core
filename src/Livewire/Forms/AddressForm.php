@@ -23,6 +23,8 @@ class AddressForm extends FluxForm
 
     public ?int $contact_id = null;
 
+    public ?string $advertising_state = null;
+
     public ?string $company = null;
 
     public ?string $title = null;

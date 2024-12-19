@@ -7,11 +7,10 @@ use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Schedule extends FluxModel
 {
-    use BroadcastsEvents, HasUserModification, HasUuid, SoftDeletes;
+    use HasUserModification, HasUuid, SoftDeletes;
 
     protected $guarded = [
         'id',
