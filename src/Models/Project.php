@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use Carbon\Carbon;
 use FluxErp\Casts\TimeDuration;
 use FluxErp\Contracts\Calendarable;
 use FluxErp\States\Project\ProjectState;
@@ -16,6 +17,7 @@ use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SoftDeletes;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -178,5 +180,14 @@ class Project extends FluxModel implements Calendarable, InteractsWithDataTables
         ]);
 
         return $project;
+    }
+
+    public function scopeInTimeframe(Builder $builder, Carbon|string|null $start, Carbon|string|null $end): void
+    {
+        $builder->where(function (Builder $query) use ($start, $end) {
+            $query->whereBetween('start_date', [$start, $end])
+                ->orWhereBetween('end_date', [$start, $end])
+                ->orWhereBetween('created_at', [$start, $end]);
+        });
     }
 }

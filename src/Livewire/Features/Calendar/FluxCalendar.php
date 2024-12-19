@@ -10,6 +10,7 @@ use FluxErp\Models\Address;
 use FluxErp\Models\Calendar;
 use FluxErp\Models\CalendarEvent;
 use FluxErp\Models\User;
+use FluxErp\Traits\HasCalendarUserSettings;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
@@ -31,6 +32,56 @@ class FluxCalendar extends CalendarComponent
 
     protected string $view = 'flux::livewire.features.calendar.flux-calendar';
 
+    protected $listeners = ['calendar-view-did-mount' => 'storeViewSettings'];
+
+    public function storeViewSettings(array $view): void
+    {
+        $this->storeSettings([
+            'initialView' => data_get($view, 'type'),
+        ]);
+    }
+
+    protected function getCacheKey(): string
+    {
+        return static::class;
+    }
+
+    #[Renderless]
+    public function storeSettings(array $data): void
+    {
+        if (! in_array(HasCalendarUserSettings::class, class_uses_recursive(auth()->user()))) {
+            return;
+        }
+
+        auth()->user()
+            ->calendarUserSettings()
+            ->updateOrCreate(
+                [
+                    'cache_key' => static::class,
+                    'component' => static::class,
+                ],
+                [
+                    'settings' => Arr::undot(
+                        array_merge(
+                            Arr::dot(auth()->user()->getCalendarSettings(static::class)->value('settings') ?? []),
+                            Arr::dot($data)
+                        )
+                    ),
+                ]
+            );
+    }
+
+    #[Renderless]
+    public function getConfig(): array
+    {
+        return Arr::undot(
+            array_merge(
+                Arr::dot(parent::getConfig()),
+                Arr::dot(auth()->user()->getCalendarSettings(static::class)->value('settings') ?? [])
+            )
+        );
+    }
+
     #[Renderless]
     public function getMyCalendars(): Collection
     {
@@ -50,6 +101,7 @@ class FluxCalendar extends CalendarComponent
             && data_get($calendarAttributes, 'isVirtual', false)
         ) {
             return morphed_model($calendarAttributes['modelType'])::query()
+                ->inTimeframe($info['start'], $info['end'])
                 ->get()
                 ->map(fn (Model $model) => $model->toCalendarEvent())
                 ->toArray();

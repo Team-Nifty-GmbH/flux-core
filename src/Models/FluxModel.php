@@ -8,4 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 abstract class FluxModel extends Model
 {
     use ResolvesRelationsThroughContainer;
+
+    protected $guarded = [
+        'id',
+    ];
 }
