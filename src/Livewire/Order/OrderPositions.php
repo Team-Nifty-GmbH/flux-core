@@ -48,6 +48,8 @@ class OrderPositions extends OrderPositionList
 
     public ?string $cacheKey = 'order.order-positions';
 
+    public ?string $discount = null;
+
     protected string $view = 'flux::livewire.order.order-positions';
 
     public function mount(): void
@@ -152,6 +154,14 @@ class OrderPositions extends OrderPositionList
                     ),
                     'wire:click' => 'recalculateOrderPositions(); showSelectedActions = false;',
                 ]),
+            DataTableButton::make()
+                ->label(__('Discount selected positions'))
+                ->when(fn () => resolve_static(UpdateOrderPosition::class, 'canPerformAction', [false])
+                    && ! $this->order->is_locked
+                )
+                ->xOnClick(<<<'JS'
+                    $openModal('edit-position-discount');
+                JS),
             DataTableButton::make()
                 ->label(__('Delete'))
                 ->icon('trash')
@@ -405,6 +415,29 @@ class OrderPositions extends OrderPositionList
         $this->recalculateOrderTotals();
 
         $this->orderPosition->reset();
+    }
+
+    #[Renderless]
+    public function discountSelectedPositions(): void
+    {
+        $discount = bcdiv($this->discount, 100);
+        foreach ($this->getSelectedModelsQuery()->get(['id']) as $orderPositions) {
+            try {
+                UpdateOrderPosition::make([
+                    'id' => $orderPositions->id,
+                    'discount_percentage' => $discount,
+                ])
+                    ->checkPermission()
+                    ->validate()
+                    ->execute();
+            } catch (ValidationException|UnauthorizedException $e) {
+                exception_to_notifications($e, $this);
+            }
+        }
+
+        $this->loadData();
+        $this->recalculateOrderTotals();
+        $this->discount = null;
     }
 
     #[Renderless]

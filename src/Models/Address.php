@@ -8,7 +8,6 @@ use FluxErp\Mail\MagicLoginLink;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
 use FluxErp\States\Address\AdvertisingState;
 use FluxErp\Support\Collection\AddressCollection;
-use FluxErp\Traits\BroadcastsEvents;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Communicatable;
 use FluxErp\Traits\Filterable;
@@ -53,10 +52,9 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Address extends FluxAuthenticatable implements HasLocalePreference, HasMedia, InteractsWithDataTables, OffersPrinting
 {
-    use BroadcastsEvents, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasCalendars, HasCart,
-        HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasRoles, HasStates, HasTags,
-        HasUserModification, HasUuid, InteractsWithMedia, Lockable, LogsActivity, MonitorsQueue, Notifiable, Printable,
-        Searchable, SoftDeletes;
+    use Commentable, Communicatable, Filterable, HasAdditionalColumns, HasCalendars, HasCart, HasClientAssignment,
+        HasFrontendAttributes, HasPackageFactory, HasRoles, HasStates, HasTags, HasUserModification, HasUuid,
+        InteractsWithMedia, Lockable, LogsActivity, MonitorsQueue, Notifiable, Printable, Searchable, SoftDeletes;
 
     protected $hidden = [
         'password',

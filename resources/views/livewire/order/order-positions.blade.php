@@ -1,4 +1,34 @@
 <div wire:ignore>
+    <x-modal
+        name="edit-position-discount"
+        x-on:open="$focus.first()"
+        x-on:close="$wire.discount = null"
+        x-on:keyup.enter="$wire.discountSelectedPositions().then(() => {close();})"
+        x-trap="show"
+    >
+        <x-card>
+            <div class="flex flex-col gap-4">
+                <x-input
+                    prefix="%"
+                    type="number"
+                    x-on:focus=""
+                    :label="__('Discount')"
+                    wire:model="discount"
+                    x-on:change="$el.value = parseNumber($el.value)"
+                />
+            </div>
+            <x-slot:footer>
+                <div class="flex justify-end gap-1.5">
+                    <x-button :label="__('Cancel')" x-on:click="close"/>
+                    <x-button
+                        primary
+                        :label="__('Save')"
+                        wire:click="discountSelectedPositions().then(() => {close();})"
+                    />
+                </div>
+            </x-slot:footer>
+        </x-card>
+    </x-modal>
     <x-modal max-width="6xl" name="edit-order-position" x-on:close="$wire.resetOrderPosition()">
         <x-card>
             @section('order-position-detail-modal.content')

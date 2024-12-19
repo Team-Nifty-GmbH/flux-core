@@ -110,6 +110,31 @@
                     {{ __('Total') }}
                 </td>
             </tr>
+            @section('total.discounts')
+                @if($model->discounts)
+                    <tr>
+                        <td class="text-right">
+                            {{ __('Sum net without discount') }}
+                        </td>
+                        <td class="text-right w-0 whitespace-nowrap pl-12">
+                            {{ $formatter->formatCurrency($model->total_base_net_price, $currency) }}
+                        </td>
+                    </tr>
+                    @foreach($model->discounts as $discount)
+                        <tr>
+                            <td class="text-right">
+                                <span>{{ data_get($discount, 'name') }}</span>
+                                <span>{{ \Illuminate\Support\Number::percentage(bcmul(data_get($discount, 'discount_percentage', 0), 100)) }}</span>
+                            </td>
+                            <td class="text-right w-0 whitespace-nowrap pl-12">
+                                {{ $formatter->formatCurrency(bcmul(data_get($discount, 'discount_flat', 0), -1), $currency) }}
+                            </td>
+                        </tr>
+                    @endforeach
+                    <tr class="border-b">
+                    </tr>
+                @endif
+            @show
             @section('total.net')
                 <tr>
                     <td class="text-right">
