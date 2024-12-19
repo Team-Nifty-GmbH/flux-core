@@ -499,20 +499,18 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
 
     public function calculateTotalGrossPrice(): static
     {
-        $totalGross = $this->orderPositions()
-            ->where('is_alternative', false)
-            ->sum('total_gross_price');
         $totalBaseGross = $this->orderPositions()
             ->where('is_alternative', false)
             ->sum('total_base_gross_price');
 
         $this->total_gross_price = discount(
             bcround(
-                bcadd($totalGross, $this->shipping_costs_gross_price ?: 0, 9),
+                bcadd($totalBaseGross, $this->shipping_costs_gross_price ?: 0, 9),
                 2
             ),
             $this->total_discount_percentage
         );
+
         $this->total_base_gross_price = bcround(
             bcadd($totalBaseGross, $this->shipping_costs_gross_price ?: 0, 9),
             2
@@ -587,17 +585,22 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
             ->where('is_alternative', false)
             ->whereNotNull('vat_rate_percentage')
             ->groupBy('vat_rate_percentage')
-            ->selectRaw('sum(vat_price) as total_vat_price, sum(total_net_price) as total_net_price, vat_rate_percentage')
+            ->selectRaw('sum(vat_price) as total_vat_price,
+                sum(total_net_price) as total_net_price,
+                sum(total_base_net_price) as total_base_net_price,
+                sum(total_base_gross_price) as total_base_gross_price,
+                vat_rate_percentage'
+            )
             ->get()
             ->map(function (OrderPosition $item) {
                 if ($this->total_discount_percentage) {
                     $item->total_net_price = discount(
-                        $item->total_net_price,
+                        $item->total_base_net_price,
                         $this->total_discount_percentage
                     );
-                    $item->total_vat_price = discount(
-                        $item->total_vat_price,
-                        $this->total_discount_percentage
+                    $item->total_vat_price = bcsub(
+                        discount($item->total_base_gross_price, $this->total_discount_percentage),
+                        $item->total_net_price
                     );
                 }
 
