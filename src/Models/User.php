@@ -40,8 +40,9 @@ use TeamNiftyGmbH\DataTable\Traits\HasDatatableUserSettings;
 class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia, InteractsWithDataTables
 {
     use CacheModelQueries, Commentable, Filterable, HasCalendars, HasCalendarUserSettings, HasCart,
-        HasDatatableUserSettings, HasFrontendAttributes, HasPackageFactory, HasPushSubscriptions, HasRoles, HasUserModification,
-        HasUuid, HasWidgets, InteractsWithMedia, MonitorsQueue, Notifiable, Searchable, SoftDeletes;
+        HasDatatableUserSettings, HasFrontendAttributes, HasPackageFactory, HasPushSubscriptions, HasRoles,
+        HasUserModification, HasUuid, HasWidgets, InteractsWithMedia, MonitorsQueue, Notifiable, Searchable,
+        SoftDeletes;
 
     protected $hidden = [
         'password',
