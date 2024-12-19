@@ -3,12 +3,14 @@
 namespace {{ namespace }};
 
 use FluxErp\Actions\FluxAction;
+use {{ model }};
+use {{ ruleset }};
 
 class {{ class }} extends FluxAction
 {
-    protected function boot(array $data): void
+    protected function getRulesets(): string|array
     {
-        parent::boot($data);
+        return {{ rulesetBaseName }};
     }
 
     public static function name(): string
@@ -23,11 +25,11 @@ class {{ class }} extends FluxAction
 
     public static function models(): array
     {
-        return [];
+        return [{{ modelBaseName }}::class];
     }
 
-    public function performAction(): mixed
+    public function performAction(): {{ modelBaseName }}
     {
-        //
+        {{ performAction }}
     }
 }

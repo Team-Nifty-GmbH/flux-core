@@ -3,6 +3,7 @@
 namespace FluxErp\Console\Commands;
 
 use Illuminate\Console\GeneratorCommand;
+use Illuminate\Support\Str;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -15,6 +16,8 @@ class MakeAction extends GeneratorCommand
      */
     protected $signature = 'make:action
             {name : The name of the action}
+            {--model= : The model the action is for}
+            {--ruleset= : The ruleset the action uses}
             {--customName= : Custom action name}
             {--description= : Custom action description}';
 
@@ -39,21 +42,59 @@ class MakeAction extends GeneratorCommand
         $stub = $this->files->get($this->getStub());
 
         return $this->replaceNamespace($stub, $name)
-            ->replaceNameAndDescription($stub, $this->option('customName'), $this->option('description'))
+            ->replacePlaceholders(
+                $stub,
+                $this->option('customName'),
+                $this->option('description'),
+                $this->option('model'),
+                $this->option('ruleset')
+            )
             ->replaceClass($stub, $name);
     }
 
-    protected function replaceNameAndDescription(string &$stub, ?string $name = null, ?string $description = null): static
-    {
+    protected function replacePlaceholders(
+        string &$stub,
+        ?string $name = null,
+        ?string $description = null,
+        ?string $model = null,
+        ?string $ruleset = null
+    ): static {
         $searches = [
-            ['{{ name }}', '{{ description }}'],
-            ['{{name}}', '{{description}}'],
+            [
+                '{{ name }}',
+                '{{ description }}',
+                '{{ model }}',
+                '{{ modelBaseName }}',
+                '{{ ruleset }}',
+                '{{ rulesetBaseName }}',
+                '{{ performAction }}',
+            ],
+            [
+                '{{name}}',
+                '{{description}}',
+                '{{model}}',
+                '{{modelBaseName}}',
+                '{{ruleset}}',
+                '{{rulesetBaseName}}',
+                '{{performAction}}',
+            ],
         ];
+        $modelBaseName = $model ? class_basename($model) : null;
+        $rulesetBaseName = $ruleset ? class_basename($ruleset) : null;
+        $ruleset = Str::beforeLast($ruleset, '::');
 
         foreach ($searches as $search) {
             $stub = str_replace(
                 $search,
-                [$name, $description],
+                [
+                    $name,
+                    $description,
+                    $model,
+                    $modelBaseName,
+                    $ruleset,
+                    $rulesetBaseName,
+                    $performAction ?? '//',
+                ],
                 $stub
             );
         }
@@ -70,7 +111,7 @@ class MakeAction extends GeneratorCommand
 
     protected function getDefaultNamespace($rootNamespace): string
     {
-        return $rootNamespace . '\Actions';
+        return $rootNamespace . '\Actions' . ($this->option('model') ? '\\' . class_basename($this->option('model')) : '');
     }
 
     protected function afterPromptingForMissingArguments(InputInterface $input, OutputInterface $output): void
