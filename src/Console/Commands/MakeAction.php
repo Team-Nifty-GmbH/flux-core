@@ -44,6 +44,7 @@ class MakeAction extends GeneratorCommand
         return $this->replaceNamespace($stub, $name)
             ->replacePlaceholders(
                 $stub,
+                $name,
                 $this->option('customName'),
                 $this->option('description'),
                 $this->option('model'),
@@ -54,7 +55,8 @@ class MakeAction extends GeneratorCommand
 
     protected function replacePlaceholders(
         string &$stub,
-        ?string $name = null,
+        string $name,
+        ?string $customName = null,
         ?string $description = null,
         ?string $model = null,
         ?string $ruleset = null
@@ -68,6 +70,7 @@ class MakeAction extends GeneratorCommand
                 '{{ ruleset }}',
                 '{{ rulesetBaseName }}',
                 '{{ performAction }}',
+                '{{ returnType }}',
             ],
             [
                 '{{name}}',
@@ -77,23 +80,31 @@ class MakeAction extends GeneratorCommand
                 '{{ruleset}}',
                 '{{rulesetBaseName}}',
                 '{{performAction}}',
+                '{{returnType}}',
             ],
         ];
         $modelBaseName = $model ? class_basename($model) : null;
-        $rulesetBaseName = $ruleset ? class_basename($ruleset) : null;
         $ruleset = Str::beforeLast($ruleset, '::');
+        $rulesetBaseName = $ruleset ? class_basename($ruleset) : null;
+        $performAction = $this->generatePerformAction($name, $modelBaseName);
+
+        $returnType = null;
+        if (str_starts_with(Str::afterLast($name, '\\'), 'Delete')) {
+            $returnType = 'bool';
+        }
 
         foreach ($searches as $search) {
             $stub = str_replace(
                 $search,
                 [
-                    $name,
+                    $customName,
                     $description,
                     $model,
                     $modelBaseName,
                     $ruleset,
                     $rulesetBaseName,
                     $performAction ?? '//',
+                    $returnType ?? $modelBaseName,
                 ],
                 $stub
             );
@@ -130,5 +141,50 @@ class MakeAction extends GeneratorCommand
         if ($description && $description !== 'none') {
             $input->setOption('description', $description);
         }
+    }
+
+    protected function generatePerformAction(string $name, string $modelBaseName): ?string
+    {
+        $pureName = Str::afterLast($name, '\\');
+
+        if (! str_starts_with($pureName, 'Create')
+            && ! str_starts_with($pureName, 'Update')
+            && ! str_starts_with($pureName, 'Delete')
+        ) {
+            return null;
+        }
+        $variableName = Str::of($pureName)->after('Create')->lcfirst();
+
+        if (str_starts_with($pureName, 'Create')) {
+            return <<<PHP
+        \${$variableName} = app($modelBaseName::class, ['attributes' => \$this->getData()]);
+                \${$variableName}->save();
+
+                return \${$variableName}->fresh();
+        PHP;
+        }
+
+        if (str_starts_with($pureName, 'Update')) {
+            return <<<PHP
+        \${$variableName} = resolve_static($modelBaseName::class, 'query')
+                    ->whereKey(\$this->getData('id'))
+                    ->first();
+                \${$variableName}->fill(\$this->getData());
+                \${$variableName}->save();
+
+                return \${$variableName}->withoutRelations()->fresh();
+        PHP;
+        }
+
+        if (str_starts_with($pureName, 'Delete')) {
+            return <<<PHP
+        return resolve_static($modelBaseName::class, 'query')
+                    ->whereKey(\$this->getData('id'))
+                    ->first()
+                    ->delete();
+        PHP;
+        }
+
+        return null;
     }
 }

@@ -23,21 +23,21 @@ class MakeForm extends FormCommand
         $imports = [];
 
         if (! is_null($this->option('createAction'))) {
-            $actionsArray[] = '                \'create\' => ' . class_basename($this->option('createAction'));
+            $actionsArray[] = '            \'create\' => ' . class_basename($this->option('createAction'));
             $imports[] = 'use ' . Str::beforeLast($this->option('createAction'), '::') . ';';
         }
 
         if (! is_null($this->option('updateAction'))) {
-            $actionsArray[] = '                \'update\' => ' . class_basename($this->option('updateAction'));
+            $actionsArray[] = '            \'update\' => ' . class_basename($this->option('updateAction'));
             $imports[] = 'use ' . Str::beforeLast($this->option('updateAction'), '::') . ';';
         }
 
         if (! is_null($this->option('deleteAction'))) {
-            $actionsArray[] = '                \'delete\' => ' . class_basename($this->option('deleteAction'));
+            $actionsArray[] = '            \'delete\' => ' . class_basename($this->option('deleteAction'));
             $imports[] = 'use ' . Str::beforeLast($this->option('deleteAction'), '::') . ';';
         }
 
-        $actions = "\n" . implode(",\n", $actionsArray) . "\n            ";
+        $actions = "\n" . implode(",\n", $actionsArray) . "\n        ";
         $imports = implode("\n", $imports);
 
         return $this->replaceNamespace($stub, $name)

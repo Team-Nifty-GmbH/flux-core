@@ -8,11 +8,11 @@ use Livewire\Attributes\Locked;
 
 class DummyClass extends FluxForm
 {
-        #[Locked]
-        public ?int $id = null;
+    #[Locked]
+    public ?int $id = null;
 
-        protected function getActions(): array
-        {
-            return [{{ actions }}];
-        }
+    protected function getActions(): array
+    {
+        return [{{ actions }}];
+    }
 }

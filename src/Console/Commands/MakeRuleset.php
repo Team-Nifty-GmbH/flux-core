@@ -26,28 +26,6 @@ class MakeRuleset extends GeneratorCommand
         return $this->replaceNamespace($stub, $name)->replaceClass($stub, $name);
     }
 
-    protected function replaceNameAndDescription(
-        string &$stub,
-        ?string $name = null,
-        ?string $description = null,
-        ?string $model = null
-    ): static {
-        $searches = [
-            ['{{ name }}', '{{ model }}'],
-            ['{{name}}', '{{model}}'],
-        ];
-
-        foreach ($searches as $search) {
-            $stub = str_replace(
-                $search,
-                [$name, $description, $model],
-                $stub
-            );
-        }
-
-        return $this;
-    }
-
     protected function resolveStubPath(string $stub): string
     {
         return file_exists($customPath = $this->laravel->basePath(trim($stub, '/')))
