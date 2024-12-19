@@ -8,6 +8,7 @@ use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
 use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\SoftDeletes;
+use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
@@ -15,11 +16,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Spatie\MediaLibrary\HasMedia;
-use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Comment extends FluxModel implements HasMedia
 {
-    use BroadcastsEvents, HasPackageFactory, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity,
+    use HasPackageFactory, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity,
         SoftDeletes;
 
     protected $appends = [
@@ -74,7 +74,7 @@ class Comment extends FluxModel implements HasMedia
      *
      * @param  string  $event
      */
-    public function broadcastOn($event): PrivateChannel
+    public function broadcastOn($event): array|Channel
     {
         return new PrivateChannel(
             str_replace('\\', '.', $this->model_type) . '.' . $this->model_id

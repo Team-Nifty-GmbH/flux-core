@@ -41,7 +41,6 @@ use FluxErp\View\Printing\Order\OrderConfirmation;
 use FluxErp\View\Printing\Order\Refund;
 use FluxErp\View\Printing\Order\Retoure;
 use FluxErp\View\Printing\Order\SupplierOrder;
-use Illuminate\Database\Eloquent\BroadcastsEvents;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -58,7 +57,7 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Order extends FluxModel implements HasMedia, InteractsWithDataTables, OffersPrinting
 {
-    use BroadcastsEvents, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasClientAssignment,
+    use Commentable, Communicatable, Filterable, HasAdditionalColumns, HasClientAssignment,
         HasCustomEvents, HasFrontendAttributes, HasPackageFactory, HasRelatedModel, HasSerialNumberRange, HasStates,
         HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable, Searchable, SoftDeletes, Trackable {
             Printable::resolvePrintViews as protected printableResolvePrintViews;

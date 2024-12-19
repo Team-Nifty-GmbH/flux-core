@@ -14,11 +14,10 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
-use TeamNiftyGmbH\DataTable\Traits\HasEloquentListeners;
 
 class ProjectTaskList extends BaseTaskList
 {
-    use Actions, HasEloquentListeners, WithTabs;
+    use Actions, WithTabs;
 
     protected string $view = 'flux::livewire.project.project-task-list';
 

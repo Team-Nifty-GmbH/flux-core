@@ -11,12 +11,9 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
-use TeamNiftyGmbH\DataTable\Traits\HasEloquentListeners;
 
 class TransactionList extends BaseDataTable
 {
-    use HasEloquentListeners;
-
     protected string $model = Transaction::class;
 
     protected ?string $includeBefore = 'flux::livewire.transactions.transactions';

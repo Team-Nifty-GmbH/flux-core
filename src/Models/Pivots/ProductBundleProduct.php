@@ -5,12 +5,9 @@ namespace FluxErp\Models\Pivots;
 use FluxErp\Models\Product;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class ProductBundleProduct extends FluxPivot
 {
-    use BroadcastsEvents;
-
     protected $table = 'product_bundle_product';
 
     public $timestamps = false;

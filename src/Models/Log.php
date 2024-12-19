@@ -3,11 +3,10 @@
 namespace FluxErp\Models;
 
 use Illuminate\Database\Eloquent\MassPrunable;
-use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Log extends FluxModel
 {
-    use BroadcastsEvents, MassPrunable;
+    use MassPrunable;
 
     protected $guarded = [
         'id',

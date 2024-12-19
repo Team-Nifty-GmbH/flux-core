@@ -11,7 +11,6 @@ use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Contracts\Support\Arrayable;
-use Illuminate\Database\Eloquent\BroadcastsEvents;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -22,7 +21,7 @@ use Illuminate\Support\Collection;
 
 class Cart extends FluxModel
 {
-    use BroadcastsEvents, HasPackageFactory, HasUuid, SoftDeletes;
+    use HasPackageFactory, HasUuid, SoftDeletes;
 
     protected $guarded = [
         'id',
@@ -79,11 +78,6 @@ class Cart extends FluxModel
                     ]
                 );
             });
-    }
-
-    public function broadcastWith(): array
-    {
-        return ['id' => $this->id];
     }
 
     public function addItems(array|int $products): static

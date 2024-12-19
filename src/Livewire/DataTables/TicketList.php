@@ -12,11 +12,10 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Locked;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
-use TeamNiftyGmbH\DataTable\Traits\HasEloquentListeners;
 
 class TicketList extends BaseDataTable
 {
-    use HasEloquentListeners, WithFileUploads;
+    use WithFileUploads;
 
     protected string $view = 'flux::livewire.ticket.tickets';
 

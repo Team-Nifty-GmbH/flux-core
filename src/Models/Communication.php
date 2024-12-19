@@ -25,11 +25,10 @@ use InvalidArgumentException;
 use Meilisearch\Endpoints\Indexes;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\Tags\HasTags;
-use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents;
 
 class Communication extends FluxModel implements HasMedia, OffersPrinting
 {
-    use BroadcastsEvents, HasPackageFactory, HasTags, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity,
+    use HasPackageFactory, HasTags, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity,
         Printable, Searchable, SoftDeletes;
 
     protected $guarded = [

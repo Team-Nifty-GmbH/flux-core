@@ -7,12 +7,9 @@ use FluxErp\Models\Order;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
-use TeamNiftyGmbH\DataTable\Traits\HasEloquentListeners;
 
 class OrderList extends BaseDataTable
 {
-    use HasEloquentListeners;
-
     protected string $model = Order::class;
 
     public bool $isSelectable = true;
