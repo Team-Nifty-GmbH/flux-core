@@ -9,6 +9,7 @@ use FluxErp\Models\AddressType;
 use FluxErp\Models\BankConnection;
 use FluxErp\Models\Calendar;
 use FluxErp\Models\CalendarEvent;
+use FluxErp\Models\CalendarUserSetting;
 use FluxErp\Models\Cart;
 use FluxErp\Models\CartItem;
 use FluxErp\Models\Category;
@@ -119,6 +120,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'bank_connection' => BankConnection::class,
             'calendar' => Calendar::class,
             'calendar_event' => CalendarEvent::class,
+            'calendar_user_setting' => CalendarUserSetting::class,
             'cart' => Cart::class,
             'cart_item' => CartItem::class,
             'category' => Category::class,

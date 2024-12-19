@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use Carbon\Carbon;
 use FluxErp\Casts\Money;
 use FluxErp\Casts\TimeDuration;
 use FluxErp\Contracts\Calendarable;
@@ -19,6 +20,7 @@ use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SoftDeletes;
 use FluxErp\Traits\Trackable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -141,7 +143,7 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
     public static function toCalendar(): array
     {
         return [
-            'id' => Str::uuid()->toString(),
+            'id' => Str::of(static::class)->replace('\\', '.'),
             'modelType' => morph_alias(static::class),
             'name' => __('Tasks'),
             'color' => '#877ae6',
@@ -181,11 +183,11 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
     {
         $task = new static();
         $task->forceFill([
-            'id' => $event['id'],
-            'name' => $event['title'],
-            'start_date' => $event['start'],
-            'due_date' => $event['end'],
-            'description' => $event['description'],
+            'id' => data_get($event, 'id'),
+            'name' => data_get($event, 'title'),
+            'start_date' => data_get($event, 'start'),
+            'due_date' => data_get($event, 'end'),
+            'description' => data_get($event, 'description'),
         ]);
 
         return $task;
@@ -194,5 +196,14 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
     public function costColumn(): string
     {
         return 'total_cost';
+    }
+
+    public function scopeInTimeframe(Builder $builder, Carbon|string|null $start, Carbon|string|null $end): void
+    {
+        $builder->where(function (Builder $query) use ($start, $end) {
+            $query->whereBetween('start_date', [$start, $end])
+                ->orWhereBetween('due_date', [$start, $end])
+                ->orWhereBetween('created_at', [$start, $end]);
+        });
     }
 }

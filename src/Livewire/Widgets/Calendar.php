@@ -4,8 +4,10 @@ namespace FluxErp\Livewire\Widgets;
 
 use FluxErp\Livewire\Features\Calendar\FluxCalendar;
 use FluxErp\Traits\Widgetable;
+use Illuminate\Support\Arr;
 use Livewire\Attributes\Isolate;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\Renderless;
 
 #[Isolate]
 class Calendar extends FluxCalendar
@@ -18,14 +20,20 @@ class Calendar extends FluxCalendar
     #[Locked]
     public bool $showInvites = false;
 
+    #[Renderless]
     public function getConfig(): array
     {
         return array_merge(
             parent::getConfig(),
-            [
-                'initialView' => 'timeGridDay',
-                'height' => 500,
-            ]
+            Arr::undot(
+                array_merge(
+                    auth()->user()->getCalendarSettings(static::class)->value('settings'),
+                    [
+                        'showCalendars' => $this->showCalendars,
+                        'showInvites' => $this->showInvites,
+                    ]
+                )
+            )
         );
     }
 
