@@ -3,6 +3,7 @@
 namespace FluxErp\Console\Commands;
 
 use Illuminate\Console\GeneratorCommand;
+use Illuminate\Support\Str;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -15,6 +16,8 @@ class MakeAction extends GeneratorCommand
      */
     protected $signature = 'make:action
             {name : The name of the action}
+            {--model= : The model the action is for}
+            {--ruleset= : The ruleset the action uses}
             {--customName= : Custom action name}
             {--description= : Custom action description}';
 
@@ -39,21 +42,70 @@ class MakeAction extends GeneratorCommand
         $stub = $this->files->get($this->getStub());
 
         return $this->replaceNamespace($stub, $name)
-            ->replaceNameAndDescription($stub, $this->option('customName'), $this->option('description'))
+            ->replacePlaceholders(
+                $stub,
+                $name,
+                $this->option('customName'),
+                $this->option('description'),
+                $this->option('model'),
+                $this->option('ruleset')
+            )
             ->replaceClass($stub, $name);
     }
 
-    protected function replaceNameAndDescription(string &$stub, ?string $name = null, ?string $description = null): static
-    {
+    protected function replacePlaceholders(
+        string &$stub,
+        string $name,
+        ?string $customName = null,
+        ?string $description = null,
+        ?string $model = null,
+        ?string $ruleset = null
+    ): static {
         $searches = [
-            ['{{ name }}', '{{ description }}'],
-            ['{{name}}', '{{description}}'],
+            [
+                '{{ name }}',
+                '{{ description }}',
+                '{{ model }}',
+                '{{ modelBaseName }}',
+                '{{ ruleset }}',
+                '{{ rulesetBaseName }}',
+                '{{ performAction }}',
+                '{{ returnType }}',
+            ],
+            [
+                '{{name}}',
+                '{{description}}',
+                '{{model}}',
+                '{{modelBaseName}}',
+                '{{ruleset}}',
+                '{{rulesetBaseName}}',
+                '{{performAction}}',
+                '{{returnType}}',
+            ],
         ];
+        $modelBaseName = $model ? class_basename($model) : null;
+        $ruleset = Str::beforeLast($ruleset, '::');
+        $rulesetBaseName = $ruleset ? class_basename($ruleset) : null;
+        $performAction = $this->generatePerformAction($name, $modelBaseName);
+
+        $returnType = null;
+        if (str_starts_with(Str::afterLast($name, '\\'), 'Delete')) {
+            $returnType = 'bool';
+        }
 
         foreach ($searches as $search) {
             $stub = str_replace(
                 $search,
-                [$name, $description],
+                [
+                    $customName,
+                    $description,
+                    $model,
+                    $modelBaseName,
+                    $ruleset,
+                    $rulesetBaseName,
+                    $performAction ?? '//',
+                    $returnType ?? $modelBaseName,
+                ],
                 $stub
             );
         }
@@ -70,7 +122,7 @@ class MakeAction extends GeneratorCommand
 
     protected function getDefaultNamespace($rootNamespace): string
     {
-        return $rootNamespace . '\Actions';
+        return $rootNamespace . '\Actions' . ($this->option('model') ? '\\' . class_basename($this->option('model')) : '');
     }
 
     protected function afterPromptingForMissingArguments(InputInterface $input, OutputInterface $output): void
@@ -89,5 +141,51 @@ class MakeAction extends GeneratorCommand
         if ($description && $description !== 'none') {
             $input->setOption('description', $description);
         }
+    }
+
+    protected function generatePerformAction(string $name, string $modelBaseName): ?string
+    {
+        $pureName = Str::afterLast($name, '\\');
+
+        if (! str_starts_with($pureName, 'Create')
+            && ! str_starts_with($pureName, 'Update')
+            && ! str_starts_with($pureName, 'Delete')
+        ) {
+            return null;
+        }
+
+        $variableName = Str::of($pureName)->after('Create')->lcfirst();
+
+        if (str_starts_with($pureName, 'Create')) {
+            return <<<PHP
+        \${$variableName} = app($modelBaseName::class, ['attributes' => \$this->getData()]);
+                \${$variableName}->save();
+
+                return \${$variableName}->fresh();
+        PHP;
+        }
+
+        if (str_starts_with($pureName, 'Update')) {
+            return <<<PHP
+        \${$variableName} = resolve_static($modelBaseName::class, 'query')
+                    ->whereKey(\$this->getData('id'))
+                    ->first();
+                \${$variableName}->fill(\$this->getData());
+                \${$variableName}->save();
+
+                return \${$variableName}->withoutRelations()->fresh();
+        PHP;
+        }
+
+        if (str_starts_with($pureName, 'Delete')) {
+            return <<<PHP
+        return resolve_static($modelBaseName::class, 'query')
+                    ->whereKey(\$this->getData('id'))
+                    ->first()
+                    ->delete();
+        PHP;
+        }
+
+        return null;
     }
 }
