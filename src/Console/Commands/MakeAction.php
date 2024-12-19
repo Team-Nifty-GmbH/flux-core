@@ -153,6 +153,7 @@ class MakeAction extends GeneratorCommand
         ) {
             return null;
         }
+
         $variableName = Str::of($pureName)->after('Create')->lcfirst();
 
         if (str_starts_with($pureName, 'Create')) {
