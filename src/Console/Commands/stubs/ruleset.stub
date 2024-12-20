@@ -1,0 +1,13 @@
+<?php
+
+namespace {{ namespace }};
+
+use FluxErp\Rulesets\FluxRuleset;
+
+class {{ class }} extends FluxRuleset
+{
+    public function rules(): array
+    {
+        return [];
+    }
+}
