@@ -27,7 +27,7 @@ class Calendar extends FluxCalendar
             parent::getConfig(),
             Arr::undot(
                 array_merge(
-                    auth()->user()->getCalendarSettings(static::class)->value('settings'),
+                    auth()->user()->getCalendarSettings(static::class)->value('settings') ?? [],
                     [
                         'showCalendars' => $this->showCalendars,
                         'showInvites' => $this->showInvites,
