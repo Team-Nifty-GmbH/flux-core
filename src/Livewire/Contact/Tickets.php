@@ -6,6 +6,7 @@ use FluxErp\Livewire\DataTables\TicketList;
 use FluxErp\Models\Address;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Modelable;
+use Livewire\Attributes\Renderless;
 
 class Tickets extends TicketList
 {
@@ -24,5 +25,11 @@ class Tickets extends TicketList
     protected function getTableActions(): array
     {
         return [];
+    }
+
+    #[Renderless]
+    public function getCacheKey(): string
+    {
+        return parent::getCacheKey() . $this->contactId;
     }
 }

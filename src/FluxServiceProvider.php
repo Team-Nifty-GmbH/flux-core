@@ -372,6 +372,7 @@ class FluxServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__ . '/../config/notifications.php', 'notifications');
         config(['permission.models.role' => resolve_static(Role::class, 'class')]);
         config(['permission.models.permission' => resolve_static(Permission::class, 'class')]);
+        config(['permission.display_permission_in_exception' => true]);
         config(['auth' => require __DIR__ . '/../config/auth.php']);
         config(['activitylog.activitymodel' => resolve_static(Activity::class, 'class')]);
         config(['logging' => array_merge_recursive(config('logging'), require __DIR__ . '/../config/logging.php')]);
