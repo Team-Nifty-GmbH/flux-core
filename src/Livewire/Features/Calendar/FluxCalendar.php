@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Features\Calendar;
 
+use DragonCode\Contracts\Support\Arrayable;
 use FluxErp\Contracts\Calendarable;
 use FluxErp\Facades\Action;
 use FluxErp\Helpers\Helper;
@@ -10,6 +11,7 @@ use FluxErp\Models\Address;
 use FluxErp\Models\Calendar;
 use FluxErp\Models\CalendarEvent;
 use FluxErp\Models\User;
+use FluxErp\Traits\HasCalendarUserSettings;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
@@ -31,6 +33,74 @@ class FluxCalendar extends CalendarComponent
 
     protected string $view = 'flux::livewire.features.calendar.flux-calendar';
 
+    protected $listeners = [
+        'calendar-view-did-mount' => 'storeViewSettings',
+        'calendar-toggle-event-source' => 'toggleEventSource',
+    ];
+
+    protected function getCacheKey(): string
+    {
+        return static::class;
+    }
+
+    #[Renderless]
+    public function toggleEventSource(array ...$activeCalendars): void
+    {
+        $this->storeSettings(array_column($activeCalendars, 'publicId'), 'activeCalendars');
+    }
+
+    #[Renderless]
+    public function storeViewSettings(array $view): void
+    {
+        $this->storeSettings(data_get($view, 'type'), 'initialView');
+    }
+
+    #[Renderless]
+    public function storeSettings(mixed $data, ?string $setPath = null): void
+    {
+        if (! in_array(HasCalendarUserSettings::class, class_uses_recursive(auth()->user()))) {
+            return;
+        }
+
+        $currentData = auth()->user()->getCalendarSettings(static::class)->value('settings') ?? [];
+
+        if (! is_null($setPath)) {
+            data_set($currentData, $setPath, $data);
+            $setData = $currentData;
+        } else {
+            $data = Arr::wrap($data instanceof Arrayable ? $data->toArray() : $data);
+            $setData = Arr::undot(
+                array_merge(
+                    Arr::dot($currentData),
+                    Arr::dot($data)
+                )
+            );
+        }
+
+        auth()->user()
+            ->calendarUserSettings()
+            ->updateOrCreate(
+                [
+                    'cache_key' => static::class,
+                    'component' => static::class,
+                ],
+                [
+                    'settings' => $setData,
+                ]
+            );
+    }
+
+    #[Renderless]
+    public function getConfig(): array
+    {
+        return Arr::undot(
+            array_merge(
+                Arr::dot(parent::getConfig()),
+                Arr::dot(auth()->user()->getCalendarSettings(static::class)->value('settings') ?? [])
+            )
+        );
+    }
+
     #[Renderless]
     public function getMyCalendars(): Collection
     {
@@ -50,6 +120,7 @@ class FluxCalendar extends CalendarComponent
             && data_get($calendarAttributes, 'isVirtual', false)
         ) {
             return morphed_model($calendarAttributes['modelType'])::query()
+                ->inTimeframe($info['start'], $info['end'])
                 ->get()
                 ->map(fn (Model $model) => $model->toCalendarEvent())
                 ->toArray();
