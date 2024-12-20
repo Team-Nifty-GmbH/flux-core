@@ -3,16 +3,23 @@
 namespace {{ namespace }};
 
 use FluxErp\Actions\FluxAction;
+use {{ model }};
+use {{ ruleset }};
 
 class {{ class }} extends FluxAction
 {
-    public static function models(): array
+    protected function getRulesets(): string|array
     {
-        return [];
+        return {{ rulesetBaseName }}::class;
     }
 
-    public function performAction(): mixed
+    public static function models(): array
     {
-        //
+        return [{{ modelBaseName }}::class];
+    }
+
+    public function performAction(): {{ returnType }}
+    {
+        {{ performAction }}
     }
 }

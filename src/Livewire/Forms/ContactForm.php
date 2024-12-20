@@ -30,6 +30,9 @@ class ContactForm extends FluxForm
 
     public ?int $currency_id = null;
 
+    #[Locked]
+    public ?int $main_address_id = null;
+
     public ?string $customer_number = null;
 
     public ?string $creditor_number = null;

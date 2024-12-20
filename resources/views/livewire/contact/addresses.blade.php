@@ -3,7 +3,7 @@
         @section('left-side-bar')
             <div class="min-w-96 overflow-auto max-h-56 md:max-h-none">
                 <x-card :title="__('Addresses')">
-                    @if(resolve_static(\FluxErp\Actions\Address\CreateAddress::class, 'canPerformAction', [false]))
+                    @canAction(\FluxErp\Actions\Address\CreateAddress::class)
                         <x-slot:action>
                             <x-button
                                 wire:click="new()"
@@ -11,7 +11,7 @@
                                 :label="__('New')"
                             />
                         </x-slot:action>
-                    @endif
+                    @endCanAction
                     <div class="flex flex-col gap-1.5">
                         <template x-for="addressItem in $wire.addresses">
                             <div
@@ -70,6 +70,13 @@
                         :options="$contactOrigins"
                     />
                 </div>
+            </x-card>
+            <x-card>
+                <livewire:widgets.address
+                    lazy
+                    :without-header="true"
+                    :model-id="$contact->main_address_id"
+                />
             </x-card>
         @show
     </div>

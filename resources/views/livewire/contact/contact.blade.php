@@ -4,7 +4,7 @@
         <div
             class="mx-auto px-4 sm:px-6 md:flex md:items-center md:justify-between md:space-x-5 lg:px-8">
             <div class="flex items-center space-x-5">
-                <label for="avatar" style="cursor: pointer">
+                <label for="avatar" class="cursor-pointer">
                     <x-avatar xl src="{{ $avatar }}" />
                 </label>
                 <input type="file" accept="image/*" id="avatar" class="hidden" wire:model.live="avatar"/>
@@ -16,7 +16,7 @@
                 </div>
             </div>
             <div class="justify-stretch mt-6 flex flex-col-reverse space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3">
-                @if(resolve_static(\FluxErp\Actions\Contact\UpdateContact::class, 'canPerformAction', [false]))
+                @canAction(\FluxErp\Actions\Contact\UpdateContact::class)
                     <div x-cloak x-show="$wire.edit">
                         <x-button
                             x-on:click="$wire.edit = false; $wire.reloadContact()"
@@ -35,13 +35,13 @@
                             :label="__('Edit')"
                         />
                     </div>
-                @endif
-                @if(resolve_static(\FluxErp\Actions\Contact\DeleteContact::class, 'canPerformAction', [false]))
+                @endCanAction
+                @canAction(\FluxErp\Actions\Contact\DeleteContact::class)
                     <x-button negative label="{{ __('Delete') }}"
                               wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Contact')]) }}"
                               wire:click="delete()"
                     />
-                @endif
+                @endCanAction
             </div>
         </div>
         <x-flux::tabs

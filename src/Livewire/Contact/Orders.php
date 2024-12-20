@@ -45,4 +45,10 @@ class Orders extends OrderList
             $openModal('create-order');
         JS);
     }
+
+    #[Renderless]
+    public function getCacheKey(): string
+    {
+        return parent::getCacheKey() . $this->contact->id;
+    }
 }
