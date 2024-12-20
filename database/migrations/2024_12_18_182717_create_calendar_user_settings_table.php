@@ -10,7 +10,7 @@ return new class() extends Migration
     {
         Schema::create('calendar_user_settings', function (Blueprint $table) {
             $table->id();
-            $table->morphs('authenticatable', 'datatable_authenticatable');
+            $table->morphs('authenticatable', 'calendar_authenticatable');
             $table->string('cache_key')->index();
             $table->string('component')->index();
             $table->json('settings');

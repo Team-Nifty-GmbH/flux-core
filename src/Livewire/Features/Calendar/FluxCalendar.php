@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Features\Calendar;
 
+use DragonCode\Contracts\Support\Arrayable;
 use FluxErp\Contracts\Calendarable;
 use FluxErp\Facades\Action;
 use FluxErp\Helpers\Helper;
@@ -67,6 +68,7 @@ class FluxCalendar extends CalendarComponent
             data_set($currentData, $setPath, $data);
             $setData = $currentData;
         } else {
+            $data = Arr::wrap($data instanceof Arrayable ? $data->toArray() : $data);
             $setData = Arr::undot(
                 array_merge(
                     Arr::dot($currentData),
