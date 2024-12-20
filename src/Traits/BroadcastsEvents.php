@@ -2,6 +2,9 @@
 
 namespace FluxErp\Traits;
 
+use Illuminate\Broadcasting\Channel;
+use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Support\Str;
 use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents as BaseBroadcastsEvents;
 
 trait BroadcastsEvents
@@ -34,10 +37,22 @@ trait BroadcastsEvents
         return static::$broadcastOnlyKey;
     }
 
+    public function broadcastChannel(): string
+    {
+        return parent::broadcastChannel();
+    }
+
     public function broadcastWith(): array
     {
         return static::getBroadcastOnlyKey() && method_exists($this, 'getKey')
             ? ['model' => [$this->getKeyName() => $this->getKey()]]
             : $this->baseBroadcastWith();
+    }
+
+    public function broadcastOn(string $event): array|Channel
+    {
+        $channel = $this->broadcastChannel();
+
+        return new PrivateChannel($event === 'created' ? Str::beforeLast($channel, '.') . '.' : $channel);
     }
 }

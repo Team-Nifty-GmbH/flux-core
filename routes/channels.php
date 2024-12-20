@@ -24,23 +24,23 @@ foreach (Relation::morphMap() as $class) {
 
     $channel = class_to_broadcast_channel($class);
 
-    Broadcast::channel($channel, function (Authenticatable $user, int|string $key) use ($class) {
-        auth()->setUser($user);
+    Broadcast::channel(
+        $channel,
+        function (Authenticatable $user, int|string $key) use ($class) {
+            auth()->setUser($user);
 
-        return $class::query()->where(app($class)->getRouteKeyName(), $key)->exists();
-    }, ['guards' => ['web', 'address']]);
+            return $class::query()->where(app($class)->getRouteKeyName(), $key)->exists();
+        },
+        ['guards' => ['web', 'address']]
+    );
 
     $channel = class_to_broadcast_channel($class, false);
-    Broadcast::channel($channel, function (Authenticatable $user) {
-        return true;
-    }, ['guards' => ['web', 'address']]);
+    Broadcast::channel($channel . '.', fn () => true, ['guards' => ['web', 'address']]);
 }
 
 Broadcast::channel(
     class_to_broadcast_channel(morphed_model('user')),
-    function ($user, $id) {
-        return (int) $user->id === (int) $id;
-    }
+    fn ($user, $id) => (int) $user->id === (int) $id
 );
 
 Broadcast::channel('job-batch.{id}', function () {
