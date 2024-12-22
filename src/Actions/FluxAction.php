@@ -4,21 +4,21 @@ namespace FluxErp\Actions;
 
 use FluxErp\Models\Permission;
 use FluxErp\Rulesets\FluxRuleset;
+use FluxErp\Traits\Action\HasActionEvents;
 use FluxErp\Traits\Makeable;
-use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Support\Arrayable;
-use Illuminate\Events\NullDispatcher;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Support\Traits\Conditionable;
 use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 
 abstract class FluxAction
 {
-    use Makeable;
+    use Conditionable, HasActionEvents, Makeable;
 
     protected array $data;
 
@@ -26,9 +26,9 @@ abstract class FluxAction
 
     protected mixed $result = null;
 
-    protected bool $keepEmptyStrings = false;
+    protected static ?Dispatcher $dispatcher;
 
-    protected static Dispatcher $dispatcher;
+    protected bool $keepEmptyStrings = false;
 
     protected static bool $hasPermission = true;
 
@@ -38,8 +38,6 @@ abstract class FluxAction
 
     public function __construct(Arrayable|array $data = [], bool $keepEmptyStrings = false)
     {
-        $this->setEventDispatcher();
-
         $this->fireActionEvent(event: 'booting', halt: false);
 
         static::bootTraits();
@@ -126,11 +124,6 @@ abstract class FluxAction
             ->headline()
             ->lower()
             ->toString();
-    }
-
-    public static function executed($callback): void
-    {
-        static::$dispatcher->listen('action.executed: ' . static::class, $callback);
     }
 
     public function setData(array|Arrayable $data, bool $keepEmptyStrings = false): static
@@ -252,33 +245,6 @@ abstract class FluxAction
         $this->data = Validator::validate($this->data, $this->getRules());
     }
 
-    final public function when(callable|bool $condition, callable $callback): static
-    {
-        if (is_callable($condition)) {
-            $condition = $condition();
-        }
-
-        if ($condition) {
-            $callback($this);
-        }
-
-        return $this;
-    }
-
-    final public function withEvents(): static
-    {
-        $this->setEventDispatcher();
-
-        return $this;
-    }
-
-    final public function withoutEvents(): static
-    {
-        $this->setEventDispatcher(true);
-
-        return $this;
-    }
-
     protected function convertEmptyStringToNull(array $data): array
     {
         return array_map(function ($value) {
@@ -288,41 +254,5 @@ abstract class FluxAction
 
             return $value === '' ? null : $value;
         }, $data);
-    }
-
-    protected function fireActionEvent(string $event, bool $halt = true)
-    {
-        $function = $halt ? 'until' : 'dispatch';
-
-        return static::$dispatcher->{$function}('action.' . $event . ': ' . static::class, $this);
-    }
-
-    private function setEventDispatcher(bool $nullDispatcher = false): void
-    {
-        if (! $nullDispatcher) {
-            try {
-                static::$dispatcher = app()->make(Dispatcher::class);
-            } catch (BindingResolutionException) {
-                static::$dispatcher = new NullDispatcher(new \Illuminate\Events\Dispatcher());
-            }
-        } else {
-            static::$dispatcher = new NullDispatcher(static::$dispatcher);
-        }
-    }
-
-    public function __serialize(): array
-    {
-        return [
-            'data' => $this->data,
-            'rules' => $this->rules,
-            'result' => $this->result,
-        ];
-    }
-
-    public function __unserialize(array $data): void
-    {
-        $this->data = $data['data'];
-        $this->rules = $data['rules'];
-        $this->result = $data['result'];
     }
 }
