@@ -10,11 +10,21 @@ use FluxErp\Support\Metrics\Value;
 use FluxErp\Support\Widgets\Charts\LineChart;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use FluxErp\Traits\MoneyChartFormattingTrait;
+use Livewire\Attributes\Renderless;
 
 class AverageOrderValue extends LineChart
 {
     use IsTimeFrameAwareWidget, MoneyChartFormattingTrait;
 
+    protected function getListeners(): array
+    {
+        return [
+            'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
+                . ',.OrderLocked' => 'calculateByTimeFrame',
+        ];
+    }
+
+    #[Renderless]
     public function calculateByTimeFrame(): void
     {
         $this->skipRender();

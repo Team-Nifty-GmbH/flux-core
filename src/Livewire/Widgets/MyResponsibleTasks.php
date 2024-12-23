@@ -12,6 +12,13 @@ class MyResponsibleTasks extends Component
 {
     use Widgetable;
 
+    public function getListeners()
+    {
+        return [
+            'echo-private:' . auth()->user()->broadcastChannel() . ',.TaskLocked' => 'render',
+        ];
+    }
+
     public function render(): View|Factory
     {
         $endStates = TaskState::all()->filter(fn ($state) => $state::$isEndState)->keys()->toArray();

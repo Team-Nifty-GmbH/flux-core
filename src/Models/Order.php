@@ -130,6 +130,10 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
                 }
             }
 
+            if ($order->isDirty('is_locked')) {
+                $order->broadcastEvent('locked');
+            }
+
             if ($order->isDirty('iban')
                 && $order->iban
                 && str_replace(' ', '', strtoupper($order->iban)) !== $order->contactBankConnection?->iban
@@ -160,6 +164,16 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
 
             $order->purchaseInvoice()->update(['order_id' => null]);
         });
+    }
+
+    public static function getGenericChannelEvents(): array
+    {
+        return array_merge(
+            parent::getGenericChannelEvents(),
+            [
+                'locked',
+            ]
+        );
     }
 
     protected function casts(): array

@@ -7,6 +7,14 @@ use FluxErp\Support\Widgets\ValueList;
 
 class ActiveTaskTimes extends ValueList
 {
+    protected function getListeners(): array
+    {
+        return [
+            'echo-private:' . resolve_static(WorkTime::class, 'getBroadcastChannel')
+                . ',.WorkTimeTaskUpdated' => 'calculateList',
+        ];
+    }
+
     public function calculateList(): void
     {
         $query = resolve_static(WorkTime::class, 'query')
@@ -18,7 +26,7 @@ class ActiveTaskTimes extends ValueList
         $this->items = $query->map(fn (WorkTime $item) => [
             'id' => $item->id,
             'label' => $item->name
-                . ' (' . $item->contact?->invoiceAddress?->getLabel() ?? __('No customer') . ')',
+                . ' (' . ($item->contact?->invoiceAddress?->getLabel() ?? __('No customer')) . ')',
             'subLabel' => $item->user?->name,
             'value' => $item->started_at
                 ->locale(app()->getLocale())
