@@ -5,32 +5,70 @@
     </div>
     <div class="flex flex-col justify-between">
         <h2 class="truncate text-lg font-semibold text-gray-400">{{ __($this->title()) }}</h2>
-        <div class="flex flex-wrap gap-4 max-w-full">
-            <div class="font-bold text-2xl whitespace-nowrap truncate flex-none">
-                {{ $sum }}
+        <div class="flex flex-wrap gap-4 max-w-full items-center">
+            <div class="font-bold text-2xl whitespace-nowrap truncate flex-none" x-text="$wire.sum">
             </div>
-            @if(! is_null($growthRate))
-                @if($shouldBePositive)
-                    <x-badge
-                        :icon="$growthRate > 0 ? 'chevron-up' : ($growthRate < 0 ? 'chevron-down' : 'chevron-right')"
-                        :color="$growthRate > 0 ? 'positive' : ($growthRate < 0 ? 'negative' : 'secondary')"
-                    >
-                        {{ $growthRate }}%
-                    </x-badge>
-                @else
-                    <x-badge
-                        :icon="$growthRate > 0 ? 'chevron-up' : ($growthRate < 0 ? 'chevron-down' : 'chevron-right')"
-                        :color="$growthRate < 0 ? 'positive' : ($growthRate > 0 ? 'negative' : 'secondary')"
-                    >
-                        {{ $growthRate }}%
-                    </x-badge>
-                @endif
+            @if($shouldBePositive)
+                <template x-if="$wire.growthRate !== null">
+                    <div>
+                        <x-badge
+                            x-cloak
+                            x-show="$wire.growthRate > 0"
+                            positive
+                            lg
+                        >
+                            <x-slot:prepend>
+                                <i class="ph ph-caret-up"></i>
+                            </x-slot:prepend>
+                            <span x-text="$wire.growthRate + '%'">
+                            </span>
+                        </x-badge>
+                        <x-badge
+                            x-cloak
+                            x-show="$wire.growthRate < 0"
+                            negative
+                            lg
+                        >
+                            <x-slot:prepend>
+                                <i class="ph ph-caret-down"></i>
+                            </x-slot:prepend>
+                            <span x-text="$wire.growthRate + '%'">
+                            </span>
+                        </x-badge>
+                    </div>
+                </template>
+            @else
+                <template x-if="$wire.growthRate !== null">
+                    <div>
+                        <x-badge
+                            x-cloak
+                            x-show="$wire.growthRate > 0"
+                            negative
+                            lg
+                        >
+                            <x-slot:prepend>
+                                <i class="ph ph-caret-up"></i>
+                            </x-slot:prepend>
+                            <span x-text="$wire.growthRate + '%'">
+                            </span>
+                        </x-badge>
+                        <x-badge
+                            x-cloak
+                            x-show="$wire.growthRate < 0"
+                            positive
+                            lg
+                        >
+                            <x-slot:prepend>
+                                <i class="ph ph-caret-down"></i>
+                            </x-slot:prepend>
+                            <span x-text="$wire.growthRate + '%'">
+                            </span>
+                        </x-badge>
+                    </div>
+                </template>
             @endif
         </div>
-        @if(! is_null($previousSum))
-            <span class="text-gray-400">
-                {{ __('Previous Period') }} {{ $previousSum }}
-            </span>
-        @endif
+        <span class="text-gray-400" x-cloak x-show="$wire.previousSum" x-text="'{{ __('Previous Period') }} ' + $wire.previousSum">
+        </span>
     </div>
 </div>

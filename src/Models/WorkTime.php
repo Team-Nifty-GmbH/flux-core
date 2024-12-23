@@ -30,6 +30,25 @@ class WorkTime extends FluxModel
                 $workTime->calculateTotalCost();
             }
         });
+
+        static::saved(function (WorkTime $workTime) {
+            if ($workTime->is_daily_work_time) {
+                $workTime->broadcastEvent('dailyUpdated');
+            } else {
+                $workTime->broadcastEvent('taskUpdated');
+            }
+        });
+    }
+
+    public static function getGenericChannelEvents(): array
+    {
+        return array_merge(
+            parent::getGenericChannelEvents(),
+            [
+                'dailyUpdated',
+                'taskUpdated',
+            ]
+        );
     }
 
     protected function casts(): array

@@ -7,6 +7,7 @@ use FluxErp\States\Order\DeliveryState\Open;
 use FluxErp\Support\Metrics\Value;
 use FluxErp\Support\Widgets\ValueBox;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
+use Livewire\Attributes\Renderless;
 
 class OpenDeliveries extends ValueBox
 {
@@ -14,6 +15,15 @@ class OpenDeliveries extends ValueBox
 
     public bool $shouldBePositive = false;
 
+    protected function getListeners(): array
+    {
+        return [
+            'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
+                . ',.OrderLocked' => 'calculateSum',
+        ];
+    }
+
+    #[Renderless]
     public function calculateSum(): void
     {
         $metric = Value::make(

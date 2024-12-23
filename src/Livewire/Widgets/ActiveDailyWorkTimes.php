@@ -7,6 +7,14 @@ use FluxErp\Support\Widgets\ValueList;
 
 class ActiveDailyWorkTimes extends ValueList
 {
+    protected function getListeners(): array
+    {
+        return [
+            'echo-private:' . resolve_static(WorkTime::class, 'getBroadcastChannel')
+                . ',.WorkTimeDailyUpdated' => 'calculateList',
+        ];
+    }
+
     public function calculateList(): void
     {
         $query = resolve_static(WorkTime::class, 'query')

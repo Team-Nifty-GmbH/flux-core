@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Widgets;
 
 use FluxErp\Enums\GrowthRateTypeEnum;
 use FluxErp\Enums\TimeFrameEnum;
+use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Support\Calculation\Rounding;
 use FluxErp\Support\Widgets\ValueList;
@@ -13,6 +14,14 @@ use Illuminate\Database\Eloquent\Builder;
 class TopProductsByUnitSold extends ValueList
 {
     use IsTimeFrameAwareWidget;
+
+    protected function getListeners(): array
+    {
+        return [
+            'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
+                . ',.OrderLocked' => 'calculateList',
+        ];
+    }
 
     public function calculateList(): void
     {

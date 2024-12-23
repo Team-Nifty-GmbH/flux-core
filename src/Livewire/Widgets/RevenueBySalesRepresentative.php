@@ -7,6 +7,7 @@ use FluxErp\Support\Metrics\Charts\Donut;
 use FluxErp\Support\Widgets\Charts\CircleChart;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use FluxErp\Traits\MoneyChartFormattingTrait;
+use Livewire\Attributes\Renderless;
 
 class RevenueBySalesRepresentative extends CircleChart
 {
@@ -17,6 +18,14 @@ class RevenueBySalesRepresentative extends CircleChart
     ];
 
     public bool $showTotals = false;
+
+    protected function getListeners(): array
+    {
+        return [
+            'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
+                . ',.OrderLocked' => 'calculateByTimeFrame',
+        ];
+    }
 
     public function getPlotOptions(): array
     {
@@ -35,6 +44,7 @@ class RevenueBySalesRepresentative extends CircleChart
         ];
     }
 
+    #[Renderless]
     public function calculateByTimeFrame(): void
     {
         $this->calculateChart();

@@ -8,6 +8,7 @@ use FluxErp\Support\Metrics\Value;
 use FluxErp\Support\Widgets\ValueBox;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use Illuminate\Support\Number;
+use Livewire\Attributes\Renderless;
 
 class Purchase extends ValueBox
 {
@@ -15,6 +16,15 @@ class Purchase extends ValueBox
 
     public bool $shouldBePositive = false;
 
+    protected function getListeners(): array
+    {
+        return [
+            'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
+                . ',.OrderLocked' => 'calculateSum',
+        ];
+    }
+
+    #[Renderless]
     public function calculateSum(): void
     {
         $metric = Value::make(

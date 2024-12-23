@@ -57,6 +57,8 @@ abstract class Chart extends Component
 
     public ?array $options = null;
 
+    public bool $withSpinner = false;
+
     abstract public function calculateChart(): void;
 
     public static function getDefaultWidth(): int

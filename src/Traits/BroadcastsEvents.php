@@ -3,6 +3,7 @@
 namespace FluxErp\Traits;
 
 use Illuminate\Broadcasting\Channel;
+use Illuminate\Broadcasting\PendingBroadcast;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Support\Str;
 use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents as BaseBroadcastsEvents;
@@ -25,6 +26,11 @@ trait BroadcastsEvents
         }
 
         static::baseBootBroadcastsEvents();
+    }
+
+    public static function getGenericChannelEvents(): array
+    {
+        return ['created'];
     }
 
     public static function getWithoutBroadcasting(): bool
@@ -53,6 +59,17 @@ trait BroadcastsEvents
     {
         $channel = $this->broadcastChannel();
 
-        return new PrivateChannel($event === 'created' ? Str::beforeLast($channel, '.') . '.' : $channel);
+        return new PrivateChannel(
+            in_array($event, static::getGenericChannelEvents())
+                ? Str::beforeLast($channel, '.') . '.'
+                : $channel
+        );
+    }
+
+    public function broadcastEvent(string $event, $channels = null): ?PendingBroadcast
+    {
+        return $this->broadcastIfBroadcastChannelsExistForEvent(
+            $this->newBroadcastableModelEvent($event), $event, $channels
+        );
     }
 }

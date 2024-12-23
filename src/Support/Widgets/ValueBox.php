@@ -6,6 +6,7 @@ use FluxErp\Traits\Widgetable;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
+use Livewire\Attributes\Renderless;
 use Livewire\Component;
 
 abstract class ValueBox extends Component
@@ -32,6 +33,7 @@ abstract class ValueBox extends Component
         return view('flux::support.widgets.value-box');
     }
 
+    #[Renderless]
     public function calculateByTimeFrame(): void
     {
         $this->calculateSum();

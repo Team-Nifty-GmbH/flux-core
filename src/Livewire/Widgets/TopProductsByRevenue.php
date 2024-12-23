@@ -5,17 +5,28 @@ namespace FluxErp\Livewire\Widgets;
 use FluxErp\Enums\GrowthRateTypeEnum;
 use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Models\Currency;
+use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Support\Calculation\Rounding;
 use FluxErp\Support\Widgets\ValueList;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Number;
+use Livewire\Attributes\Renderless;
 
 class TopProductsByRevenue extends ValueList
 {
     use IsTimeFrameAwareWidget;
 
+    protected function getListeners(): array
+    {
+        return [
+            'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
+                . ',.OrderLocked' => 'calculateList',
+        ];
+    }
+
+    #[Renderless]
     public function calculateList(): void
     {
         $query = resolve_static(OrderPosition::class, 'query')
