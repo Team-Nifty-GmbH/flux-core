@@ -10,6 +10,7 @@ use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\ContactOrigin;
 use FluxErp\Models\Permission;
+use FluxErp\States\Address\AdvertisingState;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
@@ -152,6 +153,8 @@ class Addresses extends Component
 
         $this->address->contact_id = $this->contact->id;
         $this->address->client_id = $this->contact->client_id;
+        $this->address->advertising_state = resolve_static(AdvertisingState::class, 'config')
+            ->defaultStateClass::getMorphClass();
         $this->addressId = null;
         $this->edit = true;
     }
