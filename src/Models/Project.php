@@ -145,7 +145,7 @@ class Project extends FluxModel implements Calendarable, InteractsWithDataTables
         ];
     }
 
-    public function toCalendarEvent(): array
+    public function toCalendarEvent(?array $info = null): array
     {
         return [
             'id' => $this->id,
