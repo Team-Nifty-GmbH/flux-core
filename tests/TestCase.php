@@ -44,10 +44,6 @@ abstract class TestCase extends BaseTestCase
         }
 
         parent::setUp();
-
-        if (! file_exists(public_path('flux'))) {
-            symlink(package_path('public'), public_path('flux'));
-        }
     }
 
     public function getPackageProviders($app): array
