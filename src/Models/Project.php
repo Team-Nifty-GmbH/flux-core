@@ -140,7 +140,7 @@ class Project extends FluxModel implements Calendarable, InteractsWithDataTables
             'isPublic' => false,
             'isShared' => false,
             'permission' => 'owner',
-            'group' => 'my',
+            'group' => 'other',
             'isVirtual' => true,
         ];
     }

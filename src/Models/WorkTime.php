@@ -2,15 +2,20 @@
 
 namespace FluxErp\Models;
 
+use Carbon\Carbon;
+use FluxErp\Contracts\Calendarable;
 use FluxErp\Support\Calculation\Rounding;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Str;
 
-class WorkTime extends FluxModel
+class WorkTime extends FluxModel implements Calendarable
 {
     use Filterable, HasPackageFactory, HasUuid, SoftDeletes;
 
@@ -115,5 +120,65 @@ class WorkTime extends FluxModel
         }
 
         return $this;
+    }
+
+    public static function toCalendar(): array
+    {
+        return resolve_static(User::class, 'query')
+            ->where('is_active', true)
+            ->get()
+            ->map(fn (User $user) => [
+                'id' => Str::of(static::class)->replace('\\', '.') . '.' . $user->id,
+                'modelType' => morph_alias(static::class),
+                'name' => $user->name,
+                'color' => $user->color ?? 'blue',
+                'resourceEditable' => false,
+                'hasRepeatableEvents' => false,
+                'isPublic' => false,
+                'isShared' => false,
+                'permission' => 'owner',
+                'group' => 'other',
+                'isVirtual' => true,
+            ])
+            ->toArray();
+    }
+
+    public function toCalendarEvent(): array
+    {
+        return [
+            'id' => $this->id,
+            'calendar_type' => $this->getMorphClass(),
+            'title' => $this->user->name,
+            'start' => $this->started_at->toDateTimeString(),
+            'end' => $this->ended_at?->toDateTimeString(),
+            'color' => faker()->hexColor,
+            'invited' => [],
+            'description' => $this->description,
+            'allDay' => false,
+            'is_editable' => true,
+            'is_invited' => false,
+            'is_public' => false,
+            'is_repeatable' => false,
+        ];
+    }
+
+    public function scopeInTimeframe(Builder $builder, Carbon|string|null $start, Carbon|string|null $end): void
+    {
+        if ($start) {
+            $builder->where('started_at', '>=', $start);
+        }
+
+        if ($end) {
+            $builder->where('ended_at', '<=', $end);
+        }
+
+        $builder->where('is_daily_work_time', true)
+            ->where('is_locked', true)
+            ->where('is_pause', false);
+    }
+
+    public static function fromCalendarEvent(array $event): Model
+    {
+        // TODO: Implement fromCalendarEvent() method.
     }
 }

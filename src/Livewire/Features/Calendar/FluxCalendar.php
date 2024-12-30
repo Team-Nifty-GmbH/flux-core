@@ -14,6 +14,7 @@ use FluxErp\Models\User;
 use FluxErp\Traits\HasCalendarUserSettings;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
@@ -102,15 +103,17 @@ class FluxCalendar extends CalendarComponent
     }
 
     #[Renderless]
-    public function getMyCalendars(): Collection
+    public function getOtherCalendars(): Collection
     {
-        $calendarables = model_info_all()
-            ->filter(fn ($modelInfo) => in_array(Calendarable::class, $modelInfo->implements))
-            ->unique('morphClass')
-            ->map(fn ($modelInfo) => resolve_static($modelInfo->class, 'toCalendar'));
+        $calendarables = collect(Relation::morphMap())
+            ->filter(fn (string $modelClass) => in_array(Calendarable::class, class_implements($modelClass)))
+            ->map(fn (string $modelClass) => resolve_static($modelClass, 'toCalendar'))
+            ->flatMap(fn ($item) => Arr::isAssoc($item) ? [$item] : $item)
+            ->values();
 
-        return parent::getMyCalendars()->isEmpty() ?
-            $calendarables->merge(parent::getMyCalendars()) : parent::getMyCalendars()->merge($calendarables);
+        return parent::getOtherCalendars()->isEmpty() ?
+            $calendarables->merge(parent::getOtherCalendars())
+            : parent::getOtherCalendars()->merge($calendarables);
     }
 
     #[Renderless]
