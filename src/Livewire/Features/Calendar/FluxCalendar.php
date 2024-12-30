@@ -122,7 +122,7 @@ class FluxCalendar extends CalendarComponent
             return morphed_model($calendarAttributes['modelType'])::query()
                 ->inTimeframe($info['start'], $info['end'])
                 ->get()
-                ->map(fn (Model $model) => $model->toCalendarEvent())
+                ->map(fn (Model $model) => $model->toCalendarEvent($info))
                 ->toArray();
         }
 
@@ -193,20 +193,22 @@ class FluxCalendar extends CalendarComponent
             };
         }
 
-        $result = array_map(
-            function ($event) use ($attributes) {
-                if ($event instanceof CalendarEvent) {
-                    return $event->toCalendarEventObject([
-                        'is_editable' => true,
-                        'is_repeatable' => $attributes['is_repeatable'] ?? false,
-                        'has_repeats' => ! is_null($event->repeat),
-                    ]);
-                }
+        if (data_get($this->calendarPeriod, 'start') && data_get($this->calendarPeriod, 'end')) {
+            $result = array_map(
+                function ($event) use ($attributes) {
+                    if ($event instanceof CalendarEvent) {
+                        return $event->toCalendarEventObject([
+                            'is_editable' => true,
+                            'is_repeatable' => $attributes['is_repeatable'] ?? false,
+                            'has_repeats' => ! is_null($event->repeat),
+                        ]);
+                    }
 
-                return $event;
-            },
-            Helper::getRepetitions($result, $this->calendarPeriod['start'], $this->calendarPeriod['end'])
-        );
+                    return $event;
+                },
+                Helper::getRepetitions($result, $this->calendarPeriod['start'], $this->calendarPeriod['end'])
+            );
+        }
 
         return $result ?: false;
     }

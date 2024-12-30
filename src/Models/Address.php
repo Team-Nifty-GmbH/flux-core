@@ -2,6 +2,8 @@
 
 namespace FluxErp\Models;
 
+use Carbon\Carbon;
+use FluxErp\Contracts\Calendarable;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\SalutationEnum;
 use FluxErp\Mail\MagicLoginLink;
@@ -29,8 +31,10 @@ use FluxErp\Traits\SoftDeletes;
 use FluxErp\View\Printing\Address\AddressLabel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Translation\HasLocalePreference;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -50,7 +54,7 @@ use Spatie\Tags\HasTags;
 use TeamNiftyGmbH\Calendar\Traits\HasCalendars;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
-class Address extends FluxAuthenticatable implements HasLocalePreference, HasMedia, InteractsWithDataTables, OffersPrinting
+class Address extends FluxAuthenticatable implements Calendarable, HasLocalePreference, HasMedia, InteractsWithDataTables, OffersPrinting
 {
     use Commentable, Communicatable, Filterable, HasAdditionalColumns, HasCalendars, HasCart, HasClientAssignment,
         HasFrontendAttributes, HasPackageFactory, HasRoles, HasStates, HasTags, HasUserModification, HasUuid,
@@ -436,5 +440,97 @@ class Address extends FluxAuthenticatable implements HasLocalePreference, HasMed
         return [
             'address-label' => AddressLabel::class,
         ];
+    }
+
+    public static function toCalendar(): array
+    {
+        return [
+            'id' => Str::of(static::class)->replace('\\', '.'),
+            'modelType' => morph_alias(static::class),
+            'name' => __('Birthdays'),
+            'color' => '#dd2c2c',
+            'resourceEditable' => false,
+            'hasRepeatableEvents' => false,
+            'isPublic' => false,
+            'isShared' => false,
+            'permission' => 'owner',
+            'group' => 'my',
+            'isVirtual' => true,
+        ];
+    }
+
+    public function toCalendarEvent(?array $info = null): array
+    {
+        $currentBirthday = $this->date_of_birth->setYear(Carbon::parse(data_get($info, 'start'))->year);
+        $age = $currentBirthday->diffInYears($this->date_of_birth);
+        $name = <<<HTML
+            <i class="ph ph-gift"></i>
+            <span>$this->name ($age)</span>
+        HTML;
+
+        return [
+            'id' => $this->id,
+            'calendar_type' => $this->getMorphClass(),
+            'title' => $name,
+            'start' => $currentBirthday->toDateString(),
+            'end' => $currentBirthday->toDateString(),
+            'invited' => [],
+            'allDay' => true,
+            'is_editable' => false,
+            'is_invited' => false,
+            'is_public' => false,
+        ];
+    }
+
+    public function scopeInTimeframe(Builder $builder, Carbon|string|null $start, Carbon|string|null $end): void
+    {
+        $start = $start ? Carbon::parse($start) : null;
+        $end = $end ? Carbon::parse($end) : null;
+
+        $builder->where(function (Builder $query) use ($start, $end): void {
+            if ($start && $end && $start->greaterThan($end)) {
+                $query->where(function (Builder $query) use ($start): void {
+                    $query->whereMonth('date_of_birth', '=', $start->month)
+                        ->whereDay('date_of_birth', '>=', $start->day)
+                        ->orWhere(function (Builder $q2): void {
+                            $q2->whereMonth('date_of_birth', '=', 12);
+                        });
+                })->orWhere(function (Builder $q) use ($end): void {
+                    $q->whereMonth('date_of_birth', '=', $end->month)
+                        ->whereDay('date_of_birth', '<=', $end->day);
+                });
+            } else {
+                // Normal range (no wrapping)
+                $query->where(function (Builder $query) use ($start, $end): void {
+                    if ($start) {
+                        $query->whereMonth('date_of_birth', '>', $start->month)
+                            ->orWhere(function (Builder $query) use ($start): void {
+                                $query->whereMonth('date_of_birth', '=', $start->month)
+                                    ->whereDay('date_of_birth', '>=', $start->day);
+                            });
+                    }
+                    if ($end) {
+                        $query->whereMonth('date_of_birth', '<', $end->month)
+                            ->orWhere(function (Builder $query) use ($end): void {
+                                $query->whereMonth('date_of_birth', '=', $end->month)
+                                    ->whereDay('date_of_birth', '<=', $end->day);
+                            });
+                    }
+                });
+            }
+        });
+    }
+
+    public static function fromCalendarEvent(array $event): Model
+    {
+        $currentAddress = static::query()->whereKey(data_get($event, 'id'))->first();
+
+        $address = new static();
+        $address->forceFill([
+            'id' => data_get($event, 'id'),
+            'date_of_birth' => Carbon::parse(data_get($event, 'start'))->setYear($currentAddress->date_of_birth->year),
+        ]);
+
+        return $address;
     }
 }
