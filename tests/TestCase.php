@@ -28,8 +28,6 @@ use TeamNiftyGmbH\DataTable\DataTableServiceProvider;
 use WireUi\Heroicons\HeroiconsServiceProvider;
 use WireUi\Providers\WireUiServiceProvider;
 
-use function Orchestra\Testbench\package_path;
-
 abstract class TestCase extends BaseTestCase
 {
     use CreatesApplication, DatabaseTransactions;
@@ -44,10 +42,6 @@ abstract class TestCase extends BaseTestCase
         }
 
         parent::setUp();
-
-        if (! file_exists(public_path('flux'))) {
-            symlink(package_path('public'), public_path('flux'));
-        }
     }
 
     public function getPackageProviders($app): array
