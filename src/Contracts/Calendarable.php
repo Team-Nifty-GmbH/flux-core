@@ -10,7 +10,7 @@ interface Calendarable
 {
     public static function toCalendar(): array;
 
-    public function toCalendarEvent(): array;
+    public function toCalendarEvent(?array $info = null): array;
 
     public function scopeInTimeframe(Builder $builder, string|Carbon|null $start, string|Carbon|null $end): void;
 

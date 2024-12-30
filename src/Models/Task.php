@@ -157,7 +157,7 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         ];
     }
 
-    public function toCalendarEvent(): array
+    public function toCalendarEvent(?array $info = null): array
     {
         return [
             'id' => $this->id,
