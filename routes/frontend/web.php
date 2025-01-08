@@ -69,6 +69,7 @@ use FluxErp\Livewire\Settings\Tags;
 use FluxErp\Livewire\Settings\TicketTypes;
 use FluxErp\Livewire\Settings\Translations;
 use FluxErp\Livewire\Settings\Units;
+use FluxErp\Livewire\Settings\UserEdit;
 use FluxErp\Livewire\Settings\Users;
 use FluxErp\Livewire\Settings\VatRates;
 use FluxErp\Livewire\Settings\Warehouses;
@@ -187,6 +188,7 @@ Route::middleware('web')
                         Route::get('/translations', Translations::class)->name('translations');
                         Route::get('/units', Units::class)->name('units');
                         Route::get('/users', Users::class)->name('users');
+                        Route::get('/users/{user}', UserEdit::class)->name('users.edit');
                         Route::get('/mail-accounts', MailAccounts::class)->name('mail-accounts');
                         Route::get('/work-time-types', WorkTimeTypes::class)->name('work-time-types');
                         Route::get('/vat-rates', VatRates::class)->name('vat-rates');

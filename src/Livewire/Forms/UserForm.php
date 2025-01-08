@@ -16,6 +16,8 @@ class UserForm extends FluxForm
 
     public ?int $language_id = null;
 
+    public ?int $parent_id = null;
+
     public ?int $currency_id = null;
 
     public ?string $email = null;
@@ -24,11 +26,15 @@ class UserForm extends FluxForm
 
     public ?string $lastname = null;
 
+    public ?string $phone = null;
+
     public ?string $password = null;
 
     public ?string $password_confirmation = null;
 
     public ?string $user_code = null;
+
+    public ?string $timezone = null;
 
     public ?string $iban = null;
 
@@ -39,6 +45,18 @@ class UserForm extends FluxForm
     public ?string $bic = null;
 
     public ?float $cost_per_hour = null;
+
+    public bool $is_active = false;
+
+    public bool $is_dark_mode = false;
+
+    public array $roles = [];
+
+    public array $permissions = [];
+
+    public array $clients = [];
+
+    public array $mail_accounts = [];
 
     protected function getActions(): array
     {

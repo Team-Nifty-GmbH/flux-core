@@ -39,7 +39,7 @@ class CreateUserRuleset extends FluxRuleset
             'lastname' => 'required|string',
             'phone' => 'nullable|string',
             'password' => [
-                'required',
+                'nullable',
                 Password::min(8)->mixedCase()->numbers(),
             ],
             'user_code' => 'required|string|unique:users,user_code',

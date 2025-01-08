@@ -131,7 +131,7 @@ class WorkTime extends FluxModel implements Calendarable
                 'id' => Str::of(static::class)->replace('\\', '.') . '.' . $user->id,
                 'modelType' => morph_alias(static::class),
                 'name' => $user->name,
-                'color' => $user->color ?? 'blue',
+                'color' => $user->color,
                 'resourceEditable' => false,
                 'hasRepeatableEvents' => false,
                 'isPublic' => false,
@@ -143,7 +143,7 @@ class WorkTime extends FluxModel implements Calendarable
             ->toArray();
     }
 
-    public function toCalendarEvent(): array
+    public function toCalendarEvent(?array $info = null): array
     {
         return [
             'id' => $this->id,
@@ -151,7 +151,7 @@ class WorkTime extends FluxModel implements Calendarable
             'title' => $this->user->name,
             'start' => $this->started_at->toDateTimeString(),
             'end' => $this->ended_at?->toDateTimeString(),
-            'color' => faker()->hexColor,
+            'color' => $this->user->color,
             'invited' => [],
             'description' => $this->description,
             'allDay' => false,
@@ -162,8 +162,12 @@ class WorkTime extends FluxModel implements Calendarable
         ];
     }
 
-    public function scopeInTimeframe(Builder $builder, Carbon|string|null $start, Carbon|string|null $end): void
-    {
+    public function scopeInTimeframe(
+        Builder $builder,
+        Carbon|string|null $start,
+        Carbon|string|null $end,
+        ?array $info = null
+    ): void {
         if ($start) {
             $builder->where('started_at', '>=', $start);
         }
@@ -173,6 +177,7 @@ class WorkTime extends FluxModel implements Calendarable
         }
 
         $builder->where('is_daily_work_time', true)
+            ->where('user_id', Str::afterLast(data_get($info, 'id'), '.'))
             ->where('is_locked', true)
             ->where('is_pause', false);
     }

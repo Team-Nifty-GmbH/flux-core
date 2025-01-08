@@ -123,7 +123,7 @@ class FluxCalendar extends CalendarComponent
             && data_get($calendarAttributes, 'isVirtual', false)
         ) {
             return morphed_model($calendarAttributes['modelType'])::query()
-                ->inTimeframe($info['start'], $info['end'])
+                ->inTimeframe($info['start'], $info['end'], $calendarAttributes)
                 ->get()
                 ->map(fn (Model $model) => $model->toCalendarEvent($info))
                 ->toArray();
