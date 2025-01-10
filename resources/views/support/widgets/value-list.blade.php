@@ -9,8 +9,8 @@
             <template x-for="item in $wire.items">
                 <tr>
                     <td class="flex flex-col pb-2 pr-1.5">
-                        <div x-text="item.label"></div>
-                        <div x-text="item.subLabel" class="text-gray-400 text-sm"></div>
+                        <div x-html="item.label ?? null"></div>
+                        <div x-html="item.subLabel ?? null" class="text-gray-400 text-sm"></div>
                     </td>
                     <td class="text-right font-bold whitespace-nowrap pb-2 pr-1.5" x-text="item.value"></td>
                     <td class="text-right pb-2">
@@ -56,7 +56,7 @@
                             <span>{{ __('New') }}</span>
                         </x-badge>
                         <template x-if="isNaN(item.growthRate)">
-                            <div x-html="item.growthRate">
+                            <div x-html="item.growthRate ?? null">
                             </div>
                         </template>
                     </td>
