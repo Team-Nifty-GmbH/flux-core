@@ -66,17 +66,19 @@ class Permissions extends RoleList
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit permissions'))
-                ->color('primary')
-                ->attributes([
-                    'wire:click' => 'edit(record.id)',
-                ])
-                ->when(resolve_static(UpdateRole::class, 'canPerformAction', [false])),
-            DataTableButton::make()
                 ->label(__('Assign users'))
                 ->color('primary')
                 ->attributes([
                     'wire:click' => 'editUsers(record.id)',
+                ])
+                ->when(resolve_static(UpdateRole::class, 'canPerformAction', [false])),
+            DataTableButton::make()
+                ->label(__('Edit permissions'))
+                ->color('primary')
+                ->attributes([
+                    'x-cloak',
+                    'x-show' => 'record.name !== \'Super Admin\'',
+                    'wire:click' => 'edit(record.id)',
                 ])
                 ->when(resolve_static(UpdateRole::class, 'canPerformAction', [false])),
             DataTableButton::make()

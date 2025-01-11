@@ -900,7 +900,7 @@ trait HasAdditionalColumns
                     $translation = $callbackReturnValue;
                 }
             } catch (Exception) {
-                //prevent the fallback to crash
+                // prevent the fallback to crash
             }
         }
 
