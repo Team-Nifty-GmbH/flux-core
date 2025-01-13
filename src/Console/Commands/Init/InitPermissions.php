@@ -139,11 +139,15 @@ class InitPermissions extends Command
     private function registerModelGetPermission(): void
     {
         $this->info('Registering model get permissions…');
-        $roles = resolve_static(Role::class, 'query')->where('guard_name', 'web')->get();
+        $roles = resolve_static(Role::class, 'query')
+            ->where('guard_name', 'web')
+            ->get();
         $newPermissions = [];
 
         foreach (Relation::morphMap() as $alias => $class) {
-            if (in_array(HasModelPermission::class, class_uses_recursive($class)) && $class::hasPermission()) {
+            if (in_array(HasModelPermission::class, class_uses_recursive($class))
+                && resolve_static($class, 'hasPermission')
+            ) {
                 $permission = resolve_static(
                     Permission::class,
                     'findOrCreate',

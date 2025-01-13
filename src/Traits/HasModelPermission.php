@@ -3,7 +3,7 @@
 namespace FluxErp\Traits;
 
 use FluxErp\Models\Permission;
-use Illuminate\Database\Eloquent\Builder;
+use FluxErp\Models\Scopes\ModelPermissionCheckScope;
 use Illuminate\Support\Collection;
 use Spatie\Permission\Guard;
 
@@ -12,17 +12,7 @@ trait HasModelPermission
     protected static function bootHasModelPermission(): void
     {
         if (auth()->user() && ! auth()->user()->hasRole('Super Admin')) {
-            static::addGlobalScope('permissionCheck', function (Builder $builder) {
-                if (! static::hasPermission()) {
-                    return;
-                }
-
-                $relevantPermissions = static::getRelevantPermissions();
-
-                if ($relevantPermissions->isNotEmpty() && ! auth()->user()->hasAnyPermission($relevantPermissions)) {
-                    $builder->whereRaw('1 = 0');
-                }
-            });
+            static::addGlobalScope(app(ModelPermissionCheckScope::class));
         }
     }
 

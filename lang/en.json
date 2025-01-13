@@ -178,6 +178,7 @@
     "orders.get": "View orders",
     "orders.{id}.get": "View order details",
     "pdf_created": "PDF created",
+    "permission.get": "Get",
     "products.list.get": "View product list",
     "products.serial-numbers.get": "View product serial numbers",
     "products.serial-numbers.{id?}.get": "View product serial number details",

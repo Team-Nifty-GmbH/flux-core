@@ -11,6 +11,7 @@ use FluxErp\Models\Permission;
 use FluxErp\Models\Role;
 use FluxErp\Models\User;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -32,7 +33,10 @@ class Permissions extends RoleList
             ->pluck('id', 'name')
             ->toArray();
 
-        return Arr::undotToTree($permissions);
+        return Arr::undotToTree(
+            array: $permissions,
+            translate: fn ($key) => $key === 'get' ? __('permission.get') : __(Str::headline($key))
+        );
     }
 
     protected function getViewData(): array
