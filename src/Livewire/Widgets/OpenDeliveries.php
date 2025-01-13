@@ -27,14 +27,12 @@ class OpenDeliveries extends ValueBox implements HasWidgetOptions
     #[Renderless]
     public function calculateSum(): void
     {
-        $metric = resolve_static(Order::class, 'query')
+        $this->sum = resolve_static(Order::class, 'query')
             ->whereNotNull('invoice_date')
             ->whereNotNull('invoice_number')
             ->whereState('delivery_state', Open::class)
             ->revenue()
             ->count('id');
-
-        $this->sum = $metric;
     }
 
     public function options(): array

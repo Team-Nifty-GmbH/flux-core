@@ -9,7 +9,7 @@
             @if(class_implements($this, \FluxErp\Contracts\HasWidgetOptions::class))
                 <x-dropdown>
                     @foreach($this->options() as $option)
-                        <x-dropdown.item :label="data_get($option, 'label')" wire:click="{{ $option['method'] }}">
+                        <x-dropdown.item :label="data_get($option, 'label')" wire:click="{{ data_get($option, 'method') }}">
                         </x-dropdown.item>
                     @endforeach
                 </x-dropdown>
