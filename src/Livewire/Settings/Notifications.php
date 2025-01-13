@@ -4,12 +4,16 @@ namespace FluxErp\Livewire\Settings;
 
 use FluxErp\Models\NotificationSetting;
 use FluxErp\Services\NotificationSettingsService;
+use FluxErp\Support\Notification\SubscribableNotification;
 use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\Renderless;
 use Livewire\Component;
 
 class Notifications extends Component
@@ -34,9 +38,17 @@ class Notifications extends Component
     public function mount(): void
     {
         $this->notificationChannels = config('notifications.channels');
-        $this->notifications = config('notifications.model_notifications');
+        foreach (Event::getFacadeRoot()->getRawListeners() as $event => $listeners) {
+            foreach (Event::getFacadeRoot()->getListeners($event) as $listener) {
+                /** @var \Closure $listener */
+                $notificationClass = data_get((new \ReflectionFunction($listener))->getStaticVariables(), 'listener.0');
+                if (is_subclass_of($notificationClass, SubscribableNotification::class)) {
+                    $this->notifications[] = $notificationClass;
+                }
+            }
+        }
 
-        $notificationSettings = data_get($this->notifications, '*.*');
+        $notificationSettings = $this->notifications;
         $anonymousNotificationSettings = resolve_static(NotificationSetting::class, 'query')
             ->whereNull('notifiable_id')
             ->select([
@@ -167,5 +179,11 @@ class Notifications extends Component
             $data['notification_type'] = $this->notificationType;
             $this->dirtyNotificationChannels[$path[0]] = $data;
         }
+    }
+
+    #[Renderless]
+    public function translate(string $key): string
+    {
+        return __(Str::headline(class_basename($key)));
     }
 }

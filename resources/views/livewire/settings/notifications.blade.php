@@ -49,20 +49,20 @@
                 <div class="mt-2 text-sm text-gray-300">{{ __('Here you can manage notification settings...') }}</div>
             </div>
         </div>
-        <x-table>
+        <x-flux::table>
             <x-slot name="header">
                 <th class="col-span-2">{{ __('Notification') }}</th>
             </x-slot>
             <template x-for="(notification,key) in notificationSettings">
-                <x-table.row>
+                <x-flux::table.row>
                     <td>
-                        <div x-text="key"></div>
+                        <div x-text="$wire.translate(key)"></div>
                     </td>
                     <td>
                         <x-button primary :label="__('Edit')" x-on:click="$wire.show(key)" />
                     </td>
-                </x-table.row>
+                </x-flux::table.row>
             </template>
-        </x-table>
+        </x-flux::table>
     </div>
 </div>
