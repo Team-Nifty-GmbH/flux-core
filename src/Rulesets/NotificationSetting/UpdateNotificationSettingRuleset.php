@@ -16,7 +16,6 @@ class UpdateNotificationSettingRuleset extends FluxRuleset
             'notification_type' => [
                 'required',
                 'string',
-                Rule::in(data_get(config('notifications.model_notifications'), '*.*')),
             ],
             'channel' => [
                 'required',

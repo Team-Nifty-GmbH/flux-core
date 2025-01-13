@@ -53,7 +53,7 @@
                 @foreach($notificationSettings as $notificationName => $notification)
                     <tr>
                         <td>
-                            <div>{{ $notificationName }}</div>
+                            <div>{{ __(\Illuminate\Support\Str::headline(class_basename($notificationName))) }}</div>
                         </td>
                         @foreach($notification as $channel => $channelSettings)
                             <td>

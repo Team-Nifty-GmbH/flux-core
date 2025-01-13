@@ -3,14 +3,16 @@
 namespace FluxErp\Livewire\Settings;
 
 use FluxErp\Actions\NotificationSetting\UpdateNotificationSetting;
-use FluxErp\Actions\User\UpdateUser;
+use FluxErp\Livewire\Forms\UserForm;
 use FluxErp\Models\Language;
 use FluxErp\Models\User;
+use FluxErp\Support\Notification\SubscribableNotification;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -19,7 +21,7 @@ class Profile extends Component
 {
     use Actions, WithFileUploads;
 
-    public array $user = [];
+    public UserForm $user;
 
     public array $languages = [];
 
@@ -35,14 +37,24 @@ class Profile extends Component
 
     public function mount(): void
     {
-        $this->user = auth()->user()->toArray();
+        $this->user->fill(auth()->user());
         $this->avatar = auth()->user()->getFirstMediaUrl('avatar');
-        $this->languages = app(Language::class)->all(['id', 'name'])->toArray();
+        $this->languages = resolve_static(Language::class, 'query')
+            ->get(['id', 'name'])
+            ->toArray();
 
         $this->notificationChannels = config('notifications.channels');
-        $this->notifications = config('notifications.model_notifications');
+        foreach (Event::getFacadeRoot()->getRawListeners() as $event => $listeners) {
+            foreach (Event::getFacadeRoot()->getListeners($event) as $listener) {
+                /** @var \Closure $listener */
+                $notificationClass = data_get((new \ReflectionFunction($listener))->getStaticVariables(), 'listener.0');
+                if (is_subclass_of($notificationClass, SubscribableNotification::class)) {
+                    $this->notifications[] = $notificationClass;
+                }
+            }
+        }
 
-        $notificationSettings = data_get($this->notifications, '*.*');
+        $notificationSettings = $this->notifications;
         $userNotificationSettings = auth()->user()
             ->notificationSettings()
             ->select([
@@ -122,10 +134,7 @@ class Profile extends Component
         $this->validate();
 
         try {
-            UpdateUser::make($this->user)
-                ->checkPermission()
-                ->validate()
-                ->execute();
+            $this->user->save();
             $this->notification()->success(__('Profile saved successful.'));
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);

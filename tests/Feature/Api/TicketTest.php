@@ -92,7 +92,7 @@ class TicketTest extends BaseSetup
         $tickets = json_decode($response->getContent())->data->data;
 
         $this->assertEquals($this->tickets->count(), count($tickets));
-        //Todo Assert created Ticket instances
+        // Todo Assert created Ticket instances
     }
 
     public function test_create_ticket()

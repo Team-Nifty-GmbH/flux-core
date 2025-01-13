@@ -128,7 +128,7 @@ class ToastNotification implements Arrayable
         return $this;
     }
 
-    public function icon(string $icon): static
+    public function icon(?string $icon = null): static
     {
         $this->icon = $icon;
 

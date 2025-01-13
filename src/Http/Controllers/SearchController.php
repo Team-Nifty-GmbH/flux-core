@@ -39,7 +39,7 @@ class SearchController extends Controller
                 ? $query->whereIn($optionValue, $selected)
                 : $query->where($optionValue, $selected);
         } elseif ($request->has('search') && $isSearchable) {
-            $query = !is_string($request->get('search'))
+            $query = ! is_string($request->get('search'))
                 ? resolve_static($model, 'query')->limit(20)
                 : resolve_static($model, 'search', ['query' => $request->get('search')])
                     ->toEloquentBuilder();

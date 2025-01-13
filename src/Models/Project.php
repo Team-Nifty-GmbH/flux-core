@@ -10,6 +10,7 @@ use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasClientAssignment;
+use FluxErp\Traits\HasNotificationSubscriptions;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasSerialNumberRange;
 use FluxErp\Traits\HasUserModification;
@@ -30,8 +31,8 @@ use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 class Project extends FluxModel implements Calendarable, InteractsWithDataTables
 {
     use Commentable, Filterable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes,
-        HasPackageFactory, HasSerialNumberRange, HasStates, HasTags, HasUserModification, HasUuid, LogsActivity,
-        Searchable, SoftDeletes;
+        HasNotificationSubscriptions, HasPackageFactory, HasSerialNumberRange, HasStates, HasTags, HasUserModification, HasUuid,
+        LogsActivity, Searchable, SoftDeletes;
 
     protected $guarded = [
         'id',

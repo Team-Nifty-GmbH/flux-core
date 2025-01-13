@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Features;
 
+use FluxErp\Events\Order\DocumentSignedEvent;
 use FluxErp\Livewire\Forms\MediaUploadForm;
 use FluxErp\Models\Media;
 use FluxErp\Traits\Livewire\Actions;
@@ -85,6 +86,8 @@ class SignaturePublicLink extends Component
 
             try {
                 $this->signature->force()->save();
+
+                event(new DocumentSignedEvent($this->signature->getActionResult()));
             } catch (ValidationException|UnauthorizedException $e) {
                 exception_to_notifications($e, $this);
                 $this->skipRender();

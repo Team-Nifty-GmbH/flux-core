@@ -3,9 +3,12 @@
 namespace FluxErp\Actions\Task;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Events\Task\TaskAssignedEvent;
 use FluxErp\Models\Tag;
 use FluxErp\Models\Task;
+use FluxErp\Models\User;
 use FluxErp\Rulesets\Task\UpdateTaskRuleset;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
@@ -32,11 +35,43 @@ class UpdateTask extends FluxAction
         $orderPositions = Arr::pull($this->data, 'order_positions');
         $tags = Arr::pull($this->data, 'tags');
 
-        $task->fill($this->data);
-        $task->save();
-
         if (! is_null($users)) {
-            $task->users()->sync($users);
+            $result = $task->users()->sync($users);
+
+            resolve_static(User::class, 'query')
+                ->whereIntegerInRaw('id', data_get($result, 'detached'))
+                ->get()
+                ->when(
+                    $this->getData('responsible_user_id') !== $task->responsible_user_id
+                    && ! is_null($task->responsible_user_id),
+                    fn (Collection $users) => $users->add(
+                        resolve_static(User::class, 'query')
+                            ->whereKey($task->responsible_user_id)
+                            ->first(['id'])
+                    )
+                )
+                ->filter()
+                ->each(function (Model $user) use ($task) {
+                    $user->unsubscribeNotificationChannel($task->broadcastChannel());
+                });
+
+            resolve_static(User::class, 'query')
+                ->whereIntegerInRaw('id', data_get($result, 'attached'))
+                ->get()
+                ->when(
+                    $this->getData('responsible_user_id') !== $task->responsible_user_id,
+                    fn (Collection $users) => $users->add(
+                        resolve_static(User::class, 'query')
+                            ->whereKey($this->getData('responsible_user_id'))
+                            ->first(['id'])
+                    )
+                )
+                ->filter()
+                ->each(function (Model $user) use ($task) {
+                    $user->subscribeNotificationChannel($task->broadcastChannel());
+                });
+
+            event(new TaskAssignedEvent($task));
         }
 
         if (! is_null($orderPositions)) {
@@ -51,6 +86,9 @@ class UpdateTask extends FluxAction
         if (! is_null($tags)) {
             $task->syncTags(resolve_static(Tag::class, 'query')->whereIntegerInRaw('id', $tags)->get());
         }
+
+        $task->fill($this->data);
+        $task->save();
 
         return $task->withoutRelations()->fresh();
     }
