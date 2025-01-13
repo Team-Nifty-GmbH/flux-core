@@ -66,7 +66,7 @@ class Profile extends Component
             ->get()
             ->groupBy('notification_type')
             ->map(fn ($items) => $items->keyBy('channel'))
-            ->toArray();
+            ->toArray() ?? [];
 
         foreach ($notificationSettings as $notificationSetting) {
             foreach ($this->notificationChannels as $key => $channel) {
