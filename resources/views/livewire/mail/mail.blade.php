@@ -1,28 +1,17 @@
 <div class="flex flex-col-reverse sm:flex-row gap-6"
      x-data="{
-        ...folderTree(),
-        levels: $wire.entangle('folders'),
-        selectable: false,
-        select(event, level) {
-           if (level) {
-              $wire.set('folderId', level.id);
-              const current = document.querySelector('#mail-folders [selected]');
-              current?.classList.remove('bg-primary-500', 'text-white');
-              current?.removeAttribute('selected');
-
-              event.target.parentNode.classList.add('bg-primary-500', 'text-white');
-              event.target.parentNode.setAttribute('selected', true);
-           }
-        },
         writeHtml() {
-            const html = $wire.mailMessage.html_body || $wire.mailMessage.text_body;
             const host = document.getElementById('mail-body');
             let shadow = host.shadowRoot;
             if (!shadow) {
                 shadow = host.attachShadow({mode: 'open'});
             }
             document.createElement('div');
-            shadow.innerHTML = html;
+            shadow.innerHTML = $wire.mailMessage.html_body;
+
+            if (shadow.innerHTML !== $wire.mailMessage.html_body && $wire.mailMessage.text_body) {
+                shadow.innerHTML = $wire.mailMessage.text_body;
+            }
         }
     }"
 >
@@ -70,14 +59,19 @@
       </x-card>
    </x-modal>
    <section class="max-w-[96rem] flex flex-col gap-4">
-      <x-card id="mail-folders">
-         <ul class="flex flex-col gap-1" wire:ignore>
-            <template x-for="(level, i) in levels">
-               <li x-html="renderLevel(level, i)"></li>
-            </template>
-         </ul>
-      </x-card>
-      <x-button x-show="$wire.mailAccounts" x-cloak spinner="getNewMessages()" class="w-full" :label="__('Get new messages')" x-on:click="$wire.getNewMessages()" primary/>
+       <x-card id="mail-folders" x-on:folder-tree-select="$wire.set('folderId', $event.detail.id, true)">
+           <x-flux::checkbox-tree
+               tree="$wire.folders"
+               name-attribute="name"
+               children-attribute="children"
+           >
+               <x-slot:afterTree>
+                   <div class="pt-4">
+                       <x-button x-show="$wire.mailAccounts" x-cloak spinner="getNewMessages()" class="w-full" :label="__('Get new messages')" x-on:click="$wire.getNewMessages()" primary/>
+                   </div>
+               </x-slot:afterTree>
+           </x-flux::checkbox-tree>
+       </x-card>
    </section>
    <section class="grow" x-on:data-table-row-clicked="$wire.showMail($event.detail.id)">
       @include('tall-datatables::livewire.data-table')
