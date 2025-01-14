@@ -54,6 +54,11 @@ class PriceList extends FluxModel
         );
     }
 
+    public static function hasPermission(): bool
+    {
+        return false;
+    }
+
     public function categoryDiscounts(): BelongsToMany
     {
         return $this->belongsToMany(Discount::class, 'category_price_list');

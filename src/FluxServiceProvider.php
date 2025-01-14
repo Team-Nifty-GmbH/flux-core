@@ -190,34 +190,38 @@ class FluxServiceProvider extends ServiceProvider
         }
 
         if (! Arr::hasMacro('undotToTree')) {
-            Arr::macro('undotToTree', function (array $array, string $path = ''): array {
-                $array = Arr::undot($array);
-                $buildTree = function (array $array, string $path = '') use (&$buildTree) {
-                    $tree = [];
+            Arr::macro(
+                'undotToTree',
+                function (array $array, string $path = '', ?\Closure $translate = null): array {
+                    $array = Arr::undot($array);
+                    $translate = $translate ?: fn ($key) => __(Str::headline($key));
+                    $buildTree = function (array $array, string $path = '') use (&$buildTree, $translate) {
+                        $tree = [];
 
-                    foreach ($array as $key => $value) {
-                        $currentPath = $path === '' ? $key : $path . '.' . $key;
+                        foreach ($array as $key => $value) {
+                            $currentPath = $path === '' ? $key : $path . '.' . $key;
 
-                        if (is_array($value)) {
-                            $tree[] = [
-                                'id' => $currentPath,
-                                'label' => __(Str::headline($key)),
-                                'children' => $buildTree($value, $currentPath),
-                            ];
-                        } else {
-                            $tree[] = [
-                                'id' => $currentPath,
-                                'label' => __(Str::headline($key)),
-                                'value' => $value,
-                            ];
+                            if (is_array($value)) {
+                                $tree[] = [
+                                    'id' => $currentPath,
+                                    'label' => $translate($key),
+                                    'children' => $buildTree($value, $currentPath),
+                                ];
+                            } else {
+                                $tree[] = [
+                                    'id' => $currentPath,
+                                    'label' => $translate($key),
+                                    'value' => $value,
+                                ];
+                            }
                         }
-                    }
 
-                    return $tree;
-                };
+                        return $tree;
+                    };
 
-                return $buildTree($array, $path);
-            });
+                    return $buildTree($array, $path);
+                }
+            );
         }
 
         if (! Str::hasMacro('iban')) {
