@@ -12,6 +12,7 @@ use FluxErp\Traits\Notifiable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Support\Collection;
 use NotificationChannels\WebPush\WebPushMessage;
 
 abstract class SubscribableNotification extends Notification implements HasToastNotification
@@ -36,18 +37,7 @@ abstract class SubscribableNotification extends Notification implements HasToast
         $this->event = $event;
         $this->model = $this->getModelFromEvent($this->event);
 
-        resolve_static(EventSubscription::class, 'query')
-            ->with('subscribable')
-            ->where(function (Builder $query) {
-                $query->whereNot('subscribable_type', auth()->user()?->getMorphClass())
-                    ->orWhere('subscribable_id', '!=', auth()->id());
-            })
-            ->where('channel', $this->getChannelFromEvent($event))
-            ->whereHas('subscribable', fn (Builder $query) => $query->where('is_active', true))
-            ->get()
-            ->map(fn (EventSubscription $subscription) => $subscription->subscribable)
-            ->unique()
-            ->filter(fn ($notifiable) => in_array(Notifiable::class, class_uses_recursive($notifiable)))
+        $this->getSubscriptionsForEvent($this->event)
             ->each(function (object $notifiable) {
                 $notifiable->notify($this);
             });
@@ -74,10 +64,6 @@ abstract class SubscribableNotification extends Notification implements HasToast
 
     public function toToastNotification(object $notifiable): ToastNotification
     {
-        $createdBy = $this->model && method_exists($this->model, 'getCreatedBy')
-            ? $this->model->getCreatedBy()
-            : null;
-
         return ToastNotification::make()
             ->notifiable($notifiable)
             ->title($this->getTitle())
@@ -90,6 +76,22 @@ abstract class SubscribableNotification extends Notification implements HasToast
             )
             ->description($this->getDescription())
             ->accept($this->getAcceptAction($notifiable));
+    }
+
+    protected function getSubscriptionsForEvent(object $event): Collection
+    {
+        return resolve_static(EventSubscription::class, 'query')
+            ->with('subscribable')
+            ->where(function (Builder $query) {
+                $query->whereNot('subscribable_type', auth()->user()?->getMorphClass())
+                    ->orWhere('subscribable_id', '!=', auth()->id());
+            })
+            ->where('channel', $this->getChannelFromEvent($event))
+            ->whereHas('subscribable', fn (Builder $query) => $query->where('is_active', true))
+            ->get()
+            ->map(fn (EventSubscription $subscription) => $subscription->subscribable)
+            ->unique()
+            ->filter(fn ($notifiable) => in_array(Notifiable::class, class_uses_recursive($notifiable)));
     }
 
     protected function getNotificationIcon(): ?string

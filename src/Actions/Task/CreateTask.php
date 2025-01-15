@@ -6,11 +6,9 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Events\Task\TaskAssignedEvent;
 use FluxErp\Models\Tag;
 use FluxErp\Models\Task;
-use FluxErp\Models\User;
 use FluxErp\Rulesets\Task\CreateTaskRuleset;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 
 class CreateTask extends FluxAction
@@ -37,22 +35,14 @@ class CreateTask extends FluxAction
         if ($users) {
             $task->users()->attach($users);
 
-            resolve_static(User::class, 'query')
-                ->whereIntegerInRaw('id', $users)
-                ->get()
-                ->when(
-                    $this->getData('responsible_user_id'),
-                    fn (Collection $users) => $users->add(
-                        resolve_static(User::class, 'query')
-                            ->whereKey($this->getData('responsible_user_id'))
-                            ->first(['id'])
+            event(TaskAssignedEvent::make($task)
+                ->subscribeChannel(collect($users)
+                    ->when(
+                        $this->getData('responsible_user_id'),
+                        fn (Collection $users) => $users->add($this->getData('responsible_user_id'))
                     )
                 )
-                ->each(function (Model $user) use ($task) {
-                    $user->subscribeNotificationChannel($task->broadcastChannel());
-                });
-
-            event(new TaskAssignedEvent($task));
+            );
         }
 
         if ($orderPositions) {

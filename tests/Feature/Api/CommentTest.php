@@ -336,9 +336,7 @@ class CommentTest extends BaseSetup
         $response->assertStatus(201);
 
         $this->assertDatabaseHas('event_subscriptions', [
-            'event' => 'eloquent.created: ' . Comment::class,
-            'model_type' => morph_alias(Ticket::class),
-            'model_id' => $ticket->id,
+            'channel' => $ticket->broadcastChannel(),
             'subscribable_type' => morph_alias(User::class),
             'subscribable_id' => $user->id,
         ]);

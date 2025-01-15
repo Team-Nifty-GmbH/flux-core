@@ -21,7 +21,9 @@ use FluxErp\Notifications\Order\DocumentSignedNotification;
 use FluxErp\Notifications\Order\OrderApprovalRequestNotification;
 use FluxErp\Notifications\Task\TaskAssignedNotification;
 use FluxErp\Notifications\Task\TaskUpdatedNotification;
+use FluxErp\Notifications\Ticket\TicketAssignedNotification;
 use FluxErp\Notifications\Ticket\TicketCreatedNotification;
+use FluxErp\Notifications\Ticket\TicketUpdatedNotification;
 use FluxErp\Support\QueueMonitor\QueueMonitorManager;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
@@ -69,6 +71,8 @@ class EventServiceProvider extends ServiceProvider
         TaskAssignedNotification::class,
         TaskUpdatedNotification::class,
         OrderApprovalRequestNotification::class,
+        TicketAssignedNotification::class,
+        TicketUpdatedNotification::class,
     ];
 
     public function boot(): void

@@ -2,11 +2,10 @@
 
 namespace FluxErp\Actions\Ticket;
 
-use FluxErp\Actions\EventSubscription\CreateEventSubscription;
 use FluxErp\Actions\FluxAction;
+use FluxErp\Events\Ticket\TicketAssignedEvent;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Client;
-use FluxErp\Models\Comment;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\TicketType;
 use FluxErp\Models\User;
@@ -70,34 +69,15 @@ class CreateTicket extends FluxAction
                 $users = array_filter($users, fn (int $user) => $user !== $ticket->authenticatable_id);
             }
 
-            foreach (data_get($ticket->users()->sync($users), 'attached', []) as $user) {
-                CreateEventSubscription::make([
-                    'event' => eloquent_model_event(
-                        'created',
-                        resolve_static(Comment::class, 'class')
-                    ),
-                    'subscribable_id' => $user,
-                    'subscribable_type' => morph_alias(User::class),
-                    'model_type' => $ticket->getMorphClass(),
-                    'model_id' => $ticket->id,
-                    'is_broadcast' => false,
-                    'is_notifiable' => true,
-                ])->validate()->execute();
-            }
+            $ticket->users()->attach($users);
+            event(TicketAssignedEvent::make($ticket)
+                ->subscribeChannel(collect($users))
+                ->subscribeChannel(
+                    [$ticket->authenticatable_id],
+                    morphed_model($ticket->authenticatable->getMorphClass())
+                )
+            );
         }
-
-        CreateEventSubscription::make([
-            'event' => eloquent_model_event(
-                'created',
-                resolve_static(Comment::class, 'class')
-            ),
-            'subscribable_id' => $ticket->authenticatable_id,
-            'subscribable_type' => $ticket->authenticatable->getMorphClass(),
-            'model_type' => $ticket->getMorphClass(),
-            'model_id' => $ticket->id,
-            'is_broadcast' => false,
-            'is_notifiable' => true,
-        ])->validate()->execute();
 
         return $ticket->refresh();
     }

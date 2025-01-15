@@ -2,14 +2,10 @@
 
 namespace FluxErp\Events\Order;
 
+use FluxErp\Support\Event\SubscribableEvent;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-class DocumentSignedEvent
+class DocumentSignedEvent extends SubscribableEvent
 {
     public function __construct(public Media $signature) {}
-
-    public function broadcastChannel(): string
-    {
-        return $this->signature->model->broadcastChannel();
-    }
 }

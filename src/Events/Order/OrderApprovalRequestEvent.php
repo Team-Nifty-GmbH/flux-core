@@ -3,13 +3,9 @@
 namespace FluxErp\Events\Order;
 
 use FluxErp\Models\Order;
+use FluxErp\Support\Event\SubscribableEvent;
 
-class OrderApprovalRequestEvent
+class OrderApprovalRequestEvent extends SubscribableEvent
 {
     public function __construct(public Order $order) {}
-
-    public function broadcastChannel(): string
-    {
-        return $this->order->broadcastChannel();
-    }
 }
