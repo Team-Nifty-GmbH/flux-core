@@ -46,7 +46,7 @@ class CommentCreatedNotification extends SubscribableNotification implements Sho
             ':username commented on :model',
             [
                 'username' => $this->model->getCreatedBy()?->getLabel() ?? __('Unknown'),
-                'model' => __('your ' . $this->model->getMorphClass()),
+                'model' => __('your ' . $this->model->model_type),
             ],
         );
     }
