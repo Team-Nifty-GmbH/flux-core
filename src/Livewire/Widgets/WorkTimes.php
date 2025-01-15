@@ -7,7 +7,7 @@ use Illuminate\Contracts\View\View;
 
 class WorkTimes extends MyWorkTimes
 {
-    public ?int $userId;
+    public ?int $userId = null;
 
     public function render(): View|Factory
     {
