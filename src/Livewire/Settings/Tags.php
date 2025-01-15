@@ -10,6 +10,8 @@ use FluxErp\Livewire\Forms\TagForm;
 use FluxErp\Models\Tag;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Locked;
+use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use Spatie\Tags\HasTags;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
@@ -19,6 +21,28 @@ class Tags extends TagList
     protected ?string $includeBefore = 'flux::livewire.settings.tags';
 
     public TagForm $tagForm;
+
+    #[Locked]
+    public bool $isSelectable = true;
+
+    #[Renderless]
+    public function deleteSelected(): void
+    {
+        try {
+            $this->getSelectedModelsQuery()->pluck('id')->each(function (int $id) {
+                DeleteTag::make(['id' => $id])
+                    ->checkPermission()
+                    ->validate()
+                    ->execute();
+            });
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+        }
+
+        $this->loadData();
+
+        $this->reset('selected');
+    }
 
     protected function getTableActions(): array
     {
@@ -52,6 +76,20 @@ class Tags extends TagList
                 ->when(resolve_static(DeleteTag::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'delete(record.id)',
+                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Tag')]),
+                ]),
+        ];
+    }
+
+    protected function getSelectedActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->label(__('Delete'))
+                ->color('negative')
+                ->when(resolve_static(DeleteTag::class, 'canPerformAction', [false]))
+                ->attributes([
+                    'wire:click' => 'deleteSelected',
                     'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Tag')]),
                 ]),
         ];

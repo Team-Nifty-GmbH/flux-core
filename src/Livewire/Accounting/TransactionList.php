@@ -20,6 +20,25 @@ class TransactionList extends BaseTransactionList
 
     public ?string $includeBefore = 'flux::livewire.accounting.transaction-list.include-before';
 
+    #[Renderless]
+    public function deleteSelected(): void
+    {
+        try {
+            $this->getSelectedModelsQuery()->pluck('id')->each(function (int $id) {
+                DeleteTransaction::make(['id' => $id])
+                    ->checkPermission()
+                    ->validate()
+                    ->execute();
+            });
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+        }
+
+        $this->loadData();
+
+        $this->reset('selected');
+    }
+
     protected function getTableActions(): array
     {
         return array_merge(
@@ -74,6 +93,14 @@ class TransactionList extends BaseTransactionList
                 ->color('primary')
                 ->wireClick('matchTransactions()')
                 ->when(fn () => resolve_static(UpdateTransaction::class, 'canPerformAction', [false])),
+            DataTableButton::make()
+                ->label(__('Delete'))
+                ->color('negative')
+                ->when(fn () => resolve_static(DeleteTransaction::class, 'canPerformAction', [false]))
+                ->attributes([
+                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Transaction')]),
+                    'wire:click' => 'deleteSelected()',
+                ]),
         ];
     }
 

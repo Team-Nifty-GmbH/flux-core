@@ -19,6 +19,11 @@
                             <div class="font-semibold">
                                 {{ __('Order Date') }}:
                             </div>
+                            @if($model->commission)
+                                <div class="font-semibold">
+                                    {{ __('Commission') }}:
+                                </div>
+                            @endif
                         @show
                     </div>
                     <div class="pl-6 text-right inline-block">
@@ -32,6 +37,11 @@
                             <div>
                                 {{ $model->order_date->locale(app()->getLocale())->isoFormat('L') }}
                             </div>
+                            @if($model->commission)
+                                <div>
+                                    {{ $model->commission }}
+                                </div>
+                            @endif
                         @show
                     </div>
                 @show
@@ -111,7 +121,7 @@
                 </td>
             </tr>
             @section('total.discounts')
-                @if($model->discounts)
+                @if($model->discounts->isNotEmpty())
                     <tr>
                         <td class="text-right">
                             {{ __('Sum net without discount') }}

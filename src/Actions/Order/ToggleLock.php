@@ -24,7 +24,12 @@ class ToggleLock extends FluxAction
             ->whereKey($this->data['id'])
             ->first();
         $order->is_locked = data_get($this->data, 'is_locked', ! $order->is_locked);
-        $order->save();
+
+        if ($order->is_locked) {
+            $order->calculatePrices()->calculateBalance()->save();
+        } else {
+            $order->save();
+        }
 
         return $order->withoutRelations()->fresh();
     }

@@ -686,6 +686,7 @@ class FluxServiceProvider extends ServiceProvider
                 Menu::register(route: 'settings.serial-number-ranges');
                 Menu::register(route: 'settings.scheduling');
                 Menu::register(route: 'settings.queue-monitor');
+                Menu::register(route: 'settings.failed-jobs');
                 Menu::register(route: 'settings.plugins');
             }
         );
