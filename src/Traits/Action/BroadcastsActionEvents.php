@@ -80,17 +80,23 @@ trait BroadcastsActionEvents
 
     public function broadcastWith(string $event): array
     {
-        if (! $this->getResult() instanceof Model) {
-            $payload['result'] = $this->result instanceof Serializable
-                ? $this->getResult()
-                : null;
+        $result = $this->getResult();
+
+        if (! $result instanceof Model) {
+            $payload['result'] = $result instanceof Serializable
+                ? $result
+                : (
+                    is_int($result) || is_float($result) || is_string($result) || is_bool($result)
+                        ? $result
+                        : null
+                );
 
             return $payload;
         }
 
         $payload['result'] = [
-            $this->getResult()->getKeyName() => $this->getResult()->getKey(),
-            'model' => $this->getResult()->getMorphClass(),
+            $result->getKeyName() => $result->getKey(),
+            'model' => $result->getMorphClass(),
         ];
 
         return $payload;

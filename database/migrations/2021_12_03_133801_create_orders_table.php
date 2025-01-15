@@ -11,7 +11,7 @@ class CreateOrdersTable extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->char('uuid', 36);
-            //id
+            // id
             $table->unsignedBigInteger('parent_id')->nullable();
             $table->unsignedBigInteger('client_id');
             $table->unsignedBigInteger('language_id');
@@ -22,7 +22,7 @@ class CreateOrdersTable extends Migration
             $table->unsignedBigInteger('payment_type_id');
             $table->unsignedBigInteger('tax_exemption_id')->nullable();
 
-            //number
+            // number
             $table->integer('payment_target', false, true);
             $table->integer('payment_discount_target', false, true)->nullable();
             $table->decimal('payment_discount_percent', 40, 10, true)->nullable();
@@ -38,7 +38,7 @@ class CreateOrdersTable extends Migration
             $table->integer('payment_reminder_days_2', false, true);
             $table->integer('payment_reminder_days_3', false, true);
 
-            //string
+            // string
             $table->text('header')->nullable();
             $table->text('footer')->nullable();
             $table->text('logistic_note')->nullable();
@@ -46,14 +46,14 @@ class CreateOrdersTable extends Migration
             $table->json('vats');
             $table->json('payment_texts')->nullable();
 
-            //date
+            // date
             $table->date('order_date');
             $table->date('invoice_date')->nullable();
             $table->date('system_delivery_date')->nullable();
             $table->date('customer_delivery_date')->nullable();
             $table->date('date_of_approval')->nullable();
 
-            //boolean
+            // boolean
             $table->boolean('is_locked')->default(false);
             $table->boolean('has_logistic_notify_phone_number')->default(false);
             $table->boolean('has_logistic_notify_number')->default(false);

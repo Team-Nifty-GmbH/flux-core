@@ -292,11 +292,11 @@ if (! function_exists('to_flat_tree')) {
             $node['has_children'] = (bool) ($node['children'] ?? false);
             $node['has_siblings'] = $siblings > 1;
 
-            //Set primary key if not exists
+            // Set primary key if not exists
             $node[$key] = $node[$key] ?? \Illuminate\Support\Str::uuid()->toString();
             $sanitized = \Illuminate\Support\Arr::except($node, 'children');
 
-            //Set parent key
+            // Set parent key
             if ($parent) {
                 $sanitized[$parentKey] = $parent[$key];
             }

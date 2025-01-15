@@ -255,4 +255,20 @@ abstract class FluxAction
             return $value === '' ? null : $value;
         }, $data);
     }
+
+    public function __serialize(): array
+    {
+        return [
+            'data' => $this->data,
+            'rules' => $this->rules,
+            'result' => $this->result,
+        ];
+    }
+
+    public function __unserialize(array $data): void
+    {
+        $this->data = $data['data'];
+        $this->rules = $data['rules'];
+        $this->result = $data['result'];
+    }
 }

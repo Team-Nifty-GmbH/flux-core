@@ -152,7 +152,7 @@ return new class() extends Migration
             $table->dropIndex('prices_deleted_by_foreign');
         });
 
-        //ProductOptionGroup
+        // ProductOptionGroup
         Schema::table('product_option_groups', function (Blueprint $table) {
             $table->dropIndex('product_option_groups_created_by_foreign');
             $table->dropIndex('product_option_groups_updated_by_foreign');

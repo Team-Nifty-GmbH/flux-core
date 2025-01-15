@@ -3,6 +3,7 @@
 namespace FluxErp\Traits\Action;
 
 use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Events\NullDispatcher;
 use Illuminate\Events\QueuedClosure;
 
 trait HasActionEvents
@@ -76,7 +77,7 @@ trait HasActionEvents
 
     final public function withoutEvents(): static
     {
-        $this->setEventDispatcher();
+        $this->setEventDispatcher(app(NullDispatcher::class));
 
         return $this;
     }
