@@ -1672,6 +1672,7 @@
     "Users": "Benutzer",
     "Uuid": "UUID",
     "Validate Certificate": "Zertifikat validieren",
+    "validation.already_exists": ":model existiert bereits.",
     "validation.accepted": ":attribute muss akzeptiert werden.",
     "validation.accepted_if": ":attribute muss akzeptiert werden, wenn :other :value ist.",
     "validation.active_url": ":attribute ist keine gültige Internet-Adresse.",
