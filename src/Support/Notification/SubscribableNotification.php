@@ -39,7 +39,7 @@ abstract class SubscribableNotification extends Notification implements HasToast
         resolve_static(EventSubscription::class, 'query')
             ->with('subscribable')
             ->where(function (Builder $query) {
-                $query->whereNot('subscribable_type', auth()->user()->getMorphClass())
+                $query->whereNot('subscribable_type', auth()->user()?->getMorphClass())
                     ->orWhere('subscribable_id', '!=', auth()->id());
             })
             ->where('channel', $this->getChannelFromEvent($event))

@@ -20,9 +20,9 @@ class UpdateEventSubscriptionRuleset extends FluxRuleset
                     ->where('subscribable_id', auth()->id())
                     ->where('subscribable_type', auth()->user()->getMorphClass()),
             ],
-            'channel' => 'required|string',
-            'is_broadcast' => 'required|boolean|accepted_if:is_notifiable,false,0',
-            'is_notifiable' => 'required|boolean|accepted_if:is_broadcast,false,0',
+            'channel' => 'string',
+            'is_broadcast' => 'boolean|accepted_if:is_notifiable,false,0',
+            'is_notifiable' => 'boolean|accepted_if:is_broadcast,false,0',
         ];
     }
 }
