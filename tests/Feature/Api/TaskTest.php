@@ -187,7 +187,7 @@ class TaskTest extends BaseSetup
         $this->assertTrue($this->user->is($dbTask->getUpdatedBy()));
         $this->assertEquals($task['users'], $dbTask->users()->pluck('users.id')->toArray());
         Notification::assertSentTo(
-            User::query()->whereIntegerInRaw('id', data_get($task, 'users')),
+            User::query()->whereIntegerInRaw('id', data_get($task, 'users'))->first(),
             TaskAssignedNotification::class
         );
 
