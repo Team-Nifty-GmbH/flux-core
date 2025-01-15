@@ -35,14 +35,17 @@ class UpdateTag extends FluxAction
     {
         parent::validateData();
 
-        if (resolve_static(Tag::class, 'query')
-            ->where('name', $this->getData('name'))
-            ->where(
-                'type',
-                resolve_static(Tag::class, 'query')->whereKey($this->getData('id'))->value('type')
-            )
-            ->whereKeyNot($this->getData('id'))
-            ->exists()
+        if ($this->getData('name')
+            && resolve_static(Tag::class, 'query')
+                ->whereKeyNot($this->getData('id'))
+                ->where('name', $this->getData('name'))
+                ->where(
+                    'type',
+                    resolve_static(Tag::class, 'query')
+                        ->whereKey($this->getData('id'))
+                        ->value('type')
+                )
+                ->exists()
         ) {
             throw ValidationException::withMessages([
                 'name' => [__('validation.already_exists', ['model' => __('Tag')])],

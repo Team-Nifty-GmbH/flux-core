@@ -220,6 +220,7 @@
     "validation.alpha": "The :attribute must only contain letters.",
     "validation.alpha_dash": "The :attribute must only contain letters, numbers, dashes and underscores.",
     "validation.alpha_num": "The :attribute must only contain letters and numbers.",
+    "validation.already_exists": "The :model already exists.",
     "validation.array": "The :attribute must be an array.",
     "validation.before": "The :attribute must be a date before :date.",
     "validation.before_or_equal": "The :attribute must be a date before or equal to :date.",
