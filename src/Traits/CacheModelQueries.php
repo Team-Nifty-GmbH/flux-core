@@ -8,8 +8,14 @@ use Illuminate\Support\Facades\Cache;
 
 trait CacheModelQueries
 {
+    protected static bool $cacheQueries = true;
+
     public static function bootCacheModelQueries(): void
     {
+        if (! static::$cacheQueries) {
+            return;
+        }
+
         static::$builder = CachedBuilder::class;
 
         static::saved(fn (Model $model) => $model->flushModelQueryCache());
