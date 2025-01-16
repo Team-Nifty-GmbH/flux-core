@@ -5,6 +5,7 @@ namespace FluxErp\Actions\Tag;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Tag;
 use FluxErp\Rulesets\Tag\CreateTagRuleset;
+use Illuminate\Validation\ValidationException;
 
 class CreateTag extends FluxAction
 {
@@ -24,5 +25,20 @@ class CreateTag extends FluxAction
         $tag->save();
 
         return $tag->fresh();
+    }
+
+    protected function validateData(): void
+    {
+        parent::validateData();
+
+        if (resolve_static(Tag::class, 'query')
+            ->where('name', $this->getData('name'))
+            ->where('type', $this->getData('type'))
+            ->exists()
+        ) {
+            throw ValidationException::withMessages([
+                'name' => [__('validation.already_exists', ['model' => __('Tag')])],
+            ]);
+        }
     }
 }

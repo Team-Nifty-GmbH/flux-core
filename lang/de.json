@@ -1682,6 +1682,7 @@
     "validation.alpha": ":attribute darf nur aus Buchstaben bestehen.",
     "validation.alpha_dash": ":attribute darf nur aus Buchstaben, Zahlen, Binde- und Unterstrichen bestehen.",
     "validation.alpha_num": ":attribute darf nur aus Buchstaben und Zahlen bestehen.",
+    "validation.already_exists": ":model existiert bereits.",
     "validation.array": ":attribute muss ein Array sein.",
     "validation.before": ":attribute muss ein Datum vor :date sein.",
     "validation.before_or_equal": ":attribute muss ein Datum vor :date oder gleich :date sein.",
