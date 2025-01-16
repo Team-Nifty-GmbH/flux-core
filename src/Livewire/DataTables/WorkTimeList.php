@@ -52,7 +52,7 @@ class WorkTimeList extends BaseDataTable
     public bool $isSelectable = true;
 
     #[Renderless]
-    public function toggleIsBillable(bool $isBillable)
+    public function toggleIsBillable(bool $isBillable): void
     {
         foreach ($this->getSelectedModelsQuery()->pluck('id') as $id) {
             try {
