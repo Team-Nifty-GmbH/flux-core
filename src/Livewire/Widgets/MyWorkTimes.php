@@ -11,6 +11,7 @@ use FluxErp\Support\Widgets\Charts\BarChart;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use Livewire\Attributes\Js;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\Renderless;
 
 class MyWorkTimes extends BarChart
 {
@@ -88,6 +89,7 @@ class MyWorkTimes extends BarChart
         return $this->toolTipFormatter();
     }
 
+    #[Renderless]
     public function calculateByTimeFrame(): void
     {
         $this->calculateChart();
@@ -133,8 +135,8 @@ class MyWorkTimes extends BarChart
             ->sum('total_time_ms');
 
         $data = [
-            'work_time' => [
-                'name' => __('Work Time'),
+            'presence' => [
+                'name' => __('Presence'),
                 'group' => 'worktime',
                 'color' => 'indigo',
                 'data' => $workDays->getData(),
@@ -146,6 +148,16 @@ class MyWorkTimes extends BarChart
                 'color' => 'amber',
                 'data' => $pause->getData(),
                 'growthRate' => $pause->getGrowthRate(),
+            ],
+            'work_time' => [
+                'name' => __('Work Time'),
+                'group' => 'total_worktime',
+                'color' => 'pink',
+                'data' => array_map(
+                    fn ($workTime, $pause) => bcadd($workTime, $pause),
+                    $workDays->getData(),
+                    $pause->getData()
+                ),
             ],
         ];
 
@@ -193,5 +205,10 @@ class MyWorkTimes extends BarChart
         ];
 
         $this->series = array_values($data);
+    }
+
+    public function showTitle(): bool
+    {
+        return false;
     }
 }
