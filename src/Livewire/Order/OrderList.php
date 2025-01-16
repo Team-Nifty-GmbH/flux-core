@@ -132,7 +132,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
     {
         $response = $this->createDocumentFromItems($this->getSelectedModels(), true);
         $this->loadData();
-        $this->selected = [];
+        $this->reset('selected');
 
         return $response;
     }

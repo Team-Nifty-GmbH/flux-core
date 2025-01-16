@@ -74,7 +74,7 @@ class MoneyTransfer extends DirectDebit
             return;
         }
 
-        $this->selected = [];
+        $this->reset('selected');
 
         $this->notification()->success(__('Payment Run created.'));
         $this->loadData();

@@ -63,7 +63,7 @@ class CommissionList extends BaseDataTable
             return false;
         }
 
-        $this->selected = [];
+        $this->reset('selected');
 
         return true;
     }
