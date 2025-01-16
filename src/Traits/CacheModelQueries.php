@@ -16,7 +16,7 @@ trait CacheModelQueries
             return;
         }
 
-        static::$builder = CachedBuilder::class;
+        static::$builder = resolve_static(CachedBuilder::class, 'class');
 
         static::saved(fn (Model $model) => $model->flushModelQueryCache());
         static::deleted(fn (Model $model) => $model->flushModelQueryCache());
@@ -29,6 +29,6 @@ trait CacheModelQueries
 
     public function flushModelQueryCache(): void
     {
-        Cache::forget(CachedBuilder::cacheKey(static::class));
+        Cache::forget(resolve_static(CachedBuilder::class, 'cacheKey', ['class' => static::class]));
     }
 }
