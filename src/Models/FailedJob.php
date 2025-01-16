@@ -9,7 +9,7 @@ class FailedJob extends FluxModel
         'uuid',
     ];
 
-    protected function casts()
+    protected function casts(): array
     {
         return [
             'payload' => 'array',

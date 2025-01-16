@@ -35,11 +35,11 @@ class FailedJobs extends FailedJobList
         ];
     }
 
-    public function itemToArray($item): array
+    protected function itemToArray($item): array
     {
         $array = parent::itemToArray($item);
 
-        $array['exception'] = data_get(explode("\n", $item->exception), 0);
+        $array['exception'] = data_get(explode("\n", $item->exception ?? ''), 0);
 
         return $array;
     }

@@ -70,8 +70,7 @@ class WorkTimeList extends BaseDataTable
             }
         }
 
-
-        $this->selected = [];
+        $this->reset('selected');
         $this->loadData();
     }
 
@@ -94,7 +93,7 @@ class WorkTimeList extends BaseDataTable
             return;
         }
 
-        $this->selected = [];
+        $this->reset('selected');
         $this->loadData();
     }
 

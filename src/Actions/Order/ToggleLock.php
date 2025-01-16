@@ -26,7 +26,9 @@ class ToggleLock extends FluxAction
         $order->is_locked = data_get($this->data, 'is_locked', ! $order->is_locked);
 
         if ($order->is_locked) {
-            $order->calculatePrices()->calculateBalance()->save();
+            $order->calculatePrices()
+                ->calculateBalance()
+                ->save();
         } else {
             $order->save();
         }

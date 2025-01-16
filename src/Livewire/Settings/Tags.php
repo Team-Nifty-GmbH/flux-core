@@ -28,16 +28,18 @@ class Tags extends TagList
     #[Renderless]
     public function deleteSelected(): void
     {
-        try {
-            $this->getSelectedModelsQuery()->pluck('id')->each(function (int $id) {
-                DeleteTag::make(['id' => $id])
-                    ->checkPermission()
-                    ->validate()
-                    ->execute();
+        $this->getSelectedModelsQuery()
+            ->pluck('id')
+            ->each(function (int $id) {
+                try {
+                    DeleteTag::make(['id' => $id])
+                        ->checkPermission()
+                        ->validate()
+                        ->execute();
+                } catch (ValidationException|UnauthorizedException $e) {
+                    exception_to_notifications($e, $this);
+                }
             });
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-        }
 
         $this->loadData();
 

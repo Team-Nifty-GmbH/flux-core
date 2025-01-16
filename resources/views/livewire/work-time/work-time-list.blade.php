@@ -138,18 +138,18 @@
                     option-description="description"
                     wire:model="createOrdersFromWorkTimes.product_id"
                     :async-data="[
-                    'api' => route('search', \FluxErp\Models\Product::class),
-                    'method' => 'POST',
-                    'params' => [
-                        'where' => [
-                            [
-                                'is_service',
-                                '=',
-                                true,
+                        'api' => route('search', \FluxErp\Models\Product::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'where' => [
+                                [
+                                    'is_service',
+                                    '=',
+                                    true,
+                                ],
                             ],
                         ],
-                    ],
-                ]"
+                    ]"
                 />
                 <hr/>
                 <x-radio value="round" :label="__('Do not round')" wire:model="createOrdersFromWorkTimes.round"/>
