@@ -29,6 +29,6 @@ trait CacheModelQueries
 
     public function flushModelQueryCache(): void
     {
-        Cache::forget(CachedBuilder::cacheKey(static::class));
+        Cache::forget(resolve_static(CachedBuilder::class, 'cacheKey', ['class' => static::class]));
     }
 }
