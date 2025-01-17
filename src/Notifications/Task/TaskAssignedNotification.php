@@ -9,10 +9,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
-class TaskAssignedNotification extends SubscribableNotification implements ShouldQueue
+class TaskAssignedNotification extends SubscribableNotification
 {
-    use Queueable;
-
     public function subscribe(): array
     {
         return [
