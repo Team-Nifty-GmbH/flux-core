@@ -8,6 +8,8 @@ use TeamNiftyGmbH\DataTable\Contracts\HasFrontendFormatter;
 
 abstract class TicketState extends State implements HasFrontendFormatter
 {
+    public static bool $isEndState = false;
+
     abstract public function color(): string;
 
     public static function config(): StateConfig
@@ -21,12 +23,22 @@ abstract class TicketState extends State implements HasFrontendFormatter
                         WaitingForCustomer::class,
                         InProgress::class,
                     ],
+                    Escalated::class,
+                ],
+                [
+                    [
+                        WaitingForSupport::class,
+                        WaitingForCustomer::class,
+                        InProgress::class,
+                        Escalated::class,
+                    ],
                     Done::class,
                 ],
                 [
                     [
                         WaitingForSupport::class,
                         WaitingForCustomer::class,
+                        Escalated::class,
                     ],
                     InProgress::class,
                 ],
@@ -35,6 +47,7 @@ abstract class TicketState extends State implements HasFrontendFormatter
                         WaitingForSupport::class,
                         InProgress::class,
                         Done::class,
+                        Escalated::class,
                     ],
                     WaitingForCustomer::class,
                 ],
@@ -43,6 +56,7 @@ abstract class TicketState extends State implements HasFrontendFormatter
                         WaitingForCustomer::class,
                         InProgress::class,
                         Done::class,
+                        Escalated::class,
                     ],
                     WaitingForSupport::class,
                 ],
