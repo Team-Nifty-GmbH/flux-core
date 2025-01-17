@@ -43,6 +43,25 @@ trait HasActionEvents
         static::registerActionEvent('validated', $callback);
     }
 
+    public static function setEventDispatcher(?Dispatcher $dispatcher = null): void
+    {
+        static::$dispatcher = $dispatcher;
+    }
+
+    final public function withEvents(): static
+    {
+        static::setEventDispatcher(app('events'));
+
+        return $this;
+    }
+
+    final public function withoutEvents(): static
+    {
+        static::setEventDispatcher(app(NullDispatcher::class));
+
+        return $this;
+    }
+
     protected static function registerActionEvent($event, $callback): void
     {
         if (isset(static::$dispatcher)) {
@@ -54,31 +73,12 @@ trait HasActionEvents
 
     protected function fireActionEvent(string $event, bool $halt = true): mixed
     {
-        if (! isset(static::$dispatcher)) {
+        if (is_null(static::$dispatcher)) {
             return null;
         }
 
         $function = $halt ? 'until' : 'dispatch';
 
         return static::$dispatcher->{$function}('action.' . $event . ': ' . static::class, $this);
-    }
-
-    public static function setEventDispatcher(?Dispatcher $dispatcher = null): void
-    {
-        static::$dispatcher = $dispatcher;
-    }
-
-    final public function withEvents(): static
-    {
-        $this->setEventDispatcher(app('events'));
-
-        return $this;
-    }
-
-    final public function withoutEvents(): static
-    {
-        $this->setEventDispatcher(app(NullDispatcher::class));
-
-        return $this;
     }
 }

@@ -23,44 +23,19 @@ trait BroadcastsActionEvents
         });
     }
 
+    public static function getBroadcastChannel(): string
+    {
+        return 'action.' . class_to_broadcast_channel(static::class, false);
+    }
+
     public function broadcastExecuted(Channel|HasBroadcastChannel|array|null $channels = null): PendingBroadcast
     {
         return $this->broadcastEvent('executed', $channels);
     }
 
-    protected function broadcastEvent(
-        string $event,
-        Channel|HasBroadcastChannel|array|null $channels = null
-    ): ?PendingBroadcast {
-        return $this->broadcastIfBroadcastChannelsExistForEvent(
-            $this->newBroadcastableEvent($event), $event, $channels
-        );
-    }
-
-    protected function broadcastIfBroadcastChannelsExistForEvent(
-        $instance,
-        string $event,
-        Channel|HasBroadcastChannel|array|null $channels = null
-    ): ?PendingBroadcast {
-        if (! static::$isBroadcasting) {
-            return null;
-        }
-
-        if (! empty($this->broadcastOn($event)) || ! empty($channels)) {
-            return broadcast($instance->onChannels(Arr::wrap($channels)));
-        }
-
-        return null;
-    }
-
     public function newBroadcastableEvent(string $event): BroadcastableActionEventOccurred
     {
         return new BroadcastableActionEventOccurred($this, $event);
-    }
-
-    public static function getBroadcastChannel(): string
-    {
-        return 'action.' . class_to_broadcast_channel(static::class, false);
     }
 
     public function broadcastOn(): array|Channel
@@ -100,5 +75,30 @@ trait BroadcastsActionEvents
         ];
 
         return $payload;
+    }
+
+    protected function broadcastEvent(
+        string $event,
+        Channel|HasBroadcastChannel|array|null $channels = null
+    ): ?PendingBroadcast {
+        return $this->broadcastIfBroadcastChannelsExistForEvent(
+            $this->newBroadcastableEvent($event), $event, $channels
+        );
+    }
+
+    protected function broadcastIfBroadcastChannelsExistForEvent(
+        $instance,
+        string $event,
+        Channel|HasBroadcastChannel|array|null $channels = null
+    ): ?PendingBroadcast {
+        if (! static::$isBroadcasting) {
+            return null;
+        }
+
+        if (! empty($this->broadcastOn($event)) || ! empty($channels)) {
+            return broadcast($instance->onChannels(Arr::wrap($channels)));
+        }
+
+        return null;
     }
 }
