@@ -8,8 +8,10 @@ use FluxErp\Support\Notification\SubscribableNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-class CommentCreatedNotification extends SubscribableNotification
+class CommentCreatedNotification extends SubscribableNotification implements ShouldQueue
 {
+    use Queueable;
+
     public function via(object $notifiable): array
     {
         if ($this->model->is_internal

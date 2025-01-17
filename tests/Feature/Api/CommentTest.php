@@ -14,6 +14,7 @@ use FluxErp\Notifications\Comment\CommentCreatedNotification;
 use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Notification;
 use Laravel\Sanctum\Sanctum;
 
@@ -298,6 +299,9 @@ class CommentTest extends BaseSetup
     public function test_create_comment_sends_notification()
     {
         Notification::fake();
+        Event::fake();
+        config(['queue.default' => 'sync']);
+
         $user = new User([
             'language_id' => $this->user->language_id,
             'email' => 'notification_user@example.com',

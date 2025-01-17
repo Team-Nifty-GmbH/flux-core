@@ -3,6 +3,7 @@
 namespace FluxErp\Tests\Feature\Api;
 
 use Carbon\Carbon;
+use FluxErp\Events\Task\TaskAssignedEvent;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Project;
@@ -15,6 +16,7 @@ use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
@@ -137,6 +139,9 @@ class TaskTest extends BaseSetup
     public function test_create_task()
     {
         Notification::fake();
+        Event::fake();
+        config(['queue.default' => 'sync']);
+
         $users = User::factory()->count(3)->create([
             'language_id' => $this->user->language_id,
         ]);
@@ -187,6 +192,7 @@ class TaskTest extends BaseSetup
         $this->assertTrue($this->user->is($dbTask->getUpdatedBy()));
         $this->assertEquals($task['users'], $dbTask->users()->pluck('users.id')->toArray());
 
+        Event::assertDispatched(TaskAssignedEvent::class);
         Notification::assertSentTo(
             User::query()->whereIntegerInRaw('id', data_get($task, 'users'))->get(),
             TaskAssignedNotification::class
