@@ -1644,6 +1644,7 @@
     "Type to search for products…": "Produkte suchen…",
     "Unable to clear email while 'can_login' = 'true'": "Die E-Mail kann nicht gelöscht werden, solange 'can_login' = 'true' ist.",
     "Unable to clear password while 'can_login' = 'true'": "Das Passwort kann nicht gelöscht werden, solange 'can_login' = 'true' ist.",
+    "Unassigned Tickets": "Nicht zugewiesene Tickets",
     "Undo": "Rückgängig",
     "Uninstall": "Deinstallieren",
     "Unit": "Maßeinheit",
