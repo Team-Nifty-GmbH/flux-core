@@ -46,3 +46,5 @@ Broadcast::channel(
 Broadcast::channel('job-batch.{id}', function () {
     return true;
 });
+
+Broadcast::channel('action.*', fn () => true);
