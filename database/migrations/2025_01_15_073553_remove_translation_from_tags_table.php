@@ -16,6 +16,7 @@ return new class() extends Migration
         ) {
             DB::statement('ALTER TABLE tags DROP CHECK tags_chk_1');
         }
+
         if (DB::table('information_schema.table_constraints')
             ->where('table_name', 'tags')
             ->where('constraint_name', 'tags_chk_2')
@@ -32,23 +33,23 @@ return new class() extends Migration
         DB::table('tags')
             ->whereRaw('JSON_VALID(name)')
             ->update([
-                'name' => DB::raw('JSON_UNQUOTE(
+                'name' => DB::raw("JSON_UNQUOTE(
                     JSON_EXTRACT(
                         name,
-                        CONCAT(\'$."\', JSON_UNQUOTE(JSON_EXTRACT(JSON_KEYS(name), \'\\$[0]\')), \'"\')
+                        CONCAT('$.', JSON_UNQUOTE(JSON_EXTRACT(JSON_KEYS(name), '$[0]')))
                     )
-                )'),
+                )"),
             ]);
 
         DB::table('tags')
             ->whereRaw('JSON_VALID(slug)')
             ->update([
-                'slug' => DB::raw('JSON_UNQUOTE(
+                'slug' => DB::raw("JSON_UNQUOTE(
                     JSON_EXTRACT(
                         slug,
-                        CONCAT(\'$."\', JSON_UNQUOTE(JSON_EXTRACT(JSON_KEYS(slug), \'\\$[0]\')), \'"\')
+                        CONCAT('$.', JSON_UNQUOTE(JSON_EXTRACT(JSON_KEYS(slug), '$[0]')))
                     )
-                )'),
+                )"),
             ]);
     }
 
