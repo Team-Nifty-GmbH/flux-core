@@ -137,7 +137,6 @@ class TaskTest extends BaseSetup
     public function test_create_task()
     {
         Notification::fake();
-        config(['queue.default' => 'sync']);
 
         $users = User::factory()->count(3)->create([
             'language_id' => $this->user->language_id,
@@ -190,9 +189,21 @@ class TaskTest extends BaseSetup
         $this->assertEquals($task['users'], $dbTask->users()->pluck('users.id')->toArray());
 
         Notification::assertSentTo(
-            User::query()->whereIntegerInRaw('id', data_get($task, 'users'))->get(),
+            User::query()
+                ->whereKeyNot($this->user->getKey())
+                ->whereIntegerInRaw(
+                    'id',
+                    array_filter(
+                        array_merge(
+                            data_get($task, 'users'),
+                            [data_get($task, 'responsible_user_id')]
+                        )
+                    )
+                )
+                ->get(),
             TaskAssignedNotification::class
         );
+        Notification::assertNothingSentTo($this->user);
 
         foreach ($this->additionalColumns as $additionalColumn) {
             $this->assertEquals($task[$additionalColumn->name], $responseTask->{$additionalColumn->name});

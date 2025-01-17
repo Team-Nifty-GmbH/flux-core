@@ -2,6 +2,7 @@
 
 namespace FluxErp\Notifications\Comment;
 
+use FluxErp\Models\Address;
 use FluxErp\Models\Comment;
 use FluxErp\Models\User;
 use FluxErp\Support\Notification\SubscribableNotification;
@@ -11,6 +12,16 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 class CommentCreatedNotification extends SubscribableNotification implements ShouldQueue
 {
     use Queueable;
+
+    public static function sendsTo(): array
+    {
+        return array_merge(
+            parent::sendsTo(),
+            [
+                resolve_static(Address::class, 'class'),
+            ],
+        );
+    }
 
     public function via(object $notifiable): array
     {

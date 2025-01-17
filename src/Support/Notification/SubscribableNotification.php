@@ -32,6 +32,22 @@ abstract class SubscribableNotification extends Notification implements HasToast
 
     abstract protected function getTitle(): string;
 
+    public static function sendsTo(): array
+    {
+        return [
+            resolve_static(User::class, 'class'),
+        ];
+    }
+
+    public function via(object $notifiable): array
+    {
+        if (! in_array(get_class($notifiable), static::sendsTo())) {
+            return [];
+        }
+
+        return parent::via($notifiable);
+    }
+
     public function sendNotification(object $event): void
     {
         $this->event = $event;

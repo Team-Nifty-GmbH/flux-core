@@ -10,6 +10,7 @@ use FluxErp\Models\Ticket;
 use FluxErp\Models\TicketType;
 use FluxErp\Models\User;
 use FluxErp\Rulesets\Ticket\CreateTicketRuleset;
+use FluxErp\Traits\Notifiable;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -63,6 +64,10 @@ class CreateTicket extends FluxAction
         );
 
         $ticket->save();
+
+        if (in_array(Notifiable::class, class_uses_recursive($ticket->authenticatable))) {
+            $ticket->authenticatable->subscribeNotificationChannel($ticket->broadcastChannel());
+        }
 
         if (is_array($users)) {
             if ($ticket->authenticatable->getMorphClass() === morph_alias(User::class)) {

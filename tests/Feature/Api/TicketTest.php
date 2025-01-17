@@ -8,9 +8,12 @@ use FluxErp\Models\Contact;
 use FluxErp\Models\Language;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Ticket;
+use FluxErp\Models\User;
+use FluxErp\Notifications\Ticket\TicketAssignedNotification;
 use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
@@ -138,12 +141,20 @@ class TicketTest extends BaseSetup
 
     public function test_update_ticket()
     {
+        Notification::fake();
+        config(['queue.default' => 'sync']);
+
+        $users = User::factory()->count(3)->create([
+            'language_id' => $this->user->language_id,
+        ]);
+
         $ticket = [
             'id' => $this->tickets[1]->id,
             'authenticatable_type' => morph_alias(Address::class),
             'authenticatable_id' => $this->address->id,
             'title' => 'Title Update Test',
             'description' => 'Description Update Test',
+            'users' => $users->pluck('id')->toArray(),
         ];
 
         $this->user->givePermissionTo($this->permissions['update']);
@@ -163,6 +174,10 @@ class TicketTest extends BaseSetup
         $this->assertEquals($ticket['authenticatable_id'], $dbTicket->authenticatable_id);
         $this->assertEquals($ticket['title'], $dbTicket->title);
         $this->assertEquals($ticket['description'], $dbTicket->description);
+        $this->assertEquals($ticket['users'], $dbTicket->users()->pluck('users.id')->toArray());
+
+        Notification::assertSentTo($users, TicketAssignedNotification::class);
+        Notification::assertNothingSentTo($this->user);
     }
 
     public function test_update_ticket_with_additional_columns()
