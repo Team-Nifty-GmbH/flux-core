@@ -29,23 +29,10 @@ class TopProductsByRevenue extends ValueList
     #[Renderless]
     public function calculateList(): void
     {
-        $query = resolve_static(OrderPosition::class, 'query')
-            ->selectRaw('product_id, SUM(total_net_price) as total_net_price')
-            ->groupBy('product_id')
-            ->whereHas(
-                'order',
-                fn (Builder $query) => $query
-                    ->when(
-                        $this->timeFrame === TimeFrameEnum::Custom,
-                        fn (Builder $query) => $query->whereBetween('invoice_date', [$this->start, $this->end]),
-                        fn (Builder $query) => $query->whereBetween('invoice_date', $this->timeFrame->getRange())
-                    )
-                    ->revenue()
-            )
-            ->whereHas('product')
+        $query = $this->query()
             ->orderByDesc('total_net_price')
             ->with('product:id,name')
-            ->limit(5)
+            ->limit($this->limit)
             ->get();
 
         $previous = resolve_static(OrderPosition::class, 'query')
@@ -72,7 +59,7 @@ class TopProductsByRevenue extends ValueList
                     )
                     ->revenue()
             )
-            ->limit(5)
+            ->limit($this->limit)
             ->get()
             ->keyBy('product_id');
 
@@ -85,5 +72,42 @@ class TopProductsByRevenue extends ValueList
                 $item->total_net_price ?? 0
             ),
         ])->toArray();
+    }
+
+    #[Renderless]
+    public function showMore(): void
+    {
+        $this->limit += 10;
+
+        $this->calculateList();
+    }
+
+    #[Renderless]
+    public function hasMore(): bool
+    {
+        return $this->limit < $this->query()->count();
+    }
+
+    protected function hasLoadMore(): bool
+    {
+        return true;
+    }
+
+    protected function query(): Builder
+    {
+        return resolve_static(OrderPosition::class, 'query')
+            ->selectRaw('product_id, SUM(total_net_price) as total_net_price')
+            ->groupBy('product_id')
+            ->whereHas(
+                'order',
+                fn (Builder $query) => $query
+                    ->when(
+                        $this->timeFrame === TimeFrameEnum::Custom,
+                        fn (Builder $query) => $query->whereBetween('invoice_date', [$this->start, $this->end]),
+                        fn (Builder $query) => $query->whereBetween('invoice_date', $this->timeFrame->getRange())
+                    )
+                    ->revenue()
+            )
+            ->whereHas('product');
     }
 }

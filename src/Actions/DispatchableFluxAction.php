@@ -14,7 +14,7 @@ abstract class DispatchableFluxAction extends FluxAction implements ShouldBeMoni
 
     public function handle(): mixed
     {
-        return $this->withEvents()->validate()->execute();
+        return $this->validate()->execute();
     }
 
     final public function executeAsync(): void

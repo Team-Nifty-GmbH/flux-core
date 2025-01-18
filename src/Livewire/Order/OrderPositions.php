@@ -57,9 +57,8 @@ class OrderPositions extends OrderPositionList
     {
         parent::mount();
 
-        $this->filters = [];
+        $this->reset('filters', 'selected');
         $this->page = 1;
-        $this->selected = [];
     }
 
     public function getBuilder(Builder $builder): Builder

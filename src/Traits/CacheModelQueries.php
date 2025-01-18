@@ -8,9 +8,15 @@ use Illuminate\Support\Facades\Cache;
 
 trait CacheModelQueries
 {
+    protected static bool $cacheQueries = true;
+
     public static function bootCacheModelQueries(): void
     {
-        static::$builder = CachedBuilder::class;
+        if (! static::$cacheQueries) {
+            return;
+        }
+
+        static::$builder = resolve_static(CachedBuilder::class, 'class');
 
         static::saved(fn (Model $model) => $model->flushModelQueryCache());
         static::deleted(fn (Model $model) => $model->flushModelQueryCache());
@@ -23,6 +29,6 @@ trait CacheModelQueries
 
     public function flushModelQueryCache(): void
     {
-        Cache::forget(CachedBuilder::cacheKey(static::class));
+        Cache::forget(resolve_static(CachedBuilder::class, 'cacheKey', ['class' => static::class]));
     }
 }

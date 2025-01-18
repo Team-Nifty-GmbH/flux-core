@@ -24,4 +24,9 @@ trait Widgetable
 
         return view('flux::livewire.placeholders.box');
     }
+
+    public function showTitle(): bool
+    {
+        return true;
+    }
 }

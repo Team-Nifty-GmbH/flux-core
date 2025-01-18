@@ -165,6 +165,11 @@ class Product extends FluxModel implements HasMedia, InteractsWithDataTables
         return $this->belongsToMany(Contact::class, 'product_supplier');
     }
 
+    public function unit(): BelongsTo
+    {
+        return $this->belongsTo(Unit::class);
+    }
+
     public function vatRate(): BelongsTo
     {
         return $this->belongsTo(VatRate::class);

@@ -2,7 +2,6 @@
 
 namespace FluxErp\Livewire\Features\Calendar;
 
-use DragonCode\Contracts\Support\Arrayable;
 use FluxErp\Contracts\Calendarable;
 use FluxErp\Facades\Action;
 use FluxErp\Helpers\Helper;
@@ -12,6 +11,7 @@ use FluxErp\Models\Calendar;
 use FluxErp\Models\CalendarEvent;
 use FluxErp\Models\User;
 use FluxErp\Traits\HasCalendarUserSettings;
+use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;

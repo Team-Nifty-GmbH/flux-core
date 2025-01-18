@@ -11,6 +11,7 @@ use FluxErp\Models\Permission;
 use FluxErp\Models\Role;
 use FluxErp\Models\User;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -32,7 +33,10 @@ class Permissions extends RoleList
             ->pluck('id', 'name')
             ->toArray();
 
-        return Arr::undotToTree($permissions);
+        return Arr::undotToTree(
+            array: $permissions,
+            translate: fn ($key) => $key === 'get' ? __('permission.get') : __(Str::headline($key))
+        );
     }
 
     protected function getViewData(): array
@@ -66,17 +70,19 @@ class Permissions extends RoleList
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit permissions'))
-                ->color('primary')
-                ->attributes([
-                    'wire:click' => 'edit(record.id)',
-                ])
-                ->when(resolve_static(UpdateRole::class, 'canPerformAction', [false])),
-            DataTableButton::make()
                 ->label(__('Assign users'))
                 ->color('primary')
                 ->attributes([
                     'wire:click' => 'editUsers(record.id)',
+                ])
+                ->when(resolve_static(UpdateRole::class, 'canPerformAction', [false])),
+            DataTableButton::make()
+                ->label(__('Edit permissions'))
+                ->color('primary')
+                ->attributes([
+                    'x-cloak',
+                    'x-show' => 'record.name !== \'Super Admin\'',
+                    'wire:click' => 'edit(record.id)',
                 ])
                 ->when(resolve_static(UpdateRole::class, 'canPerformAction', [false])),
             DataTableButton::make()

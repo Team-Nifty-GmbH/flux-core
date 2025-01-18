@@ -31,7 +31,7 @@ class BirthdaysTest extends BaseSetup
         Livewire::test(Birthdays::class)
             ->assertStatus(200)
             ->assertCount('items', 1)
-            ->assertSee($this->address->name)
-            ->assertSee('(30)');
+            ->assertSet('items.0.label', $this->address->name)
+            ->assertSet('items.0.subLabel', $this->address->date_of_birth->isoFormat('L') . ' (30)');
     }
 }

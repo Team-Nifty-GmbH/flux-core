@@ -12,6 +12,7 @@ use FluxErp\Models\Media;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\Renderless;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class Mail extends CommunicationList
@@ -37,35 +38,21 @@ class Mail extends CommunicationList
             ->mailAccounts()
             ->get(['mail_accounts.id', 'uuid', 'email'])
             ?->toArray() ?? [];
-
-        app(MailFolder::class)->addGlobalScope('children', function (Builder $builder) {
-            $builder->with('children')->where('is_active', true);
-        });
+        $this->loadFolders();
 
         $this->folders[] = [
-            'id' => null,
+            'id' => 'all',
             'name' => __('All Messages'),
             'children' => [],
         ];
-
-        foreach ($this->mailAccounts as $mailAccount) {
-            $mailFolders = resolve_static(MailFolder::class, 'query')
-                ->where('parent_id', null)
-                ->where('mail_account_id', $mailAccount['id'])
-                ->get(['id', 'name', 'parent_id']);
-
-            $this->folders[] = [
-                'id' => $mailAccount['uuid'],
-                'name' => $mailAccount['email'],
-                'children' => $mailFolders->toArray(),
-            ];
-        }
     }
 
+    #[Renderless]
     public function showMail(Communication $message): void
     {
         $this->skipRender();
         $this->mailMessage->fill($message);
+        $this->mailMessage->text_body = nl2br($this->mailMessage->text_body);
 
         $this->js(<<<'JS'
             writeHtml();
@@ -88,7 +75,7 @@ class Mail extends CommunicationList
 
     public function updatedFolderId(): void
     {
-        if (is_null($this->folderId)) {
+        if (is_null($this->folderId) || $this->folderId === 'all') {
             $this->selectedFolderIds = [];
         } elseif (! is_numeric($this->folderId)) {
             $folderTree = data_get(Arr::keyBy($this->folders, 'id'), $this->folderId . '.children', []);
@@ -127,7 +114,7 @@ class Mail extends CommunicationList
             });
     }
 
-    private function findFolderIdById($folders, $id): ?array
+    protected function findFolderIdById($folders, $id): ?array
     {
         foreach ($folders as $element) {
             if (($element['id'] ?? false) && $element['id'] == $id) {
@@ -143,5 +130,28 @@ class Mail extends CommunicationList
         }
 
         return null;
+    }
+
+    protected function loadFolders(): void
+    {
+        foreach ($this->mailAccounts as $mailAccount) {
+            app(MailFolder::class)
+                ->addGlobalScope('children', function (Builder $builder) use ($mailAccount) {
+                    $builder->with('children')
+                        ->where('mail_account_id', data_get($mailAccount, 'id'));
+                });
+
+            $this->folders[data_get($mailAccount, 'id')] = [
+                'id' => data_get($mailAccount, 'uuid'),
+                'name' => resolve_static(MailAccount::class, 'query')
+                    ->whereKey(data_get($mailAccount, 'id'))
+                    ->value('email'),
+                'children' => resolve_static(MailFolder::class, 'query')
+                    ->where('parent_id', null)
+                    ->where('mail_account_id', $mailAccount)
+                    ->get()
+                    ->toArray(),
+            ];
+        }
     }
 }
