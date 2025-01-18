@@ -137,6 +137,7 @@ class TaskTest extends BaseSetup
     public function test_create_task()
     {
         Notification::fake();
+        config(['queue.default' => 'sync']);
 
         $users = User::factory()->count(3)->create([
             'language_id' => $this->user->language_id,
