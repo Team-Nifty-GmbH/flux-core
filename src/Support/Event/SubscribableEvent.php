@@ -51,6 +51,8 @@ class SubscribableEvent implements ShouldDispatchAfterCommit
 
     public function unsubscribeChannel(array|Arrayable $subscribers, string $type = User::class): static
     {
+        $this->unsubscribers ??= collect();
+
         collect($subscribers)
             ->map(fn ($subscriber) => $subscriber instanceof Model
                 ? $subscriber
@@ -62,7 +64,7 @@ class SubscribableEvent implements ShouldDispatchAfterCommit
             ->each(function (Model $subscriber) {
                 try {
                     $subscriber->unsubscribeNotificationChannel($this->broadcastChannel());
-                    $this->subscribers->push($subscriber);
+                    $this->unsubscribers->push($subscriber);
                 } catch (UnauthorizedException|ValidationException) {
                 }
             });

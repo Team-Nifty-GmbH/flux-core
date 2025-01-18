@@ -146,15 +146,17 @@ class TicketTest extends BaseSetup
 
         $users = User::factory()->count(3)->create([
             'language_id' => $this->user->language_id,
+            'is_active' => true,
         ]);
+        $this->tickets[2]->users()->attach($users->last()->id);
 
         $ticket = [
-            'id' => $this->tickets[1]->id,
+            'id' => $this->tickets[2]->id,
             'authenticatable_type' => morph_alias(Address::class),
             'authenticatable_id' => $this->address->id,
             'title' => 'Title Update Test',
             'description' => 'Description Update Test',
-            'users' => $users->pluck('id')->toArray(),
+            'users' => $users->take(2)->pluck('id')->toArray(),
         ];
 
         $this->user->givePermissionTo($this->permissions['update']);
@@ -176,8 +178,9 @@ class TicketTest extends BaseSetup
         $this->assertEquals($ticket['description'], $dbTicket->description);
         $this->assertEquals($ticket['users'], $dbTicket->users()->pluck('users.id')->toArray());
 
-        Notification::assertSentTo($users, TicketAssignedNotification::class);
+        Notification::assertSentTo($users->take(2), TicketAssignedNotification::class);
         Notification::assertNothingSentTo($this->user);
+        Notification::assertNotSentTo($users->last(), TicketAssignedNotification::class);
     }
 
     public function test_update_ticket_with_additional_columns()
