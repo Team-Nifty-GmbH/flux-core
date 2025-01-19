@@ -61,7 +61,9 @@ class ProductList extends BaseProductList
     {
         $this->dispatch(
             'cart:add',
-            $this->getSelectedModelsQuery()->whereDoesntHave('children')->get(['id'])
+            $this->getSelectedModelsQuery()
+                ->whereDoesntHave('children')
+                ->pluck('id')
         )
             ->to('cart.cart');
         $this->reset('selected');
