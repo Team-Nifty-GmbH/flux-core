@@ -1,0 +1,16 @@
+<?php
+
+namespace Tests\Feature\Livewire\Settings;
+
+use FluxErp\Livewire\Settings\FailedJobs;
+use FluxErp\Tests\TestCase;
+use Livewire\Livewire;
+
+class FailedJobsTest extends TestCase
+{
+    public function test_renders_successfully()
+    {
+        Livewire::test(FailedJobs::class)
+            ->assertStatus(200);
+    }
+}
