@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Product;
 
 use FluxErp\Actions\Product\CreateProduct;
 use FluxErp\Actions\Product\DeleteProduct;
+use FluxErp\Actions\Product\UpdateProduct;
 use FluxErp\Actions\Product\Variant\CreateVariants;
 use FluxErp\Livewire\DataTables\ProductList;
 use FluxErp\Livewire\Forms\ProductForm;
@@ -13,6 +14,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Modelable;
+use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
@@ -35,6 +37,8 @@ class VariantList extends ProductList
     public array $selectedOptions = [];
 
     public array $variants = [];
+
+    public bool $isSelectable = true;
 
     public function mount(): void
     {
@@ -84,6 +88,20 @@ class VariantList extends ProductList
                     fn () => resolve_static(CreateProduct::class, 'canPerformAction', [false])
                         && resolve_static(DeleteProduct::class, 'canPerformAction', [false])
                 ),
+        ];
+    }
+
+    protected function getSelectedActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->label(__('Recalculate names'))
+                ->icon('refresh')
+                ->when(fn () => resolve_static(UpdateProduct::class, 'canPerformAction', [false]))
+                ->attributes([
+                    'wire:flux-confirm.icon.info' => __('wire:confirm.recalculate-product-names'),
+                    'wire:click' => 'recalculateNames',
+                ]),
         ];
     }
 
@@ -161,6 +179,33 @@ class VariantList extends ProductList
         }
 
         $this->variants = [];
+        $this->loadData();
+    }
+
+    #[Renderless]
+    public function recalculateNames(): void
+    {
+        $parent = resolve_static(Product::class, 'query')
+            ->whereKey($this->product->id)
+            ->first(['name']);
+
+        foreach ($this->getSelectedModelsQuery()->with('productOptions:id,name')->get(['id']) as $product) {
+            UpdateProduct::make([
+                'id' => $product->getKey(),
+                'name' => resolve_static(
+                    Product::class,
+                    'calculateVariantName',
+                    [
+                        'parentName' => data_get($parent, 'name', ''),
+                        'productOptions' => $product->productOptions,
+                    ]
+                ),
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        }
+
         $this->loadData();
     }
 }
