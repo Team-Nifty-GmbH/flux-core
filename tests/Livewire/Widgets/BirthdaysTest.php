@@ -22,6 +22,7 @@ class BirthdaysTest extends BaseSetup
             'contact_id' => $this->contact->id,
             'client_id' => $this->dbClient->id,
             'date_of_birth' => now()->subYears(30),
+            'is_active' => true,
         ]);
     }
 

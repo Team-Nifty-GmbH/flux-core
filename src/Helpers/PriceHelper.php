@@ -243,7 +243,7 @@ class PriceHelper
 
         // Apply added discount
         if ($this->discount) {
-            $this->calculateLowestDiscountedPrice($this->price, collect($this->discount));
+            $this->calculateLowestDiscountedPrice($this->price, collect([$this->discount]));
         }
 
         $this->fireEvent('price.calculated');
@@ -380,15 +380,22 @@ class PriceHelper
         }
 
         $maxPercentageDiscount = $discounts->reduce(function (?Discount $carry, Discount $item) {
-            return $item->is_percentage && $item->discount > $carry?->discount ? $item : $carry;
+            return ($item->is_percentage && $item->discount > $carry?->discount) ? $item : $carry;
         });
 
         $maxFlatDiscount = $discounts->reduce(function (?Discount $carry, Discount $item) {
-            return ! $item->is_percentage && $item->discount > $carry?->discount ? $item : $carry;
+            return (! $item->is_percentage && $item->discount > $carry?->discount) ? $item : $carry;
         });
 
         $discountedPercentage = bcmul($price->price, (1 - ($maxPercentageDiscount->discount ?? 0)));
         $discountedFlat = bcsub($price->price, $maxFlatDiscount->discount ?? 0);
+
+        if (! $this->contact && $discounts->count() === 1) {
+            $price->price = $discounts->first()->is_percentage ? $discountedPercentage : $discountedFlat;
+            $price->appliedDiscounts = $discounts->all();
+
+            return;
+        }
 
         if (bccomp($discountedPercentage, $discountedFlat) === -1) {
             $price->price = $discountedPercentage;
