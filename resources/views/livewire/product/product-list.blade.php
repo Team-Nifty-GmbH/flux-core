@@ -73,7 +73,7 @@
                                     <div x-text="'(' +
                                         ($wire.productPricesUpdate.alternation < 0 ? '{{ __('Reduce') }}' : '{{ __('Increase') }}')
                                         + ' ' + $wire.productPricesUpdate.alternation
-                                        + ($wire.productPricesUpdate.is_percent ? '%)' : '{{ \FluxErp\Models\Currency::default()->symbol }})')"
+                                        + ($wire.productPricesUpdate.is_percent ? '%)' : '{{ \FluxErp\Models\Currency::default()?->symbol }})')"
                                     >
                                     </div>
                                 </x-label>
