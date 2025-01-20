@@ -1877,5 +1877,7 @@
     "Your watchlist is empty": "Ihre Merkliste ist leer",
     "Zip": "PLZ",
     "zip": "PLZ",
-    "Zip / City": "PLZ / Ort"
+    "Zip / City": "PLZ / Ort",
+    "Increase": "Erhöhen",
+    "Reduce": "Reduzieren"
 }
