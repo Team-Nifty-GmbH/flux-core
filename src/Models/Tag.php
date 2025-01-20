@@ -23,7 +23,7 @@ class Tag extends BaseTag implements InteractsWithDataTables
         });
     }
 
-    public static function findFromString(string $name, ?string $type = null, ?string $locale = null)
+    public static function findFromString(string $name, ?string $type = null, ?string $locale = null): ?static
     {
         return static::query()
             ->where('type', $type)
@@ -37,8 +37,10 @@ class Tag extends BaseTag implements InteractsWithDataTables
     public static function findFromStringOfAnyType(string $name, ?string $locale = null): Collection
     {
         return static::query()
-            ->where('name', $name)
-            ->orWhere('slug', $name)
+            ->where(function (Builder $query) use ($name) {
+                $query->where('name', $name)
+                    ->orWhere('slug', $name);
+            })
             ->get();
     }
 
