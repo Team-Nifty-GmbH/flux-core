@@ -64,7 +64,7 @@ class NotificationAction implements Arrayable
         return $this;
     }
 
-    public function url(string $url): static
+    public function url(?string $url = null): static
     {
         $this->url = $url;
 

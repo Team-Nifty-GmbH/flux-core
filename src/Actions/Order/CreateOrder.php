@@ -4,6 +4,7 @@ namespace FluxErp\Actions\Order;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Events\Order\OrderApprovalRequestEvent;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
@@ -62,6 +63,12 @@ class CreateOrder extends FluxAction
 
         if ($users) {
             $order->users()->sync($users);
+        }
+
+        if ($order->approval_user_id) {
+            $order->approvalUser->subscribeNotificationChannel($order->broadcastChannel());
+
+            event(new OrderApprovalRequestEvent($order));
         }
 
         return $order->refresh();

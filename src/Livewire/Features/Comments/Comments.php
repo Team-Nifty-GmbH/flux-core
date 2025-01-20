@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class Comments extends Component
 {
@@ -113,7 +114,7 @@ class Comments extends Component
 
         try {
             $comment = CreateComment::make($comment)->checkPermission()->validate()->execute();
-        } catch (\Exception $e) {
+        } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
             return;
