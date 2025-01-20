@@ -32,6 +32,9 @@ class ProductPricesUpdate extends FluxAction
         $priceList = resolve_static(PriceList::class, 'query')
             ->whereKey($this->getData('price_list_id'))
             ->first();
+        $basePriceList = resolve_static(PriceList::class, 'query')
+            ->whereKey($this->getData('base_price_list_id'))
+            ->first();
         $discount = app(Discount::class, ['attributes' => [
             'is_percentage' => $this->getData('is_percent'),
             'discount' => bcmul(
@@ -45,10 +48,17 @@ class ProductPricesUpdate extends FluxAction
         foreach ($products as $product) {
             $price = PriceHelper::make($product)
                 ->addDiscount($discount)
-                ->setPriceList($priceList)
+                ->setPriceList($basePriceList ?? $priceList)
                 ->price();
+            $priceId = $price?->getKey();
 
-            if (! $price?->getKey()) {
+            if ($basePriceList) {
+                $priceId = $product->prices()
+                    ->where('price_list_id', $priceList->getKey())
+                    ->value('id');
+            }
+
+            if (! $priceId) {
                 continue;
             }
 
@@ -63,7 +73,7 @@ class ProductPricesUpdate extends FluxAction
             }
 
             UpdatePrice::make([
-                'id' => $price->id,
+                'id' => $priceId,
                 'product_id' => $product->id,
                 'price' => $price->price,
                 'price_list_id' => $priceList->id,

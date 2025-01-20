@@ -17,11 +17,16 @@ class ProductPricesUpdateRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => PriceList::class]),
             ],
-            'is_percent' => 'boolean',
+            'base_price_list_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => PriceList::class]),
+            ],
             'alternation' => [
                 'required',
                 app(Numeric::class),
             ],
+            'is_percent' => 'boolean',
         ];
     }
 

@@ -8,6 +8,8 @@ class ProductPricesUpdateForm extends Form
 {
     public ?int $price_list_id = null;
 
+    public ?int $base_price_list_id = null;
+
     public bool $is_percent = true;
 
     public ?float $alternation = null;

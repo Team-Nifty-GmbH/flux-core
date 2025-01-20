@@ -49,13 +49,24 @@
         <x-modal name="update-prices">
             <x-card :title="__('Update prices')" footer-classes="flex justify-end gap-1.5" class="flex flex-col gap-4">
                 <x-select
-                    :options="resolve_static(\FluxErp\Models\PriceList::class, 'query')->pluck('name', 'id')"
+                    :options="$priceLists = resolve_static(\FluxErp\Models\PriceList::class, 'query')->pluck('name', 'id')"
                     option-key-value
                     :label="__('Price List')"
                     wire:model="productPricesUpdate.price_list_id"
                 />
+                <x-select
+                    :options="$priceLists"
+                    option-key-value
+                    :clearable="true"
+                    :label="__('Use price from')"
+                    wire:model="productPricesUpdate.base_price_list_id"
+                />
                 <x-toggle wire:model="productPricesUpdate.is_percent" :label="__('Is Percentage')" />
                 <x-inputs.number wire:model="productPricesUpdate.alternation" :label="__('Alteration')" />
+                <template x-if="$wire.productPricesUpdate.alternation !== null">
+                    <div x-text="$wire.productPricesUpdate.alternation < 0 ? '{{ __('Decrease') }}' : '{{ __('Increase') }}'">
+                    </div>
+                </template>
                 <x-select
                     wire:model="productPricesUpdate.rounding_method_enum"
                     :label="__('Rounding Method')"
