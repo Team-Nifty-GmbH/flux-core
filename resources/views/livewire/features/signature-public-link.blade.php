@@ -1,5 +1,5 @@
 @use('FluxErp\Providers\ViewServiceProvider')
-<div>
+<div class="tester">
     @vite([
         ViewServiceProvider::getRealPackageAssetPath('/resources/js/alpine.js', 'team-nifty-gmbh/flux-erp'),
         ViewServiceProvider::getRealPackageAssetPath('/resources/css/app.css', 'team-nifty-gmbh/flux-erp'),
@@ -51,4 +51,9 @@
             </div>
         </div>
     </div>
+    <livewire:features.comments.comments
+        lazy
+        :model-type="\FluxErp\Models\Order::class"
+        :model-id="$modelInstance->id"
+    />
 </div>
