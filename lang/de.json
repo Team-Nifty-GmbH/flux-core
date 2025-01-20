@@ -791,6 +791,7 @@
     "in_review": "in Prüfung",
     "Include deleted": "Inklusive gelöschter",
     "Including :percentage VAT from :total_net": "Inklusive :percentage MwSt. from :total_net",
+    "Increase": "Erhöhen",
     "Information": "Informationen",
     "Inherited from :parent_name": "Basierend auf :parent_name",
     "Install": "Installieren",
@@ -1312,6 +1313,7 @@
     "Record": "Datensatz",
     "Record new working hours": "Neue Arbeitszeit erfassen",
     "Recurrences": "Wiederholungen",
+    "Reduce": "Reduzieren",
     "Reference Unit Id": "Referenzeinheit-ID",
     "Refresh": "Neu laden",
     "Refund": "Gutschrift",
@@ -1877,7 +1879,5 @@
     "Your watchlist is empty": "Ihre Merkliste ist leer",
     "Zip": "PLZ",
     "zip": "PLZ",
-    "Zip / City": "PLZ / Ort",
-    "Increase": "Erhöhen",
-    "Reduce": "Reduzieren"
+    "Zip / City": "PLZ / Ort"
 }

@@ -22,7 +22,7 @@ class ProductPricesUpdateRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => PriceList::class]),
             ],
-            'alternation' => [
+            'alteration' => [
                 'required',
                 app(Numeric::class),
             ],

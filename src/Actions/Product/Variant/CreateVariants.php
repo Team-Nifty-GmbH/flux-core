@@ -59,8 +59,8 @@ class CreateVariants extends FluxAction
                             Product::class,
                             'calculateVariantName',
                             [
-                                'parentName' => data_get($product, 'name'),
                                 'productOptions' => $variantCreate,
+                                'parentName' => data_get($product, 'name'),
                             ]
                         ),
                     ]

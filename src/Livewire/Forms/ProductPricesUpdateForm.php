@@ -12,7 +12,7 @@ class ProductPricesUpdateForm extends Form
 
     public bool $is_percent = true;
 
-    public ?float $alternation = null;
+    public ?float $alteration = null;
 
     public ?string $rounding_method_enum = 'none';
 

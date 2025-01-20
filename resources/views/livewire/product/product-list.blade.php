@@ -62,17 +62,17 @@
                     wire:model="productPricesUpdate.base_price_list_id"
                 />
                 <x-toggle wire:model="productPricesUpdate.is_percent" :label="__('Is Percentage')" />
-                <x-inputs.number wire:model="productPricesUpdate.alternation">
+                <x-inputs.number wire:model="productPricesUpdate.alteration">
                     <x-slot:label>
                         <div class="flex gap-1.5">
                             <span>
                                 {{ __('Alteration') }}
                             </span>
-                            <template x-if="$wire.productPricesUpdate.alternation !== null && $wire.productPricesUpdate.alternation != 0">
+                            <template x-if="$wire.productPricesUpdate.alteration !== null && $wire.productPricesUpdate.alteration != 0">
                                 <x-label>
                                     <div x-text="'(' +
-                                        ($wire.productPricesUpdate.alternation < 0 ? '{{ __('Reduce') }}' : '{{ __('Increase') }}')
-                                        + ' ' + $wire.productPricesUpdate.alternation
+                                        ($wire.productPricesUpdate.alteration < 0 ? '{{ __('Reduce') }}' : '{{ __('Increase') }}')
+                                        + ' ' + $wire.productPricesUpdate.alteration
                                         + ($wire.productPricesUpdate.is_percent ? '%)' : '{{ \FluxErp\Models\Currency::default()?->symbol }})')"
                                     >
                                     </div>

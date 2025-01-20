@@ -196,8 +196,8 @@ class VariantList extends ProductList
                     Product::class,
                     'calculateVariantName',
                     [
-                        'parentName' => data_get($parent, 'name', ''),
                         'productOptions' => $product->productOptions,
+                        'parentName' => data_get($parent, 'name', ''),
                     ]
                 ),
             ])

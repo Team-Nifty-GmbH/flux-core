@@ -39,8 +39,8 @@ class ProductPricesUpdate extends FluxAction
             'is_percentage' => $this->getData('is_percent'),
             'discount' => bcmul(
                 $this->getData('is_percent')
-                    ? bcdiv($this->getData('alternation'), 100)
-                    : $this->getData('alternation'),
+                    ? bcdiv($this->getData('alteration'), 100)
+                    : $this->getData('alteration'),
                 -1
             ),
         ]]);
@@ -75,8 +75,8 @@ class ProductPricesUpdate extends FluxAction
             UpdatePrice::make([
                 'id' => $priceId,
                 'product_id' => $product->id,
-                'price' => $price->price,
                 'price_list_id' => $priceList->id,
+                'price' => $price->price,
             ])
                 ->validate()
                 ->execute();
