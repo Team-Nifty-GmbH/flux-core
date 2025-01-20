@@ -1,4 +1,4 @@
-<html class="h-full text-sm" lang="{{ str_replace('_', '-', app()->getLocale()) }}">>
+<html class="h-full text-sm" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 @use('FluxErp\Facades\Asset')
 @use('FluxErp\Providers\ViewServiceProvider')
 <head>

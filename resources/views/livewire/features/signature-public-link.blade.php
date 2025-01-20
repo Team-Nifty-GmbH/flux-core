@@ -1,5 +1,5 @@
 @use('FluxErp\Providers\ViewServiceProvider')
-<div class="tester">
+<div>
     @vite([
         ViewServiceProvider::getRealPackageAssetPath('/resources/js/alpine.js', 'team-nifty-gmbh/flux-erp'),
         ViewServiceProvider::getRealPackageAssetPath('/resources/css/app.css', 'team-nifty-gmbh/flux-erp'),
