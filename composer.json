@@ -30,7 +30,7 @@
         "spatie/pdf-to-image": "^3.0",
         "team-nifty-gmbh/tall-calendar": "*",
         "team-nifty-gmbh/tall-datatables": "*",
-        "webklex/laravel-imap": "^5.3",
+        "webklex/laravel-imap": "^6.1",
         "wireui/heroicons": "^2.3",
         "wireui/wireui": "^1.18.4"
     },
