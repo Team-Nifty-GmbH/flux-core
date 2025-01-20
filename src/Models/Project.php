@@ -12,6 +12,7 @@ use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasSerialNumberRange;
+use FluxErp\Traits\HasTags;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
@@ -23,7 +24,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 use Spatie\ModelStates\HasStates;
-use Spatie\Tags\HasTags;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 

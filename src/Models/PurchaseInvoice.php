@@ -4,6 +4,7 @@ namespace FluxErp\Models;
 
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasTags;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
@@ -12,7 +13,6 @@ use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\MediaLibrary\HasMedia;
-use Spatie\Tags\HasTags;
 
 class PurchaseInvoice extends FluxModel implements HasMedia
 {

@@ -1,7 +1,7 @@
 <div class="comment-input px-4 py-6 sm:px-6"
      x-data="{
         user: @js(auth()->user()),
-        avatarUrl: @js(auth()->user()->getAvatarUrl()),
+        avatarUrl: @js(auth()->user()?->getAvatarUrl()),
         files: [],
         sticky: false,
         removeUpload(index) {
@@ -53,8 +53,10 @@
                         <x-button
                             x-on:click="saveComment($refs.textarea, $refs.fileUpload, $refs.sticky, true); files = [];"
                             primary
-                            wire:loading.attr="disabled" :label="auth()->user()->getMorphClass() === app(\FluxErp\Models\User::class)->getMorphClass() && $this->isPublic === true ? __('Save internal') : __('Save')"/>
-                        @if(auth()->user()->getMorphClass() === morph_alias(\FluxErp\Models\User::class) && $this->isPublic === true)
+                            wire:loading.attr="disabled"
+                            :label="auth()->user()?->getMorphClass() === morph_alias(\FluxErp\Models\User::class) && $this->isPublic === true ? __('Save internal') : __('Save')"
+                        />
+                        @if(auth()->user()?->getMorphClass() === morph_alias(\FluxErp\Models\User::class) && $this->isPublic === true)
                             <x-button
                                 x-on:click="saveComment($refs.textarea, $refs.fileUpload, $refs.sticky, false)"
                                 primary

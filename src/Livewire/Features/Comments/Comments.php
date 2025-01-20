@@ -88,6 +88,10 @@ class Comments extends Component
             })
             ->toArray();
 
+        if (! Auth::check()) {
+            $this->isPublic = false;
+        }
+
         $this->loadUsersAndRoles();
     }
 
@@ -98,7 +102,7 @@ class Comments extends Component
 
     public function saveComment(string $comment, bool $sticky, bool $internal = true): void
     {
-        if (Auth::user()->getMorphClass() !== morph_alias(User::class)) {
+        if (Auth::user()?->getMorphClass() !== morph_alias(User::class)) {
             $internal = false;
         }
 
@@ -129,8 +133,8 @@ class Comments extends Component
         }
 
         $comment = $comment->toArray();
-        $comment['user'] = Auth::user()->toArray();
-        $comment['user']['avatar_url'] = Auth::user()->getAvatarUrl();
+        $comment['user'] = Auth::user()?->toArray();
+        $comment['user']['avatar_url'] = Auth::user()?->getAvatarUrl();
 
         $this->insertComment($comment, $this->commentId);
 
@@ -233,7 +237,7 @@ class Comments extends Component
         unset($this->comments['data'][$index]);
     }
 
-    private function insertComment($comment, $parentId): void
+    protected function insertComment($comment, $parentId): void
     {
         if ($parentId) {
             $index = array_search($parentId, array_column($this->comments['data'], 'id'));
@@ -252,7 +256,7 @@ class Comments extends Component
         $this->skipRender();
     }
 
-    public function updatedCommentId()
+    public function updatedCommentId(): void
     {
         $this->skipRender();
     }

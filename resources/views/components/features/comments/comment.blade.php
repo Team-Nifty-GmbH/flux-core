@@ -14,18 +14,20 @@
                         </x-badge>
                     @endif
                 </div>
-                <x-dropdown>
-                    @canAction(\FluxErp\Actions\Comment\UpdateComment::class)
-                        <x-dropdown.item x-on:click="$wire.toggleSticky(comment.id); comment.is_sticky = ! comment.is_sticky">
-                            <span x-text="comment.is_sticky ? '{{ __('Unsticky') }}' : '{{ __('Sticky') }}'"></span>
-                        </x-dropdown.item>
-                    @endCanAction
-                    <x-dropdown.item :label="__('Delete')"
-                         x-bind:disabled="! comment.is_current_user"
-                         wire:click="delete(comment.id)"
-                         wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Comment')]) }}"
-                    />
-                </x-dropdown>
+                @if(auth()->check())
+                    <x-dropdown>
+                        @canAction(\FluxErp\Actions\Comment\UpdateComment::class)
+                            <x-dropdown.item x-on:click="$wire.toggleSticky(comment.id); comment.is_sticky = ! comment.is_sticky">
+                                <span x-text="comment.is_sticky ? '{{ __('Unsticky') }}' : '{{ __('Sticky') }}'"></span>
+                            </x-dropdown.item>
+                        @endCanAction
+                        <x-dropdown.item :label="__('Delete')"
+                             x-bind:disabled="! comment.is_current_user"
+                             wire:click="delete(comment.id)"
+                             wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Comment')]) }}"
+                        />
+                    </x-dropdown>
+                @endif
             </div>
             <div class="mt-1 text-sm dark:text-gray-50">
                 <p class="prose prose-sm dark:text-gray-50" x-html="comment.comment"></p>
