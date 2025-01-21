@@ -233,29 +233,18 @@ abstract class PrintableView extends Component
 
         $client = $model?->client ?? Client::query()->first();
 
-        $logo = $client->getFirstMedia('logo');
         $logoSmall = $client->getFirstMedia('logo_small');
 
-        if ($logoPath = $logo?->getPath()) {
-            $mimeTypeLogo = File::mimeType($logo->getPath());
-            if ($mimeTypeLogo === 'image/svg+xml') {
-                $logoPath = $logo->getPath('png');
-                $mimeTypeLogo = 'image/png';
-            }
-
-            $logoContent = file_get_contents($logoPath);
-            $client->logo = 'data:image/' . $mimeTypeLogo . ';base64,' . base64_encode($logoContent);
+        if ($logo = $client->getFirstMedia('logo')) {
+            $client->logo = File::mimeType($logo->getPath()) === 'image/svg+xml'
+                ? $logo->getUrl('png')
+                : $logo->getUrl();
         }
 
-        if ($logoSmallPath = $logoSmall?->getPath()) {
-            $mimeTypeLogoSmall = File::mimeType($logoSmall->getPath());
-            if ($mimeTypeLogoSmall === 'image/svg+xml') {
-                $logoSmallPath = $logoSmall->getPath('png');
-                $mimeTypeLogoSmall = 'image/png';
-            }
-
-            $logoSmallContent = file_get_contents($logoSmallPath);
-            $client->logo_small = 'data:image/' . $mimeTypeLogoSmall . ';base64,' . base64_encode($logoSmallContent);
+        if ($logoSmall = $client->getFirstMedia('logo_small')) {
+            $client->logo_small = File::mimeType($logoSmall->getPath()) === 'image/svg+xml'
+                ? $logoSmall->getUrl('png')
+                : $logoSmall->getUrl();
         }
 
         $signaturePath = null;
