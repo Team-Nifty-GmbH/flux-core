@@ -1,19 +1,19 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\DataTables;
+namespace FluxErp\Tests\Livewire\Contact\Accounting;
 
-use FluxErp\Livewire\DataTables\ContactAllDiscountsList;
+use FluxErp\Livewire\Contact\Accounting\AllDiscounts;
 use FluxErp\Tests\Livewire\BaseSetup;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;
 
-class ContactAllDiscountsListTest extends BaseSetup
+class AllDiscountsTest extends BaseSetup
 {
     use DatabaseTransactions;
 
     public function test_renders_successfully()
     {
-        Livewire::test(ContactAllDiscountsList::class)
+        Livewire::test(AllDiscounts::class)
             ->assertStatus(200);
     }
 }

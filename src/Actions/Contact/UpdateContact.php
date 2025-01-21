@@ -2,6 +2,7 @@
 
 namespace FluxErp\Actions\Contact;
 
+use FluxErp\Actions\Discount\CreateDiscount;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Contact;
 use FluxErp\Models\PaymentType;
@@ -10,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class UpdateContact extends FluxAction
 {
@@ -26,6 +28,7 @@ class UpdateContact extends FluxAction
     public function performAction(): Model
     {
         $discountGroups = Arr::pull($this->data, 'discount_groups');
+        $discounts = Arr::pull($this->data, 'discounts');
 
         $contact = resolve_static(Contact::class, 'query')
             ->whereKey($this->data['id'])
@@ -33,6 +36,29 @@ class UpdateContact extends FluxAction
 
         $contact->fill($this->data);
         $contact->save();
+
+        if (! is_null($discounts)) {
+            $attachDiscounts = [];
+
+            foreach ($discounts as $discount) {
+                if ($discountId = data_get($discount, 'id')) {
+                    $attachDiscounts[] = $discountId;
+
+                    continue;
+                }
+
+                try {
+                    $attachDiscounts[] = CreateDiscount::make($discount)
+                        ->checkPermission()
+                        ->validate()
+                        ->execute();
+                } catch (ValidationException|UnauthorizedException) {
+                    continue;
+                }
+            }
+
+            $contact->discounts()->attach($attachDiscounts);
+        }
 
         if (! is_null($discountGroups)) {
             $contact->discountGroups()->sync($discountGroups);

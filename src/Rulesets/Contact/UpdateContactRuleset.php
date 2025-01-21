@@ -103,6 +103,7 @@ class UpdateContactRuleset extends FluxRuleset
     {
         return array_merge(
             parent::getRules(),
+            resolve_static(DiscountRuleset::class, 'getRules'),
             resolve_static(DiscountGroupRuleset::class, 'getRules'),
             resolve_static(CategoryRuleset::class, 'getRules')
         );

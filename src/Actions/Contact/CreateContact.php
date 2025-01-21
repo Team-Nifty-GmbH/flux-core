@@ -3,6 +3,7 @@
 namespace FluxErp\Actions\Contact;
 
 use FluxErp\Actions\Address\CreateAddress;
+use FluxErp\Actions\Discount\CreateDiscount;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
@@ -12,6 +13,8 @@ use FluxErp\Models\PriceList;
 use FluxErp\Rulesets\Contact\CreateContactRuleset;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class CreateContact extends FluxAction
 {
@@ -28,6 +31,7 @@ class CreateContact extends FluxAction
     public function performAction(): Contact
     {
         $discountGroups = Arr::pull($this->data, 'discount_groups');
+        $discounts = Arr::pull($this->data, 'discounts');
         $mainAddress = Arr::pull($this->data, 'main_address');
 
         $this->data['price_list_id'] ??= PriceList::default()?->id;
@@ -36,6 +40,29 @@ class CreateContact extends FluxAction
 
         $contact = app(Contact::class, ['attributes' => $this->data]);
         $contact->save();
+
+        if (! is_null($discounts)) {
+            $attachDiscounts = [];
+
+            foreach ($discounts as $discount) {
+                if ($discountId = data_get($discount, 'id')) {
+                    $attachDiscounts[] = $discountId;
+
+                    continue;
+                }
+
+                try {
+                    $attachDiscounts[] = CreateDiscount::make($discount)
+                        ->checkPermission()
+                        ->validate()
+                        ->execute();
+                } catch (ValidationException|UnauthorizedException) {
+                    continue;
+                }
+            }
+
+            $contact->discounts()->attach($attachDiscounts);
+        }
 
         if (is_array($discountGroups)) {
             $contact->discountGroups()->attach($discountGroups);

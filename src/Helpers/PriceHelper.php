@@ -221,11 +221,11 @@ class PriceHelper
                     ->where(function (Builder $query) {
                         return $query
                             ->where(
-                                fn (Builder $query) => $query->where('model_type', app(Product::class)->getMorphClass())
+                                fn (Builder $query) => $query->where('model_type', morph_alias(Product::class))
                                     ->where('model_id', $this->product->getKey()))
                             ->orWhere(
                                 fn (Builder $query) => $query
-                                    ->where('model_type', app(Category::class)->getMorphClass())
+                                    ->where('model_type', morph_alias(Category::class))
                                     ->whereIntegerInRaw(
                                         'model_id',
                                         $this->product->categories()->pluck('id')->toArray()
