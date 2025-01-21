@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use Carbon\Carbon;
 use FluxErp\Models\Address;
 use FluxErp\Support\Widgets\ValueList;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
@@ -23,7 +24,7 @@ class Birthdays extends ValueList
             'subLabel' => $item->date_of_birth
                 ->locale(app()->getLocale())
                 ->timezone(auth()->user()?->timezone ?? config('app.timezone'))
-                ->isoFormat('L') . ' (' . $item->date_of_birth->diffInYears(now()->toDate()) . ')',
+                ->isoFormat('L') . ' (' . $item->date_of_birth->diffInYears(now()->startOfDay()) . ')',
             'growthRate' => DataTableButton::make()
                 ->icon('eye')
                 ->href($item->detailRoute())
