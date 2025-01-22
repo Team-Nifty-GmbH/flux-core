@@ -145,27 +145,27 @@
                 </div>
             </div>
         @show
-            @section('contact-channels.phone_mobile')
-                <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
-                    <x-label :label="__('Phone Mobile')" for="{{ md5('address.phone_mobile') }}" />
-                    <div class="col-span-2">
-                        <x-input x-bind:readonly="!$wire.edit" class="pl-12" wire:model="address.phone_mobile">
-                            <x-slot:prepend>
-                                <div class="absolute inset-y-0 left-0 flex items-center p-0.5">
-                                    <x-button
-                                        class="h-full rounded-l-md"
-                                        icon="phone"
-                                        primary
-                                        flat
-                                        squared
-                                        x-on:click.prevent="window.open('tel:' + $wire.address.phone_mobile)"
-                                    />
-                                </div>
-                            </x-slot:prepend>
-                        </x-input>
-                    </div>
+        @section('contact-channels.phone_mobile')
+            <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+                <x-label :label="__('Phone Mobile')" for="{{ md5('address.phone_mobile') }}" />
+                <div class="col-span-2">
+                    <x-input x-bind:readonly="!$wire.edit" class="pl-12" wire:model="address.phone_mobile">
+                        <x-slot:prepend>
+                            <div class="absolute inset-y-0 left-0 flex items-center p-0.5">
+                                <x-button
+                                    class="h-full rounded-l-md"
+                                    icon="phone"
+                                    primary
+                                    flat
+                                    squared
+                                    x-on:click.prevent="window.open('tel:' + $wire.address.phone_mobile)"
+                                />
+                            </div>
+                        </x-slot:prepend>
+                    </x-input>
                 </div>
-            @show
+            </div>
+        @show
         @if(! $onlyPostal)
             @section('contact-channels.url')
                 <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
