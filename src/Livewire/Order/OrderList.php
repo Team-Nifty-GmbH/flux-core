@@ -141,10 +141,20 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
     {
         $to = [];
 
-        // add invoice address email if an invoice is being send
-        $to[] = in_array('invoice', $documents) && $item->contact->invoiceAddress
-            ? $item->contact->invoiceAddress->email_primary
-            : $item->contact->mainAddress->email_primary;
+        // add invoice address email if an invoice is being sent
+        $address = in_array('invoice', $documents) && $item->contact->invoiceAddress
+            ? $item->contact->invoiceAddress
+            : $item->contact->mainAddress;
+
+        $to[] = $address->email_primary;
+        $to = array_merge(
+            $to,
+            $address
+                ->contactOptions()
+                ->where('type', 'email')
+                ->pluck('value')
+                ->toArray()
+        );
 
         // add primary email address if more than just the invoice is added
         if (array_diff($documents, ['invoice'])) {
