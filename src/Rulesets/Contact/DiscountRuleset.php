@@ -18,9 +18,19 @@ class DiscountRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => Discount::class]),
             ],
-            'discounts.*.sort_number' => 'required_without:id|integer|min:0',
-            'discounts.*.is_percentage' => 'required_without:id|boolean',
+            'discounts.*.sort_number' => [
+                'exclude_with:id',
+                'required_without:id',
+                'integer',
+                'min:0',
+            ],
+            'discounts.*.is_percentage' => [
+                'exclude_with:id',
+                'required_without:id',
+                'boolean',
+            ],
             'discounts.*.discount' => [
+                'exclude_with:id',
                 'required_without:id',
                 app(Numeric::class),
             ],

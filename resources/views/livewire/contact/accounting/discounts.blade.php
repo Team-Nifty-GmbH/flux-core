@@ -54,7 +54,8 @@
             :label="__('Is Percentage')"
             wire:model="discountForm.is_percentage"
         />
-        <x-inputs.number label="{{ __('Discount') }}"
+        <x-inputs.number
+             :label="__('Discount')"
              wire:model="discountForm.discount"
              step="0.01"
              min="0.01"

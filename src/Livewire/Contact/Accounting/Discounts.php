@@ -60,8 +60,7 @@ class Discounts extends DiscountList
 
     protected function getBuilder(Builder $builder): Builder
     {
-        return $builder
-            ->with('model')
+        return parent::getBuilder($builder)
             ->whereRelation(
                 'contacts',
                 'contacts.id',

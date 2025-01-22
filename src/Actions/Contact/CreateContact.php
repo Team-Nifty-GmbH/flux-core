@@ -13,8 +13,6 @@ use FluxErp\Models\PriceList;
 use FluxErp\Rulesets\Contact\CreateContactRuleset;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
-use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class CreateContact extends FluxAction
 {
@@ -51,14 +49,11 @@ class CreateContact extends FluxAction
                     continue;
                 }
 
-                try {
-                    $attachDiscounts[] = CreateDiscount::make($discount)
-                        ->checkPermission()
-                        ->validate()
-                        ->execute();
-                } catch (ValidationException|UnauthorizedException) {
-                    continue;
-                }
+                $attachDiscounts[] = CreateDiscount::make($discount)
+                    ->checkPermission()
+                    ->validate()
+                    ->execute()
+                    ->getKey();
             }
 
             $contact->discounts()->attach($attachDiscounts);

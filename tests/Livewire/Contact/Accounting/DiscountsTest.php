@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Livewire\Contact\Accounting;
+namespace FluxErp\Tests\Livewire\Contact\Accounting;
 
 use FluxErp\Livewire\Contact\Accounting\Discounts;
 use FluxErp\Tests\TestCase;

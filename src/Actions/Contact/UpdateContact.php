@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
-use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class UpdateContact extends FluxAction
 {
@@ -47,17 +46,14 @@ class UpdateContact extends FluxAction
                     continue;
                 }
 
-                try {
-                    $attachDiscounts[] = CreateDiscount::make($discount)
-                        ->checkPermission()
-                        ->validate()
-                        ->execute();
-                } catch (ValidationException|UnauthorizedException) {
-                    continue;
-                }
+                $attachDiscounts[] = CreateDiscount::make($discount)
+                    ->checkPermission()
+                    ->validate()
+                    ->execute()
+                    ->getKey();
             }
 
-            $contact->discounts()->attach($attachDiscounts);
+            $contact->discounts()->sync($attachDiscounts);
         }
 
         if (! is_null($discountGroups)) {
