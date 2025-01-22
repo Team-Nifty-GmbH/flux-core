@@ -12,10 +12,7 @@ class DiscountList extends BaseDataTable
     public array $enabledCols = [
         'model.name',
         'discount',
-    ];
-
-    public array $formatters = [
-        'discount' => 'percentage',
+        'is_percentage',
     ];
 
     protected function getBuilder(Builder $builder): Builder
