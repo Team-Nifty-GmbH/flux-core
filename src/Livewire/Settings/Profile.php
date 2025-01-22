@@ -74,9 +74,7 @@ class Profile extends Component
                 $disabled = ($channel['method'] ?? false)
                     && ! method_exists($notificationSetting ?? false, $channel['method']);
 
-                $userSetting = data_get(
-                    $userNotificationSettings,
-                    $notificationSetting . '.' . $channelDriver);
+                $userSetting = data_get($userNotificationSettings, $notificationSetting . '.' . $channelDriver);
 
                 $this->notificationSettings[$notificationSetting][$key] =
                     [

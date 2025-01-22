@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Livewire\Cart;
+namespace FluxErp\Tests\Livewire\Cart;
 
 use FluxErp\Database\Factories\CartFactory;
 use FluxErp\Livewire\Cart\Cart;

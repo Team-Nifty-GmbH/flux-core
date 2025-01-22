@@ -31,8 +31,8 @@ use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 class Project extends FluxModel implements Calendarable, InteractsWithDataTables
 {
     use Commentable, Filterable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes,
-        HasNotificationSubscriptions, HasPackageFactory, HasSerialNumberRange, HasStates, HasTags, HasUserModification, HasUuid,
-        LogsActivity, Searchable, SoftDeletes;
+        HasNotificationSubscriptions, HasPackageFactory, HasSerialNumberRange, HasStates, HasTags, HasUserModification,
+        HasUuid, LogsActivity, Searchable, SoftDeletes;
 
     protected $guarded = [
         'id',

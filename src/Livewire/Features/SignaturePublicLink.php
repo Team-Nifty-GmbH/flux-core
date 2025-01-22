@@ -87,7 +87,7 @@ class SignaturePublicLink extends Component
             try {
                 $this->signature->force()->save();
 
-                event(new DocumentSignedEvent($this->signature->getActionResult()));
+                event(DocumentSignedEvent::make($this->signature->getActionResult()));
             } catch (ValidationException|UnauthorizedException $e) {
                 exception_to_notifications($e, $this);
                 $this->skipRender();

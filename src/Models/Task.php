@@ -37,8 +37,8 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDataTables
 {
     use Categorizable, Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes,
-        HasNotificationSubscriptions, HasPackageFactory, HasStates, HasTags, HasUserModification, HasUuid, InteractsWithMedia,
-        LogsActivity, Searchable, SoftDeletes, Trackable;
+        HasNotificationSubscriptions, HasPackageFactory, HasStates, HasTags, HasUserModification, HasUuid,
+        InteractsWithMedia, LogsActivity, Searchable, SoftDeletes, Trackable;
 
     protected $guarded = [
         'id',

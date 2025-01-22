@@ -2,7 +2,9 @@
 
 namespace FluxErp\Listeners\Notifications;
 
+use FluxErp\Actions\EventSubscription\CreateEventSubscription;
 use FluxErp\Traits\HasNotificationSubscriptions;
+use Illuminate\Validation\ValidationException;
 
 class NotificationEloquentEventSubscriber
 {
@@ -22,12 +24,17 @@ class NotificationEloquentEventSubscriber
             ->where('channel', $model->broadcastChannel())
             ->doesntExist()
         ) {
-            auth()
-                ->user()
-                ->eventSubscriptions()
-                ->create([
+            try {
+                CreateEventSubscription::make([
+                    'subscribable_id' => auth()->id(),
+                    'subscribable_type' => auth()->user()->getMorphClass(),
                     'channel' => $model->broadcastChannel(),
-                ]);
+                ])
+                    ->validate()
+                    ->execute();
+            } catch (ValidationException) {
+
+            }
         }
     }
 
@@ -37,6 +44,7 @@ class NotificationEloquentEventSubscriber
             'eloquent.created: *' => 'subscribeNotifications',
             'eloquent.updated: *' => 'subscribeNotifications',
             'eloquent.restored: *' => 'subscribeNotifications',
+            'eloquent.deleted: *' => 'subscribeNotifications',
         ];
     }
 }

@@ -42,7 +42,7 @@ class UpdateEventSubscription extends FluxAction
 
         if (resolve_static(EventSubscription::class, 'query')
             ->whereKeyNot($this->getData('id'))
-            ->where('channel', $this->getData('event'))
+            ->where('channel', $this->getData('channel'))
             ->where('subscribable_type', $this->getData('subscribable_type'))
             ->where('subscribable_id', $this->getData('subscribable_id'))
             ->exists()

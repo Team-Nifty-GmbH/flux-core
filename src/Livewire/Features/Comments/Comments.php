@@ -113,7 +113,10 @@ class Comments extends Component
         ];
 
         try {
-            $comment = CreateComment::make($comment)->checkPermission()->validate()->execute();
+            $comment = CreateComment::make($comment)
+                ->checkPermission()
+                ->validate()
+                ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 

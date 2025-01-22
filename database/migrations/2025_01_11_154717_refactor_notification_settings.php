@@ -9,9 +9,7 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::table('event_subscriptions', function (Blueprint $table) {
-            $table->string('channel')->after('subscribable_type');
-
-            $table->index(['channel']);
+            $table->string('channel')->after('subscribable_type')->index();
 
             $table->dropColumn(['event', 'model_type', 'model_id']);
         });

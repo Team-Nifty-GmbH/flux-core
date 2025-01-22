@@ -31,8 +31,8 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables
 {
     use Commentable, Filterable, HasAdditionalColumns, HasCustomEvents, HasFrontendAttributes,
-        HasNotificationSubscriptions, HasPackageFactory, HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification,
-        HasUuid, InteractsWithMedia, LogsActivity, Searchable, SoftDeletes, Trackable;
+        HasNotificationSubscriptions, HasPackageFactory, HasRelatedModel, HasSerialNumberRange, HasStates,
+        HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Searchable, SoftDeletes, Trackable;
 
     protected $guarded = [
         'id',

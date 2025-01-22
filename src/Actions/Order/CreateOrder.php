@@ -68,7 +68,7 @@ class CreateOrder extends FluxAction
         if ($order->approval_user_id) {
             $order->approvalUser->subscribeNotificationChannel($order->broadcastChannel());
 
-            event(new OrderApprovalRequestEvent($order));
+            event(OrderApprovalRequestEvent::make($order));
         }
 
         return $order->refresh();

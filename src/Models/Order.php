@@ -59,9 +59,9 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 class Order extends FluxModel implements HasMedia, InteractsWithDataTables, OffersPrinting
 {
     use Commentable, Communicatable, Filterable, HasAdditionalColumns, HasClientAssignment,
-        HasCustomEvents, HasFrontendAttributes, HasNotificationSubscriptions, HasPackageFactory, HasRelatedModel, HasSerialNumberRange,
-        HasStates, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable, Searchable, SoftDeletes,
-        Trackable {
+        HasCustomEvents, HasFrontendAttributes, HasNotificationSubscriptions, HasPackageFactory, HasRelatedModel,
+        HasSerialNumberRange, HasStates, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable,
+        Searchable, SoftDeletes, Trackable {
             Printable::resolvePrintViews as protected printableResolvePrintViews;
             HasSerialNumberRange::getSerialNumber as protected hasSerialNumberRangeGetSerialNumber;
         }
