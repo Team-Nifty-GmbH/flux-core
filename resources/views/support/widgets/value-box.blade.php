@@ -81,7 +81,6 @@
             </div>
             <div class="text-lg font-semibold whitespace-nowrap truncate flex-none" x-html="$wire.subValue">
             </div>
-
         </div>
         <div class="min-h-6">
             <span class="text-gray-400" x-cloak x-show="$wire.previousSum" x-text="'{{ __('Previous Period') }} ' + $wire.previousSum">
