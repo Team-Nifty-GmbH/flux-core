@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Settings;
+namespace FluxErp\Tests\Livewire\DataTables\Settings;
 
 use FluxErp\Livewire\DataTables\Settings\DiscountGroupList;
 use FluxErp\Tests\Livewire\BaseSetup;
