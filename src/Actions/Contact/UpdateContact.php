@@ -37,16 +37,16 @@ class UpdateContact extends FluxAction
         $contact->save();
 
         if (! is_null($discounts)) {
-            $attachDiscounts = [];
+            $selectedDiscounts = [];
 
             foreach ($discounts as $discount) {
                 if ($discountId = data_get($discount, 'id')) {
-                    $attachDiscounts[] = $discountId;
+                    $selectedDiscounts[] = $discountId;
 
                     continue;
                 }
 
-                $attachDiscounts[] = CreateDiscount::make($discount)
+                $selectedDiscounts[] = CreateDiscount::make($discount)
                     ->checkPermission()
                     ->validate()
                     ->execute()
@@ -60,7 +60,7 @@ class UpdateContact extends FluxAction
                 default => 'sync',
             };
 
-            $contact->discounts()->{$syncType}($attachDiscounts);
+            $contact->discounts()->{$syncType}($selectedDiscounts);
         }
 
         if (! is_null($discountGroups)) {
