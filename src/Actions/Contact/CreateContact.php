@@ -32,10 +32,6 @@ class CreateContact extends FluxAction
         $discounts = Arr::pull($this->data, 'discounts');
         $mainAddress = Arr::pull($this->data, 'main_address');
 
-        $this->data['price_list_id'] ??= PriceList::default()?->id;
-        $this->data['payment_type_id'] ??= PaymentType::default()?->id;
-        $this->data['currency_id'] ??= Currency::default()?->id;
-
         $contact = app(Contact::class, ['attributes' => $this->data]);
         $contact->save();
 
@@ -88,6 +84,9 @@ class CreateContact extends FluxAction
     protected function prepareForValidation(): void
     {
         $this->data['client_id'] ??= Client::default()?->id;
+        $this->data['price_list_id'] ??= PriceList::default()?->id;
+        $this->data['payment_type_id'] ??= PaymentType::default()?->id;
+        $this->data['currency_id'] ??= Currency::default()?->id;
     }
 
     protected function validateData(): void

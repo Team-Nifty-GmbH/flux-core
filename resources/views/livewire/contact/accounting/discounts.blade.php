@@ -54,13 +54,23 @@
             :label="__('Is Percentage')"
             wire:model="discountForm.is_percentage"
         />
-        <x-inputs.number
-             :label="__('Discount')"
-             wire:model="discountForm.discount"
-             step="0.01"
-             min="0.01"
-             max="99.99"
-        />
+        <div x-cloak x-show="$wire.discountForm.is_percentage">
+            <x-inputs.number
+                 :label="__('Discount Percent')"
+                 wire:model="discountForm.discount"
+                 step="0.01"
+                 min="0.01"
+                 max="99.99"
+            />
+        </div>
+        <div x-cloak x-show="! $wire.discountForm.is_percentage">
+            <x-inputs.number
+                :label="__('Discount Flat')"
+                wire:model="discountForm.discount"
+                step="0.01"
+                min="0.01"
+            />
+        </div>
         <x-slot:footer>
             <x-button
                 primary

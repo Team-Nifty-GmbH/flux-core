@@ -53,7 +53,14 @@ class UpdateContact extends FluxAction
                     ->getKey();
             }
 
-            $contact->discounts()->sync($attachDiscounts);
+            $syncType = match ($this->getData('discounts_pivot_sync_type')) {
+                'attach' => 'attach',
+                'detach' => 'detach',
+                'syncWithoutDetaching' => 'syncWithoutDetaching',
+                default => 'sync',
+            };
+
+            $contact->discounts()->{$syncType}($attachDiscounts);
         }
 
         if (! is_null($discountGroups)) {
@@ -61,6 +68,16 @@ class UpdateContact extends FluxAction
         }
 
         return $contact->withoutRelations()->fresh();
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $contact = resolve_static(Contact::class, 'query')
+            ->whereKey($this->data['id'])
+            ->first();
+
+        $this->data['payment_type_id'] ??= $contact->payment_type_id;
+        $this->data['client_id'] ??= $contact->client_id;
     }
 
     protected function validateData(): void
@@ -71,12 +88,6 @@ class UpdateContact extends FluxAction
         $this->data = $validator->validate();
 
         $errors = [];
-        $contact = resolve_static(Contact::class, 'query')
-            ->whereKey($this->data['id'])
-            ->first();
-
-        $this->data['payment_type_id'] = $this->data['payment_type_id'] ?? $contact->payment_type_id;
-        $this->data['client_id'] = $this->data['client_id'] ?? $contact->client_id;
 
         if (array_key_exists('customer_number', $this->data)) {
             $customerNumberExists = resolve_static(Contact::class, 'query')

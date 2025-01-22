@@ -12,6 +12,11 @@ class DiscountRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
+            'discounts_pivot_sync_type' => [
+                'nullable',
+                'string',
+                'in:sync,attach,detach,syncWithoutDetaching',
+            ],
             'discounts' => 'nullable|array',
             'discounts.*.id' => [
                 'nullable',

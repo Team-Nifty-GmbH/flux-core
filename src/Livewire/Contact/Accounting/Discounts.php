@@ -119,6 +119,7 @@ class Discounts extends DiscountList
             try {
                 UpdateContact::make([
                     'id' => $this->contactId,
+                    'discounts_pivot_sync_type' => 'attach',
                     'discounts' => [
                         [
                             'id' => $this->discountForm->id,
