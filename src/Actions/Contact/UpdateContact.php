@@ -75,11 +75,11 @@ class UpdateContact extends FluxAction
     protected function prepareForValidation(): void
     {
         $contact = resolve_static(Contact::class, 'query')
-            ->whereKey($this->data['id'])
+            ->whereKey($this->getData('id'))
             ->first();
 
-        $this->data['payment_type_id'] ??= $contact->payment_type_id;
-        $this->data['client_id'] ??= $contact->client_id;
+        $this->data['payment_type_id'] ??= $contact?->payment_type_id;
+        $this->data['client_id'] ??= $contact?->client_id;
     }
 
     protected function validateData(): void
