@@ -59,8 +59,8 @@
                  :label="__('Discount Percent')"
                  wire:model="discountForm.discount"
                  step="0.01"
-                 min="0.01"
-                 max="99.99"
+                 min="100"
+                 max="100"
             />
         </div>
         <div x-cloak x-show="! $wire.discountForm.is_percentage">
@@ -68,7 +68,6 @@
                 :label="__('Discount Flat')"
                 wire:model="discountForm.discount"
                 step="0.01"
-                min="0.01"
             />
         </div>
         <x-slot:footer>
