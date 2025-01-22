@@ -1,9 +1,8 @@
 <?php
 
-namespace Tests\Feature\Livewire;
+namespace FluxErp\Tests\Livewire;
 
 use FluxErp\Livewire\EditMail;
-use FluxErp\Tests\Livewire\BaseSetup;
 use Livewire\Livewire;
 
 class EditMailTest extends BaseSetup

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Livewire;
+namespace FluxErp\Tests\Livewire;
 
 use FluxErp\Livewire\WorkTime;
 use FluxErp\Tests\TestCase;

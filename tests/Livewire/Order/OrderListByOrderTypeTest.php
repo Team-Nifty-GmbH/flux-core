@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Livewire\Order;
+namespace FluxErp\Tests\Livewire\Order;
 
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\Order\OrderListByOrderType;

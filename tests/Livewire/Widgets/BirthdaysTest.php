@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Livewire\Widgets;
+namespace FluxErp\Tests\Livewire\Widgets;
 
 use FluxErp\Livewire\Widgets\Birthdays;
 use FluxErp\Models\Address;

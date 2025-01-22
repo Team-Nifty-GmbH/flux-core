@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Livewire\Contact;
+namespace FluxErp\Tests\Livewire\Contact;
 
 use FluxErp\Livewire\Contact\Attachments;
 use FluxErp\Tests\TestCase;
