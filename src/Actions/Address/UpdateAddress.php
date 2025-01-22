@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -125,6 +126,13 @@ class UpdateAddress extends FluxAction
         $this->rules['email'][] = Rule::unique('addresses', 'email')
             ->whereNull('deleted_at')
             ->ignore(data_get($this->data, 'id'));
+
+        $this->data['email_primary'] = is_string($this->getData('email_primary'))
+            ? Str::between($this->getData('email_primary'), '<', '>')
+            : null;
+        $this->data['email'] = is_string($this->getData('email'))
+            ? Str::between($this->getData('email'), '<', '>')
+            : null;
     }
 
     protected function validateData(): void
