@@ -35,7 +35,7 @@ class CreateContact extends FluxAction
         $contact = app(Contact::class, ['attributes' => $this->data]);
         $contact->save();
 
-        if (! is_null($discounts)) {
+        if ($discounts) {
             $attachDiscounts = [];
 
             foreach ($discounts as $discount) {

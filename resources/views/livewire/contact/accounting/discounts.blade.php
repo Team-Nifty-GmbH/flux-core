@@ -59,7 +59,7 @@
                  :label="__('Discount Percent')"
                  wire:model="discountForm.discount"
                  step="0.01"
-                 min="100"
+                 min="-100"
                  max="100"
             />
         </div>

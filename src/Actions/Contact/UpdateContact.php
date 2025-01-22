@@ -37,28 +37,30 @@ class UpdateContact extends FluxAction
         $contact->save();
 
         if (! is_null($discounts)) {
-            $selectedDiscounts = [];
-
-            foreach ($discounts as $discount) {
-                if ($discountId = data_get($discount, 'id')) {
-                    $selectedDiscounts[] = $discountId;
-
-                    continue;
-                }
-
-                $selectedDiscounts[] = CreateDiscount::make($discount)
-                    ->checkPermission()
-                    ->validate()
-                    ->execute()
-                    ->getKey();
-            }
-
             $syncType = match ($this->getData('discounts_pivot_sync_type')) {
                 'attach' => 'attach',
                 'detach' => 'detach',
                 'syncWithoutDetaching' => 'syncWithoutDetaching',
                 default => 'sync',
             };
+
+            $selectedDiscounts = [];
+
+            if ($syncType !== 'detach') {
+                foreach ($discounts as $discount) {
+                    if ($discountId = data_get($discount, 'id')) {
+                        $selectedDiscounts[] = $discountId;
+
+                        continue;
+                    }
+
+                    $selectedDiscounts[] = CreateDiscount::make($discount)
+                        ->checkPermission()
+                        ->validate()
+                        ->execute()
+                        ->getKey();
+                }
+            }
 
             $contact->discounts()->{$syncType}($selectedDiscounts);
         }
