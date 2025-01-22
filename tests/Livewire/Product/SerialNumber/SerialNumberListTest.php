@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\DataTablesProduct\SerialNumber;
+namespace FluxErp\Tests\Livewire\Product\SerialNumber;
 
 use FluxErp\Livewire\Product\SerialNumber\SerialNumberList;
 use FluxErp\Tests\TestCase;

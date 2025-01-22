@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\DataTablesSettings;
+namespace FluxErp\Tests\Livewire\Settings;
 
 use FluxErp\Livewire\Settings\ProductPropertyGroups;
 use FluxErp\Tests\TestCase;

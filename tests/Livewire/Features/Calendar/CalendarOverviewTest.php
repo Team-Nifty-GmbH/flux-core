@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\DataTablesFeatures\Calendar;
+namespace FluxErp\Tests\Livewire\Features\Calendar;
 
 use FluxErp\Livewire\Features\Calendar\CalendarOverview;
 use FluxErp\Tests\TestCase;

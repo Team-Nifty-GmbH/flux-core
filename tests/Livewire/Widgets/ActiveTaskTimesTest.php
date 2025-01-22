@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\DataTablesWidgets;
+namespace FluxErp\Tests\Livewire\Widgets;
 
 use FluxErp\Livewire\Widgets\ActiveTaskTimes;
 use FluxErp\Models\WorkTime;

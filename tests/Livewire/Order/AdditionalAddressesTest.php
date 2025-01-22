@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\DataTablesOrder;
+namespace FluxErp\Tests\Livewire\Order;
 
 use FluxErp\Livewire\Order\AdditionalAddresses;
 use FluxErp\Tests\TestCase;

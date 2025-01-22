@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\DataTablesSettings;
+namespace FluxErp\Tests\Livewire\Settings;
 
 use FluxErp\Livewire\Settings\ContactOrigins;
 use FluxErp\Tests\TestCase;

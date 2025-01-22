@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\DataTablesAddress;
+namespace FluxErp\Tests\Livewire\Address;
 
 use FluxErp\Livewire\Address\Attachments;
 use FluxErp\Tests\TestCase;

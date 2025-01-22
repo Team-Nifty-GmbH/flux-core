@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\DataTablesPortal\Shop;
+namespace FluxErp\Tests\Livewire\Portal\Shop;
 
 use FluxErp\Livewire\Portal\Shop\Watchlists;
 use FluxErp\Tests\TestCase;
