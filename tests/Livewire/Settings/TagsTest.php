@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Livewire\Settings;
+namespace FluxErp\Tests\Livewire\DataTablesSettings;
 
 use FluxErp\Livewire\Settings\Tags;
 use FluxErp\Tests\TestCase;

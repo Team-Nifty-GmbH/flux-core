@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Livewire\Widgets;
+namespace FluxErp\Tests\Livewire\DataTablesWidgets;
 
 use FluxErp\Livewire\Widgets\Outstanding;
 use FluxErp\Models\Currency;
