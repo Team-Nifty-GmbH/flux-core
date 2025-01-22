@@ -5,17 +5,19 @@
         @section('modals')
             <x-modal name="new-contact">
                 <x-card>
-                    <x-select
-                        wire:model="contact.client_id"
-                        label="{{ __('Client') }}"
-                        :options="resolve_static(\FluxErp\Models\Client::class, 'query')->get(['id', 'name'])"
-                        option-label="name"
-                        option-value="id"
-                    />
-                    <div class="space-y-6 sm:space-y-5">
+                    @if(resolve_static(\FluxErp\Models\Client::class, 'query')->count() > 1)
+                        <x-select
+                            wire:model="contact.client_id"
+                            label="{{ __('Client') }}"
+                            :options="resolve_static(\FluxErp\Models\Client::class, 'query')->get(['id', 'name'])"
+                            option-label="name"
+                            option-value="id"
+                        />
+                    @endif
+                    <div class="flex flex-col gap-1.5 pt-1.5">
                         @section('contact')
                             <div
-                                class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-gray-200 sm:pt-5">
+                                class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-gray-200">
                                 <label for="{{ md5('contact.company') }}" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
                                     {{ __('Company') }}
                                 </label>
@@ -24,7 +26,7 @@
                                 </div>
                             </div>
                             <div
-                                class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
+                                class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4">
                                 <x-label :label="__('Salutation')" for="{{ md5('contact.main_address.salutation') }}" />
                                 <div class="col-span-2 w-full">
                                     <x-select
@@ -36,7 +38,7 @@
                                 </div>
                             </div>
                             <div
-                                class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
+                                class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4">
                                 <label for="{{ md5('address.title') }}" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
                                     {{ __('Title') }}
                                 </label>
@@ -45,7 +47,7 @@
                                 </div>
                             </div>
                             <div
-                                class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
+                                class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4">
                                 <label for="{{ md5('address.firstname') }}" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
                                     {{ __('Firstname') }}
                                 </label>
@@ -54,7 +56,7 @@
                                 </div>
                             </div>
                             <div
-                                class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
+                                class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4">
                                 <label for="{{ md5('address.lastname') }}" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
                                     {{ __('Lastname') }}
                                 </label>
@@ -65,7 +67,7 @@
                         @show
                         @section('address')
                             <div
-                                class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
+                                class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4">
                                 <label for="{{ md5('address.street') }}" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
                                     {{ __('Street') }}
                                 </label>
@@ -74,7 +76,7 @@
                                 </div>
                             </div>
                             <div
-                                class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
+                                class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4">
                                 <label for="postal-code" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
                                     {{ __('Zip / City') }}
                                 </label>
@@ -87,7 +89,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
+                            <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4">
                                 <label for="{{ md5('address.countryId') }}" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
                                     {{ __('Country') }}
                                 </label>
@@ -102,7 +104,7 @@
                                 </div>
                             </div>
                             <div
-                                class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
+                                class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4">
                                 <label for="{{ md5('address.language_id') }}" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
                                     {{ __('Language') }}
                                 </label>
@@ -119,7 +121,7 @@
                         @show
                         @section('contact-channels')
                             <div
-                                class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
+                                class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4">
                                 <label for="{{ md5('contact.main_address.email_primary') }}" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
                                     {{ __('Email') }}
                                 </label>
@@ -128,7 +130,7 @@
                                 </div>
                             </div>
                             <div
-                                class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
+                                class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4">
                                 <label for="{{ md5('contact.main_address.phone') }}" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
                                     {{ __('Phone') }}
                                 </label>
@@ -136,10 +138,19 @@
                                     <x-input x-bind:readonly="!$wire.edit" wire:model="contact.main_address.phone" />
                                 </div>
                             </div>
+                            <div
+                                class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4">
+                                <label for="{{ md5('contact.main_address.phone_mobile') }}" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
+                                    {{ __('Phone Mobile') }}
+                                </label>
+                                <div class="col-span-2">
+                                    <x-input x-bind:readonly="!$wire.edit" wire:model="contact.main_address.phone_mobile" />
+                                </div>
+                            </div>
                         @show
                         @section('contact-origin')
                             <div
-                                class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
+                                class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4">
                                 <label for="{{ md5('contact.contact_origin_id') }}" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
                                     {{ __('Contact Origin') }}
                                 </label>

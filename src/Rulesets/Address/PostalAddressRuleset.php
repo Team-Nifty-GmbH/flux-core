@@ -42,6 +42,7 @@ class PostalAddressRuleset extends FluxRuleset
             'url' => 'string|nullable',
             'email_primary' => 'email|nullable',
             'phone' => 'string|nullable',
+            'phone_mobile' => 'string|nullable',
             'has_formal_salutation' => 'boolean|nullable',
         ];
     }
