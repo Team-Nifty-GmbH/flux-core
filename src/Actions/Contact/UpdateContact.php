@@ -46,14 +46,14 @@ class UpdateContact extends FluxAction
 
             $selectedDiscounts = [];
 
-            if ($syncType !== 'detach') {
-                foreach ($discounts as $discount) {
-                    if ($discountId = data_get($discount, 'id')) {
-                        $selectedDiscounts[] = $discountId;
+            foreach ($discounts as $discount) {
+                if ($discountId = data_get($discount, 'id')) {
+                    $selectedDiscounts[] = $discountId;
 
-                        continue;
-                    }
+                    continue;
+                }
 
+                if ($syncType !== 'detach') {
                     $selectedDiscounts[] = CreateDiscount::make($discount)
                         ->checkPermission()
                         ->validate()
