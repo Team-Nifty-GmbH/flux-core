@@ -2,17 +2,15 @@
 
 namespace FluxErp\Tests\Livewire\Widgets;
 
-use FluxErp\Livewire\Widgets\Calendar;
+use FluxErp\Livewire\Widgets\RevenueByTopCustomers;
 use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
-class CalendarTest extends TestCase
+class RevenueByTopCustomersTest extends TestCase
 {
-    protected string $livewireComponent = Calendar::class;
-
     public function test_renders_successfully()
     {
-        Livewire::test($this->livewireComponent)
+        Livewire::test(RevenueByTopCustomers::class)
             ->assertStatus(200);
     }
 }

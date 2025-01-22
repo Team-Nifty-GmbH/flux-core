@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Livewire\Widgets;
+namespace FluxErp\Tests\Livewire\Widgets;
 
 use FluxErp\Livewire\Widgets\AverageOrderValue;
 use FluxErp\Tests\TestCase;

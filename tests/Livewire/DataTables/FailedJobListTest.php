@@ -2,17 +2,15 @@
 
 namespace FluxErp\Tests\Livewire\DataTables;
 
-use FluxErp\Livewire\DataTables\RoleList;
+use FluxErp\Livewire\DataTables\FailedJobList;
 use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
-class RoleListTest extends TestCase
+class FailedJobListTest extends TestCase
 {
-    protected string $livewireComponent = RoleList::class;
-
     public function test_renders_successfully()
     {
-        Livewire::test($this->livewireComponent)
+        Livewire::test(FailedJobList::class)
             ->assertStatus(200);
     }
 }

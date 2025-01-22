@@ -1,16 +1,17 @@
 <?php
 
-namespace FluxErp\Livewire\DataTables;
+namespace FluxErp\Livewire\Contact\Accounting;
 
+use FluxErp\Livewire\DataTables\DiscountList;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Discount;
+use Livewire\Attributes\Modelable;
 
-class ContactAllDiscountsList extends DiscountList
+class AllDiscounts extends DiscountList
 {
-    protected string $model = Discount::class;
-
     public bool $isFilterable = false;
 
+    #[Modelable]
     public int $contactId;
 
     public function loadData(): void
