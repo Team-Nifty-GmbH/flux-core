@@ -17,6 +17,7 @@
         "laravel/scout": "^10.0",
         "livewire/livewire": "^3.4.7",
         "meilisearch/meilisearch-php": "^1.9",
+        "nesbot/carbon": "^3.8",
         "php-http/discovery": "^1.15",
         "spatie/laravel-activitylog": "^4.6",
         "spatie/laravel-medialibrary": "^11.0",
