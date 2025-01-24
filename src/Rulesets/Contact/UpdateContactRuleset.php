@@ -93,6 +93,8 @@ class UpdateContactRuleset extends FluxRuleset
             'discount_percent' => 'sometimes|numeric|nullable',
             'credit_line' => 'sometimes|numeric|nullable',
             'vat_id' => 'sometimes|string|nullable',
+            'header' => 'string|nullable',
+            'footer' => 'string|nullable',
             'vendor_customer_number' => 'sometimes|string|nullable',
             'has_sensitive_reminder' => 'sometimes|boolean',
             'has_delivery_lock' => 'sometimes|boolean',

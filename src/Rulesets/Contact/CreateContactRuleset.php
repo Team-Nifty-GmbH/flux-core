@@ -90,6 +90,8 @@ class CreateContactRuleset extends FluxRuleset
             'discount_percent' => 'sometimes|numeric|min:0|max:100|nullable',
             'credit_line' => 'sometimes|numeric|min:0|nullable',
             'vat_id' => 'sometimes|string|nullable',
+            'header' => 'string|nullable',
+            'footer' => 'string|nullable',
             'vendor_customer_number' => 'sometimes|string|nullable',
             'has_sensitive_reminder' => 'sometimes|boolean',
             'has_delivery_lock' => 'sometimes|boolean',
