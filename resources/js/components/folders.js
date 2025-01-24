@@ -7,8 +7,6 @@ export default function folders(
     multiSelect = false,
     nameAttribute = 'label',
     childrenAttribute = 'children',
-    selectedCallback = null,
-    checkedCallback = null
 ) {
     return {
         checked: checked,
@@ -20,8 +18,6 @@ export default function folders(
         multiSelect: multiSelect,
         nameAttribute: nameAttribute,
         childrenAttribute: childrenAttribute,
-        selectedCallback: selectedCallback,
-        checkedCallback: checkedCallback,
         async init() {
             await this.refresh();
 
@@ -83,26 +79,42 @@ export default function folders(
             return this.openFolders.includes(node.id);
         },
         isLeaf(node) {
-            return !node.children || node.children.length === 0;
+            return ! Array.isArray(node.children) || node.children.length === 0;
         },
         toggleCheck(node, isChecked) {
             const traverse = (currentNode, check) => {
                 if (check) {
                     if (!this.checked.includes(currentNode.id)) {
-                        this.checked.push(currentNode.id);
+                        this.check(currentNode);
                     }
                 } else {
-                    this.checked = this.checked.filter(id => id !== currentNode.id);
+                    this.unCheck(currentNode);
                 }
+                this.$dispatch('folder-tree-check-toggle', currentNode, isChecked);
+
                 currentNode.children?.forEach(child => traverse(child, check));
             };
             traverse(node, isChecked);
 
             this.updateParentStates(node);
+
+            this.$dispatch('folder-tree-check-updated', this.checked);
+        },
+        unCheck(node) {
+            this.checked = this.checked.filter(id => id !== node.id);
+            this.$dispatch('folder-tree-uncheck', node, this.checked);
+        },
+        check(node) {
+            this.checked.push(node.id);
+            this.$dispatch('folder-tree-check', node, this.checked);
         },
         isChecked(node) {
             if (this.isLeaf(node)) {
                 return this.checked.includes(node.id);
+            }
+
+            if (! Array.isArray(node.children)) {
+                node.children = [];
             }
 
             return (node.children || []).every(child => this.isChecked(child));
@@ -112,9 +124,13 @@ export default function folders(
                 return false; // Leaf nodes can't be indeterminate
             }
 
+            if (! Array.isArray(node.children)) {
+                node.children = [];
+            }
             const childStates = (node.children || []).map(child => this.isChecked(child) || this.isIndeterminate(child));
             const allChecked = childStates.every(state => state);
             const anyChecked = childStates.some(state => state);
+
             return anyChecked && !allChecked;
         },
         updateParentStates(node) {
@@ -138,16 +154,18 @@ export default function folders(
         },
         toggleSelect(node) {
             this.selected?.id === node.id ? this.unselect() : this.select(node);
+            this.$dispatch('folder-tree-select-toggle', node, this.selected);
         },
         select(node) {
-            this.$dispatch('folder-tree-select', node, this.selected);
 
             this.selected = node;
             if (this.selectedCallback) {
                 this.selectedCallback(node, this.selected);
             }
+            this.$dispatch('folder-tree-select', node);
         },
         unselect() {
+            this.$dispatch('folder-tree-unselect', this.selected);
             this.selected = null;
         },
         removeNode(node) {

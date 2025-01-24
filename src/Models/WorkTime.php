@@ -124,23 +124,55 @@ class WorkTime extends FluxModel implements Calendarable
 
     public static function toCalendar(): array
     {
-        return resolve_static(User::class, 'query')
-            ->where('is_active', true)
-            ->get()
-            ->map(fn (User $user) => [
-                'id' => Str::of(static::class)->replace('\\', '.') . '.' . $user->id,
-                'modelType' => morph_alias(static::class),
-                'name' => $user->name,
-                'color' => $user->color,
-                'resourceEditable' => false,
-                'hasRepeatableEvents' => false,
-                'isPublic' => false,
-                'isShared' => false,
-                'permission' => 'owner',
-                'group' => 'other',
-                'isVirtual' => true,
-            ])
-            ->toArray();
+        $bluePrint = [
+            'resourceEditable' => false,
+            'hasRepeatableEvents' => false,
+            'isPublic' => false,
+            'isShared' => false,
+            'permission' => 'owner',
+            'group' => 'other',
+            'isVirtual' => true,
+            'color' => '#0891b2',
+        ];
+
+        return [
+            array_merge(
+                $bluePrint,
+                [
+                    'id' => Str::of(static::class)->replace('\\', '.'),
+                    'modelType' => morph_alias(static::class),
+                    'name' => __('Employees'),
+                    'children' => resolve_static(User::class, 'query')
+                        ->where('is_active', true)
+                        ->get()
+                        ->map(function (User $user) use (&$calendars, $bluePrint) {
+                            return array_merge(
+                                $bluePrint,
+                                [
+                                    'id' => Str::of(static::class)->replace('\\', '.') . '.' . $user->id,
+                                    'parentId' => Str::of(static::class)->replace('\\', '.'),
+                                    'modelType' => morph_alias(static::class),
+                                    'name' => $user->name,
+                                    'color' => $user->color ?? '#0891b2',
+                                    'children' => [
+                                        array_merge(
+                                            $bluePrint,
+                                            [
+                                                'id' => Str::of(static::class)->replace('\\', '.') . '.' . $user->id . '.work_time',
+                                                'parentId' => Str::of(static::class)->replace('\\', '.') . '.' . $user->id,
+                                                'modelType' => morph_alias(static::class),
+                                                'name' => $user->name . ' (' . __('Work Time') . ')',
+                                                'color' => $user->color ?? '#0891b2',
+                                            ]
+                                        ),
+                                    ],
+                                ]
+                            );
+                        })
+                        ->toArray(),
+                ]
+            ),
+        ];
     }
 
     public function toCalendarEvent(?array $info = null): array
@@ -151,7 +183,7 @@ class WorkTime extends FluxModel implements Calendarable
             'title' => $this->user->name,
             'start' => $this->started_at->toDateTimeString(),
             'end' => $this->ended_at?->toDateTimeString(),
-            'color' => $this->user->color,
+            'color' => $this->user->color ?? '#0891b2',
             'invited' => [],
             'description' => $this->description,
             'allDay' => false,
@@ -168,6 +200,10 @@ class WorkTime extends FluxModel implements Calendarable
         Carbon|string|null $end,
         ?array $info = null
     ): void {
+        $info = explode('.', data_get($info, 'id'));
+        $type = array_pop($info);
+        $userId = array_pop($info);
+
         if ($start) {
             $builder->where('started_at', '>=', $start);
         }
@@ -176,8 +212,16 @@ class WorkTime extends FluxModel implements Calendarable
             $builder->where('ended_at', '<=', $end);
         }
 
+        $builder->where('user_id', $userId);
+
+        if ($this->hasNamedScope(Str::studly($type))) {
+            $this->callNamedScope(Str::studly($type), ['builder' => $builder]);
+        }
+    }
+
+    public function scopeWorkTime(Builder $builder): void
+    {
         $builder->where('is_daily_work_time', true)
-            ->where('user_id', Str::afterLast(data_get($info, 'id'), '.'))
             ->where('is_locked', true)
             ->where('is_pause', false);
     }

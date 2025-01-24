@@ -13,6 +13,7 @@ use FluxErp\Models\CalendarEvent;
 use FluxErp\Models\User;
 use FluxErp\Traits\HasCalendarUserSettings;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Arr;
@@ -45,7 +46,7 @@ class FluxCalendar extends CalendarComponent
     }
 
     #[Renderless]
-    public function toggleEventSource(array ...$activeCalendars): void
+    public function toggleEventSource(array $activeCalendars): void
     {
         $this->storeSettings(array_column($activeCalendars, 'publicId'), 'activeCalendars');
     }
@@ -100,6 +101,27 @@ class FluxCalendar extends CalendarComponent
                 Arr::dot(auth()->user()->getCalendarSettings(static::class)->value('settings') ?? [])
             )
         );
+    }
+
+    #[Renderless]
+    public function getMyCalendars(): Collection
+    {
+        resolve_static(
+            Calendar::class,
+            'addGlobalScope',
+            [
+                'scope' => fn (Builder $query) => $query->with('children'),
+            ]
+        );
+
+        return $this->myCalendars = auth()->user()
+            ->calendars()
+            ->whereNull('parent_id')
+            ->withPivot('permission')
+            ->wherePivot('permission', 'owner')
+            ->withCount('calendarables')
+            ->get()
+            ->toCalendarObjects();
     }
 
     #[Renderless]

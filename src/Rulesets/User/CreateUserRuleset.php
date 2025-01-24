@@ -47,6 +47,11 @@ class CreateUserRuleset extends FluxRuleset
                 'nullable',
                 'timezone',
             ],
+            'color' => 'nullable|hex_color',
+            'date_of_birth' => 'nullable|date',
+            'employee_number' => 'nullable|string|max:255',
+            'employment_date' => 'nullable|date',
+            'termination_date' => 'nullable|date',
             'cost_per_hour' => [
                 'nullable',
                 app(Numeric::class),

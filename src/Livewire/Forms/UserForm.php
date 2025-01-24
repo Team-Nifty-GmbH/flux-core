@@ -36,6 +36,16 @@ class UserForm extends FluxForm
 
     public ?string $timezone = null;
 
+    public ?string $color = null;
+
+    public ?string $date_of_birth = null;
+
+    public ?string $employee_number = null;
+
+    public ?string $employment_date = null;
+
+    public ?string $termination_date = null;
+
     public ?string $iban = null;
 
     public ?string $account_holder = null;

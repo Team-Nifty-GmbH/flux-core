@@ -8,6 +8,16 @@
                     <x-input :label="__('Email')" wire:model="userForm.email"/>
                     <x-input :label="__('Phone')" wire:model="userForm.phone"/>
                     <x-input :label="__('User code')" wire:model="userForm.user_code"/>
+                    <x-color-picker :label="__('Color')" wire:model="userForm.color"/>
+                @show
+            </div>
+            <hr>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                @section('user-edit.employment')
+                    <x-datetime-picker :without-time="true" :label="__('Date Of Birth')" wire:model="userForm.date_of_birth"/>
+                    <x-input :label="__('Employee Number')" wire:model="userForm.employee_number"/>
+                    <x-datetime-picker :without-time="true" :label="__('Employment Date')" wire:model="userForm.employment_date"/>
+                    <x-datetime-picker :without-time="true" :label="__('Termination Date')" wire:model="userForm.termination_date"/>
                     <x-inputs.number
                         :prefix="\FluxErp\Models\Currency::default()?->symbol"
                         :label="__('Cost Per Hour')"
@@ -15,6 +25,7 @@
                     />
                 @show
             </div>
+            <hr>
             @section('user-edit.selects')
                 <x-select
                     wire:model="userForm.language_id"
@@ -42,6 +53,7 @@
                 <x-inputs.password :label="__('New password')" wire:model="userForm.password"/>
                 <x-inputs.password :label="__('Repeat password')" wire:model="userForm.password_confirmation"/>
             @show
+            <hr>
             @section('user-edit.bank-connection')
                 <x-input wire:model="userForm.account_holder" :label="__('Account Holder')"/>
                 <x-input wire:model="userForm.iban" :label="__('IBAN')"/>
