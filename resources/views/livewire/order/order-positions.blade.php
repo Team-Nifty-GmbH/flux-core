@@ -55,11 +55,12 @@
                                             ]"
                                             :async-data="[
                                                 'api' => route('search', \FluxErp\Models\Product::class),
+                                                'method' => 'POST',
                                                 'params' => [
                                                     'whereDoesntHave' => 'children',
                                                     'fields' => ['id', 'name', 'product_number'],
                                                     'with' => 'media',
-                                                ]
+                                                ],
                                             ]"
                                         />
                                         <div x-cloak x-show="$wire.orderPosition.product_id">
@@ -69,7 +70,8 @@
                                                 option-value="id"
                                                 option-label="name"
                                                 :async-data="[
-                                                    'api' => route('search', \FluxErp\Models\Warehouse::class)
+                                                    'api' => route('search', \FluxErp\Models\Warehouse::class),
+                                                    'method' => 'POST',
                                                 ]"
                                             />
                                         </div>
@@ -118,6 +120,7 @@
                                         wire:model.number="orderPosition.ledger_account_id"
                                         :async-data="[
                                             'api' => route('search', \FluxErp\Models\LedgerAccount::class),
+                                            'method' => 'POST',
                                             'params' => [
                                                 'where' => [
                                                     [
@@ -194,6 +197,7 @@
                                             ]"
                                             :async-data="[
                                                 'api' => route('search', \FluxErp\Models\Product::class),
+                                                'method' => 'POST',
                                                 'params' => [
                                                     'whereDoesntHave' => 'children',
                                                     'fields' => ['id', 'name', 'product_number'],

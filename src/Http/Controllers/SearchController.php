@@ -2,7 +2,9 @@
 
 namespace FluxErp\Http\Controllers;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Event;
 use Laravel\Scout\Searchable;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
@@ -14,8 +16,15 @@ class SearchController extends Controller
         // check if $model is a morph alias
         $model = morphed_model($model) ?? $model;
         $model = qualify_model(str_replace('/', '\\', $model));
+        $isSearchable = in_array(
+            Searchable::class,
+            class_uses_recursive(resolve_static($model, 'class'))
+        );
 
-        if (! class_exists($model) || ! in_array(Searchable::class, class_uses_recursive(app($model)))) {
+        if (
+            ! class_exists($model)
+            || (! $isSearchable && ! $request->get('searchFields'))
+        ) {
             abort(404);
         }
 
@@ -29,12 +38,20 @@ class SearchController extends Controller
             is_array($selected)
                 ? $query->whereIn($optionValue, $selected)
                 : $query->where($optionValue, $selected);
-        } elseif ($request->has('search')) {
+        } elseif ($request->has('search') && $isSearchable) {
             $query = ! is_string($request->get('search'))
                 ? resolve_static($model, 'query')->limit(20)
                 : resolve_static($model, 'search', ['query' => $request->get('search')])
                     ->toEloquentBuilder();
+        } elseif ($request->has('search')) {
+            $query = resolve_static($model, 'query');
+            $query->where(function (Builder $query) use ($request) {
+                foreach (Arr::wrap($request->get('searchFields')) as $field) {
+                    $query->orWhere($field, 'like', '%' . $request->get('search') . '%');
+                }
+            });
         } else {
+            /** @var \Illuminate\Database\Eloquent\Builder $query */
             $query = resolve_static($model, 'query');
         }
 
@@ -61,11 +78,11 @@ class SearchController extends Controller
         }
 
         if ($request->has('whereIn')) {
-            $query->whereIn($request->get('whereIn'));
+            $query->whereIn(...$request->get('whereIn'));
         }
 
         if ($request->has('whereNotIn')) {
-            $query->whereNotIn($request->get('whereNotIn'));
+            $query->whereNotIn(...$request->get('whereNotIn'));
         }
 
         if ($request->has('whereNull')) {
@@ -77,31 +94,31 @@ class SearchController extends Controller
         }
 
         if ($request->has('whereBetween')) {
-            $query->whereBetween($request->get('whereBetween'));
+            $query->whereBetween(...$request->get('whereBetween'));
         }
 
         if ($request->has('whereNotBetween')) {
-            $query->whereNotBetween($request->get('whereNotBetween'));
+            $query->whereNotBetween(...$request->get('whereNotBetween'));
         }
 
         if ($request->has('whereDate')) {
-            $query->whereDate($request->get('whereDate'));
+            $query->whereDate(...$request->get('whereDate'));
         }
 
         if ($request->has('whereMonth')) {
-            $query->whereMonth($request->get('whereMonth'));
+            $query->whereMonth(...$request->get('whereMonth'));
         }
 
         if ($request->has('whereDay')) {
-            $query->whereDay($request->get('whereDay'));
+            $query->whereDay(...$request->get('whereDay'));
         }
 
         if ($request->has('whereYear')) {
-            $query->whereYear($request->get('whereYear'));
+            $query->whereYear(...$request->get('whereYear'));
         }
 
         if ($request->has('whereTime')) {
-            $query->whereTime($request->get('whereTime'));
+            $query->whereTime(...$request->get('whereTime'));
         }
 
         if ($request->has('select')) {

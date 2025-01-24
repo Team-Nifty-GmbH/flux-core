@@ -10,6 +10,7 @@ use FluxErp\Livewire\DataTables\OrderPositionList;
 use FluxErp\Livewire\Forms\OrderForm;
 use FluxErp\Livewire\Forms\OrderPositionForm;
 use FluxErp\Models\OrderPosition;
+use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Models\Task;
 use FluxErp\Models\VatRate;
@@ -56,9 +57,8 @@ class OrderPositions extends OrderPositionList
     {
         parent::mount();
 
-        $this->filters = [];
+        $this->reset('filters', 'selected');
         $this->page = 1;
-        $this->selected = [];
     }
 
     public function getBuilder(Builder $builder): Builder
@@ -326,10 +326,23 @@ class OrderPositions extends OrderPositionList
     #[Renderless]
     public function changedProductId(Product $product): void
     {
+        $priceList = $this->orderPosition->price_list_id
+            ? resolve_static(PriceList::class, 'query')
+                ->whereKey($this->orderPosition->price_list_id)
+                ->first([
+                    'id',
+                    'parent_id',
+                    'rounding_method_enum',
+                    'rounding_precision',
+                    'rounding_number',
+                    'rounding_mode',
+                    'is_net',
+                ])
+            : $this->order->getPriceList();
         $this->orderPosition->fillFromProduct($product);
         $this->orderPosition->is_net = $this->order->getPriceList()->is_net;
         $this->orderPosition->unit_price = PriceHelper::make($this->orderPosition->getProduct())
-            ->setPriceList($this->order->getPriceList())
+            ->setPriceList($priceList ?? $this->order->getPriceList())
             ->setContact($this->order->getContact())
             ->price()
             ?->price ?? 0;

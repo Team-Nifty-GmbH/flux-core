@@ -23,7 +23,7 @@ class Birthdays extends ValueList
             'subLabel' => $item->date_of_birth
                 ->locale(app()->getLocale())
                 ->timezone(auth()->user()?->timezone ?? config('app.timezone'))
-                ->isoFormat('L') . ' (' . $item->date_of_birth->diffInYears(now()) . ')',
+                ->isoFormat('L') . ' (' . $item->date_of_birth->diffInYears(now()->startOfDay()) . ')',
             'growthRate' => DataTableButton::make()
                 ->icon('eye')
                 ->href($item->detailRoute())

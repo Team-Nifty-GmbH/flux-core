@@ -48,6 +48,7 @@ use FluxErp\Livewire\Settings\Countries;
 use FluxErp\Livewire\Settings\Currencies;
 use FluxErp\Livewire\Settings\CustomerPortal;
 use FluxErp\Livewire\Settings\DiscountGroups;
+use FluxErp\Livewire\Settings\FailedJobs;
 use FluxErp\Livewire\Settings\Languages;
 use FluxErp\Livewire\Settings\LedgerAccounts;
 use FluxErp\Livewire\Settings\Logs;
@@ -201,6 +202,8 @@ Route::middleware('web')
                         Route::get('/scheduling', Scheduling::class)->name('scheduling');
                         Route::get('/queue-monitor', QueueMonitor::class)
                             ->name('queue-monitor');
+                        Route::get('/failed-jobs', FailedJobs::class)
+                            ->name('failed-jobs');
                         Route::get('/plugins', Plugins::class)
                             ->name('plugins');
                     });

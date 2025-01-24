@@ -5,7 +5,6 @@ namespace FluxErp\Actions\Product\Variant;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Product\CreateProduct;
 use FluxErp\Models\Product;
-use FluxErp\Models\ProductOption;
 use FluxErp\Rulesets\Product\Variant\CreateVariantsRuleset;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -56,14 +55,14 @@ class CreateVariants extends FluxAction
                 array_merge(
                     $product,
                     [
-                        'name' => data_get($product, 'name') . ' - '
-                            . implode(
-                                ' ',
-                                resolve_static(ProductOption::class, 'query')
-                                    ->whereIntegerInRaw('id', $variantCreate)
-                                    ->pluck('name')
-                                    ->toArray()
-                            ),
+                        'name' => resolve_static(
+                            Product::class,
+                            'calculateVariantName',
+                            [
+                                'productOptions' => $variantCreate,
+                                'parentName' => data_get($product, 'name'),
+                            ]
+                        ),
                     ]
                 )
             )

@@ -5,6 +5,7 @@ namespace FluxErp\Traits;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\PendingBroadcast;
 use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Database\Eloquent\BroadcastableModelEventOccurred;
 use Illuminate\Support\Str;
 use TeamNiftyGmbH\DataTable\Traits\BroadcastsEvents as BaseBroadcastsEvents;
 
@@ -66,10 +67,17 @@ trait BroadcastsEvents
         );
     }
 
-    public function broadcastEvent(string $event, $channels = null): ?PendingBroadcast
+    public function broadcastEvent(string $event, $channels = null, bool $toEveryone = false): ?PendingBroadcast
     {
-        return $this->broadcastIfBroadcastChannelsExistForEvent(
-            $this->newBroadcastableModelEvent($event), $event, $channels
-        );
+        /** @var BroadcastableModelEventOccurred $eventClass */
+        $eventClass = $this->newBroadcastableModelEvent($event);
+
+        if ($toEveryone) {
+            $eventClass->broadcastToEveryone();
+        } else {
+            $eventClass->dontBroadcastToCurrentUser();
+        }
+
+        return $this->broadcastIfBroadcastChannelsExistForEvent($eventClass, $event, $channels);
     }
 }

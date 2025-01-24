@@ -2,17 +2,18 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use FluxErp\Contracts\HasWidgetOptions;
+use FluxErp\Livewire\Order\OrderList;
 use FluxErp\Models\Order;
 use FluxErp\States\Order\DeliveryState\Open;
-use FluxErp\Support\Metrics\Value;
 use FluxErp\Support\Widgets\ValueBox;
-use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
+use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Renderless;
+use Livewire\Livewire;
+use TeamNiftyGmbH\DataTable\Helpers\SessionFilter;
 
-class OpenDeliveries extends ValueBox
+class OpenDeliveries extends ValueBox implements HasWidgetOptions
 {
-    use IsTimeFrameAwareWidget;
-
     public bool $shouldBePositive = false;
 
     protected function getListeners(): array
@@ -26,22 +27,37 @@ class OpenDeliveries extends ValueBox
     #[Renderless]
     public function calculateSum(): void
     {
-        $metric = Value::make(
-            resolve_static(Order::class, 'query')
-                ->whereNotNull('invoice_date')
+        $this->sum = resolve_static(Order::class, 'query')
+            ->whereNotNull('invoice_date')
+            ->whereNotNull('invoice_number')
+            ->whereState('delivery_state', Open::class)
+            ->revenue()
+            ->count('id');
+    }
+
+    public function options(): array
+    {
+        return [
+            [
+                'label' => __('Show'),
+                'method' => 'show',
+            ],
+        ];
+    }
+
+    #[Renderless]
+    public function show(): void
+    {
+        SessionFilter::make(
+            Livewire::new(resolve_static(OrderList::class, 'class'))->getCacheKey(),
+            fn (Builder $query) => $query->whereNotNull('invoice_date')
                 ->whereNotNull('invoice_number')
                 ->whereState('delivery_state', Open::class)
-                ->revenue()
+                ->revenue(),
+            __($this->title()),
         )
-            ->setRange($this->timeFrame)
-            ->setEndingDate($this->end)
-            ->setStartingDate($this->start)
-            ->setDateColumn('invoice_date')
-            ->withGrowthRate()
-            ->count('id');
+            ->store();
 
-        $this->sum = $metric->getValue();
-        $this->previousSum = $metric->getPreviousValue();
-        $this->growthRate = $metric->getGrowthRate();
+        $this->redirectRoute('orders.orders', navigate: true);
     }
 }

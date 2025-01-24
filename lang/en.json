@@ -178,6 +178,7 @@
     "orders.get": "View orders",
     "orders.{id}.get": "View order details",
     "pdf_created": "PDF created",
+    "permission.get": "Get",
     "products.list.get": "View product list",
     "products.serial-numbers.get": "View product serial numbers",
     "products.serial-numbers.{id?}.get": "View product serial number details",
@@ -219,6 +220,7 @@
     "validation.alpha": "The :attribute must only contain letters.",
     "validation.alpha_dash": "The :attribute must only contain letters, numbers, dashes and underscores.",
     "validation.alpha_num": "The :attribute must only contain letters and numbers.",
+    "validation.already_exists": "The :model already exists.",
     "validation.array": "The :attribute must be an array.",
     "validation.before": "The :attribute must be a date before :date.",
     "validation.before_or_equal": "The :attribute must be a date before or equal to :date.",
@@ -309,5 +311,7 @@
     "wire:confirm.commission-credit-notes": "Create credit notes|Are you sure you want to create credit notes for the selected commissions?|Cancel|Yes",
     "wire:confirm.delete": "Delete :model|Do you really want to delete this :model?|Cancel|Delete",
     "wire:confirm.install-uploaded-plugin": "Install uploaded Plugins|The code of uploaded Plugins cant be verified.\nBe sure that the source is trusted.|Cancel|Install",
+    "wire:confirm.product-prices-update": "Update product prices|Are you sure you want to update the prices of the selected products?|Cancel|Yes",
+    "wire:confirm.recalculate-product-names": "Recalculate product names|Are you sure you want to recalculate the names of the selected products?|Cancel|Yes",
     "wire:confirm.uninstall-plugin": "Uninstall Plugin|Do you really want to uninstall this plugin?|Cancel|Uninstall"
 }

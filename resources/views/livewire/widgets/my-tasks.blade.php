@@ -2,7 +2,7 @@
     <div class="border-b pb-2 pt-2 pl-2 border-gray-200">
         <h2 class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400">{{ __('My Tasks') }}</h2>
     </div>
-    <div class="flex-1 overflow-auto" x-data="{formatter: @js(resolve_static(\FluxErp\Models\Ticket::class, 'typeScriptAttributes'))}">
+    <div class="flex-1 overflow-auto">
         @forelse($tasks as $task)
             <x-flux::list-item :item="$task">
                 <x-slot:avatar>

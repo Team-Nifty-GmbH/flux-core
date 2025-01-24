@@ -90,6 +90,6 @@ class OrderList extends BaseDataTable
             $this->loadData();
         }
 
-        $this->selected = [];
+        $this->reset('selected');
     }
 }

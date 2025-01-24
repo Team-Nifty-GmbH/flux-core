@@ -24,9 +24,7 @@ class WorkTimeList extends BaseDataTable
 {
     protected string $model = WorkTime::class;
 
-    protected ?string $includeBefore = 'flux::livewire.datatables.work-time-list.include-before';
-
-    protected string $view = 'flux::livewire.work-time.work-time-list';
+    protected ?string $includeBefore = 'flux::livewire.work-time.work-time-list';
 
     public LockedWorkTimeForm $workTime;
 
@@ -52,6 +50,52 @@ class WorkTimeList extends BaseDataTable
     ];
 
     public bool $isSelectable = true;
+
+    #[Renderless]
+    public function toggleIsBillable(bool $isBillable): void
+    {
+        foreach ($this->getSelectedModelsQuery()->pluck('id') as $id) {
+            try {
+                UpdateLockedWorkTime::make([
+                    'id' => $id,
+                    'is_billable' => $isBillable,
+                ])
+                    ->checkPermission()
+                    ->validate()
+                    ->execute();
+            } catch (ValidationException|UnauthorizedException $e) {
+                exception_to_notifications($e, $this);
+
+                return;
+            }
+        }
+
+        $this->reset('selected');
+        $this->loadData();
+    }
+
+    #[Renderless]
+    public function createOrders(): void
+    {
+        try {
+            CreateOrdersFromWorkTimes::make(
+                array_merge(
+                    $this->createOrdersFromWorkTimes->toArray(),
+                    ['work_times' => $this->getSelectedModelsQuery()->get('id')->toArray()]
+                )
+            )
+                ->checkPermission()
+                ->validate()
+                ->executeAsync();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->reset('selected');
+        $this->loadData();
+    }
 
     protected function itemToArray($item): array
     {
@@ -79,6 +123,12 @@ class WorkTimeList extends BaseDataTable
                     $openModal('create-orders');
                 JS)
                 ->when(fn () => resolve_static(CreateOrder::class, 'canPerformAction', [false])),
+            DataTableButton::make()
+                ->label(__('Change is billable'))
+                ->xOnClick(<<<'JS'
+                    $openModal('toggle-is-billable');
+                JS)
+                ->when(fn () => resolve_static(UpdateLockedWorkTime::class, 'canPerformAction', [false])),
         ];
     }
 
@@ -92,28 +142,6 @@ class WorkTimeList extends BaseDataTable
                 ->wireClick('edit')
                 ->when(resolve_static(CreateLockedWorkTime::class, 'canPerformAction', [false])),
         ];
-    }
-
-    public function createOrders(): void
-    {
-        try {
-            CreateOrdersFromWorkTimes::make(
-                array_merge(
-                    $this->createOrdersFromWorkTimes->toArray(),
-                    ['work_times' => $this->getSelectedModelsQuery()->get('id')->toArray()]
-                )
-            )
-                ->checkPermission()
-                ->validate()
-                ->executeAsync();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return;
-        }
-
-        $this->selected = [];
-        $this->loadData();
     }
 
     protected function getRowActions(): array

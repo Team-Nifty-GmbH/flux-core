@@ -240,4 +240,9 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
     {
         return static::guardNames();
     }
+
+    public static function hasPermission(): bool
+    {
+        return false;
+    }
 }

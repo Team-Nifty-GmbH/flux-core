@@ -103,64 +103,91 @@
                 </div>
             </div>
         @endif
-        <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
-            <x-label :label="__('Email')" for="{{ md5('address.email_primary') }}" />
-            <div class="col-span-2">
-                <x-input x-bind:readonly="!$wire.edit" class="pl-12" wire:model="address.email_primary">
-                    <x-slot:prepend>
-                        <div class="absolute inset-y-0 left-0 flex items-center p-0.5">
-                            <x-button
-                                class="h-full rounded-l-md"
-                                icon="mail"
-                                primary
-                                flat
-                                squared
-                                x-on:click.prevent="window.open('mailto:' + $wire.address.email_primary)"
-                            />
-                        </div>
-                    </x-slot:prepend>
-                </x-input>
-            </div>
-        </div>
-        <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
-            <x-label :label="__('Phone')" for="{{ md5('address.phone') }}" />
-            <div class="col-span-2">
-                <x-input x-bind:readonly="!$wire.edit" class="pl-12" wire:model="address.phone">
-                    <x-slot:prepend>
-                        <div class="absolute inset-y-0 left-0 flex items-center p-0.5">
-                            <x-button
-                                class="h-full rounded-l-md"
-                                icon="phone"
-                                primary
-                                flat
-                                squared
-                                x-on:click.prevent="window.open('tel:' + $wire.address.phone)"
-                            />
-                        </div>
-                    </x-slot:prepend>
-                </x-input>
-            </div>
-        </div>
-        @if(! $onlyPostal)
+        @section('contact-channels.email')
             <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
-                <x-label :label="__('URL')" for="{{ md5('address.url') }}" />
+                <x-label :label="__('Email')" for="{{ md5('address.email_primary') }}" />
                 <div class="col-span-2">
-                    <x-input x-bind:readonly="!$wire.edit" class="pl-12" wire:model="address.url">
+                    <x-input x-bind:readonly="!$wire.edit" class="pl-12" wire:model="address.email_primary">
                         <x-slot:prepend>
                             <div class="absolute inset-y-0 left-0 flex items-center p-0.5">
                                 <x-button
                                     class="h-full rounded-l-md"
-                                    icon="globe"
+                                    icon="mail"
                                     primary
                                     flat
                                     squared
-                                    x-on:click.prevent="window.open('//' + $wire.address.url)"
+                                    x-on:click.prevent="window.open('mailto:' + $wire.address.email_primary)"
                                 />
                             </div>
                         </x-slot:prepend>
                     </x-input>
                 </div>
             </div>
+        @show
+        @section('contact-channels.phone')
+            <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+                <x-label :label="__('Phone')" for="{{ md5('address.phone') }}" />
+                <div class="col-span-2">
+                    <x-input x-bind:readonly="!$wire.edit" class="pl-12" wire:model="address.phone">
+                        <x-slot:prepend>
+                            <div class="absolute inset-y-0 left-0 flex items-center p-0.5">
+                                <x-button
+                                    class="h-full rounded-l-md"
+                                    icon="phone"
+                                    primary
+                                    flat
+                                    squared
+                                    x-on:click.prevent="window.open('tel:' + $wire.address.phone)"
+                                />
+                            </div>
+                        </x-slot:prepend>
+                    </x-input>
+                </div>
+            </div>
+        @show
+        @section('contact-channels.phone_mobile')
+            <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+                <x-label :label="__('Phone Mobile')" for="{{ md5('address.phone_mobile') }}" />
+                <div class="col-span-2">
+                    <x-input x-bind:readonly="!$wire.edit" class="pl-12" wire:model="address.phone_mobile">
+                        <x-slot:prepend>
+                            <div class="absolute inset-y-0 left-0 flex items-center p-0.5">
+                                <x-button
+                                    class="h-full rounded-l-md"
+                                    icon="phone"
+                                    primary
+                                    flat
+                                    squared
+                                    x-on:click.prevent="window.open('tel:' + $wire.address.phone_mobile)"
+                                />
+                            </div>
+                        </x-slot:prepend>
+                    </x-input>
+                </div>
+            </div>
+        @show
+        @if(! $onlyPostal)
+            @section('contact-channels.url')
+                <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+                    <x-label :label="__('URL')" for="{{ md5('address.url') }}" />
+                    <div class="col-span-2">
+                        <x-input x-bind:readonly="!$wire.edit" class="pl-12" wire:model="address.url">
+                            <x-slot:prepend>
+                                <div class="absolute inset-y-0 left-0 flex items-center p-0.5">
+                                    <x-button
+                                        class="h-full rounded-l-md"
+                                        icon="globe"
+                                        primary
+                                        flat
+                                        squared
+                                        x-on:click.prevent="window.open('//' + $wire.address.url)"
+                                    />
+                                </div>
+                            </x-slot:prepend>
+                        </x-input>
+                    </div>
+                </div>
+            @show
             <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
                 <x-label :label="__('Language')" for="{{ md5('address.language_id') }}" />
                 <div class="col-span-2">
@@ -227,14 +254,16 @@
         </h3>
         <hr class="py-2" />
         <div class="flex flex-col gap-1.5">
-            <x-toggle
-                :label="__('Active')"
-                x-bind:disabled="!$wire.edit"
-                wire:model="address.is_active"
-            />
-            <x-toggle :label="__('Main Address')" x-bind:disabled="!$wire.edit || $wire.address.is_main_address" wire:model="address.is_main_address"/>
-            <x-toggle :label="__('Delivery Address')" x-bind:disabled="!$wire.edit || $wire.address.is_delivery_address" wire:model="address.is_delivery_address"/>
-            <x-toggle :label="__('Invoice Address')" x-bind:disabled="!$wire.edit || $wire.address.is_invoice_address" wire:model="address.is_invoice_address"/>
+            @section('attributes.toggles')
+                <x-toggle
+                    :label="__('Active')"
+                    x-bind:disabled="!$wire.edit"
+                    wire:model="address.is_active"
+                />
+                <x-toggle :label="__('Main Address')" x-bind:disabled="!$wire.edit || $wire.address.is_main_address" wire:model="address.is_main_address"/>
+                <x-toggle :label="__('Delivery Address')" x-bind:disabled="!$wire.edit || $wire.address.is_delivery_address" wire:model="address.is_delivery_address"/>
+                <x-toggle :label="__('Invoice Address')" x-bind:disabled="!$wire.edit || $wire.address.is_invoice_address" wire:model="address.is_invoice_address"/>
+            @show
         </div>
         <h3 class="pt-12 text-lg font-medium leading-6 text-gray-900 dark:text-gray-50">
             {{ __('Contact options') }}

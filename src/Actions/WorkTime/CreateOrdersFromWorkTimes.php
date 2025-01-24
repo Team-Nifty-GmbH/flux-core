@@ -7,6 +7,7 @@ use FluxErp\Actions\Order\CreateOrder;
 use FluxErp\Actions\Order\UpdateOrder;
 use FluxErp\Actions\OrderPosition\CreateOrderPosition;
 use FluxErp\Models\Contact;
+use FluxErp\Models\Language;
 use FluxErp\Models\Order;
 use FluxErp\Models\Product;
 use FluxErp\Models\Warehouse;
@@ -89,7 +90,9 @@ class CreateOrdersFromWorkTimes extends DispatchableFluxAction
                     $description = $prefix
                         . __('Date') . ': '
                         . $workTime->started_at
-                            ->locale($contact->invoiceAddress->language->language_code)
+                            ->locale($contact->invoiceAddress->language?->language_code
+                                ?? Language::default()?->language_code
+                            )
                             ->isoFormat('L')
                         . '<br/>'
                         . __('User') . ': ' . $workTime->user->name

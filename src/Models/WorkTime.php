@@ -38,9 +38,9 @@ class WorkTime extends FluxModel implements Calendarable
 
         static::saved(function (WorkTime $workTime) {
             if ($workTime->is_daily_work_time) {
-                $workTime->broadcastEvent('dailyUpdated');
+                $workTime->broadcastEvent('dailyUpdated', toEveryone: true);
             } else {
-                $workTime->broadcastEvent('taskUpdated');
+                $workTime->broadcastEvent('taskUpdated', toEveryone: true);
             }
         });
     }

@@ -4,6 +4,7 @@ namespace FluxErp\Tests\Livewire\Portal\Shop;
 
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\Portal\Shop\Checkout;
+use FluxErp\Mail\Order\OrderConfirmation;
 use FluxErp\Models\Address;
 use FluxErp\Models\Currency;
 use FluxErp\Models\OrderType;
@@ -11,8 +12,12 @@ use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Tests\Livewire\BaseSetup;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
+use Symfony\Component\Mailer\Transport\Smtp\SmtpTransport;
 
 class CheckoutTest extends BaseSetup
 {
@@ -101,6 +106,8 @@ class CheckoutTest extends BaseSetup
 
     public function test_can_create_order()
     {
+        $mail = Mail::fake();
+
         Livewire::actingAs($this->address)
             ->test(Checkout::class)
             ->set('termsAndConditions', true)
@@ -118,5 +125,18 @@ class CheckoutTest extends BaseSetup
             'payment_type_id' => $this->paymentType->id,
             'commission' => $commission,
         ]);
+
+        Mail::assertQueued(OrderConfirmation::class, function (OrderConfirmation $mail) {
+            return $mail->hasTo($this->address->email);
+        });
+        Mail::assertQueuedCount(1);
+
+        $mailable = Mail::queued(OrderConfirmation::class)->first();
+        $mail->sendNow($mailable);
+
+        // Assert the mail was sent
+        Mail::assertSent(OrderConfirmation::class, function (OrderConfirmation $mail) {
+            return $mail->hasTo($this->address->email);
+        });
     }
 }

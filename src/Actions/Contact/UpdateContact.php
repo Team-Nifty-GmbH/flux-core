@@ -2,6 +2,7 @@
 
 namespace FluxErp\Actions\Contact;
 
+use FluxErp\Actions\Discount\CreateDiscount;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Contact;
 use FluxErp\Models\PaymentType;
@@ -26,6 +27,7 @@ class UpdateContact extends FluxAction
     public function performAction(): Model
     {
         $discountGroups = Arr::pull($this->data, 'discount_groups');
+        $discounts = Arr::pull($this->data, 'discounts');
 
         $contact = resolve_static(Contact::class, 'query')
             ->whereKey($this->data['id'])
@@ -34,11 +36,50 @@ class UpdateContact extends FluxAction
         $contact->fill($this->data);
         $contact->save();
 
+        if (! is_null($discounts)) {
+            $syncType = match ($this->getData('discounts_pivot_sync_type')) {
+                'attach' => 'attach',
+                'detach' => 'detach',
+                'syncWithoutDetaching' => 'syncWithoutDetaching',
+                default => 'sync',
+            };
+
+            $selectedDiscounts = [];
+
+            foreach ($discounts as $discount) {
+                if ($discountId = data_get($discount, 'id')) {
+                    $selectedDiscounts[] = $discountId;
+
+                    continue;
+                }
+
+                if ($syncType !== 'detach') {
+                    $selectedDiscounts[] = CreateDiscount::make($discount)
+                        ->checkPermission()
+                        ->validate()
+                        ->execute()
+                        ->getKey();
+                }
+            }
+
+            $contact->discounts()->{$syncType}($selectedDiscounts);
+        }
+
         if (! is_null($discountGroups)) {
             $contact->discountGroups()->sync($discountGroups);
         }
 
         return $contact->withoutRelations()->fresh();
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $contact = resolve_static(Contact::class, 'query')
+            ->whereKey($this->getData('id'))
+            ->first();
+
+        $this->data['payment_type_id'] ??= $contact?->payment_type_id;
+        $this->data['client_id'] ??= $contact?->client_id;
     }
 
     protected function validateData(): void
@@ -49,12 +90,6 @@ class UpdateContact extends FluxAction
         $this->data = $validator->validate();
 
         $errors = [];
-        $contact = resolve_static(Contact::class, 'query')
-            ->whereKey($this->data['id'])
-            ->first();
-
-        $this->data['payment_type_id'] = $this->data['payment_type_id'] ?? $contact->payment_type_id;
-        $this->data['client_id'] = $this->data['client_id'] ?? $contact->client_id;
 
         if (array_key_exists('customer_number', $this->data)) {
             $customerNumberExists = resolve_static(Contact::class, 'query')

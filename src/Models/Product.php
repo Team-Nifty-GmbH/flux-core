@@ -2,10 +2,12 @@
 
 namespace FluxErp\Models;
 
+use DragonCode\Contracts\Support\Arrayable;
 use FluxErp\Enums\TimeUnitEnum;
 use FluxErp\Helpers\PriceHelper;
 use FluxErp\Models\Pivots\ClientProduct;
 use FluxErp\Models\Pivots\ProductProductOption;
+use FluxErp\Support\Collection\ProductOptionCollection;
 use FluxErp\Traits\Categorizable;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
@@ -14,6 +16,7 @@ use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasSerialNumberRange;
+use FluxErp\Traits\HasTags;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
@@ -28,7 +31,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\MediaLibrary\HasMedia;
-use Spatie\Tags\HasTags;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Product extends FluxModel implements HasMedia, InteractsWithDataTables
@@ -44,6 +46,22 @@ class Product extends FluxModel implements HasMedia, InteractsWithDataTables
     protected ?string $detailRouteName = 'products.id';
 
     public static string $iconName = 'square-3-stack-3d';
+
+    public static function calculateVariantName(
+        ProductOptionCollection|Arrayable|array $productOptions,
+        string $parentName
+    ): string {
+        return $parentName . ' - '
+            . implode(
+                ' ',
+                $productOptions instanceof ProductOptionCollection
+                    ? $productOptions->pluck('name')->toArray()
+                    : resolve_static(ProductOption::class, 'query')
+                        ->whereIntegerInRaw('id', $productOptions)
+                        ->pluck('name')
+                        ->toArray()
+            );
+    }
 
     protected static function booted(): void
     {
@@ -163,6 +181,11 @@ class Product extends FluxModel implements HasMedia, InteractsWithDataTables
     public function suppliers(): BelongsToMany
     {
         return $this->belongsToMany(Contact::class, 'product_supplier');
+    }
+
+    public function unit(): BelongsTo
+    {
+        return $this->belongsTo(Unit::class);
     }
 
     public function vatRate(): BelongsTo

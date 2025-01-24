@@ -6,6 +6,7 @@ use FluxErp\Models\Order;
 use FluxErp\View\Printing\PrintableView;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Fluent;
 
 class OrderView extends PrintableView
 {
@@ -35,7 +36,7 @@ class OrderView extends PrintableView
                 ->orderPositions()
                 ->whereNull('parent_id')
                 ->when(! $this->showAlternatives, fn ($query) => $query->whereNot('is_alternative', true))
-                ->with('tags')
+                ->with(['tags', 'product.unit:id,name,abbreviation'])
                 ->get()
                 ->append('children')
                 ->toArray()
@@ -43,7 +44,7 @@ class OrderView extends PrintableView
 
         $flattened = collect($positions)->map(
             function ($item) {
-                return (object) $item;
+                return new Fluent($item);
             }
         );
 

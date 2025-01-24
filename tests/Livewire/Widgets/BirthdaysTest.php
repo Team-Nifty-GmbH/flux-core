@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Livewire\Widgets;
+namespace FluxErp\Tests\Livewire\Widgets;
 
 use FluxErp\Livewire\Widgets\Birthdays;
 use FluxErp\Models\Address;
@@ -22,6 +22,7 @@ class BirthdaysTest extends BaseSetup
             'contact_id' => $this->contact->id,
             'client_id' => $this->dbClient->id,
             'date_of_birth' => now()->subYears(30),
+            'is_active' => true,
         ]);
     }
 
@@ -30,7 +31,7 @@ class BirthdaysTest extends BaseSetup
         Livewire::test(Birthdays::class)
             ->assertStatus(200)
             ->assertCount('items', 1)
-            ->assertSee($this->address->name)
-            ->assertSee('(30)');
+            ->assertSet('items.0.label', $this->address->name)
+            ->assertSet('items.0.subLabel', $this->address->date_of_birth->isoFormat('L') . ' (30)');
     }
 }

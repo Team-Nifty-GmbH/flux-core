@@ -721,12 +721,19 @@ class Order extends Component
 
     protected function getTo(OffersPrinting $item, array $documents): array
     {
-        $to = [];
-
         // add invoice address email if an invoice is being sent
-        $to[] = in_array('invoice', $documents) && $item->contact->invoiceAddress
-            ? $item->contact->invoiceAddress->email_primary
-            : $item->contact->mainAddress->email_primary;
+        $address = in_array('invoice', $documents) && $item->contact->invoiceAddress
+            ? $item->contact->invoiceAddress
+            : $item->contact->mainAddress;
+
+        $to = array_merge(
+            [$address->email_primary],
+            $address
+                ->contactOptions()
+                ->where('type', 'email')
+                ->pluck('value')
+                ->toArray()
+        );
 
         // add primary email address if more than just the invoice is added
         if (array_diff($documents, ['invoice'])) {

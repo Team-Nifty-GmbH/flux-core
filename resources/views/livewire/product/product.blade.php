@@ -29,14 +29,14 @@
             </div>
         </div>
         <div class="justify-stretch mt-6 flex flex-col-reverse space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3">
-            @canAction(\FluxErp\Actions\CartItem\CreateCartItem::class)
+            @if(resolve_static(\FluxErp\Actions\CartItem\CreateCartItem::class, 'canPerformAction', [false]) && ! $product->children_count > 0)
                 <x-button
                     x-on:click="$wire.$dispatch('cart:add', {products: $wire.product.id})"
                     primary
                     icon="shopping-cart"
                     label="+"
                 />
-            @endCanAction
+            @endif
             @canAction(\FluxErp\Actions\Product\DeleteProduct::class)
                 <x-button
                     negative

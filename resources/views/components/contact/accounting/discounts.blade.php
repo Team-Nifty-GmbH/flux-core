@@ -1,7 +1,7 @@
 <div class="flex flex-col gap-6">
-    <livewire:data-tables.contact-all-discounts-list
+    <livewire:contact.accounting.all-discounts
         :headline="__('Total Discounts')"
-        :contact-id="$this->contact->id"
+        wire:model="contact.id"
     />
     <div x-data="{
             get dataTableComponent() { return Alpine.$data($el.querySelector('[tall-datatable]')); },
@@ -42,7 +42,7 @@
                 <td colspan="100%">
                     <div class="p-4" x-collapse x-cloak x-show="showDetail">
                         <x-card>
-                            <x-table>
+                            <x-flux::table>
                                 <x-slot:header>
                                     <th class="text-left">
                                         {{ __('Type') }}
@@ -55,7 +55,7 @@
                                     </th>
                                 </x-slot:header>
                                 <template x-for="discount in discounts">
-                                    <x-table.row>
+                                    <x-flux::table.row>
                                         <td>
                                             <div x-text="discount.model_type"></div>
                                         </td>
@@ -65,39 +65,24 @@
                                         <td>
                                             <span x-html="discount.is_percentage ? window.formatters.percentage(discount.discount) : window.formatters.money(discount.discount)" />
                                         </td>
-                                    </x-table.row>
+                                    </x-flux::table.row>
                                 </template>
-                            </x-table>
+                            </x-flux::table>
                         </x-card>
                     </div>
                 </td>
             </tr>
             </tbody>
         </table>
-        <livewire:data-tables.discount-group-list
+        <livewire:contact.accounting.discount-groups
             :headline="__('Discount Groups')"
-            :enabled-cols="['name']"
-            :filters="[
-                'whereRelation' => [
-                    'column' => 'contact_discount_group.contact_id',
-                    'operator' => '=',
-                    'value' => $this->contact->id,
-                    'relation' => 'contacts',
-                ],
-            ]"
+            wire:model="contact.id"
         />
     </div>
     <div>
-        <livewire:data-tables.discount-list
+        <livewire:contact.accounting.discounts
+            wire:model="contact.id"
             :headline="__('Discounts')"
-            :filters="[
-                'whereRelation' => [
-                    'column' => 'contact_discount.contact_id',
-                    'operator' => '=',
-                    'value' => $this->contact->id,
-                    'relation' => 'contacts',
-                ],
-            ]"
         />
     </div>
     <div>

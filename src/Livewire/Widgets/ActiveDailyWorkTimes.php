@@ -24,9 +24,27 @@ class ActiveDailyWorkTimes extends ValueList
             ->with('user:id,name')
             ->get();
 
-        $this->items = $query->map(fn ($item) => [
+        $this->items = $query->map(fn (WorkTime $item) => [
             'id' => $item->id,
-            'label' => $item->user?->name,
+            'label' => '<div class="flex gap-1.5 items-center">' .
+                    (
+                        $item->user
+                            ->workTimes()
+                            ->where('is_daily_work_time', true)
+                            ->where('is_pause', true)
+                            ->where('is_locked', false)
+                            ->exists()
+                        ? '<span class="relative flex h-3 w-3">
+                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-warning-400 opacity-75"></span>
+                              <span class="relative inline-flex rounded-full h-3 w-3 bg-warning-500"></span>
+                           </span>'
+                        : '<span class="relative flex h-3 w-3">
+                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-positive-400 opacity-75"></span>
+                              <span class="relative inline-flex rounded-full h-3 w-3 bg-positive-500"></span>
+                           </span>'
+                    )
+                    . '<div>' . $item->user?->name . '</div>
+                </div>',
             'value' => $item->started_at
                 ->locale(app()->getLocale())
                 ->timezone(auth()->user()?->timezone ?? config('app.timezone'))

@@ -6,8 +6,10 @@ use Closure;
 use FluxErp\Facades\Action;
 use FluxErp\Facades\Widget;
 use FluxErp\Models\Permission;
+use FluxErp\Traits\HasModelPermission;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Console\Command;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Route;
 use Livewire\Mechanisms\ComponentRegistry;
@@ -32,6 +34,7 @@ class InitPermissions extends Command
         $this->currentPermissions = array_flip(app(Permission::class)->all('id')->pluck('id')->toArray());
 
         $this->registerActionPermission();
+        $this->registerModelGetPermission();
         $this->registerRoutePermissions();
         $this->registerWidgetPermissions();
         $this->registerTabPermissions();
@@ -66,7 +69,14 @@ class InitPermissions extends Command
 
             $guard = str_replace('auth:', '', $guard);
 
-            $permission = app(Permission::class)->findOrCreate($permissionName, $guard);
+            $permission = resolve_static(
+                Permission::class,
+                'findOrCreate',
+                [
+                    'name' => $permissionName,
+                    'guardName' => $guard,
+                ]
+            );
 
             unset($this->currentPermissions[$permission->id]);
 
@@ -77,7 +87,14 @@ class InitPermissions extends Command
                         continue;
                     }
 
-                    app(Permission::class)->findOrCreate($permissionName, $additionalGuard);
+                    resolve_static(
+                        Permission::class,
+                        'findOrCreate',
+                        [
+                            'name' => $permissionName,
+                            'guardName' => $additionalGuard,
+                        ]
+                    );
                 }
             }
 
@@ -87,7 +104,14 @@ class InitPermissions extends Command
         $bar->finish();
 
         foreach (array_keys(config('auth.guards')) as $guard) {
-            app(Role::class)->findOrCreate('Super Admin', $guard);
+            resolve_static(
+                Role::class,
+                'findOrCreate',
+                [
+                    'name' => 'Super Admin',
+                    'guardName' => $guard,
+                ]
+            );
         }
 
         $this->newLine();
@@ -99,8 +123,52 @@ class InitPermissions extends Command
         $this->info('Registering action permissions…');
         foreach (Action::all() as $action) {
             if ($action['class']::hasPermission()) {
-                $permission = app(Permission::class)->findOrCreate('action.' . $action['name'], 'web');
+                $permission = resolve_static(
+                    Permission::class,
+                    'findOrCreate',
+                    [
+                        'name' => 'action.' . $action['name'],
+                        'guardName' => 'web',
+                    ]
+                );
                 unset($this->currentPermissions[$permission->id]);
+            }
+        }
+    }
+
+    private function registerModelGetPermission(): void
+    {
+        $this->info('Registering model get permissions…');
+        $roles = resolve_static(Role::class, 'query')
+            ->where('guard_name', 'web')
+            ->get();
+        $newPermissions = [];
+
+        foreach (Relation::morphMap() as $alias => $class) {
+            if (in_array(HasModelPermission::class, class_uses_recursive($class))
+                && resolve_static($class, 'hasPermission')
+            ) {
+                $permission = resolve_static(
+                    Permission::class,
+                    'findOrCreate',
+                    [
+                        'name' => 'model.' . $alias . '.get',
+                        'guardName' => 'web',
+                    ]
+                );
+
+                if (is_null(data_get($this->currentPermissions, $permission->id))) {
+                    $newPermissions[] = $permission->getKey();
+                }
+
+                unset($this->currentPermissions[$permission->id]);
+            }
+        }
+
+        if ($newPermissions) {
+            foreach ($roles as $role) {
+                /** @var Role $role */
+                $role->givePermissionTo($newPermissions);
             }
         }
     }
@@ -109,9 +177,13 @@ class InitPermissions extends Command
     {
         $this->info('Registering widget permissions…');
         foreach (Widget::all() as $widget) {
-            $permission = app(Permission::class)->findOrCreate(
-                'widget.' . $widget['component_name'],
-                'web'
+            $permission = resolve_static(
+                Permission::class,
+                'findOrCreate',
+                [
+                    'name' => 'widget.' . $widget['component_name'],
+                    'guardName' => 'web',
+                ]
             );
             unset($this->currentPermissions[$permission->id]);
         }
@@ -129,7 +201,14 @@ class InitPermissions extends Command
             $componentInstance = new $component();
 
             foreach ($componentInstance->renderingWithTabs()->getTabsToRender() as $tab) {
-                $permission = app(Permission::class)->findOrCreate('tab.' . $tab->component, 'web');
+                $permission = resolve_static(
+                    Permission::class,
+                    'findOrCreate',
+                    [
+                        'name' => 'tab.' . $tab->component,
+                        'guardName' => 'web',
+                    ]
+                );
                 unset($this->currentPermissions[$permission->id]);
             }
         }
