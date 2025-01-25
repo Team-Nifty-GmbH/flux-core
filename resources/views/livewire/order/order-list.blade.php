@@ -1,5 +1,4 @@
 <div x-data="{
-        order: $wire.entangle('order'),
         updateContactId(id) {
             const modal = document.querySelector('[wireui-modal]');
             Alpine.$data(
@@ -153,7 +152,4 @@
         </x-card>
     </x-modal>
     {{ $this->renderCreateDocumentsModal() }}
-    <div wire:ignore>
-        @include('tall-datatables::livewire.data-table')
-    </div>
 </div>

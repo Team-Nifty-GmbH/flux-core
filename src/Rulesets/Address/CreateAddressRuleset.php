@@ -22,7 +22,7 @@ class CreateAddressRuleset extends FluxRuleset
         return [
             'uuid' => 'nullable|string|uuid|unique:addresses,uuid',
             'client_id' => [
-                'required',
+                'required_without:contact_id',
                 'integer',
                 app(ModelExists::class, ['model' => Client::class]),
             ],
