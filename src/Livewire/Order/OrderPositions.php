@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Order;
 
+use FluxErp\Actions\OrderPosition\CreateOrderPosition;
 use FluxErp\Actions\OrderPosition\DeleteOrderPosition;
 use FluxErp\Actions\OrderPosition\UpdateOrderPosition;
 use FluxErp\Actions\Task\CreateTask;
@@ -162,6 +163,12 @@ class OrderPositions extends OrderPositionList
                 ->xOnClick(<<<'JS'
                     $openModal('edit-position-discount');
                 JS),
+            DataTableButton::make()
+                ->label(__('Replicate'))
+                ->when(fn () => resolve_static(CreateOrderPosition::class, 'canPerformAction', [false])
+                    && ! $this->order->is_locked
+                )
+                ->wireClick('replicateSelected()'),
             DataTableButton::make()
                 ->label(__('Delete'))
                 ->icon('trash')
@@ -324,6 +331,30 @@ class OrderPositions extends OrderPositionList
     }
 
     #[Renderless]
+    public function replicateSelected(): void
+    {
+        $this->orderPosition->reset();
+        foreach ($this->getSelectedModelsQuery()
+            ->where('is_bundle_position', false)
+            ->get() as $orderPosition
+        ) {
+            $this->orderPosition->fill($orderPosition);
+            $this->orderPosition->reset(
+                'id',
+                'origin_position_id',
+                'parent_id',
+                'sort_number',
+                'slug_position',
+            );
+            $this->addOrderPosition(false);
+        }
+
+        $this->reset('selected');
+        $this->recalculateOrderTotals();
+        $this->loadData();
+    }
+
+    #[Renderless]
     public function changedProductId(Product $product): void
     {
         $priceList = $this->orderPosition->price_list_id
@@ -349,7 +380,7 @@ class OrderPositions extends OrderPositionList
     }
 
     #[Renderless]
-    public function addOrderPosition(): bool
+    public function addOrderPosition(bool $reload = true): bool
     {
         $this->orderPosition->order_id = $this->order->id;
 
@@ -361,8 +392,11 @@ class OrderPositions extends OrderPositionList
             return false;
         }
 
-        $this->recalculateOrderTotals();
-        $this->loadData();
+        if ($reload) {
+            $this->recalculateOrderTotals();
+            $this->loadData();
+        }
+
         $this->orderPosition->reset();
 
         return true;
