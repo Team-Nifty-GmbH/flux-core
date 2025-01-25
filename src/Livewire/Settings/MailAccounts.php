@@ -13,6 +13,7 @@ use FluxErp\Livewire\Forms\MailFolderForm;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -161,6 +162,7 @@ class MailAccounts extends MailAccountList
         return true;
     }
 
+    #[Renderless]
     public function testImapConnection(): void
     {
         try {
@@ -180,6 +182,7 @@ class MailAccounts extends MailAccountList
         }
     }
 
+    #[Renderless]
     public function testSmtpConnection(): void
     {
         try {
@@ -191,6 +194,22 @@ class MailAccounts extends MailAccountList
         ) {
             exception_to_notifications($e, $this);
         }
+    }
+
+    #[Renderless]
+    public function sendTestMail(?string $to = null): void
+    {
+        try {
+            Validator::make(['to' => $to], ['to' => 'required|email'])->validate();
+            $this->mailAccount->sendTestMail($to);
+
+            $this->notification()->success(__('Test mail sent'));
+        } catch (
+            ValidationException|TransportExceptionInterface $e
+        ) {
+            exception_to_notifications($e, $this);
+        }
+
     }
 
     protected function loadFolders(): void

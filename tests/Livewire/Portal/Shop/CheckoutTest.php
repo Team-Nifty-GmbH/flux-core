@@ -13,11 +13,8 @@ use FluxErp\Models\PriceList;
 use FluxErp\Tests\Livewire\BaseSetup;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
-use Symfony\Component\Mailer\Transport\Smtp\SmtpTransport;
 
 class CheckoutTest extends BaseSetup
 {
