@@ -259,7 +259,7 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
      */
     public function getAvatarUrl(): ?string
     {
-        return $this->getFirstMediaUrl('avatar', 'thumb') ?: self::icon()->getUrl();
+        return $this->getFirstMediaUrl('avatar', 'thumb') ?: static::icon()->getUrl();
     }
 
     public function getPrintViews(): array

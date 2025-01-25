@@ -133,7 +133,13 @@ class UpdateOrderPosition extends FluxAction
             $errors = [];
             $orderPosition = resolve_static(OrderPosition::class, 'query')
                 ->whereKey($this->data['id'])
-                ->with('order:id,is_locked')
+                ->with([
+                    'order:id,order_type_id,is_locked',
+                    'order.orderType:id,order_type_enum',
+                    'origin:id,order_id,amount',
+                    'origin.order:id,order_type_id',
+                    'origin.order.orderType:id,order_type_enum',
+                ])
                 ->first();
 
             if ($orderPosition->order->is_locked) {
@@ -171,7 +177,10 @@ class UpdateOrderPosition extends FluxAction
 
             // If order position has origin_position_id or is their parent, validate amount
             if (! data_get($this->data, 'is_free_text', $orderPosition->is_free_text)) {
-                if ($orderPosition->origin_position_id) {
+                if (
+                    $orderPosition->origin_position_id
+                    && ! $orderPosition->origin->order->orderType->order_type_enum->isSubscription()
+                ) {
                     $maxAmount = bcsub(
                         $orderPosition->origin->amount,
                         $orderPosition->siblings()
@@ -188,7 +197,10 @@ class UpdateOrderPosition extends FluxAction
                     }
                 }
 
-                if ($orderPosition->descendants()->exists()) {
+                if (
+                    $orderPosition->descendants()->exists()
+                    && ! $orderPosition->order->orderType->order_type_enum->isSubscription()
+                ) {
                     $minAmount = $orderPosition->descendants()->sum('amount');
 
                     if (bccomp($minAmount, data_get($this->data, 'amount', $orderPosition->amount)) > 0) {

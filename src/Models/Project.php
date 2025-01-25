@@ -15,6 +15,7 @@ use FluxErp\Traits\HasSerialNumberRange;
 use FluxErp\Traits\HasTags;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
+use FluxErp\Traits\InteractsWithMedia;
 use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SoftDeletes;
@@ -23,14 +24,15 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
+use Spatie\MediaLibrary\HasMedia;
 use Spatie\ModelStates\HasStates;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 
-class Project extends FluxModel implements Calendarable, InteractsWithDataTables
+class Project extends FluxModel implements Calendarable, HasMedia, InteractsWithDataTables
 {
-    use Commentable, Filterable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes,
-        HasPackageFactory, HasSerialNumberRange, HasStates, HasTags, HasUserModification, HasUuid, LogsActivity,
+    use Commentable, Filterable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes, HasPackageFactory,
+        HasSerialNumberRange, HasStates, HasTags, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity,
         Searchable, SoftDeletes;
 
     protected $guarded = [
@@ -38,6 +40,8 @@ class Project extends FluxModel implements Calendarable, InteractsWithDataTables
     ];
 
     protected ?string $detailRouteName = 'projects.id';
+
+    protected static string $iconName = 'briefcase';
 
     protected static function booted(): void
     {
@@ -110,7 +114,9 @@ class Project extends FluxModel implements Calendarable, InteractsWithDataTables
 
     public function getAvatarUrl(): ?string
     {
-        return null;
+        return $this->getFirstMediaUrl('avatar', 'thumb')
+            ?: $this->contact?->getFirstMediaUrl('avatar', 'thumb')
+            ?: static::icon()->getUrl();
     }
 
     public function calculateProgress(): void

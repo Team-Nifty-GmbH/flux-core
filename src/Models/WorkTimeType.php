@@ -22,4 +22,9 @@ class WorkTimeType extends FluxModel
             'is_billable' => 'boolean',
         ];
     }
+
+    protected function broadcastToEveryone(): bool
+    {
+        return true;
+    }
 }
