@@ -166,6 +166,9 @@ class OrderForm extends FluxForm
     #[Locked]
     public bool $hasContactDeliveryLock = false;
 
+    #[Locked]
+    public ?string $avatarUrl = null;
+
     protected PriceList $priceList;
 
     protected function getActions(): array
@@ -185,6 +188,7 @@ class OrderForm extends FluxForm
                 'parent',
                 'orderType:id,order_type_enum',
                 'contact:id,has_delivery_lock',
+                'contact.media' => fn (MorphMany $query) => $query->where('collection_name', 'avatar'),
                 'currency:id,symbol',
                 'discounts' => fn (MorphMany $query) => $query->ordered()
                     ->select([
@@ -198,6 +202,9 @@ class OrderForm extends FluxForm
                         'order_column',
                         'is_percentage',
                     ]),
+                'orderType:id,name,order_type_enum',
+                'priceList:id,name,is_net',
+                'users:id,name',
             ]);
             $values = array_merge(
                 $values->toArray(),
@@ -211,6 +218,7 @@ class OrderForm extends FluxForm
                     : [],
                 [
                     'isPurchase' => $values->orderType->order_type_enum->isPurchase(),
+                    'avatarUrl' => $values->contact->getFirstMediaUrl('avatar'),
                 ],
             );
         }

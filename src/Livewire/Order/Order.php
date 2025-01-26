@@ -661,11 +661,11 @@ class Order extends Component
                     ]),
                 'orderType:id,name,mail_subject,mail_body,print_layouts,order_type_enum',
                 'priceList:id,name,is_net',
+                'users:id,name',
             ])
             ->firstOrFail();
 
         $this->order->fill($order);
-        data_set($this->order, 'contact.avatar_url', $order->contact->getFirstMediaUrl('avatar'));
 
         $this->order->users = $order->users->pluck('id')->toArray();
 
