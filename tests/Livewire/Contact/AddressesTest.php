@@ -105,4 +105,20 @@ class AddressesTest extends BaseSetup
             ]
         );
     }
+
+    public function test_replicate_address()
+    {
+        $component = Livewire::actingAs($this->user)
+            ->test(Addresses::class, ['contact' => $this->contactForm, 'address' => $this->addressForm])
+            ->call('replicate')
+            ->assertStatus(200)
+            ->assertHasNoErrors()
+            ->set('address.lastname', $lastname = Str::uuid())
+            ->call('save')
+            ->assertStatus(200)
+            ->assertHasNoErrors();
+
+        $this->assertGreaterThan($this->addressForm->id, $component->get('address.id'));
+        $this->assertDatabaseHas('addresses', ['lastname' => $lastname]);
+    }
 }

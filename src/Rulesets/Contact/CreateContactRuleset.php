@@ -91,6 +91,8 @@ class CreateContactRuleset extends FluxRuleset
             'credit_line' => 'sometimes|numeric|min:0|nullable',
             'vat_id' => 'sometimes|string|nullable',
             'vendor_customer_number' => 'sometimes|string|nullable',
+            'header' => 'string|nullable',
+            'footer' => 'string|nullable',
             'has_sensitive_reminder' => 'sometimes|boolean',
             'has_delivery_lock' => 'sometimes|boolean',
         ];

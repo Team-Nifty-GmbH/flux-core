@@ -6,6 +6,7 @@ use FluxErp\Actions\ContactOption\CreateContactOption;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Address;
 use FluxErp\Models\AddressType;
+use FluxErp\Models\Contact;
 use FluxErp\Models\Country;
 use FluxErp\Models\Tag;
 use FluxErp\Rulesets\Address\CreateAddressRuleset;
@@ -58,8 +59,6 @@ class CreateAddress extends FluxAction
         }
 
         $contactOptions = Arr::pull($this->data, 'contact_options', []);
-        $this->data['country_id'] ??= Country::default()?->id;
-        $this->data['has_formal_salutation'] ??= config('flux.formal_salutation', true);
 
         $address = app(Address::class, ['attributes' => $this->data]);
         $address->save();
@@ -101,12 +100,17 @@ class CreateAddress extends FluxAction
 
     protected function prepareForValidation(): void
     {
+        $this->data['country_id'] ??= Country::default()?->id;
         $this->data['email_primary'] = is_string($this->getData('email_primary'))
             ? Str::between($this->getData('email_primary'), '<', '>')
             : null;
         $this->data['email'] = is_string($this->getData('email'))
             ? Str::between($this->getData('email'), '<', '>')
             : null;
+        $this->data['has_formal_salutation'] ??= config('flux.formal_salutation', true);
+        $this->data['client_id'] ??= resolve_static(Contact::class, 'query')
+            ->whereKey($this->getData('contact_id'))
+            ->value('client_id');
     }
 
     protected function validateData(): void

@@ -1,6 +1,18 @@
 <div x-data="{
     address: $wire.entangle('address', true),
     formatter: @js(resolve_static(\FluxErp\Models\Address::class, 'typeScriptAttributes')),
+    hrefFromContactOption(type, value) {
+        switch (type) {
+            case 'phone':
+                return 'tel:' + value;
+            case 'email':
+                return 'mailto:' + value;
+            case 'website':
+                return value;
+            default:
+                return '#';
+        }
+    }
 }">
     @if(! $withoutHeader)
         <x-slot:header>
@@ -79,14 +91,30 @@
         <a x-bind:href="'tel:' + address.phone" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px" x-text="address.phone">
         </a>
         <x-label>
+            {{ __('Phone Mobile') }}
+        </x-label>
+        <a x-bind:href="'tel:' + address.phone_mobile" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px" x-text="address.phone_mobile">
+        </a>
+        <x-label>
             {{ __('E-mail') }}
         </x-label>
-        <a x-bind:href="'mailto:' + address.email" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px" x-text="address.email">
+        <a x-bind:href="'mailto:' + address.email_primary" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px" x-text="address.email_primary">
         </a>
         <x-label>
             {{ __('Website') }}
         </x-label>
-        <a x-bind:href="address.website" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px" x-text="address.website">
+        <a x-bind:href="address.url" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px" x-text="address.url">
         </a>
+    </div>
+    <div class="pt-2 flex flex-col gap-2">
+        <template x-for="contactOption in address.contact_options" :key="contactOption.id">
+            <div class="grid grid-cols-2 gap-2">
+                <x-label>
+                    <span x-text="contactOption.label"></span>
+                </x-label>
+                <a x-bind:href="hrefFromContactOption(contactOption.type, contactOption.value)" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px" x-text="contactOption.value">
+                </a>
+            </div>
+        </template>
     </div>
 </div>

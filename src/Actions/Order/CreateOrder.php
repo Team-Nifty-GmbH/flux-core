@@ -112,6 +112,8 @@ class CreateOrder extends FluxAction
             return;
         }
 
+        $this->data['header'] ??= $contact->header;
+        $this->data['footer'] ??= $contact->footer;
         $this->data['payment_type_id'] = $this->data['payment_type_id']
             ?? $contact->payment_type_id
             ?? PaymentType::default()?->id;
