@@ -45,7 +45,9 @@ class UpdatePriceList extends FluxAction
                         'model_id' => $priceList->id,
                     ]
                 )
-            )->execute();
+            )
+                ->validate()
+                ->execute();
         } elseif ($hasDiscount && $priceList->discount) {
             // Update existing discount
             UpdateDiscount::make(
@@ -53,10 +55,14 @@ class UpdatePriceList extends FluxAction
                     $priceList->discount->toArray(),
                     $this->data['discount']
                 )
-            );
+            )
+                ->validate()
+                ->execute();
         } elseif ($priceList->discount && ! $hasDiscount) {
             // Delete existing discount
-            DeleteDiscount::make(['id' => $priceList->discount->id])->execute();
+            DeleteDiscount::make(['id' => $priceList->discount->id])
+                ->validate()
+                ->execute();
         }
 
         return $priceList->withoutRelations()->fresh($hasDiscount ? ['discount'] : []);
