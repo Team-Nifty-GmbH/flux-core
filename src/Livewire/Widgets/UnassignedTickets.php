@@ -4,13 +4,12 @@ namespace FluxErp\Livewire\Widgets;
 
 use FluxErp\Models\Ticket;
 use FluxErp\States\Ticket\TicketState;
-use FluxErp\Traits\Livewire\RemembersEventListeners;
 use FluxErp\Traits\Widgetable;
 use Illuminate\Database\Eloquent\Collection;
 
 class UnassignedTickets extends MyTickets
 {
-    use RemembersEventListeners, Widgetable;
+    use Widgetable;
 
     protected function getListeners(): array
     {
