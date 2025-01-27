@@ -29,7 +29,9 @@ class BaseSetup extends TestCase
         $this->withoutVite();
 
         $this->dbClient = Client::factory()->create(['is_default' => true]);
-        $this->defaultLanguage = Language::query()->where('language_code', config('app.locale'))->first()
+        $this->defaultLanguage = Language::query()
+            ->where('language_code', config('app.locale'))
+            ->first()
             ?? Language::factory()->create(['language_code' => config('app.locale')]);
 
         if (str_starts_with(get_called_class(), 'FluxErp\\Tests\\Livewire\\Portal\\')) {

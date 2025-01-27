@@ -9,7 +9,7 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::table('contacts', function (Blueprint $table) {
-            $table->text('header')->nullable()->after('vat_id');
+            $table->text('header')->nullable()->after('vendor_customer_number');
             $table->text('footer')->nullable()->after('header');
         });
     }
