@@ -206,6 +206,7 @@ class OrderForm extends FluxForm
                 'priceList:id,name,is_net',
                 'users:id,name',
             ]);
+
             $values = array_merge(
                 $values->toArray(),
                 $values->parent

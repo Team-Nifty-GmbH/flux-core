@@ -200,16 +200,17 @@ class MailAccounts extends MailAccountList
     public function sendTestMail(?string $to = null): void
     {
         try {
-            Validator::make(['to' => $to], ['to' => 'required|email'])->validate();
+            if (! is_null($to)) {
+                Validator::make(['to' => $to], ['to' => 'required|email'])
+                    ->validate();
+            }
+
             $this->mailAccount->sendTestMail($to);
 
             $this->notification()->success(__('Test mail sent'));
-        } catch (
-            ValidationException|TransportExceptionInterface $e
-        ) {
+        } catch (ValidationException|TransportExceptionInterface $e) {
             exception_to_notifications($e, $this);
         }
-
     }
 
     protected function loadFolders(): void
