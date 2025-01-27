@@ -16,13 +16,18 @@ class MyTickets extends Component
 
     protected ?Collection $tickets = null;
 
+    public ?array $rememberedEventListeners = null;
+
     protected function getListeners(): array
     {
-        return $this->getTickets()
-            ->mapWithKeys(fn (Ticket $ticket, int $key) => [
-                'echo-private:' . $ticket->broadcastChannel() . ',.TicketUpdated' => '$refresh',
-            ])
-            ->toArray() ?? [];
+        return $this->rememberedEventListeners = array_merge(
+            $this->rememberedEventListeners ?? [],
+            $this->getTickets()
+                ->mapWithKeys(fn (Ticket $ticket, int $key) => [
+                    'echo-private:' . $ticket->broadcastChannel() . ',.TicketUpdated' => '$refresh',
+                ])
+                ->toArray() ?? []
+        );
     }
 
     public function render(): View|Factory

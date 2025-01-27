@@ -4,16 +4,18 @@ namespace FluxErp\Livewire\Widgets;
 
 use FluxErp\Models\Ticket;
 use FluxErp\States\Ticket\TicketState;
+use FluxErp\Traits\Livewire\RemembersEventListeners;
 use FluxErp\Traits\Widgetable;
 use Illuminate\Database\Eloquent\Collection;
 
 class UnassignedTickets extends MyTickets
 {
-    use Widgetable;
+    use RemembersEventListeners, Widgetable;
 
     protected function getListeners(): array
     {
-        return array_merge(
+        return $this->rememberedEventListeners = array_merge(
+            $this->rememberedEventListeners ?? [],
             [
                 'echo-private:' . resolve_static(Ticket::class, 'getBroadcastChannel')
                     . ',.TicketCreated' => '$refresh',
