@@ -31,10 +31,6 @@ class CreateAddress extends FluxAction
     {
         $tags = Arr::pull($this->data, 'tags');
 
-        $this->data['client_id'] ??= resolve_static(Contact::class, 'query')
-            ->whereKey($this->getData('contact_id'))
-            ->value('client_id');
-
         if (! data_get($this->data, 'is_main_address', false)
             && ! resolve_static(Address::class, 'query')
                 ->where('contact_id', $this->data['contact_id'])
@@ -112,6 +108,9 @@ class CreateAddress extends FluxAction
             ? Str::between($this->getData('email'), '<', '>')
             : null;
         $this->data['has_formal_salutation'] ??= config('flux.formal_salutation', true);
+        $this->data['client_id'] ??= resolve_static(Contact::class, 'query')
+            ->whereKey($this->getData('contact_id'))
+            ->value('client_id');
     }
 
     protected function validateData(): void
