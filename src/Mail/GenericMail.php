@@ -38,11 +38,7 @@ class GenericMail extends Mailable
             ? resolve_static(Client::class, 'query')
                 ->whereKey(data_get($this->mailMessageForm, 'client_id'))
                 ->first()
-            : (
-                $this->mailMessageForm instanceof CommunicationForm
-                    ? $this->mailMessageForm->communicatable()?->client
-                    : Client::default()
-            );
+            : Client::default();
 
         $this->mailMessageForm = $this->mailMessageForm instanceof Arrayable
             ? $this->mailMessageForm->toArray()
