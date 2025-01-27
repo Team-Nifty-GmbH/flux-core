@@ -49,6 +49,24 @@ trait BroadcastsEvents
         return parent::broadcastChannel();
     }
 
+    protected function newBroadcastableEvent(string $event): BroadcastableModelEventOccurred
+    {
+        $event = new BroadcastableModelEventOccurred($this, $event);
+
+        if ($this->broadcastToEveryone()) {
+            $event->broadcastToEveryone();
+        } else {
+            $event->dontBroadcastToCurrentUser();
+        }
+
+        return $event;
+    }
+
+    protected function broadcastToEveryone(): bool
+    {
+        return false;
+    }
+
     public function broadcastWith(): array
     {
         return static::getBroadcastOnlyKey() && method_exists($this, 'getKey')

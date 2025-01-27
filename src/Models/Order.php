@@ -707,7 +707,7 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
      */
     public function getAvatarUrl(): ?string
     {
-        return $this->contact?->getAvatarUrl() ?: self::icon()->getUrl();
+        return $this->contact?->getAvatarUrl() ?: static::icon()->getUrl();
     }
 
     public function getPortalDetailRoute(): string

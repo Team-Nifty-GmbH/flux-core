@@ -42,8 +42,18 @@ enum OrderTypeEnum: string
         return self::getIsPurchase($this);
     }
 
+    public function isSubscription(): bool
+    {
+        return self::getIsSubscription($this);
+    }
+
     public static function getIsPurchase(self $value): bool
     {
         return in_array($value, [self::Purchase, self::PurchaseRefund, self::PurchaseSubscription]);
+    }
+
+    public static function getIsSubscription(self $value): bool
+    {
+        return in_array($value, [self::Subscription, self::PurchaseSubscription]);
     }
 }

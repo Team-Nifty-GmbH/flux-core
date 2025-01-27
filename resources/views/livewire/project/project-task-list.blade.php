@@ -38,7 +38,7 @@
             </x-card>
         </x-modal>
     </div>
-    <div wire:ignore x-on:data-table-row-clicked="$wire.fillForm($event.detail.id)">
+    <div wire:ignore x-on:data-table-row-clicked="$wire.edit($event.detail.id)">
         @include('tall-datatables::livewire.data-table')
     </div>
 </div>

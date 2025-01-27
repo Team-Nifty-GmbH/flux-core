@@ -163,7 +163,7 @@ class Contact extends Component
             $this->saveFileUploadsToMediaLibrary(
                 'avatar',
                 $this->contact->id,
-                app(ContactModel::class)->getMorphClass()
+                morph_alias(ContactModel::class)
             );
         } catch (\Exception $e) {
             exception_to_notifications($e, $this);

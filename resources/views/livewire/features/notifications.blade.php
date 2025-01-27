@@ -14,11 +14,8 @@
          x-on:keydown.escape="$wire.showNotifications = false"
          x-on:click.away="$wire.showNotifications = false"
     >
-        <div>
-            <x-button.circle
-                primary
-                icon="bell"
-                x-on:click="
+        <div
+            x-on:click="
                 $wire.getNotification().then(
                     result => {
                         result.forEach(
@@ -29,6 +26,10 @@
                     }
                 )});
                 $wire.showNotifications = true;"
+        >
+            <x-button.circle
+                primary
+                icon="bell"
             />
             <div class="z-10 -mt-11 pl-5" x-cloak x-transition x-show="$wire.unread">
                 <x-button rounded 2xs negative >

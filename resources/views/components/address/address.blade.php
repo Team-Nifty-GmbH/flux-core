@@ -24,7 +24,7 @@
                 <x-checkbox :label="__('Formal salutation')" x-bind:disabled="!$wire.edit" wire:model="address.has_formal_salutation"/>
             </div>
         </div>
-        <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+        <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2" x-bind:class="!$wire.edit && 'pointer-events-none'">
             <x-label :label="__('Salutation')" for="{{ md5('address.salutation') }}" />
             <div class="col-span-2 w-full">
                 <x-select
@@ -188,18 +188,19 @@
                     </div>
                 </div>
             @show
-            <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+            <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2" x-bind:class="!$wire.edit && 'pointer-events-none'">
                 <x-label :label="__('Language')" for="{{ md5('address.language_id') }}" />
                 <div class="col-span-2">
-                    <x-select x-bind:disabled="!$wire.edit"
-                              wire:model="address.language_id"
-                              searchable
-                              :options="$languages"
-                              option-key-value
+                    <x-select
+                        x-bind:disabled="!$wire.edit"
+                        wire:model="address.language_id"
+                        searchable
+                        :options="$languages"
+                        option-key-value
                     />
                 </div>
             </div>
-            <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+            <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2" x-bind:class="!$wire.edit && 'pointer-events-none'">
                 <x-label :label="__('Tags')" for="{{ md5('address.tags') }}" />
                 <div class="col-span-2">
                     <x-select
@@ -231,7 +232,7 @@
                     </x-select>
                 </div>
             </div>
-            <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+            <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2" x-bind:class="!$wire.edit && 'pointer-events-none'">
                 <x-label :label="__('Advertising State')" for="{{ md5('address.advertising_state') }}" />
                 <div class="col-span-2">
                     <x-flux::state
