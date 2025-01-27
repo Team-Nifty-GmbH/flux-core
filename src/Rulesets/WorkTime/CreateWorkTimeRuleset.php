@@ -53,7 +53,7 @@ class CreateWorkTimeRuleset extends FluxRuleset
                 'integer',
                 app(MorphExists::class, ['modelAttribute' => 'trackable_type']),
             ],
-            'started_at' => 'required_with:ended_at|nullable|date_format:Y-m-d H:i:s|before:now',
+            'started_at' => 'required_with:ended_at|nullable|date_format:Y-m-d H:i:s|before_or_equal:now',
             'ended_at' => 'nullable|date_format:Y-m-d H:i:s|after:started_at',
             'name' => 'required_unless:is_daily_work_time,true|string|nullable',
             'description' => 'string|nullable',
