@@ -24,19 +24,20 @@ class UpdateLockedWorkTime extends FluxAction
     public function performAction(): Model
     {
         $workTime = resolve_static(WorkTime::class, 'query')
-            ->whereKey($this->data['id'])
+            ->whereKey($this->getData('id'))
             ->first();
 
         $workTime->fill($this->data);
 
         if (array_key_exists('ended_at', $this->data)) {
-            if (! data_get($this->data, 'ended_at')) {
+            if (! $this->getData('ended_at')) {
                 $workTime->total_time_ms = 0;
                 $workTime->is_locked = false;
             } else {
                 $workTime->total_time_ms = bcsub(
-                    Carbon::parse($this->data['ended_at'])->diffInMilliseconds(Carbon::parse($workTime->started_at)),
-                    $workTime->paused_time_ms,
+                    Carbon::parse($workTime->started_at)
+                        ->diffInMilliseconds(Carbon::parse($this->getData('ended_at'))),
+                    $workTime->paused_time_ms ?? 0,
                     0
                 );
 
@@ -55,15 +56,17 @@ class UpdateLockedWorkTime extends FluxAction
     {
         parent::validateData();
 
-        if ($endedAt = data_get($this->data, 'ended_at')) {
+        if ($endedAt = $this->getData('ended_at')) {
             $workTime = resolve_static(WorkTime::class, 'query')
-                ->whereKey($this->data['id'])
+                ->whereKey($this->getData('id'))
                 ->first();
 
-            $totalTimeMs = Carbon::parse($endedAt)->diffInMilliseconds(Carbon::parse($this->data['started_at']))
-                - data_get($this->data, 'paused_time_ms', $workTime->paused_time_ms);
+            $totalTimeMs = bcsub(
+                Carbon::parse($this->getData('started_at'))->diffInMilliseconds(Carbon::parse($endedAt)),
+                $this->getData('paused_time_ms', $workTime->paused_time_ms ?? 0),
+            );
 
-            if ($totalTimeMs < 0) {
+            if (bccomp($totalTimeMs, 0) === -1) {
                 throw ValidationException::withMessages([
                     'paused_time_ms' => [__('Pause can not be longer than time between started_at and ended_at.')],
                 ])->errorBag('updateLockedWorkTime');

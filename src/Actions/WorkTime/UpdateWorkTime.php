@@ -88,7 +88,7 @@ class UpdateWorkTime extends FluxAction
             $workTime->total_time_ms =
                 bcsub(
                     $workTime->started_at->diffInMilliseconds($workTime->ended_at),
-                    $workTime->paused_time_ms,
+                    $workTime->paused_time_ms ?? 0,
                     0
                 );
 
