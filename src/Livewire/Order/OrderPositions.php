@@ -293,8 +293,9 @@ class OrderPositions extends OrderPositionList
             // check if the task already exists or the selected order position is not a numeric value
             if (resolve_static(Task::class, 'query')
                 ->where('project_id', $projectId)
-                ->where('model_type', morph_alias(OrderPosition::class))
-                ->where('model_id', $orderPosition->getKey())
+                ->where('order_position_id', $modelId = $orderPosition->getKey())
+                ->where('model_type', $modelType = $orderPosition->getMorphClass())
+                ->where('model_id', $modelId)
                 ->exists()
             ) {
                 continue;
@@ -303,8 +304,9 @@ class OrderPositions extends OrderPositionList
             try {
                 CreateTask::make([
                     'project_id' => $projectId,
-                    'model_type' => morph_alias(OrderPosition::class),
-                    'model_id' => $orderPosition->getKey(),
+                    'order_position_id' => $modelId,
+                    'model_type' => $modelType,
+                    'model_id' => $modelId,
                     'name' => $orderPosition->name,
                     'description' => $orderPosition->description,
                 ])
