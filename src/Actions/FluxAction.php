@@ -224,9 +224,13 @@ abstract class FluxAction
         }
 
         $current = null;
-        if ($this->getActingAs()) {
+        if ($this->getActingAs()?->isNot(auth()->user())) {
             $current = auth()->user();
-            auth()->setUser($this->getActingAs());
+            if ($this->getActingAs()) {
+                auth()->setUser($this->getActingAs());
+            } else {
+                auth()->logout();
+            }
         }
 
         DB::transaction(function () {
@@ -234,7 +238,7 @@ abstract class FluxAction
         });
 
         if ($current) {
-            auth()->setUser($current);
+            auth()->login($current);
         }
 
         $this->fireActionEvent(event: 'executed', halt: false);

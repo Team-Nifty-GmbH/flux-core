@@ -6,17 +6,18 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\MailMessage\CreateMailMessage;
 use FluxErp\Listeners\MailMessage\CreateMailExecutedSubscriber;
 use FluxErp\Models\Address;
+use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Ticket;
-use FluxErp\Tests\Unit\BaseSetup;
+use FluxErp\Tests\TestCase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Str;
 
-class CreateMailMessageTest extends BaseSetup
+class CreateMailMessageTest extends TestCase
 {
     private Address $address;
 
@@ -26,11 +27,13 @@ class CreateMailMessageTest extends BaseSetup
     {
         parent::setUp();
 
+        $dbClient = Client::factory()->create(['is_default' => true]);
+
         $this->address = Contact::factory()
-            ->has(Address::factory()->for($this->dbClient))
+            ->has(Address::factory()->for($dbClient))
             ->for(PriceList::factory())
-            ->for(PaymentType::factory()->hasAttached($this->dbClient))
-            ->for($this->dbClient)
+            ->for(PaymentType::factory()->hasAttached($dbClient))
+            ->for($dbClient)
             ->create()
             ->addresses()
             ->first();
@@ -40,7 +43,7 @@ class CreateMailMessageTest extends BaseSetup
             ->create();
     }
 
-    public function test_creates_ticket()
+    public function test_create_ticket_from_mail_message()
     {
         $dispatcher = Event::fake('action.executed: ' . CreateMailMessage::class);
         FluxAction::setEventDispatcher($dispatcher);
@@ -75,7 +78,7 @@ class CreateMailMessageTest extends BaseSetup
         $this->assertTrue($result->communications()->where('communications.id', $result->id)->exists());
     }
 
-    public function test_creates_ticket_comment()
+    public function test_creates_ticket_comment_from_mail_message()
     {
         $dispatcher = Event::fake('action.executed: ' . CreateMailMessage::class);
         FluxAction::setEventDispatcher($dispatcher);
