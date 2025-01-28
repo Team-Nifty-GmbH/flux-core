@@ -25,20 +25,12 @@
     <div class="justify-end mt-6 flex flex-col-reverse space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3">
         @section('buttons')
             @if(resolve_static(\FluxErp\Actions\Ticket\DeleteTicket::class, 'canPerformAction', [false]) && $ticket['id'])
-                <x-button negative label="{{ __('Delete') }}" x-on:click="
-                            window.$wireui.confirmDialog({
-                                title: '{{ __('Delete ticket') }}',
-                                description: '{{ __('Do you really want to delete this ticket?') }}',
-                                icon: 'error',
-                                accept: {
-                                    label: '{{ __('Delete') }}',
-                                    method: 'delete',
-                                },
-                                reject: {
-                                    label: '{{ __('Cancel') }}',
-                                }
-                            }, $wire.__instance.id)
-                        "/>
+                <x-button
+                    negative
+                    label="{{ __('Delete') }}"
+                    wire:click="delete()"
+                    wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Ticket')]) }}"
+                />
             @endif
             <x-button primary :label="__('Save')" wire:click="save"/>
         @show
@@ -50,8 +42,11 @@
                     <div class="flex-1">
                         <div class="space-y-5 dark:text-gray-50">
                             <x-card class="space-y-4">
-                                <x-input :label="__('Title')" wire:model="ticket.title" :disabled="true"/>
-                                <x-textarea :label="__('Description')" wire:model="ticket.description" :disabled="true"/>
+                                <x-input :label="__('Title')" wire:model="ticket.title" />
+                                <x-flux::editor
+                                    :label="__('Description')"
+                                    wire:model="ticket.description"
+                                />
                             </x-card>
                             <div x-cloak x-show="additionalColumns?.length > 0">
                                 <x-card>
@@ -70,7 +65,7 @@
                                                         x-html="additionalColumn.label ? additionalColumn.label : additionalColumn.name"
                                                         x-bind:for="additionalColumn.name"
                                                     />
-                                                    <x-input x-bind:class="(additionalColumn.field_type === 'color' || additionalColumn.field_type === 'checkbox') && '!w-auto'" x-bind:type="additionalColumn.field_type" x-model="ticket[additionalColumn.name]" :disabled="true"/>
+                                                    <x-input x-bind:class="(additionalColumn.field_type === 'color' || additionalColumn.field_type === 'checkbox') && '!w-auto'" x-bind:type="additionalColumn.field_type" x-model="ticket[additionalColumn.name]" />
                                                 </div>
                                             </template>
                                         </div>

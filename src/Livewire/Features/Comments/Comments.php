@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Modelable;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -27,6 +28,7 @@ class Comments extends Component
     /** @var Model $this->modelType */
     public string $modelType = '';
 
+    #[Modelable]
     public int $modelId = 0;
 
     /**

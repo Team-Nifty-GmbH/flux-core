@@ -48,12 +48,17 @@ class CreateMailExecutedSubscriber
             $id = $matches[2];
 
             try {
-                CreateComment::make([
+                $comment = CreateComment::make([
                     'model_type' => $model,
                     'model_id' => $id,
-                    'comment' => $message->text_body ?? $message->html_body ?? $message->subject,
+                    'comment' => nl2br($message->text_body ?? '') ?: $message->html_body ?? $message->subject,
                     'is_internal' => false,
-                ])->validate()->execute();
+                ])
+                    ->actingAs($this->address)
+                    ->validate()
+                    ->execute();
+
+                $comment->model->communications()->attach($message->getKey());
             } catch (\Throwable) {
             }
         } elseif ($message->mailFolder->can_create_ticket) {
@@ -74,19 +79,27 @@ class CreateMailExecutedSubscriber
 
         foreach ($message->getMedia('attachments') as $attachment) {
             try {
-                CreatePurchaseInvoice::make([
+                $purchaseInvoice = CreatePurchaseInvoice::make([
                     'client_id' => $contact?->client_id ?? Client::default()->id,
                     'contact_id' => $contact?->id,
                     'currency_id' => $contact?->currency_id ?? Currency::default()->id,
                     'payment_type_id' => $contact?->purchase_payment_type_id ?? $contact?->payment_type_id,
                     'invoice_date' => $message->date->toDateString(),
-
                     'media' => [
                         'id' => $attachment->id,
                     ],
-                ])->validate()->execute();
+                ])
+                    ->when(
+                        $this->address,
+                        fn (CreatePurchaseInvoice $action) => $action->actingAs($this->address)
+                    )
+                    ->validate()
+                    ->execute();
             } catch (\Throwable) {
+                continue;
             }
+
+            $purchaseInvoice->communications()->attach($message->getKey());
         }
     }
 
@@ -105,6 +118,7 @@ class CreateMailExecutedSubscriber
                 'title' => $communication->subject,
                 'description' => $communication->text_body ?? $communication->html_body,
             ])
+                ->actingAs($this->address)
                 ->validate()
                 ->execute();
         } catch (ValidationException) {

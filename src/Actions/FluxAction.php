@@ -6,6 +6,7 @@ use FluxErp\Models\Permission;
 use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\Traits\Action\HasActionEvents;
 use FluxErp\Traits\Makeable;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Arr;
@@ -29,6 +30,8 @@ abstract class FluxAction
     protected static ?Dispatcher $dispatcher;
 
     protected bool $keepEmptyStrings = false;
+
+    protected ?Authenticatable $actingAs;
 
     protected static bool $hasPermission = true;
 
@@ -126,6 +129,18 @@ abstract class FluxAction
             ->toString();
     }
 
+    public function actingAs(?Authenticatable $user = null): static
+    {
+        $this->actingAs = $user;
+
+        return $this;
+    }
+
+    public function getActingAs(): ?Authenticatable
+    {
+        return $this->actingAs;
+    }
+
     public function setData(array|Arrayable $data, bool $keepEmptyStrings = false): static
     {
         if (! is_array($data)) {
@@ -208,9 +223,30 @@ abstract class FluxAction
             return false;
         }
 
+        $current = null;
+        if (
+            isset($this->actingAs)
+            && (
+                (is_null($this->getActingAs()) && ! is_null(auth()->user()))
+                || (is_null(auth()->user()) && ! is_null($this->getActingAs()))
+                || $this->getActingAs()?->isNot(auth()->user())
+            )
+        ) {
+            $current = auth()->user();
+            if ($this->getActingAs()) {
+                auth()->setUser($this->getActingAs());
+            } elseif(method_exists(auth(), 'logout')) {
+                auth()->logout();
+            }
+        }
+
         DB::transaction(function () {
             $this->result = $this->performAction();
         });
+
+        if ($current) {
+            auth()->login($current);
+        }
 
         $this->fireActionEvent(event: 'executed', halt: false);
 
