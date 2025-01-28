@@ -12,6 +12,7 @@ class MailAccountFactory extends Factory
     public function definition(): array
     {
         return [
+            'uuid' => $this->faker->uuid(),
             'email' => $this->faker->safeEmail(),
             'password' => $this->faker->password(),
             'host' => $this->faker->domainName(),

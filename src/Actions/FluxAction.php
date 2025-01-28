@@ -6,6 +6,7 @@ use FluxErp\Models\Permission;
 use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\Traits\Action\HasActionEvents;
 use FluxErp\Traits\Makeable;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Arr;
@@ -29,6 +30,8 @@ abstract class FluxAction
     protected static ?Dispatcher $dispatcher;
 
     protected bool $keepEmptyStrings = false;
+
+    protected ?Authenticatable $actingAs = null;
 
     protected static bool $hasPermission = true;
 
@@ -126,6 +129,18 @@ abstract class FluxAction
             ->toString();
     }
 
+    public function actingAs(?Authenticatable $user = null): static
+    {
+        $this->actingAs = $user;
+
+        return $this;
+    }
+
+    public function getActingAs(): ?Authenticatable
+    {
+        return $this->actingAs;
+    }
+
     public function setData(array|Arrayable $data, bool $keepEmptyStrings = false): static
     {
         if (! is_array($data)) {
@@ -208,9 +223,19 @@ abstract class FluxAction
             return false;
         }
 
+        $current = null;
+        if ($this->getActingAs()) {
+            $current = auth()->user();
+            auth()->setUser($this->getActingAs());
+        }
+
         DB::transaction(function () {
             $this->result = $this->performAction();
         });
+
+        if ($current) {
+            auth()->setUser($current);
+        }
 
         $this->fireActionEvent(event: 'executed', halt: false);
 

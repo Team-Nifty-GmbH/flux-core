@@ -54,9 +54,12 @@ class CreateCommunication extends FluxAction
         }
 
         if ($tags) {
-            $communication->attachTags(resolve_static(Tag::class, 'query')
-                ->whereIntegerInRaw('id', $tags)
-                ->get());
+            $communication->attachTags(
+                resolve_static(Tag::class, 'query')
+                    ->whereIntegerInRaw('id', $tags)
+                    ->get(),
+                morph_alias(Communication::class)
+            );
         }
 
         foreach ($attachments as $attachment) {

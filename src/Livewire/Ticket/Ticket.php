@@ -103,8 +103,16 @@ class Ticket extends Component
     public function getTabs(): array
     {
         return [
-            TabButton::make('ticket.comments')->label(__('Comments'))->isLivewireComponent(),
-            TabButton::make('ticket.activities')->label(__('Activities'))->isLivewireComponent(),
+            TabButton::make('ticket.comments')
+                ->label(__('Comments'))
+                ->isLivewireComponent(),
+            TabButton::make('ticket.communication')
+                ->label(__('Communication'))
+                ->wireModel('ticket.id')
+                ->isLivewireComponent(),
+            TabButton::make('ticket.activities')
+                ->label(__('Activities'))
+                ->isLivewireComponent(),
         ];
     }
 
