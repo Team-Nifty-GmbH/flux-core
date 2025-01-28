@@ -123,7 +123,7 @@ class UpdateAddress extends FluxAction
 
     protected function prepareForValidation(): void
     {
-        if (array_key_exists('email', $this->data)) {
+        if (array_key_exists('email_primary', $this->data)) {
             $this->data['email_primary'] = is_string($this->getData('email_primary'))
                 ? Str::between($this->getData('email_primary'), '<', '>')
                 : null;

@@ -56,7 +56,6 @@ class UploadMedia extends FluxAction
         }
 
         try {
-
             $media = $fileAdder
                 ->setName($this->data['name'])
                 ->usingFileName($this->data['file_name'])

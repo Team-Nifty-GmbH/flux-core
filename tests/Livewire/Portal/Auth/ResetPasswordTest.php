@@ -57,6 +57,7 @@ class ResetPasswordTest extends BaseSetup
         $updatedAddress->refresh();
 
         $this->assertEquals($baseAddress->email, $updatedAddress->email);
+        $this->assertEquals($baseAddress->email_primary, $updatedAddress->email_primary);
         $this->assertNotEquals($baseAddress->password, $updatedAddress->password);
     }
 }
