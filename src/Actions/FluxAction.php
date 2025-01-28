@@ -31,7 +31,7 @@ abstract class FluxAction
 
     protected bool $keepEmptyStrings = false;
 
-    protected ?Authenticatable $actingAs = null;
+    protected ?Authenticatable $actingAs;
 
     protected static bool $hasPermission = true;
 
@@ -225,14 +225,17 @@ abstract class FluxAction
 
         $current = null;
         if (
-            (is_null($this->getActingAs()) && ! is_null(auth()->user()))
-            || (is_null(auth()->user()) && ! is_null($this->getActingAs()))
-            || $this->getActingAs()?->isNot(auth()->user())
+            isset($this->actingAs)
+            && (
+                (is_null($this->getActingAs()) && ! is_null(auth()->user()))
+                || (is_null(auth()->user()) && ! is_null($this->getActingAs()))
+                || $this->getActingAs()?->isNot(auth()->user())
+            )
         ) {
             $current = auth()->user();
             if ($this->getActingAs()) {
                 auth()->setUser($this->getActingAs());
-            } else {
+            } elseif(method_exists(auth(), 'logout')) {
                 auth()->logout();
             }
         }
