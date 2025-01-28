@@ -2,6 +2,7 @@
 
 namespace FluxErp\Rulesets\Task;
 
+use FluxErp\Models\OrderPosition;
 use FluxErp\Models\Project;
 use FluxErp\Models\Task;
 use FluxErp\Models\User;
@@ -29,6 +30,11 @@ class CreateTaskRuleset extends FluxRuleset
                 'integer',
                 'nullable',
                 app(ModelExists::class, ['model' => User::class]),
+            ],
+            'order_position_id' => [
+                'integer',
+                'nullable',
+                app(ModelExists::class, ['model' => OrderPosition::class]),
             ],
             'model_type' => [
                 'required_with:model_id',
