@@ -292,7 +292,7 @@ class FolderTree extends Component
                 ->with('model')
                 ->whereKey($mediaId)
                 ->first()
-                ->move($model, $targetCollectionName);
+                ?->move($model, $targetCollectionName);
         }
 
     }
