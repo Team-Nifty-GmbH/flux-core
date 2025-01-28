@@ -78,7 +78,7 @@ class CreateMailMessageTest extends TestCase
         $this->assertTrue($result->communications()->where('communications.id', $result->id)->exists());
     }
 
-    public function test_creates_ticket_comment_from_mail_message()
+    public function test_add_comment_to_ticket_from_mail_message()
     {
         $dispatcher = Event::fake('action.executed: ' . CreateMailMessage::class);
         FluxAction::setEventDispatcher($dispatcher);
@@ -92,7 +92,7 @@ class CreateMailMessageTest extends TestCase
             'mail_folder_id' => $this->mailAccount->mailFolders->first()->id,
             'from' => 'Tester McTestFace <' . $this->address->email . '>',
             'to' => [$this->mailAccount->email],
-            'subject' => $subject = Str::uuid()->toString(),
+            'subject' => Str::uuid()->toString(),
             'text_body' => $textBody = faker()->text(),
             'html_body' => '<p>'
                 . faker()->text()

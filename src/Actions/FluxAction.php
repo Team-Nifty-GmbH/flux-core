@@ -224,7 +224,11 @@ abstract class FluxAction
         }
 
         $current = null;
-        if ($this->getActingAs()?->isNot(auth()->user())) {
+        if (
+            (is_null($this->getActingAs()) && ! is_null(auth()->user()))
+            || (is_null(auth()->user()) && ! is_null($this->getActingAs()))
+            || $this->getActingAs()?->isNot(auth()->user())
+        ) {
             $current = auth()->user();
             if ($this->getActingAs()) {
                 auth()->setUser($this->getActingAs());
