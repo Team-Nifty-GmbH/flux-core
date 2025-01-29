@@ -43,6 +43,8 @@ class TicketForm extends FluxForm
 
     public array $authenticatable = [];
 
+    public array $ticket_type = [];
+
     protected function getActions(): array
     {
         return [
@@ -57,6 +59,7 @@ class TicketForm extends FluxForm
         if ($values instanceof Ticket) {
             $values->loadMissing([
                 'authenticatable',
+                'ticketType:id,name',
                 'users:id',
             ]);
             data_set($values, 'authenticatable.avatar_url', $values->authenticatable?->getAvatarUrl());

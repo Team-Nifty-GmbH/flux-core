@@ -3,7 +3,7 @@
         let component = Alpine.$data(document.getElementById('category-parent-id').querySelector('[x-data]'));
         component.asyncData.params.where[0][2] = $wire.category.model_type;
         component.asyncData.params.where[1][2] = $wire.category.id;
-    },
+    }
 }">
     @section('modals')
         <x-modal name="edit-category" x-on:open="setCategorySearch()">
