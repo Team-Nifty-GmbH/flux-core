@@ -14,8 +14,8 @@ use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Renderless;
 use Livewire\Component;
-use Livewire\Features\SupportRedirects\Redirector;
 
 class Ticket extends Component
 {
@@ -66,10 +66,10 @@ class Ticket extends Component
         $this->additionalColumns = resolve_static(AdditionalColumn::class, 'query')
             ->where('is_frontend_visible', true)
             ->where(function (Builder $query) use ($ticketModel) {
-                $query->where('model_type', app(TicketModel::class)->getMorphClass())
+                $query->where('model_type', morph_alias(TicketModel::class))
                     ->when($ticketModel->ticket_type_id, function (Builder $query) use ($ticketModel) {
                         $query->orWhere(function (Builder $query) use ($ticketModel) {
-                            $query->where('model_type', app(TicketType::class)->getMorphClass())
+                            $query->where('model_type', morph_alias(TicketType::class))
                                 ->where('model_id', $ticketModel->ticket_type_id);
                         });
                     });
@@ -82,7 +82,7 @@ class Ticket extends Component
         $this->ticket['authenticatable']['name'] = $ticketModel->authenticatable?->getLabel();
         $this->ticket['users'] = $ticketModel->users->pluck('id')->toArray();
 
-        $this->authorTypeContact = $this->ticket['authenticatable_type'] === app(Address::class)->getMorphClass();
+        $this->authorTypeContact = $this->ticket['authenticatable_type'] === morph_alias(Address::class);
 
         $this->availableStates = collect($this->states)
             ->whereIn(
@@ -121,10 +121,10 @@ class Ticket extends Component
         $this->additionalColumns = resolve_static(AdditionalColumn::class, 'query')
             ->where('is_frontend_visible', true)
             ->where(function (Builder $query) use ($id) {
-                $query->where('model_type', app(TicketModel::class)->getMorphClass())
+                $query->where('model_type', morph_alias(TicketModel::class))
                     ->when($id, function (Builder $query) use ($id) {
                         $query->orWhere(function (Builder $query) use ($id) {
-                            $query->where('model_type', app(TicketType::class)->getMorphClass())
+                            $query->where('model_type', morph_alias(TicketType::class))
                                 ->where('model_id', $id);
                         });
                     });
@@ -133,7 +133,8 @@ class Ticket extends Component
             ->toArray();
     }
 
-    public function save(): bool|Redirector
+    #[Renderless]
+    public function save(): bool
     {
         try {
             $ticket = UpdateTicket::make($this->ticket)
@@ -160,15 +161,14 @@ class Ticket extends Component
             )
             ->toArray();
 
-        $this->skipRender();
+        $this->notification()->success(__(':model saved', ['model' => __('Ticket')]));
 
         return true;
     }
 
+    #[Renderless]
     public function delete(): void
     {
-        $this->skipRender();
-
         try {
             DeleteTicket::make($this->ticket)
                 ->checkPermission()
@@ -180,12 +180,15 @@ class Ticket extends Component
             return;
         }
 
-        $this->redirect(route('tickets'));
+        $this->redirect(route('tickets'), navigate: true);
     }
 
     public function updatedAuthorTypeContact(): void
     {
-        $this->ticket['authenticatable_type'] = app($this->authorTypeContact ? Address::class : User::class);
+        $this->ticket['authenticatable_type'] = resolve_static(
+            $this->authorTypeContact ? Address::class : User::class,
+            'class'
+        );
         $this->ticket['authenticatable_id'] = null;
 
         $this->skipRender();

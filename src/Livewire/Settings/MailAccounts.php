@@ -189,9 +189,7 @@ class MailAccounts extends MailAccountList
             $this->mailAccount->testSmtpConnection();
 
             $this->notification()->success(__('Connection successful'));
-        } catch (
-            ValidationException|TransportExceptionInterface $e
-        ) {
+        } catch (ValidationException|TransportExceptionInterface $e) {
             exception_to_notifications($e, $this);
         }
     }

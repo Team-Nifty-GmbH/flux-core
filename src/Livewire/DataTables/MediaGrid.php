@@ -4,8 +4,8 @@ namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Actions\Media\DeleteMedia;
 use FluxErp\Models\Media;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use Spatie\MediaLibrary\MediaCollections\Exceptions\InvalidConversion;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class MediaGrid extends MediaList
@@ -26,12 +26,15 @@ class MediaGrid extends MediaList
 
     protected function itemToArray($item): array
     {
+        /** @var Media $item */
         $itemArray = parent::itemToArray($item);
-        try {
-            $itemArray['url'] = $item->getUrl('thumb_400x400');
-        } catch (InvalidConversion) {
-            $itemArray['url'] = $item->getUrl();
-        }
+        $itemArray['url'] = $item->hasGeneratedConversion('thumb_400x400')
+            ? $item->getUrl('thumb_400x400')
+            : (
+                Str::startsWith($item->mime_type, 'image/')
+                    ? $item->getUrl()
+                    : route('icons', ['name' => 'document'])
+            );
 
         return $itemArray;
     }

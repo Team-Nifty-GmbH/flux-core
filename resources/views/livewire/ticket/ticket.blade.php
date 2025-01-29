@@ -7,17 +7,17 @@
 >
     @section('header')
         <div class="flex items-center space-x-5">
-            <x-avatar xl x-bind:src="ticket.authenticatable.avatar_url" src="#"></x-avatar>
+            <x-avatar xl x-bind:src="$wire.ticket.authenticatable.avatar_url" src="#"></x-avatar>
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">
                     <div class="opacity-40 transition-opacity hover:opacity-100">
-                        <span x-text="ticket.ticket_type?.name">
+                        <span x-text="$wire.ticket.ticket_type?.name">
                         </span>
-                        <span x-text="ticket.ticket_number">
+                        <span x-text="$wire.ticket.ticket_number">
                         </span>
-                        <span x-text="ticket.authenticatable.name"></span>
+                        <span x-text="$wire.ticket.authenticatable.name"></span>
                     </div>
-                    <span x-text="ticket.authenticatable.name"></span>
+                    <span x-text="$wire.ticket.authenticatable.name"></span>
                 </h1>
             </div>
         </div>
@@ -158,8 +158,8 @@
                                     <x-toggle :left-label=" __('User') " :label=" __('Contact') " wire:model.live="authorTypeContact" />
                                     <div class="pl-2">
                                         <x-button href="#" xs outline icon="eye"
-                                                  x-bind:class="($wire.get('authorTypeContact') !== true || ! ticket.authenticatable_id) && 'cursor-not-allowed'"
-                                                  x-bind:href="($wire.get('authorTypeContact') === true && ticket.authenticatable.contact_id) && '{{ route('contacts.id?', ':id') }}'.replace(':id', ticket.authenticatable.contact_id) + '?address=' + ticket.authenticatable_id" >
+                                                  x-bind:class="($wire.get('authorTypeContact') !== true || ! $wire.ticket.authenticatable_id) && 'cursor-not-allowed'"
+                                                  x-bind:href="($wire.get('authorTypeContact') === true && $wire.ticket.authenticatable.contact_id) && '{{ route('contacts.id?', ':id') }}'.replace(':id', $wire.ticket.authenticatable.contact_id) + '?address=' + $wire.ticket.authenticatable_id" >
                                         </x-button>
                                     </div>
                                 </div>
@@ -185,6 +185,22 @@
                                         ]
                                     ]"
                                 />
+                            </div>
+                        </div>
+                    </x-card>
+                @show
+                @section('attributes')
+                    <x-card>
+                        <div class="text-sm whitespace-nowrap overflow-hidden text-ellipsis">
+                            <div class="flex gap-0.5">
+                                <div class="">{{ __('Created At') }}:</div>
+                                <div x-text="window.formatters.datetime($wire.ticket.created_at)"></div>
+                                <div x-text="$wire.ticket.created_by || '{{ __('Unknown') }}'"></div>
+                            </div>
+                            <div class="flex gap-0.5">
+                                <div class="">{{ __('Updated At') }}:</div>
+                                <div x-text="window.formatters.datetime($wire.ticket.updated_at)"></div>
+                                <div x-text="$wire.ticket.updated_by || '{{ __('Unknown') }}'"></div>
                             </div>
                         </div>
                     </x-card>

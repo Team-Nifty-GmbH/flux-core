@@ -52,6 +52,8 @@ class OrderPositions extends OrderPositionList
 
     public ?string $discount = null;
 
+    public bool $hasNoRedirect = true;
+
     protected string $view = 'flux::livewire.order.order-positions';
 
     public function mount(): void
