@@ -8,6 +8,8 @@ import addressMap from "./components/address-map";
 import filePond from "./components/file-pond";
 import templateOutlet from './components/template-outlet';
 import sort from '@alpinejs/sort';
+import navigationSpinner from './components/navigation-spinner.js';
+import wireNavigation from './components/wire-navigation.js';
 
 window.setupEditor = setupEditor;
 window.workTime = workTime;
@@ -15,6 +17,8 @@ window.dashboard = dashboard;
 window.addressMap = addressMap;
 window.signature = signature;
 window.filePond = filePond;
+
+navigationSpinner();
 
 window.addEventListener('alpine:init', () => {
     window.Alpine.data('wireui_notifications', notifications);
@@ -34,13 +38,7 @@ Alpine.directive('percentage', (el, { expression }, { evaluate }) => {
 Alpine.directive('template-outlet', templateOutlet);
 Alpine.data('folder_tree', folders);
 
-document.addEventListener(
-    'livewire:navigated',
-    function() {
-        wireNavigation();
-    },
-    {once: true}
-);
+document.addEventListener('livewire:navigated', wireNavigation,{once: true});
 
 document.addEventListener('livewire:init', () => {
     wireNavigation();
@@ -55,18 +53,6 @@ document.addEventListener('livewire:init', () => {
         })
     })
 })
-
-function wireNavigation() {
-    let links = [...document.querySelectorAll('a[href]:not([wire\\:navigate]):not([target="_blank"])')].filter(link => {
-        let hrefValue = link.getAttribute('href').trim();
-        return hrefValue !== '' && hrefValue !== '#' &&
-            (hrefValue.startsWith(window.location.origin) || hrefValue.startsWith('/'));
-    });
-
-    links.forEach(link => {
-        link.setAttribute('wire:navigate', 'true');
-    });
-}
 
 Livewire.directive('flux-confirm', ({ el, directive }) => {
     let icon = directive.modifiers.includes('icon')

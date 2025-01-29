@@ -12,6 +12,15 @@
     <x-flux::layouts.head.head/>
 </head>
 <body class="dark:bg-secondary-900 h-full bg-slate-50 transition duration-300 text-secondary-600 dark:text-secondary-50">
+    @section('wire.navigate.spinner')
+        @persist('spinner')
+            <div id="loading-overlay" class="fixed inset-0 overflow-y-auto p-4 hidden" style="z-index: 1000;">
+                <div id="loading-overlay-spinner" class="fixed inset-0 bg-secondary-400 dark:bg-secondary-700 bg-opacity-60 dark:bg-opacity-60 flex items-center justify-center transition-opacity opacity-0 duration-200">
+                    <x-flux::spinner-svg />
+                </div>
+            </div>
+        @endpersist
+    @show
     @section('layout.app.body')
         @persist('notifications')
             <x-notifications z-index="z-50"></x-notifications>
