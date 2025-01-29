@@ -43,7 +43,7 @@ class TicketForm extends FluxForm
 
     public array $authenticatable = [];
 
-    public array $ticket_type = [];
+    public ?array $ticket_type = null;
 
     protected function getActions(): array
     {
