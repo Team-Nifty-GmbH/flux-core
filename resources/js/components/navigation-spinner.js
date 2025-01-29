@@ -41,14 +41,10 @@ export default function() {
         }
     }
 
-    function init() {
-        // Livewire navigation events
-        document.addEventListener('livewire:navigate', showSpinner);
-        document.addEventListener('livewire:navigated', hideSpinner);
+    // Livewire navigation events
+    document.addEventListener('livewire:navigate', showSpinner);
+    document.addEventListener('livewire:navigated', hideSpinner);
 
-        // Detect full page reloads or traditional navigation
-        window.addEventListener('beforeunload', showSpinner);
-    }
-
-    return { init };
+    // Detect full page reloads or traditional navigation
+    window.addEventListener('beforeunload', showSpinner);
 }
