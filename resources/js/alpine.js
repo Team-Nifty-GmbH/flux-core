@@ -8,6 +8,7 @@ import addressMap from "./components/address-map";
 import filePond from "./components/file-pond";
 import templateOutlet from './components/template-outlet';
 import sort from '@alpinejs/sort';
+import navigationSpinner from './components/navigation-spinner.js';
 
 window.setupEditor = setupEditor;
 window.workTime = workTime;
@@ -15,6 +16,8 @@ window.dashboard = dashboard;
 window.addressMap = addressMap;
 window.signature = signature;
 window.filePond = filePond;
+
+navigationSpinner().init();
 
 window.addEventListener('alpine:init', () => {
     window.Alpine.data('wireui_notifications', notifications);
@@ -36,7 +39,7 @@ Alpine.data('folder_tree', folders);
 
 document.addEventListener(
     'livewire:navigated',
-    function() {
+    () => {
         wireNavigation();
     },
     {once: true}
