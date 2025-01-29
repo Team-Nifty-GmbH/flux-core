@@ -4,31 +4,37 @@ namespace FluxErp\Support\Calculation;
 
 class Rounding
 {
-    public static function round(string|float|int $value, int $precision = 2): string
+    public static function round(string|float|int|null $value, int $precision = 2): string
     {
-        return bcdiv(
-            bcround(bcmul($value, pow(10, $precision))),
-            pow(10, $precision),
-            max(0, $precision)
-        );
+        return is_null($value)
+            ? 0
+            : bcdiv(
+                bcround(bcmul($value, pow(10, $precision))),
+                pow(10, $precision),
+                max(0, $precision)
+            );
     }
 
-    public static function ceil(string|float|int $value, int $precision = 0): string
+    public static function ceil(string|float|int|null $value, int $precision = 0): string
     {
-        return bcdiv(
-            bcceil(bcmul($value, pow(10, $precision))),
-            pow(10, $precision),
-            max(0, $precision)
-        );
+        return is_null($value)
+            ? 0
+            : bcdiv(
+                bcceil(bcmul($value, pow(10, $precision))),
+                pow(10, $precision),
+                max(0, $precision)
+            );
     }
 
-    public static function floor(string|float|int $value, int $precision = 0): string
+    public static function floor(string|float|int|null $value, int $precision = 0): string
     {
-        return bcdiv(
-            bcfloor(bcmul($value, pow(10, $precision))),
-            pow(10, $precision),
-            max(0, $precision)
-        );
+        return is_null($value)
+            ? 0
+            : bcdiv(
+                bcfloor(bcmul($value, pow(10, $precision))),
+                pow(10, $precision),
+                max(0, $precision)
+            );
     }
 
     /**

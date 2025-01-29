@@ -85,7 +85,7 @@ class Task extends Component
             return false;
         }
 
-        $this->notification()->success(__('Task saved'));
+        $this->notification()->success(__(':model saved', ['model' => __('Task')]));
         $this->skipRender();
 
         return true;

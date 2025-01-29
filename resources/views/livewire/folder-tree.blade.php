@@ -239,6 +239,13 @@
                                         <x-slot:append>
                                             <div class="absolute inset-y-0 right-0 flex items-center p-0.5">
                                                 <x-button
+                                                    x-on:click="$openDetailModal(selection.original_url)"
+                                                    icon="eye"
+                                                    class="h-full rounded-l-md"
+                                                    primary
+                                                    squared
+                                                />
+                                                <x-button
                                                     x-on:click="$refs.originalLink.select(); document.execCommand('copy');"
                                                     class="h-full rounded-r-md"
                                                     icon="clipboard-copy"
@@ -250,7 +257,8 @@
                                     </x-input>
                                 @endCanAction
                                 <object
-                                    class="object-contain"
+                                    x-on:click="$openDetailModal(selection.original_url)"
+                                    class="object-contain cursor-pointer"
                                     x-bind:type="selection.mime_type"
                                     x-bind:data="selection.original_url + '#zoom=85&scrollbar=0&toolbar=0&navpanes=0'"
                                     width="100%"
