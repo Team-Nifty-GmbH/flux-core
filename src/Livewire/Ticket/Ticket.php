@@ -2,9 +2,8 @@
 
 namespace FluxErp\Livewire\Ticket;
 
-use FluxErp\Actions\Ticket\DeleteTicket;
-use FluxErp\Actions\Ticket\UpdateTicket;
 use FluxErp\Htmlables\TabButton;
+use FluxErp\Livewire\Forms\TicketForm;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Address;
 use FluxErp\Models\Ticket as TicketModel;
@@ -14,14 +13,16 @@ use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class Ticket extends Component
 {
     use Actions, WithTabs;
 
-    public array $ticket;
+    public TicketForm $ticket;
 
     public array $availableStates;
 
@@ -77,18 +78,15 @@ class Ticket extends Component
             ->get()
             ->toArray();
 
-        $this->ticket = $ticketModel->toArray();
-        $this->ticket['authenticatable']['avatar_url'] = $ticketModel->authenticatable?->getAvatarUrl();
-        $this->ticket['authenticatable']['name'] = $ticketModel->authenticatable?->getLabel();
-        $this->ticket['users'] = $ticketModel->users->pluck('id')->toArray();
+        $this->ticket->fill($ticketModel);
 
-        $this->authorTypeContact = $this->ticket['authenticatable_type'] === morph_alias(Address::class);
+        $this->authorTypeContact = $this->ticket->authenticatable_type === morph_alias(Address::class);
 
         $this->availableStates = collect($this->states)
             ->whereIn(
                 'name',
                 array_merge(
-                    [$this->ticket['state']],
+                    [$this->ticket->state],
                     $ticketModel->state->transitionableStates()
                 )
             )
@@ -137,26 +135,19 @@ class Ticket extends Component
     public function save(): bool
     {
         try {
-            $ticket = UpdateTicket::make($this->ticket)
-                ->checkPermission()
-                ->validate()
-                ->execute();
-        } catch (\Exception $e) {
+            $this->ticket->save();
+        } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
             return false;
         }
 
-        $this->ticket = array_merge($this->ticket, $ticket->load('authenticatable')->toArray());
-        $this->ticket['authenticatable']['avatar_url'] = $ticket->authenticatable->getAvatarUrl();
-        $this->ticket['authenticatable']['name'] = $ticket->authenticatable->getLabel();
-
         $this->availableStates = collect($this->states)
             ->whereIn(
                 'name',
                 array_merge(
-                    [$this->ticket['state']],
-                    $ticket->state->transitionableStates()
+                    [$this->ticket->state],
+                    $this->ticket->getActionResult()->state->transitionableStates()
                 )
             )
             ->toArray();
@@ -170,10 +161,7 @@ class Ticket extends Component
     public function delete(): void
     {
         try {
-            DeleteTicket::make($this->ticket)
-                ->checkPermission()
-                ->validate()
-                ->execute();
+            $this->ticket->delete();
         } catch (\Exception $e) {
             exception_to_notifications($e, $this);
 
@@ -185,11 +173,17 @@ class Ticket extends Component
 
     public function updatedAuthorTypeContact(): void
     {
-        $this->ticket['authenticatable_type'] = resolve_static(
-            $this->authorTypeContact ? Address::class : User::class,
-            'class'
+        $this->ticket->authenticatable_type = morph_alias($this->authorTypeContact
+            ? Address::class
+            : User::class
         );
-        $this->ticket['authenticatable_id'] = null;
+        $this->ticket->authenticatable_id = null;
+        $route = route('search', $this->ticket->authenticatable_type);
+
+        $this->js(<<<JS
+            let component = Alpine.\$data(document.getElementById('author-select').querySelector('[x-data]'));
+            component.asyncData.api = '$route';
+        JS);
 
         $this->skipRender();
     }

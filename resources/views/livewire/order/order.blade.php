@@ -458,7 +458,7 @@
                                 <x-button
                                     outline
                                     icon="eye"
-                                    :href="route('address.id', data_get($order, 'contact_id', ''))"
+                                    :href="route('address.id', data_get($order, 'address_delivery_id', ''))"
                                 />
                             </x-slot:action>
                             <div id="order-delivery-address-id">
