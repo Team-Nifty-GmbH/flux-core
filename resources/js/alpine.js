@@ -38,13 +38,7 @@ Alpine.directive('percentage', (el, { expression }, { evaluate }) => {
 Alpine.directive('template-outlet', templateOutlet);
 Alpine.data('folder_tree', folders);
 
-document.addEventListener(
-    'livewire:navigated',
-    () => {
-        wireNavigation();
-    },
-    {once: true}
-);
+document.addEventListener('livewire:navigated', wireNavigation,{once: true});
 
 document.addEventListener('livewire:init', () => {
     wireNavigation();
