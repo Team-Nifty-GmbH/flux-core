@@ -40,6 +40,8 @@ class RepeatableManager
 
         // Valid repeatable classes are artisan commands, jobs and invokable classes.
         $type = match (true) {
+            method_exists($class, 'repeatableType')
+                && $class::repeatableType() instanceof RepeatableTypeEnum => $class::repeatableType(),
             is_a($class, Command::class, true) => RepeatableTypeEnum::Command,
             $this->isJob($class) => RepeatableTypeEnum::Job,
             method_exists($class, '__invoke') => RepeatableTypeEnum::Invokable,
