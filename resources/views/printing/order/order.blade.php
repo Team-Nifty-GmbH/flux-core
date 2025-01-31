@@ -194,7 +194,8 @@
                 $model->vatRates()
                     ->distinct()
                     ->pluck('footer_text')
-                    ->filter()->map(fn (string $text) => Blade::render(html_entity_decode($text), ['model' => $model]))
+                    ->filter()
+                    ->map(fn (string $text) => Blade::render(html_entity_decode($text), ['model' => $model]))
                     ->implode('<br>')
             !!}
         </div>

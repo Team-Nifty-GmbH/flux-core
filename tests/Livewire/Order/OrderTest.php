@@ -301,7 +301,7 @@ class OrderTest extends BaseSetup
         $this->assertEquals(
             0,
             $replicatedOrder->orderPositions()
-                ->whereNotNull('created_from_id')
+                ->whereNull('created_from_id')
                 ->count()
         );
     }
@@ -368,7 +368,7 @@ class OrderTest extends BaseSetup
         $this->assertEquals(
             0,
             $replicatedOrder->orderPositions()
-                ->whereNotNull('created_from_id')
+                ->whereNull('created_from_id')
                 ->count()
         );
     }
