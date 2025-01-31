@@ -2,7 +2,12 @@ export default function() {
     let spinnerTimeout;
     let spinnerVisible = false;
 
-    function showSpinner() {
+    function showSpinner(event) {
+        console.log(event);
+        if (event.type === 'beforeunload' && event.target.location.href === window.location.href) {
+            return;
+        }
+
         document.body.style.pointerEvents = 'none';
         document.body.style.cursor = 'wait';
 
