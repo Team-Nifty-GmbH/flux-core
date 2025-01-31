@@ -235,7 +235,7 @@ abstract class FluxAction
             $current = auth()->user();
             if ($this->getActingAs()) {
                 auth()->setUser($this->getActingAs());
-            } elseif(method_exists(auth(), 'logout')) {
+            } elseif (method_exists(auth(), 'logout')) {
                 auth()->logout();
             }
         }
@@ -245,7 +245,17 @@ abstract class FluxAction
         });
 
         if ($current) {
-            auth()->login($current);
+            if (method_exists(auth(), 'login')) {
+                auth()->login($current);
+            } else {
+                auth()->setUser($current);
+            }
+        } elseif (isset($this->actingAs)) {
+            if (method_exists(auth(), 'logout')) {
+                auth()->logout();
+            } else {
+                auth()->forgetUser();
+            }
         }
 
         $this->fireActionEvent(event: 'executed', halt: false);
