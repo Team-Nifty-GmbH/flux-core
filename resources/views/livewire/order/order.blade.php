@@ -13,7 +13,7 @@
         {{ $this->renderCreateDocumentsModal() }}
         @canAction(\FluxErp\Actions\Task\CreateTask::class)
             <x-modal name="create-tasks">
-                <livewire:order.order-project :order="$order->id" />
+                <livewire:order.order-project lazy :order="$order->id" />
             </x-modal>
         @endCanAction
         <x-modal name="replicate-order">
@@ -32,11 +32,36 @@
                 ">
                     <div class="space-y-2.5 divide-y divide-secondary-200">
                         <x-select
-                            :options="$orderTypes"
                             option-label="name"
                             option-value="id"
                             :label="__('Order type')"
                             wire:model="replicateOrder.order_type_id"
+                            :clearable="false"
+                            :async-data="[
+                                'api' => route('search', \FluxErp\Models\OrderType::class),
+                                'method' => 'POST',
+                                'params' => [
+                                    'searchFields' => [
+                                        'name',
+                                    ],
+                                    'select' => [
+                                        'name',
+                                        'id',
+                                    ],
+                                    'where' => [
+                                        [
+                                            'is_active',
+                                            '=',
+                                            true,
+                                        ],
+                                        [
+                                            'is_hidden',
+                                            '=',
+                                            false
+                                        ]
+                                    ]
+                                ]
+                            ]"
                         />
                         <div class="pt-4">
                             <x-select
@@ -173,10 +198,34 @@
                         <x-select
                             :label="__('Order Type')"
                             wire:model="replicateOrder.order_type_id"
-                            :options="$replicateOrderTypes"
                             option-value="id"
                             option-label="name"
                             :clearable="false"
+                            :async-data="[
+                                'api' => route('search', \FluxErp\Models\OrderType::class),
+                                'method' => 'POST',
+                                'params' => [
+                                    'searchFields' => [
+                                        'name',
+                                    ],
+                                    'select' => [
+                                        'name',
+                                        'id',
+                                    ],
+                                    'where' => [
+                                        [
+                                            'is_active',
+                                            '=',
+                                            true,
+                                        ],
+                                        [
+                                            'order_type_enum',
+                                            '=',
+                                            \FluxErp\Enums\OrderTypeEnum::Retoure
+                                        ]
+                                    ]
+                                ]
+                            ]"
                         />
                     </div>
                     <div class="overflow-auto">
@@ -203,7 +252,7 @@
                     </div>
                 </div>
                 <div class="pt-4">
-                    <livewire:order.replicate-order-position-list :id="$order->id" />
+                    <livewire:order.replicate-order-position-list :order-id="$order->id" lazy />
                 </div>
                 <x-slot:footer>
                     <div class="flex justify-end gap-1.5">
@@ -300,7 +349,6 @@
                                     />
                             @endswitch
                         @endif
-
                         @if($order->hasContactDeliveryLock)
                             <x-badge
                                 :label="__('Has Delivery Lock')"
@@ -310,9 +358,16 @@
                         @endif
                     </div>
                 </h1>
-                <a wire:navigate class="flex gap-1.5 font-semibold opacity-40 dark:text-gray-200" x-bind:href="$wire.order.parent?.url" x-cloak x-show="$wire.order.parent?.url">
-                    <x-heroicons name="link" class="w-4 h-4" />
-                    <span x-text="$wire.order.parent?.label"></span>
+                <a wire:navigate
+                   class="flex gap-1.5 font-semibold opacity-40 dark:text-gray-200"
+                   x-bind:href="($wire.order.parent?.url ?? $wire.order.created_from?.url) || ''"
+                   x-on:click="console.log($el.href)"
+                   x-show="$wire.order.parent?.url || $wire.order.created_from?.url"
+                >
+                    <i class="size-4 ph ph-copy"
+                       x-bind:class="$wire.order.parent?.url ? 'ph-link' : 'ph-copy'">
+                    </i>
+                    <span x-text="$wire.order.parent?.label ?? $wire.order.created_from?.label"></span>
                 </a>
             </div>
         </div>
@@ -494,7 +549,7 @@
                                 />
                             </x-slot:action>
                             <div class="space-y-3 px-2 py-5" x-collapse x-cloak x-show="showAdditionalAddresses">
-                                <livewire:order.additional-addresses :order-id="$order->id" :client-id="$order->client_id"/>
+                                <livewire:order.additional-addresses lazy :order-id="$order->id" :client-id="$order->client_id"/>
                             </div>
                         </x-card>
                         <x-card :title="__('Order Informations')" class="!px-0 !py-0">
@@ -682,7 +737,7 @@
                                                 </template>
                                             </x-dropdown>
                                         </div>
-                                        <livewire:features.signature-link-generator :model-type="\FluxErp\Models\Order::class" wire:model="order.id"/>
+                                        <livewire:features.signature-link-generator lazy :model-type="\FluxErp\Models\Order::class" wire:model="order.id"/>
                                     @endif
                                     @foreach($additionalModelActions as $modelAction)
                                         {{$modelAction}}

@@ -73,8 +73,6 @@ class Order extends Component
 
     public array $selectedOrderPositions = [];
 
-    public array $replicateOrderTypes = [];
-
     #[Url]
     public string $tab = 'order.order-positions';
 
@@ -112,11 +110,6 @@ class Order extends Component
                     ->get(['id', 'name'])
                     ->toArray(),
                 'clients' => resolve_static(Client::class, 'query')
-                    ->get(['id', 'name'])
-                    ->toArray(),
-                'orderTypes' => resolve_static(OrderType::class, 'query')
-                    ->where('is_hidden', false)
-                    ->where('is_active', true)
                     ->get(['id', 'name'])
                     ->toArray(),
                 'frequencies' => array_map(
@@ -403,23 +396,23 @@ class Order extends Component
         }
     }
 
+    #[Renderless]
     public function replicate(?string $orderTypeEnum = null): void
     {
         $this->replicateOrder->fill($this->order->toArray());
         $this->fetchContactData();
 
-        $this->replicateOrderTypes = resolve_static(OrderType::class, 'query')
+        $replicateOrderTypes = resolve_static(OrderType::class, 'query')
             ->where('order_type_enum', $orderTypeEnum)
             ->where('is_active', true)
-            ->where('is_hidden', false)
-            ->get(['id', 'name'])
+            ->get(['id'])
             ->toArray();
 
-        if ($this->replicateOrderTypes) {
+        if ($replicateOrderTypes) {
             $this->replicateOrder->parent_id = $this->order->id;
             $this->replicateOrder->order_positions = [];
-            if (count($this->replicateOrderTypes) === 1) {
-                $this->replicateOrder->order_type_id = $this->replicateOrderTypes[0]['id'];
+            if (count($replicateOrderTypes) === 1) {
+                $this->replicateOrder->order_type_id = $replicateOrderTypes[0]['id'];
             }
 
             $this->js(<<<'JS'

@@ -38,6 +38,11 @@ class CreateOrderRuleset extends FluxRuleset
                 'nullable',
                 app(ModelExists::class, ['model' => Order::class]),
             ],
+            'created_from_id' => [
+                'integer',
+                'nullable',
+                app(ModelExists::class, ['model' => Order::class]),
+            ],
             'client_id' => [
                 'required',
                 'integer',

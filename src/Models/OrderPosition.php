@@ -162,6 +162,11 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
         return $this->hasOne(Commission::class);
     }
 
+    public function createdFrom(): BelongsTo
+    {
+        return $this->belongsTo(OrderPosition::class, 'created_from_id');
+    }
+
     public function creditNoteCommission(): HasOne
     {
         return $this->hasOne(Commission::class, 'credit_note_order_position_id');
