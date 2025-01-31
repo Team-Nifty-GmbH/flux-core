@@ -1,16 +1,49 @@
 @extends('flux::livewire.order.purchase')
 @section('modals')
     @parent
+    @use(FluxErp\Enums\OrderTypeEnum)
     <x-modal name="edit-schedule">
         <x-card :title="__('Edit Schedule')">
             <div class="flex flex-col gap-1.5">
                 <x-select
-                    :label="__('Order type')"
-                    :options="$orderTypes"
                     option-label="name"
                     option-value="id"
-                    :clearable="false"
+                    :label="__('Order type')"
                     wire:model="schedule.parameters.orderTypeId"
+                    :clearable="false"
+                    :async-data="[
+                        'api' => route('search', \FluxErp\Models\OrderType::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'searchFields' => [
+                                'name',
+                            ],
+                            'select' => [
+                                'name',
+                                'id',
+                            ],
+                            'where' => [
+                                [
+                                    'is_active',
+                                    '=',
+                                    true,
+                                ],
+                                [
+                                    'is_hidden',
+                                    '=',
+                                    false
+                                ],
+                            ],
+                            'whereIn' => [
+                                [
+                                    'order_type_enum',
+                                    collect(OrderTypeEnum::cases())
+                                        ->filter(fn(OrderTypeEnum $type) => $type->isPurchase() && ! $type->isSubscription())
+                                        ->toArray(),
+                                ],
+                            ]
+                        ]
+                    ]"
                 />
                 <x-select
                     :label="__('Repeat')"

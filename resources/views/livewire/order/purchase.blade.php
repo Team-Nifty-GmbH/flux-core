@@ -13,6 +13,7 @@
                     'name'   => 'user-option',
                 ]"
                 :async-data="[
+                    'method' => 'POST',
                     'api' => route('search', \FluxErp\Models\User::class),
                 ]"
             />
