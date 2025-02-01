@@ -25,10 +25,7 @@
                 document.addEventListener('livewire:navigating', () => {
                     this.closeMenu(true);
                 });
-                this.activeItem = window.location.pathname.split('/')[1] || 'dashboard';
             },
-            activeItem: 'dashboard',
-            activeSubItem: window.location.pathname,
             open: [],
             toggleMenu(key) {
                 if (this.isOpen(key)) {
@@ -97,16 +94,21 @@
                     @foreach($navigations as $key => $navigation)
                         <div>
                             <a
-                                x-bind:class="activeItem === '{{ $key }}' && 'bg-primary-500 dark:bg-primary-700 !text-white hover:bg-primary-600 nav-item-active'"
+                                @if((! data_get($navigation, 'is_virtual_uri') && data_get($navigation, 'children')) || data_get($navigation, 'route_name') === 'dashboard'))
+                                    wire:current.exact="bg-primary-500 dark:bg-primary-700 !text-white hover:bg-primary-600 nav-item-active"
+                                @else
+                                    wire:current="bg-primary-500 dark:bg-primary-700 !text-white hover:bg-primary-600 nav-item-active"
+                                @endif
+
+                                href="{{ data_get($navigation, 'uri', '#') }}"
+
                                 @if($navigation['children'] ?? false)
                                     x-on:click.prevent="toggleMenu('{{ $key }}')"
+                                    target="_blank"
                                 @else
-                                    href="{{ data_get($navigation, 'uri', '#') }}"
                                     target="{{ ($navigation['target_blank'] ?? false) ? '_blank' : '' }}"
-                                    x-on:click="activeItem = '{{ $key }}'; activeSubItem = ''"
                                 @endif
-                                class="dark:text-light dark:hover:bg-primary flex items-center rounded-md py-2 text-white text-gray-500 transition-colors hover:bg-gray-800/50"
-                                role="button" aria-haspopup="true"
+                                class="dark:text-light dark:hover:bg-primary flex items-center rounded-md py-2 text-gray-500 transition-colors hover:bg-gray-800/50"
                             >
                                 <div class="w-16 flex-none">
                                     <div class="flex w-full justify-center text-white">
@@ -128,14 +130,18 @@
                                 <div
                                     x-show="isOpen('{{ $key }}')"
                                     x-cloak
-                                    x-transition
+                                    x-collapse.duration.200ms
                                     class="mt-2 space-y-2 overflow-x-hidden text-white"
                                 >
                                     @foreach($navigation['children'] as $child)
-                                        <a x-on:click="activeSubItem = '{{ data_get($child, 'uri', '#') }}'; activeItem = '{{ $key }}'"
-                                           href="{{ $child['uri'] }}" role="menuitem"
-                                           :class="activeSubItem === '{{ data_get($child, 'uri', '#') }}' && 'rounded-md bg-primary-600/50 dark:bg-primary-700/5 hover:bg-primary-600/10'"
-                                           class="dark:hover:text-light block truncate rounded-md p-2 pl-20 text-sm transition-colors duration-200 hover:bg-gray-800/50">
+                                        <a
+                                            @if((! data_get($navigation, 'is_virtual_uri') && data_get($navigation, 'children')) || data_get($navigation, 'route_name') === 'dashboard'))
+                                                wire:current.exact="rounded-md bg-primary-600/50 dark:bg-primary-700/5 hover:bg-primary-600/10"
+                                            @else
+                                                wire:current="rounded-md bg-primary-600/50 dark:bg-primary-700/5 hover:bg-primary-600/10"
+                                            @endif
+                                            href="{{ $child['uri'] }}"
+                                            class="dark:hover:text-light block truncate rounded-md p-2 pl-20 text-sm transition-colors duration-200 hover:bg-gray-800/50">
                                             {{ __($child['label']) }}
                                         </a>
                                     @endforeach

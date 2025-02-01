@@ -83,6 +83,13 @@ class Navigation extends Component
 
         $navigations = Menu::forGuard($guard[1], $guard[1] === 'address' ? 'portal' : null);
 
+        foreach ($navigations as $group => &$items) {
+            if (data_get($items, 'children')) {
+                $items['uri'] = find_common_base_uri($items);
+                $items['is_virtual_uri'] = true;
+            }
+        }
+
         array_walk_recursive($navigations, function (&$item, $key) {
             if ($key === 'label') {
                 $item = __(Str::headline($item));
