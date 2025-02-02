@@ -34,10 +34,6 @@ class Client extends FluxModel implements HasMedia
         'logo_small_url',
     ];
 
-    protected $guarded = [
-        'id',
-    ];
-
     protected $with = [
         'media',
     ];

@@ -17,10 +17,6 @@ class ProductOption extends FluxModel
 {
     use Filterable, HasPackageFactory, HasUserModification, HasUuid, LogsActivity, SoftDeletes;
 
-    protected $guarded = [
-        'id',
-    ];
-
     public function products(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, 'product_product_option');

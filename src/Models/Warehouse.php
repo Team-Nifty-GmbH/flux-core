@@ -16,10 +16,6 @@ class Warehouse extends FluxModel
 {
     use Filterable, HasDefault, HasPackageFactory, HasUserModification, HasUuid, LogsActivity, Searchable, SoftDeletes;
 
-    protected $guarded = [
-        'id',
-    ];
-
     protected function casts(): array
     {
         return [

@@ -34,10 +34,6 @@ class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables
         HasPackageFactory, HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification, HasUuid,
         InteractsWithMedia, LogsActivity, Searchable, SoftDeletes, Trackable;
 
-    protected $guarded = [
-        'id',
-    ];
-
     protected ?string $detailRouteName = 'tickets.id';
 
     protected array $relatedCustomEvents = [

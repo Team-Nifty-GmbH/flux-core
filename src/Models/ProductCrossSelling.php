@@ -15,10 +15,6 @@ class ProductCrossSelling extends FluxModel implements Sortable
 {
     use HasPackageFactory, HasUuid, SortableTrait;
 
-    protected $guarded = [
-        'id',
-    ];
-
     protected function casts(): array
     {
         return [

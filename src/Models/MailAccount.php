@@ -23,10 +23,6 @@ class MailAccount extends FluxModel
 
     public bool $supportsHierarchicalFolders = true;
 
-    protected $guarded = [
-        'id',
-    ];
-
     protected $hidden = [
         'password',
         'smtp_password',

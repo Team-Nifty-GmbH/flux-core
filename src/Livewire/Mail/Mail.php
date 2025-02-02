@@ -135,18 +135,12 @@ class Mail extends CommunicationList
     protected function loadFolders(): void
     {
         foreach ($this->mailAccounts as $mailAccount) {
-            app(MailFolder::class)
-                ->addGlobalScope('children', function (Builder $builder) use ($mailAccount) {
-                    $builder->with('children')
-                        ->where('mail_account_id', data_get($mailAccount, 'id'));
-                });
-
             $this->folders[data_get($mailAccount, 'id')] = [
                 'id' => data_get($mailAccount, 'uuid'),
                 'name' => resolve_static(MailAccount::class, 'query')
                     ->whereKey(data_get($mailAccount, 'id'))
                     ->value('email'),
-                'children' => resolve_static(MailFolder::class, 'query')
+                'children' => resolve_static(MailFolder::class, 'familyTree')
                     ->where('parent_id', null)
                     ->where('mail_account_id', $mailAccount)
                     ->get()

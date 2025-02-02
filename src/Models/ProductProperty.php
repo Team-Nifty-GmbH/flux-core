@@ -20,10 +20,6 @@ class ProductProperty extends FluxModel
         'pivot',
     ];
 
-    protected $guarded = [
-        'id',
-    ];
-
     protected function casts(): array
     {
         return [

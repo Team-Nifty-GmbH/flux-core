@@ -3,27 +3,14 @@
 namespace FluxErp\Models;
 
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasParentChildRelations;
 use FluxErp\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class MailFolder extends FluxModel
 {
-    use HasPackageFactory, HasUuid;
-
-    protected $guarded = [
-        'id',
-    ];
-
-    public function children(): HasMany
-    {
-        return $this->hasMany(MailFolder::class, 'parent_id');
-    }
-
-    public function parent(): BelongsTo
-    {
-        return $this->belongsTo(MailFolder::class, 'parent_id');
-    }
+    use HasPackageFactory, HasParentChildRelations, HasUuid;
 
     public function mailAccount(): BelongsTo
     {

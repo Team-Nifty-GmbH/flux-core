@@ -10,6 +10,7 @@ use FluxErp\Traits\HasCalendarUserSettings;
 use FluxErp\Traits\HasCart;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasParentChildRelations;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\HasWidgets;
@@ -40,9 +41,9 @@ use TeamNiftyGmbH\DataTable\Traits\HasDatatableUserSettings;
 class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia, InteractsWithDataTables
 {
     use CacheModelQueries, Commentable, Filterable, HasCalendars, HasCalendarUserSettings, HasCart,
-        HasDatatableUserSettings, HasFrontendAttributes, HasPackageFactory, HasPushSubscriptions, HasRoles,
-        HasUserModification, HasUuid, HasWidgets, InteractsWithMedia, MonitorsQueue, Notifiable, Searchable,
-        SoftDeletes;
+        HasDatatableUserSettings, HasFrontendAttributes, HasPackageFactory, HasParentChildRelations,
+        HasPushSubscriptions, HasRoles, HasUserModification, HasUuid, HasWidgets, InteractsWithMedia, MonitorsQueue,
+        Notifiable, Searchable, SoftDeletes;
 
     protected $hidden = [
         'password',
@@ -90,11 +91,6 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
         return $this->morphMany(Activity::class, 'causer');
     }
 
-    public function children(): HasMany
-    {
-        return $this->hasMany(User::class, 'parent_id');
-    }
-
     public function clients(): BelongsToMany
     {
         return $this->belongsToMany(Client::class, 'client_user');
@@ -138,11 +134,6 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
     public function mailAccounts(): BelongsToMany
     {
         return $this->belongsToMany(MailAccount::class, 'mail_account_user');
-    }
-
-    public function parent(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'parent_id');
     }
 
     public function settings(): MorphMany

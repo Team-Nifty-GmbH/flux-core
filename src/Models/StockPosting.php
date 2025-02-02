@@ -4,6 +4,7 @@ namespace FluxErp\Models;
 
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasParentChildRelations;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
@@ -13,11 +14,7 @@ use Illuminate\Support\Facades\Cache;
 
 class StockPosting extends FluxModel
 {
-    use Filterable, HasPackageFactory, HasUserModification, HasUuid, LogsActivity, SoftDeletes;
-
-    protected $guarded = [
-        'id',
-    ];
+    use Filterable, HasPackageFactory, HasParentChildRelations, HasUserModification, HasUuid, LogsActivity, SoftDeletes;
 
     protected static function booted(): void
     {
@@ -46,11 +43,6 @@ class StockPosting extends FluxModel
             'updated_at' => 'datetime',
             'deleted_at' => 'datetime',
         ];
-    }
-
-    public function parent(): BelongsTo
-    {
-        return $this->belongsTo(StockPosting::class, 'parent_id');
     }
 
     public function product(): BelongsTo

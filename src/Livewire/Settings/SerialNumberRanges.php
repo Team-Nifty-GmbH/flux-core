@@ -25,13 +25,6 @@ class SerialNumberRanges extends SerialNumberRangeList
 
     public SerialNumberRangeForm $serialNumberRange;
 
-    public function mount(): void
-    {
-        parent::mount();
-
-        $this->headline = __('Serial Number Ranges');
-    }
-
     protected function getViewData(): array
     {
         return array_merge(

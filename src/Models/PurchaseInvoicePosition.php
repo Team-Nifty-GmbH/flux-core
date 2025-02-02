@@ -12,8 +12,6 @@ class PurchaseInvoicePosition extends FluxModel
 {
     use HasPackageFactory, HasUserModification, HasUuid, LogsActivity;
 
-    protected $guarded = ['id'];
-
     public function ledgerAccount(): BelongsTo
     {
         return $this->belongsTo(LedgerAccount::class);

@@ -29,10 +29,6 @@ class QueueMonitor extends FluxModel
 {
     use HasFrontendAttributes, HasStates, MassPrunable;
 
-    protected $guarded = [
-        'id',
-    ];
-
     protected function casts(): array
     {
         return [

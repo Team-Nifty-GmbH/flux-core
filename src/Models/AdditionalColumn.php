@@ -12,12 +12,6 @@ class AdditionalColumn extends FluxModel
 {
     use CacheModelQueries, Filterable, HasPackageFactory;
 
-    protected $guarded = [
-        'id',
-        'created_at',
-        'updated_at',
-    ];
-
     protected $hidden = [
         'pivot',
     ];

@@ -14,10 +14,6 @@ class ProductPropertyGroup extends FluxModel
 {
     use CacheModelQueries, Filterable, HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
 
-    protected $guarded = [
-        'id',
-    ];
-
     public function productProperties(): HasMany
     {
         return $this->hasMany(ProductProperty::class, 'product_property_group_id');

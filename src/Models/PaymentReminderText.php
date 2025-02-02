@@ -10,10 +10,6 @@ class PaymentReminderText extends FluxModel
 {
     use CacheModelQueries, HasPackageFactory, HasUuid;
 
-    protected $guarded = [
-        'id',
-    ];
-
     protected function casts(): array
     {
         return [

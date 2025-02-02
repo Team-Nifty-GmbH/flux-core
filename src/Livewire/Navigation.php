@@ -73,7 +73,9 @@ class Navigation extends Component
 
     protected function getMenu(): Collection
     {
-        $menuHash = md5(serialize(Menu::all()));
+        $menuAll = Menu::all();
+        data_forget($menuAll, 'settings.children');
+        $menuHash = md5(serialize($menuAll));
 
         if (Session::has('navigations.' . $menuHash)) {
             return Session::get('navigations.' . $menuHash);
@@ -82,6 +84,7 @@ class Navigation extends Component
         $guard = explode('_', Auth::guard()->getName());
 
         $navigations = Menu::forGuard($guard[1], $guard[1] === 'address' ? 'portal' : null);
+        data_forget($navigations, 'settings.children');
 
         array_walk_recursive($navigations, function (&$item, $key) {
             if ($key === 'label') {

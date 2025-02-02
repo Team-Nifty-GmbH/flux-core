@@ -19,10 +19,6 @@ class Country extends FluxModel
     use CacheModelQueries, Commentable, Filterable, HasDefault, HasPackageFactory, HasUserModification,
         HasUuid, LogsActivity, SoftDeletes;
 
-    protected $guarded = [
-        'id',
-    ];
-
     protected function casts(): array
     {
         return [

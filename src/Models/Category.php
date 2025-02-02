@@ -7,13 +7,13 @@ use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasParentChildRelations;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SortableTrait;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
@@ -24,12 +24,8 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Category extends FluxModel implements InteractsWithDataTables, Sortable
 {
-    use Commentable, Filterable, HasAdditionalColumns, HasPackageFactory, HasUserModification, HasUuid, LogsActivity,
-        Searchable, SortableTrait;
-
-    protected $guarded = [
-        'id',
-    ];
+    use Commentable, Filterable, HasAdditionalColumns, HasPackageFactory, HasParentChildRelations, HasUserModification,
+        HasUuid, LogsActivity, Searchable, SortableTrait;
 
     protected $hidden = [
         'pivot',
@@ -77,19 +73,9 @@ class Category extends FluxModel implements InteractsWithDataTables, Sortable
         );
     }
 
-    public function children(): HasMany
-    {
-        return $this->hasMany(Category::class, 'parent_id')->with('children');
-    }
-
     public function discounts(): BelongsToMany
     {
         return $this->belongsToMany(Discount::class, 'category_price_list');
-    }
-
-    public function parent(): BelongsTo
-    {
-        return $this->belongsTo(Category::class, 'parent_id');
     }
 
     public function media(): HasMany

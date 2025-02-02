@@ -34,10 +34,6 @@ class Price extends FluxModel
         'is_inherited',
     ];
 
-    protected $guarded = [
-        'id',
-    ];
-
     protected $with = [
         'priceList',
         'product:id,vat_rate_id',

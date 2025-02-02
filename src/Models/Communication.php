@@ -31,10 +31,6 @@ class Communication extends FluxModel implements HasMedia, OffersPrinting
     use HasPackageFactory, HasTags, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity,
         Printable, Searchable, SoftDeletes;
 
-    protected $guarded = [
-        'id',
-    ];
-
     protected static function booted(): void
     {
         static::saving(function (Communication $message) {
