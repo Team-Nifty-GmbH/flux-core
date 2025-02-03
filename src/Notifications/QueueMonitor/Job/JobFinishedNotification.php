@@ -12,12 +12,15 @@ use Illuminate\Notifications\Channels\DatabaseChannel;
 use Illuminate\Notifications\Channels\MailChannel;
 use Illuminate\Notifications\Messages\MailMessage;
 use NotificationChannels\WebPush\WebPushMessage;
+use Ramsey\Uuid\Uuid;
 
 class JobFinishedNotification extends Notification implements HasToastNotification
 {
     public function __construct(public QueueMonitor $model)
     {
-        $this->id = $this->model->job_batch_id ?? $this->model->job_id;
+        $this->id = Uuid::uuid5(
+            Uuid::NAMESPACE_URL, static::class . ':' . ($this->model->job_batch_id ?? $this->model->job_id)
+        );
     }
 
     public function via(object $notifiable): array

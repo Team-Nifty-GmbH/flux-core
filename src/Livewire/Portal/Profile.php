@@ -126,7 +126,7 @@ class Profile extends Component
             return;
         }
 
-        $this->notification()->success(__('Successfully saved'));
+        $this->notification()->success(__(':model saved', ['model' => __('My Profile')]));
         $this->loginPassword = null;
     }
 }

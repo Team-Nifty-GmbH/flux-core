@@ -149,6 +149,8 @@ class Clients extends ClientList
             }
         }
 
+        $this->notification()->success(__(':model saved', ['model' => __('Client')]));
+
         $this->loadData();
 
         return true;

@@ -245,7 +245,17 @@ abstract class FluxAction
         });
 
         if ($current) {
-            auth()->login($current);
+            if (method_exists(auth(), 'login')) {
+                auth()->login($current);
+            } else {
+                auth()->setUser($current);
+            }
+        } elseif (isset($this->actingAs)) {
+            if (method_exists(auth(), 'logout')) {
+                auth()->logout();
+            } else {
+                auth()->forgetUser();
+            }
         }
 
         $this->fireActionEvent(event: 'executed', halt: false);

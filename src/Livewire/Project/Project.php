@@ -89,7 +89,7 @@ class Project extends Component
             return false;
         }
 
-        $this->notification()->success(__('Project saved'));
+        $this->notification()->success(__(':model saved', ['model' => __('Project')]));
         $this->skipRender();
 
         return true;

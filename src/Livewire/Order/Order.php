@@ -240,7 +240,7 @@ class Order extends Component
             exception_to_notifications($e, $this);
         }
 
-        $this->notification()->success(__('Order saved successfully!'));
+        $this->notification()->success(__(':model saved', ['model' => __('Order')]));
     }
 
     public function updatedOrderAddressInvoiceId(): void
@@ -376,7 +376,7 @@ class Order extends Component
         }
 
         $action->execute();
-        $this->notification()->success(__('Order saved successfully!'));
+        $this->notification()->success(__(':model saved', ['model' => __('Order')]));
 
         return true;
     }

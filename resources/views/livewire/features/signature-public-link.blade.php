@@ -18,10 +18,10 @@
                             </template>
                         </div>
                         <template x-if="error">
-                            <p class="text-2xl">{{ __("Upload Failed") }}</p>
+                            <p class="text-2xl">{{ __('Upload Failed') }}</p>
                         </template>
                         <template x-if="id && !error">
-                            <p class="text-2xl">{{ __("Signature saved") }}</p>
+                            <p class="text-2xl">{{ __(':model saved', ['model' => __('Signature')]) }}</p>
                         </template>
                     </div>
                 </div>

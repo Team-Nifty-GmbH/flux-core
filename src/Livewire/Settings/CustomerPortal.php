@@ -96,7 +96,7 @@ class CustomerPortal extends Component
 
         $this->setting = $isNew ? $response->toArray() : $response['data']->toArray();
 
-        $this->notification()->success(__('Customer Portal settings saved successful.'));
+        $this->notification()->success(__(':model saved', ['model' => __('Customer Portal Settings')]));
 
         $this->skipRender();
     }
