@@ -24,11 +24,6 @@ trait HasParentChildRelations
         return $this->hasMany(static::class, $this->getParentKeyAttribute());
     }
 
-    public function scopeFamilyTree(): void
-    {
-        static::addGlobalScope(resolve_static(FamilyTreeScope::class, 'class'));
-    }
-
     public static function familyTree(): Builder
     {
         static::addGlobalScope(resolve_static(FamilyTreeScope::class, 'class'));
