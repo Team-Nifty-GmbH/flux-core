@@ -139,9 +139,9 @@ class WorkTime extends FluxModel implements Calendarable
             array_merge(
                 $bluePrint,
                 [
-                    'id' => Str::of(static::class)->replace('\\', '.'),
+                    'id' => base64_encode(static::class),
                     'modelType' => morph_alias(static::class),
-                    'name' => __('Employees'),
+                    'name' => __('Work Times'),
                     'children' => resolve_static(User::class, 'query')
                         ->where('is_active', true)
                         ->get()
@@ -149,7 +149,7 @@ class WorkTime extends FluxModel implements Calendarable
                             return array_merge(
                                 $bluePrint,
                                 [
-                                    'id' => Str::of(static::class)->replace('\\', '.') . '.' . $user->id,
+                                    'id' => base64_encode($user->getMorphClass() . ':' . $user->getKey()),
                                     'parentId' => Str::of(static::class)->replace('\\', '.'),
                                     'modelType' => morph_alias(static::class),
                                     'name' => $user->name,
@@ -158,7 +158,7 @@ class WorkTime extends FluxModel implements Calendarable
                                         array_merge(
                                             $bluePrint,
                                             [
-                                                'id' => Str::of(static::class)->replace('\\', '.') . '.' . $user->id . '.work_time',
+                                                'id' => base64_encode($user->getMorphClass() . ':' . $user->getKey() . '.work_time'),
                                                 'parentId' => Str::of(static::class)->replace('\\', '.') . '.' . $user->id,
                                                 'modelType' => morph_alias(static::class),
                                                 'name' => $user->name . ' (' . __('Work Time') . ')',
@@ -200,7 +200,7 @@ class WorkTime extends FluxModel implements Calendarable
         Carbon|string|null $end,
         ?array $info = null
     ): void {
-        $info = explode('.', data_get($info, 'id'));
+        $info = explode('.', base64_decode(data_get($info, 'id')));
         $type = array_pop($info);
         $userId = array_pop($info);
 
@@ -212,7 +212,7 @@ class WorkTime extends FluxModel implements Calendarable
             $builder->where('ended_at', '<=', $end);
         }
 
-        $builder->where('user_id', $userId);
+        $builder->where('user_id', Str::after($userId, ':'));
 
         if ($this->hasNamedScope(Str::studly($type))) {
             $this->callNamedScope(Str::studly($type), ['builder' => $builder]);
