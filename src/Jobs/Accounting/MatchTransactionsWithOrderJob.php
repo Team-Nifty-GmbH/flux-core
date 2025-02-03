@@ -46,7 +46,10 @@ class MatchTransactionsWithOrderJob implements ShouldQueue
                     explode(' ', $transaction->purpose),
                     explode('.', $transaction->purpose),
                     explode('-', $transaction->purpose),
-                ))->filter()->unique()->values();
+                ))
+                    ->filter()
+                    ->unique()
+                    ->values();
 
                 foreach ($search as $word) {
                     $word = trim($word);

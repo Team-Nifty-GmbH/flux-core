@@ -273,9 +273,11 @@
                 ]"
             >
                 <x-slot:beforeOptions>
-                    <div class="px-1">
-                        <x-button positive full :label="__('Add')" wire:click="addTag($promptValue())" wire:flux-confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}" />
-                    </div>
+                    @canAction(\FluxErp\Actions\Tag\CreateTag::class)
+                        <div class="px-1">
+                            <x-button positive full :label="__('Add')" wire:click="addTag($promptValue())" wire:flux-confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}" />
+                        </div>
+                    @endCanAction
                 </x-slot:beforeOptions>
             </x-select>
             <x-flux::features.media.upload-form-object :label="__('Attachments')" wire:model="attachments" :multiple="true" x-bind:disabled="$wire.communication.id && $wire.communication.communication_type_enum === 'mail'"/>
