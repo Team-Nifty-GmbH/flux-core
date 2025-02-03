@@ -432,7 +432,6 @@ class Order extends Component
             let component = Alpine.\$data(document.getElementById('replicate-order-order-type').querySelector('[x-data]'));
             component.asyncData.params.whereIn[0][1] = $orderTypeIds;
         JS);
-
     }
 
     #[Renderless]

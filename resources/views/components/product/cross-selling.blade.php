@@ -27,7 +27,7 @@
                             'product_number',
                             'name',
                         ],
-                    ]
+                    ],
                 ]"
             />
         </div>
