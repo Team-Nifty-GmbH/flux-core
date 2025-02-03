@@ -18,6 +18,7 @@
                 option-label="name"
                 :async-data="[
                     'api' => route('search', \FluxErp\Models\Category::class),
+                    'method' => 'POST',
                     'params' => [
                         'fields' => ['id', 'name'],
                         'where' => [
@@ -43,10 +44,15 @@
                 ]"
                 :async-data="[
                     'api' => route('search', \FluxErp\Models\Product::class),
+                    'method' => 'POST',
                     'params' => [
-                        'fields' => ['id', 'name', 'product_number'],
+                        'fields' => [
+                            'id',
+                            'name',
+                            'product_number',
+                        ],
                         'with' => 'media',
-                    ]
+                    ],
                 ]"
             />
         </div>

@@ -119,7 +119,7 @@
                                                         'model_type',
                                                         '=',
                                                         morph_alias(\FluxErp\Models\Product::class),
-                                                    ]
+                                                    ],
                                                 ],
                                             ],
                                         ]"

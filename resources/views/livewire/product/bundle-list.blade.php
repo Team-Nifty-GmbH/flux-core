@@ -15,8 +15,13 @@
                     ]"
                     :async-data="[
                         'api' => route('search', \FluxErp\Models\Product::class),
+                        'method' => 'POST',
                         'params' => [
-                            'fields' => ['id', 'name', 'product_number'],
+                            'fields' => [
+                                'id',
+                                'name',
+                                'product_number',
+                            ],
                             'where' => [
                                 [
                                     'id',
@@ -25,7 +30,7 @@
                                 ],
                             ],
                             'with' => 'media',
-                        ]
+                        ],
                     ]"
                 />
                 <x-inputs.number

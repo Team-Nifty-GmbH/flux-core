@@ -289,7 +289,9 @@ class OrderTest extends BaseSetup
             'orders.id',
             ['id' => $component->get('replicateOrder.id')]
         );
-        $replicatedOrder = Order::query()->whereKey($component->get('replicateOrder.id'))->first();
+        $replicatedOrder = Order::query()
+            ->whereKey($component->get('replicateOrder.id'))
+            ->first();
 
         $this->assertEquals($this->order->orderPositions()->count(), $replicatedOrder->orderPositions()->count());
         $this->assertNull($replicatedOrder->invoice_number);

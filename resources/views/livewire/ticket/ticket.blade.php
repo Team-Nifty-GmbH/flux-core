@@ -147,7 +147,7 @@
                                     'method' => 'POST',
                                     'params' => [
                                         'with' => 'media',
-                                    ]
+                                    ],
                                 ]"
                             />
                             <div>
@@ -176,13 +176,13 @@
                                     ]"
                                     :async-data="[
                                         'api' => route('search', $ticket['authenticatable_type'] ?
-                                            morphed_model($ticket['authenticatable_type']) :
-                                            resolve_static(\FluxErp\Models\Address::class, 'class')
-                                        ),
+                                                morphed_model($ticket['authenticatable_type']) :
+                                                resolve_static(\FluxErp\Models\Address::class, 'class')
+                                            ),
                                         'method' => 'POST',
                                         'params' => [
                                             'with' => $ticket['authenticatable_type'] === morph_alias(\FluxErp\Models\Address::class) ? 'contact.media' : 'media',
-                                        ]
+                                        ],
                                     ]"
                                 />
                             </div>

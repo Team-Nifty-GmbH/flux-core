@@ -426,6 +426,13 @@ class Order extends Component
                 $openModal('replicate-order');
             JS);
         }
+
+        $orderTypeIds = json_encode(array_column($replicateOrderTypes, 'id'));
+        $this->js(<<<JS
+            let component = Alpine.\$data(document.getElementById('replicate-order-order-type').querySelector('[x-data]'));
+            component.asyncData.params.whereIn[0][1] = $orderTypeIds;
+        JS);
+
     }
 
     #[Renderless]
@@ -488,6 +495,7 @@ class Order extends Component
         }
     }
 
+    #[Renderless]
     public function takeOrderPositions(array $positionIds): void
     {
         $orderPositions = resolve_static(OrderPosition::class, 'query')

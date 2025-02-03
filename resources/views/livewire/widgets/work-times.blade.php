@@ -14,7 +14,7 @@
                 'method' => 'POST',
                 'params' => [
                     'with' => 'media',
-                ]
+                ],
             ]"
         />
     </div>

@@ -18,6 +18,7 @@
                             x-bind:readonly="!edit"
                             :async-data="[
                                 'api' => route('search', \FluxErp\Models\Project::class),
+                                'method' => 'POST',
                             ]"
                         />
                     </div>
@@ -39,7 +40,7 @@
                                 'method' => 'POST',
                                 'params' => [
                                     'with' => 'media',
-                                ]
+                                ],
                             ]"
                         />
                     </div>
@@ -114,7 +115,7 @@
                         'method' => 'POST',
                         'params' => [
                             'with' => 'media',
-                        ]
+                        ],
                     ]"
                 />
             </div>

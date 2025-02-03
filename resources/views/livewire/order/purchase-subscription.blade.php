@@ -31,7 +31,7 @@
                                 [
                                     'is_hidden',
                                     '=',
-                                    false
+                                    false,
                                 ],
                             ],
                             'whereIn' => [
@@ -41,8 +41,8 @@
                                         ->filter(fn(OrderTypeEnum $type) => $type->isPurchase() && ! $type->isSubscription())
                                         ->toArray(),
                                 ],
-                            ]
-                        ]
+                            ],
+                        ],
                     ]"
                 />
                 <x-select

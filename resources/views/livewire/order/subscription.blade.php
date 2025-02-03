@@ -30,10 +30,10 @@
                                 [
                                     'is_hidden',
                                     '=',
-                                    false
-                                ]
-                            ]
-                        ]
+                                    false,
+                                ],
+                            ],
+                        ],
                     ]"
                 />
                 <x-select

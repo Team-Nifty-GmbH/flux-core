@@ -134,6 +134,7 @@ class ReplicateOrder extends FluxAction
                     ->firstWhere('origin_position_id', $orderPosition['parent_id'])
                     ?->getKey();
             }
+
             $orderPosition['created_from_id'] = data_get($orderPosition, 'id');
 
             unset(

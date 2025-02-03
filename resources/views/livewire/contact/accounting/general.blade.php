@@ -52,7 +52,7 @@
                     'method' => 'POST',
                     'params' => [
                         'with' => 'media',
-                    ]
+                    ],
                 ]"
             />
             <x-select
@@ -70,7 +70,7 @@
                     'method' => 'POST',
                     'params' => [
                         'with' => 'media',
-                    ]
+                    ],
                 ]"
             />
         </div>

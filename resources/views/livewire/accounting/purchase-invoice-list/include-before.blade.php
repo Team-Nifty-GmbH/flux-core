@@ -62,12 +62,12 @@
                                             'is_main_address',
                                             '=',
                                             true,
-                                        ]
+                                        ],
                                     ],
                                     'with' => [
                                         'contact.media',
                                     ],
-                                ]
+                                ],
                             ]"
                         />
                     </div>
@@ -106,7 +106,7 @@
                                     'method' => 'POST',
                                     'params' => [
                                         'with' => 'media',
-                                    ]
+                                    ],
                                 ]"
                             />
                         </div>
@@ -182,8 +182,8 @@
                                             'bic',
                                             'bank_name',
                                             'account_holder',
-                                        ]
-                                    ]
+                                        ],
+                                    ],
                                 ]"
                             />
                         </div>
@@ -229,11 +229,16 @@
                                             ]"
                                             :async-data="[
                                                 'api' => route('search', \FluxErp\Models\Product::class),
+                                                'method' => 'POST',
                                                 'params' => [
                                                     'whereDoesntHave' => 'children',
-                                                    'fields' => ['id', 'name', 'product_number'],
+                                                    'fields' => [
+                                                        'id',
+                                                        'name',
+                                                        'product_number',
+                                                    ],
                                                     'with' => 'media',
-                                                ]
+                                                ],
                                             ]"
                                         />
                                     </div>
@@ -288,6 +293,7 @@
                                             x-model.number="position.ledger_account_id"
                                             :async-data="[
                                                 'api' => route('search', \FluxErp\Models\LedgerAccount::class),
+                                                'method' => 'POST',
                                                 'params' => [
                                                     'where' => [
                                                         [
@@ -295,8 +301,8 @@
                                                             '=',
                                                             \FluxErp\Enums\LedgerAccountTypeEnum::Expense,
                                                         ],
-                                                    ]
-                                                ]
+                                                    ],
+                                                ],
                                             ]"
                                         />
                                     </div>

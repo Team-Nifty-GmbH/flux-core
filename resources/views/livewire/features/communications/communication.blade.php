@@ -122,16 +122,22 @@
                         'api' => route('search', \FluxErp\Models\Address::class),
                         'method' => 'POST',
                         'params' => [
-                            'fields' => ['id', 'name', 'zip', 'city', 'street'],
+                            'fields' => [
+                                'id',
+                                'name',
+                                'zip',
+                                'city',
+                                'street',
+                            ],
                             'where' => $this->modelType === morph_alias(\FluxErp\Models\Contact::class)
-                            ? [
-                                [
-                                    'contact_id',
-                                    '=',
-                                    $contactId,
-                                ],
-                            ]
-                            : [],
+                                ? [
+                                    [
+                                        'contact_id',
+                                        '=',
+                                        $contactId,
+                                    ],
+                                ]
+                                : [],
                         ],
                     ]"
                 />

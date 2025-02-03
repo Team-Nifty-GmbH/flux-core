@@ -26,7 +26,7 @@
                                             $clientId
                                         ],
                                     ],
-                                ]
+                                ],
                             ]"
                         />
                         <x-select

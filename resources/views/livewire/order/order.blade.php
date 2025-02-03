@@ -57,10 +57,10 @@
                                         [
                                             'is_hidden',
                                             '=',
-                                            false
-                                        ]
-                                    ]
-                                ]
+                                            false,
+                                        ],
+                                    ],
+                                ],
                             ]"
                         />
                         <div class="pt-4">
@@ -94,7 +94,7 @@
                                             ]
                                         ],
                                         'with' => 'contact.media',
-                                    ]
+                                    ],
                                 ]"
                             />
                             <div id="invoice-address-id">
@@ -112,9 +112,13 @@
                                         'params' => [
                                             'with' => 'contact.media',
                                             'where' => [
-                                                ['contact_id', '=', $order->contact_id],
+                                                [
+                                                    'contact_id',
+                                                    '=',
+                                                    $order->contact_id,
+                                                ],
                                             ],
-                                        ]
+                                        ],
                                     ]"
                                 />
                             </div>
@@ -133,9 +137,13 @@
                                         'params' => [
                                             'with' => 'contact.media',
                                             'where' => [
-                                                ['contact_id', '=', $order->contact_id],
+                                                [
+                                                    'contact_id',
+                                                    '=',
+                                                    $order->contact_id,
+                                                ],
                                             ],
-                                        ]
+                                        ],
                                     ]"
                                 />
                             </div>
@@ -194,7 +202,7 @@
         <x-modal name="create-child-order" max-width="7xl">
             <x-card>
                 <div class="grid grid-cols-2 gap-1.5">
-                    <div class="flex flex-col gap-1.5">
+                    <div id="replicate-order-order-type">
                         <x-select
                             :label="__('Order Type')"
                             wire:model="replicateOrder.order_type_id"
@@ -218,13 +226,14 @@
                                             '=',
                                             true,
                                         ],
+                                    ],
+                                    'whereIn' => [
                                         [
-                                            'order_type_enum',
-                                            '=',
-                                            \FluxErp\Enums\OrderTypeEnum::Retoure
-                                        ]
-                                    ]
-                                ]
+                                            'id',
+                                            '',
+                                        ],
+                                    ],
+                                ],
                             ]"
                         />
                     </div>
@@ -361,7 +370,6 @@
                 <a wire:navigate
                    class="flex gap-1.5 font-semibold opacity-40 dark:text-gray-200"
                    x-bind:href="($wire.order.parent?.url ?? $wire.order.created_from?.url) || ''"
-                   x-on:click="console.log($el.href)"
                    x-show="$wire.order.parent?.url || $wire.order.created_from?.url"
                 >
                     <i class="size-4 ph ph-copy"
@@ -452,7 +460,7 @@
                                                 ]
                                             ],
                                             'with' => 'contact.media',
-                                        ]
+                                        ],
                                     ]"
                                 />
                             </div>
@@ -475,12 +483,17 @@
                                     :clearable="false"
                                     :async-data="[
                                         'api' => route('search', \FluxErp\Models\Address::class),
+                                        'method' => 'POST',
                                         'params' => [
                                             'with' => 'contact.media',
                                             'where' => [
-                                                ['contact_id', '=', $order->contact_id],
+                                                [
+                                                    'contact_id',
+                                                    '=',
+                                                    $order->contact_id,
+                                                ],
                                             ],
-                                        ]
+                                        ],
                                     ]"
                                 />
                             </div>
@@ -515,12 +528,17 @@
                                     :clearable="false"
                                     :async-data="[
                                         'api' => route('search', \FluxErp\Models\Address::class),
+                                        'method' => 'POST',
                                         'params' => [
                                             'with' => 'contact.media',
                                             'where' => [
-                                                ['contact_id', '=', $order->contact_id],
+                                                [
+                                                    'contact_id',
+                                                    '=',
+                                                    $order->contact_id,
+                                                ],
                                             ],
-                                        ]
+                                        ],
                                     ]"
                                 />
                             </div>
@@ -589,7 +607,7 @@
                                         'method' => 'POST',
                                         'params' => [
                                             'with' => 'media',
-                                        ]
+                                        ],
                                     ]"
                                 />
                                 <x-select
@@ -607,7 +625,7 @@
                                         'method' => 'POST',
                                         'params' => [
                                             'with' => 'media',
-                                        ]
+                                        ],
                                     ]"
                                 />
                                 <x-select
@@ -626,7 +644,7 @@
                                         'method' => 'POST',
                                         'params' => [
                                             'with' => 'media',
-                                        ]
+                                        ],
                                     ]"
                                 />
                                 <x-select
