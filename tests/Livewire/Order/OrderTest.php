@@ -278,7 +278,6 @@ class OrderTest extends BaseSetup
             ->call('replicate')
             ->assertStatus(200)
             ->assertHasNoErrors()
-            ->assertSet('replicateOrderTypes', [])
             ->assertExecutesJs(<<<'JS'
                 $openModal('replicate-order')
              JS)
@@ -290,18 +289,21 @@ class OrderTest extends BaseSetup
             'orders.id',
             ['id' => $component->get('replicateOrder.id')]
         );
-        $replicatedOrder = Order::query()->whereKey($component->get('replicateOrder.id'))->first();
+        $replicatedOrder = Order::query()
+            ->whereKey($component->get('replicateOrder.id'))
+            ->first();
 
         $this->assertEquals($this->order->orderPositions()->count(), $replicatedOrder->orderPositions()->count());
-        $this->assertEquals(null, $replicatedOrder->invoice_number);
-        $this->assertEquals(false, $replicatedOrder->is_locked);
-        $this->assertEquals($this->order->id, $replicatedOrder->parent_id);
+        $this->assertNull($replicatedOrder->invoice_number);
+        $this->assertFalse($replicatedOrder->is_locked);
+        $this->assertNull($replicatedOrder->parent_id);
+        $this->assertEquals($this->order->id, $replicatedOrder->created_from_id);
         $this->assertNotEquals($replicatedOrder->order_number, $this->order->order_number);
         $this->assertNotEquals($replicatedOrder->uuid, $this->order->uuid);
         $this->assertEquals(
             0,
             $replicatedOrder->orderPositions()
-                ->whereNotNull('origin_position_id')
+                ->whereNull('created_from_id')
                 ->count()
         );
     }
@@ -335,7 +337,6 @@ class OrderTest extends BaseSetup
             ->call('replicate')
             ->assertStatus(200)
             ->assertHasNoErrors()
-            ->assertSet('replicateOrderTypes', [])
             ->assertExecutesJs(<<<'JS'
                 $openModal('replicate-order')
              JS)
@@ -365,10 +366,11 @@ class OrderTest extends BaseSetup
         $this->assertNull($replicatedOrder->invoice_number);
         $this->assertFalse($replicatedOrder->is_locked);
         $this->assertNull($replicatedOrder->parent_id);
+        $this->assertEquals($this->order->id, $replicatedOrder->created_from_id);
         $this->assertEquals(
             0,
             $replicatedOrder->orderPositions()
-                ->whereNotNull('origin_position_id')
+                ->whereNull('created_from_id')
                 ->count()
         );
     }

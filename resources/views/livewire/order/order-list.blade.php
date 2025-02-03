@@ -51,10 +51,10 @@
                                             'is_main_address',
                                             '=',
                                             true,
-                                        ]
+                                        ],
                                     ],
                                     'with' => ['contact.media', 'country:id,name'],
-                                ]
+                                ],
                             ]"
                         />
                         <div id="invoice-address-id">
@@ -72,9 +72,13 @@
                                     'params' => [
                                         'with' => 'contact.media',
                                         'where' => [
-                                            ['contact_id', '=', $order->contact_id],
+                                            [
+                                                'contact_id',
+                                                '=',
+                                                $order->contact_id,
+                                            ],
                                         ],
-                                    ]
+                                    ],
                                 ]"
                             />
                         </div>
@@ -93,9 +97,13 @@
                                     'params' => [
                                         'with' => 'contact.media',
                                         'where' => [
-                                            ['contact_id', '=', $order->contact_id],
+                                            [
+                                                'contact_id',
+                                                '=',
+                                                $order->contact_id,
+                                            ],
                                         ],
-                                    ]
+                                    ],
                                 ]"
                             />
                         </div>

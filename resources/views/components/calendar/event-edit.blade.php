@@ -377,10 +377,10 @@
                                     [
                                         'id',
                                         '!=',
-                                        auth()->user()?->id
-                                    ]
+                                        auth()->user()?->id,
+                                    ],
                                 ],
-                            ]
+                            ],
                         ]"
                         x-on:selected="$wire.calendarEvent.invited.push($event.detail); clear(); asyncData.params.where.push(['id', '!=', $event.detail.id])"
                     />

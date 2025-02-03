@@ -58,7 +58,11 @@
                                                 'method' => 'POST',
                                                 'params' => [
                                                     'whereDoesntHave' => 'children',
-                                                    'fields' => ['id', 'name', 'product_number'],
+                                                    'fields' => [
+                                                        'id',
+                                                        'name',
+                                                        'product_number',
+                                                    ],
                                                     'with' => 'media',
                                                 ],
                                             ]"
@@ -130,8 +134,8 @@
                                                             ? \FluxErp\Enums\LedgerAccountTypeEnum::Expense
                                                             : \FluxErp\Enums\LedgerAccountTypeEnum::Revenue,
                                                     ],
-                                                ]
-                                            ]
+                                                ],
+                                            ],
                                         ]"
                                     />
                                 @show
@@ -200,9 +204,13 @@
                                                 'method' => 'POST',
                                                 'params' => [
                                                     'whereDoesntHave' => 'children',
-                                                    'fields' => ['id', 'name', 'product_number'],
+                                                    'fields' => [
+                                                        'id',
+                                                        'name',
+                                                        'product_number',
+                                                    ],
                                                     'with' => 'media',
-                                                ]
+                                                ],
                                             ]"
                                         />
                                         <div

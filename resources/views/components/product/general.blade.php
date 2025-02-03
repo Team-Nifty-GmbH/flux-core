@@ -301,7 +301,7 @@
                                           'is_main_address',
                                           '=',
                                           true,
-                                      ]
+                                      ],
                                   ],
                                   'option-value' => 'contact_id',
                                   'fields' => [
@@ -309,7 +309,7 @@
                                       'name',
                                   ],
                                   'with' => 'contact.media',
-                              ]
+                              ],
                           ]"
                 />
             </div>

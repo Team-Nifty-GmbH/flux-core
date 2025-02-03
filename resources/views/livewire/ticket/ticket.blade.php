@@ -145,7 +145,7 @@
                                     'method' => 'POST',
                                     'params' => [
                                         'with' => 'media',
-                                    ]
+                                    ],
                                 ]"
                             />
                             <div>
@@ -181,7 +181,7 @@
                                             'method' => 'POST',
                                             'params' => [
                                                 'with' => $ticket->authenticatable_type === morph_alias(\FluxErp\Models\Address::class) ? 'contact.media' : 'media',
-                                            ]
+                                            ],
                                         ]"
                                     />
                                 </div>
