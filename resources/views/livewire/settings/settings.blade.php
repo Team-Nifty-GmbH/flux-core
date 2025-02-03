@@ -21,5 +21,4 @@
             />
         @endif
     </x-card>
-
 </div>

@@ -142,7 +142,7 @@ class Mail extends CommunicationList
                     ->value('email'),
                 'children' => resolve_static(MailFolder::class, 'familyTree')
                     ->where('parent_id', null)
-                    ->where('mail_account_id', $mailAccount)
+                    ->where('mail_account_id', data_get($mailAccount, 'id'))
                     ->get()
                     ->toArray(),
             ];

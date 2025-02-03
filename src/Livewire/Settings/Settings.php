@@ -31,8 +31,7 @@ class Settings extends Component
 
     public function showSetting(array $setting): void
     {
-        $uri = Str::of($setting['uri'])->after('/settings/')->prepend('settings/')->toString();
-        $route = Route::getRoutes()->match(Request::create($uri));
+        $route = Route::getRoutes()->match(Request::create(parse_url($setting['uri'], PHP_URL_PATH)));
         $permission = route_to_permission($route);
 
         if (
@@ -57,7 +56,6 @@ class Settings extends Component
 
         $this->setting = $setting;
     }
-
 
     protected function prepareSettings(array $settings, array $parent = []): array
     {

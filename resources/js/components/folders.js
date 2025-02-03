@@ -184,6 +184,10 @@ export default function folders(
             this.unselect();
         },
         searchNodes(data, search = null) {
+            if (! Array.isArray(data) && typeof data !== 'object') {
+                return [];
+            }
+            
             if (!search) {
                 return Array.isArray(data) ? data : Object.values(data); // Convert object to array if necessary
             }
