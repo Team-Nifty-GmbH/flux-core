@@ -15,6 +15,7 @@ use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasParentChildRelations;
 use FluxErp\Traits\HasSerialNumberRange;
 use FluxErp\Traits\HasTags;
 use FluxErp\Traits\HasUserModification;
@@ -36,12 +37,8 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 class Product extends FluxModel implements HasMedia, InteractsWithDataTables
 {
     use Categorizable, Commentable, Filterable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes,
-        HasPackageFactory, HasSerialNumberRange, HasTags, HasUserModification, HasUuid, InteractsWithMedia, Lockable,
-        LogsActivity, Searchable, SoftDeletes;
-
-    protected $guarded = [
-        'id',
-    ];
+        HasPackageFactory, HasParentChildRelations, HasSerialNumberRange, HasTags, HasUserModification, HasUuid,
+        InteractsWithMedia, Lockable, LogsActivity, Searchable, SoftDeletes;
 
     protected ?string $detailRouteName = 'products.id';
 
@@ -113,11 +110,6 @@ class Product extends FluxModel implements HasMedia, InteractsWithDataTables
         return $this->hasMany(CartItem::class);
     }
 
-    public function children(): HasMany
-    {
-        return $this->hasMany(Product::class, 'parent_id');
-    }
-
     public function clients(): BelongsToMany
     {
         return $this->belongsToMany(Client::class, 'client_product')->using(ClientProduct::class);
@@ -136,11 +128,6 @@ class Product extends FluxModel implements HasMedia, InteractsWithDataTables
     public function productCrossSellings(): HasMany
     {
         return $this->hasMany(ProductCrossSelling::class);
-    }
-
-    public function parent(): BelongsTo
-    {
-        return $this->belongsTo(Product::class, 'parent_id');
     }
 
     public function prices(): HasMany

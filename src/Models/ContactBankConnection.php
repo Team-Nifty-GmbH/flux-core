@@ -15,10 +15,6 @@ class ContactBankConnection extends FluxModel
 {
     use Filterable, HasPackageFactory, HasUserModification, HasUuid, LogsActivity, SoftDeletes;
 
-    protected $guarded = [
-        'id',
-    ];
-
     protected static function booted(): void
     {
         static::saving(function (ContactBankConnection $model) {

@@ -40,6 +40,8 @@
                         selectable="true"
                         tree="$wire.permissions"
                         name-attribute="label"
+                        :with-search="true"
+                        :search-attributes="['path', 'label']"
                     />
                 </div>
             </div>

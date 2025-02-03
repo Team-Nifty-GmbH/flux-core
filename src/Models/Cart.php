@@ -23,10 +23,6 @@ class Cart extends FluxModel
 {
     use HasPackageFactory, HasUuid, SoftDeletes;
 
-    protected $guarded = [
-        'id',
-    ];
-
     public function authenticatable(): MorphTo
     {
         return $this->morphTo();

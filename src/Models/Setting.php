@@ -10,10 +10,6 @@ class Setting extends FluxModel
 {
     use HasPackageFactory, HasUuid;
 
-    protected $guarded = [
-        'id',
-    ];
-
     protected function casts(): array
     {
         return [

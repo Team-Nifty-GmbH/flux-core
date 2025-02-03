@@ -12,10 +12,6 @@ class Lock extends FluxModel
 {
     use HasPackageFactory, HasUserModification, LogsActivity;
 
-    protected $guarded = [
-        'id',
-    ];
-
     protected $with = [
         'user',
     ];

@@ -16,10 +16,6 @@ class CountryRegion extends FluxModel
     use Commentable, Filterable, HasPackageFactory, HasUserModification, HasUuid, LogsActivity,
         SoftDeletes;
 
-    protected $guarded = [
-        'id',
-    ];
-
     public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class);

@@ -21,13 +21,6 @@ class WorkTimeTypes extends WorkTimeTypeList
 
     public WorkTimeTypeForm $workTimeType;
 
-    public function mount(): void
-    {
-        parent::mount();
-
-        $this->headline = __('Work Time Types');
-    }
-
     protected function getTableActions(): array
     {
         return [

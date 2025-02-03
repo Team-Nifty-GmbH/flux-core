@@ -4,25 +4,21 @@ namespace FluxErp\Models;
 
 use FluxErp\Casts\Money;
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasParentChildRelations;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Auth;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 
 class Transaction extends FluxModel implements InteractsWithDataTables
 {
-    use HasFrontendAttributes, HasPackageFactory, HasUserModification, HasUuid, LogsActivity,
+    use HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasUserModification, HasUuid, LogsActivity,
         Searchable, SoftDeletes;
-
-    protected $guarded = [
-        'id',
-    ];
 
     protected static function booted(): void
     {
@@ -69,19 +65,9 @@ class Transaction extends FluxModel implements InteractsWithDataTables
         return $this->belongsTo(BankConnection::class);
     }
 
-    public function children(): HasMany
-    {
-        return $this->hasMany(Transaction::class, 'parent_id');
-    }
-
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
-    }
-
-    public function parent(): BelongsTo
-    {
-        return $this->belongsTo(Transaction::class, 'parent_id');
     }
 
     public function getLabel(): ?string

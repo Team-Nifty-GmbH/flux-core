@@ -23,10 +23,6 @@ class SepaMandate extends FluxModel implements HasMedia, OffersPrinting
     use Communicatable, Filterable, HasClientAssignment, HasPackageFactory, HasSerialNumberRange, HasUserModification,
         HasUuid, InteractsWithMedia, LogsActivity, Printable, SoftDeletes;
 
-    protected $guarded = [
-        'id',
-    ];
-
     protected static function booted(): void
     {
         static::saving(function (SepaMandate $mandate) {

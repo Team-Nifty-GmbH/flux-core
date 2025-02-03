@@ -13,10 +13,6 @@ class CartItem extends FluxModel implements Sortable
 {
     use HasPackageFactory, HasUuid, SortableTrait;
 
-    protected $guarded = [
-        'id',
-    ];
-
     protected static function booted(): void
     {
         static::saving(function (CartItem $cartItem) {

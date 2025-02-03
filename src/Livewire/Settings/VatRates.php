@@ -21,13 +21,6 @@ class VatRates extends VatRateList
 
     public VatRateForm $vatRate;
 
-    public function mount(): void
-    {
-        parent::mount();
-
-        $this->headline = __('Vat Rates');
-    }
-
     protected function getTableActions(): array
     {
         return [

@@ -20,10 +20,6 @@ class DocumentType extends FluxModel
     use Filterable, HasClientAssignment, HasPackageFactory, HasUserModification, HasUuid, LogsActivity,
         SoftDeletes;
 
-    protected $guarded = [
-        'id',
-    ];
-
     protected function casts(): array
     {
         return [

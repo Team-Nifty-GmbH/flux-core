@@ -63,7 +63,7 @@
            <x-flux::checkbox-tree
                tree="$wire.folders"
                name-attribute="name"
-               children-attribute="children"
+               :with-search="true"
            >
                <x-slot:afterTree>
                    <div class="pt-4">

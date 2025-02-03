@@ -12,7 +12,6 @@ use FluxErp\Livewire\Forms\MailAccountForm;
 use FluxErp\Livewire\Forms\MailFolderForm;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
@@ -213,12 +212,9 @@ class MailAccounts extends MailAccountList
 
     protected function loadFolders(): void
     {
-        app(MailFolder::class)->addGlobalScope('children', function (Builder $builder) {
-            $builder->with('children')->where('mail_account_id', $this->mailAccount->id);
-        });
-
-        $this->folders = resolve_static(MailFolder::class, 'query')
+        $this->folders = resolve_static(MailFolder::class, 'familyTree')
             ->where('parent_id', null)
+            ->where('mail_account_id', $this->mailAccount->id)
             ->get()
             ->toArray();
     }

@@ -16,10 +16,6 @@ class FormBuilderResponse extends FluxModel
         'form',
     ];
 
-    protected $guarded = [
-        'id',
-    ];
-
     protected static function booted(): void
     {
         static::deleting(function (FormBuilderResponse $response) {

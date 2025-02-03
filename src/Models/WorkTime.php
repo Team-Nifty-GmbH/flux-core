@@ -5,6 +5,7 @@ namespace FluxErp\Models;
 use FluxErp\Support\Calculation\Rounding;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasParentChildRelations;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,11 +13,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class WorkTime extends FluxModel
 {
-    use Filterable, HasPackageFactory, HasUuid, SoftDeletes;
-
-    protected $guarded = [
-        'id',
-    ];
+    use Filterable, HasPackageFactory, HasParentChildRelations, HasUuid, SoftDeletes;
 
     protected static function booted(): void
     {
@@ -76,11 +73,6 @@ class WorkTime extends FluxModel
     public function orderPosition(): BelongsTo
     {
         return $this->belongsTo(OrderPosition::class);
-    }
-
-    public function parent(): BelongsTo
-    {
-        return $this->belongsTo(WorkTime::class, 'parent_id');
     }
 
     public function user(): BelongsTo

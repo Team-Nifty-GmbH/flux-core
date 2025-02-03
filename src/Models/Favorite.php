@@ -7,8 +7,4 @@ use FluxErp\Traits\HasUuid;
 class Favorite extends FluxModel
 {
     use HasUuid;
-
-    protected $guarded = [
-        'id',
-    ];
 }

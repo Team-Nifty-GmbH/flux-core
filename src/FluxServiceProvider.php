@@ -2,6 +2,7 @@
 
 namespace FluxErp;
 
+use Closure;
 use FluxErp\Console\Commands\Init\InitEnv;
 use FluxErp\Console\Commands\Init\InitPermissions;
 use FluxErp\Facades\Action;
@@ -192,7 +193,7 @@ class FluxServiceProvider extends ServiceProvider
         if (! Arr::hasMacro('undotToTree')) {
             Arr::macro(
                 'undotToTree',
-                function (array $array, string $path = '', ?\Closure $translate = null): array {
+                function (array $array, string $path = '', ?Closure $translate = null): array {
                     $array = Arr::undot($array);
                     $translate = $translate ?: fn ($key) => __(Str::headline($key));
                     $buildTree = function (array $array, string $path = '') use (&$buildTree, $translate) {
@@ -646,6 +647,7 @@ class FluxServiceProvider extends ServiceProvider
         Menu::register(route: 'calendars', icon: 'calendar');
 
         Menu::register(route: 'media-grid', icon: 'photo', label: 'media');
+        Menu::register(route: 'settings', icon: 'cog', label: 'settings');
 
         Menu::group(
             path: 'settings',

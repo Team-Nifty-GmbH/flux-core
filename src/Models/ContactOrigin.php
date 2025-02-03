@@ -12,10 +12,6 @@ class ContactOrigin extends FluxModel
 {
     use CacheModelQueries, HasPackageFactory, HasUserModification, LogsActivity;
 
-    protected $guarded = [
-        'id',
-    ];
-
     public function casts(): array
     {
         return [

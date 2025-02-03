@@ -12,10 +12,6 @@ class FormBuilderField extends FluxModel
 {
     use HasPackageFactory, HasUuid, SoftDeletes;
 
-    protected $guarded = [
-        'id',
-    ];
-
     protected static function booted(): void
     {
         static::deleting(function (FormBuilderField $field) {

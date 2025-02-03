@@ -4,6 +4,8 @@
     'tree' => null,
     'nameAttribute' => 'label',
     'childrenAttribute' => 'children',
+    'withSearch' => false,
+    'searchAttributes' => null,
 ])
 @php
     if (is_null($tree)) {
@@ -20,14 +22,20 @@
         '{{ $nameAttribute }}',
         '{{ $childrenAttribute }}',
         {{ $attributes->get('selected', 'null') }},
-        {{ $attributes->get('checked', 'null') }}
+        {{ $attributes->get('checked', 'null') }},
+        @toJs($searchAttributes)
     )">
     <!-- Root Rendering of the Tree -->
     {{ $header ?? null }}
     <div class="tree-container flex gap-4 w-full">
-        <ul class="tree pl-2">
+        <ul class="tree pl-2 grow">
             {{ $beforeTree ?? null }}
-            <template x-for="node in tree" :key="node.id">
+            @if($withSearch)
+                <div class="pb-2">
+                    <x-input type="search" x-model.debounce.500ms="search" placeholder="{{ __('Search') }}" />
+                </div>
+            @endif
+            <template @if($withSearch) x-for="node in searchNodes(tree, search)" @else x-for="node in tree" @endif :key="node.id">
                 <li>
                     <template
                         x-template-outlet="$refs.treeNodeTemplate.querySelector('template')"
@@ -64,7 +72,11 @@
                             class="form-checkbox"
                         />
                     @endif
-                    <i class="ph text-base" x-bind:class="node[childrenAttribute] ? (isOpen(node) ? 'ph-folder-open' : 'ph-folder') : 'ph-file'"></i>
+                    @if($nodeIcon ?? false)
+                        {{ $nodeIcon }}
+                    @else
+                        <i class="ph text-base" x-bind:class="node[childrenAttribute] ? (isOpen(node) ? 'ph-folder-open' : 'ph-folder') : 'ph-file'"></i>
+                    @endif
                     <div class="whitespace-nowrap" x-html="node[nameAttribute]"></div>
                 </div>
                 <template x-if="node[childrenAttribute]?.length">
@@ -78,7 +90,7 @@
                         @if($sortable)
                             <li></li>
                         @endif
-                        <template x-for="childNode in node[childrenAttribute] ?? []" :key="childNode.id">
+                        <template @if($withSearch) x-for="childNode in searchNodes(node[childrenAttribute] ?? [], search)" @else x-for="childNode in node[childrenAttribute] ?? []" @endif :key="childNode.id">
                             <!-- these are the lower levels -->
                             <li
                                 data-child-node

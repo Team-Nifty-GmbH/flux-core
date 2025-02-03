@@ -25,6 +25,7 @@ use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasCustomEvents;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasParentChildRelations;
 use FluxErp\Traits\HasRelatedModel;
 use FluxErp\Traits\HasSerialNumberRange;
 use FluxErp\Traits\HasUserModification;
@@ -57,9 +58,10 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Order extends FluxModel implements HasMedia, InteractsWithDataTables, OffersPrinting
 {
-    use Commentable, Communicatable, Filterable, HasAdditionalColumns, HasClientAssignment,
-        HasCustomEvents, HasFrontendAttributes, HasPackageFactory, HasRelatedModel, HasSerialNumberRange, HasStates,
-        HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable, Searchable, SoftDeletes, Trackable {
+    use Commentable, Communicatable, Filterable, HasAdditionalColumns, HasClientAssignment, HasCustomEvents,
+        HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasRelatedModel, HasSerialNumberRange,
+        HasStates, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable, Searchable, SoftDeletes,
+        Trackable {
             Printable::resolvePrintViews as protected printableResolvePrintViews;
             HasSerialNumberRange::getSerialNumber as protected hasSerialNumberRangeGetSerialNumber;
         }
@@ -69,10 +71,6 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
     ];
 
     protected ?string $detailRouteName = 'orders.id';
-
-    protected $guarded = [
-        'id',
-    ];
 
     public static string $iconName = 'shopping-bag';
 
@@ -279,11 +277,6 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
         return $this->belongsTo(User::class, 'agent_id');
     }
 
-    public function children(): HasMany
-    {
-        return $this->hasMany(Order::class, 'parent_id');
-    }
-
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
@@ -332,11 +325,6 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
     public function orderType(): BelongsTo
     {
         return $this->belongsTo(OrderType::class);
-    }
-
-    public function parent(): BelongsTo
-    {
-        return $this->belongsTo(Order::class, 'parent_id');
     }
 
     public function paymentReminders(): HasMany
