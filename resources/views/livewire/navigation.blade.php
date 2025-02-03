@@ -99,9 +99,7 @@
                                 @else
                                     wire:current="bg-primary-500 dark:bg-primary-700 !text-white hover:bg-primary-600 nav-item-active"
                                 @endif
-
                                 href="{{ data_get($navigation, 'uri', '#') }}"
-
                                 @if($navigation['children'] ?? false)
                                     x-on:click.prevent="toggleMenu('{{ $key }}')"
                                     target="_blank"

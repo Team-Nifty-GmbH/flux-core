@@ -123,7 +123,7 @@ if (! function_exists('find_common_base_uri')) {
         }
 
         // Extract only the path part of the URLs
-        $paths = array_map(fn(string $uri) => parse_url($uri, PHP_URL_PATH), $uris);
+        $paths = array_map(fn (string $uri) => parse_url($uri, PHP_URL_PATH), $uris);
 
         // Find the common base path
         $basePath = array_shift($paths);
@@ -139,5 +139,4 @@ if (! function_exists('find_common_base_uri')) {
 
         return rtrim($basePath, '/') . '/';
     }
-
 }
