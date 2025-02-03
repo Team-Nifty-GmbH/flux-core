@@ -454,7 +454,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
             'isPublic' => false,
             'isShared' => false,
             'permission' => 'owner',
-            'group' => 'my',
+            'group' => 'other',
             'isVirtual' => true,
         ];
     }
@@ -482,8 +482,12 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         ];
     }
 
-    public function scopeInTimeframe(Builder $builder, Carbon|string|null $start, Carbon|string|null $end): void
-    {
+    public function scopeInTimeframe(
+        Builder $builder,
+        Carbon|string|null $start,
+        Carbon|string|null $end,
+        ?array $info = null
+    ): void {
         $start = $start ? Carbon::parse($start) : null;
         $end = $end ? Carbon::parse($end) : null;
 

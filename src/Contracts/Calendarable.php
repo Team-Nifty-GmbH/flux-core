@@ -12,7 +12,12 @@ interface Calendarable
 
     public function toCalendarEvent(?array $info = null): array;
 
-    public function scopeInTimeframe(Builder $builder, string|Carbon|null $start, string|Carbon|null $end): void;
+    public function scopeInTimeframe(
+        Builder $builder,
+        Carbon|string|null $start,
+        Carbon|string|null $end,
+        ?array $info = null
+    ): void;
 
     public static function fromCalendarEvent(array $event): Model;
 }

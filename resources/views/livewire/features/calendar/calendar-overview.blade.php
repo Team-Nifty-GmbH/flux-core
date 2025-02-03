@@ -4,7 +4,7 @@
         <x-card :title="__('Edit Calendar')">
             @section('calendar-edit')
                 <div class="flex flex-col gap-4">
-                    <div x-cloak x-show="$wire.selectedCalendar.children == 0">
+                    <div x-cloak x-show="$wire.selectedCalendar.children === undefined || $wire.selectedCalendar.children?.length() === 0">
                         <x-select
                             wire:model="selectedCalendar.parentId"
                             :label="__('Parent Calendar')"
