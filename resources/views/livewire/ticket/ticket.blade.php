@@ -1,44 +1,34 @@
 <div class="min-h-full"
      x-data="{
         formatter: @js(resolve_static(\FluxErp\Models\Ticket::class, 'typeScriptAttributes')),
-        additionalColumns: $wire.entangle('additionalColumns'),
-        ticket: $wire.entangle('ticket')
     }"
 >
     @section('header')
         <div class="flex items-center space-x-5">
-            <x-avatar xl x-bind:src="ticket.authenticatable.avatar_url" src="#"></x-avatar>
+            <x-avatar xl x-bind:src="$wire.ticket.authenticatable.avatar_url" src="#"></x-avatar>
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">
                     <div class="opacity-40 transition-opacity hover:opacity-100">
-                        <span x-text="ticket.ticket_type?.name">
+                        <span x-text="$wire.ticket.ticket_type?.name">
                         </span>
-                        <span x-text="ticket.ticket_number">
+                        <span x-text="$wire.ticket.ticket_number">
                         </span>
-                        <span x-text="ticket.authenticatable.name"></span>
+                        <span x-text="$wire.ticket.authenticatable.name"></span>
                     </div>
-                    <span x-text="ticket.authenticatable.name"></span>
+                    <span x-text="$wire.ticket.authenticatable.name"></span>
                 </h1>
             </div>
         </div>
     @show
     <div class="justify-end mt-6 flex flex-col-reverse space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3">
         @section('buttons')
-            @if(resolve_static(\FluxErp\Actions\Ticket\DeleteTicket::class, 'canPerformAction', [false]) && $ticket['id'])
-                <x-button negative label="{{ __('Delete') }}" x-on:click="
-                            window.$wireui.confirmDialog({
-                                title: '{{ __('Delete ticket') }}',
-                                description: '{{ __('Do you really want to delete this ticket?') }}',
-                                icon: 'error',
-                                accept: {
-                                    label: '{{ __('Delete') }}',
-                                    method: 'delete',
-                                },
-                                reject: {
-                                    label: '{{ __('Cancel') }}',
-                                }
-                            }, $wire.__instance.id)
-                        "/>
+            @if(resolve_static(\FluxErp\Actions\Ticket\DeleteTicket::class, 'canPerformAction', [false]) && $ticket->id)
+                <x-button
+                    negative
+                    label="{{ __('Delete') }}"
+                    wire:click="delete()"
+                    wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Ticket')]) }}"
+                />
             @endif
             <x-button primary :label="__('Save')" wire:click="save"/>
         @show
@@ -50,10 +40,13 @@
                     <div class="flex-1">
                         <div class="space-y-5 dark:text-gray-50">
                             <x-card class="space-y-4">
-                                <x-input :label="__('Title')" wire:model="ticket.title" :disabled="true"/>
-                                <x-textarea :label="__('Description')" wire:model="ticket.description" :disabled="true"/>
+                                <x-input :label="__('Title')" wire:model="ticket.title" />
+                                <x-flux::editor
+                                    :label="__('Description')"
+                                    wire:model="ticket.description"
+                                />
                             </x-card>
-                            <div x-cloak x-show="additionalColumns?.length > 0">
+                            <div x-cloak x-show="$wire.additionalColumns?.length > 0">
                                 <x-card>
                                     <x-slot:header>
                                         <div class="flex items-center justify-between border-b px-4 py-2.5 dark:border-0">
@@ -64,13 +57,13 @@
                                     </x-slot:header>
                                     @section('content.additional-columns')
                                         <div class="flex flex-col gap-4">
-                                            <template x-for="additionalColumn in additionalColumns">
+                                            <template x-for="additionalColumn in $wire.additionalColumns">
                                                 <div>
                                                     <x-label
                                                         x-html="additionalColumn.label ? additionalColumn.label : additionalColumn.name"
                                                         x-bind:for="additionalColumn.name"
                                                     />
-                                                    <x-input x-bind:class="(additionalColumn.field_type === 'color' || additionalColumn.field_type === 'checkbox') && '!w-auto'" x-bind:type="additionalColumn.field_type" x-model="ticket[additionalColumn.name]" :disabled="true"/>
+                                                    <x-input x-bind:class="(additionalColumn.field_type === 'color' || additionalColumn.field_type === 'checkbox') && '!w-auto'" x-bind:type="additionalColumn.field_type" x-model="ticket[additionalColumn.name]" />
                                                 </div>
                                             </template>
                                         </div>
@@ -78,11 +71,11 @@
                                 </x-card>
                             </div>
                             @section('content.widget')
-                                @if($ticket['model_type']
-                                    && $widgetComponent = resolve_static(morphed_model($ticket['model_type']), 'getLivewireComponentWidget')
+                                @if($ticket->model_type
+                                    && $widgetComponent = resolve_static(morphed_model($ticket->model_type), 'getLivewireComponentWidget')
                                 )
                                     <x-card>
-                                        <livewire:is :component="$widgetComponent" :modelId="$ticket['model_id']" />
+                                        <livewire:is :component="$widgetComponent" :modelId="$ticket->model_id" />
                                     </x-card>
                                 @endif
                             @show
@@ -95,7 +88,7 @@
                                     </div>
                                 </x-slot:header>
                                 @section('content.attachments')
-                                    <livewire:folder-tree :model-type="\FluxErp\Models\Ticket::class" :model-id="$ticket['id']" />
+                                    <livewire:folder-tree :model-type="\FluxErp\Models\Ticket::class" :model-id="$ticket->id" />
                                 @show
                             </x-card>
                             <x-card>
@@ -106,7 +99,7 @@
                                     <livewire:is
                                         wire:key="{{ uniqid() }}"
                                         :component="$tab"
-                                        :model-id="$ticket['id']"
+                                        :model-id="$ticket->id"
                                     />
                                 </x-flux::tabs>
                             </x-card>
@@ -138,7 +131,7 @@
                                 :options="$ticketTypes"
                             />
                             <x-select
-                                :disabled="$ticket['id'] && ! resolve_static(\FluxErp\Actions\Ticket\UpdateTicket::class, 'canPerformAction', [false])"
+                                :disabled="$ticket->id && ! resolve_static(\FluxErp\Actions\Ticket\UpdateTicket::class, 'canPerformAction', [false])"
                                 multiselect
                                 :label="__('Assigned')"
                                 wire:model.live="ticket.users"
@@ -162,34 +155,52 @@
                                     </x-label>
                                     <x-toggle :left-label=" __('User') " :label=" __('Contact') " wire:model.live="authorTypeContact" />
                                     <div class="pl-2">
-                                        <x-button href="#" xs outline icon="eye"
-                                                  x-bind:class="($wire.get('authorTypeContact') !== true || ! ticket.authenticatable_id) && 'cursor-not-allowed'"
-                                                  x-bind:href="($wire.get('authorTypeContact') === true && ticket.authenticatable.contact_id) && '{{ route('contacts.id?', ':id') }}'.replace(':id', ticket.authenticatable.contact_id) + '?address=' + ticket.authenticatable_id" >
+                                        <x-button
+                                            href="#"
+                                            xs
+                                            outline icon="eye"
+                                            x-bind:class="($wire.get('authorTypeContact') !== true || ! $wire.ticket.authenticatable_id) && 'cursor-not-allowed'"
+                                            x-bind:href="($wire.get('authorTypeContact') === true && $wire.ticket.authenticatable.contact_id) && '{{ route('contacts.id?', ':id') }}'.replace(':id', $wire.ticket.authenticatable.contact_id) + '?address=' + $wire.ticket.authenticatable_id" >
                                         </x-button>
                                     </div>
                                 </div>
-                                <x-select
-                                    :disabled="! resolve_static(\FluxErp\Actions\Ticket\UpdateTicket::class, 'canPerformAction', [false])"
-                                    class="pb-4"
-                                    wire:model="ticket.authenticatable_id"
-                                    option-value="id"
-                                    option-label="label"
-                                    option-description="description"
-                                    :clearable="false"
-                                    :template="[
-                                        'name'   => 'user-option',
-                                    ]"
-                                    :async-data="[
-                                        'api' => route('search', $ticket['authenticatable_type'] ?
-                                            morphed_model($ticket['authenticatable_type']) :
-                                            resolve_static(\FluxErp\Models\Address::class, 'class')
-                                        ),
-                                        'method' => 'POST',
-                                        'params' => [
-                                            'with' => $ticket['authenticatable_type'] === morph_alias(\FluxErp\Models\Address::class) ? 'contact.media' : 'media',
-                                        ]
-                                    ]"
-                                />
+                                <div id="author-select">
+                                    <x-select
+                                        :disabled="! resolve_static(\FluxErp\Actions\Ticket\UpdateTicket::class, 'canPerformAction', [false])"
+                                        class="pb-4"
+                                        wire:model="ticket.authenticatable_id"
+                                        option-value="id"
+                                        option-label="label"
+                                        option-description="description"
+                                        :clearable="false"
+                                        :template="[
+                                            'name'   => 'user-option',
+                                        ]"
+                                        :async-data="[
+                                            'api' => route('search', $ticket->authenticatable_type ?? morph_alias(\FluxErp\Models\User::class)),
+                                            'method' => 'POST',
+                                            'params' => [
+                                                'with' => $ticket->authenticatable_type === morph_alias(\FluxErp\Models\Address::class) ? 'contact.media' : 'media',
+                                            ]
+                                        ]"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </x-card>
+                @show
+                @section('attributes')
+                    <x-card>
+                        <div class="text-sm whitespace-nowrap overflow-hidden text-ellipsis">
+                            <div class="flex gap-0.5">
+                                <div class="">{{ __('Created At') }}:</div>
+                                <div x-text="window.formatters.datetime($wire.ticket.created_at)"></div>
+                                <div x-text="$wire.ticket.created_by || '{{ __('Unknown') }}'"></div>
+                            </div>
+                            <div class="flex gap-0.5">
+                                <div class="">{{ __('Updated At') }}:</div>
+                                <div x-text="window.formatters.datetime($wire.ticket.updated_at)"></div>
+                                <div x-text="$wire.ticket.updated_by || '{{ __('Unknown') }}'"></div>
                             </div>
                         </div>
                     </x-card>

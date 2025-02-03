@@ -59,7 +59,7 @@ class ProjectTaskList extends BaseTaskList
                 ->label(__('New'))
                 ->color('primary')
                 ->attributes([
-                    'x-on:click' => '$wire.fillForm()',
+                    'x-on:click' => '$wire.edit()',
                 ]),
         ];
     }
@@ -80,7 +80,7 @@ class ProjectTaskList extends BaseTaskList
         ];
     }
 
-    public function fillForm(Task $task): void
+    public function edit(Task $task): void
     {
         $this->reset('taskTab');
         $task->project_id = $this->projectId;

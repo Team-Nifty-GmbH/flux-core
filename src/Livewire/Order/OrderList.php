@@ -26,7 +26,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
 {
     use CreatesDocuments;
 
-    protected string $view = 'flux::livewire.order.order-list';
+    protected ?string $includeBefore = 'flux::livewire.order.order-list';
 
     public ?string $cacheKey = 'order.order-list';
 

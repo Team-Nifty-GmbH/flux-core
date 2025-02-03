@@ -67,9 +67,11 @@ class UpdateCommunication extends FluxAction
         }
 
         if (! is_null($tags)) {
-            $communication->syncTags(resolve_static(Tag::class, 'query')
-                ->whereIntegerInRaw('id', $tags)
-                ->get());
+            $communication->syncTags(
+                resolve_static(Tag::class, 'query')
+                    ->whereIntegerInRaw('id', $tags)
+                    ->get(),
+            );
         }
 
         return $communication->withoutRelations()->fresh();

@@ -54,8 +54,14 @@
             <x-slot:action>
                 <div class="flex gap-1.5">
                     <x-button.circle
+                        wire:navigate
+                        outline
+                        icon="eye"
+                        :href="route('address.id', data_get($address, 'address_id', ''))"
+                    />
+                    <x-button.circle
                         icon="trash"
-                        wire:click="delete({{ $address['address_id'] }})"
+                        wire:click="delete({{ data_get($address, 'address_id') }})"
                         negative
                         wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Address assignment')]) }}"
                     />

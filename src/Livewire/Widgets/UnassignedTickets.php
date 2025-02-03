@@ -13,7 +13,8 @@ class UnassignedTickets extends MyTickets
 
     protected function getListeners(): array
     {
-        return array_merge(
+        return $this->rememberedEventListeners = array_merge(
+            $this->rememberedEventListeners ?? [],
             [
                 'echo-private:' . resolve_static(Ticket::class, 'getBroadcastChannel')
                     . ',.TicketCreated' => '$refresh',

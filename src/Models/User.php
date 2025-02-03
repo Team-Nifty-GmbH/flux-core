@@ -176,7 +176,7 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
             ->acceptsFile(function (File $file) {
                 return str_starts_with($file->mimeType, 'image/');
             })
-            ->useFallbackUrl(self::icon()->getUrl())
+            ->useFallbackUrl(static::icon()->getUrl())
             ->useDisk('public')
             ->singleFile();
     }
@@ -209,7 +209,7 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
      */
     public function getAvatarUrl(): ?string
     {
-        return $this->getFirstMediaUrl('avatar', 'thumb') ?: self::icon()->getUrl();
+        return $this->getFirstMediaUrl('avatar', 'thumb') ?: static::icon()->getUrl();
     }
 
     public function sendLoginLink(): void

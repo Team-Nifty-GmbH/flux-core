@@ -30,6 +30,14 @@ class WorkTime extends Component
 
     public array $activeWorkTimes = [];
 
+    protected function getListeners(): array
+    {
+        return [
+            'echo-private:' . resolve_static(WorkTimeType::class, 'getBroadcastChannel')
+            . ',.WorkTimeTypeCreated' => '$refresh',
+        ];
+    }
+
     public function mount(): void
     {
         $this->activeWorkTimes = resolve_static(WorkTimeModel::class, 'query')
@@ -128,6 +136,26 @@ class WorkTime extends Component
         }
 
         return true;
+    }
+
+    #[Renderless]
+    public function recordSelected(array $data): void
+    {
+        $this->workTime->fill($data);
+
+        $this->workTime->name = data_get($data, 'label') ?? data_get($data, 'name');
+        $this->workTime->description = data_get($data, 'description');
+        $this->workTime->contact_id = data_get($data, 'contact_id');
+
+        if (
+            is_null($this->workTime->contact_id)
+            && method_exists($modelClass = morphed_model($this->workTime->trackable_type), 'getContactId')
+        ) {
+            $this->workTime->contact_id = resolve_static($modelClass, 'query')
+                ->whereKey($this->workTime->trackable_id)
+                ->first()
+                ->getContactId();
+        }
     }
 
     #[Renderless]

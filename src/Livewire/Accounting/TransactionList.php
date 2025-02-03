@@ -9,9 +9,11 @@ use FluxErp\Jobs\Accounting\MatchTransactionsWithOrderJob;
 use FluxErp\Livewire\DataTables\TransactionList as BaseTransactionList;
 use FluxErp\Models\Order;
 use FluxErp\Models\Transaction;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
+use TeamNiftyGmbH\DataTable\Helpers\SessionFilter;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class TransactionList extends BaseTransactionList
@@ -47,9 +49,7 @@ class TransactionList extends BaseTransactionList
                 DataTableButton::make()
                     ->label(__('Show unassigned payments'))
                     ->color('primary')
-                    ->attributes([
-                        'x-on:click' => '$wire.showUnassignedPayments()',
-                    ]),
+                    ->wireClick('showUnassignedPayments'),
             ]
         );
     }
@@ -114,25 +114,24 @@ class TransactionList extends BaseTransactionList
         );
     }
 
+    #[Renderless]
     public function showOrder(Order $order): void
     {
         $this->redirectRoute(name: 'orders.id', parameters: ['id' => $order->id], navigate: true);
     }
 
+    #[Renderless]
     public function showUnassignedPayments(): void
     {
-        $this->userFilters = array_merge(
-            $this->userFilters,
-            [
-                [
-                    [
-                        'column' => 'order_id',
-                        'operator' => 'is null',
-                        'value' => null,
-                    ],
-                ],
-            ],
-        );
+        session()
+            ->put(
+                $this->getCacheKey() . '_query',
+                SessionFilter::make(
+                    $this->getCacheKey(),
+                    fn (Builder $query) => $query->whereNull('order_id'),
+                    __('Unassigned payments'),
+                )
+            );
 
         $this->loadData();
     }

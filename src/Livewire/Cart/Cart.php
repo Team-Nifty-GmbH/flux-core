@@ -99,12 +99,12 @@ class Cart extends Component
         }
     }
 
-    public function updateAmount(CartItem $cartItem, float $amount): void
+    public function updateAmount(CartItem $cartItem, string|float|int|null $amount): void
     {
         try {
             UpdateCartItem::make([
                 'id' => $cartItem->id,
-                'amount' => $amount,
+                'amount' => $amount ?? 0,
             ])->validate()->execute();
         } catch (ValidationException $e) {
             exception_to_notifications($e, $this);

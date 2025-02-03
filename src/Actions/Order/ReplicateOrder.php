@@ -55,7 +55,7 @@ class ReplicateOrder extends FluxAction
             $orderData['id'],
             $orderData['uuid'],
             $orderData['agent_id'],
-            $orderData['bank_connection_id'],
+            $orderData['contact_bank_connection_id'],
             $orderData['address_invoice'],
             $orderData['address_delivery'],
             $orderData['state'],

@@ -12,7 +12,6 @@ use Illuminate\Bus\PendingBatch;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Context;
-use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class MonitorablePendingBatch extends PendingBatch
@@ -37,7 +36,7 @@ class MonitorablePendingBatch extends PendingBatch
                 try {
                     $user->notify(new BatchStartedNotification($jobBatch));
                 } catch (Throwable $e) {
-                    Log::error($e);
+                    report($e);
                 }
             }
         });
@@ -53,7 +52,7 @@ class MonitorablePendingBatch extends PendingBatch
                             : new BatchProcessingNotification($jobBatch)
                     );
                 } catch (Throwable $e) {
-                    Log::error($e);
+                    report($e);
                 }
             });
         });
@@ -65,7 +64,7 @@ class MonitorablePendingBatch extends PendingBatch
                 try {
                     $user->notify(new BatchFinishedNotification($jobBatch));
                 } catch (Throwable $e) {
-                    Log::error($e);
+                    report($e);
                 }
             });
         });

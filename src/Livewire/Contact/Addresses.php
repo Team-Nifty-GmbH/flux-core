@@ -162,7 +162,17 @@ class Addresses extends Component
     #[Renderless]
     public function replicate(): void
     {
-        $this->address->reset('id', 'is_main_address', 'is_delivery_address', 'is_invoice_address');
+        $this->address->reset(
+            'id',
+            'email',
+            'is_main_address',
+            'is_delivery_address',
+            'is_invoice_address',
+        );
+
+        $this->address->advertising_state = resolve_static(AdvertisingState::class, 'config')
+            ->defaultStateClass::getMorphClass();
+
         $this->addressId = null;
         $this->edit = true;
     }

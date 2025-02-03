@@ -57,9 +57,7 @@ export default function ($wire, route) {
                 return;
             }
 
-            data.contact_id ? $wire.workTime.contact_id = data.contact_id : null;
-            data.description ? $wire.workTime.description = data.description : null;
-            data.label ? $wire.workTime.name = data.label : null;
+            $wire.recordSelected(data);
         },
         calculateTime(workTime) {
             const startedAt = new Date(workTime.started_at);

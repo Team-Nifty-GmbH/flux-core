@@ -20,4 +20,9 @@ trait Trackable
     {
         return null;
     }
+
+    public function getContactId(): ?int
+    {
+        return null;
+    }
 }

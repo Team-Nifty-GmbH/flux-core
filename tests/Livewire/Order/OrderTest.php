@@ -7,13 +7,14 @@ use FluxErp\Invokable\ProcessSubscriptionOrder;
 use FluxErp\Livewire\Order\Order as OrderView;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
+use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\Currency;
-use FluxErp\Models\Language;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
+use FluxErp\Models\User;
 use FluxErp\Models\VatRate;
 use FluxErp\Tests\Livewire\BaseSetup;
 use Illuminate\Support\Facades\Storage;
@@ -41,9 +42,11 @@ class OrderTest extends BaseSetup
             'contact_id' => $contact->id,
         ]);
 
-        $currency = Currency::factory()->create();
+        ContactBankConnection::factory()->create([
+            'contact_id' => $contact->id,
+        ]);
 
-        $language = Language::factory()->create();
+        $currency = Currency::factory()->create();
 
         $this->orderType = OrderType::factory()->create([
             'client_id' => $this->dbClient->id,
@@ -75,7 +78,7 @@ class OrderTest extends BaseSetup
             )
             ->create([
                 'client_id' => $this->dbClient->id,
-                'language_id' => $language->id,
+                'language_id' => $this->defaultLanguage->id,
                 'order_type_id' => $this->orderType->id,
                 'payment_type_id' => $paymentType->id,
                 'price_list_id' => $priceList->id,
@@ -295,6 +298,73 @@ class OrderTest extends BaseSetup
         $this->assertEquals($this->order->id, $replicatedOrder->parent_id);
         $this->assertNotEquals($replicatedOrder->order_number, $this->order->order_number);
         $this->assertNotEquals($replicatedOrder->uuid, $this->order->uuid);
+        $this->assertEquals(
+            0,
+            $replicatedOrder->orderPositions()
+                ->whereNotNull('origin_position_id')
+                ->count()
+        );
+    }
+
+    public function test_replicate_with_new_contact()
+    {
+        $contact = Contact::factory()
+            ->has(
+                Address::factory()
+                    ->for($this->dbClient)
+                    ->state([
+                        'is_main_address' => true,
+                        'is_invoice_address' => true,
+                        'is_delivery_address' => true,
+                    ])
+            )
+            ->for(User::factory()->for($this->defaultLanguage), 'agent')
+            ->for(PriceList::factory())
+            ->for(PaymentType::factory()->hasAttached($this->dbClient))
+            ->for($this->dbClient)
+            ->afterCreating(
+                fn (Contact $contact) => $contact->update([
+                    'main_address_id' => $contact->addresses->first()->id,
+                    'invoice_address_id' => $contact->addresses->first()->id,
+                    'delivery_address_id' => $contact->addresses->first()->id,
+                ])
+            )
+            ->create();
+
+        $component = Livewire::test(OrderView::class, ['id' => $this->order->id])
+            ->call('replicate')
+            ->assertStatus(200)
+            ->assertHasNoErrors()
+            ->assertSet('replicateOrderTypes', [])
+            ->assertExecutesJs(<<<'JS'
+                $openModal('replicate-order')
+             JS)
+            ->set('replicateOrder.contact_id', $contact->getKey())
+            ->call('fetchContactData', true)
+            ->assertStatus(200)
+            ->assertHasNoErrors()
+            ->assertSet('replicateOrder.contact_id', $contact->getKey())
+            ->assertSet('replicateOrder.address_invoice_id', $contact->invoice_address_id)
+            ->assertSet('replicateOrder.address_delivery_id', $contact->delivery_address_id)
+            ->assertSet('replicateOrder.price_list_id', $contact->price_list_id)
+            ->assertSet('replicateOrder.payment_type_id', $contact->payment_type_id)
+            ->assertStatus(200)
+            ->assertHasNoErrors()
+            ->call('saveReplicate')
+            ->assertStatus(200)
+            ->assertHasNoErrors();
+
+        $replicatedOrder = Order::query()->whereKey($component->get('replicateOrder.id'))->first();
+        $this->assertEquals($this->order->orderPositions()->count(), $replicatedOrder->orderPositions()->count());
+        $this->assertNotEquals($replicatedOrder->agent_id, $this->order->agent_id);
+        $this->assertNotEquals($replicatedOrder->contact_id, $this->order->contact_id);
+        $this->assertNotEquals($replicatedOrder->address_invoice_id, $this->order->address_invoice_id);
+        $this->assertNotEquals($replicatedOrder->address_delivery_id, $this->order->address_delivery_id);
+        $this->assertNotEquals($replicatedOrder->order_number, $this->order->order_number);
+        $this->assertNotEquals($replicatedOrder->uuid, $this->order->uuid);
+        $this->assertNull($replicatedOrder->invoice_number);
+        $this->assertFalse($replicatedOrder->is_locked);
+        $this->assertNull($replicatedOrder->parent_id);
         $this->assertEquals(
             0,
             $replicatedOrder->orderPositions()

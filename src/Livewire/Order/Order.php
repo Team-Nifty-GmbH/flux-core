@@ -247,7 +247,7 @@ class Order extends Component
             exception_to_notifications($e, $this);
         }
 
-        $this->notification()->success(__('Order saved successfully!'));
+        $this->notification()->success(__(':model saved', ['model' => __('Order')]));
     }
 
     public function updatedOrderAddressInvoiceId(): void
@@ -383,7 +383,7 @@ class Order extends Component
         }
 
         $action->execute();
-        $this->notification()->success(__('Order saved successfully!'));
+        $this->notification()->success(__(':model saved', ['model' => __('Order')]));
 
         return true;
     }
@@ -644,7 +644,7 @@ class Order extends Component
             ->with([
                 'addresses',
                 'client:id,name',
-                'contact.media',
+                'contact.media' => fn (MorphMany $query) => $query->where('collection_name', 'avatar'),
                 'contact.contactBankConnections:id,contact_id,iban',
                 'currency:id,iso,name,symbol',
                 'discounts' => fn (MorphMany $query) => $query->ordered()
@@ -661,11 +661,12 @@ class Order extends Component
                     ]),
                 'orderType:id,name,mail_subject,mail_body,print_layouts,order_type_enum',
                 'priceList:id,name,is_net',
+                'users:id,name',
             ])
-            ->firstOrFail()
-            ->append('avatar_url');
+            ->firstOrFail();
 
         $this->order->fill($order);
+
         $this->order->users = $order->users->pluck('id')->toArray();
 
         $this->printLayouts = array_map(

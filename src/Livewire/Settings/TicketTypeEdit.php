@@ -90,7 +90,7 @@ class TicketTypeEdit extends Component
             return;
         }
 
-        $this->notification()->success(__('Ticket Type saved successful.'));
+        $this->notification()->success(__(':model saved', ['model' => __('Ticket Type')]));
         $this->dispatch('closeModal', $this->ticketType)->to('settings.ticket-types');
     }
 

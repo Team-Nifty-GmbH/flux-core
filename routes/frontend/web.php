@@ -78,6 +78,7 @@ use FluxErp\Livewire\Settings\WorkTimeTypes;
 use FluxErp\Livewire\Task\Task;
 use FluxErp\Livewire\Task\TaskList;
 use FluxErp\Livewire\Ticket\Ticket;
+use FluxErp\Models\Address;
 use Illuminate\Support\Facades\Route;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use TeamNiftyGmbH\DataTable\Controllers\IconController;
@@ -124,6 +125,18 @@ Route::middleware('web')
                         Route::get('/{id?}', Contact::class)->where('id', '[0-9]+')->name('id?');
                         Route::get('/communications', CommunicationList::class)->name('communications');
                     });
+                Route::get(
+                    '/address/{address}',
+                    fn (Address $address) => redirect()
+                        ->route(
+                            'contacts.id?',
+                            [
+                                'id' => $address->contact_id,
+                                'address' => $address->getKey(),
+                            ]
+                        )
+                )
+                    ->name('address.id');
 
                 Route::name('orders.')->prefix('orders')
                     ->group(function () {

@@ -5,6 +5,7 @@ namespace FluxErp\Models;
 use FluxErp\Casts\Money;
 use FluxErp\States\Ticket\TicketState;
 use FluxErp\Traits\Commentable;
+use FluxErp\Traits\Communicatable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasCustomEvents;
@@ -29,7 +30,7 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables
 {
-    use Commentable, Filterable, HasAdditionalColumns, HasCustomEvents, HasFrontendAttributes,
+    use Commentable, Communicatable, Filterable, HasAdditionalColumns, HasCustomEvents, HasFrontendAttributes,
         HasPackageFactory, HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification, HasUuid,
         InteractsWithMedia, LogsActivity, Searchable, SoftDeletes, Trackable;
 
@@ -51,6 +52,15 @@ class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables
             'state' => TicketState::class,
             'total_cost' => Money::class,
         ];
+    }
+
+    public function getContactId(): ?int
+    {
+        return $this->authenticatable_type === morph_alias(Address::class)
+            ? resolve_static(Address::class, 'query')
+                ->whereKey($this->authenticatable_id)
+                ->value('contact_id')
+            : null;
     }
 
     public function authenticatable(): MorphTo
@@ -100,7 +110,7 @@ class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables
      */
     public function getAvatarUrl(): ?string
     {
-        return $this->getFirstMediaUrl('images') ?: self::icon()->getUrl();
+        return $this->getFirstMediaUrl('images') ?: static::icon()->getUrl();
     }
 
     public function getPortalDetailRoute(): string

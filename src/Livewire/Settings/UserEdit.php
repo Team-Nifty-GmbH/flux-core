@@ -114,7 +114,7 @@ class UserEdit extends Component
             return;
         }
 
-        $this->notification()->success(__('User saved successful.'));
+        $this->notification()->success(__(':model saved', ['model' => __('User')]));
 
         try {
             UpdateUserPermissions::make([

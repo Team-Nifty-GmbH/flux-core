@@ -66,6 +66,6 @@ class SerialNumber extends FluxModel implements HasMedia, InteractsWithDataTable
      */
     public function getAvatarUrl(): ?string
     {
-        return $this->getFirstMediaUrl('avatar') ?: self::icon()->getUrl();
+        return $this->getFirstMediaUrl('avatar') ?: static::icon()->getUrl();
     }
 }

@@ -260,7 +260,7 @@
     <div
         class="mx-auto md:flex md:items-center md:justify-between md:space-x-5">
         <div class="flex items-center gap-5">
-            <x-avatar xl :src="$order->contact['avatar_url'] ?? ''"></x-avatar>
+            <x-avatar xl :src="data_get($order, 'avatarUrl', '')" />
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">
                     <div class="flex gap-1.5">
@@ -351,8 +351,12 @@
                     @section('contact-address-card')
                         <x-card :title="__('Contact')">
                             <x-slot:action>
-                                <x-button outline icon="eye" href="{{ route('contacts.id?', $order->contact_id ?? '') }}">
-                                </x-button>
+                                <x-button
+                                    wire:navigate
+                                    outline
+                                    icon="eye"
+                                    :href="route('contacts.id?', data_get($order, 'contact_id', ''))"
+                                />
                             </x-slot:action>
                             <div x-data="{
                                     updateContactId(id) {
@@ -406,7 +410,12 @@
                     @section('invoice-address-card')
                         <x-card :title="__('Invoice Address')">
                             <x-slot:action>
-                                <x-button outline icon="eye" href="{{ route('contacts.id?', $order->address_invoice['contact_id'] ?? '') }}">
+                                <x-button
+                                    wire:navigate
+                                    outline
+                                    icon="eye"
+                                    :href="route('address.id', data_get($order, 'address_invoice_id', ''))"
+                                >
                                 </x-button>
                             </x-slot:action>
                             <div id="order-invoice-address-id">
@@ -446,8 +455,11 @@
                     @section('delivery-address-card')
                         <x-card :title="__('Delivery Address')">
                             <x-slot:action>
-                                <x-button outline icon="eye" href="{{ route('contacts.id?', $order->address_delivery['contact_id'] ?? '') }}">
-                                </x-button>
+                                <x-button
+                                    outline
+                                    icon="eye"
+                                    :href="route('address.id', data_get($order, 'address_delivery_id', ''))"
+                                />
                             </x-slot:action>
                             <div id="order-delivery-address-id">
                                 <x-select

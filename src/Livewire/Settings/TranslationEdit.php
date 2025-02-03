@@ -136,7 +136,7 @@ class TranslationEdit extends Component
             return;
         }
 
-        $this->notification()->success(__('Translation saved successful.'));
+        $this->notification()->success(__(':model saved', ['model' => __('Translation')]));
 
         $this->skipRender();
         $this->dispatch('closeModal', $this->isNew ? $response : $response['data']);

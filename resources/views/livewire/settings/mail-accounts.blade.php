@@ -36,12 +36,12 @@
     </x-card>
 </x-modal>
 <x-modal name="edit-mail-account">
-    <x-card>
+    <x-card footer-classes="flex justify-end gap-1.5">
         <x-slot:title>
             {{ __('Edit Mail Account') }}
         </x-slot:title>
         <div class="flex flex-col gap-4">
-            <x-card :title="__('IMAP Settings')">
+            <x-card :title="__('IMAP Settings')" footer-classes="flex justify-end gap-1.5">
                 <div class="flex flex-col gap-4">
                     <x-select :label="__('Protocol')" wire:model="mailAccount.protocol">
                         <x-select.option value="imap">{{ __('IMAP') }}</x-select.option>
@@ -61,12 +61,10 @@
                     <x-toggle wire:model.boolean="mailAccount.is_auto_assign" :label="__('Auto assign mails')" />
                 </div>
                 <x-slot:footer>
-                    <div class="flex w-full justify-end">
-                        <x-button spinner primary :label="__('Test Connection')" x-on:click="$wire.testImapConnection()"/>
-                    </div>
+                    <x-button spinner primary :label="__('Test Connection')" x-on:click="$wire.testImapConnection()"/>
                 </x-slot:footer>
             </x-card>
-            <x-card :title="__('SMTP Settings')">
+            <x-card :title="__('SMTP Settings')" footer-classes="flex justify-end gap-1.5">
                 <div class="flex flex-col gap-4">
                     <x-input wire:model="mailAccount.smtp_email" :label="__('Email')" />
                     <x-inputs.password wire:model="mailAccount.smtp_password" :label="__('Password')" />
@@ -78,21 +76,19 @@
                     </x-select>
                 </div>
                 <x-slot:footer>
-                    <div class="flex w-full justify-end">
-                        <x-button spinner primary :label="__('Test Connection')" x-on:click="$wire.testSmtpConnection()"/>
-                    </div>
+                    <x-button
+                        spinner
+                        :label="__('Send test mail')"
+                        wire:flux-confirm.prompt="{{  __('Send test mail to') }}||{{  __('Cancel') }}|{{  __('Send') }}"
+                        wire:click="sendTestMail($promptValue())"
+                    />
+                    <x-button spinner primary :label="__('Test Connection')" x-on:click="$wire.testSmtpConnection()"/>
                 </x-slot:footer>
             </x-card>
         </div>
-        <x-slot name="footer">
-            <div class="w-full">
-                <div class="flex justify-end gap-x-4">
-                    <div class="flex">
-                        <x-button flat :label="__('Cancel')" x-on:click="close"/>
-                        <x-button primary :label="__('Save')" x-on:click="$wire.save().then((success) => {if(success) {close();}})"/>
-                    </div>
-                </div>
-            </div>
-        </x-slot>
+        <x-slot:footer>
+            <x-button flat :label="__('Cancel')" x-on:click="close"/>
+            <x-button primary :label="__('Save')" x-on:click="$wire.save().then((success) => {if(success) {close();}})"/>
+        </x-slot:footer>
     </x-card>
 </x-modal>
