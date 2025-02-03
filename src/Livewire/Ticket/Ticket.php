@@ -26,8 +26,6 @@ class Ticket extends Component
 
     public array $availableStates;
 
-    public array $additionalColumns = [];
-
     public array $ticketTypes;
 
     public array $states;
@@ -57,26 +55,13 @@ class Ticket extends Component
                 'users.media',
                 'ticketType:id,name',
                 'authenticatable',
+                'meta:id,additional_column_id,model_type,model_id,key,value',
             ])
             ->whereKey($id)
             ->firstOrFail();
 
         $ticketModel->state = $ticketModel->state ?:
             resolve_static(TicketModel::class, 'getDefaultStateFor', ['state']);
-
-        $this->additionalColumns = resolve_static(AdditionalColumn::class, 'query')
-            ->where('is_frontend_visible', true)
-            ->where(function (Builder $query) use ($ticketModel) {
-                $query->where('model_type', morph_alias(TicketModel::class))
-                    ->when($ticketModel->ticket_type_id, function (Builder $query) use ($ticketModel) {
-                        $query->orWhere(function (Builder $query) use ($ticketModel) {
-                            $query->where('model_type', morph_alias(TicketType::class))
-                                ->where('model_id', $ticketModel->ticket_type_id);
-                        });
-                    });
-            })
-            ->get()
-            ->toArray();
 
         $this->ticket->fill($ticketModel);
 
