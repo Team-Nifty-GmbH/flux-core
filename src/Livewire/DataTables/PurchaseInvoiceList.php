@@ -215,7 +215,7 @@ class PurchaseInvoiceList extends BaseDataTable
         $bankConnection = $contact->contactBankConnections()->latest()->first();
         $this->purchaseInvoiceForm->approval_user_id ??= $contact->approval_user_id;
         $this->purchaseInvoiceForm->payment_type_id ??= $contact->purchase_payment_type_id ?? $contact->payment_type_id;
-        $this->purchaseInvoiceForm->currency_id = $contact->currency_id ?? Currency::default()?->id;
+        $this->purchaseInvoiceForm->currency_id = $contact->currency_id ?? Currency::default()?->getKey();
         $this->purchaseInvoiceForm->client_id = $contact->client_id;
 
         $this->purchaseInvoiceForm->lay_out_user_id = null;

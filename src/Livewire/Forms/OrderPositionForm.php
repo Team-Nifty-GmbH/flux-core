@@ -142,7 +142,7 @@ class OrderPositionForm extends FluxForm
         $this->unit_gram_weight = $this->product->weight_gram;
         $this->purchase_price = $this->product->purchasePrice($this->amount)?->price ?? 0;
 
-        $this->warehouse_id ??= Warehouse::default()?->id;
+        $this->warehouse_id ??= Warehouse::default()?->getKey();
         $this->description ??= $this->product->description;
     }
 

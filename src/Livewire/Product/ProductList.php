@@ -74,7 +74,7 @@ class ProductList extends BaseProductList
     {
         $this->product->reset();
 
-        $this->product->client_id = Client::default()?->id;
+        $this->product->client_id = Client::default()?->getKey();
         $this->product->product_type = data_get(ProductType::getDefault(), 'type');
     }
 

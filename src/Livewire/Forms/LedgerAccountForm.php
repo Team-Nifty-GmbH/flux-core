@@ -12,6 +12,8 @@ class LedgerAccountForm extends FluxForm
     #[Locked]
     public ?int $id = null;
 
+    public ?int $client_id = null;
+
     public ?string $number = null;
 
     public ?string $name = null;

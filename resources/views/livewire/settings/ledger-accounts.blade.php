@@ -1,6 +1,17 @@
 <x-modal name="edit-ledger-account">
     <x-card>
         <div class="flex flex-col gap-4">
+            <x-select
+                x-bind:readonly="!edit"
+                :label="__('Client')"
+                wire:model="ledgerAccount.client_id"
+                option-value="id"
+                option-label="name"
+                :async-data="[
+                    'api' => route('search', \FluxErp\Models\Client::class),
+                    'method' => 'POST',
+                ]"
+            />
             <x-input wire:model="ledgerAccount.name" :label="__('Name')" />
             <x-input wire:model="ledgerAccount.number" :label="__('Number')" />
             <x-select
