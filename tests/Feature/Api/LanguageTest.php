@@ -268,10 +268,10 @@ class LanguageTest extends BaseSetup
             'currency_id' => $currency->id,
         ]);
         $contact = Contact::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
         ]);
         Address::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'language_id' => $this->languages[1]->id,
             'country_id' => $country->id,
             'contact_id' => $contact->id,

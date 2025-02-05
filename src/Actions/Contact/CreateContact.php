@@ -83,10 +83,10 @@ class CreateContact extends FluxAction
 
     protected function prepareForValidation(): void
     {
-        $this->data['client_id'] ??= Client::default()?->id;
-        $this->data['price_list_id'] ??= PriceList::default()?->id;
-        $this->data['payment_type_id'] ??= PaymentType::default()?->id;
-        $this->data['currency_id'] ??= Currency::default()?->id;
+        $this->data['client_id'] ??= Client::default()?->getKey();
+        $this->data['price_list_id'] ??= PriceList::default()?->getKey();
+        $this->data['payment_type_id'] ??= PaymentType::default()?->getKey();
+        $this->data['currency_id'] ??= Currency::default()?->getKey();
     }
 
     protected function validateData(): void

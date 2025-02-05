@@ -32,7 +32,7 @@ class NavigationTest extends BaseSetup
     {
         $orderTypes = OrderType::factory(5)
             ->create([
-                'client_id' => $this->dbClient->id,
+                'client_id' => $this->dbClient->getKey(),
                 'order_type_enum' => OrderTypeEnum::Order,
                 'is_active' => true,
                 'is_visible_in_sidebar' => true,

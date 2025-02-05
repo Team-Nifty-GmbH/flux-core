@@ -34,12 +34,12 @@ class PortalSetup extends TestCase
         $this->defaultLanguageCode = $language->language_code;
 
         $this->contact = Contact::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
         ]);
 
         $this->user = Address::factory()->create([
             'contact_id' => $this->contact->id,
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'language_id' => $language->id,
         ]);
 

@@ -31,7 +31,7 @@ class OrdersTest extends PortalDuskTestCase
 
         $contacts = Contact::factory()->count(2)->create([
             'price_list_id' => $priceList->id,
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
         ]);
 
         $currency = Currency::factory()->create();
@@ -40,7 +40,7 @@ class OrdersTest extends PortalDuskTestCase
         $language = Language::factory()->create();
 
         $orderType = OrderType::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'order_type_enum' => OrderTypeEnum::Order,
         ]);
 
@@ -49,12 +49,12 @@ class OrdersTest extends PortalDuskTestCase
             ->create();
 
         $addresses = Address::factory()->count(2)->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'contact_id' => $contacts->random()->id,
         ]);
 
         Order::factory()->count(3)->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'language_id' => $language->id,
             'order_type_id' => $orderType->id,
             'payment_type_id' => $paymentType->id,
@@ -67,7 +67,7 @@ class OrdersTest extends PortalDuskTestCase
         ]);
 
         $this->orders = Order::factory()->count(3)->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'language_id' => $language->id,
             'order_type_id' => $orderType->id,
             'payment_type_id' => $paymentType->id,

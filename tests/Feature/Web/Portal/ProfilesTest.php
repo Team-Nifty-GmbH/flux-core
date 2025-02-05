@@ -57,12 +57,12 @@ class ProfilesTest extends PortalSetup
     public function test_portal_profiles_address_not_found()
     {
         $contact = Contact::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
         ]);
 
         $address = Address::factory()->create([
             'contact_id' => $contact->id,
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'language_id' => $this->user->language_id,
         ]);
 

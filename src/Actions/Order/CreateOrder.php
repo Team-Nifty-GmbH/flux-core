@@ -69,7 +69,7 @@ class CreateOrder extends FluxAction
 
     protected function prepareForValidation(): void
     {
-        $this->data['currency_id'] ??= Currency::default()?->id;
+        $this->data['currency_id'] ??= Currency::default()?->getKey();
 
         if (! data_get($this->data, 'address_invoice_id', false)
             && $contactId = data_get($this->data, 'contact_id', false)
@@ -116,7 +116,7 @@ class CreateOrder extends FluxAction
         $this->data['footer'] ??= $contact->footer;
         $this->data['payment_type_id'] = $this->data['payment_type_id']
             ?? $contact->payment_type_id
-            ?? PaymentType::default()?->id;
+            ?? PaymentType::default()?->getKey();
         $this->data['client_id'] ??= $contact->client_id;
 
         $paymentType = resolve_static(PaymentType::class, 'query')
@@ -147,10 +147,10 @@ class CreateOrder extends FluxAction
             ?? 1;
 
         $this->data['price_list_id'] ??= $contact->price_list_id
-            ?? PriceList::default()?->id;
+            ?? PriceList::default()?->getKey();
 
         $this->data['language_id'] ??= $addressInvoice->language_id
-            ?? Language::default()?->id;
+            ?? Language::default()?->getKey();
 
         $this->data['order_date'] ??= now();
 

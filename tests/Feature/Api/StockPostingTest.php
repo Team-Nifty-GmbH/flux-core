@@ -31,12 +31,12 @@ class StockPostingTest extends BaseSetup
         parent::setUp();
 
         $contact = Contact::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
         ]);
 
         $address = Address::factory()->create([
             'contact_id' => $contact->id,
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'is_main_address' => false,
         ]);
 
