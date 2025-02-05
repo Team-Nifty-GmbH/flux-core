@@ -48,12 +48,6 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=3
-        command: >
-          --skip-log-bin
-          --general-log=0
-          --slow-query-log=0
-          --log-error=/dev/null
-          --performance-schema=OFF
 
       redis:
         image: redis
