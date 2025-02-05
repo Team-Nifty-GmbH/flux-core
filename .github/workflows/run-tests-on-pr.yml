@@ -12,6 +12,9 @@ jobs:
     runs-on: self-hosted
     env:
       HOME: /github/home
+      DB_CONNECTION: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 33306
       DB_DATABASE: testing
       DB_USERNAME: root
       DB_PASSWORD: password
