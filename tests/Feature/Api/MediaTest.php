@@ -40,7 +40,7 @@ class MediaTest extends BaseSetup
         parent::setUp();
 
         $project = Project::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
         ]);
 
         $this->task = Task::factory()->create([

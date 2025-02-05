@@ -31,7 +31,7 @@ class OrderProjectTest extends BaseSetup
             'is_default' => true,
         ]);
         $contact = Contact::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
         ]);
         $priceList = PriceList::factory()->create([
             'is_default' => true,
@@ -44,12 +44,12 @@ class OrderProjectTest extends BaseSetup
             ]);
 
         $orderType = OrderType::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'order_type_enum' => OrderTypeEnum::Order->value,
         ]);
 
         $address = Address::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'contact_id' => $contact->id,
             'is_main_address' => true,
             'is_invoice_address' => true,
@@ -57,7 +57,7 @@ class OrderProjectTest extends BaseSetup
         ]);
 
         $this->order = Order::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'currency_id' => $currency->id,
             'address_invoice_id' => $address->id,
             'price_list_id' => $priceList->id,
@@ -116,7 +116,7 @@ class OrderProjectTest extends BaseSetup
     public function test_create_tasks_for_existing_project()
     {
         $projects = Project::factory(3)->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
         ]);
         $currentProjectCount = Project::query()->count();
 

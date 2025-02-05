@@ -27,12 +27,12 @@ class WarehouseTest extends BaseSetup
         parent::setUp();
 
         $dbContact = Contact::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
         ]);
 
         $this->addresses = Address::factory()->count(3)->create([
             'contact_id' => $dbContact->id,
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'is_main_address' => false,
         ]);
 

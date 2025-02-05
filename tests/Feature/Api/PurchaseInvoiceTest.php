@@ -64,10 +64,10 @@ class PurchaseInvoiceTest extends BaseSetup
             ]);
 
         $this->contacts = Contact::factory()->count(2)
-            ->has(Address::factory()->set('client_id', $this->dbClient->id))
+            ->has(Address::factory()->set('client_id', $this->dbClient->getKey()))
             ->for(PriceList::factory())
             ->create([
-                'client_id' => $this->dbClient->id,
+                'client_id' => $this->dbClient->getKey(),
                 'payment_type_id' => $this->paymentTypes->random()->id,
                 'payment_target_days' => 0,
                 'discount_days' => 0,
@@ -79,7 +79,7 @@ class PurchaseInvoiceTest extends BaseSetup
         $language = Language::factory()->create();
 
         $this->orderTypes = OrderType::factory()->count(2)->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'order_type_enum' => OrderTypeEnum::Purchase,
         ]);
 
@@ -92,7 +92,7 @@ class PurchaseInvoiceTest extends BaseSetup
                     ->toMediaCollection('purchase_invoice');
             })
             ->create([
-                'client_id' => $this->dbClient->id,
+                'client_id' => $this->dbClient->getKey(),
                 'order_type_id' => $this->orderTypes->random()->id,
                 'payment_type_id' => $this->paymentTypes->random()->id,
                 'currency_id' => $this->currencies->random()->id,
@@ -244,7 +244,9 @@ class PurchaseInvoiceTest extends BaseSetup
 
     public function test_create_purchase_invoice_maximum()
     {
-        $ledgerAccount = LedgerAccount::factory()->create();
+        $ledgerAccount = LedgerAccount::factory()->create([
+            'client_id' => $this->dbClient->getKey(),
+        ]);
         $product = Product::factory()
             ->hasAttached(factory: $this->dbClient, relationship: 'clients')
             ->create();
@@ -252,7 +254,7 @@ class PurchaseInvoiceTest extends BaseSetup
 
         $purchaseInvoice = [
             'uuid' => Str::uuid()->toString(),
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'contact_id' => $this->contacts->random()->id,
             'currency_id' => $this->currencies->random()->id,
             'order_type_id' => $this->orderTypes->random()->id,
@@ -338,7 +340,7 @@ class PurchaseInvoiceTest extends BaseSetup
     public function test_create_purchase_invoice_validation_fails()
     {
         $purchaseInvoice = [
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'purchase_invoice_positions' => [],
         ];
 

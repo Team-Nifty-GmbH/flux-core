@@ -34,7 +34,7 @@ class CheckoutTest extends BaseSetup
         ]);
 
         $this->orderType = OrderType::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'order_type_enum' => OrderTypeEnum::Order,
             'is_active' => true,
         ]);
@@ -114,7 +114,7 @@ class CheckoutTest extends BaseSetup
             ->assertRedirect(route('portal.checkout-finish'));
 
         $this->assertDatabaseHas('orders', [
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'contact_id' => $this->address->contact_id,
             'address_invoice_id' => $this->address->id,
             'address_delivery_id' => $this->address->id,

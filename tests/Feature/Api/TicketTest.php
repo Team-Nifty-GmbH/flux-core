@@ -29,7 +29,7 @@ class TicketTest extends BaseSetup
         parent::setUp();
 
         $dbContact = Contact::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
         ]);
 
         $language = Language::query()->where('language_code', config('app.locale'))->first();

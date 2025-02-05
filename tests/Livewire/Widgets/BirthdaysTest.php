@@ -15,12 +15,12 @@ class BirthdaysTest extends BaseSetup
         parent::setUp();
 
         $this->contact = Contact::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
         ]);
 
         $this->address = Address::factory()->create([
             'contact_id' => $this->contact->id,
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'date_of_birth' => now()->subYears(30),
             'is_active' => true,
         ]);

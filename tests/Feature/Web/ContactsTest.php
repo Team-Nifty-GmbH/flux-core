@@ -25,12 +25,12 @@ class ContactsTest extends BaseSetup
             ]);
 
         $this->contact = Contact::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'payment_type_id' => $paymentType->id,
         ]);
 
         Address::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'contact_id' => $this->contact->id,
             'is_main_address' => true,
         ]);

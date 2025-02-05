@@ -13,11 +13,11 @@ class TasksTest extends BaseSetup
     public function test_renders_successfully()
     {
         $contact = Contact::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
         ]);
         $address = Address::factory()->create([
             'contact_id' => $contact->id,
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'language_id' => $this->user->language_id,
             'can_login' => false,
             'is_active' => true,
