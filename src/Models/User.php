@@ -4,7 +4,6 @@ namespace FluxErp\Models;
 
 use FluxErp\Mail\MagicLoginLink;
 use FluxErp\Traits\CacheModelQueries;
-use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasCalendarUserSettings;
 use FluxErp\Traits\HasCart;
@@ -40,10 +39,10 @@ use TeamNiftyGmbH\DataTable\Traits\HasDatatableUserSettings;
 
 class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia, InteractsWithDataTables
 {
-    use CacheModelQueries, Commentable, Filterable, HasCalendars, HasCalendarUserSettings, HasCart,
-        HasDatatableUserSettings, HasFrontendAttributes, HasPackageFactory, HasParentChildRelations,
-        HasPushSubscriptions, HasRoles, HasUserModification, HasUuid, HasWidgets, InteractsWithMedia, MonitorsQueue,
-        Notifiable, Searchable, SoftDeletes;
+    use CacheModelQueries, Filterable, HasCalendars, HasCalendarUserSettings, HasCart, HasDatatableUserSettings,
+        HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasPushSubscriptions, HasRoles,
+        HasUserModification, HasUuid, HasWidgets, InteractsWithMedia, MonitorsQueue, Notifiable, Searchable,
+        SoftDeletes;
 
     protected $hidden = [
         'password',

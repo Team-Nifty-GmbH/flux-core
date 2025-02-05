@@ -3,7 +3,6 @@
 namespace FluxErp\Models;
 
 use FluxErp\Traits\Categorizable;
-use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasPackageFactory;
@@ -24,7 +23,7 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Category extends FluxModel implements InteractsWithDataTables, Sortable
 {
-    use Commentable, Filterable, HasAdditionalColumns, HasPackageFactory, HasParentChildRelations, HasUserModification,
+    use Filterable, HasAdditionalColumns, HasPackageFactory, HasParentChildRelations, HasUserModification,
         HasUuid, LogsActivity, Searchable, SortableTrait;
 
     protected $hidden = [
