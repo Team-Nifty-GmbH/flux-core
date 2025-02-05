@@ -2,6 +2,7 @@
 
 namespace FluxErp\Traits;
 
+use FluxErp\Models\Media as FluxMedia;
 use FluxErp\Support\MediaLibrary\MediaCollection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
@@ -115,5 +116,10 @@ trait InteractsWithMedia
         $this->mediaCollections[$name] = $mediaCollection;
 
         return $mediaCollection;
+    }
+
+    public function getMediaModel(): string
+    {
+        return resolve_static(FluxMedia::class, 'class');
     }
 }
