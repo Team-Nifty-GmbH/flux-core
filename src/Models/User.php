@@ -4,7 +4,6 @@ namespace FluxErp\Models;
 
 use FluxErp\Mail\MagicLoginLink;
 use FluxErp\Traits\CacheModelQueries;
-use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasCalendarUserSettings;
 use FluxErp\Traits\HasCart;

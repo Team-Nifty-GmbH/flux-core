@@ -23,15 +23,21 @@ class CommentTest extends BaseSetup
 
     private Comment $comment;
 
+    private Ticket $ticket;
+
     private array $permissions;
 
     protected function setUp(): void
     {
         parent::setUp();
 
+        $this->ticket = Ticket::factory()->create([
+            'authenticatable_type' => morph_alias(User::class),
+            'authenticatable_id' => $this->user->id,
+        ]);
         $this->comment = Comment::factory()->create([
-            'model_type' => morph_alias(User::class),
-            'model_id' => $this->user->id,
+            'model_type' => morph_alias(Ticket::class),
+            'model_id' => $this->ticket->id,
             'comment' => 'User Comment from a Test!',
         ]);
 
@@ -47,8 +53,8 @@ class CommentTest extends BaseSetup
     public function test_get_user_comments()
     {
         $dbComment = new Comment();
-        $dbComment->model_type = morph_alias(User::class);
-        $dbComment->model_id = $this->user->id;
+        $dbComment->model_type = morph_alias(Ticket::class);
+        $dbComment->model_id = $this->ticket->id;
         $dbComment->comment = 'User Comment from a Test!';
         $dbComment->save();
 
@@ -88,8 +94,8 @@ class CommentTest extends BaseSetup
     public function test_create_comment()
     {
         $comment = [
-            'model_id' => $this->user->id,
-            'model_type' => morph_alias(User::class),
+            'model_id' => $this->ticket->id,
+            'model_type' => morph_alias(Ticket::class),
             'comment' => 'test comment',
         ];
 
@@ -105,7 +111,7 @@ class CommentTest extends BaseSetup
             ->first();
         $this->assertNotEmpty($dbComment);
         $this->assertEquals($comment['model_id'], $dbComment->model_id);
-        $this->assertEquals(morph_alias(User::class), $dbComment->model_type);
+        $this->assertEquals(morph_alias(Ticket::class), $dbComment->model_type);
         $this->assertEquals($comment['comment'], $dbComment->comment);
         $this->assertTrue($this->user->is($dbComment->getCreatedBy()));
         $this->assertTrue($this->user->is($dbComment->getUpdatedBy()));
@@ -158,8 +164,8 @@ class CommentTest extends BaseSetup
     public function test_create_comment_model_instance_not_found()
     {
         $comment = [
-            'model_id' => ++$this->user->id,
-            'model_type' => morph_alias(User::class),
+            'model_id' => ++$this->ticket->id,
+            'model_type' => morph_alias(Ticket::class),
             'comment' => 'test comment',
         ];
 
@@ -173,8 +179,8 @@ class CommentTest extends BaseSetup
     public function test_create_comment_with_parent()
     {
         $comment = [
-            'model_id' => $this->user->id,
-            'model_type' => morph_alias(User::class),
+            'model_id' => $this->ticket->id,
+            'model_type' => morph_alias(Ticket::class),
             'parent_id' => $this->comment->id,
             'comment' => 'child comment',
         ];
@@ -198,8 +204,8 @@ class CommentTest extends BaseSetup
     public function test_create_comment_with_parent_not_found()
     {
         $comment = [
-            'model_id' => $this->user->id,
-            'model_type' => morph_alias(User::class),
+            'model_id' => $this->ticket->id,
+            'model_type' => morph_alias(Ticket::class),
             'parent_id' => ++$this->comment->id,
             'comment' => 'child comment',
         ];
