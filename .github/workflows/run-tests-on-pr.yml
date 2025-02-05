@@ -94,6 +94,7 @@ jobs:
 
       - name: Create schema
         run: |
+          cd $GITHUB_WORKSPACE
           php artisan migrate --force
           php artisan schema:dump
 
