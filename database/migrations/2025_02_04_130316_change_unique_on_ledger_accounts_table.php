@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -35,6 +36,13 @@ return new class() extends Migration
 
     public function down(): void
     {
+        DB::table('ledger_accounts as la1')
+            ->join(
+                'ledger_accounts as la2',
+                fn (JoinClause $join) => $join->on('la1.number', '=', 'la2.number')->whereRaw('la1.id > la2.id')
+            )
+            ->delete();
+
         Schema::table('ledger_accounts', function (Blueprint $table) {
             $table->dropConstrainedForeignId('client_id');
             $table->dropUnique(['number', 'ledger_account_type_enum', 'client_id']);

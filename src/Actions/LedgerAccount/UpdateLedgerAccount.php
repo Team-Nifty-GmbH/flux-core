@@ -43,27 +43,18 @@ class UpdateLedgerAccount extends FluxAction
 
         $ledgerAccount = resolve_static(LedgerAccount::class, 'query')
             ->whereKey($this->data['id'])
-            ->first();
+            ->first(['client_id', 'number', 'ledger_account_type_enum']);
 
         if (resolve_static(LedgerAccount::class, 'query')
             ->whereKeyNot($this->getData('id'))
-            ->where(
-                'number',
-                $this->getData('number') ?? $ledgerAccount->number
-            )
-            ->where(
-                'ledger_account_type_enum',
-                $this->getData('ledger_account_type_enum') ?? $ledgerAccount->ledger_account_type_enum
-            )
-            ->where(
-                'client_id',
-                $this->getData('client_id') ?? $ledgerAccount->client_id
+            ->where('client_id', $ledgerAccount->client_id)
+            ->where('number', $this->getData('number', $ledgerAccount->number))
+            ->where('ledger_account_type_enum',
+                $this->getData('ledger_account_type_enum', $ledgerAccount->ledger_account_type_enum)
             )
             ->exists()
         ) {
-            throw ValidationException::withMessages([
-                'number' => 'The number has already been taken for this type.',
-            ]);
+            throw ValidationException::withMessages(['number' => ['The number has already been taken for this type.']]);
         }
     }
 }

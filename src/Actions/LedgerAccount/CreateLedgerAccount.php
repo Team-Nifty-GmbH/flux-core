@@ -40,12 +40,12 @@ class CreateLedgerAccount extends FluxAction
         parent::validateData();
 
         if (resolve_static(LedgerAccount::class, 'query')
+            ->where('client_id', $this->getData('client_id'))
             ->where('number', $this->getData('number'))
             ->where('ledger_account_type_enum', $this->getData('ledger_account_type_enum'))
-            ->where('client_id', $this->getData('client_id'))
             ->exists()
         ) {
-            throw ValidationException::withMessages(['number' => 'The number has already been taken for this type.']);
+            throw ValidationException::withMessages(['number' => ['The number has already been taken for this type.']]);
         }
     }
 }
