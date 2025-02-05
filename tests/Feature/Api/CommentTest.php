@@ -50,7 +50,7 @@ class CommentTest extends BaseSetup
         Role::findOrCreate('Super Admin');
     }
 
-    public function test_get_user_comments()
+    public function test_get_ticket_comments()
     {
         $dbComment = new Comment();
         $dbComment->model_type = morph_alias(Ticket::class);
@@ -61,16 +61,16 @@ class CommentTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/user/comments/' . $this->user->id);
+        $response = $this->actingAs($this->user)->get('/api/ticket/comments/' . $this->ticket->id);
         $response->assertStatus(200);
 
         $json = json_decode($response->getContent());
         $this->assertFalse(property_exists($json, 'templates'));
-        $userComment = $json->data->data;
-        $this->assertNotEmpty($userComment);
-        $this->assertEquals($dbComment->id, $userComment[0]->id);
-        $this->assertEquals($dbComment->model_id, $userComment[0]->model_id);
-        $this->assertEquals($dbComment->comment, $userComment[0]->comment);
+        $ticketComment = $json->data->data;
+        $this->assertNotEmpty($ticketComment);
+        $this->assertEquals($dbComment->id, $ticketComment[0]->id);
+        $this->assertEquals($dbComment->model_id, $ticketComment[0]->model_id);
+        $this->assertEquals($dbComment->comment, $ticketComment[0]->comment);
     }
 
     public function test_get_comments_route_not_found()
