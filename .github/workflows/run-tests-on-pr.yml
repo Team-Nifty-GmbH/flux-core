@@ -97,9 +97,9 @@ jobs:
           MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
 
       - name: Create schema
-        run:
-          - php artisan migrate --force
-          - php artisan schema:dump
+        run: |
+          php artisan migrate --force
+          php artisan schema:dump
 
       - name: Run Livewire Tests
         run: composer test-livewire
