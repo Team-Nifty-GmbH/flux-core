@@ -12,6 +12,7 @@
     ":time elapsed": ":time vergangen",
     ":time remaining": ":time verbleibend",
     ":username commented on :model": ":username hat :model kommentiert",
+    ":username commented on :model :label": ":username hat :model :label kommentiert",
     ":view PDF created": ":view PDF erstellt",
     ":view signature has been added by :name": ":view Unterschrift wurde von :name hinzugefügt",
     "<": "kleiner",
