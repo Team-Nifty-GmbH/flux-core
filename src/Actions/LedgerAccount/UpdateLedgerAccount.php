@@ -49,7 +49,8 @@ class UpdateLedgerAccount extends FluxAction
             ->whereKeyNot($this->getData('id'))
             ->where('client_id', $ledgerAccount->client_id)
             ->where('number', $this->getData('number', $ledgerAccount->number))
-            ->where('ledger_account_type_enum',
+            ->where(
+                'ledger_account_type_enum',
                 $this->getData('ledger_account_type_enum', $ledgerAccount->ledger_account_type_enum)
             )
             ->exists()
