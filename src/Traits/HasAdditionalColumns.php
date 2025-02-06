@@ -262,7 +262,7 @@ trait HasAdditionalColumns
         $rules = [];
 
         foreach ($this->getAdditionalColumns(false) as $column) {
-            $rules[$column->name] = data_get($rules, $column->name) ?? ($column->validations ?: ['nullable']);
+            $rules[$column->name] ??= $column->validations ?: ['nullable'];
 
             if ($column->values) {
                 $rules[$column->name] = array_merge(

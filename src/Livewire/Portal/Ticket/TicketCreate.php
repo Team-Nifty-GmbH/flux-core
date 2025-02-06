@@ -156,7 +156,6 @@ class TicketCreate extends Component
             'name'
         );
 
-        $this->ticket = array_merge($this->ticket, array_fill_keys($oldAdditionalColumns, null));
         $this->oldTicketTypeId = $this->ticketTypeId;
 
         $this->selectedAdditionalColumns = $this->ticketTypeId ?
