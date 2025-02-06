@@ -6,7 +6,6 @@ use FluxErp\Enums\ComposerRepositoryTypeEnum;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Composer as BaseComposer;
-use Illuminate\Support\Str;
 use Symfony\Component\Process\Process;
 
 class Composer extends BaseComposer
