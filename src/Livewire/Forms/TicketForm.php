@@ -54,6 +54,8 @@ class TicketForm extends FluxForm
 
     public ?array $availableAdditionalColumns = [];
 
+    protected ?array $meta = null;
+
     protected function getActions(): array
     {
         return [
@@ -70,19 +72,32 @@ class TicketForm extends FluxForm
                 'authenticatable',
                 'ticketType:id,name',
                 'users:id',
+                'meta',
             ]);
             data_set($values, 'authenticatable.avatar_url', $values->authenticatable?->getAvatarUrl());
             data_set($values, 'authenticatable.avatar_url', $values->authenticatable?->getAvatarUrl());
             data_set($values, 'authenticatable.name', $values->authenticatable?->getLabel());
-            $additionalColumns = $values->meta->keyBy('key')->toArray();
+            $this->meta = $values->meta->toArray();
 
             $values = $values->toArray();
             data_set($values, 'users', array_column($values['users'], 'id'));
-            $this->additional_columns = $additionalColumns;
         }
 
         parent::fill($values);
 
+        $this->loadAdditionalColumns();
+    }
+
+    public function toActionData(): array
+    {
+        return array_merge(
+            parent::toActionData(),
+            Arr::pluck($this->additional_columns, 'value', 'key')
+        );
+    }
+
+    protected function loadAdditionalColumns(): void
+    {
         $this->availableAdditionalColumns = resolve_static(AdditionalColumn::class, 'query')
             ->where('is_frontend_visible', true)
             ->where(function (Builder $query) {
@@ -95,6 +110,7 @@ class TicketForm extends FluxForm
                     });
             })
             ->get(['id', 'name', 'field_type', 'label', 'values'])
+            ->keyBy('name')
             ->toArray();
 
         $this->additional_columns = collect(
@@ -102,13 +118,15 @@ class TicketForm extends FluxForm
                 collect($this->availableAdditionalColumns)
                     ->map(function (array $column) {
                         return [
-                            'key' => $column['name'],
-                            'value' => $this->additional_columns[$column['name']]['value'] ?? null,
-                            'label' => $column['label'],
-                            'field_type' => $column['field_type'],
-                            'values' => $column['values'],
+                            'key' => data_get($column, 'name'),
+                            'value' => data_get($this->additional_columns, data_get($column, 'name') . '.value'),
+                            'label' => data_get($column, 'label'),
+                            'field_type' => data_get($column, 'field_type'),
+                            'values' => data_get($column, 'values'),
                         ];
                     })
+                    ->toArray(),
+                collect($this->meta ?? $this->additional_columns ?? [])
                     ->keyBy('key')
                     ->toArray(),
                 $this->additional_columns
@@ -119,13 +137,10 @@ class TicketForm extends FluxForm
                     $column['value'] = (bool) data_get($column, 'value');
                 }
 
+                $column['values'] = data_get($this->availableAdditionalColumns, data_get($column, 'key') . '.values');
+
                 return $column;
             })
             ->toArray();
-    }
-
-    public function toActionData(): array
-    {
-        return array_merge(parent::toActionData(), Arr::pluck($this->additional_columns, 'value', 'key'));
     }
 }
