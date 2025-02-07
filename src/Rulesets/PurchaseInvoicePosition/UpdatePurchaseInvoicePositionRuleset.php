@@ -38,9 +38,9 @@ class UpdatePurchaseInvoicePositionRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => VatRate::class]),
             ],
             'name' => 'nullable|string|max:255',
-            'amount' => app(Numeric::class, ['min' => 0]),
-            'unit_price' => app(Numeric::class, ['min' => 0]),
-            'total_price' => app(Numeric::class, ['min' => 0]),
+            'amount' => app(Numeric::class),
+            'unit_price' => app(Numeric::class),
+            'total_price' => app(Numeric::class),
         ];
     }
 }

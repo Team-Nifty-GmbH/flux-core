@@ -46,15 +46,15 @@ class CreatePurchaseInvoicePositionRuleset extends FluxRuleset
             'name' => 'nullable|string|max:255',
             'amount' => [
                 'required',
-                app(Numeric::class, ['min' => 0]),
+                app(Numeric::class),
             ],
             'unit_price' => [
                 'required',
-                app(Numeric::class, ['min' => 0]),
+                app(Numeric::class),
             ],
             'total_price' => [
                 'required',
-                app(Numeric::class, ['min' => 0]),
+                app(Numeric::class),
             ],
         ];
     }
