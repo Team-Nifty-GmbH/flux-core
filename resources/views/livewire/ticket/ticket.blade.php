@@ -62,7 +62,7 @@
                                                     <x-checkbox
                                                         x-cloak
                                                         x-show="additionalColumn.field_type === 'checkbox'"
-                                                        wire:model.boolean="ticket.additional_columns[name].value"
+                                                        x-model="$wire.ticket.additional_columns[name].value"
                                                     >
                                                         <x-slot:label>
                                                             <span x-text="additionalColumn.label ? additionalColumn.label : additionalColumn.name"></span>
