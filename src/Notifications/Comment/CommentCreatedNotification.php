@@ -53,7 +53,7 @@ class CommentCreatedNotification extends Notification implements HasToastNotific
                 fn (MailMessage $mail) => $mail->replyTo($ticketAccount)
             )
             ->line(new HtmlString(
-                '<span>[flux:comment:'
+                '<span style="display: none">[flux:comment:'
                 . $this->model->model->getMorphClass() . ':'
                 . $this->model->model->getKey()
                 . ']</span>'
