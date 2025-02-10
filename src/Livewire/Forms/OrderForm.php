@@ -48,6 +48,8 @@ class OrderForm extends FluxForm
 
     public ?int $responsible_user_id = null;
 
+    public ?int $vat_rate_id = null;
+
     public ?array $address_invoice = null;
 
     public ?array $address_delivery = null;

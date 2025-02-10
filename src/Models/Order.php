@@ -382,6 +382,11 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
         return $this->belongsToMany(User::class, 'order_user');
     }
 
+    public function vatRate(): BelongsTo
+    {
+        return $this->belongsTo(VatRate::class);
+    }
+
     public function vatRates(): HasManyThrough
     {
         return $this->hasManyThrough(

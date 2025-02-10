@@ -32,6 +32,7 @@ use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Schedule;
+use FluxErp\Models\VatRate;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\CreatesDocuments;
 use FluxErp\Traits\Livewire\WithTabs;
@@ -137,6 +138,10 @@ class Order extends Component
                     ->select(['id', 'contact_id', 'iban'])
                     ->pluck('iban', 'id')
                     ?->toArray() ?? [],
+                'vatRates' => resolve_static(VatRate::class, 'query')
+                    ->where('is_tax_exemption', true)
+                    ->get(['id', 'name'])
+                    ->toArray(),
             ]
         );
     }

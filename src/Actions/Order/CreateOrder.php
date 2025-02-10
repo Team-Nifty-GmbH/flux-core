@@ -112,6 +112,7 @@ class CreateOrder extends FluxAction
             return;
         }
 
+        $this->data['vat_rate_id'] ??= $contact->vat_rate_id;
         $this->data['header'] ??= $contact->header;
         $this->data['footer'] ??= $contact->footer;
         $this->data['payment_type_id'] = $this->data['payment_type_id']

@@ -671,6 +671,16 @@
                                     :disabled="$order->is_locked"
                                 />
                                 <x-select
+                                    :label="__('Tax Exemption')"
+                                    :options="$vatRates"
+                                    option-value="id"
+                                    option-label="name"
+                                    autocomplete="off"
+                                    wire:model="order.vat_rate_id"
+                                    x-bind:disabled="$wire.order.is_locked"
+                                    :disabled="$order->is_locked"
+                                />
+                                <x-select
                                     :label="__('Payment method')"
                                     :options="$paymentTypes"
                                     option-value="id"
