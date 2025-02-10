@@ -624,7 +624,6 @@
                                 />
                                 <x-select
                                     :label="__('Responsible User')"
-                                    :disabled="$order->is_locked"
                                     autocomplete="off"
                                     option-value="id"
                                     option-label="label"
@@ -642,7 +641,6 @@
                                 />
                                 <x-select
                                     :label="__('Assigned')"
-                                    :disabled="$order->is_locked"
                                     autocomplete="off"
                                     :multiselect="true"
                                     option-value="id"
@@ -677,15 +675,12 @@
                                     option-label="name"
                                     :clearable="false"
                                     autocomplete="off"
-                                    wire:model.live="order.payment_type_id"
-                                    x-bind:disabled="$wire.order.is_locked"
-                                    :disabled="$order->is_locked"
+                                    wire:model="order.payment_type_id"
                                 />
                                 @if($contactBankConnections)
                                     <x-select
                                         wire:model="order.contact_bank_connection_id"
                                         :label="__('Bank connection')"
-                                        :disabled="$order->is_locked"
                                         :options="$contactBankConnections"
                                         option-key-value
                                     />
