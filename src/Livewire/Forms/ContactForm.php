@@ -33,6 +33,8 @@ class ContactForm extends FluxForm
     #[Locked]
     public ?int $main_address_id = null;
 
+    public ?int $vat_rate_id = null;
+
     public ?string $customer_number = null;
 
     public ?string $creditor_number = null;

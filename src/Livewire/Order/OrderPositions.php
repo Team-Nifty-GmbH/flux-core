@@ -387,6 +387,7 @@ class OrderPositions extends OrderPositionList
     public function addOrderPosition(bool $reload = true): bool
     {
         $this->orderPosition->order_id = $this->order->id;
+        $this->orderPosition->vat_rate_id = $this->order->vat_rate_id ?? $this->orderPosition->vat_rate_id;
 
         try {
             $this->orderPosition->save();

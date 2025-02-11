@@ -84,6 +84,10 @@ class ReplicateOrder extends FluxAction
             $orderData['parent_id'] = data_get($originalOrder, 'id');
         }
 
+        if ($originalOrder['contact_id'] !== $orderData['contact_id']) {
+            $orderData['vat_rate_id'] = null;
+        }
+
         $orderData['created_from_id'] = data_get($originalOrder, 'id');
 
         $order = CreateOrder::make($orderData)
