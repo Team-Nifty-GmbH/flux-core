@@ -302,6 +302,11 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
         return $this->belongsTo(Order::class, 'created_from_id');
     }
 
+    public function createdOrders(): HasMany
+    {
+        return $this->hasMany(Order::class, 'created_from_id');
+    }
+
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);
