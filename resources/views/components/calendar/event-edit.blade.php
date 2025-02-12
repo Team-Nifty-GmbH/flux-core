@@ -387,5 +387,14 @@
                 </div>
             </div>
         @show
+        @section('event-edit.has-taken-place')
+            <div class="mb-2">
+                <x-checkbox
+                    :label="__('Has taken place')"
+                    wire:model="calendarEvent.has_taken_place"
+                    x-bind:disabled="! $wire.calendarEvent.is_editable ?? false"
+                />
+            </div>
+        @show
     @show
 </div>
