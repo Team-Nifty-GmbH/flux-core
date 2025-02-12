@@ -74,11 +74,12 @@ class TaskForm extends FluxForm
     public function fill($values): void
     {
         if ($values instanceof Task) {
-            $values->loadMissing(['tags:id', 'categories:id']);
+            $values->loadMissing(['tags:id', 'categories:id', 'users:id']);
 
             $values = $values->toArray();
             $values['tags'] = array_column($values['tags'] ?? [], 'id');
             $values['categories'] = array_column($values['categories'] ?? [], 'id');
+            $values['users'] = array_column($values['users'] ?? [], 'id');
         }
 
         $values['start_date'] = ! is_null($values['start_date'] ?? null) ?
