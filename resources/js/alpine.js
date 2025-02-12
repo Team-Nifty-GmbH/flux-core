@@ -10,6 +10,7 @@ import templateOutlet from './components/template-outlet';
 import sort from '@alpinejs/sort';
 import navigationSpinner from './components/navigation-spinner.js';
 import wireNavigation from './components/wire-navigation.js';
+import comments from './components/comments.js';
 
 window.setupEditor = setupEditor;
 window.workTime = workTime;
@@ -37,6 +38,7 @@ Alpine.directive('percentage', (el, { expression }, { evaluate }) => {
 
 Alpine.directive('template-outlet', templateOutlet);
 Alpine.data('folder_tree', folders);
+Alpine.data('comments', comments);
 
 document.addEventListener('livewire:navigated', wireNavigation,{once: true});
 

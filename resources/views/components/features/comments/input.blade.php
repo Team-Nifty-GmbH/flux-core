@@ -1,25 +1,39 @@
-<div class="comment-input px-4 py-6 sm:px-6"
-     x-data="{
-        user: @js(auth()->user()),
-        avatarUrl: @js(auth()->user()?->getAvatarUrl()),
-        files: [],
-        sticky: false,
-        removeUpload(index) {
-            this.files.splice(index, 1);
-            this.updateInputValue(this.$refs.fileUpload);
+<div class="comment-input" wire:ignore x-data="{
+    ...filePond(
+        $wire,
+        $refs.upload,
+        '{{ Auth::user()?->language?->language_code }}',
+        {
+            title: '{{ __('File will be replaced') }}',
+            description: '{{ __('Do you want to proceed?') }}',
+            labelAccept: '{{ __('Accept') }}',
+            labelReject: '{{ __('Undo') }}',
         },
-        updateInputValue(ref) {
-            ref.value = '';
-            const dataTransfer = new DataTransfer();
-            this.files.forEach((file) => {
-            const fileInput = new File([file], file.name);
-                dataTransfer.items.add(fileInput);
-            });
-            ref.files = dataTransfer.files;
-        },
-     }"
-     wire:ignore
->
+        {
+            uploadDisabled:'{{ __('Upload not allowed - Read Only') }}',
+        }
+    ),
+    selectionProxy: {},
+    selection: {},
+    countChildren() {
+        return this.selectionProxy?.children?.length;
+    },
+    files: [],
+    sticky: false,
+    removeUpload(index) {
+        this.files.splice(index, 1);
+        this.updateInputValue(this.$refs.fileUpload);
+    },
+    updateInputValue(ref) {
+        ref.value = '';
+        const dataTransfer = new DataTransfer();
+        this.files.forEach((file) => {
+        const fileInput = new File([file], file.name);
+            dataTransfer.items.add(fileInput);
+        });
+        ref.files = dataTransfer.files;
+    }
+}">
     <div class="flex space-x-3">
         <div>
             <div class="shrink-0 inline-flex items-center justify-center overflow-hidden rounded-full border border-gray-200 dark:border-secondary-500">
@@ -27,40 +41,39 @@
             </div>
         </div>
         <div class="min-w-0 flex-1">
-            <div>
+            <div x-ref="upload">
                 <div x-ref="textarea">
                     <x-flux::editor class="comment-input" />
                 </div>
-                <div class="flex flex-wrap justify-between mt-3">
-                    <div class="flex gap-1.5">
-                        <x-button flat icon="paper-clip" :label="__('Add attachment')" x-on:click="$refs.fileUpload.click()"/>
-                        <input x-ref="fileUpload" class="hidden" multiple type="file" x-on:change="files = Array.from($el.files)">
-                        <template x-for="(file, i) in files">
-                            <x-badge rounded >
-                                <x-slot:label>
-                                    <span x-text="file.name"></span>
-                                </x-slot:label>
-                                <x-slot:append class="relative flex items-center w-2 h-2">
-                                    <button x-on:click="removeUpload(i)" type="button">
-                                        <x-icon name="x" class="w-4 h-4" />
-                                    </button>
-                                </x-slot:append>
-                            </x-badge>
-                        </template>
-                    </div>
+                <div class="grow pt-4">
+                    @canAction(\FluxErp\Actions\Media\UploadMedia::class)
+                        <div class="flex flex-col items-end">
+                            <div class="w-full mb-4">
+                                <input x-init="loadFilePond(countChildren)" id="filepond-drop" type="file"/>
+                            </div>
+                        </div>
+                    @endCanAction
+                </div>
+                <div class="flex flex-wrap justify-end">
                     <div class="flex items-center justify-end space-x-4">
                         <x-toggle x-ref="sticky" md :left-label="__('Sticky')" />
                         <x-button
-                            x-on:click="saveComment($refs.textarea, $refs.fileUpload, $refs.sticky, true); files = [];"
+                            x-on:click="saveComment($refs.textarea, tempFilesId, $refs.sticky, false, typeof node !== 'undefined' ? node : null).then((success) => {if(success) clearPond();})"
                             primary
+                            spinner="saveComment"
                             wire:loading.attr="disabled"
+                            x-bind:disabled="isLoadingFiles.length > 0"
                             :label="auth()->user()?->getMorphClass() === morph_alias(\FluxErp\Models\User::class) && $this->isPublic === true ? __('Save internal') : __('Save')"
                         />
                         @if(auth()->user()?->getMorphClass() === morph_alias(\FluxErp\Models\User::class) && $this->isPublic === true)
                             <x-button
-                                x-on:click="saveComment($refs.textarea, $refs.fileUpload, $refs.sticky, false)"
+                                x-on:click="saveComment($refs.textarea, tempFilesId, $refs.sticky, false, typeof node !== 'undefined' ? node : null).then((success) => {if(success) clearPond();})"
                                 primary
-                                wire:loading.attr="disabled" :label="__('Answer to customer')"/>
+                                spinner="saveComment"
+                                x-bind:disabled="isLoadingFiles.length > 0"
+                                wire:loading.attr="disabled"
+                                :label="__('Answer to customer')"
+                            />
                         @endif
                     </div>
                 </div>

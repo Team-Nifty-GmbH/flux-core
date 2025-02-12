@@ -133,18 +133,20 @@ export default function ($wire, $ref, lang, modalTranslations, inputTranslation)
         },
         clearFilesOnLeave() {
             if (this.pond !== null && this.tempFilesId.length > 0) {
-                this.tempFilesId = [];
-                this.pond.removeFiles()
+                this.clearPond();
             }
         },
-        async submitFiles(collectionName, successCallback) {
-            const response = await $wire.submitFiles(collectionName, this.tempFilesId);
+        async submitFiles(collectionName, successCallback, modelType = null, modelId = null) {
+            const response = await $wire.submitFiles(collectionName, this.tempFilesId, modelType, modelId);
 
             if (response && this.pond !== null) {
-                this.tempFilesId = [];
-                this.pond.removeFiles()
+                this.clearPond();
                 await (successCallback.bind(this))(this.multipleFileUpload);
             }
+        },
+        clearPond() {
+            this.tempFilesId = [];
+            this.pond.removeFiles()
         }
     };
 }

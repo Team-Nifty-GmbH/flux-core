@@ -2,14 +2,13 @@
 
 namespace FluxErp\Livewire\Features\Comments;
 
-use FluxErp\Actions\Comment\CreateComment;
-use FluxErp\Actions\Comment\DeleteComment;
-use FluxErp\Actions\Comment\UpdateComment;
+use FluxErp\Livewire\Forms\CommentForm;
 use FluxErp\Models\Comment;
 use FluxErp\Models\Role;
+use FluxErp\Models\Scopes\FamilyTreeScope;
 use FluxErp\Models\User;
 use FluxErp\Traits\Livewire\Actions;
-use FluxErp\Traits\Livewire\WithFileUploads;
+use FluxErp\Traits\Livewire\WithFilePond;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -17,13 +16,16 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Modelable;
+use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class Comments extends Component
 {
-    use Actions, WithFileUploads, WithPagination;
+    use Actions, WithFilePond, WithPagination;
 
     /** @var Model $this->modelType */
     public string $modelType = '';
@@ -35,19 +37,10 @@ class Comments extends Component
      * Setting this to true means that the component is public used.
      * This means that the user has to decide if he wants non-users to see his comment.
      */
+    #[Locked]
     public bool $isPublic = true;
 
-    public array $stickyComments = [];
-
-    public array $comments = [];
-
-    public array $users = [];
-
-    public array $roles = [];
-
-    public $files;
-
-    public int $commentId = 0;
+    public CommentForm $commentForm;
 
     public int $commentPage = 1;
 
@@ -63,9 +56,9 @@ class Comments extends Component
         $channel = app($this->modelType)->broadcastChannel() . $this->modelId;
 
         return [
-            'echo-private:' . $channel . ',.CommentCreated' => 'commentCreatedEvent',
-            'echo-private:' . $channel . ',.CommentUpdated' => 'commentUpdatedEvent',
-            'echo-private:' . $channel . ',.CommentDeleted' => 'commentDeletedEvent',
+            'echo-private:' . $channel . ',.CommentCreated' => 'loadComments',
+            'echo-private:' . $channel . ',.CommentUpdated' => 'loadComments',
+            'echo-private:' . $channel . ',.CommentDeleted' => 'loadComments',
         ];
     }
 
@@ -75,201 +68,176 @@ class Comments extends Component
             return;
         }
 
-        $record = app($this->modelType)->query()->whereKey($this->modelId)->firstOrFail();
-        $this->loadComments($record);
-
-        app(Comment::class)->addGlobalScope('sticky', function (Builder $builder) {
-            $builder->where('is_sticky', true);
-        });
-
-        $this->stickyComments = $record
-            ->comments()
-            ->get()
-            ->each(function (Comment $comment) {
-                $comment->is_current_user = $comment->getCreatedBy()?->is(Auth::user());
-            })
-            ->toArray();
-
         if (! Auth::check()) {
             $this->isPublic = false;
         }
-
-        $this->loadUsersAndRoles();
     }
 
     public function render(): View|Factory|Application
     {
-        return view('flux::livewire.features.comments.comments');
+        return view('flux::livewire.features.comments.comments', $this->loadUsersAndRoles());
     }
 
-    public function saveComment(string $comment, bool $sticky, bool $internal = true): void
+    #[Renderless]
+    public function saveComment(array $comment, array $files = []): ?array
     {
-        if (Auth::user()?->getMorphClass() !== morph_alias(User::class)) {
-            $internal = false;
-        }
-
-        $comment = [
-            'model_type' => morph_alias($this->modelType),
-            'model_id' => $this->modelId,
-            'comment' => $comment,
-            'is_sticky' => $sticky,
-            'is_internal' => $internal,
-            'parent_id' => $this->commentId ?: null,
-        ];
+        $this->commentForm->reset();
+        $this->commentForm->fill(array_merge(
+            $comment,
+            [
+                'model_type' => morph_alias($this->modelType),
+                'model_id' => $this->modelId,
+                'is_internal' => auth()->user()->getMorphClass() !== morph_alias(User::class)
+                    ? false
+                    : data_get($comment, 'is_internal', true),
+            ]
+        )
+        );
 
         try {
-            $comment = CreateComment::make($comment)->checkPermission()->validate()->execute();
-        } catch (\Exception $e) {
+            $this->commentForm->save();
+            $this->submitFiles(
+                'default',
+                $files,
+                morph_alias(Comment::class),
+                $this->commentForm->id
+            );
+        } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
-            return;
+            return null;
         }
 
-        if ($this->filesArray) {
-            try {
-                $this->saveFileUploadsToMediaLibrary('files', $comment->id, app(Comment::class)->getMorphClass());
-                $comment->load('media:id,name,model_type,model_id,disk');
-            } catch (\Exception $e) {
-                exception_to_notifications($e, $this);
-            }
-        }
-
-        $comment = $comment->toArray();
-        $comment['user'] = Auth::user()?->toArray();
+        $this->commentForm->getActionResult()->load('media:id,name,model_type,model_id,disk');
+        $comment = $this->commentForm->getActionResult()->toArray();
         $comment['user']['avatar_url'] = Auth::user()?->getAvatarUrl();
 
-        $this->insertComment($comment, $this->commentId);
-
-        $this->reset(['commentId']);
-
-        $this->skipRender();
+        return $comment;
     }
 
-    public function loadMoreComments(): void
+    #[Renderless]
+    public function loadMoreComments(): array
     {
         $this->commentPage++;
-        $this->loadComments();
+
+        return $this->loadComments();
     }
 
-    public function updatedSticky(): void
-    {
-        $this->skipRender();
-    }
-
+    #[Renderless]
     public function toggleSticky(int $id): void
     {
-        $comment = resolve_static(Comment::class, 'query')->whereKey($id)->first();
+        $this->commentForm->reset();
+        $this->commentForm->fill([
+            'id' => $id,
+            'is_sticky' => ! resolve_static(Comment::class, 'query')->whereKey($id)->value('is_sticky'),
+        ]);
 
         try {
-            UpdateComment::make([
-                'id' => $comment->id,
-                'is_sticky' => ! $comment->is_sticky,
-            ])
-                ->validate()
-                ->execute();
+            $this->commentForm->save();
         } catch (ValidationException $e) {
             exception_to_notifications($e, $this);
         }
     }
 
-    public function delete(int $id): void
+    #[Renderless]
+    public function delete(int $id): bool
     {
+        $this->commentForm->reset();
+        $this->commentForm->id = $id;
+
         try {
-            DeleteComment::make(['id' => $id])->validate()->execute();
-        } catch (ValidationException $e) {
+            $this->commentForm->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
-            return;
+            return false;
         }
 
-        $index = array_search($id, array_column($this->comments['data'], 'id'));
-        unset($this->comments['data'][$index]);
+        return true;
     }
 
-    public function loadComments(?Model $record = null): void
+    #[Renderless]
+    public function loadComments(): array
     {
-        $record = $record ?: app($this->modelType)->query()
+        /** @var Model $record */
+        $record ??= resolve_static($this->modelType, 'query')
             ->whereKey($this->modelId)
             ->firstOrFail();
 
-        app(Comment::class)->addGlobalScope('media', function (Builder $query) {
-            $query->with('media:id,name,model_type,model_id,disk');
-        });
+        resolve_static(Comment::class, 'addGlobalScopes', [
+            'scopes' => [
+                'media' => function (Builder $query) {
+                    $query->with('media');
+                },
+                'ordered' => function (Builder $query) {
+                    $query->orderBy('id', 'desc');
+                },
+                FamilyTreeScope::class,
+            ],
+        ]);
 
         $comments = $record
             ->comments()
-            ->with(['media:id,name,model_type,model_id,disk'])
+            ->whereNull('parent_id')
             ->when(
                 ! Auth::user() instanceof User,
                 function ($query) {
                     $query->where('is_internal', false);
                 }
             )
-            ->paginate($this->commentsPerPage * $this->commentPage);
+            ->paginate(page: $this->commentPage);
 
-        $data = $comments->getCollection()->each(function ($comment) {
+        $data = $comments->getCollection()->map(function ($comment) {
             $comment->is_current_user = $comment->getCreatedBy()?->is(Auth::user());
+
+            return $comment;
         });
 
-        $comments->setCollection($data);
-
-        $this->comments = $comments->toArray();
-
-        $this->comments['data'] = to_flat_tree($this->comments['data']);
+        return $comments->setCollection($data)->toArray();
     }
 
-    public function commentCreatedEvent(array $data): void
+    #[Renderless]
+    public function loadStickyComments(): array
     {
-        $this->insertComment($data['model'], $data['model']['parent_id']);
+        resolve_static(Comment::class, 'addGlobalScopes', [
+            'scopes' => [
+                'media' => function (Builder $query) {
+                    $query->with('media:id,name,model_type,model_id,disk');
+                },
+                'ordered' => function (Builder $query) {
+                    $query->orderBy('id', 'desc');
+                },
+            ],
+        ]);
 
-        $this->skipRender();
+        return resolve_static($this->modelType, 'query')
+            ->whereKey($this->modelId)
+            ->firstOrFail()
+            ->comments()
+            ->when(
+                ! Auth::user() instanceof User,
+                function ($query) {
+                    $query->where('is_internal', false);
+                }
+            )
+            ->where('is_sticky', true)
+            ->get()
+            ->map(function (Comment $comment) {
+                $comment->is_current_user = $comment->getCreatedBy()?->is(auth()->user());
+
+                return $comment;
+            })
+            ->toArray();
     }
 
-    public function commentUpdatedEvent(array $data): void
-    {
-        $index = array_search($data['model']['id'], array_column($this->comments['data'], 'id'));
-        $data['model']['slug_position'] = $this->comments['data'][$index]['slug_position'];
-
-        $this->comments['data'][$index] = $data['model'];
-    }
-
-    public function commentDeletedEvent(array $data): void
-    {
-        $index = array_search($data['model']['id'], array_column($this->comments['data'], 'id'));
-        unset($this->comments['data'][$index]);
-    }
-
-    protected function insertComment($comment, $parentId): void
-    {
-        if ($parentId) {
-            $index = array_search($parentId, array_column($this->comments['data'], 'id'));
-            $comment['slug_position'] = $this->comments['data'][$index]['slug_position'] . '.' . $comment['id'];
-            array_splice($this->comments['data'], $index + 1, 0, [$comment]);
-        } else {
-            $comment['slug_position'] = (string) $comment['id'];
-            array_unshift($this->comments['data'], $comment);
-        }
-    }
-
-    public function updatedFiles(): void
-    {
-        $this->prepareForMediaLibrary('files', $this->modelId, app($this->modelType)->getMorphClass());
-
-        $this->skipRender();
-    }
-
-    public function updatedCommentId(): void
-    {
-        $this->skipRender();
-    }
-
-    private function loadUsersAndRoles(): void
+    protected function loadUsersAndRoles(): array
     {
         if (! auth()->user()?->getMorphClass() === app(User::class)->getMorphClass()) {
-            return;
+            return [];
         }
 
-        $this->users = resolve_static(User::class, 'query')
+        $result = [];
+        $result['users'] = resolve_static(User::class, 'query')
             ->select('id', 'name')
             ->where('is_active', true)
             ->orderBy('firstname')
@@ -283,7 +251,7 @@ class Comments extends Component
             })
             ->toArray();
 
-        $this->roles = resolve_static(Role::class, 'query')
+        $result['roles'] = resolve_static(Role::class, 'query')
             ->select(['id', 'name'])
             ->whereRelation('users', 'is_active', true)
             ->orderBy('name')
@@ -296,5 +264,7 @@ class Comments extends Component
                 ];
             })
             ->toArray();
+
+        return $result;
     }
 }

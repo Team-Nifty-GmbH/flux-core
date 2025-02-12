@@ -58,12 +58,15 @@ class CreateComment extends FluxAction
             }
         }
 
-        $this->data['is_sticky'] = $this->data['is_sticky'] ?? false;
-        $this->data['is_internal'] = $this->data['is_internal'] ?? true;
-
         $comment = app(Comment::class, ['attributes' => $this->data]);
         $comment->save();
 
         return $comment->fresh();
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->data['is_sticky'] ??= false;
+        $this->data['is_internal'] ??= true;
     }
 }
