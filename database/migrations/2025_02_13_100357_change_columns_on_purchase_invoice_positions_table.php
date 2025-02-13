@@ -10,9 +10,9 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::table('purchase_invoice_positions', function (Blueprint $table) {
-            $table->decimal('amount', 40, 10)->change();
-            $table->decimal('unit_price', 40, 10)->change();
-            $table->decimal('total_price', 40, 10)->change();
+            $table->decimal('amount', 40, 10)->nullable()->change();
+            $table->decimal('unit_price', 40, 10)->nullable()->change();
+            $table->decimal('total_price', 40, 10)->nullable()->change();
         });
     }
 
@@ -26,9 +26,9 @@ return new class() extends Migration
             ]);
 
         Schema::table('purchase_invoice_positions', function (Blueprint $table) {
-            $table->decimal('amount', 40, 10)->unsigned()->change();
-            $table->decimal('unit_price', 40, 10)->unsigned()->change();
-            $table->decimal('total_price', 40, 10)->unsigned()->change();
+            $table->decimal('amount', 40, 10)->nullable()->unsigned()->change();
+            $table->decimal('unit_price', 40, 10)->nullable()->unsigned()->change();
+            $table->decimal('total_price', 40, 10)->nullable()->unsigned()->change();
         });
     }
 };
