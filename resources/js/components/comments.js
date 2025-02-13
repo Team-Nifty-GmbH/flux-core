@@ -27,7 +27,7 @@ export default function comments() {
 
         toggleSticky(node) {
             this.$wire.toggleSticky(node.id);
-            node.is_sticky = ! node.is_sticky
+            node.is_sticky = ! node.is_sticky;
 
             // add it to stickyComments if its sticky now
             if (node.is_sticky) {

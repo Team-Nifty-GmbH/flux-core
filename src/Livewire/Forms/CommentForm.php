@@ -23,9 +23,9 @@ class CommentForm extends FluxForm
 
     public ?string $comment = null;
 
-    public bool $is_internal = true;
+    public ?bool $is_internal = null;
 
-    public bool $is_sticky = false;
+    public ?bool $is_sticky = null;
 
     public function getActions(): array
     {

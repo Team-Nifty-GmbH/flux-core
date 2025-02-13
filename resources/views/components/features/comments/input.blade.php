@@ -1,39 +1,43 @@
-<div class="comment-input" wire:ignore x-data="{
-    ...filePond(
-        $wire,
-        $refs.upload,
-        '{{ Auth::user()?->language?->language_code }}',
-        {
-            title: '{{ __('File will be replaced') }}',
-            description: '{{ __('Do you want to proceed?') }}',
-            labelAccept: '{{ __('Accept') }}',
-            labelReject: '{{ __('Undo') }}',
+<div
+    class="comment-input"
+    wire:ignore
+    x-data="{
+        ...filePond(
+            $wire,
+            $refs.upload,
+            '{{ Auth::user()?->language?->language_code }}',
+            {
+                title: '{{ __('File will be replaced') }}',
+                description: '{{ __('Do you want to proceed?') }}',
+                labelAccept: '{{ __('Accept') }}',
+                labelReject: '{{ __('Undo') }}',
+            },
+            {
+                uploadDisabled:'{{ __('Upload not allowed - Read Only') }}',
+            }
+        ),
+        selectionProxy: {},
+        selection: {},
+        countChildren() {
+            return this.selectionProxy?.children?.length;
         },
-        {
-            uploadDisabled:'{{ __('Upload not allowed - Read Only') }}',
+        files: [],
+        sticky: false,
+        removeUpload(index) {
+            this.files.splice(index, 1);
+            this.updateInputValue(this.$refs.fileUpload);
+        },
+        updateInputValue(ref) {
+            ref.value = '';
+            const dataTransfer = new DataTransfer();
+            this.files.forEach((file) => {
+            const fileInput = new File([file], file.name);
+                dataTransfer.items.add(fileInput);
+            });
+            ref.files = dataTransfer.files;
         }
-    ),
-    selectionProxy: {},
-    selection: {},
-    countChildren() {
-        return this.selectionProxy?.children?.length;
-    },
-    files: [],
-    sticky: false,
-    removeUpload(index) {
-        this.files.splice(index, 1);
-        this.updateInputValue(this.$refs.fileUpload);
-    },
-    updateInputValue(ref) {
-        ref.value = '';
-        const dataTransfer = new DataTransfer();
-        this.files.forEach((file) => {
-        const fileInput = new File([file], file.name);
-            dataTransfer.items.add(fileInput);
-        });
-        ref.files = dataTransfer.files;
-    }
-}">
+    }"
+>
     <div class="flex space-x-3">
         <div>
             <div class="shrink-0 inline-flex items-center justify-center overflow-hidden rounded-full border border-gray-200 dark:border-secondary-500">
@@ -58,7 +62,7 @@
                     <div class="flex items-center justify-end space-x-4">
                         <x-toggle x-ref="sticky" md :left-label="__('Sticky')" />
                         <x-button
-                            x-on:click="saveComment($refs.textarea, tempFilesId, $refs.sticky, false, typeof node !== 'undefined' ? node : null).then((success) => {if(success) clearPond();})"
+                            x-on:click="saveComment($refs.textarea, tempFilesId, $refs.sticky, false, typeof comment !== 'undefined' ? comment : null).then((success) => {if(success) clearPond();})"
                             primary
                             spinner="saveComment"
                             wire:loading.attr="disabled"
@@ -67,7 +71,7 @@
                         />
                         @if(auth()->user()?->getMorphClass() === morph_alias(\FluxErp\Models\User::class) && $this->isPublic === true)
                             <x-button
-                                x-on:click="saveComment($refs.textarea, tempFilesId, $refs.sticky, false, typeof node !== 'undefined' ? node : null).then((success) => {if(success) clearPond();})"
+                                x-on:click="saveComment($refs.textarea, tempFilesId, $refs.sticky, false, typeof comment !== 'undefined' ? comment : null).then((success) => {if(success) clearPond();})"
                                 primary
                                 spinner="saveComment"
                                 x-bind:disabled="isLoadingFiles.length > 0"

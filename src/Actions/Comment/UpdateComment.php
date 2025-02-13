@@ -30,4 +30,15 @@ class UpdateComment extends FluxAction
 
         return $comment->withoutRelations()->fresh();
     }
+
+    protected function prepareForValidation(): void
+    {
+        if (! $this->getData('is_sticky')) {
+            unset($this->data['is_sticky']);
+        }
+
+        if (! $this->getData('is_internal')) {
+            unset($this->data['is_internal']);
+        }
+    }
 }

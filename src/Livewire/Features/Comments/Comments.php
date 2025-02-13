@@ -129,7 +129,9 @@ class Comments extends Component
         $this->commentForm->reset();
         $this->commentForm->fill([
             'id' => $id,
-            'is_sticky' => ! resolve_static(Comment::class, 'query')->whereKey($id)->value('is_sticky'),
+            'is_sticky' => ! resolve_static(Comment::class, 'query')
+                ->whereKey($id)
+                ->value('is_sticky'),
         ]);
 
         try {
@@ -160,7 +162,7 @@ class Comments extends Component
     public function loadComments(): array
     {
         /** @var Model $record */
-        $record ??= resolve_static($this->modelType, 'query')
+        $record = resolve_static($this->modelType, 'query')
             ->whereKey($this->modelId)
             ->firstOrFail();
 

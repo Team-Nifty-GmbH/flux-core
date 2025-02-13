@@ -146,7 +146,7 @@ export default function ($wire, $ref, lang, modalTranslations, inputTranslation)
         },
         clearPond() {
             this.tempFilesId = [];
-            this.pond.removeFiles()
+            this.pond.removeFiles();
         }
     };
 }
