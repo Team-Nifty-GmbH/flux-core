@@ -80,6 +80,13 @@ trait InteractsWithMedia
      */
     public function registerMediaConversions(?Media $media = null): void
     {
+        $this->addMediaConversion('preview')
+            ->width(150)
+            ->height(150)
+            ->keepOriginalImageFormat()
+            ->quality(80)
+            ->optimize();
+
         $this->addMediaConversion('thumb')
             ->width(100)
             ->height(100)
