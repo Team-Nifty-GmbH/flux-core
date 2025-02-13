@@ -33,11 +33,11 @@ class UpdateComment extends FluxAction
 
     protected function prepareForValidation(): void
     {
-        if (! $this->getData('is_sticky')) {
+        if (is_null($this->getData('is_sticky'))) {
             unset($this->data['is_sticky']);
         }
 
-        if (! $this->getData('is_internal')) {
+        if (is_null($this->getData('is_internal'))) {
             unset($this->data['is_internal']);
         }
     }
