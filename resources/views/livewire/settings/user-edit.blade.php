@@ -195,7 +195,8 @@
                         wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('User')]) }}"
                     />
                 @endCanAction
-                <div class="flex">
+                <div class="flex space-x-2">
+                    <x-button :label="__('Cancel')" wire:click="cancel()"/>
                     <x-button primary :label="__('Save')" wire:click="save()"/>
                 </div>
             </div>

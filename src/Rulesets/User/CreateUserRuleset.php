@@ -39,7 +39,7 @@ class CreateUserRuleset extends FluxRuleset
             'lastname' => 'required|string',
             'phone' => 'nullable|string',
             'password' => [
-                'nullable',
+                'required',
                 Password::min(8)->mixedCase()->numbers(),
             ],
             'user_code' => 'required|string|unique:users,user_code',
@@ -50,8 +50,8 @@ class CreateUserRuleset extends FluxRuleset
             'color' => 'nullable|hex_color',
             'date_of_birth' => 'nullable|date',
             'employee_number' => 'nullable|string|max:255',
-            'employment_date' => 'nullable|date',
-            'termination_date' => 'nullable|date',
+            'employment_date' => 'required_with:termination_date|nullable|date',
+            'termination_date' => 'nullable|date|after:employment_date',
             'cost_per_hour' => [
                 'nullable',
                 app(Numeric::class),

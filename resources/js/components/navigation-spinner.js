@@ -3,7 +3,6 @@ export default function() {
     let spinnerVisible = false;
 
     function showSpinner(event) {
-        console.log(event);
         if (event.type === 'beforeunload' && event.target.location.href === window.location.href) {
             return;
         }

@@ -173,6 +173,12 @@ class UserEdit extends Component
     }
 
     #[Renderless]
+    public function cancel(): void
+    {
+        $this->redirectRoute('settings.users', navigate: true);
+    }
+
+    #[Renderless]
     public function updatedUserRoles(): void
     {
         try {

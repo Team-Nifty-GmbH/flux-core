@@ -141,10 +141,14 @@ class FluxCalendar extends CalendarComponent
     #[Renderless]
     public function getEvents(array $info, array $calendarAttributes): array
     {
+        if (data_get($calendarAttributes, 'hasNoEvents')) {
+            return [];
+        }
+
         if (($calendarAttributes['modelType'] ?? false)
             && data_get($calendarAttributes, 'isVirtual', false)
         ) {
-            return morphed_model($calendarAttributes['modelType'])::query()
+            return resolve_static(morphed_model($calendarAttributes['modelType']), 'query')
                 ->inTimeframe($info['start'], $info['end'], $calendarAttributes)
                 ->get()
                 ->map(fn (Model $model) => $model->toCalendarEvent($info))

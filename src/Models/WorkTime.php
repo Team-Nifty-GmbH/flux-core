@@ -139,27 +139,31 @@ class WorkTime extends FluxModel implements Calendarable
             array_merge(
                 $bluePrint,
                 [
-                    'id' => base64_encode(static::class),
+                    'id' => base64_encode(morph_alias(static::class)),
                     'modelType' => morph_alias(static::class),
                     'name' => __('Work Times'),
+                    'hasNoEvents' => true,
                     'children' => resolve_static(User::class, 'query')
                         ->where('is_active', true)
                         ->get()
                         ->map(function (User $user) use (&$calendars, $bluePrint) {
+                            $key = $user->getMorphClass() . ':' . $user->getKey();
+
                             return array_merge(
                                 $bluePrint,
                                 [
-                                    'id' => base64_encode($user->getMorphClass() . ':' . $user->getKey()),
-                                    'parentId' => Str::of(static::class)->replace('\\', '.'),
+                                    'id' => base64_encode($key),
+                                    'parentId' => base64_encode(morph_alias(static::class)),
                                     'modelType' => morph_alias(static::class),
                                     'name' => $user->name,
                                     'color' => $user->color ?? '#0891b2',
+                                    'hasNoEvents' => true,
                                     'children' => [
                                         array_merge(
                                             $bluePrint,
                                             [
-                                                'id' => base64_encode($user->getMorphClass() . ':' . $user->getKey() . '.work_time'),
-                                                'parentId' => Str::of(static::class)->replace('\\', '.') . '.' . $user->id,
+                                                'id' => base64_encode($key . ':work_time'),
+                                                'parentId' => $key,
                                                 'modelType' => morph_alias(static::class),
                                                 'name' => $user->name . ' (' . __('Work Time') . ')',
                                                 'color' => $user->color ?? '#0891b2',
@@ -173,6 +177,13 @@ class WorkTime extends FluxModel implements Calendarable
                 ]
             ),
         ];
+    }
+
+    public static function fromCalendarEvent(array $event): Model
+    {
+        return resolve_static(static::class, 'query')
+            ->whereKey(data_get($event, 'id'))
+            ->first();
     }
 
     public function toCalendarEvent(?array $info = null): array
@@ -200,9 +211,18 @@ class WorkTime extends FluxModel implements Calendarable
         Carbon|string|null $end,
         ?array $info = null
     ): void {
-        $info = explode('.', base64_decode(data_get($info, 'id')));
-        $type = array_pop($info);
-        $userId = array_pop($info);
+        $id = base64_decode(data_get($info, 'id') ?? '');
+        if (! str_contains($id, ':')) {
+            return;
+        }
+
+        $exploded = explode(':', $id);
+        if (count($exploded) !== 3) {
+            return;
+        }
+
+        $type = array_pop($exploded);
+        $userId = array_pop($exploded);
 
         if ($start) {
             $builder->where('started_at', '>=', $start);
@@ -212,9 +232,9 @@ class WorkTime extends FluxModel implements Calendarable
             $builder->where('ended_at', '<=', $end);
         }
 
-        $builder->where('user_id', Str::after($userId, ':'));
+        $builder->where('user_id', $userId);
 
-        if ($this->hasNamedScope(Str::studly($type))) {
+        if ($type && $this->hasNamedScope(Str::studly($type))) {
             $this->callNamedScope(Str::studly($type), ['builder' => $builder]);
         }
     }
@@ -224,10 +244,5 @@ class WorkTime extends FluxModel implements Calendarable
         $builder->where('is_daily_work_time', true)
             ->where('is_locked', true)
             ->where('is_pause', false);
-    }
-
-    public static function fromCalendarEvent(array $event): Model
-    {
-        // TODO: Implement fromCalendarEvent() method.
     }
 }

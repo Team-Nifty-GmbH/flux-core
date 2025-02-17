@@ -7,8 +7,8 @@
     <div x-data="{
             groupCalendars: () => calendars.filter(calendar => calendar.group === '{{ $group }}'),
             storeSettings: () => {
-                    $wire.$parent.toggleEventSource(calendar.getEventSources().map(source => source.internalEventSource))
-                },
+                $wire.$parent.toggleEventSource(calendar.getEventSources().map(source => source.internalEventSource))
+            },
         }"
          x-on:folder-tree-uncheck="(event) => {hideEventSource(event.detail); storeSettings();}"
          x-on:folder-tree-check="(event) => {showEventSource(event.detail); storeSettings();}"

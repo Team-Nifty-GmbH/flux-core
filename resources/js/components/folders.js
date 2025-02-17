@@ -143,11 +143,11 @@ export default function folders(
             this.$dispatch('folder-tree-select-toggle', node, this.selected);
         },
         select(node) {
-
             this.selected = node;
             if (this.selectedCallback) {
                 this.selectedCallback(node, this.selected);
             }
+
             this.$dispatch('folder-tree-select', node);
         },
         unselect() {
