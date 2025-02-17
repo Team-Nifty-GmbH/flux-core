@@ -7,6 +7,7 @@ export default function folders(
     multiSelect = false,
     nameAttribute = 'label',
     childrenAttribute = 'children',
+    checkedCallback = null,
 ) {
     return {
         checked: checked,
@@ -18,8 +19,10 @@ export default function folders(
         multiSelect: multiSelect,
         nameAttribute: nameAttribute,
         childrenAttribute: childrenAttribute,
+        checkedCallback: checkedCallback,
         async init() {
             await this.refresh();
+            this.checkedCallback = this.checkedCallback?.bind(this);
 
             if (typeof this.property === 'string') {
                 this.$watch(property, (newFolders) => {
@@ -96,8 +99,6 @@ export default function folders(
             };
             traverse(node, isChecked);
 
-            this.updateParentStates(node);
-
             this.$dispatch('folder-tree-check-updated', this.checked);
         },
         unCheck(node) {
@@ -109,6 +110,10 @@ export default function folders(
             this.$dispatch('folder-tree-check', node, this.checked);
         },
         isChecked(node) {
+            if (typeof this.checkedCallback === 'function') {
+                return this.checkedCallback(node);
+            }
+
             if (this.isLeaf(node)) {
                 return this.checked.includes(node.id);
             }
@@ -132,25 +137,6 @@ export default function folders(
             const anyChecked = childStates.some(state => state);
 
             return anyChecked && !allChecked;
-        },
-        updateParentStates(node) {
-            if (!node.parent) {
-                return;
-            }
-
-            const parent = node.parent;
-            const childIds = parent.children.map(child => child.id);
-            const selectedChildren = childIds.filter(id => this.checked.includes(id));
-
-            if (selectedChildren.length === 0) {
-                this.checked = this.checked.filter(id => id !== parent.id);
-            } else if (selectedChildren.length === childIds.length) {
-                if (!this.checked.includes(parent.id)) {
-                    this.checked.push(parent.id);
-                }
-            }
-
-            this.updateParentStates(parent);
         },
         toggleSelect(node) {
             this.selected?.id === node.id ? this.unselect() : this.select(node);

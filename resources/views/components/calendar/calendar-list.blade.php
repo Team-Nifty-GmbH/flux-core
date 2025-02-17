@@ -5,7 +5,6 @@
         </x-button>
     @endif
     <div x-data="{
-            calendarIsChecked: (calendarItem) => calendar?.getEventSourceById(calendarItem.id) !== null,
             groupCalendars: () => calendars.filter(calendar => calendar.group === '{{ $group }}'),
             storeSettings: () => {
                     $wire.$parent.toggleEventSource(calendar.getEventSources().map(source => source.internalEventSource))
@@ -23,14 +22,15 @@
             selectable="true"
             hide-icon="true"
             x-on:calendar-initialized.window="(event) => checked = event.detail.getEventSources().map(source => source.internalEventSource.publicId)"
+            checked-callback="function(calendarItem) {return this.isLeaf(calendarItem) ? calendar?.getEventSourceById(calendarItem.id) !== null : (calendarItem.children || []).every(child => this.isChecked(child))}"
         >
             <x-slot:checkbox>
                 <x-checkbox
                     xs
-                    x-on:folder-tree-uncheck.window="$el.checked = calendarIsChecked(node)"
-                    x-on:folder-tree-check.window="$el.checked = calendarIsChecked(node)"
-                    x-effect="() => $el.indeterminate = isIndeterminate(node)"
-                    x-bind:checked="calendarIsChecked(node)"
+                    x-on:folder-tree-uncheck.window="$el.checked = isChecked(node)"
+                    x-on:folder-tree-check.window="$el.checked = isChecked(node)"
+                    x-bind:indeterminate="isIndeterminate(node)"
+                    x-bind:checked="isChecked(node)"
                     x-on:change="toggleCheck(node, $event.target.checked)"
                     x-bind:value="node.id"
                     x-bind:style="'background-color: ' + node.color"
