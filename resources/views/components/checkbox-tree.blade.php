@@ -25,8 +25,7 @@
         '{{ $nameAttribute }}',
         '{{ $childrenAttribute }}',
         {{ $attributes->get('selected', 'null') }},
-        {{ $attributes->get('checked', 'null') }},
-        {{ $attributes->get('checked-callback') }},
+        {{ $attributes->get('checked-callback', 'null') }},
         @toJs($searchAttributes)
     )">
     <!-- Root Rendering of the Tree -->
