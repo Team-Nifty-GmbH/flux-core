@@ -38,8 +38,6 @@ class Project extends FluxModel implements Calendarable, HasMedia, InteractsWith
         HasParentChildRelations, HasSerialNumberRange, HasStates, HasTags, HasUserModification,
         HasUuid, InteractsWithMedia, LogsActivity, Searchable, SoftDeletes;
 
-
-
     protected ?string $detailRouteName = 'projects.id';
 
     protected static string $iconName = 'briefcase';

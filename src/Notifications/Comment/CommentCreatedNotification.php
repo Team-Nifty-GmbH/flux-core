@@ -4,14 +4,14 @@ namespace FluxErp\Notifications\Comment;
 
 use FluxErp\Models\Address;
 use FluxErp\Models\Comment;
-use FluxErp\Models\User;
 use FluxErp\Models\MailAccount;
+use FluxErp\Models\User;
 use FluxErp\Support\Notification\SubscribableNotification;
-use Illuminate\Support\HtmlString;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Support\Str;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Support\HtmlString;
+use Illuminate\Support\Str;
 
 class CommentCreatedNotification extends SubscribableNotification implements ShouldQueue
 {
