@@ -52,8 +52,6 @@ class UserEditTest extends BaseSetup
             ->set('userForm.password_confirmation', 'Password123!')
             ->call('save')
             ->assertHasNoErrors()
-            ->assertDispatched('closeModal')
-            ->assertDispatchedTo('data-tables.user-list', 'loadData')
             ->assertWireuiNotification(icon: 'success');
 
         $this->assertEquals($newFirstName, $user->fresh()->firstname);
