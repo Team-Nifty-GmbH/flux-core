@@ -109,14 +109,15 @@ class AddressesTest extends BaseSetup
     public function test_replicate_address()
     {
 
-        Address::query()
+        $originalAddress = Address::query()
             ->whereKey($this->addressForm->id)
-            ->first()
-            ->permissions()
+            ->first();
+        $originalAddress->permissions()
             ->create([
                 'name' => Str::random(),
                 'guard' => 'address',
             ]);
+        $this->addressForm->fill($originalAddress);
 
         $component = Livewire::actingAs($this->user)
             ->test(Addresses::class, ['contact' => $this->contactForm, 'address' => $this->addressForm])
