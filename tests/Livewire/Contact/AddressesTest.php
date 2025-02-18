@@ -7,6 +7,7 @@ use FluxErp\Livewire\Forms\AddressForm;
 use FluxErp\Livewire\Forms\ContactForm;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
+use FluxErp\Models\Permission;
 use FluxErp\Tests\Livewire\BaseSetup;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -108,16 +109,11 @@ class AddressesTest extends BaseSetup
 
     public function test_replicate_address()
     {
-
         $originalAddress = Address::query()
             ->whereKey($this->addressForm->id)
             ->first();
-        $originalAddress->permissions()
-            ->create([
-                'name' => Str::random(),
-                'guard' => 'address',
-            ]);
-        $this->addressForm->fill($originalAddress);
+        $originalAddress->givePermissionTo(Permission::findOrCreate(Str::random(), 'address'));
+        $this->addressForm->fill($originalAddress->fresh());
 
         $component = Livewire::actingAs($this->user)
             ->test(Addresses::class, ['contact' => $this->contactForm, 'address' => $this->addressForm])
@@ -134,7 +130,10 @@ class AddressesTest extends BaseSetup
         $this->assertGreaterThan($this->addressForm->id, $component->get('address.id'));
         $this->assertDatabaseHas('addresses', ['lastname' => $lastname]);
 
-        $dbAddress = Address::query()->whereKey($component->get('address.id'))->with('permissions')->first();
+        $dbAddress = Address::query()
+            ->whereKey($component->get('address.id'))
+            ->with('permissions')
+            ->first();
 
         $this->assertEmpty($dbAddress->permissions);
         $this->assertDatabaseMissing(

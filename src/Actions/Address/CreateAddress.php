@@ -61,6 +61,7 @@ class CreateAddress extends FluxAction
 
         $contactOptions = Arr::pull($this->data, 'contact_options', []);
 
+        /** @var Address $address */
         $address = app(Address::class, ['attributes' => $this->data]);
         $address->save();
 
@@ -69,7 +70,7 @@ class CreateAddress extends FluxAction
         }
 
         if ($permissions) {
-            $address->attach($permissions);
+            $address->givePermissionTo($permissions);
         }
 
         if (resolve_static(CreateContactOption::class, 'canPerformAction', [false])) {
