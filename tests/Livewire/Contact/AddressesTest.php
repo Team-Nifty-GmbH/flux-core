@@ -32,6 +32,10 @@ class AddressesTest extends BaseSetup
             'is_invoice_address' => true,
             'is_delivery_address' => true,
         ]);
+        $address->permissions()->create([
+            'name' => Str::random(),
+            'guard' => 'address',
+        ]);
 
         $this->contactForm = new ContactForm(Livewire::new(Addresses::class), 'contact');
         $this->contactForm->fill($contact);
@@ -110,6 +114,7 @@ class AddressesTest extends BaseSetup
     {
         $component = Livewire::actingAs($this->user)
             ->test(Addresses::class, ['contact' => $this->contactForm, 'address' => $this->addressForm])
+            ->assertNotSet('address.permissions', null)
             ->call('replicate')
             ->assertStatus(200)
             ->assertHasNoErrors()
@@ -120,5 +125,17 @@ class AddressesTest extends BaseSetup
 
         $this->assertGreaterThan($this->addressForm->id, $component->get('address.id'));
         $this->assertDatabaseHas('addresses', ['lastname' => $lastname]);
+
+        $dbAddress = Address::query()->whereKey($component->get('address.id'))->with('permissions')->first();
+
+        $this->assertEmpty($dbAddress->permissions);
+        $this->assertDatabaseMissing(
+            'meta',
+            [
+                'model_id' => $dbAddress->id,
+                'model_type' => $dbAddress->getMorphClass(),
+                'key' => 'permissions',
+            ]
+        );
     }
 }
