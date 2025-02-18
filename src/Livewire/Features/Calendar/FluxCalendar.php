@@ -305,7 +305,7 @@ class FluxCalendar extends CalendarComponent
     {
         if ($exists = data_get($eventInfo, 'event.id', false)) {
             $this->selectableCalendars = array_filter(
-                $this->allCalendars,
+                to_flat_tree($this->allCalendars),
                 fn ($calendar) => data_get($calendar, 'modelType') ===
                     data_get($eventInfo, 'event.extendedProps.calendar_type')
             );

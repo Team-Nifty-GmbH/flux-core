@@ -60,7 +60,7 @@ class CreateContact extends FluxAction
             $contact->discountGroups()->attach($discountGroups);
         }
 
-        if (! $industries) {
+        if ($industries) {
             $contact->industries()->attach($industries);
         }
 
