@@ -1,11 +1,14 @@
 @props([
     'selectable' => false,
     'sortable' => false,
+    'hideIcon' => false,
     'tree' => null,
     'nameAttribute' => 'label',
     'childrenAttribute' => 'children',
     'withSearch' => false,
     'searchAttributes' => null,
+    'checkbox' => null,
+    'suffix' => null,
 ])
 @php
     if (is_null($tree)) {
@@ -17,12 +20,12 @@
     x-data="folder_tree(
         {{ $tree }},
         '{{ $tree }}',
-        {{ $attributes->hasAny(['wire:model', 'x-model']) && $selectable ? '$wire.' . $attributes->whereStartsWith(['wire:model', 'x-model'])->first() : '[]' }},
+        {{ $attributes->hasAny(['wire:model', 'x-model']) && $selectable ? '$wire.' . $attributes->whereStartsWith(['wire:model', 'x-model'])->first() : $attributes->get('model', '[]') }},
         {{ $attributes->has('multiselect') ? 'true' : 'false' }},
         '{{ $nameAttribute }}',
         '{{ $childrenAttribute }}',
         {{ $attributes->get('selected', 'null') }},
-        {{ $attributes->get('checked', 'null') }},
+        {{ $attributes->get('checked-callback', 'null') }},
         @toJs($searchAttributes)
     )">
     <!-- Root Rendering of the Tree -->
@@ -56,28 +59,36 @@
                 <div
                     class="flex items-center cursor-pointer space-x-2 px-1.5 -ml-3 rounded text-sm text-gray-700 dark:text-gray-50 select-none"
                     x-on:click="toggleSelect(node)"
-                    x-bind:class="selected?.id === node.id ? 'bg-primary-500 dark:bg-primary-700 text-white' : ''">
+                    x-bind:class="selected?.id === node.id ? 'bg-primary-500 dark:bg-primary-700 text-white' : ''"
+                >
                     <i
                         class="ph ph-caret-right transition-transform duration-200 text-base"
                         x-bind:class="node[childrenAttribute] ? (isOpen(node) ? 'rotate-90' : 'rotate-0') : 'invisible'"
                         x-on:click.stop="node[childrenAttribute] ? toggleOpen(node, $event) : null">
                     </i>
                     @if($selectable)
-                        <x-checkbox
-                            xs
-                            x-effect="$el.indeterminate = isIndeterminate(node)"
-                            x-on:change="toggleCheck(node, $event.target.checked)"
-                            x-bind:checked="isChecked(node)"
-                            x-bind:value="node.id"
-                            class="form-checkbox"
-                        />
+                        @if($checkbox?->isNotEmpty())
+                            {{ $checkbox }}
+                        @else
+                            <x-checkbox
+                                xs
+                                x-effect="$el.indeterminate = isIndeterminate(node)"
+                                x-on:change="toggleCheck(node, $event.target.checked)"
+                                x-bind:checked="isChecked(node)"
+                                x-bind:value="node.id"
+                                class="form-checkbox"
+                            />
+                        @endif
                     @endif
-                    @if($nodeIcon ?? false)
-                        {{ $nodeIcon }}
-                    @else
-                        <i class="ph text-base" x-bind:class="node[childrenAttribute] ? (isOpen(node) ? 'ph-folder-open' : 'ph-folder') : 'ph-file'"></i>
+                    @if(! $hideIcon)
+                        @if($nodeIcon ?? false)
+                            {{ $nodeIcon }}
+                        @else
+                            <i class="ph text-base" x-bind:class="node[childrenAttribute] ? (isOpen(node) ? 'ph-folder-open' : 'ph-folder') : 'ph-file'"></i>
+                        @endif
                     @endif
                     <div class="whitespace-nowrap" x-html="node[nameAttribute]"></div>
+                    {{ $suffix }}
                 </div>
                 <template x-if="node[childrenAttribute]?.length">
                     <ul
@@ -85,6 +96,7 @@
                             x-sort="(item, position) => {{{ $attributes->get('moved', 'null') }}}"
                             x-sort:group="folder-tree"
                         @endif
+                        x-collapse
                         x-show="isOpen(node) && node[childrenAttribute]?.length"
                         class="tree__children pl-4 border-l border-gray-200 dark:border-slate-500">
                         @if($sortable)

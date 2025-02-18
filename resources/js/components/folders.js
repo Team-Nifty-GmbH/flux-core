@@ -25,8 +25,10 @@ export default function folders(
         childrenAttribute: childrenAttribute,
         selectedCallback: selectedCallback,
         checkedCallback: checkedCallback,
+
         async init() {
             await this.refresh();
+            this.checkedCallback = this.checkedCallback?.bind(this);
 
             if (typeof this.property === 'string') {
                 this.$watch(property, (newFolders) => {
@@ -89,26 +91,44 @@ export default function folders(
             return this.openFolders.includes(node.id);
         },
         isLeaf(node) {
-            return !node.children || node.children.length === 0;
+            return ! Array.isArray(node.children) || node.children.length === 0;
         },
         toggleCheck(node, isChecked) {
             const traverse = (currentNode, check) => {
                 if (check) {
                     if (!this.checked.includes(currentNode.id)) {
-                        this.checked.push(currentNode.id);
+                        this.check(currentNode);
                     }
                 } else {
-                    this.checked = this.checked.filter(id => id !== currentNode.id);
+                    this.unCheck(currentNode);
                 }
+                this.$dispatch('folder-tree-check-toggle', currentNode, isChecked);
+
                 currentNode.children?.forEach(child => traverse(child, check));
             };
             traverse(node, isChecked);
 
-            this.updateParentStates(node);
+            this.$dispatch('folder-tree-check-updated', this.checked);
+        },
+        unCheck(node) {
+            this.checked = this.checked.filter(id => id !== node.id);
+            this.$dispatch('folder-tree-uncheck', node, this.checked);
+        },
+        check(node) {
+            this.checked.push(node.id);
+            this.$dispatch('folder-tree-check', node, this.checked);
         },
         isChecked(node) {
+            if (typeof this.checkedCallback === 'function') {
+                return this.checkedCallback(node);
+            }
+
             if (this.isLeaf(node)) {
                 return this.checked.includes(node.id);
+            }
+
+            if (! Array.isArray(node.children)) {
+                node.children = [];
             }
 
             return (node.children || []).every(child => this.isChecked(child));
@@ -118,42 +138,29 @@ export default function folders(
                 return false; // Leaf nodes can't be indeterminate
             }
 
+            if (! Array.isArray(node.children)) {
+                node.children = [];
+            }
             const childStates = (node.children || []).map(child => this.isChecked(child) || this.isIndeterminate(child));
             const allChecked = childStates.every(state => state);
             const anyChecked = childStates.some(state => state);
+
             return anyChecked && !allChecked;
-        },
-        updateParentStates(node) {
-            if (!node.parent) {
-                return;
-            }
-
-            const parent = node.parent;
-            const childIds = parent.children.map(child => child.id);
-            const selectedChildren = childIds.filter(id => this.checked.includes(id));
-
-            if (selectedChildren.length === 0) {
-                this.checked = this.checked.filter(id => id !== parent.id);
-            } else if (selectedChildren.length === childIds.length) {
-                if (!this.checked.includes(parent.id)) {
-                    this.checked.push(parent.id);
-                }
-            }
-
-            this.updateParentStates(parent);
         },
         toggleSelect(node) {
             this.selected?.id === node.id ? this.unselect() : this.select(node);
+            this.$dispatch('folder-tree-select-toggle', node, this.selected);
         },
         select(node) {
-            this.$dispatch('folder-tree-select', node, this.selected);
-
             this.selected = node;
             if (this.selectedCallback) {
                 this.selectedCallback(node, this.selected);
             }
+
+            this.$dispatch('folder-tree-select', node);
         },
         unselect() {
+            this.$dispatch('folder-tree-unselect', this.selected);
             this.selected = null;
         },
         removeNode(node) {
@@ -187,7 +194,7 @@ export default function folders(
             if (! Array.isArray(data) && typeof data !== 'object') {
                 return [];
             }
-            
+
             if (!search) {
                 return Array.isArray(data) ? data : Object.values(data); // Convert object to array if necessary
             }

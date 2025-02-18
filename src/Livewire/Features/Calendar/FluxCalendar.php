@@ -13,7 +13,9 @@ use FluxErp\Models\User;
 use FluxErp\Traits\HasCalendarUserSettings;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
@@ -44,7 +46,7 @@ class FluxCalendar extends CalendarComponent
     }
 
     #[Renderless]
-    public function toggleEventSource(array ...$activeCalendars): void
+    public function toggleEventSource(array $activeCalendars): void
     {
         $this->storeSettings(array_column($activeCalendars, 'publicId'), 'activeCalendars');
     }
@@ -104,23 +106,50 @@ class FluxCalendar extends CalendarComponent
     #[Renderless]
     public function getMyCalendars(): Collection
     {
-        $calendarables = model_info_all()
-            ->filter(fn ($modelInfo) => in_array(Calendarable::class, $modelInfo->implements))
-            ->unique('morphClass')
-            ->map(fn ($modelInfo) => resolve_static($modelInfo->class, 'toCalendar'));
+        resolve_static(
+            Calendar::class,
+            'addGlobalScope',
+            [
+                'scope' => fn (Builder $query) => $query->with('children'),
+            ]
+        );
 
-        return parent::getMyCalendars()->isEmpty() ?
-            $calendarables->merge(parent::getMyCalendars()) : parent::getMyCalendars()->merge($calendarables);
+        return $this->myCalendars = auth()->user()
+            ->calendars()
+            ->whereNull('parent_id')
+            ->withPivot('permission')
+            ->wherePivot('permission', 'owner')
+            ->withCount('calendarables')
+            ->get()
+            ->toCalendarObjects();
+    }
+
+    #[Renderless]
+    public function getOtherCalendars(): Collection
+    {
+        $calendarables = collect(Relation::morphMap())
+            ->filter(fn (string $modelClass) => in_array(Calendarable::class, class_implements($modelClass)))
+            ->map(fn (string $modelClass) => resolve_static($modelClass, 'toCalendar'))
+            ->flatMap(fn ($item) => Arr::isAssoc($item) ? [$item] : $item)
+            ->values();
+
+        return parent::getOtherCalendars()->isEmpty() ?
+            $calendarables->merge(parent::getOtherCalendars())
+            : parent::getOtherCalendars()->merge($calendarables);
     }
 
     #[Renderless]
     public function getEvents(array $info, array $calendarAttributes): array
     {
+        if (data_get($calendarAttributes, 'hasNoEvents')) {
+            return [];
+        }
+
         if (($calendarAttributes['modelType'] ?? false)
             && data_get($calendarAttributes, 'isVirtual', false)
         ) {
-            return morphed_model($calendarAttributes['modelType'])::query()
-                ->inTimeframe($info['start'], $info['end'])
+            return resolve_static(morphed_model($calendarAttributes['modelType']), 'query')
+                ->inTimeframe($info['start'], $info['end'], $calendarAttributes)
                 ->get()
                 ->map(fn (Model $model) => $model->toCalendarEvent($info))
                 ->toArray();

@@ -55,14 +55,27 @@ class UpdateUser extends FluxAction
                 'email' => $this->rules['email'] . ',' . ($this->data['id'] ?? 0),
             ]
         );
+
+        if (array_key_exists('password', $this->data) && is_null($this->getData('password'))) {
+            unset($this->data['password']);
+        }
     }
 
     protected function validateData(): void
     {
+        if ($this->getData('termination_date')) {
+            $user = resolve_static(User::class, 'query')
+                ->whereKey($this->data['id'])
+                ->first();
+
+            $this->data['employment_date'] ??= $user->employment_date;
+            $this->data['termination_date'] ??= $user->termination_date;
+        }
+
         parent::validateData();
 
-        if ($this->data['parent_id'] ?? false) {
-            $user = resolve_static(User::class, 'query')
+        if ($this->getData('parent_id')) {
+            $user ??= resolve_static(User::class, 'query')
                 ->whereKey($this->data['id'])
                 ->first();
 

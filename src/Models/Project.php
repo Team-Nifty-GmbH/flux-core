@@ -133,7 +133,7 @@ class Project extends FluxModel implements Calendarable, HasMedia, InteractsWith
             'isPublic' => false,
             'isShared' => false,
             'permission' => 'owner',
-            'group' => 'my',
+            'group' => 'other',
             'isVirtual' => true,
         ];
     }
@@ -174,8 +174,12 @@ class Project extends FluxModel implements Calendarable, HasMedia, InteractsWith
         return $project;
     }
 
-    public function scopeInTimeframe(Builder $builder, Carbon|string|null $start, Carbon|string|null $end): void
-    {
+    public function scopeInTimeframe(
+        Builder $builder,
+        Carbon|string|null $start,
+        Carbon|string|null $end,
+        ?array $info = null
+    ): void {
         $builder->where(function (Builder $query) use ($start, $end) {
             $query->whereBetween('start_date', [$start, $end])
                 ->orWhereBetween('end_date', [$start, $end])

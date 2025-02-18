@@ -15,7 +15,7 @@ class UserEditTest extends BaseSetup
     public function test_renders_successfully()
     {
         Livewire::actingAs($this->user)
-            ->test(UserEdit::class)
+            ->test(UserEdit::class, ['user' => $this->user])
             ->assertStatus(200);
     }
 
@@ -27,34 +27,31 @@ class UserEditTest extends BaseSetup
 
         /** @var Testable $component */
         $component = Livewire::actingAs($this->user)
-            ->test(UserEdit::class)
-            ->call('show', $user->id)
-            ->assertSuccessful()
+            ->test(UserEdit::class, ['user' => $user])
+            ->assertStatus(200)
+            ->assertHasNoErrors()
             ->assertSet('isSuperAdmin', false)
-            ->assertSet('user.id', $user->id)
-            ->assertSet('user.firstname', $user->firstname)
-            ->assertSet('user.lastname', $user->lastname)
-            ->assertSet('user.email', $user->email)
-            ->assertSet('user.user_code', $user->user_code)
-            ->assertSet('user.is_active', $user->is_active)
-            ->assertSet('user.password', null)
-            ->assertHasNoErrors();
+            ->assertSet('userForm.id', $user->id)
+            ->assertSet('userForm.firstname', $user->firstname)
+            ->assertSet('userForm.lastname', $user->lastname)
+            ->assertSet('userForm.email', $user->email)
+            ->assertSet('userForm.user_code', $user->user_code)
+            ->assertSet('userForm.is_active', $user->is_active)
+            ->assertSet('userForm.password', null);
 
-        $component->set('user.firstname', $newFirstName = Str::uuid()->toString())
-            ->set('user.password', 'invalid')
+        $component->set('userForm.firstname', $newFirstName = Str::uuid()->toString())
+            ->set('userForm.password', 'invalid')
             ->call('save')
             ->assertHasErrors(['password']);
         $this->assertEquals(4, count(data_get($component->errors()->messages(), 'password', [])));
 
         $component
-            ->set('user.password', 'Password123!')
+            ->set('userForm.password', 'Password123!')
             ->call('save')
             ->assertHasErrors(['password'])
-            ->set('user.password_confirmation', 'Password123!')
+            ->set('userForm.password_confirmation', 'Password123!')
             ->call('save')
             ->assertHasNoErrors()
-            ->assertDispatched('closeModal')
-            ->assertDispatchedTo('data-tables.user-list', 'loadData')
             ->assertWireuiNotification(icon: 'success');
 
         $this->assertEquals($newFirstName, $user->fresh()->firstname);
