@@ -17,6 +17,7 @@
                         option-description="description"
                         :async-data="[
                             'api' => route('search', \FluxErp\Models\Project::class),
+                            'method' => 'POST',
                         ]"
                     />
                     <x-select
@@ -33,7 +34,7 @@
                             'method' => 'POST',
                             'params' => [
                                 'with' => 'media',
-                            ]
+                            ],
                         ]"
                     />
                     <div class="flex justify-between gap-x-4">

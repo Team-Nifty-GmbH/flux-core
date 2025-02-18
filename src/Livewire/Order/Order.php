@@ -32,6 +32,7 @@ use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Schedule;
+use FluxErp\Models\VatRate;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\CreatesDocuments;
 use FluxErp\Traits\Livewire\WithTabs;
@@ -73,8 +74,6 @@ class Order extends Component
 
     public array $selectedOrderPositions = [];
 
-    public array $replicateOrderTypes = [];
-
     #[Url]
     public string $tab = 'order.order-positions';
 
@@ -114,11 +113,6 @@ class Order extends Component
                 'clients' => resolve_static(Client::class, 'query')
                     ->get(['id', 'name'])
                     ->toArray(),
-                'orderTypes' => resolve_static(OrderType::class, 'query')
-                    ->where('is_hidden', false)
-                    ->where('is_active', true)
-                    ->get(['id', 'name'])
-                    ->toArray(),
                 'frequencies' => array_map(
                     fn ($item) => ['name' => $item, 'label' => __(Str::headline($item))],
                     array_intersect(
@@ -144,6 +138,10 @@ class Order extends Component
                     ->select(['id', 'contact_id', 'iban'])
                     ->pluck('iban', 'id')
                     ?->toArray() ?? [],
+                'vatRates' => resolve_static(VatRate::class, 'query')
+                    ->where('is_tax_exemption', true)
+                    ->get(['id', 'name'])
+                    ->toArray(),
             ]
         );
     }
@@ -403,23 +401,23 @@ class Order extends Component
         }
     }
 
+    #[Renderless]
     public function replicate(?string $orderTypeEnum = null): void
     {
         $this->replicateOrder->fill($this->order->toArray());
         $this->fetchContactData();
 
-        $this->replicateOrderTypes = resolve_static(OrderType::class, 'query')
+        $replicateOrderTypes = resolve_static(OrderType::class, 'query')
             ->where('order_type_enum', $orderTypeEnum)
             ->where('is_active', true)
-            ->where('is_hidden', false)
-            ->get(['id', 'name'])
+            ->get(['id'])
             ->toArray();
 
-        if ($this->replicateOrderTypes) {
+        if ($replicateOrderTypes) {
             $this->replicateOrder->parent_id = $this->order->id;
             $this->replicateOrder->order_positions = [];
-            if (count($this->replicateOrderTypes) === 1) {
-                $this->replicateOrder->order_type_id = $this->replicateOrderTypes[0]['id'];
+            if (count($replicateOrderTypes) === 1) {
+                $this->replicateOrder->order_type_id = $replicateOrderTypes[0]['id'];
             }
 
             $this->js(<<<'JS'
@@ -433,6 +431,12 @@ class Order extends Component
                 $openModal('replicate-order');
             JS);
         }
+
+        $orderTypeIds = json_encode(array_column($replicateOrderTypes, 'id'));
+        $this->js(<<<JS
+            let component = Alpine.\$data(document.getElementById('replicate-order-order-type').querySelector('[x-data]'));
+            component.asyncData.params.whereIn[0][1] = $orderTypeIds;
+        JS);
     }
 
     #[Renderless]
@@ -495,6 +499,7 @@ class Order extends Component
         }
     }
 
+    #[Renderless]
     public function takeOrderPositions(array $positionIds): void
     {
         $orderPositions = resolve_static(OrderPosition::class, 'query')

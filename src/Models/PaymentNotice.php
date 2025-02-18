@@ -18,10 +18,6 @@ class PaymentNotice extends FluxModel
     use HasClientAssignment, HasPackageFactory, HasUserModification, HasUuid, LogsActivity,
         SoftDeletes;
 
-    protected $guarded = [
-        'id',
-    ];
-
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);

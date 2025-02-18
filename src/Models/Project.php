@@ -11,6 +11,7 @@ use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasParentChildRelations;
 use FluxErp\Traits\HasSerialNumberRange;
 use FluxErp\Traits\HasTags;
 use FluxErp\Traits\HasUserModification;
@@ -32,12 +33,8 @@ use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 class Project extends FluxModel implements Calendarable, HasMedia, InteractsWithDataTables
 {
     use Commentable, Filterable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes, HasPackageFactory,
-        HasSerialNumberRange, HasStates, HasTags, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity,
-        Searchable, SoftDeletes;
-
-    protected $guarded = [
-        'id',
-    ];
+        HasParentChildRelations, HasSerialNumberRange, HasStates, HasTags, HasUserModification, HasUuid,
+        InteractsWithMedia, LogsActivity, Searchable, SoftDeletes;
 
     protected ?string $detailRouteName = 'projects.id';
 
@@ -62,11 +59,6 @@ class Project extends FluxModel implements Calendarable, HasMedia, InteractsWith
         ];
     }
 
-    public function children(): HasMany
-    {
-        return $this->hasMany(Project::class, 'parent_id');
-    }
-
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class, 'client_id');
@@ -80,11 +72,6 @@ class Project extends FluxModel implements Calendarable, HasMedia, InteractsWith
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class, 'order_id');
-    }
-
-    public function parent(): BelongsTo
-    {
-        return $this->belongsTo(Project::class, 'parent_id');
     }
 
     public function responsibleUser(): BelongsTo

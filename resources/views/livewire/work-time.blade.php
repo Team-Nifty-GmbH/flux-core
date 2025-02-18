@@ -27,7 +27,7 @@
                                 'is_main_address',
                                 '=',
                                 true,
-                            ]
+                            ],
                         ],
                         'option-value' => 'contact_id',
                         'fields' => [
@@ -35,7 +35,7 @@
                             'name',
                         ],
                         'with' => 'contact.media',
-                    ]
+                    ],
                 ]"
             />
             <x-select
@@ -57,7 +57,7 @@
                             'appends' => [
                                 'contact_id',
                             ],
-                        ]
+                        ],
                     ]"
                     wire:model="workTime.trackable_id"
                 />

@@ -26,7 +26,7 @@ class ContactBankConnectionTest extends BaseSetup
         parent::setUp();
 
         $contacts = Contact::factory()->count(2)->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
         ]);
 
         $this->contactBankConnections = ContactBankConnection::factory()->count(2)->create([

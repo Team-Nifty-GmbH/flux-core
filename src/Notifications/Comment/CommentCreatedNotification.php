@@ -14,6 +14,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\HtmlString;
+use Illuminate\Support\Str;
 use NotificationChannels\WebPush\WebPushMessage;
 
 class CommentCreatedNotification extends Notification implements HasToastNotification, ShouldQueue
@@ -52,7 +53,7 @@ class CommentCreatedNotification extends Notification implements HasToastNotific
                 fn (MailMessage $mail) => $mail->replyTo($ticketAccount)
             )
             ->line(new HtmlString(
-                '<span>[flux:comment:'
+                '<span style="display: none">[flux:comment:'
                 . $this->model->model->getMorphClass() . ':'
                 . $this->model->model->getKey()
                 . ']</span>'
@@ -82,15 +83,25 @@ class CommentCreatedNotification extends Notification implements HasToastNotific
 
         return ToastNotification::make()
             ->notifiable($notifiable)
-            ->title(__(
-                ':username commented on :model',
-                [
-                    'username' => $createdBy && method_exists($createdBy, 'getLabel') && $createdBy->getLabel()
-                        ? $createdBy->getLabel()
-                        : __('Unknown'),
-                    'model' => __('your ' . $this->model->model->getMorphClass()),
-                ],
-            ))
+            ->title(
+                Str::of(
+                    __(
+                        ':username commented on :model :label',
+                        [
+                            'username' => $createdBy && method_exists($createdBy, 'getLabel') && $createdBy->getLabel()
+                                ? $createdBy->getLabel()
+                                : __('Unknown'),
+                            'model' => __('your ' . $this->model->model->getMorphClass()),
+                            'label' => method_exists($this->model->model, 'getLabel') && $this->model->model->getLabel()
+                                ? '"' . $this->model->model->getLabel() . '"'
+                                : '',
+                        ],
+                    )
+                )
+                    ->trim()
+                    ->deduplicate()
+                    ->toString()
+            )
             ->icon('chat')
             ->when(
                 $createdBy

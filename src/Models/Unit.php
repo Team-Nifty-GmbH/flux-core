@@ -8,12 +8,14 @@ use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Unit extends FluxModel
 {
     use Filterable, HasPackageFactory, HasUserModification, HasUuid, LogsActivity, SoftDeletes;
 
-    protected $guarded = [
-        'id',
-    ];
+    public function products(): HasMany
+    {
+        return $this->hasMany(Product::class);
+    }
 }

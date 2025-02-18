@@ -174,10 +174,13 @@
                                 'is_main_address',
                                 '=',
                                 true,
-                            ]
+                            ],
                         ],
-                        'with' => ['contact.media', 'country:id,name'],
-                    ]
+                        'with' => [
+                            'contact.media',
+                            'country:id,name',
+                        ],
+                    ],
                 ]"
             />
             <livewire:features.commission-rates lazy :userId="$user['id'] ?? null" :contactId="null" cache-key="settings.users.commission-rates"/>

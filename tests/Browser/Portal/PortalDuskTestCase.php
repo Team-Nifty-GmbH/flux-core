@@ -63,12 +63,12 @@ class PortalDuskTestCase extends DuskTestCase
 
         $contact = Contact::factory()->create([
             'price_list_id' => $priceList->id,
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'payment_type_id' => $paymentType->id,
         ]);
 
         $this->user = Address::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'contact_id' => $contact->id,
             'language_id' => $language->id,
             'country_id' => $country->id,

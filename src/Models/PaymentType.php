@@ -19,10 +19,6 @@ class PaymentType extends FluxModel
     use CacheModelQueries, Filterable, HasClientAssignment, HasDefault, HasPackageFactory, HasUserModification, HasUuid,
         LogsActivity, SoftDeletes;
 
-    protected $guarded = [
-        'id',
-    ];
-
     protected function casts(): array
     {
         return [

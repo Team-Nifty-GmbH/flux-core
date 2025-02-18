@@ -25,7 +25,7 @@ class OrderTypeTest extends BaseSetup
         parent::setUp();
 
         $this->orderTypes = OrderType::factory()->count(2)->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'order_type_enum' => OrderTypeEnum::Order,
         ]);
 

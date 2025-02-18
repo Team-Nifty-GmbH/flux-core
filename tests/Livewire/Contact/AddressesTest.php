@@ -23,10 +23,10 @@ class AddressesTest extends BaseSetup
         parent::setUp();
 
         $contact = Contact::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
         ]);
         $address = Address::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'contact_id' => $contact->id,
             'is_main_address' => true,
             'is_invoice_address' => true,

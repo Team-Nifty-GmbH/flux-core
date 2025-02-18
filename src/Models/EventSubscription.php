@@ -10,12 +10,6 @@ class EventSubscription extends FluxModel
 {
     use Filterable, HasPackageFactory;
 
-    protected $guarded = [
-        'id',
-        'created_at',
-        'updated_at',
-    ];
-
     protected function casts(): array
     {
         return [

@@ -20,8 +20,6 @@ class PurchaseInvoice extends FluxModel implements HasMedia
     use Commentable, Communicatable, HasPackageFactory, HasTags, HasUserModification, HasUuid, InteractsWithMedia,
         LogsActivity, SoftDeletes;
 
-    protected $guarded = ['id'];
-
     protected static function booted(): void
     {
         static::creating(function (PurchaseInvoice $model) {

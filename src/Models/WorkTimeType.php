@@ -7,14 +7,11 @@ use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class WorkTimeType extends FluxModel
 {
     use CacheModelQueries, HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
-
-    protected $guarded = [
-        'id',
-    ];
 
     protected function casts(): array
     {
@@ -26,5 +23,10 @@ class WorkTimeType extends FluxModel
     protected function broadcastToEveryone(): bool
     {
         return true;
+    }
+
+    public function workTimes(): HasMany
+    {
+        return $this->hasMany(WorkTime::class);
     }
 }

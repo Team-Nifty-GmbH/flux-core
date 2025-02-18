@@ -75,7 +75,7 @@
                             'method' => 'POST',
                             'params' => [
                                 'with' => 'media',
-                            ]
+                            ],
                         ]"
                     />
                 </div>
@@ -95,7 +95,7 @@
                                         'is_main_address',
                                         '=',
                                         true,
-                                    ]
+                                    ],
                                 ],
                                 'option-value' => 'contact_id',
                                 'fields' => [
@@ -103,7 +103,7 @@
                                     'name',
                                 ],
                                 'with' => 'contact.media',
-                            ]
+                            ],
                         ]"
                     />
                 </div>
@@ -117,6 +117,7 @@
                         option-description="description"
                         :async-data="[
                             'api' => route('search', \FluxErp\Models\Order::class),
+                            'method' => 'POST',
                         ]"
                     />
                 </div>

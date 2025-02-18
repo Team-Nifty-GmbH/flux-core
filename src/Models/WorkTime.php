@@ -7,6 +7,7 @@ use FluxErp\Contracts\Calendarable;
 use FluxErp\Support\Calculation\Rounding;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasParentChildRelations;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Builder;
@@ -17,11 +18,7 @@ use Illuminate\Support\Str;
 
 class WorkTime extends FluxModel implements Calendarable
 {
-    use Filterable, HasPackageFactory, HasUuid, SoftDeletes;
-
-    protected $guarded = [
-        'id',
-    ];
+    use Filterable, HasPackageFactory, HasParentChildRelations, HasUuid, SoftDeletes;
 
     protected static function booted(): void
     {
@@ -81,11 +78,6 @@ class WorkTime extends FluxModel implements Calendarable
     public function orderPosition(): BelongsTo
     {
         return $this->belongsTo(OrderPosition::class);
-    }
-
-    public function parent(): BelongsTo
-    {
-        return $this->belongsTo(WorkTime::class, 'parent_id');
     }
 
     public function user(): BelongsTo

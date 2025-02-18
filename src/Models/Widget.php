@@ -8,8 +8,4 @@ use FluxErp\Traits\HasUuid;
 class Widget extends FluxModel
 {
     use HasPackageFactory, HasUuid;
-
-    protected $guarded = [
-        'id',
-    ];
 }

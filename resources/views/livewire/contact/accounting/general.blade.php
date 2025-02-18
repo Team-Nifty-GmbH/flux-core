@@ -39,6 +39,15 @@
             />
             <x-select
                 x-bind:disabled="! $wire.$parent.$parent.edit"
+                wire:model="contact.vat_rate_id"
+                :clearable="false"
+                :label="__('Tax Exemption')"
+                :options="$vatRates"
+                option-label="name"
+                option-value="id"
+            />
+            <x-select
+                x-bind:disabled="! $wire.$parent.$parent.edit"
                 :label="__('Commission Agent')"
                 wire:model="contact.agent_id"
                 option-value="id"
@@ -52,7 +61,7 @@
                     'method' => 'POST',
                     'params' => [
                         'with' => 'media',
-                    ]
+                    ],
                 ]"
             />
             <x-select
@@ -70,7 +79,7 @@
                     'method' => 'POST',
                     'params' => [
                         'with' => 'media',
-                    ]
+                    ],
                 ]"
             />
         </div>

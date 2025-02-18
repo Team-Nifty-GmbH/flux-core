@@ -22,20 +22,8 @@ class UpdateAdditionalColumn extends FluxAction
 
     public function performAction(): Model
     {
-        if ($this->data['values'] ?? false) {
-            $this->data['validations'] = null;
-        } elseif (array_key_exists('values', $this->data)) {
-            $this->data['values'] = null;
-        }
-
-        if ($this->data['validations'] ?? false) {
-            $this->data['values'] = null;
-        } elseif (array_key_exists('validations', $this->data)) {
-            $this->data['validations'] = null;
-        }
-
         $additionalColumn = resolve_static(AdditionalColumn::class, 'query')
-            ->whereKey($this->data['id'])
+            ->whereKey($this->getData('id'))
             ->first();
 
         $additionalColumn->fill($this->data);
@@ -49,11 +37,11 @@ class UpdateAdditionalColumn extends FluxAction
         parent::validateData();
 
         $additionalColumn = resolve_static(AdditionalColumn::class, 'query')
-            ->whereKey($this->data['id'])
+            ->whereKey($this->getData('id'))
             ->first();
 
-        if ($additionalColumn->values !== null
-            && $this->data['values'] !== null
+        if (! is_null($additionalColumn->values)
+            && ! is_null($this->getData('values'))
             && $additionalColumn->modelValues()->whereNotIn('meta.value', $this->data['values'])->exists()
         ) {
             throw ValidationException::withMessages([

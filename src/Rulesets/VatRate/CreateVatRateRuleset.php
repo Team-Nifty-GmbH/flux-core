@@ -17,6 +17,7 @@ class CreateVatRateRuleset extends FluxRuleset
             'rate_percentage' => 'required|numeric|lt:1|min:0',
             'footer_text' => 'string|nullable',
             'is_default' => 'boolean',
+            'is_tax_exemption' => 'boolean',
         ];
     }
 }

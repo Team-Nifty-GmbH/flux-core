@@ -34,13 +34,6 @@ class PriceLists extends PriceListList
         'is_percentage' => true,
     ];
 
-    public function mount(): void
-    {
-        parent::mount();
-
-        $this->headline = __('Price Lists');
-    }
-
     protected function getTableActions(): array
     {
         return [

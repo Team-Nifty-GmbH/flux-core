@@ -45,7 +45,7 @@
                                     x-model="ticket[ticketTypeAdditionalColumn.name]"
                                     x-bind:options="ticketTypeAdditionalColumn.values"
                                 >
-                                    <option value="" disabled selected>
+                                    <option selected>
                                         {{ __('Please select') }}
                                     </option>
                                     <template x-for="value in ticketTypeAdditionalColumn.values">

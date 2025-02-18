@@ -27,11 +27,11 @@ class CommentsTest extends BaseSetup
         parent::setUp();
 
         $contact = Contact::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
         ]);
 
         $addresses = Address::factory()->count(2)->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'contact_id' => $contact->id,
         ]);
 
@@ -40,7 +40,7 @@ class CommentsTest extends BaseSetup
         $language = Language::factory()->create();
 
         $orderType = OrderType::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'order_type_enum' => OrderTypeEnum::Order,
         ]);
 
@@ -51,7 +51,7 @@ class CommentsTest extends BaseSetup
         $priceList = PriceList::factory()->create();
 
         $this->order = Order::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'language_id' => $language->id,
             'order_type_id' => $orderType->id,
             'payment_type_id' => $paymentType->id,

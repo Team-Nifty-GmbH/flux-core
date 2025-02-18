@@ -2,6 +2,7 @@
 
 namespace FluxErp\Traits;
 
+use FluxErp\Models\Media as FluxMedia;
 use FluxErp\Support\MediaLibrary\MediaCollection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
@@ -79,6 +80,13 @@ trait InteractsWithMedia
      */
     public function registerMediaConversions(?Media $media = null): void
     {
+        $this->addMediaConversion('preview')
+            ->width(150)
+            ->height(150)
+            ->keepOriginalImageFormat()
+            ->quality(80)
+            ->optimize();
+
         $this->addMediaConversion('thumb')
             ->width(100)
             ->height(100)
@@ -115,5 +123,10 @@ trait InteractsWithMedia
         $this->mediaCollections[$name] = $mediaCollection;
 
         return $mediaCollection;
+    }
+
+    public function getMediaModel(): string
+    {
+        return resolve_static(FluxMedia::class, 'class');
     }
 }

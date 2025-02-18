@@ -38,10 +38,6 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
         HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasSerialNumberRange, HasUserModification,
         HasUuid, InteractsWithMedia, Lockable, LogsActivity, Printable, SoftDeletes;
 
-    protected $guarded = [
-        'id',
-    ];
-
     protected string $detailRouteName = 'contacts.id?';
 
     public static string $iconName = 'users';

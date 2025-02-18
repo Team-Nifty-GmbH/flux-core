@@ -48,6 +48,8 @@ class OrderForm extends FluxForm
 
     public ?int $responsible_user_id = null;
 
+    public ?int $vat_rate_id = null;
+
     public ?array $address_invoice = null;
 
     public ?array $address_delivery = null;
@@ -161,6 +163,9 @@ class OrderForm extends FluxForm
     public ?array $parent = null;
 
     #[Locked]
+    public ?array $created_from = null;
+
+    #[Locked]
     public bool $isPurchase = false;
 
     #[Locked]
@@ -185,6 +190,7 @@ class OrderForm extends FluxForm
     {
         if ($values instanceof Order) {
             $values->loadMissing([
+                'createdFrom',
                 'parent',
                 'orderType:id,order_type_enum',
                 'contact:id,has_delivery_lock',
@@ -214,6 +220,14 @@ class OrderForm extends FluxForm
                         'parent' => [
                             'label' => $values->parent->getLabel(),
                             'url' => $values->parent->getUrl(),
+                        ],
+                    ]
+                    : [],
+                $values->createdFrom
+                    ? [
+                        'created_from' => [
+                            'label' => $values->createdFrom->getLabel(),
+                            'url' => $values->createdFrom->getUrl(),
                         ],
                     ]
                     : [],

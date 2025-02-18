@@ -36,11 +36,11 @@ class BaseSetup extends TestCase
 
         if (str_starts_with(get_called_class(), 'FluxErp\\Tests\\Livewire\\Portal\\')) {
             $this->contact = Contact::factory()->create([
-                'client_id' => $this->dbClient->id,
+                'client_id' => $this->dbClient->getKey(),
             ]);
             $this->address = Address::factory()->create([
                 'contact_id' => $this->contact->id,
-                'client_id' => $this->dbClient->id,
+                'client_id' => $this->dbClient->getKey(),
                 'language_id' => $this->defaultLanguage->id,
                 'can_login' => true,
                 'is_active' => true,

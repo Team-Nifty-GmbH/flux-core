@@ -13,8 +13,6 @@ class CustomEvent extends FluxModel
 {
     use HasPackageFactory, LogsActivity;
 
-    protected $guarded = ['id'];
-
     public function model(): MorphTo
     {
         return $this->morphTo('model');

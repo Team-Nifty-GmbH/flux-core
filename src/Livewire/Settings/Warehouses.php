@@ -20,13 +20,6 @@ class Warehouses extends WarehouseList
 
     public WareHouseForm $warehouse;
 
-    public function mount(): void
-    {
-        parent::mount();
-
-        $this->headline = __('Warehouses');
-    }
-
     protected function getTableActions(): array
     {
         return [

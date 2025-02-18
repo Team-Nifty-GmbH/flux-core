@@ -18,6 +18,7 @@
                             x-bind:readonly="!edit"
                             :async-data="[
                                 'api' => route('search', \FluxErp\Models\Project::class),
+                                'method' => 'POST',
                             ]"
                         />
                     </div>
@@ -39,7 +40,7 @@
                                 'method' => 'POST',
                                 'params' => [
                                     'with' => 'media',
-                                ]
+                                ],
                             ]"
                         />
                     </div>
@@ -114,7 +115,7 @@
                         'method' => 'POST',
                         'params' => [
                             'with' => 'media',
-                        ]
+                        ],
                     ]"
                 />
             </div>
@@ -142,9 +143,11 @@
                     ]"
                 >
                     <x-slot:beforeOptions>
-                        <div class="px-1">
-                            <x-button positive full :label="__('Add')" wire:click="addTag($promptValue())" wire:flux-confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}" />
-                        </div>
+                        @canAction(\FluxErp\Actions\Tag\CreateTag::class)
+                            <div class="px-1">
+                                <x-button positive full :label="__('Add')" wire:click="addTag($promptValue())" wire:flux-confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}" />
+                            </div>
+                        @endCanAction
                     </x-slot:beforeOptions>
                 </x-select>
             </div>

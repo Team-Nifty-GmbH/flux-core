@@ -80,9 +80,9 @@ class CreateMailExecutedSubscriber
         foreach ($message->getMedia('attachments') as $attachment) {
             try {
                 $purchaseInvoice = CreatePurchaseInvoice::make([
-                    'client_id' => $contact?->client_id ?? Client::default()->id,
+                    'client_id' => $contact?->client_id ?? Client::default()->getKey(),
                     'contact_id' => $contact?->id,
-                    'currency_id' => $contact?->currency_id ?? Currency::default()->id,
+                    'currency_id' => $contact?->currency_id ?? Currency::default()->getKey(),
                     'payment_type_id' => $contact?->purchase_payment_type_id ?? $contact?->payment_type_id,
                     'invoice_date' => $message->date->toDateString(),
                     'media' => [
@@ -112,7 +112,7 @@ class CreateMailExecutedSubscriber
         try {
             /** @var \FluxErp\Models\Ticket $ticket */
             $ticket = CreateTicket::make([
-                'client_id' => $this->address->client_id ?? Client::default()->id,
+                'client_id' => $this->address->client_id ?? Client::default()->getKey(),
                 'authenticatable_type' => morph_alias(Address::class),
                 'authenticatable_id' => $this->address->id,
                 'title' => $communication->subject,

@@ -108,7 +108,7 @@ class SerialNumberRangeTest extends BaseSetup
             'product_id' => $this->products[0]->id,
             'model_type' => morph_alias(Product::class),
             'type' => 'product',
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'start_number' => rand(1, 100),
             'prefix' => Str::random(),
             'suffix' => Str::random(),

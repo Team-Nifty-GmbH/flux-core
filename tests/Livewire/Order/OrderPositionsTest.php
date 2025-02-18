@@ -31,20 +31,20 @@ class OrderPositionsTest extends BaseSetup
         parent::setUp();
 
         $contact = Contact::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'has_delivery_lock' => false,
             'credit_line' => null,
         ]);
 
         $address = Address::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'contact_id' => $contact->id,
         ]);
 
         $language = Language::factory()->create();
 
         $this->orderType = OrderType::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'order_type_enum' => OrderTypeEnum::Order,
             'print_layouts' => ['invoice'],
         ]);
@@ -64,14 +64,14 @@ class OrderPositionsTest extends BaseSetup
                     'unit_gross_price' => 119,
                     'total_gross_price' => 119,
                     'total_net_price' => 100,
-                    'client_id' => $this->dbClient->id,
+                    'client_id' => $this->dbClient->getKey(),
                     'is_free_text' => false,
                     'is_alternative' => false,
                 ])
             )
             ->for(Currency::factory())
             ->create([
-                'client_id' => $this->dbClient->id,
+                'client_id' => $this->dbClient->getKey(),
                 'language_id' => $language->id,
                 'order_type_id' => $this->orderType->id,
                 'payment_type_id' => $paymentType->id,

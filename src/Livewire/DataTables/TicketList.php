@@ -163,7 +163,7 @@ class TicketList extends BaseDataTable
         }
 
         try {
-            $this->saveFileUploadsToMediaLibrary('attachments', $ticket->id, app(Ticket::class)->getMorphClass());
+            $this->saveFileUploadsToMediaLibrary('attachments', $ticket->id, morph_alias(Ticket::class));
         } catch (\Exception $e) {
             exception_to_notifications($e, $this);
         }
@@ -183,7 +183,7 @@ class TicketList extends BaseDataTable
     public function updatedTicketTypeId(): void
     {
         $ticketTypeAdditionalColumns = array_filter(array_map(
-            fn ($item) => data_get($item, 'additional_model_columns'),
+            fn (array $item) => data_get($item, 'additional_model_columns'),
             Arr::keyBy($this->ticketTypes, 'id')
         ));
 

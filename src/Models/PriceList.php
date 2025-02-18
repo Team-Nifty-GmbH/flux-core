@@ -6,23 +6,20 @@ use FluxErp\Enums\RoundingMethodEnum;
 use FluxErp\Traits\CacheModelQueries;
 use FluxErp\Traits\HasDefault;
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasParentChildRelations;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class PriceList extends FluxModel
 {
-    use CacheModelQueries, HasDefault, HasPackageFactory, HasUserModification, HasUuid, LogsActivity, SoftDeletes;
-
-    protected $guarded = [
-        'id',
-    ];
+    use CacheModelQueries, HasDefault, HasPackageFactory, HasParentChildRelations, HasUserModification, HasUuid,
+        LogsActivity, SoftDeletes;
 
     protected function casts(): array
     {
@@ -72,16 +69,6 @@ class PriceList extends FluxModel
     public function discountedCategories(): BelongsToMany
     {
         return $this->belongsToMany(Category::class, 'category_price_list');
-    }
-
-    public function parent(): BelongsTo
-    {
-        return $this->belongsTo(PriceList::class, 'parent_id');
-    }
-
-    public function children(): HasMany
-    {
-        return $this->hasMany(PriceList::class, 'parent_id');
     }
 
     public function prices(): HasMany

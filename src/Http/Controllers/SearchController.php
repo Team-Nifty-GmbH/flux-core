@@ -78,11 +78,15 @@ class SearchController extends Controller
         }
 
         if ($request->has('whereIn')) {
-            $query->whereIn(...$request->get('whereIn'));
+            foreach ($request->get('whereIn') as $whereIn) {
+                $query->whereIn(...$whereIn);
+            }
         }
 
         if ($request->has('whereNotIn')) {
-            $query->whereNotIn(...$request->get('whereNotIn'));
+            foreach ($request->get('whereNotIn') as $whereNotIn) {
+                $query->whereNotIn(...$whereNotIn);
+            }
         }
 
         if ($request->has('whereNull')) {

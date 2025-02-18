@@ -23,10 +23,6 @@ class Discount extends FluxModel implements Sortable
         'pivot',
     ];
 
-    protected $guarded = [
-        'id',
-    ];
-
     protected function casts(): array
     {
         return [

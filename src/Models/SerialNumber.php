@@ -23,10 +23,6 @@ class SerialNumber extends FluxModel implements HasMedia, InteractsWithDataTable
     use Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes, HasPackageFactory, HasUserModification,
         HasUuid, InteractsWithMedia, LogsActivity, Searchable;
 
-    protected $guarded = [
-        'id',
-    ];
-
     protected ?string $detailRouteName = 'products.serial-numbers.id?';
 
     public static string $iconName = 'tag';

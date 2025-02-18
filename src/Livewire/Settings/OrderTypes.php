@@ -23,13 +23,6 @@ class OrderTypes extends OrderTypeList
 
     public OrderTypeForm $orderType;
 
-    public function mount(): void
-    {
-        parent::mount();
-
-        $this->headline = __('Order Types');
-    }
-
     protected function getTableActions(): array
     {
         return [

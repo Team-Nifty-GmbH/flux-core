@@ -32,13 +32,13 @@ class OrderTest extends BaseSetup
         parent::setUp();
 
         $contact = Contact::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'has_delivery_lock' => false,
             'credit_line' => null,
         ]);
 
         $address = Address::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'contact_id' => $contact->id,
         ]);
 
@@ -49,7 +49,7 @@ class OrderTest extends BaseSetup
         $currency = Currency::factory()->create();
 
         $this->orderType = OrderType::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'order_type_enum' => OrderTypeEnum::Order,
             'print_layouts' => ['invoice'],
         ]);
@@ -71,13 +71,13 @@ class OrderTest extends BaseSetup
                     'total_base_gross_price' => 119,
                     'total_net_price' => 100,
                     'total_base_net_price' => 100,
-                    'client_id' => $this->dbClient->id,
+                    'client_id' => $this->dbClient->getKey(),
                     'is_free_text' => false,
                     'is_alternative' => false,
                 ])
             )
             ->create([
-                'client_id' => $this->dbClient->id,
+                'client_id' => $this->dbClient->getKey(),
                 'language_id' => $this->defaultLanguage->id,
                 'order_type_id' => $this->orderType->id,
                 'payment_type_id' => $paymentType->id,
@@ -150,7 +150,7 @@ class OrderTest extends BaseSetup
     public function test_add_schedule_to_order()
     {
         $orderType = OrderType::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'order_type_enum' => OrderTypeEnum::Subscription,
         ]);
         $this->order->update(['order_type_id' => $orderType->id]);
@@ -262,7 +262,7 @@ class OrderTest extends BaseSetup
     public function test_replicate_order()
     {
         OrderType::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'order_type_enum' => OrderTypeEnum::Order,
             'is_active' => true,
             'is_hidden' => false,
@@ -278,7 +278,6 @@ class OrderTest extends BaseSetup
             ->call('replicate')
             ->assertStatus(200)
             ->assertHasNoErrors()
-            ->assertSet('replicateOrderTypes', [])
             ->assertExecutesJs(<<<'JS'
                 $openModal('replicate-order')
              JS)
@@ -290,18 +289,21 @@ class OrderTest extends BaseSetup
             'orders.id',
             ['id' => $component->get('replicateOrder.id')]
         );
-        $replicatedOrder = Order::query()->whereKey($component->get('replicateOrder.id'))->first();
+        $replicatedOrder = Order::query()
+            ->whereKey($component->get('replicateOrder.id'))
+            ->first();
 
         $this->assertEquals($this->order->orderPositions()->count(), $replicatedOrder->orderPositions()->count());
-        $this->assertEquals(null, $replicatedOrder->invoice_number);
-        $this->assertEquals(false, $replicatedOrder->is_locked);
-        $this->assertEquals($this->order->id, $replicatedOrder->parent_id);
+        $this->assertNull($replicatedOrder->invoice_number);
+        $this->assertFalse($replicatedOrder->is_locked);
+        $this->assertNull($replicatedOrder->parent_id);
+        $this->assertEquals($this->order->id, $replicatedOrder->created_from_id);
         $this->assertNotEquals($replicatedOrder->order_number, $this->order->order_number);
         $this->assertNotEquals($replicatedOrder->uuid, $this->order->uuid);
         $this->assertEquals(
             0,
             $replicatedOrder->orderPositions()
-                ->whereNotNull('origin_position_id')
+                ->whereNull('created_from_id')
                 ->count()
         );
     }
@@ -335,7 +337,6 @@ class OrderTest extends BaseSetup
             ->call('replicate')
             ->assertStatus(200)
             ->assertHasNoErrors()
-            ->assertSet('replicateOrderTypes', [])
             ->assertExecutesJs(<<<'JS'
                 $openModal('replicate-order')
              JS)
@@ -365,10 +366,11 @@ class OrderTest extends BaseSetup
         $this->assertNull($replicatedOrder->invoice_number);
         $this->assertFalse($replicatedOrder->is_locked);
         $this->assertNull($replicatedOrder->parent_id);
+        $this->assertEquals($this->order->id, $replicatedOrder->created_from_id);
         $this->assertEquals(
             0,
             $replicatedOrder->orderPositions()
-                ->whereNotNull('origin_position_id')
+                ->whereNull('created_from_id')
                 ->count()
         );
     }
@@ -376,7 +378,7 @@ class OrderTest extends BaseSetup
     public function test_can_render_subscription_order()
     {
         $orderType = OrderType::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'order_type_enum' => OrderTypeEnum::Subscription,
             'is_active' => true,
             'is_hidden' => false,

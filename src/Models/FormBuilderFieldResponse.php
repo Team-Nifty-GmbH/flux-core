@@ -11,10 +11,6 @@ class FormBuilderFieldResponse extends FluxModel
 {
     use HasPackageFactory, HasUuid, SoftDeletes;
 
-    protected $guarded = [
-        'id',
-    ];
-
     public function field(): BelongsTo
     {
         return $this->belongsTo(FormBuilderField::class, 'field_id');

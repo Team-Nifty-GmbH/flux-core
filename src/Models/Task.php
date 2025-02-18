@@ -38,10 +38,6 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         HasPackageFactory, HasStates, HasTags, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity,
         Searchable, SoftDeletes, Trackable;
 
-    protected $guarded = [
-        'id',
-    ];
-
     protected ?string $detailRouteName = 'tasks.id';
 
     protected static function booted(): void

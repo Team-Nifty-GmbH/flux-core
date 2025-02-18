@@ -46,7 +46,7 @@
                                     wire:model="ticket.description"
                                 />
                             </x-card>
-                            <div x-cloak x-show="$wire.additionalColumns?.length > 0">
+                            <div x-cloak x-show="Object.keys($wire.ticket.availableAdditionalColumns)?.length > 0">
                                 <x-card>
                                     <x-slot:header>
                                         <div class="flex items-center justify-between border-b px-4 py-2.5 dark:border-0">
@@ -57,13 +57,36 @@
                                     </x-slot:header>
                                     @section('content.additional-columns')
                                         <div class="flex flex-col gap-4">
-                                            <template x-for="additionalColumn in $wire.additionalColumns">
+                                            <template x-for="(additionalColumn, name) in $wire.ticket.availableAdditionalColumns">
                                                 <div>
-                                                    <x-label
-                                                        x-html="additionalColumn.label ? additionalColumn.label : additionalColumn.name"
-                                                        x-bind:for="additionalColumn.name"
-                                                    />
-                                                    <x-input x-bind:class="(additionalColumn.field_type === 'color' || additionalColumn.field_type === 'checkbox') && '!w-auto'" x-bind:type="additionalColumn.field_type" x-model="ticket[additionalColumn.name]" />
+                                                    <x-checkbox
+                                                        x-cloak
+                                                        x-show="additionalColumn.field_type === 'checkbox'"
+                                                        x-model="$wire.ticket.additional_columns[name].value"
+                                                    >
+                                                        <x-slot:label>
+                                                            <span x-text="additionalColumn.label ? additionalColumn.label : additionalColumn.name"></span>
+                                                        </x-slot:label>
+                                                    </x-checkbox>
+                                                    <x-input
+                                                        x-cloak
+                                                        x-show="additionalColumn.field_type !== 'checkbox' && additionalColumn.field_type !== 'select'"
+                                                        x-model="$wire.ticket.additional_columns[name].value"
+                                                        x-bind:class="(additionalColumn.field_type === 'color') && '!w-auto'"
+                                                        x-bind:type="additionalColumn.field_type"
+                                                    >
+                                                    </x-input>
+                                                    <div x-cloak x-show="additionalColumn.field_type === 'select'">
+                                                        <x-native-select
+                                                            x-model="$wire.ticket.additional_columns[name].value"
+                                                            x-bind:type="additionalColumn.field_type"
+                                                        >
+                                                            <option selected>{{ __('Please select') }}</option>
+                                                            <template x-for="value in additionalColumn.values">
+                                                                <option x-bind:value="value" x-text="value"></option>
+                                                            </template>
+                                                        </x-native-select>
+                                                    </div>
                                                 </div>
                                             </template>
                                         </div>
@@ -145,7 +168,7 @@
                                     'method' => 'POST',
                                     'params' => [
                                         'with' => 'media',
-                                    ]
+                                    ],
                                 ]"
                             />
                             <div>
@@ -181,7 +204,7 @@
                                             'method' => 'POST',
                                             'params' => [
                                                 'with' => $ticket->authenticatable_type === morph_alias(\FluxErp\Models\Address::class) ? 'contact.media' : 'media',
-                                            ]
+                                            ],
                                         ]"
                                     />
                                 </div>

@@ -22,8 +22,12 @@
                 :async-data="[
                     'api' => route('search', \FluxErp\Models\Product::class),
                     'params' => [
-                        'fields' => ['id', 'product_number', 'name'],
-                    ]
+                        'fields' => [
+                            'id',
+                            'product_number',
+                            'name',
+                        ],
+                    ],
                 ]"
             />
         </div>

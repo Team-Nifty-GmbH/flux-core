@@ -27,7 +27,7 @@
                                     'method' => 'POST',
                                     'params' => [
                                         'with' => 'media',
-                                    ]
+                                    ],
                                 ]"
                             />
                         </div>
@@ -53,9 +53,13 @@
                                 :async-data="[
                                     'api' => route('search', \FluxErp\Models\Product::class),
                                     'params' => [
-                                        'fields' => ['id', 'name', 'product_number'],
+                                        'fields' => [
+                                            'id',
+                                            'name',
+                                            'product_number',
+                                        ],
                                         'with' => 'media',
-                                    ]
+                                    ],
                                 ]"
                             />
                         </div>

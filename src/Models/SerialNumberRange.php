@@ -20,10 +20,6 @@ class SerialNumberRange extends FluxModel
 {
     use Filterable, HasClientAssignment, HasPackageFactory, HasUserModification, HasUuid, LogsActivity, SoftDeletes;
 
-    protected $guarded = [
-        'id',
-    ];
-
     protected static function booted(): void
     {
         static::creating(function (SerialNumberRange $serialNumberRange) {

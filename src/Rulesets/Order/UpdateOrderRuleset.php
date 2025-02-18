@@ -6,6 +6,7 @@ use FluxErp\Models\Language;
 use FluxErp\Models\Order;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\User;
+use FluxErp\Models\VatRate;
 use FluxErp\Rules\ExistsWithForeign;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\UniqueInFieldDependence;
@@ -106,6 +107,12 @@ class UpdateOrderRuleset extends FluxRuleset
                 'integer',
                 'nullable',
                 app(ModelExists::class, ['model' => User::class]),
+            ],
+            'vat_rate_id' => [
+                'integer',
+                'nullable',
+                app(ModelExists::class, ['model' => VatRate::class])
+                    ->where('is_tax_exemption', true),
             ],
 
             'address_delivery' => [

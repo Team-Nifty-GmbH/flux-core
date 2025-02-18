@@ -15,10 +15,6 @@ class PaymentRun extends FluxModel
 {
     use HasFrontendAttributes, HasUserModification, HasUuid, LogsActivity;
 
-    protected $guarded = [
-        'id',
-    ];
-
     protected function casts(): array
     {
         return [

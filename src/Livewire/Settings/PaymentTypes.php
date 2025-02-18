@@ -22,13 +22,6 @@ class PaymentTypes extends PaymentTypeList
 
     public PaymentTypeForm $paymentType;
 
-    public function mount(): void
-    {
-        parent::mount();
-
-        $this->headline = __('Payment Types');
-    }
-
     protected function getTableActions(): array
     {
         return [

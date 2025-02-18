@@ -6,7 +6,6 @@ use FluxErp\Enums\ComposerRepositoryTypeEnum;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Composer as BaseComposer;
-use Illuminate\Support\Str;
 use Symfony\Component\Process\Process;
 
 class Composer extends BaseComposer
@@ -210,22 +209,6 @@ class Composer extends BaseComposer
         $defaultEnv = [
             'XDEBUG_MODE' => 'off',
         ];
-
-        if (config('flux.license_key')) {
-            $url = Str::of(config('app.url'))->after('://')->before('/')->replace('.', '-')->kebab()->toString();
-            $repoUrl = Str::start($url . '.repo.repman.team-nifty.com', 'https://');
-            $defaultEnv['COMPOSER_AUTH'] = json_encode([
-                'http-basic' => [
-                    Str::after($repoUrl, 'https://') => [
-                        'username' => 'token',
-                        'password' => config('flux.license_key'),
-                    ],
-                ],
-            ]);
-            $this->addRepository(ComposerRepositoryTypeEnum::Composer, $repoUrl, 'repman');
-        } else {
-            $this->removeRepository('repman');
-        }
 
         $env = array_merge(
             $env,

@@ -4,7 +4,6 @@ namespace FluxErp\Models;
 
 use FluxErp\Models\Pivots\ClientPaymentType;
 use FluxErp\Traits\CacheModelQueries;
-use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasDefault;
@@ -26,16 +25,12 @@ use Spatie\MediaLibrary\HasMedia;
 
 class Client extends FluxModel implements HasMedia
 {
-    use CacheModelQueries, Commentable, Filterable, HasClientAssignment, HasDefault, HasPackageFactory,
-        HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Searchable, SoftDeletes;
+    use CacheModelQueries, Filterable, HasClientAssignment, HasDefault, HasPackageFactory, HasUserModification, HasUuid,
+        InteractsWithMedia, LogsActivity, Searchable, SoftDeletes;
 
     protected $appends = [
         'logo_url',
         'logo_small_url',
-    ];
-
-    protected $guarded = [
-        'id',
     ];
 
     protected $with = [

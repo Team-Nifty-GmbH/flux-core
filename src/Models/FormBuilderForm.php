@@ -13,10 +13,6 @@ class FormBuilderForm extends FluxModel
 {
     use Filterable, HasPackageFactory, HasUuid, SoftDeletes;
 
-    protected $guarded = [
-        'id',
-    ];
-
     protected static function booted(): void
     {
         static::deleting(function (FormBuilderForm $form) {

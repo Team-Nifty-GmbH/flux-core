@@ -7,19 +7,25 @@ export default function folders(
     multiSelect = false,
     nameAttribute = 'label',
     childrenAttribute = 'children',
+    selectedCallback = null,
     checkedCallback = null,
+    searchAttributes = null
 ) {
     return {
         checked: checked,
         selected: null,
         openFolders: [],
         tree: [],
+        search: null,
+        searchAttributes: searchAttributes,
         property: property,
         getTreePromise: getTreePromise,
         multiSelect: multiSelect,
         nameAttribute: nameAttribute,
         childrenAttribute: childrenAttribute,
+        selectedCallback: selectedCallback,
         checkedCallback: checkedCallback,
+
         async init() {
             await this.refresh();
             this.checkedCallback = this.checkedCallback?.bind(this);
@@ -38,6 +44,9 @@ export default function folders(
                 console.error('Error fetching the tree structure:', error);
                 this.tree = [];
             }
+        },
+        getSearchAttributes() {
+            return this.searchAttributes || [this.nameAttribute];
         },
         toggleOpen(node, event) {
             if (event?.shiftKey) {
@@ -180,6 +189,50 @@ export default function folders(
 
             traverseAndRemove(this.tree);
             this.unselect();
+        },
+        searchNodes(data, search = null) {
+            if (! Array.isArray(data) && typeof data !== 'object') {
+                return [];
+            }
+
+            if (!search) {
+                return Array.isArray(data) ? data : Object.values(data); // Convert object to array if necessary
+            }
+
+            const lowerSearch = search.toLowerCase();
+
+            const traverse = (node) => {
+                let filteredChildren = [];
+
+                // Recursively check children if available
+                if (Array.isArray(node[this.childrenAttribute])) {
+                    filteredChildren = node[this.childrenAttribute]
+                        .map(traverse)
+                        .filter(child => child !== null); // Remove non-matching children
+                }
+
+                // Check if the current node matches the search term (in the `nameAttribute`)
+                const matches = this.getSearchAttributes().some(attribute => {
+                    return node[attribute].toLowerCase().includes(lowerSearch);
+                });
+
+                // If the node matches, include it along with ALL its children
+                if (matches) {
+                    return { ...node, [this.childrenAttribute]: node[this.childrenAttribute] || [] };
+                }
+
+                // If children match but the node itself does not, include the filtered children
+                if (filteredChildren.length > 0) {
+                    return { ...node, [this.childrenAttribute]: filteredChildren };
+                }
+
+                return null; // Exclude non-matching nodes
+            };
+
+            // Convert data to an array if it's an object, then filter
+            return (Array.isArray(data) ? data : Object.values(data))
+                .map(traverse)
+                .filter(node => node !== null); // Remove null (non-matching) nodes
         },
         addFolder(node = null, attributes = {}) {
             let id = uuidv4();

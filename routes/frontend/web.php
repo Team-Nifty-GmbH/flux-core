@@ -66,6 +66,7 @@ use FluxErp\Livewire\Settings\Profile;
 use FluxErp\Livewire\Settings\QueueMonitor;
 use FluxErp\Livewire\Settings\Scheduling;
 use FluxErp\Livewire\Settings\SerialNumberRanges;
+use FluxErp\Livewire\Settings\Settings;
 use FluxErp\Livewire\Settings\Tags;
 use FluxErp\Livewire\Settings\TicketTypes;
 use FluxErp\Livewire\Settings\Translations;
@@ -175,6 +176,7 @@ Route::middleware('web')
 
                 Route::get('/my-profile', Profile::class)->name('my-profile');
 
+                Route::get('/settings', Settings::class)->name('settings');
                 Route::name('settings.')->prefix('settings')
                     ->group(function () {
                         Route::get('/additional-columns', AdditionalColumns::class)->name('additional-columns');

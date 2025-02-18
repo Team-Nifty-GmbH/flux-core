@@ -29,6 +29,7 @@ class UpdateCalendarEventRuleset extends FluxRuleset
             'start' => 'required_if:confirm_option,this|required_if:confirm_option,future|date',
             'end' => 'required_if:confirm_option,this|required_if:confirm_option,future|date|after_or_equal:start',
             'is_all_day' => 'boolean',
+            'has_taken_place' => 'boolean',
             'extended_props' => 'array|nullable',
             'confirm_option' => 'required|string|in:this,future,all',
             'original_start' => 'required_if:confirm_option,this|required_if:confirm_option,future|date',
