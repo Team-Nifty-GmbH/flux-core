@@ -12,6 +12,7 @@ use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\Notifiable;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Spatie\MediaLibrary\HasMedia;
 
@@ -48,11 +49,6 @@ class Comment extends FluxModel implements HasMedia
                     });
             }
         });
-    }
-
-    public function children(): hasMany
-    {
-        return $this->hasMany(Comment::class, 'parent_id')->with('children');
     }
 
     public function model(): MorphTo
