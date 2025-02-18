@@ -20,15 +20,22 @@ class EventSubscriptionTest extends BaseSetup
 
     private Collection $eventSubscriptions;
 
+    private Collection $tickets;
+
     private array $permissions;
 
     protected function setUp(): void
     {
         parent::setUp();
 
+        $this->tickets = Ticket::factory()->count(3)->create([
+            'authenticatable_type' => $this->user->getMorphClass(),
+            'authenticatable_id' => $this->user->getKey(),
+        ]);
+
         $this->comments = Comment::factory()->count(3)->create([
-            'model_type' => morph_alias(User::class),
-            'model_id' => $this->user->id,
+            'model_type' => morph_alias(Ticket::class),
+            'model_id' => $this->tickets[0]->id,
             'comment' => 'User Comment from a Test!',
         ]);
 
