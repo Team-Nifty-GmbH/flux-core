@@ -652,6 +652,7 @@ class FluxServiceProvider extends ServiceProvider
                 Menu::register(route: 'settings.additional-columns');
                 Menu::register(route: 'settings.address-types');
                 Menu::register(route: 'settings.contact-origins');
+                Menu::register(route: 'settings.industries');
                 Menu::register(route: 'settings.categories');
                 Menu::register(route: 'settings.tags');
                 Menu::register(route: 'settings.product-option-groups');
@@ -684,7 +685,6 @@ class FluxServiceProvider extends ServiceProvider
                 Menu::register(route: 'settings.queue-monitor');
                 Menu::register(route: 'settings.failed-jobs');
                 Menu::register(route: 'settings.plugins');
-                Menu::register(route: 'settings.industries');
             }
         );
     }

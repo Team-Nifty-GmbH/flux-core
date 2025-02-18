@@ -16,7 +16,7 @@ class UpdateIndustryRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => Industry::class]),
             ],
-            'name' => 'string',
+            'name' => 'required|string|max:255',
         ];
     }
 }

@@ -1,4 +1,3 @@
-
 <x-modal name="edit-industry">
     <x-card>
         <div class="flex flex-col gap-4">

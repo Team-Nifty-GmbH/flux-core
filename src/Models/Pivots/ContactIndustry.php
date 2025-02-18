@@ -5,19 +5,20 @@ namespace FluxErp\Models\Pivots;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Industry;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ContactIndustry extends FluxPivot
 {
     protected $table = 'contact_industry';
+
+    protected $primaryKey = 'pivot_id';
 
     public function contact(): BelongsTo
     {
         return $this->belongsTo(Contact::class);
     }
 
-    public function industries(): HasMany
+    public function industry(): BelongsTo
     {
-        return $this->hasMany(Industry::class);
+        return $this->belongsTo(Industry::class);
     }
 }
