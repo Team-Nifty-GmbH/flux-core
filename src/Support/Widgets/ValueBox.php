@@ -15,6 +15,8 @@ abstract class ValueBox extends Component
 
     public string|float $sum = 0;
 
+    public string|float|null $subValue = null;
+
     public string|float|null $previousSum = null;
 
     public string|float|null $growthRate = null;

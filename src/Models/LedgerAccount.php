@@ -13,10 +13,6 @@ class LedgerAccount extends FluxModel
 {
     use CacheModelQueries, HasPackageFactory, HasUuid, Searchable;
 
-    protected $guarded = [
-        'id',
-    ];
-
     protected function casts(): array
     {
         return [

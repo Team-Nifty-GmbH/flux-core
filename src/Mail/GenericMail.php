@@ -10,6 +10,7 @@ use FluxErp\Models\Media;
 use FluxErp\Traits\Makeable;
 use FluxErp\View\Printing\PrintableView;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Mail\Attachment;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
@@ -25,18 +26,30 @@ class GenericMail extends Mailable
     use Makeable, Queueable, SerializesModels;
 
     public function __construct(
-        public CommunicationForm $mailMessageForm,
+        public Arrayable|array $mailMessageForm,
         public SerializableClosure|array|null $bladeParameters = null,
         public ?Client $client = null,
     ) {
-        $this->client ??= $this->mailMessageForm->communicatable()?->client ?? Client::default();
+        if ($this->mailMessageForm instanceof CommunicationForm) {
+            $this->client ??= $this->mailMessageForm->communicatable()?->client;
+        }
+
+        $this->client ??= data_get($this->mailMessageForm, 'client_id')
+            ? resolve_static(Client::class, 'query')
+                ->whereKey(data_get($this->mailMessageForm, 'client_id'))
+                ->first()
+            : Client::default();
+
+        $this->mailMessageForm = $this->mailMessageForm instanceof Arrayable
+            ? $this->mailMessageForm->toArray()
+            : $this->mailMessageForm;
     }
 
     public function build(): void
     {
-        if ($this->mailMessageForm->mail_account_id) {
+        if ($mailAccountId = data_get($this->mailMessageForm, 'mail_account_id')) {
             $mailAccount = resolve_static(MailAccount::class, 'query')
-                ->whereKey($this->mailMessageForm->mail_account_id)
+                ->whereKey($mailAccountId)
                 ->first();
 
             config([
@@ -48,7 +61,7 @@ class GenericMail extends Mailable
                 'mail.mailers.mail_account.port' => $mailAccount->smtp_port,
                 'mail.mailers.mail_account.encryption' => $mailAccount->smtp_encryption,
                 'mail.from.address' => $mailAccount->smtp_email,
-                'mail.from.name' => auth()->user()->name,
+                'mail.from.name' => auth()->user()?->name,
             ]);
         }
 
@@ -57,38 +70,45 @@ class GenericMail extends Mailable
                 ? $this->bladeParameters->getClosure()()
                 : $this->bladeParameters;
 
-            $this->mailMessageForm->fill(array_merge(
-                $this->mailMessageForm->toArray(),
-                [
-                    'subject' => Blade::render(
-                        $this->mailMessageForm->subject,
-                        $bladeParameters ?? []
-                    ),
-                    'html_body' => Blade::render(
-                        $this->mailMessageForm->html_body,
-                        $bladeParameters ?? []
-                    ),
-                    'text_body' => Blade::render(
-                        $this->mailMessageForm->text_body,
-                        $bladeParameters ?? []
-                    ),
-                ]
-            ));
+            data_set(
+                $this->mailMessageForm,
+                'subject',
+                Blade::render(
+                    data_get($this->mailMessageForm, 'subject', ''),
+                    $bladeParameters ?? []
+                )
+            );
+            data_set(
+                $this->mailMessageForm,
+                'html_body',
+                Blade::render(
+                    data_get($this->mailMessageForm, 'html_body', ''),
+                    $bladeParameters ?? []
+                )
+            );
+            data_set(
+                $this->mailMessageForm,
+                'text_body',
+                Blade::render(
+                    data_get($this->mailMessageForm, 'text_body', ''),
+                    $bladeParameters ?? []
+                )
+            );
         }
     }
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: $this->mailMessageForm->subject,
+            subject: data_get($this->mailMessageForm, 'subject'),
         );
     }
 
     public function content(): Content
     {
         return new Content(
-            html: $this->mailMessageForm->html_body,
-            text: $this->mailMessageForm->text_body,
+            html: data_get($this->mailMessageForm, 'html_body'),
+            text: data_get($this->mailMessageForm, 'text_body'),
             markdown: 'flux::emails.generic',
         );
     }
@@ -147,6 +167,6 @@ class GenericMail extends Mailable
             }
 
             return $attachment;
-        }, $this->mailMessageForm->attachments));
+        }, data_get($this->mailMessageForm, 'attachments', [])));
     }
 }

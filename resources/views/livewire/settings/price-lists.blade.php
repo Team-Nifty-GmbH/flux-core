@@ -50,6 +50,7 @@
                             <x-inputs.number
                                 wire:model.number="priceList.rounding_number"
                                 :label="__('Rounding Number')"
+                                step="1"
                                 min="0"
                             />
                         </div>
@@ -118,7 +119,7 @@
                                                         'model_type',
                                                         '=',
                                                         morph_alias(\FluxErp\Models\Product::class),
-                                                    ]
+                                                    ],
                                                 ],
                                             ],
                                         ]"

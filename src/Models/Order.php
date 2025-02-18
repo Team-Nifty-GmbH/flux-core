@@ -26,6 +26,7 @@ use FluxErp\Traits\HasCustomEvents;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasNotificationSubscriptions;
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasParentChildRelations;
 use FluxErp\Traits\HasRelatedModel;
 use FluxErp\Traits\HasSerialNumberRange;
 use FluxErp\Traits\HasUserModification;
@@ -58,10 +59,12 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Order extends FluxModel implements HasMedia, InteractsWithDataTables, OffersPrinting
 {
-    use Commentable, Communicatable, Filterable, HasAdditionalColumns, HasClientAssignment,
-        HasCustomEvents, HasFrontendAttributes, HasNotificationSubscriptions, HasPackageFactory, HasRelatedModel,
-        HasSerialNumberRange, HasStates, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable,
-        Searchable, SoftDeletes, Trackable {
+    use Commentable, Communicatable, Filterable, HasAdditionalColumns, HasClientAssignment, HasCustomEvents,
+        HasFrontendAttributes, HasNotificationSubscriptions, HasPackageFactory, HasParentChildRelations, HasRelatedModel,
+        HasSerialNumberRange,
+        HasStates, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable,
+        Searchable, SoftDeletes,
+        Trackable {
             Printable::resolvePrintViews as protected printableResolvePrintViews;
             HasSerialNumberRange::getSerialNumber as protected hasSerialNumberRangeGetSerialNumber;
         }
@@ -71,10 +74,6 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
     ];
 
     protected ?string $detailRouteName = 'orders.id';
-
-    protected $guarded = [
-        'id',
-    ];
 
     public static string $iconName = 'shopping-bag';
 
@@ -132,10 +131,6 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
                 }
             }
 
-            if ($order->isDirty('is_locked')) {
-                $order->broadcastEvent('locked');
-            }
-
             if ($order->isDirty('iban')
                 && $order->iban
                 && str_replace(' ', '', strtoupper($order->iban)) !== $order->contactBankConnection?->iban
@@ -156,6 +151,12 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
 
             if ($order->isDirty('iban') && $order->iban) {
                 $order->iban = str_replace(' ', '', strtoupper($order->iban));
+            }
+        });
+
+        static::saved(function (Order $order) {
+            if ($order->wasChanged('is_locked')) {
+                $order->broadcastEvent('locked');
             }
         });
 
@@ -284,11 +285,6 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
         return $this->belongsTo(User::class, 'approval_user_id');
     }
 
-    public function children(): HasMany
-    {
-        return $this->hasMany(Order::class, 'parent_id');
-    }
-
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
@@ -307,6 +303,16 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
     public function contactBankConnection(): BelongsTo
     {
         return $this->belongsTo(ContactBankConnection::class);
+    }
+
+    public function createdFrom(): BelongsTo
+    {
+        return $this->belongsTo(Order::class, 'created_from_id');
+    }
+
+    public function createdOrders(): HasMany
+    {
+        return $this->hasMany(Order::class, 'created_from_id');
     }
 
     public function currency(): BelongsTo
@@ -332,11 +338,6 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
     public function orderType(): BelongsTo
     {
         return $this->belongsTo(OrderType::class);
-    }
-
-    public function parent(): BelongsTo
-    {
-        return $this->belongsTo(Order::class, 'parent_id');
     }
 
     public function paymentReminders(): HasMany
@@ -392,6 +393,11 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'order_user');
+    }
+
+    public function vatRate(): BelongsTo
+    {
+        return $this->belongsTo(VatRate::class);
     }
 
     public function vatRates(): HasManyThrough
@@ -714,7 +720,7 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
      */
     public function getAvatarUrl(): ?string
     {
-        return $this->contact?->getAvatarUrl() ?: self::icon()->getUrl();
+        return $this->contact?->getAvatarUrl() ?: static::icon()->getUrl();
     }
 
     public function getPortalDetailRoute(): string

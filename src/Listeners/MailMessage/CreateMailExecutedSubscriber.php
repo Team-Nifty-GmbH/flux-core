@@ -12,6 +12,7 @@ use FluxErp\Models\Communication;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Media;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Spatie\Activitylog\Facades\CauserResolver;
 
 class CreateMailExecutedSubscriber
@@ -39,7 +40,7 @@ class CreateMailExecutedSubscriber
         $matches = [];
         preg_match(
             '/\[flux:comment:(\w+):(\d+)]/',
-            $message->text_body ?? $message->html_body ?? $message->subject,
+            $message->text_body . $message->html_body . $message->subject,
             $matches
         );
         if (count($matches) === 3 && $message->mailFolder->can_create_ticket) {
@@ -47,12 +48,17 @@ class CreateMailExecutedSubscriber
             $id = $matches[2];
 
             try {
-                CreateComment::make([
+                $comment = CreateComment::make([
                     'model_type' => $model,
                     'model_id' => $id,
-                    'comment' => $message->text_body ?? $message->html_body ?? $message->subject,
+                    'comment' => nl2br($message->text_body ?? '') ?: $message->html_body ?? $message->subject,
                     'is_internal' => false,
-                ])->validate()->execute();
+                ])
+                    ->actingAs($this->address)
+                    ->validate()
+                    ->execute();
+
+                $comment->model->communications()->attach($message->getKey());
             } catch (\Throwable) {
             }
         } elseif ($message->mailFolder->can_create_ticket) {
@@ -73,19 +79,27 @@ class CreateMailExecutedSubscriber
 
         foreach ($message->getMedia('attachments') as $attachment) {
             try {
-                CreatePurchaseInvoice::make([
-                    'client_id' => $contact?->client_id ?? Client::default()->id,
+                $purchaseInvoice = CreatePurchaseInvoice::make([
+                    'client_id' => $contact?->client_id ?? Client::default()->getKey(),
                     'contact_id' => $contact?->id,
-                    'currency_id' => $contact?->currency_id ?? Currency::default()->id,
+                    'currency_id' => $contact?->currency_id ?? Currency::default()->getKey(),
                     'payment_type_id' => $contact?->purchase_payment_type_id ?? $contact?->payment_type_id,
                     'invoice_date' => $message->date->toDateString(),
-
                     'media' => [
                         'id' => $attachment->id,
                     ],
-                ])->validate()->execute();
+                ])
+                    ->when(
+                        $this->address,
+                        fn (CreatePurchaseInvoice $action) => $action->actingAs($this->address)
+                    )
+                    ->validate()
+                    ->execute();
             } catch (\Throwable) {
+                continue;
             }
+
+            $purchaseInvoice->communications()->attach($message->getKey());
         }
     }
 
@@ -96,16 +110,22 @@ class CreateMailExecutedSubscriber
         }
 
         try {
+            /** @var \FluxErp\Models\Ticket $ticket */
             $ticket = CreateTicket::make([
-                'client_id' => $this->address->client_id ?? Client::default()->id,
+                'client_id' => $this->address->client_id ?? Client::default()->getKey(),
                 'authenticatable_type' => morph_alias(Address::class),
                 'authenticatable_id' => $this->address->id,
                 'title' => $communication->subject,
-                'description' => $communication->html_body ?? $communication->text_body,
-            ])->validate()->execute();
-        } catch (\Throwable) {
+                'description' => $communication->text_body ?? $communication->html_body,
+            ])
+                ->actingAs($this->address)
+                ->validate()
+                ->execute();
+        } catch (ValidationException) {
             return;
         }
+
+        $ticket->communications()->attach($communication->getKey());
 
         foreach ($communication->getMedia('attachments') as $attachment) {
             try {

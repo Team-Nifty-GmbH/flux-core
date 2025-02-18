@@ -73,7 +73,7 @@ class SerialNumber extends Component
         $response->load('product');
         $this->serialNumber = $response->toArray();
 
-        $this->notification()->success(__('Serial number saved'));
+        $this->notification()->success(__(':model saved', ['model' => __('Serial Number')]));
         $this->edit = false;
     }
 

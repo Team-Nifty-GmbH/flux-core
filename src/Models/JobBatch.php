@@ -16,10 +16,6 @@ class JobBatch extends FluxModel
 
     protected $keyType = 'string';
 
-    protected $guarded = [
-        'id',
-    ];
-
     public function casts(): array
     {
         return [

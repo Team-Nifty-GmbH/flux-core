@@ -14,10 +14,6 @@ class Media extends BaseMedia
     use LogsActivity, ResolvesRelationsThroughContainer;
 
     protected $hidden = [
-        'model_type',
-        'model_id',
-        'collection_name',
-        'name',
         'disk',
         'conversions_disk',
         'manipulations',

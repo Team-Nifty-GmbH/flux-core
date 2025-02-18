@@ -48,6 +48,8 @@ class OrderForm extends FluxForm
 
     public ?int $responsible_user_id = null;
 
+    public ?int $vat_rate_id = null;
+
     public ?array $address_invoice = null;
 
     public ?array $address_delivery = null;
@@ -161,10 +163,16 @@ class OrderForm extends FluxForm
     public ?array $parent = null;
 
     #[Locked]
+    public ?array $created_from = null;
+
+    #[Locked]
     public bool $isPurchase = false;
 
     #[Locked]
     public bool $hasContactDeliveryLock = false;
+
+    #[Locked]
+    public ?string $avatarUrl = null;
 
     protected PriceList $priceList;
 
@@ -182,9 +190,11 @@ class OrderForm extends FluxForm
     {
         if ($values instanceof Order) {
             $values->loadMissing([
+                'createdFrom',
                 'parent',
                 'orderType:id,order_type_enum',
                 'contact:id,has_delivery_lock',
+                'contact.media' => fn (MorphMany $query) => $query->where('collection_name', 'avatar'),
                 'currency:id,symbol',
                 'discounts' => fn (MorphMany $query) => $query->ordered()
                     ->select([
@@ -198,7 +208,11 @@ class OrderForm extends FluxForm
                         'order_column',
                         'is_percentage',
                     ]),
+                'orderType:id,name,order_type_enum',
+                'priceList:id,name,is_net',
+                'users:id,name',
             ]);
+
             $values = array_merge(
                 $values->toArray(),
                 $values->parent
@@ -209,8 +223,17 @@ class OrderForm extends FluxForm
                         ],
                     ]
                     : [],
+                $values->createdFrom
+                    ? [
+                        'created_from' => [
+                            'label' => $values->createdFrom->getLabel(),
+                            'url' => $values->createdFrom->getUrl(),
+                        ],
+                    ]
+                    : [],
                 [
                     'isPurchase' => $values->orderType->order_type_enum->isPurchase(),
+                    'avatarUrl' => $values->contact->getFirstMediaUrl('avatar'),
                 ],
             );
         }

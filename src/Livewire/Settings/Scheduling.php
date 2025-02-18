@@ -32,8 +32,6 @@ class Scheduling extends ScheduleList
     {
         parent::mount();
 
-        $this->headline = __('Schedules');
-
         $this->repeatable = Arr::mapWithKeys(
             Repeatable::all()->toArray(),
             fn (array $item, $key) => [

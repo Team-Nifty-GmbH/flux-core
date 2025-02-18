@@ -8,40 +8,45 @@
             <x-input x-bind:readonly="!edit" wire:model="task.name" label="{{ __('Name') }}" />
             @section('task-content.selects')
                 @section('task-content.selects.project')
-                    <div x-show="task.id">
+                    <div x-show="task.id" x-bind:class="!edit && 'pointer-events-none'">
                         <x-select
                             :label="__('Project')"
-                            wire:model="task.project_id"
                             option-value="id"
                             option-label="label"
                             option-description="description"
+                            wire:model="task.project_id"
+                            x-bind:readonly="!edit"
                             :async-data="[
                                 'api' => route('search', \FluxErp\Models\Project::class),
+                                'method' => 'POST',
                             ]"
                         />
                     </div>
                 @show
                 @section('task-content.selects.responsible-users')
-                    <x-select
-                        :label="__('Responsible User')"
-                        option-value="id"
-                        option-label="label"
-                        autocomplete="off"
-                        wire:model="task.responsible_user_id"
-                        :template="[
-                            'name'   => 'user-option',
-                        ]"
-                        :async-data="[
-                            'api' => route('search', \FluxErp\Models\User::class),
-                            'method' => 'POST',
-                            'params' => [
-                                'with' => 'media',
-                            ]
-                        ]"
-                    />
+                    <div x-bind:class="!edit && 'pointer-events-none'">
+                        <x-select
+                            :label="__('Responsible User')"
+                            option-value="id"
+                            option-label="label"
+                            autocomplete="off"
+                            wire:model="task.responsible_user_id"
+                            x-bind:readonly="!edit"
+                            :template="[
+                                'name'   => 'user-option',
+                            ]"
+                            :async-data="[
+                                'api' => route('search', \FluxErp\Models\User::class),
+                                'method' => 'POST',
+                                'params' => [
+                                    'with' => 'media',
+                                ],
+                            ]"
+                        />
+                    </div>
                 @show
             @show
-            <div class="flex justify-between gap-x-4">
+            <div class="flex justify-between gap-x-4" x-bind:class="!edit && 'pointer-events-none'">
                 @section('task-content.dates')
                     <x-datetime-picker
                         x-bind:readonly="!edit"
@@ -59,6 +64,7 @@
             </div>
             @section('task-content.multi-selects')
                 <x-state
+                    x-bind:class="!edit && 'pointer-events-none'"
                     class="w-full"
                     align="left"
                     :label="__('Task state')"
@@ -69,10 +75,11 @@
             @show
             <x-inputs.number x-bind:readonly="!edit" :label="__('Priority')" wire:model="task.priority" min="0" />
             <x-textarea x-bind:readonly="!edit" wire:model="task.description" label="{{ __('Description') }}" />
-            <div>
+            <div x-bind:class="!edit && 'pointer-events-none'">
                 <x-select
                     :label="__('Categories')"
                     wire:model="task.categories"
+                    x-bind:readonly="!edit"
                     multiselect
                     option-value="id"
                     option-label="label"
@@ -91,25 +98,28 @@
                     ]"
                 />
             </div>
-            <x-select
-                :label="__('Assigned')"
-                option-value="id"
-                option-label="label"
-                autocomplete="off"
-                multiselect
-                wire:model="task.users"
-                :template="[
-                    'name'   => 'user-option',
-                ]"
-                :async-data="[
-                    'api' => route('search', \FluxErp\Models\User::class),
-                    'method' => 'POST',
-                    'params' => [
-                        'with' => 'media',
-                    ]
-                ]"
-            />
-            <div class="col-span-2">
+            <div x-bind:class="!edit && 'pointer-events-none'">
+                <x-select
+                    :label="__('Assigned')"
+                    option-value="id"
+                    option-label="label"
+                    autocomplete="off"
+                    multiselect
+                    wire:model="task.users"
+                    x-bind:readonly="!edit"
+                    :template="[
+                        'name'   => 'user-option',
+                    ]"
+                    :async-data="[
+                        'api' => route('search', \FluxErp\Models\User::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'with' => 'media',
+                        ],
+                    ]"
+                />
+            </div>
+            <div class="col-span-2" x-bind:class="!edit && 'pointer-events-none'">
                 <x-select
                     :label="__('Tags')"
                     multiselect
@@ -133,9 +143,11 @@
                     ]"
                 >
                     <x-slot:beforeOptions>
-                        <div class="px-1">
-                            <x-button positive full :label="__('Add')" wire:click="addTag($promptValue())" wire:flux-confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}" />
-                        </div>
+                        @canAction(\FluxErp\Actions\Tag\CreateTag::class)
+                            <div class="px-1">
+                                <x-button positive full :label="__('Add')" wire:click="addTag($promptValue())" wire:flux-confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}" />
+                            </div>
+                        @endCanAction
                     </x-slot:beforeOptions>
                 </x-select>
             </div>

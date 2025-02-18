@@ -10,7 +10,9 @@ use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasParentChildRelations;
 use FluxErp\Traits\HasSerialNumberRange;
+use FluxErp\Traits\HasTags;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
@@ -28,23 +30,18 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Str;
 use Spatie\EloquentSortable\Sortable;
-use Spatie\Tags\HasTags;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortable
 {
     use Commentable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes, HasPackageFactory,
-        HasSerialNumberRange, HasTags, HasUserModification, HasUuid, LogsActivity, SoftDeletes,
+        HasParentChildRelations, HasSerialNumberRange, HasTags, HasUserModification, HasUuid, LogsActivity, SoftDeletes,
         SortableTrait {
             SortableTrait::setHighestOrderNumber as protected parentSetHighestOrderNumber;
         }
 
     protected $appends = [
         'unit_price',
-    ];
-
-    protected $guarded = [
-        'id',
     ];
 
     public array $sortable = [
@@ -147,11 +144,6 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
         );
     }
 
-    public function children(): HasMany
-    {
-        return $this->hasMany(OrderPosition::class, 'parent_id');
-    }
-
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
@@ -160,6 +152,16 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
     public function commission(): HasOne
     {
         return $this->hasOne(Commission::class);
+    }
+
+    public function createdFrom(): BelongsTo
+    {
+        return $this->belongsTo(OrderPosition::class, 'created_from_id');
+    }
+
+    public function createdOrderPositions(): HasMany
+    {
+        return $this->hasMany(OrderPosition::class, 'created_from_id');
     }
 
     public function creditNoteCommission(): HasOne
@@ -202,11 +204,6 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
     public function origin(): BelongsTo
     {
         return $this->belongsTo(OrderPosition::class, 'origin_position_id');
-    }
-
-    public function parent(): BelongsTo
-    {
-        return $this->belongsTo(OrderPosition::class, 'parent_id');
     }
 
     public function price(): BelongsTo

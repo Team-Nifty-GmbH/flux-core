@@ -22,17 +22,12 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Context;
-use Illuminate\Support\Facades\Log;
 use Spatie\ModelStates\HasStates;
 use Throwable;
 
 class QueueMonitor extends FluxModel
 {
     use HasFrontendAttributes, HasStates, MassPrunable;
-
-    protected $guarded = [
-        'id',
-    ];
 
     protected function casts(): array
     {
@@ -67,7 +62,7 @@ class QueueMonitor extends FluxModel
                     try {
                         $user->notify(new JobStartedNotification($monitor));
                     } catch (Throwable $e) {
-                        Log::error($e);
+                        report($e);
                     }
                 }
             }
@@ -83,7 +78,7 @@ class QueueMonitor extends FluxModel
                                 : new JobProcessingNotification($monitor)
                         );
                     } catch (Throwable $e) {
-                        Log::error($e);
+                        report($e);
                     }
                 });
             }

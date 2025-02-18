@@ -61,6 +61,8 @@ class AddressForm extends FluxForm
 
     public ?string $phone = null;
 
+    public ?string $phone_mobile = null;
+
     public ?string $date_of_birth = null;
 
     public ?string $department = null;

@@ -13,6 +13,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class TicketCreate extends Component
@@ -33,7 +34,8 @@ class TicketCreate extends Component
 
     public string $modelType = Ticket::class;
 
-    private ?int $oldTicketTypeId = null;
+    #[Locked]
+    public ?int $oldTicketTypeId = null;
 
     protected $listeners = [
         'show',
@@ -150,15 +152,22 @@ class TicketCreate extends Component
         ));
 
         $oldAdditionalColumns = array_column(
-            $ticketTypeAdditionalColumns[$this->oldTicketTypeId] ?? [],
+            data_get($ticketTypeAdditionalColumns, $this->oldTicketTypeId, []),
             'name'
         );
 
-        $this->ticket = array_merge($this->ticket, array_fill_keys($oldAdditionalColumns, null));
         $this->oldTicketTypeId = $this->ticketTypeId;
 
         $this->selectedAdditionalColumns = $this->ticketTypeId ?
             $ticketTypeAdditionalColumns[$this->ticketTypeId] ?? [] : [];
+
+        $this->ticket = Arr::except(
+            array_merge(
+                array_fill_keys(array_column($this->selectedAdditionalColumns, 'name'), null),
+                $this->ticket,
+            ),
+            $oldAdditionalColumns
+        );
 
         $this->skipRender();
     }

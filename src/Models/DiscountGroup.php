@@ -11,10 +11,6 @@ class DiscountGroup extends FluxModel
 {
     use HasUserModification, HasUuid, LogsActivity;
 
-    protected $guarded = [
-        'id',
-    ];
-
     protected function casts(): array
     {
         return [

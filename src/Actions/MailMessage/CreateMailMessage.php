@@ -6,6 +6,7 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Media\UploadMedia;
 use FluxErp\Models\Communication;
 use FluxErp\Models\MailAccount;
+use FluxErp\Models\Tag;
 use FluxErp\Rulesets\Communication\CreateCommunicationRuleset;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
@@ -38,7 +39,12 @@ class CreateMailMessage extends FluxAction
         $mailMessage->save();
 
         if ($tags) {
-            $mailMessage->syncTags($tags);
+            $mailMessage->attachTags(
+                resolve_static(Tag::class, 'query')
+                    ->whereIntegerInRaw('id', $tags)
+                    ->get(),
+                morph_alias(Communication::class)
+            );
         }
 
         // the maximum file size for mail messages should be managed on the mail server

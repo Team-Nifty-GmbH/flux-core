@@ -123,7 +123,7 @@ class AddressList extends BaseDataTable
             return false;
         }
 
-        $this->notification()->success(__('Contact saved'));
+        $this->notification()->success(__(':model saved', ['model' => __('Contact')]));
 
         return redirect(route('contacts.id?', ['id' => $this->contact->id]));
     }

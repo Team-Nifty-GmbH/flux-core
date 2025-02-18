@@ -1,11 +1,12 @@
 <x-mail::layout>
     {{-- Header --}}
+    @php($logo = $client->getFirstMedia('logo_small') ?? $client->getFirstMedia('logo'))
     <x-slot:header>
         <x-mail::header :url="$client->website">
             <img
-                style="max-height: 100px; max-width: 100px; width: auto; height: auto;"
-                alt="logo"
-                src="{{ $client->getFirstMediaUrl('logo_small') }}"
+                style="max-height: 100px; max-width: 100px; width: auto; height: auto; @if($logo?->mime_type === 'image/svg+xml') min-height: 60px @endif"
+                alt="{{ $client->name }}"
+                src="{{ $logo?->getUrl() ?? '#' }}"
             />
         </x-mail::header>
     </x-slot:header>

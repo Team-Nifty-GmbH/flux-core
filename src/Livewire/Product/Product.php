@@ -245,7 +245,7 @@ class Product extends Component
             return false;
         }
 
-        $this->notification()->success(__('Product saved successfully.'));
+        $this->notification()->success(__(':model saved', ['model' => __('Product')]));
 
         return true;
     }

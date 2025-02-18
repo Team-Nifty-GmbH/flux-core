@@ -12,10 +12,6 @@ class Schedule extends FluxModel
 {
     use HasUserModification, HasUuid, SoftDeletes;
 
-    protected $guarded = [
-        'id',
-    ];
-
     protected function casts(): array
     {
         return [

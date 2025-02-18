@@ -3,6 +3,7 @@
 namespace FluxErp\Actions\Contact;
 
 use FluxErp\Actions\Address\CreateAddress;
+use FluxErp\Actions\Discount\CreateDiscount;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
@@ -28,14 +29,31 @@ class CreateContact extends FluxAction
     public function performAction(): Contact
     {
         $discountGroups = Arr::pull($this->data, 'discount_groups');
+        $discounts = Arr::pull($this->data, 'discounts');
         $mainAddress = Arr::pull($this->data, 'main_address');
-
-        $this->data['price_list_id'] ??= PriceList::default()?->id;
-        $this->data['payment_type_id'] ??= PaymentType::default()?->id;
-        $this->data['currency_id'] ??= Currency::default()?->id;
 
         $contact = app(Contact::class, ['attributes' => $this->data]);
         $contact->save();
+
+        if ($discounts) {
+            $attachDiscounts = [];
+
+            foreach ($discounts as $discount) {
+                if ($discountId = data_get($discount, 'id')) {
+                    $attachDiscounts[] = $discountId;
+
+                    continue;
+                }
+
+                $attachDiscounts[] = CreateDiscount::make($discount)
+                    ->checkPermission()
+                    ->validate()
+                    ->execute()
+                    ->getKey();
+            }
+
+            $contact->discounts()->attach($attachDiscounts);
+        }
 
         if (is_array($discountGroups)) {
             $contact->discountGroups()->attach($discountGroups);
@@ -65,7 +83,10 @@ class CreateContact extends FluxAction
 
     protected function prepareForValidation(): void
     {
-        $this->data['client_id'] ??= Client::default()?->id;
+        $this->data['client_id'] ??= Client::default()?->getKey();
+        $this->data['price_list_id'] ??= PriceList::default()?->getKey();
+        $this->data['payment_type_id'] ??= PaymentType::default()?->getKey();
+        $this->data['currency_id'] ??= Currency::default()?->getKey();
     }
 
     protected function validateData(): void

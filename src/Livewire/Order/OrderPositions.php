@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Order;
 
+use FluxErp\Actions\OrderPosition\CreateOrderPosition;
 use FluxErp\Actions\OrderPosition\DeleteOrderPosition;
 use FluxErp\Actions\OrderPosition\UpdateOrderPosition;
 use FluxErp\Actions\Task\CreateTask;
@@ -50,6 +51,8 @@ class OrderPositions extends OrderPositionList
     public ?string $cacheKey = 'order.order-positions';
 
     public ?string $discount = null;
+
+    public bool $hasNoRedirect = true;
 
     protected string $view = 'flux::livewire.order.order-positions';
 
@@ -162,6 +165,12 @@ class OrderPositions extends OrderPositionList
                 ->xOnClick(<<<'JS'
                     $openModal('edit-position-discount');
                 JS),
+            DataTableButton::make()
+                ->label(__('Replicate'))
+                ->when(fn () => resolve_static(CreateOrderPosition::class, 'canPerformAction', [false])
+                    && ! $this->order->is_locked
+                )
+                ->wireClick('replicateSelected()'),
             DataTableButton::make()
                 ->label(__('Delete'))
                 ->icon('trash')
@@ -286,8 +295,9 @@ class OrderPositions extends OrderPositionList
             // check if the task already exists or the selected order position is not a numeric value
             if (resolve_static(Task::class, 'query')
                 ->where('project_id', $projectId)
-                ->where('model_type', morph_alias(OrderPosition::class))
-                ->where('model_id', $orderPosition->getKey())
+                ->where('order_position_id', $modelId = $orderPosition->getKey())
+                ->where('model_type', $modelType = $orderPosition->getMorphClass())
+                ->where('model_id', $modelId)
                 ->exists()
             ) {
                 continue;
@@ -296,8 +306,9 @@ class OrderPositions extends OrderPositionList
             try {
                 CreateTask::make([
                     'project_id' => $projectId,
-                    'model_type' => morph_alias(OrderPosition::class),
-                    'model_id' => $orderPosition->getKey(),
+                    'order_position_id' => $modelId,
+                    'model_type' => $modelType,
+                    'model_id' => $modelId,
                     'name' => $orderPosition->name,
                     'description' => $orderPosition->description,
                 ])
@@ -321,6 +332,30 @@ class OrderPositions extends OrderPositionList
         $this->js(<<<'JS'
             $openModal('edit-order-position');
         JS);
+    }
+
+    #[Renderless]
+    public function replicateSelected(): void
+    {
+        $this->orderPosition->reset();
+        foreach ($this->getSelectedModelsQuery()
+            ->where('is_bundle_position', false)
+            ->get() as $orderPosition
+        ) {
+            $this->orderPosition->fill($orderPosition);
+            $this->orderPosition->reset(
+                'id',
+                'origin_position_id',
+                'parent_id',
+                'sort_number',
+                'slug_position',
+            );
+            $this->addOrderPosition(false);
+        }
+
+        $this->reset('selected');
+        $this->recalculateOrderTotals();
+        $this->loadData();
     }
 
     #[Renderless]
@@ -349,9 +384,10 @@ class OrderPositions extends OrderPositionList
     }
 
     #[Renderless]
-    public function addOrderPosition(): bool
+    public function addOrderPosition(bool $reload = true): bool
     {
         $this->orderPosition->order_id = $this->order->id;
+        $this->orderPosition->vat_rate_id = $this->order->vat_rate_id ?? $this->orderPosition->vat_rate_id;
 
         try {
             $this->orderPosition->save();
@@ -361,8 +397,11 @@ class OrderPositions extends OrderPositionList
             return false;
         }
 
-        $this->recalculateOrderTotals();
-        $this->loadData();
+        if ($reload) {
+            $this->recalculateOrderTotals();
+            $this->loadData();
+        }
+
         $this->orderPosition->reset();
 
         return true;

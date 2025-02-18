@@ -2,10 +2,12 @@
 
 namespace FluxErp\Models;
 
+use DragonCode\Contracts\Support\Arrayable;
 use FluxErp\Enums\TimeUnitEnum;
 use FluxErp\Helpers\PriceHelper;
 use FluxErp\Models\Pivots\ClientProduct;
 use FluxErp\Models\Pivots\ProductProductOption;
+use FluxErp\Support\Collection\ProductOptionCollection;
 use FluxErp\Traits\Categorizable;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
@@ -13,7 +15,9 @@ use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasParentChildRelations;
 use FluxErp\Traits\HasSerialNumberRange;
+use FluxErp\Traits\HasTags;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
@@ -28,22 +32,33 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\MediaLibrary\HasMedia;
-use Spatie\Tags\HasTags;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Product extends FluxModel implements HasMedia, InteractsWithDataTables
 {
     use Categorizable, Commentable, Filterable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes,
-        HasPackageFactory, HasSerialNumberRange, HasTags, HasUserModification, HasUuid, InteractsWithMedia, Lockable,
-        LogsActivity, Searchable, SoftDeletes;
-
-    protected $guarded = [
-        'id',
-    ];
+        HasPackageFactory, HasParentChildRelations, HasSerialNumberRange, HasTags, HasUserModification, HasUuid,
+        InteractsWithMedia, Lockable, LogsActivity, Searchable, SoftDeletes;
 
     protected ?string $detailRouteName = 'products.id';
 
     public static string $iconName = 'square-3-stack-3d';
+
+    public static function calculateVariantName(
+        ProductOptionCollection|Arrayable|array $productOptions,
+        string $parentName
+    ): string {
+        return $parentName . ' - '
+            . implode(
+                ' ',
+                $productOptions instanceof ProductOptionCollection
+                    ? $productOptions->pluck('name')->toArray()
+                    : resolve_static(ProductOption::class, 'query')
+                        ->whereIntegerInRaw('id', $productOptions)
+                        ->pluck('name')
+                        ->toArray()
+            );
+    }
 
     protected static function booted(): void
     {
@@ -95,11 +110,6 @@ class Product extends FluxModel implements HasMedia, InteractsWithDataTables
         return $this->hasMany(CartItem::class);
     }
 
-    public function children(): HasMany
-    {
-        return $this->hasMany(Product::class, 'parent_id');
-    }
-
     public function clients(): BelongsToMany
     {
         return $this->belongsToMany(Client::class, 'client_product')->using(ClientProduct::class);
@@ -118,11 +128,6 @@ class Product extends FluxModel implements HasMedia, InteractsWithDataTables
     public function productCrossSellings(): HasMany
     {
         return $this->hasMany(ProductCrossSelling::class);
-    }
-
-    public function parent(): BelongsTo
-    {
-        return $this->belongsTo(Product::class, 'parent_id');
     }
 
     public function prices(): HasMany

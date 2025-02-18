@@ -1,7 +1,7 @@
 <x-mail::message>
 {{ __('Thank you for your order!')}}
 
-{{ __('We received your order dated :order_date.', ['order_date' => $order->order_date->formatLocalized('%x')]) }}
+{{ __('We received your order dated :order_date.', ['order_date' => $order->order_date->isoFormat('L')]) }}
 
 <x-mail::table>
 |  | {{ __('Product number') }} | {{ __('Name') }}       | {{ __('Amount') }}         | {{ __('Total') }}  |

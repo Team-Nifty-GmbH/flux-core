@@ -133,7 +133,7 @@ class Profile extends Component
 
         try {
             $this->user->save();
-            $this->notification()->success(__('Profile saved successful.'));
+            $this->notification()->success(__(':model saved', ['model' => __('My Profile')]));
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
         }

@@ -29,11 +29,11 @@ class PaymentReminderTest extends BaseSetup
     public function test_mark_selected_as_paid()
     {
         $contact = Contact::factory()
-            ->state(['client_id' => $this->dbClient->id])
+            ->state(['client_id' => $this->dbClient->getKey()])
             ->create();
         $address = Address::factory()
             ->state([
-                'client_id' => $this->dbClient->id,
+                'client_id' => $this->dbClient->getKey(),
                 'contact_id' => $contact->id,
             ])
             ->for($contact, 'contact')
@@ -54,7 +54,7 @@ class PaymentReminderTest extends BaseSetup
                 'orderType'
             )
             ->state([
-                'client_id' => $this->dbClient->id,
+                'client_id' => $this->dbClient->getKey(),
                 'contact_id' => $contact->id,
                 'address_invoice_id' => $address->id,
                 'payment_state' => Open::$name,

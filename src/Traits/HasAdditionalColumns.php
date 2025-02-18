@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Spatie\Translatable\Events\TranslationHasBeenSetEvent;
 use Spatie\Translatable\Translatable;
 
@@ -261,13 +262,20 @@ trait HasAdditionalColumns
         $rules = [];
 
         foreach ($this->getAdditionalColumns(false) as $column) {
-            if ($column->values) {
-                $rules[$column->name] = 'in:' . implode(',', $column->values);
-            }
+            $rules[$column->name] ??= $column->validations ?: ['nullable'];
 
-            $rules[$column->name] = ($rules[$column->name] ?? false)
-                ? $rules[$column->name]
-                : ($column->validations ?: 'string|nullable');
+            if ($column->values) {
+                $rules[$column->name] = array_merge(
+                    Arr::wrap(
+                        is_string($rules[$column->name])
+                            ? explode('|', $rules[$column->name])
+                            : $rules[$column->name]
+                    ),
+                    [
+                        Rule::in(Arr::wrap($column->values)),
+                    ]
+                );
+            }
         }
 
         return $rules;

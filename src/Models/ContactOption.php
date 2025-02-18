@@ -13,10 +13,6 @@ class ContactOption extends FluxModel
 {
     use HasPackageFactory, HasUserModification, LogsActivity;
 
-    protected $guarded = [
-        'id',
-    ];
-
     protected function casts(): array
     {
         return [

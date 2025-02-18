@@ -23,10 +23,10 @@ class AddressesTest extends BaseSetup
         parent::setUp();
 
         $contact = Contact::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
         ]);
         $address = Address::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'contact_id' => $contact->id,
             'is_main_address' => true,
             'is_invoice_address' => true,
@@ -104,5 +104,21 @@ class AddressesTest extends BaseSetup
                 'password' => $password,
             ]
         );
+    }
+
+    public function test_replicate_address()
+    {
+        $component = Livewire::actingAs($this->user)
+            ->test(Addresses::class, ['contact' => $this->contactForm, 'address' => $this->addressForm])
+            ->call('replicate')
+            ->assertStatus(200)
+            ->assertHasNoErrors()
+            ->set('address.lastname', $lastname = Str::uuid())
+            ->call('save')
+            ->assertStatus(200)
+            ->assertHasNoErrors();
+
+        $this->assertGreaterThan($this->addressForm->id, $component->get('address.id'));
+        $this->assertDatabaseHas('addresses', ['lastname' => $lastname]);
     }
 }

@@ -12,9 +12,12 @@ use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasNotificationSubscriptions;
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasParentChildRelations;
 use FluxErp\Traits\HasSerialNumberRange;
+use FluxErp\Traits\HasTags;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
+use FluxErp\Traits\InteractsWithMedia;
 use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SoftDeletes;
@@ -23,22 +26,23 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
+use Spatie\MediaLibrary\HasMedia;
 use Spatie\ModelStates\HasStates;
-use Spatie\Tags\HasTags;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 
-class Project extends FluxModel implements Calendarable, InteractsWithDataTables
+class Project extends FluxModel implements Calendarable, HasMedia, InteractsWithDataTables
 {
     use Commentable, Filterable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes,
-        HasNotificationSubscriptions, HasPackageFactory, HasSerialNumberRange, HasStates, HasTags, HasUserModification,
-        HasUuid, LogsActivity, Searchable, SoftDeletes;
+        HasNotificationSubscriptions, HasPackageFactory,
+        HasParentChildRelations, HasSerialNumberRange, HasStates, HasTags, HasUserModification,
+        HasUuid, InteractsWithMedia, LogsActivity, Searchable, SoftDeletes;
 
-    protected $guarded = [
-        'id',
-    ];
+
 
     protected ?string $detailRouteName = 'projects.id';
+
+    protected static string $iconName = 'briefcase';
 
     protected static function booted(): void
     {
@@ -59,11 +63,6 @@ class Project extends FluxModel implements Calendarable, InteractsWithDataTables
         ];
     }
 
-    public function children(): HasMany
-    {
-        return $this->hasMany(Project::class, 'parent_id');
-    }
-
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class, 'client_id');
@@ -77,11 +76,6 @@ class Project extends FluxModel implements Calendarable, InteractsWithDataTables
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class, 'order_id');
-    }
-
-    public function parent(): BelongsTo
-    {
-        return $this->belongsTo(Project::class, 'parent_id');
     }
 
     public function responsibleUser(): BelongsTo
@@ -111,7 +105,9 @@ class Project extends FluxModel implements Calendarable, InteractsWithDataTables
 
     public function getAvatarUrl(): ?string
     {
-        return null;
+        return $this->getFirstMediaUrl('avatar', 'thumb')
+            ?: $this->contact?->getFirstMediaUrl('avatar', 'thumb')
+            ?: static::icon()->getUrl();
     }
 
     public function calculateProgress(): void

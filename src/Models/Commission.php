@@ -14,10 +14,6 @@ class Commission extends FluxModel implements InteractsWithDataTables
 {
     use HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
 
-    protected $guarded = [
-        'id',
-    ];
-
     protected function casts(): array
     {
         return [

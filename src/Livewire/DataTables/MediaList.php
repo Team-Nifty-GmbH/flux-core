@@ -7,6 +7,7 @@ use FluxErp\Livewire\Forms\MediaForm;
 use FluxErp\Models\Media;
 use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -43,7 +44,13 @@ class MediaList extends BaseDataTable
         $item->makeVisible('collection_name');
 
         $itemArray = parent::itemToArray($item);
-        $itemArray['url'] = $item->getUrl('thumb');
+        $itemArray['url'] = $item->hasGeneratedConversion('thumb')
+            ? $item->getUrl('thumb')
+            : (
+                Str::startsWith($item->mime_type, 'image/')
+                    ? $item->getUrl('thumb')
+                    : route('icons', ['name' => 'document'])
+            );
 
         return $itemArray;
     }

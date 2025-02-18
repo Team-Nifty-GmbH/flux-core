@@ -14,6 +14,7 @@
                 ]"
                 :async-data="[
                     'api' => route('search', \FluxErp\Models\User::class),
+                    'method' => 'POST',
                 ]"
             />
             <x-checkbox wire:model.live="order.is_confirmed" :label="__('Confirmed')" :disabled="auth()->user()?->id !== $order->approval_user_id" />

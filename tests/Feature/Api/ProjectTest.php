@@ -39,11 +39,11 @@ class ProjectTest extends BaseSetup
         parent::setUp();
 
         $this->contact = Contact::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
         ]);
 
         $addresses = Address::factory()->count(2)->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'contact_id' => $this->contact->id,
         ]);
 
@@ -56,7 +56,7 @@ class ProjectTest extends BaseSetup
         $language = Language::factory()->create();
 
         $orderType = OrderType::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'order_type_enum' => OrderTypeEnum::Order,
         ]);
 
@@ -65,7 +65,7 @@ class ProjectTest extends BaseSetup
             ->create();
 
         $this->order = Order::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'language_id' => $language->id,
             'order_type_id' => $orderType->id,
             'payment_type_id' => $paymentType->id,
@@ -77,7 +77,7 @@ class ProjectTest extends BaseSetup
         ]);
 
         $this->projects = Project::factory()->count(2)->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'contact_id' => $this->contact->id,
             'order_id' => $this->order->id,
             'responsible_user_id' => $this->user->id,
@@ -173,7 +173,7 @@ class ProjectTest extends BaseSetup
     public function test_create_project()
     {
         $project = [
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'contact_id' => $this->contact->id,
             'order_id' => $this->order->id,
             'responsible_user_id' => $this->user->id,
@@ -240,7 +240,7 @@ class ProjectTest extends BaseSetup
     public function test_create_project_contact_not_found()
     {
         $project = [
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'contact_id' => ++$this->contact->id,
             'name' => 'Project Name',
         ];
@@ -255,7 +255,7 @@ class ProjectTest extends BaseSetup
     public function test_create_project_order_not_found()
     {
         $project = [
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'parent_id' => $this->order->id + 1000,
             'name' => 'Project Name',
         ];
@@ -270,7 +270,7 @@ class ProjectTest extends BaseSetup
     public function test_create_project_responsible_user_not_found()
     {
         $project = [
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'responsible_user_id' => ++$this->user->id,
             'name' => 'Project Name',
         ];
@@ -286,7 +286,7 @@ class ProjectTest extends BaseSetup
     public function test_create_project_parent_project_not_found()
     {
         $project = [
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'parent_id' => ++$this->projects[1]->id,
             'name' => 'Project Name',
         ];

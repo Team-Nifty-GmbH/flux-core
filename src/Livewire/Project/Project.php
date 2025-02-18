@@ -7,17 +7,19 @@ use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Forms\ProjectForm;
 use FluxErp\Models\Project as ProjectModel;
 use FluxErp\Traits\Livewire\Actions;
+use FluxErp\Traits\Livewire\WithFileUploads;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 
 class Project extends Component
 {
-    use Actions, WithTabs;
+    use Actions, WithFileUploads, WithTabs;
 
     public ProjectForm $project;
 
@@ -31,9 +33,15 @@ class Project extends Component
         'tab' => ['except' => 'general'],
     ];
 
+    public $avatar;
+
     public function mount(string $id): void
     {
-        $project = app(ProjectModel::class)->whereKey($id)
+        $project = resolve_static(ProjectModel::class, 'query')
+            ->whereKey($id)
+            ->with([
+                'contact.media' => fn (MorphMany $query) => $query->where('collection_name', 'avatar'),
+            ])
             ->withCount('tasks')
             ->firstOrFail();
         $this->project->fill($project);
@@ -44,6 +52,7 @@ class Project extends Component
                 null
             )
         );
+        $this->avatar = $project->getAvatarUrl();
 
         $this->availableStates = app(ProjectModel::class)
             ->getStatesFor('state')
@@ -80,7 +89,7 @@ class Project extends Component
             return false;
         }
 
-        $this->notification()->success(__('Project saved'));
+        $this->notification()->success(__(':model saved', ['model' => __('Project')]));
         $this->skipRender();
 
         return true;
@@ -127,5 +136,26 @@ class Project extends Component
                 ->first()
                 ->getAvatarUrl()
             : null;
+    }
+
+    public function updatedAvatar(): void
+    {
+        $this->collection = 'avatar';
+        try {
+            $this->saveFileUploadsToMediaLibrary(
+                'avatar',
+                $this->project->id,
+                morph_alias(ProjectModel::class)
+            );
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->avatar = resolve_static(ProjectModel::class, 'query')
+            ->whereKey($this->project->id)
+            ->first()
+            ->getAvatarUrl();
     }
 }

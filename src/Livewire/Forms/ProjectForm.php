@@ -62,6 +62,6 @@ class ProjectForm extends Form
     {
         parent::reset(...$properties);
 
-        $this->client_id = Client::default()?->id;
+        $this->client_id = Client::default()?->getKey();
     }
 }

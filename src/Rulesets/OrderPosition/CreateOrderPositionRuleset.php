@@ -52,6 +52,11 @@ class CreateOrderPositionRuleset extends FluxRuleset
                 'nullable',
                 app(ModelExists::class, ['model' => OrderPosition::class]),
             ],
+            'created_from_id' => [
+                'integer',
+                'nullable',
+                app(ModelExists::class, ['model' => OrderPosition::class]),
+            ],
             'price_id' => [
                 'exclude_if:is_free_text,true',
                 'exclude_if:is_bundle_position,true',

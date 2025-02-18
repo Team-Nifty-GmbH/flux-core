@@ -16,10 +16,6 @@ class ProductOptionGroup extends FluxModel
     use CacheModelQueries, Filterable, HasPackageFactory, HasUserModification, HasUuid, LogsActivity,
         SoftDeletes;
 
-    protected $guarded = [
-        'id',
-    ];
-
     public function productOptions(): HasMany
     {
         return $this->hasMany(ProductOption::class, 'product_option_group_id');

@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
-use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -111,9 +110,9 @@ class SignaturePublicLink extends Component
         return true;
     }
 
-    #[Layout('flux::layouts.printing')]
     public function render(): string
     {
+        config(['livewire.layout' => 'flux::layouts.printing']);
         // This ensures livewire recognizes the content and wraps the view around it
         // override the x-layouts.print with an empty div
         PrintableView::setLayout(null);
@@ -122,6 +121,9 @@ class SignaturePublicLink extends Component
             '<div>{!! $view !!} @include(\'flux::livewire.features.signature-public-link\')</div>',
             [
                 'view' => $this->getModel()->print()->renderView($this->getPrintClass()),
+                'modelInstance' => morphed_model($this->model)::query()
+                    ->where('uuid', $this->uuid)
+                    ->firstOrFail(),
             ]
         );
     }

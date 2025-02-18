@@ -77,7 +77,8 @@ class CreateContactRuleset extends FluxRuleset
             'vat_rate_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => VatRate::class]),
+                app(ModelExists::class, ['model' => VatRate::class])
+                    ->where('is_tax_exemption', true),
             ],
             'customer_number' => 'string|nullable|unique:contacts,customer_number',
             'creditor_number' => 'string|nullable|unique:contacts,creditor_number',
@@ -91,6 +92,8 @@ class CreateContactRuleset extends FluxRuleset
             'credit_line' => 'sometimes|numeric|min:0|nullable',
             'vat_id' => 'sometimes|string|nullable',
             'vendor_customer_number' => 'sometimes|string|nullable',
+            'header' => 'string|nullable',
+            'footer' => 'string|nullable',
             'has_sensitive_reminder' => 'sometimes|boolean',
             'has_delivery_lock' => 'sometimes|boolean',
         ];
@@ -101,6 +104,7 @@ class CreateContactRuleset extends FluxRuleset
         return array_merge(
             parent::getRules(),
             resolve_static(MainAddressRuleset::class, 'getRules'),
+            resolve_static(DiscountRuleset::class, 'getRules'),
             resolve_static(DiscountGroupRuleset::class, 'getRules'),
             resolve_static(CategoryRuleset::class, 'getRules')
         );

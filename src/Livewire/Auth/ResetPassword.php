@@ -58,7 +58,7 @@ class ResetPassword extends Component
             session()->flash('flash.error', __('Password reset failed'));
         }
 
-        $this->redirect('/login', true);
+        $this->redirectRoute($this->passwordBroker === 'users' ? 'login' : 'portal.login', navigate: true);
     }
 
     protected function updateUser(CanResetPassword $user, string $password): bool

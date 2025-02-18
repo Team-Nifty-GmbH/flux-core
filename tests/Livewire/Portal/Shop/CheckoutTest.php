@@ -4,6 +4,7 @@ namespace FluxErp\Tests\Livewire\Portal\Shop;
 
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\Portal\Shop\Checkout;
+use FluxErp\Mail\Order\OrderConfirmation;
 use FluxErp\Models\Address;
 use FluxErp\Models\Currency;
 use FluxErp\Models\OrderType;
@@ -11,6 +12,7 @@ use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Tests\Livewire\BaseSetup;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 
@@ -32,7 +34,7 @@ class CheckoutTest extends BaseSetup
         ]);
 
         $this->orderType = OrderType::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'order_type_enum' => OrderTypeEnum::Order,
             'is_active' => true,
         ]);
@@ -101,6 +103,8 @@ class CheckoutTest extends BaseSetup
 
     public function test_can_create_order()
     {
+        $mail = Mail::fake();
+
         Livewire::actingAs($this->address)
             ->test(Checkout::class)
             ->set('termsAndConditions', true)
@@ -110,7 +114,7 @@ class CheckoutTest extends BaseSetup
             ->assertRedirect(route('portal.checkout-finish'));
 
         $this->assertDatabaseHas('orders', [
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'contact_id' => $this->address->contact_id,
             'address_invoice_id' => $this->address->id,
             'address_delivery_id' => $this->address->id,
@@ -118,5 +122,18 @@ class CheckoutTest extends BaseSetup
             'payment_type_id' => $this->paymentType->id,
             'commission' => $commission,
         ]);
+
+        Mail::assertQueued(OrderConfirmation::class, function (OrderConfirmation $mail) {
+            return $mail->hasTo($this->address->email);
+        });
+        Mail::assertQueuedCount(1);
+
+        $mailable = Mail::queued(OrderConfirmation::class)->first();
+        $mail->sendNow($mailable);
+
+        // Assert the mail was sent
+        Mail::assertSent(OrderConfirmation::class, function (OrderConfirmation $mail) {
+            return $mail->hasTo($this->address->email);
+        });
     }
 }

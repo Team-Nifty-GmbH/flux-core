@@ -13,11 +13,16 @@
                 ]"
                 :async-data="[
                     'api' => route('search', \FluxErp\Models\Product::class),
+                    'method' => 'POST',
                     'params' => [
                         'whereDoesntHave' => 'children',
-                        'fields' => ['id', 'name', 'product_number'],
+                        'fields' => [
+                            'id',
+                            'name',
+                            'product_number',
+                        ],
                         'with' => 'media',
-                    ]
+                    ],
                 ]"
             />
             <x-input wire:model="stockPosting.serial_number.serial_number" :label="__('Serial Number')" />
@@ -36,7 +41,7 @@
                     'method' => 'POST',
                     'params' => [
                         'with' => 'contact.media',
-                    ]
+                    ],
                 ]"
             />
             <x-inputs.number wire:model="stockPosting.address.quantity" :label="__('Quantity')" />

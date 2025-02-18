@@ -18,10 +18,6 @@ class TicketType extends FluxModel
     use CacheModelQueries, HasAdditionalColumns, HasCustomEvents, HasPackageFactory, HasUserModification, HasUuid,
         LogsActivity, SoftDeletes;
 
-    protected $guarded = [
-        'id',
-    ];
-
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class, 'role_ticket_type');

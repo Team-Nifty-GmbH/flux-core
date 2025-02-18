@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Livewire\Order;
+namespace FluxErp\Tests\Livewire\Order;
 
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\Order\OrderListByOrderType;
@@ -13,7 +13,7 @@ class OrderListByOrderTypeTest extends BaseSetup
     public function test_renders_successfully()
     {
         $orderType = OrderType::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'order_type_enum' => OrderTypeEnum::Order,
         ]);
 

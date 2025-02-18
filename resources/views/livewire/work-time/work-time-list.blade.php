@@ -38,7 +38,7 @@
                                 'is_active' => true,
                             ],
                             'with' => 'media',
-                        ]
+                        ],
                     ]"
                 />
             </div>
@@ -74,14 +74,14 @@
                                     'is_main_address',
                                     '=',
                                     true,
-                                ]
+                                ],
                             ],
                             'fields' => [
                                 'contact_id',
                                 'name',
                             ],
                             'with' => 'contact.media',
-                        ]
+                        ],
                     ]"
                 />
                 <x-select

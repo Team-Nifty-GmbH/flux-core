@@ -15,6 +15,7 @@ use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasNotificationSubscriptions;
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasTags;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
@@ -31,7 +32,6 @@ use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media as MediaLibraryMedia;
 use Spatie\ModelStates\HasStates;
-use Spatie\Tags\HasTags;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDataTables
@@ -39,10 +39,6 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
     use Categorizable, Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes,
         HasNotificationSubscriptions, HasPackageFactory, HasStates, HasTags, HasUserModification, HasUuid,
         InteractsWithMedia, LogsActivity, Searchable, SoftDeletes, Trackable;
-
-    protected $guarded = [
-        'id',
-    ];
 
     protected ?string $detailRouteName = 'tasks.id';
 

@@ -109,3 +109,34 @@ if (! function_exists('cart')) {
                 ->execute();
     }
 }
+
+if (! function_exists('find_common_base_uri')) {
+    function find_common_base_uri(
+        array $navigation,
+        string $childAttribute = 'children',
+        string $uriAttribute = 'uri'
+    ): ?string {
+        $uris = array_column(data_get($navigation, $childAttribute, []), $uriAttribute);
+
+        if (! $uris) {
+            return null;
+        }
+
+        // Extract only the path part of the URLs
+        $paths = array_map(fn (string $uri) => parse_url($uri, PHP_URL_PATH), $uris);
+
+        // Find the common base path
+        $basePath = array_shift($paths);
+
+        foreach ($paths as $path) {
+            while (! str_starts_with($path, $basePath)) {
+                $basePath = dirname($basePath);
+                if ($basePath === '/' || $basePath === '.') {
+                    return '/';
+                }
+            }
+        }
+
+        return rtrim($basePath, '/') . '/';
+    }
+}

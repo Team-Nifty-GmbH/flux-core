@@ -156,7 +156,7 @@ class CreateCommissionCreditNotes extends DispatchableFluxAction
             }
         }
 
-        $this->vatRateId = $this->getData('vat_rate_id') ?? VatRate::default()?->id;
+        $this->vatRateId = $this->getData('vat_rate_id') ?? VatRate::default()?->getKey();
 
         if (! $this->vatRateId) {
             $errors += [

@@ -40,6 +40,8 @@ class CalendarEventForm extends FluxForm
 
     public bool $is_all_day = false;
 
+    public bool $has_taken_place = false;
+
     public ?array $extended_props = null;
 
     public ?string $confirm_option = null;

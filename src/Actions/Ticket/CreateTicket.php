@@ -89,11 +89,11 @@ class CreateTicket extends FluxAction
 
     protected function prepareForValidation(): void
     {
-        if ($this->data['ticket_type_id'] ?? false) {
+        if ($ticketTypeId = $this->getData('ticket_type_id')) {
             $this->rules = array_merge(
                 $this->rules,
                 resolve_static(TicketType::class, 'query')
-                    ->whereKey($this->data['ticket_type_id'])
+                    ->whereKey($ticketTypeId)
                     ->first()
                     ?->hasAdditionalColumnsValidationRules() ?? []
             );

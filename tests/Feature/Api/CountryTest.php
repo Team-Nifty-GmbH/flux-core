@@ -339,7 +339,7 @@ class CountryTest extends BaseSetup
     public function test_delete_country_country_referenced_by_address()
     {
         $contact = Contact::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
         ]);
         Address::factory()->create([
             'client_id' => $contact->client_id,

@@ -34,13 +34,6 @@ class PriceLists extends PriceListList
         'is_percentage' => true,
     ];
 
-    public function mount(): void
-    {
-        parent::mount();
-
-        $this->headline = __('Price Lists');
-    }
-
     protected function getTableActions(): array
     {
         return [
@@ -112,6 +105,7 @@ class PriceLists extends PriceListList
                 ->toArray();
         } else {
             $this->discountedCategories = [];
+            $this->priceList->rounding_method_enum = RoundingMethodEnum::None->value;
 
             $this->newCategoryDiscount = [
                 'category_id' => null,

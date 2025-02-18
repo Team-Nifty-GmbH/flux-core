@@ -20,7 +20,7 @@ class BaseSetup extends TestCase
 
     protected Contact $contact;
 
-    protected string $defaultLanguageCode;
+    protected Language $defaultLanguage;
 
     protected function setUp(): void
     {
@@ -29,21 +29,19 @@ class BaseSetup extends TestCase
         $this->withoutVite();
 
         $this->dbClient = Client::factory()->create(['is_default' => true]);
-        $language = Language::query()->where('language_code', config('app.locale'))->first();
-        if (! $language) {
-            $language = Language::factory()->create(['language_code' => config('app.locale')]);
-        }
-
-        $this->defaultLanguageCode = $language->language_code;
+        $this->defaultLanguage = Language::query()
+            ->where('language_code', config('app.locale'))
+            ->first()
+            ?? Language::factory()->create(['language_code' => config('app.locale')]);
 
         if (str_starts_with(get_called_class(), 'FluxErp\\Tests\\Livewire\\Portal\\')) {
             $this->contact = Contact::factory()->create([
-                'client_id' => $this->dbClient->id,
+                'client_id' => $this->dbClient->getKey(),
             ]);
             $this->address = Address::factory()->create([
                 'contact_id' => $this->contact->id,
-                'client_id' => $this->dbClient->id,
-                'language_id' => $language->id,
+                'client_id' => $this->dbClient->getKey(),
+                'language_id' => $this->defaultLanguage->id,
                 'can_login' => true,
                 'is_active' => true,
             ]);
@@ -51,7 +49,7 @@ class BaseSetup extends TestCase
             $this->actingAs($this->address, 'address');
         } else {
             $this->user = new User();
-            $this->user->language_id = $language->id;
+            $this->user->language_id = $this->defaultLanguage->id;
             $this->user->email = faker()->email();
             $this->user->firstname = 'firstname';
             $this->user->lastname = 'lastname';

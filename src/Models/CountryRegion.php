@@ -2,7 +2,6 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
@@ -13,12 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CountryRegion extends FluxModel
 {
-    use Commentable, Filterable, HasPackageFactory, HasUserModification, HasUuid, LogsActivity,
-        SoftDeletes;
-
-    protected $guarded = [
-        'id',
-    ];
+    use Filterable, HasPackageFactory, HasUserModification, HasUuid, LogsActivity, SoftDeletes;
 
     public function country(): BelongsTo
     {

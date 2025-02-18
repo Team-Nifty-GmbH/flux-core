@@ -20,7 +20,7 @@ class PriceListForm extends FluxForm
 
     public ?string $price_list_code = null;
 
-    public ?string $rounding_method_enum = null;
+    public ?string $rounding_method_enum = 'none';
 
     public ?int $rounding_precision = null;
 

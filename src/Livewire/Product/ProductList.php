@@ -3,9 +3,13 @@
 namespace FluxErp\Livewire\Product;
 
 use FluxErp\Actions\CartItem\CreateCartItem;
+use FluxErp\Actions\Product\CreateProduct;
+use FluxErp\Actions\Product\ProductPricesUpdate;
+use FluxErp\Enums\RoundingMethodEnum;
 use FluxErp\Facades\ProductType;
 use FluxErp\Livewire\DataTables\ProductList as BaseProductList;
 use FluxErp\Livewire\Forms\ProductForm;
+use FluxErp\Livewire\Forms\ProductPricesUpdateForm;
 use FluxErp\Models\Client;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\VatRate;
@@ -17,11 +21,13 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class ProductList extends BaseProductList
 {
-    protected string $view = 'flux::livewire.product.product-list';
+    protected ?string $includeBefore = 'flux::livewire.product.product-list';
 
     public ?string $cacheKey = 'product.product-list';
 
     public ProductForm $product;
+
+    public ProductPricesUpdateForm $productPricesUpdate;
 
     public array $vatRates = [];
 
@@ -50,21 +56,16 @@ class ProductList extends BaseProductList
             ->toArray();
     }
 
-    protected function getSelectedActions(): array
-    {
-        return [
-            DataTableButton::make()
-                ->label(__('Add to cart'))
-                ->icon('shopping-cart')
-                ->when(resolve_static(CreateCartItem::class, 'canPerformAction', [false]))
-                ->wireClick('addSelectedToCart; showSelectedActions = false;'),
-        ];
-    }
-
     #[Renderless]
     public function addSelectedToCart(): void
     {
-        $this->dispatch('cart:add', $this->selected)->to('cart.cart');
+        $this->dispatch(
+            'cart:add',
+            $this->getSelectedModelsQuery()
+                ->whereDoesntHave('children')
+                ->pluck('id')
+        )
+            ->to('cart.cart');
         $this->reset('selected');
     }
 
@@ -73,33 +74,8 @@ class ProductList extends BaseProductList
     {
         $this->product->reset();
 
-        $this->product->client_id = Client::default()?->id;
+        $this->product->client_id = Client::default()?->getKey();
         $this->product->product_type = data_get(ProductType::getDefault(), 'type');
-    }
-
-    protected function getTableActions(): array
-    {
-        return [
-            DataTableButton::make()
-                ->color('primary')
-                ->label(__('New'))
-                ->icon('plus')
-                ->attributes([
-                    'x-on:click' => "\$wire.new().then(() => {\$openModal('create-product');})",
-                ]),
-        ];
-    }
-
-    protected function getViewData(): array
-    {
-        return array_merge(
-            parent::getViewData(),
-            [
-                'vatRates' => resolve_static(VatRate::class, 'query')
-                    ->get(['id', 'name', 'rate_percentage'])
-                    ->toArray(),
-            ]
-        );
     }
 
     public function getPriceLists(): array
@@ -107,6 +83,7 @@ class ProductList extends BaseProductList
         return data_get($this->priceLists, '0', []);
     }
 
+    #[Renderless]
     public function save(): bool
     {
         $this->product->prices = [
@@ -129,5 +106,81 @@ class ProductList extends BaseProductList
         $this->redirect(route('products.id', $this->product->id), true);
 
         return true;
+    }
+
+    #[Renderless]
+    public function updatePrices(): bool
+    {
+        try {
+            ProductPricesUpdate::make(array_merge(
+                $this->productPricesUpdate->toArray(),
+                [
+                    'products' => $this->getSelectedModelsQuery()->pluck('id')->toArray(),
+                ]
+            ))
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->reset('selected');
+        $this->productPricesUpdate->reset();
+        $this->loadData();
+
+        return true;
+    }
+
+    protected function getSelectedActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->label(__('Add to cart'))
+                ->icon('shopping-cart')
+                ->when(resolve_static(CreateCartItem::class, 'canPerformAction', [false]))
+                ->wireClick('addSelectedToCart; showSelectedActions = false;'),
+            DataTableButton::make()
+                ->label(__('Update prices'))
+                ->color('warning')
+                ->when(resolve_static(ProductPricesUpdate::class, 'canPerformAction', [false]))
+                ->xOnClick(<<<'JS'
+                    $openModal('update-prices');
+                JS),
+        ];
+    }
+
+    protected function getTableActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->color('primary')
+                ->label(__('New'))
+                ->icon('plus')
+                ->when(fn () => resolve_static(CreateProduct::class, 'canPerformAction', [false]))
+                ->xOnClick(<<<'JS'
+                    $wire.new().then(() => {$openModal('create-product');});
+                JS),
+        ];
+    }
+
+    protected function getViewData(): array
+    {
+        return array_merge(
+            parent::getViewData(),
+            [
+                'vatRates' => resolve_static(VatRate::class, 'query')
+                    ->get(['id', 'name', 'rate_percentage'])
+                    ->toArray(),
+                'roundingMethods' => RoundingMethodEnum::valuesLocalized(),
+                'roundingModes' => [
+                    'round' => __('Round'),
+                    'ceil' => __('Round up'),
+                    'floor' => __('Round down'),
+                ],
+            ]
+        );
     }
 }

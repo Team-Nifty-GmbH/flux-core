@@ -3,7 +3,9 @@
 namespace FluxErp\Models;
 
 use FluxErp\Traits\Commentable;
+use FluxErp\Traits\Communicatable;
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasTags;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
@@ -12,14 +14,11 @@ use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\MediaLibrary\HasMedia;
-use Spatie\Tags\HasTags;
 
 class PurchaseInvoice extends FluxModel implements HasMedia
 {
-    use Commentable, HasPackageFactory, HasTags, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity,
-        SoftDeletes;
-
-    protected $guarded = ['id'];
+    use Commentable, Communicatable, HasPackageFactory, HasTags, HasUserModification, HasUuid, InteractsWithMedia,
+        LogsActivity, SoftDeletes;
 
     protected static function booted(): void
     {

@@ -5,9 +5,13 @@ namespace FluxErp\Notifications\Comment;
 use FluxErp\Models\Address;
 use FluxErp\Models\Comment;
 use FluxErp\Models\User;
+use FluxErp\Models\MailAccount;
 use FluxErp\Support\Notification\SubscribableNotification;
+use Illuminate\Support\HtmlString;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Support\Str;
+use Illuminate\Notifications\Messages\MailMessage;
 
 class CommentCreatedNotification extends SubscribableNotification implements ShouldQueue
 {
@@ -21,6 +25,23 @@ class CommentCreatedNotification extends SubscribableNotification implements Sho
                 resolve_static(Address::class, 'class'),
             ],
         );
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        return parent::toMail($notifiable)
+            ->when(
+                $ticketAccount = resolve_static(MailAccount::class, 'query')
+                    ->whereHas('mailFolders', fn ($query) => $query->where('can_create_ticket', true))
+                    ->value('email'),
+                fn (MailMessage $mail) => $mail->replyTo($ticketAccount)
+            )
+            ->line(new HtmlString(
+                '<span style="display: none">[flux:comment:'
+                . $this->model->model->getMorphClass() . ':'
+                . $this->model->model->getKey()
+                . ']</span>'
+            ));
     }
 
     public function via(object $notifiable): array
@@ -53,12 +74,20 @@ class CommentCreatedNotification extends SubscribableNotification implements Sho
 
     protected function getTitle(): string
     {
-        return __(
-            ':username commented on :model',
-            [
-                'username' => $this->model->getCreatedBy()?->getLabel() ?? __('Unknown'),
-                'model' => __('your ' . $this->model->model_type),
-            ],
-        );
+        return Str::of(
+            __(
+                ':username commented on :model :label',
+                [
+                    'username' => $this->model->getCreatedBy()?->getLabel() ?? __('Unknown'),
+                    'model' => __('your ' . $this->model->model_type),
+                    'label' => method_exists($this->model->model, 'getLabel') && $this->model->model->getLabel()
+                        ? '"' . $this->model->model->getLabel() . '"'
+                        : '',
+                ],
+            )
+        )
+            ->trim()
+            ->deduplicate()
+            ->toString();
     }
 }

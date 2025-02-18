@@ -87,8 +87,8 @@ class PurchaseInvoiceForm extends FluxForm
     {
         parent::reset(...$properties);
 
-        $this->client_id = Client::default()?->id;
-        $this->currency_id = Currency::default()?->id;
+        $this->client_id = Client::default()?->getKey();
+        $this->currency_id = Currency::default()?->getKey();
     }
 
     public function findMostUsedLedgerAccountId(): void

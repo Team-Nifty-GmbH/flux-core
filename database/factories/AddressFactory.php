@@ -26,6 +26,7 @@ class AddressFactory extends Factory
             'city' => $this->faker->city(),
             'street' => $this->faker->streetAddress,
             'url' => $this->faker->boolean ? $this->faker->url : null,
+            'email_primary' => uniqid() . $this->faker->safeEmail(),
             'date_of_birth' => $this->faker->boolean ? $this->faker->date : null,
             'department' => $this->faker->boolean ? $this->faker->realText(maxNbChars: 20) : null,
             'email' => uniqid() . $this->faker->unique()->safeEmail(),

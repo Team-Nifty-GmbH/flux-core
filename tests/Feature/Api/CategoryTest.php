@@ -542,10 +542,10 @@ class CategoryTest extends BaseSetup
         $category = Category::factory()->create(['model_type' => Task::class]);
         $project = Project::factory()->create([
             'category_id' => $category->id,
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
         ]);
         $contact = Contact::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
         ]);
         $address = Address::factory()->create([
             'client_id' => $contact->client_id,

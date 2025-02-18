@@ -66,6 +66,7 @@ use FluxErp\Livewire\Settings\Profile;
 use FluxErp\Livewire\Settings\QueueMonitor;
 use FluxErp\Livewire\Settings\Scheduling;
 use FluxErp\Livewire\Settings\SerialNumberRanges;
+use FluxErp\Livewire\Settings\Settings;
 use FluxErp\Livewire\Settings\Tags;
 use FluxErp\Livewire\Settings\TicketTypes;
 use FluxErp\Livewire\Settings\Translations;
@@ -77,6 +78,7 @@ use FluxErp\Livewire\Settings\WorkTimeTypes;
 use FluxErp\Livewire\Task\Task;
 use FluxErp\Livewire\Task\TaskList;
 use FluxErp\Livewire\Ticket\Ticket;
+use FluxErp\Models\Address;
 use Illuminate\Support\Facades\Route;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use TeamNiftyGmbH\DataTable\Controllers\IconController;
@@ -123,6 +125,18 @@ Route::middleware('web')
                         Route::get('/{id?}', Contact::class)->where('id', '[0-9]+')->name('id?');
                         Route::get('/communications', CommunicationList::class)->name('communications');
                     });
+                Route::get(
+                    '/address/{address}',
+                    fn (Address $address) => redirect()
+                        ->route(
+                            'contacts.id?',
+                            [
+                                'id' => $address->contact_id,
+                                'address' => $address->getKey(),
+                            ]
+                        )
+                )
+                    ->name('address.id');
 
                 Route::name('orders.')->prefix('orders')
                     ->group(function () {
@@ -161,6 +175,7 @@ Route::middleware('web')
 
                 Route::get('/my-profile', Profile::class)->name('my-profile');
 
+                Route::get('/settings', Settings::class)->name('settings');
                 Route::name('settings.')->prefix('settings')
                     ->group(function () {
                         Route::get('/additional-columns', AdditionalColumns::class)->name('additional-columns');

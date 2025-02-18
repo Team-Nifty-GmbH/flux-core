@@ -55,7 +55,7 @@ class ReplicateOrder extends FluxAction
             $orderData['id'],
             $orderData['uuid'],
             $orderData['agent_id'],
-            $orderData['bank_connection_id'],
+            $orderData['contact_bank_connection_id'],
             $orderData['address_invoice'],
             $orderData['address_delivery'],
             $orderData['state'],
@@ -77,9 +77,18 @@ class ReplicateOrder extends FluxAction
             unset($orderData['parent_id']);
         }
 
-        if ($originalOrder['contact_id'] === $orderData['contact_id']) {
+        if (
+            $originalOrder['contact_id'] === $orderData['contact_id']
+            && in_array($orderTypeEnum, [OrderTypeEnum::SplitOrder, OrderTypeEnum::Retoure])
+        ) {
             $orderData['parent_id'] = data_get($originalOrder, 'id');
         }
+
+        if ($originalOrder['contact_id'] !== $orderData['contact_id']) {
+            $orderData['vat_rate_id'] = null;
+        }
+
+        $orderData['created_from_id'] = data_get($originalOrder, 'id');
 
         $order = CreateOrder::make($orderData)
             ->checkPermission()
@@ -129,6 +138,8 @@ class ReplicateOrder extends FluxAction
                     ->firstWhere('origin_position_id', $orderPosition['parent_id'])
                     ?->getKey();
             }
+
+            $orderPosition['created_from_id'] = data_get($orderPosition, 'id');
 
             unset(
                 $orderPosition['id'],

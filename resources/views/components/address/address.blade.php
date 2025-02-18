@@ -24,7 +24,7 @@
                 <x-checkbox :label="__('Formal salutation')" x-bind:disabled="!$wire.edit" wire:model="address.has_formal_salutation"/>
             </div>
         </div>
-        <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+        <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2" x-bind:class="!$wire.edit && 'pointer-events-none'">
             <x-label :label="__('Salutation')" for="{{ md5('address.salutation') }}" />
             <div class="col-span-2 w-full">
                 <x-select
@@ -145,6 +145,27 @@
                 </div>
             </div>
         @show
+        @section('contact-channels.phone_mobile')
+            <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+                <x-label :label="__('Phone Mobile')" for="{{ md5('address.phone_mobile') }}" />
+                <div class="col-span-2">
+                    <x-input x-bind:readonly="!$wire.edit" class="pl-12" wire:model="address.phone_mobile">
+                        <x-slot:prepend>
+                            <div class="absolute inset-y-0 left-0 flex items-center p-0.5">
+                                <x-button
+                                    class="h-full rounded-l-md"
+                                    icon="phone"
+                                    primary
+                                    flat
+                                    squared
+                                    x-on:click.prevent="window.open('tel:' + $wire.address.phone_mobile)"
+                                />
+                            </div>
+                        </x-slot:prepend>
+                    </x-input>
+                </div>
+            </div>
+        @show
         @if(! $onlyPostal)
             @section('contact-channels.url')
                 <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
@@ -167,18 +188,19 @@
                     </div>
                 </div>
             @show
-            <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+            <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2" x-bind:class="!$wire.edit && 'pointer-events-none'">
                 <x-label :label="__('Language')" for="{{ md5('address.language_id') }}" />
                 <div class="col-span-2">
-                    <x-select x-bind:disabled="!$wire.edit"
-                              wire:model="address.language_id"
-                              searchable
-                              :options="$languages"
-                              option-key-value
+                    <x-select
+                        x-bind:disabled="!$wire.edit"
+                        wire:model="address.language_id"
+                        searchable
+                        :options="$languages"
+                        option-key-value
                     />
                 </div>
             </div>
-            <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+            <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2" x-bind:class="!$wire.edit && 'pointer-events-none'">
                 <x-label :label="__('Tags')" for="{{ md5('address.tags') }}" />
                 <div class="col-span-2">
                     <x-select
@@ -203,14 +225,16 @@
                         ]"
                     >
                         <x-slot:beforeOptions>
-                            <div class="px-1">
-                                <x-button positive full :label="__('Add')" wire:click="addTag($promptValue())" wire:flux-confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}" />
-                            </div>
+                            @canAction(\FluxErp\Actions\Tag\CreateTag::class)
+                                <div class="px-1">
+                                    <x-button positive full :label="__('Add')" wire:click="addTag($promptValue())" wire:flux-confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}" />
+                                </div>
+                            @endCanAction
                         </x-slot:beforeOptions>
                     </x-select>
                 </div>
             </div>
-            <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
+            <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2" x-bind:class="!$wire.edit && 'pointer-events-none'">
                 <x-label :label="__('Advertising State')" for="{{ md5('address.advertising_state') }}" />
                 <div class="col-span-2">
                     <x-flux::state
@@ -249,7 +273,24 @@
         </h3>
         <hr class="py-2" />
         @section('attributes.contact-options')
-            <div class="flex flex-col gap-1.5" x-data="{edit: $wire.entangle('edit')}">
+            <div
+                class="flex flex-col gap-1.5"
+                x-data="{
+                    edit: $wire.entangle('edit'),
+                    hrefFromContactOption(type, value) {
+                        switch (type) {
+                            case 'phone':
+                                return 'tel:' + value;
+                            case 'email':
+                                return 'mailto:' + value;
+                            case 'website':
+                                return value;
+                            default:
+                                return '#';
+                        }
+                    }
+                }"
+            >
                 <template x-for="(contactOption, index) in $wire.address.contact_options">
                     <div class="flex gap-1.5 items-center">
                         <div>
@@ -268,13 +309,16 @@
                             />
                         </div>
                         <x-input x-model="contactOption.label" :placeholder="__('Label')" x-bind:disabled="!edit" x-bind:class="! edit && 'border-none bg-transparent shadow-none'"/>
-                        <x-input x-model="contactOption.value" :placeholder="__('Value')" x-bind:disabled="!edit" x-bind:class="! edit && 'border-none bg-transparent shadow-none'"/>
-                        <div x-transition x-show="edit">
+                        <x-input x-cloak x-show="edit" x-model="contactOption.value" :placeholder="__('Value')" x-bind:disabled="!edit" x-bind:class="! edit && 'border-none bg-transparent shadow-none'"/>
+                        <div class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px">
+                            <a x-bind:href="hrefFromContactOption(contactOption.type, contactOption.value)" x-text="contactOption.value" x-cloak x-show="!edit"></a>
+                        </div>
+                        <div x-transition x-cloak x-show="edit">
                             <x-button icon="trash" negative x-on:click.prevent="$wire.address.contact_options.splice(index, 1)" x-bind:disabled="!edit"/>
                         </div>
                     </div>
                 </template>
-                <div x-transition x-show="edit">
+                <div x-transition x-cloak x-show="edit">
                     <x-button icon="plus" :label="__('Add')" primary x-on:click.prevent="$wire.address.contact_options.push({type: 'email'})" x-bind:disabled="!edit"/>
                 </div>
             </div>

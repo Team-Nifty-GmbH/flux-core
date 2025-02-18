@@ -35,7 +35,7 @@ class TaskTest extends BaseSetup
     {
         parent::setUp();
         $this->project = Project::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
         ]);
 
         $this->tasks = Task::factory()->count(3)->create([
@@ -461,7 +461,7 @@ class TaskTest extends BaseSetup
     {
         $this->tasks[2] = $this->tasks[2]->refresh();
         $project = Project::factory()->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
         ]);
 
         $task = [

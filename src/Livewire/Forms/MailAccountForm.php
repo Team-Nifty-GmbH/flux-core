@@ -5,7 +5,10 @@ namespace FluxErp\Livewire\Forms;
 use FluxErp\Actions\MailAccount\CreateMailAccount;
 use FluxErp\Actions\MailAccount\DeleteMailAccount;
 use FluxErp\Actions\MailAccount\UpdateMailAccount;
+use FluxErp\Mail\GenericMail;
 use FluxErp\Models\MailAccount;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\HtmlString;
 use Livewire\Attributes\Locked;
 use Symfony\Component\Mailer\Transport\Smtp\EsmtpTransport;
 use Webklex\PHPIMAP\Exceptions\AuthFailedException;
@@ -38,7 +41,7 @@ class MailAccountForm extends FluxForm
 
     public ?string $smtp_host = null;
 
-    public int $smtp_port = 587;
+    public ?int $smtp_port = 587;
 
     public ?string $smtp_encryption = null;
 
@@ -87,5 +90,28 @@ class MailAccountForm extends FluxForm
         $transport->setPassword($this->smtp_password);
 
         $transport->start();
+    }
+
+    public function sendTestMail(?string $to = null): void
+    {
+        $to ??= auth()->user()->email;
+
+        $mailer = Mail::build([
+            'transport' => 'smtp',
+            'host' => $this->smtp_host,
+            'port' => $this->smtp_port ?? 587,
+            'encryption' => $this->smtp_encryption,
+            'username' => $this->smtp_email,
+            'password' => $this->smtp_password,
+            'timeout' => 15,
+        ]);
+        $mailer->alwaysFrom($this->smtp_email ?: config('mail.from.address'), config('mail.from.name'));
+        $mailer->to($to)
+            ->sendNow(
+                GenericMail::make([
+                    'subject' => __('Test mail'),
+                    'html_body' => new HtmlString('<p>' . __('This is a test mail') . '</p>'),
+                ])
+            );
     }
 }

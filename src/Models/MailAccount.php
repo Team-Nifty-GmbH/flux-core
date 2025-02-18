@@ -23,10 +23,6 @@ class MailAccount extends FluxModel
 
     public bool $supportsHierarchicalFolders = true;
 
-    protected $guarded = [
-        'id',
-    ];
-
     protected $hidden = [
         'password',
         'smtp_password',
@@ -58,18 +54,24 @@ class MailAccount extends FluxModel
      * @throws AuthFailedException
      * @throws ImapServerErrorException
      */
-    public function connect(): Client
+    public function connect(): ?Client
     {
         event(new Connecting($this));
 
-        return ImapClient::make([
-            'host' => $this->host,
-            'port' => $this->port,
-            'encryption' => $this->encryption,
-            'validate_cert' => $this->has_valid_certificate,
-            'username' => $this->email,
-            'password' => $this->password,
-            'authentication' => $this->is_o_auth ? 'oauth' : null,
-        ])->connect();
+        try {
+            return ImapClient::make([
+                'host' => $this->host,
+                'port' => $this->port,
+                'encryption' => $this->encryption,
+                'validate_cert' => $this->has_valid_certificate,
+                'username' => $this->email,
+                'password' => $this->password,
+                'authentication' => $this->is_o_auth ? 'oauth' : null,
+            ])->connect();
+        } catch (AuthFailedException $e) {
+            logger($e->getMessage(), ['mail_account_id' => $this->id]);
+        }
+
+        return null;
     }
 }

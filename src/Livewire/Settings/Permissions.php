@@ -26,17 +26,17 @@ class Permissions extends RoleList
     public array $permissions = [];
 
     #[Renderless]
-    public function getPermissionTree()
+    public function getPermissionTree(): array
     {
         $permissions = Permission::query()
             ->where('guard_name', $this->roleForm->guard_name)
             ->pluck('id', 'name')
             ->toArray();
 
-        return Arr::undotToTree(
+        return $this->preparePermissions(Arr::undotToTree(
             array: $permissions,
-            translate: fn ($key) => $key === 'get' ? __('permission.get') : __(Str::headline($key))
-        );
+            translate: fn (string $key) => $key === 'get' ? __('permission.get') : __(Str::headline($key))
+        ));
     }
 
     protected function getViewData(): array
@@ -149,5 +149,24 @@ class Permissions extends RoleList
         $this->loadData();
 
         return true;
+    }
+
+    protected function preparePermissions(array $tree, array $parent = []): array
+    {
+        foreach ($tree as $key => &$value) {
+            $label = data_get($value, 'label');
+
+            if ($parent) {
+                data_set($tree, $key . '.path', data_get($parent, 'path') . ' -> ' . $label);
+            } else {
+                data_set($tree, $key . '.path', $label);
+            }
+
+            if ($children = data_get($value, 'children')) {
+                $value['children'] = $this->preparePermissions($children, $value);
+            }
+        }
+
+        return $tree;
     }
 }

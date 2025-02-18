@@ -4,6 +4,7 @@ namespace FluxErp\Models;
 
 use FluxErp\Traits\HasNotificationSubscriptions;
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasParentChildRelations;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
@@ -11,15 +12,12 @@ use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\Notifiable;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Spatie\MediaLibrary\HasMedia;
 
 class Comment extends FluxModel implements HasMedia
 {
-    use HasNotificationSubscriptions, HasPackageFactory, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity,
+    use HasNotificationSubscriptions, HasPackageFactory, HasParentChildRelations, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity,
         SoftDeletes;
 
     protected $appends = [
@@ -60,11 +58,6 @@ class Comment extends FluxModel implements HasMedia
     public function model(): MorphTo
     {
         return $this->morphTo('model');
-    }
-
-    public function parent(): BelongsTo
-    {
-        return $this->belongsTo(Comment::class, 'parent_id');
     }
 
     public function user(): Attribute

@@ -6,6 +6,7 @@ use FluxErp\Livewire\DataTables\OrderPositionList;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\View\ComponentAttributeBag;
+use Livewire\Attributes\Modelable;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableRowAttributes;
 
@@ -25,18 +26,8 @@ class ReplicateOrderPositionList extends OrderPositionList
 
     public bool $isSelectable = true;
 
-    public function mount(?string $id = null): void
-    {
-        parent::mount();
-
-        $this->filters = [
-            [
-                'column' => 'order_positions.order_id',
-                'operator' => '=',
-                'value' => $id,
-            ],
-        ];
-    }
+    #[Modelable]
+    public ?int $orderId;
 
     public function getSelectAttributes(): ComponentAttributeBag
     {
@@ -74,6 +65,7 @@ class ReplicateOrderPositionList extends OrderPositionList
     protected function getBuilder(Builder $builder): Builder
     {
         return $builder
+            ->where('order_id', $this->orderId)
             ->withSum('descendants as descendantsAmount', 'amount')
             ->whereNull('parent_id')
             ->orderBy('sort_number');

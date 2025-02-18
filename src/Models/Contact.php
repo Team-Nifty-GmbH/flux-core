@@ -38,10 +38,6 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
         HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasSerialNumberRange, HasUserModification,
         HasUuid, InteractsWithMedia, Lockable, LogsActivity, Printable, SoftDeletes;
 
-    protected $guarded = [
-        'id',
-    ];
-
     protected string $detailRouteName = 'contacts.id?';
 
     public static string $iconName = 'users';
@@ -259,7 +255,7 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
      */
     public function getAvatarUrl(): ?string
     {
-        return $this->getFirstMediaUrl('avatar', 'thumb') ?: self::icon()->getUrl();
+        return $this->getFirstMediaUrl('avatar', 'thumb') ?: static::icon()->getUrl();
     }
 
     public function getPrintViews(): array
