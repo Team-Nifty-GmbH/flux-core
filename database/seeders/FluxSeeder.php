@@ -32,6 +32,7 @@ class FluxSeeder extends Seeder
         $this->call(PaymentTypeTableSeeder::class);
         $this->call(OrderTypeTableSeeder::class);
         $this->call(ContactOriginTableSeeder::class);
+        $this->call(IndustryTableSeeder::class);
 
         $this->call(ContactTableSeeder::class);
         $this->call(AddressTypeTableSeeder::class);

@@ -49,6 +49,7 @@ use FluxErp\Livewire\Settings\Currencies;
 use FluxErp\Livewire\Settings\CustomerPortal;
 use FluxErp\Livewire\Settings\DiscountGroups;
 use FluxErp\Livewire\Settings\FailedJobs;
+use FluxErp\Livewire\Settings\Industries;
 use FluxErp\Livewire\Settings\Languages;
 use FluxErp\Livewire\Settings\LedgerAccounts;
 use FluxErp\Livewire\Settings\Logs;
@@ -179,48 +180,44 @@ Route::middleware('web')
                 Route::get('/settings', Settings::class)->name('settings');
                 Route::name('settings.')->prefix('settings')
                     ->group(function () {
+                        Route::get('/activity-logs', ActivityLogs::class)->name('activity-logs');
                         Route::get('/additional-columns', AdditionalColumns::class)->name('additional-columns');
                         Route::get('/address-types', AddressTypes::class)->name('address-types');
-                        Route::get('/contact-origins', ContactOrigins::class)->name('contact-origins');
-                        Route::get('/categories', Categories::class)->name('categories');
-                        Route::get('/tags', Tags::class)->name('tags');
-                        Route::get('/product-option-groups', ProductOptionGroups::class)->name('product-option-groups');
-                        Route::get('/product-properties', ProductPropertyGroups::class)->name('product-properties');
-                        Route::get('/clients', Clients::class)->name('clients');
                         Route::get('/bank-connections', BankConnections::class)->name('bank-connections');
+                        Route::get('/categories', Categories::class)->name('categories');
+                        Route::get('/clients', Clients::class)->name('clients');
                         Route::get('/clients/{client}/customer-portal', CustomerPortal::class)->name('customer-portal');
+                        Route::get('/contact-origins', ContactOrigins::class)->name('contact-origins');
                         Route::get('/countries', Countries::class)->name('countries');
                         Route::get('/currencies', Currencies::class)->name('currencies');
                         Route::get('/discount-groups', DiscountGroups::class)->name('discount-groups');
+                        Route::get('/failed-jobs', FailedJobs::class)->name('failed-jobs');
+                        Route::get('/industries', Industries::class)->name('industries');
                         Route::get('/languages', Languages::class)->name('languages');
                         Route::get('/ledger-accounts', LedgerAccounts::class)->name('ledger-accounts');
                         Route::get('/logs', Logs::class)->name('logs');
-                        Route::get('/activity-logs', ActivityLogs::class)->name('activity-logs');
+                        Route::get('/mail-accounts', MailAccounts::class)->name('mail-accounts');
                         Route::get('/notifications', Notifications::class)->name('notifications');
                         Route::get('/order-types', OrderTypes::class)->name('order-types');
+                        Route::get('/payment-reminder-texts', PaymentReminderTexts::class)->name('payment-reminder-texts');
+                        Route::get('/payment-types', PaymentTypes::class)->name('payment-types');
                         Route::get('/permissions', Permissions::class)->name('permissions');
+                        Route::get('/plugins', Plugins::class)->name('plugins');
                         Route::get('/price-lists', PriceLists::class)->name('price-lists');
+                        Route::get('/product-option-groups', ProductOptionGroups::class)->name('product-option-groups');
+                        Route::get('/product-properties', ProductPropertyGroups::class)->name('product-properties');
+                        Route::get('/queue-monitor', QueueMonitor::class)->name('queue-monitor');
+                        Route::get('/scheduling', Scheduling::class)->name('scheduling');
+                        Route::get('/serial-number-ranges', SerialNumberRanges::class)->name('serial-number-ranges');
+                        Route::get('/tags', Tags::class)->name('tags');
                         Route::get('/ticket-types', TicketTypes::class)->name('ticket-types');
                         Route::get('/translations', Translations::class)->name('translations');
                         Route::get('/units', Units::class)->name('units');
                         Route::get('/users', Users::class)->name('users');
                         Route::get('/users/{user}', UserEdit::class)->name('users.edit');
-                        Route::get('/mail-accounts', MailAccounts::class)->name('mail-accounts');
-                        Route::get('/work-time-types', WorkTimeTypes::class)->name('work-time-types');
                         Route::get('/vat-rates', VatRates::class)->name('vat-rates');
-                        Route::get('/payment-types', PaymentTypes::class)->name('payment-types');
-                        Route::get('/payment-reminder-texts', PaymentReminderTexts::class)
-                            ->name('payment-reminder-texts');
                         Route::get('/warehouses', Warehouses::class)->name('warehouses');
-                        Route::get('/serial-number-ranges', SerialNumberRanges::class)
-                            ->name('serial-number-ranges');
-                        Route::get('/scheduling', Scheduling::class)->name('scheduling');
-                        Route::get('/queue-monitor', QueueMonitor::class)
-                            ->name('queue-monitor');
-                        Route::get('/failed-jobs', FailedJobs::class)
-                            ->name('failed-jobs');
-                        Route::get('/plugins', Plugins::class)
-                            ->name('plugins');
+                        Route::get('/work-time-types', WorkTimeTypes::class)->name('work-time-types');
                     });
 
                 Route::get('/media', MediaGrid::class)

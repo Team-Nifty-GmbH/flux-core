@@ -108,7 +108,8 @@ class UpdateContactRuleset extends FluxRuleset
             parent::getRules(),
             resolve_static(DiscountRuleset::class, 'getRules'),
             resolve_static(DiscountGroupRuleset::class, 'getRules'),
-            resolve_static(CategoryRuleset::class, 'getRules')
+            resolve_static(CategoryRuleset::class, 'getRules'),
+            resolve_static(IndustryRuleset::class, 'getRules')
         );
     }
 }

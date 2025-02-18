@@ -106,7 +106,8 @@ class CreateContactRuleset extends FluxRuleset
             resolve_static(MainAddressRuleset::class, 'getRules'),
             resolve_static(DiscountRuleset::class, 'getRules'),
             resolve_static(DiscountGroupRuleset::class, 'getRules'),
-            resolve_static(CategoryRuleset::class, 'getRules')
+            resolve_static(CategoryRuleset::class, 'getRules'),
+            resolve_static(IndustryRuleset::class, 'getRules')
         );
     }
 }

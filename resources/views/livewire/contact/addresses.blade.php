@@ -69,6 +69,21 @@
                             ]"
                         />
                         <x-select
+                            multiselect
+                            x-bind:disabled="! $wire.$parent.edit"
+                            wire:model.number="contact.industries"
+                            :label="__('Industries')"
+                            option-value="id"
+                            option-label="name"
+                            :async-data="[
+                                'api' => route('search', \FluxErp\Models\Industry::class),
+                                'method' => 'POST',
+                                'params' => [
+                                    'searchFields' => ['name'],
+                                ],
+                            ]"
+                        />
+                        <x-select
                             searchable
                             x-bind:disabled="! $wire.$parent.edit"
                             wire:model.number="contact.contact_origin_id"
