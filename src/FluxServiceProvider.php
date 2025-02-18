@@ -84,9 +84,6 @@ class FluxServiceProvider extends ServiceProvider
 
     public static bool $registerApiRoutes = true;
 
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
         if ($this->app->runningInConsole()) {
@@ -114,9 +111,6 @@ class FluxServiceProvider extends ServiceProvider
         $this->app->bind(\TeamNiftyGmbH\Calendar\Models\CalendarEvent::class, CalendarEvent::class);
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         bcscale(9);
@@ -690,6 +684,7 @@ class FluxServiceProvider extends ServiceProvider
                 Menu::register(route: 'settings.queue-monitor');
                 Menu::register(route: 'settings.failed-jobs');
                 Menu::register(route: 'settings.plugins');
+                Menu::register(route: 'settings.industries');
             }
         );
     }

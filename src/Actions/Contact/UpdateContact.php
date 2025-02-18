@@ -28,6 +28,7 @@ class UpdateContact extends FluxAction
     {
         $discountGroups = Arr::pull($this->data, 'discount_groups');
         $discounts = Arr::pull($this->data, 'discounts');
+        $industries = Arr::pull($this->data, 'industries');
 
         $contact = resolve_static(Contact::class, 'query')
             ->whereKey($this->data['id'])
@@ -67,6 +68,10 @@ class UpdateContact extends FluxAction
 
         if (! is_null($discountGroups)) {
             $contact->discountGroups()->sync($discountGroups);
+        }
+
+        if (! is_null($industries)) {
+            $contact->industries()->sync($industries);
         }
 
         return $contact->withoutRelations()->fresh();

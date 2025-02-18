@@ -5,6 +5,7 @@ namespace FluxErp\Models;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Models\Pivots\ContactDiscount;
 use FluxErp\Models\Pivots\ContactDiscountGroup;
+use FluxErp\Models\Pivots\ContactIndustry;
 use FluxErp\Traits\Categorizable;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Communicatable;
@@ -131,6 +132,11 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
     public function discounts(): BelongsToMany
     {
         return $this->belongsToMany(Discount::class, 'contact_discount')->using(ContactDiscount::class);
+    }
+
+    public function industries(): BelongsToMany
+    {
+        return $this->belongsToMany(Industry::class, 'contact_industry')->using(ContactIndustry::class);
     }
 
     public function invoiceAddress(): BelongsTo

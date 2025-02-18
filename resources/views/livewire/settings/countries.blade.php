@@ -1,4 +1,3 @@
-
 <x-modal name="edit-country">
     <x-card>
         <div class="flex flex-col gap-4">

@@ -31,6 +31,7 @@ class CreateContact extends FluxAction
         $discountGroups = Arr::pull($this->data, 'discount_groups');
         $discounts = Arr::pull($this->data, 'discounts');
         $mainAddress = Arr::pull($this->data, 'main_address');
+        $industries = Arr::pull($this->data, 'industries');
 
         $contact = app(Contact::class, ['attributes' => $this->data]);
         $contact->save();
@@ -57,6 +58,10 @@ class CreateContact extends FluxAction
 
         if (is_array($discountGroups)) {
             $contact->discountGroups()->attach($discountGroups);
+        }
+
+        if (! is_null($industries)) {
+            $contact->industries()->attach($industries);
         }
 
         if (! ($this->data['customer_number'] ?? false)) {

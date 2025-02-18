@@ -49,6 +49,7 @@ use FluxErp\Livewire\Settings\Currencies;
 use FluxErp\Livewire\Settings\CustomerPortal;
 use FluxErp\Livewire\Settings\DiscountGroups;
 use FluxErp\Livewire\Settings\FailedJobs;
+use FluxErp\Livewire\Settings\Industries;
 use FluxErp\Livewire\Settings\Languages;
 use FluxErp\Livewire\Settings\LedgerAccounts;
 use FluxErp\Livewire\Settings\Logs;
@@ -181,6 +182,7 @@ Route::middleware('web')
                         Route::get('/additional-columns', AdditionalColumns::class)->name('additional-columns');
                         Route::get('/address-types', AddressTypes::class)->name('address-types');
                         Route::get('/contact-origins', ContactOrigins::class)->name('contact-origins');
+                        Route::get('/industries', Industries::class)->name('industries');
                         Route::get('/categories', Categories::class)->name('categories');
                         Route::get('/tags', Tags::class)->name('tags');
                         Route::get('/product-option-groups', ProductOptionGroups::class)->name('product-option-groups');

@@ -72,6 +72,8 @@ class ContactForm extends FluxForm
 
     public array $categories = [];
 
+    public array $industries = [];
+
     protected function getActions(): array
     {
         return [
@@ -93,10 +95,11 @@ class ContactForm extends FluxForm
     public function fill($values): void
     {
         if ($values instanceof Contact) {
-            $values->loadMissing(['categories:id']);
+            $values->loadMissing(['categories:id', 'industries:id']);
 
             $values = $values->toArray();
             $values['categories'] = array_column($values['categories'] ?? [], 'id');
+            $values['industries'] = array_column($values['industries'] ?? [], 'id');
         }
 
         parent::fill($values);
