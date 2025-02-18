@@ -103,7 +103,7 @@
                         <div class="flex">
                             <div class="flex-1 text-sm">{{ __($role['name']) }}</div>
                             <div class="flex-1 text-sm">{{ __($role['guard_name']) }}</div>
-                            <div class="">
+                            <div class="pr-4">
                                 <x-checkbox wire:model.number.live="userForm.roles" :value="$role['id']" />
                             </div>
                         </div>
@@ -140,7 +140,7 @@
                         <div class="flex">
                             <div class="flex-1 text-sm">{{ $client['name'] }}</div>
                             <div class="flex-1 text-sm">{{ $client['client_code'] }}</div>
-                            <div class="">
+                            <div class="pr-4">
                                 <x-checkbox wire:model.number="userForm.clients" :value="$client['id']" />
                             </div>
                         </div>
