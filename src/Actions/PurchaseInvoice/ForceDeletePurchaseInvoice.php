@@ -6,7 +6,7 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Models\PurchaseInvoice;
 use FluxErp\Rulesets\PurchaseInvoice\DeletePurchaseInvoiceRuleset;
 
-class DeletePurchaseInvoice extends FluxAction
+class ForceDeletePurchaseInvoice extends FluxAction
 {
     protected function getRulesets(): string|array
     {
@@ -23,6 +23,6 @@ class DeletePurchaseInvoice extends FluxAction
         return resolve_static(PurchaseInvoice::class, 'query')
             ->whereKey($this->getData('id'))
             ->first()
-            ->delete();
+            ->forceDelete();
     }
 }

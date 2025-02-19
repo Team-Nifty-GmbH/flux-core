@@ -30,6 +30,7 @@ class CreateAddress extends FluxAction
     public function performAction(): Address
     {
         $tags = Arr::pull($this->data, 'tags');
+        $permissions = Arr::pull($this->data, 'permissions');
 
         if (! data_get($this->data, 'is_main_address', false)
             && ! resolve_static(Address::class, 'query')
@@ -60,11 +61,16 @@ class CreateAddress extends FluxAction
 
         $contactOptions = Arr::pull($this->data, 'contact_options', []);
 
+        /** @var Address $address */
         $address = app(Address::class, ['attributes' => $this->data]);
         $address->save();
 
         if ($tags) {
             $address->attachTags(resolve_static(Tag::class, 'query')->whereIntegerInRaw('id', $tags)->get());
+        }
+
+        if ($permissions) {
+            $address->givePermissionTo($permissions);
         }
 
         if (resolve_static(CreateContactOption::class, 'canPerformAction', [false])) {
