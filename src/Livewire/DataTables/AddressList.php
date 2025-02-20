@@ -55,7 +55,7 @@ class AddressList extends BaseDataTable
             DataTableButton::make()
                 ->text(__('Show on Map'))
                 ->color('indigo')
-                ->icon('globe')
+                ->icon('globe-alt')
                 ->wireClick('$toggle(\'showMap\', true)'),
             DataTableButton::make()
                 ->text(__('Create'))
