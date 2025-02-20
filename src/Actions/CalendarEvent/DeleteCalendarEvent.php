@@ -2,7 +2,6 @@
 
 namespace FluxErp\Actions\CalendarEvent;
 
-use Carbon\Carbon;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\CalendarEvent;
 use FluxErp\Rulesets\CalendarEvent\DeleteCalendarEventRuleset;
@@ -29,13 +28,11 @@ class DeleteCalendarEvent extends FluxAction
             'this' => $event->fill([
                 'excluded' => array_merge(
                     $event->excluded ?: [],
-                    [Carbon::parse(data_get($this->data, 'original_start'))->toDateTimeString()]
+                    [$event->start->toDateTimeString()]
                 ),
             ])->save(),
             'future' => $event->fill([
-                'repeat_end' => Carbon::parse(data_get($this->data, 'original_start'))
-                    ->subSecond()
-                    ->toDateTimeString(),
+                'repeat_end' => $event->start->subSecond()->toDateTimeString(),
             ])->save(),
             default => $event->delete()
         };

@@ -21,7 +21,6 @@ class DeleteCalendarEventRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => CalendarEvent::class]),
             ],
             'confirm_option' => 'required|string|in:this,future,all',
-            'original_start' => 'required_if:confirm_option,this|required_if:confirm_option,future|date',
         ];
     }
 }
