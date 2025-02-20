@@ -46,7 +46,7 @@ class MediaGrid extends BaseMediaGrid
         $rowActions = parent::getRowActions();
         array_splice($rowActions, -1, 0, [
             DataTableButton::make(icon: 'photograph')
-                ->label(__('Cover image'))
+                ->text(__('Cover image'))
                 ->attributes([
                     'x-on:click' => '$wire.product.cover_media_id = record.id; edit = true;',
                     'x-show' => 'record.id !== $wire.product.cover_media_id',
@@ -61,8 +61,8 @@ class MediaGrid extends BaseMediaGrid
     {
         return [
             DataTableButton::make(icon: 'upload')
-                ->color('primary')
-                ->label(__('Upload'))
+                ->color('indigo')
+                ->text(__('Upload'))
                 ->attributes([
                     'wire:click' => 'uploadMedia()',
                 ])
@@ -75,7 +75,7 @@ class MediaGrid extends BaseMediaGrid
         return new ComponentAttributeBag(
             [
                 'x-bind:class' => <<<'JS'
-                    record.id === $wire.product.cover_media_id ? 'bg-primary-50 ring-2 ring-primary-500 ring-offset-2' : ''
+                    record.id === $wire.product.cover_media_id ? 'bg-indigo-50 ring-2 ring-primary-500 ring-offset-2' : ''
                 JS
             ]
         );

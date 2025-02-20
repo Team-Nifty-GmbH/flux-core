@@ -2,7 +2,6 @@ import folders from './components/folders';
 import setupEditor from './components/tiptap';
 import workTime from './components/work-time.js';
 import dashboard from './components/dashboard';
-import notifications from './components/wireui/notifications';
 import signature from './components/signature-pad.js';
 import addressMap from "./components/address-map";
 import filePond from "./components/file-pond";
@@ -22,7 +21,6 @@ window.filePond = filePond;
 navigationSpinner();
 
 window.addEventListener('alpine:init', () => {
-    window.Alpine.data('wireui_notifications', notifications);
     window.Alpine.plugin(sort)
 })
 
@@ -56,7 +54,7 @@ document.addEventListener('livewire:init', () => {
     })
 })
 
-Livewire.directive('flux-confirm', ({ el, directive }) => {
+Livewire.directive('flux-confirm', ({ el, directive, component }) => {
     let icon = directive.modifiers.includes('icon')
         ? directive.modifiers[directive.modifiers.indexOf('icon') + 1]
         : 'question';
@@ -75,23 +73,12 @@ Livewire.directive('flux-confirm', ({ el, directive }) => {
     if (title === '') title = 'Are you sure?';
 
     el.__livewire_confirm = (action) => {
-        window.$wireui.confirmDialog({
-            id: id,
-            title: title,
-            description: description,
-            icon: icon,
-            accept: {
-                label: confirmLabel,
-                method: null,
-                execute: () => {
-                    action();
-                }
-            },
-            reject: {
-                label: cancelLabel,
-                method: 'cancel'
-            }
-        });
+        $interaction()
+            .wireable(component.id)
+            .error(title, description)
+            .confirm(confirmLabel, () => { action(); })
+            .cancel(cancelLabel)
+            .send();
     }
 })
 

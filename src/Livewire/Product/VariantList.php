@@ -76,12 +76,12 @@ class VariantList extends ProductList
     {
         return [
             DataTableButton::make()
-                ->color('primary')
-                ->label(__('Edit Variants'))
+                ->color('indigo')
+                ->text(__('Edit Variants'))
                 ->icon('pencil')
                 ->attributes([
                     'x-on:click' => <<<'JS'
-                        $openModal('generate-variants-modal')
+                        $modalOpen('generate-variants-modal')
                     JS,
                 ])
                 ->when(
@@ -95,7 +95,7 @@ class VariantList extends ProductList
     {
         return [
             DataTableButton::make()
-                ->label(__('Recalculate names'))
+                ->text(__('Recalculate names'))
                 ->icon('refresh')
                 ->when(fn () => resolve_static(UpdateProduct::class, 'canPerformAction', [false]))
                 ->attributes([

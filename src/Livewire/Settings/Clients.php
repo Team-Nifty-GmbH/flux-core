@@ -58,8 +58,8 @@ class Clients extends ClientList
     {
         return [
             DataTableButton::make()
-                ->label(__('Create'))
-                ->color('primary')
+                ->text(__('Create'))
+                ->color('indigo')
                 ->icon('plus')
                 ->attributes([
                     'wire:click' => 'show()',
@@ -72,16 +72,16 @@ class Clients extends ClientList
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
-                ->color('primary')
+                ->text(__('Edit'))
+                ->color('indigo')
                 ->icon('pencil')
                 ->attributes([
                     'wire:click' => 'show(record.id)',
                 ])
                 ->when(resolve_static(UpdateClient::class, 'canPerformAction', [false])),
             DataTableButton::make()
-                ->label(__('Customer portal'))
-                ->color('primary')
+                ->text(__('Customer portal'))
+                ->color('indigo')
                 ->icon('user')
                 ->attributes([
                     'wire:click' => 'showCustomerPortal(record.id)',
@@ -110,7 +110,7 @@ class Clients extends ClientList
         $this->logoSmall->fill($record->getMedia('logo_small')->first() ?? []);
 
         $this->js(<<<'JS'
-            $openModal('edit-client');
+            $modalOpen('edit-client');
         JS);
     }
 
@@ -149,7 +149,7 @@ class Clients extends ClientList
             }
         }
 
-        $this->notification()->success(__(':model saved', ['model' => __('Client')]));
+        $this->notification()->success(__(':model saved', ['model' => __('Client')]))->send();
 
         $this->loadData();
 
@@ -181,13 +181,13 @@ class Clients extends ClientList
     {
         return [
             TabButton::make('general')
-                ->label(__('General')),
+                ->text(__('General')),
             TabButton::make('settings.client.logos')
-                ->label(__('Logos')),
+                ->text(__('Logos')),
             TabButton::make('settings.client.terms-and-conditions')
-                ->label(__('Terms and Conditions')),
+                ->text(__('Terms and Conditions')),
             TabButton::make('settings.client.sepa')
-                ->label(__('SEPA')),
+                ->text(__('SEPA')),
         ];
     }
 

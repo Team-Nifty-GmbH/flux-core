@@ -6,7 +6,7 @@
         notification: $wire.entangle('notification'),
         }"
 >
-    <x-modal.card wire:model.live="detailModal" x-on:close="$wire.closeModal()">
+    <x-modal id="edit-notification-settings-modal" wire="detailModal" x-on:close="$wire.closeModal()">
         <x-slot name="title">
             {{ __('Notification Settings') }}
         </x-slot>
@@ -19,7 +19,7 @@
                 <template x-for="(channelValue, index) in notificationChannel.channel_value">
                     <div class="flex">
                         <div class="flex items-center pr-1.5 transition-all">
-                            <x-button.circle 2xs negative label="-" x-on:click.prevent="_.pull(notificationChannel.channel_value, channelValue)"></x-button.circle>
+                            <x-button.circle 2xs color="red" label="-" x-on:click.prevent="_.pull(notificationChannel.channel_value, channelValue)"></x-button.circle>
                         </div>
                         <div class="w-full">
                             <x-input class="flex-grow" x-model="notificationChannel.channel_value[index]">
@@ -27,7 +27,7 @@
                         </div>
                     </div>
                 </template>
-                <x-button.circle 2xs positive label="+" x-on:click="notificationChannel.channel_value.push(null)"/>
+                <x-button.circle 2xs color="emerald" label="+" x-on:click="notificationChannel.channel_value.push(null)"/>
             </div>
         </template>
         <x-slot name="footer">
@@ -35,13 +35,13 @@
                 <div
                     class="flex justify-end gap-x-4">
                     <div class="flex">
-                        <x-button flat :label="__('Cancel')" x-on:click="close"/>
-                        <x-button primary :label="__('Save')" wire:click="save()"/>
+                        <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('edit-notification-settings-modal')"/>
+                        <x-button color="indigo" :text="__('Save')" wire:click="save()"/>
                     </div>
                 </div>
             </div>
         </x-slot>
-    </x-modal.card>
+    </x-modal>
     <div class="px-4 sm:px-6 lg:px-8">
         <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">
@@ -59,7 +59,7 @@
                         <div x-text="key"></div>
                     </td>
                     <td>
-                        <x-button primary :label="__('Edit')" x-on:click="$wire.show(key)" />
+                        <x-button color="indigo" :text="__('Edit')" x-on:click="$wire.show(key)" />
                     </td>
                 </x-table.row>
             </template>

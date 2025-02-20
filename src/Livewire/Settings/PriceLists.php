@@ -38,9 +38,9 @@ class PriceLists extends PriceListList
     {
         return [
             DataTableButton::make()
-                ->label(__('New'))
+                ->text(__('New'))
                 ->icon('plus')
-                ->color('primary')
+                ->color('indigo')
                 ->when(resolve_static(CreatePriceList::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'edit',
@@ -52,9 +52,9 @@ class PriceLists extends PriceListList
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
+                ->text(__('Edit'))
                 ->icon('pencil')
-                ->color('primary')
+                ->color('indigo')
                 ->when(resolve_static(UpdatePriceList::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'edit(record.id)',
@@ -115,7 +115,7 @@ class PriceLists extends PriceListList
         }
 
         $this->js(<<<'JS'
-            $openModal('edit-price-list');
+            $modalOpen('edit-price-list');
         JS);
     }
 

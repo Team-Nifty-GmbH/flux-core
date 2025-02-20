@@ -52,9 +52,9 @@ class Communication extends CommunicationList
     {
         return [
             DataTableButton::make()
-                ->label(__('New'))
+                ->text(__('New'))
                 ->icon('plus')
-                ->color('primary')
+                ->color('indigo')
                 ->wireClick('edit')
                 ->when(resolve_static(CreateCommunication::class, 'canPerformAction', [false])),
         ];
@@ -64,20 +64,20 @@ class Communication extends CommunicationList
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
+                ->text(__('Edit'))
                 ->icon('pencil')
-                ->color('primary')
+                ->color('indigo')
                 ->wireClick('edit(record.id)')
                 ->when(resolve_static(UpdateCommunication::class, 'canPerformAction', [false])),
             DataTableButton::make()
-                ->label(__('Preview'))
+                ->text(__('Preview'))
                 ->icon('document-text')
-                ->color('primary')
+                ->color('indigo')
                 ->wireClick('createPreview(record.id)'),
             DataTableButton::make()
-                ->label(__('Delete'))
+                ->text(__('Delete'))
                 ->icon('trash')
-                ->color('negative')
+                ->color('red')
                 ->attributes([
                     'wire:click' => 'delete(record.id)',
                     'wire:flux-confirm.icon.error' => __(
@@ -240,7 +240,7 @@ class Communication extends CommunicationList
             return false;
         }
 
-        $this->notification()->success(__('Email sent successfully!'));
+        $this->notification()->success(__('Email sent successfully!'))->send();
 
         $this->loadData();
 
@@ -259,7 +259,7 @@ class Communication extends CommunicationList
         }
 
         $this->js(<<<'JS'
-            $openModal('edit-communication');
+            $modalOpen('edit-communication');
         JS);
     }
 

@@ -8,6 +8,6 @@ class Open extends AdvertisingState
 
     public function color(): string
     {
-        return static::$color ?? 'negative';
+        return static::$color ?? 'red';
     }
 }

@@ -103,7 +103,7 @@ class OrderPositionsTest extends BaseSetup
             ->assertHasNoErrors()
             ->assertSet('orderPosition.id', $orderPosition->id)
             ->assertExecutesJs(<<<'JS'
-                $openModal('edit-order-position');
+                $modalOpen('edit-order-position');
             JS)
             ->call('deleteOrderPosition')
             ->assertStatus(200)

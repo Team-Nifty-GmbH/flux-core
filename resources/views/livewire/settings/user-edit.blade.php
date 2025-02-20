@@ -14,11 +14,11 @@
             <hr>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 @section('user-edit.employment')
-                    <x-datetime-picker :without-time="true" :label="__('Date Of Birth')" wire:model="userForm.date_of_birth"/>
+                    <x-date :without-time="true" :label="__('Date Of Birth')" wire:model="userForm.date_of_birth"/>
                     <x-input :label="__('Employee Number')" wire:model="userForm.employee_number"/>
-                    <x-datetime-picker :without-time="true" :label="__('Employment Date')" wire:model="userForm.employment_date"/>
-                    <x-datetime-picker :without-time="true" :label="__('Termination Date')" wire:model="userForm.termination_date"/>
-                    <x-inputs.number
+                    <x-date :without-time="true" :label="__('Employment Date')" wire:model="userForm.employment_date"/>
+                    <x-date :without-time="true" :label="__('Termination Date')" wire:model="userForm.termination_date"/>
+                    <x-number
                         :prefix="\FluxErp\Models\Currency::default()?->symbol"
                         :label="__('Cost Per Hour')"
                         wire:model="userForm.cost_per_hour"
@@ -27,31 +27,29 @@
             </div>
             <hr>
             @section('user-edit.selects')
-                <x-select
+                <x-select.styled
                     wire:model="userForm.language_id"
                     :label="__('Language')"
                     :options="$languages"
-                    option-label="name"
-                    option-value="id"
+                    select="label:name|value:id"
                 />
-                <x-select
+                <x-select.styled
                     wire:model="userForm.timezone"
                     :label="__('Timezone')"
                     :options="timezone_identifiers_list()"
                 />
-                <x-select
+                <x-select.styled
                     wire:model="userForm.parent_id"
                     :label="__('Parent')"
                     :options="$users"
-                    option-label="name"
-                    option-value="id"
+                    select="label:name|value:id"
                     option-description="email"
                 />
             @show
             @section('user-edit.attributes')
                 <x-checkbox :label="__('Active')" wire:model="userForm.is_active"/>
-                <x-inputs.password :label="__('New password')" wire:model="userForm.password"/>
-                <x-inputs.password :label="__('Repeat password')" wire:model="userForm.password_confirmation"/>
+                <x-password :label="__('New password')" wire:model="userForm.password"/>
+                <x-password :label="__('Repeat password')" wire:model="userForm.password_confirmation"/>
             @show
             <hr>
             @section('user-edit.bank-connection')
@@ -61,7 +59,7 @@
                 <x-input wire:model="userForm.bank_name" :label="__('Bank Name')"/>
             @show
             @section('user-edit.mail-accounts')
-                <x-select :options="$mailAccounts" option-label="email" option-value="id" multiselect :label="__('Mail Accounts')" wire:model="userForm.mail_accounts" />
+                <x-select.styled :options="$mailAccounts" select="label:email|value:id" multiselect :label="__('Mail Accounts')" wire:model="userForm.mail_accounts" />
             @show
         </form>
     @show
@@ -114,7 +112,7 @@
         @canAction(\FluxErp\Actions\Permission\UpdateUserPermissions::class)
             <div x-show="active === 'permissions'" x-cloak>
                 <div class="pb-3">
-                    <x-input wire:model.live.debounce.500ms="searchPermission" icon="search"/>
+                    <x-input wire:model.live.debounce.500ms="searchPermission" icon="magnifying-glass"/>
                 </div>
                 <div class="max-h-96 space-y-3 overflow-y-auto pt-3">
                     <div class="grid grid-cols-6 gap-3">
@@ -149,16 +147,15 @@
             </div>
         @endCanAction
         <div x-show="active === 'commission-rates'" x-cloak>
-            <x-select
+            <x-select.styled
                 :label="__('Commission credit contact')"
                 class="pb-4"
                 wire:model="userForm.contact_id"
-                option-value="contact_id"
-                option-label="label"
+                select="label:label|value:contact_id"
                 option-description="description"
                 template="user-option"
-                :async-data="[
-                    'api' => route('search', \FluxErp\Models\Address::class),
+                :request="[
+                    'url' => route('search', \FluxErp\Models\Address::class),
                     'method' => 'POST',
                     'params' => [
                         'option-value' => 'contact_id',
@@ -192,15 +189,15 @@
                 @canAction(\FluxErp\Actions\User\DeleteUser::class)
                     <x-button
                         flat
-                        negative
-                        :label="__('Delete')"
+                        color="red"
+                        :text="__('Delete')"
                         wire:click="delete"
                         wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('User')]) }}"
                     />
                 @endCanAction
                 <div class="flex space-x-2">
-                    <x-button :label="__('Cancel')" wire:click="cancel()"/>
-                    <x-button primary :label="__('Save')" wire:click="save()"/>
+                    <x-button color="secondary" light :text="__('Cancel')" wire:click="cancel()"/>
+                    <x-button color="indigo" :text="__('Save')" wire:click="save()"/>
                 </div>
             </div>
         </div>

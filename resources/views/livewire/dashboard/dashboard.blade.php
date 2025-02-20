@@ -8,7 +8,7 @@
                 <div class="flex items-start space-x-5">
                     @section('dashboard-header.avatar')
                         <div class="flex-shrink-0">
-                            <x-avatar :src="auth()->user()->getAvatarUrl()" />
+                            <x-avatar :image="auth()->user()->getAvatarUrl()" />
                         </div>
                     @show
                     @section('dashboard-header.user-name')

@@ -94,7 +94,7 @@ class WorkTime extends Component
         $this->workTime->fill($data ?? []);
 
         $this->js(<<<'JS'
-            $openModal('work-time');
+            $modalOpen('work-time');
         JS);
     }
 
@@ -105,7 +105,7 @@ class WorkTime extends Component
         $this->workTime->fill($workTime);
 
         $this->js(<<<'JS'
-            $openModal('work-time');
+            $modalOpen('work-time');
         JS);
     }
 

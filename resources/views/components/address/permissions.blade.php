@@ -32,7 +32,7 @@
                     {{ __('Password') }}
                 </label>
                 <div class="col-span-2">
-                    <x-inputs.password x-bind:readonly="!$wire.edit" wire:model="address.password"/>
+                    <x-password x-bind:readonly="!$wire.edit" wire:model="address.password"/>
                 </div>
             </div>
             <div
@@ -42,8 +42,8 @@
                 </label>
                 <div class="col-span-2 space-y-3">
                     <x-button
-                        primary
-                        :label="__('Select all')"
+                        color="indigo"
+                        :text="__('Select all')"
                         x-bind:disabled="!$wire.edit"
                         x-on:click="$wire.permissions().then((permissions) => $wire.address.permissions = permissions.map(permission => permission.id))"
                     />

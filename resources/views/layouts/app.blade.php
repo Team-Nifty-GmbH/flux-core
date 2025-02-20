@@ -23,7 +23,7 @@
     @show
     @section('layout.app.body')
         @persist('notifications')
-            <x-notifications z-index="z-50"></x-notifications>
+            <x-toast z-index="z-50"></x-toast>
             <x-dialog z-index="z-40" blur="md" align="center"/>
             <x-dialog z-index="z-40" blur="md" align="center" id="prompt">
                 <x-input id="prompt-value" />
@@ -36,8 +36,8 @@
                     <livewire:edit-mail lazy />
                 </div>
                 <x-modal
-                    name="detail-modal"
-                    max-width="7xl"
+                    id="detail-modal"
+                    size="7xl"
                     x-on:close="$el.querySelector('iframe').src = 'data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E'"
                 >
                     <div
@@ -57,8 +57,8 @@
                             </iframe>
                             <x-slot:footer>
                                 <div class="w-full flex justify-end gap-1.5">
-                                    <x-button :label="__('Cancel')" x-on:click="close"/>
-                                    <x-button primary :label="__('Open')" x-on:click="openUrl()"/>
+                                    <x-button color="secondary" light :text="__('Cancel')" x-on:click="$modalClose('detail-modal')"/>
+                                    <x-button color="indigo" :text="__('Open')" x-on:click="openUrl()"/>
                                 </div>
                             </x-slot:footer>
                         </x-card>

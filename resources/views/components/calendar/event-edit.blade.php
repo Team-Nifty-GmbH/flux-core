@@ -2,18 +2,16 @@
     @section('event-edit.content')
         @section('event-edit.calendar-select')
             <div x-show="!$wire.calendarEvent.calendar_type">
-                <x-select
+                <x-select.styled
                     wire:model="calendarEvent.calendar_id"
                     :label="__('Calendar')"
-                    option-value="id"
-                    option-label="name"
-                    :clearable="false"
+                    select="label:name|value:id"
+                    required
                     x-on:selected="$wire.calendarEvent.is_repeatable = $wire.isCalendarEventRepeatable($event.detail.value);"
+                    :options="$this->selectableCalendars"
+                    select="label:name|value:id"
                 >
-                    @foreach($this->selectableCalendars as $calendar)
-                        <x-select.option :value="$calendar['id']" :label="$calendar['name']"></x-select.option>
-                    @endforeach
-                </x-select>
+                </x-select.styled>
             </div>
         @show
         @section('event-edit.input-fields')
@@ -115,8 +113,8 @@
                     <x-label>
                         {{ __('Repeat every') }}
                     </x-label>
-                    <x-inputs.number wire:model="calendarEvent.interval" :min="1" x-bind:disabled="! $wire.calendarEvent.is_editable ?? false" />
-                    <x-select
+                    <x-number wire:model="calendarEvent.interval" :min="1" x-bind:disabled="! $wire.calendarEvent.is_editable ?? false" />
+                    <x-select.styled
                         x-on:selected="$wire.calendarEvent.unit = $event.detail.value"
                         x-init="$watch('$wire.calendarEvent.unit', (value) => {
                             const option = options.find(option => option.value === value);
@@ -124,15 +122,14 @@
                                 select(option);
                             }
                         })"
-                        :clearable="false"
+                        required
                         :options="[
                             ['label' => __('Day(s)'), 'value' => 'days'],
                             ['label' => __('Week(s)'), 'value' => 'weeks'],
                             ['label' => __('Month(s)'), 'value' => 'months'],
                             ['label' => __('Year(s)'), 'value' => 'years'],
                         ]"
-                        option-label="label"
-                        option-value="value"
+                        select="label:value|value:label"
                         x-bind:disabled="! $wire.calendarEvent.is_editable ?? false"
                     />
                 </div>
@@ -148,77 +145,77 @@
                                 }
                             },
                             weekdaySelected(weekday) {
-                                return $wire.calendarEvent.weekdays.indexOf(weekday) !== -1 ? 'bg-primary-500 text-white' : '';
+                                return $wire.calendarEvent.weekdays.indexOf(weekday) !== -1 ? 'bg-indigo-500 text-white' : '';
                             }
                          }"
                     >
                         <x-button
                             rounded
-                            primary
+                            color="indigo"
                             flat
                             xs
-                            :label="__('Mon')"
+                            :text="__('Mon')"
                             x-on:click="updateWeekdays('Mon')"
                             x-bind:class="weekdaySelected('Mon')"
                         />
                         <x-button
                             rounded
-                            primary
+                            color="indigo"
                             flat
                             xs
-                            :label="__('Tue')"
+                            :text="__('Tue')"
                             x-on:click="updateWeekdays('Tue')"
                             x-bind:class="weekdaySelected('Tue')"
                         />
                         <x-button
                             rounded
-                            primary
+                            color="indigo"
                             flat
                             xs
-                            :label="__('Wed')"
+                            :text="__('Wed')"
                             x-on:click="updateWeekdays('Wed')"
                             x-bind:class="weekdaySelected('Wed')"
                         />
                         <x-button
                             rounded
-                            primary
+                            color="indigo"
                             flat
                             xs
-                            :label="__('Thu')"
+                            :text="__('Thu')"
                             x-on:click="updateWeekdays('Thu')"
                             x-bind:class="weekdaySelected('Thu')"
                         />
                         <x-button
                             rounded
-                            primary
+                            color="indigo"
                             flat
                             xs
-                            :label="__('Fri')"
+                            :text="__('Fri')"
                             x-on:click="updateWeekdays('Fri')"
                             x-bind:class="weekdaySelected('Fri')"
                         />
                         <x-button
                             rounded
-                            primary
+                            color="indigo"
                             flat
                             xs
-                            :label="__('Sat')"
+                            :text="__('Sat')"
                             x-on:click="updateWeekdays('Sat')"
                             x-bind:class="weekdaySelected('Sat')"
                         />
                         <x-button
                             rounded
-                            primary
+                            color="indigo"
                             flat
                             xs
-                            :label="__('Sun')"
+                            :text="__('Sun')"
                             x-on:click="updateWeekdays('Sun')"
                             x-bind:class="weekdaySelected('Sun')"
                         />
                     </div>
                 </template>
                 <template x-if="$wire.calendarEvent.unit === 'months'">
-                    <x-select class="mt-4"
+                    <x-select.styled class="mt-4"
                               x-on:selected="$wire.calendarEvent.monthly = $event.detail.value"
                               x-init="$watch('$wire.calendarEvent.monthly', (value) => {
                                   const option = options.find(option => option.value === value);
@@ -226,34 +223,34 @@
                                       select(option);
                                   }
                               })"
-                              :clearable="false"
+                              required
                               x-bind:disabled="! $wire.calendarEvent.is_editable ?? false"
                     >
-                        <x-select.option value="day">
+                        <x-select.styled.option value="day">
                             <span x-text="'{{ __('Monthly on') }} ' + dayjs($wire.calendarEvent.start).format('DD') + '.'"></span>
-                        </x-select.option>
-                        <x-select.option value="first">
+                        </x-select.styled.option>
+                        <x-select.styled.option value="first">
                             <span x-text="'{{ __('Monthly on first') }} ' + dayjs($wire.calendarEvent.start).format('dddd')"></span>
-                        </x-select.option>
-                        <x-select.option value="second">
+                        </x-select.styled.option>
+                        <x-select.styled.option value="second">
                             <span x-text="'{{ __('Monthly on second') }} ' + dayjs($wire.calendarEvent.start).format('dddd')"></span>
-                        </x-select.option>
-                        <x-select.option value="third">
+                        </x-select.styled.option>
+                        <x-select.styled.option value="third">
                             <span x-text="'{{ __('Monthly on third') }} ' + dayjs($wire.calendarEvent.start).format('dddd')"></span>
-                        </x-select.option>
-                        <x-select.option value="fourth">
+                        </x-select.styled.option>
+                        <x-select.styled.option value="fourth">
                             <span x-text="'{{ __('Monthly on fourth') }} ' + dayjs($wire.calendarEvent.start).format('dddd')"></span>
-                        </x-select.option>
-                        <x-select.option value="last">
+                        </x-select.styled.option>
+                        <x-select.styled.option value="last">
                             <span x-text="'{{ __('Monthly on last') }} ' + dayjs($wire.calendarEvent.start).format('dddd')"></span>
-                        </x-select.option>
-                    </x-select>
+                        </x-select.styled.option>
+                    </x-select.styled>
                 </template>
 
                 <x-label class="mt-4 mb-2">
                     {{ __('Repeat end') }}
                 </x-label>
-                <x-radio :label="__('Never')" :value="null" x-model="$wire.calendarEvent.repeat_radio" x-bind:disabled="! $wire.calendarEvent.is_editable ?? false" />
+                <x-radio :text="__('Never')" :value="null" x-model="$wire.calendarEvent.repeat_radio" x-bind:disabled="! $wire.calendarEvent.is_editable ?? false" />
                 <div class="grid grid-cols-2 items-center gap-1.5">
                     <x-radio :label="__('Date At')" value="repeat_end" x-model="$wire.calendarEvent.repeat_radio" x-bind:disabled="! $wire.calendarEvent.is_editable ?? false" />
                     <x-input
@@ -264,13 +261,13 @@
                         x-on:change="$wire.calendarEvent.repeat_end = dayjs($event.target.value).format('YYYY-MM-DD')"
                     />
                     <x-radio :label="__('After amount of events')" value="recurrences" x-model="$wire.calendarEvent.repeat_radio" x-bind:disabled="! $wire.calendarEvent.is_editable ?? false" />
-                    <x-inputs.number x-model="$wire.calendarEvent.recurrences" x-bind:disabled="(! $wire.calendarEvent.is_editable ?? false) || $wire.calendarEvent.repeat_radio !== 'recurrences'" />
+                    <x-number x-model="$wire.calendarEvent.recurrences" x-bind:disabled="(! $wire.calendarEvent.is_editable ?? false) || $wire.calendarEvent.repeat_radio !== 'recurrences'" />
                 </div>
             </div>
         @show
         @section('event-edit.invites')
             <div x-show="calendarEvent.is_invited">
-                <x-select
+                <x-select.styled
                     x-model="calendarEvent.status"
                     x-init="$watch('calendarEvent.status', (value) => {
                         const option = options.find(option => option.value === value);
@@ -281,50 +278,50 @@
                         }
                     })"
                     :label="__('My status')"
-                    :clearable="false"
+                    required
                 >
-                    <x-select.option value="accepted">
+                    <x-select.styled.option value="accepted">
                         <div>
                             <x-button.circle
                                 disabled
-                                positive
+                                color="emerald"
                                 xs
                                 icon="check"
                             />
                             {{__('Accepted')}}
                         </div>
-                    </x-select.option>
-                    <x-select.option :label="__('Declined')" value="declined">
+                    </x-select.styled.option>
+                    <x-select.styled.option :text="__('Declined')" value="declined">
                         <div>
                             <x-button.circle
                                 disabled
-                                negative
+                                color="red"
                                 xs
-                                icon="x"
+                                icon="x-mark"
                             />
                             {{__('Declined')}}
                         </div>
-                    </x-select.option>
-                    <x-select.option :label="__('Maybe')" value="maybe">
+                    </x-select.styled.option>
+                    <x-select.styled.option :text="__('Maybe')" value="maybe">
                         <div>
                             <x-button.circle
                                 disabled
-                                warning
+                                color="amber"
                                 xs
                                 label="?"
                             />
                             {{__('Maybe')}}
                         </div>
-                    </x-select.option>
-                </x-select>
+                    </x-select.styled.option>
+                </x-select.styled>
             </div>
             <div>
                 <div class="grid grid-cols-1 gap-1.5" x-show="$wire.calendarEvent.is_editable ?? false" x-on:click.outside="search = false">
-                    <x-label for="invite" :label="__('Invites')" />
+                    <x-label for="invite" :text="__('Invites')" />
                     <template x-for="invited in $wire.calendarEvent.invited">
                         <div class="flex gap-1.5">
                             <x-button.circle
-                                negative
+                                color="red"
                                 xs
                                 icon="trash"
                                 x-bind:disabled="! $wire.calendarEvent.is_editable ?? false"
@@ -333,43 +330,42 @@
                             <x-button.circle
                                 x-show="invited.pivot?.status === 'accepted'"
                                 disabled
-                                positive
+                                color="emerald"
                                 xs
                                 icon="check"
                             />
                             <x-button.circle
                                 x-show="invited.pivot?.status === 'declined'"
                                 disabled
-                                negative
+                                color="red"
                                 xs
-                                icon="x" />
+                                icon="x-mark" />
                             <x-button.circle
                                 x-show="invited.pivot?.status === 'maybe'"
                                 disabled
-                                warning
+                                color="amber"
                                 xs
                                 label="?"
                             />
                             <x-button.circle
                                 x-show="invited.pivot?.status !== 'accepted' && invited.pivot?.status !== 'declined' && invited.pivot?.status !== 'maybe'"
                                 disabled
-                                secondary
+                                color="gray"
                                 xs
                                 label="?"
                             />
                             <x-badge md x-text="invited.label ?? invited.name" />
                         </div>
                     </template>
-                    <x-select
+                    <x-select.styled
                         id="invite"
-                        option-value="id"
-                        option-label="label"
+                        select="label:label|value:id"
                         :placeholder="__('Add invite')"
                         :template="[
                             'name'   => 'user-option',
                         ]"
-                        :async-data="[
-                            'api' => route('search', \FluxErp\Models\User::class),
+                        :request="[
+                            'url' => route('search', \FluxErp\Models\User::class),
                             'method' => 'POST',
                             'params' => [
                                 'with' => 'media',
@@ -382,7 +378,7 @@
                                 ],
                             ],
                         ]"
-                        x-on:selected="$wire.calendarEvent.invited.push($event.detail); clear(); asyncData.params.where.push(['id', '!=', $event.detail.id])"
+                        x-on:selected="$wire.calendarEvent.invited.push($event.detail); clear();.request.params.where.push(['id', '!=', $event.detail.id])"
                     />
                 </div>
             </div>
@@ -390,7 +386,7 @@
         @section('event-edit.has-taken-place')
             <div class="mb-2">
                 <x-checkbox
-                    :label="__('Has taken place')"
+                    :text="__('Has taken place')"
                     wire:model="calendarEvent.has_taken_place"
                     x-bind:disabled="! $wire.calendarEvent.is_editable ?? false"
                 />

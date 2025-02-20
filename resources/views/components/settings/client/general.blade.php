@@ -4,13 +4,12 @@
             <div class="mt-6 grid grid-cols-2 gap-y-6 gap-x-4">
                 <x-input :label="__('Name')" :placeholder="__('Name')" wire:model="client.name"/>
                 <x-input :label="__('Client Code')" :placeholder="__('Client Code')" wire:model="client.client_code"/>
-                <x-select
+                <x-select.styled
                     :label="__('Country')"
                     :placeholder="__('Country')"
                     wire:model="client.country_id"
                     :options="$countries"
-                    option-label="name"
-                    option-value="id"
+                    select="label:name|value:id"
                 />
                 <x-input :label="__('CEO')" :placeholder="__('CEO')" wire:model="client.ceo"/>
                 <x-input :label="__('Postcode')" :placeholder="__('Postcode')" wire:model="client.postcode"/>
@@ -21,13 +20,12 @@
                 <x-input :label="__('Email')" :placeholder="__('Email')" wire:model="client.email"/>
                 <x-input :label="__('Website')" :placeholder="__('Website')" wire:model="client.website"/>
                 <x-input :label="__('Vat Id')" :placeholder="__('Vat Id')" wire:model="client.vat_id"/>
-                <x-select
+                <x-select.styled
                     :label="__('Bank Connections')"
                     multiselect
                     wire:model="client.bank_connections"
                     :options="$bankConnections"
-                    option-label="name"
-                    option-value="id"
+                    select="label:name|value:id"
                 />
                 <x-toggle :label="__('Active')" wire:model="client.is_active"/>
                 <x-toggle :label="__('Is Default')" wire:model="client.is_default"/>
@@ -59,14 +57,14 @@
                                 <x-input type="time" x-model="hours.end"/>
                             </td>
                             <td>
-                                <x-button.circle icon="trash" negative sm x-on:click="$wire.client.opening_hours.splice(index, 1)"/>
+                                <x-button.circle icon="trash" color="red" sm x-on:click="$wire.client.opening_hours.splice(index, 1)"/>
                             </td>
                         </tr>
                     </template>
                 </x-flux::table>
                 <div class="flex w-full justify-center">
                     <div class="pt-4">
-                        <x-button primary x-on:click="$wire.client.opening_hours.push({})">
+                        <x-button color="indigo" x-on:click="$wire.client.opening_hours.push({})">
                             {{ __('Add') }}
                         </x-button>
                     </div>

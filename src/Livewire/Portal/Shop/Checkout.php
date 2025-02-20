@@ -111,7 +111,7 @@ class Checkout extends Cart
             ])->validate()->execute();
         }
 
-        $this->notification()->success('Order placed successfully!');
+        $this->notification()->success('Order placed successfully!')->send();
         event(new PortalOrderCreated($order));
 
         if (auth('address')->check()) {

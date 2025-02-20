@@ -25,12 +25,12 @@ class Orders extends OrderList
     {
         return [
             DataTableButton::make()
-                ->label(__('Balance Statement'))
+                ->text(__('Balance Statement'))
                 ->wireClick('$parent.openCreateDocumentsModal()'),
             DataTableButton::make()
                 ->icon('plus')
-                ->color('primary')
-                ->label(__('New order'))
+                ->color('indigo')
+                ->text(__('New order'))
                 ->wireClick('createOrder'),
         ];
     }
@@ -42,7 +42,7 @@ class Orders extends OrderList
         $this->order->contact_id = $this->contact->id;
 
         $this->js(<<<'JS'
-            $openModal('create-order');
+            $modalOpen('create-order');
         JS);
     }
 

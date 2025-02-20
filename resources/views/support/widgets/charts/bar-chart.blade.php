@@ -2,7 +2,7 @@
 @section('options')
     @parent
     @if($chartTypes)
-        <x-native-select
+        <x-select.native
             x-model="chartType"
             :options="[
                     [
@@ -18,10 +18,9 @@
                         'label' => __('Area'),
                     ],
                 ]"
-            option-value="value"
-            option-label="label"
+            select="label:label|value:value"
         >
-        </x-native-select>
+        </x-select.native>
     @endif
 @endsection
 @if($showTotals)
@@ -53,7 +52,7 @@
                                 x-cloak
                                 x-show="!isNaN(seriesData.growthRate) && seriesData.growthRate < 0"
                                 icon="chevron-down"
-                                negative
+                                color="red"
                             >
                                 <span x-text="seriesData.growthRate + '%'">
                                 </span>
@@ -62,7 +61,7 @@
                                 x-cloak
                                 x-show="!isNaN(seriesData.growthRate) && seriesData.growthRate == 0"
                                 icon="chevron-right"
-                                secondary
+                                color="gray"
                             >
                                 <span x-text="seriesData.growthRate + '%'">
                                 </span>

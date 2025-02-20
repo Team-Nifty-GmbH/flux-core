@@ -61,22 +61,22 @@
                 <div class="flex flex-wrap justify-end">
                     <div class="flex items-center justify-end space-x-4">
                         <x-toggle x-ref="sticky" md :left-label="__('Sticky')" />
-                        <x-button
+                        <x-button color="secondary" light
                             x-on:click="saveComment($refs.textarea, tempFilesId, $refs.sticky, false, typeof comment !== 'undefined' ? comment : null).then((success) => {if(success) clearPond();})"
                             primary
                             spinner="saveComment"
                             wire:loading.attr="disabled"
                             x-bind:disabled="isLoadingFiles.length > 0"
-                            :label="auth()->user()?->getMorphClass() === morph_alias(\FluxErp\Models\User::class) && $this->isPublic === true ? __('Save internal') : __('Save')"
+                            :text="auth()->user()?->getMorphClass() === morph_alias(\FluxErp\Models\User::class) && $this->isPublic === true ? __('Save internal') : __('Save')"
                         />
                         @if(auth()->user()?->getMorphClass() === morph_alias(\FluxErp\Models\User::class) && $this->isPublic === true)
-                            <x-button
+                            <x-button color="secondary" light
                                 x-on:click="saveComment($refs.textarea, tempFilesId, $refs.sticky, false, typeof comment !== 'undefined' ? comment : null).then((success) => {if(success) clearPond();})"
                                 primary
                                 spinner="saveComment"
                                 x-bind:disabled="isLoadingFiles.length > 0"
                                 wire:loading.attr="disabled"
-                                :label="__('Answer to customer')"
+                                :text="__('Answer to customer')"
                             />
                         @endif
                     </div>

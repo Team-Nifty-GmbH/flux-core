@@ -6,7 +6,7 @@
                 <div class="mt-2 text-sm text-gray-300">{{ __('Here you can manage all ticket types...') }}</div>
             </div>
             <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-                <x-button primary :label="__('Create')" wire:click="show()" />
+                <x-button color="indigo" :text="__('Create')" wire:click="show()" />
             </div>
         </div>
         <div class="mt-8 flex flex-col">
@@ -47,10 +47,10 @@
                                     <td class="whitespace-nowrap py-2 pl-2 pr-2 text-center text-sm text-gray-500">
                                         <div class="flex justify-center gap-1" >
                                             <div>
-                                                <x-button x-on:click="$wire.show(index)" secondary icon="pencil" />
+                                                <x-button x-on:click="$wire.show(index)" color="gray" icon="pencil" />
                                             </div>
                                             <div x-show="!ticketType.field_type" x-transition x-cloak >
-                                                <x-button x-on:click="$wire.show(index, true)" primary icon="plus" />
+                                                <x-button x-on:click="$wire.show(index, true)" color="indigo" icon="plus" />
                                             </div>
                                         </div>
                                     </td>
@@ -64,14 +64,14 @@
         </div>
     </div>
 
-    <x-modal.card z-index="z-30" wire:model="showTicketTypeModal" :title="$ticketTypeIndex === -1 ? __('Create Ticket Type') : __('Edit Ticket Type')">
+    <x-modal id="edit-ticket-type-modal" z-index="z-30" wire="showTicketTypeModal" :title="$ticketTypeIndex === -1 ? __('Create Ticket Type') : __('Edit Ticket Type')">
         <livewire:settings.ticket-type-edit/>
         <x-slot name="footer">
             <div x-data="{ticketTypeIndex: @entangle('ticketTypeIndex')}" class="w-full">
                 <div
                     class="flex justify-between gap-x-4">
                     @if(user_can('action.ticket-type.delete'))
-                        <x-button x-bind:class="ticketTypeIndex > -1 || 'invisible'" flat negative label="{{ __('Delete') }}"
+                        <x-button color="secondary" light x-bind:class="ticketTypeIndex > -1 || 'invisible'" flat negative label="{{ __('Delete') }}"
                                   x-on:click="window.$wireui.confirmDialog({
                                                             title: '{{ __('Delete ticket type') }}',
                                                             description: '{{ __('Do you really want to delete this ticket type?') }}',
@@ -87,22 +87,22 @@
                                                         " label="{{ __('Delete') }}"/>
                     @endif
                     <div class="flex">
-                        <x-button flat :label="__('Cancel')" x-on:click="close"/>
-                        <x-button primary :label="__('Save')" wire:click="$dispatchTo('settings.ticket-type-edit', 'save')"/>
+                        <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('edit-ticket-type-modal')"/>
+                        <x-button color="indigo" :text="__('Save')" wire:click="$dispatchTo('settings.ticket-type-edit', 'save')"/>
                     </div>
                 </div>
             </div>
         </x-slot>
-    </x-modal.card>
+    </x-modal>
 
-    <x-modal.card z-index="z-30" wire:model="showAdditionalColumnModal" :title="$additionalColumnIndex === -1 ? __('Create Additional Column') : __('Edit Additional Column')">
+    <x-modal id="edit-additional-column-modal" z-index="z-30" wire="showAdditionalColumnModal" :title="$additionalColumnIndex === -1 ? __('Create Additional Column') : __('Edit Additional Column')">
         <livewire:settings.additional-column-edit/>
         <x-slot name="footer">
             <div x-data="{additionalColumnIndex: @entangle('additionalColumnIndex')}" class="w-full">
                 <div
                     class="flex justify-between gap-x-4">
                     @if(user_can('action.additional-column.delete'))
-                        <x-button x-bind:class="additionalColumnIndex > -1 || 'invisible'" flat negative label="{{ __('Delete') }}"
+                        <x-button color="secondary" light x-bind:class="additionalColumnIndex > -1 || 'invisible'" flat negative label="{{ __('Delete') }}"
                                   x-on:click="window.$wireui.confirmDialog({
                                                             title: '{{ __('Delete additional column') }}',
                                                             description: '{{ __('Do you really want to delete this additional column?') }}',
@@ -119,11 +119,11 @@
                                                         " label="{{ __('Delete') }}"/>
                     @endif
                     <div class="flex">
-                        <x-button flat :label="__('Cancel')" x-on:click="close"/>
-                        <x-button primary :label="__('Save')" wire:click="$dispatchTo('settings.additional-column-edit', 'save')"/>
+                        <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('edit-additional-column-modal')"/>
+                        <x-button color="indigo" :text="__('Save')" wire:click="$dispatchTo('settings.additional-column-edit', 'save')"/>
                     </div>
                 </div>
             </div>
         </x-slot>
-    </x-modal.card>
+    </x-modal>
 </div>

@@ -52,7 +52,7 @@
             </li>
         </template>
         <template x-if="perPage < total">
-            <x-button x-on:click="page++" primary class="w-full" :label="__('Show more')"></x-button>
+            <x-button x-on:click="page++" color="indigo" class="w-full" :text="__('Show more')"></x-button>
         </template>
     </ul>
 </div>

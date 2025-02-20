@@ -58,7 +58,7 @@
              x-on:dragover.prevent="isDropping = true"
              x-on:dragleave.prevent="isDropping = false"
         >
-            <div class="absolute top-0 bottom-0 left-0 right-0 z-30 flex items-center justify-center bg-primary-500 opacity-90"
+            <div class="absolute top-0 bottom-0 left-0 right-0 z-30 flex items-center justify-center bg-indigo-500 opacity-90"
                  x-show="isDropping"
             >
                 <span class="text-3xl text-white">{{ __('Release to upload!') }}</span>
@@ -67,7 +67,7 @@
                    for="file-upload"
             >
                 <div class="pb-3">
-                    <x-heroicons name="arrow-up-on-square" class="h-12 w-12" />
+                    <x-icon name="arrow-up-on-square" class="h-12 w-12" />
                 </div>
                 <p>{{ __('Click here to select files to upload') }}</p>
                 <em class="italic text-slate-400">{{ __('(Or drag files to the page)') }}</em>
@@ -90,7 +90,7 @@
                         <span class="w-0 flex-1 truncate pl-1" x-text="file.name"></span>
                     </div>
                     <div class="flex flex-shrink-0 space-x-4">
-                        <x-button negative x-on:click="$wire.removeFileUpload('{{ $target }}', index)" :label="__('Delete')" />
+                        <x-button color="red" x-on:click="$wire.removeFileUpload('{{ $target }}', index)" :text="__('Delete')" />
                     </div>
                 </div>
             </template>

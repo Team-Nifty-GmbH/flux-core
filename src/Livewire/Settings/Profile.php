@@ -126,7 +126,7 @@ class Profile extends Component
                 ->checkPermission()
                 ->validate()
                 ->execute();
-            $this->notification()->success(__(':model saved', ['model' => __('My Profile')]));
+            $this->notification()->success(__(':model saved', ['model' => __('My Profile')]))->send();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
         }

@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\View;
 use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\View\FileViewFinder;
+use TallStackUi\Facades\TallStackUi;
 
 class ViewServiceProvider extends ServiceProvider
 {
@@ -53,10 +54,6 @@ class ViewServiceProvider extends ServiceProvider
                     static::getRealPackageAssetPath(
                         'resources/js/index.js',
                         'team-nifty-gmbh/tall-calendar'
-                    ),
-                    static::getRealPackageAssetPath(
-                        'ts/index.ts',
-                        'wireui/wireui'
                     ),
                 ]
             );
@@ -103,7 +100,7 @@ class ViewServiceProvider extends ServiceProvider
         $views[] = __DIR__ . '/../../resources/views/printing';
         $this->loadViewsFrom($views, 'print');
 
-        $this->loadViewsFrom(__DIR__ . '/../../resources/views/vendor/wireui', 'wireui');
+        $this->loadViewsFrom(__DIR__ . '/../../resources/views/vendor/tallstackui', 'tallstack-ui');
 
         View::composer('*', function () {
             Currency::default() && Number::useCurrency(Currency::default()->iso);
@@ -120,6 +117,14 @@ class ViewServiceProvider extends ServiceProvider
             } catch (\Throwable) {
             }
         });
+
+        TallStackUi::personalize()
+            ->card()
+            ->block('header.text.size', 'flex justify-end')
+            ->block('header.wrapper.base', 'w-full');
+        TallStackUi::personalize()
+            ->form('label')
+            ->block('text', 'block text-sm font-medium text-gray-700 dark:text-gray-400');
     }
 
     public static function getRealPackageAssetPath(string $path, string $packageName): string

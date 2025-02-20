@@ -11,16 +11,15 @@
 >
     <div style="display: none;">
         <div id="select">
-            <x-select
+            <x-select.styled
                 :label="__('Assign product')"
                 x-on:selected="pushProduct($event.detail, $el.closest('[data-index]').getAttribute('data-index')); clear()"
                 class="pb-4"
-                option-value="id"
-                option-label="label"
+                select="label:label|value:id"
                 option-description="product_number"
                 template="user-option"
-                :async-data="[
-                    'api' => route('search', \FluxErp\Models\Product::class),
+                :request="[
+                    'url' => route('search', \FluxErp\Models\Product::class),
                     'params' => [
                         'fields' => [
                             'id',
@@ -45,7 +44,7 @@
             </div>
             <x-slot:footer>
                 <div x-bind:data-index="index" class="flex flex-col gap-4 pb-4" x-cloak x-show="edit" x-transition>
-                    <x-button primary :label="__('Add product')" x-on:click="$el.parentNode.appendChild(document.getElementById('select'))" />
+                    <x-button color="indigo" :text="__('Add product')" x-on:click="$el.parentNode.appendChild(document.getElementById('select'))" />
                 </div>
                 <div class="flex flex-col gap-1.5">
                     <template x-for="(product, productIndex) in productCrossSelling.products">
@@ -58,23 +57,23 @@
                             </div>
                             <span x-text="product.name"></span>
                             <div x-show="productCrossSelling.products.length > 1 && edit" x-transition>
-                                <x-button.circle icon="trash" negative x-on:click="productCrossSelling.products.splice(productIndex, 1)" />
+                                <x-button.circle icon="trash" color="red" x-on:click="productCrossSelling.products.splice(productIndex, 1)" />
                             </div>
                         </div>
                     </template>
                 </div>
             </x-slot:footer>
-            <x-slot:action>
+            <x-slot:header>
                 <div x-show="edit" x-cloak x-transition>
-                    <x-button negative x-on:click="$wire.productCrossSellings.splice(index, 1)">
+                    <x-button color="red" x-on:click="$wire.productCrossSellings.splice(index, 1)">
                         {{ __('Delete') }}
                     </x-button>
                 </div>
-            </x-slot:action>
+            </x-slot:header>
         </x-card>
     </template>
     <div class="w-full flex justify-center">
-        <x-button primary x-on:click="edit = true; $wire.productCrossSellings.push({'name': '{{ __('New Cross Selling') }}', 'is_active': true, 'is_new': true, 'products': []})">
+        <x-button color="indigo" x-on:click="edit = true; $wire.productCrossSellings.push({'name': '{{ __('New Cross Selling') }}', 'is_active': true, 'is_new': true, 'products': []})">
             {{ __('Add product cross selling') }}
         </x-button>
     </div>

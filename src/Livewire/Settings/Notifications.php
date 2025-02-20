@@ -105,7 +105,7 @@ class Notifications extends Component
                     $this->notification()->error(
                         title: __('Notification setting could not be saved'),
                         description: implode(', ', Arr::flatten($response['errors']))
-                    );
+                    )->send();
                 }
             }
         }

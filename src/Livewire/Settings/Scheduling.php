@@ -49,9 +49,9 @@ class Scheduling extends ScheduleList
     {
         return [
             DataTableButton::make()
-                ->label(__('New'))
+                ->text(__('New'))
                 ->icon('plus')
-                ->color('primary')
+                ->color('indigo')
                 ->when(resolve_static(CreateSchedule::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'edit',
@@ -85,7 +85,7 @@ class Scheduling extends ScheduleList
         return [
             DataTableButton::make()
                 ->icon('pencil')
-                ->color('primary')
+                ->color('indigo')
                 ->when(resolve_static(UpdateSchedule::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'edit(record.id)',
@@ -100,7 +100,7 @@ class Scheduling extends ScheduleList
         $this->schedule->fill($schedule);
 
         $this->js(<<<'JS'
-            $openModal('edit-schedule');
+            $modalOpen('edit-schedule');
         JS);
     }
 

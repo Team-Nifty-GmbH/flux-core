@@ -23,8 +23,8 @@ class ContactOrigins extends ContactOriginList
     {
         return [
             DataTableButton::make()
-                ->label(__('Create'))
-                ->color('primary')
+                ->text(__('Create'))
+                ->color('indigo')
                 ->icon('plus')
                 ->when(resolve_static(CreateContactOrigin::class, 'canPerformAction', [false]))
                 ->wireClick('edit'),
@@ -35,14 +35,14 @@ class ContactOrigins extends ContactOriginList
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
+                ->text(__('Edit'))
                 ->icon('pencil')
-                ->color('primary')
+                ->color('indigo')
                 ->when(resolve_static(UpdateContactOrigin::class, 'canPerformAction', [false]))
                 ->wireClick('edit(record.id)'),
             DataTableButton::make()
-                ->label(__('Delete'))
-                ->color('negative')
+                ->text(__('Delete'))
+                ->color('red')
                 ->icon('trash')
                 ->when(resolve_static(DeleteContactOrigin::class, 'canPerformAction', [false]))
                 ->attributes([
@@ -62,7 +62,7 @@ class ContactOrigins extends ContactOriginList
         $this->contactOriginForm->fill($contactOrigin);
 
         $this->js(<<<'JS'
-            $openModal('edit-contact-origin');
+            $modalOpen('edit-contact-origin');
         JS);
     }
 

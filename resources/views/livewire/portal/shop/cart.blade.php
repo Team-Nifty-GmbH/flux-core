@@ -1,6 +1,6 @@
 <div x-data="{show: false, showWatchlist: false}">
     @section('icon')
-        <x-button rounded :label="count($this->cart->cartItems)" primary icon="shopping-cart" s x-on:click="show = true"/>
+        <x-button color="secondary" light rounded :text="count($this->cart->cartItems)" primary icon="shopping-cart" s x-on:click="show = true"/>
     @show
     @section('cart-sidebar')
         <x-flux::sidebar x-show="show">
@@ -34,43 +34,42 @@
                     @section('cart-sidebar.footer')
                         <div class="flex flex-col gap-1.5 w-full">
                             @section('cart-sidebar.footer.buttons')
-                                <x-button
+                                <x-button color="secondary" light
                                     class="w-full"
-                                    :label="__('Close')"
+                                    :text="__('Close')"
                                     x-on:click="show = false;"
                                 />
                                 @if($this->cart->cartItems->isNotEmpty())
                                     @section('cart-sidebar.footer.buttons.buy')
                                         <x-button
                                             class="w-full"
-                                            :label="__('Checkout')"
+                                            :text="__('Checkout')"
                                             wire:navigate
                                             x-on:click="show = false;"
                                             :href="route('portal.checkout')"
-                                            primary
+                                            color="indigo"
                                         />
                                     @show
                                     @section('cart-sidebar.footer.buttons.watchlist')
-                                        <x-button
+                                        <x-button color="secondary" light
                                             class="w-full"
                                             icon="chevron-down"
-                                            :label="__('Add items to watchlist')"
+                                            :text="__('Add items to watchlist')"
                                             x-on:click="showWatchlist = ! showWatchlist"
                                         />
                                         <div x-cloak x-show="showWatchlist" x-collapse class="flex flex-col gap-1.5 pt-4">
-                                            <x-select
+                                            <x-select.styled
                                                 class="w-full"
-                                                :clearable="false"
-                                                :label="__('Select a watchlist')"
-                                                option-label="name"
-                                                option-value="id"
+                                                required
+                                                :text="__('Select a watchlist')"
+                                                select="label:name|value:id"
                                                 :options="$watchlists"
                                                 wire:model="selectedWatchlist"
                                             />
                                             <div x-cloak x-show="$wire.selectedWatchlist === 0">
                                                 <x-input class="w-full" :label="__('Watchlist Name')" wire:model="watchlistName"/>
                                             </div>
-                                            <x-button primary wire:click="saveToWatchlist().then((success) => {if (success) showWatchlist = false;})" :label="__('Save to watchlist')" class="w-full"/>
+                                            <x-button color="indigo" wire:click="saveToWatchlist().then((success) => {if (success) showWatchlist = false;})" :text="__('Save to watchlist')" class="w-full"/>
                                         </div>
                                     @show
                                 @endif

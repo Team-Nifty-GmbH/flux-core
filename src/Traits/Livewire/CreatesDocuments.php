@@ -92,7 +92,7 @@ trait CreatesDocuments
         }
 
         $this->js(<<<'JS'
-            $openModal('create-documents');
+            $modalOpen('create-documents');
         JS);
     }
 
@@ -117,7 +117,7 @@ trait CreatesDocuments
 
         $this->js(<<<JS
             document.getElementById('preview-iframe').src = '$route';
-            \$openModal(document.getElementById('preview'));
+            \$modalOpen(document.getElementById('preview'));
         JS);
     }
 

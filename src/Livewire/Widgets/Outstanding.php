@@ -45,7 +45,7 @@ class Outstanding extends ValueBox implements HasWidgetOptions
             ->revenue();
 
         $symbol = Currency::default()->symbol;
-        $this->subValue = '<span class="text-negative-600">'
+        $this->subValue = '<span class="text-red-600">'
             . Number::abbreviate($overDueQuery->sum('balance'), 2)
             . ' ' . $symbol . ' ' . __('Overdue')
             . '</span>';

@@ -53,7 +53,7 @@ class TicketCreatedNotification extends Notification implements ShouldQueue
             ->img(method_exists($user, 'getAvatarUrl') ? $user->getAvatarUrl() : null)
             ->accept(
                 NotificationAction::make()
-                    ->label(__('View'))
+                    ->text(__('View'))
                     ->url(config('app.url') . $this->model->detailRoute(false))
             )
             ->toArray();

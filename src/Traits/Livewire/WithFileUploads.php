@@ -24,7 +24,7 @@ trait WithFileUploads
     {
         if (! file_exists($mediaItem->getPath())) {
             if (method_exists($this, 'notification')) {
-                $this->notification()->error(__('File not found!'));
+                $this->notification()->error(__('File not found!'))->send();
             }
 
             return false;

@@ -63,11 +63,11 @@ class PaymentReminder extends OrderList
     {
         return [
             DataTableButton::make()
-                ->color('primary')
-                ->label(__('Create Payment Reminder'))
+                ->color('indigo')
+                ->text(__('Create Payment Reminder'))
                 ->wireClick('openCreateDocumentsModal'),
             DatatableButton::make()
-                ->label(__('Mark as paid'))
+                ->text(__('Mark as paid'))
                 ->when(fn () => resolve_static(UpdateOrder::class, 'canPerformAction', [false]))
                 ->wireClick('markAsPaid'),
         ];

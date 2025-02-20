@@ -16,7 +16,7 @@
                             x-model="address.name"
                             disabled
                         />
-                        <x-inputs.number :label="__('Quantity')" x-model="address.quantity" disabled/>
+                        <x-number :label="__('Quantity')" x-model="address.quantity" disabled/>
                     </div>
                 </template>
             </div>

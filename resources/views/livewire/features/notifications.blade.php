@@ -1,5 +1,5 @@
 <div
-    x-data="wireui_notifications"
+    x-data="{notifications: []}"
     x-init.once="window.Echo.private('{{ auth()->user()->broadcastChannel() }}').notification((notification) => {
         $wire.sendNotify(notification);
     });"
@@ -28,11 +28,11 @@
                 $wire.showNotifications = true;"
         >
             <x-button.circle
-                primary
+                color="indigo"
                 icon="bell"
             />
             <div class="z-10 -mt-11 pl-5" x-cloak x-transition x-show="$wire.unread">
-                <x-button rounded 2xs negative >
+                <x-button rounded 2xs color="red" >
                     <x-slot name="label">
                         <span x-text="$wire.unread"></span>
                     </x-slot>
@@ -53,7 +53,7 @@
             <div class="flex h-full flex-col justify-between">
                 <div>
                     <div class="flex justify-end p-2.5">
-                        <x-button.circle secondary icon="x" x-on:click.prevent="$wire.showNotifications = false, notifications = []" />
+                        <x-button.circle color="gray" icon="x-mark" x-on:click.prevent="$wire.showNotifications = false, notifications = []" />
                     </div>
                     <div class="space-y-3 p-6">
                         <template x-for="notification in notifications">
@@ -151,10 +151,9 @@
                                             <!-- close button -->
                                             <button class="text-secondary-400 hover:text-secondary-500 inline-flex rounded-md focus:outline-none"
                                                     x-on:click="closeNotification(notification)">
-                                                <x-dynamic-component
-                                                    :component="WireUi::component('icon')"
+                                                <x-icon
                                                     class="h-5 w-5"
-                                                    name="x"
+                                                    name="x-mark"
                                                 />
                                             </button>
                                         </div>
@@ -202,7 +201,7 @@
                     </div>
                 </div>
                 <div class="w-full p-6">
-                    <x-button primary class="w-full" :label="__('Mark all as read')" x-on:click.prevent="$wire.markAllAsRead(), $wire.showNotifications = false"/>
+                    <x-button color="indigo" class="w-full" :text="__('Mark all as read')" x-on:click.prevent="$wire.markAllAsRead(), $wire.showNotifications = false"/>
                 </div>
             </div>
         </aside>

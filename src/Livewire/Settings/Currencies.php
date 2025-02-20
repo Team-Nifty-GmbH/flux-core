@@ -24,8 +24,8 @@ class Currencies extends CurrencyList
     {
         return [
             DataTableButton::make()
-                ->label(__('Create'))
-                ->color('primary')
+                ->text(__('Create'))
+                ->color('indigo')
                 ->icon('plus')
                 ->attributes([
                     'x-on:click' => '$wire.showEditModal()',
@@ -37,8 +37,8 @@ class Currencies extends CurrencyList
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
-                ->color('primary')
+                ->text(__('Edit'))
+                ->color('indigo')
                 ->icon('pencil')
                 ->attributes([
                     'x-on:click' => '$wire.showEditModal(record.id)',

@@ -1,28 +1,26 @@
 @extends('tall-calendar::livewire.calendar.calendar-overview')
 @section('calendar-modal')
-    <x-modal name="calendar-modal">
+    <x-modal id="calendar-modal">
         <x-card :title="__('Edit Calendar')">
             @section('calendar-edit')
                 <div class="flex flex-col gap-4">
                     <div x-cloak x-show="$wire.selectedCalendar.children === undefined || $wire.selectedCalendar.children?.length() === 0">
-                        <x-select
+                        <x-select.styled
                             wire:model="selectedCalendar.parentId"
                             :label="__('Parent Calendar')"
                             :options="$this->parentCalendars"
-                            option-label="name"
-                            option-value="id"
+                            select="label:name|value:id"
                             option-description="description"
                         />
                     </div>
                     <x-input wire:model="selectedCalendar.name" :label="__('Calendar Name')"/>
                     <div x-cloak x-show="$wire.availableModels">
                         <div x-bind:class="$wire.selectedCalendar.id && 'pointer-events-none'">
-                            <x-select
+                            <x-select.styled
                                 wire:model="selectedCalendar.modelType"
                                 :label="__('Model Type')"
                                 :options="$this->availableModels"
-                                option-label="label"
-                                option-value="value"
+                                select="label:value|value:label"
                                 x-bind:disabled="$wire.selectedCalendar.id"
                             />
                         </div>
@@ -37,16 +35,16 @@
                     <x-checkbox wire:model="selectedCalendar.isPublic" :label="__('Public')"/>
                     <x-card :title="__('Custom Properties')">
                         <div class="flex flex-col gap-4">
-                            <x-button.circle class="mr-2" primary icon="plus" wire:click="addCustomProperty" />
+                            <x-button.circle class="mr-2" color="indigo" icon="plus" wire:click="addCustomProperty" />
                             @foreach($selectedCalendar['customProperties'] ?? [] as $index => $customProperty)
                                 <div class="flex gap-x-4">
                                     <div class="pt-6">
-                                        <x-button.circle negative icon="trash" wire:click="removeCustomProperty({{ $index }})" />
+                                        <x-button.circle color="red" icon="trash" wire:click="removeCustomProperty({{ $index }})" />
                                     </div>
                                     <div class="max-w-sm">
-                                        <x-select
+                                        <x-select.styled
                                             wire:model="selectedCalendar.customProperties.{{ $index }}.field_type"
-                                            :label="__('Field Type')"
+                                            :text="__('Field Type')"
                                             :options="$this->fieldTypes"
                                             option-key-value
                                         />
@@ -69,13 +67,13 @@
                         <x-button
                             x-show="$wire.selectedCalendar.id && '{{ resolve_static(\FluxErp\Actions\Calendar\DeleteCalendar::class, 'canPerformAction', [false]) }}'"
                             flat
-                            negative
-                            :label="__('Delete')" x-on:click="deleteCalendar()"
+                            color="red"
+                            :text="__('Delete')" x-on:click="deleteCalendar()"
                         />
                     </div>
                     <div class="flex">
-                        <x-button flat :label="__('Cancel')" x-on:click="close();" />
-                        <x-button primary :label="__('Save')" x-on:click="saveCalendar()" />
+                        <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('calendar-modal');" />
+                        <x-button color="indigo" :text="__('Save')" x-on:click="saveCalendar()" />
                     </div>
                 </div>
             </x-slot:footer>

@@ -5,6 +5,6 @@
         </h1>
     </div>
     <div class="flex justify-center">
-        <x-button primary :href="route('portal.dashboard')">{{ __('Back to dashboard') }}</x-button>
+        <x-button color="indigo" :href="route('portal.dashboard')">{{ __('Back to dashboard') }}</x-button>
     </div>
 </div>

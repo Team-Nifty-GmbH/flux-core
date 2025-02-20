@@ -117,7 +117,7 @@ class CommentCreatedNotification extends Notification implements HasToastNotific
                 function (ToastNotification $toast) use ($notifiable) {
                     return $toast->accept(
                         NotificationAction::make()
-                            ->label(__('View'))
+                            ->text(__('View'))
                             ->url(
                                 $notifiable instanceof Address
                                     && method_exists($this->model->model, 'getPortalDetailRoute')

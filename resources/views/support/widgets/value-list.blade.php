@@ -23,7 +23,7 @@
                                         </x-slot:prepend>
                                         <span x-text="item.growthRate + '%'"></span>
                                     </x-badge>
-                                    <x-badge x-cloak x-show="item.growthRate < 0" class="w-full" negative>
+                                    <x-badge x-cloak x-show="item.growthRate < 0" class="w-full" color="red">
                                         <x-slot:prepend>
                                             <i class="ph ph-caret-down"></i>
                                         </x-slot:prepend>
@@ -40,7 +40,7 @@
                                         </x-slot:prepend>
                                         <span x-text="item.growthRate + '%'"></span>
                                     </x-badge>
-                                    <x-badge x-cloak x-show="item.growthRate < 0" class="w-full" positive>
+                                    <x-badge x-cloak x-show="item.growthRate < 0" class="w-full" color="emerald">
                                         <x-slot:prepend>
                                             <i class="ph ph-caret-down"></i>
                                         </x-slot:prepend>
@@ -49,7 +49,7 @@
                                 </div>
                             </template>
                         @endif
-                        <x-badge x-cloak x-show="item.growthRate == 0" secondary class="w-full">
+                        <x-badge x-cloak x-show="item.growthRate == 0" color="gray" class="w-full">
                             <x-slot:prepend>
                                 <i class="ph ph-caret-right"></i>
                             </x-slot:prepend>
@@ -73,7 +73,7 @@
         </table>
         @if($this->hasLoadMore())
             <div class="w-full flex justify-center mt-4" x-cloak x-show="await $wire.hasMore()">
-                <x-button spinner="showMore" :label="__('Load more')" wire:click="showMore()" />
+                <x-button color="secondary" light spinner="showMore" :text="__('Load more')" wire:click="showMore()" />
             </div>
         @endif
     </div>

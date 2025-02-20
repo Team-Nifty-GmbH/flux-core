@@ -50,7 +50,7 @@ export default function ($wire, route) {
             let searchRoute = route;
             $wire.workTime.trackable_id = null;
             searchRoute = searchRoute + '/' + type;
-            Alpine.$data(document.getElementById('trackable-id').querySelector('[x-data]')).asyncData.api = searchRoute;
+            Alpine.$data(document.getElementById('trackable-id').querySelector('[x-data]')).request.api = searchRoute;
         },
         recordSelected(data) {
             if (!data) {

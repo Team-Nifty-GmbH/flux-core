@@ -5,7 +5,7 @@
 >
     @section('header')
         <div class="flex items-center space-x-5">
-            <x-avatar xl x-bind:src="$wire.ticket.authenticatable.avatar_url" src="#"></x-avatar>
+            <x-avatar xl x-bind:image="$wire.ticket.authenticatable.avatar_url" src="#"></x-avatar>
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">
                     <div class="opacity-40 transition-opacity hover:opacity-100">
@@ -24,13 +24,13 @@
         @section('buttons')
             @if(resolve_static(\FluxErp\Actions\Ticket\DeleteTicket::class, 'canPerformAction', [false]) && $ticket->id)
                 <x-button
-                    negative
-                    label="{{ __('Delete') }}"
+                    color="red"
+                    :text="__('Delete') "
                     wire:click="delete()"
                     wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Ticket')]) }}"
                 />
             @endif
-            <x-button primary :label="__('Save')" wire:click="save"/>
+            <x-button color="indigo" :text="__('Save')" wire:click="save"/>
         @show
     </div>
     <div class="w-full pt-6 lg:col-start-1 xl:col-span-2 xl:flex xl:space-x-6">
@@ -40,7 +40,7 @@
                     <div class="flex-1">
                         <div class="space-y-5 dark:text-gray-50">
                             <x-card class="space-y-4">
-                                <x-input :label="__('Title')" wire:model="ticket.title" />
+                                <x-input :text="__('Title')" wire:model="ticket.title" />
                                 <x-flux::editor
                                     :label="__('Description')"
                                     wire:model="ticket.description"
@@ -77,7 +77,7 @@
                                                     >
                                                     </x-input>
                                                     <div x-cloak x-show="additionalColumn.field_type === 'select'">
-                                                        <x-native-select
+                                                        <x-select.native
                                                             x-model="$wire.ticket.additional_columns[name].value"
                                                             x-bind:type="additionalColumn.field_type"
                                                         >
@@ -85,7 +85,7 @@
                                                             <template x-for="value in additionalColumn.values">
                                                                 <option x-bind:value="value" x-text="value"></option>
                                                             </template>
-                                                        </x-native-select>
+                                                        </x-select.native>
                                                     </div>
                                                 </div>
                                             </template>
@@ -144,27 +144,25 @@
                         </x-slot:header>
                         <div class="space-y-4">
                             <x-state wire:model="ticket.state" formatters="formatter.state" available="availableStates"/>
-                            <x-select
+                            <x-select.styled
                                 :disabled="! resolve_static(\FluxErp\Actions\Ticket\UpdateTicket::class, 'canPerformAction', [false])"
                                 x-on:selected="$wire.updateAdditionalColumns($event.detail.value)"
                                 :label="__('Ticket Type')"
                                 wire:model.live="ticket.ticket_type_id"
-                                option-value="id"
-                                option-label="name"
+                                select="label:name|value:id"
                                 :options="$ticketTypes"
                             />
-                            <x-select
+                            <x-select.styled
                                 :disabled="$ticket->id && ! resolve_static(\FluxErp\Actions\Ticket\UpdateTicket::class, 'canPerformAction', [false])"
                                 multiselect
                                 :label="__('Assigned')"
                                 wire:model.live="ticket.users"
-                                option-value="id"
-                                option-label="label"
+                                select="label:label|value:id"
                                 :template="[
                                     'name' => 'user-option',
                                 ]"
-                                :async-data="[
-                                    'api' => route('search', \FluxErp\Models\User::class),
+                                :request="[
+                                    'url' => route('search', \FluxErp\Models\User::class),
                                     'method' => 'POST',
                                     'params' => [
                                         'with' => 'media',
@@ -178,7 +176,7 @@
                                     </x-label>
                                     <x-toggle :left-label=" __('User') " :label=" __('Contact') " wire:model.live="authorTypeContact" />
                                     <div class="pl-2">
-                                        <x-button
+                                        <x-button color="secondary" light
                                             href="#"
                                             xs
                                             outline icon="eye"
@@ -188,19 +186,18 @@
                                     </div>
                                 </div>
                                 <div id="author-select">
-                                    <x-select
+                                    <x-select.styled
                                         :disabled="! resolve_static(\FluxErp\Actions\Ticket\UpdateTicket::class, 'canPerformAction', [false])"
                                         class="pb-4"
                                         wire:model="ticket.authenticatable_id"
-                                        option-value="id"
-                                        option-label="label"
+                                        select="label:label|value:id"
                                         option-description="description"
-                                        :clearable="false"
+                                        required
                                         :template="[
                                             'name'   => 'user-option',
                                         ]"
-                                        :async-data="[
-                                            'api' => route('search', $ticket->authenticatable_type ?? morph_alias(\FluxErp\Models\User::class)),
+                                        :request="[
+                                            'url' => route('search', $ticket->authenticatable_type ?? morph_alias(\FluxErp\Models\User::class)),
                                             'method' => 'POST',
                                             'params' => [
                                                 'with' => $ticket->authenticatable_type === morph_alias(\FluxErp\Models\Address::class) ? 'contact.media' : 'media',

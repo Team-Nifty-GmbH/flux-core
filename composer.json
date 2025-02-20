@@ -32,8 +32,7 @@
         "team-nifty-gmbh/tall-calendar": "*",
         "team-nifty-gmbh/tall-datatables": "*",
         "webklex/laravel-imap": "^6.1",
-        "wireui/heroicons": "^2.3",
-        "wireui/wireui": "^1.18.4"
+        "tallstackui/tallstackui": "^2.0"
     },
     "require-dev": {
         "brianium/paratest": "^7.0",

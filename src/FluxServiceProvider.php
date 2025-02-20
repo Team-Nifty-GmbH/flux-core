@@ -366,7 +366,7 @@ class FluxServiceProvider extends ServiceProvider
 
     protected function registerConfig(): void
     {
-        $this->loadViewsFrom(__DIR__ . '/../resources/views/vendor/wireui', 'wireui');
+        $this->loadViewsFrom(__DIR__ . '/../resources/views/vendor/tallstackui', 'wireui');
         $this->mergeConfigFrom(__DIR__ . '/../config/flux.php', 'flux');
         $this->mergeConfigFrom(__DIR__ . '/../config/notifications.php', 'notifications');
         config(['permission.models.role' => resolve_static(Role::class, 'class')]);

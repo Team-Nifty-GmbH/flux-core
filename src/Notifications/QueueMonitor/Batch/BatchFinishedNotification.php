@@ -51,7 +51,7 @@ class BatchFinishedNotification extends Notification implements HasToastNotifica
             )
             ->icon($this->model->failed_jobs === 0
                 ? 'success'
-                : ($this->model->failed_jobs === $this->model->total_jobs ? 'error' : 'warning')
+                : ($this->model->failed_jobs === $this->model->total_jobs ? 'error' : 'amber')
             )
             ->timeout(0)
             ->attributes([

@@ -117,16 +117,16 @@ class WorkTimeList extends BaseDataTable
     {
         return [
             DataTableButton::make()
-                ->label(__('Create Orders'))
-                ->color('primary')
+                ->text(__('Create Orders'))
+                ->color('indigo')
                 ->xOnClick(<<<'JS'
-                    $openModal('create-orders');
+                    $modalOpen('create-orders');
                 JS)
                 ->when(fn () => resolve_static(CreateOrder::class, 'canPerformAction', [false])),
             DataTableButton::make()
-                ->label(__('Change is billable'))
+                ->text(__('Change is billable'))
                 ->xOnClick(<<<'JS'
-                    $openModal('toggle-is-billable');
+                    $modalOpen('toggle-is-billable');
                 JS)
                 ->when(fn () => resolve_static(UpdateLockedWorkTime::class, 'canPerformAction', [false])),
         ];
@@ -136,8 +136,8 @@ class WorkTimeList extends BaseDataTable
     {
         return [
             DataTableButton::make()
-                ->label(__('New'))
-                ->color('primary')
+                ->text(__('New'))
+                ->color('indigo')
                 ->icon('plus')
                 ->wireClick('edit')
                 ->when(resolve_static(CreateLockedWorkTime::class, 'canPerformAction', [false])),
@@ -148,15 +148,15 @@ class WorkTimeList extends BaseDataTable
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
+                ->text(__('Edit'))
                 ->icon('pencil')
-                ->color('primary')
+                ->color('indigo')
                 ->wireClick('edit(record.id)')
                 ->when(resolve_static(UpdateLockedWorkTime::class, 'canPerformAction', [false])),
             DataTableButton::make()
-                ->label(__('Delete'))
+                ->text(__('Delete'))
                 ->icon('trash')
-                ->color('negative')
+                ->color('red')
                 ->when(resolve_static(DeleteWorkTime::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'delete(record.id)',
@@ -202,7 +202,7 @@ class WorkTimeList extends BaseDataTable
         $this->workTime->fill($workTime);
 
         $this->js(<<<'JS'
-            $openModal('edit-work-time');
+            $modalOpen('edit-work-time');
         JS);
     }
 

@@ -195,7 +195,7 @@ class OrderTest extends BaseSetup
             ->assertSet('order.invoice_number', null)
             ->call('openCreateDocumentsModal')
             ->assertExecutesJs(<<<'JS'
-                $openModal('create-documents')
+                $modalOpen('create-documents')
              JS)
             ->assertSet(
                 'printLayouts',
@@ -279,7 +279,7 @@ class OrderTest extends BaseSetup
             ->assertStatus(200)
             ->assertHasNoErrors()
             ->assertExecutesJs(<<<'JS'
-                $openModal('replicate-order')
+                $modalOpen('replicate-order')
              JS)
             ->call('saveReplicate')
             ->assertStatus(200)
@@ -338,7 +338,7 @@ class OrderTest extends BaseSetup
             ->assertStatus(200)
             ->assertHasNoErrors()
             ->assertExecutesJs(<<<'JS'
-                $openModal('replicate-order')
+                $modalOpen('replicate-order')
              JS)
             ->set('replicateOrder.contact_id', $contact->getKey())
             ->call('fetchContactData', true)
@@ -405,7 +405,7 @@ class OrderTest extends BaseSetup
             ->assertStatus(200)
             ->assertHasNoErrors()
             ->assertExecutesJs(<<<'JS'
-                $openModal('edit-discount');
+                $modalOpen('edit-discount');
             JS)
             ->assertSet('discount.is_percentage', true)
             ->set('discount.name', $discountName = Str::uuid()->toString())

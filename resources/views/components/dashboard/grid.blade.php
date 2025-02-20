@@ -15,7 +15,7 @@
                         x-cloak
                         x-show="editGrid"
                         x-on:click="isLoading ? pendingMessage : removeWidget('{{$widget['id']}}')"
-                        class="shadow-md w-4 h-4 text-gray-400 cursor-pointer" icon="trash" negative />
+                        class="shadow-md w-4 h-4 text-gray-400 cursor-pointer" icon="trash" color="red" />
                 </div>
                 <div
                     class="w-full"

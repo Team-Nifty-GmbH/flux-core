@@ -33,7 +33,7 @@ class ProductOptionGroupList extends BaseProductOptionGroupList
     {
         return new ComponentAttributeBag([
             'x-bind:class' => <<<'JS'
-                record.id === productOptionGroup?.id && 'bg-primary-100 dark:bg-primary-800'
+                record.id === productOptionGroup?.id && 'bg-indigo-100 dark:bg-indigo-800'
             JS,
         ]);
     }

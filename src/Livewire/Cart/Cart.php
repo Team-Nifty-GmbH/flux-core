@@ -76,7 +76,7 @@ class Cart extends Component
         $this->notification()->success(count(Arr::wrap($products)) > 1
             ? __('Products added to cart')
             : __('Product added to cart')
-        );
+        )->send();
     }
 
     public function remove(CartItem $cartItem): void
@@ -146,7 +146,7 @@ class Cart extends Component
         }
 
         $this->reset('selectedWatchlist', 'watchlistName');
-        $this->notification()->success(__('Cart saved to watchlist'));
+        $this->notification()->success(__('Cart saved to watchlist'))->send();
         $this->mount();
 
         return true;

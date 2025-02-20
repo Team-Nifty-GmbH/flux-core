@@ -7,7 +7,7 @@
         @foreach($additionalColumns as $additionalColumn)
             @if($additionalColumn['is_customer_editable'] || auth()->user() instanceof \FluxErp\Models\User)
                 @if($additionalColumn['values'] ?? false)
-                    <x-select
+                    <x-select.styled
                         x-on:selected="$wire.{{ $wire }}['{{ $additionalColumn['name'] }}'] = $event.detail.value"
                         wire:model="{{ $wire }}.{{ $additionalColumn['name'] }}"
                         :label="__($additionalColumn['label'] ?? $additionalColumn['name'])"

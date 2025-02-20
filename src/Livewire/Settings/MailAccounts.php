@@ -40,8 +40,8 @@ class MailAccounts extends MailAccountList
     {
         return [
             DataTableButton::make()
-                ->label(__('Create'))
-                ->color('primary')
+                ->text(__('Create'))
+                ->color('indigo')
                 ->icon('plus')
                 ->attributes([
                     'x-on:click' => '$wire.edit()',
@@ -54,24 +54,24 @@ class MailAccounts extends MailAccountList
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
-                ->color('primary')
+                ->text(__('Edit'))
+                ->color('indigo')
                 ->icon('pencil')
                 ->attributes([
                     'x-on:click' => '$wire.edit(record.id)',
                 ])
                 ->when(fn () => resolve_static(UpdateMailAccount::class, 'canPerformAction', [false])),
             DataTableButton::make()
-                ->label(__('Edit Folders'))
-                ->color('primary')
+                ->text(__('Edit Folders'))
+                ->color('indigo')
                 ->icon('pencil')
                 ->attributes([
                     'x-on:click' => '$wire.editFolders(record.id)',
                 ])
                 ->when(fn () => resolve_static(UpdateMailFolder::class, 'canPerformAction', [false])),
             DataTableButton::make()
-                ->label(__('Delete'))
-                ->color('negative')
+                ->text(__('Delete'))
+                ->color('red')
                 ->icon('trash')
                 ->attributes([
                     'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Mail Account')]),
@@ -87,7 +87,7 @@ class MailAccounts extends MailAccountList
         $this->mailAccount->fill($mailAccount);
 
         $this->js(<<<'JS'
-            $openModal('edit-mail-account');
+            $modalOpen('edit-mail-account');
         JS);
     }
 
@@ -99,7 +99,7 @@ class MailAccounts extends MailAccountList
         $this->loadFolders();
 
         $this->js(<<<'JS'
-            $openModal('edit-mail-folders');
+            $modalOpen('edit-mail-folders');
         JS);
     }
 
@@ -167,7 +167,7 @@ class MailAccounts extends MailAccountList
         try {
             $this->mailAccount->testImapConnection();
 
-            $this->notification()->success(__('Connection successful'));
+            $this->notification()->success(__('Connection successful'))->send();
         } catch (
             ValidationException
             |ImapBadRequestException
@@ -187,7 +187,7 @@ class MailAccounts extends MailAccountList
         try {
             $this->mailAccount->testSmtpConnection();
 
-            $this->notification()->success(__('Connection successful'));
+            $this->notification()->success(__('Connection successful'))->send();
         } catch (ValidationException|TransportExceptionInterface $e) {
             exception_to_notifications($e, $this);
         }
@@ -204,7 +204,7 @@ class MailAccounts extends MailAccountList
 
             $this->mailAccount->sendTestMail($to);
 
-            $this->notification()->success(__('Test mail sent'));
+            $this->notification()->success(__('Test mail sent'))->send();
         } catch (ValidationException|TransportExceptionInterface $e) {
             exception_to_notifications($e, $this);
         }

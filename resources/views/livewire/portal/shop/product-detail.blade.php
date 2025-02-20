@@ -15,7 +15,7 @@
                 <div class="flex gap-2 justify-start">
                     @foreach($productForm->media as $media)
                         <div class="rounded-md flex-none" x-bind:class="$wire.productForm.cover_url === '{{ $media }}' && 'ring-2 ring-offset-2 ring-primary-500'" x-on:click="$wire.productForm.cover_url = '{{ $media }}'">
-                            <x-avatar xl squared :src="$media" class="w-full" />
+                            <x-avatar xl squared :image="$media" class="w-full" />
                         </div>
                     @endforeach
                 </div>
@@ -42,11 +42,11 @@
                             </h3>
                             <div class="flex gap-1.5 flex-wrap">
                                 @foreach($group['product_options'] as $option)
-                                    <x-button
+                                    <x-button color="secondary" light
                                         class="whitespace-nowrap"
-                                        x-bind:class="Object.values($wire.groups).includes({{ $option['id'] }}) ? 'bg-primary-500 text-white' : ''"
+                                        x-bind:class="Object.values($wire.groups).includes({{ $option['id'] }}) ? 'bg-indigo-500 text-white' : ''"
                                         wire:click="selectOption({{ $option['id'] }})"
-                                        :label="$option['name']"
+                                        :text="$option['name']"
                                     />
                                 @endforeach
                             </div>
@@ -61,7 +61,7 @@
                             <div class="flex gap-4 content-center justify-center w-full">
                                 <div class="text-sm font-semibold">{{ Number::currency(number: $productForm->buy_price ?? 0, locale: app()->getLocale()) }} *</div>
                                 @if(bccomp(data_get($productForm, 'root_discount_percentage'), 0) === 1)
-                                    <x-badge negative xs :label="__('%')" />
+                                    <x-badge color="red" xs :text="__('%')" />
                                 @endif
                             </div>
                             @if(bccomp(data_get($productForm, 'root_discount_percentage'), 0) === 1)
@@ -87,8 +87,8 @@
                         class="grid grid-cols-2 w-full gap-4"
                         x-data="{amount: 1}"
                     >
-                        <x-inputs.number step="1" x-model="amount"/>
-                        <x-button x-on:click="$wire.dispatch('cart:add', {products: {id: $wire.productForm.id, name: $wire.productForm.name, price: $wire.productForm.price, amount: amount}})" primary class="w-full" :label="__('Add to cart')" />
+                        <x-number step="1" x-model="amount"/>
+                        <x-button x-on:click="$wire.dispatch('cart:add', {products: {id: $wire.productForm.id, name: $wire.productForm.name, price: $wire.productForm.price, amount: amount}})" color="indigo" class="w-full" :text="__('Add to cart')" />
                     </div>
                 @endcan
             @endif
@@ -100,9 +100,9 @@
                                 {{ $name }}
                             </div>
                         </x-slot:title>
-                        <x-slot:action>
-                            <x-button icon="chevron-down" x-on:click="showMeta = showMeta === '{{ $name }}' ? null : '{{ $name }}'" />
-                        </x-slot:action>
+                        <x-slot:header>
+                            <x-button color="secondary" light icon="chevron-down" x-on:click="showMeta = showMeta === '{{ $name }}' ? null : '{{ $name }}'" />
+                        </x-slot:header>
                         <div class="px-2 py-5 md:px-4" x-cloak x-show="showMeta === '{{ $name }}'" x-collapse>
                             {!! $value !!}
                         </div>
@@ -134,12 +134,12 @@
                                     {{ __($collection) }}
                                 </div>
                             </x-slot:title>
-                            <x-slot:action>
+                            <x-slot:header>
                                 <div class="flex gap-1.5 justify-end">
-                                    <x-button :label="__('Download folder')" primary icon="save" wire:click="downloadMedia({{ \Illuminate\Support\Js::from(array_keys($media)) }}, '{{ $collection }}')" />
-                                    <x-button icon="chevron-down" x-on:click="showMedia = showMedia === '{{ $collection }}' ? null : '{{ $collection }}'" />
+                                    <x-button :text="__('Download folder')" color="indigo" icon="save" wire:click="downloadMedia({{ \Illuminate\Support\Js::from(array_keys($media)) }}, '{{ $collection }}')" />
+                                    <x-button color="secondary" light icon="chevron-down" x-on:click="showMedia = showMedia === '{{ $collection }}' ? null : '{{ $collection }}'" />
                                 </div>
-                            </x-slot:action>
+                            </x-slot:header>
                             <div class="px-2 py-5 md:px-4 flex flex-col" x-cloak x-show="showMedia === '{{ $collection }}'" x-collapse>
                                 @foreach($media as $item)
                                     <div wire:click="downloadMedia({{ $item['id'] }})" class="cursor-pointer">

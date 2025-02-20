@@ -13,10 +13,10 @@
     <div class="grid-cols-3 gap-8 pb-8 md:grid">
         <x-card :title="__('General')">
             <div>
-                <x-select :label="__('Dashboard module')" :options="$modules" wire:model="setting.settings.dashboard_module"/>
+                <x-select.styled :label="__('Dashboard module')" :options="$modules" wire:model="setting.settings.dashboard_module"/>
             </div>
             <div class="mt-4">
-                <x-select :label="__('Calendars')" wire:model="setting.settings.calendars" :options="$calendars" :multiselect="true" option-label="name" option-value="id" />
+                <x-select.styled :label="__('Calendars')" wire:model="setting.settings.calendars" :options="$calendars" :multiselect="true" select="label:name|value:id" />
             </div>
         </x-card>
         <x-card :title="__('Navigation styling')">
@@ -48,7 +48,7 @@
                 <input class="w-full" type="color" wire:model="setting.settings.nav.hover_item" />
             </div>
             <div class="mt-4">
-                <x-inputs.number min="12" max="48" step="2" :label="__('Icon size')" wire:model="setting.settings.nav.icon_size" />
+                <x-number min="12" max="48" step="2" :label="__('Icon size')" wire:model="setting.settings.nav.icon_size" />
             </div>
         </x-card>
         <x-card :title="__('Append links')">
@@ -65,12 +65,12 @@
                             <x-input x-model="link.icon" :label="__('Icon')"/>
                             <x-input x-model="link.uri" :label="__('URL')" placeholder="your-website.com" />
                             <div class="ml-1 flex h-full items-center sm:col-span-1">
-                                <x-button.circle negative icon="trash" x-on:click="setting.settings.nav.append_links.splice(index,1)" />
+                                <x-button.circle color="red" icon="trash" x-on:click="setting.settings.nav.append_links.splice(index,1)" />
                             </div>
                         </div>
                     </template>
                 <div class="sm:col-span-6">
-                    <x-button.circle class="mr-2" primary icon="plus" x-on:click="setting.settings.nav.append_links.push({children: []})" />
+                    <x-button.circle class="mr-2" color="indigo" icon="plus" x-on:click="setting.settings.nav.append_links.push({children: []})" />
                 </div>
             </div>
         </x-card>
@@ -80,7 +80,7 @@
     </x-card>
 
     <div class="flex justify-end space-x-5 pt-5">
-        <x-button :label="__('Cancel')" :href="route('settings.clients')"/>
-        <x-button primary :label="__('Save')" wire:click="save"/>
+        <x-button color="secondary" light :text="__('Cancel')" :href="route('settings.clients')"/>
+        <x-button color="indigo" :text="__('Save')" wire:click="save"/>
     </div>
 </div>

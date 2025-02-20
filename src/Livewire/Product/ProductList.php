@@ -138,16 +138,16 @@ class ProductList extends BaseProductList
     {
         return [
             DataTableButton::make()
-                ->label(__('Add to cart'))
+                ->text(__('Add to cart'))
                 ->icon('shopping-cart')
                 ->when(resolve_static(CreateCartItem::class, 'canPerformAction', [false]))
                 ->wireClick('addSelectedToCart; showSelectedActions = false;'),
             DataTableButton::make()
-                ->label(__('Update prices'))
-                ->color('warning')
+                ->text(__('Update prices'))
+                ->color('amber')
                 ->when(resolve_static(ProductPricesUpdate::class, 'canPerformAction', [false]))
                 ->xOnClick(<<<'JS'
-                    $openModal('update-prices');
+                    $modalOpen('update-prices');
                 JS),
         ];
     }
@@ -156,12 +156,12 @@ class ProductList extends BaseProductList
     {
         return [
             DataTableButton::make()
-                ->color('primary')
-                ->label(__('New'))
+                ->color('indigo')
+                ->text(__('New'))
                 ->icon('plus')
                 ->when(fn () => resolve_static(CreateProduct::class, 'canPerformAction', [false]))
                 ->xOnClick(<<<'JS'
-                    $wire.new().then(() => {$openModal('create-product');});
+                    $wire.new().then(() => {$modalOpen('create-product');});
                 JS),
         ];
     }

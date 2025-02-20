@@ -12,28 +12,27 @@
         @show
         <div @if($collapsed) x-collapse x-show="expanded" x-cloak @endif class="space-y-2.5">
             <div x-bind:class="! edit && 'pointer-events-none'" x-show="! $wire.project.id" x-cloak>
-                <x-select
+                <x-select.styled
                     x-bind:readonly="!edit"
                     :label="__('Client')"
                     wire:model="project.client_id"
-                    option-value="id"
-                    option-label="name"
-                    :async-data="[
-                        'api' => route('search', \FluxErp\Models\Client::class),
+                    select="label:name|value:id"
+                    :request="[
+                        'url' => route('search', \FluxErp\Models\Client::class),
                         'method' => 'POST',
                     ]"
                 />
             </div>
             <div class="flex justify-between gap-x-4">
                 @section('dates')
-                    <x-datetime-picker
+                    <x-date
                         without-time
                         x-bind:readonly="!edit"
                         x-bind:class="! edit && 'pointer-events-none'"
                         wire:model="project.start_date"
                         :label="__('Start Date')"
                     />
-                    <x-datetime-picker
+                    <x-date
                         without-time
                         x-bind:readonly="!edit"
                         x-bind:class="! edit && 'pointer-events-none'"
@@ -60,18 +59,17 @@
             />
             @section('connections')
                 <div x-bind:class="! edit && 'pointer-events-none'">
-                    <x-select
+                    <x-select.styled
                         x-bind:readonly="!edit"
                         :label="__('Responsible User')"
-                        option-value="id"
-                        option-label="label"
+                        select="label:label|value:id"
                         autocomplete="off"
                         wire:model="project.responsible_user_id"
                         :template="[
                             'name'   => 'user-option',
                         ]"
-                        :async-data="[
-                            'api' => route('search', \FluxErp\Models\User::class),
+                        :request="[
+                            'url' => route('search', \FluxErp\Models\User::class),
                             'method' => 'POST',
                             'params' => [
                                 'with' => 'media',
@@ -80,14 +78,13 @@
                     />
                 </div>
                 <div x-bind:class="! edit && 'pointer-events-none'">
-                    <x-select :label="__('Contact')"
+                    <x-select.styled :label="__('Contact')"
                         x-bind:readonly="!edit"
                         wire:model="project.contact_id"
-                        option-value="contact_id"
-                        option-label="label"
+                        select="label:label|value:contact_id"
                         template="user-option"
-                        :async-data="[
-                            'api' => route('search', \FluxErp\Models\Address::class),
+                        :request="[
+                            'url' => route('search', \FluxErp\Models\Address::class),
                             'method' => 'POST',
                             'params' => [
                                 'where' => [
@@ -108,22 +105,21 @@
                     />
                 </div>
                 <div x-bind:class="! edit && 'pointer-events-none'">
-                    <x-select
+                    <x-select.styled
                         x-bind:readonly="!edit"
                         :label="__('Order')"
                         wire:model="project.order_id"
-                        option-value="id"
-                        option-label="label"
+                        select="label:label|value:id"
                         option-description="description"
-                        :async-data="[
-                            'api' => route('search', \FluxErp\Models\Order::class),
+                        :request="[
+                            'url' => route('search', \FluxErp\Models\Order::class),
                             'method' => 'POST',
                         ]"
                     />
                 </div>
             @show
             @section('budget')
-                <x-inputs.number
+                <x-number
                     :label="__('Budget')"
                     x-bind:readonly="!edit"
                     wire:model="project.budget"

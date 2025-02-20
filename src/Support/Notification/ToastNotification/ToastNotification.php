@@ -263,7 +263,7 @@ class ToastNotification implements Arrayable
 
     public function href(string $url, string $label = 'Open…'): static
     {
-        $this->accept(NotificationAction::make()->label(__($label))->url($url));
+        $this->accept(NotificationAction::make()->text(__($label))->url($url));
 
         return $this;
     }

@@ -18,7 +18,7 @@
         <x-slot:header>
             <div class="flex items-center justify-between border-b px-4 py-2.5 dark:border-0">
                 <div class="flex">
-                    <x-avatar squared :src="$address['avatar']" />
+                    <x-avatar squared :image="$address['avatar']" />
                     <div class="pl-2">
                         <div class="text-sm font-semibold text-gray-900 dark:text-gray-50">
                             {{ $address['label'] }}
@@ -29,7 +29,7 @@
                     </div>
                 </div>
                 <div class="pl-2">
-                    <x-button outline icon="eye" href="{{ route('contacts.id?', $address['contact_id']) }}">
+                    <x-button color="secondary" light outline icon="eye" href="{{ route('contacts.id?', $address['contact_id']) }}">
                     </x-button>
                 </div>
             </div>

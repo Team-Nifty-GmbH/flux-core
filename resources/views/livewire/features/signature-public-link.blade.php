@@ -38,15 +38,15 @@
                     x-cloak
                     x-show="!isEmpty"
                     x-on:click="clear"
-                    negative
-                    :label="__('Clear')"
+                    color="red"
+                    :text="__('Clear')"
                 />
                 <x-button
                     x-cloak
                     x-show="!isEmpty"
                     x-on:click="save"
-                    primary
-                    :label="__('Save')"
+                    color="indigo"
+                    :text="__('Save')"
                 />
             </div>
         </div>

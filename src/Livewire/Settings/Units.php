@@ -25,8 +25,8 @@ class Units extends UnitList
     {
         return [
             DataTableButton::make()
-                ->label(__('Create'))
-                ->color('primary')
+                ->text(__('Create'))
+                ->color('indigo')
                 ->icon('plus')
                 ->when(resolve_static(CreateUnit::class, 'canPerformAction', [false]))
                 ->wireClick('edit'),
@@ -37,14 +37,14 @@ class Units extends UnitList
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
+                ->text(__('Edit'))
                 ->icon('pencil')
-                ->color('primary')
+                ->color('indigo')
                 ->when(resolve_static(UpdateUnit::class, 'canPerformAction', [false]))
                 ->wireClick('edit(record.id)'),
             DataTableButton::make()
-                ->label(__('Delete'))
-                ->color('negative')
+                ->text(__('Delete'))
+                ->color('red')
                 ->icon('trash')
                 ->when(resolve_static(DeleteUnit::class, 'canPerformAction', [false]))
                 ->attributes([
@@ -60,7 +60,7 @@ class Units extends UnitList
         $this->unit->fill($unit);
 
         $this->js(<<<'JS'
-            $openModal('edit-unit');
+            $modalOpen('edit-unit');
         JS);
     }
 

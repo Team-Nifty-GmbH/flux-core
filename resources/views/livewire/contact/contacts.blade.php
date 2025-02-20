@@ -3,15 +3,14 @@
     {{ $this->renderCreateDocumentsModal() }}
     @can('action.contact.create')
         @section('modals')
-            <x-modal name="new-contact">
+            <x-modal id="new-contact">
                 <x-card>
                     @if(resolve_static(\FluxErp\Models\Client::class, 'query')->count() > 1)
-                        <x-select
+                        <x-select.styled
                             wire:model="contact.client_id"
                             label="{{ __('Client') }}"
                             :options="resolve_static(\FluxErp\Models\Client::class, 'query')->get(['id', 'name'])"
-                            option-label="name"
-                            option-value="id"
+                            select="label:name|value:id"
                         />
                     @endif
                     <div class="flex flex-col gap-1.5 pt-1.5">
@@ -29,7 +28,7 @@
                                 class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4">
                                 <x-label :label="__('Salutation')" for="{{ md5('contact.main_address.salutation') }}" />
                                 <div class="col-span-2 w-full">
-                                    <x-select
+                                    <x-select.styled
                                         :options="SalutationEnum::valuesLocalized()"
                                         option-key-value
                                         x-bind:readonly="!$wire.edit"
@@ -94,12 +93,11 @@
                                     {{ __('Country') }}
                                 </label>
                                 <div class="col-span-2">
-                                    <x-select
+                                    <x-select.styled
                                         wire:model="contact.main_address.country_id"
                                         searchable
                                         :options="resolve_static(\FluxErp\Models\Country::class, 'query')->get(['id', 'name'])"
-                                        option-label="name"
-                                        option-value="id"
+                                        select="label:name|value:id"
                                     />
                                 </div>
                             </div>
@@ -109,12 +107,11 @@
                                     {{ __('Language') }}
                                 </label>
                                 <div class="col-span-2">
-                                    <x-select
+                                    <x-select.styled
                                         wire:model="contact.main_address.language_id"
                                         searchable
                                         :options="resolve_static(\FluxErp\Models\Language::class, 'query')->get(['id', 'name'])"
-                                        option-label="name"
-                                        option-value="id"
+                                        select="label:name|value:id"
                                     />
                                 </div>
                             </div>
@@ -155,12 +152,11 @@
                                     {{ __('Contact Origin') }}
                                 </label>
                                 <div class="col-span-2">
-                                    <x-select
+                                    <x-select.styled
                                         wire:model="contact.contact_origin_id"
                                         searchable
                                         :options="resolve_static(\FluxErp\Models\ContactOrigin::class, 'query')->where('is_active', true)->get(['id', 'name'])"
-                                        option-label="name"
-                                        option-value="id"
+                                        select="label:name|value:id"
                                     />
                                 </div>
                             </div>
@@ -168,8 +164,8 @@
                     </div>
                     <x-slot name="footer">
                         <div class="flex justify-end gap-x-4">
-                            <x-button flat label="{{ __('Cancel') }}" x-on:click="close"/>
-                            <x-button primary label="{{ __('Save') }}" wire:click="save"/>
+                            <x-button color="secondary" light flat :text="__('Cancel') " x-on:click="$modalClose('new-contact')"/>
+                            <x-button color="indigo" :text="__('Save') " wire:click="save"/>
                         </div>
                     </x-slot>
                 </x-card>
@@ -187,9 +183,9 @@
                 x-collapse
             >
                 <x-card class="w-full">
-                    <x-slot:action>
-                        <x-button.circle wire:click="$set('showMap', false, true)" icon="x" />
-                    </x-slot:action>
+                    <x-slot:header>
+                        <x-button color="secondary" light.circle wire:click="$set('showMap', false, true)" icon="x-mark" />
+                    </x-slot:header>
                     <div x-intersect.once="onChange()">
                         <div id="map" class="h-96 min-w-96"></div>
                     </div>

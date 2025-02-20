@@ -9,24 +9,22 @@
                                  wire:model="ticketType.name"/>
                     </div>
                     <div class="sm:col-span-6" x-show="isNew" x-transition x-cloak>
-                        <x-select
+                        <x-select.styled
                             label="{{ __('Model') }}"
                             placeholder="{{ __('Model') }}"
                             wire:model="ticketType.model_type"
                             :options="$models"
-                            option-label="label"
-                            option-value="value"
+                            select="label:value|value:label"
                         />
                     </div>
                     <div class="sm:col-span-6">
-                        <x-select
+                        <x-select.styled
                             label="{{ __('Notifications') }}"
                             placeholder="{{ __('Roles') }}"
                             wire:model="ticketType.roles"
                             :multiselect="true"
                             :options="$roles"
-                            option-value="id"
-                            option-label="name"
+                            select="label:name|value:id"
                         />
                     </div>
                 </div>

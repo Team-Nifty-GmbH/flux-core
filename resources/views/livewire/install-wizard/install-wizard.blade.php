@@ -33,16 +33,16 @@
                 <div class="flex justify-between" x-cloak x-show="progress.progress === 100">
                     <div>
                         @if($step > 0)
-                            <x-button
+                            <x-button color="secondary" light
                                 flat
-                                :label="__('Back')"
+                                :text="__('Back')"
                                 x-on:click="$wire.step--; $wire.$refresh();"
                             />
                        @endif
                     </div>
                     <x-button
                         spinner
-                        primary
+                        color="indigo"
                         wire:click="continue"
                     >
                         {{ __('Continue') }}

@@ -26,12 +26,12 @@
             class="justify-stretch mt-6 flex flex-col-reverse space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3">
             @can('action.serial-number.update')
                 <template x-if="serialNumber.id && $wire.edit === false">
-                    <x-button primary label="{{ __('Edit') }}" x-on:click="$wire.startEdit()"/>
+                    <x-button color="indigo" :text="__('Edit') " x-on:click="$wire.startEdit()"/>
                 </template>
                 <template x-if="$wire.edit === true">
                     <div>
-                        <x-button primary label="{{ __('Save') }}" x-on:click="$wire.save()"/>
-                        <x-button label="{{ __('Cancel') }}" x-on:click="$wire.cancel()"/>
+                        <x-button color="indigo" :text="__('Save') " x-on:click="$wire.save()"/>
+                        <x-button color="secondary" light :text="__('Cancel') " x-on:click="$wire.cancel()"/>
                     </div>
                 </template>
             @endcan

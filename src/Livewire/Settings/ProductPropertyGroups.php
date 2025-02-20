@@ -28,9 +28,9 @@ class ProductPropertyGroups extends ProductPropertyGroupList
     {
         return [
             DataTableButton::make()
-                ->label(__('Add'))
+                ->text(__('Add'))
                 ->icon('plus')
-                ->color('primary')
+                ->color('indigo')
                 ->wireClick('edit')
                 ->when(
                     fn () => resolve_static(CreateProductPropertyGroup::class, 'canPerformAction', [false])
@@ -42,17 +42,17 @@ class ProductPropertyGroups extends ProductPropertyGroupList
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
+                ->text(__('Edit'))
                 ->icon('pencil')
-                ->color('primary')
+                ->color('indigo')
                 ->wireClick('edit(record.id)')
                 ->when(
                     fn () => resolve_static(UpdateProductPropertyGroup::class, 'canPerformAction', [false])
                 ),
             DataTableButton::make()
-                ->label(__('Delete'))
+                ->text(__('Delete'))
                 ->icon('trash')
-                ->color('negative')
+                ->color('red')
                 ->attributes([
                     'wire:flux-confirm.icon.error' => __(
                         'wire:confirm.delete',
@@ -87,7 +87,7 @@ class ProductPropertyGroups extends ProductPropertyGroupList
         $this->productPropertyGroup->fill($productPropertyGroup);
 
         $this->js(<<<'JS'
-            $openModal('edit-product-property-group');
+            $modalOpen('edit-product-property-group');
         JS);
     }
 

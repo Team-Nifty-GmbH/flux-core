@@ -9,19 +9,19 @@
             <div class="flex gap-1.5">
                 <div x-text="comment.created_by ?? '{{ __('Unknown') }}'" class="font-medium text-gray-500"></div>
                 @if($this->isPublic === true)
-                    <x-badge flat x-bind:class="! comment.is_internal && 'hidden'" :label="__('Internal')">
+                    <x-badge flat x-bind:class="! comment.is_internal && 'hidden'" :text="__('Internal')">
                     </x-badge>
                 @endif
             </div>
             @if(auth()->check())
                 <x-dropdown>
                     @canAction(\FluxErp\Actions\Comment\UpdateComment::class)
-                        <x-dropdown.item x-on:click="toggleSticky(comment)">
+                        <x-dropdown.items x-on:click="toggleSticky(comment)">
                             <span x-text="comment.is_sticky ? '{{ __('Unsticky') }}' : '{{ __('Sticky') }}'"></span>
-                        </x-dropdown.item>
+                        </x-dropdown.items>
                     @endCanAction
-                    <x-dropdown.item
-                        :label="__('Delete')"
+                    <x-dropdown.items
+                        :text="__('Delete')"
                         x-bind:disabled="! comment.is_current_user"
                         wire:click="delete(comment.id).then((success) => { if(success) removecomment(comment)})"
                         wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Comment')]) }}"
@@ -39,13 +39,13 @@
                         <img x-bind:src="file.preview_url === '' ? '{{ route('icons', ['name' => 'document', 'variant' => 'outline']) }}' : file.preview_url" class="w-6 h-6" x-bind:alt="file.name" />
                         <span x-text="file.name"></span>
                         <div class="flex">
-                            <x-button
+                            <x-button color="secondary" light
                                 xs
                                 class="h-full"
                                 wire:click="download(file.id)"
-                                icon="download"
+                                icon="arrow-down-tray"
                             />
-                            <x-button
+                            <x-button color="secondary" light
                                 xs
                                 x-cloak
                                 x-show="file.preview_url !== ''"

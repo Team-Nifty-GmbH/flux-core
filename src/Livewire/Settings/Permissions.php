@@ -56,8 +56,8 @@ class Permissions extends RoleList
     {
         return [
             DataTableButton::make()
-                ->label(__('Create'))
-                ->color('primary')
+                ->text(__('Create'))
+                ->color('indigo')
                 ->icon('plus')
                 ->attributes([
                     'wire:click' => 'edit()',
@@ -70,15 +70,15 @@ class Permissions extends RoleList
     {
         return [
             DataTableButton::make()
-                ->label(__('Assign users'))
-                ->color('primary')
+                ->text(__('Assign users'))
+                ->color('indigo')
                 ->attributes([
                     'wire:click' => 'editUsers(record.id)',
                 ])
                 ->when(resolve_static(UpdateRole::class, 'canPerformAction', [false])),
             DataTableButton::make()
-                ->label(__('Edit permissions'))
-                ->color('primary')
+                ->text(__('Edit permissions'))
+                ->color('indigo')
                 ->attributes([
                     'x-cloak',
                     'x-show' => 'record.name !== \'Super Admin\'',
@@ -86,8 +86,8 @@ class Permissions extends RoleList
                 ])
                 ->when(resolve_static(UpdateRole::class, 'canPerformAction', [false])),
             DataTableButton::make()
-                ->label(__('Delete'))
-                ->color('negative')
+                ->text(__('Delete'))
+                ->color('red')
                 ->attributes([
                     'x-cloak',
                     'x-show' => 'record.name !== \'Super Admin\'',
@@ -112,7 +112,7 @@ class Permissions extends RoleList
         $this->permissions = $this->getPermissionTree();
 
         $this->js(<<<JS
-            \$openModal('$modal');
+            \$modalOpen('$modal');
         JS);
     }
 

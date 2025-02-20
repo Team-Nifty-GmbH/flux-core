@@ -6,7 +6,7 @@
     <div class="space-y-3 pb-3">
         <template x-for="customEvent in customEvents">
             <div class="flex justify-end">
-                <x-button secondary
+                <x-button color="gray"
                           spinner
                           class="w-full"
                           x-text="customEvent.name"

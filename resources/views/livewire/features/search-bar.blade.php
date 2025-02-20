@@ -26,7 +26,7 @@
 >
     <x-input shadowless
          autocomplete="off"
-         icon="search"
+         icon="magnifying-glass"
          class="w-full border-0"
          x-on:click="show = true"
          x-on:keydown="show = true"
@@ -37,7 +37,7 @@
     <div class="absolute z-[9] w-full pt-6" x-show="show" x-transition x-cloak>
         <x-card class="relative !px-0 !py-0 pb-2">
             <x-label x-show="$wire.search.length && ! Object.keys($wire.return).length" x-cloak class="flex w-full items-center justify-center py-1.5">
-                <x-icon name="search" class="mr-2 h-5 w-5" />
+                <x-icon name="magnifying-glass" class="mr-2 h-5 w-5" />
                 <div>
                     {{ __('No results…') }}
                 </div>
@@ -55,10 +55,10 @@
                             <ul class="mt-2 text-sm text-gray-800" role="none">
                                 <template x-for="item in items">
                                     <li x-on:mouseover.debounce.500ms="showDetails(model, item.id)"
-                                        class="hover:bg-primary-600 flex cursor-pointer select-none items-center space-x-1.5 px-4 py-2 hover:text-white"
+                                        class="hover:bg-indigo-600 flex cursor-pointer select-none items-center space-x-1.5 px-4 py-2 hover:text-white"
                                         x-on:click="show = false; $wire.showDetail(model, item.id)"
                                     >
-                                        <x-avatar src="#" xs x-bind:src="item.src" x-cloak x-show="item.src" />
+                                        <x-avatar src="#" xs x-bind:image="item.src" x-cloak x-show="item.src" />
                                         <div class="inline-block align-middle hover:text-white dark:text-gray-50" x-text="item.label">
                                         </div>
                                     </li>

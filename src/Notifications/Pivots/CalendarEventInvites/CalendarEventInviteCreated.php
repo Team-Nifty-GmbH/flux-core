@@ -52,7 +52,7 @@ class CalendarEventInviteCreated extends Notification implements HasToastNotific
                 method_exists($this->model->calendarEvent, 'detailRoute'),
                 function (ToastNotification $toast) {
                     return $toast->accept(NotificationAction::make()
-                        ->label(__('View'))
+                        ->text(__('View'))
                         ->url($this->model->calendarEvent->setDetailRouteParams()->detailRoute()
                         ));
                 });

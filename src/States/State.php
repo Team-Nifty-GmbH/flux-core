@@ -34,9 +34,9 @@ abstract class State extends BaseState implements Arrayable
 
     public function badge(): string
     {
-        return Blade::render(html_entity_decode('<x-badge :$label :$color />'), [
+        return Blade::render(html_entity_decode('<x-badge :$text :$color />'), [
             'color' => $this->color(),
-            'label' => __(Str::headline($this->__toString())),
+            'text' => __(Str::headline($this->__toString())),
         ]);
     }
 }

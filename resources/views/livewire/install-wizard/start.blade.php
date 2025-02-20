@@ -20,8 +20,8 @@
     </div>
     @if($databaseConnectionSuccessful)
         <div class="mt-5 flex flex-col gap-1.5">
-            <x-button x-cloak x-show="! $wire.requestRefresh" spinner primary wire:click="start(); resetProgress();" :label="__('Install')" />
-            <x-button x-cloak x-show="$wire.requestRefresh" spinner primary wire:click="reload().then(() => window.location.reload(true));" :label="__('Reload')" />
+            <x-button x-cloak x-show="! $wire.requestRefresh" spinner color="indigo" wire:click="start(); resetProgress();" :text="__('Install')" />
+            <x-button x-cloak x-show="$wire.requestRefresh" spinner color="indigo" wire:click="reload().then(() => window.location.reload(true));" :text="__('Reload')" />
         </div>
     @else
         <div class="flex flex-col gap-1.5">
@@ -31,7 +31,7 @@
             <x-input wire:model="dbForm.database" :label="__('Database Name')" />
             <x-input wire:model="dbForm.username" :label="__('Database Username')" />
             <x-input wire:model="dbForm.password" :label="__('Database Password')" />
-            <x-button primary wire:click="testDatabaseConnection()" spinner :label="__('Test Database Connection')" />
+            <x-button color="indigo" wire:click="testDatabaseConnection()" spinner :text="__('Test Database Connection')" />
         </div>
     @endif
 </div>

@@ -35,9 +35,9 @@ class BankConnections extends BaseContactBankConnectionList
     {
         return [
             DataTableButton::make()
-                ->label(__('New'))
+                ->text(__('New'))
                 ->icon('plus')
-                ->color('primary')
+                ->color('indigo')
                 ->wireClick('edit')
                 ->when(resolve_static(CreateContactBankConnection::class, 'canPerformAction', [false])),
         ];
@@ -47,15 +47,15 @@ class BankConnections extends BaseContactBankConnectionList
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
+                ->text(__('Edit'))
                 ->icon('pencil')
-                ->color('primary')
+                ->color('indigo')
                 ->wireClick('edit(record.id)')
                 ->when(resolve_static(UpdateContactBankConnection::class, 'canPerformAction', [false])),
             DataTableButton::make()
-                ->label(__('Delete'))
+                ->text(__('Delete'))
                 ->icon('trash')
-                ->color('negative')
+                ->color('red')
                 ->attributes([
                     'wire:click' => 'delete(record.id)',
                     'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Bank connection')]),
@@ -102,7 +102,7 @@ class BankConnections extends BaseContactBankConnectionList
         $this->contactBankConnection->fill($contactBankConnection);
 
         $this->js(<<<'JS'
-            $openModal('edit-contact-bank-connection');
+            $modalOpen('edit-contact-bank-connection');
         JS);
     }
 }

@@ -45,8 +45,8 @@ class Categories extends CategoryList
     {
         return [
             DataTableButton::make()
-                ->label(__('Create'))
-                ->color('primary')
+                ->text(__('Create'))
+                ->color('indigo')
                 ->icon('plus')
                 ->when(resolve_static(CreateCategory::class, 'canPerformAction', [false]))
                 ->wireClick('edit()'),
@@ -57,14 +57,14 @@ class Categories extends CategoryList
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
-                ->color('primary')
+                ->text(__('Edit'))
+                ->color('indigo')
                 ->icon('pencil')
                 ->when(resolve_static(UpdateCategory::class, 'canPerformAction', [false]))
                 ->wireClick('edit(record.id)'),
             DataTableButton::make()
-                ->label(__('Delete'))
-                ->color('negative')
+                ->text(__('Delete'))
+                ->color('red')
                 ->icon('trash')
                 ->when(resolve_static(DeleteCategory::class, 'canPerformAction', [false]))
                 ->attributes([
@@ -81,7 +81,7 @@ class Categories extends CategoryList
         $this->category->fill($category);
 
         $this->js(<<<'JS'
-            $openModal('edit-category');
+            $modalOpen('edit-category');
         JS);
     }
 

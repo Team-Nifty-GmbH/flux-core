@@ -9,8 +9,8 @@
             @if(class_implements($this, \FluxErp\Contracts\HasWidgetOptions::class))
                 <x-dropdown>
                     @foreach($this->options() as $option)
-                        <x-dropdown.item :label="data_get($option, 'label')" wire:click="{{ data_get($option, 'method') }}">
-                        </x-dropdown.item>
+                        <x-dropdown.items :label="data_get($option, 'label')" wire:click="{{ data_get($option, 'method') }}">
+                        </x-dropdown.items>
                     @endforeach
                 </x-dropdown>
             @endif
@@ -37,7 +37,7 @@
                             <x-badge
                                 x-cloak
                                 x-show="$wire.growthRate < 0"
-                                negative
+                                color="red"
                                 lg
                             >
                                 <x-slot:prepend>
@@ -66,7 +66,7 @@
                             <x-badge
                                 x-cloak
                                 x-show="$wire.growthRate < 0"
-                                positive
+                                color="emerald"
                                 lg
                             >
                                 <x-slot:prepend>

@@ -11,15 +11,15 @@
         <div class="dropdown-full-w">
             <x-dropdown width="w-full">
                 <x-slot name="trigger">
-                    <x-button class="w-full" icon="document">
+                    <x-button color="secondary" light class="w-full" icon="document">
                         {{ __('Add Signature') }}
                     </x-button>
                 </x-slot>
                 @foreach($unsignedViews as $unsignedView)
-                    <x-dropdown.item
+                    <x-dropdown.items
                         wire:click="setPublicLink('{{ $unsignedView }}')">
                         {{ __($unsignedView) }}
-                    </x-dropdown.item>
+                    </x-dropdown.items>
                 @endforeach
             </x-dropdown>
         </div>
@@ -40,8 +40,8 @@
                             <x-button
                                 x-on:click="$refs.link{{ implode('', array_map('ucfirst', explode('-', $label))) }}.select(); document.execCommand('copy');"
                                 class="h-full rounded-r-md"
-                                icon="clipboard-copy"
-                                primary
+                                icon="clipboard-document"
+                                color="indigo"
                                 squared
                             />
                         </div>

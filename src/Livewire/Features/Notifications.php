@@ -42,7 +42,7 @@ class Notifications extends Component
                 {!! $notify['description'] !!}
                 <div class="flex gap-1.5 items-center h-6">
                     <div class="overflow-hidden h-2 text-xs flex rounded bg-gray-200 dark:bg-gray-700 w-full">
-                        <div x-bind:style="{width: notification.progress * 100 + '%'}" class="transition-all shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-primary-500 dark:bg-primary-700"></div>
+                        <div x-bind:style="{width: notification.progress * 100 + '%'}" class="transition-all shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-indigo-500 dark:bg-indigo-700"></div>
                     </div>
                 </div>
             BLADE, ['notify' => $notify]);

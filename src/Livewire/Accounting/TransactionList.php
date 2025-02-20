@@ -47,8 +47,8 @@ class TransactionList extends BaseTransactionList
             parent::getTableActions(),
             [
                 DataTableButton::make()
-                    ->label(__('Show unassigned payments'))
-                    ->color('primary')
+                    ->text(__('Show unassigned payments'))
+                    ->color('indigo')
                     ->wireClick('showUnassignedPayments'),
             ]
         );
@@ -60,7 +60,7 @@ class TransactionList extends BaseTransactionList
             parent::getRowActions(),
             [
                 DataTableButton::make()
-                    ->label(__('Show Order'))
+                    ->text(__('Show Order'))
                     ->attributes(
                         [
                             'x-on:click' => <<<'JS'
@@ -71,8 +71,8 @@ class TransactionList extends BaseTransactionList
                         ]
                     ),
                 DataTableButton::make()
-                    ->label(__('Assign'))
-                    ->color('primary')
+                    ->text(__('Assign'))
+                    ->color('indigo')
                     ->attributes(
                         [
                             'wire:click' => 'assign(record.id)',
@@ -89,13 +89,13 @@ class TransactionList extends BaseTransactionList
     {
         return [
             DataTableButton::make()
-                ->label(__('Start automatic assignment'))
-                ->color('primary')
+                ->text(__('Start automatic assignment'))
+                ->color('indigo')
                 ->wireClick('matchTransactions()')
                 ->when(fn () => resolve_static(UpdateTransaction::class, 'canPerformAction', [false])),
             DataTableButton::make()
-                ->label(__('Delete'))
-                ->color('negative')
+                ->text(__('Delete'))
+                ->color('red')
                 ->when(fn () => resolve_static(DeleteTransaction::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Transaction')]),
@@ -150,7 +150,7 @@ class TransactionList extends BaseTransactionList
             MatchTransactionsWithOrderJob::dispatchSync($chunk);
         }
 
-        $this->notification()->success(__('The transactions are being matched with the orders.'));
+        $this->notification()->success(__('The transactions are being matched with the orders.'))->send();
     }
 
     #[Renderless]
@@ -160,7 +160,7 @@ class TransactionList extends BaseTransactionList
         $this->transactionForm->fill($transaction);
 
         $this->js(<<<'JS'
-            $openModal('assign-order');
+            $modalOpen('assign-order');
         JS);
     }
 

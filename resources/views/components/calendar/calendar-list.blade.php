@@ -1,6 +1,6 @@
 <div class="whitespace-nowrap">
     @if($group === 'my' && resolve_static(\FluxErp\Actions\Calendar\CreateCalendar::class, 'canPerformAction', [false]))
-        <x-button icon="plus" class="w-full" x-on:click="calendarItem = {}; $wire.editCalendar();">
+        <x-button color="secondary" light icon="plus" class="w-full" x-on:click="calendarItem = {}; $wire.editCalendar();">
             {{ __('Create Calendar') }}
         </x-button>
     @endif
