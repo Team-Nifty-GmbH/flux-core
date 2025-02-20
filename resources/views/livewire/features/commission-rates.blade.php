@@ -93,7 +93,7 @@
                                           label: '{{ __('Cancel') }}',
                                       }
                                   }, $wire.__instance.id)"
-                                  label="{{ __('Delete') }}"
+                                  :text="__('Delete')"
                         />
                     @endif
                     <div class="flex">

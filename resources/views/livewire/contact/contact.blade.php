@@ -7,7 +7,7 @@
                 @section('contact.title')
                     @section('contact.title.avatar')
                         <label for="avatar" class="cursor-pointer">
-                            <x-avatar xl src="{{ $avatar }}" />
+                            <x-avatar xl :image="$avatar" />
                         </label>
                         <input type="file" accept="image/*" id="avatar" class="hidden" wire:model.live="avatar"/>
                     @show

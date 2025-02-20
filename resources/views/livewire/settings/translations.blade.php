@@ -65,7 +65,7 @@
                 <div
                     class="flex justify-between gap-x-4">
                     @if(user_can('action.translation.delete'))
-                        <x-button color="secondary" light x-bind:class="index > -1 || 'invisible'" flat negative label="{{ __('Delete') }}"
+                        <x-button color="secondary" light x-bind:class="index > -1 || 'invisible'" flat negative :text="__('Delete')"
                                   @click="window.$wireui.confirmDialog({
                                                             title: '{{ __('Delete translation') }}',
                                                             description: '{{ __('Do you really want to delete this translation entry?') }}',

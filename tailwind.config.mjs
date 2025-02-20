@@ -7,6 +7,8 @@ export default {
         __dirname + '/resources/**/*.js',
         __dirname + '/resources/**/*.vue',
         __dirname + '/src/Htmlables/**/*.php',
+        __dirname + '/src/Providers/*.php',
+        __dirname + '/src/View/Components/**/*.php',
         __dirname + '/src/Livewire/**/*.php',
     ],
     theme: {

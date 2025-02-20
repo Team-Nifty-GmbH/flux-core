@@ -83,7 +83,7 @@
                         <x-button color="secondary" light.circle xs label="?" x-on:mouseover="$el._tippy ? $el._tippy.show() : tippy($el, {content: document.getElementById('unit-price-tooltip').content})" />
                     </x-slot:cornerHint>
                 </x-number>
-                <x-number x-bind:readonly="!edit" label="{{ __('Basic unit') }}" wire:model.number="product.basic_unit">
+                <x-number x-bind:readonly="!edit" :text="__('Basic unit')" wire:model.number="product.basic_unit">
                     <x-slot:cornerHint>
                         <x-button color="secondary" light.circle xs label="?" x-on:mouseover="$el._tippy ? $el._tippy.show() : tippy($el, {content: document.getElementById('unit-price-tooltip').content})" />
                     </x-slot:cornerHint>

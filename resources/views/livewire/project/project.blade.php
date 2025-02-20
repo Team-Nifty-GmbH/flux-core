@@ -8,7 +8,7 @@
             @section('project.title')
                 @section('project.title.avatar')
                     <label for="avatar" class="cursor-pointer">
-                        <x-avatar xl src="{{ $avatar }}" />
+                        <x-avatar xl :image="$avatar" />
                     </label>
                     <input type="file" accept="image/*" id="avatar" class="hidden" wire:model.live="avatar"/>
                 @show
@@ -34,14 +34,14 @@
             @show
         </div>
         <div class="justify-stretch mt-6 flex flex-col-reverse space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3">
-            @if(resolve_static(\FluxErp\Actions\Project\DeleteProject::class, 'canPerformAction', [false]))
-                <x-button color="secondary" light
+            @canAction(\FluxErp\Actions\Project\DeleteProject::class)
+                <x-button
                     wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Project')]) }}"
-                    negative
-                    label="{{ __('Delete') }}"
+                    color="red"
+                    :text="__('Delete')"
                     wire:click="delete()"
                 />
-            @endif
+            @endCanAction
             <x-button
                 color="indigo"
                 x-cloak

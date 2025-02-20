@@ -29,7 +29,7 @@
             @foreach($generatedUrls as $label => $link)
                 <x-input
                     class="mb-2"
-                    label="{{ __($label) }}"
+                    :text="__($label)"
                     readonly
                     value="{{ $link }}"
                     type="text"

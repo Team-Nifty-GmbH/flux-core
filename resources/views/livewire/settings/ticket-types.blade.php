@@ -71,7 +71,7 @@
                 <div
                     class="flex justify-between gap-x-4">
                     @if(user_can('action.ticket-type.delete'))
-                        <x-button color="secondary" light x-bind:class="ticketTypeIndex > -1 || 'invisible'" flat negative label="{{ __('Delete') }}"
+                        <x-button color="secondary" light x-bind:class="ticketTypeIndex > -1 || 'invisible'" flat negative :text="__('Delete')"
                                   x-on:click="window.$wireui.confirmDialog({
                                                             title: '{{ __('Delete ticket type') }}',
                                                             description: '{{ __('Do you really want to delete this ticket type?') }}',
@@ -102,7 +102,7 @@
                 <div
                     class="flex justify-between gap-x-4">
                     @if(user_can('action.additional-column.delete'))
-                        <x-button color="secondary" light x-bind:class="additionalColumnIndex > -1 || 'invisible'" flat negative label="{{ __('Delete') }}"
+                        <x-button color="secondary" light x-bind:class="additionalColumnIndex > -1 || 'invisible'" flat negative :text="__('Delete')"
                                   x-on:click="window.$wireui.confirmDialog({
                                                             title: '{{ __('Delete additional column') }}',
                                                             description: '{{ __('Do you really want to delete this additional column?') }}',

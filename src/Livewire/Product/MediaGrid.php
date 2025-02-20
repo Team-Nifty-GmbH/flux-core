@@ -45,7 +45,8 @@ class MediaGrid extends BaseMediaGrid
     {
         $rowActions = parent::getRowActions();
         array_splice($rowActions, -1, 0, [
-            DataTableButton::make(icon: 'photograph')
+            DataTableButton::make()
+                ->icon('photo')
                 ->text(__('Cover image'))
                 ->attributes([
                     'x-on:click' => '$wire.product.cover_media_id = record.id; edit = true;',
@@ -60,7 +61,8 @@ class MediaGrid extends BaseMediaGrid
     protected function getTableActions(): array
     {
         return [
-            DataTableButton::make(icon: 'upload')
+            DataTableButton::make()
+                ->icon('arrow-up-tray')
                 ->color('indigo')
                 ->text(__('Upload'))
                 ->attributes([

@@ -24,7 +24,7 @@
                 <x-button color="secondary" light
                     wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Task')]) }}"
                     negative
-                    label="{{ __('Delete') }}"
+                    :text="__('Delete')"
                     wire:click="delete()"
                 />
             @endif

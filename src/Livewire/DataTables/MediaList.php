@@ -58,22 +58,26 @@ class MediaList extends BaseDataTable
     protected function getRowActions(): array
     {
         return [
-            DataTableButton::make(icon: 'save')
+            DataTableButton::make()
+                ->icon('arrow-down-tray')
                 ->text(__('Download'))
                 ->attributes([
                     'x-on:click' => '$wire.downloadMedia(record.id)',
                 ]),
-            DataTableButton::make(icon: 'pencil')
+            DataTableButton::make()
+                ->icon('pencil')
                 ->text(__('Edit'))
                 ->wireClick('edit(record.id)'),
-            DataTableButton::make(icon: 'eye')
+            DataTableButton::make()
+                ->icon('eye')
                 ->text(__('View'))
                 ->href('record.url')
                 ->attributes([
                     'target' => '_blank',
                     'x-bind:href' => 'record.url',
                 ]),
-            DataTableButton::make(icon: 'trash')
+            DataTableButton::make()
+                ->icon('trash')
                 ->color('red')
                 ->text(__('Delete'))
                 ->when(fn () => resolve_static(DeleteMedia::class, 'canPerformAction', [false]))

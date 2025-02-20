@@ -10,7 +10,7 @@
                         flat color="red" :text="__('Delete') "
                         wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Additional Column')]) }}"
                         wire:click="delete"
-                        label="{{ __('Delete') }}"
+                        :text="__('Delete')"
                     />
                 @endif
                 <div class="flex">

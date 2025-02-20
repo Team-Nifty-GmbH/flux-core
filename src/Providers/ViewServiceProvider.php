@@ -119,6 +119,9 @@ class ViewServiceProvider extends ServiceProvider
         });
 
         TallStackUi::personalize()
+            ->avatar()
+            ->block('wrapper.class', 'inline-flex shrink-0 items-center justify-center overflow-hidden !bg-secondary-200');
+        TallStackUi::personalize()
             ->card()
             ->block('header.text.size', 'flex justify-end')
             ->block('header.wrapper.base', 'w-full');

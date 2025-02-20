@@ -36,12 +36,12 @@
     />
     <div class="absolute z-[9] w-full pt-6" x-show="show" x-transition x-cloak>
         <x-card class="relative !px-0 !py-0 pb-2">
-            <x-label x-show="$wire.search.length && ! Object.keys($wire.return).length" x-cloak class="flex w-full items-center justify-center py-1.5">
+            <div x-show="$wire.search.length && ! Object.keys($wire.return).length" x-cloak class="flex w-full items-center justify-center py-1.5">
                 <x-icon name="magnifying-glass" class="mr-2 h-5 w-5" />
                 <div>
                     {{ __('No results…') }}
                 </div>
-            </x-label>
+            </div>
             <x-flux::spinner />
             <div class="dark:divide-secondary-600 flex flex-row divide-x divide-gray-100">
                 <ul class="sm:basis-1/2">
@@ -58,7 +58,7 @@
                                         class="hover:bg-indigo-600 flex cursor-pointer select-none items-center space-x-1.5 px-4 py-2 hover:text-white"
                                         x-on:click="show = false; $wire.showDetail(model, item.id)"
                                     >
-                                        <x-avatar src="#" xs x-bind:image="item.src" x-cloak x-show="item.src" />
+                                        <x-avatar image="#" xs x-bind:image="item.src" x-cloak x-show="item.src" />
                                         <div class="inline-block align-middle hover:text-white dark:text-gray-50" x-text="item.label">
                                         </div>
                                     </li>

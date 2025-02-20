@@ -12,7 +12,7 @@
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div class="w-full md:flex md:space-x-6">
                         <label for="avatar" style="cursor: pointer">
-                            <x-avatar class="m-auto" size="w-24 h-24" src="{{ $avatar }}"/>
+                            <x-avatar class="m-auto" size="w-24 h-24" :image="$avatar"/>
                         </label>
                         <input type="file" accept="image/*" id="avatar" class="hidden" wire:model.live="avatar"/>
                         <div class="w-full space-y-5">

@@ -11,8 +11,6 @@
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">
                     <div class="flex">
-                        <x-icon x-cloak x-show="$wire.product.is_locked" variant="solid" name="lock-closed" />
-                        <x-icon x-cloak x-show="! $wire.product.is_locked" variant="solid" name="lock-open" />
                         <div class="pl-2">
                             <span x-text="$wire.product.name">
                             </span>

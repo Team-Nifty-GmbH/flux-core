@@ -8,7 +8,7 @@
     <div class="mx-auto px-4 sm:px-6 md:flex md:items-center md:justify-between md:space-x-5 lg:px-8">
         <div class="flex items-center space-x-5">
             <label for="avatar">
-                <x-avatar xl :label="$productImage === '' ? strtoupper(substr($serialNumber->id ?? '', 0, 2)) : false" src="{{ $productImage }}" />
+                <x-avatar xl :label="$productImage === '' ? strtoupper(substr($serialNumber->id ?? '', 0, 2)) : false" :image="$productImage" />
             </label>
             <input type="file" accept="image/*" id="avatar" class="hidden" wire:model.live="productImage" disabled/>
             <div>

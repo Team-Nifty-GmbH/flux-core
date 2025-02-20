@@ -49,7 +49,7 @@
                 x-on:selected="$event.detail.value === 'mail' ? $wire.communication.to = [] : null"
                 wire:model="communication.communication_type_enum"
                 :label="__('Communication Type')"
-                select="label:label|select="label:name|value:id"
+                select="label:label|value:name"
             />
         </div>
         <div class="flex gap-1.5">
