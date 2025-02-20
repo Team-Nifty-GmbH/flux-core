@@ -270,6 +270,7 @@ class FluxCalendar extends CalendarComponent
             try {
                 $this->event->reset();
                 $this->event->fill($attributes);
+                $this->event->original_start = data_get($this->oldCalendarEvent, 'start');
                 $this->event->delete();
             } catch (UnauthorizedException|ValidationException $e) {
                 exception_to_notifications($e, $this);
