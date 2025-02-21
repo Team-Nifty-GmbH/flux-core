@@ -28,7 +28,7 @@ class EventSubscriptionController extends BaseController
         $subscriptions = resolve_static(EventSubscription::class, 'query')
             ->where('subscribable_type', $request->user()->getMorphClass())
             ->where('subscribable_id', $request->user()->id)
-            ->orderBy('event')
+            ->orderBy('channel')
             ->get();
 
         return ResponseHelper::createResponseFromBase(statusCode: 200, data: $subscriptions);

@@ -35,7 +35,11 @@ class Notifications extends Component
     #[Renderless]
     public function sendNotify(array $notify): void
     {
-        $notify['description'] = Str::of(data_get($notify, 'description'))->limit(75);
+        if (request()->header('referer') === data_get($notify, 'accept.url')) {
+            return;
+        }
+
+        $notify['description'] = Str::limit(data_get($notify, 'description'), 75);
 
         if (! is_null(data_get($notify, 'progress'))) {
             $notify['description'] = Blade::render(<<<'BLADE'

@@ -24,6 +24,7 @@ use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasCustomEvents;
 use FluxErp\Traits\HasFrontendAttributes;
+use FluxErp\Traits\HasNotificationSubscriptions;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasParentChildRelations;
 use FluxErp\Traits\HasRelatedModel;
@@ -59,8 +60,10 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 class Order extends FluxModel implements HasMedia, InteractsWithDataTables, OffersPrinting
 {
     use Commentable, Communicatable, Filterable, HasAdditionalColumns, HasClientAssignment, HasCustomEvents,
-        HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasRelatedModel, HasSerialNumberRange,
-        HasStates, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable, Searchable, SoftDeletes,
+        HasFrontendAttributes, HasNotificationSubscriptions, HasPackageFactory, HasParentChildRelations, HasRelatedModel,
+        HasSerialNumberRange,
+        HasStates, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable,
+        Searchable, SoftDeletes,
         Trackable {
             Printable::resolvePrintViews as protected printableResolvePrintViews;
             HasSerialNumberRange::getSerialNumber as protected hasSerialNumberRangeGetSerialNumber;
@@ -275,6 +278,11 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
     public function agent(): BelongsTo
     {
         return $this->belongsTo(User::class, 'agent_id');
+    }
+
+    public function approvalUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approval_user_id');
     }
 
     public function client(): BelongsTo

@@ -1,11 +1,11 @@
 <?php
 
-namespace FluxErp\Events;
+namespace FluxErp\Events\Order;
 
 use FluxErp\Models\Order;
 use FluxErp\Support\Event\SubscribableEvent;
 
-class PortalOrderCreated extends SubscribableEvent
+class OrderApprovalRequestEvent extends SubscribableEvent
 {
     public function __construct(public Order $order) {}
 }

@@ -10,6 +10,7 @@ use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasCustomEvents;
 use FluxErp\Traits\HasFrontendAttributes;
+use FluxErp\Traits\HasNotificationSubscriptions;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasRelatedModel;
 use FluxErp\Traits\HasSerialNumberRange;
@@ -31,8 +32,8 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables
 {
     use Commentable, Communicatable, Filterable, HasAdditionalColumns, HasCustomEvents, HasFrontendAttributes,
-        HasPackageFactory, HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification, HasUuid,
-        InteractsWithMedia, LogsActivity, Searchable, SoftDeletes, Trackable;
+        HasNotificationSubscriptions, HasPackageFactory, HasRelatedModel, HasSerialNumberRange, HasStates,
+        HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Searchable, SoftDeletes, Trackable;
 
     protected ?string $detailRouteName = 'tickets.id';
 
