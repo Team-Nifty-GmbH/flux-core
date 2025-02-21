@@ -15,7 +15,12 @@ export default function (content, debounceDelay = 0, searchModel = ['user', 'rol
             proxy: null,
             editable: true,
             content: content,
-            init(element) {
+            popUp: null,
+            initTextArea(element) {
+                console.log(this.$refs?.popWindow?.content);
+                const buttons = this.$refs?.popWindow?.content.cloneNode(true);
+                // access the alpine instance in the editor callback
+                const parent = this;
                 _editor = new Editor({
                     element: element,
                     extensions: [
@@ -90,12 +95,48 @@ export default function (content, debounceDelay = 0, searchModel = ['user', 'rol
                             class: 'prose prose-sm max-w-full content-editable-placeholder placeholder-secondary-400 dark:bg-secondary-800 dark:placeholder-secondary-500 border-secondary-300 focus:ring-primary-500 focus:border-primary-500 dark:border-secondary-600 form-input block min-h-[85px] w-full rounded-b-md border p-3 shadow-sm transition duration-100 ease-in-out focus:outline-none dark:text-gray-50 sm:text-sm',
                         },
                     },
+                    onSelectionUpdate: ({ editor }) => {
+                        const { from, to } = editor.state.selection;
+                        // init popUp if not
+                        if(parent.popUp === null) {
+                            parent.popUp =  window.tippy(element, {
+                                content: buttons ?? 'not defined',
+                                showOnCreate: true,
+                                interactive: true,
+                                trigger: 'manual',
+                                placement: 'top',
+                            })
+                        }
+
+                        if (from !== to) {
+                            if(parent.popUp.state.isVisible) return;
+                            // in case it is not visible determine the cursor position
+                            const cursorPosition = editor.view.coordsAtPos(from);
+                            // update the position if cursorPosition is defined
+                            cursorPosition && parent.popUp.setProps({
+                                getReferenceClientRect: () => ({
+                                    width:0,
+                                    height:0,
+                                    top: cursorPosition.top,
+                                    left: cursorPosition.left,
+                                    bottom: cursorPosition.bottom,
+                                    right: cursorPosition.right,
+                                })
+                            })
+                            parent.popUp.show();
+
+                        } else {
+                            if(!parent.popUp.state.isVisible) return;
+                            parent.popUp.hide();
+                        }
+                    },
                     onUpdate: ({ editor }) => {
                         clearTimeout(this.timeout);
                         this.timeout = setTimeout(() => {
                             this.content = editor.getHTML();
                         }, debounceDelay);
                     },
+
                 });
 
                 this.proxy = Alpine.raw(_editor);
