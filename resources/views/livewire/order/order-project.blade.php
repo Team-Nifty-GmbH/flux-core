@@ -13,7 +13,6 @@
                 'url' => route('search', \FluxErp\Models\Project::class),
                 'method' => 'POST',
             ]"
-            select="label:label|value:id"
         />
     </div>
     @canAction(\FluxErp\Actions\Project\CreateProject::class)
@@ -27,6 +26,6 @@
 <x-slot:footer>
     <div class="flex justify-end gap-x-4">
         <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('create-tasks')" />
-        <x-button spinner="createTasks" color="indigo" :text="__('Save')" wire:click="save().then((success) => {if(success) $modalClose('create-tasks');})" />
+        <x-button loading="createTasks" color="indigo" :text="__('Save')" wire:click="save().then((success) => {if(success) $modalClose('create-tasks');})" />
     </div>
 </x-slot:footer>

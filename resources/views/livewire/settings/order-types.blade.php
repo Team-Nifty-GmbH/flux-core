@@ -23,7 +23,7 @@
                         :label="__('Print Layouts')"
                         :placeholder="__('Select Print Layouts')"
                         wire:model="orderType.print_layouts"
-                        multiselect
+                        multiple
                         select="label:value|value:label"
                         :options="$printViews"
                     />
@@ -31,7 +31,7 @@
                         :label="__('Post stock')"
                         :hint="__('Stock will be posted on creation of given documents')"
                         wire:model="orderType.post_stock_print_layouts"
-                        multiselect
+                        multiple
                         select="label:value|value:label"
                         :options="$printViews"
                     />
@@ -39,7 +39,7 @@
                         :label="__('Reserve stock')"
                         :hint="__('Stock will be reserved on creation of given documents.') . ' ' . __('Stock posting has priority over stock reservation.')"
                         wire:model="orderType.reserve_stock_print_layouts"
-                        multiselect
+                        multiple
                         select="label:value|value:label"
                         :options="$printViews"
                     />
@@ -59,7 +59,7 @@
                     flat
                     color="red"
                     :text="__('Delete')"
-                    wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Order Type')]) }}"
+                    wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Order Type')]) }}"
                     wire:click="delete().then((success) => {if (success) $modalClose('edit-order-type-modal');})"
                 />
             </div>

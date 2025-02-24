@@ -5,7 +5,7 @@
             $wire.workTime.trackable_id = null;
             let searchRoute = {{  '\'' . route('search', '__model__') . '\'' }}
             searchRoute = searchRoute.replace('__model__', this.trackable_type);
-            Alpine.$data(document.getElementById('trackable-id-edit').querySelector('[x-data]')).request.api = searchRoute;
+            $tallstackuiSelect('invoice-address-id').setRequestUrl(searchRoute);
         });
     }
 }">
@@ -16,17 +16,13 @@
                 :options="$workTimeTypes"
                 wire:model="workTime.work_time_type_id"
                 select="label:name|value:id"
-                x-on:selected="$wire.workTime.is_billable = $event.detail.is_billable"
+                x-on:select="$wire.workTime.is_billable = $event.detail.is_billable"
             />
             <x-toggle :label="__('Is Billable')" wire:model="workTime.is_billable" />
             <x-select.styled
                 :label="__('User')"
-                select="label:label|value:id"
                 autocomplete="off"
                 wire:model="workTime.user_id"
-                :template="[
-                    'name'   => 'user-option',
-                ]"
                 :request="[
                     'url' => route('search', \FluxErp\Models\User::class),
                     'method' => 'POST',
@@ -59,7 +55,6 @@
             <x-select.styled :label="__('Contact')"
                 wire:model="workTime.contact_id"
                 select="label:label|value:contact_id"
-                template="user-option"
                 :request="[
                     'url' => route('search', \FluxErp\Models\Address::class),
                     'method' => 'POST',
@@ -89,8 +84,7 @@
             <div id="trackable-id-edit" x-show="$wire.workTime.trackable_type">
                 <x-select.styled
                     :label="__('Record')"
-                    x-on:selected="$event.detail.contact_id ? $wire.workTime.contact_id = $event.detail.contact_id : null"
-                    select="label:label|value:id"
+                    x-on:select="$event.detail.contact_id ? $wire.workTime.contact_id = $event.detail.contact_id : null"
                     :request="[
                         'url' => route('search', '__model__'),
                         'method' => 'POST',
@@ -110,7 +104,7 @@
             <div class="flex justify-end gap-x-4">
                 <div class="flex">
                     <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('edit-work-time-modal')" />
-                    <x-button color="indigo" spinner x-on:click="$wire.save().then((success) => { if (success) $modalClose('edit-work-time-modal'); })" :text="__('Save')" />
+                    <x-button color="indigo" loading x-on:click="$wire.save().then((success) => { if (success) $modalClose('edit-work-time-modal'); })" :text="__('Save')" />
                 </div>
             </div>
         </x-slot:footer>
@@ -125,7 +119,6 @@
             />
             <x-select.styled
                 :label="__('Product')"
-                select="label:label|value:id"
                 option-description="description"
                 wire:model="createOrdersFromWorkTimes.product_id"
                 :request="[
@@ -155,7 +148,7 @@
             <div class="flex justify-end gap-x-4">
                 <div class="flex">
                     <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('create-orders-modal')" />
-                    <x-button color="indigo" spinner x-on:click="$wire.createOrders().then(() => { $modalClose('create-orders-modal'); })" :text="__('Create Orders')" />
+                    <x-button color="indigo" loading x-on:click="$wire.createOrders().then(() => { $modalClose('create-orders-modal'); })" :text="__('Create Orders')" />
                 </div>
             </div>
         </x-slot:footer>
@@ -165,7 +158,7 @@
             <x-toggle x-model="isBillable" :label="__('Is Billable')" />
             <x-slot:footer>
                 <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('toggle-is-billable-modal')" />
-                <x-button color="indigo" spinner wire:click="toggleIsBillable(isBillable).then(() => { $modalClose('toggle-is-billable-modal'); })" :text="__('Apply')" />
+                <x-button color="indigo" loading wire:click="toggleIsBillable(isBillable).then(() => { $modalClose('toggle-is-billable-modal'); })" :text="__('Apply')" />
             </x-slot:footer>
         </x-modal>
     </div>

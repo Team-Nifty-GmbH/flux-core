@@ -71,20 +71,14 @@
                 <div
                     class="flex justify-between gap-x-4">
                     @if(user_can('action.ticket-type.delete'))
-                        <x-button color="secondary" light x-bind:class="ticketTypeIndex > -1 || 'invisible'" flat negative :text="__('Delete')"
-                                  x-on:click="window.$wireui.confirmDialog({
-                                                            title: '{{ __('Delete ticket type') }}',
-                                                            description: '{{ __('Do you really want to delete this ticket type?') }}',
-                                                            icon: 'error',
-                                                            accept: {
-                                                                label: '{{ __('Delete') }}',
-                                                                method: 'delete',
-                                                            },
-                                                            reject: {
-                                                                label: '{{ __('Cancel') }}',
-                                                            }
-                                                        }, $wire.__instance.id)
-                                                        " label="{{ __('Delete') }}"/>
+                        <x-button
+                            color="red"
+                            light x-bind:class="ticketTypeIndex > -1 || 'invisible'"
+                            flat
+                            :text="__('Delete')"
+                            wire:click="delete()"
+                            wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Ticket Type')]) }}"
+                        />
                     @endif
                     <div class="flex">
                         <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('edit-ticket-type-modal')"/>
@@ -102,21 +96,14 @@
                 <div
                     class="flex justify-between gap-x-4">
                     @if(user_can('action.additional-column.delete'))
-                        <x-button color="secondary" light x-bind:class="additionalColumnIndex > -1 || 'invisible'" flat negative :text="__('Delete')"
-                                  x-on:click="window.$wireui.confirmDialog({
-                                                            title: '{{ __('Delete additional column') }}',
-                                                            description: '{{ __('Do you really want to delete this additional column?') }}',
-                                                            icon: 'error',
-                                                            accept: {
-                                                                label: '{{ __('Delete') }}',
-                                                                method: 'delete',
-                                                                params: true
-                                                            },
-                                                            reject: {
-                                                                label: '{{ __('Cancel') }}',
-                                                            }
-                                                        }, $wire.__instance.id)
-                                                        " label="{{ __('Delete') }}"/>
+                        <x-button
+                            color="red"
+                            light x-bind:class="additionalColumnIndex > -1 || 'invisible'"
+                            flat
+                            :text="__('Delete')"
+                            wire:click="delete()"
+                            wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Additional Column')]) }}"
+                        />
                     @endif
                     <div class="flex">
                         <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('edit-additional-column-modal')"/>

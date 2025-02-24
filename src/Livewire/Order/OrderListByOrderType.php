@@ -38,7 +38,7 @@ class OrderListByOrderType extends BaseOrderList
                     && resolve_static(CreateOrder::class, 'canPerformAction', [false])
                 )
                 ->attributes([
-                    'x-on:click' => "\$modalOpen('create-order')",
+                    'x-on:click' => "\$modalOpen('create-order-modal')",
                 ]),
         ];
     }

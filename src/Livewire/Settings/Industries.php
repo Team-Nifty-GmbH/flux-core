@@ -46,7 +46,7 @@ class Industries extends IndustryList
                 ->when(resolve_static(DeleteIndustry::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'delete(record.id)',
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Industry')]),
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Industry')]),
                 ]),
         ];
     }

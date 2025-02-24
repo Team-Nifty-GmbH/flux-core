@@ -51,7 +51,7 @@
             @if($cartForm->isUserOwned())
                 <x-button
                     color="red"
-                    wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Watchlist')]) }}"
+                    wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Watchlist')]) }}"
                     wire:click="delete()"
                     :text="__('Delete')"
                 />

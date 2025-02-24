@@ -38,7 +38,7 @@
             />
             <x-button
                 color="red"
-                wire:flux-confirm.icon.error="{{ __('wire:confirm.cancel.dashboard-edit') }}"
+                wire:flux-confirm.type.error="{{ __('wire:confirm.cancel.dashboard-edit') }}"
                 wire:click="resetWidgets().then(() => {reInit().disable(); isLoading = false; editGridMode(false);})"
                 class="flex-shrink-0"
                 :text="__('Cancel')"

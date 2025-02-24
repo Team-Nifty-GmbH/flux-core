@@ -35,7 +35,7 @@
     relatedSelected(type) {
         let searchRoute = '{{  route('search', '') }}';
         searchRoute = searchRoute + '/' + type;
-        Alpine.$data(document.getElementById('communicatable-id').querySelector('[x-data]')).request.api = searchRoute;
+        $tallstackuiSelect('communicatable-id').setRequestUrl(searchRoute);
     },
     modelType: null,
     modelId: null
@@ -46,7 +46,7 @@
             <x-select.styled
                 required
                 :options="$communicationTypes"
-                x-on:selected="$event.detail.value === 'mail' ? $wire.communication.to = [] : null"
+                x-on:select="$event.detail.select.value === 'mail' ? $wire.communication.to = [] : null"
                 wire:model="communication.communication_type_enum"
                 :label="__('Communication Type')"
                 select="label:label|value:name"
@@ -55,7 +55,7 @@
         <div class="flex gap-1.5">
             <template x-for="(model, index) in $wire.communication.communicatables">
                 <x-badge flat color="indigo" cl>
-                    <x-slot name="prepend" class="p-0.5">
+                    <x-slot name="left" class="p-0.5">
                         <x-button.circle
                             x-cloak
                             x-show="model.href"
@@ -67,11 +67,11 @@
                             class="size-4"
                         />
                     </x-slot>
-                    <x-slot:label>
+                    <x-slot:text>
                         <span x-text="model.label"></span>
-                    </x-slot:label>
+                    </x-slot:text>
                     <x-slot
-                        name="append"
+                        name="right"
                         class="relative flex items-center size-2"
                     >
                         <button
@@ -89,17 +89,16 @@
         </div>
         <div id="communicatable-type">
             <x-select.styled
-                :text="__('Model')"
+                :label="__('Model')"
                 :option-key-value="true"
-                x-on:selected="modelType = $event.detail?.value"
+                x-on:select="modelType = $event.detail?.select.value"
                 :options="$this->communicatables"
             />
         </div>
         <div id="communicatable-id" x-show="modelType" x-cloak>
             <x-select.styled
-                :text="__('Record')"
-                select="label:label|value:id"
-                x-on:selected="modelId = $event.detail?.value;"
+                :label="__('Record')"
+                x-on:select="modelId = $event.detail?.select.value;"
                 :request="[
                     'url' => route('search', ''),
                     'method' => 'POST',
@@ -111,9 +110,8 @@
         <div class="flex flex-col gap-4" x-show="$wire.communication.communication_type_enum === 'phone-call' || $wire.communication.communication_type_enum === 'letter'">
             <x-select.styled
                 :label="__('Address')"
-                select="label:label|value:id"
                 option-description="description"
-                x-on:selected="$wire.setTo($event.detail)"
+                x-on:select="$wire.setTo($event.detail)"
                 :request="[
                     'url' => route('search', \FluxErp\Models\Address::class),
                     'method' => 'POST',
@@ -144,11 +142,11 @@
             <div class="flex gap-1">
                 <template x-for="to in $wire.communication.to">
                     <x-badge flat color="indigo" cl>
-                        <x-slot:label>
+                        <x-slot:text>
                             <span x-text="to"></span>
-                        </x-slot:label>
+                        </x-slot:text>
                         <x-slot
-                            name="append"
+                            name="right"
                             class="relative flex items-center w-2 h-2"
                         >
                             <button
@@ -177,11 +175,11 @@
             <div class="flex gap-1">
                 <template x-for="cc in $wire.communication.cc">
                     <x-badge flat color="indigo" cl>
-                        <x-slot:label>
+                        <x-slot:text>
                             <span x-text="cc"></span>
-                        </x-slot:label>
+                        </x-slot:text>
                         <x-slot
-                            name="append"
+                            name="right"
                             class="relative flex items-center w-2 h-2"
                         >
                             <button
@@ -210,11 +208,11 @@
             <div class="flex gap-1">
                 <template x-for="bcc in $wire.communication.bcc">
                     <x-badge flat color="indigo" cl>
-                        <x-slot:label>
+                        <x-slot:text>
                             <span x-text="bcc"></span>
-                        </x-slot:label>
+                        </x-slot:text>
                         <x-slot
-                            name="append"
+                            name="right"
                             class="relative flex items-center w-2 h-2"
                         >
                             <button
@@ -241,17 +239,16 @@
         <div class="grow">
             <x-input wire:model="communication.subject"
                      class="w-full"
-                     :text="__('Subject')"
+                     :label="__('Subject')"
                      x-bind:disabled="$wire.communication.id && $wire.communication.communication_type_enum === 'mail'"
             />
         </div>
         <x-flux::editor wire:model="communication.html_body" :label="__('Content')"/>
         <x-select.styled
             :label="__('Tags')"
-            multiselect
+            multiple
             wire:model.number="communication.tags"
             x-bind:disabled="$wire.communication.id && $wire.communication.communication_type_enum === 'mail'"
-            select="label:label|value:id"
             :request="[
                 'url' => route('search', \FluxErp\Models\Tag::class),
                 'method' => 'POST',
@@ -267,13 +264,13 @@
                 ],
             ]"
         >
-            <x-slot:beforeOptions>
+            <x-slot:after>
                 @canAction(\FluxErp\Actions\Tag\CreateTag::class)
                     <div class="px-1">
                         <x-button color="emerald" full :text="__('Add')" wire:click="addTag($promptValue())" wire:flux-confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}" />
                     </div>
                 @endCanAction
-            </x-slot:beforeOptions>
+            </x-slot:after>
         </x-select.styled>
         <x-flux::features.media.upload-form-object :text="__('Attachments')" wire:model="attachments" :multiple="true" x-bind:disabled="$wire.communication.id && $wire.communication.communication_type_enum === 'mail'"/>
         <x-slot:footer>
@@ -283,13 +280,13 @@
                     :text="__('Cancel')"
                 />
                 <x-button color="secondary" light
-                    wire:click="save().then((success) => { if(success) close(); })"
+                    wire:click="save().then((success) => { if(success) $modalClose('edit-communication'); })"
                     primary
                     :text="__('Save')"
                 />
                 <div x-show="$wire.communication.communication_type_enum === 'mail' && !$wire.communication.id">
                     <x-button color="secondary" light
-                        wire:click="send().then((success) => { if(success) close(); })"
+                        wire:click="send().then((success) => { if(success) $modalClose('edit-communication'); })"
                         primary
                         :text="__('Send')"
                     />
@@ -312,7 +309,7 @@
             <div class="flex justify-end gap-x-4">
                 <div class="flex">
                     <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('create-preview')" />
-                    <x-button color="indigo" :text="__('Continue')" spinner wire:click="createDocuments().then(() => { $modalClose('create-preview'); });" />
+                    <x-button color="indigo" :text="__('Continue')" loading="createDocuments" wire:click="createDocuments().then(() => { $modalClose('create-preview'); });" />
                 </div>
             </div>
         </x-slot:footer>

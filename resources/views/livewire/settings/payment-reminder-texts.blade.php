@@ -41,11 +41,11 @@
         <div class="flex gap-1">
             <template x-for="to in $wire.paymentReminderTextForm.mail_to || []">
                 <x-badge flat color="indigo" cl>
-                    <x-slot:label>
+                    <x-slot:text>
                         <span x-text="to"></span>
-                    </x-slot:label>
+                    </x-slot:text>
                     <x-slot
-                        name="append"
+                        name="right"
                         class="relative flex items-center w-2 h-2"
                     >
                         <button
@@ -71,11 +71,11 @@
         <div class="flex gap-1">
             <template x-for="to in $wire.paymentReminderTextForm.mail_cc || []">
                 <x-badge flat color="indigo" cl>
-                    <x-slot:label>
+                    <x-slot:text>
                         <span x-text="to"></span>
-                    </x-slot:label>
+                    </x-slot:text>
                     <x-slot
-                        name="append"
+                        name="right"
                         class="relative flex items-center w-2 h-2"
                     >
                         <button

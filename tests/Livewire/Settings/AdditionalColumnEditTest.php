@@ -33,7 +33,7 @@ class AdditionalColumnEditTest extends TestCase
             ->assertStatus(200)
             ->assertHasNoErrors()
             ->assertDispatched('closeModal')
-            ->assertWireuiNotification(icon: 'success');
+            ->assertToastNotification(type: 'success');
     }
 
     public function test_edit_additional_column()
@@ -56,6 +56,6 @@ class AdditionalColumnEditTest extends TestCase
             ->assertStatus(200)
             ->assertHasNoErrors()
             ->assertDispatched('closeModal', $component->get('additionalColumn')->toArray())
-            ->assertWireuiNotification(icon: 'success');
+            ->assertToastNotification(type: 'success');
     }
 }

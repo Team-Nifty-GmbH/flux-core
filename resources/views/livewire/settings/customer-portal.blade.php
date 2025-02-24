@@ -16,7 +16,7 @@
                 <x-select.styled :label="__('Dashboard module')" :options="$modules" wire:model="setting.settings.dashboard_module"/>
             </div>
             <div class="mt-4">
-                <x-select.styled :label="__('Calendars')" wire:model="setting.settings.calendars" :options="$calendars" :multiselect="true" select="label:name|value:id" />
+                <x-select.styled :label="__('Calendars')" wire:model="setting.settings.calendars" :options="$calendars" multiple select="label:name|value:id" />
             </div>
         </x-card>
         <x-card :title="__('Navigation styling')">

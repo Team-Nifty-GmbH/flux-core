@@ -20,7 +20,7 @@
                 flat
                 color="red"
                 wire:click="deleteTransaction().then((success) => {if(success) $modalClose('transaction-detail-modal');})"
-                wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Transaction')]) }}"
+                wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Transaction')]) }}"
             />
             <div class="w-full flex justify-end gap-1.5">
                 <x-button color="secondary" light :text="__('Cancel')" x-on:click="$modalClose('transaction-detail-modal')"/>

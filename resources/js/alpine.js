@@ -10,6 +10,7 @@ import sort from '@alpinejs/sort';
 import navigationSpinner from './components/navigation-spinner.js';
 import wireNavigation from './components/wire-navigation.js';
 import comments from './components/comments.js';
+import selectComponent from './components/tallstackui/select.js';
 
 window.setupEditor = setupEditor;
 window.workTime = workTime;
@@ -17,6 +18,7 @@ window.dashboard = dashboard;
 window.addressMap = addressMap;
 window.signature = signature;
 window.filePond = filePond;
+window.$tallstackuiSelect = selectComponent;
 
 navigationSpinner();
 
@@ -55,18 +57,28 @@ document.addEventListener('livewire:init', () => {
 })
 
 Livewire.directive('flux-confirm', ({ el, directive, component }) => {
-    let icon = directive.modifiers.includes('icon')
-        ? directive.modifiers[directive.modifiers.indexOf('icon') + 1]
-        : 'question';
+    let type = directive.modifiers.includes('type')
+        ? directive.modifiers[directive.modifiers.indexOf('type') + 1]
+        : 'info';
 
-    let id = directive.modifiers.includes('prompt')
-        ? 'prompt'
+    if (! ['success', 'error', 'warning', 'info'].includes(type)) {
+        type = 'info';
+    }
+
+    let promptAppend = directive.modifiers.includes('prompt')
+        ? '<div>\n' +
+        '    <div class="relative mt-1 rounded-md shadow-sm">\n' +
+        '    <div class="focus:ring-primary-600 focus-within:focus:ring-primary-600 focus-within:ring-primary-600 dark:focus-within:ring-primary-600 flex rounded-md ring-1 transition focus-within:ring-2 dark:ring-dark-600 dark:text-dark-300 text-gray-600 ring-gray-300 dark:bg-dark-800 bg-white">\n' +
+        '        <input id="prompt-value" class="dark:placeholder-dark-400 w-full rounded-md border-0 bg-transparent py-1.5 ring-0 placeholder:text-gray-400 focus:outline-hidden focus:ring-transparent sm:text-sm sm:leading-6">\n' +
+        '    </div>\n' +
+        '    </div>\n' +
+        '</div>'
         : (directive.modifiers.includes('id') ? directive.modifiers[directive.modifiers.indexOf('id') + 1] : null);
 
     // Convert sanitized linebreaks ("\n") to real line breaks...
     let message = directive.expression.replaceAll('\\n', '\n').split('|');
     let title = message.shift();
-    let description = message[0];
+    let description = '<div>' + message[0] + '</div>' + (promptAppend ? '<div>' + promptAppend + '</div>' : '');
     let cancelLabel = message[1] ?? 'Cancel';
     let confirmLabel = message[2] ?? 'Confirm';
 
@@ -74,8 +86,7 @@ Livewire.directive('flux-confirm', ({ el, directive, component }) => {
 
     el.__livewire_confirm = (action) => {
         $interaction()
-            .wireable(component.id)
-            .error(title, description)
+            .wireable(component.id)[type](title, description)
             .confirm(confirmLabel, () => { action(); })
             .cancel(cancelLabel)
             .send();

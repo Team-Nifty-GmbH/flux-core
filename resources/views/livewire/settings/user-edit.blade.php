@@ -59,7 +59,7 @@
                 <x-input wire:model="userForm.bank_name" :label="__('Bank Name')"/>
             @show
             @section('user-edit.mail-accounts')
-                <x-select.styled :options="$mailAccounts" select="label:email|value:id" multiselect :label="__('Mail Accounts')" wire:model="userForm.mail_accounts" />
+                <x-select.styled :options="$mailAccounts" select="label:email|value:id" multiple :label="__('Mail Accounts')" wire:model="userForm.mail_accounts" />
             @show
         </form>
     @show
@@ -153,7 +153,6 @@
                 wire:model="userForm.contact_id"
                 select="label:label|value:contact_id"
                 option-description="description"
-                template="user-option"
                 :request="[
                     'url' => route('search', \FluxErp\Models\Address::class),
                     'method' => 'POST',
@@ -192,7 +191,7 @@
                         color="red"
                         :text="__('Delete')"
                         wire:click="delete"
-                        wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('User')]) }}"
+                        wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('User')]) }}"
                     />
                 @endCanAction
                 <div class="flex space-x-2">

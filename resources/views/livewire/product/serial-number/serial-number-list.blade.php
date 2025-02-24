@@ -3,12 +3,8 @@
         <x-select.styled
             :label="__('Product')"
             wire:model="stockPosting.product_id"
-            select="label:label|value:id"
             option-description="product_number"
             required
-            :template="[
-                'name' => 'user-option',
-            ]"
             :request="[
                 'url' => route('search', \FluxErp\Models\Product::class),
                 'method' => 'POST',
@@ -30,7 +26,6 @@
         <x-select.styled
             :label="__('Address')"
             wire:model="stockPosting.address.id"
-            select="label:label|value:id"
             option-description="description"
             required
             :request="[

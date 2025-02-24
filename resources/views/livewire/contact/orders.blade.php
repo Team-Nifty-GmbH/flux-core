@@ -2,7 +2,7 @@
         order: $wire.entangle('order'),
     }"
 >
-    <x-modal id="create-order" :title="__('New Order')">
+    <x-modal id="create-order-modal" :title="__('New Order')">
         <section>
             <div class="space-y-2.5 divide-y divide-secondary-200">
                 <x-select.styled
@@ -20,8 +20,7 @@
                         option-description="description"
                         required
                         disabled
-                        x-on:selected="updateContactId($event.detail.contact_id)"
-                        template="user-option"
+                        x-on:select="updateContactId($event.detail.select.value)"
                         :request="[
                             'url' => route('search', \FluxErp\Models\Address::class),
                             'method' => 'POST',
@@ -50,7 +49,6 @@
                             class="pb-4"
                             :label="__('Invoice Address')"
                             wire:model="order.address_invoice_id"
-                            select="label:label|value:id"
                             option-description="description"
                             required
                             :request="[
@@ -74,7 +72,6 @@
                             :label="__('Delivery Address')"
                             class="pb-4"
                             wire:model="order.address_delivery_id"
-                            select="label:label|value:id"
                             option-description="description"
                             required
                             :request="[
@@ -134,8 +131,8 @@
         <x-slot name="footer">
             <div class="flex justify-end gap-x-4">
                 <div class="flex">
-                    <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('create-order')" />
-                    <x-button spinner color="indigo" :text="__('Save')" wire:click="save" />
+                    <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('create-order-modal')" />
+                    <x-button loading color="indigo" :text="__('Save')" wire:click="save" />
                 </div>
             </div>
         </x-slot>

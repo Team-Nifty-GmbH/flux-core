@@ -160,7 +160,7 @@ class WorkTimeList extends BaseDataTable
                 ->when(resolve_static(DeleteWorkTime::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'delete(record.id)',
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Work Time')]),
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Work Time')]),
                 ]),
         ];
     }
@@ -202,7 +202,7 @@ class WorkTimeList extends BaseDataTable
         $this->workTime->fill($workTime);
 
         $this->js(<<<'JS'
-            $modalOpen('edit-work-time');
+            $modalOpen('edit-work-time-modal');
         JS);
     }
 

@@ -8,7 +8,7 @@
                     <x-button
                         x-bind:class="! create || 'invisible'"
                         flat color="red" :text="__('Delete') "
-                        wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Additional Column')]) }}"
+                        wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Additional Column')]) }}"
                         wire:click="delete"
                         :text="__('Delete')"
                     />

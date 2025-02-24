@@ -102,17 +102,19 @@ class AddressList extends BaseDataTable
         return $returnArray;
     }
 
+    #[Renderless]
     public function show(): void
     {
         $this->contact->reset();
 
         $this->js(
             <<<'JS'
-               $modalOpen('new-contact');
+               $modalOpen('new-contact-modal');
             JS
         );
     }
 
+    #[Renderless]
     public function save(): false|RedirectResponse|Redirector
     {
         try {

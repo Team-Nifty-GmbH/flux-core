@@ -37,13 +37,13 @@
             <x-select.styled
                 :label="__('Repeat')"
                 :options="$frequencies"
-                select="label:label|select="label:name|value:id"
+                select="label:label|value:name"
                 autocomplete="off"
                 required
                 wire:model="schedule.cron.methods.basic"
             />
             <div x-cloak x-show="['dailyAt', 'lastDayOfMonth'].indexOf($wire.schedule.cron.methods.basic) >= 0">
-                <x-time-picker
+                <x-time
                     :label="__('Time')"
                     format="24"
                     wire:model="schedule.cron.parameters.basic.0"
@@ -64,7 +64,7 @@
                     select="label:name|value:id"
                     wire:model="schedule.cron.parameters.basic.0"
                 />
-                <x-time-picker
+                <x-time
                     :label="__('Time')"
                     format="24"
                     wire:model="schedule.cron.parameters.basic.1"
@@ -72,7 +72,7 @@
             </div>
             <div x-cloak x-show="['monthlyOn', 'quarterlyOn'].indexOf($wire.schedule.cron.methods.basic) >= 0" class="flex flex-col gap-4">
                 <x-number :max="31" :min="0" wire:model="schedule.cron.parameters.basic.0" :label="__('Day')" />
-                <x-time-picker
+                <x-time
                     :label="__('Time')"
                     format="24"
                     wire:model="schedule.cron.parameters.basic.1"
@@ -83,7 +83,7 @@
                 <div class="mt-4">
                     <x-number :max="31" :min="0" wire:model="schedule.cron.parameters.basic.1" :label="__('Day')" />
                 </div>
-                <x-time-picker
+                <x-time
                     :label="__('Time')"
                     format="24"
                     wire:model="schedule.cron.parameters.basic.2"
@@ -108,10 +108,10 @@
                         ]"
                     select="label:name|value:id"
                     wire:model="schedule.cron.parameters.basic.0"
-                    x-on:selected="document.getElementById('month-day-input').max = $event.detail.days; $wire.schedule.cron.parameters.basic[1] = Math.min($wire.schedule.cron.parameters.basic[1], $event.detail.days);"
+                    x-on:select="document.getElementById('month-day-input').max = $event.detail.days; $wire.schedule.cron.parameters.basic[1] = Math.min($wire.schedule.cron.parameters.basic[1], $event.detail.days);"
                 />
                 <x-number id="month-day-input" :max="31" :min="0" wire:model.blur="schedule.cron.parameters.basic.1" :label="__('Day')" />
-                <x-time-picker
+                <x-time
                     :label="__('Time')"
                     format="24"
                     wire:model="schedule.cron.parameters.basic.2"

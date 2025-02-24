@@ -29,10 +29,9 @@ use Spatie\Tags\TagsServiceProvider;
 use Spatie\Translatable\TranslatableServiceProvider;
 use Spatie\TranslationLoader\TranslationServiceProvider;
 use Symfony\Component\Process\Process;
+use TallStackUi\TallStackUiServiceProvider;
 use TeamNiftyGmbH\Calendar\CalendarServiceProvider;
 use TeamNiftyGmbH\DataTable\DataTableServiceProvider;
-use WireUi\Heroicons\HeroiconsServiceProvider;
-use WireUi\Providers\WireUiServiceProvider;
 
 use function Orchestra\Testbench\package_path;
 
@@ -138,8 +137,7 @@ abstract class DuskTestCase extends TestCase
             PermissionServiceProvider::class,
             TagsServiceProvider::class,
             ScoutServiceProvider::class,
-            HeroiconsServiceProvider::class,
-            WireUiServiceProvider::class,
+            TallStackUiServiceProvider::class,
             MediaLibraryServiceProvider::class,
             CalendarServiceProvider::class,
             QueryBuilderServiceProvider::class,

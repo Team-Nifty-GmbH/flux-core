@@ -6,14 +6,14 @@
         <x-button color="secondary" light
             :text="__('Clear cart')"
             wire:click="clear()"
-            wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Cart Items')]) }}"
+            wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Cart Items')]) }}"
             negative
             class="w-full"
         />
     @endsection
     <x-select.styled
         class="w-full"
-        :text="__('Load a watchlist')"
+        :label="__('Load a watchlist')"
         select="label:name|value:id"
         :options="array_filter($watchlists, fn (array $watchlist) => $watchlist['id'] ?? false)"
         wire:model.live.numeric="loadWatchlist"

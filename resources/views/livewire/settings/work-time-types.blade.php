@@ -12,7 +12,7 @@
                         color="red"
                         :text="__('Delete')"
                         wire:click="delete().then((success) => { if(success) $modalClose('edit-work-time-type-modal')})"
-                        wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Work Time Type')]) }}"
+                        wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Work Time Type')]) }}"
                     />
                 </div>
             @endif

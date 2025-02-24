@@ -36,7 +36,7 @@
         <div class="justify-stretch mt-6 flex flex-col-reverse space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3">
             @canAction(\FluxErp\Actions\Project\DeleteProject::class)
                 <x-button
-                    wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Project')]) }}"
+                    wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Project')]) }}"
                     color="red"
                     :text="__('Delete')"
                     wire:click="delete()"
@@ -53,7 +53,7 @@
             <x-button
                 x-cloak
                 color="indigo"
-                spinner
+                loading="save"
                 x-cloak
                 x-show="edit"
                 class="w-full"
@@ -65,7 +65,7 @@
             <x-button
                 x-cloak
                 color="indigo"
-                spinner
+                loading="save"
                 x-cloak
                 x-show="edit"
                 class="w-full"

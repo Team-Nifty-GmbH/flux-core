@@ -44,7 +44,7 @@
                                     <div class="max-w-sm">
                                         <x-select.styled
                                             wire:model="selectedCalendar.customProperties.{{ $index }}.field_type"
-                                            :text="__('Field Type')"
+                                            :label="__('Field Type')"
                                             :options="$this->fieldTypes"
                                             option-key-value
                                         />

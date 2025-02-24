@@ -122,9 +122,15 @@ class ViewServiceProvider extends ServiceProvider
             ->avatar()
             ->block('wrapper.class', 'inline-flex shrink-0 items-center justify-center overflow-hidden !bg-secondary-200');
         TallStackUi::personalize()
-            ->card()
-            ->block('header.text.size', 'flex justify-end')
-            ->block('header.wrapper.base', 'w-full');
+            ->dropdown()
+            ->block('wrapper.second', 'relative inline-block text-left w-full');
+
+        TallStackUi::personalize()
+            ->badge()
+            ->block('wrapper.class', 'outline-hidden inline-flex items-center border px-2 py-0.5');
+        TallStackUi::personalize()
+            ->button()
+            ->block('wrapper.sizes.md', 'text-sm px-4 py-2');
         TallStackUi::personalize()
             ->form('label')
             ->block('text', 'block text-sm font-medium text-gray-700 dark:text-gray-400');

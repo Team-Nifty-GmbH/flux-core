@@ -13,9 +13,10 @@
         </x-label>
     @endif
     <div class="dropdown-full-w" {{ $attributes->whereStartsWith('x-bind') }}>
-        <x-dropdown width="w-full" align="{{ $attributes->get('align', 'right') }}">
-            <x-slot:trigger>
+        <x-dropdown position="{{ $attributes->get('align', 'bottom') }}">
+            <x-slot:action>
                 <button
+                    x-on:click="show = !show"
                     wire:loading.attr="disabled"
                     wire:loading.class="!cursor-wait"
                     type="button"
@@ -24,16 +25,13 @@
                 >
                     <span x-text="Array.from(Object.values(availableStates)).find((state) => {return state.name === model})?.label"></span> <x-icon name="chevron-down" class="h-4 w-4" />
                 </button>
-            </x-slot:trigger>
-            <div class="grid grid-cols-1 gap-3 py-2">
-                <template x-for="state in availableStates">
-                    <div x-on:click="model = state.name" class="flex w-full cursor-pointer items-center">
-                        <x-icon x-show="state.name === model" name="check" class="h-4 w-4" />
-                        <div x-html="window.formatters.state(state.label, formatter[1][state.name])">
-                        </div>
+            </x-slot:action>
+            <template x-for="state in availableStates">
+                <x-dropdown.items x-on:click="model = state.name; show = false">
+                    <div x-html="window.formatters.state(state.label, formatter[1][state.name])">
                     </div>
-                </template>
-            </div>
+                </x-dropdown.items>
+            </template>
         </x-dropdown>
     </div>
 </div>

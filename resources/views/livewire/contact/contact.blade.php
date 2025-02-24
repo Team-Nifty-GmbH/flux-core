@@ -45,7 +45,7 @@
                     @endCanAction
                     @canAction(\FluxErp\Actions\Contact\DeleteContact::class)
                         <x-button color="red" :text="__('Delete') "
-                                  wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Contact')]) }}"
+                                  wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Contact')]) }}"
                                   wire:click="delete()"
                         />
                     @endCanAction

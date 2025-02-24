@@ -23,7 +23,7 @@
                                 color="red"
                                 :text="__('Delete')"
                                 wire:click="removeOrder(order.id).then((closeModal) => {if(closeModal) close();})"
-                                wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Payment position')]) }}"
+                                wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Payment position')]) }}"
                             />
                             <x-button
                                 color="indigo"
@@ -44,7 +44,7 @@
                 @section('payment-properties')
                     <x-select.styled
                         wire:model="paymentRunForm.bank_connection_id"
-                        :text="__('Account')"
+                        :label="__('Account')"
                         :options="$accounts"
                         select="label:name|value:id"
                         option-description="iban"
@@ -78,7 +78,7 @@
                 color="red"
                 :text="__('Delete')"
                 wire:click="delete().then((success) => {if(success) $modalClose('execute-payment-run');})"
-                wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Payment Run')]) }}"
+                wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Payment Run')]) }}"
             />
             <div class="flex justify-end gap-1.5">
                 <x-button color="secondary" light :text="__('Cancel')" x-on:click="$modalClose('execute-payment-run')" />

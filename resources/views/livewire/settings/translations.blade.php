@@ -65,20 +65,15 @@
                 <div
                     class="flex justify-between gap-x-4">
                     @if(user_can('action.translation.delete'))
-                        <x-button color="secondary" light x-bind:class="index > -1 || 'invisible'" flat negative :text="__('Delete')"
-                                  @click="window.$wireui.confirmDialog({
-                                                            title: '{{ __('Delete translation') }}',
-                                                            description: '{{ __('Do you really want to delete this translation entry?') }}',
-                                                            icon: 'error',
-                                                            accept: {
-                                                                label: '{{ __('Delete') }}',
-                                                                method: 'delete',
-                                                            },
-                                                            reject: {
-                                                                label: '{{ __('Cancel') }}',
-                                                            }
-                                                        }, $wire.__instance.id)
-                                                        " label="{{ __('Delete') }}"/>
+                        <x-button
+                            color="red"
+                            light
+                            x-bind:class="index > -1 || 'invisible'"
+                            flat
+                            :text="__('Delete')"
+                            wire:click="delete()"
+                            wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Translation')]) }}"
+                        />
                     @endif
                     <div class="flex">
                         <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('edit-translation-modal')"/>

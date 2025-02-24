@@ -11,10 +11,10 @@
                     <div x-cloak class="pt-10 lg:pt-0 flex flex-col items-center justify-center" x-show="error || id">
                         <div class="w-10 h-10">
                             <template x-if="error">
-                                <x-icon name="exclamation" />
+                                <x-icon name="exclamation-triangle" />
                             </template>
                             <template x-if="id && !error">
-                                <x-icon name="check" />
+                                <x-icon name="check-circle" />
                             </template>
                         </div>
                         <template x-if="error">

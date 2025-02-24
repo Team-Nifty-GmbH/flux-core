@@ -78,7 +78,7 @@ class Tags extends TagList
                 ->when(resolve_static(DeleteTag::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'delete(record.id)',
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Tag')]),
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Tag')]),
                 ]),
         ];
     }
@@ -92,7 +92,7 @@ class Tags extends TagList
                 ->when(resolve_static(DeleteTag::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'deleteSelected',
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Tag')]),
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Tag')]),
                 ]),
         ];
     }

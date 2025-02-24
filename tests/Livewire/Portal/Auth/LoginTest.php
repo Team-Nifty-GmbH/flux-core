@@ -31,7 +31,7 @@ class LoginTest extends BaseSetup
             ->set('password', 'wrongpassword')
             ->call('login')
             ->assertNoRedirect()
-            ->assertDispatched('wireui:notification');
+            ->assertDispatched('tallstackui:toast');
 
         $this->assertGuest();
     }
@@ -56,7 +56,7 @@ class LoginTest extends BaseSetup
             ->set('password')
             ->call('login')
             ->assertNoRedirect()
-            ->assertDispatched('wireui:notification');
+            ->assertDispatched('tallstackui:toast');
 
         $this->assertGuest();
 

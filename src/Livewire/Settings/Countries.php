@@ -51,7 +51,7 @@ class Countries extends CountryList
                 ->when(resolve_static(DeleteCountry::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'delete(record.id)',
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Country')]),
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Country')]),
                 ]),
         ];
     }

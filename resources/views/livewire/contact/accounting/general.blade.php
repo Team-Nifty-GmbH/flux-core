@@ -45,11 +45,7 @@
                 x-bind:disabled="! $wire.$parent.$parent.edit"
                 :label="__('Commission Agent')"
                 wire:model="contact.agent_id"
-                select="label:label|value:id"
                 required
-                :template="[
-                    'name'   => 'user-option',
-                ]"
                 :request="[
                     'url' => route('search', \FluxErp\Models\User::class),
                     'method' => 'POST',
@@ -62,11 +58,7 @@
                 x-bind:disabled="! $wire.$parent.$parent.edit"
                 :label="__('Approval User')"
                 wire:model="contact.approval_user_id"
-                select="label:label|value:id"
                 required
-                :template="[
-                    'name'   => 'user-option',
-                ]"
                 :request="[
                     'url' => route('search', \FluxErp\Models\User::class),
                     'method' => 'POST',

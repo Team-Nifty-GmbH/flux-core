@@ -8,7 +8,7 @@ use TeamNiftyGmbH\DataTable\Traits\HasEloquentListeners;
 
 abstract class BaseDataTable extends DataTable
 {
-    use HasEloquentListeners, Actions;
+    use Actions, HasEloquentListeners;
 
     protected function getModel(): string
     {

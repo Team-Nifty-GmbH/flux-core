@@ -16,7 +16,7 @@
                             flat
                             color="red"
                             :text="__('Delete')"
-                            wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Task')]) }}"
+                            wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Task')]) }}"
                             wire:click="delete().then((success) => {
                                 if (success) close();
                             })"

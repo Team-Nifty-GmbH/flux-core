@@ -60,7 +60,7 @@
                 </div>
                 <div class="flex flex-wrap justify-end">
                     <div class="flex items-center justify-end space-x-4">
-                        <x-toggle x-ref="sticky" md :left-label="__('Sticky')" />
+                        <x-toggle x-ref="sticky" :label="__('Sticky')" position="left" />
                         <x-button color="secondary" light
                             x-on:click="saveComment($refs.textarea, tempFilesId, $refs.sticky, false, typeof comment !== 'undefined' ? comment : null).then((success) => {if(success) clearPond();})"
                             primary

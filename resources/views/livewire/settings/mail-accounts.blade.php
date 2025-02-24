@@ -7,7 +7,7 @@
                 children-attribute="children"
             >
                 <x-slot:afterTree>
-                    <x-button spinner="syncFolders" class="w-full" color="indigo" :text="__('Sync folders')" wire:click="syncFolders($wire.mailAccount.id)"/>
+                    <x-button loading="syncFolders" class="w-full" color="indigo" :text="__('Sync folders')" wire:click="syncFolders($wire.mailAccount.id)"/>
                 </x-slot:afterTree>
             </x-flux::checkbox-tree>
         </x-card>
@@ -21,7 +21,7 @@
                 </div>
                 <x-slot:footer>
                     <div class="flex w-full justify-end">
-                        <x-button spinner="saveMailFolder" color="indigo" :text="__('Save')" wire:click="saveMailFolder()"/>
+                        <x-button loading="saveMailFolder" color="indigo" :text="__('Save')" wire:click="saveMailFolder()"/>
                     </div>
                 </x-slot:footer>
             </x-card>
@@ -41,7 +41,7 @@
         <x-card :title="__('IMAP Settings')" footer-classes="flex justify-end gap-1.5">
             <div class="flex flex-col gap-4">
                 <x-select.styled
-                    :text="__('Protocol')"
+                    :label="__('Protocol')"
                     wire:model="mailAccount.protocol"
                     :options="[
                             ['value' => 'imap', 'label' => __('IMAP')],
@@ -68,7 +68,7 @@
                 <x-toggle wire:model.boolean="mailAccount.is_auto_assign" :label="__('Auto assign mails')" />
             </div>
             <x-slot:footer>
-                <x-button spinner color="indigo" :text="__('Test Connection')" x-on:click="$wire.testImapConnection()"/>
+                <x-button loading color="indigo" :text="__('Test Connection')" x-on:click="$wire.testImapConnection()"/>
             </x-slot:footer>
         </x-card>
         <x-card :title="__('SMTP Settings')" footer-classes="flex justify-end gap-1.5">
@@ -94,7 +94,7 @@
                     wire:flux-confirm.prompt="{{  __('Send test mail to') }}||{{  __('Cancel') }}|{{  __('Send') }}"
                     wire:click="sendTestMail($promptValue())"
                 />
-                <x-button spinner color="indigo" :text="__('Test Connection')" x-on:click="$wire.testSmtpConnection()"/>
+                <x-button loading color="indigo" :text="__('Test Connection')" x-on:click="$wire.testSmtpConnection()"/>
             </x-slot:footer>
         </x-card>
     </div>

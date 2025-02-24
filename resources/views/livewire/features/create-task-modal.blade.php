@@ -11,7 +11,6 @@
                 <x-select.styled
                     :label="__('Project')"
                     wire:model="task.project_id"
-                    select="label:label|value:id"
                     option-description="description"
                     :request="[
                         'url' => route('search', \FluxErp\Models\Project::class),
@@ -20,12 +19,8 @@
                 />
                 <x-select.styled
                     :label="__('Responsible User')"
-                    select="label:label|value:id"
                     autocomplete="off"
                     wire:model="task.responsible_user_id"
-                    :template="[
-                        'name'   => 'user-option',
-                    ]"
                     :request="[
                         'url' => route('search', \FluxErp\Models\User::class),
                         'method' => 'POST',
@@ -38,9 +33,9 @@
                     <x-input type="date" wire:model="task.start_date" label="{{ __('Start Date') }}" />
                     <x-input type="date" wire:model="task.due_date" label="{{ __('Due Date') }}" />
                 </div>
-                <x-state
+                <x-flux::state
                     class="w-full"
-                    align="left"
+                    align="bottom-start"
                     :label="__('Task state')"
                     wire:model="task.state"
                     formatters="formatter.state"
@@ -51,8 +46,7 @@
                 <x-select.styled
                     :label="__('Categories')"
                     wire:model="task.categories"
-                    multiselect
-                    select="label:label|value:id"
+                    multiple
                     :request="[
                         'url' => route('search', \FluxErp\Models\Category::class),
                         'method' => 'POST',
@@ -69,13 +63,9 @@
                 />
                 <x-select.styled
                     :label="__('Assigned')"
-                    select="label:label|value:id"
                     autocomplete="off"
-                    multiselect
+                    multiple
                     wire:model="task.users"
-                    :template="[
-                        'name'   => 'user-option',
-                    ]"
                     :request="[
                         'url' => route('search', \FluxErp\Models\User::class),
                         'method' => 'POST',

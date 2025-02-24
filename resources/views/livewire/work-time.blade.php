@@ -8,13 +8,12 @@
                   :options="$workTimeTypes"
                   wire:model="workTime.work_time_type_id"
                   select="label:name|value:id"
-                  x-on:selected="$wire.workTime.is_billable = $event.detail.is_billable"
+                  x-on:select="$wire.workTime.is_billable = $event.detail.select.is_billable"
         />
         <x-toggle :label="__('Is Billable')" wire:model="workTime.is_billable" />
         <x-select.styled :label="__('Contact')"
             wire:model="workTime.contact_id"
             select="label:label|value:contact_id"
-            template="user-option"
             :request="[
                 'url' => route('search', \FluxErp\Models\Address::class),
                 'method' => 'POST',
@@ -39,12 +38,13 @@
             :label="__('Model')"
             wire:model="workTime.trackable_type"
             :options="$trackableTypes"
-            select="label:value|value:label"
+            select="label:label|value:value"
+            x-on:select="relatedSelected($event.detail.value)"
         />
         <div id="trackable-id" x-cloak x-show="$wire.workTime.trackable_type">
-            <x-select.styled :label="__('Record')"
-                x-on:selected="recordSelected($event.detail)"
-                select="label:label|value:id"
+            <x-select.styled
+                :label="__('Record')"
+                x-on:select="recordSelected($event.detail)"
                 :request="[
                     'url' => route('search', '__model__'),
                     'method' => 'POST',
@@ -63,7 +63,7 @@
             <div class="flex justify-end gap-x-4">
                 <div class="flex">
                     <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('work-time-modal')" />
-                    <x-button color="indigo" :text="__('Start')" spinner x-on:click="$wire.save().then((success) => { if (success) $modalClose('work-time-modal'); })">
+                    <x-button color="indigo" :text="__('Start')" loading x-on:click="$wire.save().then((success) => { if (success) $modalClose('work-time-modal'); })">
                         <x-slot:label>
                             <span x-text="$wire.workTime.id ? '{{ __('Save') }}' : '{{ __('Start') }}'">
                         </x-slot:label>
@@ -95,7 +95,7 @@
     >
         <x-card id="active-work-times" class="flex flex-col gap-4 max-w-md" :title="__('Active Work Times')">
             <x-slot:header>
-                <x-button color="secondary" light.circle xs x-on:click="open = false" icon="x-mark" />
+                <x-button.circle color="secondary" light xs x-on:click="open = false" icon="x-mark" />
             </x-slot:header>
             <div class="flex w-full gap-1.5">
                 <x-button class="w-full" x-show="! $wire.dailyWorkTime.id" color="emerald" :text="__('Start Workday')" x-on:click="$wire.toggleWorkDay(true)" />

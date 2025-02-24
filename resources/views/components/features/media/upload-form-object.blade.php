@@ -25,11 +25,9 @@
         uploadError() {
             this.isUploading = false;
             this.progress = 0;
-            window.$wireui.notify({
-                title: '{{ __('File upload failed') }}',
-                description: '{{ __('Your file upload failed. Please try again.') }}',
-                icon: 'error'
-            });
+            $interaction()
+                .error('{{ __('File upload failed') }}', '{{ __('Your file upload failed. Please try again.') }}')
+                .send();
         },
         uploadSuccess(success, files) {
             this.isUploading = false;

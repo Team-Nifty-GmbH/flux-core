@@ -54,7 +54,7 @@ class ProductPropertyGroups extends ProductPropertyGroupList
                 ->icon('trash')
                 ->color('red')
                 ->attributes([
-                    'wire:flux-confirm.icon.error' => __(
+                    'wire:flux-confirm.type.error' => __(
                         'wire:confirm.delete',
                         ['model' => __('Product Property Group')]
                     ),

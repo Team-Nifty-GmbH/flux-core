@@ -46,7 +46,7 @@
                         <x-select.styled
                             label="{{ __('Validations') }}"
                             placeholder="{{ __('Validations') }}"
-                            multiselect
+                            multiple
                             wire:model="additionalColumn.validations"
                             :options="$availableValidationRules"
                         />

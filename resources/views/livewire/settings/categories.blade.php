@@ -1,8 +1,13 @@
 <div x-data="{
     setCategorySearch() {
         let component = Alpine.$data(document.getElementById('category-parent-id').querySelector('[x-data]'));
-        component.request.params.where[0][2] = $wire.category.model_type;
-        component.request.params.where[1][2] = $wire.category.id;
+        $tallstackuiSelect('category-parent-id')
+                .mergeRequestParams({
+                    where: [
+                        ['model_type', '=', $wire.category.model_type],
+                        ['contact_id', '=', $wire.category.id],
+                    ]}
+                );
     }
 }">
     @section('modals')
@@ -26,7 +31,6 @@
                         <x-select.styled
                             wire:model="category.parent_id"
                             :label="__('Parent')"
-                            select="label:label|value:id"
                             option-description="description"
                             :request="[
                             'url' => route('search', \FluxErp\Models\Category::class),

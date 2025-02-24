@@ -47,7 +47,7 @@ class PaymentReminderTexts extends PaymentReminderTextList
                 ->color('red')
                 ->when(resolve_static(DeletePaymentReminderText::class, 'canPerformAction', [false]))
                 ->attributes([
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Payment Reminder Text')]),
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Payment Reminder Text')]),
                     'wire:click' => 'delete(record.id)',
                 ]),
         ];

@@ -98,7 +98,7 @@ class TransactionList extends BaseTransactionList
                 ->color('red')
                 ->when(fn () => resolve_static(DeleteTransaction::class, 'canPerformAction', [false]))
                 ->attributes([
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Transaction')]),
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Transaction')]),
                     'wire:click' => 'deleteSelected()',
                 ]),
         ];

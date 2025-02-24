@@ -8,9 +8,9 @@
 >
     <!-- Sidebar component, swap this element with another sidebar if you like -->
     <div class="soft-scrollbar flex flex-grow flex-col overflow-x-hidden">
-        <div class="flex relative flex h-16 shrink-0 justify-center p-2 px-4">
+        <div class="relative flex h-16 shrink-0 justify-center p-2 px-4">
             <x-flux::logo fill="#D7E3EC" />
-            <x-button color="secondary" light.circle icon="x-mark" x-on:click="closeMenu(true)" class="absolute top-6 right-6 block md:hidden" />
+            <x-button.circle color="secondary" light icon="x-mark" x-on:click="closeMenu(true)" class="absolute top-6 right-6 block md:hidden" />
         </div>
         <!-- User Menu -->
         <div>
@@ -18,7 +18,7 @@
                 <div class="whitespace-nowrap pb-8 pt-4">
                     <x-dropdown>
                         <x-slot:action>
-                            <div class="-ml-2 flex cursor-pointer px-4">
+                            <div class="-ml-2 flex cursor-pointer px-4" x-on:click="show = !show">
                                 <div class="flex w-16 flex-none justify-center">
                                     <div class="">
                                         <x-avatar lg :image="auth()->user()->getAvatarUrl()" />
@@ -40,9 +40,7 @@
                             <x-dropdown.items :text="__('My profile')" />
                         </a>
                         <x-dropdown.items x-on:click="document.getElementById('logout-form-desktop').submit()" :text="__('Logout')" />
-                        <x-dropdown.items>
-                            <livewire:toggle-dark-mode />
-                        </x-dropdown.items>
+                        <x-theme-switch />
                     </x-dropdown>
                     <div class="hidden">
                         <!-- Authentication -->

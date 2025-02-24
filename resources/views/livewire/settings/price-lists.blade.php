@@ -105,7 +105,6 @@
                                 <x-select.styled
                                     wire:model="newCategoryDiscount.category_id"
                                     required
-                                    select="label:label|value:id"
                                     option-description="description"
                                     :request="[
                                         'url' => route('search', \FluxErp\Models\Category::class),
@@ -146,7 +145,7 @@
                             :text="__('Delete')"
                             x-on:click="$modalClose('edit-price-list-modal')"
                             wire:click="delete().then((success) => { if(success) $modalClose('edit-price-list-modal')})"
-                            wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Price List')]) }}"
+                            wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Price List')]) }}"
                         />
                     </div>
                 @endif

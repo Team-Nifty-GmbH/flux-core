@@ -1,16 +1,22 @@
 <div x-data="{
         updateContactId(id) {
-            const modal = document.querySelector('[wireui-modal]');
-            Alpine.$data(
-                document.getElementById('invoice-address-id').querySelector('[x-data]')
-            ).request.params.where[0][2] = id;
-            Alpine.$data(
-                document.getElementById('delivery-address-id').querySelector('[x-data]')
-            ).request.params.where[0][2] = id;
+            $tallstackuiSelect('invoice-address-id')
+                .mergeRequestParams({
+                    where: [
+                        ['contact_id', '=', id]
+                    ]}
+                );
+            $tallstackuiSelect('delivery-address-id')
+                .mergeRequestParams({
+                    where: [
+                        ['contact_id', '=', id]
+                    ]}
+                );
+
             $wire.fetchContactData();
         }
     }">
-    <x-modal id="create-order" :title="__('New Order')">
+    <x-modal id="create-order-modal" :title="__('New Order')">
         <section>
             <div class="space-y-2.5 divide-y divide-secondary-200">
                 @if(! $orderType ?? true)
@@ -30,8 +36,8 @@
                         select="label:label|value:contact_id"
                         option-description="description"
                         required
-                        x-on:selected="updateContactId($event.detail.contact_id)"
-                        template="user-option"
+                        x-on:select="console.log($event.detail)"
+                        x-on:select="updateContactId($event.detail.select.contact_id)"
                         :request="[
                             'url' => route('search', \FluxErp\Models\Address::class),
                             'method' => 'POST',
@@ -60,7 +66,6 @@
                             class="pb-4"
                             :label="__('Invoice Address')"
                             wire:model="order.address_invoice_id"
-                            select="label:label|value:id"
                             option-description="description"
                             required
                             :request="[
@@ -84,7 +89,6 @@
                             :label="__('Delivery Address')"
                             class="pb-4"
                             wire:model="order.address_delivery_id"
-                            select="label:label|value:id"
                             option-description="description"
                             required
                             :request="[
@@ -144,8 +148,8 @@
         <x-slot name="footer">
             <div class="flex justify-end gap-x-4">
                 <div class="flex">
-                    <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('create-order')" />
-                    <x-button spinner color="indigo" :text="__('Save')" wire:click="save" />
+                    <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('create-order-modal')" />
+                    <x-button loading="save" color="indigo" :text="__('Save')" wire:click="save" />
                 </div>
             </div>
         </x-slot>

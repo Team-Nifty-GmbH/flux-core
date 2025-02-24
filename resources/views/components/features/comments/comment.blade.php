@@ -14,17 +14,17 @@
                 @endif
             </div>
             @if(auth()->check())
-                <x-dropdown>
+                <x-dropdown icon="ellipsis-vertical" static>
                     @canAction(\FluxErp\Actions\Comment\UpdateComment::class)
-                        <x-dropdown.items x-on:click="toggleSticky(comment)">
+                        <x-dropdown.items x-on:click="toggleSticky(comment); show = false;">
                             <span x-text="comment.is_sticky ? '{{ __('Unsticky') }}' : '{{ __('Sticky') }}'"></span>
                         </x-dropdown.items>
                     @endCanAction
                     <x-dropdown.items
                         :text="__('Delete')"
                         x-bind:disabled="! comment.is_current_user"
-                        wire:click="delete(comment.id).then((success) => { if(success) removecomment(comment)})"
-                        wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Comment')]) }}"
+                        wire:click="delete(comment.id).then((success) => { if(success) removeNode(comment)})"
+                        wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Comment')]) }}"
                     />
                 </x-dropdown>
             @endif

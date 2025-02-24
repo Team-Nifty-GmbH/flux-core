@@ -109,7 +109,7 @@
                 <x-label :label="__('Email')" for="{{ md5('address.email_primary') }}" />
                 <div class="col-span-2">
                     <x-input x-bind:readonly="!$wire.edit" class="pl-12" wire:model="address.email_primary">
-                        <x-slot:prepend>
+                        <x-slot:prefix>
                             <div class="absolute inset-y-0 left-0 flex items-center p-0.5">
                                 <x-button
                                     class="h-full rounded-l-md"
@@ -120,7 +120,7 @@
                                     x-on:click.prevent="window.open('mailto:' + $wire.address.email_primary)"
                                 />
                             </div>
-                        </x-slot:prepend>
+                        </x-slot:prefix>
                     </x-input>
                 </div>
             </div>
@@ -130,7 +130,7 @@
                 <x-label :label="__('Phone')" for="{{ md5('address.phone') }}" />
                 <div class="col-span-2">
                     <x-input x-bind:readonly="!$wire.edit" class="pl-12" wire:model="address.phone">
-                        <x-slot:prepend>
+                        <x-slot:prefix>
                             <div class="absolute inset-y-0 left-0 flex items-center p-0.5">
                                 <x-button
                                     class="h-full rounded-l-md"
@@ -141,7 +141,7 @@
                                     x-on:click.prevent="window.open('tel:' + $wire.address.phone)"
                                 />
                             </div>
-                        </x-slot:prepend>
+                        </x-slot:prefix>
                     </x-input>
                 </div>
             </div>
@@ -151,7 +151,7 @@
                 <x-label :label="__('Phone Mobile')" for="{{ md5('address.phone_mobile') }}" />
                 <div class="col-span-2">
                     <x-input x-bind:readonly="!$wire.edit" class="pl-12" wire:model="address.phone_mobile">
-                        <x-slot:prepend>
+                        <x-slot:prefix>
                             <div class="absolute inset-y-0 left-0 flex items-center p-0.5">
                                 <x-button
                                     class="h-full rounded-l-md"
@@ -162,7 +162,7 @@
                                     x-on:click.prevent="window.open('tel:' + $wire.address.phone_mobile)"
                                 />
                             </div>
-                        </x-slot:prepend>
+                        </x-slot:prefix>
                     </x-input>
                 </div>
             </div>
@@ -173,7 +173,7 @@
                     <x-label :label="__('URL')" for="{{ md5('address.url') }}" />
                     <div class="col-span-2">
                         <x-input x-bind:readonly="!$wire.edit" class="pl-12" wire:model="address.url">
-                            <x-slot:prepend>
+                            <x-slot:prefix>
                                 <div class="absolute inset-y-0 left-0 flex items-center p-0.5">
                                     <x-button
                                         class="h-full rounded-l-md"
@@ -184,7 +184,7 @@
                                         x-on:click.prevent="window.open('//' + $wire.address.url)"
                                     />
                                 </div>
-                            </x-slot:prepend>
+                            </x-slot:prefix>
                         </x-input>
                     </div>
                 </div>
@@ -205,10 +205,9 @@
                 <x-label :label="__('Tags')" for="{{ md5('address.tags') }}" />
                 <div class="col-span-2">
                     <x-select.styled
-                        multiselect
+                        multiple
                         x-bind:disabled="! $wire.edit"
                         wire:model.number="address.tags"
-                        select="label:label|value:id"
                         :request="[
                             'url' => route('search', \FluxErp\Models\Tag::class),
                             'method' => 'POST',
@@ -224,13 +223,13 @@
                             ],
                         ]"
                     >
-                        <x-slot:beforeOptions>
+                        <x-slot:after>
                             @canAction(\FluxErp\Actions\Tag\CreateTag::class)
                                 <div class="px-1">
-                                    <x-button color="emerald" full :text="__('Add')" wire:click="addTag($promptValue())" wire:flux-confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}" />
+                                    <x-button class="w-full" color="emerald" :text="__('Add')" wire:click="addTag($promptValue())" wire:flux-confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}" />
                                 </div>
                             @endCanAction
-                        </x-slot:beforeOptions>
+                        </x-slot:after>
                     </x-select.styled>
                 </div>
             </div>

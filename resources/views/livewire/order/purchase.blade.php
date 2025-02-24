@@ -5,12 +5,8 @@
             <x-select.styled
                 :label="__('Authorisation user')"
                 wire:model="order.approval_user_id"
-                select="label:label|value:id"
                 required
                 :disabled="$order->is_confirmed || (auth()->user()?->id !== $order->approval_user_id && $order->is_locked && ! is_null($order->approval_user_id))"
-                :template="[
-                    'name'   => 'user-option',
-                ]"
                 :request="[
                     'url' => route('search', \FluxErp\Models\User::class),
                     'method' => 'POST',

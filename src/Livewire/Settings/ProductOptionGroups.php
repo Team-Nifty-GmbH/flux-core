@@ -51,7 +51,7 @@ class ProductOptionGroups extends ProductOptionGroupList
                 ->icon('trash')
                 ->color('red')
                 ->attributes([
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Product Option Group')]),
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Product Option Group')]),
                     'wire:click' => 'delete(record.id)',
                 ])
                 ->when(

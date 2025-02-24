@@ -69,7 +69,7 @@ class Categories extends CategoryList
                 ->when(resolve_static(DeleteCategory::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'delete(record.id)',
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Category')]),
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Category')]),
                 ]),
         ];
     }

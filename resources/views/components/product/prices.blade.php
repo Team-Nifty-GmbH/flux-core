@@ -34,7 +34,7 @@
     <x-card :title="__('Calculation')">
         <x-select.styled
             :options="$this->vatRates"
-            x-on:selected="$wire.product.vat_rate = $event.detail"
+            x-on:selected="$wire.product.vat_rate = $event.detail.select"
             label="{{ __('VAT rate') }}"
             wire:model="product.vat_rate_id"
             select="label:name|value:id"

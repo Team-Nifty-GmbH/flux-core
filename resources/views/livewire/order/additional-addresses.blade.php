@@ -5,8 +5,6 @@
                 <div class="flex flex-col gap-4">
                     <x-select.styled
                         :label="__('Address')"
-                        select="label:label|value:id"
-                        template="user-option"
                         wire:model="address_id"
                         :request="[
                             'url' => route('search', \FluxErp\Models\Address::class),
@@ -37,7 +35,7 @@
                 <x-slot:footer>
                     <div class="flex justify-end gap-x-4">
                         <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('edit-address-assignment')" />
-                        <x-button color="indigo" spinner x-on:click="$wire.save().then((success) => {if(success) $modalClose('edit-address-assignment');})" :text="__('Save')" />
+                        <x-button color="indigo" loading="save" x-on:click="$wire.save().then((success) => {if(success) $modalClose('edit-address-assignment');})" :text="__('Save')" />
                     </div>
                 </x-slot:footer>
             </x-modal>
@@ -50,7 +48,9 @@
             </div>
             <x-slot:header>
                 <div class="flex gap-1.5">
-                    <x-button color="secondary" light.circle
+                    <x-button.circle
+                        color="secondary"
+                        light
                         wire:navigate
                         outline
                         icon="eye"
@@ -60,7 +60,7 @@
                         icon="trash"
                         wire:click="delete({{ data_get($address, 'address_id') }})"
                         color="red"
-                        wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Address assignment')]) }}"
+                        wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Address assignment')]) }}"
                     />
                 </div>
             </x-slot:header>

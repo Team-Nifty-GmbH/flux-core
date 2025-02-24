@@ -5,12 +5,8 @@
                 class="pb-4"
                 :label="__('Product')"
                 wire:model="productBundleProductForm.bundle_product_id"
-                select="label:label|value:id"
                 option-description="product_number"
                 required
-                :template="[
-                    'name' => 'user-option',
-                ]"
                 :request="[
                     'url' => route('search', \FluxErp\Models\Product::class),
                     'method' => 'POST',
@@ -46,7 +42,7 @@
                 />
                 <x-button
                     color="indigo"
-                    spinner
+                    loading="save"
                     :text="__('Save')"
                     wire:click="save().then((success) => { if(success) $modalClose('edit-bundle-product-modal'); })"
                 />

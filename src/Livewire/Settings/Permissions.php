@@ -92,7 +92,7 @@ class Permissions extends RoleList
                     'x-cloak',
                     'x-show' => 'record.name !== \'Super Admin\'',
                     'wire:click' => 'delete(record.id)',
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Role')]),
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Role')]),
                 ])
                 ->when(resolve_static(DeleteRole::class, 'canPerformAction', [false])),
         ];

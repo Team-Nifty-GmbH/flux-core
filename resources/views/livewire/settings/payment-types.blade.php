@@ -11,7 +11,7 @@
             :label="__('Client')"
             :options="$clients"
             select="label:name|value:id"
-            multiselect
+            multiple
             autocomplete="off"
             wire:model="paymentType.clients"
         />
@@ -33,7 +33,7 @@
                         :text="__('Delete')"
                         x-on:click="$modalClose('edit-payment-type-modal')"
                         wire:click="delete().then((success) => { if(success) close()})"
-                        wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Payment Type')]) }}"
+                        wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Payment Type')]) }}"
                     />
                 </div>
             @endif

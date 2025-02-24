@@ -15,7 +15,7 @@
                         color="red"
                         :text="__('Delete')"
                         wire:click="delete().then((success) => { if(success) $modalClose('edit-vat-rate-modal')})"
-                        wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Vat Rate')]) }}"
+                        wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Vat Rate')]) }}"
                     />
                 </div>
             @endif

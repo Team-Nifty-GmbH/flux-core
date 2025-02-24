@@ -23,11 +23,11 @@
             <div class="flex gap-1" x-cloak x-show="! $wire.multiple">
                 <template x-for="to in $wire.mailMessage.to || []">
                     <x-badge flat color="indigo" cl>
-                        <x-slot:label>
+                        <x-slot:text>
                             <span x-text="to"></span>
-                        </x-slot:label>
+                        </x-slot:text>
                         <x-slot
-                            name="append"
+                            name="right"
                             class="relative flex items-center w-2 h-2"
                         >
                             <button
@@ -57,11 +57,11 @@
             <div class="flex gap-1" x-cloak x-show="! $wire.multiple">
                 <template x-for="cc in $wire.mailMessage.cc || []">
                     <x-badge flat color="indigo" cl>
-                        <x-slot:label>
+                        <x-slot:text>
                             <span x-text="cc"></span>
-                        </x-slot:label>
+                        </x-slot:text>
                         <x-slot
-                            name="append"
+                            name="right"
                             class="relative flex items-center w-2 h-2"
                         >
                             <button
@@ -84,11 +84,11 @@
             <div class="flex gap-1">
                 <template x-for="bcc in $wire.mailMessage.bcc || []">
                     <x-badge flat color="indigo" cl>
-                        <x-slot:label>
+                        <x-slot:text>
                             <span x-text="bcc"></span>
-                        </x-slot:label>
+                        </x-slot:text>
                         <x-slot
-                            name="append"
+                            name="right"
                             class="relative flex items-center w-2 h-2"
                         >
                             <button
@@ -107,7 +107,7 @@
             <x-input :placeholder="__('Add a new bcc')" x-on:blur="addReceiver($event, 'bcc')" x-on:keyup="addReceiver($event, 'bcc')" class="w-full" />
         </div>
         <div class="grow">
-            <x-input wire:model="mailMessage.subject" class="w-full" :text="__('Subject')"/>
+            <x-input wire:model="mailMessage.subject" class="w-full" :label="__('Subject')"/>
         </div>
         <x-select.styled
             label=""
@@ -123,19 +123,19 @@
                 <div class="flex gap-1 min-h-[2rem] w-full rounded-md bg-gray-100 p-1.5">
                     <template x-for="file in $wire.mailMessage.attachments">
                         <x-badge white rounded>
-                            <x-slot:prepend>
+                            <x-slot:left>
                                 <x-icon name="paper-clip" class="w-4 h-4"/>
-                            </x-slot:prepend>
-                            <x-slot:label>
+                            </x-slot:left>
+                            <x-slot:text>
                                 <div wire:click.prevent="downloadAttachment(file.id)" class="cursor-pointer">
                                     <span x-text="file.name"></span>
                                 </div>
-                            </x-slot:label>
-                            <x-slot:append>
+                            </x-slot:text>
+                            <x-slot:right>
                                 <button type="button" x-on:click.prevent="$wire.mailMessage.attachments.splice($wire.mailMessage.attachments.indexOf(file), 1)">
                                     <x-icon name="x-mark" class="w-4 h-4"/>
                                 </button>
-                            </x-slot:append>
+                            </x-slot:right>
                         </x-badge>
                     </template>
                 </div>

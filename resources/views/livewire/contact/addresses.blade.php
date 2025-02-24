@@ -47,11 +47,10 @@
                 <x-card>
                     <div class="flex flex-col gap-1.5" x-bind:class="! $wire.$parent.edit && 'pointer-events-none'">
                         <x-select.styled
-                            multiselect
+                            multiple
                             x-bind:disabled="! $wire.$parent.edit"
                             wire:model.number="contact.categories"
-                            :text="__('Categories')"
-                            select="label:label|value:id"
+                            :label="__('Categories')"
                             option-description="description"
                             :request="[
                                 'url' => route('search', \FluxErp\Models\Category::class),
@@ -68,10 +67,10 @@
                             ]"
                         />
                         <x-select.styled
-                            multiselect
+                            multiple
                             x-bind:disabled="! $wire.$parent.edit"
                             wire:model.number="contact.industries"
-                            :text="__('Industries')"
+                            :label="__('Industries')"
                             select="label:name|value:id"
                             :request="[
                                 'url' => route('search', \FluxErp\Models\Industry::class),
@@ -139,7 +138,7 @@
                         @canAction(\FluxErp\Actions\Address\DeleteAddress::class)
                             <div x-cloak x-show="! $wire.address.is_main_address">
                                 <x-button
-                                    wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Address')]) }}"
+                                    wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Address')]) }}"
                                     wire:click="delete()"
                                     color="red"
                                     :text="__('Delete')"

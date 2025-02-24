@@ -90,10 +90,6 @@
     .suggestion-item {
         @apply py-2 px-3 focus:outline-none ease-in-out duration-150 relative text-secondary-600 dark:text-secondary-400 flex items-center justify-between cursor-pointer focus:bg-indigo-100 focus:text-primary-800 hover:text-white dark:focus:bg-secondary-700 hover:bg-indigo-500 dark:hover:bg-secondary-700;
     }
-
-    [x-data^="wireui_select"] .truncate[style*="max-width: 5rem"] {
-        @apply !max-w-none;
-    }
 }
 
 .sortable-ghost {

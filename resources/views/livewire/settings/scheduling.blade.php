@@ -42,7 +42,7 @@
             <x-number :max="59" :min="0" wire:model="schedule.cron.parameters.basic.0" :label="__('Minute')" />
         </div>
         <div x-cloak x-show="['dailyAt', 'lastDayOfMonth'].indexOf($wire.schedule.cron.methods.basic) >= 0">
-            <x-time-picker
+            <x-time
                 :label="__('Time')"
                 format="24"
                 wire:model="schedule.cron.parameters.basic.0"
@@ -72,7 +72,7 @@
                 select="label:name|value:id"
                 wire:model="schedule.cron.parameters.basic.0"
             />
-            <x-time-picker
+            <x-time
                 :label="__('Time')"
                 format="24"
                 wire:model="schedule.cron.parameters.basic.1"
@@ -80,7 +80,7 @@
         </div>
         <div x-cloak x-show="['monthlyOn', 'quarterlyOn'].indexOf($wire.schedule.cron.methods.basic) >= 0" class="flex flex-col gap-4">
             <x-number :max="31" :min="0" wire:model="schedule.cron.parameters.basic.0" :label="__('Day')" />
-            <x-time-picker
+            <x-time
                 :label="__('Time')"
                 format="24"
                 wire:model="schedule.cron.parameters.basic.1"
@@ -91,7 +91,7 @@
             <div class="mt-4">
                 <x-number :max="31" :min="0" wire:model="schedule.cron.parameters.basic.1" :label="__('Day')" />
             </div>
-            <x-time-picker
+            <x-time
                 :label="__('Time')"
                 format="24"
                 wire:model="schedule.cron.parameters.basic.2"
@@ -116,10 +116,10 @@
                 ]"
                 select="label:name|value:id"
                 wire:model="schedule.cron.parameters.basic.0"
-                x-on:selected="document.getElementById('month-day-input').max = $event.detail.days; $wire.schedule.cron.parameters.basic[1] = Math.min($wire.schedule.cron.parameters.basic[1], $event.detail.days);"
+                x-on:select="document.getElementById('month-day-input').max = $event.detail.days; $wire.schedule.cron.parameters.basic[1] = Math.min($wire.schedule.cron.parameters.basic[1], $event.detail.days);"
             />
             <x-number id="month-day-input" :max="31" :min="0" wire:model.blur="schedule.cron.parameters.basic.1" :label="__('Day')" />
-            <x-time-picker
+            <x-time
                 :label="__('Time')"
                 format="24"
                 wire:model="schedule.cron.parameters.basic.2"
@@ -144,7 +144,7 @@
                     ['id' => 0, 'name' => __('Sundays')],
                 ]"
                 select="label:name|value:id"
-                :multiselect="true"
+                multiple
                 wire:model="schedule.cron.parameters.dayConstraint"
             />
         </div>
@@ -156,19 +156,19 @@
             wire:model="schedule.cron.methods.timeConstraint"
         />
         <div x-cloak x-show="$wire.schedule.cron.methods.timeConstraint === 'at'">
-            <x-time-picker
+            <x-time
                 :label="__('Time')"
                 format="24"
                 wire:model="schedule.cron.parameters.timeConstraint.0"
             />
         </div>
         <div x-cloak x-show="$wire.schedule.cron.methods.timeConstraint && $wire.schedule.cron.methods.timeConstraint !== 'at'" class="flex flex-col gap-4">
-            <x-time-picker
+            <x-time
                 :label="__('Start')"
                 format="24"
                 wire:model="schedule.cron.parameters.timeConstraint.0"
             />
-            <x-time-picker
+            <x-time
                 :label="__('End')"
                 format="24"
                 wire:model="schedule.cron.parameters.timeConstraint.1"
@@ -199,7 +199,7 @@
                         color="red"
                         :text="__('Delete')"
                         wire:click="delete().then((success) => { if(success) $modalClose('edit-schedule-modal')})"
-                        wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Schedule')]) }}"
+                        wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Schedule')]) }}"
                     />
                 </div>
             @endif

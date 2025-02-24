@@ -22,7 +22,7 @@
                             label="{{ __('Notifications') }}"
                             placeholder="{{ __('Roles') }}"
                             wire:model="ticketType.roles"
-                            :multiselect="true"
+                            multiple
                             :options="$roles"
                             select="label:name|value:id"
                         />

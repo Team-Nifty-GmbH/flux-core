@@ -71,7 +71,7 @@ class BundleList extends ProductBundleProductList
                 ->text(__('Delete'))
                 ->icon('trash')
                 ->attributes([
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Bundle Product')]),
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Bundle Product')]),
                     'wire:click' => 'delete(record.id)',
                 ])
                 ->when(

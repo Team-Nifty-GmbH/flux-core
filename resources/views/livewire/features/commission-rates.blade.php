@@ -15,12 +15,8 @@
                             <x-select.styled
                                 :label="__('Commission Agent')"
                                 wire:model="commissionRate.user_id"
-                                select="label:label|value:id"
                                 :disabled="! $create"
                                 required
-                                :template="[
-                                    'name'   => 'user-option',
-                                ]"
                                 :request="[
                                     'url' => route('search', \FluxErp\Models\User::class),
                                     'method' => 'POST',
@@ -42,11 +38,7 @@
                             <x-select.styled
                                 :label="__('Product')"
                                 wire:model.live="commissionRate.product_id"
-                                select="label:label|value:id"
                                 option-description="product_number"
-                                :template="[
-                                    'name'   => 'user-option',
-                                ]"
                                 :request="[
                                     'url' => route('search', \FluxErp\Models\Product::class),
                                     'params' => [
@@ -78,22 +70,14 @@
                 <div
                     class="flex justify-between gap-x-4">
                     @if(user_can('action.commission-rates.delete'))
-                        <x-button x-bind:class="! create || 'invisible'" flat color="red" :text="__('Delete') "
-                                  x-on:click="window.$wireui.confirmDialog({
-                                      title: '{{ __('Delete commission rate') }}',
-                                      description: '{{ __('Do you really want to delete this commission rate?') }}',
-                                      icon: 'error',
-                                      accept: {
-                                          label: '{{ __('Delete') }}',
-                                          execute: () => {
-                                              $wire.delete()
-                                          }
-                                      },
-                                      reject: {
-                                          label: '{{ __('Cancel') }}',
-                                      }
-                                  }, $wire.__instance.id)"
-                                  :text="__('Delete')"
+                        <x-button
+                            x-bind:class="! create || 'invisible'"
+                            flat
+                            color="red"
+                            :text="__('Delete')"
+                            wire:click="delete()"
+                            wire:flux-confirm.type.error="{{  __('wire:confirm.delete', ['model' => __('Commission Rate')]) }}"
+                            :text="__('Delete')"
                         />
                     @endif
                     <div class="flex">

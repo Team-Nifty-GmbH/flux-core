@@ -80,12 +80,12 @@
                 </x-number>
                 <x-number x-bind:readonly="!edit" label="{{ __('Selling unit') }}" wire:model.number="product.selling_unit">
                     <x-slot:cornerHint>
-                        <x-button color="secondary" light.circle xs label="?" x-on:mouseover="$el._tippy ? $el._tippy.show() : tippy($el, {content: document.getElementById('unit-price-tooltip').content})" />
+                        <x-button.circle color="secondary" light xs label="?" x-on:mouseover="$el._tippy ? $el._tippy.show() : tippy($el, {content: document.getElementById('unit-price-tooltip').content})" />
                     </x-slot:cornerHint>
                 </x-number>
                 <x-number x-bind:readonly="!edit" :text="__('Basic unit')" wire:model.number="product.basic_unit">
                     <x-slot:cornerHint>
-                        <x-button color="secondary" light.circle xs label="?" x-on:mouseover="$el._tippy ? $el._tippy.show() : tippy($el, {content: document.getElementById('unit-price-tooltip').content})" />
+                        <x-button.circle color="secondary" light xs label="?" x-on:mouseover="$el._tippy ? $el._tippy.show() : tippy($el, {content: document.getElementById('unit-price-tooltip').content})" />
                     </x-slot:cornerHint>
                 </x-number>
             </div>
@@ -93,11 +93,10 @@
     </x-card>
     <x-card class="flex flex-col gap-1.5" :title="__('Assignment')">
         <x-select.styled
-            multiselect
+            multiple
             x-bind:disabled="!edit"
             wire:model.number="product.categories"
-            :text="__('Categories')"
-            select="label:label|value:id"
+            :label="__('Categories')"
             option-description="description"
             :request="[
                 'url' => route('search', \FluxErp\Models\Category::class),
@@ -114,24 +113,22 @@
             ]"
         />
         <x-select.styled
-            multiselect
+            multiple
             x-bind:disabled="!edit"
             wire:model.number="product.clients"
             :label="__('Clients')"
             select="label:name|value:id"
             :src="'logo_small_url'"
-            template="user-option"
             :request="[
                 'url' => route('search', \FluxErp\Models\Client::class),
                 'method' => 'POST',
             ]"
         />
         <x-select.styled
-            multiselect
+            multiple
             x-bind:disabled="!edit"
             wire:model.number="product.tags"
             :label="__('Tags')"
-            select="label:label|value:id"
             :request="[
                 'url' => route('search', \FluxErp\Models\Tag::class),
                 'method' => 'POST',
@@ -147,63 +144,61 @@
                 ],
             ]"
         >
-            <x-slot:beforeOptions>
+            <x-slot:after>
                 @canAction(\FluxErp\Actions\Tag\CreateTag::class)
                     <div class="px-1">
                         <x-button color="emerald" full :text="__('Add')" wire:click="addTag($promptValue())" wire:flux-confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}" />
                     </div>
                 @endCanAction
-            </x-slot:beforeOptions>
+            </x-slot:after>
         </x-select.styled>
     </x-card>
     <x-card class="space-y-2.5 bg-gray-50 dark:bg-secondary-700" :title="__('Product Properties')">
         @section('product-properties')
             <x-modal id="edit-product-properties-modal" size="6xl" :title="__('Edit Product Properties')" x-data="{productPropertyGroup: null}">
-                <x-card :title="__('Edit Product Properties')" x-data="{productPropertyGroup: null}">
-                    <div class="flex gap-4"
-                         x-on:data-table-row-clicked="$wire.loadProductProperties($event.detail.id ?? $event.detail.record.id); productPropertyGroup = $event.detail.record ?? $event.detail;"
-                    >
-                        <div class="flex-grow">
-                            <livewire:product.product-property-group-list />
-                        </div>
-                        <div x-collapse x-show="Object.values($wire.productProperties).length > 0" x-cloak class="w-1/2">
-                            <x-card>
-                                <x-slot:title>
-                                    <span x-text="productPropertyGroup?.name"></span>
-                                </x-slot:title>
-                                <template x-for="productProperty in $wire.productProperties" :key="productProperty.id">
-                                    <div class="flex gap-1.5">
-                                        <x-checkbox
-                                            x-bind:id="'product-property' + productProperty.id"
-                                            x-bind:value="productProperty.id"
-                                            x-model.number="$wire.selectedProductProperties[productProperty.id]"
-                                        />
-                                        <label
-                                            x-text="productProperty.name"
-                                            class="block text-sm font-medium text-gray-700 dark:text-gray-50"
-                                            x-bind:for="'product-property' + productProperty.id"
-                                        >
-                                        </label>
-                                    </div>
-                                </template>
-                            </x-card>
-                        </div>
+                <div class="flex gap-4"
+                     x-on:data-table-row-clicked="$wire.loadProductProperties($event.detail.id ?? $event.detail.record.id); productPropertyGroup = $event.detail.record ?? $event.detail;"
+                >
+                    <div class="flex-grow">
+                        <livewire:product.product-property-group-list />
                     </div>
-                    <x-slot:footer>
-                        <div class="flex justify-end gap-1.5">
-                            <x-button color="secondary" light
-                                flat
-                                :text="__('Cancel')"
-                                x-on:click="$modalClose('edit-product-properties-modal')"
-                            />
-                            <x-button
-                                color="indigo"
-                                :text="__('Save')"
-                                wire:click="addProductProperties().then(() => { close(); })"
-                            />
-                        </div>
-                    </x-slot:footer>
-                </x-card>
+                    <div x-collapse x-show="Object.values($wire.productProperties).length > 0" x-cloak class="w-1/2">
+                        <x-card>
+                            <x-slot:title>
+                                <span x-text="productPropertyGroup?.name"></span>
+                            </x-slot:title>
+                            <template x-for="productProperty in $wire.productProperties" :key="productProperty.id">
+                                <div class="flex gap-1.5">
+                                    <x-checkbox
+                                        x-bind:id="'product-property' + productProperty.id"
+                                        x-bind:value="productProperty.id"
+                                        x-model.number="$wire.selectedProductProperties[productProperty.id]"
+                                    />
+                                    <label
+                                        x-text="productProperty.name"
+                                        class="block text-sm font-medium text-gray-700 dark:text-gray-50"
+                                        x-bind:for="'product-property' + productProperty.id"
+                                    >
+                                    </label>
+                                </div>
+                            </template>
+                        </x-card>
+                    </div>
+                </div>
+                <x-slot:footer>
+                    <div class="flex justify-end gap-1.5">
+                        <x-button color="secondary" light
+                            flat
+                            :text="__('Cancel')"
+                            x-on:click="$modalClose('edit-product-properties-modal')"
+                        />
+                        <x-button
+                            color="indigo"
+                            :text="__('Save')"
+                            wire:click="addProductProperties().then(() => { close(); })"
+                        />
+                    </div>
+                </x-slot:footer>
             </x-modal>
             <x-button
                 color="indigo"
@@ -286,29 +281,29 @@
                 </x-flux::list-item>
             </template>
             <div x-show="edit" x-cloak x-transition>
-                <x-select.styled :text="__('Contact')"
-                          select="label:label|value:contact_id"
-                          template="user-option"
-                          x-on:selected="$wire.addSupplier($event.detail.value); clear();"
-                          :request="[
-                              'url' => route('search', \FluxErp\Models\Address::class),
-                              'method' => 'POST',
-                              'params' => [
-                                  'where' => [
-                                      [
-                                          'is_main_address',
-                                          '=',
-                                          true,
-                                      ],
-                                  ],
-                                  'option-value' => 'contact_id',
-                                  'fields' => [
-                                      'contact_id',
-                                      'name',
-                                  ],
-                                  'with' => 'contact.media',
+                <x-select.styled
+                    :label="__('Contact')"
+                    select="label:label|value:contact_id"
+                    x-on:select="$wire.addSupplier($event.detail.select.value); clear();"
+                    :request="[
+                      'url' => route('search', \FluxErp\Models\Address::class),
+                      'method' => 'POST',
+                      'params' => [
+                          'where' => [
+                              [
+                                  'is_main_address',
+                                  '=',
+                                  true,
                               ],
-                          ]"
+                          ],
+                          'option-value' => 'contact_id',
+                          'fields' => [
+                              'contact_id',
+                              'name',
+                          ],
+                          'with' => 'contact.media',
+                      ],
+                    ]"
                 />
             </div>
         @show

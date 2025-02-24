@@ -13,11 +13,9 @@
         <div id="select">
             <x-select.styled
                 :label="__('Assign product')"
-                x-on:selected="pushProduct($event.detail, $el.closest('[data-index]').getAttribute('data-index')); clear()"
+                x-on:select="pushProduct($event.detail.select, $el.closest('[data-index]').getAttribute('data-index')); clear()"
                 class="pb-4"
-                select="label:label|value:id"
                 option-description="product_number"
-                template="user-option"
                 :request="[
                     'url' => route('search', \FluxErp\Models\Product::class),
                     'params' => [

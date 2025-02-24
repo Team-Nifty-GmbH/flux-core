@@ -179,7 +179,7 @@ class OrderPositions extends OrderPositionList
                     && ! $this->order->is_locked
                 )
                 ->attributes([
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Order positions')]),
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Order positions')]),
                     'wire:click' => 'deleteSelectedOrderPositions(); showSelectedActions = false;',
                 ]),
         ];

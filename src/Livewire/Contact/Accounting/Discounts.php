@@ -51,7 +51,7 @@ class Discounts extends DiscountList
                 ->icon('trash')
                 ->when(fn () => resolve_static(DeleteDiscount::class, 'canPerformAction', [false]))
                 ->attributes([
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Discount')]),
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Discount')]),
                     'wire:click' => 'delete(record.id)',
                 ])
                 ->color('red'),

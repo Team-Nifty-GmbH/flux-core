@@ -226,7 +226,7 @@
                                             color="red"
                                             icon="trash"
                                             wire:click="deleteFavorite({{ $favorite['id'] }})"
-                                            wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Favorite')]) }}"
+                                            wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Favorite')]) }}"
                                         />
                                     </div>
                                 </div>

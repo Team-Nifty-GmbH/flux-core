@@ -43,7 +43,7 @@
                                 x-cloak
                                 x-show="!isNaN(seriesData.growthRate) && seriesData.growthRate > 0"
                                 icon="chevron-up"
-                                positive
+                                color="emerald"
                             >
                                 <span x-text="seriesData.growthRate + '%'">
                                 </span>

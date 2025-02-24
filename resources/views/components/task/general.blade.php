@@ -11,7 +11,6 @@
                     <div x-show="task.id" x-bind:class="!edit && 'pointer-events-none'">
                         <x-select.styled
                             :label="__('Project')"
-                            select="label:label|value:id"
                             option-description="description"
                             wire:model="task.project_id"
                             x-bind:readonly="!edit"
@@ -26,13 +25,9 @@
                     <div x-bind:class="!edit && 'pointer-events-none'">
                         <x-select.styled
                             :label="__('Responsible User')"
-                            select="label:label|value:id"
                             autocomplete="off"
                             wire:model="task.responsible_user_id"
                             x-bind:readonly="!edit"
-                            :template="[
-                                'name'   => 'user-option',
-                            ]"
                             :request="[
                                 'url' => route('search', \FluxErp\Models\User::class),
                                 'method' => 'POST',
@@ -61,10 +56,10 @@
                 @show
             </div>
             @section('task-content.multi-selects')
-                <x-state
+                <x-flux::state
                     x-bind:class="!edit && 'pointer-events-none'"
                     class="w-full"
-                    align="left"
+                    align="bottom-start"
                     :label="__('Task state')"
                     wire:model="task.state"
                     formatters="formatter.state"
@@ -78,8 +73,7 @@
                     :label="__('Categories')"
                     wire:model="task.categories"
                     x-bind:readonly="!edit"
-                    multiselect
-                    select="label:label|value:id"
+                    multiple
                     :request="[
                         'url' => route('search', \FluxErp\Models\Category::class),
                         'method' => 'POST',
@@ -98,14 +92,10 @@
             <div x-bind:class="!edit && 'pointer-events-none'">
                 <x-select.styled
                     :label="__('Assigned')"
-                    select="label:label|value:id"
                     autocomplete="off"
-                    multiselect
+                    multiple
                     wire:model="task.users"
                     x-bind:readonly="!edit"
-                    :template="[
-                        'name'   => 'user-option',
-                    ]"
                     :request="[
                         'url' => route('search', \FluxErp\Models\User::class),
                         'method' => 'POST',
@@ -118,10 +108,9 @@
             <div class="col-span-2" x-bind:class="!edit && 'pointer-events-none'">
                 <x-select.styled
                     :label="__('Tags')"
-                    multiselect
+                    multiple
                     x-bind:disabled="! edit"
                     wire:model.number="task.tags"
-                    select="label:label|value:id"
                     :request="[
                         'url' => route('search', \FluxErp\Models\Tag::class),
                         'method' => 'POST',
@@ -137,13 +126,13 @@
                         ],
                     ]"
                 >
-                    <x-slot:beforeOptions>
+                    <x-slot:after>
                         @canAction(\FluxErp\Actions\Tag\CreateTag::class)
                             <div class="px-1">
                                 <x-button color="emerald" full :text="__('Add')" wire:click="addTag($promptValue())" wire:flux-confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}" />
                             </div>
                         @endCanAction
-                    </x-slot:beforeOptions>
+                    </x-slot:after>
                 </x-select.styled>
             </div>
             <x-number x-bind:readonly="!edit" :text="__('Budget')" wire:model="task.budget" step="0.01" />

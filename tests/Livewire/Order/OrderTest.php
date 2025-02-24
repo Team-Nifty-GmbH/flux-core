@@ -144,7 +144,7 @@ class OrderTest extends BaseSetup
             ->assertStatus(200)
             ->assertNoRedirect()
             ->assertHasErrors(['is_locked'])
-            ->assertWireuiNotification(icon: 'error');
+            ->assertToastNotification(type: 'error');
     }
 
     public function test_add_schedule_to_order()

@@ -20,9 +20,4 @@ export default defineConfig({
             refresh: false
         })
     ],
-    resolve: {
-        alias: {
-            '@': path.resolve(__dirname, 'vendor/wireui/wireui/ts')
-        },
-    },
 });

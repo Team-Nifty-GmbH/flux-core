@@ -35,13 +35,12 @@
             @section('supplier-data')
                 <div x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'">
                     <x-select.styled
-                        x-on:selected="$wire.fillFromSelectedContact($event.detail?.contact?.id)"
+                        x-on:select="$wire.fillFromSelectedContact($event.detail?.contact?.id)"
                         x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
                         :label="__('Supplier')"
                         wire:model="purchaseInvoiceForm.contact_id"
                         select="label:label|value:contact_id"
                         option-description="description"
-                        template="user-option"
                         :request="[
                             'url' => route('search', \FluxErp\Models\Address::class),
                             'method' => 'POST',
@@ -94,10 +93,6 @@
                         <x-select.styled
                             :label="__('Approval User')"
                             wire:model="purchaseInvoiceForm.approval_user_id"
-                            select="label:label|value:id"
-                            :template="[
-                                'name'   => 'user-option',
-                            ]"
                             :request="[
                                 'url' => route('search', \FluxErp\Models\User::class),
                                 'method' => 'POST',
@@ -158,13 +153,9 @@
                     <div class="col-span-2">
                         <x-select.styled
                             :label="__('Lay out user')"
-                            select="label:label|value:id"
                             autocomplete="off"
-                            x-on:selected="$wire.purchaseInvoiceForm.iban = $event.detail?.iban; $wire.purchaseInvoiceForm.bic = $event.detail?.bic; $wire.purchaseInvoiceForm.bank_name = $event.detail?.bank_name; $wire.purchaseInvoiceForm.account_holder = $event.detail?.account_holder"
+                            x-on:select="$wire.purchaseInvoiceForm.iban = $event.detail?.iban; $wire.purchaseInvoiceForm.bic = $event.detail?.bic; $wire.purchaseInvoiceForm.bank_name = $event.detail?.bank_name; $wire.purchaseInvoiceForm.account_holder = $event.detail?.account_holder"
                             wire:model="purchaseInvoiceForm.lay_out_user_id"
-                            :template="[
-                                'name'   => 'user-option',
-                            ]"
                             :request="[
                                 'url' => route('search', \FluxErp\Models\User::class),
                                 'method' => 'POST',
@@ -215,13 +206,9 @@
                                     <x-select.styled
                                         :label="__('Product')"
                                         x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
-                                        x-on:selected="position.name = $event.detail?.label; position.product_id = $event.detail?.id"
-                                        select="label:label|value:id"
+                                        x-on:select="position.name = $event.detail?.label; position.product_id = $event.detail?.select.value"
                                         option-description="product_number"
                                         required
-                                        :template="[
-                                            'name'   => 'user-option',
-                                        ]"
                                         :request="[
                                             'url' => route('search', \FluxErp\Models\Product::class),
                                             'method' => 'POST',
@@ -257,7 +244,7 @@
                                             option-key-value
                                             :label="__('Vat Rate')"
                                             x-model.number="position.vat_rate_id"
-                                            x-on:selected="position.vat_rate_id = $event.detail?.value"
+                                            x-on:select="position.vat_rate_id = $event.detail?.select.value"
                                             x-init="$el.value = position.vat_rate_id; fillSelectedFromInputValue();"
                                         />
                                     </div>
@@ -278,7 +265,7 @@
                                 </div>
                                 <div x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'" class="w-full">
                                     <x-select.styled
-                                        x-on:selected="position.ledger_account_id = $event.detail?.value"
+                                        x-on:select="position.ledger_account_id = $event.detail?.select.value"
                                         x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
                                         :label="__('Ledger Account')"
                                         select="label:name|value:id"
@@ -338,7 +325,7 @@
                             x-show="$wire.purchaseInvoiceForm.id && ! $wire.purchaseInvoiceForm.order_id"
                             :text="__('Delete')"
                             wire:click="delete().then((success) => { if (success) close(); })"
-                            wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Purchase Invoice')]) }}"
+                            wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Purchase Invoice')]) }}"
                         />
                     @show
                 </div>

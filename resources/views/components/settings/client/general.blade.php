@@ -22,7 +22,7 @@
                 <x-input :label="__('Vat Id')" :placeholder="__('Vat Id')" wire:model="client.vat_id"/>
                 <x-select.styled
                     :label="__('Bank Connections')"
-                    multiselect
+                    multiple
                     wire:model="client.bank_connections"
                     :options="$bankConnections"
                     select="label:name|value:id"

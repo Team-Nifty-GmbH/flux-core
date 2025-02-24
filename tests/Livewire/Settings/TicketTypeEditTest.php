@@ -27,7 +27,7 @@ class TicketTypeEditTest extends TestCase
             ->call('save')
             ->assertHasNoErrors()
             ->assertDispatchedTo('settings.ticket-types', 'closeModal')
-            ->assertWireuiNotification(icon: 'success');
+            ->assertToastNotification(type: 'success');
 
         $this->assertDatabaseHas('ticket_types', [
             'name' => $ticketTypeName,
@@ -45,7 +45,7 @@ class TicketTypeEditTest extends TestCase
             ->call('save')
             ->assertHasNoErrors()
             ->assertDispatchedTo('settings.ticket-types', 'closeModal')
-            ->assertWireuiNotification(icon: 'success');
+            ->assertToastNotification(type: 'success');
 
         $this->assertDatabaseHas('ticket_types', [
             'id' => $ticketType->id,

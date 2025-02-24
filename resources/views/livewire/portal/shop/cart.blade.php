@@ -61,7 +61,7 @@
                                             <x-select.styled
                                                 class="w-full"
                                                 required
-                                                :text="__('Select a watchlist')"
+                                                :label="__('Select a watchlist')"
                                                 select="label:name|value:id"
                                                 :options="$watchlists"
                                                 wire:model="selectedWatchlist"

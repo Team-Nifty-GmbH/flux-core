@@ -1,17 +1,16 @@
 <!DOCTYPE html>
 @props(['navigation' => request()->boolean('no-navigation')])
-<html @class([
+<html x-data="tallstackui_darkTheme()" @class([
         'sort-scrollbar',
         'h-full',
-        'text-sm',
-        'dark' => auth()->check() && auth()->user()->is_dark_mode,
+        'text-sm'
     ]
 ) lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <title>{{ $title ?? config('app.name', 'Flux ERP') }}</title>
     <x-flux::layouts.head.head/>
 </head>
-<body class="dark:bg-secondary-900 h-full bg-slate-50 transition duration-300 text-secondary-600 dark:text-secondary-50">
+<body x-bind:class="{ 'dark bg-secondary-800': darkTheme, 'bg-slate-50': !darkTheme }" class="h-full transition duration-300 text-secondary-600 dark:text-secondary-50">
     @section('wire.navigate.spinner')
         @persist('spinner')
             <div id="loading-overlay" class="fixed inset-0 overflow-y-auto p-4 hidden" style="z-index: 1000;">
@@ -25,9 +24,6 @@
         @persist('notifications')
             <x-toast z-index="z-50"></x-toast>
             <x-dialog z-index="z-40" blur="md" align="center"/>
-            <x-dialog z-index="z-40" blur="md" align="center" id="prompt">
-                <x-input id="prompt-value" />
-            </x-dialog>
         @endpersist
         <x-flux::flash />
         @auth('web')

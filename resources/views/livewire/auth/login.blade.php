@@ -23,10 +23,10 @@
                             </div>
                         </div>
                         <div x-transition x-cloak x-show="$wire.email && $wire.password">
-                            <x-button spinner color="indigo" class="w-full" :text="__('Login')" type="submit" dusk="login-button"></x-button>
+                            <x-button loading color="indigo" class="w-full" :text="__('Login')" type="submit" dusk="login-button"></x-button>
                         </div>
                         <div x-transition x-cloak x-show="$wire.email">
-                            <x-button spinner color="indigo" class="w-full" :text="__('Send Login Link')" type="submit" dusk="magic-login-button"></x-button>
+                            <x-button loading color="indigo" class="w-full" :text="__('Send Login Link')" type="submit" dusk="magic-login-button"></x-button>
                         </div>
                     </form>
                 @show

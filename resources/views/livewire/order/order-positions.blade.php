@@ -35,20 +35,16 @@
                     <div class="flex w-full justify-items-stretch gap-3">
                         <div class="flex-auto space-y-2">
                             @section('order-position-detail-modal.content.left')
-                                <x-checkbox wire:model.boolean="orderPosition.is_free_text" :text="__('Comment / Block')" />
+                                <x-checkbox wire:model.boolean="orderPosition.is_free_text" :label="__('Comment / Block')" />
                                 <x-input :label="__('Name')" wire:model="orderPosition.name"/>
                                 <div x-cloak x-show="$wire.orderPosition.is_free_text !== true">
                                     <x-select.styled
-                                        x-on:selected="$wire.changedProductId($event.detail.id)"
+                                        x-on:select="$wire.changedProductId($event.detail.select.value)"
                                         class="pb-4"
                                         :label="__('Product')"
                                         wire:model="orderPosition.product_id"
-                                        select="label:label|value:id"
                                         option-description="product_number"
                                         required
-                                        :template="[
-                                            'name' => 'user-option',
-                                        ]"
                                         :request="[
                                             'url' => route('search', \FluxErp\Models\Product::class),
                                             'method' => 'POST',
@@ -149,7 +145,7 @@
                         color="red"
                         :text="__('Delete')"
                         wire:click="deleteOrderPosition().then((success) => {if(success) $modalClose('edit-order-position');})"
-                        wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Order Position')]) }}"
+                        wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Order Position')]) }}"
                     />
                 </div>
                 <div class="flex w-full justify-end">
@@ -178,18 +174,14 @@
                                         <x-select.styled
                                             class="pb-4"
                                             :label="__('Product')"
-                                            x-on:selected="$wire.changedProductId($event.detail.id).then(() => {
+                                            x-on:select="$wire.changedProductId($event.detail.select.value).then(() => {
                                                 const input = $refs.quickAddAmount.querySelector('input');
                                                 input.focus();
                                                 input.select();
                                             })"
                                             wire:model="orderPosition.product_id"
-                                            select="label:label|value:id"
                                             option-description="product_number"
                                             required
-                                            :template="[
-                                                'name'   => 'user-option',
-                                            ]"
                                             :request="[
                                                 'url' => route('search', \FluxErp\Models\Product::class),
                                                 'method' => 'POST',

@@ -32,7 +32,7 @@
                         color="red"
                         :text="__('Delete')"
                         wire:click="delete().then((success) => { if(success) $modalClose('edit-serial-number-range-modal')})"
-                        wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Serial Number Range')]) }}"
+                        wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Serial Number Range')]) }}"
                     />
                 </div>
             @endif

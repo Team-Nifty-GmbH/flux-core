@@ -62,12 +62,8 @@
                     <x-select.styled
                         x-bind:readonly="!edit"
                         :label="__('Responsible User')"
-                        select="label:label|value:id"
                         autocomplete="off"
                         wire:model="project.responsible_user_id"
-                        :template="[
-                            'name'   => 'user-option',
-                        ]"
                         :request="[
                             'url' => route('search', \FluxErp\Models\User::class),
                             'method' => 'POST',
@@ -82,7 +78,6 @@
                         x-bind:readonly="!edit"
                         wire:model="project.contact_id"
                         select="label:label|value:contact_id"
-                        template="user-option"
                         :request="[
                             'url' => route('search', \FluxErp\Models\Address::class),
                             'method' => 'POST',
@@ -109,7 +104,6 @@
                         x-bind:readonly="!edit"
                         :label="__('Order')"
                         wire:model="project.order_id"
-                        select="label:label|value:id"
                         option-description="description"
                         :request="[
                             'url' => route('search', \FluxErp\Models\Order::class),
@@ -146,12 +140,12 @@
         </div>
         @if($collapsed)
             <x-badge outline md label="Prepend" class="w-full cursor-pointer gap-x-4 py-2" x-on:click="expanded = !expanded">
-                <x-slot:label>
+                <x-slot:text>
                     <span x-text="expanded ? '{{ __('Show less') }}' : '{{ __('Show more') }}'"></span>
-                </x-slot:label>
-                <x-slot:prepend class="relative flex items-center w-2 h-2 transition-transform" x-bind:class="expanded && '-rotate-180'">
+                </x-slot:text>
+                <x-slot:left class="relative flex items-center w-2 h-2 transition-transform" x-bind:class="expanded && '-rotate-180'">
                     <x-icon name="chevron-down" class="w-4 h-4 shrink-0" />
-                </x-slot:prepend>
+                </x-slot:left>
             </x-badge>
         @endif
     </div>

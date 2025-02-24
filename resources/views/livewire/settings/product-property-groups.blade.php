@@ -38,7 +38,7 @@
             />
             <x-button
                 color="indigo"
-                spinner="save()"
+                loading="save()"
                 :text="__('Save')"
                 wire:click="save().then((success) => { if(success) $modalClose('edit-product-property-group-modal'); })"
             />

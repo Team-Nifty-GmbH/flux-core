@@ -26,7 +26,7 @@
             <x-slot:footer>
                 <div class="flex justify-end gap-1.5 items-center">
                     <x-button color="secondary" light flat :text="__('Close')" x-on:click="$modalClose('update-plugin-modal')" />
-                    <x-button color="indigo" :text="__('Update')" spinner="update" wire:click="updatePackages($wire.update.package); $modalClose('update-plugin-modal');" />
+                    <x-button color="indigo" :text="__('Update')" loading="update" wire:click="updatePackages($wire.update.package); $modalClose('update-plugin-modal');" />
                 </div>
             </x-slot:footer>
         </x-modal>
@@ -45,7 +45,7 @@
                 <x-flux::features.media.upload-form-object wire:model="file" :multiple="true" accept=".zip,.rar,.7zip">
                     <x-slot:footer>
                         <div x-show="$wire.file.stagedFiles.length > 0" x-cloak x-transition class="flex justify-end">
-                            <x-button color="indigo" spinner="installUploaded" :text="__('Upload package')" wire:click="installUploaded" wire:flux-confirm.icon.warning="{{ __('wire:confirm.install-uploaded-plugin') }}"/>
+                            <x-button color="indigo" loading="installUploaded" :text="__('Upload package')" wire:click="installUploaded" wire:flux-confirm.icon.warning="{{ __('wire:confirm.install-uploaded-plugin') }}"/>
                         </div>
                     </x-slot:footer>
                 </x-flux::features.media.upload-form-object>
@@ -90,7 +90,7 @@
         </x-modal>
     @endif
     <div x-show="$wire.offerRefresh" x-transition x-cloak>
-        <x-card class="bg-positive-500 text-white gap-4 rounded-xl">
+        <x-card class="bg-emerald-500 text-white gap-4 rounded-xl">
             {{ __('You have to refresh the page to see the changes.') }}
             <x-button x-on:click="window.location.reload(true)" color="indigo" :text="__('Refresh')" />
         </x-card>
@@ -117,10 +117,10 @@
             @endif
             @if(resolve_static(\FluxErp\Actions\Plugins\Update::class, 'canPerformAction', [false]))
                 <div x-transition x-show="$wire.outdated === 0">
-                    <x-button color="emerald" :text="__('Check for Updates')" spinner="checkForUpdates" wire:click="checkForUpdates()" />
+                    <x-button color="emerald" :text="__('Check for Updates')" loading="checkForUpdates" wire:click="checkForUpdates()" />
                 </div>
                 <div x-transition x-cloak x-show="$wire.outdated > 0">
-                    <x-button color="emerald" :text="__('Update all')" spinner="updateAll" wire:click="updateAll()" />
+                    <x-button color="emerald" :text="__('Update all')" loading="updateAll" wire:click="updateAll()" />
                 </div>
             @endif
         </div>
@@ -166,7 +166,7 @@
                         @endif
                         @if(resolve_static(\FluxErp\Actions\Plugins\Uninstall::class, 'canPerformAction', [false]))
                             <div x-cloak x-show="plugin.can_uninstall">
-                                <x-button color="red" :text="__('Uninstall')" wire:click="uninstall(key, $promptValue('delete-data'))" wire:flux-confirm.icon.error.id.uninstall="{{ __('wire:confirm.uninstall-plugin') }}" />
+                                <x-button color="red" :text="__('Uninstall')" wire:click="uninstall(key, $promptValue('delete-data'))" wire:flux-confirm.type.error.id.uninstall="{{ __('wire:confirm.uninstall-plugin') }}" />
                             </div>
                         @endif
                         @if(resolve_static(\FluxErp\Actions\Plugins\Update::class, 'canPerformAction', [false]))

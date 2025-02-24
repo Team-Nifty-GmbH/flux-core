@@ -14,13 +14,12 @@
                 </div>
                 <x-input wire:model="product.name" :label="__('Name')" />
                 <x-select.styled
-                    multiselect
+                    multiple
                     x-bind:disabled="!edit"
                     wire:model.number="product.clients"
                     :label="__('Clients')"
                     select="label:name|value:id"
                     :src="'logo_small_url'"
-                    template="user-option"
                     :request="[
                         'url' => route('search', \FluxErp\Models\Client::class),
                         'method' => 'POST',
@@ -35,7 +34,7 @@
                 <div class="flex justify-end gap-x-4">
                     <div class="flex">
                         <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('create-product')" />
-                        <x-button spinner color="indigo" :text="__('Save')" wire:click="save" />
+                        <x-button loading="save" color="indigo" :text="__('Save')" wire:click="save" />
                     </div>
                 </div>
             </x-slot>
@@ -107,7 +106,7 @@
             <x-slot:footer>
                 <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('update-prices')" />
                 <x-button
-                    spinner
+                    loading="updatePrices"
                     color="indigo"
                     :text="__('Save')"
                     wire:flux-confirm.icon.warning="{{ __('wire:confirm.product-prices-update') }}"

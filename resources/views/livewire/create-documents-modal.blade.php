@@ -7,7 +7,7 @@
         <x-slot:footer>
             <div class="flex justify-end gap-x-4">
                 <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('preview')" />
-                <x-button spinner color="indigo" :text="__('Download')" wire:click="downloadPreview()" />
+                <x-button loading color="indigo" :text="__('Download')" wire:click="downloadPreview()" />
             </div>
         </x-slot:footer>
     </x-modal>
@@ -83,7 +83,7 @@
         <div class="flex justify-end gap-x-4">
             <div class="flex">
                 <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('create-documents')" />
-                <x-button color="indigo" :text="__('Continue')" spinner wire:click="createDocuments().then(() => { $modalClose('create-documents'); });" />
+                <x-button color="indigo" :text="__('Continue')" loading="createDocuments" wire:click="createDocuments().then(() => { $modalClose('create-documents'); });" />
             </div>
         </div>
     </x-slot:footer>

@@ -117,7 +117,7 @@ trait CreatesDocuments
 
         $this->js(<<<JS
             document.getElementById('preview-iframe').src = '$route';
-            \$modalOpen(document.getElementById('preview'));
+            \$modalOpen('preview');
         JS);
     }
 

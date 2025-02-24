@@ -65,24 +65,17 @@
 
                             // on folder change, clear temp files - if confirmation is accepted
                             if (this.tempFilesId.length !== 0) {
-                                window.$wireui.confirmDialog({
-                                    title: '{{ __('Selected files not submitted') }}',
-                                    description: '{{ __('Selected files will be deleted on folder change') }}',
-                                    icon: 'amber',
-                                    accept: {
-                                        label: '{{ __('Confirm') }}',
-                                        execute: () => {
-                                            this.clearFilesOnLeave();
-                                            this.selectionProxy = level;
-                                            this.selection = JSON.parse(JSON.stringify(level));
-                                            this.selected = true;
-                                            this.setCollection(this.selection?.collection_name);
-                                        },
-                                    },
-                                    reject: {
-                                        label: '{{ __('Cancel') }}',
-                                    }
-                                }, $wire.__instance.id);
+                                $interaction('dialog')
+                                    .wireable($wire.__instance.id)
+                                    .warning('{{ __('Selected files not submitted') }}', '{{ __('Selected files will be deleted on folder change') }}', 'amber')
+                                    .confirm('{{ __('Confirm') }}', () => {
+                                        this.clearFilesOnLeave();
+                                        this.selectionProxy = level;
+                                        this.selection = JSON.parse(JSON.stringify(level));
+                                        this.selected = true;
+                                        this.setCollection(this.selection?.collection_name);
+                                    });
+
 
                                 return;
                             }
@@ -127,7 +120,7 @@
                                         x-show="! selected?.is_static"
                                         :text="__('Delete')"
                                         color="red"
-                                        wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Folder')]) }}"
+                                        wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Folder')]) }}"
                                         wire:click="deleteCollection(getNodePath('collection_name')).then(() => {
                                                     try {
                                                             selected = null;
@@ -156,7 +149,7 @@
                                     />
                                 @endCanAction
                                 <x-button color="secondary" light
-                                    spinner
+                                    loading
                                     :text="__('Download folder')"
                                     x-on:click="$wire.downloadCollection(getNodePath())"
                                 />
@@ -205,7 +198,7 @@
                                 <x-button
                                     color="red"
                                     :text="__('Delete')"
-                                    wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Media')]) }}"
+                                    wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Media')]) }}"
                                     wire:click="delete(selected.id).then(() => {
                                         try {
                                                 this.selected = null;

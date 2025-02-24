@@ -88,13 +88,13 @@
     <div class="flex justify-end pb-5 gap-1.5">
         @section('actions')
             @if($order['invoice_number'])
-                <x-button color="indigo" :text="__('Download invoice')" wire:click="downloadInvoice()" spinner="downloadInvoice"/>
+                <x-button color="indigo" :text="__('Download invoice')" wire:click="downloadInvoice()" loading="downloadInvoice"/>
             @endif
 
             @if($order['parent_id'])
-                <x-button color="indigo" :href="route('portal.orders.id', data_get($order, 'parent_id'))">{{ __('Show parent') }}</x-button>
+                <x-button color="indigo" :href="route('portal.orders.id', data_get($order, 'parent_id'))" :text="__('Show parent')"/>
             @endif
-            <x-button color="indigo" :text="__('New Ticket')" x-on:click="Alpine.$data(document.getElementById('new-ticket-modal').querySelector('[wireui-modal]')).open();" spinner="downloadInvoice"/>
+            <x-button color="indigo" :text="__('New Ticket')" x-on:click="$modalOpen('new-ticket-modal')" loading="downloadInvoice"/>
         @show
     </div>
     <div class="space-y-5">

@@ -86,7 +86,7 @@
             </template>
         </x-table>
     </div>
-    <x-button spinner color="indigo" x-on:click="orderPositions.length < 1 ? $wire.loadOrderPositions() : orderPositions = []">
+    <x-button loading color="indigo" x-on:click="orderPositions.length < 1 ? $wire.loadOrderPositions() : orderPositions = []">
         <span x-text="orderPositions.length < 1 ? '{{ __('Show') }}' : '{{ __('Hide') }}'"></span>
     </x-button>
 </div>

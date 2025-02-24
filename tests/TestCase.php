@@ -23,10 +23,9 @@ use Spatie\QueryBuilder\QueryBuilderServiceProvider;
 use Spatie\Tags\TagsServiceProvider;
 use Spatie\Translatable\TranslatableServiceProvider;
 use Spatie\TranslationLoader\TranslationServiceProvider;
+use TallStackUi\TallStackUiServiceProvider;
 use TeamNiftyGmbH\Calendar\CalendarServiceProvider;
 use TeamNiftyGmbH\DataTable\DataTableServiceProvider;
-use WireUi\Heroicons\HeroiconsServiceProvider;
-use WireUi\Providers\WireUiServiceProvider;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -54,8 +53,7 @@ abstract class TestCase extends BaseTestCase
             PermissionServiceProvider::class,
             TagsServiceProvider::class,
             ScoutServiceProvider::class,
-            HeroiconsServiceProvider::class,
-            WireUiServiceProvider::class,
+            TallStackUiServiceProvider::class,
             MediaLibraryServiceProvider::class,
             CalendarServiceProvider::class,
             QueryBuilderServiceProvider::class,

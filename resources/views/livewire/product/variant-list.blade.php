@@ -70,7 +70,7 @@
                     primary
                     spinner="save()"
                     :text="__('Save')"
-                    wire:flux-confirm.icon.error="{{ __('Save Variants') }}|{{ __('Non existing product option combinations will be deleted!') }}|{{ __('Cancel') }}|{{ __('OK') }}"
+                    wire:flux-confirm.type.error="{{ __('Save Variants') }}|{{ __('Non existing product option combinations will be deleted!') }}|{{ __('Cancel') }}|{{ __('OK') }}"
                     wire:click="save().then(() => { $modalClose('generate-variants-modal'); })"
                 />
             </div>

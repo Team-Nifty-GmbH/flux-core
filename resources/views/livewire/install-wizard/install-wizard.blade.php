@@ -41,7 +41,7 @@
                        @endif
                     </div>
                     <x-button
-                        spinner
+                        loading
                         color="indigo"
                         wire:click="continue"
                     >
