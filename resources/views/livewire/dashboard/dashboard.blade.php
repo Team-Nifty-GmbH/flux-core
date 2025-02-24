@@ -3,7 +3,6 @@
         <x-flux::dashboard.widget-select />
     @show
     <div class="mx-auto py-6 md:flex justify-between items-center">
-        <x-flux::editor/>
         @section('dashboard-header')
             <div class="pb-6 md:flex md:items-center md:justify-between md:space-x-5">
                 <div class="flex items-start space-x-5">

@@ -16,10 +16,23 @@ export default function (content, debounceDelay = 0, searchModel = ['user', 'rol
             editable: true,
             content: content,
             popUp: null,
-            initTextArea(element) {
-                console.log(this.$refs?.popWindow?.content);
-                const buttons = this.$refs?.popWindow?.content.cloneNode(true);
-                // access the alpine instance in the editor callback
+            initTextArea(element, isTransparent, showTooltipDropdown) {
+                const popUp = this.$refs?.popWindow;
+                const controlPanel = this.$refs?.controlPanel;
+                const commands = this.$refs?.commands;
+                let actions = null;
+                if(showTooltipDropdown && popUp !== null) {
+                    // append controllers to tiptap
+                    const popUpNode = popUp.content.cloneNode(true);
+                    const commandsNode = commands.content.cloneNode(true);
+                    popUpNode.appendChild(commandsNode);
+                    actions = popUpNode;
+
+                } else {
+                    // append to controls to div
+                    controlPanel.appendChild(commands.content.cloneNode(true));
+                }
+                //  access to the parent scope in onSelectionUpdate callback
                 const parent = this;
                 _editor = new Editor({
                     element: element,
@@ -92,15 +105,18 @@ export default function (content, debounceDelay = 0, searchModel = ['user', 'rol
                     editable: this.editable,
                     editorProps: {
                         attributes: {
-                            class: 'prose prose-sm max-w-full content-editable-placeholder placeholder-secondary-400 dark:bg-secondary-800 dark:placeholder-secondary-500 border-secondary-300 focus:ring-primary-500 focus:border-primary-500 dark:border-secondary-600 form-input block min-h-[85px] w-full rounded-b-md border p-3 shadow-sm transition duration-100 ease-in-out focus:outline-none dark:text-gray-50 sm:text-sm',
+                            class: `${isTransparent ? 'bg-transparent' : 'dark:bg-secondary-800'} ${showTooltipDropdown ? 'rounded-md' : 'rounded-b-md' } \
+                                prose prose-sm max-w-full content-editable-placeholder placeholder-secondary-400 dark:placeholder-secondary-500 \
+                                border-secondary-300 focus:ring-primary-500 focus:border-primary-500 dark:border-secondary-600 form-input block \
+                                min-h-[85px] w-full  border p-3 shadow-sm transition duration-100 ease-in-out focus:outline-none dark:text-gray-50 sm:text-sm`,
                         },
                     },
-                    onSelectionUpdate: ({ editor }) => {
+                    onSelectionUpdate: showTooltipDropdown ?  ({ editor }) => {
                         const { from, to } = editor.state.selection;
                         // init popUp if not
                         if(parent.popUp === null) {
                             parent.popUp =  window.tippy(element, {
-                                content: buttons ?? 'not defined',
+                                content: actions ?? 'not defined',
                                 showOnCreate: true,
                                 interactive: true,
                                 trigger: 'manual',
@@ -129,7 +145,7 @@ export default function (content, debounceDelay = 0, searchModel = ['user', 'rol
                             if(!parent.popUp.state.isVisible) return;
                             parent.popUp.hide();
                         }
-                    },
+                    } : null,
                     onUpdate: ({ editor }) => {
                         clearTimeout(this.timeout);
                         this.timeout = setTimeout(() => {
