@@ -10,14 +10,11 @@ use FluxErp\Models\Language;
 use FluxErp\Models\Permission;
 use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Laravel\Sanctum\Sanctum;
 
 class CountryRegionTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Model $country;
 
     private Collection $countryRegions;

@@ -3,12 +3,9 @@
 namespace FluxErp\Tests\Feature\Web;
 
 use FluxErp\Models\Permission;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class SettingsTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     public function test_settings_no_user()
     {
         $this->get('/settings/clients')

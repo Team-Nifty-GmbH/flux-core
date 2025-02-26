@@ -8,14 +8,11 @@ use FluxErp\Models\Permission;
 use FluxErp\Models\User;
 use FluxErp\Tests\TestCase;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
 class AuthTest extends TestCase
 {
-    use DatabaseTransactions;
-
     private User $user;
 
     private Model $interfaceUser;

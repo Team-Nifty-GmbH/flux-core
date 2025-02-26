@@ -57,7 +57,7 @@
                                     x-bind:id="'permission-' + permission.id"
                                 />
                             </div>
-                            <x-label class="pl-2" x-text="permission.name" x-bind:for="'permission-' + permission.id"/>
+                            <span class="pl-2" x-text="permission.name" x-bind:for="'permission-' + permission.id"></span>
                         </div>
                     </template>
                 </div>

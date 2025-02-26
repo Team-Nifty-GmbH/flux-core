@@ -5,14 +5,11 @@ namespace FluxErp\Tests\Feature\Api;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Role;
 use FluxErp\Tests\Feature\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
 class RoleTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private array $permissions;
 
     protected function setUp(): void

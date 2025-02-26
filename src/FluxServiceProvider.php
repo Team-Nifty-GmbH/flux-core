@@ -75,7 +75,6 @@ use RegexIterator;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 use Spatie\Translatable\Facades\Translatable;
-use TallStackUi\View\Components\Button\Button;
 
 class FluxServiceProvider extends ServiceProvider
 {
@@ -114,12 +113,6 @@ class FluxServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        //        $this->app->resolving(Button::class, function (Button $button) {
-        //            if (is_null($button->xs) && is_null($button->sm) && is_null($button->md) && is_null($button->lg)) {
-        //                $button->sm = true;
-        //            }
-        //        });
-
         bcscale(9);
         $this->bootMiddleware();
         $this->bootCommands();
@@ -282,16 +275,29 @@ class FluxServiceProvider extends ServiceProvider
             if (! Testable::hasMacro('assertToastNotification')) {
                 Testable::macro(
                     'assertToastNotification',
-                    function (?string $title = null, ?string $type = null, ?string $description = null) {
+                    function (
+                        ?string $title = null,
+                        ?string $type = null,
+                        ?string $description = null,
+                        ?bool $expandable = null,
+                        ?int $timeout = null,
+                        ?bool $persistent = null,
+                        string|int|null $id = null
+                    ) {
                         $this->assertDispatched(
                             'tallstackui:toast',
-                            function (string $eventName, array $params) use ($title, $type, $description) {
-                                $options = data_get($params, '0.options');
-
-                                return array_key_exists('component', $params[0])
-                                    && (is_null($type) || data_get($options, 'type') === $type)
-                                    && (is_null($title) || data_get($options, 'title') === $title)
-                                    && (is_null($description) || data_get($options, 'description') === $description);
+                            function (
+                                string $eventName,
+                                array $params
+                            ) use ($title, $type, $description, $expandable, $timeout, $persistent, $id) {
+                                return array_key_exists('component', $params)
+                                    && (is_null($type) || data_get($params, 'type') === $type)
+                                    && (is_null($title) || data_get($params, 'title') === $title)
+                                    && (is_null($description) || data_get($params, 'description') === $description)
+                                    && (is_null($expandable) || data_get($params, 'expandable') === $expandable)
+                                    && (is_null($timeout) || data_get($params, 'timeout') === $timeout)
+                                    && (is_null($persistent) || data_get($params, 'persistent') === $persistent)
+                                    && (is_null($id) || data_get($params, 'persistent') === $id);
                             }
                         );
 
@@ -306,7 +312,7 @@ class FluxServiceProvider extends ServiceProvider
                     function (string $js) {
                         Assert::assertStringContainsString(
                             $js,
-                            implode(' ', data_get($this->lastState->getEffects(), 'xjs', []))
+                            implode(' ', data_get($this->lastState->getEffects(), 'xjs.*.expression', []))
                         );
 
                         return $this;

@@ -7,12 +7,9 @@ use FluxErp\Models\Currency;
 use FluxErp\Models\Permission;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class ProductsTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Product $product;
 
     protected function setUp(): void

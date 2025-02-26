@@ -3,12 +3,9 @@
 namespace FluxErp\Tests\Feature\Web;
 
 use FluxErp\Models\Permission;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class SettingsUsersTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     public function test_settings_users_page()
     {
         $this->user->givePermissionTo(Permission::findOrCreate('settings.users.get', 'web'));

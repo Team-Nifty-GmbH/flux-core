@@ -8,15 +8,12 @@ use FluxErp\Models\User;
 use FluxErp\Models\Widget;
 use FluxErp\Tests\Livewire\BaseSetup;
 use FluxErp\Traits\Widgetable;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\Livewire;
 
 class DashboardTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     public array $components = [];
 
     protected function setUp(): void

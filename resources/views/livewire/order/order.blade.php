@@ -395,8 +395,8 @@
             @endif
         </div>
     </div>
-    <x-flux::tabs wire:loading="tab" wire:model="tab" :$tabs class="w-full lg:col-start-1 xl:col-span-2 xl:flex gap-4">
-        <x-slot:left>
+    <x-flux::tabs wire:loading="tab" wire:model="tab" :tabs="$tabs" class="w-full lg:col-start-1 xl:col-span-2 xl:flex gap-4">
+        <x-slot:prepend>
             <section class="relative basis-2/12" wire:ignore>
                 <div class="sticky top-6 flex flex-col gap-4">
                     @section('contact-address-card')
@@ -713,7 +713,7 @@
                     @show
                 </div>
             </section>
-        </x-slot:left>
+        </x-slot:prepend>
         <x-slot:append>
             <section class="relative basis-2/12" wire:ignore>
                 <div class="sticky top-6 space-y-6">

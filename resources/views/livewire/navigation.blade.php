@@ -84,11 +84,11 @@
                 </div>
             @else
                 <x-card class="block md:hidden">
-                    <x-button color="indigo" icon="menu" x-on:click="showMenu(true)" />
+                    <x-button color="indigo" icon="bars-3" x-on:click="showMenu(true)" />
                 </x-card>
             @endif
         </div>
-        <x-nav.nav :background="$background">
+        <x-flux::nav.nav :background="$background">
             <nav class="flex-1 space-y-2 overflow-x-hidden overflow-y-hidden px-2 py-4 hover:overflow-y-auto flex flex-col gap-6">
                 <div>
                     @foreach($navigations as $key => $navigation)
@@ -244,6 +244,6 @@
                     </div>
                 @endif
             </nav>
-        </x-nav.nav>
+        </x-flux::nav.nav>
     </div>
 </div>

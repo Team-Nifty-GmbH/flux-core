@@ -105,7 +105,7 @@ class Permissions extends RoleList
     }
 
     #[Renderless]
-    public function edit(?Role $role, string $modal = 'edit-role-permissions'): void
+    public function edit(?Role $role, string $modal = 'edit-role-permissions-modal'): void
     {
         $this->roleForm->reset();
         $this->roleForm->fill($role);

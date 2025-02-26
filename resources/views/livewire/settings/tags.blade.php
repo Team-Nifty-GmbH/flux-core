@@ -2,7 +2,7 @@
     <x-modal id="edit-tag-modal">
         <div class="flex flex-col gap-4">
             <x-input wire:model="tagForm.name" :label="__('Name')" />
-            <x-color-picker wire:model="tagForm.color" :label="__('Color')" />
+            <x-color wire:model="tagForm.color" :label="__('Color')" />
             <div x-bind:class="$wire.tagForm.id && 'pointer-events-none'">
                 <x-select.styled
                     x-bind:disabled="$wire.tagForm.id"

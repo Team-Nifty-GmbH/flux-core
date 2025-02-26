@@ -5,13 +5,10 @@ namespace FluxErp\Tests\Livewire\Features\Comments;
 use FluxErp\Livewire\Features\Comments\Comments;
 use FluxErp\Models\Product;
 use FluxErp\Tests\Livewire\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;
 
 class CommentsTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Product $product;
 
     protected function setUp(): void

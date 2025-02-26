@@ -7,7 +7,6 @@ use FluxErp\Models\Language;
 use FluxErp\Models\Permission;
 use FluxErp\Models\User;
 use FluxErp\Tests\Feature\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -15,8 +14,6 @@ use Laravel\Sanctum\Sanctum;
 
 class UserTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Collection $users;
 
     private Language $language;

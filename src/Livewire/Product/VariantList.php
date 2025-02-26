@@ -96,7 +96,7 @@ class VariantList extends ProductList
         return [
             DataTableButton::make()
                 ->text(__('Recalculate names'))
-                ->icon('refresh')
+                ->icon('arrow-path')
                 ->when(fn () => resolve_static(UpdateProduct::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:flux-confirm.icon.info' => __('wire:confirm.recalculate-product-names'),

@@ -9,15 +9,12 @@ use FluxErp\Models\Product;
 use FluxErp\Models\StockPosting;
 use FluxErp\Models\Warehouse;
 use FluxErp\Tests\Feature\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
 class StockPostingTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Collection $warehouses;
 
     private Collection $products;

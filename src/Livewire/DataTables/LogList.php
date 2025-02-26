@@ -83,7 +83,8 @@ class LogList extends BaseDataTable
     protected function getTableActions(): array
     {
         return [
-            DataTableButton::make(label: __('Mark found as done'))
+            DataTableButton::make()
+                ->text(__('Mark all as done'))
                 ->color('indigo')
                 ->attributes([
                     'x-on:click' => '$wire.markAllAsDone()',

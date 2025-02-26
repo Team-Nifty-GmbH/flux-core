@@ -39,6 +39,11 @@ class SerialNumberRange extends FluxModel
         ];
     }
 
+    public static function hasPermission(): bool
+    {
+        return false;
+    }
+
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);

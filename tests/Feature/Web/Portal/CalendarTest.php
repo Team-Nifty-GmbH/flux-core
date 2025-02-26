@@ -3,12 +3,9 @@
 namespace FluxErp\Tests\Feature\Web\Portal;
 
 use FluxErp\Models\Permission;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class CalendarTest extends PortalSetup
 {
-    use DatabaseTransactions;
-
     public function test_portal_calendar_page()
     {
         $this->user->givePermissionTo(Permission::findOrCreate('calendar.get', 'address'));

@@ -8,7 +8,7 @@
                     <x-input :label="__('Email')" wire:model="userForm.email"/>
                     <x-input :label="__('Phone')" wire:model="userForm.phone"/>
                     <x-input :label="__('User code')" wire:model="userForm.user_code"/>
-                    <x-color-picker :label="__('Color')" wire:model="userForm.color"/>
+                    <x-color :label="__('Color')" wire:model="userForm.color"/>
                 @show
             </div>
             <hr>

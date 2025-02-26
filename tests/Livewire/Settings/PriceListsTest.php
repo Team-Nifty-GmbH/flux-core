@@ -6,14 +6,11 @@ use FluxErp\Livewire\Forms\PriceListForm;
 use FluxErp\Livewire\Settings\PriceLists;
 use FluxErp\Models\PriceList;
 use FluxErp\Tests\Livewire\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 
 class PriceListsTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private PriceList $priceList;
 
     protected function setUp(): void

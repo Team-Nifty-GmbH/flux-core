@@ -6,13 +6,10 @@ use FluxErp\Livewire\Settings\AdditionalColumnEdit;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\TicketType;
 use FluxErp\Tests\TestCase;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;
 
 class AdditionalColumnEditTest extends TestCase
 {
-    use DatabaseTransactions;
-
     public function test_renders_successfully()
     {
         Livewire::test(AdditionalColumnEdit::class)

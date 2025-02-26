@@ -29,7 +29,7 @@
         >
             <x-slot:checkbox>
                 <x-checkbox
-                    xs
+                    sm
                     x-on:folder-tree-uncheck.window="$el.checked = isChecked(node); $el.indeterminate = isIndeterminate(node);"
                     x-on:folder-tree-check.window="$el.checked = isChecked(node); $el.indeterminate = isIndeterminate(node);"
                     x-effect="$el.indeterminate = isIndeterminate(node)"

@@ -18,7 +18,6 @@ use FluxErp\Models\Project;
 use FluxErp\Models\Task;
 use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Testing\File;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -27,8 +26,6 @@ use Laravel\Sanctum\Sanctum;
 
 class MediaTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private File $file;
 
     private Model $task;

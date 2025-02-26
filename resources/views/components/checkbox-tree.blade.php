@@ -71,7 +71,7 @@
                             {{ $checkbox }}
                         @else
                             <x-checkbox
-                                xs
+                                sm
                                 x-effect="$el.indeterminate = isIndeterminate(node)"
                                 x-on:change="toggleCheck(node, $event.target.checked)"
                                 x-bind:checked="isChecked(node)"
