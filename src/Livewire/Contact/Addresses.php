@@ -159,15 +159,18 @@ class Addresses extends Component
         $this->edit = true;
     }
 
-    #[Renderless]
     public function replicate(): void
     {
+        $this->tab = 'address.address';
         $this->address->reset(
             'id',
             'email',
             'is_main_address',
             'is_delivery_address',
             'is_invoice_address',
+            'can_login',
+
+            'permissions',
         );
 
         $this->address->advertising_state = resolve_static(AdvertisingState::class, 'config')

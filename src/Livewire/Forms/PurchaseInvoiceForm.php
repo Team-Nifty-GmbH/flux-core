@@ -5,7 +5,7 @@ namespace FluxErp\Livewire\Forms;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\PurchaseInvoice\CreateOrderFromPurchaseInvoice;
 use FluxErp\Actions\PurchaseInvoice\CreatePurchaseInvoice;
-use FluxErp\Actions\PurchaseInvoice\DeletePurchaseInvoice;
+use FluxErp\Actions\PurchaseInvoice\ForceDeletePurchaseInvoice;
 use FluxErp\Actions\PurchaseInvoice\UpdatePurchaseInvoice;
 use FluxErp\Enums\LedgerAccountTypeEnum;
 use FluxErp\Models\Client;
@@ -67,7 +67,7 @@ class PurchaseInvoiceForm extends FluxForm
         return [
             'create' => CreatePurchaseInvoice::class,
             'update' => UpdatePurchaseInvoice::class,
-            'delete' => DeletePurchaseInvoice::class,
+            'delete' => ForceDeletePurchaseInvoice::class,
             'create-order' => CreateOrderFromPurchaseInvoice::class,
         ];
     }
