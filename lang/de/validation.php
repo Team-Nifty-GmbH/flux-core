@@ -472,6 +472,7 @@ return [
         'main_address.permissions' => 'Berechtigungen',
         'main_address.permissions.*' => 'Berechtigung',
         'main_address.phone' => 'Telefon',
+        'main_address.phone_mobile' => 'Mobiltelefon',
         'main_address.salutation' => 'Anrede',
         'main_address.street' => 'Straße',
         'main_address.tags' => 'Tags',
