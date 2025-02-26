@@ -461,8 +461,30 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
 
     public function toCalendarEvent(?array $info = null): array
     {
-        $currentBirthday = $this->date_of_birth->setYear(Carbon::parse(data_get($info, 'start'))->year);
-        $age = $currentBirthday->diffInYears($this->date_of_birth);
+        $currentBirthday = null;
+        $start = Carbon::parse(data_get($info, 'start'));
+        $end = Carbon::parse(data_get($info, 'end'));
+        $birthday = $this->date_of_birth->format('m-d');
+
+        while ($start->lessThanOrEqualTo($end)) {
+            if ($start->format('m-d') === $birthday) {
+                $currentBirthday = $start;
+                break;
+            }
+
+            $start->addDay();
+        }
+
+        if ($start->gt($end)) {
+            $currentBirthday = null;
+        }
+
+        if (is_null($currentBirthday)) {
+            return [];
+        }
+
+        $age = $currentBirthday->year - $this->date_of_birth->year;
+
         $name = <<<HTML
             <i class="ph ph-gift"></i>
             <span>$this->name ($age)</span>
