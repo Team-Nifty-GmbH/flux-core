@@ -290,25 +290,29 @@
                             </div>
                             <x-slot:footer>
                                 <div class="flex justify-end">
-                                    <x-button
-                                        x-cloak
-                                        x-show="! $wire.purchaseInvoiceForm.order_id"
-                                        color="red"
-                                        :text="__('Delete')"
-                                        x-on:click="$wire.purchaseInvoiceForm.purchase_invoice_positions.splice(index, 1)"
-                                    />
+                                    @canAction(\FluxErp\Actions\PurchaseInvoicePosition\DeletePurchaseInvoicePosition::class)
+                                        <x-button
+                                            x-cloak
+                                            x-show="! $wire.purchaseInvoiceForm.order_id"
+                                            color="red"
+                                            :text="__('Delete')"
+                                            x-on:click="$wire.purchaseInvoiceForm.purchase_invoice_positions.splice(index, 1)"
+                                        />
+                                    @endCanAction
                                 </div>
                             </x-slot:footer>
                         </x-card>
                     </template>
                     <div class="flex justify-center pt-4">
-                        <x-button
-                            x-cloak
-                            x-show="! $wire.purchaseInvoiceForm.order_id"
-                            color="emerald"
-                            :text="__('Add Position')"
-                            x-on:click="$wire.purchaseInvoiceForm.purchase_invoice_positions.push({ ledger_account_id: $wire.purchaseInvoiceForm.lastLedgerAccountId, vat_rate_id: null, product_id: null, name: null, amount: 1, unit_price: 0, total_price: 0 })"
-                        />
+                        @canAction(\FluxErp\Actions\PurchaseInvoicePosition\CreatePurchaseInvoicePosition::class)
+                            <x-button
+                                x-cloak
+                                x-show="! $wire.purchaseInvoiceForm.order_id"
+                                color="emerald"
+                                :text="__('Add Position')"
+                                x-on:click="$wire.purchaseInvoiceForm.purchase_invoice_positions.push({ ledger_account_id: $wire.purchaseInvoiceForm.lastLedgerAccountId, vat_rate_id: null, product_id: null, name: null, amount: 1, unit_price: 0, total_price: 0 })"
+                            />
+                        @endCanAction
                     </div>
                 </div>
             @show
@@ -319,14 +323,16 @@
             <div class="flex justify-between">
                 <div>
                     @section('footer-buttons.left')
-                        <x-button
-                            color="red"
-                            x-cloak
-                            x-show="$wire.purchaseInvoiceForm.id && ! $wire.purchaseInvoiceForm.order_id"
-                            :text="__('Delete')"
-                            wire:click="delete().then((success) => { if (success) close(); })"
-                            wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Purchase Invoice')]) }}"
-                        />
+                        @canAction(\FluxErp\Actions\PurchaseInvoice\ForceDeletePurchaseInvoice::class)
+                            <x-button
+                                color="red"
+                                x-cloak
+                                x-show="$wire.purchaseInvoiceForm.id && ! $wire.purchaseInvoiceForm.order_id"
+                                :text="__('Delete')"
+                                wire:click="delete().then((success) => { if (success) close(); })"
+                                wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Purchase Invoice')]) }}"
+                            />
+                        @endCanAction
                     @show
                 </div>
                 <div class="flex gap-1.5">
@@ -342,13 +348,15 @@
                             :text="__('Save')"
                             wire:click="save().then((success) => { if (success) $modalClose('edit-purchase-invoice'); })"
                         />
-                        <x-button
-                            color="indigo"
-                            x-cloak
-                            x-show="$wire.purchaseInvoiceForm.id && ! $wire.purchaseInvoiceForm.order_id"
-                            :text="__('Finish')"
-                            wire:click="finish().then((success) => { if (success) $modalClose('edit-purchase-invoice'); })"
-                        />
+                        @canAction(\FluxErp\Actions\PurchaseInvoice\CreateOrderFromPurchaseInvoice::class)
+                            <x-button
+                                color="indigo"
+                                x-cloak
+                                x-show="$wire.purchaseInvoiceForm.id && ! $wire.purchaseInvoiceForm.order_id"
+                                :text="__('Finish')"
+                                wire:click="finish().then((success) => { if (success) $modalClose('edit-purchase-invoice'); })"
+                            />
+                        @endCanAction
                     @show
                 </div>
             </div>
