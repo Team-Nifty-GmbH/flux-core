@@ -26,6 +26,7 @@ use FluxErp\Models\CalendarEvent;
 use FluxErp\Models\Category;
 use FluxErp\Models\Client;
 use FluxErp\Models\LedgerAccount;
+use FluxErp\Models\Notification;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\Permission;
@@ -46,6 +47,7 @@ use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Contracts\Queue\Factory as QueueFactoryContract;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Http\Request as HttpRequest;
+use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Routing\Route;
@@ -109,6 +111,7 @@ class FluxServiceProvider extends ServiceProvider
         app('livewire')->componentHook(SupportFormObjects::class);
         $this->app->bind(\TeamNiftyGmbH\Calendar\Models\Calendar::class, Calendar::class);
         $this->app->bind(\TeamNiftyGmbH\Calendar\Models\CalendarEvent::class, CalendarEvent::class);
+        $this->app->bind(DatabaseNotification::class, Notification::class);
     }
 
     public function boot(): void

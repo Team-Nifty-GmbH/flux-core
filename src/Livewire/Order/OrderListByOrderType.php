@@ -30,7 +30,11 @@ class OrderListByOrderType extends BaseOrderList
         return [
             DataTableButton::make()
                 ->color('indigo')
-                ->text(__('New order'))
+                ->text(
+                    resolve_static(OrderType::class, 'query')
+                        ->whereKey($this->orderType)
+                        ->value('name')
+                )
                 ->icon('plus')
                 ->when(! resolve_static(OrderType::class, 'query')
                     ->whereKey($this->orderType)

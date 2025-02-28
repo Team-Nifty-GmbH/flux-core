@@ -31,7 +31,7 @@
     }"
     class="space-y-5"
 >
-    <x-card :title="__('Calculation')">
+    <x-card :header="__('Calculation')">
         <x-select.styled
             :options="$this->vatRates"
             x-on:selected="$wire.product.vat_rate = $event.detail.select"

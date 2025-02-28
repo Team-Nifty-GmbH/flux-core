@@ -102,13 +102,12 @@ class CommentCreatedNotification extends Notification implements HasToastNotific
                     ->deduplicate()
                     ->toString()
             )
-            ->icon('chat')
             ->when(
                 $createdBy
                 && method_exists($createdBy, 'getAvatarUrl')
                 && $createdBy->getAvatarUrl(),
                 function (ToastNotification $toast) use ($createdBy) {
-                    return $toast->img($createdBy->getAvatarUrl());
+                    return $toast->image($createdBy->getAvatarUrl());
                 }
             )
             ->description($this->model->comment)
@@ -117,7 +116,7 @@ class CommentCreatedNotification extends Notification implements HasToastNotific
                 function (ToastNotification $toast) use ($notifiable) {
                     return $toast->accept(
                         NotificationAction::make()
-                            ->text(__('View'))
+                            ->label(__('View'))
                             ->url(
                                 $notifiable instanceof Address
                                     && method_exists($this->model->model, 'getPortalDetailRoute')

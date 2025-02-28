@@ -38,7 +38,7 @@
         {{ __('Edit Mail Account') }}
     </x-slot:title>
     <div class="flex flex-col gap-4">
-        <x-card :title="__('IMAP Settings')" footer-classes="flex justify-end gap-1.5">
+        <x-card :header="__('IMAP Settings')" footer-classes="flex justify-end gap-1.5">
             <div class="flex flex-col gap-4">
                 <x-select.styled
                     :label="__('Protocol')"
@@ -71,7 +71,7 @@
                 <x-button loading color="indigo" :text="__('Test Connection')" x-on:click="$wire.testImapConnection()"/>
             </x-slot:footer>
         </x-card>
-        <x-card :title="__('SMTP Settings')" footer-classes="flex justify-end gap-1.5">
+        <x-card :header="__('SMTP Settings')" footer-classes="flex justify-end gap-1.5">
             <div class="flex flex-col gap-4">
                 <x-input wire:model="mailAccount.smtp_email" :text="__('Email')" />
                 <x-password wire:model="mailAccount.smtp_password" :label="__('Password')" />

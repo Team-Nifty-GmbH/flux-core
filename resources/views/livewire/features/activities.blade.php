@@ -32,7 +32,7 @@
                                         <span x-on:click="showProperties(activity.id)" href="#" class="cursor-pointer font-medium text-gray-900 dark:text-white" x-text="activity.event"></span>
                                         <div x-show="activity.id === activeActivity" x-collapse x-cloak>
                                             <div x-text="activity.description"></div>
-                                            <template x-for="(value, name) in Object.fromEntries(Object.entries(activity.properties.attributes))">
+                                            <template x-for="(value, name) in Object.fromEntries(Object.entries(activity.properties.attributes ?? {}))">
                                                 <div>
                                                     <span class="font-semibold" x-text="name + ':'"></span>
                                                     <span x-html="activity.properties.old && activity.properties.old[name] ? activity.properties.old[name] + '<span> -></span>' : ''"></span>

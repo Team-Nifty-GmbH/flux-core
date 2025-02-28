@@ -42,7 +42,7 @@ class CalendarEventInviteCreated extends Notification implements HasToastNotific
             )
             ->icon('calendar')
             ->when($this->model->userCreated?->avatar_url, function (ToastNotification $toast) {
-                return $toast->img($this->model->userCreated->avatar_url);
+                return $toast->image($this->model->userCreated->avatar_url);
             })
             ->description(
                 '<div class="font-semibold">' . $this->model->calendarEvent->title . '</div>' .
@@ -52,7 +52,7 @@ class CalendarEventInviteCreated extends Notification implements HasToastNotific
                 method_exists($this->model->calendarEvent, 'detailRoute'),
                 function (ToastNotification $toast) {
                     return $toast->accept(NotificationAction::make()
-                        ->text(__('View'))
+                        ->label(__('View'))
                         ->url($this->model->calendarEvent->setDetailRouteParams()->detailRoute()
                         ));
                 });

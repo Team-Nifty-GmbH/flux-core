@@ -32,7 +32,7 @@
                 />
                 <x-checkbox wire:model="selectedCalendar.hasRepeatableEvents" :label="__('Has repeatable events')"/>
                 <x-checkbox wire:model="selectedCalendar.isPublic" :label="__('Public')"/>
-                <x-card :title="__('Custom Properties')">
+                <x-card :header="__('Custom Properties')">
                     <div class="flex flex-col gap-4">
                         <x-button.circle class="mr-2" color="indigo" icon="plus" wire:click="addCustomProperty" />
                         @foreach($selectedCalendar['customProperties'] ?? [] as $index => $customProperty)

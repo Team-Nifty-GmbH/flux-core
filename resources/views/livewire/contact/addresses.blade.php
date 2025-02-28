@@ -2,7 +2,7 @@
     <div class="flex flex-col gap-6" wire:ignore>
         @section('left-side-bar')
             <div class="min-w-96 overflow-auto max-h-56 md:max-h-none">
-                <x-card :title="__('Addresses')">
+                <x-card :header="__('Addresses')">
                     @canAction(\FluxErp\Actions\Address\CreateAddress::class)
                         <x-slot:header>
                             <x-button
@@ -103,7 +103,7 @@
         @show
     </div>
     <div class="w-full" x-data="{formatter: @js(resolve_static(\FluxErp\Models\Address::class, 'typeScriptAttributes'))}">
-        <x-card :title="__('Details')">
+        <x-card :header="__('Details')">
             <x-slot:header>
                 @section('address-details.actions')
                     <div class="flex gap-1.5">

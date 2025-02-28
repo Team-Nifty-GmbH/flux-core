@@ -5,7 +5,7 @@
         return '(' + window.formatters.date(result) + ')';
     }
 }">
-    <x-card :title="__('Payment Conditions')">
+    <x-card :header="__('Payment Conditions')">
         <div class="flex flex-col gap-4">
             <div>
                 <div class="block text-sm font-medium text-gray-700 dark:text-gray-400">
@@ -61,7 +61,7 @@
             </div>
         </div>
     </x-card>
-    <x-card :title="__('Bank Connection')">
+    <x-card :header="__('Bank Connection')">
         <div class="flex flex-col gap-4">
             <x-input x-model="$wire.$parent.order.account_holder" :label="__('Account Holder')"/>
             <x-input x-model="$wire.$parent.order.iban" :label="__('IBAN')"/>

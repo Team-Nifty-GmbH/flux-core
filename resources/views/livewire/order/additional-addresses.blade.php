@@ -42,7 +42,7 @@
         @endteleport
     </div>
     @foreach($form->addresses as $address)
-        <x-card :title="$address['address_type']">
+        <x-card :header="$address['address_type']">
             <div class="text-sm">
                 {!! implode('<br>', $address['address']) !!}
             </div>

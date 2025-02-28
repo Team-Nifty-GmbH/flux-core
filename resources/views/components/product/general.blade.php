@@ -2,14 +2,14 @@
      x-data
      wire:key="products-general"
 >
-    <x-card class="space-y-2.5" :title="__('General')">
+    <x-card class="space-y-2.5" :header="__('General')">
         @section('general')
-        <x-input x-bind:readonly="!edit" label="{{ __('Product number') }}" wire:model="product.product_number" />
-        <x-input x-bind:readonly="!edit" label="{{ __('Name') }}" wire:model="product.name" />
-        <x-flux::editor x-model="edit" wire:model="product.description" :label="__('Description')" />
+            <x-input x-bind:readonly="!edit" label="{{ __('Product number') }}" wire:model="product.product_number" />
+            <x-input x-bind:readonly="!edit" label="{{ __('Name') }}" wire:model="product.name" />
+            <x-flux::editor x-model="edit" wire:model="product.description" :label="__('Description')" />
         @show
     </x-card>
-    <x-card class="space-y-2.5" :title="__('Attributes')">
+    <x-card class="space-y-2.5" :header="__('Attributes')">
         @section('attributes')
             @section('bools')
                 <x-checkbox x-bind:disabled="!edit" label="{{ __('Is active') }}" wire:model="product.is_active" />
@@ -91,7 +91,7 @@
             </div>
         @show
     </x-card>
-    <x-card class="flex flex-col gap-1.5" :title="__('Assignment')">
+    <x-card class="flex flex-col gap-1.5" :header="__('Assignment')">
         <x-select.styled
             multiple
             x-bind:disabled="!edit"
@@ -153,7 +153,7 @@
             </x-slot:after>
         </x-select.styled>
     </x-card>
-    <x-card class="space-y-2.5 bg-gray-50 dark:bg-secondary-700" :title="__('Product Properties')">
+    <x-card class="space-y-2.5 bg-gray-50 dark:bg-secondary-700" :header="__('Product Properties')">
         @section('product-properties')
             <x-modal id="edit-product-properties-modal" size="6xl" :title="__('Edit Product Properties')" x-data="{productPropertyGroup: null}">
                 <div class="flex gap-4"
@@ -246,7 +246,7 @@
         @show
     </x-card>
     @if($this->additionalColumns)
-        <x-card :title="__('Additional columns')">
+        <x-card :header="__('Additional columns')">
             @section('additional-columns')
                 <div class="flex flex-col gap-4">
                     <x-flux::additional-columns :table="false" wire="product" :model="\FluxErp\Models\Product::class" :id="$this->product->id" />
@@ -254,7 +254,7 @@
             @show
         </x-card>
     @endif
-    <x-card class="flex flex-col gap-4" :title="__('Suppliers')">
+    <x-card class="flex flex-col gap-4" :header="__('Suppliers')">
         @section('suppliers')
             <template x-for="(supplier, index) in $wire.product.suppliers">
                 <x-flux::list-item :item="[]">

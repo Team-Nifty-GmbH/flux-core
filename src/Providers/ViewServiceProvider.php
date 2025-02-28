@@ -134,6 +134,26 @@ class ViewServiceProvider extends ServiceProvider
         TallStackUi::personalize()
             ->form('label')
             ->block('text', 'block text-sm font-medium text-gray-700 dark:text-gray-400');
+
+        TallStackUi::personalize()
+            ->card()
+            ->block('header.text.size', 'text-sm font-medium w-full');
+
+        TallStackUi::personalize()
+            ->slide('notifications')
+            ->block('body', 'soft-scrollbar dark:text-dark-300 grow overflow-y-auto rounded-b-xl text-gray-700');
+
+        TallStackUi::personalize()
+            ->toast()
+            ->block('buttons.wrapper.second', 'flex min-h-full flex-col justify-between')
+            ->block('buttons.close.wrapper', 'ml-2 flex shrink-0');
+
+        TallStackUi::personalize()
+            ->toast('relative')
+            ->block('wrapper.first', 'pointer-events-none inset-0 flex flex-col items-end justify-end gap-y-2 px-4 py-4')
+            ->block('wrapper.third', 'dark:bg-dark-700 pointer-events-auto w-full w-full overflow-hidden rounded-xl bg-white shadow-lg ring-1 ring-black ring-opacity-5')
+            ->block('buttons.wrapper.second', 'flex min-h-full flex-col justify-between')
+            ->block('buttons.close.wrapper', 'ml-2 flex shrink-0');
     }
 
     public static function getRealPackageAssetPath(string $path, string $packageName): string

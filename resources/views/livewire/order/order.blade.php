@@ -400,14 +400,17 @@
             <section class="relative basis-2/12" wire:ignore>
                 <div class="sticky top-6 flex flex-col gap-4">
                     @section('contact-address-card')
-                        <x-card :title="__('Contact')">
+                        <x-card>
                             <x-slot:header>
-                                <x-button color="secondary"
-                                    light
-                                    wire:navigate
-                                    icon="eye"
-                                    :href="route('contacts.id?', data_get($order, 'contact_id', ''))"
-                                />
+                                <div class="flex justify-between gap-4 w-full items-center">
+                                    <div>{{ __('Contact') }}</div>
+                                    <x-button color="secondary"
+                                        light
+                                        wire:navigate
+                                        icon="eye"
+                                        :href="route('contacts.id?', data_get($order, 'contact_id', ''))"
+                                    />
+                                </div>
                             </x-slot:header>
                             <div x-data="{
                                     updateContactId(id) {
@@ -464,15 +467,17 @@
                         </x-card>
                     @show
                     @section('invoice-address-card')
-                        <x-card :title="__('Invoice Address')">
+                        <x-card>
                             <x-slot:header>
-                                <x-button color="secondary" light
-                                    wire:navigate
-                                    outline
-                                    icon="eye"
-                                    :href="route('address.id', data_get($order, 'address_invoice_id', ''))"
-                                >
-                                </x-button>
+                                <div class="flex justify-between gap-4 w-full items-center">
+                                    <div>{{ __('Invoice Address') }}</div>
+                                    <x-button color="secondary" light
+                                        wire:navigate
+                                        light
+                                        icon="eye"
+                                        :href="route('address.id', data_get($order, 'address_invoice_id', ''))"
+                                    />
+                                </div>
                             </x-slot:header>
                             <div id="order-invoice-address-id">
                                 <x-select.styled
@@ -512,13 +517,16 @@
                         </x-card>
                     @show
                     @section('delivery-address-card')
-                        <x-card :title="__('Delivery Address')">
+                        <x-card>
                             <x-slot:header>
-                                <x-button color="secondary" light
-                                    outline
-                                    icon="eye"
-                                    :href="route('address.id', data_get($order, 'address_delivery_id', ''))"
-                                />
+                                <div class="flex justify-between gap-4 w-full items-center">
+                                    <div>{{ __('Delivery Address') }}</div>
+                                    <x-button color="secondary" light
+                                        light
+                                        icon="eye"
+                                        :href="route('address.id', data_get($order, 'address_delivery_id', ''))"
+                                    />
+                                </div>
                             </x-slot:header>
                             <div id="order-delivery-address-id">
                                 <x-select.styled
@@ -558,32 +566,13 @@
                         </x-card>
                     @show
                     @section('general-card')
-                        <x-card :title="__('Additional Addresses')" class="!px-0 !py-0">
-                            <x-slot:header>
-                                <x-button.circle color="secondary"
-                                    light
-                                    class="transition-transform"
-                                    x-bind:class="showAdditionalAddresses && '-rotate-90'"
-                                    icon="chevron-left"
-                                    x-on:click="showAdditionalAddresses = !showAdditionalAddresses"
-                                />
-                            </x-slot:header>
-                            <div class="space-y-3 px-2 py-5" x-collapse x-cloak x-show="showAdditionalAddresses">
+                        <x-card :header="__('Additional Addresses')" minimize="mount">
+                            <div class="space-y-3 px-2 py-5">
                                 <livewire:order.additional-addresses lazy :order-id="$order->id" :client-id="$order->client_id"/>
                             </div>
                         </x-card>
-                        <x-card :title="__('Order Informations')" class="!px-0 !py-0">
-                            <x-slot:header>
-                                <x-button.circle
-                                    color="secondary"
-                                    light
-                                    class="transition-transform"
-                                    x-bind:class="showOrderInformations && '-rotate-90'"
-                                    icon="chevron-left"
-                                    x-on:click="showOrderInformations = !showOrderInformations"
-                                />
-                            </x-slot:header>
-                            <div class="space-y-3 px-2 py-5" x-collapse x-cloak x-show="showOrderInformations">
+                        <x-card :header="__('Order Informations')" minimize="mount">
+                            <div class="space-y-3 px-2 py-5">
                                 @if(count($clients) > 1)
                                     <x-select.styled
                                         disabled

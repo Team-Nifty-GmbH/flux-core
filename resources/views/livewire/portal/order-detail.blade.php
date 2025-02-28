@@ -99,7 +99,7 @@
     </div>
     <div class="space-y-5">
         <div class="flex gap-8">
-            <x-card :title="__('Invoice Address')">
+            <x-card :header="__('Invoice Address')">
                 <div>
                     {{ data_get($order, 'address_invoice.company', '') }}
                 </div>
@@ -125,7 +125,7 @@
         </div>
         @section('attachments')
             @if($attachments)
-                <x-card :title="__('Attachments')">
+                <x-card :header="__('Attachments')">
                     @foreach($attachments as $attachment)
                         <div class="flex justify-between">
                             <div class="flex justify-center items-center gap-1">

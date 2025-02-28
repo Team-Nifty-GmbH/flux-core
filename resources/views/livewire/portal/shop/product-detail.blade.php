@@ -109,7 +109,7 @@
                     </x-card>
                 @endforeach
                 @if($productForm->bundle_products)
-                    <x-card :title="__('Bundle Products')">
+                    <x-card :header="__('Bundle Products')">
                         @foreach($productForm->bundle_products as $bundleProduct)
                            <a href="{{ route('portal.products.show', [$bundleProduct['id']]) }}">
                                <div class="flex gap-4">

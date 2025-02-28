@@ -33,7 +33,7 @@
             </div>
         </x-slot>
     </x-modal>
-    <x-card :title="__('Terms And Conditions')">
+    <x-card :header="__('Terms And Conditions')">
         <div class="flex items-center gap-1.5">
             <x-checkbox wire:model.boolean="termsAndConditions" />
             <div>
@@ -45,12 +45,12 @@
         </div>
     </x-card>
     <div class="flex flex-col sm:flex-row gap-4 justify-between">
-        <x-card :title="__('Invoice Address')">
+        <x-card :header="__('Invoice Address')">
             <p>
                 {!! implode('</p><p>', auth()->user()->contact->invoiceAddress?->postal_address ?? [])  !!}
             </p>
         </x-card>
-        <x-card :title="__('Delivery Address')">
+        <x-card :header="__('Delivery Address')">
             <x-slot:header>
                 <x-button color="secondary" light xs x-on:click="$modalOpen('edit-delivery-address')" :text="__('Edit delivery address')" />
             </x-slot:header>
@@ -68,7 +68,7 @@
             <x-textarea :label="__('Comment')" wire:model="comment" />
         </div>
     </x-card>
-    <x-card :title="__('Positions')">
+    <x-card :header="__('Positions')">
         <div class="flex flex-col gap-1.5">
             @foreach($this->cart?->cartItems ?? [] as $key => $cartItem)
                 <x-flux::shop.cart-item :cartItem="$cartItem" :key="$cartItem->id"/>
@@ -76,7 +76,7 @@
             @endforeach
         </div>
     </x-card>
-    <x-card :title="__('Summary')">
+    <x-card :header="__('Summary')">
         <div class="flex flex-col gap-1.5">
             <div class="flex justify-between gap-2">
                 <div>{{ __('Total Net') }}</div>

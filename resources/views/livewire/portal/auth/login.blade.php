@@ -4,7 +4,7 @@
     @endphp
     @section('password-reset-dialog')
         <x-modal id="password-reset">
-            <x-card :title="__('Reset password')">
+            <x-card :header="__('Reset password')">
                 <x-input wire:model="email" :label="__('Email')" name="reset-email" type="email" required/>
                 <x-slot:footer>
                     <x-button wire:click="resetPassword()" color="indigo" class="w-full" :text="__('Reset password')" x-on:click="$modalClose('password-reset')"></x-button>

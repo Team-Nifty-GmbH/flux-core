@@ -1,4 +1,4 @@
-<div x-data="dashboard($wire)">
+<div x-data="dashboard()" x-init.once="reInit().disable()">
     @section('dashboard-widget-select')
         <x-flux::dashboard.widget-select />
     @show

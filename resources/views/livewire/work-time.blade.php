@@ -93,9 +93,12 @@
          x-anchor.bottom-end.offset.5="$refs.button"
          class="z-10"
     >
-        <x-card id="active-work-times" class="flex flex-col gap-4 max-w-md" :title="__('Active Work Times')">
+        <x-card id="active-work-times" class="flex flex-col gap-4 max-w-md" :header="__('Active Work Times')">
             <x-slot:header>
-                <x-button.circle color="secondary" light xs x-on:click="open = false" icon="x-mark" />
+                <div class="flex justify-between gap-4 w-full items-center">
+                    <div>{{ __('Active Work Times') }}</div>
+                    <x-button.circle color="secondary" light sm x-on:click="open = false" icon="x-mark" />
+                </div>
             </x-slot:header>
             <div class="flex w-full gap-1.5">
                 <x-button class="w-full" x-show="! $wire.dailyWorkTime.id" color="emerald" :text="__('Start Workday')" x-on:click="$wire.toggleWorkDay(true)" />

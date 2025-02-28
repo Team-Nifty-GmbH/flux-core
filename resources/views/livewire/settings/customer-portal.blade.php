@@ -11,7 +11,7 @@
         </div>
     </div>
     <div class="grid-cols-3 gap-8 pb-8 md:grid">
-        <x-card :title="__('General')">
+        <x-card :header="__('General')">
             <div>
                 <x-select.styled :label="__('Dashboard module')" :options="$modules" wire:model="setting.settings.dashboard_module"/>
             </div>
@@ -19,7 +19,7 @@
                 <x-select.styled :label="__('Calendars')" wire:model="setting.settings.calendars" :options="$calendars" multiple select="label:name|value:id" />
             </div>
         </x-card>
-        <x-card :title="__('Navigation styling')">
+        <x-card :header="__('Navigation styling')">
             <div class="grid grid-cols-2 gap-4">
                 <div class="grid grid-cols-1 gap-2">
                     <div>
@@ -51,7 +51,7 @@
                 <x-number min="12" max="48" step="2" :label="__('Icon size')" wire:model="setting.settings.nav.icon_size" />
             </div>
         </x-card>
-        <x-card :title="__('Append links')">
+        <x-card :header="__('Append links')">
             <div class="space-y-5">
                     <template x-for="(link, index) in setting.settings.nav.append_links" :key="index">
                         <div class="flex w-full items-center space-x-3">
@@ -75,7 +75,7 @@
             </div>
         </x-card>
     </div>
-    <x-card :title="__('Custom CSS')">
+    <x-card :header="__('Custom CSS')">
         <x-textarea x-model="setting.settings.custom_css"></x-textarea>
     </x-card>
 

@@ -2,14 +2,17 @@
 
 namespace FluxErp\Support\Notification\ToastNotification;
 
+use Closure;
+use FluxErp\Enums\ToastType;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Arr;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Traits\Macroable;
 use NotificationChannels\WebPush\WebPushMessage;
+use TallStackUi\Foundation\Interactions\Toast;
 
-class ToastNotification implements Arrayable
+class ToastNotification extends Toast implements Arrayable
 {
     use Macroable;
 
@@ -17,19 +20,7 @@ class ToastNotification implements Arrayable
 
     protected ?string $description = null;
 
-    protected ?string $icon = null;
-
-    protected ?string $iconColor = null;
-
-    protected ?string $img = null;
-
-    protected bool $closeButton = true;
-
-    protected ?int $timeout = 8500;
-
-    protected ?bool $dense = null;
-
-    protected ?bool $rightButtons = true;
+    protected ToastType $toastType = ToastType::INFO;
 
     protected ?bool $progressbar = null;
 
@@ -44,10 +35,6 @@ class ToastNotification implements Arrayable
     protected ?NotificationAction $accept = null;
 
     protected ?NotificationAction $reject = null;
-
-    protected ?string $acceptLabel = null;
-
-    protected ?string $rejectLabel = null;
 
     protected ?NotificationEvent $onClose = null;
 
@@ -101,9 +88,9 @@ class ToastNotification implements Arrayable
         return $this;
     }
 
-    public function when(\Closure|bool $condition, \Closure $callback): static
+    public function when(Closure|bool $condition, Closure $callback): static
     {
-        if ($condition instanceof \Closure) {
+        if ($condition instanceof Closure) {
             $condition = $condition();
         }
 
@@ -128,51 +115,16 @@ class ToastNotification implements Arrayable
         return $this;
     }
 
-    public function icon(string $icon): static
+    public function type(ToastType $type): static
     {
-        $this->icon = $icon;
+        $this->toastType = $type;
 
         return $this;
     }
 
-    public function iconColor(string $iconColor): static
+    public function image(string $image): static
     {
-        $this->iconColor = $iconColor;
-
-        return $this;
-    }
-
-    public function img(string $img): static
-    {
-        $this->img = $img;
-
-        return $this;
-    }
-
-    public function closeButton(bool $closeButton): static
-    {
-        $this->closeButton = $closeButton;
-
-        return $this;
-    }
-
-    public function timeout(int $timeout): static
-    {
-        $this->timeout = $timeout;
-
-        return $this;
-    }
-
-    public function dense(bool $dense): static
-    {
-        $this->dense = $dense;
-
-        return $this;
-    }
-
-    public function rightButtons(bool $rightButtons): static
-    {
-        $this->rightButtons = $rightButtons;
+        $this->data['image'] = $image;
 
         return $this;
     }
@@ -226,20 +178,6 @@ class ToastNotification implements Arrayable
         return $this;
     }
 
-    public function acceptLabel(string $acceptLabel): static
-    {
-        $this->acceptLabel = $acceptLabel;
-
-        return $this;
-    }
-
-    public function rejectLabel(string $rejectLabel): static
-    {
-        $this->rejectLabel = $rejectLabel;
-
-        return $this;
-    }
-
     public function onClose(NotificationEvent $onClose): static
     {
         $this->onClose = $onClose;
@@ -263,7 +201,7 @@ class ToastNotification implements Arrayable
 
     public function href(string $url, string $label = 'Open…'): static
     {
-        $this->accept(NotificationAction::make()->text(__($label))->url($url));
+        $this->accept(NotificationAction::make()->label(__($label))->url($url));
 
         return $this;
     }
@@ -279,15 +217,10 @@ class ToastNotification implements Arrayable
     {
         return array_merge(
             [
-                'title' => $this->title,
+                'title' => $this->title ?? '',
                 'description' => $this->description,
-                'icon' => $this->icon,
-                'iconColor' => $this->iconColor,
-                'img' => $this->img,
-                'closeButton' => $this->closeButton,
+                'toastType' => $this->toastType,
                 'timeout' => $this->timeout,
-                'dense' => $this->dense,
-                'rightButtons' => $this->rightButtons,
                 'progressbar' => $this->progressbar,
                 'params' => $this->params,
                 'method' => $this->method,
@@ -295,13 +228,12 @@ class ToastNotification implements Arrayable
                 'to' => $this->to,
                 'accept' => $this->accept?->toArray(),
                 'reject' => $this->reject?->toArray(),
-                'acceptLabel' => $this->acceptLabel,
-                'rejectLabel' => $this->rejectLabel ?? __('Cancel'),
                 'onClose' => $this->onClose?->toArray(),
                 'onDismiss' => $this->onDismiss?->toArray(),
                 'onTimeout' => $this->onTimeout?->toArray(),
             ],
-            $this->attributes
+            $this->attributes,
+            $this->additional()
         );
     }
 
@@ -310,10 +242,10 @@ class ToastNotification implements Arrayable
         $mailMessage = (new MailMessage())
             ->greeting(__('Hello') . ' ' . $this->notifiable?->name)
             ->subject($this->title ?? '')
-            ->line(new HtmlString($this->description ?? ''));
+            ->line(new HtmlString($this->description));
 
-        if ($this->accept || $this->acceptLabel) {
-            $mailMessage->action($this->acceptLabel ?? $this->accept?->label ?? '', $this->accept?->url ?? '');
+        if ($this->accept) {
+            $mailMessage->action($this->accept->label ?? '', $this->accept->url ?? '');
         }
 
         return $mailMessage;

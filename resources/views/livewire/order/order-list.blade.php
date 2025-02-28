@@ -28,7 +28,7 @@
                         wire:model="order.order_type_id"
                     />
                 @endif
-                <div class="pt-4">
+                <div class="pt-4 flex flex-col gap-4">
                     <x-select.styled
                         :label="__('Contact')"
                         class="pb-4"
@@ -108,7 +108,7 @@
                         />
                     </div>
                 </div>
-                <div class="space-y-3 pt-4">
+                <div class="pt-4 flex flex-col gap-4">
                     <x-select.styled
                         :label="__('Client')"
                         :options="$clients"
