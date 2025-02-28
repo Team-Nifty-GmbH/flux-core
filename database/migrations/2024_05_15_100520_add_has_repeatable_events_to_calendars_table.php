@@ -8,15 +8,15 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('datatable_user_settings', function (Blueprint $table) {
-            $table->boolean('is_layout')->default(false)->after('authenticatable_id');
+        Schema::table('calendars', function (Blueprint $table) {
+            $table->boolean('has_repeatable_events')->default(true)->after('has_notifications');
         });
     }
 
     public function down(): void
     {
-        Schema::table('datatable_user_settings', function (Blueprint $table) {
-            $table->dropColumn('is_layout');
+        Schema::table('calendars', function (Blueprint $table) {
+            $table->dropColumn('has_repeatable_events');
         });
     }
 };
