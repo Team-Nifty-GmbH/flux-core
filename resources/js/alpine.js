@@ -11,6 +11,7 @@ import navigationSpinner from './components/navigation-spinner.js';
 import wireNavigation from './components/wire-navigation.js';
 import comments from './components/comments.js';
 import selectComponent from './components/tallstackui/select.js';
+import toastComponent from './components/tallstackui/toast.js';
 
 window.setupEditor = setupEditor;
 window.workTime = workTime;
@@ -19,6 +20,7 @@ window.addressMap = addressMap;
 window.signature = signature;
 window.filePond = filePond;
 window.$tallstackuiSelect = selectComponent;
+window.$tallstackuiToast = toastComponent;
 
 navigationSpinner();
 

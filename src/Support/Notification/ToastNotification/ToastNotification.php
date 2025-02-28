@@ -2,15 +2,14 @@
 
 namespace FluxErp\Support\Notification\ToastNotification;
 
-use Closure;
 use FluxErp\Enums\ToastType;
+use FluxErp\Support\TallstackUI\Interactions\Toast;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Arr;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Traits\Macroable;
 use NotificationChannels\WebPush\WebPushMessage;
-use TallStackUi\Foundation\Interactions\Toast;
 
 class ToastNotification extends Toast implements Arrayable
 {
@@ -45,6 +44,8 @@ class ToastNotification extends Toast implements Arrayable
     protected array $attributes = [];
 
     protected ?object $notifiable = null;
+
+    protected int|string|null $id = null;
 
     public static function make(...$arguments): static
     {
@@ -84,19 +85,6 @@ class ToastNotification extends Toast implements Arrayable
     public function notifiable(object $notifiable): static
     {
         $this->notifiable = $notifiable;
-
-        return $this;
-    }
-
-    public function when(Closure|bool $condition, Closure $callback): static
-    {
-        if ($condition instanceof Closure) {
-            $condition = $condition();
-        }
-
-        if ($condition) {
-            return $callback($this);
-        }
 
         return $this;
     }
@@ -213,6 +201,13 @@ class ToastNotification extends Toast implements Arrayable
         return $this;
     }
 
+    public function id(string|int|null $id): static
+    {
+        $this->id = $id;
+
+        return $this;
+    }
+
     public function toArray(): array
     {
         return array_merge(
@@ -233,7 +228,10 @@ class ToastNotification extends Toast implements Arrayable
                 'onTimeout' => $this->onTimeout?->toArray(),
             ],
             $this->attributes,
-            $this->additional()
+            $this->additional(),
+            [
+                'contextId' => $this->id,
+            ]
         );
     }
 

@@ -49,6 +49,7 @@ class Notification extends DatabaseNotification
             blade;
         }
 
+        /** @var Toast $toast */
         $toast = Toast::make($component)
             ->{data_get($this->data, 'toastType') ?? ToastType::INFO->value}($title, $description);
 
@@ -72,8 +73,12 @@ class Notification extends DatabaseNotification
             $toast->progress(data_get($this->data, 'progress'));
         }
 
-        if (data_get($this->data, 'accept')) {
+        if (data_get($this->data, 'accept') || data_get($this->data, 'persistent')) {
             $toast->persistent();
+        }
+
+        if (data_get($this->data, 'toastId')) {
+            $toast->setEventName('toast-upsert');
         }
 
         if (length(data_get($this->data, 'description')) > 100 && ! data_get($this->data, 'progress')) {

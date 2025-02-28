@@ -47,12 +47,19 @@ class Notifications extends Component
             $notify['timeout'] = 0;
         }
 
+        /** @var Notification $notification */
         $notification = resolve_static(Notification::class, 'query')
             ->whereKey(data_get($notify, 'id'))
-            ->first();
-        $notification->markAsRead();
+            ->firstOrNew();
 
-        $notification->toast($this)->send();
+        if ($notification->exists) {
+            $notification->markAsRead();
+        } else {
+            $notification->data = $notify;
+            $notification->created_at = now();
+        }
+
+        $notification->toast($this)->id(data_get($notify, 'contextId'))->send();
     }
 
     #[Renderless]

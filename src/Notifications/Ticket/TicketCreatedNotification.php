@@ -49,8 +49,6 @@ class TicketCreatedNotification extends Notification implements ShouldQueue
         return ToastNotification::make()
             ->title(__(':username created ticket :id', ['username' => $user->name, 'id' => $this->model->id]))
             ->description($this->model->title . '<br>' . $this->model->description)
-            ->icon('info')
-            ->img(method_exists($user, 'getAvatarUrl') ? $user->getAvatarUrl() : null)
             ->accept(
                 NotificationAction::make()
                     ->label(__('View'))

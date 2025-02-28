@@ -22,7 +22,9 @@
     @show
     @section('layout.app.body')
         @persist('notifications')
-            <x-toast z-index="z-50"></x-toast>
+            <div id="{{ \Illuminate\Support\Str::uuid() }}" x-on:tallstackui:toast-upsert.window="$tallstackuiToast($el.id).upsertToast($event)">
+                <x-toast z-index="z-50"></x-toast>
+            </div>
             <x-dialog z-index="z-40" blur="md" align="center"/>
         @endpersist
         <x-flux::flash />
