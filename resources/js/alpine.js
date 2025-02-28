@@ -1,6 +1,7 @@
 import folders from './components/folders';
 import setupEditor from './components/tiptap';
 import workTime from './components/work-time.js';
+import calendar from './components/calendar.js';
 import dashboard from './components/dashboard';
 import signature from './components/signature-pad.js';
 import addressMap from "./components/address-map";
@@ -13,6 +14,16 @@ import comments from './components/comments.js';
 import selectComponent from './components/tallstackui/select.js';
 import toastComponent from './components/tallstackui/toast.js';
 
+import {Calendar} from '@fullcalendar/core';
+import allLocales from '@fullcalendar/core/locales-all';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import listPlugin from '@fullcalendar/list';
+import interactionPlugin from '@fullcalendar/interaction';
+import dayjs from 'dayjs';
+
+window.dayjs = dayjs;
+window.calendar = calendar;
 window.setupEditor = setupEditor;
 window.workTime = workTime;
 window.dashboard = dashboard;
@@ -21,6 +32,13 @@ window.signature = signature;
 window.filePond = filePond;
 window.$tallstackuiSelect = selectComponent;
 window.$tallstackuiToast = toastComponent;
+
+window.Calendar = Calendar;
+window.dayGridPlugin = dayGridPlugin;
+window.timeGridPlugin = timeGridPlugin;
+window.listPlugin = listPlugin;
+window.interactionPlugin = interactionPlugin;
+window.allLocales = allLocales;
 
 navigationSpinner();
 

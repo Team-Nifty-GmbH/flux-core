@@ -30,7 +30,6 @@ use Spatie\Translatable\TranslatableServiceProvider;
 use Spatie\TranslationLoader\TranslationServiceProvider;
 use Symfony\Component\Process\Process;
 use TallStackUi\TallStackUiServiceProvider;
-use TeamNiftyGmbH\Calendar\CalendarServiceProvider;
 use TeamNiftyGmbH\DataTable\DataTableServiceProvider;
 
 use function Orchestra\Testbench\package_path;
@@ -139,7 +138,6 @@ abstract class DuskTestCase extends TestCase
             ScoutServiceProvider::class,
             TallStackUiServiceProvider::class,
             MediaLibraryServiceProvider::class,
-            CalendarServiceProvider::class,
             QueryBuilderServiceProvider::class,
             DataTableServiceProvider::class,
             ActivitylogServiceProvider::class,

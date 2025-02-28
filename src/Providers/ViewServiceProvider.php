@@ -51,10 +51,6 @@ class ViewServiceProvider extends ServiceProvider
                         'resources/js/tall-datatables.js',
                         'team-nifty-gmbh/tall-datatables'
                     ),
-                    static::getRealPackageAssetPath(
-                        'resources/js/index.js',
-                        'team-nifty-gmbh/tall-calendar'
-                    ),
                 ]
             );
 

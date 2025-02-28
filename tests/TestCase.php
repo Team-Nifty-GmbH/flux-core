@@ -25,7 +25,6 @@ use Spatie\Translatable\TranslatableServiceProvider;
 use Spatie\TranslationLoader\TranslationServiceProvider;
 use TallStackUi\Facades\TallStackUi;
 use TallStackUi\TallStackUiServiceProvider;
-use TeamNiftyGmbH\Calendar\CalendarServiceProvider;
 use TeamNiftyGmbH\DataTable\DataTableServiceProvider;
 
 abstract class TestCase extends BaseTestCase
@@ -56,7 +55,6 @@ abstract class TestCase extends BaseTestCase
             TagsServiceProvider::class,
             ScoutServiceProvider::class,
             MediaLibraryServiceProvider::class,
-            CalendarServiceProvider::class,
             QueryBuilderServiceProvider::class,
             DataTableServiceProvider::class,
             ActivitylogServiceProvider::class,

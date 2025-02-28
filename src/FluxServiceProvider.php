@@ -21,8 +21,6 @@ use FluxErp\Http\Middleware\SetJobAuthenticatedUserMiddleware;
 use FluxErp\Livewire\Features\Calendar\CalendarOverview;
 use FluxErp\Models\Activity;
 use FluxErp\Models\Address;
-use FluxErp\Models\Calendar;
-use FluxErp\Models\CalendarEvent;
 use FluxErp\Models\Category;
 use FluxErp\Models\Client;
 use FluxErp\Models\LedgerAccount;
@@ -109,8 +107,6 @@ class FluxServiceProvider extends ServiceProvider
         );
 
         app('livewire')->componentHook(SupportFormObjects::class);
-        $this->app->bind(\TeamNiftyGmbH\Calendar\Models\Calendar::class, Calendar::class);
-        $this->app->bind(\TeamNiftyGmbH\Calendar\Models\CalendarEvent::class, CalendarEvent::class);
         $this->app->bind(DatabaseNotification::class, Notification::class);
     }
 
@@ -125,10 +121,6 @@ class FluxServiceProvider extends ServiceProvider
         $this->bootRoutes();
         $this->registerLivewireComponents();
         $this->registerBladeComponents();
-
-        // special case for calendar event to load into correct namespace
-        Blade::component('flux::components.calendar.event-edit', 'tall-calendar::event-edit');
-        Blade::component('flux::components.calendar.calendar-list', 'tall-calendar::calendar-list');
 
         if (static::$registerFluxRoutes && (! $this->app->runningInConsole() || $this->app->runningUnitTests())) {
             $this->bootFluxMenu();

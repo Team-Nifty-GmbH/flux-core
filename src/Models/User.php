@@ -5,6 +5,7 @@ namespace FluxErp\Models;
 use FluxErp\Mail\MagicLoginLink;
 use FluxErp\Traits\CacheModelQueries;
 use FluxErp\Traits\Filterable;
+use FluxErp\Traits\HasCalendars;
 use FluxErp\Traits\HasCalendarUserSettings;
 use FluxErp\Traits\HasCart;
 use FluxErp\Traits\HasFrontendAttributes;
@@ -33,7 +34,6 @@ use NotificationChannels\WebPush\HasPushSubscriptions;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\File;
 use Spatie\Permission\Traits\HasRoles;
-use TeamNiftyGmbH\Calendar\Traits\HasCalendars;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 use TeamNiftyGmbH\DataTable\Traits\HasDatatableUserSettings;
 

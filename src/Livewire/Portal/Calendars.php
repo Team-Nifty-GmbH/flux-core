@@ -2,17 +2,15 @@
 
 namespace FluxErp\Livewire\Portal;
 
-use Illuminate\Contracts\View\Factory;
+use FluxErp\Livewire\Features\Calendar\FluxCalendar;
+use FluxErp\Models\Calendar;
+use FluxErp\Models\CalendarEvent;
 use Illuminate\Contracts\View\View;
-use Illuminate\Foundation\Application;
 use Illuminate\Support\Carbon;
-use TeamNiftyGmbH\Calendar\Livewire\CalendarComponent;
-use TeamNiftyGmbH\Calendar\Models\Calendar;
-use TeamNiftyGmbH\Calendar\Models\CalendarEvent;
 
-class Calendars extends CalendarComponent
+class Calendars extends FluxCalendar
 {
-    public function render(): Factory|View|Application
+    public function render(): View
     {
         return view('flux::livewire.portal.calendar-view');
     }
