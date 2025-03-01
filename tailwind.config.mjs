@@ -1,4 +1,6 @@
 import defaultTheme from 'tailwindcss/defaultTheme';
+import forms from '@tailwindcss/forms';
+import typography from '@tailwindcss/typography';
 
 export default {
     darkMode: 'selector',
@@ -45,7 +47,7 @@ export default {
             },
         },
     },
-    plugins: [require('@tailwindcss/typography'), require('@tailwindcss/forms')],
+    plugins: [typography, forms],
     safelist: [
         'mention',
         'tippy-box',

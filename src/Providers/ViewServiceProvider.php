@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\View\FileViewFinder;
 use TallStackUi\Facades\TallStackUi;
 
 class ViewServiceProvider extends ServiceProvider
@@ -63,21 +62,6 @@ class ViewServiceProvider extends ServiceProvider
                 ]);
             }
         }
-
-        /** use @extendFlux() at the end of the component, not the beginning */
-        Blade::directive('extendFlux', function (string $view) {
-            // Trim and remove quotes
-            $view = trim($view, ' "\'');
-
-            $path = [
-                flux_path('resources/views'),
-            ];
-
-            $finder = new FileViewFinder(app('files'), $path);
-            $filePath = $finder->find($view);
-
-            return Blade::compileString(file_get_contents($filePath));
-        });
 
         Blade::directive('canAction', function ($expression) {
             return "<?php if (resolve_static($expression, 'canPerformAction', [false])): ?>";
@@ -145,11 +129,21 @@ class ViewServiceProvider extends ServiceProvider
             ->block('buttons.close.wrapper', 'ml-2 flex shrink-0');
 
         TallStackUi::personalize()
+            ->card('w-auto')
+            ->block('wrapper.first', 'flex justify-center gap-4 w-auto');
+        TallStackUi::personalize()
+            ->card()
+            ->block('wrapper.first', 'flex justify-center gap-4 w-full');
+
+        TallStackUi::personalize()
             ->toast('relative')
             ->block('wrapper.first', 'pointer-events-none inset-0 flex flex-col items-end justify-end gap-y-2 px-4 py-4')
             ->block('wrapper.third', 'dark:bg-dark-700 pointer-events-auto w-full w-full overflow-hidden rounded-xl bg-white shadow-lg ring-1 ring-black ring-opacity-5')
             ->block('buttons.wrapper.second', 'flex min-h-full flex-col justify-between')
             ->block('buttons.close.wrapper', 'ml-2 flex shrink-0');
+
+        // override the label view from tallstack-ui namespace
+        $this->loadViewsFrom(__DIR__ . '/../../resources/views/vendor/tallstackui', 'tallstack-ui');
     }
 
     public static function getRealPackageAssetPath(string $path, string $packageName): string

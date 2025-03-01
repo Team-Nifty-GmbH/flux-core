@@ -27,7 +27,11 @@
                         <input class="w-full" type="color" x-on:change="calculateBackground()" wire:model="setting.settings.nav.background.start" />
                     </div>
                     <div>
-                        <x-label><span x-text="'{{ __('Angle') }} ' + setting.settings.nav.background.angle + '°'"></span></x-label>
+                        <x-label>
+                            <x-slot:word>
+                                <span x-text="'{{ __('Angle') }} ' + setting.settings.nav.background.angle + '°'"></span>
+                            </x-slot:word>
+                        </x-label>
                         <input class="w-full" type="range" x-on:change="calculateBackground()" min="0" max="360" wire:model.live="setting.settings.nav.background.angle" />
                     </div>
                     <div>
@@ -56,7 +60,7 @@
                     <template x-for="(link, index) in setting.settings.nav.append_links" :key="index">
                         <div class="flex w-full items-center space-x-3">
                             <div>
-                                <x-label>{{ __('Target blank') }}</x-label>
+                                <x-label :label="__('Target blank')" />
                                 <div class="flex items-center">
                                     <x-checkbox x-model="link.target_blank" />
                                 </div>

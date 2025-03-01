@@ -77,7 +77,7 @@
         color="indigo"
         x-on:click="open = ! open"
         x-ref="button"
-        x-bind:class="$wire.workTime.is_pause && 'ring-warning-500 text-white bg-warning-500 hover:bg-warning-600 hover:ring-warning-600 dark:ring-offset-slate-800 dark:bg-warning-700 dark:ring-warning-700 dark:hover:bg-warning-600 dark:hover:ring-warning-600'"
+        x-bind:class="$wire.workTime.is_pause && 'ring-amber-500 text-white bg-amber-500 hover:bg-amber-600 hover:ring-amber-600 dark:ring-offset-slate-800 dark:bg-amber-700 dark:ring-amber-700 dark:hover:bg-amber-600 dark:hover:ring-amber-600'"
         icon="clock"
     >
         <div x-text="msTimeToString(time)"></div>

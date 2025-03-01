@@ -39,10 +39,8 @@
     }"
 >
     <div class="flex space-x-3">
-        <div>
-            <div class="shrink-0 inline-flex items-center justify-center overflow-hidden rounded-full border border-gray-200 dark:border-secondary-500">
-                <img class="shrink-0 object-cover object-center rounded-full w-10 h-10 text-base" x-bind:src="avatarUrl" />
-            </div>
+        <div x-init="$nextTick(() => { $el.querySelector('img').src = avatarUrl })">
+            <x-avatar image="{{ route('icons', ['name' => 'user']) }}" xl />
         </div>
         <div class="min-w-0 flex-1">
             <div x-ref="upload">

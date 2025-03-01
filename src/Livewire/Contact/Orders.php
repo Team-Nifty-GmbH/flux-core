@@ -42,7 +42,7 @@ class Orders extends OrderList
         $this->order->contact_id = $this->contact->id;
 
         $this->js(<<<'JS'
-            $modalOpen('create-order');
+            $modalOpen('create-order-modal');
         JS);
     }
 

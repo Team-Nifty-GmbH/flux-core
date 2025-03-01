@@ -9,29 +9,20 @@
             <x-modal id="calendar-event-modal" :title="__('Edit Event')">
                 <x-flux::calendar.event-edit />
                 <x-slot name="footer">
-                    <div class="flex justify-between gap-x-4">
+                    <div class="flex justify-between gap-2 w-full">
                         <div>
                             <x-button
                                 x-show="calendarEvent.id"
                                 spinner
                                 flat
-                                negative
+                                color="red"
                                 :text="__('Delete')"
                                 x-show="$wire.calendarEvent.is_editable && $wire.calendarEvent.id"
-                                x-on:click="$wireui.confirmDialog({
-                                    id: 'delete-event-dialog',
-                                    icon: 'question',
-                                    accept: {
-                                        label: '{{ __('OK') }}',
-                                        execute: () => deleteEvent()
-                                    },
-                                    reject: {
-                                        label: '{{ __('Cancel') }}',
-                                    }
-                                })"
+                                wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Calendar Event')]) }}"
+                                wire:click="deleteEvent($wire.calendarEvent).then((calendarEvent) => {deleteEvent(calendarEvent);})"
                             />
                         </div>
-                        <div class="flex">
+                        <div class="flex gap-2">
                             <x-button flat :text="__('Cancel')" x-on:click="$modalClose('calendar-event-modal')" />
                             <x-button
                                 primary

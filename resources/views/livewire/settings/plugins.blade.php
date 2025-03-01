@@ -61,11 +61,11 @@
                                 </div>
                                 <div class="flex gap-1.5">
                                     <x-badge color="indigo">
-                                        <x-icon name="arrow-down-tray" class="w-3 h-3 fill-warning-400" />
+                                        <x-icon name="arrow-down-tray" class="w-3 h-3 fill-amber-400" />
                                         <span class="font-semibold text-xs" x-text="plugin.downloads + ' ' + '{{ __('Downloads') }}'"></span>
                                     </x-badge>
                                     <x-badge>
-                                        <x-icon name="star" class="w-3 h-3 fill-warning-400" />
+                                        <x-icon name="star" class="w-3 h-3 fill-amber-400" />
                                         <span class="font-semibold text-xs" x-text="plugin.favers"></span>
                                     </x-badge>
                                 </div>

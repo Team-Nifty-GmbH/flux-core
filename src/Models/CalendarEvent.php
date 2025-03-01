@@ -5,10 +5,11 @@ namespace FluxErp\Models;
 use Carbon\Carbon;
 use FluxErp\Models\Pivots\CalendarEventInvite;
 use FluxErp\Models\Pivots\Inviteable;
+use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\InteractsWithMedia;
 use FluxErp\Traits\LogsActivity;
-use FluxErp\Traits\ResolvesRelationsThroughContainer;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
@@ -20,7 +21,7 @@ use Spatie\MediaLibrary\HasMedia;
 
 class CalendarEvent extends FluxModel implements HasMedia
 {
-    use HasUserModification, InteractsWithMedia, LogsActivity, ResolvesRelationsThroughContainer;
+    use HasPackageFactory, HasUlids, HasUserModification, InteractsWithMedia, LogsActivity;
 
     protected function casts(): array
     {

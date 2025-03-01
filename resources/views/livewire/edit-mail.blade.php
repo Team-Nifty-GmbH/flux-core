@@ -53,7 +53,7 @@
             />
         </div>
         <div class="flex flex-col gap-1.5">
-            <x-label>{{ __('CC') }}</x-label>
+            <x-label :label="__('CC')" />
             <div class="flex gap-1" x-cloak x-show="! $wire.multiple">
                 <template x-for="cc in $wire.mailMessage.cc || []">
                     <x-badge flat color="indigo" cl>
@@ -80,7 +80,7 @@
             <x-input :placeholder="__('Add a new cc')" x-on:blur="addReceiver($event, 'cc')" x-on:keyup="addReceiver($event, 'cc')" class="w-full" />
         </div>
         <div class="flex flex-col gap-1.5">
-            <x-label>{{ __('BCC') }}</x-label>
+            <x-label :label="__('BCC')" />
             <div class="flex gap-1">
                 <template x-for="bcc in $wire.mailMessage.bcc || []">
                     <x-badge flat color="indigo" cl>
@@ -118,7 +118,7 @@
             select="label:email|value:id"
         />
         <div>
-            <x-label>{{ __('Attachments') }}</x-label>
+            <x-label :label="__('Attachments')" />
             <label for="files">
                 <div class="flex gap-1 min-h-[2rem] w-full rounded-md bg-gray-100 p-1.5">
                     <template x-for="file in $wire.mailMessage.attachments">

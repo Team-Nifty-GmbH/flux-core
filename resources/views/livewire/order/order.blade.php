@@ -327,22 +327,19 @@
                                 @case(1)
                                     <x-badge
                                         :text="__('Reminder Level :level', ['level' => $order->payment_reminder_current_level])"
-                                        warning
-                                        rounded
+                                        color="amber"
                                     />
                                     @break
                                 @case(2)
                                     <x-badge
                                         :text="__('Reminder Level :level', ['level' => $order->payment_reminder_current_level])"
-                                        orange
-                                        rounded
+                                        color="orange"
                                     />
                                     @break
                                 @default
                                     <x-badge
                                         :text="__('Reminder Level :level', ['level' => $order->payment_reminder_current_level])"
-                                        negative
-                                        rounded
+                                        color="red"
                                     />
                             @endswitch
                         @endif

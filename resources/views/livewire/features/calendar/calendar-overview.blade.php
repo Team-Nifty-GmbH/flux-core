@@ -61,18 +61,20 @@
                                 </div>
                             </x-card>
                         </div>
-            @show
+                    @show
                     <x-slot:footer>
-                        <div class="flex justify-between gap-x-4">
+                        <div class="flex justify-between gap-2 w-full">
                             <div>
                                 <x-button
                                     x-show="$wire.selectedCalendar.id && '{{ resolve_static(\FluxErp\Actions\Calendar\DeleteCalendar::class, 'canPerformAction', [false]) }}'"
                                     flat
                                     color="red"
-                                    :text="__('Delete')" x-on:click="deleteCalendar()"
+                                    :text="__('Delete')"
+                                    wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Calendar')]) }}"
+                                    wire:click="deleteCalendar(calendarItem).then((success) => {if(success) deleteCalendar();})"
                                 />
                             </div>
-                            <div class="flex">
+                            <div class="flex gap-2">
                                 <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('calendar-modal');" />
                                 <x-button color="indigo" :text="__('Save')" x-on:click="saveCalendar()" />
                             </div>

@@ -1,4 +1,4 @@
-<div class="grid-stack">
+<div class="grid-stack" wire:ignore>
     @forelse($this->widgets as $widget)
         <div class="grid-stack-item rounded-lg relative z-0"
              gs-id="{{$widget['id']}}"

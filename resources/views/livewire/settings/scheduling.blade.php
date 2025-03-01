@@ -174,9 +174,7 @@
                 wire:model="schedule.cron.parameters.timeConstraint.1"
             />
         </div>
-        <x-label>
-            {{ __('End') }}
-        </x-label>
+        <x-label :label="__('End')" />
         <x-radio :label="__('Never')" value="never" wire:model="schedule.end_radio" />
         <div class="grid grid-cols-2 items-center gap-1.5">
             <x-radio :label="__('Ends At')" value="ends_at" wire:model="schedule.end_radio" />

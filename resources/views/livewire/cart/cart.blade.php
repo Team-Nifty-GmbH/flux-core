@@ -7,7 +7,7 @@
             :text="__('Clear cart')"
             wire:click="clear()"
             wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Cart Items')]) }}"
-            negative
+            color="red"
             class="w-full"
         />
     @endsection

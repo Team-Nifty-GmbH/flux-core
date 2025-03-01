@@ -118,9 +118,7 @@
                 />
             </div>
             <x-date wire:model="schedule.due_at" :label="__('Due At')" timezone="UTC"/>
-            <x-label>
-                {{ __('End') }}
-            </x-label>
+            <x-label :label="__('End')" />
             <x-radio :label="__('Never')" value="never" wire:model="schedule.end_radio" />
             <div class="grid grid-cols-2 items-center gap-1.5">
                 <x-radio :label="__('Ends At')" value="ends_at" wire:model="schedule.end_radio" />
@@ -129,7 +127,7 @@
                 <x-number wire:model="schedule.recurrences" :min="1" x-bind:disabled="$wire.schedule.end_radio !== 'recurrences'" />
             </div>
             <div class="grid grid-cols-2 items-center gap-1.5 mb-2" x-cloak x-show="$wire.schedule.id && $wire.schedule.end_radio === 'recurrences'">
-                <x-label>{{ __('Current Recurrence') }}</x-label>
+                <x-label :label="__('Current Recurrence')" />
                 <span class="flex justify-center">{{ $schedule->current_recurrence ?? 0 }}</span>
             </div>
             <x-toggle wire:model="schedule.is_active" :label="__('Is Active')" />

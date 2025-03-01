@@ -41,9 +41,7 @@
                 />
             </div>
             <div class="grid grid-cols-3 items-center gap-1.5">
-                <x-label>
-                    {{__('End')}}
-                </x-label>
+                <x-label :label="__('End')" />
                 <x-input
                     id="calendar-event-end-date"
                     type="date"
@@ -65,7 +63,11 @@
             <template x-for="(customProperty, propertyName) in $wire.calendarEvent.customProperties">
                 <div>
                     <div x-cloak x-show="customProperty.field_type === 'text'">
-                        <x-label class="mb-1" x-bind:for="propertyName" x-text="propertyName" />
+                        <x-label class="mb-1" x-bind:for="propertyName">
+                            <x-slot:word>
+                                <span x-text="propertyName"></span>
+                            </x-slot:word>
+                        </x-label>
                         <x-input
                             x-model="customProperty.value"
                             x-bind:disabled="! $wire.calendarEvent.is_editable ?? false"
@@ -110,9 +112,7 @@
             </div>
             <div x-show="$wire.calendarEvent.has_repeats && $wire.calendarEvent.is_repeatable">
                 <div class="grid grid-cols-3 items-center gap-1.5">
-                    <x-label>
-                        {{ __('Repeat every') }}
-                    </x-label>
+                    <x-label :label="__('Repeat every')" />
                     <x-number wire:model="calendarEvent.interval" :min="1" x-bind:disabled="! $wire.calendarEvent.is_editable ?? false" />
                     <x-select.styled
                         x-on:select="$wire.calendarEvent.unit = $event.detail.select.value"
@@ -298,9 +298,7 @@
                     </x-select.styled>
                 </template>
 
-                <x-label class="mt-4 mb-2">
-                    {{ __('Repeat end') }}
-                </x-label>
+                <x-label class="mt-4 mb-2" :label="__('Repeat end')" />
                 <x-radio :label="__('Never')" :value="null" x-model="$wire.calendarEvent.repeat_radio" x-bind:disabled="! $wire.calendarEvent.is_editable ?? false" />
                 <div class="grid grid-cols-2 items-center gap-1.5">
                     <x-radio :label="__('Date At')" value="repeat_end" x-model="$wire.calendarEvent.repeat_radio" x-bind:disabled="! $wire.calendarEvent.is_editable ?? false" />

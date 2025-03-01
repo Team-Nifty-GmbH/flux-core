@@ -21,8 +21,8 @@
                     <div x-bind:class="activity.id === activeActivity && 'border-gray-200 dark:border-secondary-500 rounded-md border'">
                         <div class="relative flex space-x-3 p-1.5">
                             <div>
-                                <div class="shrink-0 inline-flex items-center justify-center overflow-hidden rounded-full border border-gray-200 dark:border-secondary-500">
-                                    <img class="shrink-0 object-cover object-center rounded-full w-8 h-8 text-base" x-bind:src="activity.causer.avatar_url">
+                                <div x-init="$nextTick(() => { $el.querySelector('img').src = activity.causer.avatar_url })">
+                                    <x-avatar sm image="{{ route('icons', ['name' => 'user']) }}" xl />
                                 </div>
                             </div>
                             <div class="flex min-w-0 flex-1 justify-between space-x-4">

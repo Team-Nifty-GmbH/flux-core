@@ -191,7 +191,7 @@
                         <div x-on:click="favoritesOpen = ! favoritesOpen" class="cursor-pointer dark:text-light dark:hover:bg-indigo flex items-center rounded-md py-2 text-white text-gray-500 transition-colors hover:bg-gray-800/50">
                             <div class="w-16 flex-none">
                                 <div class="flex w-full justify-center text-white">
-                                    <x-icon name="star" variant="solid" class="h-4 w-4 fill-warning-400" />
+                                    <x-icon name="star" variant="solid" class="h-4 w-4 fill-amber-400" />
                                 </div>
                             </div>
                             <span class="truncate text-sm text-white">{{ __('Favorites') }}</span>

@@ -24,67 +24,53 @@
     </x-slot:header>
     <div class="pb-2 font-semibold uppercase">{{ __('General') }}</div>
     <div class="grid grid-cols-2 gap-2">
-        <x-label>
-            {{ __('Customer') }}
-        </x-label>
+        <x-label :label="__('Customer')" />
         <div class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px" x-text="order.address_invoice.name">
         </div>
-        <x-label>
-            {{ __('Invoice Address') }}
-        </x-label>
+        <x-label :label="__('Invoice Address')" />
         <div class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px" x-text="order.address_invoice.description">
         </div>
-        <x-label>
-            {{ __('Order state') }}
-        </x-label>
+        <x-label :label="__('Order state')" />
         <div class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px" x-html="formatters.state(order.state, formatter.state[1])">
         </div>
-        <x-label>
-            {{ __('Commission') }}
-        </x-label>
+        <x-label :label="__('Commission')" />
         <div class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px" x-text="order.commission">
         </div>
-        <x-label>
-            {{ __('Invoice number') }}
-        </x-label>
+        <x-label :label="__('Invoice number')" />
         <div class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px" x-text="order.invoice_number">
         </div>
     </div>
     <div class="pt-8 pb-2 font-semibold uppercase">{{ __('Accounting') }}</div>
     <div class="grid grid-cols-2 gap-2">
-        <x-label>
-            {{ __('Payment state') }}
-        </x-label>
+        <x-label :label="__('Payment state')" />
         <div class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px" x-html="formatters.state(order.payment_state, formatter.payment_state[1])">
         </div>
-        <x-label>
-            {{ __('Total net') }}
-        </x-label>
+        <x-label :label="__('Total net')" />
         <div class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px" x-text="formatters.money(order.total_net_price, order.currency)">
         </div>
     </div>
     <div class="pt-8 pb-2 font-semibold uppercase">{{ __('Order positions') }}</div>
     <div class="w-full pb-2" x-show="orderPositions.length > 0" x-collapse x-cloak>
-        <x-table>
+        <x-flux::table>
             <x-slot:header>
-                <x-table.head-cell>
+                <x-flux::table.head-cell>
                     {{ __('Name') }}
-                </x-table.head-cell>
-                <x-table.head-cell>
+                </x-flux::table.head-cell>
+                <x-flux::table.head-cell>
                     {{ __('Amount') }}
-                </x-table.head-cell>
-                <x-table.head-cell>
+                </x-flux::table.head-cell>
+                <x-flux::table.head-cell>
                     {{ __('Total Net Price') }}
-                </x-table.head-cell>
+                </x-flux::table.head-cell>
             </x-slot:header>
             <template x-for="orderPosition in orderPositions">
-                <x-table.row>
-                    <x-table.cell x-html="orderPosition.name"></x-table.cell>
-                    <x-table.cell class="text-right" x-html="window.formatters.float(orderPosition.amount)"></x-table.cell>
-                    <x-table.cell class="text-right" x-html="window.formatters.coloredMoney(orderPosition.total_net_price)"></x-table.cell>
-                </x-table.row>
+                <x-flux::table.row>
+                    <x-flux::table.cell x-html="orderPosition.name"></x-flux::table.cell>
+                    <x-flux::table.cell class="text-right" x-html="window.formatters.float(orderPosition.amount)"></x-flux::table.cell>
+                    <x-flux::table.cell class="text-right" x-html="window.formatters.coloredMoney(orderPosition.total_net_price)"></x-flux::table.cell>
+                </x-flux::table.row>
             </template>
-        </x-table>
+        </x-flux::table>
     </div>
     <x-button loading color="indigo" x-on:click="orderPositions.length < 1 ? $wire.loadOrderPositions() : orderPositions = []">
         <span x-text="orderPositions.length < 1 ? '{{ __('Show') }}' : '{{ __('Hide') }}'"></span>

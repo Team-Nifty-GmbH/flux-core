@@ -74,12 +74,13 @@ class TicketForm extends FluxForm
                 'users:id',
                 'meta',
             ]);
-            data_set($values, 'authenticatable.avatar_url', $values->authenticatable?->getAvatarUrl());
-            data_set($values, 'authenticatable.avatar_url', $values->authenticatable?->getAvatarUrl());
-            data_set($values, 'authenticatable.name', $values->authenticatable?->getLabel());
+            $model = $values;
             $this->meta = $values->meta->toArray();
 
             $values = $values->toArray();
+            data_set($values, 'authenticatable.avatar_url', $model->authenticatable?->getAvatarUrl());
+            data_set($values, 'authenticatable.avatar_url', $model->authenticatable?->getAvatarUrl());
+            data_set($values, 'authenticatable.name', $model->authenticatable?->getLabel());
             data_set($values, 'users', array_column($values['users'], 'id'));
         }
 

@@ -147,7 +147,7 @@ class Ticket extends Component
     {
         try {
             $this->ticket->delete();
-        } catch (\Exception $e) {
+        } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
             return;

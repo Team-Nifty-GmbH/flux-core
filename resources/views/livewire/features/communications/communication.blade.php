@@ -171,7 +171,7 @@
             />
         </div>
         <div class="flex flex-col gap-1.5" x-cloak x-show="$wire.communication.communication_type_enum === 'mail'">
-            <x-label>{{ __('CC') }}</x-label>
+            <x-label :label="__('CC')" />
             <div class="flex gap-1">
                 <template x-for="cc in $wire.communication.cc">
                     <x-badge flat color="indigo" cl>
@@ -204,7 +204,7 @@
             />
         </div>
         <div class="flex flex-col gap-1.5" x-cloak x-show="$wire.communication.communication_type_enum === 'mail'">
-            <x-label>{{ __('BCC') }}</x-label>
+            <x-label :label=" __('BCC')" />
             <div class="flex gap-1">
                 <template x-for="bcc in $wire.communication.bcc">
                     <x-badge flat color="indigo" cl>

@@ -64,12 +64,13 @@
                         </span>
                         <template x-if="$wire.productPricesUpdate.alteration !== null && $wire.productPricesUpdate.alteration != 0">
                             <x-label>
-                                <div x-text="'(' +
-                                    ($wire.productPricesUpdate.alteration < 0 ? '{{ __('Reduce') }}' : '{{ __('Increase') }}')
-                                    + ' ' + $wire.productPricesUpdate.alteration
-                                    + ($wire.productPricesUpdate.is_percent ? '%)' : '{{ \FluxErp\Models\Currency::default()?->symbol }})')"
-                                >
-                                </div>
+                                <x-slot:word>
+                                    <div x-text="'(' +
+                                        ($wire.productPricesUpdate.alteration < 0 ? '{{ __('Reduce') }}' : '{{ __('Increase') }}')
+                                        + ' ' + $wire.productPricesUpdate.alteration
+                                        + ($wire.productPricesUpdate.is_percent ? '%)' : '{{ \FluxErp\Models\Currency::default()?->symbol }})')"
+                                    />
+                                </x-slot:word>
                             </x-label>
                         </template>
                     </div>

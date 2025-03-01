@@ -94,15 +94,11 @@ const calendar = () => {
             });
         },
         deleteCalendar() {
-            this.$wire.deleteCalendar(this.calendarItem).then(success => {
-                if (success) {
-                    this.calendar.getEventSourceById(this.calendarItem.id).remove();
-                    this.calendars.splice(this.calendars.findIndex(c => c.id === this.calendarItem.id), 1);
-                    this.$wire.$parent.removeSelectableCalendar(this.calendarItem);
+            this.calendar.getEventSourceById(this.calendarItem.id).remove();
+            this.calendars.splice(this.calendars.findIndex(c => c.id === this.calendarItem.id), 1);
+            this.$wire.$parent.removeSelectableCalendar(this.calendarItem);
 
-                    $modalClose('calendar-modal');
-                }
-            });
+            $modalClose('calendar-modal');
         },
         saveEvent() {
             this.$wire.saveEvent(this.$wire.calendarEvent).then(event => {
@@ -146,34 +142,32 @@ const calendar = () => {
                 this.$wire.calendarEvent.end = dateTime.format(); // Use the default ISO 8601 format
             }
         },
-        deleteEvent() {
-            this.$wire.deleteEvent(this.$wire.calendarEvent).then(event => {
-                if (event === false) {
-                    return false;
-                }
+        deleteEvent(event) {
+            if (event === false) {
+                return false;
+            }
 
-                switch (true) {
-                    case event.repetition === null:
-                        this.calendar.getEventById(event.id)?.remove();
-                        break;
-                    case event.confirmOption === 'this':
-                        this.calendar.getEventById(event.id + '|' + event.repetition)?.remove();
-                        break;
-                    case event.confirmOption === 'future':
-                    case event.confirmOption === 'all':
-                        this.calendar.getEvents().filter(e => {
-                            const split = e.id.split('|');
-                            if (event.confirmOption === 'future') {
-                                return split[0] === String(event.id) && split[1] >= event.repetition;
-                            } else {
-                                return split[0] === String(event.id);
-                            }
-                        }).forEach(e => e.remove());
-                        break;
-                }
+            switch (true) {
+                case event.repetition === null:
+                    this.calendar.getEventById(event.id)?.remove();
+                    break;
+                case event.confirmOption === 'this':
+                    this.calendar.getEventById(event.id + '|' + event.repetition)?.remove();
+                    break;
+                case event.confirmOption === 'future':
+                case event.confirmOption === 'all':
+                    this.calendar.getEvents().filter(e => {
+                        const split = e.id.split('|');
+                        if (event.confirmOption === 'future') {
+                            return split[0] === String(event.id) && split[1] >= event.repetition;
+                        } else {
+                            return split[0] === String(event.id);
+                        }
+                    }).forEach(e => e.remove());
+                    break;
+            }
 
-                $modalClose('calendar-event-modal');
-            });
+            $modalClose('calendar-event-modal');
         },
         calendar: null,
         config: {},

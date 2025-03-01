@@ -1,8 +1,6 @@
 <div class="flex w-full space-x-3">
-    <div class="dark:border-secondary-500 inline-flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-gray-200 bg-gray-500 text-base dark:bg-gray-600">
-        <div class="shrink-0 inline-flex items-center justify-center overflow-hidden rounded-full border border-gray-200 dark:border-secondary-500">
-            <img class="shrink-0 object-cover object-center rounded-full w-10 h-10 text-base" x-bind:src="comment.user?.avatar_url" />
-        </div>
+    <div x-init="$nextTick(() => { $el.querySelector('img').src = comment.user?.avatar_url })">
+        <x-avatar image="{{ route('icons', ['name' => 'user']) }}" xl />
     </div>
     <div class="w-full">
         <div class="flex justify-between text-sm">

@@ -1,4 +1,5 @@
-<x-card class="flex flex-col justify-between gap-1.5 z-0">
+<div>
+    <x-card class="flex flex-col justify-between gap-1.5 z-0">
     <a href="{{ route('portal.products.show', ['product' => $productForm->id]) }}" class="flex flex-col justify-between">
         @section('image')
             <div class="h-1/2 w-full overflow-hidden rounded-md bg-gray-200 group-hover:opacity-75 lg:h-72 xl:h-80 relative flex justify-items-center">
@@ -70,3 +71,4 @@
         @endif
     @show
 </x-card>
+</div>

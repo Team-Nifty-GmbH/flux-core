@@ -50,6 +50,8 @@ class CalendarEventForm extends FluxForm
 
     public array $invited = [];
 
+    public ?int $interval = null;
+
     protected function getActions(): array
     {
         return [

@@ -34,7 +34,7 @@
                         @else
                             <template x-if="item.growthRate !== null && !isNaN(item.growthRate)">
                                 <div>
-                                    <x-badge x-cloak x-show="item.growthRate > 0" class="w-full" negative>
+                                    <x-badge x-cloak x-show="item.growthRate > 0" class="w-full" color="red">
                                         <x-slot:left>
                                             <i class="ph ph-caret-up"></i>
                                         </x-slot:left>

@@ -23,7 +23,7 @@
             @if(resolve_static(\FluxErp\Actions\Task\DeleteTask::class, 'canPerformAction', [false]))
                 <x-button color="secondary" light
                     wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Task')]) }}"
-                    negative
+                    color="red"
                     :text="__('Delete')"
                     wire:click="delete()"
                 />

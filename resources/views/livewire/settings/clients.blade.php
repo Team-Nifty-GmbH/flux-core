@@ -27,7 +27,7 @@
                             x-bind:class="$wire.client.id > 0 || 'invisible'"
                             wire:click="delete().then((success) => {if(success) close();});"
                             flat
-                            negative
+                            color="red"
                             :text="__('Delete')"
                         />
                     @endif

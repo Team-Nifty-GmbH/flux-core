@@ -5,6 +5,7 @@ namespace FluxErp\Models;
 use FluxErp\Models\Pivots\Calendarable;
 use FluxErp\Models\Pivots\Inviteable;
 use FluxErp\Support\Collection\CalendarCollection;
+use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasParentChildRelations;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\LogsActivity;
@@ -16,7 +17,7 @@ use Illuminate\Support\Str;
 
 class Calendar extends FluxModel
 {
-    use HasParentChildRelations, HasUserModification, LogsActivity, ResolvesRelationsThroughContainer;
+    use HasPackageFactory, HasParentChildRelations, HasUserModification, LogsActivity, ResolvesRelationsThroughContainer;
 
     protected $guarded = [
         'id',

@@ -5,7 +5,9 @@
 >
     @section('header')
         <div class="flex items-center space-x-5">
-            <x-avatar xl x-bind:image="$wire.ticket.authenticatable.avatar_url" src="#"></x-avatar>
+            <div x-init="$nextTick(() => { $el.querySelector('img').src = $wire.ticket.authenticatable.avatar_url })">
+                <x-avatar image="{{ route('icons', ['name' => 'user']) }}" xl />
+            </div>
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">
                     <div class="opacity-40 transition-opacity hover:opacity-100">
@@ -105,9 +107,7 @@
                             <x-card>
                                 <x-slot:header>
                                     <div class="flex items-center justify-between border-b px-4 py-2.5 dark:border-0">
-                                        <x-label>
-                                            {{ __('Attachments') }}
-                                        </x-label>
+                                        <x-label :label="__('Attachments')" />
                                     </div>
                                 </x-slot:header>
                                 @section('content.attachments')
@@ -134,14 +134,7 @@
         <section class="basis-2/12">
             <div class="sticky top-6 space-y-6">
                 @section('details')
-                    <x-card>
-                        <x-slot:header>
-                            <div class="flex items-center justify-between border-b px-4 py-2.5 dark:border-0">
-                                <x-label>
-                                    {{ __('Details') }}
-                                </x-label>
-                            </div>
-                        </x-slot:header>
+                    <x-card :header="__('Details')">
                         <div class="space-y-4">
                             <x-flux::state wire:model="ticket.state" formatters="formatter.state" available="availableStates"/>
                             <x-select.styled

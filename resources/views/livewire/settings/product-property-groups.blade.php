@@ -6,7 +6,7 @@
                 <x-label>{{ __('Product Properties') }}</x-label>
             </div>
             <div class="col-span-2" x-show="$wire.productPropertyGroup.product_properties.length > 0" x-cloak>
-                <x-label>{{ __('Property Type') }}</x-label>
+                <x-label :label="__('Property Type')" />
             </div>
         </div>
         <template x-for="(property, index) in $wire.productPropertyGroup.product_properties">

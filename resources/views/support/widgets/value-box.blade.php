@@ -53,7 +53,7 @@
                             <x-badge
                                 x-cloak
                                 x-show="$wire.growthRate > 0"
-                                negative
+                                color="red"
                                 lg
                             >
                                 <x-slot:left>

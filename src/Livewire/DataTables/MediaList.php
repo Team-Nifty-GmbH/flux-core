@@ -62,12 +62,12 @@ class MediaList extends BaseDataTable
                 ->icon('arrow-down-tray')
                 ->text(__('Download'))
                 ->attributes([
-                    'x-on:click' => '$wire.downloadMedia(record.id)',
+                    'x-on:click' => 'show = false; $wire.downloadMedia(record.id)',
                 ]),
             DataTableButton::make()
                 ->icon('pencil')
                 ->text(__('Edit'))
-                ->wireClick('edit(record.id)'),
+                ->wireClick('edit(record.id); show = false;'),
             DataTableButton::make()
                 ->icon('eye')
                 ->text(__('View'))
@@ -83,7 +83,7 @@ class MediaList extends BaseDataTable
                 ->when(fn () => resolve_static(DeleteMedia::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Media')]),
-                    'wire:click' => 'deleteMedia(record.id)',
+                    'wire:click' => 'show = false; deleteMedia(record.id)',
                 ]),
         ];
     }

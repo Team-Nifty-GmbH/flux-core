@@ -13,7 +13,7 @@
         </x-label>
     @endif
     <div class="dropdown-full-w" {{ $attributes->whereStartsWith('x-bind') }}>
-        <x-dropdown position="{{ $attributes->get('align', 'bottom') }}">
+        <x-dropdown position="{{ $attributes->get('align', 'bottom') }}" scope="state">
             <x-slot:action>
                 <button
                     x-on:click="show = !show"

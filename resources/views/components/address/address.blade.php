@@ -239,7 +239,7 @@
                     <x-flux::state
                         x-bind:class="!$wire.edit && 'pointer-events-none'"
                         class="w-full"
-                        align="left"
+                        align="bottom-start"
                         wire:model="address.advertising_state"
                         formatters="formatter.advertising_state"
                         available="availableStates"
