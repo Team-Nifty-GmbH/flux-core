@@ -191,11 +191,13 @@ class OrderTest extends BaseSetup
         $this->order->update(['is_locked' => false, 'invoice_number' => null]);
         Storage::fake();
 
-        Livewire::test(OrderView::class, ['id' => $this->order->id])
+        $component = Livewire::test(OrderView::class, ['id' => $this->order->id]);
+        $componentId = strtolower($component->id());
+        $component
             ->assertSet('order.invoice_number', null)
             ->call('openCreateDocumentsModal')
-            ->assertExecutesJs(<<<'JS'
-                $modalOpen('create-documents')
+            ->assertExecutesJs(<<<JS
+                \$modalOpen('create-documents-$componentId')
              JS)
             ->assertSet(
                 'printLayouts',
