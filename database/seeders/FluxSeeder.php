@@ -3,8 +3,6 @@
 namespace FluxErp\Database\Seeders;
 
 use FluxErp\Console\Commands\Init\InitPermissions;
-use FluxErp\Database\Factories\CalendarEventTableSeeder;
-use FluxErp\Database\Factories\CalendarTableSeeder;
 use FluxErp\Models\Role;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Artisan;

@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\Database\Factories;
+namespace FluxErp\Database\Seeders;
 
 use FluxErp\Models\Calendar;
 use FluxErp\Traits\HasCalendars;
