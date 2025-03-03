@@ -1,7 +1,5 @@
 @props([
     'editable' => true,
-    'transparent' => false,
-    'tooltipDropdown' => false,
 ])
 
 <div>
@@ -42,8 +40,7 @@
              focus:border-primary-500 dark:border-secondary-600  w-full sm:text-sm
              rounded-t-md transition ease-in-out duration-100 focus:outline-none">
         </div>
-        <div
-            class="list-disc"  x-ref="editor"></div>
+        <div class="list-disc"  x-ref="editor"></div>
     </div>
     <template x-ref="commands">
         @if($bold)

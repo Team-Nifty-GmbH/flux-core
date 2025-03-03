@@ -21,6 +21,7 @@ export default function (content, debounceDelay = 0, searchModel = ['user', 'rol
                 const controlPanel = this.$refs?.controlPanel;
                 const commands = this.$refs?.commands;
                 let actions = null;
+
                 if(showTooltipDropdown && popUp !== null) {
                     // append controllers to tiptap
                     const popUpNode = popUp.content.cloneNode(true);
@@ -32,6 +33,7 @@ export default function (content, debounceDelay = 0, searchModel = ['user', 'rol
                     // append to controls to div
                     controlPanel.appendChild(commands.content.cloneNode(true));
                 }
+
                 //  access to the parent scope in onSelectionUpdate callback
                 const parent = this;
                 _editor = new Editor({
@@ -113,6 +115,7 @@ export default function (content, debounceDelay = 0, searchModel = ['user', 'rol
                     },
                     onSelectionUpdate: showTooltipDropdown ?  ({ editor }) => {
                         const { from, to } = editor.state.selection;
+
                         // init popUp if not
                         if(parent.popUp === null) {
                             parent.popUp =  window.tippy(element, {

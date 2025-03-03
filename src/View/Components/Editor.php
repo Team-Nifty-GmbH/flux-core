@@ -20,10 +20,11 @@ class Editor extends Component
         public bool $bulletList = true,
         public bool $orderedList = true,
         public bool $quote = true,
-        public bool $codeBlock = true
-    ) {
-        //
-    }
+        public bool $codeBlock = true,
+
+        public bool $tooltipDropdown = false,
+        public bool $transparent = false
+    ) {}
 
     public function render(): View|Closure|string
     {
