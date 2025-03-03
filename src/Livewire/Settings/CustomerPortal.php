@@ -89,14 +89,14 @@ class CustomerPortal extends Component
             $this->notification()->error(
                 implode(',', array_keys($response['errors'])),
                 implode(', ', Arr::dot($response['errors']))
-            );
+            )->send();
 
             return;
         }
 
         $this->setting = $isNew ? $response->toArray() : $response['data']->toArray();
 
-        $this->notification()->success(__(':model saved', ['model' => __('Customer Portal Settings')]));
+        $this->notification()->success(__(':model saved', ['model' => __('Customer Portal Settings')]))->send();
 
         $this->skipRender();
     }

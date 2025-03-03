@@ -1,5 +1,5 @@
-<x-modal name="widget-list">
-    <x-card>
+@teleport('body')
+    <x-modal id="widget-list">
         <div class="h-full p-2.5 overflow-auto">
             <h2 class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400 pb-6">{{ __('Available Widgets') }}</h2>
             @forelse($this->availableWidgets as $widget)
@@ -15,5 +15,5 @@
                 </div>
             @endforelse
         </div>
-    </x-card>
-</x-modal>
+    </x-modal>
+@endteleport

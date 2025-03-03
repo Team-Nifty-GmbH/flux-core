@@ -10,7 +10,6 @@ use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
 use FluxErp\Models\PriceList;
 use FluxErp\Tests\Feature\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -18,7 +17,7 @@ use Laravel\Sanctum\Sanctum;
 
 class ContactTest extends BaseSetup
 {
-    use DatabaseTransactions, WithFaker;
+    use WithFaker;
 
     private Collection $paymentTypes;
 

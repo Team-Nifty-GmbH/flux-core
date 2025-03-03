@@ -1,5 +1,5 @@
 <div>
-    <x-modal name="show-failed-job" max-width="6xl">
+    <x-modal id="show-failed-job" max-width="6xl">
         <x-card footer-classes="flex justify-end" class="flex flex-col gap-4">
             <pre class="max-h-96 p-1 font-mono bg-black text-white rounded-md overflow-auto">
                 <template x-for="line in $wire.failedJob.exception">
@@ -14,7 +14,7 @@
                 </div>
             </pre>
             <x-slot:footer>
-                <x-button :label="__('Close')" x-on:click="close()" />
+                <x-button color="secondary" light :text="__('Close')" x-on:click="$modalClose('show-failed-job')" />
             </x-slot:footer>
         </x-card>
     </x-modal>

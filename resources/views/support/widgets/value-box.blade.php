@@ -7,10 +7,9 @@
         <div class="flex justify-between w-full">
             <h2 class="truncate text-lg font-semibold text-gray-400">{{ __($this->title()) }}</h2>
             @if(class_implements($this, \FluxErp\Contracts\HasWidgetOptions::class))
-                <x-dropdown>
+                <x-dropdown icon="ellipsis-vertical" static>
                     @foreach($this->options() as $option)
-                        <x-dropdown.item :label="data_get($option, 'label')" wire:click="{{ data_get($option, 'method') }}">
-                        </x-dropdown.item>
+                        <x-dropdown.items :text="data_get($option, 'label')" wire:click="{{ data_get($option, 'method') }}" />
                     @endforeach
                 </x-dropdown>
             @endif
@@ -25,24 +24,24 @@
                             <x-badge
                                 x-cloak
                                 x-show="$wire.growthRate > 0"
-                                positive
+                                color="emerald"
                                 lg
                             >
-                                <x-slot:prepend>
+                                <x-slot:left>
                                     <i class="ph ph-caret-up"></i>
-                                </x-slot:prepend>
+                                </x-slot:left>
                                 <span x-text="$wire.growthRate + '%'">
                                 </span>
                             </x-badge>
                             <x-badge
                                 x-cloak
                                 x-show="$wire.growthRate < 0"
-                                negative
+                                color="red"
                                 lg
                             >
-                                <x-slot:prepend>
+                                <x-slot:left>
                                     <i class="ph ph-caret-down"></i>
-                                </x-slot:prepend>
+                                </x-slot:left>
                                 <span x-text="$wire.growthRate + '%'">
                                 </span>
                             </x-badge>
@@ -54,24 +53,24 @@
                             <x-badge
                                 x-cloak
                                 x-show="$wire.growthRate > 0"
-                                negative
+                                color="red"
                                 lg
                             >
-                                <x-slot:prepend>
+                                <x-slot:left>
                                     <i class="ph ph-caret-up"></i>
-                                </x-slot:prepend>
+                                </x-slot:left>
                                 <span x-text="$wire.growthRate + '%'">
                                 </span>
                             </x-badge>
                             <x-badge
                                 x-cloak
                                 x-show="$wire.growthRate < 0"
-                                positive
+                                color="emerald"
                                 lg
                             >
-                                <x-slot:prepend>
+                                <x-slot:left>
                                     <i class="ph ph-caret-down"></i>
-                                </x-slot:prepend>
+                                </x-slot:left>
                                 <span x-text="$wire.growthRate + '%'">
                                 </span>
                             </x-badge>

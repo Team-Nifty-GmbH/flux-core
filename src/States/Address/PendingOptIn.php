@@ -8,6 +8,6 @@ class PendingOptIn extends AdvertisingState
 
     public function color(): string
     {
-        return static::$color ?? 'warning';
+        return static::$color ?? 'amber';
     }
 }

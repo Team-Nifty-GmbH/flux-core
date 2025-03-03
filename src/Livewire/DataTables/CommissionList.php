@@ -89,8 +89,8 @@ class CommissionList extends BaseDataTable
     {
         return [
             DataTableButton::make()
-                ->color('primary')
-                ->label(__('Create credit notes'))
+                ->color('indigo')
+                ->text(__('Create credit notes'))
                 ->attributes([
                     'wire:click' => 'createCreditNotes',
                     'wire:flux-confirm' => __('wire:confirm.commission-credit-notes'),
@@ -101,8 +101,9 @@ class CommissionList extends BaseDataTable
     protected function getRowActions(): array
     {
         return [
-            DataTableButton::make(label: __('View Order'))
-                ->color('primary')
+            DataTableButton::make()
+                ->text(__('View Order'))
+                ->color('indigo')
                 ->icon('eye')
                 ->href('#')
                 ->attributes([

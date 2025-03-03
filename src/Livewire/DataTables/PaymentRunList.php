@@ -38,8 +38,8 @@ class PaymentRunList extends BaseDataTable
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
-                ->color('primary')
+                ->text(__('Edit'))
+                ->color('indigo')
                 ->wireClick(<<<'JS'
                     edit(record.id);
                 JS),
@@ -58,7 +58,7 @@ class PaymentRunList extends BaseDataTable
         $this->loadPaymentRun($paymentRun);
 
         $this->js(<<<'JS'
-            $openModal('execute-payment-run');
+            $modalOpen('execute-payment-run');
         JS);
     }
 

@@ -6,13 +6,10 @@ use FluxErp\Livewire\Settings\AdditionalColumnEdit;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\TicketType;
 use FluxErp\Tests\TestCase;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;
 
 class AdditionalColumnEditTest extends TestCase
 {
-    use DatabaseTransactions;
-
     public function test_renders_successfully()
     {
         Livewire::test(AdditionalColumnEdit::class)
@@ -33,7 +30,7 @@ class AdditionalColumnEditTest extends TestCase
             ->assertStatus(200)
             ->assertHasNoErrors()
             ->assertDispatched('closeModal')
-            ->assertWireuiNotification(icon: 'success');
+            ->assertToastNotification(type: 'success');
     }
 
     public function test_edit_additional_column()
@@ -56,6 +53,6 @@ class AdditionalColumnEditTest extends TestCase
             ->assertStatus(200)
             ->assertHasNoErrors()
             ->assertDispatched('closeModal', $component->get('additionalColumn')->toArray())
-            ->assertWireuiNotification(icon: 'success');
+            ->assertToastNotification(type: 'success');
     }
 }

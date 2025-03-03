@@ -8,7 +8,7 @@
             @section('project.title')
                 @section('project.title.avatar')
                     <label for="avatar" class="cursor-pointer">
-                        <x-avatar xl src="{{ $avatar }}" />
+                        <x-avatar xl :image="$avatar" />
                     </label>
                     <input type="file" accept="image/*" id="avatar" class="hidden" wire:model.live="avatar"/>
                 @show
@@ -25,7 +25,7 @@
                             </div>
                         </h1>
                         <a class="flex gap-1.5 font-semibold opacity-40" x-bind:href="$wire.project.parent?.url" x-cloak x-show="$wire.project.parent?.url">
-                            <x-heroicons name="link" class="w-4 h-4" />
+                            <x-icon name="link" class="w-4 h-4" />
                             <span x-text="$wire.project.parent?.label">
                             </span>
                         </a>
@@ -34,43 +34,43 @@
             @show
         </div>
         <div class="justify-stretch mt-6 flex flex-col-reverse space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3">
-            @if(resolve_static(\FluxErp\Actions\Project\DeleteProject::class, 'canPerformAction', [false]))
+            @canAction(\FluxErp\Actions\Project\DeleteProject::class)
                 <x-button
-                    wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Project')]) }}"
-                    negative
-                    label="{{ __('Delete') }}"
+                    wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Project')]) }}"
+                    color="red"
+                    :text="__('Delete')"
                     wire:click="delete()"
                 />
-            @endif
+            @endCanAction
             <x-button
-                primary
+                color="indigo"
                 x-cloak
                 x-show="!edit"
                 class="w-full"
                 x-on:click="edit = true"
-                :label="__('Edit')"
+                :text="__('Edit')"
             />
             <x-button
                 x-cloak
-                primary
-                spinner
+                color="indigo"
+                loading="save"
                 x-cloak
                 x-show="edit"
                 class="w-full"
                 x-on:click="$wire.save().then((success) => {
                     edit = false;
                 });"
-                :label="__('Save')"
+                :text="__('Save')"
             />
             <x-button
                 x-cloak
-                primary
-                spinner
+                color="indigo"
+                loading="save"
                 x-cloak
                 x-show="edit"
                 class="w-full"
                 x-on:click="edit = false; $wire.resetForm();"
-                :label="__('Cancel')"
+                :text="__('Cancel')"
             />
         </div>
     </div>

@@ -55,9 +55,9 @@ class SepaMandates extends SepaMandateList
     {
         return [
             DataTableButton::make()
-                ->label(__('New'))
+                ->text(__('New'))
                 ->icon('plus')
-                ->color('primary')
+                ->color('indigo')
                 ->wireClick('edit')
                 ->when(resolve_static(CreateSepaMandate::class, 'canPerformAction', [false])),
         ];
@@ -67,23 +67,23 @@ class SepaMandates extends SepaMandateList
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
+                ->text(__('Edit'))
                 ->icon('pencil')
-                ->color('primary')
+                ->color('indigo')
                 ->wireClick('edit(record.id)')
                 ->when(resolve_static(UpdateSepaMandate::class, 'canPerformAction', [false])),
             DataTableButton::make()
-                ->label(__('Create Template'))
+                ->text(__('Create Template'))
                 ->icon('document-text')
-                ->color('primary')
+                ->color('indigo')
                 ->wireClick('createTemplate(record.id)'),
             DataTableButton::make()
-                ->label(__('Delete'))
+                ->text(__('Delete'))
                 ->icon('trash')
-                ->color('negative')
+                ->color('red')
                 ->attributes([
                     'wire:click' => 'delete(record.id)',
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Sepa Mandate')]),
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Sepa Mandate')]),
                 ])
                 ->when(resolve_static(DeleteSepaMandate::class, 'canPerformAction', [false])),
         ];
@@ -140,7 +140,7 @@ class SepaMandates extends SepaMandateList
         $this->sepaMandate->fill($sepaMandate);
 
         $this->js(<<<'JS'
-            $openModal('edit-sepa-mandate');
+            $modalOpen('edit-sepa-mandate');
         JS);
     }
 

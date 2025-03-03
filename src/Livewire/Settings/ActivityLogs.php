@@ -17,8 +17,8 @@ class ActivityLogs extends ActivityLogList
         return [
             DataTableButton::make()
                 ->icon('eye')
-                ->label(__('Show'))
-                ->color('primary')
+                ->text(__('Show'))
+                ->color('indigo')
                 ->wireClick('show(record.id)'),
         ];
     }
@@ -29,7 +29,7 @@ class ActivityLogs extends ActivityLogList
         $this->activity['causer'] = $activity->causer?->name;
 
         $this->js(<<<'JS'
-            $openModal('activity-log-detail');
+            $modalOpen('activity-log-detail');
         JS);
     }
 }

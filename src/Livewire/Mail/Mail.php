@@ -56,7 +56,7 @@ class Mail extends CommunicationList
 
         $this->js(<<<'JS'
             writeHtml();
-            $openModal('show-mail');
+            $modalOpen('show-mail');
         JS);
     }
 
@@ -64,7 +64,7 @@ class Mail extends CommunicationList
     {
         if (! file_exists($mediaItem->getPath())) {
             if (method_exists($this, 'notification')) {
-                $this->notification()->error(__('File not found!'));
+                $this->notification()->error(__('File not found!'))->send();
             }
 
             return false;

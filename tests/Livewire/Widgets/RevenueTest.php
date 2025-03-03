@@ -5,13 +5,10 @@ namespace FluxErp\Tests\Livewire\Widgets;
 use FluxErp\Livewire\Widgets\Revenue;
 use FluxErp\Models\Currency;
 use FluxErp\Tests\TestCase;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;
 
 class RevenueTest extends TestCase
 {
-    use DatabaseTransactions;
-
     protected function setUp(): void
     {
         parent::setUp();

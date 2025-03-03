@@ -44,8 +44,8 @@ class ProjectList extends BaseProjectList
     {
         return [
             DataTableButton::make()
-                ->color('primary')
-                ->label(__('Create'))
+                ->color('indigo')
+                ->text(__('Create'))
                 ->icon('plus')
                 ->wireClick('createProject')
                 ->when(fn () => resolve_static(CreateProject::class, 'canPerformAction', [false])),
@@ -80,7 +80,7 @@ class ProjectList extends BaseProjectList
         );
 
         $this->js(<<<'JS'
-            $openModal('edit-project');
+            $modalOpen('edit-project');
         JS);
     }
 }

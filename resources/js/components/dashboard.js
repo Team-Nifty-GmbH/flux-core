@@ -1,16 +1,14 @@
 import {GridStack} from 'gridstack';
 import {v4 as uuidv4} from 'uuid';
 
-export default function ($wire) {
+export default function () {
     return {
         editGrid: false,
         emptyLayout: false,
         grid: null,
-        availableWidgets: null,
         isLoading: false,
         init() {
             this.reInit().disable();
-            this.availableWidgets = $wire.availableWidgets;
         },
         destroy() {
             // destroy grid - on page leave - since livewire caches the component
@@ -29,7 +27,7 @@ export default function ($wire) {
             this.editGrid = mode;
         },
         async syncGridOnNewItem() {
-            const snapshot = Array.from($wire.widgets);
+            const snapshot = Array.from(this.$wire.widgets);
             const onScreen = this.grid.getGridItems();
             const newSnapshot = [];
             // update x,y coordinates and type of widget if selected
@@ -65,10 +63,10 @@ export default function ($wire) {
                 }
             });
             // sync property
-            await $wire.syncWidgets(newSnapshot);
+            await this.$wire.syncWidgets(newSnapshot);
         },
         async syncGridOnDelete() {
-            const snapshot = Array.from($wire.widgets);
+            const snapshot = Array.from(this.$wire.widgets);
             const onScreen = this.grid.getGridItems();
             const newSnapshot = [];
             onScreen.forEach((item) => {
@@ -85,11 +83,11 @@ export default function ($wire) {
                 }
             });
             // sync property
-            await $wire.syncWidgets(newSnapshot);
+            await this.$wire.syncWidgets(newSnapshot);
         },
         async save() {
             this.isLoading = true;
-            const snapshot = Array.from($wire.widgets);
+            const snapshot = Array.from(this.$wire.widgets);
             const onScreen = this.grid.getGridItems();
             const newSnapshot = [];
             // update x,y coordinates on save
@@ -106,21 +104,21 @@ export default function ($wire) {
                 }
             });
             // sync and save to db
-            await $wire.saveWidgets(newSnapshot);
+            await this.$wire.saveWidgets(newSnapshot);
             // stop edit mode
             this.editGridMode(false);
             // refresh id
-            await $wire.$refresh();
+            await this.$wire.$refresh();
             // stop grid
             this.reInit().disable();
         },
         async selectWidget(key) {
             this.isLoading = true;
-            if (this.availableWidgets === null) {
-                this.availableWidgets = await $wire.availableWidgets;
+            if (this.$wire.availableWidgets === null) {
+                this.$wire.availableWidgets = await this.$wire.availableWidgets;
             }
             const id = uuidv4();
-            const selectedWidget = this.availableWidgets[key];
+            const selectedWidget = this.$wire.availableWidgets[key];
 
             const placeholder = this.grid.addWidget({
                 id,
@@ -135,7 +133,7 @@ export default function ($wire) {
             await this.syncGridOnNewItem();
 
             // reload component
-            await $wire.$refresh();
+            await this.$wire.$refresh();
 
             // re-init grid-stack
             this.reInit();
@@ -179,7 +177,7 @@ export default function ($wire) {
 
                 await this.syncGridOnDelete();
                 //  reload component
-                await $wire.$refresh();
+                await this.$wire.$refresh();
                 // init grid
                 this.reInit();
             }

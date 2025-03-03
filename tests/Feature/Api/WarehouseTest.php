@@ -7,15 +7,12 @@ use FluxErp\Models\Contact;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Warehouse;
 use FluxErp\Tests\Feature\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
 class WarehouseTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Collection $addresses;
 
     private Collection $warehouses;

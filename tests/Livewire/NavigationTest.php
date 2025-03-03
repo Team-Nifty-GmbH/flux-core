@@ -7,14 +7,11 @@ use FluxErp\Facades\Menu;
 use FluxErp\Livewire\Navigation;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PriceList;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 
 class NavigationTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     protected function setUp(): void
     {
         parent::setUp();

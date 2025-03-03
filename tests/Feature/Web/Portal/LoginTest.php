@@ -2,12 +2,8 @@
 
 namespace FluxErp\Tests\Feature\Web\Portal;
 
-use Illuminate\Foundation\Testing\DatabaseTransactions;
-
 class LoginTest extends PortalSetup
 {
-    use DatabaseTransactions;
-
     public function test_login_page()
     {
         $this->get($this->portalDomain . '/login')

@@ -36,8 +36,8 @@ if (! function_exists('exception_to_notifications')) {
         bool $skipRender = true,
         ?string $description = null
     ): void {
-        if (! method_exists($component, 'notification')) {
-            throw new InvalidArgumentException('Component does not have a notification method.');
+        if (! method_exists($component, 'toast')) {
+            throw new InvalidArgumentException('Component does not have a toast method.');
         }
 
         switch (true) {
@@ -57,14 +57,16 @@ if (! function_exists('exception_to_notifications')) {
                     );
 
                     foreach (\Illuminate\Support\Arr::flatten($messages) as $message) {
-                        $component->notification()->error(implode(' -> ', $title), __($message), $description);
+                        $component->toast()
+                            ->error(implode(' -> ', $title), __($message), $description)
+                            ->send();
                         $component->addError($field, __($message));
                     }
                 }
 
                 break;
             default:
-                $component->notification()->error($exception->getMessage(), $description);
+                $component->toast()->error($exception->getMessage(), $description)->send();
                 $component->addError('', $exception->getMessage());
         }
 

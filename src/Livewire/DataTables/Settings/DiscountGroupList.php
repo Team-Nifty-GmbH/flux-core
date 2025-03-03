@@ -15,16 +15,16 @@ class DiscountGroupList extends BaseDiscountGroupList
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
+                ->text(__('Edit'))
                 ->icon('pencil')
-                ->color('primary')
+                ->color('indigo')
                 ->attributes([
                     'x-on:click' => 'editItem(record.id)',
                 ]),
             DataTableButton::make()
-                ->label(__('Delete'))
+                ->text(__('Delete'))
                 ->icon('trash')
-                ->color('negative')
+                ->color('red')
                 ->attributes([
                     'x-on:click' => 'deleteItem(record.id)',
                     'wire:loading.attr' => 'disabled',
@@ -36,9 +36,9 @@ class DiscountGroupList extends BaseDiscountGroupList
     {
         return [
             DataTableButton::make()
-                ->label(__('Create'))
+                ->text(__('Create'))
                 ->icon('plus')
-                ->color('primary')
+                ->color('indigo')
                 ->attributes([
                     'x-on:click' => 'editItem(null)',
                 ]),

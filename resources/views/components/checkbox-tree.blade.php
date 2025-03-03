@@ -26,7 +26,7 @@
         '{{ $childrenAttribute }}',
         {{ $attributes->get('selected', 'null') }},
         {{ $attributes->get('checked-callback', 'null') }},
-        @toJs($searchAttributes)
+        @js($searchAttributes)
     )">
     <!-- Root Rendering of the Tree -->
     {{ $header ?? null }}
@@ -59,7 +59,7 @@
                 <div
                     class="flex items-center cursor-pointer space-x-2 px-1.5 -ml-3 rounded text-sm text-gray-700 dark:text-gray-50 select-none"
                     x-on:click="toggleSelect(node)"
-                    x-bind:class="selected?.id === node.id ? 'bg-primary-500 dark:bg-primary-700 text-white' : ''"
+                    x-bind:class="selected?.id === node.id ? 'bg-indigo-500 dark:bg-indigo-700 text-white' : ''"
                 >
                     <i
                         class="ph ph-caret-right transition-transform duration-200 text-base"
@@ -71,7 +71,7 @@
                             {{ $checkbox }}
                         @else
                             <x-checkbox
-                                xs
+                                sm
                                 x-effect="$el.indeterminate = isIndeterminate(node)"
                                 x-on:change="toggleCheck(node, $event.target.checked)"
                                 x-bind:checked="isChecked(node)"

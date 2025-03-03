@@ -13,7 +13,7 @@
                         {{ __('Please request a new one.') }}
                     </div>
                 </div>
-                <x-button primary class="w-full" :label="__('Back to Login')" :href="route('login')"></x-button>
+                <x-button color="indigo" class="w-full" :text="__('Back to Login')" :href="route('login')"></x-button>
             </x-card>
         </div>
     </div>

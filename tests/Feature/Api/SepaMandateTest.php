@@ -10,15 +10,12 @@ use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
 use FluxErp\Models\SepaMandate;
 use FluxErp\Tests\Feature\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
 class SepaMandateTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Collection $contacts;
 
     private Collection $contactBankConnections;

@@ -14,13 +14,10 @@ use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Tests\Livewire\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;
 
 class RelatedTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Order $order;
 
     protected function setUp(): void

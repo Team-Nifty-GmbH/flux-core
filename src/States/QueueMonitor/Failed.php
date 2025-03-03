@@ -8,6 +8,6 @@ class Failed extends QueueMonitorState
 
     public function color(): string
     {
-        return static::$color ?? 'negative';
+        return static::$color ?? 'red';
     }
 }

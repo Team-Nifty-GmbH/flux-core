@@ -7,12 +7,9 @@ use FluxErp\Models\Product;
 use FluxErp\Models\SerialNumber;
 use FluxErp\Models\StockPosting;
 use FluxErp\Models\Warehouse;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class ServiceTest extends PortalSetup
 {
-    use DatabaseTransactions;
-
     public function test_portal_service_page()
     {
         $product = Product::factory()

@@ -25,11 +25,9 @@
         uploadError() {
             this.isUploading = false;
             this.progress = 0;
-            window.$wireui.notify({
-                title: '{{ __('File upload failed') }}',
-                description: '{{ __('Your file upload failed. Please try again.') }}',
-                icon: 'error'
-            });
+            $interaction()
+                .error('{{ __('File upload failed') }}', '{{ __('Your file upload failed. Please try again.') }}')
+                .send();
         },
         uploadSuccess(success, files) {
             this.isUploading = false;
@@ -74,7 +72,7 @@
                    x-bind:for="uploadObjectId"
             >
                 <div class="pb-3">
-                    <x-heroicons name="arrow-up-on-square" class="h-12 w-12" />
+                    <x-icon name="arrow-up-on-square" class="h-12 w-12" />
                 </div>
                 <p>{{ __('Click here to select files to upload') }}</p>
                 <em class="italic text-slate-400">{{ __('(Or drag files to the page)') }}</em>
@@ -100,10 +98,10 @@
                             <span class="w-0 flex-1 truncate pl-1" x-text="file.name"></span>
                         </div>
                         <div x-cloak x-show="file.id">
-                            <x-button primary icon="download" wire:click="download(file.id)" />
+                            <x-button color="indigo" icon="arrow-down-tray" wire:click="download(file.id)" />
                         </div>
                         <div class="flex flex-shrink-0 px-4">
-                            <x-button negative x-on:click="file.shouldDelete = true" :label="__('Delete')" />
+                            <x-button color="red" x-on:click="file.shouldDelete = true" :text="__('Delete')" />
                         </div>
                     </div>
                 </x-card>

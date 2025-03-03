@@ -6,12 +6,9 @@ use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Ticket;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class TicketsTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Ticket $ticket;
 
     protected function setUp(): void

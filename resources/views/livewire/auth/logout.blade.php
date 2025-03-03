@@ -24,7 +24,7 @@
                     <div class="flex flex-col gap-4">
                         <p class="font-semibold">{{ __('Logged out successfully.') }}</p>
                         <p>{{ __('You will be redirected to the login page in') }} <span x-text="redirect"></span></p>
-                        <x-button primary :label="__('Login')" class="w-full" wire:click="redirectToLogin()"></x-button>
+                        <x-button color="indigo" :text="__('Login')" class="w-full" wire:click="redirectToLogin()"></x-button>
                     </div>
                 </div>
             </div>

@@ -6,14 +6,13 @@ use Carbon\Carbon;
 use FluxErp\Models\Calendar;
 use FluxErp\Models\Permission;
 use FluxErp\Tests\Feature\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Collection;
 use Laravel\Sanctum\Sanctum;
 
 class CalendarTest extends BaseSetup
 {
-    use DatabaseTransactions, WithFaker;
+    use WithFaker;
 
     private array $permissions;
 

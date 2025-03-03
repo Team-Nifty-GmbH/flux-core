@@ -41,8 +41,8 @@ class TotalOrdersCount extends LineChart
         $metric = Line::make($query)
             ->setDateColumn('invoice_date')
             ->setRange($this->timeFrame)
-            ->setEndingDate($this->end)
-            ->setStartingDate($this->start);
+            ->setEndingDate($this->end?->endOfDay())
+            ->setStartingDate($this->start?->startOfDay());
         $previousMetric = Line::make($query)
             ->setDateColumn('invoice_date')
             ->setEndingDate($metric->previousRange()[1])
@@ -51,8 +51,8 @@ class TotalOrdersCount extends LineChart
 
         $growth = Value::make($query)
             ->setRange($this->timeFrame)
-            ->setEndingDate($this->end)
-            ->setStartingDate($this->start)
+            ->setEndingDate($this->end?->endOfDay())
+            ->setStartingDate($this->start?->startOfDay())
             ->setDateColumn('invoice_date')
             ->withGrowthRate()
             ->count('total_net_price');

@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\View\FileViewFinder;
+use TallStackUi\Facades\TallStackUi;
 
 class ViewServiceProvider extends ServiceProvider
 {
@@ -50,14 +50,6 @@ class ViewServiceProvider extends ServiceProvider
                         'resources/js/tall-datatables.js',
                         'team-nifty-gmbh/tall-datatables'
                     ),
-                    static::getRealPackageAssetPath(
-                        'resources/js/index.js',
-                        'team-nifty-gmbh/tall-calendar'
-                    ),
-                    static::getRealPackageAssetPath(
-                        'ts/index.ts',
-                        'wireui/wireui'
-                    ),
                 ]
             );
 
@@ -70,21 +62,6 @@ class ViewServiceProvider extends ServiceProvider
                 ]);
             }
         }
-
-        /** use @extendFlux() at the end of the component, not the beginning */
-        Blade::directive('extendFlux', function (string $view) {
-            // Trim and remove quotes
-            $view = trim($view, ' "\'');
-
-            $path = [
-                flux_path('resources/views'),
-            ];
-
-            $finder = new FileViewFinder(app('files'), $path);
-            $filePath = $finder->find($view);
-
-            return Blade::compileString(file_get_contents($filePath));
-        });
 
         Blade::directive('canAction', function ($expression) {
             return "<?php if (resolve_static($expression, 'canPerformAction', [false])): ?>";
@@ -103,7 +80,7 @@ class ViewServiceProvider extends ServiceProvider
         $views[] = __DIR__ . '/../../resources/views/printing';
         $this->loadViewsFrom($views, 'print');
 
-        $this->loadViewsFrom(__DIR__ . '/../../resources/views/vendor/wireui', 'wireui');
+        $this->loadViewsFrom(__DIR__ . '/../../resources/views/vendor/tallstackui', 'tallstack-ui');
 
         View::composer('*', function () {
             Currency::default() && Number::useCurrency(Currency::default()->iso);
@@ -120,6 +97,53 @@ class ViewServiceProvider extends ServiceProvider
             } catch (\Throwable) {
             }
         });
+
+        TallStackUi::personalize()
+            ->avatar()
+            ->block('wrapper.class', 'inline-flex shrink-0 items-center justify-center overflow-hidden !bg-secondary-200');
+        TallStackUi::personalize()
+            ->dropdown()
+            ->block('wrapper.second', 'relative inline-block text-left w-full');
+
+        TallStackUi::personalize()
+            ->badge()
+            ->block('wrapper.class', 'outline-hidden inline-flex items-center border px-2 py-0.5');
+        TallStackUi::personalize()
+            ->button()
+            ->block('wrapper.sizes.md', 'text-sm px-4 py-2');
+        TallStackUi::personalize()
+            ->form('label')
+            ->block('text', 'block text-sm font-medium text-gray-700 dark:text-gray-400');
+
+        TallStackUi::personalize()
+            ->card()
+            ->block('header.text.size', 'text-sm font-medium w-full');
+
+        TallStackUi::personalize()
+            ->slide('notifications')
+            ->block('body', 'soft-scrollbar dark:text-dark-300 grow overflow-y-auto rounded-b-xl text-gray-700');
+
+        TallStackUi::personalize()
+            ->toast()
+            ->block('buttons.wrapper.second', 'flex min-h-full flex-col justify-between')
+            ->block('buttons.close.wrapper', 'ml-2 flex shrink-0');
+
+        TallStackUi::personalize()
+            ->card('w-auto')
+            ->block('wrapper.first', 'flex justify-center gap-4 w-auto');
+        TallStackUi::personalize()
+            ->card()
+            ->block('wrapper.first', 'flex justify-center gap-4 w-full');
+
+        TallStackUi::personalize()
+            ->toast('relative')
+            ->block('wrapper.first', 'pointer-events-none inset-0 flex flex-col items-end justify-end gap-y-2 px-4 py-4')
+            ->block('wrapper.third', 'dark:bg-dark-700 pointer-events-auto w-full w-full overflow-hidden rounded-xl bg-white shadow-lg ring-1 ring-black ring-opacity-5')
+            ->block('buttons.wrapper.second', 'flex min-h-full flex-col justify-between')
+            ->block('buttons.close.wrapper', 'ml-2 flex shrink-0');
+
+        // override the label view from tallstack-ui namespace
+        $this->loadViewsFrom(__DIR__ . '/../../resources/views/vendor/tallstackui', 'tallstack-ui');
     }
 
     public static function getRealPackageAssetPath(string $path, string $packageName): string

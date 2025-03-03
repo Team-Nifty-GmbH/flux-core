@@ -248,7 +248,7 @@ class FolderTree extends Component
             return false;
         }
 
-        $this->notification()->success(__('File saved!'));
+        $this->notification()->success(__('File saved!'))->send();
 
         return $response instanceof Media;
     }

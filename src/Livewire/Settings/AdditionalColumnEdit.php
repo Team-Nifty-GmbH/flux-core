@@ -104,7 +104,7 @@ class AdditionalColumnEdit extends Component
             return;
         }
 
-        $this->notification()->success(__(':model saved', ['model' => __('Additional Column')]));
+        $this->notification()->success(__(':model saved', ['model' => __('Additional Column')]))->send();
         $this->dispatch('closeModal', $this->additionalColumn->toArray());
     }
 

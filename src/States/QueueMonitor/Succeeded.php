@@ -8,6 +8,6 @@ class Succeeded extends QueueMonitorState
 
     public function color(): string
     {
-        return static::$color ?? 'positive';
+        return static::$color ?? 'emerald';
     }
 }

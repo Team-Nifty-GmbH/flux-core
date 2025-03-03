@@ -150,8 +150,8 @@ class Order extends Component
     {
         return [
             DataTableButton::make()
-                ->label(__('Create Retoure'))
-                ->color('negative')
+                ->text(__('Create Retoure'))
+                ->color('red')
                 ->when(function () {
                     return resolve_static(ReplicateOrder::class, 'canPerformAction', [false])
                         && $this->order->invoice_date
@@ -172,9 +172,9 @@ class Order extends Component
                     'x-on:click' => '$wire.replicate(\'' . OrderTypeEnum::Retoure->value . '\')',
                 ]),
             DataTableButton::make()
-                ->label(__('Create Split-Order'))
+                ->text(__('Create Split-Order'))
                 ->icon('shopping-bag')
-                ->color('primary')
+                ->color('indigo')
                 ->when(function () {
                     return resolve_static(ReplicateOrder::class, 'canPerformAction', [false])
                         && ! $this->order->invoice_date
@@ -199,31 +199,31 @@ class Order extends Component
     {
         return [
             TabButton::make('order.order-positions')
-                ->label(__('Order positions'))
+                ->text(__('Order positions'))
                 ->isLivewireComponent()
                 ->wireModel('order'),
             TabButton::make('order.attachments')
-                ->label(__('Attachments'))
+                ->text(__('Attachments'))
                 ->isLivewireComponent()
                 ->wireModel('order'),
             TabButton::make('order.texts')
-                ->label(__('Texts'))
+                ->text(__('Texts'))
                 ->isLivewireComponent()
                 ->wireModel('order'),
             TabButton::make('order.accounting')
-                ->label(__('Accounting'))
+                ->text(__('Accounting'))
                 ->isLivewireComponent()
                 ->wireModel('order'),
             TabButton::make('order.comments')
-                ->label(__('Comments'))
+                ->text(__('Comments'))
                 ->isLivewireComponent()
                 ->wireModel('order'),
             TabButton::make('order.related')
-                ->label(__('Related processes'))
+                ->text(__('Related processes'))
                 ->isLivewireComponent()
                 ->wireModel('order'),
             TabButton::make('order.activities')
-                ->label(__('Activities'))
+                ->text(__('Activities'))
                 ->isLivewireComponent()
                 ->wireModel('order.id'),
         ];
@@ -245,7 +245,7 @@ class Order extends Component
             exception_to_notifications($e, $this);
         }
 
-        $this->notification()->success(__(':model saved', ['model' => __('Order')]));
+        $this->notification()->success(__(':model saved', ['model' => __('Order')]))->send();
     }
 
     public function updatedOrderAddressInvoiceId(): void
@@ -312,7 +312,7 @@ class Order extends Component
         $this->discount->fill($discount);
 
         $this->js(<<<'JS'
-            $openModal('edit-discount');
+            $modalOpen('edit-discount');
         JS);
     }
 
@@ -381,7 +381,7 @@ class Order extends Component
         }
 
         $action->execute();
-        $this->notification()->success(__(':model saved', ['model' => __('Order')]));
+        $this->notification()->success(__(':model saved', ['model' => __('Order')]))->send();
 
         return true;
     }
@@ -421,21 +421,21 @@ class Order extends Component
             }
 
             $this->js(<<<'JS'
-                $openModal('create-child-order');
+                $modalOpen('create-child-order');
             JS);
         } else {
             $this->replicateOrder->order_positions = null;
             $this->skipRender();
 
             $this->js(<<<'JS'
-                $openModal('replicate-order');
+                $modalOpen('replicate-order');
             JS);
         }
 
         $orderTypeIds = json_encode(array_column($replicateOrderTypes, 'id'));
         $this->js(<<<JS
             let component = Alpine.\$data(document.getElementById('replicate-order-order-type').querySelector('[x-data]'));
-            component.asyncData.params.whereIn[0][1] = $orderTypeIds;
+            component.request.params.whereIn[0][1] = $orderTypeIds;
         JS);
     }
 

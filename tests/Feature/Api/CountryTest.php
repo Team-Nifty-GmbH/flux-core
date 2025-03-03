@@ -12,14 +12,11 @@ use FluxErp\Models\Language;
 use FluxErp\Models\Permission;
 use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Laravel\Sanctum\Sanctum;
 
 class CountryTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Model $language;
 
     private Model $currency;

@@ -2,9 +2,15 @@
 
 namespace FluxErp\Traits\Livewire;
 
-use WireUi\Traits\Actions as BaseActions;
+use TallStackUi\Foundation\Interactions\Toast;
+use TallStackUi\Traits\Interactions as BaseActions;
 
 trait Actions
 {
     use BaseActions;
+
+    public function notification(): Toast
+    {
+        return $this->toast();
+    }
 }

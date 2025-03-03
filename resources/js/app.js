@@ -86,5 +86,5 @@ window.$openDetailModal = (url, hideNavigation = true) => {
     urlObj.searchParams.set('no-navigation', hideNavigation === true ? 'true' : 'false');
 
     document.getElementById('detail-modal-iframe').src = urlObj.href;
-    $openModal('detail-modal');
+    $modalOpen('detail-modal');
 }

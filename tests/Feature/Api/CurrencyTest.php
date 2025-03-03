@@ -8,14 +8,11 @@ use FluxErp\Models\Currency;
 use FluxErp\Models\Language;
 use FluxErp\Models\Permission;
 use FluxErp\Tests\Feature\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Laravel\Sanctum\Sanctum;
 
 class CurrencyTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Collection $currencies;
 
     private array $permissions;

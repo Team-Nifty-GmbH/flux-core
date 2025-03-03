@@ -8,6 +8,6 @@ class WaitingForCustomer extends TicketState
 
     public function color(): string
     {
-        return static::$color ?? 'secondary';
+        return static::$color ?? 'gray';
     }
 }

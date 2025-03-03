@@ -5,9 +5,7 @@
     </td>
     <td class="py-4 pr-8 align-top" style="padding-left: {{ $position->depth * 15 }}px">
         @if($position->is_alternative)
-            <x-badge color="warning" class="mb-2">
-                {{ __('Alternative') }}
-            </x-badge>
+            <x-badge color="amber" class="mb-2" :text="__('Alternative')" />
         @endif
         <p class="font-italic text-xs">
             {{ $position->product_number }}

@@ -17,7 +17,7 @@ class BatchFinishedNotification extends Notification implements HasToastNotifica
 {
     public function __construct(public JobBatch $model)
     {
-        $this->id = Uuid::uuid5(Uuid::NAMESPACE_URL, static::class . ':' . $this->model->getKey());
+        $this->id = Uuid::uuid5(Uuid::NAMESPACE_URL, $this->model->getKey());
     }
 
     public function via(object $notifiable): array
@@ -39,6 +39,7 @@ class BatchFinishedNotification extends Notification implements HasToastNotifica
     public function toToastNotification(object $notifiable): ToastNotification
     {
         return ToastNotification::make()
+            ->id($this->id)
             ->notifiable($notifiable)
             ->title(__(':job_name is finished', ['job_name' => __($this->model->name)]))
             ->description(
@@ -49,14 +50,8 @@ class BatchFinishedNotification extends Notification implements HasToastNotifica
                         : __(':count jobs have failed', ['count' => $this->model->failed_jobs])
                     )
             )
-            ->icon($this->model->failed_jobs === 0
-                ? 'success'
-                : ($this->model->failed_jobs === $this->model->total_jobs ? 'error' : 'warning')
-            )
-            ->timeout(0)
-            ->attributes([
-                'progress' => $this->model->getProgress(),
-            ]);
+            ->persistent()
+            ->progress($this->model->getProgress());
     }
 
     public function toMail(object $notifiable): MailMessage

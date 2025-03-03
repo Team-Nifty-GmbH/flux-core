@@ -53,13 +53,13 @@ class AddressList extends BaseDataTable
     {
         return [
             DataTableButton::make()
-                ->label(__('Show on Map'))
-                ->color('primary')
-                ->icon('globe')
+                ->text(__('Show on Map'))
+                ->color('indigo')
+                ->icon('globe-alt')
                 ->wireClick('$toggle(\'showMap\', true)'),
             DataTableButton::make()
-                ->label(__('Create'))
-                ->color('primary')
+                ->text(__('Create'))
+                ->color('indigo')
                 ->icon('plus')
                 ->attributes([
                     'x-on:click' => '$wire.show()',
@@ -73,12 +73,12 @@ class AddressList extends BaseDataTable
         return [
             DataTableButton::make()
                 ->icon('document-text')
-                ->label(__('Create Documents'))
-                ->color('primary')
+                ->text(__('Create Documents'))
+                ->color('indigo')
                 ->wireClick('openCreateDocumentsModal'),
             DataTableButton::make()
-                ->label(__('Send Mail'))
-                ->color('primary')
+                ->text(__('Send Mail'))
+                ->color('indigo')
                 ->wireClick('createMailMessage'),
         ];
     }
@@ -102,17 +102,19 @@ class AddressList extends BaseDataTable
         return $returnArray;
     }
 
+    #[Renderless]
     public function show(): void
     {
         $this->contact->reset();
 
         $this->js(
             <<<'JS'
-               $openModal('new-contact');
+               $modalOpen('new-contact-modal');
             JS
         );
     }
 
+    #[Renderless]
     public function save(): false|RedirectResponse|Redirector
     {
         try {
@@ -123,7 +125,7 @@ class AddressList extends BaseDataTable
             return false;
         }
 
-        $this->notification()->success(__(':model saved', ['model' => __('Contact')]));
+        $this->notification()->success(__(':model saved', ['model' => __('Contact')]))->send();
 
         return redirect(route('contacts.id?', ['id' => $this->contact->id]));
     }

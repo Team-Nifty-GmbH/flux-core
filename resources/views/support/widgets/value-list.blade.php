@@ -17,16 +17,16 @@
                         @if($shouldBePositive)
                             <template x-if="item.growthRate !== null && !isNaN(item.growthRate)">
                                 <div>
-                                    <x-badge x-cloak x-show="item.growthRate > 0" class="w-full" positive>
-                                        <x-slot:prepend>
+                                    <x-badge x-cloak x-show="item.growthRate > 0" class="w-full" color:emerald>
+                                        <x-slot:left>
                                             <i class="ph ph-caret-up"></i>
-                                        </x-slot:prepend>
+                                        </x-slot:left>
                                         <span x-text="item.growthRate + '%'"></span>
                                     </x-badge>
-                                    <x-badge x-cloak x-show="item.growthRate < 0" class="w-full" negative>
-                                        <x-slot:prepend>
+                                    <x-badge x-cloak x-show="item.growthRate < 0" class="w-full" color="red">
+                                        <x-slot:left>
                                             <i class="ph ph-caret-down"></i>
-                                        </x-slot:prepend>
+                                        </x-slot:left>
                                         <span x-text="item.growthRate + '%'"></span>
                                     </x-badge>
                                 </div>
@@ -34,25 +34,25 @@
                         @else
                             <template x-if="item.growthRate !== null && !isNaN(item.growthRate)">
                                 <div>
-                                    <x-badge x-cloak x-show="item.growthRate > 0" class="w-full" negative>
-                                        <x-slot:prepend>
+                                    <x-badge x-cloak x-show="item.growthRate > 0" class="w-full" color="red">
+                                        <x-slot:left>
                                             <i class="ph ph-caret-up"></i>
-                                        </x-slot:prepend>
+                                        </x-slot:left>
                                         <span x-text="item.growthRate + '%'"></span>
                                     </x-badge>
-                                    <x-badge x-cloak x-show="item.growthRate < 0" class="w-full" positive>
-                                        <x-slot:prepend>
+                                    <x-badge x-cloak x-show="item.growthRate < 0" class="w-full" color="emerald">
+                                        <x-slot:left>
                                             <i class="ph ph-caret-down"></i>
-                                        </x-slot:prepend>
+                                        </x-slot:left>
                                         <span x-text="item.growthRate + '%'"></span>
                                     </x-badge>
                                 </div>
                             </template>
                         @endif
-                        <x-badge x-cloak x-show="item.growthRate == 0" secondary class="w-full">
-                            <x-slot:prepend>
+                        <x-badge x-cloak x-show="item.growthRate == 0" color="gray" class="w-full">
+                            <x-slot:left>
                                 <i class="ph ph-caret-right"></i>
-                            </x-slot:prepend>
+                            </x-slot:left>
                             <span>{{ __('New') }}</span>
                         </x-badge>
                         <template x-if="isNaN(item.growthRate)">
@@ -73,7 +73,7 @@
         </table>
         @if($this->hasLoadMore())
             <div class="w-full flex justify-center mt-4" x-cloak x-show="await $wire.hasMore()">
-                <x-button spinner="showMore" :label="__('Load more')" wire:click="showMore()" />
+                <x-button color="secondary" light loading="showMore" :text="__('Load more')" wire:click="showMore()" />
             </div>
         @endif
     </div>

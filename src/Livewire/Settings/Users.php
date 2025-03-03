@@ -22,8 +22,8 @@ class Users extends UserList
     {
         return [
             DataTableButton::make()
-                ->label(__('Create'))
-                ->color('primary')
+                ->text(__('Create'))
+                ->color('indigo')
                 ->icon('plus')
                 ->when(resolve_static(CreateUser::class, 'canPerformAction', [false]))
                 ->wireClick('edit()'),
@@ -34,8 +34,8 @@ class Users extends UserList
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
-                ->color('primary')
+                ->text(__('Edit'))
+                ->color('indigo')
                 ->icon('pencil')
                 ->when(resolve_static(UpdateUser::class, 'canPerformAction', [false]))
                 ->wireClick('edit(record.id)'),
@@ -53,7 +53,7 @@ class Users extends UserList
 
         $this->userForm->reset();
         $this->js(<<<'JS'
-            $openModal('create-user-modal');
+            $modalOpen('create-user-modal');
         JS);
     }
 

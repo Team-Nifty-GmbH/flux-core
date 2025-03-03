@@ -30,13 +30,13 @@ class SearchController extends Controller
 
         Event::dispatch('tall-datatables-searching', $request);
 
-        if ($request->has('selected')) {
+        if ($request->has('selected') && ! $request->has('search')) {
             $selected = $request->get('selected');
             $optionValue = $request->get('option-value') ?: (app($model))->getKeyName();
 
             $query = resolve_static($model, 'query');
             is_array($selected)
-                ? $query->whereIn($optionValue, $selected)
+                ? $query->whereIn($optionValue, Arr::wrap($selected))
                 : $query->where($optionValue, $selected);
         } elseif ($request->has('search') && $isSearchable) {
             $query = ! is_string($request->get('search'))
@@ -79,6 +79,7 @@ class SearchController extends Controller
 
         if ($request->has('whereIn')) {
             foreach ($request->get('whereIn') as $whereIn) {
+                $whereIn[1] = Arr::wrap($whereIn[1]);
                 $query->whereIn(...$whereIn);
             }
         }
@@ -149,10 +150,10 @@ class SearchController extends Controller
             $result = $result->map(function ($item) use ($request) {
                 return array_merge(
                     [
-                        'id' => $item->getKey(),
+                        'value' => $item->getKey(),
                         'label' => $item->getLabel(),
                         'description' => $item->getDescription(),
-                        'src' => $item->getAvatarUrl(),
+                        'image' => $item->getAvatarUrl(),
                     ],
                     $item->only($request->get('fields', [])),
                     $item->only($request->get('appends', [])),

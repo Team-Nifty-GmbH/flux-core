@@ -8,6 +8,6 @@ class PartialPaid extends PaymentState
 
     public function color(): string
     {
-        return static::$color ?? 'warning';
+        return static::$color ?? 'amber';
     }
 }

@@ -7,8 +7,6 @@ use FluxErp\Models\Role;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Artisan;
 use Spatie\Activitylog\Facades\CauserResolver;
-use TeamNiftyGmbH\Calendar\Database\Seeders\CalendarEventTableSeeder;
-use TeamNiftyGmbH\Calendar\Database\Seeders\CalendarTableSeeder;
 
 class FluxSeeder extends Seeder
 {

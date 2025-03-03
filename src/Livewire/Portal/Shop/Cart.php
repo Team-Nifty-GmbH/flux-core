@@ -49,7 +49,7 @@ class Cart extends BaseCart
         }
 
         $this->reset('selectedWatchlist', 'watchlistName');
-        $this->notification()->success(__('Cart saved to watchlist'));
+        $this->notification()->success(__('Cart saved to watchlist'))->send();
 
         return true;
     }

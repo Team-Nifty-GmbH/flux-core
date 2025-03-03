@@ -7,15 +7,12 @@ use FluxErp\Models\Product;
 use FluxErp\Models\SerialNumber;
 use FluxErp\Models\SerialNumberRange;
 use FluxErp\Tests\Feature\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
 class SerialNumberRangeTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Collection $products;
 
     private Collection $serialNumberRanges;

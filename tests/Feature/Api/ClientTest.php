@@ -7,13 +7,10 @@ use FluxErp\Models\Client;
 use FluxErp\Models\Permission;
 use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Laravel\Sanctum\Sanctum;
 
 class ClientTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Collection $clients;
 
     private array $permissions;

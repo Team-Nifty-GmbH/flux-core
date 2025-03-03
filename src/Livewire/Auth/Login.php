@@ -51,7 +51,7 @@ class Login extends Component
             $login = $this->tryLogin();
         } else {
             $this->sendMagicLink();
-            $this->notification()->success(__('Login link sent, check your inbox'));
+            $this->notification()->success(__('Login link sent, check your inbox'))->send();
 
             return true;
         }
@@ -62,7 +62,7 @@ class Login extends Component
             return true;
         } else {
             $this->reset('password');
-            $this->notification()->error(__('Login failed'));
+            $this->notification()->error(__('Login failed'))->send();
             $this->js('$focus.focus(document.getElementById(\'password\'));');
         }
 
@@ -86,7 +86,7 @@ class Login extends Component
 
         $this->getPasswordBroker()->sendResetLink(['email' => $this->email]);
 
-        $this->notification()->success(__('Password reset link sent'));
+        $this->notification()->success(__('Password reset link sent'))->send();
     }
 
     protected function tryLogin(): bool

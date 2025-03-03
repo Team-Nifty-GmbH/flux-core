@@ -56,8 +56,8 @@ class ProjectTaskList extends BaseTaskList
     {
         return [
             DataTableButton::make()
-                ->label(__('New'))
-                ->color('primary')
+                ->text(__('New'))
+                ->color('indigo')
                 ->attributes([
                     'x-on:click' => '$wire.edit()',
                 ]),
@@ -68,12 +68,12 @@ class ProjectTaskList extends BaseTaskList
     public function getTabs(): array
     {
         return [
-            TabButton::make('task.general')->label(__('General')),
-            TabButton::make('task.comments')->label(__('Comments'))
+            TabButton::make('task.general')->text(__('General')),
+            TabButton::make('task.comments')->text(__('Comments'))
                 ->attributes([
                     'x-bind:disabled' => '! $wire.task.id',
                 ]),
-            TabButton::make('task.media')->label(__('Media'))
+            TabButton::make('task.media')->text(__('Media'))
                 ->attributes([
                     'x-bind:disabled' => '! $wire.task.id',
                 ]),
@@ -96,7 +96,7 @@ class ProjectTaskList extends BaseTaskList
         );
 
         $this->js(<<<'JS'
-            $openModal('task-form-modal');
+            $modalOpen('task-form-modal');
         JS);
     }
 

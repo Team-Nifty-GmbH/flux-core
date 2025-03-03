@@ -9,7 +9,7 @@
             {{ __('Manage users') }}
         </h1>
         <div class="flex w-full justify-end pt-8">
-            <x-button primary :label="__('New user')" :href="route('portal.profiles.id?', 'new')" />
+            <x-button color="indigo" :text="__('New user')" :href="route('portal.profiles.id?', 'new')" />
         </div>
     </div>
     <div
@@ -43,7 +43,7 @@
                     <td x-text="address.lastname" class="whitespace-nowrap py-4 pl-4 pr-4 text-sm font-medium text-gray-900 sm:pl-6" />
                     <td x-text="address.email" class="whitespace-nowrap py-4 pl-4 pr-4 text-sm font-medium text-gray-900 sm:pl-6" />
                     <td class="whitespace-nowrap py-2 pl-2 pr-2 text-center text-sm text-gray-500">
-                        <x-button :label="__('Edit')" href="#" x-bind:href="editUserUrl.replace(':addressId', address.id)" />
+                        <x-button color="secondary" light :text="__('Edit')" href="#" x-bind:href="editUserUrl.replace(':addressId', address.id)" />
                     </td>
                 </tr>
             </template>

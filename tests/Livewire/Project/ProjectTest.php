@@ -5,13 +5,10 @@ namespace FluxErp\Tests\Livewire\Project;
 use FluxErp\Livewire\Project\Project as ProjectView;
 use FluxErp\Models\Project;
 use FluxErp\Tests\Livewire\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;
 
 class ProjectTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Project $project;
 
     protected function setUp(): void

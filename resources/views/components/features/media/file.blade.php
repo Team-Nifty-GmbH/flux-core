@@ -1,6 +1,6 @@
 <div {{ $attributes->merge(['class' => 'py-3 flex items-center justify-between text-sm']) }}>
     <div class="flex w-0 flex-1 items-center">
-        <x-heroicons name="paper-clip" class="h-4 w-4" />
+        <x-icon name="paper-clip" class="h-4 w-4" />
         <span class="w-0 flex-1 truncate">
             {{ $slug ?? '/' }}
         </span>

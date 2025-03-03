@@ -118,8 +118,8 @@ class MyWorkTimes extends BarChart
         )
             ->setDateColumn('started_at')
             ->setRange($this->timeFrame)
-            ->setEndingDate($this->end)
-            ->setStartingDate($this->start)
+            ->setEndingDate($this->end?->endOfDay())
+            ->setStartingDate($this->start?->startOfDay())
             ->sum('total_time_ms');
 
         $pause = Bar::make(
@@ -130,8 +130,8 @@ class MyWorkTimes extends BarChart
         )
             ->setDateColumn('started_at')
             ->setRange($this->timeFrame)
-            ->setEndingDate($this->end)
-            ->setStartingDate($this->start)
+            ->setEndingDate($this->end?->endOfDay())
+            ->setStartingDate($this->start?->startOfDay())
             ->sum('total_time_ms');
 
         $data = [
@@ -185,8 +185,8 @@ class MyWorkTimes extends BarChart
             )
                 ->setDateColumn('started_at')
                 ->setRange($this->timeFrame)
-                ->setEndingDate($this->end)
-                ->setStartingDate($this->start)
+                ->setEndingDate($this->end?->endOfDay())
+                ->setStartingDate($this->start?->startOfDay())
                 ->sum('total_time_ms');
 
             if (array_sum($typeData->getData()) > 0) {

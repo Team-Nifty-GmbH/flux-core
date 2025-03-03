@@ -109,7 +109,7 @@ class TranslationEdit extends Component
             $this->notification()->error(
                 __('insufficient permissions'),
                 __('You have not the rights to modify this record')
-            );
+            )->send();
 
             return;
         }
@@ -131,12 +131,12 @@ class TranslationEdit extends Component
             $this->notification()->error(
                 implode(',', array_keys($response['errors'])),
                 implode(', ', Arr::dot($response['errors']))
-            );
+            )->send();
 
             return;
         }
 
-        $this->notification()->success(__(':model saved', ['model' => __('Translation')]));
+        $this->notification()->success(__(':model saved', ['model' => __('Translation')]))->send();
 
         $this->skipRender();
         $this->dispatch('closeModal', $this->isNew ? $response : $response['data']);

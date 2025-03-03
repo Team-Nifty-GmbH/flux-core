@@ -3,12 +3,9 @@
 namespace FluxErp\Tests\Feature\Web;
 
 use FluxErp\Models\Permission;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class MyProfileTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     public function test_my_profile_page()
     {
         $this->user->givePermissionTo(Permission::findOrCreate('my-profile.get', 'web'));

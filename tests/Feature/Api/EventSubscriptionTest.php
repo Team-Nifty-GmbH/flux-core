@@ -7,14 +7,11 @@ use FluxErp\Models\EventSubscription;
 use FluxErp\Models\Permission;
 use FluxErp\Models\User;
 use FluxErp\Tests\Feature\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Laravel\Sanctum\Sanctum;
 
 class EventSubscriptionTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Collection $comments;
 
     private Collection $eventSubscriptions;

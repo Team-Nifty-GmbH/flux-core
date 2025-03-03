@@ -51,7 +51,7 @@ trait HasSerialNumberRange
             if (! $serialNumberRange->is_pre_filled && ! $serialNumberRange->is_randomized) {
                 $serialNumberRange = DB::transaction(function () use ($serialNumberRange) {
                     $serialNumberRange = resolve_static(SerialNumberRange::class, 'query')
-                        ->whereKey($serialNumberRange->id)
+                        ->whereKey($serialNumberRange->getKey())
                         ->lockForUpdate()
                         ->first();
                     $serialNumberRange->increment('current_number');

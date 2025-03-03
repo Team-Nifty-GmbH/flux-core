@@ -12,12 +12,9 @@ use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
 use FluxErp\Models\PriceList;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class OrdersTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Order $order;
 
     protected function setUp(): void

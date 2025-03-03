@@ -25,9 +25,9 @@ class VatRates extends VatRateList
     {
         return [
             DataTableButton::make()
-                ->label(__('New'))
+                ->text(__('New'))
                 ->icon('plus')
-                ->color('primary')
+                ->color('indigo')
                 ->when(resolve_static(CreateVatRate::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'edit',
@@ -39,9 +39,9 @@ class VatRates extends VatRateList
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
+                ->text(__('Edit'))
                 ->icon('pencil')
-                ->color('primary')
+                ->color('indigo')
                 ->when(resolve_static(UpdateVatRate::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'edit(record.id)',
@@ -55,7 +55,7 @@ class VatRates extends VatRateList
         $this->vatRate->fill($vatRate);
 
         $this->js(<<<'JS'
-            $openModal('edit-vat-rate');
+            $modalOpen('edit-vat-rate');
         JS);
     }
 

@@ -50,9 +50,9 @@ class SerialNumberRanges extends SerialNumberRangeList
     {
         return [
             DataTableButton::make()
-                ->label(__('New'))
+                ->text(__('New'))
                 ->icon('plus')
-                ->color('primary')
+                ->color('indigo')
                 ->when(resolve_static(CreateSerialNumberRange::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'edit',
@@ -64,9 +64,9 @@ class SerialNumberRanges extends SerialNumberRangeList
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
+                ->text(__('Edit'))
                 ->icon('pencil')
-                ->color('primary')
+                ->color('indigo')
                 ->when(resolve_static(UpdateSerialNumberRange::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'edit(record.id)',
@@ -80,7 +80,7 @@ class SerialNumberRanges extends SerialNumberRangeList
         $this->serialNumberRange->fill($serialNumberRange);
 
         $this->js(<<<'JS'
-            $openModal('edit-serial-number-range');
+            $modalOpen('edit-serial-number-range');
         JS);
     }
 

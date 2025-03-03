@@ -33,9 +33,9 @@ class CommunicationList extends BaseDataTable
             'communication_type_enum' => [
                 'state',
                 [
-                    __('Letter') => 'secondary',
-                    __('Mail') => 'primary',
-                    __('Phone Call') => 'positive',
+                    __('Letter') => 'gray',
+                    __('Mail') => 'indigo',
+                    __('Phone Call') => 'emerald',
                 ],
             ],
         ]);

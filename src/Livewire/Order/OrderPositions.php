@@ -118,7 +118,7 @@ class OrderPositions extends OrderPositionList
         return [
             DataTableButton::make()
                 ->icon('pencil')
-                ->color('primary')
+                ->color('indigo')
                 ->when(fn () => resolve_static(UpdateOrderPosition::class, 'canPerformAction', [false])
                     && ! $this->order->is_locked
                 )
@@ -143,11 +143,11 @@ class OrderPositions extends OrderPositionList
     {
         return [
             DataTableButton::make()
-                ->label(__('Create tasks'))
+                ->text(__('Create tasks'))
                 ->when(fn () => resolve_static(CreateTask::class, 'canPerformAction', [false]))
-                ->xOnClick('$openModal(\'create-tasks\')'),
+                ->xOnClick('$modalOpen(\'create-tasks\')'),
             DataTableButton::make()
-                ->label(__('Recalculate prices'))
+                ->text(__('Recalculate prices'))
                 ->when(fn () => resolve_static(UpdateOrderPosition::class, 'canPerformAction', [false])
                     && ! $this->order->is_locked
                 )
@@ -158,28 +158,28 @@ class OrderPositions extends OrderPositionList
                     'wire:click' => 'recalculateOrderPositions(); showSelectedActions = false;',
                 ]),
             DataTableButton::make()
-                ->label(__('Discount selected positions'))
+                ->text(__('Discount selected positions'))
                 ->when(fn () => resolve_static(UpdateOrderPosition::class, 'canPerformAction', [false])
                     && ! $this->order->is_locked
                 )
                 ->xOnClick(<<<'JS'
-                    $openModal('edit-position-discount');
+                    $modalOpen('edit-position-discount');
                 JS),
             DataTableButton::make()
-                ->label(__('Replicate'))
+                ->text(__('Replicate'))
                 ->when(fn () => resolve_static(CreateOrderPosition::class, 'canPerformAction', [false])
                     && ! $this->order->is_locked
                 )
                 ->wireClick('replicateSelected()'),
             DataTableButton::make()
-                ->label(__('Delete'))
+                ->text(__('Delete'))
                 ->icon('trash')
-                ->color('negative')
+                ->color('red')
                 ->when(fn () => resolve_static(DeleteOrderPosition::class, 'canPerformAction', [false])
                     && ! $this->order->is_locked
                 )
                 ->attributes([
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Order positions')]),
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Order positions')]),
                     'wire:click' => 'deleteSelectedOrderPositions(); showSelectedActions = false;',
                 ]),
         ];
@@ -191,7 +191,7 @@ class OrderPositions extends OrderPositionList
             parent::getFormatters(),
             [
                 'slug_position' => 'string',
-                'alternative_tag' => ['state', [__('Alternative') => 'negative']],
+                'alternative_tag' => ['state', [__('Alternative') => 'red']],
             ]
         );
     }
@@ -330,7 +330,7 @@ class OrderPositions extends OrderPositionList
         }
 
         $this->js(<<<'JS'
-            $openModal('edit-order-position');
+            $modalOpen('edit-order-position');
         JS);
     }
 

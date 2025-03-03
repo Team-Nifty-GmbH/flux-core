@@ -10,6 +10,6 @@ class Done extends TicketState
 
     public function color(): string
     {
-        return static::$color ?? 'positive';
+        return static::$color ?? 'emerald';
     }
 }

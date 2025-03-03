@@ -144,7 +144,7 @@ class OrderTest extends BaseSetup
             ->assertStatus(200)
             ->assertNoRedirect()
             ->assertHasErrors(['is_locked'])
-            ->assertWireuiNotification(icon: 'error');
+            ->assertToastNotification(type: 'error');
     }
 
     public function test_add_schedule_to_order()
@@ -191,11 +191,13 @@ class OrderTest extends BaseSetup
         $this->order->update(['is_locked' => false, 'invoice_number' => null]);
         Storage::fake();
 
-        Livewire::test(OrderView::class, ['id' => $this->order->id])
+        $component = Livewire::test(OrderView::class, ['id' => $this->order->id]);
+        $componentId = strtolower($component->id());
+        $component
             ->assertSet('order.invoice_number', null)
             ->call('openCreateDocumentsModal')
-            ->assertExecutesJs(<<<'JS'
-                $openModal('create-documents')
+            ->assertExecutesJs(<<<JS
+                \$modalOpen('create-documents-$componentId')
              JS)
             ->assertSet(
                 'printLayouts',
@@ -279,7 +281,7 @@ class OrderTest extends BaseSetup
             ->assertStatus(200)
             ->assertHasNoErrors()
             ->assertExecutesJs(<<<'JS'
-                $openModal('replicate-order')
+                $modalOpen('replicate-order')
              JS)
             ->call('saveReplicate')
             ->assertStatus(200)
@@ -338,7 +340,7 @@ class OrderTest extends BaseSetup
             ->assertStatus(200)
             ->assertHasNoErrors()
             ->assertExecutesJs(<<<'JS'
-                $openModal('replicate-order')
+                $modalOpen('replicate-order')
              JS)
             ->set('replicateOrder.contact_id', $contact->getKey())
             ->call('fetchContactData', true)
@@ -405,7 +407,7 @@ class OrderTest extends BaseSetup
             ->assertStatus(200)
             ->assertHasNoErrors()
             ->assertExecutesJs(<<<'JS'
-                $openModal('edit-discount');
+                $modalOpen('edit-discount');
             JS)
             ->assertSet('discount.is_percentage', true)
             ->set('discount.name', $discountName = Str::uuid()->toString())

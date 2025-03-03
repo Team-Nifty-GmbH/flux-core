@@ -4,12 +4,9 @@ namespace FluxErp\Tests\Feature\Web;
 
 use FluxErp\Models\Permission;
 use FluxErp\Models\Project;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class ProjectsTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Project $project;
 
     protected function setUp(): void

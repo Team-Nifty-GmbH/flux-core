@@ -6,7 +6,7 @@
         @forelse($invoices as $invoice)
             <x-flux::list-item :item="$invoice">
                 <x-slot:avatar>
-                    <x-avatar :src="$invoice->contact->getAvatarUrl()" />
+                    <x-avatar :image="$invoice->contact->getAvatarUrl()" />
                 </x-slot:avatar>
                 <x-slot:value>
                     <span x-html="window.formatters.coloredMoney({{ $invoice->total_gross_price }}, '{{ $invoice->currency->symbol }}')"></span>
@@ -25,7 +25,7 @@
                     </div>
                 </x-slot:sub-value>
                 <x-slot:actions>
-                    <x-button icon="eye" wire:navigate :href="route('orders.id', $invoice->id)">
+                    <x-button color="secondary" light icon="eye" wire:navigate :href="route('orders.id', $invoice->id)">
                         <div class="hidden sm:block">{{ __('View') }}</div>
                     </x-button>
                 </x-slot:actions>

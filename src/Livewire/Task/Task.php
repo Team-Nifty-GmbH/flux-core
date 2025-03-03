@@ -63,12 +63,12 @@ class Task extends Component
     public function getTabs(): array
     {
         return [
-            TabButton::make('task.general')->label(__('General')),
-            TabButton::make('task.comments')->label(__('Comments'))
+            TabButton::make('task.general')->text(__('General')),
+            TabButton::make('task.comments')->text(__('Comments'))
                 ->attributes([
                     'x-bind:disabled' => '! $wire.task.id',
                 ]),
-            TabButton::make('task.media')->label(__('Media'))
+            TabButton::make('task.media')->text(__('Media'))
                 ->attributes([
                     'x-bind:disabled' => '! $wire.task.id',
                 ]),
@@ -85,7 +85,7 @@ class Task extends Component
             return false;
         }
 
-        $this->notification()->success(__(':model saved', ['model' => __('Task')]));
+        $this->notification()->success(__(':model saved', ['model' => __('Task')]))->send();
         $this->skipRender();
 
         return true;

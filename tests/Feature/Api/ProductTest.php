@@ -11,15 +11,12 @@ use FluxErp\Models\ProductProperty;
 use FluxErp\Models\Unit;
 use FluxErp\Models\VatRate;
 use FluxErp\Tests\Feature\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
 class ProductTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Collection $clients;
 
     private Collection $products;

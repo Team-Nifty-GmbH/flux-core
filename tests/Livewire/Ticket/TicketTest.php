@@ -6,13 +6,10 @@ use FluxErp\Livewire\Ticket\Ticket as TicketView;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\User;
 use FluxErp\Tests\Livewire\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;
 
 class TicketTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Ticket $ticket;
 
     protected function setUp(): void

@@ -133,7 +133,7 @@ class OrderProjectTest extends BaseSetup
             ->call('save')
             ->assertReturned(false)
             ->assertStatus(200)
-            ->assertWireuiNotification(icon: 'error')
+            ->assertToastNotification(type: 'error')
             ->assertHasErrors(['projectId']);
 
         $component

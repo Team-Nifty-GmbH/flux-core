@@ -4,12 +4,9 @@ namespace FluxErp\Tests\Feature\Web;
 
 use FluxErp\Models\Permission;
 use FluxErp\Models\Task;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class TasksTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Task $task;
 
     protected function setUp(): void

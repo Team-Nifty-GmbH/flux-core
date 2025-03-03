@@ -95,7 +95,7 @@ class Plugins extends Component
         $this->settingsComponent = $this->installed[$package]['settings'] ?? null;
 
         $this->js(<<<'JS'
-            $openModal('more');
+            $modalOpen('more');
         JS);
     }
 
@@ -154,7 +154,7 @@ class Plugins extends Component
         try {
             $updates = app('composer')->outdated();
         } catch (ProcessFailedException $e) {
-            $this->notification()->error(__('Failed to check for updates.'));
+            $this->notification()->error(__('Failed to check for updates.'))->send();
             $this->addError('checkForUpdates', $e->getMessage());
 
             return;
@@ -191,7 +191,7 @@ class Plugins extends Component
         }
 
         $this->js(<<<'JS'
-            $openModal('update');
+            $modalOpen('update');
         JS);
     }
 
@@ -211,7 +211,7 @@ class Plugins extends Component
             return;
         }
 
-        $this->notification()->success(__('Packages updated successfully'));
+        $this->notification()->success(__('Packages updated successfully'))->send();
 
         $this->checkForUpdates();
     }
@@ -229,7 +229,7 @@ class Plugins extends Component
             return;
         }
 
-        $this->notification()->success(__('Packages updated successfully'));
+        $this->notification()->success(__('Packages updated successfully'))->send();
 
         $this->checkForUpdates();
     }
@@ -276,7 +276,7 @@ class Plugins extends Component
         }
 
         $this->offerRefresh = true;
-        $this->notification()->success(__('Package :package installed successfully.', ['package' => $package]));
+        $this->notification()->success(__('Package :package installed successfully.', ['package' => $package]))->send();
         $this->getInstalled();
 
         return true;

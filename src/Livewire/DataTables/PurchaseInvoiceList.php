@@ -70,7 +70,7 @@ class PurchaseInvoiceList extends BaseDataTable
     public function downloadMedia(Media $media): false|BinaryFileResponse
     {
         if (! file_exists($media->getPath())) {
-            $this->notification()->error(__('The file does not exist anymore.'));
+            $this->notification()->error(__('The file does not exist anymore.'))->send();
 
             return false;
         }
@@ -87,8 +87,8 @@ class PurchaseInvoiceList extends BaseDataTable
     {
         return [
             DataTableButton::make()
-                ->color('primary')
-                ->label(__('Upload'))
+                ->color('indigo')
+                ->text(__('Upload'))
                 ->wireClick('edit'),
         ];
     }
@@ -159,7 +159,7 @@ class PurchaseInvoiceList extends BaseDataTable
         }
 
         $this->js(<<<'JS'
-            $openModal('edit-purchase-invoice');
+            $modalOpen('edit-purchase-invoice');
         JS);
     }
 

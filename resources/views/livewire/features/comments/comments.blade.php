@@ -19,7 +19,7 @@
                     <div x-cloak x-show="stickyComments.length > 0">
                         <h3 class="pb-4">{{ __('Sticky comments') }}</h3>
                         <template x-for="comment in stickyComments" :key="comment.id">
-                            <div class="bg-positive-50 dark:bg-positive-900 px-4 py-6 sm:px-6">
+                            <div class="bg-emerald-50 dark:bg-emerald-900 px-4 py-6 sm:px-6">
                                 <x-flux::features.comments.comment x-model="comment" />
                             </div>
                         </template>
@@ -42,7 +42,7 @@
                         <div x-ref="treecommentTemplate">
                             <template>
                                 <ul>
-                                    <li x-bind:class="comment.is_sticky && 'bg-positive-50 dark:bg-positive-900'" class="px-4 py-6 sm:px-6">
+                                    <li x-bind:class="comment.is_sticky && 'bg-emerald-50 dark:bg-emerald-900'" class="px-4 py-6 sm:px-6">
                                         <x-flux::features.comments.comment x-model="comment" />
                                     </li>
                                     <template x-if="comment.children?.length > 0">

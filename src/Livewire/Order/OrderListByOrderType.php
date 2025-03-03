@@ -29,8 +29,12 @@ class OrderListByOrderType extends BaseOrderList
     {
         return [
             DataTableButton::make()
-                ->color('primary')
-                ->label(__('New order'))
+                ->color('indigo')
+                ->text(
+                    resolve_static(OrderType::class, 'query')
+                        ->whereKey($this->orderType)
+                        ->value('name')
+                )
                 ->icon('plus')
                 ->when(! resolve_static(OrderType::class, 'query')
                     ->whereKey($this->orderType)
@@ -38,7 +42,7 @@ class OrderListByOrderType extends BaseOrderList
                     && resolve_static(CreateOrder::class, 'canPerformAction', [false])
                 )
                 ->attributes([
-                    'x-on:click' => "\$openModal('create-order')",
+                    'x-on:click' => "\$modalOpen('create-order-modal')",
                 ]),
         ];
     }

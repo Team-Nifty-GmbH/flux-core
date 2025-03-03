@@ -66,8 +66,8 @@
                     <x-card class="flex w-full gap-2">
                         <x-button
                             class="block md:hidden"
-                            icon="menu"
-                            primary
+                            icon="bars-3"
+                            color="indigo"
                             x-on:click="showMenu(true)"
                         />
                         <livewire:features.search-bar />
@@ -84,20 +84,20 @@
                 </div>
             @else
                 <x-card class="block md:hidden">
-                    <x-button primary icon="menu" x-on:click="showMenu(true)" />
+                    <x-button color="indigo" icon="bars-3" x-on:click="showMenu(true)" />
                 </x-card>
             @endif
         </div>
-        <x-nav.nav :background="$background">
+        <x-flux::nav.nav :background="$background">
             <nav class="flex-1 space-y-2 overflow-x-hidden overflow-y-hidden px-2 py-4 hover:overflow-y-auto flex flex-col gap-6">
                 <div>
                     @foreach($navigations as $key => $navigation)
                         <div>
                             <a
                                 @if((! data_get($navigation, 'is_virtual_uri') && data_get($navigation, 'children')) || data_get($navigation, 'route_name') === 'dashboard'))
-                                    wire:current.exact="bg-primary-500 dark:bg-primary-700 !text-white hover:bg-primary-600 nav-item-active"
+                                    wire:current.exact="bg-indigo-500 dark:bg-indigo-700 !text-white hover:bg-indigo-600 nav-item-active"
                                 @else
-                                    wire:current="bg-primary-500 dark:bg-primary-700 !text-white hover:bg-primary-600 nav-item-active"
+                                    wire:current="bg-indigo-500 dark:bg-indigo-700 !text-white hover:bg-indigo-600 nav-item-active"
                                 @endif
                                 href="{{ data_get($navigation, 'uri', '#') }}"
                                 @if($navigation['children'] ?? false)
@@ -106,11 +106,11 @@
                                 @else
                                     target="{{ ($navigation['target_blank'] ?? false) ? '_blank' : '' }}"
                                 @endif
-                                class="dark:text-light dark:hover:bg-primary flex items-center rounded-md py-2 text-gray-500 transition-colors hover:bg-gray-800/50"
+                                class="dark:text-light dark:hover:bg-indigo flex items-center rounded-md py-2 text-gray-500 transition-colors hover:bg-gray-800/50"
                             >
                                 <div class="w-16 flex-none">
                                     <div class="flex w-full justify-center text-white">
-                                        <x-heroicons :name="$navigation['icon'] ?? 'no-symbol'" class="h-4 w-4" />
+                                        <x-icon :name="$navigation['icon'] ?? 'no-symbol'" class="h-4 w-4" />
                                     </div>
                                 </div>
                                 <span class="truncate text-sm text-white"> {{ __($navigation['label'] ?? $key) }} </span>
@@ -134,9 +134,9 @@
                                     @foreach($navigation['children'] as $child)
                                         <a
                                             @if((! data_get($navigation, 'is_virtual_uri') && data_get($navigation, 'children')) || data_get($navigation, 'route_name') === 'dashboard'))
-                                                wire:current.exact="rounded-md bg-primary-600/50 dark:bg-primary-700/5 hover:bg-primary-600/10"
+                                                wire:current.exact="rounded-md bg-indigo-600/50 dark:bg-indigo-700/5 hover:bg-indigo-600/10"
                                             @else
-                                                wire:current="rounded-md bg-primary-600/50 dark:bg-primary-700/5 hover:bg-primary-600/10"
+                                                wire:current="rounded-md bg-indigo-600/50 dark:bg-indigo-700/5 hover:bg-indigo-600/10"
                                             @endif
                                             href="{{ $child['uri'] }}"
                                             class="dark:hover:text-light block truncate rounded-md p-2 pl-20 text-sm transition-colors duration-200 hover:bg-gray-800/50">
@@ -150,10 +150,10 @@
                 </div>
                 @if(! is_null($visits))
                     <div class="whitespace-nowrap">
-                        <div x-on:click="frequentlyVisitedOpen = ! frequentlyVisitedOpen" class="cursor-pointer dark:text-light dark:hover:bg-primary flex items-center rounded-md py-2 text-white text-gray-500 transition-colors hover:bg-gray-800/50">
+                        <div x-on:click="frequentlyVisitedOpen = ! frequentlyVisitedOpen" class="cursor-pointer dark:text-light dark:hover:bg-indigo flex items-center rounded-md py-2 text-white text-gray-500 transition-colors hover:bg-gray-800/50">
                             <div class="w-16 flex-none">
                                 <div class="flex w-full justify-center text-white">
-                                    <x-heroicons name="clock" class="h-4 w-4" />
+                                    <x-icon name="clock" class="h-4 w-4" />
                                 </div>
                             </div>
                             <span class="truncate text-sm text-white">{{ __('Frequently visited') }}</span>
@@ -170,11 +170,11 @@
                                 <a
                                     wire:navigate
                                     href="{{ $visit }}"
-                                    class="dark:text-light dark:hover:bg-primary flex items-center rounded-md py-2 text-white text-gray-500 transition-colors hover:bg-gray-800/50"
+                                    class="dark:text-light dark:hover:bg-indigo flex items-center rounded-md py-2 text-white text-gray-500 transition-colors hover:bg-gray-800/50"
                                 >
                                     <div class="w-16 flex-none">
                                         <div class="flex w-full justify-center text-white">
-                                            <x-heroicons
+                                            <x-icon
                                                 :name="$navigations->first(fn ($item) => str_starts_with($visit, data_get($item, 'uri')) && data_get($item, 'uri') !== '/')['icon'] ?? 'no-symbol'"
                                                 class="h-4 w-4"
                                             />
@@ -188,10 +188,10 @@
                 @endif
                 @if(! is_null($favorites))
                     <div class="whitespace-nowrap">
-                        <div x-on:click="favoritesOpen = ! favoritesOpen" class="cursor-pointer dark:text-light dark:hover:bg-primary flex items-center rounded-md py-2 text-white text-gray-500 transition-colors hover:bg-gray-800/50">
+                        <div x-on:click="favoritesOpen = ! favoritesOpen" class="cursor-pointer dark:text-light dark:hover:bg-indigo flex items-center rounded-md py-2 text-white text-gray-500 transition-colors hover:bg-gray-800/50">
                             <div class="w-16 flex-none">
                                 <div class="flex w-full justify-center text-white">
-                                    <x-heroicons name="star" variant="solid" class="h-4 w-4 fill-warning-400" />
+                                    <x-icon name="star" variant="solid" class="h-4 w-4 fill-amber-400" />
                                 </div>
                             </div>
                             <span class="truncate text-sm text-white">{{ __('Favorites') }}</span>
@@ -209,11 +209,11 @@
                                     <a
                                         wire:navigate
                                         href="{{ $favorite['url'] }}"
-                                        class="flex-1 overflow-hidden dark:text-light dark:hover:bg-primary flex items-center rounded-md py-2 text-white text-gray-500 transition-colors hover:bg-gray-800/50"
+                                        class="flex-1 overflow-hidden dark:text-light dark:hover:bg-indigo flex items-center rounded-md py-2 text-white text-gray-500 transition-colors hover:bg-gray-800/50"
                                     >
                                         <div class="w-16 flex-none">
                                             <div class="flex w-full justify-center text-white">
-                                                <x-heroicons
+                                                <x-icon
                                                     :name="$navigations->first(fn ($item) => str_starts_with($favorite['url'], data_get($item, 'uri')) && data_get($item, 'uri') !== '/')['icon'] ?? 'no-symbol'"
                                                     class="h-4 w-4"/>
                                             </div>
@@ -223,20 +223,20 @@
                                     <div class="truncate" x-show="menuOpen" x-transition x-cloak>
                                         <x-button.circle
                                             xs
-                                            negative
+                                            color="red"
                                             icon="trash"
                                             wire:click="deleteFavorite({{ $favorite['id'] }})"
-                                            wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Favorite')]) }}"
+                                            wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Favorite')]) }}"
                                         />
                                     </div>
                                 </div>
                             @endforeach
                             <x-button
                                 x-bind:class="! menuOpen && 'invisible'"
-                                positive
+                                color="emerald"
                                 class="w-full"
                                 icon="plus"
-                                :label="__('Add')"
+                                :text="__('Add')"
                                 wire:click="addFavorite(window.location.pathname + window.location.search, $promptValue())"
                                 wire:flux-confirm.prompt="{{  __('New Favorite') }}||{{  __('Cancel') }}|{{  __('Save') }}"
                             />
@@ -244,6 +244,6 @@
                     </div>
                 @endif
             </nav>
-        </x-nav.nav>
+        </x-flux::nav.nav>
     </div>
 </div>

@@ -30,8 +30,8 @@ class DirectDebit extends OrderList
     {
         return [
             DataTableButton::make()
-                ->color('primary')
-                ->label(__('Create Payment Run'))
+                ->color('indigo')
+                ->text(__('Create Payment Run'))
                 ->attributes([
                     'wire:click' => 'createPaymentRun',
                     'wire:flux-confirm' => __('Create Payment Run|Do you really want to create the Payment Run?|Cancel|Yes'),
@@ -90,7 +90,7 @@ class DirectDebit extends OrderList
 
         $this->reset('selected');
 
-        $this->notification()->success(__('Payment Run created.'));
+        $this->notification()->success(__('Payment Run created.'))->send();
         $this->loadData();
     }
 }

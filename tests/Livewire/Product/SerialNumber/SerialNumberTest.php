@@ -9,13 +9,10 @@ use FluxErp\Models\SerialNumber;
 use FluxErp\Models\StockPosting;
 use FluxErp\Models\Warehouse;
 use FluxErp\Tests\TestCase;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;
 
 class SerialNumberTest extends TestCase
 {
-    use DatabaseTransactions;
-
     private SerialNumber $serialNumber;
 
     protected function setUp(): void

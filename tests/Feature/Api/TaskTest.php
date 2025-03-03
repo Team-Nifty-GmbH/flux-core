@@ -12,15 +12,12 @@ use FluxErp\States\Task\Done;
 use FluxErp\States\Task\Open;
 use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
 class TaskTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Model $project;
 
     private Collection $tasks;

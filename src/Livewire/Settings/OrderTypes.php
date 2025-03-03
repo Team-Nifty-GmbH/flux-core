@@ -27,9 +27,9 @@ class OrderTypes extends OrderTypeList
     {
         return [
             DataTableButton::make()
-                ->label(__('New'))
+                ->text(__('New'))
                 ->icon('plus')
-                ->color('primary')
+                ->color('indigo')
                 ->when(resolve_static(CreateOrderType::class, 'canPerformAction', [false]))
                 ->attributes(
                     ['wire:click' => 'edit']
@@ -41,8 +41,8 @@ class OrderTypes extends OrderTypeList
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
-                ->color('primary')
+                ->text(__('Edit'))
+                ->color('indigo')
                 ->icon('pencil')
                 ->attributes([
                     'x-on:click' => '$wire.edit(record.id)',
@@ -94,7 +94,7 @@ class OrderTypes extends OrderTypeList
         $this->orderType->fill($orderType);
 
         $this->js(<<<'JS'
-            $openModal('edit-order-type');
+            $modalOpen('edit-order-type');
         JS);
     }
 

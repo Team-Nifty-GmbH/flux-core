@@ -2,12 +2,8 @@
 
 namespace FluxErp\Tests\Feature\Web;
 
-use Illuminate\Foundation\Testing\DatabaseTransactions;
-
 class LoginTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     public function test_login_page()
     {
         $this->get('/login')

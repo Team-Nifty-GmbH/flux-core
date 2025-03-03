@@ -43,8 +43,8 @@ class TaskList extends BaseTaskList
     {
         return [
             DataTableButton::make()
-                ->label(__('New'))
-                ->color('primary')
+                ->text(__('New'))
+                ->color('indigo')
                 ->attributes([
                     'x-on:click' => "\$dispatch('new-task')",
                 ]),

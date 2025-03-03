@@ -35,12 +35,12 @@ class ActiveDailyWorkTimes extends ValueList
                             ->where('is_locked', false)
                             ->exists()
                         ? '<span class="relative flex h-3 w-3">
-                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-warning-400 opacity-75"></span>
-                              <span class="relative inline-flex rounded-full h-3 w-3 bg-warning-500"></span>
+                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                              <span class="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
                            </span>'
                         : '<span class="relative flex h-3 w-3">
-                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-positive-400 opacity-75"></span>
-                              <span class="relative inline-flex rounded-full h-3 w-3 bg-positive-500"></span>
+                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                              <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
                            </span>'
                     )
                     . '<div>' . $item->user?->name . '</div>

@@ -1,5 +1,5 @@
 <div class="flex gap-4" x-data="{search: null}">
-    <x-card wire:ignore card-classes="!w-auto" x-on:folder-tree-select="$wire.showSetting($event.detail)">
+    <x-card wire:ignore scope="w-auto" x-on:folder-tree-select="$wire.showSetting($event.detail)">
         <x-flux::checkbox-tree
             tree="$wire.settings"
             name-attribute="label"

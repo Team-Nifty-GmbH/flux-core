@@ -21,7 +21,6 @@ use FluxErp\Models\PurchaseInvoice;
 use FluxErp\Models\PurchaseInvoicePosition;
 use FluxErp\Models\VatRate;
 use FluxErp\Tests\Feature\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
@@ -30,8 +29,6 @@ use Laravel\Sanctum\Sanctum;
 
 class PurchaseInvoiceTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Collection $clients;
 
     private Collection $contacts;

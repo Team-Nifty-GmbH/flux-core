@@ -6,14 +6,11 @@ use FluxErp\Models\Permission;
 use FluxErp\Models\Unit;
 use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
 class UnitTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Model $unit;
 
     protected function setUp(): void

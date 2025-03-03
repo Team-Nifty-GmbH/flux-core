@@ -7,13 +7,10 @@ use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Models\Language;
 use FluxErp\Models\User;
 use FluxErp\Tests\TestCase;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;
 
 class LoginTest extends TestCase
 {
-    use DatabaseTransactions;
-
     public function test_renders_successfully()
     {
         Livewire::test(Login::class)

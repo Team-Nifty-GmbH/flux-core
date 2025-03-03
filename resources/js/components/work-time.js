@@ -47,10 +47,12 @@ export default function ($wire, route) {
             });
         },
         relatedSelected(type) {
+            if (! type) return;
+
             let searchRoute = route;
             $wire.workTime.trackable_id = null;
             searchRoute = searchRoute + '/' + type;
-            Alpine.$data(document.getElementById('trackable-id').querySelector('[x-data]')).asyncData.api = searchRoute;
+            $tallstackuiSelect('trackable-id').setRequestUrl(searchRoute);
         },
         recordSelected(data) {
             if (!data) {

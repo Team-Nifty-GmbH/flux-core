@@ -5,12 +5,9 @@ namespace FluxErp\Tests\Feature\Web\Portal;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Permission;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class ProfilesTest extends PortalSetup
 {
-    use DatabaseTransactions;
-
     public function test_portal_profiles_page()
     {
         $this->user->givePermissionTo(Permission::findOrCreate('profiles.{id?}.get', 'address'));

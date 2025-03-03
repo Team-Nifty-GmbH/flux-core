@@ -30,7 +30,7 @@ class TaskList extends BaseDataTable
         return [
             DataTableButton::make()
                 ->icon('clock')
-                ->label(__('Track Time'))
+                ->text(__('Track Time'))
                 ->xOnClick(<<<'JS'
                     $event.stopPropagation();
                     $dispatch(

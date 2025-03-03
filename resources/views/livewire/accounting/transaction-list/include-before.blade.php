@@ -1,24 +1,23 @@
 @extends('flux::livewire.transactions.transactions')
-<x-modal name="assign-order" max-width="7xl">
+<x-modal id="assign-order" max-width="7xl">
     <x-card>
         <div class="grid grid-cols-2 gap-1.5">
             <div class="flex flex-col gap-1.5">
-                <x-select
+                <x-select.styled
                     readonly
                     :label="__('Bank Connection')"
                     wire:model="transactionForm.bank_connection_id"
                     :options="$bankConnections"
-                    option-value="id"
-                    option-label="name"
+                    select="label:name|value:id"
                     option-description="iban"
                 />
-                <x-datetime-picker readonly without-time wire:model="transactionForm.booking_date" :label="__('Booking Date')"/>
-                <x-datetime-picker readonly without-time wire:model="transactionForm.value_date" :label="__('Value Date')"/>
+                <x-date readonly without-time wire:model="transactionForm.booking_date" :label="__('Booking Date')"/>
+                <x-date readonly without-time wire:model="transactionForm.value_date" :label="__('Value Date')"/>
                 <x-input readonly wire:model="transactionForm.counterpart_name" :label="__('Counterpart Name')"/>
                 <x-input readonly wire:model="transactionForm.counterpart_iban" :label="__('Counterpart IBAN')"/>
                 <x-input readonly wire:model="transactionForm.counterpart_bank_name" :label="__('Counterpart Bank Name')"/>
                 <x-textarea readonly wire:model="transactionForm.purpose" :label="__('Purpose')"/>
-                <x-inputs.number readonly step="0.01" wire:model="transactionForm.amount" :label="__('Amount')"/>
+                <x-number readonly step="0.01" wire:model="transactionForm.amount" :label="__('Amount')"/>
             </div>
             <div class="overflow-auto">
                 <template x-for="(child, index) in $wire.transactionForm.children">
@@ -34,8 +33,8 @@
                             </div>
                         </x-slot:sub-value>
                         <x-slot:actions>
-                            <x-inputs.number x-model="child.amount" step="0.01" />
-                            <x-button negative icon="trash" x-on:click="$wire.transactionForm.children.splice(index, 1); $wire.recalculateDifference();"/>
+                            <x-number x-model="child.amount" step="0.01" />
+                            <x-button color="red" icon="trash" x-on:click="$wire.transactionForm.children.splice(index, 1); $wire.recalculateDifference();"/>
                         </x-slot:actions>
                     </x-flux::list-item>
                 </template>
@@ -50,8 +49,8 @@
         </div>
         <x-slot:footer>
             <div class="flex justify-end gap-1.5">
-                <x-button :label="__('Cancel')" x-on:click="close"/>
-                <x-button primary :label="__('Save')" wire:click="saveAssignment().then((success) => {if(success) close();})"/>
+                <x-button color="secondary" light :text="__('Cancel')" x-on:click="$modalClose('assign-order')"/>
+                <x-button color="indigo" :text="__('Save')" wire:click="saveAssignment().then((success) => {if(success) $modalClose('assign-order');})"/>
             </div>
         </x-slot:footer>
     </x-card>

@@ -75,7 +75,7 @@ class EditMail extends Component
         }
 
         $this->js(<<<'JS'
-            $openModal('edit-mail');
+            $modalOpen('edit-mail');
         JS);
     }
 
@@ -217,11 +217,11 @@ class EditMail extends Component
         }
 
         if ($exceptions === 0) {
-            $this->notification()->success(__('Email(s) sent successfully!'));
+            $this->notification()->success(__('Email(s) sent successfully!'))->send();
         }
 
         if (count($this->mailMessages) === $exceptions) {
-            $this->notification()->error(__('Failed to send emails!'));
+            $this->notification()->error(__('Failed to send emails!'))->send();
         }
 
         return true;

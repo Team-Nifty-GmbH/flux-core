@@ -7,15 +7,12 @@ use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\Permission;
 use FluxErp\Tests\Feature\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
 class OrderTypeTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Collection $orderTypes;
 
     private array $permissions;

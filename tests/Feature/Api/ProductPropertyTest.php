@@ -9,15 +9,12 @@ use FluxErp\Models\Product;
 use FluxErp\Models\ProductProperty;
 use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
 class ProductPropertyTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Model $products;
 
     private Collection $productProperties;

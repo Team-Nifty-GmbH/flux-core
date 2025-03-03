@@ -25,27 +25,27 @@ class LogList extends BaseDataTable
         'level' => [
             'state',
             [
-                '100' => 'secondary',
-                '200' => 'primary',
-                '250' => 'primary',
-                '300' => 'warning',
-                '400' => 'negative',
-                '500' => 'negative',
-                '550' => 'negative',
-                '600' => 'negative',
+                '100' => 'gray',
+                '200' => 'indigo',
+                '250' => 'indigo',
+                '300' => 'amber',
+                '400' => 'red',
+                '500' => 'red',
+                '550' => 'red',
+                '600' => 'red',
             ],
         ],
         'level_name' => [
             'state',
             [
-                'DEBUG' => 'secondary',
-                'INFO' => 'primary',
-                'NOTICE' => 'primary',
-                'WARNING' => 'warning',
-                'ERROR' => 'negative',
-                'CRITICAL' => 'negative',
-                'ALERT' => 'negative',
-                'EMERGENCY' => 'negative',
+                'DEBUG' => 'gray',
+                'INFO' => 'indigo',
+                'NOTICE' => 'indigo',
+                'WARNING' => 'amber',
+                'ERROR' => 'red',
+                'CRITICAL' => 'red',
+                'ALERT' => 'red',
+                'EMERGENCY' => 'red',
             ],
         ],
     ];
@@ -70,9 +70,10 @@ class LogList extends BaseDataTable
     protected function getRowActions(): array
     {
         return [
-            DataTableButton::make(label: __('Done'))
+            DataTableButton::make()
+                ->text(__('Done'))
                 ->icon('check')
-                ->color('positive')
+                ->color('emerald')
                 ->attributes([
                     'x-on:click' => 'event.stopPropagation(); $wire.markAsDone(record.id)',
                 ]),
@@ -82,8 +83,9 @@ class LogList extends BaseDataTable
     protected function getTableActions(): array
     {
         return [
-            DataTableButton::make(label: __('Mark found as done'))
-                ->color('primary')
+            DataTableButton::make()
+                ->text(__('Mark all as done'))
+                ->color('indigo')
                 ->attributes([
                     'x-on:click' => '$wire.markAllAsDone()',
                 ]),

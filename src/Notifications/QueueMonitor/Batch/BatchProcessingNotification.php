@@ -13,7 +13,7 @@ class BatchProcessingNotification extends Notification implements HasToastNotifi
 {
     public function __construct(public JobBatch $model)
     {
-        $this->id = Uuid::uuid5(Uuid::NAMESPACE_URL, static::class . ':' . $this->model->getKey());
+        $this->id = Uuid::uuid5(Uuid::NAMESPACE_URL, $this->model->getKey());
     }
 
     public function via(object $notifiable): array
@@ -24,16 +24,14 @@ class BatchProcessingNotification extends Notification implements HasToastNotifi
     public function toToastNotification(object $notifiable): ToastNotification
     {
         return ToastNotification::make()
+            ->id($this->id)
             ->notifiable($notifiable)
             ->title(__(':job_name is processing', ['job_name' => __($this->model->name)]))
             ->description($this->model->getProcessedJobs() . ' / ' . $this->model->total_jobs . '<br>'
                 . __(':time remaining', ['time' => $this->model->getRemainingInterval()])
             )
-            ->icon('info')
-            ->timeout(0)
-            ->attributes([
-                'progress' => $this->model->getProgress(),
-            ]);
+            ->persistent()
+            ->progress($this->model->getProgress());
     }
 
     public function toArray(object $notifiable): array

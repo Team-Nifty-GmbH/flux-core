@@ -1,4 +1,4 @@
-<div x-data="dashboard($wire)">
+<div x-data="dashboard()" x-init.once="reInit().disable()">
     @section('dashboard-widget-select')
         <x-flux::dashboard.widget-select />
     @show
@@ -8,7 +8,7 @@
                 <div class="flex items-start space-x-5">
                     @section('dashboard-header.avatar')
                         <div class="flex-shrink-0">
-                            <x-avatar :src="auth()->user()->getAvatarUrl()" />
+                            <x-avatar :image="auth()->user()->getAvatarUrl()" />
                         </div>
                     @show
                     @section('dashboard-header.user-name')

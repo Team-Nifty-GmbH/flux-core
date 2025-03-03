@@ -8,6 +8,6 @@ class Done extends ProjectState
 
     public function color(): string
     {
-        return static::$color ?? 'positive';
+        return static::$color ?? 'emerald';
     }
 }

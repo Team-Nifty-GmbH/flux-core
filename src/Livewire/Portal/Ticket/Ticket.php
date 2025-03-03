@@ -55,8 +55,8 @@ class Ticket extends Component
     public function getTabs(): array
     {
         return [
-            TabButton::make('portal.ticket.comments')->label(__('Comments'))->isLivewireComponent(),
-            TabButton::make('portal.ticket.activities')->label(__('Activities'))->isLivewireComponent(),
+            TabButton::make('portal.ticket.comments')->text(__('Comments'))->isLivewireComponent(),
+            TabButton::make('portal.ticket.activities')->text(__('Activities'))->isLivewireComponent(),
         ];
     }
 }

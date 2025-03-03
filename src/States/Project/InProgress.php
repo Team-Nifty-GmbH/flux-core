@@ -8,6 +8,6 @@ class InProgress extends ProjectState
 
     public function color(): string
     {
-        return static::$color ?? 'warning';
+        return static::$color ?? 'amber';
     }
 }

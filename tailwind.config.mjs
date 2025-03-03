@@ -1,4 +1,6 @@
 import defaultTheme from 'tailwindcss/defaultTheme';
+import forms from '@tailwindcss/forms';
+import typography from '@tailwindcss/typography';
 
 export default {
     darkMode: 'selector',
@@ -7,6 +9,8 @@ export default {
         __dirname + '/resources/**/*.js',
         __dirname + '/resources/**/*.vue',
         __dirname + '/src/Htmlables/**/*.php',
+        __dirname + '/src/Providers/*.php',
+        __dirname + '/src/View/Components/**/*.php',
         __dirname + '/src/Livewire/**/*.php',
     ],
     theme: {
@@ -43,7 +47,7 @@ export default {
             },
         },
     },
-    plugins: [require('@tailwindcss/typography'), require('@tailwindcss/forms')],
+    plugins: [typography, forms],
     safelist: [
         'mention',
         'tippy-box',

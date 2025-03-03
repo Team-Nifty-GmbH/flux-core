@@ -162,26 +162,26 @@ class Product extends Component
     public function getTabs(): array
     {
         return [
-            TabButton::make('product.general')->label(__('General')),
+            TabButton::make('product.general')->text(__('General')),
             TabButton::make('product.variant-list')
-                ->label(__('Variants'))
+                ->text(__('Variants'))
                 ->isLivewireComponent()
                 ->wireModel('product')
                 ->when(fn () => ! $this->product->parent_id && ! $this->product->is_bundle),
             TabButton::make('product.bundle-list')
-                ->label(__('Bundle'))
+                ->text(__('Bundle'))
                 ->isLivewireComponent()
                 ->wireModel('product')
                 ->when(fn () => ! $this->product->children_count),
-            TabButton::make('product.prices')->label(__('Prices')),
+            TabButton::make('product.prices')->text(__('Prices')),
             TabButton::make('product.warehouse-list')
-                ->label(__('Stock'))
+                ->text(__('Stock'))
                 ->isLivewireComponent()
                 ->wireModel('product'),
-            TabButton::make('product.media')->label(__('Media')),
-            TabButton::make('product.cross-selling')->label(__('Cross Selling')),
+            TabButton::make('product.media')->text(__('Media')),
+            TabButton::make('product.cross-selling')->text(__('Cross Selling')),
             TabButton::make('product.activities')
-                ->label(__('Activities'))
+                ->text(__('Activities'))
                 ->isLivewireComponent()
                 ->wireModel('product.id'),
         ];
@@ -245,7 +245,7 @@ class Product extends Component
             return false;
         }
 
-        $this->notification()->success(__(':model saved', ['model' => __('Product')]));
+        $this->notification()->success(__(':model saved', ['model' => __('Product')]))->send();
 
         return true;
     }
@@ -381,7 +381,7 @@ class Product extends Component
         );
 
         $this->js(<<<'JS'
-            $openModal('edit-product-properties-modal');
+            $modalOpen('edit-product-properties-modal');
         JS);
     }
 

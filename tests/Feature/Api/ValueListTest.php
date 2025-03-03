@@ -9,14 +9,11 @@ use FluxErp\Models\Permission;
 use FluxErp\Models\User;
 use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
 class ValueListTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private array $valueLists;
 
     private array $permissions;

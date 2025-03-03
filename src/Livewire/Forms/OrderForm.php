@@ -233,7 +233,7 @@ class OrderForm extends FluxForm
                     : [],
                 [
                     'isPurchase' => $values->orderType->order_type_enum->isPurchase(),
-                    'avatarUrl' => $values->contact->getFirstMediaUrl('avatar'),
+                    'avatarUrl' => $values->contact?->getFirstMediaUrl('avatar'),
                 ],
             );
         }

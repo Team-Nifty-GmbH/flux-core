@@ -16,7 +16,7 @@
         <form class="pt-12">
             @if(auth()->user()->can('profiles.{id?}.get'))
                 <div class="flex w-full justify-end">
-                    <x-button primary wire:click="showUsers" :label="__('Edit users')" />
+                    <x-button color="indigo" wire:click="showUsers" :text="__('Edit users')" />
                 </div>
             @endif
             <div
@@ -76,13 +76,12 @@
                     {{ __('Country') }}
                 </label>
                 <div class="col-span-2">
-                    <x-select
+                    <x-select.styled
                         wire:model="address.country_id"
                         searchable
                         :options="app(\FluxErp\Models\Country::class)->all(['id', 'name'])"
-                        option-label="name"
-                        option-value="id"
-                    ></x-select>
+                        select="label:name|value:id"
+                    ></x-select.styled>
                 </div>
             </div>
             <div
@@ -107,13 +106,12 @@
                     {{ __('Language') }}
                 </label>
                 <div class="col-span-2">
-                    <x-select
+                    <x-select.styled
                         wire:model="address.language_id"
                         searchable
                         :options="app(\FluxErp\Models\Language::class)->all(['id', 'name'])"
-                        option-label="name"
-                        option-value="id"
-                    ></x-select>
+                        select="label:name|value:id"
+                    ></x-select.styled>
                 </div>
             </div>
             <div
@@ -123,7 +121,7 @@
                     {{ __('Password') }}
                 </label>
                 <div class="col-span-2">
-                    <x-inputs.password wire:model="loginPassword"/>
+                    <x-password wire:model="loginPassword"/>
                 </div>
             </div>
         </form>
@@ -160,7 +158,7 @@
                             wire:model.number="address.permissions"
                             :id="uniqid()"
                             :value="$permission['id']"
-                            :label="__($permission['name'])"
+                            :text="__($permission['name'])"
                         />
                     @endforeach
                 </div>
@@ -186,7 +184,7 @@
                             <div class="grid grid-cols-3">
                                 <div class="flex items-center">
                                     <div class="flex items-center pr-1.5 transition-all">
-                                        <x-button.circle 2xs negative label="-" x-on:click.prevent="removeContactOption(index, key)"></x-button.circle>
+                                        <x-button.circle 2xs color="red" label="-" x-on:click.prevent="removeContactOption(index, key)"></x-button.circle>
                                     </div>
                                     <div class="pr-1.5">
                                         <x-checkbox
@@ -209,7 +207,7 @@
                         </template>
                     </div>
                     <div class="flex space-x-2 pt-5 transition-all">
-                        <x-button.circle 2xs positive label="+" x-on:click.prevent="contactOptions[key].push({type: key, label: key, address_id: address.id})" />
+                        <x-button.circle 2xs color="emerald" label="+" x-on:click.prevent="contactOptions[key].push({type: key, label: key, address_id: address.id})" />
                         <div class="text-sm">
                             <span x-text="key"></span>
                         </div>
@@ -219,7 +217,7 @@
         </div>
         <x-errors />
         <div class="flex justify-end pt-8">
-            <x-button primary :label="__('Save')" wire:click="save" />
+            <x-button color="indigo" :text="__('Save')" wire:click="save" />
         </div>
     </div>
     <div x-show="showUserList">

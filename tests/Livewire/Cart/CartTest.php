@@ -54,7 +54,7 @@ class CartTest extends BaseSetup
             ->assertSet('loadWatchlist', null)
             ->assertStatus(200)
             ->assertCount('cart.cartItems', 3)
-            ->assertWireuiNotification(icon: 'success');
+            ->assertToastNotification(type: 'success');
     }
 
     public function test_can_save_cart_to_watchlist()
@@ -74,7 +74,7 @@ class CartTest extends BaseSetup
             ->call('saveToWatchlist')
             ->assertHasNoErrors()
             ->assertReturned(true)
-            ->assertWireuiNotification(icon: 'success');
+            ->assertToastNotification(type: 'success');
 
         $this->assertDatabaseHas('carts', [
             'authenticatable_type' => $this->user->getMorphClass(),

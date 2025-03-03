@@ -37,8 +37,8 @@ class TransactionList extends BaseDataTable
     {
         return [
             DataTableButton::make()
-                ->label(__('Add'))
-                ->color('primary')
+                ->text(__('Add'))
+                ->color('indigo')
                 ->wireClick('editTransaction')
                 ->when(fn () => resolve_static(CreateTransaction::class, 'canPerformAction', [false])),
         ];
@@ -59,8 +59,8 @@ class TransactionList extends BaseDataTable
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
-                ->color('primary')
+                ->text(__('Edit'))
+                ->color('indigo')
                 ->wireClick('editTransaction(record.id)')
                 ->when(fn () => resolve_static(UpdateTransaction::class, 'canPerformAction', [false])),
         ];
@@ -80,7 +80,7 @@ class TransactionList extends BaseDataTable
         }
 
         $this->js(<<<'JS'
-            $openModal('transaction-details');
+            $modalOpen('transaction-details');
         JS);
     }
 

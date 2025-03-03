@@ -8,7 +8,7 @@ use Illuminate\View\Compilers\BladeCompiler;
 use Illuminate\View\ComponentAttributeBag;
 use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use WireUi\View\Components\Button;
+use TallStackUi\View\Components\Button\Button;
 
 class TabButton implements Htmlable
 {
@@ -16,18 +16,17 @@ class TabButton implements Htmlable
 
     public static function make(
         string $component,
-        bool $rounded = false,
-        bool $squared = false,
+        bool $round = false,
+        bool $square = false,
         bool $outline = false,
         bool $flat = true,
-        bool $full = false,
         ?string $color = null,
         ?string $size = null,
-        ?string $label = null,
+        ?string $text = null,
         ?string $icon = null,
-        ?string $rightIcon = null,
-        ?string $spinner = null,
-        ?string $loadingDelay = null,
+        ?string $position = null,
+        ?string $loading = null,
+        ?string $delay = null,
         ?string $href = null,
         bool $isLivewireComponent = false,
         ?string $wireModel = null,
@@ -35,18 +34,17 @@ class TabButton implements Htmlable
     ): static {
         return new static(
             component: $component,
-            rounded: $rounded,
-            squared: $squared,
+            round: $round,
+            square: $square,
             outline: $outline,
             flat: $flat,
-            full: $full,
             color: $color,
             size: $size,
-            label: $label,
+            text: $text,
             icon: $icon,
-            rightIcon: $rightIcon,
-            spinner: $spinner,
-            loadingDelay: $loadingDelay,
+            position: $position,
+            loading: $loading,
+            delay: $delay,
             href: $href,
             isLivewireComponent: $isLivewireComponent,
             wireModel: $wireModel,
@@ -56,18 +54,17 @@ class TabButton implements Htmlable
 
     public function __construct(
         public string $component,
-        public bool $rounded = false,
-        public bool $squared = false,
+        public bool $round = false,
+        public bool $square = false,
         public bool $outline = false,
         public bool $flat = true,
-        public bool $full = false,
         public ?string $color = null,
         public ?string $size = null,
-        public ?string $label = null,
+        public ?string $text = null,
         public ?string $icon = null,
-        public ?string $rightIcon = null,
-        public ?string $spinner = null,
-        public ?string $loadingDelay = null,
+        public ?string $position = null,
+        public ?string $loading = null,
+        public ?string $delay = null,
         public ?string $href = null,
         public bool $isLivewireComponent = false,
         public ?string $wireModel = null,
@@ -123,27 +120,26 @@ class TabButton implements Htmlable
             return null;
         }
 
-        $this->label = is_null($this->label) ? '' : $this->label;
+        $this->text = is_null($this->text) ? '' : $this->text;
         $button = new Button(
-            rounded: $this->rounded,
-            squared: $this->squared,
+            text: $this->text,
+            icon: $this->icon,
+            position: $this->position,
+            color: $this->color ?? 'indigo',
+            square: $this->square,
+            round: $this->round,
+            href: $this->href,
+            loading: $this->loading,
+            delay: $this->delay,
             outline: $this->outline,
             flat: $this->flat,
-            full: $this->full,
-            color: $this->color,
-            size: $this->size,
-            label: $this->label,
-            icon: $this->icon,
-            rightIcon: $this->rightIcon,
-            spinner: $this->spinner,
-            loadingDelay: $this->loadingDelay,
-            href: $this->href,
+            size: $this->size ?? 'md',
         );
         $button->attributes = new ComponentAttributeBag(
             array_merge([
                 'wire:loading.attr' => 'readonly',
-                'class' => 'border-b-2 border-b-transparent focus:!ring-0 focus:!ring-offset-0',
-                'x-bind:class' => "{'!border-b-primary-600 rounded-b-none': tab === '{$this->component}'}",
+                'class' => 'border-b-2 !text-secondary-600 !dark:text-secondary-400 border-b-transparent focus:!ring-0 focus:!ring-offset-0',
+                'x-bind:class' => "{'!border-b-primary-600 !rounded-b-none': tab === '{$this->component}'}",
                 'data-tab-name' => $this->component,
                 'x-on:click.prevent' => 'tabButtonClicked($el)',
             ], $this->attributes)
@@ -173,16 +169,16 @@ class TabButton implements Htmlable
         return $this;
     }
 
-    public function rounded(bool $rounded = true): static
+    public function round(bool $round = true): static
     {
-        $this->rounded = $rounded;
+        $this->round = $round;
 
         return $this;
     }
 
-    public function squared(bool $squared = true): static
+    public function square(bool $square = true): static
     {
-        $this->squared = $squared;
+        $this->square = $square;
 
         return $this;
     }
@@ -222,9 +218,9 @@ class TabButton implements Htmlable
         return $this;
     }
 
-    public function label(?string $label = null): static
+    public function text(?string $text = null): static
     {
-        $this->label = $label;
+        $this->text = $text;
 
         return $this;
     }
@@ -236,23 +232,23 @@ class TabButton implements Htmlable
         return $this;
     }
 
-    public function rightIcon(string $rightIcon): static
+    public function position(string $position): static
     {
-        $this->rightIcon = $rightIcon;
+        $this->position = $position;
 
         return $this;
     }
 
-    public function spinner(string $spinner): static
+    public function loading(string $loading): static
     {
-        $this->spinner = $spinner;
+        $this->loading = $loading;
 
         return $this;
     }
 
-    public function loadingDelay(string $loadingDelay): static
+    public function delay(string $delay): static
     {
-        $this->loadingDelay = $loadingDelay;
+        $this->delay = $delay;
 
         return $this;
     }

@@ -91,8 +91,9 @@ trait CreatesDocuments
             }
         }
 
-        $this->js(<<<'JS'
-            $openModal('create-documents');
+        $id = strtolower($this->getId());
+        $this->js(<<<JS
+            \$modalOpen('create-documents-$id');
         JS);
     }
 
@@ -115,9 +116,10 @@ trait CreatesDocuments
         ];
         $route = route('print.render', $this->previewData);
 
+        $id = strtolower($this->getId());
         $this->js(<<<JS
-            document.getElementById('preview-iframe').src = '$route';
-            \$openModal(document.getElementById('preview'));
+            document.getElementById('preview-$id').querySelector('iframe').src = '$route';
+            \$modalOpen('preview-$id');
         JS);
     }
 

@@ -26,9 +26,9 @@ class PaymentTypes extends PaymentTypeList
     {
         return [
             DataTableButton::make()
-                ->label(__('New'))
+                ->text(__('New'))
                 ->icon('plus')
-                ->color('primary')
+                ->color('indigo')
                 ->when(resolve_static(CreatePaymentType::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'edit',
@@ -53,9 +53,9 @@ class PaymentTypes extends PaymentTypeList
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
+                ->text(__('Edit'))
                 ->icon('pencil')
-                ->color('primary')
+                ->color('indigo')
                 ->when(resolve_static(UpdatePaymentType::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'edit(record.id)',
@@ -69,7 +69,7 @@ class PaymentTypes extends PaymentTypeList
         $this->paymentType->fill($paymentType);
 
         $this->js(<<<'JS'
-            $openModal('edit-payment-type');
+            $modalOpen('edit-payment-type');
         JS);
     }
 
