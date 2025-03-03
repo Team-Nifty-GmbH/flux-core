@@ -64,10 +64,8 @@
             </x-table>
         </div>
         <x-slot:footer>
-            <div class="flex justify-end gap-4">
-                <x-button color="secondary" light flat x-on:click="$modalClose('manage-discount-group-modal')">{{ __('Cancel') }}</x-button>
-                <x-button color="indigo" class="mr-2" x-on:click="saveItem()">{{ __('Save') }}</x-button>
-            </div>
+            <x-button color="secondary" light flat x-on:click="$modalClose('manage-discount-group-modal')">{{ __('Cancel') }}</x-button>
+            <x-button color="indigo" class="mr-2" x-on:click="saveItem()">{{ __('Save') }}</x-button>
         </x-slot:footer>
     </x-modal>
     <livewire:data-tables.settings.discount-group-list />

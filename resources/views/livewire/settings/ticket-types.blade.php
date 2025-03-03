@@ -66,7 +66,7 @@
 
     <x-modal id="edit-ticket-type-modal" z-index="z-30" wire="showTicketTypeModal" :title="$ticketTypeIndex === -1 ? __('Create Ticket Type') : __('Edit Ticket Type')">
         <livewire:settings.ticket-type-edit/>
-        <x-slot name="footer">
+        <x-slot:footer>
             <div x-data="{ticketTypeIndex: @entangle('ticketTypeIndex')}" class="w-full">
                 <div
                     class="flex justify-between gap-x-4">
@@ -80,18 +80,18 @@
                             wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Ticket Type')]) }}"
                         />
                     @endif
-                    <div class="flex">
+                    <div class="flex gap-x-2">
                         <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('edit-ticket-type-modal')"/>
                         <x-button color="indigo" :text="__('Save')" wire:click="$dispatchTo('settings.ticket-type-edit', 'save')"/>
                     </div>
                 </div>
             </div>
-        </x-slot>
+        </x-slot:footer>
     </x-modal>
 
     <x-modal id="edit-additional-column-modal" z-index="z-30" wire="showAdditionalColumnModal" :title="$additionalColumnIndex === -1 ? __('Create Additional Column') : __('Edit Additional Column')">
         <livewire:settings.additional-column-edit/>
-        <x-slot name="footer">
+        <x-slot:footer>
             <div x-data="{additionalColumnIndex: @entangle('additionalColumnIndex')}" class="w-full">
                 <div
                     class="flex justify-between gap-x-4">
@@ -105,12 +105,12 @@
                             wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Additional Column')]) }}"
                         />
                     @endif
-                    <div class="flex">
+                    <div class="flex gap-x-2">
                         <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('edit-additional-column-modal')"/>
                         <x-button color="indigo" :text="__('Save')" wire:click="$dispatchTo('settings.additional-column-edit', 'save')"/>
                     </div>
                 </div>
             </div>
-        </x-slot>
+        </x-slot:footer>
     </x-modal>
 </div>

@@ -146,12 +146,8 @@
         </section>
         <x-errors />
         <x-slot name="footer">
-            <div class="flex justify-end gap-x-4">
-                <div class="flex">
-                    <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('create-order-modal')" />
-                    <x-button loading="save" color="indigo" :text="__('Save')" wire:click="save" />
-                </div>
-            </div>
+            <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('create-order-modal')" />
+            <x-button loading="save" color="indigo" :text="__('Save')" wire:click="save" />
         </x-slot>
     </x-modal>
     {{ $this->renderCreateDocumentsModal() }}

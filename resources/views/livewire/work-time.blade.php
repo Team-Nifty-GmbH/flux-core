@@ -3,73 +3,75 @@
     x-data="workTime($wire, '{{ route('search', '') }}')"
     x-init.once="load()"
 >
-    <x-modal id="work-time-modal" persistent="true" x-on:close="$wire.resetWorkTime()" class="flex flex-col gap-4">
-        <x-select.styled :label="__('Work Time Type')"
-                  :options="$workTimeTypes"
-                  wire:model="workTime.work_time_type_id"
-                  select="label:name|value:id"
-                  x-on:select="$wire.workTime.is_billable = $event.detail.select.is_billable"
-        />
-        <x-toggle :label="__('Is Billable')" wire:model="workTime.is_billable" />
-        <x-select.styled :label="__('Contact')"
-            wire:model="workTime.contact_id"
-            select="label:label|value:contact_id"
-            :request="[
-                'url' => route('search', \FluxErp\Models\Address::class),
-                'method' => 'POST',
-                'params' => [
-                    'where' => [
-                        [
-                            'is_main_address',
-                            '=',
-                            true,
-                        ],
-                    ],
-                    'option-value' => 'contact_id',
-                    'fields' => [
-                        'contact_id',
-                        'name',
-                    ],
-                    'with' => 'contact.media',
-                ],
-            ]"
-        />
-        <x-select.styled
-            :label="__('Model')"
-            wire:model="workTime.trackable_type"
-            :options="$trackableTypes"
-            select="label:label|value:value"
-            x-on:select="relatedSelected($event.detail.value)"
-        />
-        <div id="trackable-id" x-cloak x-show="$wire.workTime.trackable_type">
+    <x-modal id="work-time-modal" persistent="true" x-on:close="$wire.resetWorkTime()">
+        <div class="flex flex-col gap-1.5">
             <x-select.styled
-                :label="__('Record')"
-                x-on:select="recordSelected($event.detail)"
+                :label="__('Work Time Type')"
+                :options="$workTimeTypes"
+                wire:model="workTime.work_time_type_id"
+                select="label:name|value:id"
+                x-on:select="$wire.workTime.is_billable = $event.detail.select.is_billable"
+            />
+            <div class="mt-2">
+                <x-toggle :label="__('Is Billable')" wire:model="workTime.is_billable" />
+            </div>
+            <x-select.styled
+                :label="__('Contact')"
+                wire:model="workTime.contact_id"
+                select="label:label|value:contact_id"
                 :request="[
-                    'url' => route('search', '__model__'),
+                    'url' => route('search', \FluxErp\Models\Address::class),
                     'method' => 'POST',
                     'params' => [
-                        'appends' => [
-                            'contact_id',
+                        'where' => [
+                            [
+                                'is_main_address',
+                                '=',
+                                true,
+                            ],
                         ],
+                        'option-value' => 'contact_id',
+                        'fields' => [
+                            'contact_id',
+                            'name',
+                        ],
+                        'with' => 'contact.media',
                     ],
                 ]"
-                wire:model="workTime.trackable_id"
             />
-        </div>
-        <x-input :label="__('Name')" wire:model="workTime.name" />
-        <x-textarea :label="__('Description')" wire:model="workTime.description" />
-        <x-slot:footer>
-            <div class="flex justify-end gap-x-4">
-                <div class="flex">
-                    <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('work-time-modal')" />
-                    <x-button color="indigo" :text="__('Start')" loading x-on:click="$wire.save().then((success) => { if (success) $modalClose('work-time-modal'); })">
-                        <x-slot:label>
-                            <span x-text="$wire.workTime.id ? '{{ __('Save') }}' : '{{ __('Start') }}'">
-                        </x-slot:label>
-                    </x-button>
-                </div>
+            <x-select.styled
+                :label="__('Model')"
+                wire:model="workTime.trackable_type"
+                :options="$trackableTypes"
+                select="label:label|value:value"
+                x-on:select="relatedSelected($event.detail.value)"
+            />
+            <div id="trackable-id" x-cloak x-show="$wire.workTime.trackable_type">
+                <x-select.styled
+                    :label="__('Record')"
+                    x-on:select="recordSelected($event.detail)"
+                    :request="[
+                        'url' => route('search', '__model__'),
+                        'method' => 'POST',
+                        'params' => [
+                            'appends' => [
+                                'contact_id',
+                            ],
+                        ],
+                    ]"
+                    wire:model="workTime.trackable_id"
+                />
             </div>
+            <x-input :label="__('Name')" wire:model="workTime.name" />
+            <x-textarea :label="__('Description')" wire:model="workTime.description" />
+        </div>
+        <x-slot:footer>
+            <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('work-time-modal')" />
+            <x-button color="indigo" :text="__('Start')" loading x-on:click="$wire.save().then((success) => { if (success) $modalClose('work-time-modal'); })">
+                <x-slot:label>
+                    <span x-text="$wire.workTime.id ? '{{ __('Save') }}' : '{{ __('Start') }}'"></span>
+                </x-slot:label>
+            </x-button>
         </x-slot:footer>
     </x-modal>
     <x-button

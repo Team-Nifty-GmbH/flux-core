@@ -24,7 +24,6 @@
         <x-select.styled
             :label="__('Repeat')"
             :options="$basic"
-            select="label:label|select="label:name|value:id"
             autocomplete="off"
             wire:model="schedule.cron.methods.basic"
         />
@@ -97,7 +96,7 @@
                 wire:model="schedule.cron.parameters.basic.2"
             />
         </div>
-        <div x-cloak x-show="$wire.schedule.cron.methods.basic === 'yearlyOn'" class="flex flex-col gap-4">
+        <div x-cloak x-show="$wire.schedule.cron.methods.basic === 'yearlyOn'" class="flex flex-col gap-1.5">
             <x-select.styled
                 :label="__('Month')"
                 :options="[
@@ -128,7 +127,6 @@
         <x-select.styled
             :label="__('Day Constraints')"
             :options="$dayConstraints"
-            select="label:label|select="label:name|value:id"
             autocomplete="off"
             wire:model="schedule.cron.methods.dayConstraint"
         />
@@ -151,7 +149,6 @@
         <x-select.styled
             :label="__('Time Constraints')"
             :options="$timeConstraints"
-            select="label:label|select="label:name|value:id"
             autocomplete="off"
             wire:model="schedule.cron.methods.timeConstraint"
         />
@@ -189,22 +186,7 @@
         <x-toggle wire:model="schedule.is_active" :label="__('Is Active')" />
     </div>
     <x-slot:footer>
-        <div class="flex justify-between gap-x-4">
-            @if(\FluxErp\Actions\Schedule\DeleteSchedule::canPerformAction(false))
-                <div x-bind:class="$wire.schedule.id > 0 || 'invisible'">
-                    <x-button
-                        flat
-                        color="red"
-                        :text="__('Delete')"
-                        wire:click="delete().then((success) => { if(success) $modalClose('edit-schedule-modal')})"
-                        wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Schedule')]) }}"
-                    />
-                </div>
-            @endif
-            <div class="flex">
-                <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('edit-schedule-modal')"/>
-                <x-button color="indigo" :text="__('Save')" wire:click="save().then((success) => { if(success) $modalClose('edit-schedule-modal')})"/>
-            </div>
-        </div>
+        <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('edit-schedule-modal')"/>
+        <x-button color="indigo" :text="__('Save')" wire:click="save().then((success) => { if(success) $modalClose('edit-schedule-modal')})"/>
     </x-slot:footer>
 </x-modal>

@@ -126,7 +126,7 @@ class Addresses extends Component
                 'contactOrigins' => resolve_static(ContactOrigin::class, 'query')
                     ->where('is_active', true)
                     ->get(['id', 'name'])
-                    ->pluck('name', 'id'),
+                    ->toArray(),
             ]
         );
     }

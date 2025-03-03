@@ -189,7 +189,7 @@ class WorkTimeList extends BaseDataTable
                     ->where('is_active', true)
                     ->get(['id', 'name', 'order_type_enum'])
                     ->filter(fn (OrderType $orderType) => ! $orderType->order_type_enum->isPurchase())
-                    ->pluck('name', 'id')
+                    ->get(['id', 'name'])
                     ->toArray(),
             ]
         );

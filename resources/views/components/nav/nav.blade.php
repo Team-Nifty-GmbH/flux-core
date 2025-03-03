@@ -40,7 +40,9 @@
                             <x-dropdown.items :text="__('My profile')" />
                         </a>
                         <x-dropdown.items x-on:click="document.getElementById('logout-form-desktop').submit()" :text="__('Logout')" />
-                        <x-theme-switch />
+                        <div class="ml-4 mb-2">
+                            <x-theme-switch />
+                        </div>
                     </x-dropdown>
                     <div class="hidden">
                         <!-- Authentication -->

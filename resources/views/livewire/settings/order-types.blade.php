@@ -17,7 +17,7 @@
                         :disabled="(bool) $orderType->id"
                         :placeholder="__('Select Order Type')"
                         wire:model="orderType.order_type_enum"
-                        :options="$enum"
+                        :options="\FluxErp\Enums\OrderTypeEnum::valuesLocalized()"
                     />
                     <x-select.styled
                         :label="__('Print Layouts')"
@@ -53,24 +53,11 @@
         </div>
     </div>
     <x-slot:footer>
-        <div class="flex justify-between gap-x-4">
-            <div x-bind:class="$wire.orderType.id > 0 || 'invisible'">
-                <x-button
-                    flat
-                    color="red"
-                    :text="__('Delete')"
-                    wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Order Type')]) }}"
-                    wire:click="delete().then((success) => {if (success) $modalClose('edit-order-type-modal');})"
-                />
-            </div>
-            <div class="flex">
-                <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('edit-order-type-modal')"/>
-                <x-button
-                    color="indigo"
-                    :text="__('Save')"
-                    wire:click="save().then((success) => {if (success) $modalClose('edit-order-type-modal');})"
-                />
-            </div>
-        </div>
+        <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('edit-order-type-modal')"/>
+        <x-button
+            color="indigo"
+            :text="__('Save')"
+            wire:click="save().then((success) => {if (success) $modalClose('edit-order-type-modal');})"
+        />
     </x-slot:footer>
 </x-modal>

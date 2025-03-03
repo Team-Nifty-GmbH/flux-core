@@ -1,6 +1,6 @@
 <x-modal id="edit-payment-reminder-text-modal">
     <div
-        class="flex flex-col gap-4"
+        class="flex flex-col gap-1.5"
         x-data="{
             addReceiver($event, type) {
                 let value = $event.target.value;
@@ -104,14 +104,12 @@
               wire:model="paymentReminderTextForm.mail_body"
         />
         <x-slot:footer>
-            <div class="flex justify-end gap-x-4">
-                <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('edit-payment-reminder-text-modal')"/>
-                <x-button
-                    color="indigo"
-                    :text="__('Save')"
-                    wire:click="save().then((success) => { if (success) $modalClose('edit-payment-reminder-text-modal'); })"
-                />
-            </div>
+            <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('edit-payment-reminder-text-modal')"/>
+            <x-button
+                color="indigo"
+                :text="__('Save')"
+                wire:click="save().then((success) => { if (success) $modalClose('edit-payment-reminder-text-modal'); })"
+            />
         </x-slot:footer>
     </div>
 </x-modal>

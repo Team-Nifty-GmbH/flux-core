@@ -88,8 +88,8 @@
                             x-bind:disabled="! $wire.$parent.edit"
                             wire:model.number="contact.contact_origin_id"
                             :label="__('Contact Origin')"
-                            option-key-value
                             :options="$contactOrigins"
+                            select="label:name|value:id"
                         />
                     </div>
                 </x-card>
@@ -111,9 +111,9 @@
                 <div class="flex justify-between gap-4 w-full items-center">
                     <div>{{ __('Details') }}</div>
                     @section('address-details.actions')
-                        <div class="flex gap-1.5">
+                        <div class="flex gap-2">
                             @canAction(\FluxErp\Actions\Address\UpdateAddress::class)
-                                <div x-cloak x-show="$wire.edit">
+                                <div x-cloak x-show="$wire.edit" class="flex gap-x-2">
                                     <x-button color="secondary" light
                                         x-on:click="$wire.edit = false; $wire.reloadAddress()"
                                         :text="__('Cancel')"

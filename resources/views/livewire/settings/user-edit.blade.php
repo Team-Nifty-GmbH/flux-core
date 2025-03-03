@@ -187,14 +187,13 @@
             <div class="flex justify-between gap-x-4">
                 @canAction(\FluxErp\Actions\User\DeleteUser::class)
                     <x-button
-                        flat
                         color="red"
                         :text="__('Delete')"
                         wire:click="delete"
                         wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('User')]) }}"
                     />
                 @endCanAction
-                <div class="flex space-x-2">
+                <div class="flex gap-x-2">
                     <x-button color="secondary" light :text="__('Cancel')" wire:click="cancel()"/>
                     <x-button color="indigo" :text="__('Save')" wire:click="save()"/>
                 </div>

@@ -18,7 +18,7 @@
                     <x-select.native
                         x-model="$wire.productPropertyGroup.product_properties[index].property_type_enum"
                         required
-                        select="label:label|select="label:name|value:id"
+                        select="label:label|value:name"
                         :options="$propertyTypes"
                     />
                 </div>
@@ -30,18 +30,16 @@
         <x-button color="indigo" x-on:click="$wire.productPropertyGroup.product_properties.push({name: '', property_type_enum: 'text'})">{{ __('Add Product Property') }}</x-button>
     </div>
     <x-slot:footer>
-        <div class="flex justify-end gap-1.5">
-            <x-button color="secondary" light
-                flat
-                :text="__('Cancel')"
-                x-on:click="$modalClose('edit-product-property-group-modal')"
-            />
-            <x-button
-                color="indigo"
-                loading="save()"
-                :text="__('Save')"
-                wire:click="save().then((success) => { if(success) $modalClose('edit-product-property-group-modal'); })"
-            />
-        </div>
+        <x-button color="secondary" light
+            flat
+            :text="__('Cancel')"
+            x-on:click="$modalClose('edit-product-property-group-modal')"
+        />
+        <x-button
+            color="indigo"
+            loading="save()"
+            :text="__('Save')"
+            wire:click="save().then((success) => { if(success) $modalClose('edit-product-property-group-modal'); })"
+        />
     </x-slot:footer>
 </x-modal>

@@ -184,12 +184,8 @@
             </section>
             <x-errors />
             <x-slot:footer>
-                <div class="flex justify-end gap-x-4">
-                    <div class="flex">
-                        <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('replicate-order')" />
-                        <x-button loading="saveReplicate" color="indigo" :text="__('Save')" wire:click="saveReplicate()" />
-                    </div>
-                </div>
+                <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('replicate-order')" />
+                <x-button loading="saveReplicate" color="indigo" :text="__('Save')" wire:click="saveReplicate()" />
             </x-slot:footer>
         </x-modal>
         <x-modal id="create-child-order" size="7xl">
@@ -255,16 +251,14 @@
                 <livewire:order.replicate-order-position-list :order-id="$order->id" lazy />
             </div>
             <x-slot:footer>
-                <div class="flex justify-end gap-1.5">
-                    <x-button color="secondary" light :text="__('Cancel')" x-on:click="$modalClose('create-child-order')"/>
-                    <x-button
-                        x-cloak
-                        x-show="$wire.replicateOrder.order_positions?.length"
-                        color="indigo"
-                        :text="__('Save')"
-                        wire:click="saveReplicate()"
-                    />
-                </div>
+                <x-button color="secondary" light :text="__('Cancel')" x-on:click="$modalClose('create-child-order')"/>
+                <x-button
+                    x-cloak
+                    x-show="$wire.replicateOrder.order_positions?.length"
+                    color="indigo"
+                    :text="__('Save')"
+                    wire:click="saveReplicate()"
+                />
             </x-slot:footer>
         </x-modal>
         <x-modal id="edit-discount" x-on:open="$focus.first()" x-trap="show" x-on:keyup.enter="$wire.saveDiscount().then((success) => {if(success) $modalClose('edit-discount');})">
@@ -292,14 +286,12 @@
                 <x-toggle wire:model="discount.is_percentage" :label="__('Is Percentage')" />
             </div>
             <x-slot:footer>
-                <div class="flex justify-end gap-1.5">
-                    <x-button color="secondary" light :text="__('Cancel')" x-on:click="$modalClose('edit-discount')"/>
-                    <x-button
-                        color="indigo"
-                        :text="__('Save')"
-                        wire:click="saveDiscount().then((success) => {if(success) $modalClose('edit-discount');})"
-                    />
-                </div>
+                <x-button color="secondary" light :text="__('Cancel')" x-on:click="$modalClose('edit-discount')"/>
+                <x-button
+                    color="indigo"
+                    :text="__('Save')"
+                    wire:click="saveDiscount().then((success) => {if(success) $modalClose('edit-discount');})"
+                />
             </x-slot:footer>
         </x-modal>
     @show
@@ -809,7 +801,7 @@
                                     <div class="flex justify-between p-2.5 opacity-50" x-cloak x-show="($wire.order.total_discount_percentage ?? 0) != 0">
                                         <div>
                                             <span>{{ __('Total discount') }}</span>
-                                            <span x-html="formatters.percentage($wire.order.total_discount_percentage ?? 0)">
+                                            <span x-html="formatters.percentage($wire.order.total_discount_percentage ?? 0)"></span>
                                         </div>
                                         <div>
                                             <span x-html="formatters.coloredMoney(($wire.order.total_discount_flat ?? 0) * -1)">

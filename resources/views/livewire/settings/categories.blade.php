@@ -11,11 +11,13 @@
     }
 }">
     @section('modals')
-        <x-modal id="edit-category" x-on:open="setCategorySearch()" :title="$category->id ? __('Edit Category') : __('Create Category')">
-            <div class="flex flex-col gap-4">
+        <x-modal id="edit-category-modal" x-on:open="setCategorySearch()" :title="$category->id ? __('Edit Category') : __('Create Category')">
+            <div class="flex flex-col gap-1.5">
                 @section('modals.edit-category.content')
                     <x-input wire:model="category.name" :label="__('Name')"></x-input>
-                    <x-toggle wire:model="category.is_active" :label="__('Active')"></x-toggle>
+                    <div class="mt-2">
+                        <x-toggle wire:model="category.is_active" :label="__('Active')"></x-toggle>
+                    </div>
                     <div x-bind:class="$wire.category.id && 'pointer-events-none'">
                         <x-select.styled
                             x-bind:disabled="$wire.category.id"
@@ -33,32 +35,30 @@
                             :label="__('Parent')"
                             option-description="description"
                             :request="[
-                            'url' => route('search', \FluxErp\Models\Category::class),
-                            'method' => 'POST',
-                            'params' => [
-                                'where' => [
-                                    [
-                                        'model_type',
-                                        '=',
-                                        $category->model_type,
-                                    ],
-                                    [
-                                        'id',
-                                        '!=',
-                                        $category->id,
+                                'url' => route('search', \FluxErp\Models\Category::class),
+                                'method' => 'POST',
+                                'params' => [
+                                    'where' => [
+                                        [
+                                            'model_type',
+                                            '=',
+                                            $category->model_type,
+                                        ],
+                                        [
+                                            'id',
+                                            '!=',
+                                            $category->id,
+                                        ],
                                     ],
                                 ],
-                            ],
-                        ]"
+                            ]"
                         />
                     </div>
                 @show
             </div>
             <x-slot:footer>
-                <div class="flex justify-end gap-x-4">
-                    <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('edit-category')"/>
-                    <x-button color="indigo" :text="__('Save')" wire:click="save().then((success) => {if(success) $modalClose('edit-category');});"/>
-                </div>
+                <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('edit-category-modal')"/>
+                <x-button color="indigo" :text="__('Save')" wire:click="save().then((success) => {if(success) $modalClose('edit-category-modal');});"/>
             </x-slot:footer>
         </x-modal>
     @show

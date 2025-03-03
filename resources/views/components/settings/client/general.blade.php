@@ -1,7 +1,7 @@
 <div class="space-y-8 divide-y divide-gray-200">
     <div class="space-y-8 divide-y divide-gray-200">
         <div>
-            <div class="mt-6 grid grid-cols-2 gap-y-6 gap-x-4">
+            <div class="mt-6 grid grid-cols-2 gap-y-2 gap-x-4">
                 <x-input :label="__('Name')" :placeholder="__('Name')" wire:model="client.name"/>
                 <x-input :label="__('Client Code')" :placeholder="__('Client Code')" wire:model="client.client_code"/>
                 <x-select.styled
@@ -27,6 +27,8 @@
                     :options="$bankConnections"
                     select="label:name|value:id"
                 />
+            </div>
+            <div class="flex flex-col gap-2 mt-2">
                 <x-toggle :label="__('Active')" wire:model="client.is_active"/>
                 <x-toggle :label="__('Is Default')" wire:model="client.is_default"/>
             </div>

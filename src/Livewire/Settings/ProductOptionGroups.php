@@ -25,7 +25,7 @@ class ProductOptionGroups extends ProductOptionGroupList
     {
         return [
             DataTableButton::make()
-                ->text(__('Add'))
+                ->text(__('New'))
                 ->icon('plus')
                 ->color('indigo')
                 ->wireClick('edit')
@@ -67,13 +67,15 @@ class ProductOptionGroups extends ProductOptionGroupList
         $this->productOptionGroupForm->fill($productOptionGroup);
 
         $this->js(<<<'JS'
-            $modalOpen('edit-product-option-group');
+            $modalOpen('edit-product-option-group-modal');
         JS);
     }
 
     public function delete(ProductOptionGroup $productOptionGroup): void
     {
+        $this->productOptionGroupForm->reset();
         $this->productOptionGroupForm->fill($productOptionGroup);
+
         try {
             $this->productOptionGroupForm->delete();
         } catch (ValidationException|UnauthorizedException $e) {

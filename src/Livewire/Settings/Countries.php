@@ -62,9 +62,11 @@ class Countries extends CountryList
             parent::getViewData(),
             [
                 'languages' => resolve_static(Language::class, 'query')
-                    ->pluck('name', 'id'),
+                    ->get(['id', 'name'])
+                    ->toArray(),
                 'currencies' => resolve_static(Currency::class, 'query')
-                    ->pluck('name', 'id'),
+                    ->get(['id', 'name'])
+                    ->toArray(),
             ]
         );
     }
@@ -75,7 +77,7 @@ class Countries extends CountryList
         $this->country->fill($country);
 
         $this->js(<<<'JS'
-            $modalOpen('edit-country');
+            $modalOpen('edit-country-modal');
         JS);
     }
 

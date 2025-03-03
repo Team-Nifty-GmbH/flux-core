@@ -62,7 +62,7 @@ class ContactOrigins extends ContactOriginList
         $this->contactOriginForm->fill($contactOrigin);
 
         $this->js(<<<'JS'
-            $modalOpen('edit-contact-origin');
+            $modalOpen('edit-contact-origin-modal');
         JS);
     }
 

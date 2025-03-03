@@ -46,6 +46,15 @@ class WorkTimeTypes extends WorkTimeTypeList
                 ->attributes([
                     'wire:click' => 'edit(record.id)',
                 ]),
+            DataTableButton::make()
+                ->text(__('Delete'))
+                ->color('red')
+                ->icon('trash')
+                ->when(resolve_static(DeleteWorkTimeType::class, 'canPerformAction', [false]))
+                ->attributes([
+                    'wire:click' => 'delete(record.id)',
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Work Time Type')]),
+                ]),
         ];
     }
 
@@ -55,7 +64,7 @@ class WorkTimeTypes extends WorkTimeTypeList
         $this->workTimeType->fill($workTimeType);
 
         $this->js(<<<'JS'
-            $modalOpen('edit-work-time-type');
+            $modalOpen('edit-work-time-type-modal');
         JS);
     }
 

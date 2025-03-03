@@ -3,12 +3,13 @@
 namespace FluxErp\Livewire\Forms;
 
 use FluxErp\Actions\Schedule\CreateSchedule;
+use FluxErp\Actions\Schedule\DeleteSchedule;
 use FluxErp\Actions\Schedule\UpdateSchedule;
 use FluxErp\Facades\Repeatable;
 use Livewire\Attributes\Locked;
 use Livewire\Form;
 
-class ScheduleForm extends Form
+class ScheduleForm extends FluxForm
 {
     #[Locked]
     public ?int $id = null;
@@ -127,5 +128,12 @@ class ScheduleForm extends Form
             ! is_null($this->recurrences) => 'recurrences',
             default => 'never'
         };
+    }
+
+    protected function getActions(): array
+    {
+        return [
+            'delete' => DeleteSchedule::class,
+        ];
     }
 }

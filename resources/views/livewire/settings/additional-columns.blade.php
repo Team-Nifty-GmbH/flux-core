@@ -1,6 +1,6 @@
 <x-modal id="edit-additional-column-modal" z-index="z-30" wire="showAdditionalColumnModal" :title="$create ? __('Create Additional Column') : __('Edit Additional Column')">
     <livewire:settings.additional-column-edit/>
-    <x-slot name="footer">
+    <x-slot:footer>
         <div x-data="{create: $wire.entangle('create')}" class="w-full">
             <div
                 class="flex justify-between gap-x-4">
@@ -13,11 +13,11 @@
                         :text="__('Delete')"
                     />
                 @endif
-                <div class="flex">
+                <div class="flex gap-x-2">
                     <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('edit-additional-column-modal')"/>
                     <x-button color="indigo" :text="__('Save')" wire:click="$dispatchTo('settings.additional-column-edit', 'save')"/>
                 </div>
             </div>
         </div>
-    </x-slot>
+    </x-slot:footer>
 </x-modal>

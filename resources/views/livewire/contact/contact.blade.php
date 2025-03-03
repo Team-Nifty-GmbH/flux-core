@@ -21,10 +21,10 @@
                     @show
                 @show
             </div>
-            <div class="justify-stretch mt-6 flex flex-col-reverse space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3">
+            <div class="justify-stretch mt-6 flex flex-col-reverse gap-2 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:gap-x-2 sm:space-x-reverse md:mt-0 md:flex-row md:gap-x-2">
                 @section('contact.buttons')
                     @canAction(\FluxErp\Actions\Contact\UpdateContact::class)
-                        <div x-cloak x-show="$wire.edit">
+                        <div x-cloak x-show="$wire.edit" class="flex gap-x-2">
                             <x-button color="secondary" light
                                 x-on:click="$wire.edit = false; $wire.reloadContact()"
                                 :text="__('Cancel')"

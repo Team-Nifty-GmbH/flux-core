@@ -30,17 +30,10 @@
                 <x-button.circle 2xs color="emerald" label="+" x-on:click="notificationChannel.channel_value.push(null)"/>
             </div>
         </template>
-        <x-slot name="footer">
-            <div class="w-full">
-                <div
-                    class="flex justify-end gap-x-4">
-                    <div class="flex">
-                        <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('edit-notification-settings-modal')"/>
-                        <x-button color="indigo" :text="__('Save')" wire:click="save()"/>
-                    </div>
-                </div>
-            </div>
-        </x-slot>
+        <x-slot:footer>
+            <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('edit-notification-settings-modal')"/>
+            <x-button color="indigo" :text="__('Save')" wire:click="save()"/>
+        </x-slot:footer>
     </x-modal>
     <div class="px-4 sm:px-6 lg:px-8">
         <div class="sm:flex sm:items-center">

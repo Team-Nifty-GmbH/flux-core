@@ -1,5 +1,5 @@
 <x-modal id="edit-role-users-modal">
-    <div class="space-y-6">
+    <div class="flex flex-col gap-1.5">
         @foreach($users as $user)
             <div class="flex">
                 <div class="flex-1 font-medium">{{ $user['name'] }}</div>
@@ -10,15 +10,13 @@
         @endforeach
     </div>
     <x-slot:footer>
-        <div class="flex justify-end">
-            <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('edit-role-users-modal')"/>
-            <x-button color="indigo" :text="__('Save')" wire:click="save().then((success) => { if(success) $modalClose('edit-role-users-modal'); })"/>
-        </div>
+        <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('edit-role-users-modal')"/>
+        <x-button color="indigo" :text="__('Save')" wire:click="save().then((success) => { if(success) $modalClose('edit-role-users-modal'); })"/>
     </x-slot:footer>
 </x-modal>
 
 <x-modal id="edit-role-permissions-modal">
-    <div class="space-y-6">
+    <div class="flex flex-col gap-1.5">
         <x-input wire:model="roleForm.name" :text="__('Name')"/>
         <div x-bind:class="$wire.roleForm.id && 'pointer-events-none'">
             <x-select.styled
@@ -44,9 +42,7 @@
         </div>
     </div>
     <x-slot:footer>
-        <div class="flex justify-end">
-            <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('edit-role-permissions-modal')"/>
-            <x-button color="indigo" :text="__('Save')" wire:click="save().then((success) => { if(success) $modalClose('edit-role-permissions-modal'); })"/>
-        </div>
+        <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('edit-role-permissions-modal')"/>
+        <x-button color="indigo" :text="__('Save')" wire:click="save().then((success) => { if(success) $modalClose('edit-role-permissions-modal'); })"/>
     </x-slot:footer>
 </x-modal>

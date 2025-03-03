@@ -81,7 +81,7 @@ class Categories extends CategoryList
         $this->category->fill($category);
 
         $this->js(<<<'JS'
-            $modalOpen('edit-category');
+            $modalOpen('edit-category-modal');
         JS);
     }
 

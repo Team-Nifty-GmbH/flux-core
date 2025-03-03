@@ -147,7 +147,7 @@ class ProductList extends BaseProductList
                 ->color('amber')
                 ->when(resolve_static(ProductPricesUpdate::class, 'canPerformAction', [false]))
                 ->xOnClick(<<<'JS'
-                    $modalOpen('update-prices');
+                    $modalOpen('update-prices-modal');
                 JS),
         ];
     }
@@ -161,7 +161,7 @@ class ProductList extends BaseProductList
                 ->icon('plus')
                 ->when(fn () => resolve_static(CreateProduct::class, 'canPerformAction', [false]))
                 ->xOnClick(<<<'JS'
-                    $wire.new().then(() => {$modalOpen('create-product');});
+                    $wire.new().then(() => {$modalOpen('create-product-modal');});
                 JS),
         ];
     }
@@ -171,14 +171,26 @@ class ProductList extends BaseProductList
         return array_merge(
             parent::getViewData(),
             [
+                'selectablePriceLists' => resolve_static(PriceList::class, 'query')
+                    ->get(['id', 'name'])
+                    ->toArray(),
                 'vatRates' => resolve_static(VatRate::class, 'query')
                     ->get(['id', 'name', 'rate_percentage'])
                     ->toArray(),
                 'roundingMethods' => RoundingMethodEnum::valuesLocalized(),
                 'roundingModes' => [
-                    'round' => __('Round'),
-                    'ceil' => __('Round up'),
-                    'floor' => __('Round down'),
+                    [
+                        'label' => __('Round'),
+                        'value' => 'round',
+                    ],
+                    [
+                        'label' => __('Round up'),
+                        'value' => 'ceil',
+                    ],
+                    [
+                        'label' => __('Round down'),
+                        'value' => 'floor',
+                    ],
                 ],
             ]
         );

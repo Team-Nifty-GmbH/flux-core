@@ -1,5 +1,5 @@
 <x-modal id="edit-mail-folders" class="bg-gray-50">
-    <div class="grid grid-cols-2 gap-4">
+    <div class="grid grid-cols-2 gap-1.5">
         <x-card id="mail-folders" x-on:folder-tree-select="$wire.editMailFolder($event.detail.id)">
             <x-flux::checkbox-tree
                 tree="$wire.folders"
@@ -28,18 +28,16 @@
         </div>
     </div>
     <x-slot:footer>
-        <div class="flex w-full justify-end">
-            <x-button color="secondary" light :text="__('Close')" x-on:click="$modalClose('edit-mail-folders')" />
-        </div>
+        <x-button color="secondary" light :text="__('Close')" x-on:click="$modalClose('edit-mail-folders')" />
     </x-slot:footer>
 </x-modal>
 <x-modal id="edit-mail-account">
     <x-slot:title>
         {{ __('Edit Mail Account') }}
     </x-slot:title>
-    <div class="flex flex-col gap-4">
+    <div class="flex flex-col gap-1.5">
         <x-card :header="__('IMAP Settings')" footer-classes="flex justify-end gap-1.5">
-            <div class="flex flex-col gap-4">
+            <div class="flex flex-col gap-1.5">
                 <x-select.styled
                     :label="__('Protocol')"
                     wire:model="mailAccount.protocol"
@@ -72,7 +70,7 @@
             </x-slot:footer>
         </x-card>
         <x-card :header="__('SMTP Settings')" footer-classes="flex justify-end gap-1.5">
-            <div class="flex flex-col gap-4">
+            <div class="flex flex-col gap-1.5">
                 <x-input wire:model="mailAccount.smtp_email" :text="__('Email')" />
                 <x-password wire:model="mailAccount.smtp_password" :label="__('Password')" />
                 <x-input wire:model="mailAccount.smtp_host" :label="__('Host')" />

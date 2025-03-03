@@ -72,7 +72,7 @@ class AddressTypes extends AddressTypeList
         $this->addressType->fill($addressType);
 
         $this->js(<<<'JS'
-            $modalOpen('edit-address-type');
+            $modalOpen('edit-address-type-modal');
         JS);
     }
 

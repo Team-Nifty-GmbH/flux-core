@@ -1,4 +1,4 @@
-<div class="py-6"  x-data="{translations: $wire.entangle('translations'), locale: @entangle('locale').live}">
+<div class="py-6" x-data="{translations: $wire.entangle('translations'), locale: @entangle('locale').live}">
     <div class="px-4 sm:px-6 lg:px-8">
         <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">
@@ -60,7 +60,7 @@
 
     <x-modal id="edit-translation-modal" z-index="z-30" wire="showTranslationModal" :title="$index === -1 ? __('Create Translation') : __('Edit Translation')">
         <livewire:settings.translation-edit/>
-        <x-slot name="footer">
+        <x-slot:footer>
             <div x-data="{index: @entangle('index')}" class="w-full">
                 <div
                     class="flex justify-between gap-x-4">
@@ -75,12 +75,12 @@
                             wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Translation')]) }}"
                         />
                     @endif
-                    <div class="flex">
+                    <div class="flex gap-x-2">
                         <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('edit-translation-modal')"/>
                         <x-button color="indigo" :text="__('Save')" wire:click="$dispatchTo('settings.translation-edit', 'save')"/>
                     </div>
                 </div>
             </div>
-        </x-slot>
+        </x-slot:footer>
     </x-modal>
 </div>

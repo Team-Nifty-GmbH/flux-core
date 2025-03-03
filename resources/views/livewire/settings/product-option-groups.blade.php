@@ -11,18 +11,16 @@
         <x-button color="indigo" x-on:click="$wire.productOptionGroupForm.product_options.push({name: ''})">{{ __('Add Product Option') }}</x-button>
     </div>
     <x-slot:footer>
-        <div class="flex justify-end gap-1.5">
-            <x-button color="secondary" light
-                flat
-                :text="__('Cancel')"
-                x-on:click="$modalClose('edit-product-option-group-modal')"
-            />
-            <x-button
-                color="indigo"
-                loading="save()"
-                :text="__('Save')"
-                wire:click="save().then((success) => { if(success) $modalClose('edit-product-option-group-modal'); })"
-            />
-        </div>
+        <x-button color="secondary" light
+            flat
+            :text="__('Cancel')"
+            x-on:click="$modalClose('edit-product-option-group-modal')"
+        />
+        <x-button
+            color="indigo"
+            loading="save()"
+            :text="__('Save')"
+            wire:click="save().then((success) => { if(success) $modalClose('edit-product-option-group-modal'); })"
+        />
     </x-slot:footer>
 </x-modal>

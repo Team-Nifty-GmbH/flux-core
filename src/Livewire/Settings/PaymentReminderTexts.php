@@ -74,7 +74,7 @@ class PaymentReminderTexts extends PaymentReminderTextList
         $this->paymentReminderTextForm->fill($paymentReminderText);
 
         $this->js(<<<'JS'
-            $modalOpen('edit-payment-reminder-text');
+            $modalOpen('edit-payment-reminder-text-modal');
         JS);
     }
 

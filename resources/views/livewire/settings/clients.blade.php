@@ -22,7 +22,9 @@
             <div class="w-full">
                 <div class="flex justify-between gap-x-4">
                     @if(resolve_static(\FluxErp\Actions\Client\DeleteClient::class, 'canPerformAction', [false]))
-                        <x-button color="secondary" light
+                        <x-button
+                            color="secondary"
+                            light
                             wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Client')]) }}"
                             x-bind:class="$wire.client.id > 0 || 'invisible'"
                             wire:click="delete().then((success) => {if(success) close();});"
@@ -31,7 +33,7 @@
                             :text="__('Delete')"
                         />
                     @endif
-                    <div class="flex">
+                    <div class="flex gap-x-2">
                         <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('edit-client')"/>
                         <x-button color="indigo" :text="__('Save')" wire:click="save().then((success) => {if(success) $modalClose('edit-client');});"/>
                     </div>

@@ -10,7 +10,7 @@
         <div class="space-y-8 divide-y divide-gray-200">
             <div class="space-y-8 divide-y divide-gray-200">
                 <div>
-                    <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                    <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                         <div class="space-y-2.5 sm:col-span-6">
                             <x-input wire:model="priceList.name" :label="__('Name')"/>
                             <x-select.styled
@@ -36,7 +36,6 @@
                         wire:model="priceList.rounding_method_enum"
                         :label="__('Rounding Method')"
                         :options="$roundingMethods"
-                        option-key-value
                     />
                     <div x-show="$wire.priceList.rounding_method_enum !== 'none'">
                         <x-number
@@ -57,7 +56,6 @@
                             wire:model="priceList.rounding_mode"
                             :label="__('Rounding Mode')"
                             :options="$roundingModes"
-                            option-key-value
                         />
                     </div>
                 </div>
@@ -93,7 +91,9 @@
                                     </div>
                                 <td class="text-right">
                                     @if($priceList->id ? resolve_static(\FluxErp\Actions\Discount\UpdateDiscount::class, 'canPerformAction', [false]) : resolve_static(\FluxErp\Actions\Discount\CreateDiscount::class, 'canPerformAction', [false]))
-                                        <x-button icon="trash" color="red" x-on:click="$wire.removeCategoryDiscount(index)"/>
+                                        <div class="mt-1">
+                                            <x-button icon="trash" color="red" x-on:click="$wire.removeCategoryDiscount(index)"/>
+                                        </div>
                                     @endif
                                 </td>
                             </tr>
@@ -136,24 +136,8 @@
             </div>
         </div>
         <x-slot:footer>
-            <div class="flex justify-between gap-x-4">
-                @if(resolve_static(\FluxErp\Actions\PriceList\DeletePriceList::class, 'canPerformAction', [false]))
-                    <div x-bind:class="$wire.priceList.id > 0 || 'invisible'">
-                        <x-button
-                            flat
-                            color="red"
-                            :text="__('Delete')"
-                            x-on:click="$modalClose('edit-price-list-modal')"
-                            wire:click="delete().then((success) => { if(success) $modalClose('edit-price-list-modal')})"
-                            wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Price List')]) }}"
-                        />
-                    </div>
-                @endif
-                <div class="flex">
-                    <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('edit-price-list-modal')"/>
-                    <x-button color="indigo" :text="__('Save')" wire:click="save().then((success) => { if(success) $modalClose('edit-price-list-modal')})"/>
-                </div>
-            </div>
+            <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('edit-price-list-modal')"/>
+            <x-button color="indigo" :text="__('Save')" wire:click="save().then((success) => { if(success) $modalClose('edit-price-list-modal')})"/>
         </x-slot:footer>
     </x-modal>
 </div>

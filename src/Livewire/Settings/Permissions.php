@@ -101,7 +101,7 @@ class Permissions extends RoleList
     #[Renderless]
     public function editUsers(Role $role): void
     {
-        $this->edit($role, 'edit-role-users');
+        $this->edit($role, 'edit-role-users-modal');
     }
 
     #[Renderless]

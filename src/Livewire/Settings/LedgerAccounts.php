@@ -71,7 +71,7 @@ class LedgerAccounts extends LedgerAccountList
         $this->ledgerAccount->fill($ledgerAccount);
 
         $this->js(<<<'JS'
-            $modalOpen('edit-ledger-account');
+            $modalOpen('edit-ledger-account-modal');
         JS);
     }
 

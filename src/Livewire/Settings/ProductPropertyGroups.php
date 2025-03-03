@@ -28,7 +28,7 @@ class ProductPropertyGroups extends ProductPropertyGroupList
     {
         return [
             DataTableButton::make()
-                ->text(__('Add'))
+                ->text(__('New'))
                 ->icon('plus')
                 ->color('indigo')
                 ->wireClick('edit')
@@ -51,18 +51,13 @@ class ProductPropertyGroups extends ProductPropertyGroupList
                 ),
             DataTableButton::make()
                 ->text(__('Delete'))
-                ->icon('trash')
                 ->color('red')
+                ->icon('trash')
+                ->when(resolve_static(DeleteProductPropertyGroup::class, 'canPerformAction', [false]))
                 ->attributes([
-                    'wire:flux-confirm.type.error' => __(
-                        'wire:confirm.delete',
-                        ['model' => __('Product Property Group')]
-                    ),
                     'wire:click' => 'delete(record.id)',
-                ])
-                ->when(
-                    fn () => resolve_static(DeleteProductPropertyGroup::class, 'canPerformAction', [false])
-                ),
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Product Property Group')]),
+                ]),
         ];
     }
 
@@ -87,7 +82,7 @@ class ProductPropertyGroups extends ProductPropertyGroupList
         $this->productPropertyGroup->fill($productPropertyGroup);
 
         $this->js(<<<'JS'
-            $modalOpen('edit-product-property-group');
+            $modalOpen('edit-product-property-group-modal');
         JS);
     }
 
@@ -110,7 +105,9 @@ class ProductPropertyGroups extends ProductPropertyGroupList
     #[Renderless]
     public function delete(ProductPropertyGroup $productPropertyGroup): void
     {
+        $this->productPropertyGroup->reset();
         $this->productPropertyGroup->fill($productPropertyGroup);
+
         try {
             $this->productPropertyGroup->delete();
         } catch (ValidationException|UnauthorizedException $e) {

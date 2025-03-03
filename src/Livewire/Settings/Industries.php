@@ -57,7 +57,7 @@ class Industries extends IndustryList
         $this->industryForm->fill($industry);
 
         $this->js(<<<'JS'
-            $modalOpen('edit-industry');
+            $modalOpen('edit-industry-modal');
         JS);
     }
 

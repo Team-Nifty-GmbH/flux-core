@@ -60,7 +60,7 @@ class Units extends UnitList
         $this->unit->fill($unit);
 
         $this->js(<<<'JS'
-            $modalOpen('edit-unit');
+            $modalOpen('edit-unit-modal');
         JS);
     }
 

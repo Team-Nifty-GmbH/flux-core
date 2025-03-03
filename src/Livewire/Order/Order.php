@@ -114,7 +114,7 @@ class Order extends Component
                     ->get(['id', 'name'])
                     ->toArray(),
                 'frequencies' => array_map(
-                    fn ($item) => ['name' => $item, 'label' => __(Str::headline($item))],
+                    fn ($item) => ['value' => $item, 'label' => __(Str::headline($item))],
                     array_intersect(
                         FrequenciesEnum::getBasicFrequencies(),
                         [

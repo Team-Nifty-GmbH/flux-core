@@ -46,6 +46,15 @@ class VatRates extends VatRateList
                 ->attributes([
                     'wire:click' => 'edit(record.id)',
                 ]),
+            DataTableButton::make()
+                ->text(__('Delete'))
+                ->icon('trash')
+                ->color('red')
+                ->when(resolve_static(DeleteVatRate::class, 'canPerformAction', [false]))
+                ->attributes([
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Vat Rate')]),
+                    'wire:click' => 'delete(record.id)',
+                ]),
         ];
     }
 
@@ -55,7 +64,7 @@ class VatRates extends VatRateList
         $this->vatRate->fill($vatRate);
 
         $this->js(<<<'JS'
-            $modalOpen('edit-vat-rate');
+            $modalOpen('edit-vat-rate-modal');
         JS);
     }
 
@@ -74,13 +83,13 @@ class VatRates extends VatRateList
         return true;
     }
 
-    public function delete(): bool
+    public function delete(VatRate $vatRate): bool
     {
+        $this->vatRate->reset();
+        $this->vatRate->fill($vatRate);
+
         try {
-            DeleteVatRate::make($this->vatRate->toArray())
-                ->checkPermission()
-                ->validate()
-                ->execute();
+            $this->vatRate->delete();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 

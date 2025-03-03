@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\Settings;
 
 use FluxErp\Actions\OrderType\CreateOrderType;
+use FluxErp\Actions\OrderType\DeleteOrderType;
 use FluxErp\Actions\OrderType\UpdateOrderType;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\DataTables\OrderTypeList;
@@ -48,6 +49,15 @@ class OrderTypes extends OrderTypeList
                     'x-on:click' => '$wire.edit(record.id)',
                 ])
                 ->when(fn () => resolve_static(UpdateOrderType::class, 'canPerformAction', [false])),
+            DataTableButton::make()
+                ->text(__('Delete'))
+                ->color('red')
+                ->icon('trash')
+                ->when(resolve_static(DeleteOrderType::class, 'canPerformAction', [false]))
+                ->attributes([
+                    'wire:click' => 'delete(record.id)',
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Order Type')]),
+                ]),
         ];
     }
 
@@ -68,7 +78,6 @@ class OrderTypes extends OrderTypeList
                 'clients' => resolve_static(Client::class, 'query')
                     ->get(['id', 'name'])
                     ->toArray(),
-                'enum' => OrderTypeEnum::values(),
             ]
         );
     }
@@ -94,7 +103,7 @@ class OrderTypes extends OrderTypeList
         $this->orderType->fill($orderType);
 
         $this->js(<<<'JS'
-            $modalOpen('edit-order-type');
+            $modalOpen('edit-order-type-modal');
         JS);
     }
 

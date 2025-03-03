@@ -23,13 +23,13 @@
                                 <x-input x-ref="company" wire:model="contact.main_address.company"/>
                             </div>
                         </div>
-                        <div
-                            class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4">
-                            <x-label :label="__('Salutation')" for="{{ md5('contact.main_address.salutation') }}" />
+                        <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4">
+                            <label for="{{ md5('address.salutation') }}" class="block text-sm font-medium text-gray-700 dark:text-gray-50 sm:mt-px sm:pt-2">
+                                {{ __('Salutation') }}
+                            </label>
                             <div class="col-span-2 w-full">
                                 <x-select.styled
                                     :options="SalutationEnum::valuesLocalized()"
-                                    option-key-value
                                     x-bind:readonly="!$wire.edit"
                                     wire:model="contact.main_address.salutation"
                                 />
@@ -161,12 +161,10 @@
                         </div>
                     @show
                 </div>
-                <x-slot name="footer">
-                    <div class="flex justify-end gap-x-4">
-                        <x-button color="secondary" light flat :text="__('Cancel') " x-on:click="$modalClose('new-contact-modal')"/>
-                        <x-button color="indigo" :text="__('Save') " wire:click="save"/>
-                    </div>
-                </x-slot>
+                <x-slot:footer>
+                    <x-button color="secondary" light flat :text="__('Cancel') " x-on:click="$modalClose('new-contact-modal')"/>
+                    <x-button color="indigo" :text="__('Save') " wire:click="save"/>
+                </x-slot:footer>
             </x-modal>
         @show
     @endcan

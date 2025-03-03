@@ -1,8 +1,8 @@
 @use('\FluxErp\Enums\SalutationEnum')
 @props([
     'onlyPostal' => false,
-    'countries' => resolve_static(\FluxErp\Models\Country::class, 'query')->select(['id', 'name'])->pluck('name', 'id')->toArray(),
-    'languages' => resolve_static(\FluxErp\Models\Language::class, 'query')->select(['id', 'name'])->pluck('name', 'id')->toArray(),
+    'countries' => resolve_static(\FluxErp\Models\Country::class, 'query')->get(['id', 'name'])->toArray(),
+    'languages' => resolve_static(\FluxErp\Models\Language::class, 'query')->get(['id', 'name'])->toArray(),
 ])
 <div class="table w-full table-auto gap-1.5" x-ref="address">
     @section('contact')
@@ -29,7 +29,6 @@
             <div class="col-span-2 w-full">
                 <x-select.styled
                     :options="SalutationEnum::valuesLocalized()"
-                    option-key-value
                     x-bind:readonly="!$wire.edit"
                     wire:model="address.salutation"
                 />
@@ -75,7 +74,7 @@
                     wire:model="address.country_id"
                     searchable
                     :options="$countries"
-                    option-key-value
+                    select="label:name|value:id"
                 />
             </div>
         </div>
@@ -197,7 +196,7 @@
                         wire:model="address.language_id"
                         searchable
                         :options="$languages"
-                        option-key-value
+                        select="label:name|value:id"
                     />
                 </div>
             </div>

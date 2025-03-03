@@ -9,21 +9,24 @@
         });
     }
 }">
-    <x-modal id="edit-work-time-modal" class="flex flex-col gap-4">
-        <div class="flex flex-col gap-1.5" x-cloak x-show="! $wire.workTime.is_daily_work_time">
-            <x-select.styled
-                :label="__('Work Time Type')"
-                :options="$workTimeTypes"
-                wire:model="workTime.work_time_type_id"
-                select="label:name|value:id"
-                x-on:select="$wire.workTime.is_billable = $event.detail.is_billable"
-            />
-            <x-toggle :label="__('Is Billable')" wire:model="workTime.is_billable" />
-            <x-select.styled
-                :label="__('User')"
-                autocomplete="off"
-                wire:model="workTime.user_id"
-                :request="[
+    <x-modal id="edit-work-time-modal">
+        <div class="flex flex-col gap-1.5">
+            <div class="flex flex-col gap-1.5" x-cloak x-show="! $wire.workTime.is_daily_work_time">
+                <x-select.styled
+                    :label="__('Work Time Type')"
+                    :options="$workTimeTypes"
+                    wire:model="workTime.work_time_type_id"
+                    select="label:name|value:id"
+                    x-on:select="$wire.workTime.is_billable = $event.detail.is_billable"
+                />
+                <div class="mt-2 mb-2">
+                    <x-toggle :label="__('Is Billable')" wire:model="workTime.is_billable" />
+                </div>
+                <x-select.styled
+                    :label="__('User')"
+                    autocomplete="off"
+                    wire:model="workTime.user_id"
+                    :request="[
                     'url' => route('search', \FluxErp\Models\User::class),
                     'method' => 'POST',
                     'params' => [
@@ -33,88 +36,86 @@
                         'with' => 'media',
                     ],
                 ]"
-            />
-        </div>
-        <x-date time-format="24"
-            :label="__('Started At')"
-            display-format="DD.MM.YYYY HH:mm"
-            parse-format="YYYY-MM-DD HH:mm:ss"
-            wire:model="workTime.started_at"
-        />
-        <x-date time-format="24"
-           :label="__('Ended At')"
-           display-format="DD.MM.YYYY HH:mm"
-           parse-format="YYYY-MM-DD HH:mm:ss"
-           wire:model="workTime.ended_at"
-        />
-        <x-input :label="__('Paused Time')"
-                 wire:model.blur="workTime.paused_time"
-                 :corner-hint="__('Hours:Minutes')"
-        />
-        <div class="flex flex-col gap-1.5" x-cloak x-show="! $wire.workTime.is_daily_work_time">
-            <x-select.styled :label="__('Contact')"
-                wire:model="workTime.contact_id"
-                select="label:label|value:contact_id"
-                :request="[
-                    'url' => route('search', \FluxErp\Models\Address::class),
-                    'method' => 'POST',
-                    'params' => [
-                        'option-value' => 'contact_id',
-                        'where' => [
-                            [
-                                'is_main_address',
-                                '=',
-                                true,
-                            ],
-                        ],
-                        'fields' => [
-                            'contact_id',
-                            'name',
-                        ],
-                        'with' => 'contact.media',
-                    ],
-                ]"
-            />
-            <x-select.styled
-                :label="__('Model')"
-                wire:model="workTime.trackable_type"
-                :options="$trackableTypes"
-                select="label:value|value:label"
-            />
-            <div id="trackable-id-edit" x-show="$wire.workTime.trackable_type">
-                <x-select.styled
-                    :label="__('Record')"
-                    x-on:select="$event.detail.contact_id ? $wire.workTime.contact_id = $event.detail.contact_id : null"
-                    :request="[
-                        'url' => route('search', '__model__'),
-                        'method' => 'POST',
-                        'params' => [
-                            'appends' => [
-                                'contact_id',
-                            ],
-                        ],
-                    ]"
-                    wire:model="workTime.trackable_id"
                 />
             </div>
-            <x-input :label="__('Name')" wire:model="workTime.name" />
-            <x-textarea :label="__('Description')" wire:model="workTime.description" />
+            <x-date time-format="24"
+                    :label="__('Started At')"
+                    display-format="DD.MM.YYYY HH:mm"
+                    parse-format="YYYY-MM-DD HH:mm:ss"
+                    wire:model="workTime.started_at"
+            />
+            <x-date time-format="24"
+                    :label="__('Ended At')"
+                    display-format="DD.MM.YYYY HH:mm"
+                    parse-format="YYYY-MM-DD HH:mm:ss"
+                    wire:model="workTime.ended_at"
+            />
+            <x-input :label="__('Paused Time')"
+                     wire:model.blur="workTime.paused_time"
+                     :corner-hint="__('Hours:Minutes')"
+            />
+            <div class="flex flex-col gap-1.5" x-cloak x-show="! $wire.workTime.is_daily_work_time">
+                <x-select.styled
+                    :label="__('Contact')"
+                    wire:model="workTime.contact_id"
+                    select="label:label|value:contact_id"
+                    :request="[
+                        'url' => route('search', \FluxErp\Models\Address::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'option-value' => 'contact_id',
+                            'where' => [
+                                [
+                                    'is_main_address',
+                                    '=',
+                                    true,
+                                ],
+                            ],
+                            'fields' => [
+                                'contact_id',
+                                'name',
+                            ],
+                            'with' => 'contact.media',
+                        ],
+                    ]"
+                />
+                <x-select.styled
+                    :label="__('Model')"
+                    wire:model="workTime.trackable_type"
+                    :options="$trackableTypes"
+                    select="label:value|value:label"
+                />
+                <div id="trackable-id-edit" x-show="$wire.workTime.trackable_type">
+                    <x-select.styled
+                        :label="__('Record')"
+                        x-on:select="$event.detail.contact_id ? $wire.workTime.contact_id = $event.detail.contact_id : null"
+                        :request="[
+                            'url' => route('search', '__model__'),
+                            'method' => 'POST',
+                            'params' => [
+                                'appends' => [
+                                    'contact_id',
+                                ],
+                            ],
+                        ]"
+                        wire:model="workTime.trackable_id"
+                    />
+                </div>
+                <x-input :label="__('Name')" wire:model="workTime.name" />
+                <x-textarea :label="__('Description')" wire:model="workTime.description" />
+            </div>
         </div>
         <x-slot:footer>
-            <div class="flex justify-end gap-x-4">
-                <div class="flex">
-                    <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('edit-work-time-modal')" />
-                    <x-button color="indigo" loading x-on:click="$wire.save().then((success) => { if (success) $modalClose('edit-work-time-modal'); })" :text="__('Save')" />
-                </div>
-            </div>
+            <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('edit-work-time-modal')" />
+            <x-button color="indigo" loading x-on:click="$wire.save().then((success) => { if (success) $modalClose('edit-work-time-modal'); })" :text="__('Save')" />
         </x-slot:footer>
     </x-modal>
     <x-modal id="create-orders-modal">
-        <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-1.5">
             <x-select.styled
                 :label="__('Order Type')"
                 :options="$orderTypes"
-                option-key-value
+                select="label:name|value:id"
                 wire:model="createOrdersFromWorkTimes.order_type_id"
             />
             <x-select.styled
@@ -145,17 +146,15 @@
             <x-toggle :label="__('Add non billable times')" wire:model="createOrdersFromWorkTimes.add_non_billable_work_times" />
         </div>
         <x-slot:footer>
-            <div class="flex justify-end gap-x-4">
-                <div class="flex">
-                    <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('create-orders-modal')" />
-                    <x-button color="indigo" loading x-on:click="$wire.createOrders().then(() => { $modalClose('create-orders-modal'); })" :text="__('Create Orders')" />
-                </div>
-            </div>
+            <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('create-orders-modal')" />
+            <x-button color="indigo" loading x-on:click="$wire.createOrders().then(() => { $modalClose('create-orders-modal'); })" :text="__('Create Orders')" />
         </x-slot:footer>
     </x-modal>
     <div x-data="{isBillable: true}">
-        <x-modal id="toggle-is-billable-modal" class="flex flex-col gap-4">
-            <x-toggle x-model="isBillable" :label="__('Is Billable')" />
+        <x-modal id="toggle-is-billable-modal">
+            <div class="flex flex-col gap-1.5">
+                <x-toggle x-model="isBillable" :label="__('Is Billable')" />
+            </div>
             <x-slot:footer>
                 <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('toggle-is-billable-modal')" />
                 <x-button color="indigo" loading wire:click="toggleIsBillable(isBillable).then(() => { $modalClose('toggle-is-billable-modal'); })" :text="__('Apply')" />
