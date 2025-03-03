@@ -15,7 +15,27 @@ export default function (content, debounceDelay = 0, searchModel = ['user', 'rol
             proxy: null,
             editable: true,
             content: content,
-            init(element) {
+            popUp: null,
+            initTextArea(element, isTransparent, showTooltipDropdown) {
+                const popUp = this.$refs?.popWindow;
+                const controlPanel = this.$refs?.controlPanel;
+                const commands = this.$refs?.commands;
+                let actions = null;
+
+                if(showTooltipDropdown && popUp !== null) {
+                    // append controllers to tiptap
+                    const popUpNode = popUp.content.cloneNode(true);
+                    const commandsNode = commands.content.cloneNode(true);
+                    popUpNode.appendChild(commandsNode);
+                    actions = popUpNode;
+
+                } else {
+                    // append to controls to div
+                    controlPanel.appendChild(commands.content.cloneNode(true));
+                }
+
+                //  access to the parent scope in onSelectionUpdate callback
+                const parent = this;
                 _editor = new Editor({
                     element: element,
                     extensions: [
@@ -87,15 +107,55 @@ export default function (content, debounceDelay = 0, searchModel = ['user', 'rol
                     editable: this.editable,
                     editorProps: {
                         attributes: {
-                            class: 'prose prose-sm max-w-full content-editable-placeholder placeholder-secondary-400 dark:bg-secondary-800 dark:placeholder-secondary-500 border-secondary-300 focus:ring-primary-500 focus:border-primary-500 dark:border-secondary-600 form-input block min-h-[85px] w-full rounded-b-md border p-3 shadow-sm transition duration-100 ease-in-out focus:outline-none dark:text-gray-50 sm:text-sm',
+                            class: `${isTransparent ? 'bg-transparent' : 'dark:bg-secondary-800'} ${showTooltipDropdown ? 'rounded-md' : 'rounded-b-md' } \
+                                prose prose-sm max-w-full content-editable-placeholder placeholder-secondary-400 dark:placeholder-secondary-500 \
+                                border-secondary-300 focus:ring-primary-500 focus:border-primary-500 dark:border-secondary-600 form-input block \
+                                min-h-[85px] w-full  border p-3 shadow-sm transition duration-100 ease-in-out focus:outline-none dark:text-gray-50 sm:text-sm`,
                         },
                     },
+                    onSelectionUpdate: showTooltipDropdown ?  ({ editor }) => {
+                        const { from, to } = editor.state.selection;
+
+                        // init popUp if not
+                        if(parent.popUp === null) {
+                            parent.popUp =  window.tippy(element, {
+                                content: actions ?? 'not defined',
+                                showOnCreate: true,
+                                interactive: true,
+                                trigger: 'manual',
+                                placement: 'top',
+                            })
+                        }
+
+                        if (from !== to) {
+                            if(parent.popUp.state.isVisible) return;
+                            // in case it is not visible determine the cursor position
+                            const cursorPosition = editor.view.coordsAtPos(from);
+                            // update the position if cursorPosition is defined
+                            cursorPosition && parent.popUp.setProps({
+                                getReferenceClientRect: () => ({
+                                    width:0,
+                                    height:0,
+                                    top: cursorPosition.top,
+                                    left: cursorPosition.left,
+                                    bottom: cursorPosition.bottom,
+                                    right: cursorPosition.right,
+                                })
+                            })
+                            parent.popUp.show();
+
+                        } else {
+                            if(!parent.popUp.state.isVisible) return;
+                            parent.popUp.hide();
+                        }
+                    } : null,
                     onUpdate: ({ editor }) => {
                         clearTimeout(this.timeout);
                         this.timeout = setTimeout(() => {
                             this.content = editor.getHTML();
                         }, debounceDelay);
                     },
+
                 });
 
                 this.proxy = Alpine.raw(_editor);
