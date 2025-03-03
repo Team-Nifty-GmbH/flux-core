@@ -299,7 +299,7 @@ class FluxServiceProvider extends ServiceProvider
                     function (string $js) {
                         Assert::assertStringContainsString(
                             $js,
-                            implode(' ', data_get($this->lastState->getEffects(), 'xjs', []))
+                            implode(' ', data_get($this->lastState->getEffects(), 'xjs.*.expression', []))
                         );
 
                         return $this;
