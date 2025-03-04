@@ -54,10 +54,8 @@
                             <iframe class="object-contain" height="100%" width="100%" id="detail-modal-iframe" src="data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E">
                             </iframe>
                             <x-slot:footer>
-                                <div class="w-full flex justify-end gap-1.5">
-                                    <x-button color="secondary" light :text="__('Cancel')" x-on:click="$modalClose('detail-modal')"/>
-                                    <x-button color="indigo" :text="__('Open')" x-on:click="openUrl()"/>
-                                </div>
+                                <x-button color="secondary" light :text="__('Cancel')" x-on:click="$modalClose('detail-modal')"/>
+                                <x-button color="indigo" :text="__('Open')" x-on:click="openUrl()"/>
                             </x-slot:footer>
                         </x-card>
                     </div>

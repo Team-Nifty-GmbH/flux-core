@@ -1,7 +1,9 @@
 <x-modal id="edit-payment-type-modal">
     <div class="flex flex-col gap-1.5">
         <x-input wire:model="paymentType.name" :label="__('Name')" />
-        <x-toggle wire:model.boolean="paymentType.is_active" :label="__('Is Active')" />
+        <div class="mt-2">
+            <x-toggle wire:model.boolean="paymentType.is_active" :label="__('Is Active')" />
+        </div>
         <x-toggle wire:model.boolean="paymentType.is_default" :label="__('Is Default')" />
         <x-toggle wire:model.boolean="paymentType.is_purchase" :label="__('Is Purchase')" />
         <x-toggle wire:model.boolean="paymentType.is_sales" :label="__('Is Sales')" />

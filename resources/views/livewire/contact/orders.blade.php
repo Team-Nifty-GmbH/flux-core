@@ -1,7 +1,4 @@
-<div x-data="{
-        order: $wire.entangle('order'),
-    }"
->
+<div>
     <x-modal id="create-order-modal" :title="__('New Order')">
         <section>
             <div class="space-y-2.5 divide-y divide-secondary-200">
@@ -127,17 +124,9 @@
                 </div>
             </div>
         </section>
-        <x-errors />
-        <x-slot name="footer">
-            <div class="flex justify-end gap-x-4">
-                <div class="flex">
-                    <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('create-order-modal')" />
-                    <x-button loading color="indigo" :text="__('Save')" wire:click="save" />
-                </div>
-            </div>
-        </x-slot>
+        <x-slot:footer>
+            <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('create-order-modal')" />
+            <x-button loading color="indigo" :text="__('Save')" wire:click="save" />
+        </x-slot:footer>
     </x-modal>
-    <div wire:ignore>
-        @include('tall-datatables::livewire.data-table')
-    </div>
 </div>

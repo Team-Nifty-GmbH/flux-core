@@ -36,13 +36,11 @@
                         select="label:label|value:contact_id"
                         option-description="description"
                         required
-                        x-on:select="console.log($event.detail)"
                         x-on:select="updateContactId($event.detail.select.contact_id)"
                         :request="[
                             'url' => route('search', \FluxErp\Models\Address::class),
                             'method' => 'POST',
                             'params' => [
-                                'option-value' => 'contact_id',
                                 'fields' => [
                                     'name',
                                     'contact_id',
@@ -145,10 +143,10 @@
             </div>
         </section>
         <x-errors />
-        <x-slot name="footer">
+        <x-slot:footer>
             <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('create-order-modal')" />
             <x-button loading="save" color="indigo" :text="__('Save')" wire:click="save" />
-        </x-slot>
+        </x-slot:footer>
     </x-modal>
     {{ $this->renderCreateDocumentsModal() }}
 </div>

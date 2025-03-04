@@ -39,9 +39,7 @@
             </div>
         </div>
         <x-slot:footer>
-            <div class="flex justify-end">
-                <x-button color="secondary" light x-on:click="$modalClose('show-log-modal')" class="mr-2">{{ __('Close') }}</x-button>
-            </div>
+            <x-button color="secondary" light :text="__('Close')" x-on:click="$modalClose('show-log-modal')" class="mr-2"/>
         </x-slot:footer>
     </x-modal>
     <div class="mb-6 sm:flex sm:items-center">

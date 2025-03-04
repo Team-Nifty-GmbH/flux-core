@@ -22,7 +22,7 @@
                             })"
                         />
                     </div>
-                    <div class="flex">
+                    <div class="flex justify-end gap-x-2">
                         <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('task-form-modal')"/>
                         <x-button
                             color="indigo"

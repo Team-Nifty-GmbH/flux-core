@@ -14,7 +14,7 @@
                     }
                 }"
             >
-                <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                <div class="mt-6 grid grid-cols-1 gap-1.5 sm:grid-cols-6">
                     <div class="sm:col-span-6">
                         <x-input :label="__('Title')"
                                  :placeholder="__('What is it about?')"
@@ -75,14 +75,8 @@
             </div>
         </div>
     </div>
-    <x-slot name="footer">
-        <div class="w-full">
-            <div class="flex justify-end gap-x-4">
-                <div class="flex">
-                    <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('new-ticket-modal')"/>
-                    <x-button color="indigo" :text="__('Save')" wire:click="save"/>
-                </div>
-            </div>
-        </div>
-    </x-slot>
+    <x-slot:footer>
+        <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('new-ticket-modal')"/>
+        <x-button color="indigo" :text="__('Save')" wire:click="save"/>
+    </x-slot:footer>
 </x-modal>

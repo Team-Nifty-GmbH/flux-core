@@ -262,7 +262,7 @@
             </x-slot:footer>
         </x-modal>
         <x-modal id="edit-discount" x-on:open="$focus.first()" x-trap="show" x-on:keyup.enter="$wire.saveDiscount().then((success) => {if(success) $modalClose('edit-discount');})">
-            <div class="flex flex-col gap-4">
+            <div class="flex flex-col gap-1.5">
                 <x-input wire:model="discount.name" :text="__('Name')" />
                 <div x-cloak x-show="$wire.discount.is_percentage">
                     <x-input
@@ -428,7 +428,7 @@
                                     select="label:label|value:contact_id"
                                     option-description="description"
                                     required
-                                    x-on:selected="updateContactId($event.detail.select.value)"
+                                    x-on:select="updateContactId($event.detail.select.value)"
                                     :request="[
                                         'url' => route('search', \FluxErp\Models\Address::class),
                                         'method' => 'POST',
@@ -643,7 +643,7 @@
                                         wire:model="order.contact_bank_connection_id"
                                         :label="__('Bank connection')"
                                         :options="$contactBankConnections"
-                                        option-key-value
+                                        select="label:iban|value:id"
                                     />
                                 @endif
                                 @if(count($languages) > 1)

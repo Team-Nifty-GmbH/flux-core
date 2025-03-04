@@ -98,7 +98,6 @@ class FluxServiceProvider extends ServiceProvider
 
         $this->loadJsonTranslationsFrom(__DIR__ . '/../lang');
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'flux');
-        $this->loadViewsFrom(__DIR__ . '/../../resources/views/vendor/tallstackui/', 'tallstack-ui');
         $this->registerConfig();
         $this->registerMarcos();
         $this->registerExtensions();

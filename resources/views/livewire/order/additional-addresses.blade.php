@@ -27,16 +27,14 @@
                     />
                     <x-select.styled
                         :label="__('Type')"
-                        option-key-value
                         wire:model="address_type_id"
-                        :options="resolve_static(\FluxErp\Models\AddressType::class, 'query')->where('client_id', $clientId)->pluck('name', 'id')"
+                        :options="resolve_static(\FluxErp\Models\AddressType::class, 'query')->where('client_id', $clientId)->get(['id', 'name'])->toArray()"
+                        select="label:name|value:id"
                     />
                 </div>
                 <x-slot:footer>
-                    <div class="flex justify-end gap-x-4">
-                        <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('edit-address-assignment')" />
-                        <x-button color="indigo" loading="save" x-on:click="$wire.save().then((success) => {if(success) $modalClose('edit-address-assignment');})" :text="__('Save')" />
-                    </div>
+                    <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('edit-address-assignment')" />
+                    <x-button color="indigo" loading="save" x-on:click="$wire.save().then((success) => {if(success) $modalClose('edit-address-assignment');})" :text="__('Save')" />
                 </x-slot:footer>
             </x-modal>
         @endteleport

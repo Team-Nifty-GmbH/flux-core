@@ -8,7 +8,7 @@
         @section('calendar-event-modal')
             <x-modal id="calendar-event-modal" :title="__('Edit Event')">
                 <x-flux::calendar.event-edit />
-                <x-slot name="footer">
+                <x-slot:footer>
                     <div class="flex justify-between gap-2 w-full">
                         <div>
                             <x-button
@@ -47,7 +47,7 @@
                             />
                         </div>
                     </div>
-                </x-slot>
+                </x-slot:footer>
             </x-modal>
             <x-dialog id="edit-repeatable-event-dialog" :title="__('Edit Repeatable Event')">
                 <div x-show="! $wire.calendarEvent.has_repeats">

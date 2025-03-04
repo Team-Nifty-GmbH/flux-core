@@ -135,8 +135,7 @@ class Order extends Component
                 ),
                 'contactBankConnections' => resolve_static(ContactBankConnection::class, 'query')
                     ->where('contact_id', $this->order->contact_id)
-                    ->select(['id', 'contact_id', 'iban'])
-                    ->pluck('iban', 'id')
+                    ->get(['id', 'contact_id', 'iban'])
                     ?->toArray() ?? [],
                 'vatRates' => resolve_static(VatRate::class, 'query')
                     ->where('is_tax_exemption', true)

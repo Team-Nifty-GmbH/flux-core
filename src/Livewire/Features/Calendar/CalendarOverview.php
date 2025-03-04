@@ -54,10 +54,22 @@ class CalendarOverview extends Component
             ->toArray();
 
         $this->fieldTypes = [
-            'text' => __('Text'),
-            'textarea' => __('Textarea'),
-            'checkbox' => __('Checkbox'),
-            'date' => __('Date'),
+            [
+                'label' => __('Text'),
+                'value' => 'text',
+            ],
+            [
+                'label' => __('Textarea'),
+                'value' => 'textarea',
+            ],
+            [
+                'label' => __('Checkbox'),
+                'value' => 'checkbox',
+            ],
+            [
+                'label' => __('Date'),
+                'value' => 'date',
+            ],
         ];
 
         // Todo: add 'select', 'datetime', 'toggle' to available field types

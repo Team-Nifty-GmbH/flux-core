@@ -144,12 +144,8 @@
         </div>
         <x-flux::editor wire:model="mailMessage.html_body" />
         <x-slot:footer>
-            <div class="flex justify-end">
-                <div class="flex gap-1">
-                    <x-button color="secondary" light x-on:click="$modalClose('edit-mail')" class="mr-2">{{ __('Cancel') }}</x-button>
-                    <x-button color="indigo" wire:click="send().then((success) => {if(success) $modalClose('edit-mail');})" class="ml-auto">{{ __('Send') }}</x-button>
-                </div>
-            </div>
+            <x-button color="secondary" light x-on:click="$modalClose('edit-mail')" class="mr-2">{{ __('Cancel') }}</x-button>
+            <x-button color="indigo" wire:click="send().then((success) => {if(success) $modalClose('edit-mail');})" class="ml-auto">{{ __('Send') }}</x-button>
         </x-slot:footer>
     </x-modal>
 </div>

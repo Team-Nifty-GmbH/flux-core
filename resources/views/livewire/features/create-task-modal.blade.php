@@ -90,22 +90,20 @@
             </div>
         </div>
         <x-slot:footer>
-            <div class="flex justify-end">
-                <x-button color="secondary" light
-                    flat
-                    :text="__('Cancel')"
-                    x-on:click="$modalClose('create-task-modal')"
-                />
-                <x-button
-                    color="indigo"
-                    :text="__('Save')"
-                    x-on:click="$wire.save().then((task) => {
-                        if (task) {
-                            close();
-                        }
-                    });"
-                />
-            </div>
+            <x-button color="secondary" light
+                flat
+                :text="__('Cancel')"
+                x-on:click="$modalClose('create-task-modal')"
+            />
+            <x-button
+                color="indigo"
+                :text="__('Save')"
+                x-on:click="$wire.save().then((task) => {
+                    if (task) {
+                        close();
+                    }
+                });"
+            />
         </x-slot:footer>
     </x-modal>
     <x-button

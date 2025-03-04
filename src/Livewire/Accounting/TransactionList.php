@@ -160,7 +160,7 @@ class TransactionList extends BaseTransactionList
         $this->transactionForm->fill($transaction);
 
         $this->js(<<<'JS'
-            $modalOpen('assign-order');
+            $modalOpen('assign-order-modal');
         JS);
     }
 

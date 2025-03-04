@@ -47,7 +47,6 @@
                                                     wire:model="selectedCalendar.customProperties.{{ $index }}.field_type"
                                                     :label="__('Field Type')"
                                                     :options="$this->fieldTypes"
-                                                    option-key-value
                                                 />
                                             </div>
                                             <div class="w-full">

@@ -63,16 +63,10 @@
     <div id="new-ticket-modal-wrapper">
         <x-modal id="new-ticket-modal" :title="__('New Ticket')">
             <livewire:portal.ticket.ticket-create :model-type="\FluxErp\Models\Order::class" :model-id="$order['id']"/>
-            <x-slot name="footer">
-                <div class="w-full">
-                    <div class="flex justify-between gap-x-4">
-                        <div class="flex">
-                            <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('new-ticket-modal')"/>
-                            <x-button color="indigo" :text="__('Save')" x-on:click="Alpine.$data(document.getElementById('new-ticket-modal-wrapper').querySelector('[x-data]').querySelector('[x-data]')).save();"/>
-                        </div>
-                    </div>
-                </div>
-            </x-slot>
+            <x-slot:footer>
+                <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('new-ticket-modal')"/>
+                <x-button color="indigo" :text="__('Save')" x-on:click="Alpine.$data(document.getElementById('new-ticket-modal-wrapper').querySelector('[x-data]').querySelector('[x-data]')).save();"/>
+            </x-slot:footer>
         </x-modal>
     </div>
     <h2 class="text-base font-bold uppercase">

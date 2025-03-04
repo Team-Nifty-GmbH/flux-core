@@ -24,19 +24,15 @@
             </x-slot:title>
             <div class="prose max-w-full" x-html="$wire.update.readme"></div>
             <x-slot:footer>
-                <div class="flex justify-end gap-1.5 items-center">
-                    <x-button color="secondary" light flat :text="__('Close')" x-on:click="$modalClose('update-plugin-modal')" />
-                    <x-button color="indigo" :text="__('Update')" loading="update" wire:click="updatePackages($wire.update.package); $modalClose('update-plugin-modal');" />
-                </div>
+                <x-button color="secondary" light flat :text="__('Close')" x-on:click="$modalClose('update-plugin-modal')" />
+                <x-button color="indigo" :text="__('Update')" loading="update" wire:click="updatePackages($wire.update.package); $modalClose('update-plugin-modal');" />
             </x-slot:footer>
         </x-modal>
     @endif
     <x-modal id="more-plugin-modal" size="7xl">
         <div class="prose max-w-full" x-html="$wire.readme"></div>
         <x-slot:footer>
-            <div class="flex justify-end gap-1.5 items-center">
-                <x-button color="secondary" light flat :text="__('Close')" x-on:click="$modalClose('more-plugin-modal')" />
-            </div>
+            <x-button color="secondary" light flat :text="__('Close')" x-on:click="$modalClose('more-plugin-modal')" />
         </x-slot:footer>
     </x-modal>
     @if(resolve_static(\FluxErp\Actions\Plugins\Install::class, 'canPerformAction', [false]))
@@ -83,9 +79,7 @@
                 </div>
             </div>
             <x-slot:footer>
-                <div class="flex justify-end gap-1.5 items-center">
-                    <x-button color="secondary" light flat :text="__('Close')" x-on:click="$modalClose('install-plugin-modal')" />
-                </div>
+                <x-button color="secondary" light flat :text="__('Close')" x-on:click="$modalClose('install-plugin-modal')" />
             </x-slot:footer>
         </x-modal>
     @endif

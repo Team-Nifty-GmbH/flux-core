@@ -107,7 +107,7 @@
                     ]"
                     select="label:name|value:id"
                     wire:model="schedule.cron.parameters.basic.0"
-                    x-on:select="document.getElementById('month-day-input').max = $event.detail.days; $wire.schedule.cron.parameters.basic[1] = Math.min($wire.schedule.cron.parameters.basic[1], $event.detail.days);"
+                    x-on:select="document.getElementById('month-day-input').max = $event.detail.select.days; $wire.schedule.cron.parameters.basic[1] = Math.min($wire.schedule.cron.parameters.basic[1], $event.detail.select.days);"
                 />
                 <x-number id="month-day-input" :max="31" :min="0" wire:model.blur="schedule.cron.parameters.basic.1" :label="__('Day')" />
                 <x-time
@@ -136,7 +136,7 @@
                 x-on:click="$modalClose('edit-schedule')"
                 :text="__('Cancel')"
             />
-            <x-button color="secondary" light
+            <x-button color="indigo"
                 wire:click="saveSchedule().then((success) => { if(success) $modalClose('edit-schedule'); })"
                 primary
                 :text="__('Save')"

@@ -1,10 +1,11 @@
-<x-modal id="create-serial-number">
-    <div class="flex flex-col gap-4">
+<x-modal id="create-serial-number-modal">
+    <div class="flex flex-col gap-1.5">
         <x-select.styled
             :label="__('Product')"
             wire:model="stockPosting.product_id"
             option-description="product_number"
             required
+            select="label:name|value:id"
             :request="[
                 'url' => route('search', \FluxErp\Models\Product::class),
                 'method' => 'POST',
@@ -39,9 +40,7 @@
         <x-number wire:model="stockPosting.address.quantity" :label="__('Quantity')" />
     </div>
     <x-slot:footer>
-        <div class="flex justify-end gap-1.5">
-            <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$closeModal('create-serial-number')"/>
-            <x-button color="indigo" :text="__('Save')" wire:click="save().then((success) => { if(success) $closeModal('create-serial-number')})"/>
-        </div>
+        <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$closeModal('create-serial-number-modal')"/>
+        <x-button color="indigo" :text="__('Save')" wire:click="save().then((success) => { if(success) $closeModal('create-serial-number-modal')})"/>
     </x-slot:footer>
 </x-modal>

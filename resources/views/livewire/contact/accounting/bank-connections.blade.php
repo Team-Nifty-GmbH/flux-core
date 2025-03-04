@@ -19,17 +19,15 @@
             />
         </div>
         <x-slot:footer>
-            <div class="flex gap-1.5 justify-end">
-                <x-button color="secondary" light
-                    x-on:click="$modalClose('edit-contact-bank-connection')"
-                    :text="__('Cancel')"
-                />
-                <x-button color="secondary" light
-                    wire:click="save().then((success) => { if(success) $modalClose('edit-contact-bank-connection'); })"
-                    primary
-                    :text="__('Save')"
-                />
-            </div>
+            <x-button color="secondary" light
+                x-on:click="$modalClose('edit-contact-bank-connection')"
+                :text="__('Cancel')"
+            />
+            <x-button color="secondary" light
+                wire:click="save().then((success) => { if(success) $modalClose('edit-contact-bank-connection'); })"
+                primary
+                :text="__('Save')"
+            />
         </x-slot:footer>
     </x-modal>
     @include('tall-datatables::livewire.data-table')

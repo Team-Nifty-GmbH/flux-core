@@ -5,10 +5,8 @@
     <x-modal id="preview-{{ strtolower($this->getId()) }}" size="6xl" :title="__('Preview')" x-on:close="$el.querySelector('iframe').src = 'data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E'">
         <iframe id="preview-iframe" src="data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E" loading="lazy" class="w-full min-h-screen"></iframe>
         <x-slot:footer>
-            <div class="flex justify-end gap-x-4">
-                <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('preview-{{ strtolower($this->getId()) }}')" />
-                <x-button loading color="indigo" :text="__('Download')" wire:click="downloadPreview()" />
-            </div>
+            <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('preview-{{ strtolower($this->getId()) }}')" />
+            <x-button loading color="indigo" :text="__('Download')" wire:click="downloadPreview()" />
         </x-slot:footer>
     </x-modal>
 @endif
@@ -80,9 +78,7 @@
         </div>
     </div>
     <x-slot:footer>
-        <div class="flex justify-end gap-2">
-            <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('create-documents-{{ strtolower($this->getId()) }}')" />
-            <x-button color="indigo" :text="__('Continue')" loading="createDocuments" wire:click="createDocuments().then(() => { $modalClose('create-documents-{{ strtolower($this->getId()) }}'); });" />
-        </div>
+        <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('create-documents-{{ strtolower($this->getId()) }}')" />
+        <x-button color="indigo" :text="__('Continue')" loading="createDocuments" wire:click="createDocuments().then(() => { $modalClose('create-documents-{{ strtolower($this->getId()) }}'); });" />
     </x-slot:footer>
 </x-modal>

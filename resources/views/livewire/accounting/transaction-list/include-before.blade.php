@@ -1,5 +1,5 @@
 @extends('flux::livewire.transactions.transactions')
-<x-modal id="assign-order" max-width="7xl">
+<x-modal id="assign-order-modal" size="7xl">
     <x-card>
         <div class="grid grid-cols-2 gap-1.5">
             <div class="flex flex-col gap-1.5">
@@ -47,11 +47,9 @@
         <div class="pt-4">
             <livewire:accounting.order-list />
         </div>
-        <x-slot:footer>
-            <div class="flex justify-end gap-1.5">
-                <x-button color="secondary" light :text="__('Cancel')" x-on:click="$modalClose('assign-order')"/>
-                <x-button color="indigo" :text="__('Save')" wire:click="saveAssignment().then((success) => {if(success) $modalClose('assign-order');})"/>
-            </div>
-        </x-slot:footer>
     </x-card>
+    <x-slot:footer>
+        <x-button color="secondary" light :text="__('Cancel')" x-on:click="$modalClose('assign-order-modal')"/>
+        <x-button color="indigo" :text="__('Save')" wire:click="saveAssignment().then((success) => {if(success) $modalClose('assign-order-modal');})"/>
+    </x-slot:footer>
 </x-modal>

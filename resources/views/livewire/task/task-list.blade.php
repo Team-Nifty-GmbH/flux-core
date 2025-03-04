@@ -5,7 +5,7 @@
                 formatter: @js(resolve_static(\FluxErp\Models\Task::class, 'typeScriptAttributes'))
             }"
         >
-            <div class="space-y-2.5">
+            <div class="flex flex-col gap-1.5">
                 <x-input wire:model="task.name" label="{{ __('Name') }}" />
                 <x-select.styled
                     :label="__('Project')"
@@ -81,7 +81,7 @@
                     placeholder="02:30"
                 />
             </div>
-            <div class="space-y-2.5">
+            <div class="flex flex-col gap-1.5">
                 <h3 class="font-medium whitespace-normal text-md text-secondary-700 dark:text-secondary-400 mt-4">
                     {{ __('Additional Columns') }}
                 </h3>
@@ -89,23 +89,21 @@
             </div>
         </div>
         <x-slot:footer>
-            <div class="flex justify-end">
-                <x-button color="secondary" light
-                    flat
-                    :text="__('Cancel')"
-                    x-on:click="$modalClose('new-task-modal')"
-                />
-                <x-button
-                    color="indigo"
-                    :text="__('Save')"
-                    x-on:click="$wire.save().then((task) => {
-                        if (task) {
-                            $modalClose('new-task-modal');
-                            window.location.href = baseRoute.replace(':id', $wire.task.id);
-                        }
-                    });"
-                />
-            </div>
+            <x-button color="secondary" light
+                flat
+                :text="__('Cancel')"
+                x-on:click="$modalClose('new-task-modal')"
+            />
+            <x-button
+                color="indigo"
+                :text="__('Save')"
+                x-on:click="$wire.save().then((task) => {
+                    if (task) {
+                        $modalClose('new-task-modal');
+                        window.location.href = baseRoute.replace(':id', $wire.task.id);
+                    }
+                });"
+            />
         </x-slot:footer>
     </x-modal>
 </div>

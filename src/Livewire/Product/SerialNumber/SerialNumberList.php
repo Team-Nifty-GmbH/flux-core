@@ -35,7 +35,7 @@ class SerialNumberList extends BaseSerialNumberList
         ];
 
         $this->js(<<<'JS'
-            $modalOpen('create-serial-number');
+            $modalOpen('create-serial-number-modal');
         JS);
     }
 

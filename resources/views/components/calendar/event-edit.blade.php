@@ -423,7 +423,7 @@
                                 ],
                             ],
                         ]"
-                        x-on:selected="$wire.calendarEvent.invited.push($event.detail.select); clear();.request.params.where.push(['id', '!=', $event.detail.select.value])"
+                        x-on:select="$wire.calendarEvent.invited.push($event.detail.select); clear();.request.params.where.push(['id', '!=', $event.detail.select.value])"
                     />
                 </div>
             </div>

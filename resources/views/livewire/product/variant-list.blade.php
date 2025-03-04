@@ -43,37 +43,35 @@
             </div>
         </div>
         <x-slot:footer>
-            <div class="flex justify-end gap-1.5">
-                <x-button color="secondary" light
-                    x-show="! Object.values($wire.variants).length > 0"
-                    flat
-                    :text="__('Cancel')"
-                    x-on:click="$modalClose('generate-variants-modal')"
-                />
-                <x-button color="secondary" light
-                    x-show="! Object.values($wire.variants).length > 0"
-                    primary
-                    spinner="next()"
-                    :text="__('Next')"
-                    wire:click="next()"
-                />
-                <x-button color="secondary" light
-                    x-show="Object.values($wire.variants).length > 0"
-                    x-cloak
-                    flat
-                    :text="__('Back')"
-                    x-on:click="$wire.variants = {}"
-                />
-                <x-button color="secondary" light
-                    x-show="Object.values($wire.variants).length > 0"
-                    x-cloak
-                    primary
-                    spinner="save()"
-                    :text="__('Save')"
-                    wire:flux-confirm.type.error="{{ __('Save Variants') }}|{{ __('Non existing product option combinations will be deleted!') }}|{{ __('Cancel') }}|{{ __('OK') }}"
-                    wire:click="save().then(() => { $modalClose('generate-variants-modal'); })"
-                />
-            </div>
+            <x-button color="secondary" light
+                x-show="! Object.values($wire.variants).length > 0"
+                flat
+                :text="__('Cancel')"
+                x-on:click="$modalClose('generate-variants-modal')"
+            />
+            <x-button color="secondary" light
+                x-show="! Object.values($wire.variants).length > 0"
+                primary
+                spinner="next()"
+                :text="__('Next')"
+                wire:click="next()"
+            />
+            <x-button color="secondary" light
+                x-show="Object.values($wire.variants).length > 0"
+                x-cloak
+                flat
+                :text="__('Back')"
+                x-on:click="$wire.variants = {}"
+            />
+            <x-button color="secondary" light
+                x-show="Object.values($wire.variants).length > 0"
+                x-cloak
+                primary
+                spinner="save()"
+                :text="__('Save')"
+                wire:flux-confirm.type.error="{{ __('Save Variants') }}|{{ __('Non existing product option combinations will be deleted!') }}|{{ __('Cancel') }}|{{ __('OK') }}"
+                wire:click="save().then(() => { $modalClose('generate-variants-modal'); })"
+            />
         </x-slot:footer>
     </x-modal>
     <div wire:ignore>

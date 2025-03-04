@@ -40,16 +40,14 @@
         @show
     </div>
     <x-slot:footer>
-        <div class="flex justify-end gap-1.5">
-            <x-button color="secondary" light
-                x-on:click="$modalClose('edit-media')"
-                :text="__('Cancel')"
-            />
-            <x-button color="secondary" light
-                wire:click="save().then((success) => {if(success) $modalClose('edit-media')})"
-                primary
-                :text="__('Save')"
-            />
-        </div>
+        <x-button color="secondary" light
+            x-on:click="$modalClose('edit-media')"
+            :text="__('Cancel')"
+        />
+        <x-button color="secondary" light
+            wire:click="save().then((success) => {if(success) $modalClose('edit-media')})"
+            primary
+            :text="__('Save')"
+        />
     </x-slot:footer>
 </x-modal>

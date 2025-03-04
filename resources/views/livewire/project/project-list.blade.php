@@ -5,24 +5,22 @@
                 <x-project.edit/>
             </div>
             <x-slot:footer>
-                <div class="flex justify-end">
-                    <x-button color="secondary" light
-                        flat
-                        :text="__('Cancel')"
-                        x-on:click="$modalClose('edit-project')"
-                    />
-                    <x-button
-                        color="indigo"
-                        :text="__('Save')"
-                        x-on:click="$wire.save().then((project) => {
-                            if (project) {
-                                $modalClose('edit-project');
-                                let baseRoute = '{{ route('projects.id', ['id' => ':id']) }}';
-                                Livewire.navigate(baseRoute.replace(':id', $wire.project.id));
-                            }
-                        });"
-                    />
-                </div>
+                <x-button color="secondary" light
+                    flat
+                    :text="__('Cancel')"
+                    x-on:click="$modalClose('edit-project')"
+                />
+                <x-button
+                    color="indigo"
+                    :text="__('Save')"
+                    x-on:click="$wire.save().then((project) => {
+                        if (project) {
+                            $modalClose('edit-project');
+                            let baseRoute = '{{ route('projects.id', ['id' => ':id']) }}';
+                            Livewire.navigate(baseRoute.replace(':id', $wire.project.id));
+                        }
+                    });"
+                />
             </x-slot:footer>
         </x-card>
     </x-modal>

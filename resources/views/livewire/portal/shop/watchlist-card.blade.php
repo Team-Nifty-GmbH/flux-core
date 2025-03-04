@@ -47,20 +47,18 @@
         </div>
     @endif
     <x-slot:footer>
-        <div class="flex justify-end gap-1.5">
-            @if($cartForm->isUserOwned())
-                <x-button
-                    color="red"
-                    wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Watchlist')]) }}"
-                    wire:click="delete()"
-                    :text="__('Delete')"
-                />
-            @endif
+        @if($cartForm->isUserOwned())
             <x-button
-                color="indigo"
-                wire:click="addToCart()"
-                :text="__('Add products to cart')"
+                color="red"
+                wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Watchlist')]) }}"
+                wire:click="delete()"
+                :text="__('Delete')"
             />
-        </div>
+        @endif
+        <x-button
+            color="indigo"
+            wire:click="addToCart()"
+            :text="__('Add products to cart')"
+        />
     </x-slot:footer>
 </x-card>

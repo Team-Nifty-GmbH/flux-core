@@ -1,14 +1,19 @@
 <x-modal wire:close="resetDiscount()" id="edit-discount">
-    <x-card class="flex flex-col gap-4" footer-classes="flex justify-end gap-1.5">
+    <x-card class="flex flex-col gap-1.5">
         <x-select.styled
-            :options="[
-                morph_alias(\FluxErp\Models\Product::class) => __('Product'),
-                morph_alias(\FluxErp\Models\Category::class) => __('Category'),
-            ]"
-            option-key-value
             :label="__('Type')"
-            x-on:selected="$wire.discountForm.model_id = null"
+            x-on:select="$wire.discountForm.model_id = null"
             wire:model="discountForm.model_type"
+            :options="[
+                [
+                    'label' => __('Product'),
+                    'value' => morph_alias(\FluxErp\Models\Product::class),
+                ],
+                [
+                    'label' => __('Category'),
+                    'value' => morph_alias(\FluxErp\Models\Category::class),
+                ],
+            ]"
         />
         <div x-cloak x-show="$wire.discountForm.model_type === '{{ morph_alias(\FluxErp\Models\Category::class) }}'">
             <x-select.styled
@@ -70,12 +75,12 @@
                 step="0.01"
             />
         </div>
-        <x-slot:footer>
-            <x-button
-                color="indigo"
-                :text="__('Save')"
-                wire:click="save().then((success) => {if(success) close();})"
-            />
-        </x-slot:footer>
     </x-card>
+    <x-slot:footer>
+        <x-button
+            color="indigo"
+            :text="__('Save')"
+            wire:click="save().then((success) => {if(success) close();})"
+        />
+    </x-slot:footer>
 </x-modal>

@@ -43,13 +43,12 @@
                 :label="__('Model')"
                 wire:model="workTime.trackable_type"
                 :options="$trackableTypes"
-                select="label:label|value:value"
-                x-on:select="relatedSelected($event.detail.value)"
+                x-on:select="relatedSelected($event.detail.select?.value)"
             />
             <div id="trackable-id" x-cloak x-show="$wire.workTime.trackable_type">
                 <x-select.styled
                     :label="__('Record')"
-                    x-on:select="recordSelected($event.detail)"
+                    x-on:select="recordSelected($event.detail.select)"
                     :request="[
                         'url' => route('search', '__model__'),
                         'method' => 'POST',

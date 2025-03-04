@@ -80,7 +80,7 @@ class TransactionList extends BaseDataTable
         }
 
         $this->js(<<<'JS'
-            $modalOpen('transaction-details');
+            $modalOpen('transaction-details-modal');
         JS);
     }
 

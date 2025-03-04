@@ -67,7 +67,7 @@
                 />
             @show
             <x-number x-bind:readonly="!edit" :label="__('Priority')" wire:model="task.priority" min="0" />
-            <x-textarea x-bind:readonly="!edit" wire:model="task.description" label="{{ __('Description') }}" />
+            <x-textarea x-bind:readonly="!edit" wire:model="task.description" :label="__('Description')" />
             <div x-bind:class="!edit && 'pointer-events-none'">
                 <x-select.styled
                     :label="__('Categories')"

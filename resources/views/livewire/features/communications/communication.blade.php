@@ -91,7 +91,6 @@
             <div id="communicatable-type">
                 <x-select.styled
                     :label="__('Model')"
-                    :option-key-value="true"
                     x-on:select="modelType = $event.detail?.select.value"
                     :options="$this->communicatables"
                 />
@@ -114,7 +113,7 @@
                 <x-select.styled
                     :label="__('Address')"
                     option-description="description"
-                    x-on:select="$wire.setTo($event.detail)"
+                    x-on:select="$wire.setTo($event.detail.select)"
                     :request="[
                         'url' => route('search', \FluxErp\Models\Address::class),
                         'method' => 'POST',
@@ -279,25 +278,23 @@
         </div>
 
         <x-slot:footer>
-            <div class="flex gap-1.5 justify-end">
-                <x-button color="secondary" light
-                    x-on:click="$modalClose('edit-communication')"
-                    :text="__('Cancel')"
-                />
+            <x-button color="secondary" light
+                x-on:click="$modalClose('edit-communication')"
+                :text="__('Cancel')"
+            />
+            <x-button
+                color="indigo"
+                wire:click="save().then((success) => { if(success) $modalClose('edit-communication'); })"
+                primary
+                :text="__('Save')"
+            />
+            <div x-show="$wire.communication.communication_type_enum === 'mail' && !$wire.communication.id">
                 <x-button
                     color="indigo"
-                    wire:click="save().then((success) => { if(success) $modalClose('edit-communication'); })"
+                    wire:click="send().then((success) => { if(success) $modalClose('edit-communication'); })"
                     primary
-                    :text="__('Save')"
+                    :text="__('Send')"
                 />
-                <div x-show="$wire.communication.communication_type_enum === 'mail' && !$wire.communication.id">
-                    <x-button
-                        color="indigo"
-                        wire:click="send().then((success) => { if(success) $modalClose('edit-communication'); })"
-                        primary
-                        :text="__('Send')"
-                    />
-                </div>
             </div>
         </x-slot:footer>
     </x-modal>

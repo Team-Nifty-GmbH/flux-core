@@ -18,7 +18,7 @@ class CommissionRates extends BaseDataTable
 {
     use Actions;
 
-    protected string $view = 'flux::livewire.features.commission-rates';
+    protected ?string $includeBefore = 'flux::livewire.features.commission-rates';
 
     protected string $model = CommissionRate::class;
 

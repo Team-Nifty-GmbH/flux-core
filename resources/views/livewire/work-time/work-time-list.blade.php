@@ -14,10 +14,10 @@
             <div class="flex flex-col gap-1.5" x-cloak x-show="! $wire.workTime.is_daily_work_time">
                 <x-select.styled
                     :label="__('Work Time Type')"
-                    :options="$workTimeTypes"
                     wire:model="workTime.work_time_type_id"
+                    :options="$workTimeTypes"
                     select="label:name|value:id"
-                    x-on:select="$wire.workTime.is_billable = $event.detail.is_billable"
+                    x-on:select="$wire.workTime.is_billable = $event.detail.select.is_billable"
                 />
                 <div class="mt-2 mb-2">
                     <x-toggle :label="__('Is Billable')" wire:model="workTime.is_billable" />
@@ -63,7 +63,6 @@
                         'url' => route('search', \FluxErp\Models\Address::class),
                         'method' => 'POST',
                         'params' => [
-                            'option-value' => 'contact_id',
                             'where' => [
                                 [
                                     'is_main_address',
@@ -88,7 +87,8 @@
                 <div id="trackable-id-edit" x-show="$wire.workTime.trackable_type">
                     <x-select.styled
                         :label="__('Record')"
-                        x-on:select="$event.detail.contact_id ? $wire.workTime.contact_id = $event.detail.contact_id : null"
+                        wire:model="workTime.trackable_id"
+                        x-on:select="$event.detail.select.contact_id ? $wire.workTime.contact_id = $event.detail.select.contact_id : null"
                         :request="[
                             'url' => route('search', '__model__'),
                             'method' => 'POST',
@@ -98,7 +98,6 @@
                                 ],
                             ],
                         ]"
-                        wire:model="workTime.trackable_id"
                     />
                 </div>
                 <x-input :label="__('Name')" wire:model="workTime.name" />

@@ -17,14 +17,12 @@
             />
         </div>
         <x-slot:footer>
-            <div class="flex justify-end gap-1.5">
-                <x-button color="secondary" light :text="__('Cancel')" x-on:click="$modalClose('edit-position-discount')"/>
-                <x-button
-                    color="indigo"
-                    :text="__('Save')"
-                    wire:click="discountSelectedPositions().then(() => {$modalClose('edit-position-discount');})"
-                />
-            </div>
+            <x-button color="secondary" light :text="__('Cancel')" x-on:click="$modalClose('edit-position-discount')"/>
+            <x-button
+                color="indigo"
+                :text="__('Save')"
+                wire:click="discountSelectedPositions().then(() => {$modalClose('edit-position-discount');})"
+            />
         </x-slot:footer>
     </x-modal>
     <x-modal size="6xl" id="edit-order-position" x-on:close="$wire.resetOrderPosition()">
@@ -148,7 +146,7 @@
                         wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Order Position')]) }}"
                     />
                 </div>
-                <div class="flex w-full justify-end">
+                <div class="flex w-full justify-end gap-x-2">
                     <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('edit-order-position')" />
                     <x-button
                             color="indigo"

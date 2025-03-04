@@ -27,10 +27,8 @@
             </div>
         </div>
         <x-slot:footer>
-            <div class="flex justify-end gap-1">
-                <x-button color="secondary" light x-on:click="$modalClose('edit-delivery-address')">{{ __('Cancel') }}</x-button>
-                <x-button color="secondary" light wire:click="saveDeliveryAddress().then((success) => success ? $modalClose('edit-delivery-address') : null)" primary>{{ __('Save') }}</x-button>
-            </div>
+            <x-button color="secondary" light x-on:click="$modalClose('edit-delivery-address')">{{ __('Cancel') }}</x-button>
+            <x-button color="secondary" light wire:click="saveDeliveryAddress().then((success) => success ? $modalClose('edit-delivery-address') : null)" primary>{{ __('Save') }}</x-button>
         </x-slot>
     </x-modal>
     <x-card :header="__('Terms And Conditions')">

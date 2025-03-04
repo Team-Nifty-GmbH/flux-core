@@ -32,7 +32,7 @@
             </div>
                 <x-slot:footer>
                     @section('cart-sidebar.footer')
-                        <div class="flex flex-col gap-1.5 w-full">
+                        <div class="flex flex-col gap-x-2 w-full">
                             @section('cart-sidebar.footer.buttons')
                                 <x-button color="secondary" light
                                     class="w-full"

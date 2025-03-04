@@ -135,7 +135,7 @@ class Communication extends CommunicationList
                 ARRAY_FILTER_USE_BOTH
             )
         )
-            ->mapWithKeys(fn ($value, $key) => [$key => __(Str::headline($key))])
+            ->mapWithKeys(fn ($value, $key) => [$key => ['value' => $key, 'label' => __(Str::headline($key))]])
             ->toArray();
     }
 

@@ -80,7 +80,7 @@
                 wire:click="delete().then((success) => {if(success) $modalClose('execute-payment-run');})"
                 wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Payment Run')]) }}"
             />
-            <div class="flex justify-end gap-1.5">
+            <div class="flex justify-end gap-x-2">
                 <x-button color="secondary" light :text="__('Cancel')" x-on:click="$modalClose('execute-payment-run')" />
                 <x-button
                     color="indigo"

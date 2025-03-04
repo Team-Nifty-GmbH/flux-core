@@ -1,16 +1,10 @@
 <div>
     <x-modal id="new-ticket-modal" z-index="z-30" wire="showTicketModal" :title="__('New Ticket')">
         <livewire:portal.ticket.ticket-create/>
-        <x-slot name="footer">
-            <div class="w-full">
-                <div class="flex justify-end gap-x-4">
-                    <div class="flex">
-                        <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('new-ticket-modal')"/>
-                        <x-button color="indigo" :text="__('Save')" wire:click="$dispatchTo('portal.ticket.ticket-create', 'save')"/>
-                    </div>
-                </div>
-            </div>
-        </x-slot>
+        <x-slot:footer>
+            <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('new-ticket-modal')"/>
+            <x-button color="indigo" :text="__('Save')" wire:click="$dispatchTo('portal.ticket.ticket-create', 'save')"/>
+        </x-slot:footer>
     </x-modal>
     <div class="dark:text-white">
         <h2 class="text-base font-bold uppercase">

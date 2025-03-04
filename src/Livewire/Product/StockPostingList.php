@@ -102,7 +102,7 @@ class StockPostingList extends BaseStockPostingList
     {
         $viewData = [
             'warehouses' => resolve_static(Warehouse::class, 'query')
-                ->pluck('name', 'id')
+                ->get(['id', 'name'])
                 ->toArray(),
         ];
 
@@ -110,7 +110,7 @@ class StockPostingList extends BaseStockPostingList
             $viewData['serialNumberRanges'] = resolve_static(SerialNumberRange::class, 'query')
                 ->where('model_type', morph_alias(Product::class))
                 ->where('model_id', $this->productId)
-                ->pluck('type', 'id')
+                ->get(['id', 'type'])
                 ->toArray();
         }
 

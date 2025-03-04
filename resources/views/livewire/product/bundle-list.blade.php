@@ -34,19 +34,17 @@
             />
         </div>
         <x-slot:footer>
-            <div class="flex justify-end gap-1.5">
-                <x-button color="secondary" light
-                    flat
-                    :text="__('Cancel')"
-                    x-on:click="$modalClose('edit-bundle-product-modal')"
-                />
-                <x-button
-                    color="indigo"
-                    loading="save"
-                    :text="__('Save')"
-                    wire:click="save().then((success) => { if(success) $modalClose('edit-bundle-product-modal'); })"
-                />
-            </div>
+            <x-button color="secondary" light
+                flat
+                :text="__('Cancel')"
+                x-on:click="$modalClose('edit-bundle-product-modal')"
+            />
+            <x-button
+                color="indigo"
+                loading="save"
+                :text="__('Save')"
+                wire:click="save().then((success) => { if(success) $modalClose('edit-bundle-product-modal'); })"
+            />
         </x-slot:footer>
     </x-modal>
     <div wire:ignore>

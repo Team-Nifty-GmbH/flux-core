@@ -19,7 +19,6 @@
                 <x-checkbox x-bind:disabled="!edit" label="{{ __('Is service') }}" wire:model="product.is_service" />
                 <div x-cloak x-show="$wire.product.is_service">
                     <x-select.styled label="{{ __('Time unit') }}"
-                        option-key-value
                         wire:model="product.time_unit_enum"
                         :options="\FluxErp\Enums\TimeUnitEnum::valuesLocalized()"
                     />
@@ -30,63 +29,82 @@
             <x-input x-bind:readonly="!edit" label="{{ __('Manufacturer product number') }}" wire:model="product.manufacturer_product_number" />
             <x-select.styled
                 x-bind:readonly="!edit" label="{{ __('Unit') }}"
-                option-key-value
                 wire:model.number="product.unit_id"
-                :options="resolve_static(\FluxErp\Models\Unit::class, 'query')->pluck('name', 'id')"
+                :options="resolve_static(\FluxErp\Models\Unit::class, 'query')->get(['id', 'name'])->toArray()"
+                select="label:name|value:id"
             />
             <div class="grid grid-cols-1 sm:grid-cols-4 gap-4" x-bind:class="!edit && 'pointer-events-none'">
-                <template id="unit-price-tooltip">
-                    <div class="p-1.5">
-                        <div class="p-1.5">
-                            {!! __('Required to calculate the product\'s unit price. The value to be entered depends on the selected scale unit.<br><br>Unit price = (product price * basic unit) / selling unit.<br><br>Unit price not displayed, if selling unit and basic unit have the same value.') !!}
-                        </div>
-                    </div>
-                </template>
-                <x-number x-bind:readonly="!edit" label="{{ __('Length') }}" wire:model.number="product.dimension_length_mm">
-                    <x-slot:cornerHint>
-                        <div class="flex gap-1.5 items-center">
-                            <div class="text-secondary-400">
+                <x-number x-bind:readonly="!edit" wire:model.number="product.dimension_length_mm">
+                    <x-slot:label>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                {{ __('Length') }}
+                            </div>
+                            <div>
                                 {{ __('mm') }}
                             </div>
                         </div>
-                    </x-slot:cornerHint>
+                    </x-slot:label>
                 </x-number>
-                <x-number x-bind:readonly="!edit" label="{{ __('Width') }}" wire:model.number="product.dimension_width_mm">
-                    <x-slot:cornerHint>
-                        <div class="flex gap-1.5 items-center">
-                            <div class="text-secondary-400">
+                <x-number x-bind:readonly="!edit" wire:model.number="product.dimension_width_mm">
+                    <x-slot:label>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                {{ __('Width') }}
+                            </div>
+                            <div>
                                 {{ __('mm') }}
                             </div>
                         </div>
-                    </x-slot:cornerHint>
+                    </x-slot:label>
                 </x-number>
-                <x-number x-bind:readonly="!edit" label="{{ __('Height') }}" wire:model.number="product.dimension_height_mm">
-                    <x-slot:cornerHint>
-                        <div class="flex gap-1.5 items-center">
-                            <div class="text-secondary-400">
+                <x-number x-bind:readonly="!edit" wire:model.number="product.dimension_height_mm">
+                    <x-slot:label>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                {{ __('Height') }}
+                            </div>
+                            <div>
                                 {{ __('mm') }}
                             </div>
                         </div>
-                    </x-slot:cornerHint>
+                    </x-slot:label>
                 </x-number>
-                <x-number x-bind:readonly="!edit" label="{{ __('Weight') }}" wire:model.number="product.weight_gram">
-                    <x-slot:cornerHint>
-                        <div class="flex gap-1.5 items-center">
-                            <div class="text-secondary-400">
+                <x-number x-bind:readonly="!edit" wire:model.number="product.weight_gram">
+                    <x-slot:label>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                {{ __('Weight') }}
+                            </div>
+                            <div>
                                 {{ __('Gram') }}
                             </div>
                         </div>
-                    </x-slot:cornerHint>
+                    </x-slot:label>
                 </x-number>
-                <x-number x-bind:readonly="!edit" label="{{ __('Selling unit') }}" wire:model.number="product.selling_unit">
-                    <x-slot:cornerHint>
-                        <x-button.circle color="secondary" light xs label="?" x-on:mouseover="$el._tippy ? $el._tippy.show() : tippy($el, {content: document.getElementById('unit-price-tooltip').content})" />
-                    </x-slot:cornerHint>
+                <x-number x-bind:readonly="!edit" wire:model.number="product.selling_unit">
+                    <x-slot:label>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                {{ __('Selling Unit') }}
+                            </div>
+                            <div>
+                                <x-tooltip :text="__('Required to calculate the product\'s unit price. The value to be entered depends on the selected scale unit.<br><br>Unit price = (product price * basic unit) / selling unit.<br><br>Unit price not displayed, if selling unit and basic unit have the same value.')"/>
+                            </div>
+                        </div>
+                    </x-slot:label>
                 </x-number>
-                <x-number x-bind:readonly="!edit" :text="__('Basic unit')" wire:model.number="product.basic_unit">
-                    <x-slot:cornerHint>
-                        <x-button.circle color="secondary" light xs label="?" x-on:mouseover="$el._tippy ? $el._tippy.show() : tippy($el, {content: document.getElementById('unit-price-tooltip').content})" />
-                    </x-slot:cornerHint>
+                <x-number x-bind:readonly="!edit" wire:model.number="product.basic_unit">
+                    <x-slot:label>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                {{ __('Basic Unit') }}
+                            </div>
+                            <div>
+                                <x-tooltip :text="__('Required to calculate the product\'s unit price. The value to be entered depends on the selected scale unit.<br><br>Unit price = (product price * basic unit) / selling unit.<br><br>Unit price not displayed, if selling unit and basic unit have the same value.')"/>
+                            </div>
+                        </div>
+                    </x-slot:label>
                 </x-number>
             </div>
         @show
@@ -98,6 +116,7 @@
             wire:model.number="product.categories"
             :label="__('Categories')"
             option-description="description"
+            select="label:name|value:id"
             :request="[
                 'url' => route('search', \FluxErp\Models\Category::class),
                 'method' => 'POST',
@@ -129,11 +148,11 @@
             x-bind:disabled="!edit"
             wire:model.number="product.tags"
             :label="__('Tags')"
+            select="label:name|value:id"
             :request="[
                 'url' => route('search', \FluxErp\Models\Tag::class),
                 'method' => 'POST',
                 'params' => [
-                    'option-value' => 'id',
                     'where' => [
                         [
                             'type',
@@ -186,18 +205,16 @@
                     </div>
                 </div>
                 <x-slot:footer>
-                    <div class="flex justify-end gap-1.5">
-                        <x-button color="secondary" light
-                            flat
-                            :text="__('Cancel')"
-                            x-on:click="$modalClose('edit-product-properties-modal')"
-                        />
-                        <x-button
-                            color="indigo"
-                            :text="__('Save')"
-                            wire:click="addProductProperties().then(() => { close(); })"
-                        />
-                    </div>
+                    <x-button color="secondary" light
+                        flat
+                        :text="__('Cancel')"
+                        x-on:click="$modalClose('edit-product-properties-modal')"
+                    />
+                    <x-button
+                        color="indigo"
+                        :text="__('Save')"
+                        wire:click="addProductProperties().then(() => { close(); })"
+                    />
                 </x-slot:footer>
             </x-modal>
             <x-button
@@ -267,8 +284,8 @@
                         </div>
                     </x-slot:sub-value>
                     <x-slot:actions>
-                        <x-input x-bind:disabled="! edit" x-model="supplier.manufacturer_product_number" :text="__('Manufacturer product number')" />
-                        <x-number x-bind:disabled="! edit" x-model="supplier.purchase_price" :text="__('Purchase Price')" step="0.01" />
+                        <x-input x-bind:disabled="! edit" x-model="supplier.manufacturer_product_number" :label="__('Manufacturer product number')" />
+                        <x-number x-bind:disabled="! edit" x-model="supplier.purchase_price" :label="__('Purchase Price')" step="0.01" />
                         <div class="mt-6">
                             <x-button
                                 color="red"

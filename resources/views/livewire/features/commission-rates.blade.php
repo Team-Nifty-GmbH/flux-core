@@ -1,9 +1,4 @@
 <div
-    x-data="{
-        userId: @entangle('userId'),
-        contactId: @entangle('contactId'),
-        create: @entangle('create')
-    }"
     x-on:data-table-row-clicked="$wire.show($event.detail.id)"
 >
     <x-modal id="edit-commission-rate" z-index="z-30" wire="showModal" :title="$create ? __('Create Commission Rate') : __('Edit Commission Rate')">
@@ -11,7 +6,7 @@
             <div class="space-y-8 divide-y divide-gray-200">
                 <div>
                     <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-                        <div class="sm:col-span-6" x-show="!userId">
+                        <div class="sm:col-span-6" x-show="!$wire.userId">
                             <x-select.styled
                                 :label="__('Commission Agent')"
                                 wire:model="commissionRate.user_id"
@@ -53,8 +48,8 @@
                             />
                         </div>
                         <div class="sm:col-span-6">
-                            <x-number label="{{ __('Commission Rate (in %)') }}"
-                                 placeholder="{{ __('Commission Rate') }}"
+                            <x-number :label="__('Commission Rate (in %)')"
+                                 :placeholder="__('Commission Rate')"
                                  wire:model="commissionRate.commission_rate"
                                  step="0.01"
                                  min="0.01"
@@ -65,13 +60,13 @@
                 </div>
             </div>
         </div>
-        <x-slot name="footer">
+        <x-slot:footer>
             <div class="w-full">
                 <div
                     class="flex justify-between gap-x-4">
                     @if(user_can('action.commission-rates.delete'))
                         <x-button
-                            x-bind:class="! create || 'invisible'"
+                            x-bind:class="! $wire.create || 'invisible'"
                             flat
                             color="red"
                             :text="__('Delete')"
@@ -80,14 +75,12 @@
                             :text="__('Delete')"
                         />
                     @endif
-                    <div class="flex">
+                    <div class="flex gap-x-2">
                         <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('edit-commission-rate')"/>
                         <x-button color="indigo" :text="__('Save')" wire:click="save"/>
                     </div>
                 </div>
             </div>
-        </x-slot>
+        </x-slot:footer>
     </x-modal>
-
-    @include('tall-datatables::livewire.data-table')
 </div>

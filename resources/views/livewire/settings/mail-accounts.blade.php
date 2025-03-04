@@ -20,9 +20,7 @@
                     <x-toggle wire:model="mailFolder.is_active" :label="__('Active')" />
                 </div>
                 <x-slot:footer>
-                    <div class="flex w-full justify-end">
-                        <x-button loading="saveMailFolder" color="indigo" :text="__('Save')" wire:click="saveMailFolder()"/>
-                    </div>
+                    <x-button loading="saveMailFolder" color="indigo" :text="__('Save')" wire:click="saveMailFolder()"/>
                 </x-slot:footer>
             </x-card>
         </div>

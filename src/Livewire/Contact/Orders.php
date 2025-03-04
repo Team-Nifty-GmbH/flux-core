@@ -11,7 +11,7 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class Orders extends OrderList
 {
-    protected string $view = 'flux::livewire.contact.orders';
+    protected ?string $includeBefore = 'flux::livewire.contact.orders';
 
     #[Modelable]
     public ContactForm $contact;
