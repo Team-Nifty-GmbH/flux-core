@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\View;
 use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
 use TallStackUi\Facades\TallStackUi;
+use Throwable;
 
 class ViewServiceProvider extends ServiceProvider
 {
@@ -23,64 +24,14 @@ class ViewServiceProvider extends ServiceProvider
             && file_exists(public_path('build/manifest.json'))
         ) {
             // get the real path for the flux package root folder
-            Asset::vite(
-                public_path('build'),
-                [
-                    static::getRealPackageAssetPath(
-                        'resources/css/app.css',
-                        'team-nifty-gmbh/flux-erp'
-                    ),
-                    static::getRealPackageAssetPath(
-                        'resources/js/app.js',
-                        'team-nifty-gmbh/flux-erp'
-                    ),
-                    static::getRealPackageAssetPath(
-                        'resources/js/apex-charts.js',
-                        'team-nifty-gmbh/flux-erp'
-                    ),
-                    static::getRealPackageAssetPath(
-                        'resources/js/alpine.js',
-                        'team-nifty-gmbh/flux-erp'
-                    ),
-                    static::getRealPackageAssetPath(
-                        'resources/js/sw.js',
-                        'team-nifty-gmbh/flux-erp'
-                    ),
-                    static::getRealPackageAssetPath(
-                        'resources/js/tall-datatables.js',
-                        'team-nifty-gmbh/tall-datatables'
-                    ),
-                ]
-            );
-
-            if (auth()->guard('web')->check()) {
-                Asset::vite(public_path('build'), [
-                    static::getRealPackageAssetPath(
-                        'resources/js/web-push.js',
-                        'team-nifty-gmbh/flux-erp'
-                    ),
-                ]);
-            }
+            $this->bootAssets();
         }
 
-        Blade::directive('canAction', function ($expression) {
-            return "<?php if (resolve_static($expression, 'canPerformAction', [false])): ?>";
-        });
-        Blade::directive('endCanAction', function () {
-            return '<?php endif; ?>';
-        });
+        $this->customizeTallstackUi();
 
-        Blade::component(App::class, 'flux::layouts.app');
-        Blade::component(Printing::class, 'flux::layouts.print');
-        config([
-            'livewire.layout' => 'flux::layouts.app',
-        ]);
+        $this->registerViews();
 
-        // Register Printing views as blade components
-        $views[] = __DIR__ . '/../../resources/views/printing';
-        $this->loadViewsFrom($views, 'print');
-
-        $this->loadViewsFrom(__DIR__ . '/../../resources/views/vendor/tallstackui', 'tallstack-ui');
+        $this->bootBladeDirectives();
 
         View::composer('*', function () {
             Currency::default() && Number::useCurrency(Currency::default()->iso);
@@ -94,10 +45,52 @@ class ViewServiceProvider extends ServiceProvider
                 } else {
                     View::share('defaultCurrency', app(Currency::class));
                 }
-            } catch (\Throwable) {
+            } catch (Throwable) {
             }
         });
+    }
 
+    public static function getRealPackageAssetPath(string $path, string $packageName): string
+    {
+        $path = ltrim($path, '/');
+        $relativePath = ltrim(
+            substr(
+                realpath(InstalledVersions::getInstallPath($packageName)),
+                strlen(realpath(array_keys(ClassLoader::getRegisteredLoaders())[0] . '/../'))
+            ) . '/',
+            '/'
+        );
+
+        return $relativePath . $path;
+    }
+
+    protected function registerViews(): void
+    {
+
+        Blade::component(App::class, 'flux::layouts.app');
+        Blade::component(Printing::class, 'flux::layouts.print');
+        config([
+            'livewire.layout' => 'flux::layouts.app',
+        ]);
+
+        // Register Printing views as blade components
+        $views[] = __DIR__ . '/../../resources/views/printing';
+        $this->loadViewsFrom($views, 'print');
+
+        // Special case for tallstack to get the label view from flux
+        $this->callAfterResolving('view', function ($view) {
+            $viewFinder = $view->getFinder();
+
+            $paths = [
+                __DIR__ . '/../../resources/views/vendor/tallstackui',
+            ];
+            $paths = array_merge($paths, data_get($viewFinder->getHints(), 'tallstack-ui', []));
+            $viewFinder->replaceNamespace('tallstack-ui', $paths);
+        });
+    }
+
+    protected function customizeTallstackUi(): void
+    {
         TallStackUi::personalize()
             ->avatar()
             ->block('wrapper.class', 'inline-flex shrink-0 items-center justify-center overflow-hidden !bg-secondary-200');
@@ -141,22 +134,58 @@ class ViewServiceProvider extends ServiceProvider
             ->block('wrapper.third', 'dark:bg-dark-700 pointer-events-auto w-full w-full overflow-hidden rounded-xl bg-white shadow-lg ring-1 ring-black ring-opacity-5')
             ->block('buttons.wrapper.second', 'flex min-h-full flex-col justify-between')
             ->block('buttons.close.wrapper', 'ml-2 flex shrink-0');
-
-        // override the label view from tallstack-ui namespace
-        $this->loadViewsFrom(__DIR__ . '/../../resources/views/vendor/tallstackui', 'tallstack-ui');
     }
 
-    public static function getRealPackageAssetPath(string $path, string $packageName): string
+    protected function bootAssets(): void
     {
-        $path = ltrim($path, '/');
-        $relativePath = ltrim(
-            substr(
-                realpath(InstalledVersions::getInstallPath($packageName)),
-                strlen(realpath(array_keys(ClassLoader::getRegisteredLoaders())[0] . '/../'))
-            ) . '/',
-            '/'
+        Asset::vite(
+            public_path('build'),
+            [
+                static::getRealPackageAssetPath(
+                    'resources/css/app.css',
+                    'team-nifty-gmbh/flux-erp'
+                ),
+                static::getRealPackageAssetPath(
+                    'resources/js/app.js',
+                    'team-nifty-gmbh/flux-erp'
+                ),
+                static::getRealPackageAssetPath(
+                    'resources/js/apex-charts.js',
+                    'team-nifty-gmbh/flux-erp'
+                ),
+                static::getRealPackageAssetPath(
+                    'resources/js/alpine.js',
+                    'team-nifty-gmbh/flux-erp'
+                ),
+                static::getRealPackageAssetPath(
+                    'resources/js/sw.js',
+                    'team-nifty-gmbh/flux-erp'
+                ),
+                static::getRealPackageAssetPath(
+                    'resources/js/tall-datatables.js',
+                    'team-nifty-gmbh/tall-datatables'
+                ),
+            ]
         );
 
-        return $relativePath . $path;
+        if (auth()->guard('web')->check()) {
+            Asset::vite(public_path('build'), [
+                static::getRealPackageAssetPath(
+                    'resources/js/web-push.js',
+                    'team-nifty-gmbh/flux-erp'
+                ),
+            ]);
+        }
+    }
+
+    protected function bootBladeDirectives(): void
+    {
+        Blade::directive('canAction', function ($expression) {
+            return "<?php if (resolve_static($expression, 'canPerformAction', [false])): ?>";
+        });
+
+        Blade::directive('endCanAction', function () {
+            return '<?php endif; ?>';
+        });
     }
 }

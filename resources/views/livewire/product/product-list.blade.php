@@ -42,14 +42,14 @@
                     :label="__('Price List')"
                     wire:model="productPricesUpdate.price_list_id"
                     :options="$selectablePriceLists"
-                    select="label:id|value:id"
+                    select="label:name|value:id"
                 />
                 <x-select.styled
                     :label="__('Use price from')"
                     wire:model="productPricesUpdate.base_price_list_id"
                     :clearable="true"
                     :options="$selectablePriceLists"
-                    select="label:id|value:id"
+                    select="label:name|value:id"
                 />
                 <div class="mt-2">
                     <x-toggle wire:model="productPricesUpdate.is_percent" :label="__('Is Percentage')" />

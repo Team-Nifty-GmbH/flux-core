@@ -5,7 +5,6 @@ namespace FluxErp\Livewire\Settings;
 use FluxErp\Actions\OrderType\CreateOrderType;
 use FluxErp\Actions\OrderType\DeleteOrderType;
 use FluxErp\Actions\OrderType\UpdateOrderType;
-use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\DataTables\OrderTypeList;
 use FluxErp\Livewire\Forms\OrderTypeForm;
 use FluxErp\Models\Client;
@@ -13,6 +12,7 @@ use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
@@ -82,6 +82,7 @@ class OrderTypes extends OrderTypeList
         );
     }
 
+    #[Renderless]
     public function save(): bool
     {
         try {
@@ -97,6 +98,7 @@ class OrderTypes extends OrderTypeList
         return true;
     }
 
+    #[Renderless]
     public function edit(OrderType $orderType): void
     {
         $this->orderType->reset();
@@ -107,6 +109,7 @@ class OrderTypes extends OrderTypeList
         JS);
     }
 
+    #[Renderless]
     public function delete(): bool
     {
         try {

@@ -2,9 +2,7 @@
     'editable' => true,
 ])
 <div>
-    <x-label class="mb-1">
-        {{ $label ?? '' }}
-    </x-label>
+    <x-label class="mb-1" :label="$label ?? ''" />
     <div
         @if($attributes->has('x-modelable'))
             x-modelable="{{ $attributes->get('x-modelable') }}"

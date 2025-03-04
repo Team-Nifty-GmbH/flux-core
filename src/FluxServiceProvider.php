@@ -98,6 +98,7 @@ class FluxServiceProvider extends ServiceProvider
 
         $this->loadJsonTranslationsFrom(__DIR__ . '/../lang');
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'flux');
+        $this->loadViewsFrom(__DIR__ . '/../../resources/views/vendor/tallstackui/', 'tallstack-ui');
         $this->registerConfig();
         $this->registerMarcos();
         $this->registerExtensions();
@@ -374,7 +375,6 @@ class FluxServiceProvider extends ServiceProvider
 
     protected function registerConfig(): void
     {
-        $this->loadViewsFrom(__DIR__ . '/../resources/views/vendor/tallstackui', 'tallstack-ui');
         $this->booted(function () {
             config([
                 'tallstackui.settings.toast.z-index' => 'z-50',

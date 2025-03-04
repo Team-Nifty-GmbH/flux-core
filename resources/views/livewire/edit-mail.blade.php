@@ -19,7 +19,7 @@
 }">
     <x-modal size="7xl" id="edit-mail" x-on:close="$wire.clear()" class="flex flex-col gap-4">
         <div class="flex flex-col gap-1.5">
-            <x-label>{{ __('To') }}</x-label>
+            <x-label :label="__('To')" />
             <div class="flex gap-1" x-cloak x-show="! $wire.multiple">
                 <template x-for="to in $wire.mailMessage.to || []">
                     <x-badge flat color="indigo" cl>
