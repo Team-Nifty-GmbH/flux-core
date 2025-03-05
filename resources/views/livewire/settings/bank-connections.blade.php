@@ -1,8 +1,19 @@
 <x-modal id="bank-connection-modal" class="flex flex-col gap-4">
     <div class="flex flex-col gap-1.5">
         <x-input wire:model="bankConnection.name" :label="__('Name')"/>
-        <x-select.styled wire:model="bankConnection.currency_id"  required select="label:name|value:id" :options="$currencies" :label="__('Currency')"/>
-        <x-select.styled wire:model="bankConnection.ledger_account_id" select="label:name|value:id" :options="$ledgerAccounts" :label="__('Ledger Account')"/>
+        <x-select.styled
+            :label="__('Currency')"
+            wire:model="bankConnection.currency_id"
+            required
+            select="label:name|value:id"
+            :options="$currencies"
+        />
+        <x-select.styled
+            :label="__('Ledger Account')"
+            wire:model="bankConnection.ledger_account_id"
+            select="label:name|value:id"
+            :options="$ledgerAccounts"
+        />
         <x-input wire:model="bankConnection.account_holder" :label="__('Account Holder')"/>
         <x-input x-bind:disabled="$wire.bankConnection.id" wire:model="bankConnection.iban" :label="__('IBAN')"/>
         <x-input wire:model="bankConnection.bic" :label="__('BIC')"/>

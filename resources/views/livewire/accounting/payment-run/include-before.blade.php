@@ -45,9 +45,8 @@
                     <x-select.styled
                         wire:model="paymentRunForm.bank_connection_id"
                         :label="__('Account')"
+                        select="label:name|value:id|description:iban"
                         :options="$accounts"
-                        select="label:name|value:id"
-                        option-description="iban"
                     />
                     <x-date
                         wire:model="paymentRunForm.instructed_execution_date"

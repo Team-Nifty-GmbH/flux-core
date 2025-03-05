@@ -3,9 +3,8 @@
         <x-select.styled
             :label="__('Bank Connection')"
             wire:model="transactionForm.bank_connection_id"
+            select="label:name|value:id|description:iban"
             :options="$bankConnections"
-            select="label:name|value:id"
-            option-description="iban"
         />
         <x-date without-time wire:model="transactionForm.booking_date" :label="__('Booking Date')"/>
         <x-date without-time wire:model="transactionForm.value_date" :label="__('Value Date')"/>

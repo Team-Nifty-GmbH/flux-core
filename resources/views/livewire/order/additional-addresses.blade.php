@@ -6,6 +6,7 @@
                     <x-select.styled
                         :label="__('Address')"
                         wire:model="address_id"
+                        select="label:label|value:id"
                         :request="[
                             'url' => route('search', \FluxErp\Models\Address::class),
                             'method' => 'POST',
@@ -28,8 +29,8 @@
                     <x-select.styled
                         :label="__('Type')"
                         wire:model="address_type_id"
-                        :options="resolve_static(\FluxErp\Models\AddressType::class, 'query')->where('client_id', $clientId)->get(['id', 'name'])->toArray()"
                         select="label:name|value:id"
+                        :options="resolve_static(\FluxErp\Models\AddressType::class, 'query')->where('client_id', $clientId)->get(['id', 'name'])->toArray()"
                     />
                 </div>
                 <x-slot:footer>

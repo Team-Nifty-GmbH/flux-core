@@ -64,6 +64,7 @@
                         :label="__('Responsible User')"
                         autocomplete="off"
                         wire:model="project.responsible_user_id"
+                        select="label:name|value:id"
                         :request="[
                             'url' => route('search', \FluxErp\Models\User::class),
                             'method' => 'POST',
@@ -104,7 +105,7 @@
                         x-bind:readonly="!edit"
                         :label="__('Order')"
                         wire:model="project.order_id"
-                        option-description="description"
+                        select="label:label|value:id"
                         :request="[
                             'url' => route('search', \FluxErp\Models\Order::class),
                             'method' => 'POST',

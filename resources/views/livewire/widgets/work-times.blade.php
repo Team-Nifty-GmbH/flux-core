@@ -4,6 +4,7 @@
         <x-select.styled
             autocomplete="off"
             wire:model.live="userId"
+            select="label:label|value:id"
             :request="[
                 'url' => route('search', \FluxErp\Models\User::class),
                 'method' => 'POST',

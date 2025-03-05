@@ -13,10 +13,20 @@
     <div class="grid-cols-3 gap-8 pb-8 md:grid">
         <x-card :header="__('General')">
             <div>
-                <x-select.styled :label="__('Dashboard module')" :options="$modules" wire:model="setting.settings.dashboard_module"/>
+                <x-select.styled
+                    :label="__('Dashboard module')"
+                    wire:model="setting.settings.dashboard_module"
+                    :options="$modules"
+                />
             </div>
             <div class="mt-4">
-                <x-select.styled :label="__('Calendars')" wire:model="setting.settings.calendars" :options="$calendars" multiple select="label:name|value:id" />
+                <x-select.styled
+                    :label="__('Calendars')"
+                    wire:model="setting.settings.calendars"
+                    multiple
+                    select="label:name|value:id"
+                    :options="$calendars"
+                />
             </div>
         </x-card>
         <x-card :header="__('Navigation styling')">

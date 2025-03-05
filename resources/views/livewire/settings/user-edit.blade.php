@@ -30,8 +30,8 @@
                 <x-select.styled
                     wire:model="userForm.language_id"
                     :label="__('Language')"
-                    :options="$languages"
                     select="label:name|value:id"
+                    :options="$languages"
                 />
                 <x-select.styled
                     wire:model="userForm.timezone"
@@ -41,9 +41,8 @@
                 <x-select.styled
                     wire:model="userForm.parent_id"
                     :label="__('Parent')"
+                    select="label:name|value:id|description:email"
                     :options="$users"
-                    select="label:name|value:id"
-                    option-description="email"
                 />
             @show
             @section('user-edit.attributes')
@@ -59,7 +58,13 @@
                 <x-input wire:model="userForm.bank_name" :label="__('Bank Name')"/>
             @show
             @section('user-edit.mail-accounts')
-                <x-select.styled :options="$mailAccounts" select="label:email|value:id" multiple :label="__('Mail Accounts')" wire:model="userForm.mail_accounts" />
+                <x-select.styled
+                    :label="__('Mail Accounts')"
+                    wire:model="userForm.mail_accounts"
+                    multiple
+                    select="label:email|value:id"
+                    :options="$mailAccounts"
+                />
             @show
         </form>
     @show
@@ -152,7 +157,6 @@
                 class="pb-4"
                 wire:model="userForm.contact_id"
                 select="label:label|value:contact_id"
-                option-description="description"
                 :request="[
                     'url' => route('search', \FluxErp\Models\Address::class),
                     'method' => 'POST',

@@ -28,8 +28,8 @@
                 <x-select.styled
                     wire:model="user.language_id"
                     :label="__('Language')"
-                    :options="$languages"
                     select="label:name|value:id"
+                    :options="$languages"
                 />
                 <x-password :label="__('New password')" wire:model="user.password"/>
                 <x-password :label="__('Repeat password')" wire:model="user.password_confirmation"/>

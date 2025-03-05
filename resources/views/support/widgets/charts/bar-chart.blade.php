@@ -5,20 +5,19 @@
         <x-select.native
             x-model="chartType"
             :options="[
-                    [
-                        'value' => 'bar',
-                        'label' => __('Bar'),
-                    ],
-                    [
-                        'value' => 'line',
-                        'label' => __('Line'),
-                    ],
-                    [
-                        'value' => 'area',
-                        'label' => __('Area'),
-                    ],
-                ]"
-            select="label:label|value:value"
+                [
+                    'value' => 'bar',
+                    'label' => __('Bar'),
+                ],
+                [
+                    'value' => 'line',
+                    'label' => __('Line'),
+                ],
+                [
+                    'value' => 'area',
+                    'label' => __('Area'),
+                ],
+            ]"
         >
         </x-select.native>
     @endif

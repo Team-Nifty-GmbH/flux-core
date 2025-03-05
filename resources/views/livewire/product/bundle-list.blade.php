@@ -5,8 +5,8 @@
                 class="pb-4"
                 :label="__('Product')"
                 wire:model="productBundleProductForm.bundle_product_id"
-                option-description="product_number"
                 required
+                select="label:label|value:id|description:product_number"
                 :request="[
                     'url' => route('search', \FluxErp\Models\Product::class),
                     'method' => 'POST',

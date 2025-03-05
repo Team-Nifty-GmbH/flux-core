@@ -7,6 +7,7 @@
                 wire:model="order.approval_user_id"
                 required
                 :disabled="$order->is_confirmed || (auth()->user()?->id !== $order->approval_user_id && $order->is_locked && ! is_null($order->approval_user_id))"
+                select="label:label|value:id"
                 :request="[
                     'url' => route('search', \FluxErp\Models\User::class),
                     'method' => 'POST',

@@ -6,46 +6,47 @@
                 wire:model="contact.price_list_id"
                 required
                 :label="__('Price group')"
-                :options="$priceLists"
                 select="label:name|value:id"
+                :options="$priceLists"
             />
             <x-select.styled
                 x-bind:disabled="! $wire.$parent.$parent.edit"
                 wire:model="contact.payment_type_id"
                 required
                 :label="__('Payment type')"
-                :options="$paymentTypes"
                 select="label:name|value:id"
+                :options="$paymentTypes"
             />
             <x-select.styled
                 x-bind:disabled="! $wire.$parent.$parent.edit"
                 wire:model="contact.purchase_payment_type_id"
                 required
                 :label="__('Purchase Payment Type')"
-                :options="$purchasePaymentTypes"
                 select="label:name|value:id"
+                :options="$purchasePaymentTypes"
             />
             <x-select.styled
                 x-bind:disabled="! $wire.$parent.$parent.edit"
                 wire:model="contact.currency_id"
                 required
                 :label="__('Currency')"
-                :options="$currencies"
                 select="label:name|value:id"
+                :options="$currencies"
             />
             <x-select.styled
                 x-bind:disabled="! $wire.$parent.$parent.edit"
                 wire:model="contact.vat_rate_id"
                 required
                 :label="__('Tax Exemption')"
-                :options="$vatRates"
                 select="label:name|value:id"
+                :options="$vatRates"
             />
             <x-select.styled
                 x-bind:disabled="! $wire.$parent.$parent.edit"
                 :label="__('Commission Agent')"
                 wire:model="contact.agent_id"
                 required
+                select="label:label|value:id"
                 :request="[
                     'url' => route('search', \FluxErp\Models\User::class),
                     'method' => 'POST',
@@ -59,6 +60,7 @@
                 :label="__('Approval User')"
                 wire:model="contact.approval_user_id"
                 required
+                select="label:label|value:id"
                 :request="[
                     'url' => route('search', \FluxErp\Models\User::class),
                     'method' => 'POST',

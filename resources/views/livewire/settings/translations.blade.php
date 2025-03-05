@@ -14,8 +14,8 @@
                 <x-select.styled
                     :label="__('Language')"
                     wire:model.live="locale"
-                    :options="$locales"
                     required
+                    :options="$locales"
                 />
             </div>
             <div class="mt-6 sm:ml-16">

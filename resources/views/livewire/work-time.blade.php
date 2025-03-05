@@ -7,10 +7,10 @@
         <div class="flex flex-col gap-1.5">
             <x-select.styled
                 :label="__('Work Time Type')"
-                :options="$workTimeTypes"
                 wire:model="workTime.work_time_type_id"
-                select="label:name|value:id"
                 x-on:select="$wire.workTime.is_billable = $event.detail.select.is_billable"
+                select="label:name|value:id"
+                :options="$workTimeTypes"
             />
             <div class="mt-2">
                 <x-toggle :label="__('Is Billable')" wire:model="workTime.is_billable" />
@@ -42,13 +42,15 @@
             <x-select.styled
                 :label="__('Model')"
                 wire:model="workTime.trackable_type"
-                :options="$trackableTypes"
                 x-on:select="relatedSelected($event.detail.select?.value)"
+                :options="$trackableTypes"
             />
             <div id="trackable-id" x-cloak x-show="$wire.workTime.trackable_type">
                 <x-select.styled
                     :label="__('Record')"
                     x-on:select="recordSelected($event.detail.select)"
+                    wire:model="workTime.trackable_id"
+                    select="label:label|value:id"
                     :request="[
                         'url' => route('search', '__model__'),
                         'method' => 'POST',
@@ -58,7 +60,6 @@
                             ],
                         ],
                     ]"
-                    wire:model="workTime.trackable_id"
                 />
             </div>
             <x-input :label="__('Name')" wire:model="workTime.name" />

@@ -40,7 +40,7 @@
             <x-select.styled
                 :label="__('Product')"
                 wire:model="discountForm.model_id"
-                option-description="product_number"
+                select="label:label|value:id|description:product_number"
                 :request="[
                     'url' => route('search', \FluxErp\Models\Product::class),
                     'method' => 'POST',

@@ -40,12 +40,11 @@
                     :label="__('Protocol')"
                     wire:model="mailAccount.protocol"
                     :options="[
-                            ['value' => 'imap', 'label' => __('IMAP')],
-                            ['value' => 'pop3', 'label' => __('POP3')],
-                            ['value' => 'nntp', 'label' => __('NNTP')],
-                        ]"
-                >
-                </x-select.styled>
+                        ['value' => 'imap', 'label' => __('IMAP')],
+                        ['value' => 'pop3', 'label' => __('POP3')],
+                        ['value' => 'nntp', 'label' => __('NNTP')],
+                    ]"
+                />
                 <x-input x-bind:disabled="$wire.mailAccount.id" wire:model="mailAccount.email" :label="__('Email')" />
                 <x-password wire:model="mailAccount.password" :label="__('Password')" />
                 <x-input wire:model="mailAccount.host" :label="__('Host')" />
@@ -57,8 +56,7 @@
                         ['value' => 'ssl', 'label' => __('SSL')],
                         ['value' => 'tls', 'label' => __('TLS')],
                     ]"
-                >
-                </x-select.styled>
+                />
                 <x-checkbox wire:model.boolean="mailAccount.has_valid_certificate" :label="__('Validate Certificate')" />
                 <x-checkbox wire:model.boolean="mailAccount.is_o_auth" :label="__('oAuth')" />
                 <x-toggle wire:model.boolean="mailAccount.is_auto_assign" :label="__('Auto assign mails')" />
@@ -80,8 +78,7 @@
                         ['value' => 'ssl', 'label' => __('SSL')],
                         ['value' => 'tls', 'label' => __('TLS')],
                     ]"
-                >
-                </x-select.styled>
+                />
             </div>
             <x-slot:footer>
                 <x-button color="secondary" light

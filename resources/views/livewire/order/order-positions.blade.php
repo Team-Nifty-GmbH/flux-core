@@ -41,8 +41,8 @@
                                         class="pb-4"
                                         :label="__('Product')"
                                         wire:model="orderPosition.product_id"
-                                        option-description="product_number"
                                         required
+                                        select="label:label|value:id|description:product_number"
                                         :request="[
                                             'url' => route('search', \FluxErp\Models\Product::class),
                                             'method' => 'POST',
@@ -107,8 +107,8 @@
                                 <x-select.styled
                                     :label="__('Ledger Account')"
                                     select="label:name|value:id"
-                                    option-description="number"
                                     wire:model.number="orderPosition.ledger_account_id"
+                                    select="label:name|value:id|description:number"
                                     :request="[
                                         'url' => route('search', \FluxErp\Models\LedgerAccount::class),
                                         'method' => 'POST',
@@ -178,8 +178,8 @@
                                                 input.select();
                                             })"
                                             wire:model="orderPosition.product_id"
-                                            option-description="product_number"
                                             required
+                                            select="label:label|value:id|description:product_number"
                                             :request="[
                                                 'url' => route('search', \FluxErp\Models\Product::class),
                                                 'method' => 'POST',

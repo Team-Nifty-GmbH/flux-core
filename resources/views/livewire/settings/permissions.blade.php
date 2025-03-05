@@ -22,9 +22,9 @@
             <x-select.styled
                 :label="__('Guard')"
                 :disabled="$roleForm->id ?? false"
-                :options="$guards"
                 wire:model="roleForm.guard_name"
                 x-bind:readonly="$wire.roleForm.id"
+                :options="$guards"
             />
         </div>
         <div>

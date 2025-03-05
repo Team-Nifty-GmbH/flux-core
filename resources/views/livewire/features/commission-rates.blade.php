@@ -12,6 +12,7 @@
                                 wire:model="commissionRate.user_id"
                                 :disabled="! $create"
                                 required
+                                select="label:label|value:id"
                                 :request="[
                                     'url' => route('search', \FluxErp\Models\User::class),
                                     'method' => 'POST',
@@ -25,15 +26,15 @@
                             <x-select.styled
                                 :label="__('Category')"
                                 wire:model.live="commissionRate.category_id"
-                                :options="$categories"
                                 select="label:name|value:id"
+                                :options="$categories"
                             />
                         </div>
                         <div class="sm:col-span-6">
                             <x-select.styled
                                 :label="__('Product')"
                                 wire:model.live="commissionRate.product_id"
-                                option-description="product_number"
+                                select="label:label|value:id|description:product_number"
                                 :request="[
                                     'url' => route('search', \FluxErp\Models\Product::class),
                                     'params' => [

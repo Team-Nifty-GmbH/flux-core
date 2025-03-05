@@ -9,8 +9,8 @@
                         :label="__('Client')"
                         :placeholder="__('Select a Client')"
                         wire:model="orderType.client_id"
-                        :options="$clients"
                         select="label:name|value:id"
+                        :options="$clients"
                     />
                     <x-select.styled
                         :label="__('Order Type')"

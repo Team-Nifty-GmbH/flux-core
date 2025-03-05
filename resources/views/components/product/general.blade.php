@@ -30,8 +30,8 @@
             <x-select.styled
                 x-bind:readonly="!edit" label="{{ __('Unit') }}"
                 wire:model.number="product.unit_id"
-                :options="resolve_static(\FluxErp\Models\Unit::class, 'query')->get(['id', 'name'])->toArray()"
                 select="label:name|value:id"
+                :options="resolve_static(\FluxErp\Models\Unit::class, 'query')->get(['id', 'name'])->toArray()"
             />
             <div class="grid grid-cols-1 sm:grid-cols-4 gap-4" x-bind:class="!edit && 'pointer-events-none'">
                 <x-number x-bind:readonly="!edit" wire:model.number="product.dimension_length_mm">
@@ -115,8 +115,7 @@
             x-bind:disabled="!edit"
             wire:model.number="product.categories"
             :label="__('Categories')"
-            option-description="description"
-            select="label:name|value:id"
+            select="label:label|value:id"
             :request="[
                 'url' => route('search', \FluxErp\Models\Category::class),
                 'method' => 'POST',

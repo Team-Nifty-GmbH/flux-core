@@ -37,10 +37,10 @@
             ">
                 <div class="space-y-2.5 divide-y divide-secondary-200">
                     <x-select.styled
-                        select="label:name|value:id"
                         :label="__('Order type')"
                         wire:model="replicateOrder.order_type_id"
                         required
+                        select="label:name|value:id"
                         :request="[
                             'url' => route('search', \FluxErp\Models\OrderType::class),
                             'method' => 'POST',
@@ -72,10 +72,9 @@
                             :label="__('Contact')"
                             class="pb-4"
                             wire:model="replicateOrder.contact_id"
-                            select="label:label|value:contact_id"
-                            option-description="description"
                             required
                             x-on:select="updateContactId($event.detail.select.contact_id)"
+                            select="label:label|value:contact_id"
                             :request="[
                                 'url' => route('search', \FluxErp\Models\Address::class),
                                 'method' => 'POST',
@@ -104,8 +103,8 @@
                                 class="pb-4"
                                 :label="__('Invoice Address')"
                                 wire:model="replicateOrder.address_invoice_id"
-                                option-description="description"
                                 required
+                                select="label:label|value:id"
                                 :request="[
                                     'url' => route('search', \FluxErp\Models\Address::class),
                                     'method' => 'POST',
@@ -127,8 +126,8 @@
                                 :label="__('Delivery Address')"
                                 class="pb-4"
                                 wire:model="replicateOrder.address_delivery_id"
-                                option-description="description"
                                 required
+                                select="label:label|value:id"
                                 :request="[
                                     'url' => route('search', \FluxErp\Models\Address::class),
                                     'method' => 'POST',
@@ -149,35 +148,35 @@
                     <div class="space-y-3 pt-4">
                         <x-select.styled
                             :label="__('Client')"
-                            :options="$clients"
-                            select="label:name|value:id"
                             required
                             autocomplete="off"
                             wire:model="replicateOrder.client_id"
+                            select="label:name|value:id"
+                            :options="$clients"
                         />
                         <x-select.styled
                             :label="__('Price list')"
-                            :options="$priceLists"
-                            select="label:name|value:id"
                             required
                             autocomplete="off"
                             wire:model="replicateOrder.price_list_id"
+                            select="label:name|value:id"
+                            :options="$priceLists"
                         />
                         <x-select.styled
                             :label="__('Payment method')"
-                            :options="$paymentTypes"
-                            select="label:name|value:id"
                             required
                             autocomplete="off"
                             wire:model="replicateOrder.payment_type_id"
+                            select="label:name|value:id"
+                            :options="$paymentTypes"
                         />
                         <x-select.styled
                             :label="__('Language')"
-                            :options="$languages"
-                            select="label:name|value:id"
                             required
                             autocomplete="off"
                             wire:model="replicateOrder.language_id"
+                            select="label:name|value:id"
+                            :options="$languages"
                         />
                     </div>
                 </div>
@@ -194,8 +193,8 @@
                     <x-select.styled
                         :label="__('Order Type')"
                         wire:model="replicateOrder.order_type_id"
-                        select="label:name|value:id"
                         required
+                        select="label:name|value:id"
                         :request="[
                             'url' => route('search', \FluxErp\Models\OrderType::class),
                             'method' => 'POST',
@@ -425,10 +424,9 @@
                                     :label="__('Contact')"
                                     :disabled="$order->is_locked"
                                     wire:model="order.contact_id"
-                                    select="label:label|value:contact_id"
-                                    option-description="description"
                                     required
                                     x-on:select="updateContactId($event.detail.select.value)"
+                                    select="label:label|value:contact_id"
                                     :request="[
                                         'url' => route('search', \FluxErp\Models\Address::class),
                                         'method' => 'POST',
@@ -473,8 +471,8 @@
                                     :disabled="$order->is_locked"
                                     class="pb-4"
                                     wire:model.live="order.address_invoice_id"
-                                    option-description="description"
                                     required
+                                    select="label:label|value:id"
                                     :request="[
                                         'url' => route('search', \FluxErp\Models\Address::class),
                                         'method' => 'POST',
@@ -522,8 +520,8 @@
                                     :disabled="$order->is_locked"
                                     class="pb-4"
                                     wire:model.live="order.address_delivery_id"
-                                    option-description="description"
                                     required
+                                    select="label:label|value:id"
                                     :request="[
                                         'url' => route('search', \FluxErp\Models\Address::class),
                                         'method' => 'POST',
@@ -566,11 +564,11 @@
                                     <x-select.styled
                                         disabled
                                         :label="__('Client')"
-                                        :options="$clients"
-                                        select="label:name|value:id"
                                         required
                                         autocomplete="off"
                                         wire:model.live="order.client_id"
+                                        select="label:name|value:id"
+                                        :options="$clients"
                                     />
                                 @endif
                                 <x-select.styled
@@ -578,6 +576,7 @@
                                     :disabled="$order->is_locked"
                                     autocomplete="off"
                                     wire:model="order.agent_id"
+                                    select="label:label|value:id"
                                     :request="[
                                         'url' => route('search', \FluxErp\Models\User::class),
                                         'method' => 'POST',
@@ -590,6 +589,7 @@
                                     :label="__('Responsible User')"
                                     autocomplete="off"
                                     wire:model="order.responsible_user_id"
+                                    select="label:label|value:id"
                                     :request="[
                                         'url' => route('search', \FluxErp\Models\User::class),
                                         'method' => 'POST',
@@ -603,6 +603,7 @@
                                     autocomplete="off"
                                     multiple
                                     wire:model="order.users"
+                                    select="label:label|value:id"
                                     :request="[
                                         'url' => route('search', \FluxErp\Models\User::class),
                                         'method' => 'POST',
@@ -613,49 +614,49 @@
                                 />
                                 <x-select.styled
                                     :label="__('Price list')"
-                                    :options="$priceLists"
-                                    select="label:name|value:id"
                                     required
                                     autocomplete="off"
                                     wire:model.live="order.price_list_id"
                                     x-bind:disabled="$wire.order.is_locked"
                                     :disabled="$order->is_locked"
+                                    select="label:name|value:id"
+                                    :options="$priceLists"
                                 />
                                 <x-select.styled
                                     :label="__('Tax Exemption')"
-                                    :options="$vatRates"
-                                    select="label:name|value:id"
                                     autocomplete="off"
                                     wire:model="order.vat_rate_id"
                                     x-bind:disabled="$wire.order.is_locked"
                                     :disabled="$order->is_locked"
+                                    select="label:name|value:id"
+                                    :options="$vatRates"
                                 />
                                 <x-select.styled
                                     :label="__('Payment method')"
-                                    :options="$paymentTypes"
-                                    select="label:name|value:id"
                                     required
                                     autocomplete="off"
                                     wire:model="order.payment_type_id"
+                                    select="label:name|value:id"
+                                    :options="$paymentTypes"
                                 />
                                 @if($contactBankConnections)
                                     <x-select.styled
                                         wire:model="order.contact_bank_connection_id"
                                         :label="__('Bank connection')"
-                                        :options="$contactBankConnections"
                                         select="label:iban|value:id"
+                                        :options="$contactBankConnections"
                                     />
                                 @endif
                                 @if(count($languages) > 1)
                                     <x-select.styled
                                         :label="__('Language')"
-                                        :options="$languages"
-                                        select="label:name|value:id"
                                         required
                                         autocomplete="off"
                                         wire:model="order.language_id"
                                         x-bind:disabled="$wire.order.is_locked"
                                         :disabled="$order->is_locked"
+                                        select="label:name|value:id"
+                                        :options="$languages"
                                     />
                                 @endif
                             </div>

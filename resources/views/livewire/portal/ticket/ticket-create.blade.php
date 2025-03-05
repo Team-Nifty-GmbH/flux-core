@@ -29,8 +29,8 @@
                             :label="__('Ticket Type')"
                             :placeholder="__('Ticket Type')"
                             wire:model.live="ticketTypeId"
-                            :options="$ticketTypes"
                             select="label:name|value:id"
+                            :options="$ticketTypes"
                         />
                     </div>
                     <template x-for="ticketTypeAdditionalColumn in selectedAdditionalColumns">

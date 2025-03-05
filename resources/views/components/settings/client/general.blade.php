@@ -8,8 +8,8 @@
                     :label="__('Country')"
                     :placeholder="__('Country')"
                     wire:model="client.country_id"
-                    :options="$countries"
                     select="label:name|value:id"
+                    :options="$countries"
                 />
                 <x-input :label="__('CEO')" :placeholder="__('CEO')" wire:model="client.ceo"/>
                 <x-input :label="__('Postcode')" :placeholder="__('Postcode')" wire:model="client.postcode"/>
@@ -24,8 +24,8 @@
                     :label="__('Bank Connections')"
                     multiple
                     wire:model="client.bank_connections"
-                    :options="$bankConnections"
                     select="label:name|value:id"
+                    :options="$bankConnections"
                 />
             </div>
             <div class="flex flex-col gap-2 mt-2">

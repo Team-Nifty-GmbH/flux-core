@@ -5,10 +5,10 @@
     <x-modal id="edit-schedule" :title="__('Edit Schedule')">
         <div class="flex flex-col gap-1.5">
             <x-select.styled
-                select="label:name|value:id"
                 :label="__('Order type')"
                 wire:model="schedule.parameters.orderTypeId"
                 required
+                select="label:name|value:id"
                 :request="[
                     'url' => route('search', \FluxErp\Models\OrderType::class),
                     'method' => 'POST',
@@ -45,10 +45,10 @@
             />
             <x-select.styled
                 :label="__('Repeat')"
-                :options="$frequencies"
                 autocomplete="off"
                 required
                 wire:model="schedule.cron.methods.basic"
+                :options="$frequencies"
             />
             <div x-cloak x-show="['dailyAt', 'lastDayOfMonth'].indexOf($wire.schedule.cron.methods.basic) >= 0">
                 <x-time
@@ -60,6 +60,8 @@
             <div x-cloak x-show="$wire.schedule.cron.methods.basic === 'weeklyOn'" class="flex flex-col gap-4">
                 <x-select.styled
                     :label="__('Weekday')"
+                    wire:model="schedule.cron.parameters.basic.0"
+                    select="label:name|value:id"
                     :options="[
                         ['id' => 1, 'name' => __('Mondays')],
                         ['id' => 2, 'name' => __('Tuesdays')],
@@ -69,8 +71,6 @@
                         ['id' => 6, 'name' => __('Saturdays')],
                         ['id' => 0, 'name' => __('Sundays')],
                     ]"
-                    select="label:name|value:id"
-                    wire:model="schedule.cron.parameters.basic.0"
                 />
                 <x-time
                     :label="__('Time')"
@@ -100,6 +100,9 @@
             <div x-cloak x-show="$wire.schedule.cron.methods.basic === 'yearlyOn'" class="flex flex-col gap-4">
                 <x-select.styled
                     :label="__('Month')"
+                    wire:model="schedule.cron.parameters.basic.0"
+                    x-on:select="document.getElementById('month-day-input').max = $event.detail.select.days; $wire.schedule.cron.parameters.basic[1] = Math.min($wire.schedule.cron.parameters.basic[1], $event.detail.select.days);"
+                    select="label:name|value:id"
                     :options="[
                         ['id' => 1, 'name' => __('January'), 'days' => 31],
                         ['id' => 2, 'name' => __('February'), 'days' => 28],
@@ -114,9 +117,6 @@
                         ['id' => 11, 'name' => __('November'), 'days' => 30],
                         ['id' => 12, 'name' => __('December'), 'days' => 31],
                     ]"
-                    select="label:name|value:id"
-                    wire:model="schedule.cron.parameters.basic.0"
-                    x-on:select="document.getElementById('month-day-input').max = $event.detail.select.days; $wire.schedule.cron.parameters.basic[1] = Math.min($wire.schedule.cron.parameters.basic[1], $event.detail.select.days);"
                 />
                 <x-number id="month-day-input" :max="31" :min="0" wire:model.blur="schedule.cron.parameters.basic.1" :label="__('Day')" />
                 <x-time

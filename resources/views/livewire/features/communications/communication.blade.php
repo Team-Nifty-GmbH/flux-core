@@ -46,11 +46,11 @@
             <div>
                 <x-select.styled
                     required
-                    :options="$communicationTypes"
                     x-on:select="$event.detail.select.value === 'mail' ? $wire.communication.to = [] : null"
                     wire:model="communication.communication_type_enum"
                     :label="__('Communication Type')"
                     select="label:label|value:name"
+                    :options="$communicationTypes"
                 />
             </div>
             <div class="flex gap-1.5">
@@ -99,11 +99,12 @@
                 <x-select.styled
                     :label="__('Record')"
                     x-on:select="modelId = $event.detail?.select.value;"
+                    x-model="modelId"
+                    select="label:label|value:id"
                     :request="[
                         'url' => route('search', ''),
                         'method' => 'POST',
                     ]"
-                    x-model="modelId"
                 />
             </div>
             <div class="m-2">
@@ -112,8 +113,8 @@
             <div class="flex flex-col gap-4" x-show="$wire.communication.communication_type_enum === 'phone-call' || $wire.communication.communication_type_enum === 'letter'">
                 <x-select.styled
                     :label="__('Address')"
-                    option-description="description"
                     x-on:select="$wire.setTo($event.detail.select)"
+                    select="label:label|value:id"
                     :request="[
                         'url' => route('search', \FluxErp\Models\Address::class),
                         'method' => 'POST',
@@ -251,20 +252,21 @@
                 multiple
                 wire:model.number="communication.tags"
                 x-bind:disabled="$wire.communication.id && $wire.communication.communication_type_enum === 'mail'"
+                select="label:name|value:id"
                 :request="[
-                'url' => route('search', \FluxErp\Models\Tag::class),
-                'method' => 'POST',
-                'params' => [
-                    'option-value' => 'id',
-                    'where' => [
-                        [
-                            'type',
-                            '=',
-                            app(\FluxErp\Models\Communication::class)->getMorphClass(),
+                    'url' => route('search', \FluxErp\Models\Tag::class),
+                    'method' => 'POST',
+                    'params' => [
+                        'option-value' => 'id',
+                        'where' => [
+                            [
+                                'type',
+                                '=',
+                                app(\FluxErp\Models\Communication::class)->getMorphClass(),
+                            ],
                         ],
                     ],
-                ],
-            ]"
+                ]"
             >
                 <x-slot:after>
                     @canAction(\FluxErp\Actions\Tag\CreateTag::class)

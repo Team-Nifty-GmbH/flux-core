@@ -10,8 +10,8 @@
                 label="{{ __('Model') }}"
                 placeholder="{{ __('Model') }}"
                 wire:model="ticketType.model_type"
-                :options="$models"
                 select="label:value|value:label"
+                :options="$models"
             />
         </div>
         <div class="sm:col-span-6">
@@ -20,8 +20,8 @@
                 placeholder="{{ __('Roles') }}"
                 wire:model="ticketType.roles"
                 multiple
-                :options="$roles"
                 select="label:name|value:id"
+                :options="$roles"
             />
         </div>
     </div>

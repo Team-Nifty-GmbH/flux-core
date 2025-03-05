@@ -60,7 +60,7 @@ class LedgerAccounts extends LedgerAccountList
         return array_merge(
             parent::getViewData(),
             [
-                'ledgerAccountTypes' => LedgerAccountTypeEnum::values(),
+                'ledgerAccountTypes' => LedgerAccountTypeEnum::valuesLocalized(),
             ]
         );
     }

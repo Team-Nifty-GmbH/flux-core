@@ -62,9 +62,9 @@
                                                 class="w-full"
                                                 required
                                                 :label="__('Select a watchlist')"
+                                                wire:model="selectedWatchlist"
                                                 select="label:name|value:id"
                                                 :options="$watchlists"
-                                                wire:model="selectedWatchlist"
                                             />
                                             <div x-cloak x-show="$wire.selectedWatchlist === 0">
                                                 <x-input class="w-full" :label="__('Watchlist Name')" wire:model="watchlistName"/>

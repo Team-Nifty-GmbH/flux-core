@@ -5,13 +5,11 @@
                 <x-select.styled
                     wire:model="calendarEvent.calendar_id"
                     :label="__('Calendar')"
-                    select="label:name|value:id"
                     required
                     x-on:select="$wire.calendarEvent.is_repeatable = $wire.isCalendarEventRepeatable($event.detail.select.value);"
-                    :options="$this->selectableCalendars"
                     select="label:name|value:id"
-                >
-                </x-select.styled>
+                    :options="$this->selectableCalendars"
+                />
             </div>
         @show
         @section('event-edit.input-fields')
@@ -129,7 +127,6 @@
                             ['label' => __('Month(s)'), 'value' => 'months'],
                             ['label' => __('Year(s)'), 'value' => 'years'],
                         ]"
-                        select="label:value|value:label"
                         x-bind:disabled="! $wire.calendarEvent.is_editable ?? false"
                     />
                 </div>
@@ -409,6 +406,8 @@
                     <x-select.styled
                         id="invite"
                         :placeholder="__('Add invite')"
+                        x-on:select="$wire.calendarEvent.invited.push($event.detail.select); clear();.request.params.where.push(['id', '!=', $event.detail.select.value])"
+                        select="label:name|value:id"
                         :request="[
                             'url' => route('search', \FluxErp\Models\User::class),
                             'method' => 'POST',
@@ -423,7 +422,6 @@
                                 ],
                             ],
                         ]"
-                        x-on:select="$wire.calendarEvent.invited.push($event.detail.select); clear();.request.params.where.push(['id', '!=', $event.detail.select.value])"
                     />
                 </div>
             </div>

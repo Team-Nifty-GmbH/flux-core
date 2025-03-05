@@ -4,14 +4,14 @@
         <x-select.styled
             wire:model="country.language_id"
             :label="__('Language')"
-            :options="$languages"
             select="label:name|value:id"
+            :options="$languages"
         />
         <x-select.styled
             wire:model="country.currency_id"
             :label="__('Currency')"
-            :options="$currencies"
             select="label:name|value:id"
+            :options="$currencies"
         />
         <x-input wire:model="country.iso_alpha2" :label="__('ISO alpha2')"/>
         <x-input wire:model="country.iso_alpha3" :label="__('ISO alpha3')"/>

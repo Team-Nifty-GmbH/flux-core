@@ -11,9 +11,9 @@
                     <div x-show="task.id" x-bind:class="!edit && 'pointer-events-none'">
                         <x-select.styled
                             :label="__('Project')"
-                            option-description="description"
                             wire:model="task.project_id"
                             x-bind:readonly="!edit"
+                            select="label:label|value:id"
                             :request="[
                                 'url' => route('search', \FluxErp\Models\Project::class),
                                 'method' => 'POST',
@@ -28,6 +28,7 @@
                             autocomplete="off"
                             wire:model="task.responsible_user_id"
                             x-bind:readonly="!edit"
+                            select="label:label|value:id"
                             :request="[
                                 'url' => route('search', \FluxErp\Models\User::class),
                                 'method' => 'POST',
@@ -74,6 +75,7 @@
                     wire:model="task.categories"
                     x-bind:readonly="!edit"
                     multiple
+                    select="label:label|value:id"
                     :request="[
                         'url' => route('search', \FluxErp\Models\Category::class),
                         'method' => 'POST',
@@ -96,6 +98,7 @@
                     multiple
                     wire:model="task.users"
                     x-bind:readonly="!edit"
+                    select="label:label|value:id"
                     :request="[
                         'url' => route('search', \FluxErp\Models\User::class),
                         'method' => 'POST',
@@ -111,6 +114,7 @@
                     multiple
                     x-bind:disabled="! edit"
                     wire:model.number="task.tags"
+                    select="label:label|value:id"
                     :request="[
                         'url' => route('search', \FluxErp\Models\Tag::class),
                         'method' => 'POST',

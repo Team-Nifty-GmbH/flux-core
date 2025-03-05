@@ -150,6 +150,7 @@
                                 multiple
                                 :label="__('Assigned')"
                                 wire:model.live="ticket.users"
+                                select="label:label|value:id"
                                 :request="[
                                     'url' => route('search', \FluxErp\Models\User::class),
                                     'method' => 'POST',
@@ -179,8 +180,8 @@
                                         :disabled="! resolve_static(\FluxErp\Actions\Ticket\UpdateTicket::class, 'canPerformAction', [false])"
                                         class="pb-4"
                                         wire:model="ticket.authenticatable_id"
-                                        option-description="description"
                                         required
+                                        select="label:label|value:id"
                                         :request="[
                                             'url' => route('search', $ticket->authenticatable_type ?? morph_alias(\FluxErp\Models\User::class)),
                                             'method' => 'POST',

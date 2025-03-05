@@ -9,6 +9,7 @@
         <x-select.styled
             wire:model="projectId"
             :label="__('Project')"
+            select="label:label|value:id"
             :request="[
                 'url' => route('search', \FluxErp\Models\Project::class),
                 'method' => 'POST',

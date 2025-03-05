@@ -17,8 +17,8 @@
                     x-bind:disabled="!edit"
                     wire:model.number="product.clients"
                     :label="__('Clients')"
-                    select="label:name|value:id"
                     :src="'logo_small_url'"
+                    select="label:name|value:id"
                     :request="[
                         'url' => route('search', \FluxErp\Models\Client::class),
                         'method' => 'POST',
@@ -41,15 +41,15 @@
                 <x-select.styled
                     :label="__('Price List')"
                     wire:model="productPricesUpdate.price_list_id"
-                    :options="$selectablePriceLists"
                     select="label:name|value:id"
+                    :options="$selectablePriceLists"
                 />
                 <x-select.styled
                     :label="__('Use price from')"
                     wire:model="productPricesUpdate.base_price_list_id"
                     :clearable="true"
-                    :options="$selectablePriceLists"
                     select="label:name|value:id"
+                    :options="$selectablePriceLists"
                 />
                 <div class="mt-2">
                     <x-toggle wire:model="productPricesUpdate.is_percent" :label="__('Is Percentage')" />

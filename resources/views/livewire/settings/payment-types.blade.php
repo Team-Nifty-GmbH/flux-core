@@ -11,11 +11,11 @@
         <x-toggle wire:model.boolean="paymentType.requires_manual_transfer" :label="__('Requires Manual Transfer')" />
         <x-select.styled
             :label="__('Client')"
-            :options="$clients"
-            select="label:name|value:id"
             multiple
             autocomplete="off"
             wire:model="paymentType.clients"
+            select="label:name|value:id"
+            :options="$clients"
         />
         <x-number wire:model="paymentType.payment_reminder_days_1" :label="__('Payment Reminder Days 1')" />
         <x-number wire:model="paymentType.payment_reminder_days_2" :label="__('Payment Reminder Days 2')" />

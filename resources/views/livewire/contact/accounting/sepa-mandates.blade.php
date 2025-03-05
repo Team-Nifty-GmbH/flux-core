@@ -4,8 +4,7 @@
         <x-select.styled
             wire:model="sepaMandate.contact_bank_connection_id"
             :label="__('Bank connection')"
-            select="label:iban|value:id"
-            option-description="bank_name"
+            select="label:iban|value:id|description:bank_name"
             :options="$contactBankConnections"
         />
         <x-date

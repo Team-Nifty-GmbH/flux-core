@@ -24,16 +24,15 @@
                             label="{{ __('Model') }}"
                             placeholder="{{ __('Model') }}"
                             wire:model="category.model_type"
-                            :options="$models"
-                            select="label:value|value:label"
                             required
+                            :options="$models"
                         />
                     </div>
                     <div id="category-parent-id">
                         <x-select.styled
                             wire:model="category.parent_id"
                             :label="__('Parent')"
-                            option-description="description"
+                            select="label:label|value:id"
                             :request="[
                                 'url' => route('search', \FluxErp\Models\Category::class),
                                 'method' => 'POST',

@@ -21,11 +21,11 @@
             <div class="space-y-2.5 divide-y divide-secondary-200">
                 @if(! $orderType ?? true)
                     <x-select.styled
-                        :options="$orderTypes"
-                        select="label:name|value:id"
                         :label="__('Order type')"
                         required
                         wire:model="order.order_type_id"
+                        select="label:name|value:id"
+                        :options="$orderTypes"
                     />
                 @endif
                 <div class="pt-4 flex flex-col gap-4">
@@ -33,14 +33,14 @@
                         :label="__('Contact')"
                         class="pb-4"
                         wire:model="order.contact_id"
-                        select="label:label|value:contact_id"
-                        option-description="description"
                         required
                         x-on:select="updateContactId($event.detail.select.contact_id)"
+                        select="label:label|value:contact_id"
                         :request="[
                             'url' => route('search', \FluxErp\Models\Address::class),
                             'method' => 'POST',
                             'params' => [
+                                'option-value' => 'contact_id',
                                 'fields' => [
                                     'name',
                                     'contact_id',
@@ -64,8 +64,8 @@
                             class="pb-4"
                             :label="__('Invoice Address')"
                             wire:model="order.address_invoice_id"
-                            option-description="description"
                             required
+                            select="label:label|value:id"
                             :request="[
                                 'url' => route('search', \FluxErp\Models\Address::class),
                                 'method' => 'POST',
@@ -87,8 +87,8 @@
                             :label="__('Delivery Address')"
                             class="pb-4"
                             wire:model="order.address_delivery_id"
-                            option-description="description"
                             required
+                            select="label:label|value:id"
                             :request="[
                                 'url' => route('search', \FluxErp\Models\Address::class),
                                 'method' => 'POST',
@@ -109,35 +109,35 @@
                 <div class="pt-4 flex flex-col gap-4">
                     <x-select.styled
                         :label="__('Client')"
-                        :options="$clients"
-                        select="label:name|value:id"
                         required
                         autocomplete="off"
                         wire:model="order.client_id"
+                        select="label:name|value:id"
+                        :options="$clients"
                     />
                     <x-select.styled
                         :label="__('Price list')"
-                        :options="$priceLists"
-                        select="label:name|value:id"
                         required
                         autocomplete="off"
                         wire:model="order.price_list_id"
+                        select="label:name|value:id"
+                        :options="$priceLists"
                     />
                     <x-select.styled
                         :label="__('Payment method')"
-                        :options="$paymentTypes"
-                        select="label:name|value:id"
                         required
                         autocomplete="off"
                         wire:model="order.payment_type_id"
+                        select="label:name|value:id"
+                        :options="$paymentTypes"
                     />
                     <x-select.styled
                         :label="__('Language')"
-                        :options="$languages"
-                        select="label:name|value:id"
                         required
                         autocomplete="off"
                         wire:model="order.language_id"
+                        select="label:name|value:id"
+                        :options="$languages"
                     />
                 </div>
             </div>

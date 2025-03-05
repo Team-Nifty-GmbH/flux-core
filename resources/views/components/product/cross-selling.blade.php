@@ -15,7 +15,7 @@
                 :label="__('Assign product')"
                 x-on:select="pushProduct($event.detail.select, $el.closest('[data-index]').getAttribute('data-index')); clear()"
                 class="pb-4"
-                option-description="product_number"
+                select="label:name|value:id|description:product_number"
                 :request="[
                     'url' => route('search', \FluxErp\Models\Product::class),
                     'params' => [

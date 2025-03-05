@@ -14,9 +14,9 @@
     <x-select.styled
         class="w-full"
         :label="__('Load a watchlist')"
+        wire:model.live.numeric="loadWatchlist"
         select="label:name|value:id"
         :options="array_filter($watchlists, fn (array $watchlist) => $watchlist['id'] ?? false)"
-        wire:model.live.numeric="loadWatchlist"
     />
     <x-button
         :text="__('Edit watchlists')"

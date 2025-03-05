@@ -5,9 +5,9 @@
         <div x-show="! $wire.addressType.id" x-cloak>
             <x-select.styled
                 :label="__('Client')"
-                select="label:name|value:id"
                 autocomplete="off"
                 wire:model="addressType.client_id"
+                select="label:name|value:id"
                 :options="$clients"
             />
         </div>

@@ -10,8 +10,8 @@
                 label="{{ __('Model') }}"
                 placeholder="{{ __('Model') }}"
                 wire:model="additionalColumn.model_type"
-                :options="$models"
                 select="label:value|value:label"
+                :options="$models"
             />
         </div>
         <div class="sm:col-span-6">

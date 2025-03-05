@@ -15,9 +15,9 @@
                 <x-select.styled
                     :label="__('Work Time Type')"
                     wire:model="workTime.work_time_type_id"
-                    :options="$workTimeTypes"
-                    select="label:name|value:id"
                     x-on:select="$wire.workTime.is_billable = $event.detail.select.is_billable"
+                    select="label:name|value:id"
+                    :options="$workTimeTypes"
                 />
                 <div class="mt-2 mb-2">
                     <x-toggle :label="__('Is Billable')" wire:model="workTime.is_billable" />
@@ -26,16 +26,17 @@
                     :label="__('User')"
                     autocomplete="off"
                     wire:model="workTime.user_id"
+                    select="label:label|value:id"
                     :request="[
-                    'url' => route('search', \FluxErp\Models\User::class),
-                    'method' => 'POST',
-                    'params' => [
-                        'where'=> [
-                            'is_active' => true,
+                        'url' => route('search', \FluxErp\Models\User::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'where'=> [
+                                'is_active' => true,
+                            ],
+                            'with' => 'media',
                         ],
-                        'with' => 'media',
-                    ],
-                ]"
+                    ]"
                 />
             </div>
             <x-date time-format="24"
@@ -63,6 +64,7 @@
                         'url' => route('search', \FluxErp\Models\Address::class),
                         'method' => 'POST',
                         'params' => [
+                            'option-value' => 'contact_id',
                             'where' => [
                                 [
                                     'is_main_address',
@@ -81,14 +83,15 @@
                 <x-select.styled
                     :label="__('Model')"
                     wire:model="workTime.trackable_type"
-                    :options="$trackableTypes"
                     select="label:value|value:label"
+                    :options="$trackableTypes"
                 />
                 <div id="trackable-id-edit" x-show="$wire.workTime.trackable_type">
                     <x-select.styled
                         :label="__('Record')"
                         wire:model="workTime.trackable_id"
                         x-on:select="$event.detail.select.contact_id ? $wire.workTime.contact_id = $event.detail.select.contact_id : null"
+                        select="label:label|value:id"
                         :request="[
                             'url' => route('search', '__model__'),
                             'method' => 'POST',
@@ -119,8 +122,8 @@
             />
             <x-select.styled
                 :label="__('Product')"
-                option-description="description"
                 wire:model="createOrdersFromWorkTimes.product_id"
+                select="label:label|value:id"
                 :request="[
                     'url' => route('search', \FluxErp\Models\Product::class),
                     'method' => 'POST',

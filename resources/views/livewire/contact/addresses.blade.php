@@ -54,7 +54,7 @@
                             x-bind:disabled="! $wire.$parent.edit"
                             wire:model.number="contact.categories"
                             :label="__('Categories')"
-                            option-description="description"
+                            select="label:label|value:id"
                             :request="[
                                 'url' => route('search', \FluxErp\Models\Category::class),
                                 'method' => 'POST',
@@ -88,8 +88,8 @@
                             x-bind:disabled="! $wire.$parent.edit"
                             wire:model.number="contact.contact_origin_id"
                             :label="__('Contact Origin')"
-                            :options="$contactOrigins"
                             select="label:name|value:id"
+                            :options="$contactOrigins"
                         />
                     </div>
                 </x-card>

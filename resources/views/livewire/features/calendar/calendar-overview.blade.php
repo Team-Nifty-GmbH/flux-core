@@ -9,9 +9,8 @@
                                 <x-select.styled
                                     wire:model="selectedCalendar.parentId"
                                     :label="__('Parent Calendar')"
-                                    :options="$this->parentCalendars"
                                     select="label:name|value:id"
-                                    option-description="description"
+                                    :options="$this->parentCalendars"
                                 />
                             </div>
                             <x-input wire:model="selectedCalendar.name" :label="__('Calendar Name')"/>
@@ -20,9 +19,9 @@
                                     <x-select.styled
                                         wire:model="selectedCalendar.modelType"
                                         :label="__('Model Type')"
-                                        :options="$this->availableModels"
-                                        select="label:value|value:label"
                                         x-bind:disabled="$wire.selectedCalendar.id"
+                                        select="label:value|value:label"
+                                        :options="$this->availableModels"
                                     />
                                 </div>
                             </div>

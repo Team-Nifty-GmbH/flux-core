@@ -8,8 +8,8 @@
                     <x-select.styled
                         wire:model="contact.client_id"
                         label="{{ __('Client') }}"
-                        :options="resolve_static(\FluxErp\Models\Client::class, 'query')->get(['id', 'name'])"
                         select="label:name|value:id"
+                        :options="resolve_static(\FluxErp\Models\Client::class, 'query')->get(['id', 'name'])"
                     />
                 @endif
                 <div class="flex flex-col gap-1.5 pt-1.5">
@@ -29,9 +29,9 @@
                             </label>
                             <div class="col-span-2 w-full">
                                 <x-select.styled
-                                    :options="SalutationEnum::valuesLocalized()"
                                     x-bind:readonly="!$wire.edit"
                                     wire:model="contact.main_address.salutation"
+                                    :options="SalutationEnum::valuesLocalized()"
                                 />
                             </div>
                         </div>
@@ -95,8 +95,8 @@
                                 <x-select.styled
                                     wire:model="contact.main_address.country_id"
                                     searchable
-                                    :options="resolve_static(\FluxErp\Models\Country::class, 'query')->get(['id', 'name'])"
                                     select="label:name|value:id"
+                                    :options="resolve_static(\FluxErp\Models\Country::class, 'query')->get(['id', 'name'])"
                                 />
                             </div>
                         </div>
@@ -109,8 +109,8 @@
                                 <x-select.styled
                                     wire:model="contact.main_address.language_id"
                                     searchable
-                                    :options="resolve_static(\FluxErp\Models\Language::class, 'query')->get(['id', 'name'])"
                                     select="label:name|value:id"
+                                    :options="resolve_static(\FluxErp\Models\Language::class, 'query')->get(['id', 'name'])"
                                 />
                             </div>
                         </div>
@@ -154,8 +154,8 @@
                                 <x-select.styled
                                     wire:model="contact.contact_origin_id"
                                     searchable
-                                    :options="resolve_static(\FluxErp\Models\ContactOrigin::class, 'query')->where('is_active', true)->get(['id', 'name'])"
                                     select="label:name|value:id"
+                                    :options="resolve_static(\FluxErp\Models\ContactOrigin::class, 'query')->where('is_active', true)->get(['id', 'name'])"
                                 />
                             </div>
                         </div>

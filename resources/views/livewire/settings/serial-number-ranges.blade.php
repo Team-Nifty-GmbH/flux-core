@@ -9,8 +9,8 @@
             <x-select.styled
                 wire:model="serialNumberRange.client_id"
                 :label="__('Client')"
-                :options="$clients"
                 select="label:name|value:id"
+                :options="$clients"
             />
         </div>
         <x-input wire:model="serialNumberRange.type" :label="__('Type')" />

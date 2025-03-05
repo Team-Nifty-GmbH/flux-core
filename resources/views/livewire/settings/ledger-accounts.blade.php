@@ -13,11 +13,11 @@
         <x-input wire:model="ledgerAccount.name" :label="__('Name')" />
         <x-input wire:model="ledgerAccount.number" :label="__('Number')" />
         <x-select.styled
+            :label="__('Ledger Account Type')"
             wire:model="ledgerAccount.ledger_account_type_enum"
             required
             :options="$ledgerAccountTypes"
-            :label="__('Ledger Account Type')"
-        ></x-select.styled>
+        />
         <div class="mt-2">
             <x-toggle wire:model.boolean="ledgerAccount.is_automatic" :label="__('Is Automatic')" />
         </div>

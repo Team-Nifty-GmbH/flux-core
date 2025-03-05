@@ -207,6 +207,7 @@
                         multiple
                         x-bind:disabled="! $wire.edit"
                         wire:model.number="address.tags"
+                        select="label:label|value:id"
                         :request="[
                             'url' => route('search', \FluxErp\Models\Tag::class),
                             'method' => 'POST',
@@ -301,7 +302,6 @@
                                     ['label' => __('Phone'), 'value' => 'phone'],
                                     ['label' => __('Website'), 'value' => 'website'],
                                 ]"
-                                select="label:value|value:label"
                                 required
                             />
                         </div>

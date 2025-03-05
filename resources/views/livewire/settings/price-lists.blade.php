@@ -16,8 +16,8 @@
                             <x-select.styled
                                 wire:model="priceList.parent_id"
                                 :label="__('Parent')"
-                                :options="$priceLists"
                                 select="label:name|value:id"
+                                :options="$priceLists"
                             />
                             <div x-show="$wire.priceList.parent_id > 0" class="grid grid-cols-1 gap-y-6">
                                 <x-number wire:model.number="priceList.discount.discount" :label="__('Discount')"/>
@@ -105,7 +105,7 @@
                                 <x-select.styled
                                     wire:model="newCategoryDiscount.category_id"
                                     required
-                                    option-description="description"
+                                    select="label:label|value:id"
                                     :request="[
                                         'url' => route('search', \FluxErp\Models\Category::class),
                                         'method' => 'POST',
