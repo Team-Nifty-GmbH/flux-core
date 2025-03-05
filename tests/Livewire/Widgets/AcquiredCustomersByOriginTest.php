@@ -14,6 +14,7 @@ use Livewire\Livewire;
 class AcquiredCustomersByOriginTest extends BaseSetup
 {
     private Collection $contactCollection;
+
     private Collection $contactOriginCollection;
 
     protected function setUp(): void
@@ -22,68 +23,56 @@ class AcquiredCustomersByOriginTest extends BaseSetup
 
         $now = Carbon::now();
 
-        $contact_origin_active = ContactOrigin::factory()->create([
+        $contactOriginActive = ContactOrigin::factory()->create([
             'name' => 'testOrigin1',
             'is_active' => true,
         ]);
 
-        $contact_origin_inactive = ContactOrigin::factory()->create([
+        $contactOriginInactive = ContactOrigin::factory()->create([
             'name' => 'testOrigin2',
             'is_active' => false,
         ]);
 
         $this->contactOriginCollection = collect([
-            $contact_origin_active->id => $contact_origin_active,
-            $contact_origin_inactive->id => $contact_origin_inactive,
-        ]);
-
-        $contact1 = Contact::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-            'contact_origin_id' => $contact_origin_active->id,
-            'customer_number' => 5551,
-        ]);
-
-        $contact2 = Contact::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-            'contact_origin_id' => $contact_origin_active->id,
-            'customer_number' => 5552,
-            'created_at' => $now->startOfWeek(),
-        ]);
-
-        $contact3 = Contact::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-            'contact_origin_id' => $contact_origin_active->id,
-            'customer_number' => 5553,
-            'created_at' => $now->startOfMonth(),
-        ]);
-
-        $contact4 = Contact::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-            'contact_origin_id' => $contact_origin_active->id,
-            'customer_number' => 5554,
-            'created_at' => $now->startOfQuarter(),
-        ]);
-
-        $contact5 = Contact::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-            'contact_origin_id' => $contact_origin_active->id,
-            'customer_number' => 5555,
-            'created_at' => $now->startOfYear(),
-        ]);
-
-        $contact6 = Contact::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-            'contact_origin_id' => $contact_origin_inactive->id,
-            'customer_number' => 5556,
+            $contactOriginActive->id => $contactOriginActive,
+            $contactOriginInactive->id => $contactOriginInactive,
         ]);
 
         $this->contactCollection = collect([
-            $contact1,
-            $contact2,
-            $contact3,
-            $contact4,
-            $contact5,
-            $contact6,
+            Contact::factory()->create([
+                'client_id' => $this->dbClient->getKey(),
+                'contact_origin_id' => $contactOriginActive->id,
+                'customer_number' => 5551,
+            ]),
+            Contact::factory()->create([
+                'client_id' => $this->dbClient->getKey(),
+                'contact_origin_id' => $contactOriginActive->id,
+                'customer_number' => 5552,
+                'created_at' => $now->startOfWeek(),
+            ]),
+            Contact::factory()->create([
+                'client_id' => $this->dbClient->getKey(),
+                'contact_origin_id' => $contactOriginActive->id,
+                'customer_number' => 5553,
+                'created_at' => $now->startOfMonth(),
+            ]),
+            Contact::factory()->create([
+                'client_id' => $this->dbClient->getKey(),
+                'contact_origin_id' => $contactOriginActive->id,
+                'customer_number' => 5554,
+                'created_at' => $now->startOfQuarter(),
+            ]),
+            Contact::factory()->create([
+                'client_id' => $this->dbClient->getKey(),
+                'contact_origin_id' => $contactOriginActive->id,
+                'customer_number' => 5555,
+                'created_at' => $now->startOfYear(),
+            ]),
+            Contact::factory()->create([
+                'client_id' => $this->dbClient->getKey(),
+                'contact_origin_id' => $contactOriginInactive->id,
+                'customer_number' => 5556,
+            ]),
         ]);
     }
 
@@ -115,7 +104,7 @@ class AcquiredCustomersByOriginTest extends BaseSetup
             ->set('timeFrame', $timeFrame)
             ->call('calculateChart')
             ->assertSet('labels', [0 => 'testOrigin1'])
-            ->assertSet('series', [0 => 1 + $this->getNumberOfContactsWithSameDate($this->contactCollection->get(0))])
+            ->assertSet('series', [0 => 1 + $this->getNumberOfContactsWithSameDate($this->contactCollection[0])])
             ->assertStatus(200)
             ->assertHasNoErrors();
     }
@@ -128,7 +117,7 @@ class AcquiredCustomersByOriginTest extends BaseSetup
             ->set('timeFrame', $timeFrame)
             ->call('calculateChart')
             ->assertSet('labels', [0 => 'testOrigin1'])
-            ->assertSet('series', [0 => 2 + $this->getNumberOfContactsWithSameDate($this->contactCollection->get(1))])
+            ->assertSet('series', [0 => 2 + $this->getNumberOfContactsWithSameDate($this->contactCollection[1])])
             ->assertStatus(200)
             ->assertHasNoErrors();
     }
@@ -141,7 +130,7 @@ class AcquiredCustomersByOriginTest extends BaseSetup
             ->set('timeFrame', $timeFrame)
             ->call('calculateChart')
             ->assertSet('labels', [0 => 'testOrigin1'])
-            ->assertSet('series', [0 => 3 + $this->getNumberOfContactsWithSameDate($this->contactCollection->get(2))])
+            ->assertSet('series', [0 => 3 + $this->getNumberOfContactsWithSameDate($this->contactCollection[2])])
             ->assertStatus(200)
             ->assertHasNoErrors();
     }
@@ -154,7 +143,7 @@ class AcquiredCustomersByOriginTest extends BaseSetup
             ->set('timeFrame', $timeFrame)
             ->call('calculateChart')
             ->assertSet('labels', [0 => 'testOrigin1'])
-            ->assertSet('series', [0 => 4 + $this->getNumberOfContactsWithSameDate($this->contactCollection->get(3))])
+            ->assertSet('series', [0 => 4 + $this->getNumberOfContactsWithSameDate($this->contactCollection[3])])
             ->assertStatus(200)
             ->assertHasNoErrors();
     }
@@ -167,7 +156,7 @@ class AcquiredCustomersByOriginTest extends BaseSetup
             ->set('timeFrame', $timeFrame)
             ->call('calculateChart')
             ->assertSet('labels', [0 => 'testOrigin1'])
-            ->assertSet('series', [0 => 4 + $this->getNumberOfContactsWithSameDate($this->contactCollection->get(4))])
+            ->assertSet('series', [0 => 4 + $this->getNumberOfContactsWithSameDate($this->contactCollection[4])])
             ->assertStatus(200)
             ->assertHasNoErrors();
     }
