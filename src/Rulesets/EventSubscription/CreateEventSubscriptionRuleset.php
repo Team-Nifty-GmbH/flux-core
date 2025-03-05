@@ -14,7 +14,7 @@ class CreateEventSubscriptionRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'event' => 'required|string',
+            'channel' => 'required|string',
             'subscribable_type' => [
                 'required',
                 'string',
@@ -24,17 +24,6 @@ class CreateEventSubscriptionRuleset extends FluxRuleset
                 'required',
                 'integer',
                 app(MorphExists::class, ['modelAttribute' => 'subscribable_type']),
-            ],
-            'model_type' => [
-                'required',
-                'string',
-                app(MorphClassExists::class),
-            ],
-            'model_id' => [
-                'present',
-                'integer',
-                'nullable',
-                app(MorphExists::class),
             ],
             'is_broadcast' => 'required|boolean|accepted_if:is_notifiable,false,0',
             'is_notifiable' => 'required|boolean|accepted_if:is_broadcast,false,0',

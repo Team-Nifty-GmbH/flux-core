@@ -2,33 +2,46 @@
 
 namespace FluxErp\Notifications\Comment;
 
-use FluxErp\Contracts\HasToastNotification;
 use FluxErp\Models\Address;
 use FluxErp\Models\Comment;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\User;
-use FluxErp\Notifications\Notification;
-use FluxErp\Support\Notification\ToastNotification\NotificationAction;
-use FluxErp\Support\Notification\ToastNotification\ToastNotification;
+use FluxErp\Support\Notification\SubscribableNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
-use NotificationChannels\WebPush\WebPushMessage;
 
-class CommentCreatedNotification extends Notification implements HasToastNotification, ShouldQueue
+class CommentCreatedNotification extends SubscribableNotification implements ShouldQueue
 {
     use Queueable;
 
-    public Comment $model;
-
-    public ?string $route = null;
-
-    public function __construct(Comment $model)
+    public static function sendsTo(): array
     {
-        $this->model = $model;
-        $this->route = request()->header('referer');
+        return array_merge(
+            parent::sendsTo(),
+            [
+                resolve_static(Address::class, 'class'),
+            ],
+        );
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        return parent::toMail($notifiable)
+            ->when(
+                $ticketAccount = resolve_static(MailAccount::class, 'query')
+                    ->whereHas('mailFolders', fn ($query) => $query->where('can_create_ticket', true))
+                    ->value('email'),
+                fn (MailMessage $mail) => $mail->replyTo($ticketAccount)
+            )
+            ->line(new HtmlString(
+                '<span style="display: none">[flux:comment:'
+                . $this->model->model->getMorphClass() . ':'
+                . $this->model->model->getKey()
+                . ']</span>'
+            ));
     }
 
     public function via(object $notifiable): array
@@ -42,90 +55,39 @@ class CommentCreatedNotification extends Notification implements HasToastNotific
         return parent::via($notifiable);
     }
 
-    public function toMail(object $notifiable): MailMessage
+    public function subscribe(): array
     {
-        return $this->toToastNotification($notifiable)
-            ->toMail()
-            ->when(
-                $ticketAccount = resolve_static(MailAccount::class, 'query')
-                    ->whereHas('mailFolders', fn ($query) => $query->where('can_create_ticket', true))
-                    ->value('email'),
-                fn (MailMessage $mail) => $mail->replyTo($ticketAccount)
-            )
-            ->line(new HtmlString(
-                '<span style="display: none">[flux:comment:'
-                . $this->model->model->getMorphClass() . ':'
-                . $this->model->model->getKey()
-                . ']</span>'
-            )
-            );
+        return [
+            'eloquent.created: ' . resolve_static(Comment::class, 'class') => 'sendNotification',
+        ];
     }
 
-    public function toArray(object $notifiable): array
+    protected function getNotificationIcon(): ?string
     {
-        return $this->toToastNotification($notifiable)->toArray();
+        return 'chat';
     }
 
-    public function toWebPush(object $notifiable): ?WebPushMessage
+    protected function getDescription(): ?string
     {
-        if (! method_exists($notifiable, 'pushSubscriptions') || ! $notifiable->pushSubscriptions()->exists()) {
-            return null;
-        }
-
-        return $this->toToastNotification($notifiable)->toWebPush();
+        return $this->model->comment;
     }
 
-    public function toToastNotification(object $notifiable): ToastNotification
+    protected function getTitle(): string
     {
-        $createdBy = method_exists($this->model, 'getCreatedBy')
-            ? $this->model->getCreatedBy()
-            : null;
-
-        return ToastNotification::make()
-            ->notifiable($notifiable)
-            ->title(
-                Str::of(
-                    __(
-                        ':username commented on :model :label',
-                        [
-                            'username' => $createdBy && method_exists($createdBy, 'getLabel') && $createdBy->getLabel()
-                                ? $createdBy->getLabel()
-                                : __('Unknown'),
-                            'model' => __('your ' . $this->model->model->getMorphClass()),
-                            'label' => method_exists($this->model->model, 'getLabel') && $this->model->model->getLabel()
-                                ? '"' . $this->model->model->getLabel() . '"'
-                                : '',
-                        ],
-                    )
-                )
-                    ->trim()
-                    ->deduplicate()
-                    ->toString()
+        return Str::of(
+            __(
+                ':username commented on :model :label',
+                [
+                    'username' => $this->model->getCreatedBy()?->getLabel() ?? __('Unknown'),
+                    'model' => __('your ' . $this->model->model_type),
+                    'label' => method_exists($this->model->model, 'getLabel') && $this->model->model->getLabel()
+                        ? '"' . $this->model->model->getLabel() . '"'
+                        : '',
+                ],
             )
-            ->icon('chat')
-            ->when(
-                $createdBy
-                && method_exists($createdBy, 'getAvatarUrl')
-                && $createdBy->getAvatarUrl(),
-                function (ToastNotification $toast) use ($createdBy) {
-                    return $toast->img($createdBy->getAvatarUrl());
-                }
-            )
-            ->description($this->model->comment)
-            ->when(
-                $this->model->model && method_exists($this->model->model, 'detailRoute'),
-                function (ToastNotification $toast) use ($notifiable) {
-                    return $toast->accept(
-                        NotificationAction::make()
-                            ->label(__('View'))
-                            ->url(
-                                $notifiable instanceof Address
-                                    && method_exists($this->model->model, 'getPortalDetailRoute')
-                                ? $this->model->model->getPortalDetailRoute()
-                                : $this->route
-                            )
-                    );
-                }
-            );
+        )
+            ->trim()
+            ->deduplicate()
+            ->toString();
     }
 }
