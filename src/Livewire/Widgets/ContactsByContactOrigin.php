@@ -8,7 +8,7 @@ use FluxErp\Support\Widgets\Charts\CircleChart;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use Livewire\Attributes\Renderless;
 
-class AcquiredCustomersByOrigin extends CircleChart
+class ContactsByContactOrigin extends CircleChart
 {
     use IsTimeFrameAwareWidget;
 

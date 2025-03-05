@@ -4,14 +4,14 @@ namespace FluxErp\Tests\Livewire\Widgets;
 
 use Carbon\Carbon;
 use FluxErp\Enums\TimeFrameEnum;
-use FluxErp\Livewire\Widgets\AcquiredCustomersByOrigin;
+use FluxErp\Livewire\Widgets\ContactsByContactOrigin;
 use FluxErp\Models\Contact;
 use FluxErp\Models\ContactOrigin;
 use FluxErp\Tests\Livewire\BaseSetup;
 use Illuminate\Support\Collection;
 use Livewire\Livewire;
 
-class AcquiredCustomersByOriginTest extends BaseSetup
+class ContactsByContactOriginTest extends BaseSetup
 {
     private Collection $contactCollection;
 
@@ -92,7 +92,7 @@ class AcquiredCustomersByOriginTest extends BaseSetup
 
     public function test_renders_successfully()
     {
-        Livewire::test(AcquiredCustomersByOrigin::class)
+        Livewire::test(ContactsByContactOrigin::class)
             ->assertStatus(200);
     }
 
@@ -100,7 +100,7 @@ class AcquiredCustomersByOriginTest extends BaseSetup
     {
         $timeFrame = TimeFrameEnum::Today;
 
-        Livewire::test(AcquiredCustomersByOrigin::class)
+        Livewire::test(ContactsByContactOrigin::class)
             ->set('timeFrame', $timeFrame)
             ->call('calculateChart')
             ->assertSet('labels', [0 => 'testOrigin1'])
@@ -113,7 +113,7 @@ class AcquiredCustomersByOriginTest extends BaseSetup
     {
         $timeFrame = TimeFrameEnum::ThisWeek;
 
-        Livewire::test(AcquiredCustomersByOrigin::class)
+        Livewire::test(ContactsByContactOrigin::class)
             ->set('timeFrame', $timeFrame)
             ->call('calculateChart')
             ->assertSet('labels', [0 => 'testOrigin1'])
@@ -126,7 +126,7 @@ class AcquiredCustomersByOriginTest extends BaseSetup
     {
         $timeFrame = TimeFrameEnum::ThisMonth;
 
-        Livewire::test(AcquiredCustomersByOrigin::class)
+        Livewire::test(ContactsByContactOrigin::class)
             ->set('timeFrame', $timeFrame)
             ->call('calculateChart')
             ->assertSet('labels', [0 => 'testOrigin1'])
@@ -139,7 +139,7 @@ class AcquiredCustomersByOriginTest extends BaseSetup
     {
         $timeFrame = TimeFrameEnum::ThisQuarter;
 
-        Livewire::test(AcquiredCustomersByOrigin::class)
+        Livewire::test(ContactsByContactOrigin::class)
             ->set('timeFrame', $timeFrame)
             ->call('calculateChart')
             ->assertSet('labels', [0 => 'testOrigin1'])
@@ -152,7 +152,7 @@ class AcquiredCustomersByOriginTest extends BaseSetup
     {
         $timeFrame = TimeFrameEnum::ThisYear;
 
-        Livewire::test(AcquiredCustomersByOrigin::class)
+        Livewire::test(ContactsByContactOrigin::class)
             ->set('timeFrame', $timeFrame)
             ->call('calculateChart')
             ->assertSet('labels', [0 => 'testOrigin1'])
@@ -167,7 +167,7 @@ class AcquiredCustomersByOriginTest extends BaseSetup
         $end = Carbon::now()->addDays(2);
         $timeFrame = TimeFrameEnum::Custom;
 
-        Livewire::test(AcquiredCustomersByOrigin::class)
+        Livewire::test(ContactsByContactOrigin::class)
             ->set('timeFrame', $timeFrame)
             ->set('start', $start)
             ->set('end', $end)
