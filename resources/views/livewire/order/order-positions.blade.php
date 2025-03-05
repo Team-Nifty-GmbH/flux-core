@@ -166,8 +166,8 @@
                 @section('order-positions-footer-card')
                     <div x-show="! $wire.order.is_locked" x-cloak class="sticky bottom-6 pt-6">
                         <x-card>
-                            <form class="flex gap-4" x-on:submit.prevent="$wire.quickAdd().then(() => Alpine.$data($el.querySelector('[x-data]')).show = true)">
-                                <div class="flex gap-4 w-full">
+                            <form class="flex flex-col gap-4" x-on:submit.prevent="$wire.quickAdd().then(() => Alpine.$data($el.querySelector('[x-data]')).show = true)">
+                                <div class="flex flex-col gap-4">
                                     @section('order-positions-footer-card.inputs')
                                         <x-select.styled
                                             class="pb-4"
@@ -208,7 +208,7 @@
                                         </div>
                                     @show
                                 </div>
-                                <div class="flex gap-1.5 items-center pt-2">
+                                <div class="flex gap-2 items-center pt-2 w-full justify-end">
                                     @section('order-positions-footer-card.buttons')
                                         <div x-transition x-cloak x-show="$wire.orderPosition.product_id">
                                             <x-button

@@ -76,17 +76,6 @@ class ViewServiceProvider extends ServiceProvider
         // Register Printing views as blade components
         $views[] = __DIR__ . '/../../resources/views/printing';
         $this->loadViewsFrom($views, 'print');
-
-        // Special case for tallstack to get the label view from flux
-        $this->callAfterResolving('view', function ($view) {
-            $viewFinder = $view->getFinder();
-
-            $paths = [
-                __DIR__ . '/../../resources/views/vendor/tallstackui',
-            ];
-            $paths = array_merge($paths, data_get($viewFinder->getHints(), 'tallstack-ui', []));
-            $viewFinder->replaceNamespace('tallstack-ui', $paths);
-        });
     }
 
     protected function customizeTallstackUi(): void
