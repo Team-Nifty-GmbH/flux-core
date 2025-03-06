@@ -29,6 +29,11 @@ class RevenueByTopCustomers extends CircleChart
         ];
     }
 
+    public function showTitle(): bool
+    {
+        return true;
+    }
+
     public function getPlotOptions(): array
     {
         return [
