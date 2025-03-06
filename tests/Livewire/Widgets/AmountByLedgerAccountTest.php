@@ -27,6 +27,7 @@ class AmountByLedgerAccountTest extends BaseSetup
     private LedgerAccount $ledgerAccountExpenses;
 
     private Collection $orders;
+
     protected function setUp(): void
     {
         parent::setUp();

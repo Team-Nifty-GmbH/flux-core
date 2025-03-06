@@ -65,7 +65,6 @@ class AmountByLedgerAccount extends CircleChart
             ->setLabelKey('ledgerAccount.name')
             ->sum('total_gross_price', 'ledger_account_id');
 
-
         $tempLabels = $metrics->getLabels();
         $indexOfEmptyLabel = array_search('', $tempLabels);
 
@@ -75,6 +74,5 @@ class AmountByLedgerAccount extends CircleChart
 
         $this->labels = $tempLabels;
         $this->series = $metrics->getData();
-
     }
 }
