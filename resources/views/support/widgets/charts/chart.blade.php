@@ -8,7 +8,7 @@
                 </div>
                 <hr class="mx-6">
             @endif
-        @endsection
+        @show
         @section('options')
         @show
     </div>

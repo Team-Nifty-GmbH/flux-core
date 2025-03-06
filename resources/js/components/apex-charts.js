@@ -82,6 +82,7 @@ export default function($wire) {
         mapLivewireData(options) {
             options = JSON.parse(JSON.stringify(options));
             options.series = options.series || [];
+            options.labels = options.labels || [];
 
             options.chart.type = this.chartType || options.chart.type;
 
