@@ -13,9 +13,9 @@ use Livewire\Livewire;
 
 class ContactsByContactOriginTest extends BaseSetup
 {
-    private Collection $contactCollection;
+    private Collection $contacts;
 
-    private Collection $contactOriginCollection;
+    private Collection $contactOrigins;
 
     protected function setUp(): void
     {
@@ -23,71 +23,65 @@ class ContactsByContactOriginTest extends BaseSetup
 
         $now = Carbon::now();
 
-        $contactOriginActive = ContactOrigin::factory()->create([
-            'name' => 'testOrigin1',
-            'is_active' => true,
+        $this->contactOrigins = collect([
+            ContactOrigin::factory()->create([
+                'name' => 'testOrigin1',
+                'is_active' => true,
+            ]),
+            ContactOrigin::factory()->create([
+                'name' => 'testOrigin2',
+                'is_active' => false,
+            ]),
         ]);
 
-        $contactOriginInactive = ContactOrigin::factory()->create([
-            'name' => 'testOrigin2',
-            'is_active' => false,
-        ]);
-
-        $this->contactOriginCollection = collect([
-            $contactOriginActive->id => $contactOriginActive,
-            $contactOriginInactive->id => $contactOriginInactive,
-        ]);
-
-        $this->contactCollection = collect([
+        $this->contacts = collect([
             Contact::factory()->create([
                 'client_id' => $this->dbClient->getKey(),
-                'contact_origin_id' => $contactOriginActive->id,
+                'contact_origin_id' => $this->contactOrigins->first()->id,
                 'customer_number' => 5551,
             ]),
             Contact::factory()->create([
                 'client_id' => $this->dbClient->getKey(),
-                'contact_origin_id' => $contactOriginActive->id,
+                'contact_origin_id' => $this->contactOrigins->first()->id,
                 'customer_number' => 5552,
                 'created_at' => $now->startOfWeek(),
             ]),
             Contact::factory()->create([
                 'client_id' => $this->dbClient->getKey(),
-                'contact_origin_id' => $contactOriginActive->id,
+                'contact_origin_id' => $this->contactOrigins->first()->id,
                 'customer_number' => 5553,
                 'created_at' => $now->startOfMonth(),
             ]),
             Contact::factory()->create([
                 'client_id' => $this->dbClient->getKey(),
-                'contact_origin_id' => $contactOriginActive->id,
+                'contact_origin_id' => $this->contactOrigins->first()->id,
                 'customer_number' => 5554,
                 'created_at' => $now->startOfQuarter(),
             ]),
             Contact::factory()->create([
                 'client_id' => $this->dbClient->getKey(),
-                'contact_origin_id' => $contactOriginActive->id,
+                'contact_origin_id' => $this->contactOrigins->first()->id,
                 'customer_number' => 5555,
                 'created_at' => $now->startOfYear(),
             ]),
             Contact::factory()->create([
                 'client_id' => $this->dbClient->getKey(),
-                'contact_origin_id' => $contactOriginInactive->id,
+                'contact_origin_id' => $this->contactOrigins->last()->id,
                 'customer_number' => 5556,
             ]),
         ]);
     }
 
-    private function getNumberOfContactsWithSameDate(Contact $inputContact): int
+    public function getNumberOfSameCreationDatesOfContacts(TimeFrameEnum $timeFrame) : int
     {
-        $sameDateContacts = -1;
-
-        foreach ($this->contactCollection as $contact) {
-            if ($inputContact->created_at == $contact->created_at &&
-                $this->contactOriginCollection->get($contact->contact_origin_id)->is_active) {
-                $sameDateContacts++;
-            }
-        }
-
-        return $sameDateContacts;
+        return $this->contacts
+            ->filter(
+                fn (Contact $contact) => $contact->created_at->between(...$timeFrame->getRange())
+                    && $contact->contactOrigin()
+                        ->where('is_active', true)
+                        ->exists()
+            )
+            ->count();
     }
 
     public function test_renders_successfully()
@@ -103,8 +97,12 @@ class ContactsByContactOriginTest extends BaseSetup
         Livewire::test(ContactsByContactOrigin::class)
             ->set('timeFrame', $timeFrame)
             ->call('calculateChart')
-            ->assertSet('labels', [0 => 'testOrigin1'])
-            ->assertSet('series', [0 => 1 + $this->getNumberOfContactsWithSameDate($this->contactCollection[0])])
+            ->assertSet('labels', [
+                $this->contactOrigins->first()->name
+            ])
+            ->assertSet('series', [
+                $this->getNumberOfSameCreationDatesOfContacts($timeFrame)
+            ])
             ->assertStatus(200)
             ->assertHasNoErrors();
     }
@@ -116,8 +114,12 @@ class ContactsByContactOriginTest extends BaseSetup
         Livewire::test(ContactsByContactOrigin::class)
             ->set('timeFrame', $timeFrame)
             ->call('calculateChart')
-            ->assertSet('labels', [0 => 'testOrigin1'])
-            ->assertSet('series', [0 => 2 + $this->getNumberOfContactsWithSameDate($this->contactCollection[1])])
+            ->assertSet('labels', [
+                $this->contactOrigins->first()->name]
+            )
+            ->assertSet('series', [
+                $this->getNumberOfSameCreationDatesOfContacts($timeFrame)
+            ])
             ->assertStatus(200)
             ->assertHasNoErrors();
     }
@@ -129,8 +131,12 @@ class ContactsByContactOriginTest extends BaseSetup
         Livewire::test(ContactsByContactOrigin::class)
             ->set('timeFrame', $timeFrame)
             ->call('calculateChart')
-            ->assertSet('labels', [0 => 'testOrigin1'])
-            ->assertSet('series', [0 => 3 + $this->getNumberOfContactsWithSameDate($this->contactCollection[2])])
+            ->assertSet('labels', [
+                $this->contactOrigins->first()->name
+            ])
+            ->assertSet('series', [
+                $this->getNumberOfSameCreationDatesOfContacts($timeFrame)
+            ])
             ->assertStatus(200)
             ->assertHasNoErrors();
     }
@@ -142,8 +148,12 @@ class ContactsByContactOriginTest extends BaseSetup
         Livewire::test(ContactsByContactOrigin::class)
             ->set('timeFrame', $timeFrame)
             ->call('calculateChart')
-            ->assertSet('labels', [0 => 'testOrigin1'])
-            ->assertSet('series', [0 => 4 + $this->getNumberOfContactsWithSameDate($this->contactCollection[3])])
+            ->assertSet('labels', [
+                $this->contactOrigins->first()->name
+            ])
+            ->assertSet('series', [
+                $this->getNumberOfSameCreationDatesOfContacts($timeFrame)
+            ])
             ->assertStatus(200)
             ->assertHasNoErrors();
     }
@@ -155,8 +165,12 @@ class ContactsByContactOriginTest extends BaseSetup
         Livewire::test(ContactsByContactOrigin::class)
             ->set('timeFrame', $timeFrame)
             ->call('calculateChart')
-            ->assertSet('labels', [0 => 'testOrigin1'])
-            ->assertSet('series', [0 => 4 + $this->getNumberOfContactsWithSameDate($this->contactCollection[4])])
+            ->assertSet('labels', [
+                $this->contactOrigins->first()->name
+            ])
+            ->assertSet('series', [
+                $this->getNumberOfSameCreationDatesOfContacts($timeFrame)
+            ])
             ->assertStatus(200)
             ->assertHasNoErrors();
     }

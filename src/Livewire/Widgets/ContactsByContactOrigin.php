@@ -18,8 +18,6 @@ class ContactsByContactOrigin extends CircleChart
 
     public bool $showTotals = false;
 
-    public int $limit = 10;
-
     public function showTitle(): bool
     {
         return true;
@@ -54,7 +52,6 @@ class ContactsByContactOrigin extends CircleChart
         $metrics = Donut::make(
             resolve_static(Contact::class, 'query')
                 ->whereNotNull('contact_origin_id')
-                ->limit($this->limit)
                 ->join('contact_origins', 'contact_origins.id', '=', 'contacts.contact_origin_id')
                 ->where('contact_origins.is_active', true)
                 ->orderByRaw('COUNT(*) DESC')
