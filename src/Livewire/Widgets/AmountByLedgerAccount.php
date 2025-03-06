@@ -19,8 +19,6 @@ class AmountByLedgerAccount extends CircleChart
 
     public bool $showTotals = false;
 
-    public int $limit = 10;
-
     public function showTitle(): bool
     {
         return true;

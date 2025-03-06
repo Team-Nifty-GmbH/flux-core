@@ -126,26 +126,29 @@ class AmountByLedgerAccountTest extends BaseSetup
             ->set('timeFrame', $timeFrame)
             ->call('calculateChart')
             ->assertSet('labels', [
-                0 => 'Not Assigned',
-                1 => $this->ledgerAccountRevenue->name,
-                2 => $this->ledgerAccountExpenses->name,
+                'Not Assigned',
+                $this->ledgerAccountRevenue->name,
+                $this->ledgerAccountExpenses->name,
             ])
             ->assertSet('series', [
-                0 => round(
+                round(
                     $this->orders[0]
                         ->orderPositions()
                         ->sum('total_gross_price'),
-                    2),
-                1 => round(
+                    2
+                ),
+                round(
                     $this->orders[1]
                         ->orderPositions()
                         ->sum('total_gross_price'),
-                    2),
-                2 => round(
+                    2
+                ),
+                round(
                     $this->orders[2]
                         ->orderPositions()
                         ->sum('total_gross_price'),
-                    2),
+                    2
+                ),
             ])
             ->assertHasNoErrors()
             ->assertStatus(200);
@@ -159,14 +162,15 @@ class AmountByLedgerAccountTest extends BaseSetup
             ->set('timeFrame', $timeFrame)
             ->call('calculateChart')
             ->assertSet('labels', [
-                0 => 'Not Assigned',
+                'Not Assigned',
             ])
             ->assertSet('series', [
-                0 => round(
+                round(
                     $this->orders[3]
                         ->orderPositions()
                         ->sum('total_gross_price'),
-                    2),
+                    2
+                ),
             ])
             ->assertHasNoErrors()
             ->assertStatus(200);
