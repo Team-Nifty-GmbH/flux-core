@@ -9,8 +9,8 @@ class UpdatePrinterRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'name' => 'string|max:255',
-            'spooler_name' => 'string|max:255',
+            'name' => 'sometimes|required|string|max:255',
+            'spooler_name' => 'sometimes|required|string|max:255',
             'location' => 'nullable|string|max:255',
             'make_and_model' => 'nullable|string|max:255',
             'media_sizes' => 'array',

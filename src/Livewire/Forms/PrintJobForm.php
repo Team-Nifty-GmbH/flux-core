@@ -2,9 +2,9 @@
 
 namespace FluxErp\Livewire\Forms;
 
-use FluxErp\Actions\PrintJob\PrintJob\CreatePrintJob;
-use FluxErp\Actions\PrintJob\PrintJob\DeletePrintJob;
-use FluxErp\Actions\PrintJob\PrintJob\UpdatePrintJob;
+use FluxErp\Actions\PrintJob\CreatePrintJob;
+use FluxErp\Actions\PrintJob\DeletePrintJob;
+use FluxErp\Actions\PrintJob\UpdatePrintJob;
 use Livewire\Attributes\Locked;
 
 class PrintJobForm extends FluxForm

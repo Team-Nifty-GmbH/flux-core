@@ -2,6 +2,8 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Models\Pivots\PrinterUser;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Printer extends FluxModel
@@ -17,5 +19,11 @@ class Printer extends FluxModel
     public function printJobs(): HasMany
     {
         return $this->hasMany(PrintJob::class);
+    }
+
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'printer_user')
+            ->using(PrinterUser::class);
     }
 }

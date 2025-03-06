@@ -11,7 +11,7 @@ class PrinterRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'printers' => 'array',
+            'printers' => 'nullable|array',
             'printers.*' => [
                 'required',
                 'integer',

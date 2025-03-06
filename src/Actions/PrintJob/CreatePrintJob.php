@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\Actions\PrintJob\PrintJob;
+namespace FluxErp\Actions\PrintJob;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\PrintJob;

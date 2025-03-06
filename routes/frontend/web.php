@@ -208,7 +208,6 @@ Route::middleware('web')
                         Route::get('/price-lists', PriceLists::class)->name('price-lists');
                         Route::get('/print-jobs', PrintJobs::class)->name('print-jobs');
                         Route::get('/printers', Printers::class)->name('printers');
-
                         Route::get('/product-option-groups', ProductOptionGroups::class)->name('product-option-groups');
                         Route::get('/product-properties', ProductPropertyGroups::class)->name('product-properties');
                         Route::get('/queue-monitor', QueueMonitor::class)->name('queue-monitor');

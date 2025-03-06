@@ -43,7 +43,7 @@ class UpdateUser extends FluxAction
         }
 
         // Delete all tokens of the user if the user is set to is_active = false
-        if (! $this->getData('is_active')) {
+        if ($this->getData('is_active') === false) {
             $user->tokens()->delete();
             $user->locks()->delete();
         }
