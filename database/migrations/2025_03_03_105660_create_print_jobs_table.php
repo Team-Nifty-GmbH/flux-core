@@ -12,7 +12,7 @@ return new class() extends Migration
             $table->id();
             $table->foreignId('media_id')->constrained()->cascadeOnDelete();
             $table->foreignId('printer_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('user_id')->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
             $table->unsignedInteger('quantity')->default(1);
             $table->string('size');
             $table->boolean('is_completed')->default(false);
