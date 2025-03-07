@@ -17,7 +17,7 @@ return new class() extends Migration
         });
 
         Schema::table('additional_columns', function (Blueprint $table) {
-            $table->string('name')->collation('utf8mb4_unicode_ci')->nullable()->change();
+            $table->string('name')->collation('utf8mb4_unicode_ci')->change();
         });
     }
 
@@ -32,7 +32,7 @@ return new class() extends Migration
         });
 
         Schema::table('additional_columns', function (Blueprint $table) {
-            $table->string('name')->collation('utf8mb4_bin')->nullable()->change();
+            $table->string('name')->collation('utf8mb4_bin')->change();
         });
     }
 };
