@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use FluxErp\Mail\MagicLoginLink;
+use FluxErp\Models\Pivots\PrinterUser;
 use FluxErp\Traits\CacheModelQueries;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasCalendarUserSettings;
@@ -133,6 +134,12 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
     public function mailAccounts(): BelongsToMany
     {
         return $this->belongsToMany(MailAccount::class, 'mail_account_user');
+    }
+
+    public function printers(): BelongsToMany
+    {
+        return $this->belongsToMany(Printer::class, 'printer_user')
+            ->using(PrinterUser::class);
     }
 
     public function settings(): MorphMany

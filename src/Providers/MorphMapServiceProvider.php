@@ -68,12 +68,15 @@ use FluxErp\Models\Pivots\Communicatable;
 use FluxErp\Models\Pivots\ContactDiscount;
 use FluxErp\Models\Pivots\ContactDiscountGroup;
 use FluxErp\Models\Pivots\JobBatchable;
+use FluxErp\Models\Pivots\PrinterUser;
 use FluxErp\Models\Pivots\ProductBundleProduct;
 use FluxErp\Models\Pivots\ProductCrossSellingProduct;
 use FluxErp\Models\Pivots\ProductProductOption;
 use FluxErp\Models\Pivots\QueueMonitorable;
 use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
+use FluxErp\Models\Printer;
+use FluxErp\Models\PrintJob;
 use FluxErp\Models\Product;
 use FluxErp\Models\ProductCrossSelling;
 use FluxErp\Models\ProductOption;
@@ -173,6 +176,8 @@ class MorphMapServiceProvider extends ServiceProvider
             'permission' => Permission::class,
             'price' => Price::class,
             'price_list' => PriceList::class,
+            'print_job' => PrintJob::class,
+            'printer' => Printer::class,
             'product' => Product::class,
             'product_cross_selling' => ProductCrossSelling::class,
             'product_option' => ProductOption::class,
@@ -213,6 +218,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'contact_discount' => ContactDiscount::class,
             'contact_discount_group' => ContactDiscountGroup::class,
             'job_batchable' => JobBatchable::class,
+            'printer_user' => PrinterUser::class,
             'product_bundle_product' => ProductBundleProduct::class,
             'product_cross_selling_product' => ProductCrossSellingProduct::class,
             'product_product_option' => ProductProductOption::class,
