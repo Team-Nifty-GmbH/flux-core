@@ -3,7 +3,8 @@
     @parent
     @section('cart-sidebar.footer.buttons.buy')
         <x-button wire:click="addToCurrentOrder()" color="indigo" class="w-full" :text="__('Add to current order')"/>
-        <x-button color="secondary" light
+        <x-button
+            light
             :text="__('Clear cart')"
             wire:click="clear()"
             wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Cart Items')]) }}"

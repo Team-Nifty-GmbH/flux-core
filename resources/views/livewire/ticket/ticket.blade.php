@@ -164,7 +164,11 @@
                                     <x-label>
                                         {{ __('Author') }}
                                     </x-label>
-                                    <x-toggle :left-label=" __('User') " :label=" __('Contact') " wire:model.live="authorTypeContact" />
+                                    <x-toggle wire:model.live="authorTypeContact">
+                                        <x-slot:label>
+                                            <span x-text="$wire.authorTypeContact ? '{{ __('Contact') }}' : '{{ __('User') }}'"></span>
+                                        </x-slot:label>
+                                    </x-toggle>
                                     <div class="pl-2">
                                         <x-button color="secondary" light
                                             href="#"

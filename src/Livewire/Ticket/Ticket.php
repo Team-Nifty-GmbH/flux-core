@@ -167,7 +167,7 @@ class Ticket extends Component
 
         $this->js(<<<JS
             let component = Alpine.\$data(document.getElementById('author-select').querySelector('[x-data]'));
-            component.request.api = '$route';
+            component.request.url = '$route';
         JS);
 
         $this->skipRender();

@@ -8,9 +8,11 @@
     @endif
 }">
     @if ($label ?? false)
-        <x-label class="mb-1">
-            {{ $label }}
-        </x-label>
+        <div class="mb-1">
+            <x-label>
+                {{ $label }}
+            </x-label>
+        </div>
     @endif
     <div class="dropdown-full-w" {{ $attributes->whereStartsWith('x-bind') }}>
         <x-dropdown position="{{ $attributes->get('align', 'bottom') }}" scope="state">

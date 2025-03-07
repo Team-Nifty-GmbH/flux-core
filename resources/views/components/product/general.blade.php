@@ -240,11 +240,12 @@
                                     <div class="space-y-2.5" x-cloak x-show="propertyType !== 'option'">
                                         <template x-for="displayedProperty in displayedProperties">
                                             <div>
-                                                <x-label
-                                                    class="mb-1"
-                                                    x-bind:for="'displayed-property-' + displayedProperty.id"
-                                                    x-text="displayedProperty.name"
-                                                ></x-label>
+                                                <div class="mb-1">
+                                                    <x-label
+                                                        x-bind:for="'displayed-property-' + displayedProperty.id"
+                                                        x-text="displayedProperty.name"
+                                                    />
+                                                </div>
                                                 <x-input
                                                     x-model="displayedProperty.value"
                                                     x-bind:id="'displayed-property-' + displayedProperty.id"
