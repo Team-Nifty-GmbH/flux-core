@@ -11,7 +11,7 @@ return new class() extends Migration
         Schema::create('print_jobs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('media_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('printer_id')->constrained();
+            $table->foreignId('printer_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('user_id')->nullable()->constrained()->cascadeOnDelete();
             $table->unsignedInteger('quantity')->default(1);
             $table->string('size');

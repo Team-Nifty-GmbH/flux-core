@@ -30,6 +30,7 @@ class CreatePrintJobRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => User::class]),
             ],
             'quantity' => [
+                'required',
                 'integer',
                 'min:1',
             ],
