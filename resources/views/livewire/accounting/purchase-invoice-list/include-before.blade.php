@@ -1,5 +1,5 @@
-<x-modal id="edit-purchase-invoice-modal" size="7xl" spacing="">
-    <div class="h-full grid sm:grid-cols-2 gap-4 content-stretch">
+<x-modal id="edit-purchase-invoice-modal" size="full" scope="fullscreen" spacing="">
+    <div class="h-full grid sm:grid-cols-2 gap-4 content-stretch min-h-screen">
         @section('invoice-file')
             @section('invoice-upload')
                 <div x-cloak x-show="! $wire.purchaseInvoiceForm.id">

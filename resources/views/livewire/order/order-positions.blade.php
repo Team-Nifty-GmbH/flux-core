@@ -37,7 +37,7 @@
                                 <x-input :label="__('Name')" wire:model="orderPosition.name"/>
                                 <div x-cloak x-show="$wire.orderPosition.is_free_text !== true">
                                     <x-select.styled
-                                        x-on:select="$wire.changedProductId($event.detail.select.value)"
+                                        x-on:select="$wire.changedProductId($event.detail.select.id)"
                                         class="pb-4"
                                         :label="__('Product')"
                                         wire:model="orderPosition.product_id"
@@ -172,7 +172,7 @@
                                         <x-select.styled
                                             class="pb-4"
                                             :label="__('Product')"
-                                            x-on:select="$wire.changedProductId($event.detail.select.value).then(() => {
+                                            x-on:select="$wire.changedProductId($event.detail.select.id).then(() => {
                                                 const input = $refs.quickAddAmount.querySelector('input');
                                                 input.focus();
                                                 input.select();
@@ -202,6 +202,7 @@
                                             class="min-w-28"
                                         >
                                             <x-number
+                                                :step="0.01"
                                                 :label="__('Amount')"
                                                 wire:model="orderPosition.amount"
                                             />

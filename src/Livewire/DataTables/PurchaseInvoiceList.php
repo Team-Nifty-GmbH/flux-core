@@ -161,7 +161,7 @@ class PurchaseInvoiceList extends BaseDataTable
         }
 
         $this->js(<<<'JS'
-            $modalOpen('edit-purchase-invoice');
+            $modalOpen('edit-purchase-invoice-modal');
         JS);
     }
 

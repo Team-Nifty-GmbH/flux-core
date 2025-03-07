@@ -123,6 +123,11 @@ class ViewServiceProvider extends ServiceProvider
             ->block('wrapper.third', 'dark:bg-dark-700 pointer-events-auto w-full w-full overflow-hidden rounded-xl bg-white shadow-lg ring-1 ring-black ring-opacity-5')
             ->block('buttons.wrapper.second', 'flex min-h-full flex-col justify-between')
             ->block('buttons.close.wrapper', 'ml-2 flex shrink-0');
+
+        TallStackUi::personalize()
+            ->modal('fullscreen')
+            ->block('wrapper.fourth', 'dark:bg-dark-700 relative flex w-full transform flex-col rounded-xl bg-white text-left shadow-xl transition-all min-h-screen')
+            ->block('body', 'dark:text-dark-300 grow rounded-b-xl py-5 text-gray-700 px-4 min-h-screen');
     }
 
     protected function bootAssets(): void
