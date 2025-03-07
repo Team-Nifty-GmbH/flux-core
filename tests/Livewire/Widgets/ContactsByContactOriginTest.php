@@ -21,8 +21,6 @@ class ContactsByContactOriginTest extends BaseSetup
     {
         parent::setUp();
 
-        $now = Carbon::now();
-
         $this->contactOrigins = collect([
             ContactOrigin::factory()->create([
                 'name' => 'testOrigin1',
@@ -30,46 +28,47 @@ class ContactsByContactOriginTest extends BaseSetup
             ]),
             ContactOrigin::factory()->create([
                 'name' => 'testOrigin2',
+                'is_active' => true,
+            ]),
+            ContactOrigin::factory()->create([
+                'name' => 'testOrigin3',
                 'is_active' => false,
             ]),
         ]);
 
-        $this->contacts = collect([
-            Contact::factory()->create([
-                'client_id' => $this->dbClient->getKey(),
-                'contact_origin_id' => $this->contactOrigins->first()->id,
-                'customer_number' => 5551,
-            ]),
-            Contact::factory()->create([
-                'client_id' => $this->dbClient->getKey(),
-                'contact_origin_id' => $this->contactOrigins->first()->id,
-                'customer_number' => 5552,
-                'created_at' => $now->startOfWeek(),
-            ]),
-            Contact::factory()->create([
-                'client_id' => $this->dbClient->getKey(),
-                'contact_origin_id' => $this->contactOrigins->first()->id,
-                'customer_number' => 5553,
-                'created_at' => $now->startOfMonth(),
-            ]),
-            Contact::factory()->create([
-                'client_id' => $this->dbClient->getKey(),
-                'contact_origin_id' => $this->contactOrigins->first()->id,
-                'customer_number' => 5554,
-                'created_at' => $now->startOfQuarter(),
-            ]),
-            Contact::factory()->create([
-                'client_id' => $this->dbClient->getKey(),
-                'contact_origin_id' => $this->contactOrigins->first()->id,
-                'customer_number' => 5555,
-                'created_at' => $now->startOfYear(),
-            ]),
-            Contact::factory()->create([
-                'client_id' => $this->dbClient->getKey(),
-                'contact_origin_id' => $this->contactOrigins->last()->id,
-                'customer_number' => 5556,
-            ]),
-        ]);
+        $this->contacts = collect();
+
+        foreach ($this->contactOrigins as $contactOrigin) {
+            $quantity = $contactOrigin->id === $this->contactOrigins[1]->id ? 2 : 1;
+
+            $this->contacts->push(
+                Contact::factory()->count($quantity)->create([
+                    'client_id' => $this->dbClient->getKey(),
+                    'contact_origin_id' => $contactOrigin->id,
+                ])->merge(
+                Contact::factory()->count($quantity)->create([
+                    'client_id' => $this->dbClient->getKey(),
+                    'contact_origin_id' => $contactOrigin->id,
+                    'created_at' => Carbon::now()->startOfWeek(),
+                ]))->merge(
+                Contact::factory()->count($quantity)->create([
+                    'client_id' => $this->dbClient->getKey(),
+                    'contact_origin_id' => $contactOrigin->id,
+                    'created_at' => Carbon::now()->startOfMonth(),
+                ]))->merge(
+                Contact::factory()->count($quantity)->create([
+                    'client_id' => $this->dbClient->getKey(),
+                    'contact_origin_id' => $contactOrigin->id,
+                    'created_at' => Carbon::now()->startOfQuarter(),
+                ]))->merge(
+                Contact::factory()->count($quantity)->create([
+                    'client_id' => $this->dbClient->getKey(),
+                    'contact_origin_id' => $contactOrigin->id,
+                    'created_at' => Carbon::now()->startOfYear(),
+                ])),
+            );
+        }
+        $this->contacts = $this->contacts[0]->merge($this->contacts[1])->merge($this->contacts[2]);
     }
 
     public function test_renders_successfully()
@@ -86,10 +85,12 @@ class ContactsByContactOriginTest extends BaseSetup
             ->set('timeFrame', $timeFrame)
             ->call('calculateChart')
             ->assertSet('labels', [
-                $this->contactOrigins->first()->name
+                $this->contactOrigins[1]->name,
+                $this->contactOrigins[0]->name,
             ])
             ->assertSet('series', [
-                $this->getContactsCountInTimeFrame($timeFrame)
+                $this->getContactsCountInTimeFrame($timeFrame, $this->contactOrigins[1]),
+                $this->getContactsCountInTimeFrame($timeFrame, $this->contactOrigins[0]),
             ])
             ->assertStatus(200)
             ->assertHasNoErrors();
@@ -103,10 +104,12 @@ class ContactsByContactOriginTest extends BaseSetup
             ->set('timeFrame', $timeFrame)
             ->call('calculateChart')
             ->assertSet('labels', [
-                $this->contactOrigins->first()->name]
-            )
+                $this->contactOrigins[1]->name,
+                $this->contactOrigins[0]->name,
+            ])
             ->assertSet('series', [
-                $this->getContactsCountInTimeFrame($timeFrame)
+                $this->getContactsCountInTimeFrame($timeFrame, $this->contactOrigins[1]),
+                $this->getContactsCountInTimeFrame($timeFrame, $this->contactOrigins[0]),
             ])
             ->assertStatus(200)
             ->assertHasNoErrors();
@@ -120,10 +123,12 @@ class ContactsByContactOriginTest extends BaseSetup
             ->set('timeFrame', $timeFrame)
             ->call('calculateChart')
             ->assertSet('labels', [
-                $this->contactOrigins->first()->name
+                $this->contactOrigins[1]->name,
+                $this->contactOrigins[0]->name,
             ])
             ->assertSet('series', [
-                $this->getContactsCountInTimeFrame($timeFrame)
+                $this->getContactsCountInTimeFrame($timeFrame, $this->contactOrigins[1]),
+                $this->getContactsCountInTimeFrame($timeFrame, $this->contactOrigins[0]),
             ])
             ->assertStatus(200)
             ->assertHasNoErrors();
@@ -137,10 +142,12 @@ class ContactsByContactOriginTest extends BaseSetup
             ->set('timeFrame', $timeFrame)
             ->call('calculateChart')
             ->assertSet('labels', [
-                $this->contactOrigins->first()->name
+                $this->contactOrigins[1]->name,
+                $this->contactOrigins[0]->name,
             ])
             ->assertSet('series', [
-                $this->getContactsCountInTimeFrame($timeFrame)
+                $this->getContactsCountInTimeFrame($timeFrame, $this->contactOrigins[1]),
+                $this->getContactsCountInTimeFrame($timeFrame, $this->contactOrigins[0]),
             ])
             ->assertStatus(200)
             ->assertHasNoErrors();
@@ -154,10 +161,12 @@ class ContactsByContactOriginTest extends BaseSetup
             ->set('timeFrame', $timeFrame)
             ->call('calculateChart')
             ->assertSet('labels', [
-                $this->contactOrigins->first()->name
+                $this->contactOrigins[1]->name,
+                $this->contactOrigins[0]->name,
             ])
             ->assertSet('series', [
-                $this->getContactsCountInTimeFrame($timeFrame)
+                $this->getContactsCountInTimeFrame($timeFrame, $this->contactOrigins[1]),
+                $this->getContactsCountInTimeFrame($timeFrame, $this->contactOrigins[0]),
             ])
             ->assertStatus(200)
             ->assertHasNoErrors();
@@ -180,13 +189,14 @@ class ContactsByContactOriginTest extends BaseSetup
             ->assertHasNoErrors();
     }
 
-    private function getContactsCountInTimeFrame(TimeFrameEnum $timeFrame): int
+    private function getContactsCountInTimeFrame(TimeFrameEnum $timeFrame, ContactOrigin $contactOrigin): int
     {
         return $this->contacts
             ->filter(
                 fn (Contact $contact) => $contact->created_at->between(...$timeFrame->getRange())
                     && $contact->contactOrigin()
                         ->where('is_active', true)
+                        ->where('id', $contactOrigin->id)
                         ->exists()
             )
             ->count();
