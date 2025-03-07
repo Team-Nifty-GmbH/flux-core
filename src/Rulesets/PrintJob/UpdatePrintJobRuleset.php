@@ -23,6 +23,7 @@ class UpdatePrintJobRuleset extends FluxRuleset
             ],
             'size' => [
                 'sometimes',
+                'required',
                 'string',
                 'max:255',
             ],
