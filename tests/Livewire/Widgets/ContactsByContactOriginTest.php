@@ -72,18 +72,6 @@ class ContactsByContactOriginTest extends BaseSetup
         ]);
     }
 
-    public function getNumberOfSameCreationDatesOfContacts(TimeFrameEnum $timeFrame) : int
-    {
-        return $this->contacts
-            ->filter(
-                fn (Contact $contact) => $contact->created_at->between(...$timeFrame->getRange())
-                    && $contact->contactOrigin()
-                        ->where('is_active', true)
-                        ->exists()
-            )
-            ->count();
-    }
-
     public function test_renders_successfully()
     {
         Livewire::test(ContactsByContactOrigin::class)
@@ -101,7 +89,7 @@ class ContactsByContactOriginTest extends BaseSetup
                 $this->contactOrigins->first()->name
             ])
             ->assertSet('series', [
-                $this->getNumberOfSameCreationDatesOfContacts($timeFrame)
+                $this->getContactsCountInTimeFrame($timeFrame)
             ])
             ->assertStatus(200)
             ->assertHasNoErrors();
@@ -118,7 +106,7 @@ class ContactsByContactOriginTest extends BaseSetup
                 $this->contactOrigins->first()->name]
             )
             ->assertSet('series', [
-                $this->getNumberOfSameCreationDatesOfContacts($timeFrame)
+                $this->getContactsCountInTimeFrame($timeFrame)
             ])
             ->assertStatus(200)
             ->assertHasNoErrors();
@@ -135,7 +123,7 @@ class ContactsByContactOriginTest extends BaseSetup
                 $this->contactOrigins->first()->name
             ])
             ->assertSet('series', [
-                $this->getNumberOfSameCreationDatesOfContacts($timeFrame)
+                $this->getContactsCountInTimeFrame($timeFrame)
             ])
             ->assertStatus(200)
             ->assertHasNoErrors();
@@ -152,7 +140,7 @@ class ContactsByContactOriginTest extends BaseSetup
                 $this->contactOrigins->first()->name
             ])
             ->assertSet('series', [
-                $this->getNumberOfSameCreationDatesOfContacts($timeFrame)
+                $this->getContactsCountInTimeFrame($timeFrame)
             ])
             ->assertStatus(200)
             ->assertHasNoErrors();
@@ -169,7 +157,7 @@ class ContactsByContactOriginTest extends BaseSetup
                 $this->contactOrigins->first()->name
             ])
             ->assertSet('series', [
-                $this->getNumberOfSameCreationDatesOfContacts($timeFrame)
+                $this->getContactsCountInTimeFrame($timeFrame)
             ])
             ->assertStatus(200)
             ->assertHasNoErrors();
@@ -190,5 +178,17 @@ class ContactsByContactOriginTest extends BaseSetup
             ->assertSet('series', [])
             ->assertStatus(200)
             ->assertHasNoErrors();
+    }
+
+    private function getContactsCountInTimeFrame(TimeFrameEnum $timeFrame): int
+    {
+        return $this->contacts
+            ->filter(
+                fn (Contact $contact) => $contact->created_at->between(...$timeFrame->getRange())
+                    && $contact->contactOrigin()
+                        ->where('is_active', true)
+                        ->exists()
+            )
+            ->count();
     }
 }
