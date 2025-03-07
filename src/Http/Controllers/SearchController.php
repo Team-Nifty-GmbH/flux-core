@@ -150,7 +150,7 @@ class SearchController extends Controller
             $result = $result->map(function ($item) use ($request) {
                 return array_merge(
                     [
-                        'value' => $item->getKey(),
+                        'id' => $item->getKey(),
                         'label' => $item->getLabel(),
                         'description' => $item->getDescription(),
                         'image' => $item->getAvatarUrl(),

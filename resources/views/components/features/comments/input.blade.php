@@ -59,18 +59,16 @@
                 <div class="flex flex-wrap justify-end">
                     <div class="flex items-center justify-end gap-x-2">
                         <x-toggle x-ref="sticky" :label="__('Sticky')" position="left" />
-                        <x-button color="secondary" light
+                        <x-button color="indigo"
                             x-on:click="saveComment($refs.textarea, tempFilesId, $refs.sticky, false, typeof comment !== 'undefined' ? comment : null).then((success) => {if(success) clearPond();})"
-                            primary
                             spinner="saveComment"
                             wire:loading.attr="disabled"
                             x-bind:disabled="isLoadingFiles.length > 0"
                             :text="auth()->user()?->getMorphClass() === morph_alias(\FluxErp\Models\User::class) && $this->isPublic === true ? __('Save internal') : __('Save')"
                         />
                         @if(auth()->user()?->getMorphClass() === morph_alias(\FluxErp\Models\User::class) && $this->isPublic === true)
-                            <x-button color="secondary" light
+                            <x-button color="indigo"
                                 x-on:click="saveComment($refs.textarea, tempFilesId, $refs.sticky, false, typeof comment !== 'undefined' ? comment : null).then((success) => {if(success) clearPond();})"
-                                primary
                                 spinner="saveComment"
                                 x-bind:disabled="isLoadingFiles.length > 0"
                                 wire:loading.attr="disabled"

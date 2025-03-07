@@ -61,11 +61,13 @@
             <template x-for="(customProperty, propertyName) in $wire.calendarEvent.customProperties">
                 <div>
                     <div x-cloak x-show="customProperty.field_type === 'text'">
-                        <x-label class="mb-1" x-bind:for="propertyName">
-                            <x-slot:word>
-                                <span x-text="propertyName"></span>
-                            </x-slot:word>
-                        </x-label>
+                        <div class="mb-1">
+                            <x-label x-bind:for="propertyName">
+                                <x-slot:word>
+                                    <span x-text="propertyName"></span>
+                                </x-slot:word>
+                            </x-label>
+                        </div>
                         <x-input
                             x-model="customProperty.value"
                             x-bind:disabled="! $wire.calendarEvent.is_editable ?? false"
@@ -73,7 +75,9 @@
                         />
                     </div>
                     <div x-cloak x-show="customProperty.field_type === 'textarea'">
-                        <x-label class="mb-1" x-bind:for="propertyName" x-text="propertyName" />
+                        <div class="mb-1">
+                            <x-label x-bind:for="propertyName" x-text="propertyName" />
+                        </div>
                         <x-textarea
                             x-model="customProperty.value"
                             x-bind:disabled="! $wire.calendarEvent.is_editable ?? false"
@@ -89,7 +93,9 @@
                         <x-label x-bind:for="propertyName" x-text="propertyName" />
                     </div>
                     <div x-cloak x-show="customProperty.field_type === 'date'">
-                        <x-label class="mb-1" x-bind:for="propertyName" x-text="propertyName" />
+                        <div class="mb-1">
+                            <x-label x-bind:for="propertyName" x-text="propertyName" />
+                        </div>
                         <x-input
                             x-model="customProperty.value"
                             x-bind:disabled="! $wire.calendarEvent.is_editable ?? false"
@@ -295,7 +301,9 @@
                     </x-select.styled>
                 </template>
 
-                <x-label class="mt-4 mb-2" :label="__('Repeat end')" />
+                <div class="mt-4 mb-2">
+                    <x-label :label="__('Repeat end')" />
+                </div>
                 <x-radio :label="__('Never')" :value="null" x-model="$wire.calendarEvent.repeat_radio" x-bind:disabled="! $wire.calendarEvent.is_editable ?? false" />
                 <div class="grid grid-cols-2 items-center gap-1.5">
                     <x-radio :label="__('Date At')" value="repeat_end" x-model="$wire.calendarEvent.repeat_radio" x-bind:disabled="! $wire.calendarEvent.is_editable ?? false" />
@@ -309,6 +317,15 @@
                     <x-radio :label="__('After amount of events')" value="recurrences" x-model="$wire.calendarEvent.repeat_radio" x-bind:disabled="! $wire.calendarEvent.is_editable ?? false" />
                     <x-number x-model="$wire.calendarEvent.recurrences" x-bind:disabled="(! $wire.calendarEvent.is_editable ?? false) || $wire.calendarEvent.repeat_radio !== 'recurrences'" />
                 </div>
+            </div>
+        @show
+        @section('event-edit.has-taken-place')
+            <div class="mb-2">
+                <x-checkbox
+                    :label="__('Has taken place')"
+                    wire:model="calendarEvent.has_taken_place"
+                    x-bind:disabled="! $wire.calendarEvent.is_editable ?? false"
+                />
             </div>
         @show
         @section('event-edit.invites')
@@ -424,15 +441,6 @@
                         ]"
                     />
                 </div>
-            </div>
-        @show
-        @section('event-edit.has-taken-place')
-            <div class="mb-2">
-                <x-checkbox
-                    :label="__('Has taken place')"
-                    wire:model="calendarEvent.has_taken_place"
-                    x-bind:disabled="! $wire.calendarEvent.is_editable ?? false"
-                />
             </div>
         @show
     @show

@@ -19,12 +19,12 @@
                                 class="w-full whitespace-nowrap my-2"
                                 :text="__('Add folder')"
                                 x-on:click="addFolder(null, {
-                                        is_static: false,
-                                        is_new: true,
-                                        collection_name: 'new_folder',
-                                        name: '{{ __('New folder') }}',
-                                        children: [],
-                                    })"
+                                    is_static: false,
+                                    is_new: true,
+                                    collection_name: 'new_folder',
+                                    name: '{{ __('New folder') }}',
+                                    children: [],
+                                })"
                             />
                         @endCanAction
                     @show
