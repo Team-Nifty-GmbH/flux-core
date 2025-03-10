@@ -97,9 +97,9 @@ jobs:
 
       - name: Create schema
         run: |
-          cd $GITHUB_WORKSPACE/vendor/orchestra/testbench-core/laravel
-          php artisan migrate --force
-          php artisan schema:dump
+          cd $GITHUB_WORKSPACE
+          ./vendor/bin/testbench migrate --force
+          ./vendor/bin/testbench schema:dump
 
       - name: Run Livewire Tests
         run: composer test-livewire

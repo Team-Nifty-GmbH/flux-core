@@ -461,8 +461,30 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
 
     public function toCalendarEvent(?array $info = null): array
     {
-        $currentBirthday = $this->date_of_birth->setYear(Carbon::parse(data_get($info, 'start'))->year);
-        $age = $currentBirthday->diffInYears($this->date_of_birth);
+        $currentBirthday = null;
+        $start = Carbon::parse(data_get($info, 'start'));
+        $end = Carbon::parse(data_get($info, 'end'));
+        $birthday = $this->date_of_birth->format('m-d');
+
+        while ($start->lessThanOrEqualTo($end)) {
+            if ($start->format('m-d') === $birthday) {
+                $currentBirthday = $start;
+                break;
+            }
+
+            $start->addDay();
+        }
+
+        if ($start->gt($end)) {
+            $currentBirthday = null;
+        }
+
+        if (is_null($currentBirthday)) {
+            return [];
+        }
+
+        $age = $currentBirthday->year - $this->date_of_birth->year;
+
         $name = <<<HTML
             <i class="ph ph-gift"></i>
             <span>$this->name ($age)</span>
@@ -491,38 +513,29 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         $start = $start ? Carbon::parse($start) : null;
         $end = $end ? Carbon::parse($end) : null;
 
-        $builder->where(function (Builder $query) use ($start, $end): void {
-            if ($start && $end && $start->greaterThan($end)) {
-                $query->where(function (Builder $query) use ($start): void {
-                    $query->whereMonth('date_of_birth', '=', $start->month)
-                        ->whereDay('date_of_birth', '>=', $start->day)
-                        ->orWhere(function (Builder $q2): void {
-                            $q2->whereMonth('date_of_birth', '=', 12);
-                        });
-                })->orWhere(function (Builder $q) use ($end): void {
-                    $q->whereMonth('date_of_birth', '=', $end->month)
-                        ->whereDay('date_of_birth', '<=', $end->day);
-                });
-            } else {
-                // Normal range (no wrapping)
-                $query->where(function (Builder $query) use ($start, $end): void {
-                    if ($start) {
-                        $query->whereMonth('date_of_birth', '>', $start->month)
-                            ->orWhere(function (Builder $query) use ($start): void {
-                                $query->whereMonth('date_of_birth', '=', $start->month)
-                                    ->whereDay('date_of_birth', '>=', $start->day);
-                            });
-                    }
-                    if ($end) {
-                        $query->whereMonth('date_of_birth', '<', $end->month)
-                            ->orWhere(function (Builder $query) use ($end): void {
-                                $query->whereMonth('date_of_birth', '=', $end->month)
-                                    ->whereDay('date_of_birth', '<=', $end->day);
-                            });
-                    }
-                });
-            }
-        });
+        if ($start && $end && $start->greaterThan($end)) {
+            $var = $start;
+            $start = $end;
+            $end = $var;
+        }
+
+        $builder
+            ->when($start && $end, function (Builder $builder) use ($start, $end) {
+                $builder->whereRaw("REPLACE(SUBSTR(date_of_birth, 6), '-', '') BETWEEN ? AND ?", [
+                    $start->format('md'),
+                    $end->format('md'),
+                ]);
+            })
+            ->when($start && ! $end, function (Builder $builder) use ($start) {
+                $builder->whereRaw("REPLACE(SUBSTR(date_of_birth, 6), '-', '') >= ?", [
+                    $start->format('md'),
+                ]);
+            })
+            ->when(! $start && $end, function (Builder $builder) use ($end) {
+                $builder->whereRaw("REPLACE(SUBSTR(date_of_birth, 6), '-', '') <= ?", [
+                    $end->format('md'),
+                ]);
+            });
     }
 
     public static function fromCalendarEvent(array $event): Model

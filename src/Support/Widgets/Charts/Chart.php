@@ -71,6 +71,20 @@ abstract class Chart extends Component
         return 2;
     }
 
+    public static function getNoData(): array
+    {
+        return [
+            'text' => __('No data available'),
+            'align' => 'center',
+            'verticalAlign' => 'middle',
+            'offsetY' => 0,
+            'style' => [
+                'color' => '#888',
+                'fontSize' => '14px',
+            ],
+        ];
+    }
+
     public function mount(): void
     {
         $this->calculateChart();
@@ -103,7 +117,7 @@ abstract class Chart extends Component
     protected function getOptions(): array
     {
         $public = [];
-        $reflection = new \ReflectionClass(Chart::class);
+        $reflection = new \ReflectionClass(static::class);
         $properties = array_filter(
             $reflection->getProperties(\ReflectionProperty::IS_PUBLIC),
             fn ($property) => ! in_array($property->getName(), ['timeFrame', 'options'])

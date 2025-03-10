@@ -6,6 +6,7 @@ use FluxErp\Support\MediaLibrary\MediaCollection;
 use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\ResolvesRelationsThroughContainer;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Spatie\MediaLibrary\MediaCollections\Models\Media as BaseMedia;
 
@@ -34,6 +35,11 @@ class Media extends BaseMedia
     public function category(): MorphToMany
     {
         return $this->morphToMany(Category::class, 'categorizable');
+    }
+
+    public function printJobs(): HasMany
+    {
+        return $this->hasMany(PrintJob::class);
     }
 
     public function temporaryUpload(): BelongsTo

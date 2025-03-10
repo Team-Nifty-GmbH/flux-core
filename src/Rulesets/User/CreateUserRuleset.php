@@ -65,7 +65,8 @@ class CreateUserRuleset extends FluxRuleset
         return array_merge(
             parent::getRules(),
             resolve_static(BankConnectionRuleset::class, 'getRules'),
-            resolve_static(MailAccountRuleset::class, 'getRules')
+            resolve_static(MailAccountRuleset::class, 'getRules'),
+            resolve_static(PrinterRuleset::class, 'getRules')
         );
     }
 }
