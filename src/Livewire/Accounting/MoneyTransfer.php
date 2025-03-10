@@ -5,6 +5,7 @@ namespace FluxErp\Livewire\Accounting;
 use FluxErp\Actions\PaymentRun\CreatePaymentRun;
 use FluxErp\Enums\PaymentRunTypeEnum;
 use FluxErp\Models\OrderType;
+use FluxErp\States\Order\PaymentState\Paid;
 use FluxErp\States\PaymentRun\Open;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
@@ -27,9 +28,7 @@ class MoneyTransfer extends DirectDebit
         $orderTypes = resolve_static(OrderType::class, 'query')
             ->where('is_active', true)
             ->get(['id', 'order_type_enum'])
-            ->filter(fn (OrderType $orderType) => $orderType->order_type_enum->isPurchase()
-                && $orderType->order_type_enum->multiplier() < 0
-            )
+            ->filter(fn (OrderType $orderType) => $orderType->order_type_enum->multiplier() < 0)
             ->pluck('id');
 
         return $builder
@@ -46,6 +45,7 @@ class MoneyTransfer extends DirectDebit
                     ->orWhereDoesntHave('paymentRuns');
             })
             ->where('balance', '<', 0)
+            ->whereNotState('payment_state', Paid::class)
             ->whereNotNull('invoice_number')
             ->whereIntegerInRaw('order_type_id', $orderTypes);
     }

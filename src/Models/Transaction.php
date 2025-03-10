@@ -53,10 +53,9 @@ class Transaction extends FluxModel implements InteractsWithDataTables
     protected function casts(): array
     {
         return [
-            'value_date' => 'date:Y-md',
-            'booking_date' => 'date:Y-md',
+            'value_date' => 'date:Y-m-d',
+            'booking_date' => 'date:Y-m-d',
             'amount' => Money::class,
-            'created_at' => 'datetime:Y-m-d H:i:s',
         ];
     }
 
