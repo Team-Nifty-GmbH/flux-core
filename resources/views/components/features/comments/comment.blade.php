@@ -28,7 +28,7 @@
             @endif
         </div>
         <div class="mt-1 text-sm dark:text-gray-50">
-            <p class="prose prose-sm dark:text-gray-50" x-html="comment.comment"></p>
+            <p class="prose prose-sm dark:prose-invert dark:text-gray-50" x-html="comment.comment"></p>
             <div class="flex gap-1">
                 <template x-for="file in comment.media">
                     <div class="flex gap-0.5 outline-none inline-flex justify-center items-center group transition-all ease-in duration-150 focus:ring-2 focus:ring-offset-2 hover:shadow-sm disabled:opacity-80 disabled:cursor-not-allowed rounded-lg gap-x-2 text-sm px-4 py-2 border text-slate-500 hover:bg-slate-100 ring-slate-200

@@ -22,7 +22,7 @@
                 <span x-text="$wire.update.package"></span>
                 <span x-text="$wire.update.version"></span>
             </x-slot:title>
-            <div class="prose max-w-full" x-html="$wire.update.readme"></div>
+            <div class="prose dark:prose-invert max-w-full" x-html="$wire.update.readme"></div>
             <x-slot:footer>
                 <x-button color="secondary" light flat :text="__('Close')" x-on:click="$modalClose('update-plugin-modal')" />
                 <x-button color="indigo" :text="__('Update')" loading="update" wire:click="updatePackages($wire.update.package); $modalClose('update-plugin-modal');" />
@@ -30,7 +30,7 @@
         </x-modal>
     @endif
     <x-modal id="more-plugin-modal" size="7xl">
-        <div class="prose max-w-full" x-html="$wire.readme"></div>
+        <div class="prose dark:prose-invert max-w-full" x-html="$wire.readme"></div>
         <x-slot:footer>
             <x-button color="secondary" light flat :text="__('Close')" x-on:click="$modalClose('more-plugin-modal')" />
         </x-slot:footer>
