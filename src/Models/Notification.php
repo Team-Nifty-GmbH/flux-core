@@ -9,8 +9,6 @@ use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Notifications\DatabaseNotification;
 use Livewire\Component;
 
-use function Psl\Str\length;
-
 class Notification extends DatabaseNotification
 {
     use MassPrunable, ResolvesRelationsThroughContainer;
@@ -81,7 +79,7 @@ class Notification extends DatabaseNotification
             $toast->setEventName('toast-upsert');
         }
 
-        if (length(data_get($this->data, 'description')) > 100 && ! data_get($this->data, 'progress')) {
+        if (strlen(data_get($this->data, 'description')) > 100 && ! data_get($this->data, 'progress')) {
             $toast->expandable();
         }
 
