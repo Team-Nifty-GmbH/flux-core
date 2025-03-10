@@ -6,6 +6,7 @@ use FluxErp\Actions\PaymentRun\CreatePaymentRun;
 use FluxErp\Enums\PaymentRunTypeEnum;
 use FluxErp\Livewire\DataTables\OrderList;
 use FluxErp\Models\OrderType;
+use FluxErp\States\Order\PaymentState\Paid;
 use FluxErp\States\PaymentRun\Open;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
@@ -60,6 +61,7 @@ class DirectDebit extends OrderList
                     ->orWhereDoesntHave('paymentRuns');
             })
             ->where('balance', '>', 0)
+            ->whereNotState('payment_state', Paid::class)
             ->whereNotNull('invoice_number')
             ->whereIntegerInRaw('order_type_id', $orderTypes);
     }
