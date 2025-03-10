@@ -50,9 +50,9 @@ class Tags extends TagList
     {
         return [
             DataTableButton::make()
-                ->label(__('New'))
+                ->text(__('New'))
                 ->icon('plus')
-                ->color('primary')
+                ->color('indigo')
                 ->when(resolve_static(CreateTag::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'edit',
@@ -64,21 +64,21 @@ class Tags extends TagList
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
+                ->text(__('Edit'))
                 ->icon('pencil')
-                ->color('primary')
+                ->color('indigo')
                 ->when(resolve_static(UpdateTag::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'edit(record.id)',
                 ]),
             DataTableButton::make()
-                ->label(__('Delete'))
-                ->color('negative')
+                ->text(__('Delete'))
+                ->color('red')
                 ->icon('trash')
                 ->when(resolve_static(DeleteTag::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'delete(record.id)',
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Tag')]),
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Tag')]),
                 ]),
         ];
     }
@@ -87,12 +87,12 @@ class Tags extends TagList
     {
         return [
             DataTableButton::make()
-                ->label(__('Delete'))
-                ->color('negative')
+                ->text(__('Delete'))
+                ->color('red')
                 ->when(resolve_static(DeleteTag::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'deleteSelected',
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Tag')]),
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Tag')]),
                 ]),
         ];
     }
@@ -123,7 +123,7 @@ class Tags extends TagList
         $this->tagForm->fill($tag);
 
         $this->js(<<<'JS'
-            $openModal('edit-tag-modal');
+            $modalOpen('edit-tag-modal');
         JS);
     }
 

@@ -6,13 +6,10 @@ use FluxErp\Livewire\Widgets\Address as AddressView;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Tests\Livewire\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;
 
 class AddressTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     protected function setUp(): void
     {
         parent::setUp();

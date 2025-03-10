@@ -41,12 +41,12 @@ class BundleList extends ProductBundleProductList
     {
         return [
             DataTableButton::make()
-                ->color('primary')
-                ->label(__('Add'))
+                ->color('indigo')
+                ->text(__('Add'))
                 ->icon('plus')
                 ->attributes([
                     'x-on:click' => <<<'JS'
-                        $openModal('edit-bundle-product-modal')
+                        $modalOpen('edit-bundle-product-modal')
                     JS,
                 ])
                 ->when(
@@ -59,19 +59,19 @@ class BundleList extends ProductBundleProductList
     {
         return [
             DataTableButton::make()
-                ->color('primary')
-                ->label(__('Edit'))
+                ->color('indigo')
+                ->text(__('Edit'))
                 ->icon('pencil')
                 ->wireClick('edit(record.id)')
                 ->when(
                     fn () => resolve_static(UpdateProductBundleProduct::class, 'canPerformAction', [false])
                 ),
             DataTableButton::make()
-                ->color('negative')
-                ->label(__('Delete'))
+                ->color('red')
+                ->text(__('Delete'))
                 ->icon('trash')
                 ->attributes([
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Bundle Product')]),
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Bundle Product')]),
                     'wire:click' => 'delete(record.id)',
                 ])
                 ->when(
@@ -97,7 +97,7 @@ class BundleList extends ProductBundleProductList
         $this->productBundleProductForm->fill($productBundleProduct);
 
         $this->js(<<<'JS'
-            $openModal('edit-bundle-product-modal');
+            $modalOpen('edit-bundle-product-modal');
         JS);
     }
 

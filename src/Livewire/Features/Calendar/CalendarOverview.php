@@ -11,11 +11,12 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Locked;
+use Livewire\Component;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use TeamNiftyGmbH\Calendar\Livewire\CalendarOverview as TallCalendarOverview;
 use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 
-class CalendarOverview extends TallCalendarOverview
+class CalendarOverview extends Component
 {
     use Actions;
 
@@ -24,6 +25,17 @@ class CalendarOverview extends TallCalendarOverview
     public array $availableModels = [];
 
     public array $fieldTypes = [];
+
+    public bool $showCalendars = true;
+
+    public bool $showInvites = true;
+
+    public array $selectedCalendar;
+
+    public array $parentCalendars = [];
+
+    #[Locked]
+    public array $calendarGroups = [];
 
     public function mount(): void
     {
@@ -42,10 +54,22 @@ class CalendarOverview extends TallCalendarOverview
             ->toArray();
 
         $this->fieldTypes = [
-            'text' => __('Text'),
-            'textarea' => __('Textarea'),
-            'checkbox' => __('Checkbox'),
-            'date' => __('Date'),
+            [
+                'label' => __('Text'),
+                'value' => 'text',
+            ],
+            [
+                'label' => __('Textarea'),
+                'value' => 'textarea',
+            ],
+            [
+                'label' => __('Checkbox'),
+                'value' => 'checkbox',
+            ],
+            [
+                'label' => __('Date'),
+                'value' => 'date',
+            ],
         ];
 
         // Todo: add 'select', 'datetime', 'toggle' to available field types
@@ -54,6 +78,26 @@ class CalendarOverview extends TallCalendarOverview
     public function render(): Factory|Application|View
     {
         return view('flux::livewire.features.calendar.calendar-overview');
+    }
+
+    public function editCalendar(?array $calendar = null): void
+    {
+        if (is_null($calendar)) {
+            $calendar = app(Calendar::class)
+                ->toCalendarObject();
+
+            $calendar['color'] = '#' . dechex(rand(0x000000, 0xFFFFFF));
+        }
+
+        $this->selectedCalendar = $calendar;
+
+        $this->parentCalendars = $this->getAvailableParents();
+
+        $this->js(
+            <<<'JS'
+                $modalOpen('calendar-modal');
+            JS
+        );
     }
 
     public function saveCalendar(): array|false
@@ -119,5 +163,18 @@ class CalendarOverview extends TallCalendarOverview
     public function removeCustomProperty(int $index): void
     {
         unset($this->selectedCalendar['customProperties'][$index]);
+    }
+
+    protected function getAvailableParents(): array
+    {
+        return resolve_static(Calendar::class, 'query')
+            ->whereKeyNot(data_get($this->selectedCalendar, 'id'))
+            ->whereNull('parent_id')
+            ->when(
+                data_get($this->selectedCalendar, 'id'),
+                fn ($query) => $query->where('model_type', data_get($this->selectedCalendar, 'modelType'))
+            )
+            ->get(['id', 'name', 'description'])
+            ->toArray();
     }
 }

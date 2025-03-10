@@ -31,8 +31,8 @@ class OrderList extends DataTableOrderList
     {
         return [
             DataTableButton::make()
-                ->label(__('Assign'))
-                ->color('primary')
+                ->text(__('Assign'))
+                ->color('indigo')
                 ->attributes([
                     'x-on:click' => '$wire.$parent.assignOrders($wire.selected).then(() => {$wire.selected = [];});',
                 ])

@@ -28,9 +28,9 @@ class ProductPropertyGroups extends ProductPropertyGroupList
     {
         return [
             DataTableButton::make()
-                ->label(__('Add'))
+                ->text(__('New'))
                 ->icon('plus')
-                ->color('primary')
+                ->color('indigo')
                 ->wireClick('edit')
                 ->when(
                     fn () => resolve_static(CreateProductPropertyGroup::class, 'canPerformAction', [false])
@@ -42,27 +42,22 @@ class ProductPropertyGroups extends ProductPropertyGroupList
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
+                ->text(__('Edit'))
                 ->icon('pencil')
-                ->color('primary')
+                ->color('indigo')
                 ->wireClick('edit(record.id)')
                 ->when(
                     fn () => resolve_static(UpdateProductPropertyGroup::class, 'canPerformAction', [false])
                 ),
             DataTableButton::make()
-                ->label(__('Delete'))
+                ->text(__('Delete'))
+                ->color('red')
                 ->icon('trash')
-                ->color('negative')
+                ->when(resolve_static(DeleteProductPropertyGroup::class, 'canPerformAction', [false]))
                 ->attributes([
-                    'wire:flux-confirm.icon.error' => __(
-                        'wire:confirm.delete',
-                        ['model' => __('Product Property Group')]
-                    ),
                     'wire:click' => 'delete(record.id)',
-                ])
-                ->when(
-                    fn () => resolve_static(DeleteProductPropertyGroup::class, 'canPerformAction', [false])
-                ),
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Product Property Group')]),
+                ]),
         ];
     }
 
@@ -87,7 +82,7 @@ class ProductPropertyGroups extends ProductPropertyGroupList
         $this->productPropertyGroup->fill($productPropertyGroup);
 
         $this->js(<<<'JS'
-            $openModal('edit-product-property-group');
+            $modalOpen('edit-product-property-group-modal');
         JS);
     }
 
@@ -110,7 +105,9 @@ class ProductPropertyGroups extends ProductPropertyGroupList
     #[Renderless]
     public function delete(ProductPropertyGroup $productPropertyGroup): void
     {
+        $this->productPropertyGroup->reset();
         $this->productPropertyGroup->fill($productPropertyGroup);
+
         try {
             $this->productPropertyGroup->delete();
         } catch (ValidationException|UnauthorizedException $e) {

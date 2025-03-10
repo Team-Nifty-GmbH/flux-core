@@ -7,13 +7,10 @@ use FluxErp\Models\Client;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Product;
 use FluxErp\Tests\TestCase;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;
 
 class ProductTest extends TestCase
 {
-    use DatabaseTransactions;
-
     private Product $product;
 
     protected function setUp(): void

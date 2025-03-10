@@ -60,7 +60,7 @@ class StockPostingList extends BaseStockPostingList
             $this->warehouseId ?? resolve_static(Warehouse::class, 'default')->id;
 
         $this->js(<<<'JS'
-            $openModal('create-stock-posting');
+            $modalOpen('create-stock-posting');
         JS);
     }
 
@@ -102,7 +102,7 @@ class StockPostingList extends BaseStockPostingList
     {
         $viewData = [
             'warehouses' => resolve_static(Warehouse::class, 'query')
-                ->pluck('name', 'id')
+                ->get(['id', 'name'])
                 ->toArray(),
         ];
 
@@ -110,7 +110,7 @@ class StockPostingList extends BaseStockPostingList
             $viewData['serialNumberRanges'] = resolve_static(SerialNumberRange::class, 'query')
                 ->where('model_type', morph_alias(Product::class))
                 ->where('model_id', $this->productId)
-                ->pluck('type', 'id')
+                ->get(['id', 'type'])
                 ->toArray();
         }
 
@@ -124,9 +124,9 @@ class StockPostingList extends BaseStockPostingList
     {
         return [
             DataTableButton::make()
-                ->label(__('New Stock Posting'))
+                ->text(__('New Stock Posting'))
                 ->icon('plus')
-                ->color('primary')
+                ->color('indigo')
                 ->wireClick('create')
                 ->when(resolve_static(CreateStockPosting::class, 'canPerformAction', [false])),
         ];
@@ -136,8 +136,8 @@ class StockPostingList extends BaseStockPostingList
     {
         return [
             DataTableButton::make()
-                ->label(__('View Order'))
-                ->color('primary')
+                ->text(__('View Order'))
+                ->color('indigo')
                 ->icon('eye')
                 ->attributes([
                     'x-show' => 'record.order_position_id',

@@ -83,20 +83,14 @@ export default function ($wire, $ref, lang, modalTranslations, inputTranslation)
                     if (!this.multipleFileUpload && error === null) {
                         //  check if single file folder is not empty
                         if (this.fileCount !== null && this.fileCount() !== undefined && this.fileCount() > 0) {
-                            window.$wireui.confirmDialog({
-                                title: modalTranslations.title,
-                                description: modalTranslations.description,
-                                icon: 'error',
-                                accept: {
-                                    label: modalTranslations.labelAccept,
-                                },
-                                reject: {
-                                    execute: () => {
-                                        this.pond.removeFile(file.id);
-                                    },
-                                    label: modalTranslations.labelReject,
-                                }
-                            }, $wire.__instance.id);
+                            $interaction('dialog')
+                                .wireable($wire.id)
+                                .question(modalTranslations.title, modalTranslations.description)
+                                .confirm(modalTranslations.labelAccept)
+                                .cancel(modalTranslations.labelReject, () => {
+                                    this.pond.removeFile(file.id);
+                                })
+                                .send();
                         }
                     }
                 },

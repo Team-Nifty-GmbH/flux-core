@@ -26,8 +26,8 @@ class LedgerAccounts extends LedgerAccountList
     {
         return [
             DataTableButton::make()
-                ->label(__('Create'))
-                ->color('primary')
+                ->text(__('Create'))
+                ->color('indigo')
                 ->icon('plus')
                 ->when(resolve_static(CreateLedgerAccount::class, 'canPerformAction', [false]))
                 ->wireClick('edit'),
@@ -38,19 +38,19 @@ class LedgerAccounts extends LedgerAccountList
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
+                ->text(__('Edit'))
                 ->icon('pencil')
-                ->color('primary')
+                ->color('indigo')
                 ->when(resolve_static(UpdateLedgerAccount::class, 'canPerformAction', [false]))
                 ->wireClick('edit(record.id)'),
             DataTableButton::make()
-                ->label(__('Delete'))
-                ->color('negative')
+                ->text(__('Delete'))
+                ->color('red')
                 ->icon('trash')
                 ->when(resolve_static(DeleteLedgerAccount::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'delete(record.id)',
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Ledger Account')]),
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Ledger Account')]),
                 ]),
         ];
     }
@@ -60,7 +60,7 @@ class LedgerAccounts extends LedgerAccountList
         return array_merge(
             parent::getViewData(),
             [
-                'ledgerAccountTypes' => LedgerAccountTypeEnum::values(),
+                'ledgerAccountTypes' => LedgerAccountTypeEnum::valuesLocalized(),
             ]
         );
     }
@@ -71,7 +71,7 @@ class LedgerAccounts extends LedgerAccountList
         $this->ledgerAccount->fill($ledgerAccount);
 
         $this->js(<<<'JS'
-            $openModal('edit-ledger-account');
+            $modalOpen('edit-ledger-account-modal');
         JS);
     }
 

@@ -28,7 +28,7 @@ class ProductPropertyGroupList extends BaseProductPropertyGroupList
     {
         return new ComponentAttributeBag([
             'x-bind:class' => <<<'JS'
-                record.id === productPropertyGroup?.id && 'bg-primary-100 dark:bg-primary-800'
+                record.id === productPropertyGroup?.id && 'bg-indigo-100 dark:bg-indigo-800'
             JS,
         ]);
     }

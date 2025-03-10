@@ -18,7 +18,7 @@ class CommissionRates extends BaseDataTable
 {
     use Actions;
 
-    protected string $view = 'flux::livewire.features.commission-rates';
+    protected ?string $includeBefore = 'flux::livewire.features.commission-rates';
 
     protected string $model = CommissionRate::class;
 
@@ -99,8 +99,8 @@ class CommissionRates extends BaseDataTable
     {
         return [
             DataTableButton::make()
-                ->label(__('Create'))
-                ->color('primary')
+                ->text(__('Create'))
+                ->color('indigo')
                 ->icon('plus')
                 ->attributes([
                     'x-on:click' => '$wire.show()',

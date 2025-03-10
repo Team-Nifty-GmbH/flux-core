@@ -21,11 +21,10 @@ use FluxErp\Http\Middleware\SetJobAuthenticatedUserMiddleware;
 use FluxErp\Livewire\Features\Calendar\CalendarOverview;
 use FluxErp\Models\Activity;
 use FluxErp\Models\Address;
-use FluxErp\Models\Calendar;
-use FluxErp\Models\CalendarEvent;
 use FluxErp\Models\Category;
 use FluxErp\Models\Client;
 use FluxErp\Models\LedgerAccount;
+use FluxErp\Models\Notification;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\Permission;
@@ -46,6 +45,7 @@ use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Contracts\Queue\Factory as QueueFactoryContract;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Http\Request as HttpRequest;
+use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Routing\Route;
@@ -107,8 +107,7 @@ class FluxServiceProvider extends ServiceProvider
         );
 
         app('livewire')->componentHook(SupportFormObjects::class);
-        $this->app->bind(\TeamNiftyGmbH\Calendar\Models\Calendar::class, Calendar::class);
-        $this->app->bind(\TeamNiftyGmbH\Calendar\Models\CalendarEvent::class, CalendarEvent::class);
+        $this->app->bind(DatabaseNotification::class, Notification::class);
     }
 
     public function boot(): void
@@ -122,10 +121,6 @@ class FluxServiceProvider extends ServiceProvider
         $this->bootRoutes();
         $this->registerLivewireComponents();
         $this->registerBladeComponents();
-
-        // special case for calendar event to load into correct namespace
-        Blade::component('flux::components.calendar.event-edit', 'tall-calendar::event-edit');
-        Blade::component('flux::components.calendar.calendar-list', 'tall-calendar::calendar-list');
 
         if (static::$registerFluxRoutes && (! $this->app->runningInConsole() || $this->app->runningUnitTests())) {
             $this->bootFluxMenu();
@@ -272,19 +267,32 @@ class FluxServiceProvider extends ServiceProvider
         }
 
         if ($this->app->runningUnitTests()) {
-            if (! Testable::hasMacro('assertWireuiNotification')) {
+            if (! Testable::hasMacro('assertToastNotification')) {
                 Testable::macro(
-                    'assertWireuiNotification',
-                    function (?string $title = null, ?string $icon = null, ?string $description = null) {
+                    'assertToastNotification',
+                    function (
+                        ?string $title = null,
+                        ?string $type = null,
+                        ?string $description = null,
+                        ?bool $expandable = null,
+                        ?int $timeout = null,
+                        ?bool $persistent = null,
+                        string|int|null $id = null
+                    ) {
                         $this->assertDispatched(
-                            'wireui:notification',
-                            function (string $eventName, array $params) use ($title, $icon, $description) {
-                                $options = data_get($params, '0.options');
-
-                                return array_key_exists('componentId', $params[0])
-                                    && (is_null($icon) || data_get($options, 'icon') === $icon)
-                                    && (is_null($title) || data_get($options, 'title') === $title)
-                                    && (is_null($description) || data_get($options, 'description') === $description);
+                            'tallstackui:toast',
+                            function (
+                                string $eventName,
+                                array $params
+                            ) use ($title, $type, $description, $expandable, $timeout, $persistent, $id) {
+                                return array_key_exists('component', $params)
+                                    && (is_null($type) || data_get($params, 'type') === $type)
+                                    && (is_null($title) || data_get($params, 'title') === $title)
+                                    && (is_null($description) || data_get($params, 'description') === $description)
+                                    && (is_null($expandable) || data_get($params, 'expandable') === $expandable)
+                                    && (is_null($timeout) || data_get($params, 'timeout') === $timeout)
+                                    && (is_null($persistent) || data_get($params, 'persistent') === $persistent)
+                                    && (is_null($id) || data_get($params, 'persistent') === $id);
                             }
                         );
 
@@ -366,102 +374,100 @@ class FluxServiceProvider extends ServiceProvider
 
     protected function registerConfig(): void
     {
-        $this->loadViewsFrom(__DIR__ . '/../resources/views/vendor/wireui', 'wireui');
+        $this->booted(function () {
+            config([
+                'tallstackui.settings.toast.z-index' => 'z-50',
+                'tallstackui.settings.dialog.z-index' => 'z-40',
+                'tallstackui.settings.modal.z-index' => 'z-30',
+            ]);
+            config(['permission.models.role' => resolve_static(Role::class, 'class')]);
+            config(['permission.models.permission' => resolve_static(Permission::class, 'class')]);
+            config(['permission.display_permission_in_exception' => true]);
+            config(['activitylog.activitymodel' => resolve_static(Activity::class, 'class')]);
+            config(['media-library.media_downloader' => MediaLibraryDownloader::class]);
+            config([
+                'scout.meilisearch.index-settings' => [
+                    resolve_static(Address::class, 'class') => [
+                        'filterableAttributes' => [
+                            'is_main_address',
+                            'contact_id',
+                        ],
+                        'sortableAttributes' => ['*'],
+                    ],
+                    resolve_static(Category::class, 'class') => [
+                        'filterableAttributes' => [
+                            'model_type',
+                        ],
+                    ],
+                    resolve_static(LedgerAccount::class, 'class') => [
+                        'filterableAttributes' => [
+                            'ledger_account_type_enum',
+                            'is_automatic',
+                        ],
+                        'sortableAttributes' => ['*'],
+                    ],
+                    resolve_static(Order::class, 'class') => [
+                        'filterableAttributes' => [
+                            'parent_id',
+                            'contact_id',
+                            'is_locked',
+                        ],
+                        'sortableAttributes' => ['*'],
+                    ],
+                    resolve_static(Permission::class, 'class') => [
+                        'filterableAttributes' => [
+                            'guard_name',
+                        ],
+                        'sortableAttributes' => [
+                            'name',
+                        ],
+                    ],
+                    resolve_static(Product::class, 'class') => [
+                        'filterableAttributes' => [
+                            'is_active',
+                            'parent_id',
+                        ],
+                        'sortableAttributes' => ['*'],
+                    ],
+                    resolve_static(Project::class, 'class') => [
+                        'filterableAttributes' => [
+                            'parent_id',
+                            'state',
+                        ],
+                        'sortableAttributes' => ['*'],
+                    ],
+                    resolve_static(SerialNumber::class, 'class') => [
+                        'filterableAttributes' => [
+                            'address_id',
+                        ],
+                    ],
+                    resolve_static(Task::class, 'class') => [
+                        'filterableAttributes' => [
+                            'project_id',
+                            'state',
+                        ],
+                        'sortableAttributes' => ['*'],
+                    ],
+                    resolve_static(Ticket::class, 'class') => [
+                        'filterableAttributes' => [
+                            'authenticatable_type',
+                            'authenticatable_id',
+                            'state',
+                        ],
+                        'sortableAttributes' => ['*'],
+                    ],
+                    resolve_static(User::class, 'class') => [
+                        'filterableAttributes' => [
+                            'is_active',
+                        ],
+                    ],
+                ],
+            ]);
+        });
         $this->mergeConfigFrom(__DIR__ . '/../config/flux.php', 'flux');
         $this->mergeConfigFrom(__DIR__ . '/../config/notifications.php', 'notifications');
-        config(['permission.models.role' => resolve_static(Role::class, 'class')]);
-        config(['permission.models.permission' => resolve_static(Permission::class, 'class')]);
-        config(['permission.display_permission_in_exception' => true]);
         config(['auth' => require __DIR__ . '/../config/auth.php']);
-        config(['activitylog.activitymodel' => resolve_static(Activity::class, 'class')]);
         config(['logging' => array_merge_recursive(config('logging'), require __DIR__ . '/../config/logging.php')]);
-        config(['wireui.heroicons.alias' => 'heroicons']);
-        config(['wireui.modal' => [
-            'zIndex' => env('WIREUI_MODAL_Z_INDEX', 'z-20'),
-            'maxWidth' => env('WIREUI_MODAL_MAX_WIDTH', '2xl'),
-            'spacing' => env('WIREUI_MODAL_SPACING', 'p-4'),
-            'align' => env('WIREUI_MODAL_ALIGN', 'start'),
-            'blur' => env('WIREUI_MODAL_BLUR', false),
-        ]]);
-        config(['media-library.media_downloader' => MediaLibraryDownloader::class]);
-        config([
-            'scout.meilisearch.index-settings' => [
-                resolve_static(Address::class, 'class') => [
-                    'filterableAttributes' => [
-                        'is_main_address',
-                        'contact_id',
-                    ],
-                    'sortableAttributes' => ['*'],
-                ],
-                resolve_static(Category::class, 'class') => [
-                    'filterableAttributes' => [
-                        'model_type',
-                    ],
-                ],
-                resolve_static(LedgerAccount::class, 'class') => [
-                    'filterableAttributes' => [
-                        'ledger_account_type_enum',
-                        'is_automatic',
-                    ],
-                    'sortableAttributes' => ['*'],
-                ],
-                resolve_static(Order::class, 'class') => [
-                    'filterableAttributes' => [
-                        'parent_id',
-                        'contact_id',
-                        'is_locked',
-                    ],
-                    'sortableAttributes' => ['*'],
-                ],
-                resolve_static(Permission::class, 'class') => [
-                    'filterableAttributes' => [
-                        'guard_name',
-                    ],
-                    'sortableAttributes' => [
-                        'name',
-                    ],
-                ],
-                resolve_static(Product::class, 'class') => [
-                    'filterableAttributes' => [
-                        'is_active',
-                        'parent_id',
-                    ],
-                    'sortableAttributes' => ['*'],
-                ],
-                resolve_static(Project::class, 'class') => [
-                    'filterableAttributes' => [
-                        'parent_id',
-                        'state',
-                    ],
-                    'sortableAttributes' => ['*'],
-                ],
-                resolve_static(SerialNumber::class, 'class') => [
-                    'filterableAttributes' => [
-                        'address_id',
-                    ],
-                ],
-                resolve_static(Task::class, 'class') => [
-                    'filterableAttributes' => [
-                        'project_id',
-                        'state',
-                    ],
-                    'sortableAttributes' => ['*'],
-                ],
-                resolve_static(Ticket::class, 'class') => [
-                    'filterableAttributes' => [
-                        'authenticatable_type',
-                        'authenticatable_id',
-                        'state',
-                    ],
-                    'sortableAttributes' => ['*'],
-                ],
-                resolve_static(User::class, 'class') => [
-                    'filterableAttributes' => [
-                        'is_active',
-                    ],
-                ],
-            ],
-        ]);
 
         if ($this->app->runningInConsole()) {
             config([

@@ -52,7 +52,7 @@ class UserEditTest extends BaseSetup
             ->set('userForm.password_confirmation', 'Password123!')
             ->call('save')
             ->assertHasNoErrors()
-            ->assertWireuiNotification(icon: 'success');
+            ->assertToastNotification(type: 'success');
 
         $this->assertEquals($newFirstName, $user->fresh()->firstname);
         $this->assertNotEquals($user->password, $user->fresh()->password);

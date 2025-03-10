@@ -34,12 +34,12 @@ class OrderList extends BaseDataTable
         return [
             DataTableButton::make()
                 ->icon('trash')
-                ->label(__('Delete'))
-                ->color('negative')
+                ->text(__('Delete'))
+                ->color('red')
                 ->when(fn () => resolve_static(DeleteOrder::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'delete',
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Orders')]),
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Orders')]),
                 ]),
         ];
     }
@@ -84,7 +84,7 @@ class OrderList extends BaseDataTable
             }
         }
 
-        $this->notification()->success(__('Deleted :count orders', ['count' => $deleted]));
+        $this->notification()->success(__('Deleted :count orders', ['count' => $deleted]))->send();
 
         if ($deleted > 0) {
             $this->loadData();

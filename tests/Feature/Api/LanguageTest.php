@@ -11,14 +11,11 @@ use FluxErp\Models\Language;
 use FluxErp\Models\Permission;
 use FluxErp\Models\User;
 use FluxErp\Tests\Feature\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Laravel\Sanctum\Sanctum;
 
 class LanguageTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Collection $languages;
 
     private array $permissions;

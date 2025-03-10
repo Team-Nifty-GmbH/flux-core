@@ -79,39 +79,39 @@ class Contact extends Component
     {
         return [
             TabButton::make('contact.addresses')
-                ->label(__('Addresses'))
+                ->text(__('Addresses'))
                 ->isLivewireComponent()
                 ->wireModel('contact'),
             TabButton::make('contact.orders')
-                ->label(__('Orders'))
+                ->text(__('Orders'))
                 ->isLivewireComponent()
                 ->wireModel('contact'),
             TabButton::make('contact.communication')
-                ->label(__('Communication'))
+                ->text(__('Communication'))
                 ->isLivewireComponent()
                 ->wireModel('contact.id'),
             TabButton::make('contact.projects')
-                ->label(__('Projects'))
+                ->text(__('Projects'))
                 ->isLivewireComponent()
                 ->wireModel('contact.id'),
             TabButton::make('contact.attachments')
-                ->label(__('Attachments'))
+                ->text(__('Attachments'))
                 ->isLivewireComponent()
                 ->wireModel('contact.id'),
             TabButton::make('contact.tickets')
-                ->label(__('Tickets'))
+                ->text(__('Tickets'))
                 ->isLivewireComponent()
                 ->wireModel('contact.id'),
             TabButton::make('contact.work-times')
-                ->label(__('Work Times'))
+                ->text(__('Work Times'))
                 ->isLivewireComponent()
                 ->wireModel('contact.id'),
             TabButton::make('contact.accounting')
-                ->label(__('Accounting'))
+                ->text(__('Accounting'))
                 ->isLivewireComponent()
                 ->wireModel('contact'),
             TabButton::make('contact.statistics')
-                ->label(__('Statistics')),
+                ->text(__('Statistics')),
         ];
     }
 

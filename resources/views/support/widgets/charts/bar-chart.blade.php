@@ -2,26 +2,24 @@
 @section('options')
     @parent
     @if($chartTypes)
-        <x-native-select
+        <x-select.native
             x-model="chartType"
             :options="[
-                    [
-                        'value' => 'bar',
-                        'label' => __('Bar'),
-                    ],
-                    [
-                        'value' => 'line',
-                        'label' => __('Line'),
-                    ],
-                    [
-                        'value' => 'area',
-                        'label' => __('Area'),
-                    ],
-                ]"
-            option-value="value"
-            option-label="label"
+                [
+                    'value' => 'bar',
+                    'label' => __('Bar'),
+                ],
+                [
+                    'value' => 'line',
+                    'label' => __('Line'),
+                ],
+                [
+                    'value' => 'area',
+                    'label' => __('Area'),
+                ],
+            ]"
         >
-        </x-native-select>
+        </x-select.native>
     @endif
 @endsection
 @if($showTotals)
@@ -44,7 +42,7 @@
                                 x-cloak
                                 x-show="!isNaN(seriesData.growthRate) && seriesData.growthRate > 0"
                                 icon="chevron-up"
-                                positive
+                                color="emerald"
                             >
                                 <span x-text="seriesData.growthRate + '%'">
                                 </span>
@@ -53,7 +51,7 @@
                                 x-cloak
                                 x-show="!isNaN(seriesData.growthRate) && seriesData.growthRate < 0"
                                 icon="chevron-down"
-                                negative
+                                color="red"
                             >
                                 <span x-text="seriesData.growthRate + '%'">
                                 </span>
@@ -62,7 +60,7 @@
                                 x-cloak
                                 x-show="!isNaN(seriesData.growthRate) && seriesData.growthRate == 0"
                                 icon="chevron-right"
-                                secondary
+                                color="gray"
                             >
                                 <span x-text="seriesData.growthRate + '%'">
                                 </span>

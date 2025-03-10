@@ -87,14 +87,14 @@ class Ticket extends Component
     {
         return [
             TabButton::make('ticket.comments')
-                ->label(__('Comments'))
+                ->text(__('Comments'))
                 ->isLivewireComponent(),
             TabButton::make('ticket.communication')
-                ->label(__('Communication'))
+                ->text(__('Communication'))
                 ->wireModel('ticket.id')
                 ->isLivewireComponent(),
             TabButton::make('ticket.activities')
-                ->label(__('Activities'))
+                ->text(__('Activities'))
                 ->isLivewireComponent(),
         ];
     }
@@ -137,7 +137,7 @@ class Ticket extends Component
             )
             ->toArray();
 
-        $this->notification()->success(__(':model saved', ['model' => __('Ticket')]));
+        $this->notification()->success(__(':model saved', ['model' => __('Ticket')]))->send();
 
         return true;
     }
@@ -147,7 +147,7 @@ class Ticket extends Component
     {
         try {
             $this->ticket->delete();
-        } catch (\Exception $e) {
+        } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
             return;
@@ -167,7 +167,7 @@ class Ticket extends Component
 
         $this->js(<<<JS
             let component = Alpine.\$data(document.getElementById('author-select').querySelector('[x-data]'));
-            component.asyncData.api = '$route';
+            component.request.url = '$route';
         JS);
 
         $this->skipRender();

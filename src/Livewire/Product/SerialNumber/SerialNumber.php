@@ -52,8 +52,8 @@ class SerialNumber extends Component
     public function getTabs(): array
     {
         return [
-            TabButton::make('product.serial-number.general')->label(__('General')),
-            TabButton::make('product.serial-number.comments')->label(__('Comments')),
+            TabButton::make('product.serial-number.general')->text(__('General')),
+            TabButton::make('product.serial-number.comments')->text(__('Comments')),
         ];
     }
 
@@ -73,7 +73,7 @@ class SerialNumber extends Component
         $response->load('product');
         $this->serialNumber = $response->toArray();
 
-        $this->notification()->success(__(':model saved', ['model' => __('Serial Number')]));
+        $this->notification()->success(__(':model saved', ['model' => __('Serial Number')]))->send();
         $this->edit = false;
     }
 

@@ -73,9 +73,9 @@ class Project extends Component
     public function getTabs(): array
     {
         return [
-            TabButton::make('project.general')->label(__('General')),
-            TabButton::make('project.comments')->label(__('Comments')),
-            TabButton::make('project.statistics')->label(__('Statistics')),
+            TabButton::make('project.general')->text(__('General')),
+            TabButton::make('project.comments')->text(__('Comments')),
+            TabButton::make('project.statistics')->text(__('Statistics')),
         ];
     }
 
@@ -89,7 +89,7 @@ class Project extends Component
             return false;
         }
 
-        $this->notification()->success(__(':model saved', ['model' => __('Project')]));
+        $this->notification()->success(__(':model saved', ['model' => __('Project')]))->send();
         $this->skipRender();
 
         return true;

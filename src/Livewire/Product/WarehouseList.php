@@ -64,7 +64,7 @@ class WarehouseList extends BaseWarehouseList
     {
         return new ComponentAttributeBag([
             'x-bind:class' => <<<'JS'
-                    record.id === $wire.warehouseId && 'bg-primary-100 dark:bg-primary-800'
+                    record.id === $wire.warehouseId && 'bg-indigo-100 dark:bg-indigo-800'
                 JS,
         ]);
     }

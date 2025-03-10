@@ -22,8 +22,8 @@ class Industries extends IndustryList
     {
         return [
             DataTableButton::make()
-                ->label(__('Create'))
-                ->color('primary')
+                ->text(__('Create'))
+                ->color('indigo')
                 ->icon('plus')
                 ->when(resolve_static(CreateIndustry::class, 'canPerformAction', [false]))
                 ->wireClick('edit'),
@@ -34,19 +34,19 @@ class Industries extends IndustryList
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
+                ->text(__('Edit'))
                 ->icon('pencil')
-                ->color('primary')
+                ->color('indigo')
                 ->when(resolve_static(UpdateIndustry::class, 'canPerformAction', [false]))
                 ->wireClick('edit(record.id)'),
             DataTableButton::make()
-                ->label(__('Delete'))
-                ->color('negative')
+                ->text(__('Delete'))
+                ->color('red')
                 ->icon('trash')
                 ->when(resolve_static(DeleteIndustry::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'delete(record.id)',
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Industry')]),
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Industry')]),
                 ]),
         ];
     }
@@ -57,7 +57,7 @@ class Industries extends IndustryList
         $this->industryForm->fill($industry);
 
         $this->js(<<<'JS'
-            $openModal('edit-industry');
+            $modalOpen('edit-industry-modal');
         JS);
     }
 

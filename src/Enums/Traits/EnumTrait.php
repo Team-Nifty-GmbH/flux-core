@@ -14,9 +14,12 @@ trait EnumTrait
 
     public static function valuesLocalized(): array
     {
-        return array_combine(
-            self::values(),
-            array_map(fn ($value) => __($value), self::values()),
+        return array_map(
+            fn ($case) => [
+                'value' => $case->value,
+                'label' => __(Str::headline($case->value)),
+            ],
+            self::cases()
         );
     }
 

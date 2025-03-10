@@ -18,7 +18,7 @@
      class="dark:text-white"
      x-on:data-table-record-selected="selected = Alpine.$data(document.getElementById('order-position-table').querySelector('[tall-datatable]')).selected"
 >
-    <x-modal.card id="detail-modal" wire:model="detailModal">
+    <x-modal id="detail-modal" wire="detailModal">
         @section('product-modal.content')
             <div class="grid grid-cols-3 gap-5">
                 <div class="col-span-1">
@@ -59,21 +59,15 @@
                 @show
             </div>
         @show
-    </x-modal.card>
-    <div id="new-ticket-modal">
-        <x-modal.card :title="__('New Ticket')">
+    </x-modal>
+    <div id="new-ticket-modal-wrapper">
+        <x-modal id="new-ticket-modal" :title="__('New Ticket')">
             <livewire:portal.ticket.ticket-create :model-type="\FluxErp\Models\Order::class" :model-id="$order['id']"/>
-            <x-slot name="footer">
-                <div class="w-full">
-                    <div class="flex justify-between gap-x-4">
-                        <div class="flex">
-                            <x-button flat :label="__('Cancel')" x-on:click="close"/>
-                            <x-button primary :label="__('Save')" x-on:click="Alpine.$data(document.getElementById('new-ticket-modal').querySelector('[x-data]').querySelector('[x-data]')).save();"/>
-                        </div>
-                    </div>
-                </div>
-            </x-slot>
-        </x-modal.card>
+            <x-slot:footer>
+                <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('new-ticket-modal')"/>
+                <x-button color="indigo" :text="__('Save')" x-on:click="Alpine.$data(document.getElementById('new-ticket-modal-wrapper').querySelector('[x-data]').querySelector('[x-data]')).save();"/>
+            </x-slot:footer>
+        </x-modal>
     </div>
     <h2 class="text-base font-bold uppercase">
         {{ __('Order details') }}
@@ -88,18 +82,18 @@
     <div class="flex justify-end pb-5 gap-1.5">
         @section('actions')
             @if($order['invoice_number'])
-                <x-button primary :label="__('Download invoice')" wire:click="downloadInvoice()" spinner="downloadInvoice"/>
+                <x-button color="indigo" :text="__('Download invoice')" wire:click="downloadInvoice()" loading="downloadInvoice"/>
             @endif
 
             @if($order['parent_id'])
-                <x-button primary :href="route('portal.orders.id', data_get($order, 'parent_id'))">{{ __('Show parent') }}</x-button>
+                <x-button color="indigo" :href="route('portal.orders.id', data_get($order, 'parent_id'))" :text="__('Show parent')"/>
             @endif
-            <x-button primary :label="__('New Ticket')" x-on:click="Alpine.$data(document.getElementById('new-ticket-modal').querySelector('[wireui-modal]')).open();" spinner="downloadInvoice"/>
+            <x-button color="indigo" :text="__('New Ticket')" x-on:click="$modalOpen('new-ticket-modal')" loading="downloadInvoice"/>
         @show
     </div>
     <div class="space-y-5">
         <div class="flex gap-8">
-            <x-card :title="__('Invoice Address')">
+            <x-card :header="__('Invoice Address')">
                 <div>
                     {{ data_get($order, 'address_invoice.company', '') }}
                 </div>
@@ -125,14 +119,14 @@
         </div>
         @section('attachments')
             @if($attachments)
-                <x-card :title="__('Attachments')">
+                <x-card :header="__('Attachments')">
                     @foreach($attachments as $attachment)
                         <div class="flex justify-between">
                             <div class="flex justify-center items-center gap-1">
                                 <div target="_blank">
                                     <span class="font-semibold">{{ __(\Illuminate\Support\Str::headline($attachment['collection_name'])) }}</span> {{ $attachment['file_name'] }}
                                 </div>
-                                <x-button primary xs flat :label="__('Download')" wire:click="downloadMedia({{ $attachment['id'] }})" />
+                                <x-button color="indigo" xs flat :text="__('Download')" wire:click="downloadMedia({{ $attachment['id'] }})" />
                             </div>
                         </div>
                     @endforeach

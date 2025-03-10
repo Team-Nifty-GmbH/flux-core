@@ -50,21 +50,21 @@ class CartTest extends BaseSetup
             ->fireEvent('cart:add', $products->first()->id)
             ->assertStatus(200)
             ->assertHasNoErrors()
-            ->assertWireuiNotification(icon: 'success')
+            ->assertToastNotification(type: 'success')
             ->assertCount('cart.cartItems', 1)
             ->fireEvent('cart:add', [$products->get(1)->id])
             ->assertStatus(200)
             ->assertHasNoErrors()
-            ->assertWireuiNotification(icon: 'success')
+            ->assertToastNotification(type: 'success')
             ->assertCount('cart.cartItems', 2)
             ->fireEvent('cart:add', ['id' => $products->get(1)->id, 'amount' => 2])
             ->assertStatus(200)
             ->assertHasNoErrors()
-            ->assertWireuiNotification(icon: 'success')
+            ->assertToastNotification(type: 'success')
             ->assertCount('cart.cartItems', 2)
             ->assertSet('cart.cartItems.1.amount', 3)
             ->assertStatus(200)
             ->assertHasNoErrors()
-            ->assertWireuiNotification(icon: 'success');
+            ->assertToastNotification(type: 'success');
     }
 }

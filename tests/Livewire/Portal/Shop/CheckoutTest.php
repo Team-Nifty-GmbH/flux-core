@@ -98,7 +98,7 @@ class CheckoutTest extends BaseSetup
             ->set('termsAndConditions', false)
             ->call('buy')
             ->assertHasNoErrors(['terms_and_conditions'])
-            ->assertWireuiNotification(icon: 'error');
+            ->assertToastNotification(type: 'error');
     }
 
     public function test_can_create_order()

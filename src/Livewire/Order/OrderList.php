@@ -38,12 +38,12 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
     {
         return [
             DataTableButton::make()
-                ->color('primary')
-                ->label(__('New order'))
+                ->color('indigo')
+                ->text(__('New order'))
                 ->icon('plus')
                 ->when(resolve_static(CreateOrder::class, 'canPerformAction', [false]))
                 ->attributes([
-                    'x-on:click' => "\$openModal('create-order')",
+                    'x-on:click' => "\$modalOpen('create-order-modal')",
                 ]),
         ];
     }
@@ -80,17 +80,17 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         return [
             DataTableButton::make()
                 ->icon('document-text')
-                ->label(__('Create Documents'))
-                ->color('primary')
+                ->text(__('Create Documents'))
+                ->color('indigo')
                 ->wireClick('openCreateDocumentsModal'),
             DataTableButton::make()
                 ->icon('trash')
-                ->label(__('Delete'))
-                ->color('negative')
+                ->text(__('Delete'))
+                ->color('red')
                 ->when(fn () => resolve_static(DeleteOrder::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'delete',
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Orders')]),
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Orders')]),
                 ]),
         ];
     }

@@ -80,7 +80,7 @@ class AppServiceProvider extends ServiceProvider
                     // If your Livewire component is used like this: <livewire:contact.custom-tab />
                     // The component name would be contact.custom-tab
                     \FluxErp\Htmlables\TabButton::make('contact.custom-tab')
-                        ->label(__('Custom Tab'))
+                        ->text(__('Custom Tab'))
                         ->icon('icon')
                         ->isLivewireComponent()
                         ->wireModel('contact.id')

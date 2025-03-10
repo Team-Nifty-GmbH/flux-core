@@ -26,9 +26,9 @@ class PaymentTypes extends PaymentTypeList
     {
         return [
             DataTableButton::make()
-                ->label(__('New'))
+                ->text(__('New'))
                 ->icon('plus')
-                ->color('primary')
+                ->color('indigo')
                 ->when(resolve_static(CreatePaymentType::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'edit',
@@ -53,12 +53,21 @@ class PaymentTypes extends PaymentTypeList
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
+                ->text(__('Edit'))
                 ->icon('pencil')
-                ->color('primary')
+                ->color('indigo')
                 ->when(resolve_static(UpdatePaymentType::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'edit(record.id)',
+                ]),
+            DataTableButton::make()
+                ->text(__('Delete'))
+                ->color('red')
+                ->icon('trash')
+                ->when(resolve_static(DeletePaymentType::class, 'canPerformAction', [false]))
+                ->attributes([
+                    'wire:click' => 'delete(record.id)',
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Currency')]),
                 ]),
         ];
     }
@@ -69,7 +78,7 @@ class PaymentTypes extends PaymentTypeList
         $this->paymentType->fill($paymentType);
 
         $this->js(<<<'JS'
-            $openModal('edit-payment-type');
+            $modalOpen('edit-payment-type-modal');
         JS);
     }
 
@@ -88,13 +97,13 @@ class PaymentTypes extends PaymentTypeList
         return true;
     }
 
-    public function delete(): bool
+    public function delete(PaymentType $paymentType): bool
     {
+        $this->paymentType->reset();
+        $this->paymentType->fill($paymentType);
+
         try {
-            DeletePaymentType::make($this->paymentType->toArray())
-                ->checkPermission()
-                ->validate()
-                ->execute();
+            $this->paymentType->delete();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 

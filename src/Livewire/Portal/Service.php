@@ -79,7 +79,7 @@ class Service extends Component
             exception_to_notifications($e, $this);
         }
 
-        $this->notification()->success(__('Ticket created…'));
+        $this->notification()->success(__('Ticket created…'))->send();
         Event::dispatch('customerTicket.created', $ticket);
 
         $this->redirect(route('portal.dashboard'), true);

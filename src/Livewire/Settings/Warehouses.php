@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\Settings;
 
 use FluxErp\Actions\Warehouse\CreateWarehouse;
+use FluxErp\Actions\Warehouse\DeleteWarehouse;
 use FluxErp\Actions\Warehouse\UpdateWarehouse;
 use FluxErp\Livewire\DataTables\WarehouseList;
 use FluxErp\Livewire\Forms\WarehouseForm;
@@ -24,9 +25,9 @@ class Warehouses extends WarehouseList
     {
         return [
             DataTableButton::make()
-                ->label(__('New'))
+                ->text(__('New'))
                 ->icon('plus')
-                ->color('primary')
+                ->color('indigo')
                 ->when(resolve_static(CreateWarehouse::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'edit',
@@ -38,12 +39,21 @@ class Warehouses extends WarehouseList
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
+                ->text(__('Edit'))
                 ->icon('pencil')
-                ->color('primary')
+                ->color('indigo')
                 ->when(resolve_static(UpdateWarehouse::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'edit(record.id)',
+                ]),
+            DataTableButton::make()
+                ->text(__('Delete'))
+                ->color('red')
+                ->icon('trash')
+                ->when(resolve_static(DeleteWarehouse::class, 'canPerformAction', [false]))
+                ->attributes([
+                    'wire:click' => 'delete(record.id)',
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Warehouse')]),
                 ]),
         ];
     }
@@ -54,7 +64,7 @@ class Warehouses extends WarehouseList
         $this->warehouse->fill($warehouse);
 
         $this->js(<<<'JS'
-            $openModal('edit-warehouse');
+            $modalOpen('edit-warehouse-modal');
         JS);
     }
 

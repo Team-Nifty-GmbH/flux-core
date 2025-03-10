@@ -66,7 +66,7 @@ class OrderPositionList extends BaseDataTable
             $this->formatters,
             [
                 'slug_position' => 'string',
-                'alternative_tag' => ['state', [__('Alternative') => 'negative']],
+                'alternative_tag' => ['state', [__('Alternative') => 'red']],
             ]
         );
     }

@@ -20,7 +20,7 @@ class FailedJobs extends FailedJobList
         $this->failedJob['exception'] = explode("\n", data_get($this->failedJob, 'exception', ''));
 
         $this->js(<<<'JS'
-            $openModal('show-failed-job');
+            $modalOpen('show-failed-job');
         JS);
     }
 
@@ -28,8 +28,8 @@ class FailedJobs extends FailedJobList
     {
         return [
             DataTableButton::make()
-                ->label(__('Show'))
-                ->color('primary')
+                ->text(__('Show'))
+                ->color('indigo')
                 ->icon('eye')
                 ->wireClick('show(record.id)'),
         ];

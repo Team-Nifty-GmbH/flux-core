@@ -49,9 +49,9 @@ class Scheduling extends ScheduleList
     {
         return [
             DataTableButton::make()
-                ->label(__('New'))
+                ->text(__('New'))
                 ->icon('plus')
-                ->color('primary')
+                ->color('indigo')
                 ->when(resolve_static(CreateSchedule::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'edit',
@@ -65,15 +65,15 @@ class Scheduling extends ScheduleList
             parent::getViewData(),
             [
                 'basic' => array_map(
-                    fn ($item) => ['name' => $item, 'label' => __(Str::headline($item))],
+                    fn ($item) => ['value' => $item, 'label' => __(Str::headline($item))],
                     FrequenciesEnum::getBasicFrequencies()
                 ),
                 'dayConstraints' => array_map(
-                    fn ($item) => ['name' => $item, 'label' => __(Str::headline($item))],
+                    fn ($item) => ['value' => $item, 'label' => __(Str::headline($item))],
                     FrequenciesEnum::getDayConstraints()
                 ),
                 'timeConstraints' => array_map(
-                    fn ($item) => ['name' => $item, 'label' => __(Str::headline($item))],
+                    fn ($item) => ['value' => $item, 'label' => __(Str::headline($item))],
                     FrequenciesEnum::getTimeConstraints()
                 ),
             ]
@@ -85,10 +85,18 @@ class Scheduling extends ScheduleList
         return [
             DataTableButton::make()
                 ->icon('pencil')
-                ->color('primary')
+                ->color('indigo')
                 ->when(resolve_static(UpdateSchedule::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'edit(record.id)',
+                ]),
+            DataTableButton::make()
+                ->icon('trash')
+                ->color('red')
+                ->when(resolve_static(DeleteSchedule::class, 'canPerformAction', [false]))
+                ->attributes([
+                    'wire:click' => 'delete(record.id)',
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Schedule')]),
                 ]),
         ];
     }
@@ -100,7 +108,7 @@ class Scheduling extends ScheduleList
         $this->schedule->fill($schedule);
 
         $this->js(<<<'JS'
-            $openModal('edit-schedule');
+            $modalOpen('edit-schedule-modal');
         JS);
     }
 
@@ -121,13 +129,13 @@ class Scheduling extends ScheduleList
     }
 
     #[Renderless]
-    public function delete(): bool
+    public function delete(Schedule $schedule): bool
     {
+        $this->schedule->reset();
+        $this->schedule->fill($schedule);
+
         try {
-            DeleteSchedule::make($this->schedule->toArray())
-                ->checkPermission()
-                ->validate()
-                ->execute();
+            $this->schedule->delete();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 

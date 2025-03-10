@@ -3,12 +3,9 @@
 namespace FluxErp\Tests\Feature\Web;
 
 use FluxErp\Models\Permission;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class CalendarsTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     public function test_calendars_page()
     {
         $this->user->givePermissionTo(Permission::findOrCreate('calendars.get', 'web'));

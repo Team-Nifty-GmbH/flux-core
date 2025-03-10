@@ -17,7 +17,7 @@ class TicketList extends BaseDataTable
 {
     use WithFileUploads;
 
-    protected string $view = 'flux::livewire.ticket.tickets';
+    protected ?string $includeBefore = 'flux::livewire.ticket.tickets';
 
     public array $enabledCols = [
         'ticket_number',
@@ -91,8 +91,8 @@ class TicketList extends BaseDataTable
     {
         return [
             DataTableButton::make()
-                ->label(__('Create'))
-                ->color('primary')
+                ->text(__('Create'))
+                ->color('indigo')
                 ->icon('plus')
                 ->attributes([
                     'x-on:click' => '$wire.show()',
@@ -168,7 +168,7 @@ class TicketList extends BaseDataTable
             exception_to_notifications($e, $this);
         }
 
-        $this->notification()->success(__('Ticket created…'));
+        $this->notification()->success(__('Ticket created…'))->send();
 
         $this->showTicketModal = false;
         $this->skipRender();

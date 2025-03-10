@@ -54,8 +54,8 @@ class ReplicateOrderPositionList extends OrderPositionList
     {
         return [
             DataTableButton::make()
-                ->label(__('Take'))
-                ->color('primary')
+                ->text(__('Take'))
+                ->color('indigo')
                 ->attributes([
                     'x-on:click' => '$wire.$parent.takeOrderPositions($wire.selected).then(() => {$wire.selected = [];});',
                 ]),
@@ -77,7 +77,7 @@ class ReplicateOrderPositionList extends OrderPositionList
             parent::getFormatters(),
             [
                 'slug_position' => 'string',
-                'alternative_tag' => ['state', [__('Alternative') => 'negative']],
+                'alternative_tag' => ['state', [__('Alternative') => 'red']],
             ]
         );
     }

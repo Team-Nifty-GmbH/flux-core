@@ -8,20 +8,20 @@
 >
     <!-- Sidebar component, swap this element with another sidebar if you like -->
     <div class="soft-scrollbar flex flex-grow flex-col overflow-x-hidden">
-        <div class="flex relative flex h-16 shrink-0 justify-center p-2 px-4">
+        <div class="relative flex h-16 shrink-0 justify-center p-2 px-4">
             <x-flux::logo fill="#D7E3EC" />
-            <x-button.circle icon="x" x-on:click="closeMenu(true)" class="absolute top-6 right-6 block md:hidden" />
+            <x-button.circle color="secondary" light icon="x-mark" x-on:click="closeMenu(true)" class="absolute top-6 right-6 block md:hidden" />
         </div>
         <!-- User Menu -->
         <div>
             <div class="flex flex-1 flex-col pt-0">
                 <div class="whitespace-nowrap pb-8 pt-4">
-                    <x-dropdown align="left">
-                        <x-slot name="trigger">
-                            <div class="-ml-2 flex cursor-pointer px-4">
+                    <x-dropdown>
+                        <x-slot:action>
+                            <div class="-ml-2 flex cursor-pointer px-4" x-on:click="show = !show">
                                 <div class="flex w-16 flex-none justify-center">
                                     <div class="">
-                                        <x-avatar lg :src="auth()->user()->getAvatarUrl()" />
+                                        <x-avatar lg :image="auth()->user()->getAvatarUrl()" />
                                     </div>
                                 </div>
                                 <div class="easy-in-out flex content-center pl-2 text-white transition">
@@ -35,14 +35,14 @@
                                     </div>
                                 </div>
                             </div>
-                        </x-slot>
-                        <x-dropdown.item :label="__('My profile')" href="/my-profile" />
-
-                        <x-dropdown.item :label="__('Logout')"
-                                         x-on:click="document.getElementById('logout-form-desktop').submit()"/>
-                        <x-dropdown.item>
-                            <livewire:toggle-dark-mode />
-                        </x-dropdown.item>
+                        </x-slot:action>
+                        <a href="{{ route('my-profile') }}">
+                            <x-dropdown.items :text="__('My profile')" />
+                        </a>
+                        <x-dropdown.items x-on:click="document.getElementById('logout-form-desktop').submit()" :text="__('Logout')" />
+                        <div class="ml-4 mb-2">
+                            <x-theme-switch />
+                        </div>
                     </x-dropdown>
                     <div class="hidden">
                         <!-- Authentication -->

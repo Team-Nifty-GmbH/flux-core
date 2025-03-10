@@ -274,9 +274,14 @@ if (! function_exists('eloquent_model_event')) {
 }
 
 if (! function_exists('to_flat_tree')) {
-    function to_flat_tree(array $tree, string $key = 'id', string $parentKey = 'parent_id', array $parent = []): array
-    {
+    function to_flat_tree(
+        array|\Illuminate\Contracts\Support\Arrayable $tree,
+        string $key = 'id',
+        string $parentKey = 'parent_id',
+        array $parent = []
+    ): array {
         $flat = [];
+        $tree = $tree instanceof \Illuminate\Contracts\Support\Arrayable ? $tree->toArray() : $tree;
         $siblings = count($tree);
         $padding = max(strlen($siblings), 2);
 

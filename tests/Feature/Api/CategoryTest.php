@@ -12,14 +12,11 @@ use FluxErp\Models\Project;
 use FluxErp\Models\Task;
 use FluxErp\Services\CategoryService;
 use FluxErp\Tests\Feature\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Laravel\Sanctum\Sanctum;
 
 class CategoryTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Collection $additionalColumns;
 
     private array $categories;

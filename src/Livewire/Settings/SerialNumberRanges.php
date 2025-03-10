@@ -50,9 +50,9 @@ class SerialNumberRanges extends SerialNumberRangeList
     {
         return [
             DataTableButton::make()
-                ->label(__('New'))
+                ->text(__('New'))
                 ->icon('plus')
-                ->color('primary')
+                ->color('indigo')
                 ->when(resolve_static(CreateSerialNumberRange::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'edit',
@@ -64,12 +64,21 @@ class SerialNumberRanges extends SerialNumberRangeList
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
+                ->text(__('Edit'))
                 ->icon('pencil')
-                ->color('primary')
+                ->color('indigo')
                 ->when(resolve_static(UpdateSerialNumberRange::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'edit(record.id)',
+                ]),
+            DataTableButton::make()
+                ->text(__('Delete'))
+                ->color('red')
+                ->icon('trash')
+                ->when(resolve_static(DeleteSerialNumberRange::class, 'canPerformAction', [false]))
+                ->attributes([
+                    'wire:click' => 'delete(record.id)',
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Serial Number Range')]),
                 ]),
         ];
     }
@@ -80,7 +89,7 @@ class SerialNumberRanges extends SerialNumberRangeList
         $this->serialNumberRange->fill($serialNumberRange);
 
         $this->js(<<<'JS'
-            $openModal('edit-serial-number-range');
+            $modalOpen('edit-serial-number-range-modal');
         JS);
     }
 
@@ -99,13 +108,13 @@ class SerialNumberRanges extends SerialNumberRangeList
         return true;
     }
 
-    public function delete(): bool
+    public function delete(SerialNumberRange $serialNumberRange): bool
     {
+        $this->serialNumberRange->reset();
+        $this->serialNumberRange->fill($serialNumberRange);
+
         try {
-            DeleteSerialNumberRange::make($this->serialNumberRange->toArray())
-                ->checkPermission()
-                ->validate()
-                ->execute();
+            $this->serialNumberRange->delete();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 

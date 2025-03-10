@@ -5,15 +5,12 @@ namespace FluxErp\Tests\Feature\Api;
 use FluxErp\Models\CustomEvent;
 use FluxErp\Models\Permission;
 use FluxErp\Tests\Feature\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
 class CustomEventTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private CustomEvent $customEvent;
 
     private array $permissions;

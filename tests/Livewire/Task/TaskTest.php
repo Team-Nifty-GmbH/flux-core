@@ -5,13 +5,10 @@ namespace FluxErp\Tests\Livewire\Task;
 use FluxErp\Livewire\Task\Task as TaskView;
 use FluxErp\Models\Task;
 use FluxErp\Tests\Livewire\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;
 
 class TaskTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Task $task;
 
     protected function setUp(): void

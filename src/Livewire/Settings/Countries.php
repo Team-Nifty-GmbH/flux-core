@@ -27,8 +27,8 @@ class Countries extends CountryList
     {
         return [
             DataTableButton::make()
-                ->label(__('Create'))
-                ->color('primary')
+                ->text(__('Create'))
+                ->color('indigo')
                 ->icon('plus')
                 ->when(resolve_static(CreateCountry::class, 'canPerformAction', [false]))
                 ->wireClick('edit'),
@@ -39,19 +39,19 @@ class Countries extends CountryList
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
+                ->text(__('Edit'))
                 ->icon('pencil')
-                ->color('primary')
+                ->color('indigo')
                 ->when(resolve_static(UpdateCountry::class, 'canPerformAction', [false]))
                 ->wireClick('edit(record.id)'),
             DataTableButton::make()
-                ->label(__('Delete'))
-                ->color('negative')
+                ->text(__('Delete'))
+                ->color('red')
                 ->icon('trash')
                 ->when(resolve_static(DeleteCountry::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'delete(record.id)',
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Country')]),
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Country')]),
                 ]),
         ];
     }
@@ -62,9 +62,11 @@ class Countries extends CountryList
             parent::getViewData(),
             [
                 'languages' => resolve_static(Language::class, 'query')
-                    ->pluck('name', 'id'),
+                    ->get(['id', 'name'])
+                    ->toArray(),
                 'currencies' => resolve_static(Currency::class, 'query')
-                    ->pluck('name', 'id'),
+                    ->get(['id', 'name'])
+                    ->toArray(),
             ]
         );
     }
@@ -75,7 +77,7 @@ class Countries extends CountryList
         $this->country->fill($country);
 
         $this->js(<<<'JS'
-            $openModal('edit-country');
+            $modalOpen('edit-country-modal');
         JS);
     }
 

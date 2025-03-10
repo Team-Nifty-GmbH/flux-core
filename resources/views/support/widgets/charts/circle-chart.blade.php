@@ -2,7 +2,7 @@
 @section('options')
     @parent
     <div class="px-6 py-2">
-        <x-native-select
+        <x-select.native
             x-model="chartType"
             :options="[
                 [
@@ -18,9 +18,6 @@
                     'label' => __('Pie'),
                 ],
             ]"
-            option-value="value"
-            option-label="label"
-        >
-        </x-native-select>
+        />
     </div>
 @endsection

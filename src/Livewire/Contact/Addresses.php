@@ -126,7 +126,7 @@ class Addresses extends Component
                 'contactOrigins' => resolve_static(ContactOrigin::class, 'query')
                     ->where('is_active', true)
                     ->get(['id', 'name'])
-                    ->pluck('name', 'id'),
+                    ->toArray(),
             ]
         );
     }
@@ -247,9 +247,9 @@ class Addresses extends Component
     {
         return [
             TabButton::make('address.address')
-                ->label(__('Address')),
+                ->text(__('Address')),
             TabButton::make('address.comments')
-                ->label(__('Comments'))
+                ->text(__('Comments'))
                 ->attributes([
                     'x-cloak',
                     'x-show' => '$wire.address.id',
@@ -257,7 +257,7 @@ class Addresses extends Component
                 ->isLivewireComponent()
                 ->wireModel('address.id'),
             TabButton::make('address.attachments')
-                ->label(__('Attachments'))
+                ->text(__('Attachments'))
                 ->attributes([
                     'x-cloak',
                     'x-show' => '$wire.address.id',
@@ -265,7 +265,7 @@ class Addresses extends Component
                 ->isLivewireComponent()
                 ->wireModel('address.id'),
             TabButton::make('address.communication')
-                ->label(__('Communication'))
+                ->text(__('Communication'))
                 ->attributes([
                     'x-cloak',
                     'x-show' => '$wire.address.id',
@@ -273,7 +273,7 @@ class Addresses extends Component
                 ->isLivewireComponent()
                 ->wireModel('address.id'),
             TabButton::make('address.tasks')
-                ->label(__('Tasks'))
+                ->text(__('Tasks'))
                 ->attributes([
                     'x-cloak',
                     'x-show' => '$wire.address.id',
@@ -281,13 +281,13 @@ class Addresses extends Component
                 ->isLivewireComponent()
                 ->wireModel('address.id'),
             TabButton::make('address.permissions')
-                ->label(__('Permissions'))
+                ->text(__('Permissions'))
                 ->attributes([
                     'x-cloak',
                     'x-show' => '$wire.address.id',
                 ]),
             TabButton::make('address.activities')
-                ->label(__('Activities'))
+                ->text(__('Activities'))
                 ->attributes([
                     'x-cloak',
                     'x-show' => '$wire.address.id',

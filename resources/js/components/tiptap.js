@@ -108,7 +108,7 @@ export default function (content, debounceDelay = 0, searchModel = ['user', 'rol
                     editorProps: {
                         attributes: {
                             class: `${isTransparent ? 'bg-transparent' : 'dark:bg-secondary-800'} ${showTooltipDropdown ? 'rounded-md' : 'rounded-b-md' } \
-                                prose prose-sm max-w-full content-editable-placeholder placeholder-secondary-400 dark:placeholder-secondary-500 \
+                                prose prose-sm dark:prose-invert max-w-full content-editable-placeholder placeholder-secondary-400 dark:placeholder-secondary-500 \
                                 border-secondary-300 focus:ring-primary-500 focus:border-primary-500 dark:border-secondary-600 form-input block \
                                 min-h-[85px] w-full  border p-3 shadow-sm transition duration-100 ease-in-out focus:outline-none dark:text-gray-50 sm:text-sm`,
                         },

@@ -5,6 +5,7 @@ namespace FluxErp\Livewire\Settings;
 use FluxErp\Actions\Discount\CreateDiscount;
 use FluxErp\Actions\Discount\UpdateDiscount;
 use FluxErp\Actions\PriceList\CreatePriceList;
+use FluxErp\Actions\PriceList\DeletePriceList;
 use FluxErp\Actions\PriceList\UpdatePriceList;
 use FluxErp\Enums\RoundingMethodEnum;
 use FluxErp\Livewire\DataTables\PriceListList;
@@ -38,9 +39,9 @@ class PriceLists extends PriceListList
     {
         return [
             DataTableButton::make()
-                ->label(__('New'))
+                ->text(__('New'))
                 ->icon('plus')
-                ->color('primary')
+                ->color('indigo')
                 ->when(resolve_static(CreatePriceList::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'edit',
@@ -52,12 +53,21 @@ class PriceLists extends PriceListList
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
+                ->text(__('Edit'))
                 ->icon('pencil')
-                ->color('primary')
+                ->color('indigo')
                 ->when(resolve_static(UpdatePriceList::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'edit(record.id)',
+                ]),
+            DataTableButton::make()
+                ->text(__('Delete'))
+                ->icon('trash')
+                ->color('red')
+                ->when(resolve_static(DeletePriceList::class, 'canPerformAction', [false]))
+                ->attributes([
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Price List')]),
+                    'wire:click' => 'delete(record.id)',
                 ]),
         ];
     }
@@ -72,9 +82,18 @@ class PriceLists extends PriceListList
                     ->toArray(),
                 'roundingMethods' => RoundingMethodEnum::valuesLocalized(),
                 'roundingModes' => [
-                    'round' => __('Round'),
-                    'ceil' => __('Round up'),
-                    'floor' => __('Round down'),
+                    [
+                        'label' => __('Round'),
+                        'value' => 'round',
+                    ],
+                    [
+                        'label' => __('Round up'),
+                        'value' => 'ceil',
+                    ],
+                    [
+                        'label' => __('Round down'),
+                        'value' => 'floor',
+                    ],
                 ],
             ]
         );
@@ -115,7 +134,7 @@ class PriceLists extends PriceListList
         }
 
         $this->js(<<<'JS'
-            $openModal('edit-price-list');
+            $modalOpen('edit-price-list-modal');
         JS);
     }
 
@@ -198,8 +217,11 @@ class PriceLists extends PriceListList
     }
 
     #[Renderless]
-    public function delete(): bool
+    public function delete(PriceList $priceList): bool
     {
+        $this->priceList->reset();
+        $this->priceList->fill($priceList);
+
         try {
             $this->priceList->delete();
         } catch (ValidationException|UnauthorizedException $e) {

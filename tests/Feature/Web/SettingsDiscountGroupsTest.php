@@ -3,12 +3,9 @@
 namespace FluxErp\Tests\Feature\Web;
 
 use FluxErp\Models\Permission;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class SettingsDiscountGroupsTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     public function test_settings_discount_groups_page()
     {
         $this->user->givePermissionTo(Permission::findOrCreate('settings.discount-groups.get', 'web'));

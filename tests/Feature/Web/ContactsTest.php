@@ -6,12 +6,9 @@ use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class ContactsTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Contact $contact;
 
     protected function setUp(): void

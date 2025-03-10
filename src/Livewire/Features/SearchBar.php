@@ -121,7 +121,7 @@ class SearchBar extends Component
         $modelInstance = resolve_static($model, 'query')->whereKey($id)->first();
 
         if (! $modelInstance) {
-            $this->notification()->error(__('Record not found'));
+            $this->notification()->error(__('Record not found'))->send();
 
             return;
         }

@@ -3,12 +3,9 @@
 namespace FluxErp\Tests\Feature\Web;
 
 use FluxErp\Models\Permission;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class SettingsPriceListsTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     public function test_settings_price_lists_page()
     {
         $this->user->givePermissionTo(Permission::findOrCreate('settings.price-lists.get', 'web'));

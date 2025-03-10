@@ -35,7 +35,7 @@ class SerialNumberList extends BaseSerialNumberList
         ];
 
         $this->js(<<<'JS'
-            $openModal('create-serial-number');
+            $modalOpen('create-serial-number-modal');
         JS);
     }
 
@@ -63,9 +63,9 @@ class SerialNumberList extends BaseSerialNumberList
     {
         return [
             DataTableButton::make()
-                ->label(__('New'))
+                ->text(__('New'))
                 ->icon('plus')
-                ->color('primary')
+                ->color('indigo')
                 ->wireClick('edit')
                 ->when(resolve_static(CreateSerialNumber::class, 'canPerformAction', [false])),
         ];

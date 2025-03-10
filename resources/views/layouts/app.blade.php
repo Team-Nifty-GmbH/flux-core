@@ -1,17 +1,16 @@
 <!DOCTYPE html>
 @props(['navigation' => request()->boolean('no-navigation')])
-<html @class([
+<html x-data="tallstackui_darkTheme()" @class([
         'sort-scrollbar',
         'h-full',
-        'text-sm',
-        'dark' => auth()->check() && auth()->user()->is_dark_mode,
+        'text-sm'
     ]
 ) lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <title>{{ $title ?? config('app.name', 'Flux ERP') }}</title>
     <x-flux::layouts.head.head/>
 </head>
-<body class="dark:bg-secondary-900 h-full bg-slate-50 transition duration-300 text-secondary-600 dark:text-secondary-50">
+<body x-bind:class="{ 'dark bg-secondary-800': darkTheme, 'bg-slate-50': !darkTheme }" class="h-full transition duration-300 text-secondary-600 dark:text-secondary-50">
     @section('wire.navigate.spinner')
         @persist('spinner')
             <div id="loading-overlay" class="fixed inset-0 overflow-y-auto p-4 hidden" style="z-index: 1000;">
@@ -23,11 +22,10 @@
     @show
     @section('layout.app.body')
         @persist('notifications')
-            <x-notifications z-index="z-50"></x-notifications>
+            <div id="{{ \Illuminate\Support\Str::uuid() }}" x-on:tallstackui:toast-upsert.window="$tallstackuiToast($el.id).upsertToast($event)">
+                <x-toast z-index="z-50"></x-toast>
+            </div>
             <x-dialog z-index="z-40" blur="md" align="center"/>
-            <x-dialog z-index="z-40" blur="md" align="center" id="prompt">
-                <x-input id="prompt-value" />
-            </x-dialog>
         @endpersist
         <x-flux::flash />
         @auth('web')
@@ -36,8 +34,8 @@
                     <livewire:edit-mail lazy />
                 </div>
                 <x-modal
-                    name="detail-modal"
-                    max-width="7xl"
+                    id="detail-modal"
+                    size="7xl"
                     x-on:close="$el.querySelector('iframe').src = 'data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E'"
                 >
                     <div
@@ -56,10 +54,8 @@
                             <iframe class="object-contain" height="100%" width="100%" id="detail-modal-iframe" src="data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E">
                             </iframe>
                             <x-slot:footer>
-                                <div class="w-full flex justify-end gap-1.5">
-                                    <x-button :label="__('Cancel')" x-on:click="close"/>
-                                    <x-button primary :label="__('Open')" x-on:click="openUrl()"/>
-                                </div>
+                                <x-button color="secondary" light :text="__('Cancel')" x-on:click="$modalClose('detail-modal')"/>
+                                <x-button color="indigo" :text="__('Open')" x-on:click="openUrl()"/>
                             </x-slot:footer>
                         </x-card>
                     </div>

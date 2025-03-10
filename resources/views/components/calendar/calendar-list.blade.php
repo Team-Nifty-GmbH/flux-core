@@ -1,6 +1,6 @@
 <div class="whitespace-nowrap">
     @if($group === 'my' && resolve_static(\FluxErp\Actions\Calendar\CreateCalendar::class, 'canPerformAction', [false]))
-        <x-button icon="plus" class="w-full" x-on:click="calendarItem = {}; $wire.editCalendar();">
+        <x-button color="secondary" light icon="plus" class="w-full" x-on:click="calendarItem = {}; $wire.editCalendar();">
             {{ __('Create Calendar') }}
         </x-button>
     @endif
@@ -29,7 +29,7 @@
         >
             <x-slot:checkbox>
                 <x-checkbox
-                    xs
+                    sm
                     x-on:folder-tree-uncheck.window="$el.checked = isChecked(node); $el.indeterminate = isIndeterminate(node);"
                     x-on:folder-tree-check.window="$el.checked = isChecked(node); $el.indeterminate = isIndeterminate(node);"
                     x-effect="$el.indeterminate = isIndeterminate(node)"

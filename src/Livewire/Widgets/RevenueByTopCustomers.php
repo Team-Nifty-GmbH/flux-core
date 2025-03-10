@@ -71,8 +71,8 @@ class RevenueByTopCustomers extends CircleChart
         )
             ->setDateColumn('invoice_date')
             ->setRange($this->timeFrame)
-            ->setEndingDate($this->end)
-            ->setStartingDate($this->start)
+            ->setEndingDate($this->end?->endOfDay())
+            ->setStartingDate($this->start?->startOfDay())
             ->setLabelKey('addressInvoice.name')
             ->sum('total_net_price', 'address_invoice_id');
 

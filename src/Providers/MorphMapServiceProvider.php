@@ -165,6 +165,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'media' => Media::class,
             'meta' => Meta::class,
             'notification' => Notification::class,
+            'database_notification' => Notification::class,
             'notification_setting' => NotificationSetting::class,
             'order' => Order::class,
             'order_position' => OrderPosition::class,

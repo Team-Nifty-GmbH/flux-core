@@ -29,12 +29,14 @@ class ProductListCard extends Component
     public function placeholder(): string
     {
         return <<<'Blade'
-            <x-card class="flex flex-col justify-between gap-1.5 z-0">
-                <div class="h-1/2 w-full overflow-hidden rounded-md bg-gray-200 group-hover:opacity-75 lg:h-72 xl:h-80 relative flex justify-items-center">
-                    @include('flux::livewire.placeholders.box')
-                </div>
-                @include('flux::livewire.placeholders.horizontal-bar')
-            </x-card>
+            <div>
+                <x-card class="flex flex-col justify-between gap-1.5 z-0">
+                    <div class="h-1/2 w-full overflow-hidden rounded-md bg-gray-200 group-hover:opacity-75 lg:h-72 xl:h-80 relative flex justify-items-center">
+                        @include('flux::livewire.placeholders.box')
+                    </div>
+                    @include('flux::livewire.placeholders.horizontal-bar')
+                </x-card>
+            </div>
         Blade;
     }
 

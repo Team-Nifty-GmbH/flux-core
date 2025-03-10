@@ -70,7 +70,7 @@ class PurchaseInvoiceList extends BaseDataTable
     public function downloadMedia(Media $media): false|BinaryFileResponse
     {
         if (! file_exists($media->getPath())) {
-            $this->notification()->error(__('The file does not exist anymore.'));
+            $this->notification()->error(__('The file does not exist anymore.'))->send();
 
             return false;
         }
@@ -87,8 +87,8 @@ class PurchaseInvoiceList extends BaseDataTable
     {
         return [
             DataTableButton::make()
-                ->color('primary')
-                ->label(__('Upload'))
+                ->color('indigo')
+                ->text(__('Upload'))
                 ->wireClick('edit'),
         ];
     }
@@ -103,15 +103,17 @@ class PurchaseInvoiceList extends BaseDataTable
         return array_merge(
             parent::getViewData(),
             [
-                'clients' => resolve_static(Client::class, 'query')->pluck('name', 'id'),
-                'currencies' => resolve_static(Currency::class, 'query')->pluck('name', 'id'),
+                'clients' => resolve_static(Client::class, 'query')->get(['id', 'name'])->toArray(),
+                'currencies' => resolve_static(Currency::class, 'query')->get(['id', 'name'])->toArray(),
                 'orderTypes' => resolve_static(OrderType::class, 'query')
                     ->whereIn('order_type_enum', $purchaseOrderTypes)
-                    ->pluck('name', 'id'),
+                    ->get(['id', 'name'])
+                    ->toArray(),
                 'paymentTypes' => resolve_static(PaymentType::class, 'query')
                     ->where('is_purchase', true)
-                    ->pluck('name', 'id'),
-                'vatRates' => resolve_static(VatRate::class, 'query')->pluck('name', 'id'),
+                    ->get(['id', 'name'])
+                    ->toArray(),
+                'vatRates' => resolve_static(VatRate::class, 'query')->get(['id', 'name'])->toArray(),
             ]
         );
     }
@@ -159,7 +161,7 @@ class PurchaseInvoiceList extends BaseDataTable
         }
 
         $this->js(<<<'JS'
-            $openModal('edit-purchase-invoice');
+            $modalOpen('edit-purchase-invoice-modal');
         JS);
     }
 

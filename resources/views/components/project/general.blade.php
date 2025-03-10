@@ -6,7 +6,7 @@
     @section('edit-card')
         <x-card
             class="space-y-2.5"
-            :title="__('General')">
+            :header="__('General')">
             <x-flux::project.edit :collapsed="true"/>
         </x-card>
     @show

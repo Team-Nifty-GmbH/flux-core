@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Settings;
 
+use FluxErp\Actions\Currency\DeleteCurrency;
 use FluxErp\Livewire\DataTables\CurrencyList;
 use FluxErp\Livewire\Forms\CurrencyForm;
 use FluxErp\Models\Currency;
@@ -24,8 +25,8 @@ class Currencies extends CurrencyList
     {
         return [
             DataTableButton::make()
-                ->label(__('Create'))
-                ->color('primary')
+                ->text(__('Create'))
+                ->color('indigo')
                 ->icon('plus')
                 ->attributes([
                     'x-on:click' => '$wire.showEditModal()',
@@ -37,26 +38,28 @@ class Currencies extends CurrencyList
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
-                ->color('primary')
+                ->text(__('Edit'))
+                ->color('indigo')
                 ->icon('pencil')
                 ->attributes([
                     'x-on:click' => '$wire.showEditModal(record.id)',
                 ]),
+            DataTableButton::make()
+                ->text(__('Delete'))
+                ->color('red')
+                ->icon('trash')
+                ->when(resolve_static(DeleteCurrency::class, 'canPerformAction', [false]))
+                ->attributes([
+                    'wire:click' => 'delete(record.id)',
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Currency')]),
+                ]),
         ];
     }
 
-    public function showEditModal(?int $currencyId = null): void
+    public function showEditModal(Currency $currency): void
     {
-        if (! $currencyId) {
-            $this->selectedCurrency->reset();
-        } else {
-            $this->selectedCurrency->fill(
-                resolve_static(Currency::class, 'query')
-                    ->whereKey($currencyId)
-                    ->first()
-            );
-        }
+        $this->selectedCurrency->reset();
+        $this->selectedCurrency->fill($currency);
 
         $this->editModal = true;
         $this->resetErrorBag();
@@ -77,8 +80,11 @@ class Currencies extends CurrencyList
         return true;
     }
 
-    public function delete(): bool
+    public function delete(Currency $currency): bool
     {
+        $this->selectedCurrency->reset();
+        $this->selectedCurrency->fill($currency);
+
         try {
             $this->selectedCurrency->delete();
         } catch (ValidationException|UnauthorizedException $e) {

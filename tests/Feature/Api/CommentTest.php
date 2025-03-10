@@ -12,15 +12,12 @@ use FluxErp\Models\Unit;
 use FluxErp\Models\User;
 use FluxErp\Notifications\Comment\CommentCreatedNotification;
 use FluxErp\Tests\Feature\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Laravel\Sanctum\Sanctum;
 
 class CommentTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Comment $comment;
 
     private Ticket $ticket;

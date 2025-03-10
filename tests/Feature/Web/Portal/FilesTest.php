@@ -3,12 +3,9 @@
 namespace FluxErp\Tests\Feature\Web\Portal;
 
 use FluxErp\Models\Permission;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class FilesTest extends PortalSetup
 {
-    use DatabaseTransactions;
-
     public function test_portal_files_page()
     {
         $this->user->givePermissionTo(Permission::findOrCreate('files.get', 'address'));

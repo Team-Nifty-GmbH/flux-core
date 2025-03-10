@@ -6,14 +6,11 @@ use FluxErp\Models\Permission;
 use FluxErp\Models\Setting;
 use FluxErp\Models\User;
 use FluxErp\Tests\Feature\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
 class SettingTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Setting $settings;
 
     private Setting $settings2;

@@ -3,15 +3,12 @@
 namespace FluxErp\Tests\Feature\Web;
 
 use FluxErp\Models\Permission;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class MediaTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Media $media;
 
     private string $filename;
