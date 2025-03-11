@@ -31,33 +31,32 @@
             <div id="mail">
                 <livewire:edit-mail lazy />
             </div>
-            <x-modal
-                id="detail-modal"
-                size="7xl"
-                x-on:close="$el.querySelector('iframe').src = 'data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E'"
-            >
-                <div
-                    class="w-full"
-                    x-data="{
-                        openUrl() {
-                            let urlObj = new URL($el.querySelector('iframe').src);
-                            urlObj.searchParams.delete('no-navigation');
+            <div
+                x-data="{
+                    openUrl() {
+                        let urlObj = new URL($el.querySelector('iframe').src);
+                        urlObj.searchParams.delete('no-navigation');
 
-                            window.open(urlObj);
-                            close();
-                        }
-                    }"
+                        window.open(urlObj);
+                        $modalClose('detail-modal');
+                    }
+                }"
+            >
+                <x-modal
+                    id="detail-modal"
+                    size="7xl"
+                    x-on:close="$el.querySelector('iframe').src = 'data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E'"
                 >
-                    <x-card class="grid h-screen">
+                    <div class="w-full grid h-screen">
                         <iframe class="object-contain" height="100%" width="100%" id="detail-modal-iframe" src="data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E">
                         </iframe>
-                        <x-slot:footer>
-                            <x-button color="secondary" light :text="__('Cancel')" x-on:click="$modalClose('detail-modal')"/>
-                            <x-button color="indigo" :text="__('Open')" x-on:click="openUrl()"/>
-                        </x-slot:footer>
-                    </x-card>
-                </div>
-            </x-modal>
+                    </div>
+                    <x-slot:footer>
+                        <x-button color="secondary" light :text="__('Cancel')" x-on:click="$modalClose('detail-modal')"/>
+                        <x-button color="indigo" :text="__('Open')" x-on:click="openUrl()"/>
+                    </x-slot:footer>
+                </x-modal>
+            </div>
         @endpersist
     @endauth
     <x-layout>
