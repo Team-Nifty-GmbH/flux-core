@@ -2,7 +2,14 @@
     class="flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8"
     x-data="{
         redirect: 5,
-
+        init() {
+            setInterval(() => {
+                this.redirect--;
+                if (this.redirect === 0) {
+                    $wire.redirectToLogin();
+                }
+            }, 1000);
+        }
     }"
 >
     @section('content')
