@@ -1,5 +1,5 @@
-<div x-data="{edit: true}">
-    <x-modal id="new-task-modal" x-on:new-task.window="$wire.resetForm().then(() => open())">
+<div>
+    <x-modal id="new-task-modal">
         <div class="space-y-8 divide-y divide-gray-200"
             x-data="{
                 formatter: @js(resolve_static(\FluxErp\Models\Task::class, 'typeScriptAttributes'))

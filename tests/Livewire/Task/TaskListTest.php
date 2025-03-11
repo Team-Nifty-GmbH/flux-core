@@ -14,7 +14,7 @@ class TaskListTest extends BaseSetup
     {
         Livewire::actingAs($this->user)
             ->test(TaskList::class)
-            ->call('resetForm')
+            ->call('show')
             ->assertSet('task.responsible_user_id', $this->user->id)
             ->set('task.name', $taskName = Str::uuid())
             ->set('task.description', $taskDescription = Str::uuid())
