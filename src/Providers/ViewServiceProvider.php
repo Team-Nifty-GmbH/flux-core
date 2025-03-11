@@ -125,6 +125,15 @@ class ViewServiceProvider extends ServiceProvider
             ->block('buttons.close.wrapper', 'ml-2 flex shrink-0');
 
         TallStackUi::personalize()
+            ->layout()
+            ->block('wrapper.second', 'md:pl-20')
+            ->block('main', 'mx-auto max-w-full p-4 md:p-10');
+
+        TallStackUi::personalize()
+            ->layout('header')
+            ->block('wrapper', 'dark:bg-dark-700 dark:border-dark-600 sticky top-0 z-10 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8');
+
+        TallStackUi::personalize()
             ->modal('fullscreen')
             ->block('wrapper.fourth', 'dark:bg-dark-700 relative flex w-full transform flex-col rounded-xl bg-white text-left shadow-xl transition-all min-h-screen')
             ->block('body', 'dark:text-dark-300 grow rounded-b-xl py-5 text-gray-700 px-4 min-h-screen');

@@ -18,12 +18,8 @@ class Navigation extends Component
 
     public ?array $setting;
 
-    public bool $showSearchBar = true;
-
-    public function mount(?array $setting = null, bool $showSearchBar = true): void
+    public function mount(?array $setting = null): void
     {
-        $this->showSearchBar = $showSearchBar;
-
         if ($setting) {
             $setting = $setting['settings'];
             $this->setting = $setting;

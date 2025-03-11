@@ -20,69 +20,82 @@
             </div>
         @endpersist
     @show
-    @section('layout.app.body')
-        @persist('notifications')
-            <div id="{{ \Illuminate\Support\Str::uuid() }}" x-on:tallstackui:toast-upsert.window="$tallstackuiToast($el.id).upsertToast($event)">
-                <x-toast z-index="z-50"></x-toast>
+    @persist('notifications')
+        <div id="{{ \Illuminate\Support\Str::uuid() }}" x-on:tallstackui:toast-upsert.window="$tallstackuiToast($el.id).upsertToast($event)">
+            <x-toast z-index="z-50"></x-toast>
+        </div>
+        <x-dialog z-index="z-40" blur="md" align="center"/>
+    @endpersist
+    @auth('web')
+        @persist('mail')
+            <div id="mail">
+                <livewire:edit-mail lazy />
             </div>
-            <x-dialog z-index="z-40" blur="md" align="center"/>
-        @endpersist
-        <x-flux::flash />
-        @auth('web')
-            @persist('mail')
-                <div id="mail">
-                    <livewire:edit-mail lazy />
-                </div>
+            <div
+                x-data="{
+                    openUrl() {
+                        let urlObj = new URL($el.querySelector('iframe').src);
+                        urlObj.searchParams.delete('no-navigation');
+
+                        window.open(urlObj);
+                        $modalClose('detail-modal');
+                    }
+                }"
+            >
                 <x-modal
                     id="detail-modal"
                     size="7xl"
                     x-on:close="$el.querySelector('iframe').src = 'data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E'"
                 >
-                    <div
-                        class="w-full"
-                        x-data="{
-                            openUrl() {
-                                let urlObj = new URL($el.querySelector('iframe').src);
-                                urlObj.searchParams.delete('no-navigation');
-
-                                window.open(urlObj);
-                                close();
-                            }
-                        }"
-                    >
-                        <x-card class="grid h-screen">
-                            <iframe class="object-contain" height="100%" width="100%" id="detail-modal-iframe" src="data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E">
-                            </iframe>
-                            <x-slot:footer>
-                                <x-button color="secondary" light :text="__('Cancel')" x-on:click="$modalClose('detail-modal')"/>
-                                <x-button color="indigo" :text="__('Open')" x-on:click="openUrl()"/>
-                            </x-slot:footer>
-                        </x-card>
+                    <div class="w-full grid h-screen">
+                        <iframe class="object-contain" height="100%" width="100%" id="detail-modal-iframe" src="data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E">
+                        </iframe>
                     </div>
+                    <x-slot:footer>
+                        <x-button color="secondary" light :text="__('Cancel')" x-on:click="$modalClose('detail-modal')"/>
+                        <x-button color="indigo" :text="__('Open')" x-on:click="openUrl()"/>
+                    </x-slot:footer>
                 </x-modal>
-            @endpersist
-        @endauth
-        @section('layout.app.body.content')
-            <div x-data="{ open: false }" x-on:keydown.window.escape="open = false" class="flex h-screen w-full flex-col">
-                @section('layout.app.body.content.navigation')
-                    @if(auth()->check() && method_exists(auth()->guard(), 'getName') && ! $navigation)
-                        @php($navigation = true)
-                        @persist('navigation')
-                            <div id="nav">
-                                <livewire:navigation />
-                            </div>
-                        @endpersist
-                    @endif
-                @show
-                @section('layout.app.body.content.main')
-                    <div @if($navigation) class="md:pl-20" @endif>
-                        <main @if($navigation) class="px-1.5 md:px-8 pb-1.5 md:pb-8" @endif>
-                            {{ $slot }}
-                        </main>
-                    </div>
-                @show
             </div>
-        @show
-    @show
+        @endpersist
+    @endauth
+    <x-layout>
+        @if(! $navigation && auth()->check() && ! request()->routeIs('logout'))
+            <x-slot:header>
+                <x-layout.header without-mobile-button>
+                    <x-slot:left>
+                        <x-button flat class="md:hidden" icon="bars-4" x-on:click="$dispatch('menu-force-open')"/>
+                    </x-slot:left>
+                    <div x-persist="layout.header.search-bar" class="grow">
+                        <livewire:features.search-bar />
+                    </div>
+                    <div class="flex gap-2 overflow-hidden">
+                        @persist('layout.header.cart')
+                            @canAction(\FluxErp\Actions\Cart\CreateCart::class)
+                                <livewire:cart.cart lazy />
+                            @endCanAction
+                        @endpersist
+                        @canAction(\FluxErp\Actions\WorkTime\CreateWorkTime::class)
+                            <livewire:work-time lazy />
+                        @endCanAction
+                        @persist('layout.header.notifications')
+                            <livewire:features.notifications lazy />
+                        @endpersist
+                    </div>
+                </x-layout.header>
+            </x-slot:header>
+        @endif
+        @if(auth()->check() && ! request()->routeIs('logout') && method_exists(auth()->guard(), 'getName') && ! $navigation)
+            <x-slot:menu>
+                    @php($navigation = true)
+                    @persist('navigation')
+                        <div id="nav">
+                            <livewire:navigation />
+                        </div>
+                    @endpersist
+            </x-slot:menu>
+        @endif
+        {{ $slot }}
+    </x-layout>
 </body>
 </html>
