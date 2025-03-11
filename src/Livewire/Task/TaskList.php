@@ -52,6 +52,7 @@ class TaskList extends BaseTaskList
         ];
     }
 
+    #[Renderless]
     public function show(): void
     {
         $this->task->reset();
