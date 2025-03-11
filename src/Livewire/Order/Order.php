@@ -433,8 +433,7 @@ class Order extends Component
 
         $orderTypeIds = json_encode(array_column($replicateOrderTypes, 'id'));
         $this->js(<<<JS
-            let component = Alpine.\$data(document.getElementById('replicate-order-order-type').querySelector('[x-data]'));
-            component.request.params.whereIn[0][1] = $orderTypeIds;
+            \$tallstackuiSelect('replicate-order-order-type').mergeRequestParams({whereIn: [['id', $orderTypeIds]]})
         JS);
     }
 
