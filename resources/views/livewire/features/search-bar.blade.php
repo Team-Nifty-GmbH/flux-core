@@ -58,7 +58,7 @@
                                         class="hover:bg-indigo-600 flex cursor-pointer select-none items-center space-x-1.5 px-4 py-2 hover:text-white"
                                         x-on:click="show = false; $wire.showDetail(model, item.id)"
                                     >
-                                        <x-avatar image="#" xs x-bind:image="item.src" x-cloak x-show="item.src" />
+                                        <x-avatar image xs x-bind:src="item.src" x-cloak x-show="item.src" />
                                         <div class="inline-block align-middle hover:text-white dark:text-gray-50" x-text="item.label">
                                         </div>
                                     </li>

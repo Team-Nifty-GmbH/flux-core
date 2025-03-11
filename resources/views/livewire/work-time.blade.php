@@ -3,7 +3,7 @@
     x-data="workTime($wire, '{{ route('search', '') }}')"
     x-init.once="load()"
 >
-    <x-modal id="work-time-modal" persistent="true" x-on:close="$wire.resetWorkTime()">
+    <x-modal id="work-time-modal" persistent x-on:close="$wire.resetWorkTime()">
         <div class="flex flex-col gap-1.5">
             <x-select.styled
                 :label="__('Work Time Type')"

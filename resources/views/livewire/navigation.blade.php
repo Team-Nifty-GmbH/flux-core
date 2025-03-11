@@ -20,7 +20,9 @@
             @endif
         </style>
     @endif
-    <div id="main-navigation" x-data="{
+    <div id="main-navigation"
+         x-on:menu-force-open.window="menuOpen ? closeMenu(true) : showMenu(true)"
+         x-data="{
             init() {
                 document.addEventListener('livewire:navigating', () => {
                     this.closeMenu(true);
@@ -60,34 +62,6 @@
             favoritesOpen: false,
         }"
     >
-        <div class="pb-4 md:pt-4 md:pr-8 md:pl-28">
-            @if($showSearchBar)
-                <div>
-                    <x-card class="flex w-full gap-2">
-                        <x-button
-                            class="block md:hidden"
-                            icon="bars-3"
-                            color="indigo"
-                            x-on:click="showMenu(true)"
-                        />
-                        <livewire:features.search-bar />
-                        <div class="flex gap-1.5" wire:ignore>
-                            @canAction(\FluxErp\Actions\Cart\CreateCart::class)
-                                <livewire:cart.cart />
-                            @endCanAction
-                            @canAction(\FluxErp\Actions\WorkTime\CreateWorkTime::class)
-                                <livewire:work-time lazy />
-                            @endCanAction
-                            <livewire:features.notifications lazy />
-                        </div>
-                    </x-card>
-                </div>
-            @else
-                <x-card class="block md:hidden">
-                    <x-button color="indigo" icon="bars-3" x-on:click="showMenu(true)" />
-                </x-card>
-            @endif
-        </div>
         <x-flux::nav.nav :background="$background">
             <nav class="flex-1 space-y-2 overflow-x-hidden overflow-y-hidden px-2 py-4 hover:overflow-y-auto flex flex-col gap-6">
                 <div>
