@@ -85,7 +85,7 @@ class WorkTime extends Component
     }
 
     #[Renderless]
-    public function start(?array $data): void
+    public function start(?array $data = null): void
     {
         if ($trackableType = data_get($data, 'trackable_type')) {
             $data['trackable_type'] = morph_alias(morphed_model($trackableType) ?? $trackableType);
@@ -94,7 +94,7 @@ class WorkTime extends Component
         $this->workTime->fill($data ?? []);
 
         $this->js(<<<'JS'
-            $modalOpen('work-time');
+            $modalOpen('work-time-modal');
         JS);
     }
 
