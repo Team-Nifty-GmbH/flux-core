@@ -10,6 +10,14 @@ class CreateTicketTypeRuleset extends FluxRuleset
 {
     protected static ?string $model = TicketType::class;
 
+    public static function getRules(): array
+    {
+        return array_merge(
+            parent::getRules(),
+            resolve_static(RoleRuleset::class, 'getRules')
+        );
+    }
+
     public function rules(): array
     {
         return [
@@ -21,13 +29,5 @@ class CreateTicketTypeRuleset extends FluxRuleset
                 app(MorphClassExists::class),
             ],
         ];
-    }
-
-    public static function getRules(): array
-    {
-        return array_merge(
-            parent::getRules(),
-            resolve_static(RoleRuleset::class, 'getRules')
-        );
     }
 }

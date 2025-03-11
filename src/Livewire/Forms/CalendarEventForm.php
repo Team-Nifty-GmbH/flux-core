@@ -12,54 +12,45 @@ use Livewire\Attributes\Locked;
 class CalendarEventForm extends FluxForm
 {
     #[Locked]
-    public ?int $id = null;
+    public int|string|null $calendar_id = null;
 
     #[Locked]
     public ?string $calendar_type = null;
 
-    #[Locked]
-    public int|string|null $calendar_id = null;
+    public ?string $confirm_option = null;
 
-    public ?string $model_type = null;
-
-    public ?int $model_id = null;
-
-    public ?string $start = null;
+    public ?string $description = null;
 
     public ?string $end = null;
 
-    public ?string $title = null;
+    public ?array $extended_props = null;
 
-    public ?string $description = null;
+    public bool $has_taken_place = false;
+
+    #[Locked]
+    public ?int $id = null;
+
+    public ?int $interval = null;
+
+    public array $invited = [];
+
+    public bool $is_all_day = false;
+
+    public ?int $model_id = null;
+
+    public ?string $model_type = null;
+
+    public ?string $original_start = null;
+
+    public ?int $recurrences = null;
 
     public ?array $repeat = null;
 
     public ?string $repeat_end = null;
 
-    public ?int $recurrences = null;
+    public ?string $start = null;
 
-    public bool $is_all_day = false;
-
-    public bool $has_taken_place = false;
-
-    public ?array $extended_props = null;
-
-    public ?string $confirm_option = null;
-
-    public ?string $original_start = null;
-
-    public array $invited = [];
-
-    public ?int $interval = null;
-
-    protected function getActions(): array
-    {
-        return [
-            'create' => CreateCalendarEvent::class,
-            'update' => UpdateCalendarEvent::class,
-            'delete' => DeleteCalendarEvent::class,
-        ];
-    }
+    public ?string $title = null;
 
     public function fill($values): void
     {
@@ -72,5 +63,14 @@ class CalendarEventForm extends FluxForm
         }
 
         parent::fill($values);
+    }
+
+    protected function getActions(): array
+    {
+        return [
+            'create' => CreateCalendarEvent::class,
+            'update' => UpdateCalendarEvent::class,
+            'delete' => DeleteCalendarEvent::class,
+        ];
     }
 }

@@ -11,7 +11,7 @@ return new class() extends Migration
      */
     public function up(): void
     {
-        Schema::table('order_types', function (Blueprint $table) {
+        Schema::table('order_types', function (Blueprint $table): void {
             $table->json('print_layouts')->nullable()->after('description');
         });
     }
@@ -21,7 +21,7 @@ return new class() extends Migration
      */
     public function down(): void
     {
-        Schema::table('order_types', function (Blueprint $table) {
+        Schema::table('order_types', function (Blueprint $table): void {
             $table->dropColumn('print_layouts');
         });
     }

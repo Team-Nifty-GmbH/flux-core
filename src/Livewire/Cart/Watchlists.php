@@ -22,11 +22,24 @@ class Watchlists extends BaseWatchlist
         );
     }
 
+    public function addToCart(Cart $cart): void
+    {
+        $this->dispatch(
+            event: 'cart:add',
+            products: $cart->cartItems()
+                ->ordered()
+                ->get(['product_id', 'amount', 'order_column'])
+                ->map(fn (CartItem $cartItem) => ['id' => $cartItem->product_id, 'amount' => $cartItem->amount])
+                ->toArray()
+        )
+            ->to('cart.cart');
+    }
+
     public function getCarts(): Collection
     {
         return resolve_static(Cart::class, 'query')
             ->where('is_watchlist', true)
-            ->where(function (Builder $query) {
+            ->where(function (Builder $query): void {
                 $query->where(fn (Builder $query) => $query
                     ->where('authenticatable_id', auth()->id())
                     ->where('authenticatable_type', auth()->user()?->getMorphClass())
@@ -63,18 +76,5 @@ class Watchlists extends BaseWatchlist
                     return $productArray;
                 })
             );
-    }
-
-    public function addToCart(Cart $cart): void
-    {
-        $this->dispatch(
-            event: 'cart:add',
-            products: $cart->cartItems()
-                ->ordered()
-                ->get(['product_id', 'amount', 'order_column'])
-                ->map(fn (CartItem $cartItem) => ['id' => $cartItem->product_id, 'amount' => $cartItem->amount])
-                ->toArray()
-        )
-            ->to('cart.cart');
     }
 }

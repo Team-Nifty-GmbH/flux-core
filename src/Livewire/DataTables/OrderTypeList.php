@@ -8,8 +8,6 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class OrderTypeList extends BaseDataTable
 {
-    protected string $model = OrderType::class;
-
     public array $enabledCols = [
         'name',
         'description',
@@ -17,6 +15,8 @@ class OrderTypeList extends BaseDataTable
         'order_type_enum',
         'print_layouts',
     ];
+
+    protected string $model = OrderType::class;
 
     protected function getTableActions(): array
     {

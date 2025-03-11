@@ -35,22 +35,44 @@ class WatchlistCard extends Component
     }
 
     #[Renderless]
-    public function reOrder(CartItem $cartItem, int $index): void
+    public function addToCart(): void
     {
-        if (! $this->cartForm->isUserOwned()) {
+        $this->dispatch(
+            'cart:add',
+            products: resolve_static(Cart::class, 'query')
+                ->whereKey($this->cartForm->id)
+                ->first()
+                ->cartItems()
+                ->ordered()
+                ->whereHas('product', function (Builder $query): void {
+                    $query->when(auth()->user()?->getMorphClass() !== 'user', fn () => $query->webshop());
+                })
+                ->with([
+                    'product' => fn (BelongsTo $query) => $query
+                        ->when(auth()->user()?->getMorphClass() !== 'user', fn () => $query->webshop()),
+                ])
+                ->get(['product_id', 'amount', 'order_column'])
+                ->map(fn (CartItem $cartItem) => ['id' => $cartItem->product_id, 'amount' => $cartItem->amount])
+                ->toArray()
+        )
+            ->to(auth()->user()?->getMorphClass() === 'user' ? 'cart.cart' : 'portal.shop.cart');
+    }
+
+    public function delete(): void
+    {
+        $this->skipRender();
+
+        try {
+            $this->cartForm->delete();
+        } catch (ValidationException $e) {
+            exception_to_notifications($e, $this);
+
             return;
         }
 
-        try {
-            UpdateCartItem::make([
-                'id' => $cartItem->id,
-                'order_column' => $index + 1,
-            ])
-                ->validate()
-                ->execute();
-        } catch (ValidationException $e) {
-            exception_to_notifications($e, $this);
-        }
+        $this->js(<<<'JS'
+            $wire.$parent.$refresh();
+        JS);
     }
 
     public function removeProduct(int $productId): void
@@ -82,54 +104,32 @@ class WatchlistCard extends Component
         JS);
     }
 
-    public function delete(): void
+    #[Renderless]
+    public function reOrder(CartItem $cartItem, int $index): void
     {
-        $this->skipRender();
-
-        try {
-            $this->cartForm->delete();
-        } catch (ValidationException $e) {
-            exception_to_notifications($e, $this);
-
+        if (! $this->cartForm->isUserOwned()) {
             return;
         }
 
-        $this->js(<<<'JS'
-            $wire.$parent.$refresh();
-        JS);
+        try {
+            UpdateCartItem::make([
+                'id' => $cartItem->id,
+                'order_column' => $index + 1,
+            ])
+                ->validate()
+                ->execute();
+        } catch (ValidationException $e) {
+            exception_to_notifications($e, $this);
+        }
     }
 
-    #[Renderless]
-    public function addToCart(): void
-    {
-        $this->dispatch(
-            'cart:add',
-            products: resolve_static(Cart::class, 'query')
-                ->whereKey($this->cartForm->id)
-                ->first()
-                ->cartItems()
-                ->ordered()
-                ->whereHas('product', function (Builder $query) {
-                    $query->when(auth()->user()?->getMorphClass() !== 'user', fn () => $query->webshop());
-                })
-                ->with([
-                    'product' => fn (BelongsTo $query) => $query
-                        ->when(auth()->user()?->getMorphClass() !== 'user', fn () => $query->webshop()),
-                ])
-                ->get(['product_id', 'amount', 'order_column'])
-                ->map(fn (CartItem $cartItem) => ['id' => $cartItem->product_id, 'amount' => $cartItem->amount])
-                ->toArray()
-        )
-            ->to(auth()->user()?->getMorphClass() === 'user' ? 'cart.cart' : 'portal.shop.cart');
-    }
-
-    public function updatedCartFormIsPublic(): void
+    public function updatedCartFormIsPortalPublic(): void
     {
         $this->skipRender();
         $this->cartForm->save();
     }
 
-    public function updatedCartFormIsPortalPublic(): void
+    public function updatedCartFormIsPublic(): void
     {
         $this->skipRender();
         $this->cartForm->save();

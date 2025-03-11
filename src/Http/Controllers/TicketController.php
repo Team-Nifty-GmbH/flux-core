@@ -30,17 +30,6 @@ class TicketController extends BaseController
         );
     }
 
-    public function update(Request $request, TicketService $ticketService): JsonResponse
-    {
-        $ticket = $ticketService->update($request->all());
-
-        return ResponseHelper::createResponseFromBase(
-            statusCode: 200,
-            data: $ticket,
-            statusMessage: 'ticket updated'
-        );
-    }
-
     public function delete(string $id, TicketService $ticketService): JsonResponse
     {
         $response = $ticketService->delete($id);
@@ -53,5 +42,16 @@ class TicketController extends BaseController
         $response = $ticketService->toggleUserAssignment($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
+    }
+
+    public function update(Request $request, TicketService $ticketService): JsonResponse
+    {
+        $ticket = $ticketService->update($request->all());
+
+        return ResponseHelper::createResponseFromBase(
+            statusCode: 200,
+            data: $ticket,
+            statusMessage: 'ticket updated'
+        );
     }
 }

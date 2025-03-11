@@ -8,14 +8,14 @@ use FluxErp\Rulesets\ProductCrossSelling\CreateProductCrossSellingRuleset;
 
 class CreateProductCrossSelling extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateProductCrossSellingRuleset::class;
-    }
-
     public static function models(): array
     {
         return [ProductCrossSelling::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateProductCrossSellingRuleset::class;
     }
 
     public function performAction(): ProductCrossSelling

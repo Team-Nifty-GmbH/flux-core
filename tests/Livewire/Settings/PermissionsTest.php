@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class PermissionsTest extends TestCase
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(Permissions::class)
             ->assertStatus(200);

@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('purchase_invoices', function (Blueprint $table) {
+        Schema::table('purchase_invoices', function (Blueprint $table): void {
             $table->foreignId('lay_out_user_id')
                 ->nullable()
                 ->after('currency_id')
@@ -18,7 +18,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('purchase_invoices', function (Blueprint $table) {
+        Schema::table('purchase_invoices', function (Blueprint $table): void {
             $table->dropForeign(['lay_out_user_id']);
             $table->dropColumn('lay_out_user_id');
         });

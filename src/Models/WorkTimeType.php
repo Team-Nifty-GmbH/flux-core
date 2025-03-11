@@ -20,13 +20,13 @@ class WorkTimeType extends FluxModel
         ];
     }
 
-    protected function broadcastToEveryone(): bool
-    {
-        return true;
-    }
-
     public function workTimes(): HasMany
     {
         return $this->hasMany(WorkTime::class);
+    }
+
+    protected function broadcastToEveryone(): bool
+    {
+        return true;
     }
 }

@@ -69,17 +69,6 @@ class Login extends Component
         return false;
     }
 
-    public function sendMagicLink(): void
-    {
-        $user = Auth::guard($this->guard)
-            ->getProvider()
-            ->retrieveByCredentials(['email' => $this->email]);
-
-        if ($user && method_exists($user, 'sendLoginLink')) {
-            $user->sendLoginLink();
-        }
-    }
-
     public function resetPassword(): void
     {
         $this->validateOnly('email');
@@ -89,13 +78,15 @@ class Login extends Component
         $this->notification()->success(__('Password reset link sent'))->send();
     }
 
-    protected function tryLogin(): bool
+    public function sendMagicLink(): void
     {
-        return Auth::guard($this->guard)->attempt([
-            'email' => $this->email,
-            'password' => $this->password,
-            'is_active' => true,
-        ]);
+        $user = Auth::guard($this->guard)
+            ->getProvider()
+            ->retrieveByCredentials(['email' => $this->email]);
+
+        if ($user && method_exists($user, 'sendLoginLink')) {
+            $user->sendLoginLink();
+        }
     }
 
     protected function getPasswordBroker(): PasswordBroker
@@ -109,5 +100,14 @@ class Login extends Component
             ->first();
 
         return Password::broker($broker);
+    }
+
+    protected function tryLogin(): bool
+    {
+        return Auth::guard($this->guard)->attempt([
+            'email' => $this->email,
+            'password' => $this->password,
+            'is_active' => true,
+        ]);
     }
 }

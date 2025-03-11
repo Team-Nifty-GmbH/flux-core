@@ -8,14 +8,14 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('calendars', function (Blueprint $table) {
+        Schema::table('calendars', function (Blueprint $table): void {
             $table->boolean('has_repeatable_events')->default(true)->after('has_notifications');
         });
     }
 
     public function down(): void
     {
-        Schema::table('calendars', function (Blueprint $table) {
+        Schema::table('calendars', function (Blueprint $table): void {
             $table->dropColumn('has_repeatable_events');
         });
     }

@@ -12,14 +12,14 @@ abstract class ScalarHandler implements HandlerInterface
      */
     protected string $type;
 
-    public function getDataType(): string
-    {
-        return $this->type;
-    }
-
     public function canHandleValue(mixed $value): bool
     {
         return gettype($value) == $this->type;
+    }
+
+    public function getDataType(): string
+    {
+        return $this->type;
     }
 
     public function serializeValue(mixed $value): string

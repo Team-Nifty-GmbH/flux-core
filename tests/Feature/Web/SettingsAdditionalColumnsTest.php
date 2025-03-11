@@ -6,7 +6,14 @@ use FluxErp\Models\Permission;
 
 class SettingsAdditionalColumnsTest extends BaseSetup
 {
-    public function test_settings_additional_columns_page()
+    public function test_settings_additional_columns_no_user(): void
+    {
+        $this->get('/settings/additional-columns')
+            ->assertStatus(302)
+            ->assertRedirect(route('login'));
+    }
+
+    public function test_settings_additional_columns_page(): void
     {
         $this->user->givePermissionTo(
             Permission::findOrCreate('settings.additional-columns.get', 'web')
@@ -16,14 +23,7 @@ class SettingsAdditionalColumnsTest extends BaseSetup
             ->assertStatus(200);
     }
 
-    public function test_settings_additional_columns_no_user()
-    {
-        $this->get('/settings/additional-columns')
-            ->assertStatus(302)
-            ->assertRedirect(route('login'));
-    }
-
-    public function test_settings_additional_columns_without_permission()
+    public function test_settings_additional_columns_without_permission(): void
     {
         Permission::findOrCreate('settings.additional-columns.get', 'web');
 

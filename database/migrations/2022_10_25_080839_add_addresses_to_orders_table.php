@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('orders', function (Blueprint $table) {
+        Schema::table('orders', function (Blueprint $table): void {
             $table->foreignId('contact_id')
                 ->nullable()
                 ->after('client_id')
@@ -24,7 +24,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('orders', function (Blueprint $table) {
+        Schema::table('orders', function (Blueprint $table): void {
             $table->dropForeign(['contact_id']);
             $table->unsignedBigInteger('language_id')->nullable(false)->change();
             $table->dropColumn(

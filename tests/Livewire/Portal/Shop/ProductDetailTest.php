@@ -19,7 +19,7 @@ class ProductDetailTest extends TestCase
         ]);
     }
 
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         $product = Product::factory()->create();
 
@@ -37,7 +37,7 @@ class ProductDetailTest extends TestCase
             ]);
     }
 
-    public function test_shows_bundle_products()
+    public function test_shows_bundle_products(): void
     {
         $product = Product::factory()
             ->has(

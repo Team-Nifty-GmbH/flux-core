@@ -24,9 +24,9 @@ class Scheduling extends ScheduleList
 
     public ?string $includeBefore = 'flux::livewire.settings.scheduling';
 
-    public ScheduleForm $schedule;
-
     public array $repeatable;
+
+    public ScheduleForm $schedule;
 
     public function mount(): void
     {
@@ -59,27 +59,6 @@ class Scheduling extends ScheduleList
         ];
     }
 
-    protected function getViewData(): array
-    {
-        return array_merge(
-            parent::getViewData(),
-            [
-                'basic' => array_map(
-                    fn ($item) => ['value' => $item, 'label' => __(Str::headline($item))],
-                    FrequenciesEnum::getBasicFrequencies()
-                ),
-                'dayConstraints' => array_map(
-                    fn ($item) => ['value' => $item, 'label' => __(Str::headline($item))],
-                    FrequenciesEnum::getDayConstraints()
-                ),
-                'timeConstraints' => array_map(
-                    fn ($item) => ['value' => $item, 'label' => __(Str::headline($item))],
-                    FrequenciesEnum::getTimeConstraints()
-                ),
-            ]
-        );
-    }
-
     protected function getRowActions(): array
     {
         return [
@@ -99,6 +78,25 @@ class Scheduling extends ScheduleList
                     'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Schedule')]),
                 ]),
         ];
+    }
+
+    #[Renderless]
+    public function delete(Schedule $schedule): bool
+    {
+        $this->schedule->reset();
+        $this->schedule->fill($schedule);
+
+        try {
+            $this->schedule->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
     }
 
     #[Renderless]
@@ -129,28 +127,30 @@ class Scheduling extends ScheduleList
     }
 
     #[Renderless]
-    public function delete(Schedule $schedule): bool
-    {
-        $this->schedule->reset();
-        $this->schedule->fill($schedule);
-
-        try {
-            $this->schedule->delete();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
-    }
-
-    #[Renderless]
     public function updatedScheduleName(): void
     {
         $this->schedule->description = $this->repeatable[$this->schedule->name]['description'];
         $this->schedule->parameters = $this->repeatable[$this->schedule->name]['parameters'];
+    }
+
+    protected function getViewData(): array
+    {
+        return array_merge(
+            parent::getViewData(),
+            [
+                'basic' => array_map(
+                    fn ($item) => ['value' => $item, 'label' => __(Str::headline($item))],
+                    FrequenciesEnum::getBasicFrequencies()
+                ),
+                'dayConstraints' => array_map(
+                    fn ($item) => ['value' => $item, 'label' => __(Str::headline($item))],
+                    FrequenciesEnum::getDayConstraints()
+                ),
+                'timeConstraints' => array_map(
+                    fn ($item) => ['value' => $item, 'label' => __(Str::headline($item))],
+                    FrequenciesEnum::getTimeConstraints()
+                ),
+            ]
+        );
     }
 }

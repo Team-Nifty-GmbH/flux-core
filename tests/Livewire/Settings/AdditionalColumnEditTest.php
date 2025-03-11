@@ -10,13 +10,7 @@ use Livewire\Livewire;
 
 class AdditionalColumnEditTest extends TestCase
 {
-    public function test_renders_successfully()
-    {
-        Livewire::test(AdditionalColumnEdit::class)
-            ->assertStatus(200);
-    }
-
-    public function test_create_additional_column()
+    public function test_create_additional_column(): void
     {
         Livewire::test(AdditionalColumnEdit::class)
             ->call('show')
@@ -33,7 +27,7 @@ class AdditionalColumnEditTest extends TestCase
             ->assertToastNotification(type: 'success');
     }
 
-    public function test_edit_additional_column()
+    public function test_edit_additional_column(): void
     {
         $additionalColumn = AdditionalColumn::factory()->create([
             'model_type' => morph_alias(TicketType::class),
@@ -54,5 +48,11 @@ class AdditionalColumnEditTest extends TestCase
             ->assertHasNoErrors()
             ->assertDispatched('closeModal', $component->get('additionalColumn')->toArray())
             ->assertToastNotification(type: 'success');
+    }
+
+    public function test_renders_successfully(): void
+    {
+        Livewire::test(AdditionalColumnEdit::class)
+            ->assertStatus(200);
     }
 }

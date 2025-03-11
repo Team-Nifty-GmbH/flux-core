@@ -16,6 +16,23 @@ class ContactService
         return CreateContact::make($data)->validate()->execute();
     }
 
+    public function delete(string $id): array
+    {
+        try {
+            DeleteContact::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
+            return ResponseHelper::createArrayResponse(
+                statusCode: 404,
+                data: $e->errors()
+            );
+        }
+
+        return ResponseHelper::createArrayResponse(
+            statusCode: 204,
+            statusMessage: 'contact deleted'
+        );
+    }
+
     public function update(array $data): array
     {
         if (! array_is_list($data)) {
@@ -50,23 +67,6 @@ class ContactService
             data: $responses,
             statusMessage: $statusCode === 422 ? null : 'contact(s) updated',
             bulk: true
-        );
-    }
-
-    public function delete(string $id): array
-    {
-        try {
-            DeleteContact::make(['id' => $id])->validate()->execute();
-        } catch (ValidationException $e) {
-            return ResponseHelper::createArrayResponse(
-                statusCode: 404,
-                data: $e->errors()
-            );
-        }
-
-        return ResponseHelper::createArrayResponse(
-            statusCode: 204,
-            statusMessage: 'contact deleted'
         );
     }
 }

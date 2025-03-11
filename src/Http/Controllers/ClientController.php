@@ -27,16 +27,16 @@ class ClientController extends BaseController
         );
     }
 
-    public function update(Request $request, ClientService $clientService): JsonResponse
+    public function delete(string $id, ClientService $clientService): JsonResponse
     {
-        $response = $clientService->update($request->all());
+        $response = $clientService->delete($id);
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
-    public function delete(string $id, ClientService $clientService): JsonResponse
+    public function update(Request $request, ClientService $clientService): JsonResponse
     {
-        $response = $clientService->delete($id);
+        $response = $clientService->update($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }

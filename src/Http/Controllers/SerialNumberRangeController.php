@@ -27,16 +27,16 @@ class SerialNumberRangeController extends BaseController
         );
     }
 
-    public function update(Request $request, SerialNumberRangeService $serialNumberRangeService): JsonResponse
+    public function delete(string $id, SerialNumberRangeService $serialNumberRangeService): JsonResponse
     {
-        $response = $serialNumberRangeService->update($request->all());
+        $response = $serialNumberRangeService->delete($id);
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
-    public function delete(string $id, SerialNumberRangeService $serialNumberRangeService): JsonResponse
+    public function update(Request $request, SerialNumberRangeService $serialNumberRangeService): JsonResponse
     {
-        $response = $serialNumberRangeService->delete($id);
+        $response = $serialNumberRangeService->update($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }

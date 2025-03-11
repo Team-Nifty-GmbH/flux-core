@@ -13,14 +13,14 @@ use Illuminate\Support\Str;
 
 class CreateMailMessage extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateCommunicationRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Communication::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateCommunicationRuleset::class;
     }
 
     public function performAction(): Communication

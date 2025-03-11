@@ -9,14 +9,14 @@ use Illuminate\Support\Arr;
 
 class CreateSerialNumber extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateSerialNumberRuleset::class;
-    }
-
     public static function models(): array
     {
         return [SerialNumber::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateSerialNumberRuleset::class;
     }
 
     public function performAction(): SerialNumber

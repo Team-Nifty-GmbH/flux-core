@@ -16,9 +16,9 @@ class OrderList extends BaseOrderList
         'payment_state',
     ];
 
-    public int $perPage = 5;
-
     public bool $hasNoRedirect = true;
+
+    public int $perPage = 5;
 
     protected function getTableActions(): array
     {

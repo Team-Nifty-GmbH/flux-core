@@ -10,7 +10,14 @@ use FluxErp\Models\Warehouse;
 
 class ServiceTest extends PortalSetup
 {
-    public function test_portal_service_page()
+    public function test_portal_service_no_user(): void
+    {
+        $this->get(route('portal.service', ['serialNumberId' => null]))
+            ->assertStatus(302)
+            ->assertRedirect($this->portalDomain . '/login');
+    }
+
+    public function test_portal_service_page(): void
     {
         $product = Product::factory()
             ->hasAttached(factory: $this->dbClient, relationship: 'clients')
@@ -37,7 +44,7 @@ class ServiceTest extends PortalSetup
             ->assertStatus(200);
     }
 
-    public function test_portal_service_page_without_serial_number()
+    public function test_portal_service_page_without_serial_number(): void
     {
         $this->user->givePermissionTo(
             Permission::findOrCreate('service.{serialnumberid?}.get', 'address')
@@ -47,14 +54,7 @@ class ServiceTest extends PortalSetup
             ->assertStatus(200);
     }
 
-    public function test_portal_service_no_user()
-    {
-        $this->get(route('portal.service', ['serialNumberId' => null]))
-            ->assertStatus(302)
-            ->assertRedirect($this->portalDomain . '/login');
-    }
-
-    public function test_portal_service_without_permission()
+    public function test_portal_service_without_permission(): void
     {
         Permission::findOrCreate('service.{serialnumberid?}.get', 'address');
 

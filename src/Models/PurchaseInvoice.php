@@ -22,11 +22,11 @@ class PurchaseInvoice extends FluxModel implements HasMedia
 
     protected static function booted(): void
     {
-        static::creating(function (PurchaseInvoice $model) {
+        static::creating(function (PurchaseInvoice $model): void {
             $model->invoice_date = $model->invoice_date ?: now()->toDateString();
         });
 
-        static::saving(function (PurchaseInvoice $model) {
+        static::saving(function (PurchaseInvoice $model): void {
             if ($model->isDirty('iban')) {
                 $model->iban = str_replace(' ', '', strtoupper($model->iban));
             }

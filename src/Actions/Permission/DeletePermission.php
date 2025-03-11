@@ -9,14 +9,14 @@ use Illuminate\Validation\ValidationException;
 
 class DeletePermission extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeletePermissionRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Permission::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeletePermissionRuleset::class;
     }
 
     public function performAction(): ?bool

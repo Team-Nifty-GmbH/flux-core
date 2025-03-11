@@ -8,9 +8,9 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class DeleteCommissionRateRuleset extends FluxRuleset
 {
-    protected static ?string $model = CommissionRate::class;
-
     protected static bool $addAdditionalColumnRules = false;
+
+    protected static ?string $model = CommissionRate::class;
 
     public function rules(): array
     {

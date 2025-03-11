@@ -10,7 +10,7 @@ return new class() extends Migration
     public function up(): void
     {
         // Address Types table
-        Schema::table('address_types', function (Blueprint $table) {
+        Schema::table('address_types', function (Blueprint $table): void {
             $table->string('name_migration')->after('name');
         });
         DB::table('address_types')->update([
@@ -41,13 +41,13 @@ return new class() extends Migration
                 )
             "),
         ]);
-        Schema::table('address_types', function (Blueprint $table) {
+        Schema::table('address_types', function (Blueprint $table): void {
             $table->dropColumn('name');
             $table->renameColumn('name_migration', 'name');
         });
 
         // Categories table
-        Schema::table('categories', function (Blueprint $table) {
+        Schema::table('categories', function (Blueprint $table): void {
             $table->string('name_migration')->after('name');
         });
         DB::table('categories')->update([
@@ -78,13 +78,13 @@ return new class() extends Migration
                 )
             "),
         ]);
-        Schema::table('categories', function (Blueprint $table) {
+        Schema::table('categories', function (Blueprint $table): void {
             $table->dropColumn('name');
             $table->renameColumn('name_migration', 'name');
         });
 
         // Countries table
-        Schema::table('countries', function (Blueprint $table) {
+        Schema::table('countries', function (Blueprint $table): void {
             $table->string('name_migration')->after('name');
         });
         DB::table('countries')->update([
@@ -115,13 +115,13 @@ return new class() extends Migration
                 )
             "),
         ]);
-        Schema::table('countries', function (Blueprint $table) {
+        Schema::table('countries', function (Blueprint $table): void {
             $table->dropColumn('name');
             $table->renameColumn('name_migration', 'name');
         });
 
         // Country Regions table
-        Schema::table('country_regions', function (Blueprint $table) {
+        Schema::table('country_regions', function (Blueprint $table): void {
             $table->string('name_migration')->after('name');
         });
         DB::table('country_regions')->update([
@@ -152,13 +152,13 @@ return new class() extends Migration
                 )
             "),
         ]);
-        Schema::table('country_regions', function (Blueprint $table) {
+        Schema::table('country_regions', function (Blueprint $table): void {
             $table->dropColumn('name');
             $table->renameColumn('name_migration', 'name');
         });
 
         // Languages table
-        Schema::table('languages', function (Blueprint $table) {
+        Schema::table('languages', function (Blueprint $table): void {
             $table->string('name_migration')->after('name');
         });
         DB::table('languages')->update([
@@ -189,13 +189,13 @@ return new class() extends Migration
                 )
             "),
         ]);
-        Schema::table('languages', function (Blueprint $table) {
+        Schema::table('languages', function (Blueprint $table): void {
             $table->dropColumn('name');
             $table->renameColumn('name_migration', 'name');
         });
 
         // Order Types table
-        Schema::table('order_types', function (Blueprint $table) {
+        Schema::table('order_types', function (Blueprint $table): void {
             $table->string('name_migration')->after('name');
             $table->string('description_migration')->nullable()->after('description');
         });
@@ -246,7 +246,7 @@ return new class() extends Migration
                 )
             "),
         ]);
-        Schema::table('order_types', function (Blueprint $table) {
+        Schema::table('order_types', function (Blueprint $table): void {
             $table->dropColumn('name');
             $table->dropColumn('description');
             $table->renameColumn('name_migration', 'name');
@@ -254,7 +254,7 @@ return new class() extends Migration
         });
 
         // Orders table
-        Schema::table('orders', function (Blueprint $table) {
+        Schema::table('orders', function (Blueprint $table): void {
             $table->longText('header_migration')->nullable()->after('header');
             $table->longText('footer_migration')->nullable()->after('footer');
             $table->longText('logistic_note_migration')->nullable()->after('logistic_note');
@@ -318,7 +318,7 @@ return new class() extends Migration
                 )
             "),
         ]);
-        Schema::table('orders', function (Blueprint $table) {
+        Schema::table('orders', function (Blueprint $table): void {
             $table->dropColumn('header');
             $table->dropColumn('footer');
             $table->dropColumn('logistic_note');
@@ -328,7 +328,7 @@ return new class() extends Migration
         });
 
         // Payment Types table
-        Schema::table('payment_types', function (Blueprint $table) {
+        Schema::table('payment_types', function (Blueprint $table): void {
             $table->string('name_migration')->after('name');
             $table->string('description_migration')->nullable()->after('description');
         });
@@ -379,7 +379,7 @@ return new class() extends Migration
                 )
             "),
         ]);
-        Schema::table('payment_types', function (Blueprint $table) {
+        Schema::table('payment_types', function (Blueprint $table): void {
             $table->dropColumn('name');
             $table->dropColumn('description');
             $table->renameColumn('name_migration', 'name');
@@ -387,7 +387,7 @@ return new class() extends Migration
         });
 
         // Product Option Groups table
-        Schema::table('product_option_groups', function (Blueprint $table) {
+        Schema::table('product_option_groups', function (Blueprint $table): void {
             $table->string('name_migration')->after('name');
         });
         DB::table('product_option_groups')->update([
@@ -418,13 +418,13 @@ return new class() extends Migration
                 )
             "),
         ]);
-        Schema::table('product_option_groups', function (Blueprint $table) {
+        Schema::table('product_option_groups', function (Blueprint $table): void {
             $table->dropColumn('name');
             $table->renameColumn('name_migration', 'name');
         });
 
         // Product Options table
-        Schema::table('product_options', function (Blueprint $table) {
+        Schema::table('product_options', function (Blueprint $table): void {
             $table->string('name_migration')->after('name');
         });
         DB::table('product_options')->update([
@@ -455,13 +455,13 @@ return new class() extends Migration
                 )
             "),
         ]);
-        Schema::table('product_options', function (Blueprint $table) {
+        Schema::table('product_options', function (Blueprint $table): void {
             $table->dropColumn('name');
             $table->renameColumn('name_migration', 'name');
         });
 
         // Product Properties table
-        Schema::table('product_properties', function (Blueprint $table) {
+        Schema::table('product_properties', function (Blueprint $table): void {
             $table->string('name_migration')->after('name');
         });
         DB::table('product_properties')->update([
@@ -492,13 +492,13 @@ return new class() extends Migration
                 )
             "),
         ]);
-        Schema::table('product_properties', function (Blueprint $table) {
+        Schema::table('product_properties', function (Blueprint $table): void {
             $table->dropColumn('name');
             $table->renameColumn('name_migration', 'name');
         });
 
         // Products table
-        Schema::table('products', function (Blueprint $table) {
+        Schema::table('products', function (Blueprint $table): void {
             $table->string('name_migration')->nullable()->after('name');
             $table->longText('description_migration')->nullable()->after('description');
         });
@@ -546,7 +546,7 @@ return new class() extends Migration
                 )
             "),
         ]);
-        Schema::table('products', function (Blueprint $table) {
+        Schema::table('products', function (Blueprint $table): void {
             $table->dropColumn('name');
             $table->dropColumn('description');
             $table->renameColumn('name_migration', 'name');
@@ -554,7 +554,7 @@ return new class() extends Migration
         });
 
         // Ticket Types table
-        Schema::table('ticket_types', function (Blueprint $table) {
+        Schema::table('ticket_types', function (Blueprint $table): void {
             $table->string('name_migration')->after('name');
         });
         DB::table('ticket_types')->update([
@@ -585,13 +585,13 @@ return new class() extends Migration
                 )
             "),
         ]);
-        Schema::table('ticket_types', function (Blueprint $table) {
+        Schema::table('ticket_types', function (Blueprint $table): void {
             $table->dropColumn('name');
             $table->renameColumn('name_migration', 'name');
         });
 
         // Work Time Types table
-        Schema::table('work_time_types', function (Blueprint $table) {
+        Schema::table('work_time_types', function (Blueprint $table): void {
             $table->string('name_migration')->after('name');
         });
         DB::table('work_time_types')->update([
@@ -622,7 +622,7 @@ return new class() extends Migration
                 )
             "),
         ]);
-        Schema::table('work_time_types', function (Blueprint $table) {
+        Schema::table('work_time_types', function (Blueprint $table): void {
             $table->dropColumn('name');
             $table->renameColumn('name_migration', 'name');
         });
@@ -634,7 +634,7 @@ return new class() extends Migration
         DB::table('work_time_types')->update([
             'name' => DB::raw("JSON_SET('{}', '$." . app()->getLocale() . "', name)"),
         ]);
-        Schema::table('work_time_types', function (Blueprint $table) {
+        Schema::table('work_time_types', function (Blueprint $table): void {
             $table->json('name')->change();
         });
 
@@ -642,7 +642,7 @@ return new class() extends Migration
         DB::table('ticket_types')->update([
             'name' => DB::raw("JSON_SET('{}', '$." . app()->getLocale() . "', name)"),
         ]);
-        Schema::table('ticket_types', function (Blueprint $table) {
+        Schema::table('ticket_types', function (Blueprint $table): void {
             $table->json('name')->change();
         });
 
@@ -651,7 +651,7 @@ return new class() extends Migration
             'name' => DB::raw("JSON_SET('{}', '$." . app()->getLocale() . "', name)"),
             'description' => DB::raw("JSON_SET('{}', '$." . app()->getLocale() . "', description)"),
         ]);
-        Schema::table('products', function (Blueprint $table) {
+        Schema::table('products', function (Blueprint $table): void {
             $table->json('name')->nullable()->change();
             $table->json('description')->nullable()->change();
         });
@@ -660,7 +660,7 @@ return new class() extends Migration
         DB::table('product_properties')->update([
             'name' => DB::raw("JSON_SET('{}', '$." . app()->getLocale() . "', name)"),
         ]);
-        Schema::table('product_properties', function (Blueprint $table) {
+        Schema::table('product_properties', function (Blueprint $table): void {
             $table->json('name')->change();
         });
 
@@ -668,7 +668,7 @@ return new class() extends Migration
         DB::table('product_options')->update([
             'name' => DB::raw("JSON_SET('{}', '$." . app()->getLocale() . "', name)"),
         ]);
-        Schema::table('product_options', function (Blueprint $table) {
+        Schema::table('product_options', function (Blueprint $table): void {
             $table->json('name')->change();
         });
 
@@ -676,7 +676,7 @@ return new class() extends Migration
         DB::table('product_option_groups')->update([
             'name' => DB::raw("JSON_SET('{}', '$." . app()->getLocale() . "', name)"),
         ]);
-        Schema::table('product_option_groups', function (Blueprint $table) {
+        Schema::table('product_option_groups', function (Blueprint $table): void {
             $table->json('name')->change();
         });
 
@@ -685,7 +685,7 @@ return new class() extends Migration
             'name' => DB::raw("JSON_SET('{}', '$." . app()->getLocale() . "', name)"),
             'description' => DB::raw("JSON_SET('{}', '$." . app()->getLocale() . "', description)"),
         ]);
-        Schema::table('payment_types', function (Blueprint $table) {
+        Schema::table('payment_types', function (Blueprint $table): void {
             $table->json('name')->change();
             $table->json('description')->nullable()->change();
         });
@@ -696,7 +696,7 @@ return new class() extends Migration
             'footer' => DB::raw("JSON_SET('{}', '$." . app()->getLocale() . "', footer)"),
             'logistic_note' => DB::raw("JSON_SET('{}', '$." . app()->getLocale() . "', logistic_note)"),
         ]);
-        Schema::table('orders', function (Blueprint $table) {
+        Schema::table('orders', function (Blueprint $table): void {
             $table->json('header')->nullable()->change();
             $table->json('footer')->nullable()->change();
             $table->json('logistic_note')->nullable()->change();
@@ -707,7 +707,7 @@ return new class() extends Migration
             'name' => DB::raw("JSON_SET('{}', '$." . app()->getLocale() . "', name)"),
             'description' => DB::raw("JSON_SET('{}', '$." . app()->getLocale() . "', description)"),
         ]);
-        Schema::table('order_types', function (Blueprint $table) {
+        Schema::table('order_types', function (Blueprint $table): void {
             $table->json('name')->change();
             $table->json('description')->nullable()->change();
         });
@@ -716,7 +716,7 @@ return new class() extends Migration
         DB::table('languages')->update([
             'name' => DB::raw("JSON_SET('{}', '$." . app()->getLocale() . "', name)"),
         ]);
-        Schema::table('languages', function (Blueprint $table) {
+        Schema::table('languages', function (Blueprint $table): void {
             $table->json('name')->change();
         });
 
@@ -724,7 +724,7 @@ return new class() extends Migration
         DB::table('countries')->update([
             'name' => DB::raw("JSON_SET('{}', '$." . app()->getLocale() . "', name)"),
         ]);
-        Schema::table('countries', function (Blueprint $table) {
+        Schema::table('countries', function (Blueprint $table): void {
             $table->json('name')->change();
         });
 
@@ -732,7 +732,7 @@ return new class() extends Migration
         DB::table('country_regions')->update([
             'name' => DB::raw("JSON_SET('{}', '$." . app()->getLocale() . "', name)"),
         ]);
-        Schema::table('country_regions', function (Blueprint $table) {
+        Schema::table('country_regions', function (Blueprint $table): void {
             $table->json('name')->change();
         });
 
@@ -740,7 +740,7 @@ return new class() extends Migration
         DB::table('categories')->update([
             'name' => DB::raw("JSON_SET('{}', '$." . app()->getLocale() . "', name)"),
         ]);
-        Schema::table('categories', function (Blueprint $table) {
+        Schema::table('categories', function (Blueprint $table): void {
             $table->json('name')->change();
         });
 
@@ -748,7 +748,7 @@ return new class() extends Migration
         DB::table('address_types')->update([
             'name' => DB::raw("JSON_SET('{}', '$." . app()->getLocale() . "', name)"),
         ]);
-        Schema::table('address_types', function (Blueprint $table) {
+        Schema::table('address_types', function (Blueprint $table): void {
             $table->json('name')->change();
         });
     }

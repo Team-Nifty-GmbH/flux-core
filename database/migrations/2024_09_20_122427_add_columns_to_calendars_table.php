@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('calendars', function (Blueprint $table) {
+        Schema::table('calendars', function (Blueprint $table): void {
             $table->foreignId('parent_id')
                 ->nullable()
                 ->after('id')
@@ -21,7 +21,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('calendars', function (Blueprint $table) {
+        Schema::table('calendars', function (Blueprint $table): void {
             $table->dropForeign(['parent_id']);
             $table->dropColumn([
                 'parent_id',

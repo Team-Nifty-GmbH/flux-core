@@ -12,9 +12,9 @@ class WorkTimeTypeForm extends FluxForm
     #[Locked]
     public ?int $id = null;
 
-    public ?string $name = null;
-
     public bool $is_billable = true;
+
+    public ?string $name = null;
 
     protected function getActions(): array
     {

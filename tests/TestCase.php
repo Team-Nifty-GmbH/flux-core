@@ -69,13 +69,6 @@ abstract class TestCase extends BaseTestCase
         ];
     }
 
-    protected function getPackageAliases($app): array
-    {
-        return [
-            'TallStackUi' => TallStackUi::class,
-        ];
-    }
-
     protected function defineEnvironment($app): void
     {
         $app['config']->set('database.default', 'mysql');
@@ -83,5 +76,12 @@ abstract class TestCase extends BaseTestCase
         $app['config']->set('flux.install_done', true);
         $app['config']->set('auth.defaults.guard', 'sanctum');
         $app['config']->set('cache.default', 'array');
+    }
+
+    protected function getPackageAliases($app): array
+    {
+        return [
+            'TallStackUi' => TallStackUi::class,
+        ];
     }
 }

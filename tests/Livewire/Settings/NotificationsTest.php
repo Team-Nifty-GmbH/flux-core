@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class NotificationsTest extends TestCase
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(Notifications::class)
             ->assertStatus(200);

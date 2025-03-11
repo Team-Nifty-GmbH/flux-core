@@ -85,7 +85,7 @@ class OrderDetailTest extends BaseSetup
             'is_locked' => true,
         ]);
 
-        Order::addGlobalScope('portal', function ($query) {
+        Order::addGlobalScope('portal', function ($query): void {
             $query->where('contact_id', auth()->user()->contact_id)
                 ->where(fn ($query) => $query->where('is_locked', true)
                     ->orWhere('is_imported', true)
@@ -93,19 +93,19 @@ class OrderDetailTest extends BaseSetup
         });
     }
 
-    public function test_renders_successfully()
-    {
-        Livewire::test(OrderDetail::class, ['id' => $this->orders[0]->id])
-            ->assertStatus(200);
-    }
-
-    public function test_dont_render_order_from_other_address()
+    public function test_dont_render_order_from_other_address(): void
     {
         Livewire::test(OrderDetail::class, ['id' => $this->orders[1]->id])
             ->assertStatus(404);
     }
 
-    public function test_select_order_position()
+    public function test_renders_successfully(): void
+    {
+        Livewire::test(OrderDetail::class, ['id' => $this->orders[0]->id])
+            ->assertStatus(200);
+    }
+
+    public function test_select_order_position(): void
     {
         Livewire::test(OrderDetail::class, ['id' => $this->orders[0]->id])
             ->call('selectPosition', $this->orders[0]->orderPositions->first()->id)

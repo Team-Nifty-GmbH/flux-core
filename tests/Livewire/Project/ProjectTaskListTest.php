@@ -24,7 +24,7 @@ class ProjectTaskListTest extends TestCase
         ]);
     }
 
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(ProjectTaskList::class, ['projectId' => $this->project->id])
             ->assertStatus(200);

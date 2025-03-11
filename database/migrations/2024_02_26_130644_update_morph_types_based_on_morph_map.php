@@ -24,6 +24,21 @@ return new class() extends Migration
         $this->migrateMorphTypes(true);
     }
 
+    private function migrate(string $table, array $columns, Collection $items): void
+    {
+        $items->each(function ($item) use ($table, $columns): void {
+            foreach ($columns as $column) {
+                if (is_null($item->{$column})) {
+                    continue;
+                }
+
+                DB::table($table)
+                    ->where($column, $item->{$column})
+                    ->update([$column => $this->morphMap[$item->{$column}] ?? $item->{$column}]);
+            }
+        });
+    }
+
     private function migrateMorphTypes(bool $rollback = false): void
     {
         if (! $rollback) {
@@ -197,20 +212,5 @@ return new class() extends Migration
             ->distinct()
             ->get(['trackable_type']);
         $this->migrate('work_times', ['trackable_type'], $workTimes);
-    }
-
-    private function migrate(string $table, array $columns, Collection $items): void
-    {
-        $items->each(function ($item) use ($table, $columns) {
-            foreach ($columns as $column) {
-                if (is_null($item->{$column})) {
-                    continue;
-                }
-
-                DB::table($table)
-                    ->where($column, $item->{$column})
-                    ->update([$column => $this->morphMap[$item->{$column}] ?? $item->{$column}]);
-            }
-        });
     }
 };

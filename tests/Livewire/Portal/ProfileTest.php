@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class ProfileTest extends BaseSetup
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(Profile::class)
             ->assertStatus(200);

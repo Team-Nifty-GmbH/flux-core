@@ -33,13 +33,13 @@ class ContactTest extends TestCase
         ]);
     }
 
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(Contact::class, ['id' => $this->contact->id])
             ->assertStatus(200);
     }
 
-    public function test_switch_tabs()
+    public function test_switch_tabs(): void
     {
         $component = Livewire::test(Contact::class, ['id' => $this->contact->id]);
 

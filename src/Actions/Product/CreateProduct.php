@@ -18,14 +18,14 @@ use Illuminate\Support\Facades\Validator;
 
 class CreateProduct extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateProductRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Product::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateProductRuleset::class;
     }
 
     public function performAction(): Product
@@ -92,14 +92,6 @@ class CreateProduct extends FluxAction
         return $product->refresh();
     }
 
-    protected function validateData(): void
-    {
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(Product::class));
-
-        $this->data = $validator->validate();
-    }
-
     public function prepareForValidation(): void
     {
         $this->data['product_type'] ??= data_get(ProductType::getDefault(), 'type');
@@ -133,5 +125,13 @@ class CreateProduct extends FluxAction
                 $this->data['vat_rate_id'] = resolve_static(VatRate::class, 'default')?->id;
             }
         }
+    }
+
+    protected function validateData(): void
+    {
+        $validator = Validator::make($this->data, $this->rules);
+        $validator->addModel(app(Product::class));
+
+        $this->data = $validator->validate();
     }
 }

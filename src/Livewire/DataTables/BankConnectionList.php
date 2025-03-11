@@ -6,8 +6,6 @@ use FluxErp\Models\BankConnection;
 
 class BankConnectionList extends BaseDataTable
 {
-    protected string $model = BankConnection::class;
-
     public array $enabledCols = [
         'is_active',
         'name',
@@ -16,4 +14,6 @@ class BankConnectionList extends BaseDataTable
         'bank_name',
         'bic',
     ];
+
+    protected string $model = BankConnection::class;
 }

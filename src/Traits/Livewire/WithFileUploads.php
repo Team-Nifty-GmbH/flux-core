@@ -14,9 +14,9 @@ trait WithFileUploads
 {
     use EnsureUsedInLivewire, WithFileUploadsBase;
 
-    public array $filesArray = [];
-
     public string $collection = '';
+
+    public array $filesArray = [];
 
     public bool $filesArrayDirty = false;
 
@@ -83,13 +83,6 @@ trait WithFileUploads
         }
     }
 
-    public function removeFileUpload(string $name, int $index): void
-    {
-        unset($this->filesArray[$index]);
-
-        $this->skipRender();
-    }
-
     public function prepareForMediaLibrary(string $name, ?int $modelId = null, ?string $modelType = null): void
     {
         $this->filesArrayDirty = true;
@@ -113,6 +106,13 @@ trait WithFileUploads
                 'media' => $file->getRealPath(),
             ];
         }
+    }
+
+    public function removeFileUpload(string $name, int $index): void
+    {
+        unset($this->filesArray[$index]);
+
+        $this->skipRender();
     }
 
     public function saveFileUploadsToMediaLibrary(string $name, ?int $modelId = null, ?string $modelType = null): array

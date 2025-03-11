@@ -15,11 +15,11 @@ class Languages extends LanguageList
 {
     use Actions;
 
-    protected ?string $includeBefore = 'flux::livewire.settings.languages';
+    public bool $editModal = false;
 
     public LanguageForm $selectedLanguage;
 
-    public bool $editModal = false;
+    protected ?string $includeBefore = 'flux::livewire.settings.languages';
 
     protected function getTableActions(): array
     {
@@ -56,20 +56,22 @@ class Languages extends LanguageList
         ];
     }
 
-    public function showEditModal(?int $languageId = null): void
+    public function delete(Language $language): bool
     {
-        if (! $languageId) {
-            $this->selectedLanguage->reset();
-        } else {
-            $this->selectedLanguage->fill(
-                resolve_static(Language::class, 'query')
-                    ->whereKey($languageId)
-                    ->first()
-            );
+        $this->selectedLanguage->reset();
+        $this->selectedLanguage->fill($language);
+
+        try {
+            $this->selectedLanguage->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
         }
 
-        $this->editModal = true;
-        $this->resetErrorBag();
+        $this->loadData();
+
+        return true;
     }
 
     public function save(): bool
@@ -87,21 +89,19 @@ class Languages extends LanguageList
         return true;
     }
 
-    public function delete(Language $language): bool
+    public function showEditModal(?int $languageId = null): void
     {
-        $this->selectedLanguage->reset();
-        $this->selectedLanguage->fill($language);
-
-        try {
-            $this->selectedLanguage->delete();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
+        if (! $languageId) {
+            $this->selectedLanguage->reset();
+        } else {
+            $this->selectedLanguage->fill(
+                resolve_static(Language::class, 'query')
+                    ->whereKey($languageId)
+                    ->first()
+            );
         }
 
-        $this->loadData();
-
-        return true;
+        $this->editModal = true;
+        $this->resetErrorBag();
     }
 }

@@ -18,6 +18,16 @@ class ExistsWithIgnore implements Rule
      */
     private mixed $ignore = null;
 
+    public function getColumn(): string
+    {
+        return $this->column;
+    }
+
+    public function getTable(): Model|string
+    {
+        return $this->table;
+    }
+
     /**
      * Ignore the given ID during the exists check.
      *
@@ -46,6 +56,11 @@ class ExistsWithIgnore implements Rule
         return $this;
     }
 
+    public function message(): string
+    {
+        return __('validation.exists');
+    }
+
     public function passes($attribute, $value): bool
     {
         $attribute = str_contains($attribute, '.') ? pathinfo($attribute, PATHINFO_EXTENSION) : $attribute;
@@ -60,11 +75,6 @@ class ExistsWithIgnore implements Rule
         return $query->exists();
     }
 
-    public function message(): string
-    {
-        return __('validation.exists');
-    }
-
     /**
      * Add the given conditions to the query.
      */
@@ -72,7 +82,7 @@ class ExistsWithIgnore implements Rule
     {
         foreach ($conditions as $key => $value) {
             if ($value instanceof Closure) {
-                $query->where(function ($query) use ($value) {
+                $query->where(function ($query) use ($value): void {
                     $value($query);
                 });
             } elseif (is_array($value)) {
@@ -99,15 +109,5 @@ class ExistsWithIgnore implements Rule
         } else {
             $query->where($key, $extraValue);
         }
-    }
-
-    public function getTable(): Model|string
-    {
-        return $this->table;
-    }
-
-    public function getColumn(): string
-    {
-        return $this->column;
     }
 }

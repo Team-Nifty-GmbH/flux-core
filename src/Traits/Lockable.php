@@ -12,11 +12,11 @@ trait Lockable
 {
     protected static function bootLockable(): void
     {
-        static::addGlobalScope(function ($builder) {
+        static::addGlobalScope(function ($builder): void {
             $builder->with('lock');
         });
 
-        static::saving(function ($model) {
+        static::saving(function ($model): void {
             if ($model->is_locked && Auth::user()->isNot($model?->lock->user)) {
                 throw new HttpResponseException(
                     ResponseHelper::createResponseFromBase(
@@ -27,7 +27,7 @@ trait Lockable
             }
         });
 
-        static::deleting(function ($model) {
+        static::deleting(function ($model): void {
             if ($model->is_locked && Auth::user()->isNot($model?->lock->user)) {
                 throw new HttpResponseException(
                     ResponseHelper::createResponseFromBase(
@@ -37,12 +37,6 @@ trait Lockable
                 );
             }
         });
-    }
-
-    public function initializeLockable(): void
-    {
-        // TODO: Currently disabled as the locks dont have any functionality.
-        // $this->setAppends(array_merge($this->appends ?? [], ['is_locked']));
     }
 
     public function getIsLockedAttribute(): bool
@@ -50,6 +44,12 @@ trait Lockable
         $lock = $this->lock;
 
         return $lock !== null && Auth::user() && Auth::user()->isNot($lock?->user);
+    }
+
+    public function initializeLockable(): void
+    {
+        // TODO: Currently disabled as the locks dont have any functionality.
+        // $this->setAppends(array_merge($this->appends ?? [], ['is_locked']));
     }
 
     public function lock(): MorphOne

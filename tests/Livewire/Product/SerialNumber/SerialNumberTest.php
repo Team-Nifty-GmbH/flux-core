@@ -36,7 +36,7 @@ class SerialNumberTest extends TestCase
         ]);
     }
 
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(SerialNumberView::class, ['id' => $this->serialNumber->id])
             ->assertStatus(200);

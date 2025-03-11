@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class AllDiscountsTest extends BaseSetup
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(AllDiscounts::class)
             ->assertStatus(200);

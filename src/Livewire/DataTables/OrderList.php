@@ -10,10 +10,6 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class OrderList extends BaseDataTable
 {
-    protected string $model = Order::class;
-
-    public bool $isSelectable = true;
-
     public array $enabledCols = [
         'order_type.name',
         'order_date',
@@ -27,7 +23,11 @@ class OrderList extends BaseDataTable
         'commission',
     ];
 
+    public bool $isSelectable = true;
+
     public bool $showModal = false;
+
+    protected string $model = Order::class;
 
     protected function getSelectedActions(): array
     {
@@ -42,24 +42,6 @@ class OrderList extends BaseDataTable
                     'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Orders')]),
                 ]),
         ];
-    }
-
-    public function getFormatters(): array
-    {
-        $formatters = parent::getFormatters();
-
-        array_walk($formatters, function (&$formatter) {
-            if ($formatter === 'money') {
-                $formatter = ['coloredMoney', ['property' => 'currency.iso']];
-            }
-        });
-
-        return $formatters;
-    }
-
-    protected function getReturnKeys(): array
-    {
-        return array_merge(parent::getReturnKeys(), ['currency.iso']);
     }
 
     public function delete(): void
@@ -91,5 +73,23 @@ class OrderList extends BaseDataTable
         }
 
         $this->reset('selected');
+    }
+
+    public function getFormatters(): array
+    {
+        $formatters = parent::getFormatters();
+
+        array_walk($formatters, function (&$formatter): void {
+            if ($formatter === 'money') {
+                $formatter = ['coloredMoney', ['property' => 'currency.iso']];
+            }
+        });
+
+        return $formatters;
+    }
+
+    protected function getReturnKeys(): array
+    {
+        return array_merge(parent::getReturnKeys(), ['currency.iso']);
     }
 }

@@ -7,17 +7,6 @@ use Illuminate\Support\Collection as SupportCollection;
 
 class CalendarCollection extends Collection
 {
-    public function toFlatTree(): SupportCollection
-    {
-        $tree = [];
-
-        foreach (collect($this->items)->sortBy('parent_id') as $item) {
-            $tree[$item->parent_id ?? $item->id][] = $item;
-        }
-
-        return collect($tree)->flatten(1);
-    }
-
     public function toCalendarObjects(): SupportCollection
     {
         return $this->map(function ($calendar) {
@@ -34,5 +23,16 @@ class CalendarCollection extends Collection
 
             return $transformed;
         });
+    }
+
+    public function toFlatTree(): SupportCollection
+    {
+        $tree = [];
+
+        foreach (collect($this->items)->sortBy('parent_id') as $item) {
+            $tree[$item->parent_id ?? $item->id][] = $item;
+        }
+
+        return collect($tree)->flatten(1);
     }
 }

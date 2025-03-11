@@ -17,7 +17,9 @@ class TicketList extends BaseDataTable
 {
     use WithFileUploads;
 
-    protected ?string $includeBefore = 'flux::livewire.ticket.tickets';
+    public array $additionalColumns;
+
+    public $attachments;
 
     public array $enabledCols = [
         'ticket_number',
@@ -29,29 +31,27 @@ class TicketList extends BaseDataTable
         'created_at',
     ];
 
-    protected string $model = Ticket::class;
-
-    public array $ticket;
+    #[Locked]
+    public ?int $modelId = null;
 
     #[Locked]
     public ?string $modelType = null;
 
-    #[Locked]
-    public ?int $modelId = null;
+    public array $selectedAdditionalColumns = [];
+
+    public bool $showTicketModal = false;
+
+    public array $ticket;
 
     public ?int $ticketTypeId = null;
 
-    public array $selectedAdditionalColumns = [];
-
     public array $ticketTypes;
 
-    public array $additionalColumns;
+    protected ?string $includeBefore = 'flux::livewire.ticket.tickets';
 
-    public $attachments;
+    protected string $model = Ticket::class;
 
     private ?int $oldTicketTypeId = null;
-
-    public bool $showTicketModal = false;
 
     public function mount(): void
     {
@@ -68,7 +68,7 @@ class TicketList extends BaseDataTable
             ->when(
                 $modelType,
                 fn (Builder $query) => $query->where(
-                    function (Builder $query) use ($modelType) {
+                    function (Builder $query) use ($modelType): void {
                         $query->where('model_type', $modelType)
                             ->orWhereNull('model_type');
                     }),
@@ -98,44 +98,6 @@ class TicketList extends BaseDataTable
                     'x-on:click' => '$wire.show()',
                 ]),
         ];
-    }
-
-    protected function getBuilder(Builder $builder): Builder
-    {
-        return $builder->with([
-            'ticketType:id,name',
-            'authenticatable',
-            'model',
-        ]);
-    }
-
-    protected function itemToArray($item): array
-    {
-        $returnArray = parent::itemToArray($item);
-
-        /** @var Ticket $item */
-        if ($related = $item->morphTo('model')->getResults()) {
-            $returnArray['related'] = method_exists($related, 'getLabel') ? $related->getLabel() : null;
-        }
-
-        $returnArray['user'] = $item->authenticatable?->getLabel();
-
-        return $returnArray;
-    }
-
-    public function show(): void
-    {
-        $this->ticket = [
-            'title' => null,
-            'description' => null,
-        ];
-
-        $this->ticketTypeId = null;
-        $this->selectedAdditionalColumns = [];
-        $this->filesArray = [];
-        $this->attachments = [];
-
-        $this->showTicketModal = true;
     }
 
     public function save(): void
@@ -175,6 +137,21 @@ class TicketList extends BaseDataTable
         $this->loadData();
     }
 
+    public function show(): void
+    {
+        $this->ticket = [
+            'title' => null,
+            'description' => null,
+        ];
+
+        $this->ticketTypeId = null;
+        $this->selectedAdditionalColumns = [];
+        $this->filesArray = [];
+        $this->attachments = [];
+
+        $this->showTicketModal = true;
+    }
+
     public function updatedAttachments(): void
     {
         $this->prepareForMediaLibrary('attachments');
@@ -197,5 +174,28 @@ class TicketList extends BaseDataTable
 
         $this->selectedAdditionalColumns = $this->ticketTypeId ?
             $ticketTypeAdditionalColumns[$this->ticketTypeId] ?? [] : [];
+    }
+
+    protected function getBuilder(Builder $builder): Builder
+    {
+        return $builder->with([
+            'ticketType:id,name',
+            'authenticatable',
+            'model',
+        ]);
+    }
+
+    protected function itemToArray($item): array
+    {
+        $returnArray = parent::itemToArray($item);
+
+        /** @var Ticket $item */
+        if ($related = $item->morphTo('model')->getResults()) {
+            $returnArray['related'] = method_exists($related, 'getLabel') ? $related->getLabel() : null;
+        }
+
+        $returnArray['user'] = $item->authenticatable?->getLabel();
+
+        return $returnArray;
     }
 }

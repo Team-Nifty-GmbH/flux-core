@@ -22,21 +22,13 @@ class WorkTime extends Component
 {
     use Actions;
 
-    public WorkTimeForm $workTime;
+    public array $activeWorkTimes = [];
 
     public WorkTimeForm $dailyWorkTime;
 
     public WorkTimeForm $dailyWorkTimePause;
 
-    public array $activeWorkTimes = [];
-
-    protected function getListeners(): array
-    {
-        return [
-            'echo-private:' . resolve_static(WorkTimeType::class, 'getBroadcastChannel')
-            . ',.WorkTimeTypeCreated' => '$refresh',
-        ];
-    }
+    public WorkTimeForm $workTime;
 
     public function mount(): void
     {
@@ -85,17 +77,21 @@ class WorkTime extends Component
     }
 
     #[Renderless]
-    public function start(?array $data = null): void
+    public function continue(WorkTimeModel $workTime): bool
     {
-        if ($trackableType = data_get($data, 'trackable_type')) {
-            $data['trackable_type'] = morph_alias(morphed_model($trackableType) ?? $trackableType);
+        $this->workTime->fill($workTime);
+        $this->workTime->ended_at = null;
+
+        if ($this->save()) {
+            $this->activeWorkTimes = Arr::keyBy($this->activeWorkTimes, 'id');
+            $this->activeWorkTimes[$workTime->id] = $this->workTime->toArray();
+            $this->activeWorkTimes = array_values($this->activeWorkTimes);
+            $this->workTime->reset();
+
+            return true;
         }
 
-        $this->workTime->fill($data ?? []);
-
-        $this->js(<<<'JS'
-            $modalOpen('work-time-modal');
-        JS);
+        return false;
     }
 
     #[Renderless]
@@ -107,6 +103,50 @@ class WorkTime extends Component
         $this->js(<<<'JS'
             $modalOpen('work-time-modal');
         JS);
+    }
+
+    #[Renderless]
+    public function pause(WorkTimeModel $workTime): bool
+    {
+        $this->workTime->fill($workTime);
+        $this->workTime->ended_at = now()->toDateTimeString();
+
+        if ($this->save()) {
+            $this->activeWorkTimes = Arr::keyBy($this->activeWorkTimes, 'id');
+            $this->activeWorkTimes[$workTime->id] = $this->workTime->toArray();
+            $this->activeWorkTimes = array_values($this->activeWorkTimes);
+            $this->workTime->reset();
+
+            return true;
+        }
+
+        return false;
+    }
+
+    #[Renderless]
+    public function recordSelected(array $data): void
+    {
+        $this->workTime->fill($data);
+
+        $this->workTime->name = data_get($data, 'label') ?? data_get($data, 'name');
+        $this->workTime->description = data_get($data, 'description');
+        $this->workTime->contact_id = data_get($data, 'contact_id');
+
+        if (
+            is_null($this->workTime->contact_id)
+            && method_exists($modelClass = morphed_model($this->workTime->trackable_type), 'getContactId')
+        ) {
+            $this->workTime->contact_id = resolve_static($modelClass, 'query')
+                ->whereKey($this->workTime->trackable_id)
+                ->first()
+                ->getContactId();
+        }
+    }
+
+    #[Renderless]
+    public function resetWorkTime(): void
+    {
+        $this->workTime->reset();
     }
 
     #[Renderless]
@@ -139,22 +179,56 @@ class WorkTime extends Component
     }
 
     #[Renderless]
-    public function recordSelected(array $data): void
+    public function start(?array $data = null): void
     {
-        $this->workTime->fill($data);
+        if ($trackableType = data_get($data, 'trackable_type')) {
+            $data['trackable_type'] = morph_alias(morphed_model($trackableType) ?? $trackableType);
+        }
 
-        $this->workTime->name = data_get($data, 'label') ?? data_get($data, 'name');
-        $this->workTime->description = data_get($data, 'description');
-        $this->workTime->contact_id = data_get($data, 'contact_id');
+        $this->workTime->fill($data ?? []);
 
-        if (
-            is_null($this->workTime->contact_id)
-            && method_exists($modelClass = morphed_model($this->workTime->trackable_type), 'getContactId')
-        ) {
-            $this->workTime->contact_id = resolve_static($modelClass, 'query')
-                ->whereKey($this->workTime->trackable_id)
-                ->first()
-                ->getContactId();
+        $this->js(<<<'JS'
+            $modalOpen('work-time-modal');
+        JS);
+    }
+
+    #[Renderless]
+    public function stop(WorkTimeModel $workTime): bool
+    {
+        $this->workTime->fill($workTime);
+        $this->workTime->ended_at = now()->toDateTimeString();
+        $this->workTime->is_locked = true;
+
+        if ($save = $this->save()) {
+            $this->activeWorkTimes = Arr::keyBy($this->activeWorkTimes, 'id');
+            unset($this->activeWorkTimes[$workTime->id]);
+            $this->activeWorkTimes = array_values($this->activeWorkTimes);
+            $this->workTime->reset();
+        }
+
+        return $save;
+    }
+
+    #[Renderless]
+    public function togglePauseWorkDay(bool $start): void
+    {
+        if ($start) {
+            $this->dailyWorkTimePause->fill([
+                'user_id' => auth()->id(),
+                'parent_id' => $this->dailyWorkTime->id,
+                'started_at' => now()->toDateTimeString(),
+                'is_daily_work_time' => true,
+                'is_pause' => true,
+            ]);
+        } else {
+            $this->dailyWorkTimePause->ended_at = now()->toDateTimeString();
+            $this->dailyWorkTimePause->is_locked = true;
+        }
+
+        $this->dailyWorkTimePause->save();
+
+        if (! $start) {
+            $this->dailyWorkTimePause->reset();
         }
     }
 
@@ -187,85 +261,11 @@ class WorkTime extends Component
         }
     }
 
-    #[Renderless]
-    public function togglePauseWorkDay(bool $start): void
+    protected function getListeners(): array
     {
-        if ($start) {
-            $this->dailyWorkTimePause->fill([
-                'user_id' => auth()->id(),
-                'parent_id' => $this->dailyWorkTime->id,
-                'started_at' => now()->toDateTimeString(),
-                'is_daily_work_time' => true,
-                'is_pause' => true,
-            ]);
-        } else {
-            $this->dailyWorkTimePause->ended_at = now()->toDateTimeString();
-            $this->dailyWorkTimePause->is_locked = true;
-        }
-
-        $this->dailyWorkTimePause->save();
-
-        if (! $start) {
-            $this->dailyWorkTimePause->reset();
-        }
-    }
-
-    #[Renderless]
-    public function stop(WorkTimeModel $workTime): bool
-    {
-        $this->workTime->fill($workTime);
-        $this->workTime->ended_at = now()->toDateTimeString();
-        $this->workTime->is_locked = true;
-
-        if ($save = $this->save()) {
-            $this->activeWorkTimes = Arr::keyBy($this->activeWorkTimes, 'id');
-            unset($this->activeWorkTimes[$workTime->id]);
-            $this->activeWorkTimes = array_values($this->activeWorkTimes);
-            $this->workTime->reset();
-        }
-
-        return $save;
-    }
-
-    #[Renderless]
-    public function pause(WorkTimeModel $workTime): bool
-    {
-        $this->workTime->fill($workTime);
-        $this->workTime->ended_at = now()->toDateTimeString();
-
-        if ($this->save()) {
-            $this->activeWorkTimes = Arr::keyBy($this->activeWorkTimes, 'id');
-            $this->activeWorkTimes[$workTime->id] = $this->workTime->toArray();
-            $this->activeWorkTimes = array_values($this->activeWorkTimes);
-            $this->workTime->reset();
-
-            return true;
-        }
-
-        return false;
-    }
-
-    #[Renderless]
-    public function continue(WorkTimeModel $workTime): bool
-    {
-        $this->workTime->fill($workTime);
-        $this->workTime->ended_at = null;
-
-        if ($this->save()) {
-            $this->activeWorkTimes = Arr::keyBy($this->activeWorkTimes, 'id');
-            $this->activeWorkTimes[$workTime->id] = $this->workTime->toArray();
-            $this->activeWorkTimes = array_values($this->activeWorkTimes);
-            $this->workTime->reset();
-
-            return true;
-        }
-
-        return false;
-    }
-
-    #[Renderless]
-    public function resetWorkTime(): void
-    {
-        $this->workTime->reset();
+        return [
+            'echo-private:' . resolve_static(WorkTimeType::class, 'getBroadcastChannel')
+            . ',.WorkTimeTypeCreated' => '$refresh',
+        ];
     }
 }

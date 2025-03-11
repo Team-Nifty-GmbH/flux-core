@@ -17,39 +17,9 @@ class RevenueByTopCustomers extends CircleChart
         'type' => 'donut',
     ];
 
-    public bool $showTotals = false;
-
     public int $limit = 10;
 
-    protected function getListeners(): array
-    {
-        return [
-            'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
-                . ',.OrderLocked' => 'calculateByTimeFrame',
-        ];
-    }
-
-    public function showTitle(): bool
-    {
-        return true;
-    }
-
-    public function getPlotOptions(): array
-    {
-        return [
-            'pie' => [
-                'donut' => [
-                    'labels' => [
-                        'show' => true,
-                        'total' => [
-                            'show' => true,
-                            'label' => __('Total'),
-                        ],
-                    ],
-                ],
-            ],
-        ];
-    }
+    public bool $showTotals = false;
 
     #[Renderless]
     public function calculateByTimeFrame(): void
@@ -78,5 +48,35 @@ class RevenueByTopCustomers extends CircleChart
 
         $this->series = $metrics->getData();
         $this->labels = $metrics->getLabels();
+    }
+
+    public function getPlotOptions(): array
+    {
+        return [
+            'pie' => [
+                'donut' => [
+                    'labels' => [
+                        'show' => true,
+                        'total' => [
+                            'show' => true,
+                            'label' => __('Total'),
+                        ],
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    public function showTitle(): bool
+    {
+        return true;
+    }
+
+    protected function getListeners(): array
+    {
+        return [
+            'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
+                . ',.OrderLocked' => 'calculateByTimeFrame',
+        ];
     }
 }

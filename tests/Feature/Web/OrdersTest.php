@@ -62,53 +62,14 @@ class OrdersTest extends BaseSetup
         ]);
     }
 
-    public function test_orders_page()
-    {
-        $this->user->givePermissionTo(Permission::findOrCreate('orders.list.get', 'web'));
-
-        $this->actingAs($this->user, 'web')->get('/orders/list')
-            ->assertStatus(200);
-    }
-
-    public function test_orders_no_user()
-    {
-        $this->get('/orders/list')
-            ->assertStatus(302)
-            ->assertRedirect(route('login'));
-    }
-
-    public function test_orders_without_permission()
-    {
-        Permission::findOrCreate('orders.list.get', 'web');
-
-        $this->actingAs($this->user, 'web')->get('/orders/list')
-            ->assertStatus(403);
-    }
-
-    public function test_orders_id_page()
-    {
-        $this->user->givePermissionTo(Permission::findOrCreate('orders.{id}.get', 'web'));
-
-        $this->actingAs($this->user, 'web')->get('/orders/' . $this->order->id)
-            ->assertStatus(200);
-    }
-
-    public function test_orders_id_no_user()
+    public function test_orders_id_no_user(): void
     {
         $this->get('/orders/' . $this->order->id)
             ->assertStatus(302)
             ->assertRedirect(route('login'));
     }
 
-    public function test_orders_id_without_permission()
-    {
-        Permission::findOrCreate('orders.{id}.get', 'web');
-
-        $this->actingAs($this->user, 'web')->get('/orders/' . $this->order->id)
-            ->assertStatus(403);
-    }
-
-    public function test_orders_id_order_not_found()
+    public function test_orders_id_order_not_found(): void
     {
         $this->order->delete();
 
@@ -116,5 +77,44 @@ class OrdersTest extends BaseSetup
 
         $this->actingAs($this->user, 'web')->get('/orders/' . $this->order->id)
             ->assertStatus(404);
+    }
+
+    public function test_orders_id_page(): void
+    {
+        $this->user->givePermissionTo(Permission::findOrCreate('orders.{id}.get', 'web'));
+
+        $this->actingAs($this->user, 'web')->get('/orders/' . $this->order->id)
+            ->assertStatus(200);
+    }
+
+    public function test_orders_id_without_permission(): void
+    {
+        Permission::findOrCreate('orders.{id}.get', 'web');
+
+        $this->actingAs($this->user, 'web')->get('/orders/' . $this->order->id)
+            ->assertStatus(403);
+    }
+
+    public function test_orders_no_user(): void
+    {
+        $this->get('/orders/list')
+            ->assertStatus(302)
+            ->assertRedirect(route('login'));
+    }
+
+    public function test_orders_page(): void
+    {
+        $this->user->givePermissionTo(Permission::findOrCreate('orders.list.get', 'web'));
+
+        $this->actingAs($this->user, 'web')->get('/orders/list')
+            ->assertStatus(200);
+    }
+
+    public function test_orders_without_permission(): void
+    {
+        Permission::findOrCreate('orders.list.get', 'web');
+
+        $this->actingAs($this->user, 'web')->get('/orders/list')
+            ->assertStatus(403);
     }
 }

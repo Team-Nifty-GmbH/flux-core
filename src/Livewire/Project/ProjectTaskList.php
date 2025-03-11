@@ -19,17 +19,17 @@ class ProjectTaskList extends BaseTaskList
 {
     use Actions, WithTabs;
 
-    protected string $view = 'flux::livewire.project.project-task-list';
-
-    public string $taskTab = 'task.general';
-
-    public TaskForm $task;
-
     public array $availableStates = [];
+
+    public bool $hasNoRedirect = true;
 
     public ?int $projectId;
 
-    public bool $hasNoRedirect = true;
+    public TaskForm $task;
+
+    public string $taskTab = 'task.general';
+
+    protected string $view = 'flux::livewire.project.project-task-list';
 
     public function mount(): void
     {
@@ -64,20 +64,22 @@ class ProjectTaskList extends BaseTaskList
         ];
     }
 
-    #[Renderless]
-    public function getTabs(): array
+    public function delete(): bool
     {
-        return [
-            TabButton::make('task.general')->text(__('General')),
-            TabButton::make('task.comments')->text(__('Comments'))
-                ->attributes([
-                    'x-bind:disabled' => '! $wire.task.id',
-                ]),
-            TabButton::make('task.media')->text(__('Media'))
-                ->attributes([
-                    'x-bind:disabled' => '! $wire.task.id',
-                ]),
-        ];
+        try {
+            DeleteTask::make($this->task->toArray())
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
     }
 
     public function edit(Task $task): void
@@ -101,28 +103,26 @@ class ProjectTaskList extends BaseTaskList
     }
 
     #[Renderless]
+    public function getTabs(): array
+    {
+        return [
+            TabButton::make('task.general')->text(__('General')),
+            TabButton::make('task.comments')->text(__('Comments'))
+                ->attributes([
+                    'x-bind:disabled' => '! $wire.task.id',
+                ]),
+            TabButton::make('task.media')->text(__('Media'))
+                ->attributes([
+                    'x-bind:disabled' => '! $wire.task.id',
+                ]),
+        ];
+    }
+
+    #[Renderless]
     public function save(): bool
     {
         try {
             $this->task->save();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
-    }
-
-    public function delete(): bool
-    {
-        try {
-            DeleteTask::make($this->task->toArray())
-                ->checkPermission()
-                ->validate()
-                ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 

@@ -16,14 +16,6 @@ class AverageOrderValue extends LineChart
 {
     use IsTimeFrameAwareWidget, MoneyChartFormattingTrait;
 
-    protected function getListeners(): array
-    {
-        return [
-            'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
-                . ',.OrderLocked' => 'calculateByTimeFrame',
-        ];
-    }
-
     #[Renderless]
     public function calculateByTimeFrame(): void
     {
@@ -77,5 +69,13 @@ class AverageOrderValue extends LineChart
         ];
 
         $this->xaxis['categories'] = $revenue->getLabels();
+    }
+
+    protected function getListeners(): array
+    {
+        return [
+            'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
+                . ',.OrderLocked' => 'calculateByTimeFrame',
+        ];
     }
 }

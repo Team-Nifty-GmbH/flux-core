@@ -27,7 +27,7 @@ class Calendar extends FluxModel
     {
         parent::booted();
 
-        static::deleting(function ($calendar) {
+        static::deleting(function ($calendar): void {
             $calendar->calendarEvents()->delete();
         });
     }
@@ -53,6 +53,19 @@ class Calendar extends FluxModel
         return $this->hasMany(CalendarEvent::class);
     }
 
+    public function fromCalendarObject(array $calendar): static
+    {
+        $mappedArray = [];
+
+        foreach ($calendar as $key => $value) {
+            $mappedArray[Str::snake($key)] = $value;
+        }
+
+        $this->fill($mappedArray);
+
+        return $this;
+    }
+
     public function invitesCalendarEvents()
     {
         return $this->hasManyThrough(
@@ -62,11 +75,6 @@ class Calendar extends FluxModel
             'id',
             'id',
             'calendar_event_id');
-    }
-
-    public function users(): MorphToMany
-    {
-        return $this->morphedByMany(User::class, 'calendarable', 'calendarables');
     }
 
     public function newCollection(array $models = []): Collection
@@ -93,16 +101,8 @@ class Calendar extends FluxModel
         );
     }
 
-    public function fromCalendarObject(array $calendar): static
+    public function users(): MorphToMany
     {
-        $mappedArray = [];
-
-        foreach ($calendar as $key => $value) {
-            $mappedArray[Str::snake($key)] = $value;
-        }
-
-        $this->fill($mappedArray);
-
-        return $this;
+        return $this->morphedByMany(User::class, 'calendarable', 'calendarables');
     }
 }

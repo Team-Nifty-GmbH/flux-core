@@ -8,7 +8,7 @@ class CreateClientUserTable extends Migration
 {
     public function up(): void
     {
-        Schema::create('client_user', function (Blueprint $table) {
+        Schema::create('client_user', function (Blueprint $table): void {
             $table->unsignedBigInteger('client_id');
             $table->unsignedBigInteger('user_id');
 

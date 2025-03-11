@@ -56,11 +56,11 @@ class Address extends Component
 
         $this->address['orders'] = resolve_static(OrderType::class, 'query')
             ->select(['id', 'name'])
-            ->whereHas('orders', function ($query) {
+            ->whereHas('orders', function ($query): void {
                 $query->where('contact_id', $this->address['contact_id']);
             })
             ->withCount([
-                'orders' => function ($query) {
+                'orders' => function ($query): void {
                     $query->where('contact_id', $this->address['contact_id']);
                 },
             ])

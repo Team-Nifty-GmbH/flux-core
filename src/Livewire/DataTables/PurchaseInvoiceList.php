@@ -26,10 +26,6 @@ class PurchaseInvoiceList extends BaseDataTable
 {
     use WithFileUploads;
 
-    protected string $model = PurchaseInvoice::class;
-
-    public ?string $includeBefore = 'flux::livewire.accounting.purchase-invoice-list.include-before';
-
     public array $enabledCols = [
         'url',
         'media.file_name',
@@ -41,9 +37,101 @@ class PurchaseInvoiceList extends BaseDataTable
         'url' => 'image',
     ];
 
-    public PurchaseInvoiceForm $purchaseInvoiceForm;
+    public ?string $includeBefore = 'flux::livewire.accounting.purchase-invoice-list.include-before';
 
     public MediaUploadForm $mediaForm;
+
+    public PurchaseInvoiceForm $purchaseInvoiceForm;
+
+    protected string $model = PurchaseInvoice::class;
+
+    protected function getTableActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->color('indigo')
+                ->text(__('Upload'))
+                ->wireClick('edit'),
+        ];
+    }
+
+    public function delete(): bool
+    {
+        try {
+            $this->purchaseInvoiceForm->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
+    }
+
+    public function downloadMedia(Media $media): false|BinaryFileResponse
+    {
+        if (! file_exists($media->getPath())) {
+            $this->notification()->error(__('The file does not exist anymore.'))->send();
+
+            return false;
+        }
+
+        return response()->download($media->getPath(), $media->file_name);
+    }
+
+    #[Renderless]
+    public function edit(?PurchaseInvoice $purchaseInvoice = null): void
+    {
+        $this->purchaseInvoiceForm->reset();
+        $this->mediaForm->reset();
+
+        if ($purchaseInvoice->exists) {
+            $purchaseInvoice->loadMissing(['purchaseInvoicePositions', 'invoice']);
+            $this->purchaseInvoiceForm->fill($purchaseInvoice);
+            $this->purchaseInvoiceForm->mediaUrl = $purchaseInvoice->getFirstMediaUrl('purchase_invoice')
+                ?: $purchaseInvoice->invoice->getUrl();
+            $this->purchaseInvoiceForm->findMostUsedLedgerAccountId();
+        }
+
+        $this->js(<<<'JS'
+            $modalOpen('edit-purchase-invoice-modal');
+        JS);
+    }
+
+    #[Renderless]
+    public function fillFromSelectedContact(Contact $contact): void
+    {
+        $bankConnection = $contact->contactBankConnections()->latest()->first();
+        $this->purchaseInvoiceForm->approval_user_id ??= $contact->approval_user_id;
+        $this->purchaseInvoiceForm->payment_type_id ??= $contact->purchase_payment_type_id ?? $contact->payment_type_id;
+        $this->purchaseInvoiceForm->currency_id = $contact->currency_id ?? Currency::default()?->getKey();
+        $this->purchaseInvoiceForm->client_id = $contact->client_id;
+
+        $this->purchaseInvoiceForm->lay_out_user_id = null;
+        $this->purchaseInvoiceForm->account_holder = $bankConnection?->account_holder;
+        $this->purchaseInvoiceForm->bank_name = $bankConnection?->bank_name;
+        $this->purchaseInvoiceForm->bic = $bankConnection?->bic;
+        $this->purchaseInvoiceForm->iban = $bankConnection?->iban;
+
+        $this->purchaseInvoiceForm->findMostUsedLedgerAccountId();
+    }
+
+    public function finish(): bool
+    {
+        try {
+            $this->purchaseInvoiceForm->finish();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
+    }
 
     public function mountSupportsCache(): void
     {
@@ -62,20 +150,25 @@ class PurchaseInvoiceList extends BaseDataTable
         }
     }
 
-    protected function getBuilder(Builder $builder): Builder
+    public function save(): bool
     {
-        return $builder->with(['media', 'invoice']);
-    }
-
-    public function downloadMedia(Media $media): false|BinaryFileResponse
-    {
-        if (! file_exists($media->getPath())) {
-            $this->notification()->error(__('The file does not exist anymore.'))->send();
+        $this->purchaseInvoiceForm->media = $this->mediaForm->uploadedFile[0] ?? null;
+        try {
+            $this->purchaseInvoiceForm->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
 
             return false;
         }
 
-        return response()->download($media->getPath(), $media->file_name);
+        $this->loadData();
+
+        return true;
+    }
+
+    protected function getBuilder(Builder $builder): Builder
+    {
+        return $builder->with(['media', 'invoice']);
     }
 
     protected function getLayout(): string
@@ -83,14 +176,16 @@ class PurchaseInvoiceList extends BaseDataTable
         return 'tall-datatables::layouts.grid';
     }
 
-    protected function getTableActions(): array
+    protected function getRowAttributes(): ComponentAttributeBag
     {
-        return [
-            DataTableButton::make()
-                ->color('indigo')
-                ->text(__('Upload'))
-                ->wireClick('edit'),
-        ];
+        return new ComponentAttributeBag(
+            [
+                'wire:click' => <<<'JS'
+                    edit(record.id)
+                JS,
+                'class' => 'cursor-pointer',
+            ]
+        );
     }
 
     protected function getViewData(): array
@@ -118,18 +213,6 @@ class PurchaseInvoiceList extends BaseDataTable
         );
     }
 
-    protected function getRowAttributes(): ComponentAttributeBag
-    {
-        return new ComponentAttributeBag(
-            [
-                'wire:click' => <<<'JS'
-                    edit(record.id)
-                JS,
-                'class' => 'cursor-pointer',
-            ]
-        );
-    }
-
     protected function itemToArray($item): array
     {
         $itemArray = parent::itemToArray($item);
@@ -144,88 +227,5 @@ class PurchaseInvoiceList extends BaseDataTable
         $itemArray['media.file_name'] = $media?->file_name;
 
         return $itemArray;
-    }
-
-    #[Renderless]
-    public function edit(?PurchaseInvoice $purchaseInvoice = null): void
-    {
-        $this->purchaseInvoiceForm->reset();
-        $this->mediaForm->reset();
-
-        if ($purchaseInvoice->exists) {
-            $purchaseInvoice->loadMissing(['purchaseInvoicePositions', 'invoice']);
-            $this->purchaseInvoiceForm->fill($purchaseInvoice);
-            $this->purchaseInvoiceForm->mediaUrl = $purchaseInvoice->getFirstMediaUrl('purchase_invoice')
-                ?: $purchaseInvoice->invoice->getUrl();
-            $this->purchaseInvoiceForm->findMostUsedLedgerAccountId();
-        }
-
-        $this->js(<<<'JS'
-            $modalOpen('edit-purchase-invoice-modal');
-        JS);
-    }
-
-    public function save(): bool
-    {
-        $this->purchaseInvoiceForm->media = $this->mediaForm->uploadedFile[0] ?? null;
-        try {
-            $this->purchaseInvoiceForm->save();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
-    }
-
-    public function finish(): bool
-    {
-        try {
-            $this->purchaseInvoiceForm->finish();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
-    }
-
-    public function delete(): bool
-    {
-        try {
-            $this->purchaseInvoiceForm->delete();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
-    }
-
-    #[Renderless]
-    public function fillFromSelectedContact(Contact $contact): void
-    {
-        $bankConnection = $contact->contactBankConnections()->latest()->first();
-        $this->purchaseInvoiceForm->approval_user_id ??= $contact->approval_user_id;
-        $this->purchaseInvoiceForm->payment_type_id ??= $contact->purchase_payment_type_id ?? $contact->payment_type_id;
-        $this->purchaseInvoiceForm->currency_id = $contact->currency_id ?? Currency::default()?->getKey();
-        $this->purchaseInvoiceForm->client_id = $contact->client_id;
-
-        $this->purchaseInvoiceForm->lay_out_user_id = null;
-        $this->purchaseInvoiceForm->account_holder = $bankConnection?->account_holder;
-        $this->purchaseInvoiceForm->bank_name = $bankConnection?->bank_name;
-        $this->purchaseInvoiceForm->bic = $bankConnection?->bic;
-        $this->purchaseInvoiceForm->iban = $bankConnection?->iban;
-
-        $this->purchaseInvoiceForm->findMostUsedLedgerAccountId();
     }
 }

@@ -22,14 +22,14 @@ class CalendarEventInviteCreated extends Notification implements HasToastNotific
         $this->model = $model;
     }
 
-    public function toMail(object $notifiable): MailMessage
-    {
-        return $this->toToastNotification($notifiable)->toMail();
-    }
-
     public function toArray(object $notifiable): array
     {
         return $this->toToastNotification($notifiable)->toArray();
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        return $this->toToastNotification($notifiable)->toMail();
     }
 
     public function toToastNotification(object $notifiable): ToastNotification

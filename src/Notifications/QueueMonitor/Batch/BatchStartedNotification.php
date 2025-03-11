@@ -16,9 +16,9 @@ class BatchStartedNotification extends Notification implements HasToastNotificat
         $this->id = Uuid::uuid5(Uuid::NAMESPACE_URL, $this->model->getKey());
     }
 
-    public function via(object $notifiable): array
+    public function toArray(object $notifiable): array
     {
-        return [BroadcastNowChannel::class];
+        return $this->toToastNotification($notifiable)->toArray();
     }
 
     public function toToastNotification(object $notifiable): ToastNotification
@@ -31,8 +31,8 @@ class BatchStartedNotification extends Notification implements HasToastNotificat
             ->progress($this->model->jobBatch?->progress ?? $this->model->getProgress());
     }
 
-    public function toArray(object $notifiable): array
+    public function via(object $notifiable): array
     {
-        return $this->toToastNotification($notifiable)->toArray();
+        return [BroadcastNowChannel::class];
     }
 }

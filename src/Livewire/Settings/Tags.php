@@ -18,33 +18,12 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class Tags extends TagList
 {
-    protected ?string $includeBefore = 'flux::livewire.settings.tags';
-
-    public TagForm $tagForm;
-
     #[Locked]
     public bool $isSelectable = true;
 
-    #[Renderless]
-    public function deleteSelected(): void
-    {
-        foreach ($this->getSelectedModelsQuery()->pluck('id') as $id) {
-            try {
-                DeleteTag::make(['id' => $id])
-                    ->checkPermission()
-                    ->validate()
-                    ->execute();
-            } catch (ValidationException|UnauthorizedException $e) {
-                exception_to_notifications($e, $this);
+    public TagForm $tagForm;
 
-                break;
-            }
-        }
-
-        $this->loadData();
-
-        $this->reset('selected');
-    }
+    protected ?string $includeBefore = 'flux::livewire.settings.tags';
 
     protected function getTableActions(): array
     {
@@ -97,24 +76,43 @@ class Tags extends TagList
         ];
     }
 
-    protected function getViewData(): array
+    public function delete(Tag $tag): bool
     {
-        return array_merge(
-            parent::getViewData(),
-            [
-                'taggables' => model_info_all()
-                    ->filter(fn ($modelInfo) => in_array(
-                        HasTags::class,
-                        class_uses_recursive($modelInfo->class)
-                    ))
-                    ->unique('morphClass')
-                    ->map(fn ($modelInfo) => [
-                        'label' => __(Str::headline($modelInfo->morphClass)),
-                        'value' => $modelInfo->morphClass,
-                    ])
-                    ->toArray(),
-            ]
-        );
+        $this->tagForm->reset();
+        $this->tagForm->fill($tag);
+
+        try {
+            $this->tagForm->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
+    }
+
+    #[Renderless]
+    public function deleteSelected(): void
+    {
+        foreach ($this->getSelectedModelsQuery()->pluck('id') as $id) {
+            try {
+                DeleteTag::make(['id' => $id])
+                    ->checkPermission()
+                    ->validate()
+                    ->execute();
+            } catch (ValidationException|UnauthorizedException $e) {
+                exception_to_notifications($e, $this);
+
+                break;
+            }
+        }
+
+        $this->loadData();
+
+        $this->reset('selected');
     }
 
     public function edit(Tag $tag): void
@@ -142,21 +140,23 @@ class Tags extends TagList
         return true;
     }
 
-    public function delete(Tag $tag): bool
+    protected function getViewData(): array
     {
-        $this->tagForm->reset();
-        $this->tagForm->fill($tag);
-
-        try {
-            $this->tagForm->delete();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
+        return array_merge(
+            parent::getViewData(),
+            [
+                'taggables' => model_info_all()
+                    ->filter(fn ($modelInfo) => in_array(
+                        HasTags::class,
+                        class_uses_recursive($modelInfo->class)
+                    ))
+                    ->unique('morphClass')
+                    ->map(fn ($modelInfo) => [
+                        'label' => __(Str::headline($modelInfo->morphClass)),
+                        'value' => $modelInfo->morphClass,
+                    ])
+                    ->toArray(),
+            ]
+        );
     }
 }

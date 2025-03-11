@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class PaymentReminderTextListTest extends TestCase
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(PaymentReminderTextList::class)
             ->assertStatus(200);

@@ -31,18 +31,6 @@ class FormBuilderSectionController extends BaseController
         );
     }
 
-    public function update(Request $request): JsonResponse
-    {
-        $formBuilderSection = UpdateFormBuilderSection::make($request->all())
-            ->validate()
-            ->execute();
-
-        return ResponseHelper::createResponseFromBase(
-            statusCode: 200,
-            data: $formBuilderSection
-        );
-    }
-
     public function delete(string $id): JsonResponse
     {
         try {
@@ -59,6 +47,18 @@ class FormBuilderSectionController extends BaseController
         return ResponseHelper::createResponseFromBase(
             statusCode: 204,
             statusMessage: 'form builder section deleted'
+        );
+    }
+
+    public function update(Request $request): JsonResponse
+    {
+        $formBuilderSection = UpdateFormBuilderSection::make($request->all())
+            ->validate()
+            ->execute();
+
+        return ResponseHelper::createResponseFromBase(
+            statusCode: 200,
+            data: $formBuilderSection
         );
     }
 }

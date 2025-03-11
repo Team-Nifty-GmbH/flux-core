@@ -20,26 +20,11 @@ class WorkTime extends FluxModel implements Calendarable
 {
     use Filterable, HasPackageFactory, HasParentChildRelations, HasUuid, SoftDeletes;
 
-    protected static function booted(): void
+    public static function fromCalendarEvent(array $event): Model
     {
-        static::creating(function (WorkTime $workTime) {
-            $workTime->started_at = $workTime->started_at ?? now();
-            $workTime->user_id = $workTime->user_id ?? auth()->id();
-        });
-
-        static::saving(function (WorkTime $workTime) {
-            if ($workTime->is_locked) {
-                $workTime->calculateTotalCost();
-            }
-        });
-
-        static::saved(function (WorkTime $workTime) {
-            if ($workTime->is_daily_work_time) {
-                $workTime->broadcastEvent('dailyUpdated', toEveryone: true);
-            } else {
-                $workTime->broadcastEvent('taskUpdated', toEveryone: true);
-            }
-        });
+        return resolve_static(static::class, 'query')
+            ->whereKey(data_get($event, 'id'))
+            ->first();
     }
 
     public static function getGenericChannelEvents(): array
@@ -51,67 +36,6 @@ class WorkTime extends FluxModel implements Calendarable
                 'taskUpdated',
             ]
         );
-    }
-
-    protected function casts(): array
-    {
-        return [
-            'started_at' => 'datetime',
-            'ended_at' => 'datetime',
-            'is_billable' => 'boolean',
-            'is_daily_work_time' => 'boolean',
-            'is_locked' => 'boolean',
-            'is_pause' => 'boolean',
-        ];
-    }
-
-    public function contact(): BelongsTo
-    {
-        return $this->belongsTo(Contact::class);
-    }
-
-    public function model(): MorphTo
-    {
-        return $this->morphTo('trackable');
-    }
-
-    public function orderPosition(): BelongsTo
-    {
-        return $this->belongsTo(OrderPosition::class);
-    }
-
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    public function workTimeType(): BelongsTo
-    {
-        return $this->belongsTo(WorkTimeType::class);
-    }
-
-    public function calculateTotalCost(): static
-    {
-        $this->total_cost = Rounding::round(
-            bcmul(
-                $this->user->cost_per_hour,
-                bcdiv($this->total_time_ms, 3600000),
-                9
-            )
-        );
-
-        if ($this->model && method_exists($this->model, 'costColumn')
-            && $costColumn = $this->model->costColumn()
-        ) {
-            $this->model->{$costColumn} = bcadd(
-                $this->model->{$costColumn},
-                $this->total_cost,
-                2
-            );
-            $this->model->save();
-        }
-
-        return $this;
     }
 
     public static function toCalendar(): array
@@ -171,30 +95,77 @@ class WorkTime extends FluxModel implements Calendarable
         ];
     }
 
-    public static function fromCalendarEvent(array $event): Model
+    protected static function booted(): void
     {
-        return resolve_static(static::class, 'query')
-            ->whereKey(data_get($event, 'id'))
-            ->first();
+        static::creating(function (WorkTime $workTime): void {
+            $workTime->started_at = $workTime->started_at ?? now();
+            $workTime->user_id = $workTime->user_id ?? auth()->id();
+        });
+
+        static::saving(function (WorkTime $workTime): void {
+            if ($workTime->is_locked) {
+                $workTime->calculateTotalCost();
+            }
+        });
+
+        static::saved(function (WorkTime $workTime): void {
+            if ($workTime->is_daily_work_time) {
+                $workTime->broadcastEvent('dailyUpdated', toEveryone: true);
+            } else {
+                $workTime->broadcastEvent('taskUpdated', toEveryone: true);
+            }
+        });
     }
 
-    public function toCalendarEvent(?array $info = null): array
+    protected function casts(): array
     {
         return [
-            'id' => $this->id,
-            'calendar_type' => $this->getMorphClass(),
-            'title' => $this->user->name,
-            'start' => $this->started_at->toDateTimeString(),
-            'end' => $this->ended_at?->toDateTimeString(),
-            'color' => $this->user->color ?? '#0891b2',
-            'invited' => [],
-            'description' => $this->description,
-            'allDay' => false,
-            'is_editable' => true,
-            'is_invited' => false,
-            'is_public' => false,
-            'is_repeatable' => false,
+            'started_at' => 'datetime',
+            'ended_at' => 'datetime',
+            'is_billable' => 'boolean',
+            'is_daily_work_time' => 'boolean',
+            'is_locked' => 'boolean',
+            'is_pause' => 'boolean',
         ];
+    }
+
+    public function calculateTotalCost(): static
+    {
+        $this->total_cost = Rounding::round(
+            bcmul(
+                $this->user->cost_per_hour,
+                bcdiv($this->total_time_ms, 3600000),
+                9
+            )
+        );
+
+        if ($this->model && method_exists($this->model, 'costColumn')
+            && $costColumn = $this->model->costColumn()
+        ) {
+            $this->model->{$costColumn} = bcadd(
+                $this->model->{$costColumn},
+                $this->total_cost,
+                2
+            );
+            $this->model->save();
+        }
+
+        return $this;
+    }
+
+    public function contact(): BelongsTo
+    {
+        return $this->belongsTo(Contact::class);
+    }
+
+    public function model(): MorphTo
+    {
+        return $this->morphTo('trackable');
+    }
+
+    public function orderPosition(): BelongsTo
+    {
+        return $this->belongsTo(OrderPosition::class);
     }
 
     public function scopeInTimeframe(
@@ -236,5 +207,34 @@ class WorkTime extends FluxModel implements Calendarable
         $builder->where('is_daily_work_time', true)
             ->where('is_locked', true)
             ->where('is_pause', false);
+    }
+
+    public function toCalendarEvent(?array $info = null): array
+    {
+        return [
+            'id' => $this->id,
+            'calendar_type' => $this->getMorphClass(),
+            'title' => $this->user->name,
+            'start' => $this->started_at->toDateTimeString(),
+            'end' => $this->ended_at?->toDateTimeString(),
+            'color' => $this->user->color ?? '#0891b2',
+            'invited' => [],
+            'description' => $this->description,
+            'allDay' => false,
+            'is_editable' => true,
+            'is_invited' => false,
+            'is_public' => false,
+            'is_repeatable' => false,
+        ];
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function workTimeType(): BelongsTo
+    {
+        return $this->belongsTo(WorkTimeType::class);
     }
 }

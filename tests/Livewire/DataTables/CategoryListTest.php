@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class CategoryListTest extends BaseSetup
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(CategoryList::class)
             ->assertStatus(200);

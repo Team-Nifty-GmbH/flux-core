@@ -10,14 +10,14 @@ use Illuminate\Validation\ValidationException;
 
 class CreateCountry extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateCountryRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Country::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateCountryRuleset::class;
     }
 
     public function performAction(): Country

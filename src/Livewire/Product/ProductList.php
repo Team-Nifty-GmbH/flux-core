@@ -21,21 +21,21 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class ProductList extends BaseProductList
 {
-    protected ?string $includeBefore = 'flux::livewire.product.product-list';
-
     public ?string $cacheKey = 'product.product-list';
+
+    public bool $isSelectable = true;
+
+    public array $priceLists = [];
 
     public ProductForm $product;
 
     public ProductPricesUpdateForm $productPricesUpdate;
 
-    public array $vatRates = [];
-
-    public array $priceLists = [];
-
     public array $productTypes = [];
 
-    public bool $isSelectable = true;
+    public array $vatRates = [];
+
+    protected ?string $includeBefore = 'flux::livewire.product.product-list';
 
     public function mount(): void
     {
@@ -56,6 +56,38 @@ class ProductList extends BaseProductList
             ->toArray();
     }
 
+    protected function getTableActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->color('indigo')
+                ->text(__('New'))
+                ->icon('plus')
+                ->when(fn () => resolve_static(CreateProduct::class, 'canPerformAction', [false]))
+                ->xOnClick(<<<'JS'
+                    $wire.new().then(() => {$modalOpen('create-product-modal');});
+                JS),
+        ];
+    }
+
+    protected function getSelectedActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->text(__('Add to cart'))
+                ->icon('shopping-cart')
+                ->when(resolve_static(CreateCartItem::class, 'canPerformAction', [false]))
+                ->wireClick('addSelectedToCart; showSelectedActions = false;'),
+            DataTableButton::make()
+                ->text(__('Update prices'))
+                ->color('amber')
+                ->when(resolve_static(ProductPricesUpdate::class, 'canPerformAction', [false]))
+                ->xOnClick(<<<'JS'
+                    $modalOpen('update-prices-modal');
+                JS),
+        ];
+    }
+
     #[Renderless]
     public function addSelectedToCart(): void
     {
@@ -69,6 +101,11 @@ class ProductList extends BaseProductList
         $this->reset('selected');
     }
 
+    public function getPriceLists(): array
+    {
+        return data_get($this->priceLists, '0', []);
+    }
+
     #[Renderless]
     public function new(): void
     {
@@ -76,11 +113,6 @@ class ProductList extends BaseProductList
 
         $this->product->client_id = Client::default()?->getKey();
         $this->product->product_type = data_get(ProductType::getDefault(), 'type');
-    }
-
-    public function getPriceLists(): array
-    {
-        return data_get($this->priceLists, '0', []);
     }
 
     #[Renderless]
@@ -132,38 +164,6 @@ class ProductList extends BaseProductList
         $this->loadData();
 
         return true;
-    }
-
-    protected function getSelectedActions(): array
-    {
-        return [
-            DataTableButton::make()
-                ->text(__('Add to cart'))
-                ->icon('shopping-cart')
-                ->when(resolve_static(CreateCartItem::class, 'canPerformAction', [false]))
-                ->wireClick('addSelectedToCart; showSelectedActions = false;'),
-            DataTableButton::make()
-                ->text(__('Update prices'))
-                ->color('amber')
-                ->when(resolve_static(ProductPricesUpdate::class, 'canPerformAction', [false]))
-                ->xOnClick(<<<'JS'
-                    $modalOpen('update-prices-modal');
-                JS),
-        ];
-    }
-
-    protected function getTableActions(): array
-    {
-        return [
-            DataTableButton::make()
-                ->color('indigo')
-                ->text(__('New'))
-                ->icon('plus')
-                ->when(fn () => resolve_static(CreateProduct::class, 'canPerformAction', [false]))
-                ->xOnClick(<<<'JS'
-                    $wire.new().then(() => {$modalOpen('create-product-modal');});
-                JS),
-        ];
     }
 
     protected function getViewData(): array

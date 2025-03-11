@@ -91,63 +91,7 @@ class OrderTest extends BaseSetup
         $this->order->calculatePrices()->save();
     }
 
-    public function test_renders_successfully()
-    {
-        Livewire::test(OrderView::class, ['id' => $this->order->id])
-            ->assertStatus(200);
-    }
-
-    public function test_switch_tabs()
-    {
-        $component = Livewire::test(OrderView::class, ['id' => $this->order->id]);
-
-        foreach (Livewire::new(OrderView::class)->getTabs() as $tab) {
-            $component
-                ->set('tab', $tab->component)
-                ->assertStatus(200);
-
-            if ($tab->isLivewireComponent) {
-                $component->assertSeeLivewire($tab->component);
-            }
-        }
-    }
-
-    public function test_update_locked_order()
-    {
-        $commission = Str::uuid()->toString();
-        $invoiceNumber = $this->order->invoice_number;
-        $this->order->update(['is_locked' => true]);
-
-        Livewire::test(OrderView::class, ['id' => $this->order->id])
-            ->set('order.commission', $commission)
-            ->set('order.invoice_number', $commission)
-            ->assertSet('order.commission', $commission)
-            ->assertSet('order.invoice_number', $commission)
-            ->call('save')
-            ->assertStatus(200)
-            ->assertHasNoErrors();
-
-        $this->order->refresh();
-
-        // ensure that the commission changed but the invoice number didnt
-        $this->assertTrue($this->order->is_locked);
-        $this->assertEquals($commission, $this->order->commission);
-        $this->assertEquals($invoiceNumber, $this->order->invoice_number);
-    }
-
-    public function test_delete_locked_order_fails()
-    {
-        $this->order->update(['is_locked' => true]);
-
-        Livewire::test(OrderView::class, ['id' => $this->order->id])
-            ->call('delete')
-            ->assertStatus(200)
-            ->assertNoRedirect()
-            ->assertHasErrors(['is_locked'])
-            ->assertToastNotification(type: 'error');
-    }
-
-    public function test_add_schedule_to_order()
+    public function test_add_schedule_to_order(): void
     {
         $orderType = OrderType::factory()->create([
             'client_id' => $this->dbClient->getKey(),
@@ -186,7 +130,106 @@ class OrderTest extends BaseSetup
         );
     }
 
-    public function test_create_invoice()
+    public function test_can_add_discount(): void
+    {
+        Livewire::test(OrderView::class, ['id' => $this->order->id])
+            ->assertSet('order.discounts', [])
+            ->call('editDiscount')
+            ->assertStatus(200)
+            ->assertHasNoErrors()
+            ->assertExecutesJs(<<<'JS'
+                $modalOpen('edit-discount');
+            JS)
+            ->assertSet('discount.is_percentage', true)
+            ->set('discount.name', $discountName = Str::uuid()->toString())
+            ->set('discount.discount', 10)
+            ->call('saveDiscount')
+            ->assertStatus(200)
+            ->assertHasNoErrors()
+            ->assertNotSet('order.discounts', []);
+
+        $this->assertDatabaseHas(
+            'discounts',
+            [
+                'model_type' => 'order',
+                'model_id' => $this->order->id,
+                'name' => $discountName,
+                'discount' => bcdiv(10, 100),
+                'order_column' => 1,
+                'is_percentage' => 1,
+            ]
+        );
+    }
+
+    public function test_can_delete_order(): void
+    {
+        Livewire::test(OrderView::class, ['id' => $this->order->id])
+            ->call('delete')
+            ->assertStatus(200)
+            ->assertHasNoErrors()
+            ->assertRedirectToRoute('orders.orders');
+
+        $this->assertSoftDeleted('orders', ['id' => $this->order->id]);
+        $this->assertSoftDeleted('order_positions', ['order_id' => $this->order->id]);
+    }
+
+    public function test_can_render_subscription_order(): void
+    {
+        $orderType = OrderType::factory()->create([
+            'client_id' => $this->dbClient->getKey(),
+            'order_type_enum' => OrderTypeEnum::Subscription,
+            'is_active' => true,
+            'is_hidden' => false,
+        ]);
+        $this->order->update([
+            'order_type_id' => $orderType->id,
+            'is_locked' => true,
+            'invoice_number' => Str::uuid(),
+        ]);
+
+        Livewire::test(OrderView::class, ['id' => $this->order->id])
+            ->assertStatus(200)
+            ->assertViewIs('flux::livewire.order.subscription')
+            ->set('schedule.cron.parameters.basic.1', 1)
+            ->assertStatus(200)
+            ->assertViewIs('flux::livewire.order.subscription');
+    }
+
+    public function test_cant_create_invoice_with_delivery_lock(): void
+    {
+        $this->order->update(['is_locked' => false, 'invoice_number' => null]);
+        $this->order->contact->update(['has_delivery_lock' => true, 'credit_line' => 1]);
+
+        Livewire::test(OrderView::class, ['id' => $this->order->id])
+            ->assertSet('order.invoice_number', null)
+            ->call('openCreateDocumentsModal')
+            ->assertSet(
+                'printLayouts',
+                [
+                    [
+                        'layout' => 'invoice',
+                        'label' => 'invoice',
+                    ],
+                ]
+            )
+            ->set([
+                'selectedPrintLayouts' => [
+                    'download' => [
+                        'invoice',
+                    ],
+                ],
+            ])
+            ->call('createDocuments')
+            ->assertStatus(200)
+            ->assertReturned(null)
+            ->assertHasErrors(['has_contact_delivery_lock', 'balance'])
+            ->assertSet('order.invoice_number', null);
+
+        $this->assertNull($this->order->refresh()->invoice_number);
+        $this->assertNull($this->order->invoice());
+    }
+
+    public function test_create_invoice(): void
     {
         $this->order->update(['is_locked' => false, 'invoice_number' => null]);
         Storage::fake();
@@ -227,41 +270,25 @@ class OrderTest extends BaseSetup
         $this->assertNotEmpty(file_get_contents($invoice->getPath()));
     }
 
-    public function test_cant_create_invoice_with_delivery_lock()
+    public function test_delete_locked_order_fails(): void
     {
-        $this->order->update(['is_locked' => false, 'invoice_number' => null]);
-        $this->order->contact->update(['has_delivery_lock' => true, 'credit_line' => 1]);
+        $this->order->update(['is_locked' => true]);
 
         Livewire::test(OrderView::class, ['id' => $this->order->id])
-            ->assertSet('order.invoice_number', null)
-            ->call('openCreateDocumentsModal')
-            ->assertSet(
-                'printLayouts',
-                [
-                    [
-                        'layout' => 'invoice',
-                        'label' => 'invoice',
-                    ],
-                ]
-            )
-            ->set([
-                'selectedPrintLayouts' => [
-                    'download' => [
-                        'invoice',
-                    ],
-                ],
-            ])
-            ->call('createDocuments')
+            ->call('delete')
             ->assertStatus(200)
-            ->assertReturned(null)
-            ->assertHasErrors(['has_contact_delivery_lock', 'balance'])
-            ->assertSet('order.invoice_number', null);
-
-        $this->assertNull($this->order->refresh()->invoice_number);
-        $this->assertNull($this->order->invoice());
+            ->assertNoRedirect()
+            ->assertHasErrors(['is_locked'])
+            ->assertToastNotification(type: 'error');
     }
 
-    public function test_replicate_order()
+    public function test_renders_successfully(): void
+    {
+        Livewire::test(OrderView::class, ['id' => $this->order->id])
+            ->assertStatus(200);
+    }
+
+    public function test_replicate_order(): void
     {
         OrderType::factory()->create([
             'client_id' => $this->dbClient->getKey(),
@@ -310,7 +337,7 @@ class OrderTest extends BaseSetup
         );
     }
 
-    public function test_replicate_with_new_contact()
+    public function test_replicate_with_new_contact(): void
     {
         $contact = Contact::factory()
             ->has(
@@ -377,68 +404,41 @@ class OrderTest extends BaseSetup
         );
     }
 
-    public function test_can_render_subscription_order()
+    public function test_switch_tabs(): void
     {
-        $orderType = OrderType::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-            'order_type_enum' => OrderTypeEnum::Subscription,
-            'is_active' => true,
-            'is_hidden' => false,
-        ]);
-        $this->order->update([
-            'order_type_id' => $orderType->id,
-            'is_locked' => true,
-            'invoice_number' => Str::uuid(),
-        ]);
+        $component = Livewire::test(OrderView::class, ['id' => $this->order->id]);
 
-        Livewire::test(OrderView::class, ['id' => $this->order->id])
-            ->assertStatus(200)
-            ->assertViewIs('flux::livewire.order.subscription')
-            ->set('schedule.cron.parameters.basic.1', 1)
-            ->assertStatus(200)
-            ->assertViewIs('flux::livewire.order.subscription');
+        foreach (Livewire::new(OrderView::class)->getTabs() as $tab) {
+            $component
+                ->set('tab', $tab->component)
+                ->assertStatus(200);
+
+            if ($tab->isLivewireComponent) {
+                $component->assertSeeLivewire($tab->component);
+            }
+        }
     }
 
-    public function test_can_add_discount()
+    public function test_update_locked_order(): void
     {
+        $commission = Str::uuid()->toString();
+        $invoiceNumber = $this->order->invoice_number;
+        $this->order->update(['is_locked' => true]);
+
         Livewire::test(OrderView::class, ['id' => $this->order->id])
-            ->assertSet('order.discounts', [])
-            ->call('editDiscount')
+            ->set('order.commission', $commission)
+            ->set('order.invoice_number', $commission)
+            ->assertSet('order.commission', $commission)
+            ->assertSet('order.invoice_number', $commission)
+            ->call('save')
             ->assertStatus(200)
-            ->assertHasNoErrors()
-            ->assertExecutesJs(<<<'JS'
-                $modalOpen('edit-discount');
-            JS)
-            ->assertSet('discount.is_percentage', true)
-            ->set('discount.name', $discountName = Str::uuid()->toString())
-            ->set('discount.discount', 10)
-            ->call('saveDiscount')
-            ->assertStatus(200)
-            ->assertHasNoErrors()
-            ->assertNotSet('order.discounts', []);
+            ->assertHasNoErrors();
 
-        $this->assertDatabaseHas(
-            'discounts',
-            [
-                'model_type' => 'order',
-                'model_id' => $this->order->id,
-                'name' => $discountName,
-                'discount' => bcdiv(10, 100),
-                'order_column' => 1,
-                'is_percentage' => 1,
-            ]
-        );
-    }
+        $this->order->refresh();
 
-    public function test_can_delete_order()
-    {
-        Livewire::test(OrderView::class, ['id' => $this->order->id])
-            ->call('delete')
-            ->assertStatus(200)
-            ->assertHasNoErrors()
-            ->assertRedirectToRoute('orders.orders');
-
-        $this->assertSoftDeleted('orders', ['id' => $this->order->id]);
-        $this->assertSoftDeleted('order_positions', ['order_id' => $this->order->id]);
+        // ensure that the commission changed but the invoice number didnt
+        $this->assertTrue($this->order->is_locked);
+        $this->assertEquals($commission, $this->order->commission);
+        $this->assertEquals($invoiceNumber, $this->order->invoice_number);
     }
 }

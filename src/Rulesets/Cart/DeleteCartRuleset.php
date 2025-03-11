@@ -8,9 +8,9 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class DeleteCartRuleset extends FluxRuleset
 {
-    protected static ?string $model = Cart::class;
-
     protected static bool $addAdditionalColumnRules = false;
+
+    protected static ?string $model = Cart::class;
 
     public function rules(): array
     {

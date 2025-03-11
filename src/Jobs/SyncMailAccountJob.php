@@ -45,9 +45,75 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
         }
     }
 
-    public function uniqueId(): string
+    public static function defaultCron(): ?CronExpression
     {
-        return $this->mailAccount->uuid;
+        return null;
+    }
+
+    public static function description(): ?string
+    {
+        return 'Import Mails from given Mail Account.';
+    }
+
+    public static function isRepeatable(): bool
+    {
+        return true;
+    }
+
+    public static function name(): string
+    {
+        return class_basename(self::class);
+    }
+
+    public static function parameters(): array
+    {
+        return [
+            'email' => null,
+        ];
+    }
+
+    public function getUnseenMessages(Folder $folder): void
+    {
+        try {
+            $query = $folder->messages()
+                ->setFetchBody(false)
+                ->leaveUnread()
+                ->unseen()
+                ->since($this->mailAccount->created_at);
+        } catch (ResponseException) {
+            return;
+        }
+
+        $unreadUids = [];
+
+        $page = 0;
+        do {
+            $page++;
+            $messages = $query->paginate(100, $page);
+            $unreadUids[] = $messages->map(fn (Message $message) => $message->getUid())->toArray();
+        } while ($page !== $messages->lastPage());
+
+        resolve_static(Communication::class, 'query')
+            ->where('mail_account_id', $this->mailAccount->id)
+            ->where('mail_folder_id', $this->folderIds[$folder->path])
+            ->where('is_seen', false)
+            ->whereIntegerNotInRaw('message_uid', $unreadUids)
+            ->each(
+                fn (Communication $message) => UpdateCommunication::make(['id' => $message->id, 'is_seen' => true])
+                    ->validate()
+                    ->execute()
+            );
+
+        resolve_static(Communication::class, 'query')
+            ->where('mail_account_id', $this->mailAccount->id)
+            ->where('mail_folder_id', $this->folderIds[$folder->path])
+            ->where('is_seen', true)
+            ->whereIntegerInRaw('message_uid', $unreadUids)
+            ->each(
+                fn (Communication $message) => UpdateCommunication::make(['id' => $message->id, 'is_seen' => false])
+                    ->validate()
+                    ->execute()
+            );
     }
 
     public function handle(): void
@@ -86,6 +152,11 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
             $this->getNewMessages($folder);
             $this->getUnseenMessages($folder);
         }
+    }
+
+    public function uniqueId(): string
+    {
+        return $this->mailAccount->uuid;
     }
 
     protected function createFolder(Folder $folder, ?int $parentId = null): array
@@ -151,50 +222,6 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
                 $this->storeMessage($message, $this->folderIds[$folder->path]);
             }
         } while ($page !== $messages->lastPage());
-    }
-
-    public function getUnseenMessages(Folder $folder): void
-    {
-        try {
-            $query = $folder->messages()
-                ->setFetchBody(false)
-                ->leaveUnread()
-                ->unseen()
-                ->since($this->mailAccount->created_at);
-        } catch (ResponseException) {
-            return;
-        }
-
-        $unreadUids = [];
-
-        $page = 0;
-        do {
-            $page++;
-            $messages = $query->paginate(100, $page);
-            $unreadUids[] = $messages->map(fn (Message $message) => $message->getUid())->toArray();
-        } while ($page !== $messages->lastPage());
-
-        resolve_static(Communication::class, 'query')
-            ->where('mail_account_id', $this->mailAccount->id)
-            ->where('mail_folder_id', $this->folderIds[$folder->path])
-            ->where('is_seen', false)
-            ->whereIntegerNotInRaw('message_uid', $unreadUids)
-            ->each(
-                fn (Communication $message) => UpdateCommunication::make(['id' => $message->id, 'is_seen' => true])
-                    ->validate()
-                    ->execute()
-            );
-
-        resolve_static(Communication::class, 'query')
-            ->where('mail_account_id', $this->mailAccount->id)
-            ->where('mail_folder_id', $this->folderIds[$folder->path])
-            ->where('is_seen', true)
-            ->whereIntegerInRaw('message_uid', $unreadUids)
-            ->each(
-                fn (Communication $message) => UpdateCommunication::make(['id' => $message->id, 'is_seen' => false])
-                    ->validate()
-                    ->execute()
-            );
     }
 
     protected function storeMessage(Message $message, int $folderId): void
@@ -267,32 +294,5 @@ class SyncMailAccountJob implements Repeatable, ShouldBeUnique, ShouldQueue
                 ->validate()
                 ->execute();
         }
-    }
-
-    public static function isRepeatable(): bool
-    {
-        return true;
-    }
-
-    public static function name(): string
-    {
-        return class_basename(self::class);
-    }
-
-    public static function description(): ?string
-    {
-        return 'Import Mails from given Mail Account.';
-    }
-
-    public static function parameters(): array
-    {
-        return [
-            'email' => null,
-        ];
-    }
-
-    public static function defaultCron(): ?CronExpression
-    {
-        return null;
     }
 }

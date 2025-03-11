@@ -9,12 +9,12 @@ use Livewire\Attributes\Locked;
 
 class UnitForm extends FluxForm
 {
+    public ?string $abbreviation = null;
+
     #[Locked]
     public ?int $id = null;
 
     public ?string $name = null;
-
-    public ?string $abbreviation = null;
 
     protected function getActions(): array
     {

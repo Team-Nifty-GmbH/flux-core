@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('media', function (Blueprint $table) {
+        Schema::table('media', function (Blueprint $table): void {
             $table->unsignedBigInteger('parent_id')->nullable()->after('model_id');
 
             $table->foreign('parent_id')->references('id')->on('media');
@@ -17,7 +17,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('media', function (Blueprint $table) {
+        Schema::table('media', function (Blueprint $table): void {
             $table->dropForeign('media_parent_id_foreign');
 
             $table->dropColumn('parent_id');

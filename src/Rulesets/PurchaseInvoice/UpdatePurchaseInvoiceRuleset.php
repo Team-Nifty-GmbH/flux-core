@@ -18,6 +18,22 @@ class UpdatePurchaseInvoiceRuleset extends FluxRuleset
 {
     protected static ?string $model = PurchaseInvoice::class;
 
+    public static function getRules(): array
+    {
+        return array_merge(
+            parent::getRules(),
+            resolve_static(BankConnectionRuleset::class, 'getRules'),
+            resolve_static(PurchaseInvoicePositionRuleset::class, 'getRules'),
+            resolve_static(TagRuleset::class, 'getRules'),
+            [
+                'purchase_invoice_positions.*.id' => [
+                    'integer',
+                    app(ModelExists::class, ['model' => PurchaseInvoicePosition::class]),
+                ],
+            ]
+        );
+    }
+
     public function rules(): array
     {
         return [
@@ -70,21 +86,5 @@ class UpdatePurchaseInvoiceRuleset extends FluxRuleset
 
             'purchase_invoice_positions' => 'array',
         ];
-    }
-
-    public static function getRules(): array
-    {
-        return array_merge(
-            parent::getRules(),
-            resolve_static(BankConnectionRuleset::class, 'getRules'),
-            resolve_static(PurchaseInvoicePositionRuleset::class, 'getRules'),
-            resolve_static(TagRuleset::class, 'getRules'),
-            [
-                'purchase_invoice_positions.*.id' => [
-                    'integer',
-                    app(ModelExists::class, ['model' => PurchaseInvoicePosition::class]),
-                ],
-            ]
-        );
     }
 }

@@ -19,13 +19,13 @@ class NavigationTest extends BaseSetup
         PriceList::factory()->create(['is_default' => true]);
     }
 
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(Navigation::class)
             ->assertStatus(200);
     }
 
-    public function test_shows_order_types()
+    public function test_shows_order_types(): void
     {
         $orderTypes = OrderType::factory(5)
             ->create([

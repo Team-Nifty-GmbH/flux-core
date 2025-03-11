@@ -11,55 +11,35 @@ use Livewire\Attributes\Locked;
 
 class PriceListForm extends FluxForm
 {
-    #[Locked]
-    public ?int $id = null;
-
-    public ?int $parent_id = null;
-
-    public ?string $name = null;
-
-    public ?string $price_list_code = null;
-
-    public ?string $rounding_method_enum = 'none';
-
-    public ?int $rounding_precision = null;
-
-    public ?int $rounding_number = null;
-
-    public ?string $rounding_mode = null;
-
-    public ?bool $is_net = true;
-
-    public ?bool $is_default = false;
-
-    public ?bool $is_purchase = false;
-
     public ?array $discount = [
         'discount' => null,
         'is_percentage' => true,
     ];
 
+    #[Locked]
+    public ?int $id = null;
+
+    public ?bool $is_default = false;
+
+    public ?bool $is_net = true;
+
+    public ?bool $is_purchase = false;
+
+    public ?string $name = null;
+
+    public ?int $parent_id = null;
+
+    public ?string $price_list_code = null;
+
+    public ?string $rounding_method_enum = 'none';
+
+    public ?string $rounding_mode = null;
+
+    public ?int $rounding_number = null;
+
+    public ?int $rounding_precision = null;
+
     protected ?string $modelClass = PriceList::class;
-
-    protected function getActions(): array
-    {
-        return [
-            'create' => CreatePriceList::class,
-            'update' => UpdatePriceList::class,
-            'delete' => DeletePriceList::class,
-        ];
-    }
-
-    protected function makeAction(string $name, ?array $data = null): FluxAction
-    {
-        $data = $data ?? $this->toArray();
-
-        if (data_get($data, 'discount.is_percentage')) {
-            data_set($data, 'discount.discount', data_get($data, 'discount.discount') / 100);
-        }
-
-        return parent::makeAction($name, $data);
-    }
 
     public function fill($values): void
     {
@@ -79,5 +59,25 @@ class PriceListForm extends FluxForm
                 'is_percentage' => true,
             ];
         }
+    }
+
+    protected function getActions(): array
+    {
+        return [
+            'create' => CreatePriceList::class,
+            'update' => UpdatePriceList::class,
+            'delete' => DeletePriceList::class,
+        ];
+    }
+
+    protected function makeAction(string $name, ?array $data = null): FluxAction
+    {
+        $data = $data ?? $this->toArray();
+
+        if (data_get($data, 'discount.is_percentage')) {
+            data_set($data, 'discount.discount', data_get($data, 'discount.discount') / 100);
+        }
+
+        return parent::makeAction($name, $data);
     }
 }

@@ -15,14 +15,6 @@ class TotalOrdersCount extends LineChart
 {
     use IsTimeFrameAwareWidget, Widgetable;
 
-    protected function getListeners(): array
-    {
-        return [
-            'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
-                . ',.OrderLocked' => 'calculateByTimeFrame',
-        ];
-    }
-
     #[Renderless]
     public function calculateByTimeFrame(): void
     {
@@ -76,5 +68,13 @@ class TotalOrdersCount extends LineChart
         ];
 
         $this->xaxis['categories'] = $revenue->getLabels();
+    }
+
+    protected function getListeners(): array
+    {
+        return [
+            'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
+                . ',.OrderLocked' => 'calculateByTimeFrame',
+        ];
     }
 }

@@ -8,7 +8,7 @@ class RenameProjectIdToParentIdOnProjectsTable extends Migration
 {
     public function up(): void
     {
-        Schema::table('projects', function (Blueprint $table) {
+        Schema::table('projects', function (Blueprint $table): void {
             $table->dropForeign('projects_project_id_foreign');
             $table->dropIndex('projects_project_id_foreign');
 
@@ -20,7 +20,7 @@ class RenameProjectIdToParentIdOnProjectsTable extends Migration
 
     public function down(): void
     {
-        Schema::table('projects', function (Blueprint $table) {
+        Schema::table('projects', function (Blueprint $table): void {
             $table->dropForeign('projects_parent_id_foreign');
             $table->dropIndex('projects_parent_id_foreign');
 

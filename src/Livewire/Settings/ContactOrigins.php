@@ -15,9 +15,9 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class ContactOrigins extends ContactOriginList
 {
-    protected ?string $includeBefore = 'flux::livewire.settings.contact-origins';
-
     public ContactOriginForm $contactOriginForm;
+
+    protected ?string $includeBefore = 'flux::livewire.settings.contact-origins';
 
     protected function getTableActions(): array
     {
@@ -56,6 +56,25 @@ class ContactOrigins extends ContactOriginList
     }
 
     #[Renderless]
+    public function delete(ContactOrigin $contactOrigin): bool
+    {
+        $this->contactOriginForm->reset();
+        $this->contactOriginForm->fill($contactOrigin);
+
+        try {
+            $this->contactOriginForm->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
+    }
+
+    #[Renderless]
     public function edit(ContactOrigin $contactOrigin): void
     {
         $this->contactOriginForm->reset();
@@ -71,25 +90,6 @@ class ContactOrigins extends ContactOriginList
     {
         try {
             $this->contactOriginForm->save();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
-    }
-
-    #[Renderless]
-    public function delete(ContactOrigin $contactOrigin): bool
-    {
-        $this->contactOriginForm->reset();
-        $this->contactOriginForm->fill($contactOrigin);
-
-        try {
-            $this->contactOriginForm->delete();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 

@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('contacts', function (Blueprint $table) {
+        Schema::table('contacts', function (Blueprint $table): void {
             $table->dropIndex('contacts_customer_number_index');
             $table->unique(['customer_number', 'client_id']);
             $table->unique(['creditor_number', 'client_id']);
@@ -17,7 +17,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('contacts', function (Blueprint $table) {
+        Schema::table('contacts', function (Blueprint $table): void {
             $table->dropUnique('contacts_customer_number_client_id_unique');
             $table->dropUnique('contacts_creditor_number_client_id_unique');
             $table->index('customer_number');

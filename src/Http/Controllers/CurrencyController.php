@@ -27,16 +27,16 @@ class CurrencyController extends BaseController
         );
     }
 
-    public function update(Request $request, CurrencyService $currencyService): JsonResponse
+    public function delete(string $id, CurrencyService $currencyService): JsonResponse
     {
-        $response = $currencyService->update($request->all());
+        $response = $currencyService->delete($id);
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
-    public function delete(string $id, CurrencyService $currencyService): JsonResponse
+    public function update(Request $request, CurrencyService $currencyService): JsonResponse
     {
-        $response = $currencyService->delete($id);
+        $response = $currencyService->update($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }

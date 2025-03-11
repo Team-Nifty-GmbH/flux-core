@@ -6,10 +6,10 @@ use FluxErp\Models\Tag;
 
 class TagList extends BaseDataTable
 {
-    protected string $model = Tag::class;
-
     public array $enabledCols = [
         'name',
         'type',
     ];
+
+    protected string $model = Tag::class;
 }

@@ -8,9 +8,9 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class FinishProjectRuleset extends FluxRuleset
 {
-    protected static ?string $model = Project::class;
-
     protected static bool $addAdditionalColumnRules = false;
+
+    protected static ?string $model = Project::class;
 
     public function rules(): array
     {

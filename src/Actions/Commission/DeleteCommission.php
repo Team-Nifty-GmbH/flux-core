@@ -8,14 +8,14 @@ use FluxErp\Rulesets\Commission\DeleteCommissionRuleset;
 
 class DeleteCommission extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeleteCommissionRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Commission::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeleteCommissionRuleset::class;
     }
 
     public function performAction(): ?bool

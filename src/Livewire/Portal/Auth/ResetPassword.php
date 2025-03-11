@@ -7,7 +7,7 @@ use FluxErp\Livewire\Auth\ResetPassword as BaseResetPassword;
 
 class ResetPassword extends BaseResetPassword
 {
-    protected string $updateAction = UpdateAddress::class;
-
     protected string $passwordBroker = 'addresses';
+
+    protected string $updateAction = UpdateAddress::class;
 }

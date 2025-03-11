@@ -14,9 +14,9 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class PaymentReminderTexts extends PaymentReminderTextList
 {
-    protected ?string $includeBefore = 'flux::livewire.settings.payment-reminder-texts';
-
     public PaymentReminderTextForm $paymentReminderTextForm;
+
+    protected ?string $includeBefore = 'flux::livewire.settings.payment-reminder-texts';
 
     protected function getTableActions(): array
     {
@@ -53,10 +53,16 @@ class PaymentReminderTexts extends PaymentReminderTextList
         ];
     }
 
-    public function save(): bool
+    public function delete(PaymentReminderText $paymentReminderText): bool
     {
+        $this->paymentReminderTextForm->reset();
+        $this->paymentReminderTextForm->fill($paymentReminderText);
+
         try {
-            $this->paymentReminderTextForm->save();
+            DeletePaymentReminderText::make($this->paymentReminderTextForm)
+                ->checkPermission()
+                ->validate()
+                ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
@@ -78,16 +84,10 @@ class PaymentReminderTexts extends PaymentReminderTextList
         JS);
     }
 
-    public function delete(PaymentReminderText $paymentReminderText): bool
+    public function save(): bool
     {
-        $this->paymentReminderTextForm->reset();
-        $this->paymentReminderTextForm->fill($paymentReminderText);
-
         try {
-            DeletePaymentReminderText::make($this->paymentReminderTextForm)
-                ->checkPermission()
-                ->validate()
-                ->execute();
+            $this->paymentReminderTextForm->save();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 

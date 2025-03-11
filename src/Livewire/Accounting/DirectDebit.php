@@ -15,6 +15,8 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class DirectDebit extends OrderList
 {
+    public array $accounts = [];
+
     public array $enabledCols = [
         'invoice_number',
         'invoice_date',
@@ -24,8 +26,6 @@ class DirectDebit extends OrderList
         'balance',
         'commission',
     ];
-
-    public array $accounts = [];
 
     protected function getSelectedActions(): array
     {
@@ -39,31 +39,6 @@ class DirectDebit extends OrderList
                 ])
                 ->when(resolve_static(CreatePaymentRun::class, 'canPerformAction', [false])),
         ];
-    }
-
-    protected function getBuilder(Builder $builder): Builder
-    {
-        $orderTypes = resolve_static(OrderType::class, 'query')
-            ->where('is_active', true)
-            ->get(['id', 'order_type_enum'])
-            ->filter(fn (OrderType $orderType) => ! $orderType->order_type_enum->isPurchase()
-                && $orderType->order_type_enum->multiplier() > 0
-            )
-            ->pluck('id');
-
-        return $builder->whereRelation('paymentType', 'is_direct_debit', true)
-            ->where(function (Builder $query) {
-                $query
-                    ->whereHas(
-                        'paymentRuns',
-                        fn (Builder $builder) => $builder->whereNotIn('state', ['open', 'successful', 'pending'])
-                    )
-                    ->orWhereDoesntHave('paymentRuns');
-            })
-            ->where('balance', '>', 0)
-            ->whereNotState('payment_state', Paid::class)
-            ->whereNotNull('invoice_number')
-            ->whereIntegerInRaw('order_type_id', $orderTypes);
     }
 
     public function createPaymentRun(): void
@@ -94,5 +69,30 @@ class DirectDebit extends OrderList
 
         $this->notification()->success(__('Payment Run created.'))->send();
         $this->loadData();
+    }
+
+    protected function getBuilder(Builder $builder): Builder
+    {
+        $orderTypes = resolve_static(OrderType::class, 'query')
+            ->where('is_active', true)
+            ->get(['id', 'order_type_enum'])
+            ->filter(fn (OrderType $orderType) => ! $orderType->order_type_enum->isPurchase()
+                && $orderType->order_type_enum->multiplier() > 0
+            )
+            ->pluck('id');
+
+        return $builder->whereRelation('paymentType', 'is_direct_debit', true)
+            ->where(function (Builder $query): void {
+                $query
+                    ->whereHas(
+                        'paymentRuns',
+                        fn (Builder $builder) => $builder->whereNotIn('state', ['open', 'successful', 'pending'])
+                    )
+                    ->orWhereDoesntHave('paymentRuns');
+            })
+            ->where('balance', '>', 0)
+            ->whereNotState('payment_state', Paid::class)
+            ->whereNotNull('invoice_number')
+            ->whereIntegerInRaw('order_type_id', $orderTypes);
     }
 }

@@ -12,21 +12,21 @@ use Livewire\Component;
 
 class TicketTypes extends Component
 {
-    #[Locked]
-    public array $dbTicketTypes = [];
+    public int $additionalColumnIndex = -1;
 
     #[Locked]
     public array $additionalColumns = [];
 
-    public array $ticketTypes;
+    #[Locked]
+    public array $dbTicketTypes = [];
 
-    public int $ticketTypeIndex = -1;
-
-    public int $additionalColumnIndex = -1;
+    public bool $showAdditionalColumnModal = false;
 
     public bool $showTicketTypeModal = false;
 
-    public bool $showAdditionalColumnModal = false;
+    public int $ticketTypeIndex = -1;
+
+    public array $ticketTypes;
 
     protected $listeners = [
         'closeModal',
@@ -79,46 +79,6 @@ class TicketTypes extends Component
     public function render(): View
     {
         return view('flux::livewire.settings.ticket-types');
-    }
-
-    public function show(?int $index = null, bool $newAdditionalColumn = false): void
-    {
-        if (is_null($index)) {
-            $this->ticketTypeIndex = -1;
-            $this->additionalColumnIndex = -1;
-        } elseif (array_key_exists('field_type', $this->ticketTypes[$index])) {
-            $this->ticketTypeIndex = -1;
-            $this->additionalColumnIndex = $index;
-        } else {
-            $this->ticketTypeIndex = $index;
-            $this->additionalColumnIndex = -1;
-        }
-
-        if ($this->additionalColumnIndex !== -1 || $newAdditionalColumn) {
-            $this->dispatch(
-                'show',
-                ! $newAdditionalColumn ? $this->ticketTypes[$index] :
-                    array_merge(
-                        array_fill_keys(
-                            array_keys(resolve_static(CreateAdditionalColumnRuleset::class, 'getRules')),
-                            null
-                        ),
-                        [
-                            'model_type' => morph_alias(TicketType::class),
-                            'model_id' => $this->ticketTypes[$index]['id'],
-                        ]
-                    )
-            )->to('settings.additional-column-edit');
-
-            $this->showAdditionalColumnModal = true;
-        } else {
-            $this->dispatch(
-                'show',
-                ! is_null($index) ? $this->ticketTypes[$index] : []
-            )->to('settings.ticket-type-edit');
-
-            $this->showTicketTypeModal = true;
-        }
     }
 
     public function closeModal(array $data, bool $delete = false): void
@@ -177,6 +137,46 @@ class TicketTypes extends Component
             $this->dispatch('delete')->to('settings.additional-column-edit');
         } else {
             $this->dispatch('delete')->to('settings.ticket-type-edit');
+        }
+    }
+
+    public function show(?int $index = null, bool $newAdditionalColumn = false): void
+    {
+        if (is_null($index)) {
+            $this->ticketTypeIndex = -1;
+            $this->additionalColumnIndex = -1;
+        } elseif (array_key_exists('field_type', $this->ticketTypes[$index])) {
+            $this->ticketTypeIndex = -1;
+            $this->additionalColumnIndex = $index;
+        } else {
+            $this->ticketTypeIndex = $index;
+            $this->additionalColumnIndex = -1;
+        }
+
+        if ($this->additionalColumnIndex !== -1 || $newAdditionalColumn) {
+            $this->dispatch(
+                'show',
+                ! $newAdditionalColumn ? $this->ticketTypes[$index] :
+                    array_merge(
+                        array_fill_keys(
+                            array_keys(resolve_static(CreateAdditionalColumnRuleset::class, 'getRules')),
+                            null
+                        ),
+                        [
+                            'model_type' => morph_alias(TicketType::class),
+                            'model_id' => $this->ticketTypes[$index]['id'],
+                        ]
+                    )
+            )->to('settings.additional-column-edit');
+
+            $this->showAdditionalColumnModal = true;
+        } else {
+            $this->dispatch(
+                'show',
+                ! is_null($index) ? $this->ticketTypes[$index] : []
+            )->to('settings.ticket-type-edit');
+
+            $this->showTicketTypeModal = true;
         }
     }
 

@@ -11,7 +11,7 @@ return new class() extends Migration
      */
     public function up(): void
     {
-        Schema::table('orders', function (Blueprint $table) {
+        Schema::table('orders', function (Blueprint $table): void {
             $table->decimal('shipping_costs_vat_rate_percentage', 40, 10)
                 ->nullable()
                 ->after('shipping_costs')
@@ -32,7 +32,7 @@ return new class() extends Migration
                 ->change();
         });
 
-        Schema::table('orders', function (Blueprint $table) {
+        Schema::table('orders', function (Blueprint $table): void {
             $table->renameColumn('shipping_costs', 'shipping_costs_net_price');
         });
     }
@@ -42,7 +42,7 @@ return new class() extends Migration
      */
     public function down(): void
     {
-        Schema::table('orders', function (Blueprint $table) {
+        Schema::table('orders', function (Blueprint $table): void {
             $table->decimal('shipping_costs_net_price', 40, 10)
                 ->default(0)
                 ->nullable(false)
@@ -54,7 +54,7 @@ return new class() extends Migration
             $table->dropColumn('shipping_costs_vat_rate_percentage');
         });
 
-        Schema::table('orders', function (Blueprint $table) {
+        Schema::table('orders', function (Blueprint $table): void {
             $table->renameColumn('shipping_costs_net_price', 'shipping_costs');
         });
     }

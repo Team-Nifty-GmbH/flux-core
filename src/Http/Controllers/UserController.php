@@ -27,16 +27,16 @@ class UserController extends BaseController
         );
     }
 
-    public function update(Request $request, UserService $userService): JsonResponse
+    public function delete(string $id, UserService $userService): JsonResponse
     {
-        $response = $userService->update($request->all());
+        $response = $userService->delete($id);
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
-    public function delete(string $id, UserService $userService): JsonResponse
+    public function update(Request $request, UserService $userService): JsonResponse
     {
-        $response = $userService->delete($id);
+        $response = $userService->update($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }

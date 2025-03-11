@@ -15,30 +15,38 @@ use Livewire\Attributes\Locked;
 
 class TicketForm extends FluxForm
 {
-    #[Locked]
-    public ?int $id = null;
+    public ?array $additional_columns = [];
 
-    public ?string $authenticatable_type = null;
+    public array $authenticatable = [];
 
     public ?int $authenticatable_id = null;
 
-    public ?string $model_type = null;
+    public ?string $authenticatable_type = null;
 
-    public ?int $model_id = null;
-
-    public ?int $ticket_type_id = null;
-
-    public ?string $ticket_number = null;
-
-    public ?string $title = null;
-
-    public ?string $description = null;
-
-    public ?string $state = null;
+    public ?array $availableAdditionalColumns = [];
 
     public ?string $created_at = null;
 
     public ?string $created_by = null;
+
+    public ?string $description = null;
+
+    #[Locked]
+    public ?int $id = null;
+
+    public ?int $model_id = null;
+
+    public ?string $model_type = null;
+
+    public ?string $state = null;
+
+    public ?string $ticket_number = null;
+
+    public ?array $ticket_type = null;
+
+    public ?int $ticket_type_id = null;
+
+    public ?string $title = null;
 
     public ?string $updated_at = null;
 
@@ -46,24 +54,7 @@ class TicketForm extends FluxForm
 
     public array $users = [];
 
-    public array $authenticatable = [];
-
-    public ?array $ticket_type = null;
-
-    public ?array $additional_columns = [];
-
-    public ?array $availableAdditionalColumns = [];
-
     protected ?array $meta = null;
-
-    protected function getActions(): array
-    {
-        return [
-            'create' => CreateTicket::class,
-            'update' => UpdateTicket::class,
-            'delete' => DeleteTicket::class,
-        ];
-    }
 
     public function fill($values): void
     {
@@ -97,14 +88,23 @@ class TicketForm extends FluxForm
         );
     }
 
+    protected function getActions(): array
+    {
+        return [
+            'create' => CreateTicket::class,
+            'update' => UpdateTicket::class,
+            'delete' => DeleteTicket::class,
+        ];
+    }
+
     protected function loadAdditionalColumns(): void
     {
         $this->availableAdditionalColumns = resolve_static(AdditionalColumn::class, 'query')
             ->where('is_frontend_visible', true)
-            ->where(function (Builder $query) {
+            ->where(function (Builder $query): void {
                 $query->where('model_type', morph_alias(TicketModel::class))
-                    ->when($this->ticket_type_id, function (Builder $query) {
-                        $query->orWhere(function (Builder $query) {
+                    ->when($this->ticket_type_id, function (Builder $query): void {
+                        $query->orWhere(function (Builder $query): void {
                             $query->where('model_type', morph_alias(TicketType::class))
                                 ->where('model_id', $this->ticket_type_id);
                         });

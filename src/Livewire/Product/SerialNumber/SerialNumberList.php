@@ -12,9 +12,9 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class SerialNumberList extends BaseSerialNumberList
 {
-    protected ?string $includeBefore = 'flux::livewire.product.serial-number.serial-number-list';
-
     public StockPostingForm $stockPosting;
+
+    protected ?string $includeBefore = 'flux::livewire.product.serial-number.serial-number-list';
 
     public function mount(): void
     {
@@ -24,6 +24,18 @@ class SerialNumberList extends BaseSerialNumberList
         ];
 
         parent::mount();
+    }
+
+    protected function getTableActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->text(__('New'))
+                ->icon('plus')
+                ->color('indigo')
+                ->wireClick('edit')
+                ->when(resolve_static(CreateSerialNumber::class, 'canPerformAction', [false])),
+        ];
     }
 
     public function edit(): void
@@ -57,17 +69,5 @@ class SerialNumberList extends BaseSerialNumberList
         $this->loadData();
 
         return true;
-    }
-
-    protected function getTableActions(): array
-    {
-        return [
-            DataTableButton::make()
-                ->text(__('New'))
-                ->icon('plus')
-                ->color('indigo')
-                ->wireClick('edit')
-                ->when(resolve_static(CreateSerialNumber::class, 'canPerformAction', [false])),
-        ];
     }
 }

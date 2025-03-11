@@ -10,14 +10,14 @@ use Illuminate\Validation\ValidationException;
 
 class DeleteComment extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeleteCommentRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Comment::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeleteCommentRuleset::class;
     }
 
     public function performAction(): ?bool

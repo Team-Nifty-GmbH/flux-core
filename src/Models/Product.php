@@ -40,9 +40,9 @@ class Product extends FluxModel implements HasMedia, InteractsWithDataTables
         HasPackageFactory, HasParentChildRelations, HasSerialNumberRange, HasTags, HasUserModification, HasUuid,
         InteractsWithMedia, Lockable, LogsActivity, Searchable, SoftDeletes;
 
-    protected ?string $detailRouteName = 'products.id';
-
     public static string $iconName = 'square-3-stack-3d';
+
+    protected ?string $detailRouteName = 'products.id';
 
     public static function calculateVariantName(
         ProductOptionCollection|Arrayable|array $productOptions,
@@ -62,7 +62,7 @@ class Product extends FluxModel implements HasMedia, InteractsWithDataTables
 
     protected static function booted(): void
     {
-        static::creating(function (Product $product) {
+        static::creating(function (Product $product): void {
             if (! $product->product_number) {
                 $product->getSerialNumber('product_number');
             }
@@ -82,17 +82,6 @@ class Product extends FluxModel implements HasMedia, InteractsWithDataTables
             'is_nos' => 'boolean',
             'is_active_export_to_web_shop' => 'boolean',
         ];
-    }
-
-    public function price(): Attribute
-    {
-        return Attribute::get(function () {
-            return resolve_static(PriceHelper::class, 'make', ['product' => $this])
-                ->when(is_a(auth()->user(), Address::class), function (PriceHelper $priceHelper) {
-                    return $priceHelper->setContact(auth()->user()->contact);
-                })
-                ->price();
-        });
     }
 
     public function bundleProducts(): BelongsToMany
@@ -120,19 +109,78 @@ class Product extends FluxModel implements HasMedia, InteractsWithDataTables
         return $this->belongsTo(Media::class, 'cover_media_id');
     }
 
+    /**
+     * @throws \Exception
+     */
+    public function getAvatarUrl(): ?string
+    {
+        return $this->coverMedia?->getUrl('thumb')
+            ?? $this->getFirstMedia('images')?->getUrl('thumb')
+            ?? static::icon()->getUrl();
+    }
+
+    public function getChildProductOptions(): Collection
+    {
+        return resolve_static(ProductOptionGroup::class, 'query')
+            ->whereHas(
+                'productOptions.products',
+                function (Builder $query) {
+                    return $query->whereIntegerInRaw('product_id', $this->children->pluck('id'));
+                }
+            )
+            ->with([
+                'productOptions' => fn ($query) => $query
+                    ->whereHas('products', function (Builder $query) {
+                        return $query->whereIntegerInRaw('product_id', $this->children->pluck('id'));
+                    })
+                    ->select([
+                        'product_options.id',
+                        'product_option_group_id',
+                        'name',
+                    ]),
+            ])
+            ->get();
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function getLabel(): ?string
+    {
+        return $this->name;
+    }
+
+    public function getUrl(): ?string
+    {
+        return $this->detailRoute();
+    }
+
     public function orderPositions(): HasMany
     {
         return $this->hasMany(OrderPosition::class);
     }
 
-    public function productCrossSellings(): HasMany
+    public function price(): Attribute
     {
-        return $this->hasMany(ProductCrossSelling::class);
+        return Attribute::get(function () {
+            return resolve_static(PriceHelper::class, 'make', ['product' => $this])
+                ->when(is_a(auth()->user(), Address::class), function (PriceHelper $priceHelper) {
+                    return $priceHelper->setContact(auth()->user()->contact);
+                })
+                ->price();
+        });
     }
 
     public function prices(): HasMany
     {
         return $this->hasMany(Price::class);
+    }
+
+    public function productCrossSellings(): HasMany
+    {
+        return $this->hasMany(ProductCrossSelling::class);
     }
 
     public function productOptions(): BelongsToMany
@@ -160,90 +208,22 @@ class Product extends FluxModel implements HasMedia, InteractsWithDataTables
             )->price();
     }
 
-    public function stockPostings(): HasMany
-    {
-        return $this->hasMany(StockPosting::class);
-    }
-
-    public function suppliers(): BelongsToMany
-    {
-        return $this->belongsToMany(Contact::class, 'product_supplier');
-    }
-
-    public function unit(): BelongsTo
-    {
-        return $this->belongsTo(Unit::class);
-    }
-
-    public function vatRate(): BelongsTo
-    {
-        return $this->belongsTo(VatRate::class);
-    }
-
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('images')
             ->useDisk('public');
     }
 
-    public function getChildProductOptions(): Collection
-    {
-        return resolve_static(ProductOptionGroup::class, 'query')
-            ->whereHas(
-                'productOptions.products',
-                function (Builder $query) {
-                    return $query->whereIntegerInRaw('product_id', $this->children->pluck('id'));
-                }
-            )
-            ->with([
-                'productOptions' => fn ($query) => $query
-                    ->whereHas('products', function (Builder $query) {
-                        return $query->whereIntegerInRaw('product_id', $this->children->pluck('id'));
-                    })
-                    ->select([
-                        'product_options.id',
-                        'product_option_group_id',
-                        'name',
-                    ]),
-            ])
-            ->get();
-    }
-
-    public function getLabel(): ?string
-    {
-        return $this->name;
-    }
-
-    public function getDescription(): ?string
-    {
-        return $this->description;
-    }
-
-    public function getUrl(): ?string
-    {
-        return $this->detailRoute();
-    }
-
-    /**
-     * @throws \Exception
-     */
-    public function getAvatarUrl(): ?string
-    {
-        return $this->coverMedia?->getUrl('thumb')
-            ?? $this->getFirstMedia('images')?->getUrl('thumb')
-            ?? static::icon()->getUrl();
-    }
-
     public function scopeWebshop(Builder $query): void
     {
         $query->with('coverMedia')
             ->withCount('children')
-            ->where(function (Builder $query) {
+            ->where(function (Builder $query): void {
                 $query->where(fn (Builder $query) => $query->whereHas('stockPostings')
                     ->orWhere('is_nos', true)
                 )
-                    ->orWhereHas('children', function (Builder $query) {
-                        $query->where(function (Builder $query) {
+                    ->orWhereHas('children', function (Builder $query): void {
+                        $query->where(function (Builder $query): void {
                             $query->where('is_nos', true)
                                 ->orWhereHas('stockPostings');
                         })
@@ -266,5 +246,25 @@ class Product extends FluxModel implements HasMedia, InteractsWithDataTables
                     'is_highlight',
                 ]
             ));
+    }
+
+    public function stockPostings(): HasMany
+    {
+        return $this->hasMany(StockPosting::class);
+    }
+
+    public function suppliers(): BelongsToMany
+    {
+        return $this->belongsToMany(Contact::class, 'product_supplier');
+    }
+
+    public function unit(): BelongsTo
+    {
+        return $this->belongsTo(Unit::class);
+    }
+
+    public function vatRate(): BelongsTo
+    {
+        return $this->belongsTo(VatRate::class);
     }
 }

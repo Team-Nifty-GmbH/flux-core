@@ -42,9 +42,60 @@ class CalendarEvent extends FluxModel implements HasMedia
         return $this->belongsTo(Calendar::class);
     }
 
-    public function invites(): HasMany
+    public function fromCalendarEventObject(array $calendarEvent): static
     {
-        return $this->hasMany(Inviteable::class);
+        $mappedArray = [];
+
+        foreach ($calendarEvent as $key => $value) {
+            $mappedArray[Str::snake($key)] = $value;
+        }
+
+        $mappedArray['is_all_day'] = $calendarEvent['allDay'] ?? false;
+
+        foreach ($mappedArray['extended_props'] ?? [] as $key => $value) {
+            $mappedArray[Str::snake($key)] = $mappedArray[Str::snake($key)] ?? $value;
+        }
+
+        if ($mappedArray['has_repeats'] ?? false) {
+            // Build repeat string
+            if (in_array($mappedArray['unit'], ['days', 'years'])
+                || ($mappedArray['unit'] === 'months' && ($mappedArray['monthly'] ?? false) === 'day')
+            ) {
+                $mappedArray['repeat'] = '+' . $mappedArray['interval'] . ' ' . $mappedArray['unit'];
+            } elseif ($mappedArray['unit'] === 'weeks') {
+                $mappedArray['repeat'] = implode(',', array_map(
+                    fn ($item) => 'next ' . $item . ' +' . $mappedArray['interval'] - 1 . ' ' . $mappedArray['unit'],
+                    array_intersect(
+                        array_map(
+                            fn ($item) => Carbon::parse($mappedArray['start'])->addDays($item)->format('D'),
+                            range(0, 6)
+                        ),
+                        $mappedArray['weekdays'],
+                    )
+                ));
+            } elseif ($mappedArray['unit'] === 'months') {
+                $mappedArray['repeat'] = $mappedArray['monthly'] . ' '
+                    . Carbon::parse($mappedArray['start'])->format('D') . ' of +'
+                    . $mappedArray['interval'] . ' ' . $mappedArray['unit'];
+            }
+        }
+
+        switch ($mappedArray['repeat_radio']) {
+            case 'repeat_end':
+                $mappedArray['recurrences'] = null;
+                break;
+            case 'recurrences':
+                $mappedArray['repeat_end'] = null;
+                break;
+            default:
+                $mappedArray['recurrences'] = null;
+                $mappedArray['repeat_end'] = null;
+                break;
+        }
+
+        $this->fill($mappedArray);
+
+        return $this;
     }
 
     public function invited(): MorphToMany
@@ -59,6 +110,26 @@ class CalendarEvent extends FluxModel implements HasMedia
         return $this->morphedByMany(Address::class, 'inviteable', 'inviteables')
             ->using(CalendarEventInvite::class)
             ->withPivot(['status', 'model_calendar_id']);
+    }
+
+    public function invitedModels(): Collection
+    {
+        $types = $this->invites()->distinct('inviteable_type')->pluck('inviteable_type')->toArray();
+
+        $invitedModels = collect();
+        foreach ($types as $type) {
+            $invitedModels = $invitedModels->merge(
+                $this->morphedByMany(
+                    Relation::getMorphedModel($type), 'inviteable')->withPivot('status')->get()
+            );
+        }
+
+        return $invitedModels;
+    }
+
+    public function invites(): HasMany
+    {
+        return $this->hasMany(Inviteable::class);
     }
 
     public function toCalendarEventObject(array $attributes = []): array
@@ -152,77 +223,6 @@ class CalendarEvent extends FluxModel implements HasMedia
         }
 
         return $calendarEventObject;
-    }
-
-    public function fromCalendarEventObject(array $calendarEvent): static
-    {
-        $mappedArray = [];
-
-        foreach ($calendarEvent as $key => $value) {
-            $mappedArray[Str::snake($key)] = $value;
-        }
-
-        $mappedArray['is_all_day'] = $calendarEvent['allDay'] ?? false;
-
-        foreach ($mappedArray['extended_props'] ?? [] as $key => $value) {
-            $mappedArray[Str::snake($key)] = $mappedArray[Str::snake($key)] ?? $value;
-        }
-
-        if ($mappedArray['has_repeats'] ?? false) {
-            // Build repeat string
-            if (in_array($mappedArray['unit'], ['days', 'years'])
-                || ($mappedArray['unit'] === 'months' && ($mappedArray['monthly'] ?? false) === 'day')
-            ) {
-                $mappedArray['repeat'] = '+' . $mappedArray['interval'] . ' ' . $mappedArray['unit'];
-            } elseif ($mappedArray['unit'] === 'weeks') {
-                $mappedArray['repeat'] = implode(',', array_map(
-                    fn ($item) => 'next ' . $item . ' +' . $mappedArray['interval'] - 1 . ' ' . $mappedArray['unit'],
-                    array_intersect(
-                        array_map(
-                            fn ($item) => Carbon::parse($mappedArray['start'])->addDays($item)->format('D'),
-                            range(0, 6)
-                        ),
-                        $mappedArray['weekdays'],
-                    )
-                ));
-            } elseif ($mappedArray['unit'] === 'months') {
-                $mappedArray['repeat'] = $mappedArray['monthly'] . ' '
-                    . Carbon::parse($mappedArray['start'])->format('D') . ' of +'
-                    . $mappedArray['interval'] . ' ' . $mappedArray['unit'];
-            }
-        }
-
-        switch ($mappedArray['repeat_radio']) {
-            case 'repeat_end':
-                $mappedArray['recurrences'] = null;
-                break;
-            case 'recurrences':
-                $mappedArray['repeat_end'] = null;
-                break;
-            default:
-                $mappedArray['recurrences'] = null;
-                $mappedArray['repeat_end'] = null;
-                break;
-        }
-
-        $this->fill($mappedArray);
-
-        return $this;
-    }
-
-    public function invitedModels(): Collection
-    {
-        $types = $this->invites()->distinct('inviteable_type')->pluck('inviteable_type')->toArray();
-
-        $invitedModels = collect();
-        foreach ($types as $type) {
-            $invitedModels = $invitedModels->merge(
-                $this->morphedByMany(
-                    Relation::getMorphedModel($type), 'inviteable')->withPivot('status')->get()
-            );
-        }
-
-        return $invitedModels;
     }
 
     public function uniqueIds(): array

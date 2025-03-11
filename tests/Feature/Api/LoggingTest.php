@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 
 class LoggingTest extends TestCase
 {
-    public function test_create_database_log_entry()
+    public function test_create_database_log_entry(): void
     {
         $uuid = Str::uuid();
         $message = 'Alert message';

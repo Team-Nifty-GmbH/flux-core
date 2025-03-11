@@ -11,9 +11,7 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class PaymentRunList extends BaseDataTable
 {
-    protected string $model = PaymentRun::class;
-
-    public ?string $includeBefore = 'flux::livewire.accounting.payment-run.include-before';
+    public array $accounts = [];
 
     public array $enabledCols = [
         'bank_connection.iban',
@@ -21,9 +19,11 @@ class PaymentRunList extends BaseDataTable
         'payment_run_type_enum',
     ];
 
-    public array $accounts = [];
+    public ?string $includeBefore = 'flux::livewire.accounting.payment-run.include-before';
 
     public PaymentRunForm $paymentRunForm;
+
+    protected string $model = PaymentRun::class;
 
     public function mount(): void
     {
@@ -46,9 +46,17 @@ class PaymentRunList extends BaseDataTable
         ];
     }
 
-    public function executePaymentRun(): bool
+    public function delete(): bool
     {
-        // TODO: Create SEPA File in xml format
+        try {
+            $this->paymentRunForm->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
 
         return true;
     }
@@ -62,17 +70,9 @@ class PaymentRunList extends BaseDataTable
         JS);
     }
 
-    public function delete(): bool
+    public function executePaymentRun(): bool
     {
-        try {
-            $this->paymentRunForm->delete();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
+        // TODO: Create SEPA File in xml format
 
         return true;
     }

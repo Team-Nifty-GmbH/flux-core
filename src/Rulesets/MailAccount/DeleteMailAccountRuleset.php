@@ -8,9 +8,9 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class DeleteMailAccountRuleset extends FluxRuleset
 {
-    protected static ?string $model = MailAccount::class;
-
     protected static bool $addAdditionalColumnRules = false;
+
+    protected static ?string $model = MailAccount::class;
 
     public function rules(): array
     {

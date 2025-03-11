@@ -11,19 +11,14 @@ class BalanceStatement extends PrintableView
 {
     public Contact $model;
 
-    public static function shouldForceRecreate(): bool
-    {
-        return true;
-    }
-
     public function __construct(Contact $contact)
     {
         $this->model = $contact;
     }
 
-    public function getModel(): Contact
+    public static function shouldForceRecreate(): bool
     {
-        return $this->model;
+        return true;
     }
 
     public function render(): View|Factory
@@ -36,6 +31,11 @@ class BalanceStatement extends PrintableView
     public function getFileName(): string
     {
         return $this->getSubject() . '_' . $this->model->customer_number;
+    }
+
+    public function getModel(): Contact
+    {
+        return $this->model;
     }
 
     public function getSubject(): string

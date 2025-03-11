@@ -29,16 +29,30 @@ class MediaGrid extends BaseMediaGrid
         'url' => 'image',
     ];
 
-    public array $uploads = [];
-
     #[Modelable]
     public ProductForm $product;
+
+    public array $uploads = [];
 
     public function mount(): void
     {
         parent::mount();
 
         $this->collection = 'images';
+    }
+
+    protected function getTableActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->icon('arrow-up-tray')
+                ->color('indigo')
+                ->text(__('Upload'))
+                ->attributes([
+                    'wire:click' => 'uploadMedia()',
+                ])
+                ->when(fn () => resolve_static(UploadMedia::class, 'canPerformAction', [false])),
+        ];
     }
 
     protected function getRowActions(): array
@@ -58,44 +72,32 @@ class MediaGrid extends BaseMediaGrid
         return $rowActions;
     }
 
-    protected function getTableActions(): array
+    public function deleteMedia(Media $media): bool
     {
-        return [
-            DataTableButton::make()
-                ->icon('arrow-up-tray')
-                ->color('indigo')
-                ->text(__('Upload'))
-                ->attributes([
-                    'wire:click' => 'uploadMedia()',
-                ])
-                ->when(fn () => resolve_static(UploadMedia::class, 'canPerformAction', [false])),
-        ];
-    }
+        $delete = parent::deleteMedia($media);
 
-    protected function getRowAttributes(): ComponentAttributeBag
-    {
-        return new ComponentAttributeBag(
-            [
-                'x-bind:class' => <<<'JS'
-                    record.id === $wire.product.cover_media_id ? 'bg-indigo-50 ring-2 ring-primary-500 ring-offset-2' : ''
-                JS
-            ]
-        );
-    }
-
-    #[Js]
-    public function uploadMedia(): string
-    {
-        return <<<'JS'
-            let input = document.createElement('input');
-            input.type = 'file';
-            input.multiple = true;
-            input.click();
-
-            input.onchange = e => {
-                $wire.uploadMultiple('uploads', e.target.files);
+        if ($delete) {
+            if ($this->product->cover_media_id === $media->id) {
+                $this->product->cover_media_id = resolve_static(Media::class, 'query')
+                    ->where('model_id', $this->product->id)
+                    ->where('model_type', morph_alias(Product::class))
+                    ->where('collection_name', 'images')
+                    ->value('id');
             }
-        JS;
+
+            try {
+                UpdateProduct::make([
+                    'id' => $this->product->id,
+                    'cover_media_id' => $this->product->cover_media_id,
+                ])
+                    ->validate()
+                    ->execute();
+            } catch (ValidationException|UnauthorizedException $e) {
+                exception_to_notifications($e, $this);
+            }
+        }
+
+        return $delete;
     }
 
     public function updatedUploads(): void
@@ -130,31 +132,29 @@ class MediaGrid extends BaseMediaGrid
         $this->loadData();
     }
 
-    public function deleteMedia(Media $media): bool
+    #[Js]
+    public function uploadMedia(): string
     {
-        $delete = parent::deleteMedia($media);
+        return <<<'JS'
+            let input = document.createElement('input');
+            input.type = 'file';
+            input.multiple = true;
+            input.click();
 
-        if ($delete) {
-            if ($this->product->cover_media_id === $media->id) {
-                $this->product->cover_media_id = resolve_static(Media::class, 'query')
-                    ->where('model_id', $this->product->id)
-                    ->where('model_type', morph_alias(Product::class))
-                    ->where('collection_name', 'images')
-                    ->value('id');
+            input.onchange = e => {
+                $wire.uploadMultiple('uploads', e.target.files);
             }
+        JS;
+    }
 
-            try {
-                UpdateProduct::make([
-                    'id' => $this->product->id,
-                    'cover_media_id' => $this->product->cover_media_id,
-                ])
-                    ->validate()
-                    ->execute();
-            } catch (ValidationException|UnauthorizedException $e) {
-                exception_to_notifications($e, $this);
-            }
-        }
-
-        return $delete;
+    protected function getRowAttributes(): ComponentAttributeBag
+    {
+        return new ComponentAttributeBag(
+            [
+                'x-bind:class' => <<<'JS'
+                    record.id === $wire.product.cover_media_id ? 'bg-indigo-50 ring-2 ring-primary-500 ring-offset-2' : ''
+                JS
+            ]
+        );
     }
 }

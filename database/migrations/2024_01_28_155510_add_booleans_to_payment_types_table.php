@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('payment_types', function (Blueprint $table) {
+        Schema::table('payment_types', function (Blueprint $table): void {
             $table->boolean('is_direct_debit')->default(false)->after('is_active');
             $table->boolean('is_purchase')->default(false)->after('is_default');
             $table->boolean('is_sales')->default(true)->after('is_purchase');
@@ -18,7 +18,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('payment_types', function (Blueprint $table) {
+        Schema::table('payment_types', function (Blueprint $table): void {
             $table->dropColumn([
                 'is_direct_debit',
                 'is_purchase',

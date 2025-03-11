@@ -20,26 +20,9 @@ class Categories extends CategoryList
 {
     use Actions;
 
-    protected ?string $includeBefore = 'flux::livewire.settings.categories';
-
     public CategoryForm $category;
 
-    protected function getViewData(): array
-    {
-        return array_merge(parent::getViewData(), [
-            'models' => model_info_all()
-                ->filter(fn ($modelInfo) => in_array(
-                    Categorizable::class,
-                    class_uses_recursive($modelInfo->class)
-                ))
-                ->unique('morphClass')
-                ->map(fn ($modelInfo) => [
-                    'label' => __(Str::headline($modelInfo->morphClass)),
-                    'value' => $modelInfo->morphClass,
-                ])
-                ->toArray(),
-        ]);
-    }
+    protected ?string $includeBefore = 'flux::livewire.settings.categories';
 
     protected function getTableActions(): array
     {
@@ -75,6 +58,25 @@ class Categories extends CategoryList
     }
 
     #[Renderless]
+    public function delete(Category $category): bool
+    {
+        $this->category->reset();
+        $this->category->fill($category);
+
+        try {
+            $this->category->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
+    }
+
+    #[Renderless]
     public function edit(Category $category): void
     {
         $this->category->reset();
@@ -101,22 +103,20 @@ class Categories extends CategoryList
         return true;
     }
 
-    #[Renderless]
-    public function delete(Category $category): bool
+    protected function getViewData(): array
     {
-        $this->category->reset();
-        $this->category->fill($category);
-
-        try {
-            $this->category->delete();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
+        return array_merge(parent::getViewData(), [
+            'models' => model_info_all()
+                ->filter(fn ($modelInfo) => in_array(
+                    Categorizable::class,
+                    class_uses_recursive($modelInfo->class)
+                ))
+                ->unique('morphClass')
+                ->map(fn ($modelInfo) => [
+                    'label' => __(Str::headline($modelInfo->morphClass)),
+                    'value' => $modelInfo->morphClass,
+                ])
+                ->toArray(),
+        ]);
     }
 }

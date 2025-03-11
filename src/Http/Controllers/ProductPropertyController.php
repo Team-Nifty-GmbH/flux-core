@@ -27,16 +27,16 @@ class ProductPropertyController extends BaseController
         );
     }
 
-    public function update(Request $request, ProductPropertyService $productPropertyService): JsonResponse
+    public function delete(string $id, ProductPropertyService $productPropertyService): JsonResponse
     {
-        $response = $productPropertyService->update($request->all());
+        $response = $productPropertyService->delete($id);
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
-    public function delete(string $id, ProductPropertyService $productPropertyService): JsonResponse
+    public function update(Request $request, ProductPropertyService $productPropertyService): JsonResponse
     {
-        $response = $productPropertyService->delete($id);
+        $response = $productPropertyService->update($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }

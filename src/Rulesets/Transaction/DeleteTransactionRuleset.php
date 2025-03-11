@@ -8,9 +8,9 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class DeleteTransactionRuleset extends FluxRuleset
 {
-    protected static ?string $model = Transaction::class;
-
     protected static bool $addAdditionalColumnRules = false;
+
+    protected static ?string $model = Transaction::class;
 
     public function rules(): array
     {

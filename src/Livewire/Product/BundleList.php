@@ -17,12 +17,12 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class BundleList extends ProductBundleProductList
 {
-    protected string $view = 'flux::livewire.product.bundle-list';
-
     #[Modelable]
     public ProductForm $product;
 
     public ProductBundleProductForm $productBundleProductForm;
+
+    protected string $view = 'flux::livewire.product.bundle-list';
 
     public function mount(): void
     {
@@ -80,15 +80,32 @@ class BundleList extends ProductBundleProductList
         ];
     }
 
-    protected function getReturnKeys(): array
+    public function delete(int $id): void
     {
-        return array_merge(
-            parent::getReturnKeys(),
-            [
-                'product_id',
-                'bundle_product_id',
-            ]
-        );
+        $this->productBundleProductForm->reset();
+        $this->productBundleProductForm->id = $id;
+
+        try {
+            $this->productBundleProductForm->delete();
+        } catch (UnauthorizedException|ValidationException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        if (resolve_static(Product::class, 'query')
+            ->whereKey($this->product->id)
+            ->first()
+            ->bundleProducts()
+            ->count() === 0
+        ) {
+            $this->product->is_bundle = false;
+            $this->js(<<<'JS'
+                Livewire.navigate(window.location.href);
+            JS);
+        } else {
+            $this->loadData();
+        }
     }
 
     public function edit(ProductBundleProduct $productBundleProduct): void
@@ -126,31 +143,14 @@ class BundleList extends ProductBundleProductList
         return true;
     }
 
-    public function delete(int $id): void
+    protected function getReturnKeys(): array
     {
-        $this->productBundleProductForm->reset();
-        $this->productBundleProductForm->id = $id;
-
-        try {
-            $this->productBundleProductForm->delete();
-        } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
-
-            return;
-        }
-
-        if (resolve_static(Product::class, 'query')
-            ->whereKey($this->product->id)
-            ->first()
-            ->bundleProducts()
-            ->count() === 0
-        ) {
-            $this->product->is_bundle = false;
-            $this->js(<<<'JS'
-                Livewire.navigate(window.location.href);
-            JS);
-        } else {
-            $this->loadData();
-        }
+        return array_merge(
+            parent::getReturnKeys(),
+            [
+                'product_id',
+                'bundle_product_id',
+            ]
+        );
     }
 }

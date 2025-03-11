@@ -10,9 +10,9 @@ use Spatie\ModelStates\StateConfig;
 
 abstract class State extends BaseState implements Arrayable
 {
-    protected static ?array $config = null;
-
     protected static ?string $color = null;
+
+    protected static ?array $config = null;
 
     public static function registerStateConfig(StateConfig $config, ?string $baseStateClass = null): void
     {
@@ -27,16 +27,16 @@ abstract class State extends BaseState implements Arrayable
         static::$config[$stateClass] = $config;
     }
 
-    public function toArray(): array|string
-    {
-        return $this->__toString();
-    }
-
     public function badge(): string
     {
         return Blade::render(html_entity_decode('<x-badge :$text :$color />'), [
             'color' => $this->color(),
             'text' => __(Str::headline($this->__toString())),
         ]);
+    }
+
+    public function toArray(): array|string
+    {
+        return $this->__toString();
     }
 }

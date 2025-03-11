@@ -11,14 +11,14 @@ trait IsTimeFrameAwareWidget
 {
     use Widgetable;
 
-    #[Modelable]
-    public array $timeParams = [];
-
-    public TimeFrameEnum $timeFrame = TimeFrameEnum::ThisMonth;
+    public ?Carbon $end = null;
 
     public ?Carbon $start = null;
 
-    public ?Carbon $end = null;
+    public TimeFrameEnum $timeFrame = TimeFrameEnum::ThisMonth;
+
+    #[Modelable]
+    public array $timeParams = [];
 
     abstract public function calculateByTimeFrame(): void;
 

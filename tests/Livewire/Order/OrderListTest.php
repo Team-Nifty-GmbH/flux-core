@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class OrderListTest extends BaseSetup
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(OrderList::class)
             ->assertStatus(200);

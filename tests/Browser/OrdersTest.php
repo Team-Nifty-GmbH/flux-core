@@ -10,9 +10,9 @@ class OrdersTest extends DuskTestCase
 {
     use DatabaseTruncation;
 
-    public function test_user_can_see_orders()
+    public function test_user_can_see_orders(): void
     {
-        $this->browse(function (Browser $browser) {
+        $this->browse(function (Browser $browser): void {
             $browser->visit('/');
 
             $this->openMenu();

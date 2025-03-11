@@ -13,6 +13,15 @@ class UpdateCommunicationRuleset extends FluxRuleset
 {
     protected static ?string $model = Communication::class;
 
+    public static function getRules(): array
+    {
+        return array_merge(
+            parent::getRules(),
+            resolve_static(TagRuleset::class, 'getRules'),
+            resolve_static(CommunicatablesRuleset::class, 'getRules'),
+        );
+    }
+
     public function rules(): array
     {
         return [
@@ -42,14 +51,5 @@ class UpdateCommunicationRuleset extends FluxRuleset
             'html_body' => 'nullable|string',
             'is_seen' => 'boolean',
         ];
-    }
-
-    public static function getRules(): array
-    {
-        return array_merge(
-            parent::getRules(),
-            resolve_static(TagRuleset::class, 'getRules'),
-            resolve_static(CommunicatablesRuleset::class, 'getRules'),
-        );
     }
 }

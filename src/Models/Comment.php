@@ -28,26 +28,6 @@ class Comment extends FluxModel implements HasMedia
         'model_type',
     ];
 
-    public function model(): MorphTo
-    {
-        return $this->morphTo('model');
-    }
-
-    public function user(): Attribute
-    {
-        $user = $this->getCreatedBy();
-
-        $userData = null;
-        if ($user) {
-            $userData = $user->only('id', 'name', 'email', 'user_code');
-            $userData['avatar_url'] = method_exists($user, 'getAvatarUrl')
-                ? $user->getAvatarUrl()
-                : null;
-        }
-
-        return Attribute::get(fn () => $userData);
-    }
-
     public static function restoring($callback): void
     {
         static::registerModelEvent('restoring', $callback);
@@ -71,5 +51,25 @@ class Comment extends FluxModel implements HasMedia
         $data['user'] = $this->user;
 
         return ['model' => $data];
+    }
+
+    public function model(): MorphTo
+    {
+        return $this->morphTo('model');
+    }
+
+    public function user(): Attribute
+    {
+        $user = $this->getCreatedBy();
+
+        $userData = null;
+        if ($user) {
+            $userData = $user->only('id', 'name', 'email', 'user_code');
+            $userData['avatar_url'] = method_exists($user, 'getAvatarUrl')
+                ? $user->getAvatarUrl()
+                : null;
+        }
+
+        return Attribute::get(fn () => $userData);
     }
 }

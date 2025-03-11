@@ -16,6 +16,14 @@ class CreatePaymentRunRuleset extends FluxRuleset
 {
     protected static ?string $model = PaymentRun::class;
 
+    public static function getRules(): array
+    {
+        return array_merge(
+            parent::getRules(),
+            resolve_static(OrderRuleset::class, 'getRules')
+        );
+    }
+
     public function rules(): array
     {
         return [
@@ -40,13 +48,5 @@ class CreatePaymentRunRuleset extends FluxRuleset
             'instructed_execution_date' => 'date',
             'is_instant_payment' => 'boolean',
         ];
-    }
-
-    public static function getRules(): array
-    {
-        return array_merge(
-            parent::getRules(),
-            resolve_static(OrderRuleset::class, 'getRules')
-        );
     }
 }

@@ -20,13 +20,13 @@ class ProjectTest extends BaseSetup
         ]);
     }
 
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(ProjectView::class, ['id' => $this->project->id])
             ->assertStatus(200);
     }
 
-    public function test_switch_tabs()
+    public function test_switch_tabs(): void
     {
         $component = Livewire::test(ProjectView::class, ['id' => $this->project->id]);
 

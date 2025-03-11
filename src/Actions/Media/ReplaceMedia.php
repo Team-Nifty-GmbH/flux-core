@@ -15,14 +15,14 @@ class ReplaceMedia extends FluxAction
 {
     protected bool $force = false;
 
-    protected function getRulesets(): string|array
-    {
-        return ReplaceMediaRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Media::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return ReplaceMediaRuleset::class;
     }
 
     public function force($force = true): static

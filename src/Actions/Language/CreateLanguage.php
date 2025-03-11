@@ -9,14 +9,14 @@ use Illuminate\Support\Facades\Validator;
 
 class CreateLanguage extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateLanguageRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Language::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateLanguageRuleset::class;
     }
 
     public function performAction(): Language

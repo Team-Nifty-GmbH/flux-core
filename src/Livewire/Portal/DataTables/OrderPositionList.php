@@ -12,23 +12,7 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableRowAttributes;
 
 class OrderPositionList extends BaseDataTable
 {
-    protected string $model = OrderPosition::class;
-
-    /** @locked */
-    public int $orderId;
-
-    /** @locked */
-    public bool $isLocked = false;
-
-    public bool $isSelectable = true;
-
-    public array $enabledCols = [
-        'slug_position',
-        'name',
-        'unit_net_price',
-        'amount',
-        'total_net_price',
-    ];
+    public array $aggregatable = [];
 
     public array $availableCols = [
         'slug_position',
@@ -45,13 +29,29 @@ class OrderPositionList extends BaseDataTable
         'is_alternative',
     ];
 
-    public ?bool $isSearchable = false;
+    public array $availableRelations = [];
+
+    public array $enabledCols = [
+        'slug_position',
+        'name',
+        'unit_net_price',
+        'amount',
+        'total_net_price',
+    ];
 
     public bool $isFilterable = false;
 
-    public array $availableRelations = [];
+    /** @locked */
+    public bool $isLocked = false;
 
-    public array $aggregatable = [];
+    public ?bool $isSearchable = false;
+
+    public bool $isSelectable = true;
+
+    /** @locked */
+    public int $orderId;
+
+    protected string $model = OrderPosition::class;
 
     public function mount(): void
     {
@@ -78,24 +78,41 @@ class OrderPositionList extends BaseDataTable
         ]);
     }
 
-    protected function getRowAttributes(): DataTableRowAttributes
-    {
-        return DataTableRowAttributes::make()
-            ->bind(
-                'class',
-                "{
-                    'bg-gray-200 dark:bg-secondary-700 font-bold': (record.is_free_text && record.depth === 0 && record.has_children),
-                    'opacity-90': record.is_alternative,
-                    'opacity-50 sortable-filter': record.is_bundle_position,
-                    'font-semibold': record.is_free_text
-                }"
-            );
-    }
-
     protected function getBuilder(Builder $builder): Builder
     {
         return $builder->whereNull('parent_id')
             ->reorder('sort_number', 'asc');
+    }
+
+    protected function getLeftAppends(): array
+    {
+        return [
+            'name' => 'indentation',
+        ];
+    }
+
+    protected function getResultFromQuery(Builder $query): array
+    {
+        $tree = to_flat_tree($query->get()->toArray());
+        $returnKeys = $this->getReturnKeys();
+
+        foreach ($tree as &$item) {
+            $item = Arr::only(Arr::dot($item), $returnKeys);
+            $item['is_locked'] = $this->isLocked;
+            $item['indentation'] = '';
+            $item['unit_price'] = $item['is_net'] ? $item['unit_net_price'] : $item['unit_gross_price'];
+            $item['alternative_tag'] = $item['is_alternative'] ? __('Alternative') : '';
+
+            if ($item['depth'] > 0) {
+                $indent = $item['depth'] * 20;
+                $item['indentation'] = <<<HTML
+                    <div class="text-right indent-icon" style="width:{$indent}px;">
+                    </div>
+                    HTML;
+            }
+        }
+
+        return $tree;
     }
 
     protected function getReturnKeys(): array
@@ -136,48 +153,31 @@ class OrderPositionList extends BaseDataTable
         );
     }
 
-    protected function getResultFromQuery(Builder $query): array
-    {
-        $tree = to_flat_tree($query->get()->toArray());
-        $returnKeys = $this->getReturnKeys();
-
-        foreach ($tree as &$item) {
-            $item = Arr::only(Arr::dot($item), $returnKeys);
-            $item['is_locked'] = $this->isLocked;
-            $item['indentation'] = '';
-            $item['unit_price'] = $item['is_net'] ? $item['unit_net_price'] : $item['unit_gross_price'];
-            $item['alternative_tag'] = $item['is_alternative'] ? __('Alternative') : '';
-
-            if ($item['depth'] > 0) {
-                $indent = $item['depth'] * 20;
-                $item['indentation'] = <<<HTML
-                    <div class="text-right indent-icon" style="width:{$indent}px;">
-                    </div>
-                    HTML;
-            }
-        }
-
-        return $tree;
-    }
-
-    protected function getLeftAppends(): array
+    protected function getRightAppends(): array
     {
         return [
-            'name' => 'indentation',
+            'name' => 'alternative_tag',
         ];
+    }
+
+    protected function getRowAttributes(): DataTableRowAttributes
+    {
+        return DataTableRowAttributes::make()
+            ->bind(
+                'class',
+                "{
+                    'bg-gray-200 dark:bg-secondary-700 font-bold': (record.is_free_text && record.depth === 0 && record.has_children),
+                    'opacity-90': record.is_alternative,
+                    'opacity-50 sortable-filter': record.is_bundle_position,
+                    'font-semibold': record.is_free_text
+                }"
+            );
     }
 
     protected function getTopAppends(): array
     {
         return [
             'name' => 'product_number',
-        ];
-    }
-
-    protected function getRightAppends(): array
-    {
-        return [
-            'name' => 'alternative_tag',
         ];
     }
 }

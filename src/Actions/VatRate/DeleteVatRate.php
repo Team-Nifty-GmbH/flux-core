@@ -8,14 +8,14 @@ use FluxErp\Rulesets\VatRate\DeleteVatRateRuleset;
 
 class DeleteVatRate extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeleteVatRateRuleset::class;
-    }
-
     public static function models(): array
     {
         return [VatRate::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeleteVatRateRuleset::class;
     }
 
     public function performAction(): ?bool

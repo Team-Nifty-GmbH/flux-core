@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class ProductCrossSellingListTest extends BaseSetup
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(ProductCrossSellingList::class)
             ->assertStatus(200);

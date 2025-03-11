@@ -8,7 +8,7 @@ class CreateAdditionalColumnsTable extends Migration
 {
     public function up(): void
     {
-        Schema::create('additional_columns', function (Blueprint $table) {
+        Schema::create('additional_columns', function (Blueprint $table): void {
             $table->id();
             $table->string('name');
             $table->string('model');

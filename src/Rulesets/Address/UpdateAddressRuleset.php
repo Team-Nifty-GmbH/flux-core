@@ -15,6 +15,18 @@ class UpdateAddressRuleset extends FluxRuleset
 {
     protected static ?string $model = Address::class;
 
+    public static function getRules(): array
+    {
+        return array_merge(
+            parent::getRules(),
+            resolve_static(PostalAddressRuleset::class, 'getRules'),
+            resolve_static(AddressTypeRuleset::class, 'getRules'),
+            resolve_static(ContactOptionRuleset::class, 'getRules'),
+            resolve_static(TagRuleset::class, 'getRules'),
+            resolve_static(PermissionRuleset::class, 'getRules')
+        );
+    }
+
     public function rules(): array
     {
         return [
@@ -59,17 +71,5 @@ class UpdateAddressRuleset extends FluxRuleset
             'is_active' => 'boolean',
             'can_login' => 'boolean',
         ];
-    }
-
-    public static function getRules(): array
-    {
-        return array_merge(
-            parent::getRules(),
-            resolve_static(PostalAddressRuleset::class, 'getRules'),
-            resolve_static(AddressTypeRuleset::class, 'getRules'),
-            resolve_static(ContactOptionRuleset::class, 'getRules'),
-            resolve_static(TagRuleset::class, 'getRules'),
-            resolve_static(PermissionRuleset::class, 'getRules')
-        );
     }
 }

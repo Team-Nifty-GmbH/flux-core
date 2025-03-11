@@ -9,9 +9,9 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class MediaTest extends BaseSetup
 {
-    private Media $media;
-
     private string $filename;
+
+    private Media $media;
 
     protected function setUp(): void
     {
@@ -24,7 +24,7 @@ class MediaTest extends BaseSetup
             ->toMediaCollection();
     }
 
-    public function test_download_media()
+    public function test_download_media(): void
     {
         $this->user->givePermissionTo(Permission::findOrCreate('media.{media}.{filename}.get', 'web'));
 
@@ -33,22 +33,7 @@ class MediaTest extends BaseSetup
             ->assertDownload();
     }
 
-    public function test_download_media_no_user()
-    {
-        $this->get('/media/' . $this->media->id . '/' . $this->filename)
-            ->assertStatus(302)
-            ->assertRedirect(route('login'));
-    }
-
-    public function test_download_media_without_permission()
-    {
-        Permission::findOrCreate('media.{media}.{filename}.get', 'web');
-
-        $this->actingAs($this->user, 'web')->get('/media/' . $this->media->id . '/' . $this->filename)
-            ->assertStatus(403);
-    }
-
-    public function test_download_media_media_not_found()
+    public function test_download_media_media_not_found(): void
     {
         $this->media->delete();
 
@@ -56,5 +41,20 @@ class MediaTest extends BaseSetup
 
         $this->actingAs($this->user, 'web')->get('/media/' . $this->media->id . '/' . $this->filename)
             ->assertStatus(404);
+    }
+
+    public function test_download_media_no_user(): void
+    {
+        $this->get('/media/' . $this->media->id . '/' . $this->filename)
+            ->assertStatus(302)
+            ->assertRedirect(route('login'));
+    }
+
+    public function test_download_media_without_permission(): void
+    {
+        Permission::findOrCreate('media.{media}.{filename}.get', 'web');
+
+        $this->actingAs($this->user, 'web')->get('/media/' . $this->media->id . '/' . $this->filename)
+            ->assertStatus(403);
     }
 }

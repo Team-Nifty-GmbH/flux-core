@@ -19,36 +19,6 @@ class RevenueBySalesRepresentative extends CircleChart
 
     public bool $showTotals = false;
 
-    protected function getListeners(): array
-    {
-        return [
-            'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
-                . ',.OrderLocked' => 'calculateByTimeFrame',
-        ];
-    }
-
-    public function showTitle(): bool
-    {
-        return true;
-    }
-
-    public function getPlotOptions(): array
-    {
-        return [
-            'pie' => [
-                'donut' => [
-                    'labels' => [
-                        'show' => true,
-                        'total' => [
-                            'show' => true,
-                            'label' => __('Total'),
-                        ],
-                    ],
-                ],
-            ],
-        ];
-    }
-
     #[Renderless]
     public function calculateByTimeFrame(): void
     {
@@ -75,5 +45,35 @@ class RevenueBySalesRepresentative extends CircleChart
 
         $this->series = $metrics->getData();
         $this->labels = $metrics->getLabels();
+    }
+
+    public function getPlotOptions(): array
+    {
+        return [
+            'pie' => [
+                'donut' => [
+                    'labels' => [
+                        'show' => true,
+                        'total' => [
+                            'show' => true,
+                            'label' => __('Total'),
+                        ],
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    public function showTitle(): bool
+    {
+        return true;
+    }
+
+    protected function getListeners(): array
+    {
+        return [
+            'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
+                . ',.OrderLocked' => 'calculateByTimeFrame',
+        ];
     }
 }

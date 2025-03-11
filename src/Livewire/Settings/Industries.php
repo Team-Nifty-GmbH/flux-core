@@ -51,6 +51,24 @@ class Industries extends IndustryList
         ];
     }
 
+    public function delete(Industry $industry): bool
+    {
+        $this->industryForm->reset();
+        $this->industryForm->fill($industry);
+
+        try {
+            $this->industryForm->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
+    }
+
     public function edit(Industry $industry): void
     {
         $this->industryForm->reset();
@@ -65,24 +83,6 @@ class Industries extends IndustryList
     {
         try {
             $this->industryForm->save();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
-    }
-
-    public function delete(Industry $industry): bool
-    {
-        $this->industryForm->reset();
-        $this->industryForm->fill($industry);
-
-        try {
-            $this->industryForm->delete();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 

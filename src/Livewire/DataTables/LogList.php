@@ -8,16 +8,12 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class LogList extends BaseDataTable
 {
-    protected string $model = Log::class;
-
     public array $enabledCols = [
         'id',
         'message',
         'level_name',
         'created_at',
     ];
-
-    public ?bool $isSearchable = true;
 
     public array $formatters = [
         'message' => 'string',
@@ -50,6 +46,10 @@ class LogList extends BaseDataTable
         ],
     ];
 
+    public ?bool $isSearchable = true;
+
+    protected string $model = Log::class;
+
     public function mount(): void
     {
         parent::mount();
@@ -67,6 +67,18 @@ class LogList extends BaseDataTable
         }
     }
 
+    protected function getTableActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->text(__('Mark all as done'))
+                ->color('indigo')
+                ->attributes([
+                    'x-on:click' => '$wire.markAllAsDone()',
+                ]),
+        ];
+    }
+
     protected function getRowActions(): array
     {
         return [
@@ -80,25 +92,23 @@ class LogList extends BaseDataTable
         ];
     }
 
-    protected function getTableActions(): array
+    public function markAllAsDone(): void
     {
-        return [
-            DataTableButton::make()
-                ->text(__('Mark all as done'))
-                ->color('indigo')
-                ->attributes([
-                    'x-on:click' => '$wire.markAllAsDone()',
-                ]),
-        ];
+        $this->skipRender();
+
+        $this->buildSearch()->update(['is_done' => true]);
+
+        $this->loadData();
     }
 
-    protected function itemToArray($item): array
+    public function markAsDone(Log $log): void
     {
-        $item = parent::itemToArray($item);
+        $this->skipRender();
 
-        $item['message'] = Str::limit($item['message'], 150);
+        $log->is_done = true;
+        $log->save();
 
-        return $item;
+        $this->loadData();
     }
 
     public function startSearch(): void
@@ -112,22 +122,12 @@ class LogList extends BaseDataTable
         parent::startSearch();
     }
 
-    public function markAsDone(Log $log): void
+    protected function itemToArray($item): array
     {
-        $this->skipRender();
+        $item = parent::itemToArray($item);
 
-        $log->is_done = true;
-        $log->save();
+        $item['message'] = Str::limit($item['message'], 150);
 
-        $this->loadData();
-    }
-
-    public function markAllAsDone(): void
-    {
-        $this->skipRender();
-
-        $this->buildSearch()->update(['is_done' => true]);
-
-        $this->loadData();
+        return $item;
     }
 }

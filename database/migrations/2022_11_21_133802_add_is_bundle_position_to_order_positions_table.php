@@ -11,7 +11,7 @@ return new class() extends Migration
      */
     public function up(): void
     {
-        Schema::table('order_positions', function (Blueprint $table) {
+        Schema::table('order_positions', function (Blueprint $table): void {
             $table->boolean('is_bundle_position')->default(false)->after('is_no_product');
             $table->renameColumn('is_no_product', 'is_free_text');
         });
@@ -22,7 +22,7 @@ return new class() extends Migration
      */
     public function down(): void
     {
-        Schema::table('order_positions', function (Blueprint $table) {
+        Schema::table('order_positions', function (Blueprint $table): void {
             $table->dropColumn('is_bundle_position');
             $table->renameColumn('is_free_text', 'is_no_product');
         });

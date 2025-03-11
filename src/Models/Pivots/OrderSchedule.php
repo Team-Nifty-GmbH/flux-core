@@ -8,13 +8,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OrderSchedule extends FluxPivot
 {
-    protected $table = 'order_schedule';
+    public $incrementing = true;
 
     public $timestamps = false;
 
-    public $incrementing = true;
-
     protected $primaryKey = 'pivot_id';
+
+    protected $table = 'order_schedule';
 
     public function order(): BelongsTo
     {

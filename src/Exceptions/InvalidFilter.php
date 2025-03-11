@@ -13,6 +13,14 @@ class InvalidFilter extends HttpException
         parent::__construct(Response::HTTP_BAD_REQUEST, $message);
     }
 
+    public static function filterNotAllowed(string $column, Collection $allowed): static
+    {
+        $message = 'Requested filter \'' . $column . '\' not allowed. Allowed filters are \'' .
+            $allowed->implode(', ') . '\'';
+
+        return new static($message);
+    }
+
     public static function invalidFilterScheme(string $item, string $filter): static
     {
         if ($filter === 'between') {
@@ -22,14 +30,6 @@ class InvalidFilter extends HttpException
         }
 
         $message = 'Invalid Filter scheme: expected: ' . $scheme . ', requested: \'' . $item . '\'';
-
-        return new static($message);
-    }
-
-    public static function filterNotAllowed(string $column, Collection $allowed): static
-    {
-        $message = 'Requested filter \'' . $column . '\' not allowed. Allowed filters are \'' .
-            $allowed->implode(', ') . '\'';
 
         return new static($message);
     }

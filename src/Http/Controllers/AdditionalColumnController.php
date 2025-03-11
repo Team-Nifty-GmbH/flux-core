@@ -23,16 +23,16 @@ class AdditionalColumnController extends BaseController
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
-    public function update(Request $request, AdditionalColumnService $additionalColumnService): JsonResponse
+    public function delete(string $id, AdditionalColumnService $additionalColumnService): JsonResponse
     {
-        $response = $additionalColumnService->update($request->all());
+        $response = $additionalColumnService->delete($id);
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
-    public function delete(string $id, AdditionalColumnService $additionalColumnService): JsonResponse
+    public function update(Request $request, AdditionalColumnService $additionalColumnService): JsonResponse
     {
-        $response = $additionalColumnService->delete($id);
+        $response = $additionalColumnService->update($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }

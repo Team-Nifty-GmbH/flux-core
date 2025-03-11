@@ -6,8 +6,6 @@ use FluxErp\Models\StockPosting;
 
 class StockPostingList extends BaseDataTable
 {
-    protected string $model = StockPosting::class;
-
     public array $enabledCols = [
         'warehouse.name',
         'posting',
@@ -21,4 +19,6 @@ class StockPostingList extends BaseDataTable
         'posting' => 'coloredFloat',
         'stock' => 'coloredFloat',
     ];
+
+    protected string $model = StockPosting::class;
 }

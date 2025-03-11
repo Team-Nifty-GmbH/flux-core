@@ -9,14 +9,14 @@ use Illuminate\Support\Facades\Validator;
 
 class CreateCountryRegion extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateCountryRegionRuleset::class;
-    }
-
     public static function models(): array
     {
         return [CountryRegion::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateCountryRegionRuleset::class;
     }
 
     public function performAction(): CountryRegion

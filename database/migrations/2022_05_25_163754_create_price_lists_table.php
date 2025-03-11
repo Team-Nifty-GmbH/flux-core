@@ -8,7 +8,7 @@ class CreatePriceListsTable extends Migration
 {
     public function up(): void
     {
-        Schema::create('price_lists', function (Blueprint $table) {
+        Schema::create('price_lists', function (Blueprint $table): void {
             $table->id()
                 ->comment('An incrementing number to unique identify a record in this table. This also is the primary key of this table.');
             $table->string('uuid')

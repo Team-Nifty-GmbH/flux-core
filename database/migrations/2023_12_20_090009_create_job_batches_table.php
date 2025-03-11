@@ -12,7 +12,7 @@ return new class() extends Migration
             return;
         }
 
-        Schema::create('job_batches', function (Blueprint $table) {
+        Schema::create('job_batches', function (Blueprint $table): void {
             $table->string('id')->primary();
             $table->string('name');
             $table->integer('total_jobs');

@@ -4,9 +4,9 @@ namespace FluxErp\States\Task;
 
 class Done extends TaskState
 {
-    public static $name = 'done';
-
     public static bool $isEndState = true;
+
+    public static $name = 'done';
 
     public function color(): string
     {

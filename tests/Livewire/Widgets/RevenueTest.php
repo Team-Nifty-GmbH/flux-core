@@ -18,7 +18,7 @@ class RevenueTest extends TestCase
         ]);
     }
 
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(Revenue::class)
             ->assertStatus(200);

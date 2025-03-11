@@ -13,15 +13,6 @@ class Tickets extends TicketList
     #[Modelable]
     public int $contactId;
 
-    protected function getBuilder(Builder $builder): Builder
-    {
-        return $builder->whereHasMorph(
-            'authenticatable',
-            app(Address::class)->getMorphClass(),
-            fn ($query) => $query->where('contact_id', $this->contactId)
-        );
-    }
-
     protected function getTableActions(): array
     {
         return [];
@@ -31,5 +22,14 @@ class Tickets extends TicketList
     public function getCacheKey(): string
     {
         return parent::getCacheKey() . $this->contactId;
+    }
+
+    protected function getBuilder(Builder $builder): Builder
+    {
+        return $builder->whereHasMorph(
+            'authenticatable',
+            app(Address::class)->getMorphClass(),
+            fn ($query) => $query->where('contact_id', $this->contactId)
+        );
     }
 }

@@ -19,7 +19,7 @@ class Warehouses extends WarehouseList
 
     public ?string $includeBefore = 'flux::livewire.settings.warehouses';
 
-    public WareHouseForm $warehouse;
+    public WarehouseForm $warehouse;
 
     protected function getTableActions(): array
     {
@@ -58,6 +58,21 @@ class Warehouses extends WarehouseList
         ];
     }
 
+    public function delete(): bool
+    {
+        try {
+            $this->warehouse->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
+    }
+
     public function edit(Warehouse $warehouse): void
     {
         $this->warehouse->reset();
@@ -72,21 +87,6 @@ class Warehouses extends WarehouseList
     {
         try {
             $this->warehouse->save();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
-    }
-
-    public function delete(): bool
-    {
-        try {
-            $this->warehouse->delete();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 

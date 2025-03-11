@@ -19,7 +19,7 @@ class WarehouseListTest extends TestCase
         $this->product = Product::factory()->create();
     }
 
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         $form = new ProductForm(Livewire::new(WarehouseList::class), 'product');
         $form->fill($this->product);

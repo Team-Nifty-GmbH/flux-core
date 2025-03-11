@@ -23,15 +23,6 @@ trait CreatesDocuments
 {
     use Actions, EnsureUsedInLivewire;
 
-    public array $printLayouts = [];
-
-    public array $selectedPrintLayouts = [
-        'print' => [],
-        'email' => [],
-        'download' => [],
-        'force' => [],
-    ];
-
     #[Locked]
     public array $forcedPrintLayouts = [
         'print' => [],
@@ -43,21 +34,38 @@ trait CreatesDocuments
     #[Locked]
     public array $previewData = [];
 
-    abstract protected function getTo(OffersPrinting $item, array $documents): array;
+    public array $printLayouts = [];
 
-    abstract protected function getSubject(OffersPrinting $item): string;
-
-    abstract protected function getHtmlBody(OffersPrinting $item): string;
-
-    abstract protected function getPrintLayouts(): array;
+    public array $selectedPrintLayouts = [
+        'print' => [],
+        'email' => [],
+        'download' => [],
+        'force' => [],
+    ];
 
     abstract public function createDocuments(): null|MediaStream|Media;
 
-    public function renderCreateDocumentsModal(): View
+    #[Renderless]
+    public function downloadPreview(): ?StreamedResponse
     {
-        return view(
-            'flux::livewire.create-documents-modal',
-            ['supportsDocumentPreview' => $this->supportsDocumentPreview()]
+        if (! $this->supportsDocumentPreview()) {
+            throw new \BadMethodCallException('Document preview is not supported');
+        }
+
+        try {
+            $pdf = Printing::make($this->previewData)
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return null;
+        }
+
+        return response()->streamDownload(
+            fn () => print ($pdf->pdf->output()),
+            Str::finish($pdf->getFileName(), '.pdf')
         );
     }
 
@@ -123,27 +131,11 @@ trait CreatesDocuments
         JS);
     }
 
-    #[Renderless]
-    public function downloadPreview(): ?StreamedResponse
+    public function renderCreateDocumentsModal(): View
     {
-        if (! $this->supportsDocumentPreview()) {
-            throw new \BadMethodCallException('Document preview is not supported');
-        }
-
-        try {
-            $pdf = Printing::make($this->previewData)
-                ->checkPermission()
-                ->validate()
-                ->execute();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return null;
-        }
-
-        return response()->streamDownload(
-            fn () => print ($pdf->pdf->output()),
-            Str::finish($pdf->getFileName(), '.pdf')
+        return view(
+            'flux::livewire.create-documents-modal',
+            ['supportsDocumentPreview' => $this->supportsDocumentPreview()]
         );
     }
 
@@ -307,9 +299,14 @@ trait CreatesDocuments
         return null;
     }
 
-    protected function supportsDocumentPreview(): bool
+    protected function getAttachments(OffersPrinting $item): array
     {
-        return false;
+        return [];
+    }
+
+    protected function getBcc(OffersPrinting $item): array
+    {
+        return [];
     }
 
     protected function getBladeParameters(): array|SerializableClosure|null
@@ -317,9 +314,9 @@ trait CreatesDocuments
         return null;
     }
 
-    protected function getCommunicatableType(OffersPrinting $item): string
+    protected function getCc(OffersPrinting $item): array
     {
-        return $item->getMorphClass();
+        return [];
     }
 
     protected function getCommunicatableId(OffersPrinting $item): int
@@ -327,9 +324,9 @@ trait CreatesDocuments
         return $item->getKey();
     }
 
-    protected function getAttachments(OffersPrinting $item): array
+    protected function getCommunicatableType(OffersPrinting $item): string
     {
-        return [];
+        return $item->getMorphClass();
     }
 
     protected function getCreateAttachmentArray(OffersPrinting $item, string $view): array
@@ -342,13 +339,16 @@ trait CreatesDocuments
         ];
     }
 
-    protected function getCc(OffersPrinting $item): array
-    {
-        return [];
-    }
+    abstract protected function getHtmlBody(OffersPrinting $item): string;
 
-    protected function getBcc(OffersPrinting $item): array
+    abstract protected function getPrintLayouts(): array;
+
+    abstract protected function getSubject(OffersPrinting $item): string;
+
+    abstract protected function getTo(OffersPrinting $item, array $documents): array;
+
+    protected function supportsDocumentPreview(): bool
     {
-        return [];
+        return false;
     }
 }

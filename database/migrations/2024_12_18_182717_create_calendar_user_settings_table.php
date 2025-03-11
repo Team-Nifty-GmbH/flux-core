@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::create('calendar_user_settings', function (Blueprint $table) {
+        Schema::create('calendar_user_settings', function (Blueprint $table): void {
             $table->id();
             $table->morphs('authenticatable', 'calendar_authenticatable');
             $table->string('cache_key')->index();

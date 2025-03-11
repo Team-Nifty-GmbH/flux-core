@@ -8,14 +8,14 @@ class AddUniqueUserCodeOnUsersTable extends Migration
 {
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table): void {
             $table->string('user_code')->nullable()->unique()->change();
         });
     }
 
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table): void {
             $table->dropUnique('users_user_code_unique');
         });
     }

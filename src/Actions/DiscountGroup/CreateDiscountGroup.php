@@ -9,14 +9,14 @@ use Illuminate\Support\Arr;
 
 class CreateDiscountGroup extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateDiscountGroupRuleset::class;
-    }
-
     public static function models(): array
     {
         return [DiscountGroup::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateDiscountGroupRuleset::class;
     }
 
     public function performAction(): DiscountGroup

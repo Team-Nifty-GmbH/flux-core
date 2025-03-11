@@ -15,25 +15,19 @@ class ToastNotification extends Toast implements Arrayable
 {
     use Macroable;
 
-    protected ?string $title = null;
+    protected ?NotificationAction $accept = null;
+
+    protected array $attributes = [];
 
     protected ?string $description = null;
 
-    protected ToastType $toastType = ToastType::INFO;
+    protected ?string $emit = null;
 
-    protected ?bool $progressbar = null;
-
-    protected mixed $params = null;
+    protected int|string|null $id = null;
 
     protected ?string $method = null;
 
-    protected ?string $emit = null;
-
-    protected ?string $to = null;
-
-    protected ?NotificationAction $accept = null;
-
-    protected ?NotificationAction $reject = null;
+    protected ?object $notifiable = null;
 
     protected ?NotificationEvent $onClose = null;
 
@@ -41,11 +35,35 @@ class ToastNotification extends Toast implements Arrayable
 
     protected ?NotificationEvent $onTimeout = null;
 
-    protected array $attributes = [];
+    protected mixed $params = null;
 
-    protected ?object $notifiable = null;
+    protected ?bool $progressbar = null;
 
-    protected int|string|null $id = null;
+    protected ?NotificationAction $reject = null;
+
+    protected ?string $title = null;
+
+    protected ?string $to = null;
+
+    protected ToastType $toastType = ToastType::INFO;
+
+    public function __get($name)
+    {
+        if (property_exists($this, $name)) {
+            return $this->$name;
+        }
+
+        return data_get($this->attributes, $name);
+    }
+
+    public function __set($name, $value): void
+    {
+        if (property_exists($this, $name)) {
+            $this->$name = $value;
+        } else {
+            $this->attributes[$name] = $value;
+        }
+    }
 
     public static function make(...$arguments): static
     {
@@ -64,34 +82,16 @@ class ToastNotification extends Toast implements Arrayable
         return $instance;
     }
 
-    public function __set($name, $value)
+    public function accept(?NotificationAction $accept = null): static
     {
-        if (property_exists($this, $name)) {
-            $this->$name = $value;
-        } else {
-            $this->attributes[$name] = $value;
-        }
-    }
-
-    public function __get($name)
-    {
-        if (property_exists($this, $name)) {
-            return $this->$name;
-        }
-
-        return data_get($this->attributes, $name);
-    }
-
-    public function notifiable(object $notifiable): static
-    {
-        $this->notifiable = $notifiable;
+        $this->accept = $accept;
 
         return $this;
     }
 
-    public function title(string $title): static
+    public function attributes(array $attributes): static
     {
-        $this->title = $title;
+        $this->attributes = $attributes;
 
         return $this;
     }
@@ -103,9 +103,23 @@ class ToastNotification extends Toast implements Arrayable
         return $this;
     }
 
-    public function type(ToastType $type): static
+    public function emit(string $emit): static
     {
-        $this->toastType = $type;
+        $this->emit = $emit;
+
+        return $this;
+    }
+
+    public function href(string $url, string $label = 'Open…'): static
+    {
+        $this->accept(NotificationAction::make()->label(__($label))->url($url));
+
+        return $this;
+    }
+
+    public function id(string|int|null $id): static
+    {
+        $this->id = $id;
 
         return $this;
     }
@@ -117,20 +131,6 @@ class ToastNotification extends Toast implements Arrayable
         return $this;
     }
 
-    public function progressbar(bool $progressbar): static
-    {
-        $this->progressbar = $progressbar;
-
-        return $this;
-    }
-
-    public function params(mixed $params): static
-    {
-        $this->params = $params;
-
-        return $this;
-    }
-
     public function method(string $method): static
     {
         $this->method = $method;
@@ -138,30 +138,9 @@ class ToastNotification extends Toast implements Arrayable
         return $this;
     }
 
-    public function emit(string $emit): static
+    public function notifiable(object $notifiable): static
     {
-        $this->emit = $emit;
-
-        return $this;
-    }
-
-    public function to(string $to): static
-    {
-        $this->to = $to;
-
-        return $this;
-    }
-
-    public function accept(?NotificationAction $accept = null): static
-    {
-        $this->accept = $accept;
-
-        return $this;
-    }
-
-    public function reject(?NotificationAction $reject = null): static
-    {
-        $this->reject = $reject;
+        $this->notifiable = $notifiable;
 
         return $this;
     }
@@ -187,23 +166,37 @@ class ToastNotification extends Toast implements Arrayable
         return $this;
     }
 
-    public function href(string $url, string $label = 'Open…'): static
+    public function params(mixed $params): static
     {
-        $this->accept(NotificationAction::make()->label(__($label))->url($url));
+        $this->params = $params;
 
         return $this;
     }
 
-    public function attributes(array $attributes): static
+    public function progressbar(bool $progressbar): static
     {
-        $this->attributes = $attributes;
+        $this->progressbar = $progressbar;
 
         return $this;
     }
 
-    public function id(string|int|null $id): static
+    public function reject(?NotificationAction $reject = null): static
     {
-        $this->id = $id;
+        $this->reject = $reject;
+
+        return $this;
+    }
+
+    public function title(string $title): static
+    {
+        $this->title = $title;
+
+        return $this;
+    }
+
+    public function to(string $to): static
+    {
+        $this->to = $to;
 
         return $this;
     }
@@ -263,5 +256,12 @@ class ToastNotification extends Toast implements Arrayable
             ->title($this->title)
             ->body($this->description)
             ->data(['url' => $this->accept?->url ?? '']);
+    }
+
+    public function type(ToastType $type): static
+    {
+        $this->toastType = $type;
+
+        return $this;
     }
 }

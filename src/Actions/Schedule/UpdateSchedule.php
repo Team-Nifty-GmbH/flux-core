@@ -11,14 +11,14 @@ use Illuminate\Support\Arr;
 
 class UpdateSchedule extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateScheduleRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Schedule::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateScheduleRuleset::class;
     }
 
     public function performAction(): Model

@@ -36,19 +36,6 @@ class PaymentTypes extends PaymentTypeList
         ];
     }
 
-    protected function getViewData(): array
-    {
-        return array_merge(
-            parent::getViewData(),
-            [
-                'clients' => resolve_static(Client::class, 'query')
-                    ->select(['id', 'name'])
-                    ->get()
-                    ->toArray(),
-            ]
-        );
-    }
-
     protected function getRowActions(): array
     {
         return [
@@ -70,6 +57,24 @@ class PaymentTypes extends PaymentTypeList
                     'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Currency')]),
                 ]),
         ];
+    }
+
+    public function delete(PaymentType $paymentType): bool
+    {
+        $this->paymentType->reset();
+        $this->paymentType->fill($paymentType);
+
+        try {
+            $this->paymentType->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
     }
 
     public function edit(PaymentType $paymentType): void
@@ -97,21 +102,16 @@ class PaymentTypes extends PaymentTypeList
         return true;
     }
 
-    public function delete(PaymentType $paymentType): bool
+    protected function getViewData(): array
     {
-        $this->paymentType->reset();
-        $this->paymentType->fill($paymentType);
-
-        try {
-            $this->paymentType->delete();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
+        return array_merge(
+            parent::getViewData(),
+            [
+                'clients' => resolve_static(Client::class, 'query')
+                    ->select(['id', 'name'])
+                    ->get()
+                    ->toArray(),
+            ]
+        );
     }
 }

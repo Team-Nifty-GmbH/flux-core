@@ -23,11 +23,7 @@ class AddressList extends BaseDataTable
 {
     use CreatesDocuments;
 
-    protected ?string $includeBefore = 'flux::livewire.contact.contacts';
-
-    protected string $model = Address::class;
-
-    public bool $isSelectable = true;
+    public ContactForm $contact;
 
     public array $enabledCols = [
         'avatar',
@@ -45,9 +41,13 @@ class AddressList extends BaseDataTable
         'avatar' => 'image',
     ];
 
+    public bool $isSelectable = true;
+
     public bool $showMap = false;
 
-    public ContactForm $contact;
+    protected ?string $includeBefore = 'flux::livewire.contact.contacts';
+
+    protected string $model = Address::class;
 
     protected function getTableActions(): array
     {
@@ -83,51 +83,34 @@ class AddressList extends BaseDataTable
         ];
     }
 
-    protected function getBuilder(Builder $builder): Builder
+    public function createDocuments(): null|MediaStream|Media
     {
-        // add contact_id to the select statement to ensure that the contact route is available
-        return $builder->addSelect('contact_id')->with('contact.media');
+        $response = $this->createDocumentFromItems($this->getSelectedModels(), true);
+        $this->loadData();
+        $this->reset('selected');
+
+        return $response;
     }
 
-    protected function getReturnKeys(): array
+    public function createMailMessage(): void
     {
-        return array_merge(parent::getReturnKeys(), ['contact_id']);
-    }
-
-    protected function itemToArray($item): array
-    {
-        $returnArray = parent::itemToArray($item);
-        $returnArray['avatar'] = $item->getAvatarUrl();
-
-        return $returnArray;
-    }
-
-    #[Renderless]
-    public function show(): void
-    {
-        $this->contact->reset();
-
-        $this->js(
-            <<<'JS'
-               $modalOpen('new-contact-modal');
-            JS
-        );
-    }
-
-    #[Renderless]
-    public function save(): false|RedirectResponse|Redirector
-    {
-        try {
-            $this->contact->save();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
+        $mailMessages = [];
+        foreach ($this->getSelectedModels() as $model) {
+            $mailMessages[] = [
+                'to' => $this->getTo($model, []),
+                'cc' => $this->getCc($model),
+                'bcc' => $this->getBcc($model),
+                'subject' => null,
+                'html_body' => null,
+                'communicatable_type' => $this->getCommunicatableType($model),
+                'communicatable_id' => $this->getCommunicatableId($model),
+            ];
         }
 
-        $this->notification()->success(__(':model saved', ['model' => __('Contact')]))->send();
+        $sessionKey = 'mail_' . Str::uuid()->toString();
+        session()->put($sessionKey, $mailMessages);
 
-        return redirect(route('contacts.id?', ['id' => $this->contact->id]));
+        $this->dispatch('createFromSession', key: $sessionKey)->to('edit-mail');
     }
 
     #[Renderless]
@@ -138,12 +121,6 @@ class AddressList extends BaseDataTable
         if ($this->showMap) {
             $this->updatedShowMap();
         }
-    }
-
-    #[Renderless]
-    public function updatedShowMap(): void
-    {
-        $this->dispatch('load-map');
     }
 
     #[Renderless]
@@ -175,46 +152,44 @@ class AddressList extends BaseDataTable
             ->toArray();
     }
 
-    public function createMailMessage(): void
+    #[Renderless]
+    public function save(): false|RedirectResponse|Redirector
     {
-        $mailMessages = [];
-        foreach ($this->getSelectedModels() as $model) {
-            $mailMessages[] = [
-                'to' => $this->getTo($model, []),
-                'cc' => $this->getCc($model),
-                'bcc' => $this->getBcc($model),
-                'subject' => null,
-                'html_body' => null,
-                'communicatable_type' => $this->getCommunicatableType($model),
-                'communicatable_id' => $this->getCommunicatableId($model),
-            ];
+        try {
+            $this->contact->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
         }
 
-        $sessionKey = 'mail_' . Str::uuid()->toString();
-        session()->put($sessionKey, $mailMessages);
+        $this->notification()->success(__(':model saved', ['model' => __('Contact')]))->send();
 
-        $this->dispatch('createFromSession', key: $sessionKey)->to('edit-mail');
+        return redirect(route('contacts.id?', ['id' => $this->contact->id]));
     }
 
-    public function createDocuments(): null|MediaStream|Media
+    #[Renderless]
+    public function show(): void
     {
-        $response = $this->createDocumentFromItems($this->getSelectedModels(), true);
-        $this->loadData();
-        $this->reset('selected');
+        $this->contact->reset();
 
-        return $response;
-    }
-
-    protected function getTo(OffersPrinting $item, array $documents): array
-    {
-        return Arr::wrap(
-            $item->email_primary ?? $item->contactOptions->where('type', 'email')->first()?->value ?? []
+        $this->js(
+            <<<'JS'
+               $modalOpen('new-contact-modal');
+            JS
         );
     }
 
-    protected function getSubject(OffersPrinting $item): string
+    #[Renderless]
+    public function updatedShowMap(): void
     {
-        return __('Address Label');
+        $this->dispatch('load-map');
+    }
+
+    protected function getBuilder(Builder $builder): Builder
+    {
+        // add contact_id to the select statement to ensure that the contact route is available
+        return $builder->addSelect('contact_id')->with('contact.media');
     }
 
     protected function getHtmlBody(OffersPrinting $item): string
@@ -225,5 +200,30 @@ class AddressList extends BaseDataTable
     protected function getPrintLayouts(): array
     {
         return app(Address::class)->getPrintViews();
+    }
+
+    protected function getReturnKeys(): array
+    {
+        return array_merge(parent::getReturnKeys(), ['contact_id']);
+    }
+
+    protected function getSubject(OffersPrinting $item): string
+    {
+        return __('Address Label');
+    }
+
+    protected function getTo(OffersPrinting $item, array $documents): array
+    {
+        return Arr::wrap(
+            $item->email_primary ?? $item->contactOptions->where('type', 'email')->first()?->value ?? []
+        );
+    }
+
+    protected function itemToArray($item): array
+    {
+        $returnArray = parent::itemToArray($item);
+        $returnArray['avatar'] = $item->getAvatarUrl();
+
+        return $returnArray;
     }
 }

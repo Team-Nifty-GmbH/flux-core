@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('orders', function (Blueprint $table) {
+        Schema::table('orders', function (Blueprint $table): void {
             $table->decimal('total_base_discounted_net_price', 40, 10)
                 ->nullable()
                 ->after('total_base_gross_price');
@@ -34,7 +34,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('orders', function (Blueprint $table) {
+        Schema::table('orders', function (Blueprint $table): void {
             $table->dropColumn([
                 'total_discount_percentage',
                 'total_discount_flat',

@@ -80,9 +80,28 @@ class OrdersTest extends PortalDuskTestCase
         ]);
     }
 
-    public function test_can_see_orders()
+    public function test_can_see_order_details(): void
     {
-        $this->browse(function (Browser $browser) {
+        $this->browse(function (Browser $browser): void {
+            $this->openMenu();
+            $browser
+                ->click('nav [href="/orders"]')
+                ->waitForRoute('portal.orders');
+
+            $browser->waitFor('[tall-datatable] tbody [data-id]');
+
+            $rows = $browser->elements('[tall-datatable] tbody [data-id]');
+
+            $rows[0]->click();
+
+            $browser->waitForRoute('portal.orders.id', ['id' => $this->orders[2]->id])
+                ->assertRouteIs('portal.orders.id', ['id' => $this->orders[2]->id]);
+        });
+    }
+
+    public function test_can_see_orders(): void
+    {
+        $this->browse(function (Browser $browser): void {
             $browser->visit($this->baseUrl())->type('email', $this->user->email)
                 ->type('password', $this->password)
                 ->press('Login')
@@ -108,25 +127,6 @@ class OrdersTest extends PortalDuskTestCase
             $rows = $browser->elements('[tall-datatable] tbody [data-id]');
 
             $this->assertCount(3, $rows);
-        });
-    }
-
-    public function test_can_see_order_details()
-    {
-        $this->browse(function (Browser $browser) {
-            $this->openMenu();
-            $browser
-                ->click('nav [href="/orders"]')
-                ->waitForRoute('portal.orders');
-
-            $browser->waitFor('[tall-datatable] tbody [data-id]');
-
-            $rows = $browser->elements('[tall-datatable] tbody [data-id]');
-
-            $rows[0]->click();
-
-            $browser->waitForRoute('portal.orders.id', ['id' => $this->orders[2]->id])
-                ->assertRouteIs('portal.orders.id', ['id' => $this->orders[2]->id]);
         });
     }
 }

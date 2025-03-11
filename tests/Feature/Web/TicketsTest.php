@@ -32,30 +32,14 @@ class TicketsTest extends BaseSetup
         ]);
     }
 
-    public function test_tickets_page()
+    public function test_tickets_id_no_user(): void
     {
-        $this->user->givePermissionTo(Permission::findOrCreate('tickets.get', 'web'));
-
-        $this->actingAs($this->user, 'web')->get('/tickets')
-            ->assertStatus(200);
-    }
-
-    public function test_tickets_no_user()
-    {
-        $this->get('/tickets')
+        $this->get('/tickets/' . $this->ticket->id)
             ->assertStatus(302)
             ->assertRedirect(route('login'));
     }
 
-    public function test_tickets_without_permission()
-    {
-        Permission::findOrCreate('tickets.get', 'web');
-
-        $this->actingAs($this->user, 'web')->get('/tickets')
-            ->assertStatus(403);
-    }
-
-    public function test_tickets_id_page()
+    public function test_tickets_id_page(): void
     {
         $this->user->givePermissionTo(Permission::findOrCreate('tickets.{id}.get', 'web'));
 
@@ -63,22 +47,7 @@ class TicketsTest extends BaseSetup
             ->assertStatus(200);
     }
 
-    public function test_tickets_id_no_user()
-    {
-        $this->get('/tickets/' . $this->ticket->id)
-            ->assertStatus(302)
-            ->assertRedirect(route('login'));
-    }
-
-    public function test_tickets_id_without_permission()
-    {
-        Permission::findOrCreate('tickets.{id}.get', 'web');
-
-        $this->actingAs($this->user, 'web')->get('/tickets/' . $this->ticket->id)
-            ->assertStatus(403);
-    }
-
-    public function test_tickets_id_ticket_not_found()
+    public function test_tickets_id_ticket_not_found(): void
     {
         $this->ticket->delete();
 
@@ -86,5 +55,36 @@ class TicketsTest extends BaseSetup
 
         $this->actingAs($this->user, 'web')->get('/tickets/' . $this->ticket->id)
             ->assertStatus(404);
+    }
+
+    public function test_tickets_id_without_permission(): void
+    {
+        Permission::findOrCreate('tickets.{id}.get', 'web');
+
+        $this->actingAs($this->user, 'web')->get('/tickets/' . $this->ticket->id)
+            ->assertStatus(403);
+    }
+
+    public function test_tickets_no_user(): void
+    {
+        $this->get('/tickets')
+            ->assertStatus(302)
+            ->assertRedirect(route('login'));
+    }
+
+    public function test_tickets_page(): void
+    {
+        $this->user->givePermissionTo(Permission::findOrCreate('tickets.get', 'web'));
+
+        $this->actingAs($this->user, 'web')->get('/tickets')
+            ->assertStatus(200);
+    }
+
+    public function test_tickets_without_permission(): void
+    {
+        Permission::findOrCreate('tickets.get', 'web');
+
+        $this->actingAs($this->user, 'web')->get('/tickets')
+            ->assertStatus(403);
     }
 }

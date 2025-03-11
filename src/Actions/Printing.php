@@ -11,9 +11,19 @@ use Illuminate\View\View;
 
 class Printing extends FluxAction
 {
+    public Model $model;
+
     public Printable $printable;
 
-    public Model $model;
+    public static function models(): array
+    {
+        return [];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return PrintingRuleset::class;
+    }
 
     public function boot($data): void
     {
@@ -23,16 +33,6 @@ class Printing extends FluxAction
         $this->model = morphed_model($this->data['model_type'])::query()
             ->whereKey($this->data['model_id'])
             ->first();
-    }
-
-    protected function getRulesets(): string|array
-    {
-        return PrintingRuleset::class;
-    }
-
-    public static function models(): array
-    {
-        return [];
     }
 
     public function performAction(): View|Factory|PrintableView

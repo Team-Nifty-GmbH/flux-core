@@ -12,9 +12,9 @@ class TicketTypeForm extends FluxForm
     #[Locked]
     public ?int $id = null;
 
-    public ?string $name = null;
-
     public ?string $model_type = null;
+
+    public ?string $name = null;
 
     public array $roles = [];
 

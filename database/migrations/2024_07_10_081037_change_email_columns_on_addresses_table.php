@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('addresses', function (Blueprint $table) {
+        Schema::table('addresses', function (Blueprint $table): void {
             $table->renameColumn('email', 'email_primary');
             $table->renameColumn('login_name', 'email');
             $table->renameColumn('login_password', 'password');
@@ -17,7 +17,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('addresses', function (Blueprint $table) {
+        Schema::table('addresses', function (Blueprint $table): void {
             $table->renameColumn('password', 'login_password');
             $table->renameColumn('email', 'login_name');
             $table->renameColumn('email_primary', 'email');

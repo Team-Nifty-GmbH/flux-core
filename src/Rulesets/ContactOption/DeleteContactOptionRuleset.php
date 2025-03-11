@@ -8,9 +8,9 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class DeleteContactOptionRuleset extends FluxRuleset
 {
-    protected static ?string $model = ContactOption::class;
-
     protected static bool $addAdditionalColumnRules = false;
+
+    protected static ?string $model = ContactOption::class;
 
     public function rules(): array
     {

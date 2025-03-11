@@ -19,21 +19,11 @@ class CustomerPortal extends Component
 {
     use Actions;
 
-    public array $setting = [];
+    public array $calendars = [];
 
     public array $modules = [];
 
-    public array $calendars = [];
-
-    public function getRules(): array
-    {
-        return Arr::prependKeysWith(
-            ($this->setting['id'] ?? false)
-            ? resolve_static(UpdateSettingRuleset::class, 'getRules')
-            : resolve_static(CreateSettingRuleset::class, 'getRules'),
-            'setting.'
-        );
-    }
+    public array $setting = [];
 
     public function mount(Client $client): void
     {
@@ -76,6 +66,16 @@ class CustomerPortal extends Component
     public function render(): View|Factory|Application
     {
         return view('flux::livewire.settings.customer-portal');
+    }
+
+    public function getRules(): array
+    {
+        return Arr::prependKeysWith(
+            ($this->setting['id'] ?? false)
+            ? resolve_static(UpdateSettingRuleset::class, 'getRules')
+            : resolve_static(CreateSettingRuleset::class, 'getRules'),
+            'setting.'
+        );
     }
 
     public function save(): void

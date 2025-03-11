@@ -8,14 +8,14 @@ use FluxErp\Rulesets\Printer\CreatePrinterRuleset;
 
 class CreatePrinter extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreatePrinterRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Printer::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreatePrinterRuleset::class;
     }
 
     public function performAction(): Printer

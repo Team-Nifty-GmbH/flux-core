@@ -26,14 +26,14 @@ class Cart extends Component
 {
     use Actions;
 
-    public array $watchlists = [];
+    public ?int $loadWatchlist = null;
 
     public int $selectedWatchlist = 0;
 
-    public ?int $loadWatchlist = null;
-
     #[Rule('required_if:selectedWatchlist,0')]
     public ?string $watchlistName = null;
+
+    public array $watchlists = [];
 
     public function mount(): void
     {
@@ -41,24 +41,9 @@ class Cart extends Component
         $this->watchlists[] = ['id' => 0, 'name' => __('New watchlist')];
     }
 
-    protected function getListeners(): array
-    {
-        return [
-            'echo-private:' . $this->cart()->broadcastChannel() . ',.CartUpdated' => 'refresh',
-            'cart:add' => 'add',
-            'cart:remove' => 'remove',
-            'cart:refresh' => 'refresh',
-        ];
-    }
-
     public function render(): View
     {
         return view('flux::livewire.cart.cart');
-    }
-
-    public function refresh(): void
-    {
-        unset($this->cart);
     }
 
     public function add(array|int $products): void
@@ -79,17 +64,19 @@ class Cart extends Component
         )->send();
     }
 
-    public function remove(CartItem $cartItem): void
+    #[Renderless]
+    public function addToCurrentOrder(): void
     {
-        try {
-            DeleteCartItem::make(['id' => $cartItem->id])->validate()->execute();
-        } catch (ValidationException $e) {
-            exception_to_notifications($e, $this);
+        $this->dispatch(
+            'order:add-products',
+            $this->cart()->cartItems()->select(['product_id', 'amount', 'order_column'])->ordered()->get()->toArray()
+        );
+    }
 
-            return;
-        }
-
-        unset($this->cart);
+    #[Computed(persist: true)]
+    public function cart(): ?CartModel
+    {
+        return cart();
     }
 
     public function clear(): void
@@ -99,13 +86,15 @@ class Cart extends Component
         }
     }
 
-    public function updateAmount(CartItem $cartItem, string|float|int|null $amount): void
+    public function refresh(): void
+    {
+        unset($this->cart);
+    }
+
+    public function remove(CartItem $cartItem): void
     {
         try {
-            UpdateCartItem::make([
-                'id' => $cartItem->id,
-                'amount' => $amount ?? 0,
-            ])->validate()->execute();
+            DeleteCartItem::make(['id' => $cartItem->id])->validate()->execute();
         } catch (ValidationException $e) {
             exception_to_notifications($e, $this);
 
@@ -152,13 +141,20 @@ class Cart extends Component
         return true;
     }
 
-    #[Renderless]
-    public function addToCurrentOrder(): void
+    public function updateAmount(CartItem $cartItem, string|float|int|null $amount): void
     {
-        $this->dispatch(
-            'order:add-products',
-            $this->cart()->cartItems()->select(['product_id', 'amount', 'order_column'])->ordered()->get()->toArray()
-        );
+        try {
+            UpdateCartItem::make([
+                'id' => $cartItem->id,
+                'amount' => $amount ?? 0,
+            ])->validate()->execute();
+        } catch (ValidationException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        unset($this->cart);
     }
 
     public function updatedLoadWatchlist(): void
@@ -190,16 +186,20 @@ class Cart extends Component
         $this->loadWatchlist = null;
     }
 
-    #[Computed(persist: true)]
-    public function cart(): ?CartModel
+    protected function getListeners(): array
     {
-        return cart();
+        return [
+            'echo-private:' . $this->cart()->broadcastChannel() . ',.CartUpdated' => 'refresh',
+            'cart:add' => 'add',
+            'cart:remove' => 'remove',
+            'cart:refresh' => 'refresh',
+        ];
     }
 
     protected function getWatchLists(): void
     {
         $this->watchlists = resolve_static(CartModel::class, 'query')
-            ->where(function (Builder $query) {
+            ->where(function (Builder $query): void {
                 $query->where(fn (Builder $query) => $query
                     ->where('authenticatable_type', auth()->user()?->getMorphClass())
                     ->where('authenticatable_id', auth()->id()))

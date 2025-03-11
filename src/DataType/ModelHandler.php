@@ -9,14 +9,14 @@ use Illuminate\Database\Eloquent\Model;
  */
 class ModelHandler implements HandlerInterface
 {
-    public function getDataType(): string
-    {
-        return 'model';
-    }
-
     public function canHandleValue(mixed $value): bool
     {
         return $value instanceof Model;
+    }
+
+    public function getDataType(): string
+    {
+        return 'model';
     }
 
     public function serializeValue(mixed $value): string

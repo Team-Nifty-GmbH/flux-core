@@ -10,14 +10,14 @@ use Illuminate\Validation\ValidationException;
 
 class DeleteUser extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeleteUserRuleset::class;
-    }
-
     public static function models(): array
     {
         return [User::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeleteUserRuleset::class;
     }
 
     public function performAction(): ?bool

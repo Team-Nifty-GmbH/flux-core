@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('purchase_invoices', function (Blueprint $table) {
+        Schema::table('purchase_invoices', function (Blueprint $table): void {
             $table->foreignId('approval_user_id')
                 ->nullable()
                 ->after('uuid')
@@ -19,7 +19,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('purchase_invoices', function (Blueprint $table) {
+        Schema::table('purchase_invoices', function (Blueprint $table): void {
             $table->dropConstrainedForeignId('approval_user_id');
         });
     }

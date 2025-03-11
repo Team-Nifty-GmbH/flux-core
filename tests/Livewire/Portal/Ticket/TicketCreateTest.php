@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class TicketCreateTest extends BaseSetup
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(TicketCreate::class)
             ->assertStatus(200);

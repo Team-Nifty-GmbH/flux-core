@@ -11,7 +11,7 @@ return new class() extends Migration
      */
     public function up(): void
     {
-        Schema::table('ticket_types', function (Blueprint $table) {
+        Schema::table('ticket_types', function (Blueprint $table): void {
             $table->string('model_type')->nullable()->index()->after('name');
         });
     }
@@ -21,7 +21,7 @@ return new class() extends Migration
      */
     public function down(): void
     {
-        Schema::table('ticket_types', function (Blueprint $table) {
+        Schema::table('ticket_types', function (Blueprint $table): void {
             $table->dropIndex('ticket_types_model_type_index');
 
             $table->dropColumn('model_type');

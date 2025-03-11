@@ -19,6 +19,18 @@ class OrderConfirmation extends Mailable
         $this->when($locale = $this->order?->addressInvoice?->language?->iso_name, fn () => $this->locale($locale));
     }
 
+    public function attachments(): array
+    {
+        return [];
+    }
+
+    public function content(): Content
+    {
+        return new Content(
+            markdown: 'flux::emails.orders.order-confirmation',
+        );
+    }
+
     public function envelope(): Envelope
     {
         return new Envelope(
@@ -29,17 +41,5 @@ class OrderConfirmation extends Mailable
                 ]
             ),
         );
-    }
-
-    public function content(): Content
-    {
-        return new Content(
-            markdown: 'flux::emails.orders.order-confirmation',
-        );
-    }
-
-    public function attachments(): array
-    {
-        return [];
     }
 }

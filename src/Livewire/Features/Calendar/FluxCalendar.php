@@ -32,31 +32,13 @@ class FluxCalendar extends Component
 {
     use Actions;
 
-    public string $tab = 'users';
-
-    public string $search = '';
-
-    public array $searchResults = [];
-
     #[Locked]
     public array $allCalendars = [];
-
-    #[Locked]
-    public array $selectableCalendars = [];
 
     public array $calendarEvent = [];
 
     #[Locked]
-    public array $oldCalendarEvent = [];
-
-    #[Locked]
     public bool $calendarEventWasRepeatable = false;
-
-    #[Locked]
-    public bool $showCalendars = true;
-
-    #[Locked]
-    public bool $showInvites = true;
 
     #[Locked]
     public array $calendarPeriod = [
@@ -64,24 +46,42 @@ class FluxCalendar extends Component
         'end' => null,
     ];
 
-    public array $validationErrors = [];
+    public string $confirmDelete = 'this';
 
     public string $confirmSave = 'future';
 
-    public string $confirmDelete = 'this';
-
-    protected Collection $sharedWithMe;
-
-    protected Collection $myCalendars;
-
     public CalendarEventForm $event;
 
-    protected string $view = 'flux::livewire.features.calendar.flux-calendar';
+    #[Locked]
+    public array $oldCalendarEvent = [];
+
+    public string $search = '';
+
+    public array $searchResults = [];
+
+    #[Locked]
+    public array $selectableCalendars = [];
+
+    #[Locked]
+    public bool $showCalendars = true;
+
+    #[Locked]
+    public bool $showInvites = true;
+
+    public string $tab = 'users';
+
+    public array $validationErrors = [];
 
     protected $listeners = [
         'calendar-view-did-mount' => 'storeViewSettings',
         'calendar-toggle-event-source' => 'toggleEventSource',
     ];
+
+    protected Collection $myCalendars;
+
+    protected Collection $sharedWithMe;
+
+    protected string $view = 'flux::livewire.features.calendar.flux-calendar';
 
     public function mount(): void
     {
@@ -98,439 +98,12 @@ class FluxCalendar extends Component
         return view($this->view);
     }
 
-    public function getViews(): array
-    {
-        return [
-            'dayGridMonth',
-        ];
-    }
-
-    protected function getCacheKey(): string
-    {
-        return static::class;
-    }
-
     #[Renderless]
-    public function toggleEventSource(array $activeCalendars): void
+    public function addInvitedRecord(int $id): void
     {
-        $this->storeSettings(array_column($activeCalendars, 'publicId'), 'activeCalendars');
-    }
+        $model = app($this->tab === 'users' ? User::class : Address::class);
 
-    #[Renderless]
-    public function storeViewSettings(array $view): void
-    {
-        $this->storeSettings(data_get($view, 'type'), 'initialView');
-    }
-
-    #[Renderless]
-    public function getCalendarEventsBeingListenedFor(): array
-    {
-        return array_intersect_key(
-            method_exists(parent::class, 'getEventsBeingListenedFor')
-                ? parent::getEventsBeingListenedFor()
-                : array_keys(parent::getListeners()),
-            [
-                'select',
-                'unselect',
-                'dateClick',
-                'eventClick',
-                'eventMouseEnter',
-                'eventMouseLeave',
-                'eventDragStart',
-                'eventDragStop',
-                'eventDrop',
-                'eventResizeStart',
-                'eventResizeStop',
-                'eventResize',
-                'eventReceive',
-                'eventLeave',
-                'eventAdd',
-                'eventChange',
-                'eventRemove',
-                'drop',
-                'eventsSet',
-            ]
-        );
-    }
-
-    #[Renderless]
-    public function storeSettings(mixed $data, ?string $setPath = null): void
-    {
-        if (! in_array(HasCalendarUserSettings::class, class_uses_recursive(auth()->user()))) {
-            return;
-        }
-
-        $currentData = auth()->user()->getCalendarSettings(static::class)->value('settings') ?? [];
-
-        if (! is_null($setPath)) {
-            data_set($currentData, $setPath, $data);
-            $setData = $currentData;
-        } else {
-            $data = Arr::wrap($data instanceof Arrayable ? $data->toArray() : $data);
-            $setData = Arr::undot(
-                array_merge(
-                    Arr::dot($currentData),
-                    Arr::dot($data)
-                )
-            );
-        }
-
-        auth()->user()
-            ->calendarUserSettings()
-            ->updateOrCreate(
-                [
-                    'cache_key' => static::class,
-                    'component' => static::class,
-                ],
-                [
-                    'settings' => $setData,
-                ]
-            );
-    }
-
-    #[Renderless]
-    public function getConfig(): array
-    {
-        return Arr::undot(
-            array_merge(
-                Arr::dot(
-                    [
-                        'locale' => app()->getLocale(),
-                        'firstDay' => Carbon::getWeekStartsAt(),
-                        'height' => 'auto',
-                        'views' => $this->getViews(),
-                        'headerToolbar' => [
-                            'end' => 'prev,next today',
-                            'left' => 'title',
-                            'center' => 'timeGridDay,timeGridWeek,dayGridMonth',
-                        ],
-                        'nowIndicator' => true,
-                        'buttonText' => [
-                            'today' => __('Today'),
-                            'month' => __('Month'),
-                            'week' => __('Week'),
-                            'day' => __('Day'),
-                        ],
-                    ]
-                ),
-                Arr::dot(auth()->user()->getCalendarSettings(static::class)->value('settings') ?? [])
-            )
-        );
-    }
-
-    #[Renderless]
-    public function getCalendars(): array
-    {
-        $this->allCalendars = array_merge(
-            $this->getMyCalendars()->toArray(),
-            $this->getSharedWithMeCalendars()->toArray(),
-            $this->getPublicCalendars()->toArray(),
-            $this->getOtherCalendars()->toArray(),
-        );
-
-        $this->selectableCalendars = collect($this->allCalendars)
-            ->where('resourceEditable', true)
-            ->map(function ($calendar) {
-                if ($parentId = data_get($calendar, 'parentId')) {
-                    $calendar['name'] = resolve_static(Calendar::class, 'query')
-                        ->query()
-                        ->whereKey($parentId)
-                        ->value('name') . ' -> ' . $calendar['name'] ?? '';
-                }
-
-                return $calendar;
-            })
-            ->all();
-
-        return $this->allCalendars;
-    }
-
-    #[Renderless]
-    public function getMyCalendars(): Collection
-    {
-        resolve_static(
-            Calendar::class,
-            'addGlobalScope',
-            [
-                'scope' => fn (Builder $query) => $query->with('children'),
-            ]
-        );
-
-        return $this->myCalendars = auth()->user()
-            ->calendars()
-            ->whereNull('parent_id')
-            ->withPivot('permission')
-            ->wherePivot('permission', 'owner')
-            ->withCount('calendarables')
-            ->get()
-            ->toCalendarObjects();
-    }
-
-    #[Renderless]
-    public function getInvites(): array
-    {
-        return auth()->user()
-            ->invites()
-            ->with('calendarEvent:id,start,end,title,is_all_day,calendar_id')
-            ->get()
-            ->toArray();
-    }
-
-    #[Renderless]
-    public function inviteStatus(Inviteable $event, string $status, int $calendarId): void
-    {
-        $event->status = $status;
-        $event->model_calendar_id = $calendarId;
-        $event->save();
-
-        $this->skipRender();
-    }
-
-    public function isCalendarEventRepeatable(int|string $calendarId): bool
-    {
-        return (bool) resolve_static(Calendar::class, 'query')
-            ->whereKey($calendarId)
-            ->value('has_repeatable_events');
-    }
-
-    #[Renderless]
-    public function updateSelectableCalendars(array $calendar): void
-    {
-        $index = collect($this->selectableCalendars)->search(fn ($item) => $item['id'] === data_get($calendar, 'id'));
-        if ($parentId = data_get($calendar, 'parentId')) {
-            $calendar['name'] = resolve_static(Calendar::class, 'query')
-                ->whereKey($parentId)
-                ->value('name') . ' -> ' . $calendar['name'] ?? '';
-        }
-
-        if ($index === false) {
-            $this->selectableCalendars[] = $calendar;
-        } else {
-            $this->selectableCalendars[$index] = $calendar;
-        }
-    }
-
-    #[Renderless]
-    public function removeSelectableCalendar(array $calendar): void
-    {
-        $this->selectableCalendars = collect($this->selectableCalendars)
-            ->reject(fn ($item) => $item['id'] === data_get($calendar, 'id'))
-            ->all();
-    }
-
-    #[Renderless]
-    public function showModal(): void
-    {
-        $this->js(
-            <<<'JS'
-               $modalOpen('calendar-event-modal');
-            JS
-        );
-    }
-
-    #[Renderless]
-    public function getCalendarGroups(): array
-    {
-        return [
-            'my' => __('My Calendars'),
-            'shared' => __('Shared with me'),
-            'public' => __('Public'),
-            'other' => __('Other'),
-        ];
-    }
-
-    public function getSharedWithMeCalendars(): Collection
-    {
-        return $this->sharedWithMe = auth()->user()
-            ->calendars()
-            ->withPivot('permission')
-            ->wherePivot('permission', '!=', 'owner')
-            ->get()
-            ->toFlatTree()
-            ->map(function (Calendar $calendar) {
-                return $calendar->toCalendarObject(
-                    [
-                        'permission' => $calendar['pivot']['permission'],
-                        'resourceEditable' => $calendar['pivot']['permission'] !== 'reader',
-                        'group' => 'shared',
-                    ]
-                );
-            });
-    }
-
-    public function getPublicCalendars(): Collection
-    {
-        return resolve_static(Calendar::class, 'query')
-            ->where('is_public', true)
-            ->whereNotIn('id', $this->myCalendars->pluck('id'))
-            ->whereNotIn('id', $this->sharedWithMe->pluck('id'))
-            ->get()
-            ->toFlatTree()
-            ->map(function (Calendar $calendar) {
-                return $calendar->toCalendarObject([
-                    'permission' => 'reader',
-                    'group' => 'public',
-                    'resourceEditable' => false,
-                ]);
-            });
-    }
-
-    #[Renderless]
-    public function getOtherCalendars(): Collection
-    {
-        return collect(Relation::morphMap())
-            ->filter(fn (string $modelClass) => in_array(Calendarable::class, class_implements($modelClass)))
-            ->map(fn (string $modelClass) => resolve_static($modelClass, 'toCalendar'))
-            ->flatMap(fn ($item) => Arr::isAssoc($item) ? [$item] : $item)
-            ->values();
-    }
-
-    #[Renderless]
-    public function getEvents(array $info, array $calendarAttributes): array
-    {
-        if (data_get($calendarAttributes, 'hasNoEvents')) {
-            return [];
-        }
-
-        if (($calendarAttributes['modelType'] ?? false)
-            && data_get($calendarAttributes, 'isVirtual', false)
-        ) {
-            return resolve_static(morphed_model($calendarAttributes['modelType']), 'query')
-                ->inTimeframe($info['start'], $info['end'], $calendarAttributes)
-                ->get()
-                ->map(fn (Model $model) => $model->toCalendarEvent($info))
-                ->toArray();
-        }
-
-        $this->calendarPeriod = [
-            'start' => Carbon::parse($info['startStr'])->toDateTimeString(),
-            'end' => Carbon::parse($info['endStr'])->toDateTimeString(),
-        ];
-
-        $calendar = resolve_static(Calendar::class, 'query')
-            ->whereKey($calendarAttributes['id'])
-            ->first();
-
-        $calendarEvents = $calendar->calendarEvents()
-            ->whereNull('repeat')
-            ->where(function ($query) use ($info) {
-                $query->whereBetween('start', [
-                    Carbon::parse($info['start']),
-                    Carbon::parse($info['end']),
-                ])
-                    ->orWhereBetween('end', [
-                        Carbon::parse($info['start']),
-                        Carbon::parse($info['end']),
-                    ]);
-            })
-            ->with('invited', fn ($query) => $query->withPivot('status'))
-            ->get()
-            ->merge(
-                $calendar->invitesCalendarEvents()
-                    ->addSelect('calendar_events.*')
-                    ->addSelect('inviteables.status')
-                    ->addSelect('inviteables.model_calendar_id AS calendar_id')
-                    ->whereIn('inviteables.status', ['accepted', 'maybe'])
-                    ->get()
-                    ->each(fn ($event) => $event->is_invited = true)
-            );
-
-        return $this->calculateRepeatableEvents($calendar, $calendarEvents)
-            ->map(function ($event) use ($calendarAttributes, $calendar) {
-                $invited = $this->getInvited($event);
-
-                return $event->toCalendarEventObject([
-                    'is_editable' => $calendarAttributes['permission'] !== 'reader',
-                    'invited' => $invited,
-                    'is_repeatable' => $calendar->has_repeatable_events ?? false,
-                    'has_repeats' => ! is_null($event->repeat),
-                ]);
-            })
-            ?->toArray();
-    }
-
-    #[Renderless]
-    public function saveEvent(array $attributes): array|false
-    {
-        $attributes['is_all_day'] = $attributes['allDay'] ?? false;
-        $attributes['confirm_option'] = ! $this->calendarEventWasRepeatable ? 'all' : $this->confirmSave;
-        $attributes['calendar_type'] ??= data_get(
-            collect($this->selectableCalendars)->firstWhere('id', data_get($attributes, 'calendar_id')),
-            'model_type'
-        );
-
-        if ($attributes['has_repeats'] ?? false) {
-            $attributes['repeat'] = [
-                'start' => $attributes['start'],
-                'interval' => $attributes['interval'] ?? null,
-                'unit' => $attributes['unit'] ?? null,
-                'weekdays' => $attributes['weekdays'] ?? null,
-                'monthly' => $attributes['monthly'] ?? null,
-            ];
-        }
-
-        if ($attributes['calendar_type'] ?? false) {
-            $action = Action::get(
-                $attributes['calendar_type'] . (($attributes['id'] ?? false) ? '.update' : '.create')
-            );
-
-            if (! $action) {
-                return false;
-            }
-
-            $modelClass = morphed_model($attributes['calendar_type']);
-
-            try {
-                $result = $action['class']::make(resolve_static($modelClass, 'fromCalendarEvent', [$attributes]))
-                    ->checkPermission()
-                    ->validate()
-                    ->execute();
-            } catch (UnauthorizedException|ValidationException $e) {
-                exception_to_notifications($e, $this);
-
-                return false;
-            }
-
-            $result = $result->toCalendarEvent();
-        } else {
-            try {
-                $attributes['extended_props'] = array_values(data_get($attributes, 'customProperties', []));
-                $this->event->reset();
-                $this->event->fill($attributes);
-                $this->event->original_start = data_get($this->oldCalendarEvent, 'start');
-                $this->event->save();
-            } catch (ValidationException|UnauthorizedException $e) {
-                exception_to_notifications($e, $this);
-
-                return false;
-            }
-
-            $actionResult = $this->event->getActionResult();
-
-            $result = match (true) {
-                is_array($actionResult) => array_values(array_filter($actionResult)),
-                default => Arr::wrap($actionResult),
-            };
-        }
-
-        if (data_get($this->calendarPeriod, 'start') && data_get($this->calendarPeriod, 'end')) {
-            $result = array_map(
-                function ($event) use ($attributes) {
-                    if ($event instanceof CalendarEvent) {
-                        return $event->toCalendarEventObject([
-                            'is_editable' => true,
-                            'is_repeatable' => $attributes['is_repeatable'] ?? false,
-                            'has_repeats' => ! is_null($event->repeat),
-                        ]);
-                    }
-
-                    return $event;
-                },
-                Helper::getRepetitions($result, $this->calendarPeriod['start'], $this->calendarPeriod['end'])
-            );
-        }
-
-        return $result ?: false;
+        $this->addInvitee($model->query()->whereKey($id)->first());
     }
 
     #[Renderless]
@@ -578,39 +151,166 @@ class FluxCalendar extends Component
     }
 
     #[Renderless]
-    public function updatedCalendarEventStatus($value): void
+    public function getCalendarEventsBeingListenedFor(): array
     {
-        $calendarEvent = resolve_static(CalendarEvent::class, 'query')
-            ->whereKey($this->calendarEvent['id'])
-            ->firstOrFail();
-
-        $this->inviteStatus($calendarEvent, $value, $calendarEvent->calendar_id);
+        return array_intersect_key(
+            method_exists(parent::class, 'getEventsBeingListenedFor')
+                ? parent::getEventsBeingListenedFor()
+                : array_keys(parent::getListeners()),
+            [
+                'select',
+                'unselect',
+                'dateClick',
+                'eventClick',
+                'eventMouseEnter',
+                'eventMouseLeave',
+                'eventDragStart',
+                'eventDragStop',
+                'eventDrop',
+                'eventResizeStart',
+                'eventResizeStop',
+                'eventResize',
+                'eventReceive',
+                'eventLeave',
+                'eventAdd',
+                'eventChange',
+                'eventRemove',
+                'drop',
+                'eventsSet',
+            ]
+        );
     }
 
     #[Renderless]
-    public function updatedSearch(): void
+    public function getCalendarGroups(): array
     {
-        $model = app($this->tab === 'users' ? User::class : Address::class);
-        $this->searchResults = $this->search ? $model::search($this->search)->get()->toArray() : [];
+        return [
+            'my' => __('My Calendars'),
+            'shared' => __('Shared with me'),
+            'public' => __('Public'),
+            'other' => __('Other'),
+        ];
     }
 
     #[Renderless]
-    public function updatedTab(): void
+    public function getCalendars(): array
     {
-        $this->search = '';
-        $this->searchResults = [];
-    }
-
-    public function updatedCalendarEventCalendarId(): void
-    {
-        $this->calendarEvent['customProperties'] = Arr::mapWithKeys(
-            resolve_static(Calendar::class, 'query')
-                ->whereKey($this->calendarEvent['calendar_id'])
-                ->value('custom_properties') ?? [],
-            fn ($item) => [$item['name'] => array_merge(['value' => null], $item)]
+        $this->allCalendars = array_merge(
+            $this->getMyCalendars()->toArray(),
+            $this->getSharedWithMeCalendars()->toArray(),
+            $this->getPublicCalendars()->toArray(),
+            $this->getOtherCalendars()->toArray(),
         );
 
-        $this->skipRender();
+        $this->selectableCalendars = collect($this->allCalendars)
+            ->where('resourceEditable', true)
+            ->map(function ($calendar) {
+                if ($parentId = data_get($calendar, 'parentId')) {
+                    $calendar['name'] = resolve_static(Calendar::class, 'query')
+                        ->query()
+                        ->whereKey($parentId)
+                        ->value('name') . ' -> ' . $calendar['name'] ?? '';
+                }
+
+                return $calendar;
+            })
+            ->all();
+
+        return $this->allCalendars;
+    }
+
+    #[Renderless]
+    public function getConfig(): array
+    {
+        return Arr::undot(
+            array_merge(
+                Arr::dot(
+                    [
+                        'locale' => app()->getLocale(),
+                        'firstDay' => Carbon::getWeekStartsAt(),
+                        'height' => 'auto',
+                        'views' => $this->getViews(),
+                        'headerToolbar' => [
+                            'end' => 'prev,next today',
+                            'left' => 'title',
+                            'center' => 'timeGridDay,timeGridWeek,dayGridMonth',
+                        ],
+                        'nowIndicator' => true,
+                        'buttonText' => [
+                            'today' => __('Today'),
+                            'month' => __('Month'),
+                            'week' => __('Week'),
+                            'day' => __('Day'),
+                        ],
+                    ]
+                ),
+                Arr::dot(auth()->user()->getCalendarSettings(static::class)->value('settings') ?? [])
+            )
+        );
+    }
+
+    #[Renderless]
+    public function getEvents(array $info, array $calendarAttributes): array
+    {
+        if (data_get($calendarAttributes, 'hasNoEvents')) {
+            return [];
+        }
+
+        if (($calendarAttributes['modelType'] ?? false)
+            && data_get($calendarAttributes, 'isVirtual', false)
+        ) {
+            return resolve_static(morphed_model($calendarAttributes['modelType']), 'query')
+                ->inTimeframe($info['start'], $info['end'], $calendarAttributes)
+                ->get()
+                ->map(fn (Model $model) => $model->toCalendarEvent($info))
+                ->toArray();
+        }
+
+        $this->calendarPeriod = [
+            'start' => Carbon::parse($info['startStr'])->toDateTimeString(),
+            'end' => Carbon::parse($info['endStr'])->toDateTimeString(),
+        ];
+
+        $calendar = resolve_static(Calendar::class, 'query')
+            ->whereKey($calendarAttributes['id'])
+            ->first();
+
+        $calendarEvents = $calendar->calendarEvents()
+            ->whereNull('repeat')
+            ->where(function ($query) use ($info): void {
+                $query->whereBetween('start', [
+                    Carbon::parse($info['start']),
+                    Carbon::parse($info['end']),
+                ])
+                    ->orWhereBetween('end', [
+                        Carbon::parse($info['start']),
+                        Carbon::parse($info['end']),
+                    ]);
+            })
+            ->with('invited', fn ($query) => $query->withPivot('status'))
+            ->get()
+            ->merge(
+                $calendar->invitesCalendarEvents()
+                    ->addSelect('calendar_events.*')
+                    ->addSelect('inviteables.status')
+                    ->addSelect('inviteables.model_calendar_id AS calendar_id')
+                    ->whereIn('inviteables.status', ['accepted', 'maybe'])
+                    ->get()
+                    ->each(fn ($event) => $event->is_invited = true)
+            );
+
+        return $this->calculateRepeatableEvents($calendar, $calendarEvents)
+            ->map(function ($event) use ($calendarAttributes, $calendar) {
+                $invited = $this->getInvited($event);
+
+                return $event->toCalendarEventObject([
+                    'is_editable' => $calendarAttributes['permission'] !== 'reader',
+                    'invited' => $invited,
+                    'is_repeatable' => $calendar->has_repeatable_events ?? false,
+                    'has_repeats' => ! is_null($event->repeat),
+                ]);
+            })
+            ?->toArray();
     }
 
     public function getInvited(Model $event): array
@@ -629,11 +329,104 @@ class FluxCalendar extends Component
     }
 
     #[Renderless]
-    public function addInvitedRecord(int $id): void
+    public function getInvites(): array
     {
-        $model = app($this->tab === 'users' ? User::class : Address::class);
+        return auth()->user()
+            ->invites()
+            ->with('calendarEvent:id,start,end,title,is_all_day,calendar_id')
+            ->get()
+            ->toArray();
+    }
 
-        $this->addInvitee($model->query()->whereKey($id)->first());
+    #[Renderless]
+    public function getMyCalendars(): Collection
+    {
+        resolve_static(
+            Calendar::class,
+            'addGlobalScope',
+            [
+                'scope' => fn (Builder $query) => $query->with('children'),
+            ]
+        );
+
+        return $this->myCalendars = auth()->user()
+            ->calendars()
+            ->whereNull('parent_id')
+            ->withPivot('permission')
+            ->wherePivot('permission', 'owner')
+            ->withCount('calendarables')
+            ->get()
+            ->toCalendarObjects();
+    }
+
+    #[Renderless]
+    public function getOtherCalendars(): Collection
+    {
+        return collect(Relation::morphMap())
+            ->filter(fn (string $modelClass) => in_array(Calendarable::class, class_implements($modelClass)))
+            ->map(fn (string $modelClass) => resolve_static($modelClass, 'toCalendar'))
+            ->flatMap(fn ($item) => Arr::isAssoc($item) ? [$item] : $item)
+            ->values();
+    }
+
+    public function getPublicCalendars(): Collection
+    {
+        return resolve_static(Calendar::class, 'query')
+            ->where('is_public', true)
+            ->whereNotIn('id', $this->myCalendars->pluck('id'))
+            ->whereNotIn('id', $this->sharedWithMe->pluck('id'))
+            ->get()
+            ->toFlatTree()
+            ->map(function (Calendar $calendar) {
+                return $calendar->toCalendarObject([
+                    'permission' => 'reader',
+                    'group' => 'public',
+                    'resourceEditable' => false,
+                ]);
+            });
+    }
+
+    public function getSharedWithMeCalendars(): Collection
+    {
+        return $this->sharedWithMe = auth()->user()
+            ->calendars()
+            ->withPivot('permission')
+            ->wherePivot('permission', '!=', 'owner')
+            ->get()
+            ->toFlatTree()
+            ->map(function (Calendar $calendar) {
+                return $calendar->toCalendarObject(
+                    [
+                        'permission' => $calendar['pivot']['permission'],
+                        'resourceEditable' => $calendar['pivot']['permission'] !== 'reader',
+                        'group' => 'shared',
+                    ]
+                );
+            });
+    }
+
+    public function getViews(): array
+    {
+        return [
+            'dayGridMonth',
+        ];
+    }
+
+    #[Renderless]
+    public function inviteStatus(Inviteable $event, string $status, int $calendarId): void
+    {
+        $event->status = $status;
+        $event->model_calendar_id = $calendarId;
+        $event->save();
+
+        $this->skipRender();
+    }
+
+    public function isCalendarEventRepeatable(int|string $calendarId): bool
+    {
+        return (bool) resolve_static(Calendar::class, 'query')
+            ->whereKey($calendarId)
+            ->value('has_repeatable_events');
     }
 
     #[Renderless]
@@ -747,6 +540,208 @@ class FluxCalendar extends Component
         $this->saveEvent($event);
     }
 
+    #[Renderless]
+    public function removeSelectableCalendar(array $calendar): void
+    {
+        $this->selectableCalendars = collect($this->selectableCalendars)
+            ->reject(fn ($item) => $item['id'] === data_get($calendar, 'id'))
+            ->all();
+    }
+
+    #[Renderless]
+    public function saveEvent(array $attributes): array|false
+    {
+        $attributes['is_all_day'] = $attributes['allDay'] ?? false;
+        $attributes['confirm_option'] = ! $this->calendarEventWasRepeatable ? 'all' : $this->confirmSave;
+        $attributes['calendar_type'] ??= data_get(
+            collect($this->selectableCalendars)->firstWhere('id', data_get($attributes, 'calendar_id')),
+            'model_type'
+        );
+
+        if ($attributes['has_repeats'] ?? false) {
+            $attributes['repeat'] = [
+                'start' => $attributes['start'],
+                'interval' => $attributes['interval'] ?? null,
+                'unit' => $attributes['unit'] ?? null,
+                'weekdays' => $attributes['weekdays'] ?? null,
+                'monthly' => $attributes['monthly'] ?? null,
+            ];
+        }
+
+        if ($attributes['calendar_type'] ?? false) {
+            $action = Action::get(
+                $attributes['calendar_type'] . (($attributes['id'] ?? false) ? '.update' : '.create')
+            );
+
+            if (! $action) {
+                return false;
+            }
+
+            $modelClass = morphed_model($attributes['calendar_type']);
+
+            try {
+                $result = $action['class']::make(resolve_static($modelClass, 'fromCalendarEvent', [$attributes]))
+                    ->checkPermission()
+                    ->validate()
+                    ->execute();
+            } catch (UnauthorizedException|ValidationException $e) {
+                exception_to_notifications($e, $this);
+
+                return false;
+            }
+
+            $result = $result->toCalendarEvent();
+        } else {
+            try {
+                $attributes['extended_props'] = array_values(data_get($attributes, 'customProperties', []));
+                $this->event->reset();
+                $this->event->fill($attributes);
+                $this->event->original_start = data_get($this->oldCalendarEvent, 'start');
+                $this->event->save();
+            } catch (ValidationException|UnauthorizedException $e) {
+                exception_to_notifications($e, $this);
+
+                return false;
+            }
+
+            $actionResult = $this->event->getActionResult();
+
+            $result = match (true) {
+                is_array($actionResult) => array_values(array_filter($actionResult)),
+                default => Arr::wrap($actionResult),
+            };
+        }
+
+        if (data_get($this->calendarPeriod, 'start') && data_get($this->calendarPeriod, 'end')) {
+            $result = array_map(
+                function ($event) use ($attributes) {
+                    if ($event instanceof CalendarEvent) {
+                        return $event->toCalendarEventObject([
+                            'is_editable' => true,
+                            'is_repeatable' => $attributes['is_repeatable'] ?? false,
+                            'has_repeats' => ! is_null($event->repeat),
+                        ]);
+                    }
+
+                    return $event;
+                },
+                Helper::getRepetitions($result, $this->calendarPeriod['start'], $this->calendarPeriod['end'])
+            );
+        }
+
+        return $result ?: false;
+    }
+
+    #[Renderless]
+    public function showModal(): void
+    {
+        $this->js(
+            <<<'JS'
+               $modalOpen('calendar-event-modal');
+            JS
+        );
+    }
+
+    #[Renderless]
+    public function storeSettings(mixed $data, ?string $setPath = null): void
+    {
+        if (! in_array(HasCalendarUserSettings::class, class_uses_recursive(auth()->user()))) {
+            return;
+        }
+
+        $currentData = auth()->user()->getCalendarSettings(static::class)->value('settings') ?? [];
+
+        if (! is_null($setPath)) {
+            data_set($currentData, $setPath, $data);
+            $setData = $currentData;
+        } else {
+            $data = Arr::wrap($data instanceof Arrayable ? $data->toArray() : $data);
+            $setData = Arr::undot(
+                array_merge(
+                    Arr::dot($currentData),
+                    Arr::dot($data)
+                )
+            );
+        }
+
+        auth()->user()
+            ->calendarUserSettings()
+            ->updateOrCreate(
+                [
+                    'cache_key' => static::class,
+                    'component' => static::class,
+                ],
+                [
+                    'settings' => $setData,
+                ]
+            );
+    }
+
+    #[Renderless]
+    public function storeViewSettings(array $view): void
+    {
+        $this->storeSettings(data_get($view, 'type'), 'initialView');
+    }
+
+    #[Renderless]
+    public function toggleEventSource(array $activeCalendars): void
+    {
+        $this->storeSettings(array_column($activeCalendars, 'publicId'), 'activeCalendars');
+    }
+
+    public function updatedCalendarEventCalendarId(): void
+    {
+        $this->calendarEvent['customProperties'] = Arr::mapWithKeys(
+            resolve_static(Calendar::class, 'query')
+                ->whereKey($this->calendarEvent['calendar_id'])
+                ->value('custom_properties') ?? [],
+            fn ($item) => [$item['name'] => array_merge(['value' => null], $item)]
+        );
+
+        $this->skipRender();
+    }
+
+    #[Renderless]
+    public function updatedCalendarEventStatus($value): void
+    {
+        $calendarEvent = resolve_static(CalendarEvent::class, 'query')
+            ->whereKey($this->calendarEvent['id'])
+            ->firstOrFail();
+
+        $this->inviteStatus($calendarEvent, $value, $calendarEvent->calendar_id);
+    }
+
+    #[Renderless]
+    public function updatedSearch(): void
+    {
+        $model = app($this->tab === 'users' ? User::class : Address::class);
+        $this->searchResults = $this->search ? $model::search($this->search)->get()->toArray() : [];
+    }
+
+    #[Renderless]
+    public function updatedTab(): void
+    {
+        $this->search = '';
+        $this->searchResults = [];
+    }
+
+    #[Renderless]
+    public function updateSelectableCalendars(array $calendar): void
+    {
+        $index = collect($this->selectableCalendars)->search(fn ($item) => $item['id'] === data_get($calendar, 'id'));
+        if ($parentId = data_get($calendar, 'parentId')) {
+            $calendar['name'] = resolve_static(Calendar::class, 'query')
+                ->whereKey($parentId)
+                ->value('name') . ' -> ' . $calendar['name'] ?? '';
+        }
+
+        if ($index === false) {
+            $this->selectableCalendars[] = $calendar;
+        } else {
+            $this->selectableCalendars[$index] = $calendar;
+        }
+    }
+
     protected function calculateRepeatableEvents($calendar, Collection $calendarEvents): Collection
     {
         $repeatables = $calendar->calendarEvents()
@@ -839,6 +834,11 @@ class FluxCalendar extends Component
         }
 
         return $events;
+    }
+
+    protected function getCacheKey(): string
+    {
+        return static::class;
     }
 
     #[Renderless]

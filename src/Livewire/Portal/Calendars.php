@@ -15,6 +15,16 @@ class Calendars extends FluxCalendar
         return view('flux::livewire.portal.calendar-view');
     }
 
+    public function attendEvent(CalendarEvent $event): void
+    {
+        $event->invites()
+            ->create([
+                'inviteable_type' => auth()->user()->getMorphClass(),
+                'inviteable_id' => auth()->user()->getKey(),
+                'status' => 'accepted',
+            ]);
+    }
+
     public function getCalendars(): array
     {
         return resolve_static(Calendar::class, 'query')
@@ -37,7 +47,7 @@ class Calendars extends FluxCalendar
             ->first();
 
         return $calendar->calendarEvents()
-            ->where(function ($query) use ($info) {
+            ->where(function ($query) use ($info): void {
                 $query->whereBetween('start', [
                     Carbon::parse($info['start']),
                     Carbon::parse($info['end']),
@@ -57,16 +67,6 @@ class Calendars extends FluxCalendar
                 return $event->toCalendarEventObject(['is_editable' => false, 'is_attending' => $invited]);
             })
             ?->toArray();
-    }
-
-    public function attendEvent(CalendarEvent $event): void
-    {
-        $event->invites()
-            ->create([
-                'inviteable_type' => auth()->user()->getMorphClass(),
-                'inviteable_id' => auth()->user()->getKey(),
-                'status' => 'accepted',
-            ]);
     }
 
     public function notAttendEvent(CalendarEvent $event): void

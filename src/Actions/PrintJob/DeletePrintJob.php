@@ -8,14 +8,14 @@ use FluxErp\Rulesets\PrintJob\DeletePrintJobRuleset;
 
 class DeletePrintJob extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeletePrintJobRuleset::class;
-    }
-
     public static function models(): array
     {
         return [PrintJob::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeletePrintJobRuleset::class;
     }
 
     public function performAction(): bool

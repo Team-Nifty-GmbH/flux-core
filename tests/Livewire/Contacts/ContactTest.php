@@ -28,7 +28,7 @@ class ContactTest extends TestCase
         ]);
     }
 
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(ContactView::class, ['id' => $this->contact->id])
             ->assertStatus(200);

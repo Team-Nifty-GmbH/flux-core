@@ -9,13 +9,7 @@ use Livewire\Livewire;
 
 class ProductListTest extends TestCase
 {
-    public function test_renders_successfully()
-    {
-        Livewire::test(ProductList::class)
-            ->assertStatus(200);
-    }
-
-    public function test_can_add_products_to_cart()
+    public function test_can_add_products_to_cart(): void
     {
         $products = Product::factory()->count(3)->create();
 
@@ -24,5 +18,11 @@ class ProductListTest extends TestCase
             ->call('addSelectedToCart')
             ->assertDispatched('cart:add', [$products->first()->id])
             ->assertSet('selected', []);
+    }
+
+    public function test_renders_successfully(): void
+    {
+        Livewire::test(ProductList::class)
+            ->assertStatus(200);
     }
 }

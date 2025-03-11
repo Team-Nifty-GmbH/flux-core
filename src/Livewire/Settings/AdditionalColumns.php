@@ -8,11 +8,11 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class AdditionalColumns extends AdditionalColumnList
 {
-    protected ?string $includeBefore = 'flux::livewire.settings.additional-columns';
+    public bool $create = true;
 
     public bool $showAdditionalColumnModal = false;
 
-    public bool $create = true;
+    protected ?string $includeBefore = 'flux::livewire.settings.additional-columns';
 
     protected $listeners = [
         'closeModal',
@@ -44,14 +44,6 @@ class AdditionalColumns extends AdditionalColumnList
         ];
     }
 
-    public function show(?AdditionalColumn $record = null): void
-    {
-        $this->dispatch('show', $record?->toArray())->to('settings.additional-column-edit');
-
-        $this->create = ! $record->exists;
-        $this->showAdditionalColumnModal = true;
-    }
-
     public function closeModal(): void
     {
         $this->loadData();
@@ -63,5 +55,13 @@ class AdditionalColumns extends AdditionalColumnList
     public function delete(): void
     {
         $this->dispatch('delete')->to('settings.additional-column-edit');
+    }
+
+    public function show(?AdditionalColumn $record = null): void
+    {
+        $this->dispatch('show', $record?->toArray())->to('settings.additional-column-edit');
+
+        $this->create = ! $record->exists;
+        $this->showAdditionalColumnModal = true;
     }
 }

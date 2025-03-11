@@ -118,6 +118,14 @@ class Iban implements Rule
     ];
 
     /**
+     * Get the validation error message.
+     */
+    public function message(): string
+    {
+        return __('The sent IBAN is not valid');
+    }
+
+    /**
      * Determine if the validation rule passes.
      */
     public function passes($attribute, $value): bool
@@ -162,14 +170,6 @@ class Iban implements Rule
         return $this->lengths[$countryCode] ?? false;
     }
 
-    /**
-     * Determine if given iban has the proper length
-     */
-    private function hasValidLength(string $iban): bool
-    {
-        return $this->getDesignatedIbanLength($iban) == strlen($iban);
-    }
-
     private function getReplacementsChars(): array
     {
         return range('A', 'Z');
@@ -186,10 +186,10 @@ class Iban implements Rule
     }
 
     /**
-     * Get the validation error message.
+     * Determine if given iban has the proper length
      */
-    public function message(): string
+    private function hasValidLength(string $iban): bool
     {
-        return __('The sent IBAN is not valid');
+        return $this->getDesignatedIbanLength($iban) == strlen($iban);
     }
 }

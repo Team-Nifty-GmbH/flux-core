@@ -17,6 +17,20 @@ use Throwable;
 
 class ViewServiceProvider extends ServiceProvider
 {
+    public static function getRealPackageAssetPath(string $path, string $packageName): string
+    {
+        $path = ltrim($path, '/');
+        $relativePath = ltrim(
+            substr(
+                realpath(InstalledVersions::getInstallPath($packageName)),
+                strlen(realpath(array_keys(ClassLoader::getRegisteredLoaders())[0] . '/../'))
+            ) . '/',
+            '/'
+        );
+
+        return $relativePath . $path;
+    }
+
     public function boot(): void
     {
         if (
@@ -33,7 +47,7 @@ class ViewServiceProvider extends ServiceProvider
 
         $this->bootBladeDirectives();
 
-        View::composer('*', function () {
+        View::composer('*', function (): void {
             Currency::default() && Number::useCurrency(Currency::default()->iso);
 
             try {
@@ -50,32 +64,57 @@ class ViewServiceProvider extends ServiceProvider
         });
     }
 
-    public static function getRealPackageAssetPath(string $path, string $packageName): string
+    protected function bootAssets(): void
     {
-        $path = ltrim($path, '/');
-        $relativePath = ltrim(
-            substr(
-                realpath(InstalledVersions::getInstallPath($packageName)),
-                strlen(realpath(array_keys(ClassLoader::getRegisteredLoaders())[0] . '/../'))
-            ) . '/',
-            '/'
+        Asset::vite(
+            public_path('build'),
+            [
+                static::getRealPackageAssetPath(
+                    'resources/css/app.css',
+                    'team-nifty-gmbh/flux-erp'
+                ),
+                static::getRealPackageAssetPath(
+                    'resources/js/app.js',
+                    'team-nifty-gmbh/flux-erp'
+                ),
+                static::getRealPackageAssetPath(
+                    'resources/js/apex-charts.js',
+                    'team-nifty-gmbh/flux-erp'
+                ),
+                static::getRealPackageAssetPath(
+                    'resources/js/alpine.js',
+                    'team-nifty-gmbh/flux-erp'
+                ),
+                static::getRealPackageAssetPath(
+                    'resources/js/sw.js',
+                    'team-nifty-gmbh/flux-erp'
+                ),
+                static::getRealPackageAssetPath(
+                    'resources/js/tall-datatables.js',
+                    'team-nifty-gmbh/tall-datatables'
+                ),
+            ]
         );
 
-        return $relativePath . $path;
+        if (auth()->guard('web')->check()) {
+            Asset::vite(public_path('build'), [
+                static::getRealPackageAssetPath(
+                    'resources/js/web-push.js',
+                    'team-nifty-gmbh/flux-erp'
+                ),
+            ]);
+        }
     }
 
-    protected function registerViews(): void
+    protected function bootBladeDirectives(): void
     {
+        Blade::directive('canAction', function ($expression) {
+            return "<?php if (resolve_static($expression, 'canPerformAction', [false])): ?>";
+        });
 
-        Blade::component(App::class, 'flux::layouts.app');
-        Blade::component(Printing::class, 'flux::layouts.print');
-        config([
-            'livewire.layout' => 'flux::layouts.app',
-        ]);
-
-        // Register Printing views as blade components
-        $views[] = __DIR__ . '/../../resources/views/printing';
-        $this->loadViewsFrom($views, 'print');
+        Blade::directive('endCanAction', function () {
+            return '<?php endif; ?>';
+        });
     }
 
     protected function customizeTallstackUi(): void
@@ -139,56 +178,17 @@ class ViewServiceProvider extends ServiceProvider
             ->block('body', 'dark:text-dark-300 grow rounded-b-xl py-5 text-gray-700 px-4 min-h-screen');
     }
 
-    protected function bootAssets(): void
+    protected function registerViews(): void
     {
-        Asset::vite(
-            public_path('build'),
-            [
-                static::getRealPackageAssetPath(
-                    'resources/css/app.css',
-                    'team-nifty-gmbh/flux-erp'
-                ),
-                static::getRealPackageAssetPath(
-                    'resources/js/app.js',
-                    'team-nifty-gmbh/flux-erp'
-                ),
-                static::getRealPackageAssetPath(
-                    'resources/js/apex-charts.js',
-                    'team-nifty-gmbh/flux-erp'
-                ),
-                static::getRealPackageAssetPath(
-                    'resources/js/alpine.js',
-                    'team-nifty-gmbh/flux-erp'
-                ),
-                static::getRealPackageAssetPath(
-                    'resources/js/sw.js',
-                    'team-nifty-gmbh/flux-erp'
-                ),
-                static::getRealPackageAssetPath(
-                    'resources/js/tall-datatables.js',
-                    'team-nifty-gmbh/tall-datatables'
-                ),
-            ]
-        );
 
-        if (auth()->guard('web')->check()) {
-            Asset::vite(public_path('build'), [
-                static::getRealPackageAssetPath(
-                    'resources/js/web-push.js',
-                    'team-nifty-gmbh/flux-erp'
-                ),
-            ]);
-        }
-    }
+        Blade::component(App::class, 'flux::layouts.app');
+        Blade::component(Printing::class, 'flux::layouts.print');
+        config([
+            'livewire.layout' => 'flux::layouts.app',
+        ]);
 
-    protected function bootBladeDirectives(): void
-    {
-        Blade::directive('canAction', function ($expression) {
-            return "<?php if (resolve_static($expression, 'canPerformAction', [false])): ?>";
-        });
-
-        Blade::directive('endCanAction', function () {
-            return '<?php endif; ?>';
-        });
+        // Register Printing views as blade components
+        $views[] = __DIR__ . '/../../resources/views/printing';
+        $this->loadViewsFrom($views, 'print');
     }
 }

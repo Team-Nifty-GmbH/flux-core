@@ -8,9 +8,9 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class DeleteBankConnectionRuleset extends FluxRuleset
 {
-    protected static ?string $model = BankConnection::class;
-
     protected static bool $addAdditionalColumnRules = false;
+
+    protected static ?string $model = BankConnection::class;
 
     public function rules(): array
     {

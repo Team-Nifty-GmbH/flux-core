@@ -74,6 +74,18 @@ class MessageSendingEventSubscriber
         ];
     }
 
+    protected function injectTracker(Email $email, Communication $communication): void
+    {
+        $html = $email->getHtmlBody();
+        $text = $email->getTextBody();
+
+        if ($html) {
+            $email->html($this->injectTrackingPixel($html, $communication));
+        }
+
+        $email->text($text . "\n\n" . '[' . $communication->uuid . ']');
+    }
+
     protected function injectTrackingPixel($html, Communication $communication): array|string
     {
         $tracking_pixel =
@@ -89,17 +101,5 @@ class MessageSendingEventSubscriber
         }
 
         return str_replace($linebreak, "\n", $html);
-    }
-
-    protected function injectTracker(Email $email, Communication $communication): void
-    {
-        $html = $email->getHtmlBody();
-        $text = $email->getTextBody();
-
-        if ($html) {
-            $email->html($this->injectTrackingPixel($html, $communication));
-        }
-
-        $email->text($text . "\n\n" . '[' . $communication->uuid . ']');
     }
 }

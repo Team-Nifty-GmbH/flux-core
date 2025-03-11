@@ -9,20 +9,9 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class FailedJobs extends FailedJobList
 {
-    public ?string $includeBefore = 'flux::livewire.settings.failed-jobs';
-
     public ?array $failedJob = null;
 
-    #[Renderless]
-    public function show(FailedJob $failedJob): void
-    {
-        $this->failedJob = $failedJob->toArray();
-        $this->failedJob['exception'] = explode("\n", data_get($this->failedJob, 'exception', ''));
-
-        $this->js(<<<'JS'
-            $modalOpen('show-failed-job');
-        JS);
-    }
+    public ?string $includeBefore = 'flux::livewire.settings.failed-jobs';
 
     protected function getRowActions(): array
     {
@@ -33,6 +22,17 @@ class FailedJobs extends FailedJobList
                 ->icon('eye')
                 ->wireClick('show(record.id)'),
         ];
+    }
+
+    #[Renderless]
+    public function show(FailedJob $failedJob): void
+    {
+        $this->failedJob = $failedJob->toArray();
+        $this->failedJob['exception'] = explode("\n", data_get($this->failedJob, 'exception', ''));
+
+        $this->js(<<<'JS'
+            $modalOpen('show-failed-job');
+        JS);
     }
 
     protected function itemToArray($item): array

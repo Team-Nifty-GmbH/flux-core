@@ -17,9 +17,9 @@ class ProductOptionGroups extends ProductOptionGroupList
 {
     use Actions;
 
-    protected ?string $includeBefore = 'flux::livewire.settings.product-option-groups';
-
     public ProductOptionGroupForm $productOptionGroupForm;
+
+    protected ?string $includeBefore = 'flux::livewire.settings.product-option-groups';
 
     protected function getTableActions(): array
     {
@@ -60,17 +60,6 @@ class ProductOptionGroups extends ProductOptionGroupList
         ];
     }
 
-    public function edit(?ProductOptionGroup $productOptionGroup = null): void
-    {
-        $productOptionGroup->loadMissing('productOptions:id,product_option_group_id,name');
-        $this->productOptionGroupForm->reset();
-        $this->productOptionGroupForm->fill($productOptionGroup);
-
-        $this->js(<<<'JS'
-            $modalOpen('edit-product-option-group-modal');
-        JS);
-    }
-
     public function delete(ProductOptionGroup $productOptionGroup): void
     {
         $this->productOptionGroupForm->reset();
@@ -85,6 +74,17 @@ class ProductOptionGroups extends ProductOptionGroupList
         }
 
         $this->loadData();
+    }
+
+    public function edit(?ProductOptionGroup $productOptionGroup = null): void
+    {
+        $productOptionGroup->loadMissing('productOptions:id,product_option_group_id,name');
+        $this->productOptionGroupForm->reset();
+        $this->productOptionGroupForm->fill($productOptionGroup);
+
+        $this->js(<<<'JS'
+            $modalOpen('edit-product-option-group-modal');
+        JS);
     }
 
     public function save(): bool

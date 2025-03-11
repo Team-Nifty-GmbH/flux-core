@@ -13,6 +13,17 @@ use Illuminate\Http\Response;
 
 class PrintController extends Controller
 {
+    public function render(Request $request): View|Factory|Response
+    {
+        $data = $request->all();
+        $data['html'] = true;
+        $data['preview'] = false;
+
+        return Printing::make($data)
+            ->validate()
+            ->execute();
+    }
+
     public function getPrintViews(GetPrintViewsRequest $request): JsonResponse
     {
         $validated = $request->validated();
@@ -31,17 +42,6 @@ class PrintController extends Controller
 
         return ResponseHelper::createResponseFromBase(statusCode: 200, data: $views)
             ->setEncodingOptions(JSON_UNESCAPED_SLASHES);
-    }
-
-    public function render(Request $request): View|Factory|Response
-    {
-        $data = $request->all();
-        $data['html'] = true;
-        $data['preview'] = false;
-
-        return Printing::make($data)
-            ->validate()
-            ->execute();
     }
 
     public function renderPdf(Request $request): Response

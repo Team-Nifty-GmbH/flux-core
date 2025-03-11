@@ -40,15 +40,46 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
 
     protected ?string $detailRouteName = 'tasks.id';
 
+    public static function fromCalendarEvent(array $event): Model
+    {
+        $task = new static();
+        $task->forceFill([
+            'id' => data_get($event, 'id'),
+            'name' => data_get($event, 'title'),
+            'start_date' => data_get($event, 'start'),
+            'due_date' => data_get($event, 'end'),
+            'description' => data_get($event, 'description'),
+        ]);
+
+        return $task;
+    }
+
+    public static function toCalendar(): array
+    {
+        return [
+            'id' => Str::of(static::class)->replace('\\', '.'),
+            'modelType' => morph_alias(static::class),
+            'name' => __('Tasks'),
+            'color' => '#877ae6',
+            'resourceEditable' => false,
+            'hasRepeatableEvents' => false,
+            'isPublic' => false,
+            'isShared' => false,
+            'permission' => 'owner',
+            'group' => 'other',
+            'isVirtual' => true,
+        ];
+    }
+
     protected static function booted(): void
     {
-        static::saving(function (Task $task) {
+        static::saving(function (Task $task): void {
             if ($task->state::$isEndState) {
                 $task->progress = 1;
             }
         });
 
-        static::saved(function (Task $task) {
+        static::saved(function (Task $task): void {
             $task->project?->calculateProgress();
         });
     }
@@ -62,6 +93,31 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
             'time_budget' => TimeDuration::class,
             'total_cost' => Money::class,
         ];
+    }
+
+    public function costColumn(): string
+    {
+        return 'total_cost';
+    }
+
+    public function getAvatarUrl(): ?string
+    {
+        return null;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function getLabel(): ?string
+    {
+        return $this->id . ' - ' . $this->name . ($this->project ? ' (' . $this->project->name . ')' : '');
+    }
+
+    public function getUrl(): ?string
+    {
+        return $this->detailRoute();
     }
 
     public function model(): MorphTo
@@ -85,16 +141,6 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         return $this->belongsTo(Project::class);
     }
 
-    public function responsibleUser(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'responsible_user_id');
-    }
-
-    public function users(): BelongsToMany
-    {
-        return $this->belongsToMany(User::class, 'task_user');
-    }
-
     /**
      * @throws \Spatie\Image\Exceptions\InvalidManipulation
      */
@@ -108,49 +154,22 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
             ->performOnCollections('files');
     }
 
-    public function toSearchableArray(): array
+    public function responsibleUser(): BelongsTo
     {
-        return $this->with('project:id,project_number,name')
-            ->whereKey($this->id)
-            ->first()
-            ?->toArray() ?? [];
+        return $this->belongsTo(User::class, 'responsible_user_id');
     }
 
-    public function getLabel(): ?string
-    {
-        return $this->id . ' - ' . $this->name . ($this->project ? ' (' . $this->project->name . ')' : '');
-    }
-
-    public function getDescription(): ?string
-    {
-        return $this->description;
-    }
-
-    public function getUrl(): ?string
-    {
-        return $this->detailRoute();
-    }
-
-    public function getAvatarUrl(): ?string
-    {
-        return null;
-    }
-
-    public static function toCalendar(): array
-    {
-        return [
-            'id' => Str::of(static::class)->replace('\\', '.'),
-            'modelType' => morph_alias(static::class),
-            'name' => __('Tasks'),
-            'color' => '#877ae6',
-            'resourceEditable' => false,
-            'hasRepeatableEvents' => false,
-            'isPublic' => false,
-            'isShared' => false,
-            'permission' => 'owner',
-            'group' => 'other',
-            'isVirtual' => true,
-        ];
+    public function scopeInTimeframe(
+        Builder $builder,
+        Carbon|string|null $start,
+        Carbon|string|null $end,
+        ?array $info = null
+    ): void {
+        $builder->where(function (Builder $query) use ($start, $end): void {
+            $query->whereBetween('start_date', [$start, $end])
+                ->orWhereBetween('due_date', [$start, $end])
+                ->orWhereBetween('created_at', [$start, $end]);
+        });
     }
 
     public function toCalendarEvent(?array $info = null): array
@@ -175,35 +194,16 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         ];
     }
 
-    public static function fromCalendarEvent(array $event): Model
+    public function toSearchableArray(): array
     {
-        $task = new static();
-        $task->forceFill([
-            'id' => data_get($event, 'id'),
-            'name' => data_get($event, 'title'),
-            'start_date' => data_get($event, 'start'),
-            'due_date' => data_get($event, 'end'),
-            'description' => data_get($event, 'description'),
-        ]);
-
-        return $task;
+        return $this->with('project:id,project_number,name')
+            ->whereKey($this->id)
+            ->first()
+            ?->toArray() ?? [];
     }
 
-    public function costColumn(): string
+    public function users(): BelongsToMany
     {
-        return 'total_cost';
-    }
-
-    public function scopeInTimeframe(
-        Builder $builder,
-        Carbon|string|null $start,
-        Carbon|string|null $end,
-        ?array $info = null
-    ): void {
-        $builder->where(function (Builder $query) use ($start, $end) {
-            $query->whereBetween('start_date', [$start, $end])
-                ->orWhereBetween('due_date', [$start, $end])
-                ->orWhereBetween('created_at', [$start, $end]);
-        });
+        return $this->belongsToMany(User::class, 'task_user');
     }
 }

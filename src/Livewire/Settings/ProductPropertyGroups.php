@@ -20,9 +20,9 @@ class ProductPropertyGroups extends ProductPropertyGroupList
 {
     use Actions;
 
-    protected ?string $includeBefore = 'flux::livewire.settings.product-property-groups';
-
     public ProductPropertyGroupForm $productPropertyGroup;
+
+    protected ?string $includeBefore = 'flux::livewire.settings.product-property-groups';
 
     protected function getTableActions(): array
     {
@@ -61,17 +61,21 @@ class ProductPropertyGroups extends ProductPropertyGroupList
         ];
     }
 
-    protected function getViewData(): array
+    #[Renderless]
+    public function delete(ProductPropertyGroup $productPropertyGroup): void
     {
-        return array_merge(
-            parent::getViewData(),
-            [
-                'propertyTypes' => array_map(
-                    fn ($item) => ['name' => $item, 'label' => __(Str::headline($item))],
-                    PropertyTypeEnum::values()
-                ),
-            ]
-        );
+        $this->productPropertyGroup->reset();
+        $this->productPropertyGroup->fill($productPropertyGroup);
+
+        try {
+            $this->productPropertyGroup->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->loadData();
     }
 
     #[Renderless]
@@ -102,20 +106,16 @@ class ProductPropertyGroups extends ProductPropertyGroupList
         return true;
     }
 
-    #[Renderless]
-    public function delete(ProductPropertyGroup $productPropertyGroup): void
+    protected function getViewData(): array
     {
-        $this->productPropertyGroup->reset();
-        $this->productPropertyGroup->fill($productPropertyGroup);
-
-        try {
-            $this->productPropertyGroup->delete();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return;
-        }
-
-        $this->loadData();
+        return array_merge(
+            parent::getViewData(),
+            [
+                'propertyTypes' => array_map(
+                    fn ($item) => ['name' => $item, 'label' => __(Str::headline($item))],
+                    PropertyTypeEnum::values()
+                ),
+            ]
+        );
     }
 }

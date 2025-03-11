@@ -8,7 +8,7 @@ class CreateDocumentGenerationSettingsTable extends Migration
 {
     public function up(): void
     {
-        Schema::create('document_generation_settings', function (Blueprint $table) {
+        Schema::create('document_generation_settings', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
             $table->unsignedBigInteger('client_id');

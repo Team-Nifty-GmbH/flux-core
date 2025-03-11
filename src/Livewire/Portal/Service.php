@@ -18,13 +18,13 @@ class Service extends Component
 
     public $attachments = [];
 
-    public array $ticket;
-
-    public array $serialNumber;
-
     public array $contactData = [];
 
     public string $modelType = Ticket::class;
+
+    public array $serialNumber;
+
+    public array $ticket;
 
     protected $listeners = [
         'updateFilesArray',

@@ -17,6 +17,21 @@ use Illuminate\Support\Arr;
 
 class CreateOrderFromPurchaseInvoiceRuleset extends FluxRuleset
 {
+    public static function getRules(): array
+    {
+        return array_merge(
+            parent::getRules(),
+            resolve_static(BankConnectionRuleset::class, 'getRules'),
+            [
+                'purchase_invoice_positions' => 'array',
+            ],
+            Arr::prependKeysWith(
+                resolve_static(UpdatePurchaseInvoicePositionRuleset::class, 'getRules'),
+                'purchase_invoice_positions.*'
+            ),
+        );
+    }
+
     public function rules(): array
     {
         return [
@@ -66,20 +81,5 @@ class CreateOrderFromPurchaseInvoiceRuleset extends FluxRuleset
             'invoice_date' => 'required|date',
             'is_net' => 'boolean',
         ];
-    }
-
-    public static function getRules(): array
-    {
-        return array_merge(
-            parent::getRules(),
-            resolve_static(BankConnectionRuleset::class, 'getRules'),
-            [
-                'purchase_invoice_positions' => 'array',
-            ],
-            Arr::prependKeysWith(
-                resolve_static(UpdatePurchaseInvoicePositionRuleset::class, 'getRules'),
-                'purchase_invoice_positions.*'
-            ),
-        );
     }
 }

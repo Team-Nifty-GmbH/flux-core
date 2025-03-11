@@ -10,7 +10,7 @@
 if (! function_exists('format_number')) {
     function format_number(
         string|int|float|null $number,
-        int $style = \NumberFormatter::DECIMAL,
+        int $style = NumberFormatter::DECIMAL,
         int $maxFractionDigits = 2,
         ?string $currencyCode = null
     ): float|bool|int|string|null {
@@ -19,9 +19,9 @@ if (! function_exists('format_number')) {
         }
 
         $numberFormatter = numfmt_create(app()->getLocale(), $style);
-        numfmt_set_attribute($numberFormatter, \NumberFormatter::MAX_FRACTION_DIGITS, $maxFractionDigits);
+        numfmt_set_attribute($numberFormatter, NumberFormatter::MAX_FRACTION_DIGITS, $maxFractionDigits);
 
-        if ($style === \NumberFormatter::CURRENCY) {
+        if ($style === NumberFormatter::CURRENCY) {
             return numfmt_format_currency($numberFormatter, $number, $currencyCode);
         }
 
@@ -52,11 +52,11 @@ if (! function_exists('exception_to_notifications')) {
                     $title = array_map(
                         fn ($segment) => is_numeric($segment)
                             ? $segment + 1
-                            : __(\Illuminate\Support\Str::headline($segment)),
+                            : __(Illuminate\Support\Str::headline($segment)),
                         explode('.', $field)
                     );
 
-                    foreach (\Illuminate\Support\Arr::flatten($messages) as $message) {
+                    foreach (Illuminate\Support\Arr::flatten($messages) as $message) {
                         $component->toast()
                             ->error(implode(' -> ', $title), __($message), $description)
                             ->send();
@@ -70,8 +70,8 @@ if (! function_exists('exception_to_notifications')) {
                 $component->addError('', $exception->getMessage());
         }
 
-        if (! $exception instanceof \Illuminate\Validation\ValidationException) {
-            \Illuminate\Support\Facades\Log::error(
+        if (! $exception instanceof Illuminate\Validation\ValidationException) {
+            Illuminate\Support\Facades\Log::error(
                 $exception->getMessage(),
                 [
                     'exception' => $exception,
@@ -86,27 +86,27 @@ if (! function_exists('exception_to_notifications')) {
 }
 
 if (! function_exists('cart')) {
-    function cart(): \FluxErp\Models\Cart
+    function cart(): FluxErp\Models\Cart
     {
         return auth()
             ->user()
             ?->carts()
             ->current()
             ->with([
-                'cartItems' => fn (\Illuminate\Database\Eloquent\Relations\HasMany $query) => $query->ordered(),
+                'cartItems' => fn (Illuminate\Database\Eloquent\Relations\HasMany $query) => $query->ordered(),
                 'cartItems.product.coverMedia',
             ])
             ->withSum('cartItems', 'total')
             ->withSum('cartItems', 'total_net')
             ->withSum('cartItems', 'total_gross')
             ->first()
-            ?? resolve_static(\FluxErp\Models\Cart::class, 'query')
+            ?? resolve_static(FluxErp\Models\Cart::class, 'query')
                 ->where('session_id', session()->id())
                 ->current()
                 ->with(['cartItems', 'cartItems.product.coverMedia'])
                 ->withSum('cartItems', 'total')
                 ->first()
-            ?? \FluxErp\Actions\Cart\CreateCart::make()
+            ?? FluxErp\Actions\Cart\CreateCart::make()
                 ->validate()
                 ->execute();
     }

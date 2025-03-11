@@ -21,6 +21,22 @@ use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 
 class QueryBuilder
 {
+    public static function allowedScopeFilters(object $model, array $columnTypes): Collection
+    {
+        $columns = $model::getColumns();
+
+        foreach ($columns as $key => $column) {
+            if (str_contains($column->Type, 'tinyint') ||
+                count(array_filter($columnTypes, function ($item) use ($column) {
+                    return str_contains($column->Type, $item);
+                })) === 0) {
+                unset($columns[$key]);
+            }
+        }
+
+        return $columns;
+    }
+
     public static function filterModel(object $model, ?Request $request = null): LaravelQueryBuilder
     {
         $queryBuilder = LaravelQueryBuilder::for($model::query(), $request);
@@ -129,20 +145,18 @@ class QueryBuilder
         return $queryBuilder;
     }
 
-    public static function allowedScopeFilters(object $model, array $columnTypes): Collection
+    private static function allowedFilters(array $filters, string $type): array
     {
-        $columns = $model::getColumns();
-
-        foreach ($columns as $key => $column) {
-            if (str_contains($column->Type, 'tinyint') ||
-                count(array_filter($columnTypes, function ($item) use ($column) {
-                    return str_contains($column->Type, $item);
-                })) === 0) {
-                unset($columns[$key]);
-            }
+        if (count($filters) < 1) {
+            return [];
         }
 
-        return $columns;
+        $result = [];
+        foreach ($filters as $filter) {
+            $result[] = AllowedFilter::{$type}($filter);
+        }
+
+        return $result;
     }
 
     private static function calculateFilters(object $model, ?string $related = null): array
@@ -205,7 +219,7 @@ class QueryBuilder
     {
         $allowed = $model::getColumns()->pluck('Field')->toArray();
 
-        array_walk($allowed, function (&$item) use ($baseModelClass, $relation) {
+        array_walk($allowed, function (&$item) use ($baseModelClass, $relation): void {
             $item = AllowedSort::custom(
                 $relation . '.' . $item,
                 new RelatedColumnSort(),
@@ -214,19 +228,5 @@ class QueryBuilder
         });
 
         return $allowed;
-    }
-
-    private static function allowedFilters(array $filters, string $type): array
-    {
-        if (count($filters) < 1) {
-            return [];
-        }
-
-        $result = [];
-        foreach ($filters as $filter) {
-            $result[] = AllowedFilter::{$type}($filter);
-        }
-
-        return $result;
     }
 }

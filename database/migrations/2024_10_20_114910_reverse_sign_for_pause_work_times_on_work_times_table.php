@@ -9,7 +9,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('work_times', function (Blueprint $table) {
+        Schema::table('work_times', function (Blueprint $table): void {
             $table->bigInteger('total_time_ms')->default(0)->change();
         });
 
@@ -20,7 +20,7 @@ return new class() extends Migration
     {
         DB::statement('UPDATE work_times SET total_time_ms = ABS(total_time_ms) WHERE is_pause = true');
 
-        Schema::table('work_times', function (Blueprint $table) {
+        Schema::table('work_times', function (Blueprint $table): void {
             $table->unsignedBigInteger('total_time_ms')->default(0)->change();
         });
     }

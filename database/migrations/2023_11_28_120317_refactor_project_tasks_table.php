@@ -12,7 +12,7 @@ return new class() extends Migration
      */
     public function up(): void
     {
-        Schema::table('project_tasks', function (Blueprint $table) {
+        Schema::table('project_tasks', function (Blueprint $table): void {
             $table->dropForeign('project_tasks_address_id_foreign');
             $table->dropForeign('project_tasks_order_position_id_foreign');
             $table->dropForeign('project_tasks_project_id_foreign');
@@ -45,7 +45,7 @@ return new class() extends Migration
 
         Schema::rename('project_tasks', 'tasks');
 
-        Schema::table('tasks', function (Blueprint $table) {
+        Schema::table('tasks', function (Blueprint $table): void {
             $table->unsignedBigInteger('responsible_user_id')->nullable()->change();
 
             $table->foreign('project_id')->references('id')->on('projects')->nullOnDelete();
@@ -59,7 +59,7 @@ return new class() extends Migration
      */
     public function down(): void
     {
-        Schema::table('tasks', function (Blueprint $table) {
+        Schema::table('tasks', function (Blueprint $table): void {
             $table->dropForeign('tasks_order_position_id_foreign');
             $table->dropForeign('tasks_project_id_foreign');
             $table->dropForeign('tasks_responsible_user_id_foreign');
@@ -73,7 +73,7 @@ return new class() extends Migration
             . '": "\', REPLACE(name, \'"\', \'\\\\"\'), \'"}\')'
         );
 
-        Schema::table('project_tasks', function (Blueprint $table) {
+        Schema::table('project_tasks', function (Blueprint $table): void {
             $table->renameColumn('responsible_user_id', 'user_id');
 
             $table->dropColumn([

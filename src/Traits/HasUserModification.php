@@ -12,6 +12,30 @@ use Illuminate\Database\Eloquent\Model;
  */
 trait HasUserModification
 {
+    public function getCreatedBy(): ?Model
+    {
+        $user = $this->getRawOriginal($this->getCreatedByColumn());
+
+        return $user ? morph_to($user) : null;
+    }
+
+    public function getCreatedByColumn(): string
+    {
+        return defined(static::class . '::CREATED_BY') ? static::CREATED_BY : 'created_by';
+    }
+
+    public function getUpdatedBy(): ?Model
+    {
+        $user = $this->getRawOriginal($this->getUpdatedByColumn());
+
+        return $user ? morph_to($user) : null;
+    }
+
+    public function getUpdatedByColumn(): string
+    {
+        return defined(static::class . '::UPDATED_BY') ? static::UPDATED_BY : 'updated_by';
+    }
+
     public function initializeHasUserModification(): void
     {
         $this->mergeCasts([
@@ -36,29 +60,5 @@ trait HasUserModification
             : null;
 
         return parent::setUpdatedAt($value);
-    }
-
-    public function getCreatedByColumn(): string
-    {
-        return defined(static::class . '::CREATED_BY') ? static::CREATED_BY : 'created_by';
-    }
-
-    public function getUpdatedByColumn(): string
-    {
-        return defined(static::class . '::UPDATED_BY') ? static::UPDATED_BY : 'updated_by';
-    }
-
-    public function getCreatedBy(): ?Model
-    {
-        $user = $this->getRawOriginal($this->getCreatedByColumn());
-
-        return $user ? morph_to($user) : null;
-    }
-
-    public function getUpdatedBy(): ?Model
-    {
-        $user = $this->getRawOriginal($this->getUpdatedByColumn());
-
-        return $user ? morph_to($user) : null;
     }
 }

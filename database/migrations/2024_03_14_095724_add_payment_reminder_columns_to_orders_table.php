@@ -9,7 +9,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('orders', function (Blueprint $table) {
+        Schema::table('orders', function (Blueprint $table): void {
             $table->unsignedInteger('payment_reminder_current_level')->nullable()->after('payment_reminder_days_3');
             $table->date('payment_reminder_next_date')->nullable()->after('payment_reminder_current_level');
         });
@@ -22,7 +22,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('orders', function (Blueprint $table) {
+        Schema::table('orders', function (Blueprint $table): void {
             $table->dropColumn(['payment_reminder_next_date', 'payment_reminder_current_level']);
         });
     }

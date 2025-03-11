@@ -17,25 +17,6 @@ class PermissionController extends BaseController
         $this->model = app(Permission::class);
     }
 
-    public function showUserPermissions(string $id): JsonResponse
-    {
-        $user = resolve_static(User::class, 'query')
-            ->whereKey($id)
-            ->first();
-
-        if (! $user) {
-            return ResponseHelper::createResponseFromBase(
-                statusCode: 404,
-                data: ['id' => 'user not found']
-            );
-        }
-
-        return ResponseHelper::createResponseFromBase(
-            statusCode: 200,
-            data: $user->permissions()->get()
-        );
-    }
-
     public function create(Request $request, PermissionService $permissionService): JsonResponse
     {
         $permission = $permissionService->create($request->all());
@@ -45,6 +26,13 @@ class PermissionController extends BaseController
             data: $permission,
             statusMessage: 'permission created'
         );
+    }
+
+    public function delete(string $id, PermissionService $permissionService): JsonResponse
+    {
+        $response = $permissionService->delete($id);
+
+        return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
     public function give(Request $request, PermissionService $permissionService): JsonResponse
@@ -69,6 +57,25 @@ class PermissionController extends BaseController
         );
     }
 
+    public function showUserPermissions(string $id): JsonResponse
+    {
+        $user = resolve_static(User::class, 'query')
+            ->whereKey($id)
+            ->first();
+
+        if (! $user) {
+            return ResponseHelper::createResponseFromBase(
+                statusCode: 404,
+                data: ['id' => 'user not found']
+            );
+        }
+
+        return ResponseHelper::createResponseFromBase(
+            statusCode: 200,
+            data: $user->permissions()->get()
+        );
+    }
+
     public function sync(Request $request, PermissionService $permissionService): JsonResponse
     {
         $permissions = $permissionService->syncUserPermissions($request->all());
@@ -78,12 +85,5 @@ class PermissionController extends BaseController
             data: $permissions,
             statusMessage: 'user permissions updated'
         );
-    }
-
-    public function delete(string $id, PermissionService $permissionService): JsonResponse
-    {
-        $response = $permissionService->delete($id);
-
-        return ResponseHelper::createResponseFromArrayResponse($response);
     }
 }

@@ -8,7 +8,7 @@ class CreateVatRatesTable extends Migration
 {
     public function up(): void
     {
-        Schema::create('vat_rates', function (Blueprint $table) {
+        Schema::create('vat_rates', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
 

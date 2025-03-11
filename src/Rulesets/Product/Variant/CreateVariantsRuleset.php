@@ -14,25 +14,6 @@ class CreateVariantsRuleset extends FluxRuleset
 {
     protected static ?string $model = Product::class;
 
-    public function rules(): array
-    {
-        return [
-            'parent_id' => [
-                'required',
-                'integer',
-                app(ModelExists::class, ['model' => Product::class]),
-            ],
-            'name' => 'string',
-            'clients' => 'array',
-            'clients.*' => [
-                'required',
-                'integer',
-                app(ModelExists::class, ['model' => Client::class]),
-            ],
-            'product_options' => 'required|array',
-        ];
-    }
-
     public static function getRules(): array
     {
         return array_merge(
@@ -57,5 +38,24 @@ class CreateVariantsRuleset extends FluxRuleset
             ),
             parent::getRules(),
         );
+    }
+
+    public function rules(): array
+    {
+        return [
+            'parent_id' => [
+                'required',
+                'integer',
+                app(ModelExists::class, ['model' => Product::class]),
+            ],
+            'name' => 'string',
+            'clients' => 'array',
+            'clients.*' => [
+                'required',
+                'integer',
+                app(ModelExists::class, ['model' => Client::class]),
+            ],
+            'product_options' => 'required|array',
+        ];
     }
 }

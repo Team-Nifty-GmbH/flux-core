@@ -8,7 +8,7 @@ class AddIsoOnLanguagesTable extends Migration
 {
     public function up(): void
     {
-        Schema::table('languages', function (Blueprint $table) {
+        Schema::table('languages', function (Blueprint $table): void {
             $table->string('language_code')->unique()->after('name');
             $table->string('iso_name')->after('name');
         });
@@ -16,7 +16,7 @@ class AddIsoOnLanguagesTable extends Migration
 
     public function down(): void
     {
-        Schema::table('languages', function (Blueprint $table) {
+        Schema::table('languages', function (Blueprint $table): void {
             $table->dropColumn([
                 'iso_name',
                 'language_code',

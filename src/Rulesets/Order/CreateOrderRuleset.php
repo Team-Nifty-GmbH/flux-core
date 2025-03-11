@@ -25,6 +25,20 @@ class CreateOrderRuleset extends FluxRuleset
 {
     protected static ?string $model = Order::class;
 
+    public static function getRules(): array
+    {
+        return array_merge(
+            parent::getRules(),
+            resolve_static(BankConnectionRuleset::class, 'getRules'),
+            Arr::prependKeysWith(
+                resolve_static(PostalAddressRuleset::class, 'getRules'),
+                'address_delivery.'
+            ),
+            resolve_static(AddressRuleset::class, 'getRules'),
+            resolve_static(UserRuleset::class, 'getRules')
+        );
+    }
+
     public function rules(): array
     {
         return [
@@ -194,19 +208,5 @@ class CreateOrderRuleset extends FluxRuleset
             'is_paid' => 'boolean',
             'requires_approval' => 'boolean',
         ];
-    }
-
-    public static function getRules(): array
-    {
-        return array_merge(
-            parent::getRules(),
-            resolve_static(BankConnectionRuleset::class, 'getRules'),
-            Arr::prependKeysWith(
-                resolve_static(PostalAddressRuleset::class, 'getRules'),
-                'address_delivery.'
-            ),
-            resolve_static(AddressRuleset::class, 'getRules'),
-            resolve_static(UserRuleset::class, 'getRules')
-        );
     }
 }

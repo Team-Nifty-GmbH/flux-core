@@ -31,13 +31,6 @@ class OrderController extends BaseController
         );
     }
 
-    public function update(Request $request, OrderService $orderService): JsonResponse
-    {
-        $response = $orderService->update($request->all());
-
-        return ResponseHelper::createResponseFromArrayResponse($response);
-    }
-
     public function delete(string $id, OrderService $orderService): JsonResponse
     {
         $response = $orderService->delete($id);
@@ -56,5 +49,12 @@ class OrderController extends BaseController
             data: $order,
             statusMessage: 'order lock toggled'
         );
+    }
+
+    public function update(Request $request, OrderService $orderService): JsonResponse
+    {
+        $response = $orderService->update($request->all());
+
+        return ResponseHelper::createResponseFromArrayResponse($response);
     }
 }

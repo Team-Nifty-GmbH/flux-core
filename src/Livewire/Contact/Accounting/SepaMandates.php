@@ -28,8 +28,6 @@ class SepaMandates extends SepaMandateList
 {
     use Actions, CreatesDocuments, WithFileUploads;
 
-    protected ?string $includeBefore = 'flux::livewire.contact.accounting.sepa-mandates';
-
     #[Modelable]
     public ContactForm $contact;
 
@@ -37,19 +35,7 @@ class SepaMandates extends SepaMandateList
 
     public MediaUploadForm $signedMandate;
 
-    protected function getViewData(): array
-    {
-        return array_merge(parent::getViewData(), [
-            'contactBankConnections' => resolve_static(ContactBankConnection::class, 'query')
-                ->where('contact_id', $this->contact->id)
-                ->get(['id', 'iban', 'bank_name']),
-        ]);
-    }
-
-    protected function getBuilder(Builder $builder): Builder
-    {
-        return $builder->where('contact_id', $this->contact->id);
-    }
+    protected ?string $includeBefore = 'flux::livewire.contact.accounting.sepa-mandates';
 
     protected function getTableActions(): array
     {
@@ -89,6 +75,53 @@ class SepaMandates extends SepaMandateList
         ];
     }
 
+    #[Renderless]
+    public function createDocuments(): null|MediaStream|Media
+    {
+        $response = $this->createDocumentFromItems(
+            resolve_static(SepaMandate::class, 'query')
+                ->whereKey($this->sepaMandate->id)
+                ->first()
+        );
+        $this->loadData();
+
+        return $response;
+    }
+
+    #[Renderless]
+    public function createTemplate(?SepaMandate $sepaMandate = null): void
+    {
+        $this->sepaMandate->reset();
+        $this->sepaMandate->fill($sepaMandate);
+
+        $this->openCreateDocumentsModal();
+    }
+
+    public function delete(SepaMandate $sepaMandate): void
+    {
+        $this->sepaMandate->fill($sepaMandate);
+
+        try {
+            $this->sepaMandate->delete();
+        } catch (UnauthorizedException|ValidationException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->loadData();
+    }
+
+    public function edit(?SepaMandate $sepaMandate = null): void
+    {
+        $this->sepaMandate->reset();
+        $this->sepaMandate->fill($sepaMandate);
+
+        $this->js(<<<'JS'
+            $modalOpen('edit-sepa-mandate');
+        JS);
+    }
+
     public function save(): bool
     {
         $this->sepaMandate->client_id = $this->contact->client_id;
@@ -119,61 +152,9 @@ class SepaMandates extends SepaMandateList
         return true;
     }
 
-    public function delete(SepaMandate $sepaMandate): void
+    protected function getBuilder(Builder $builder): Builder
     {
-        $this->sepaMandate->fill($sepaMandate);
-
-        try {
-            $this->sepaMandate->delete();
-        } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
-
-            return;
-        }
-
-        $this->loadData();
-    }
-
-    public function edit(?SepaMandate $sepaMandate = null): void
-    {
-        $this->sepaMandate->reset();
-        $this->sepaMandate->fill($sepaMandate);
-
-        $this->js(<<<'JS'
-            $modalOpen('edit-sepa-mandate');
-        JS);
-    }
-
-    #[Renderless]
-    public function createTemplate(?SepaMandate $sepaMandate = null): void
-    {
-        $this->sepaMandate->reset();
-        $this->sepaMandate->fill($sepaMandate);
-
-        $this->openCreateDocumentsModal();
-    }
-
-    #[Renderless]
-    public function createDocuments(): null|MediaStream|Media
-    {
-        $response = $this->createDocumentFromItems(
-            resolve_static(SepaMandate::class, 'query')
-                ->whereKey($this->sepaMandate->id)
-                ->first()
-        );
-        $this->loadData();
-
-        return $response;
-    }
-
-    protected function getTo(OffersPrinting $item, array $documents): array
-    {
-        return [$item->contact->invoiceAddress?->email_primary ?? $item->contact->mainAddress->email_primary];
-    }
-
-    protected function getSubject(OffersPrinting $item): string
-    {
-        return __('Sepa Mandate');
+        return $builder->where('contact_id', $this->contact->id);
     }
 
     protected function getHtmlBody(OffersPrinting $item): string
@@ -187,5 +168,24 @@ class SepaMandates extends SepaMandateList
             ->whereKey($this->sepaMandate->id)
             ->first(['id'])
             ->resolvePrintViews();
+    }
+
+    protected function getSubject(OffersPrinting $item): string
+    {
+        return __('Sepa Mandate');
+    }
+
+    protected function getTo(OffersPrinting $item, array $documents): array
+    {
+        return [$item->contact->invoiceAddress?->email_primary ?? $item->contact->mainAddress->email_primary];
+    }
+
+    protected function getViewData(): array
+    {
+        return array_merge(parent::getViewData(), [
+            'contactBankConnections' => resolve_static(ContactBankConnection::class, 'query')
+                ->where('contact_id', $this->contact->id)
+                ->get(['id', 'iban', 'bank_name']),
+        ]);
     }
 }

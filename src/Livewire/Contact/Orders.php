@@ -11,15 +11,10 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class Orders extends OrderList
 {
-    protected ?string $includeBefore = 'flux::livewire.contact.orders';
-
     #[Modelable]
     public ContactForm $contact;
 
-    protected function getBuilder(Builder $builder): Builder
-    {
-        return $builder->where('contact_id', $this->contact->id);
-    }
+    protected ?string $includeBefore = 'flux::livewire.contact.orders';
 
     protected function getTableActions(): array
     {
@@ -50,5 +45,10 @@ class Orders extends OrderList
     public function getCacheKey(): string
     {
         return parent::getCacheKey() . $this->contact->id;
+    }
+
+    protected function getBuilder(Builder $builder): Builder
+    {
+        return $builder->where('contact_id', $this->contact->id);
     }
 }

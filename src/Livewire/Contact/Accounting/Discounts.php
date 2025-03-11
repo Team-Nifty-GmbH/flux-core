@@ -17,12 +17,12 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class Discounts extends DiscountList
 {
-    protected ?string $includeBefore = 'flux::livewire.contact.accounting.discounts';
+    #[Modelable]
+    public int $contactId;
 
     public DiscountForm $discountForm;
 
-    #[Modelable]
-    public int $contactId;
+    protected ?string $includeBefore = 'flux::livewire.contact.accounting.discounts';
 
     protected function getTableActions(): array
     {
@@ -58,33 +58,6 @@ class Discounts extends DiscountList
         ];
     }
 
-    protected function getBuilder(Builder $builder): Builder
-    {
-        return parent::getBuilder($builder)
-            ->whereRelation(
-                'contacts',
-                'contacts.id',
-                $this->contactId
-            );
-    }
-
-    #[Renderless]
-    public function resetDiscount(): void
-    {
-        $this->discountForm->reset();
-    }
-
-    #[Renderless]
-    public function edit(Discount $discount): void
-    {
-        $this->discountForm->reset();
-        $this->discountForm->fill($discount);
-
-        $this->js(<<<'JS'
-            $modalOpen('edit-discount');
-        JS);
-    }
-
     #[Renderless]
     public function delete(Discount $discount): void
     {
@@ -100,6 +73,23 @@ class Discounts extends DiscountList
         }
 
         $this->loadData();
+    }
+
+    #[Renderless]
+    public function edit(Discount $discount): void
+    {
+        $this->discountForm->reset();
+        $this->discountForm->fill($discount);
+
+        $this->js(<<<'JS'
+            $modalOpen('edit-discount');
+        JS);
+    }
+
+    #[Renderless]
+    public function resetDiscount(): void
+    {
+        $this->discountForm->reset();
     }
 
     #[Renderless]
@@ -138,5 +128,15 @@ class Discounts extends DiscountList
         $this->loadData();
 
         return true;
+    }
+
+    protected function getBuilder(Builder $builder): Builder
+    {
+        return parent::getBuilder($builder)
+            ->whereRelation(
+                'contacts',
+                'contacts.id',
+                $this->contactId
+            );
     }
 }

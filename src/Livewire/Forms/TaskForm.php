@@ -13,40 +13,59 @@ use Livewire\Attributes\Locked;
 
 class TaskForm extends FluxForm
 {
+    public array $additionalColumns = [];
+
+    public ?string $budget = null;
+
+    public array $categories = [];
+
+    public ?string $description = null;
+
+    public ?string $due_date = null;
+
     #[Locked]
     public ?int $id = null;
+
+    public ?int $model_id = null;
+
+    public ?string $model_type = null;
+
+    public ?string $name = null;
+
+    public ?int $priority = 0;
 
     public ?int $project_id = null;
 
     public ?int $responsible_user_id = null;
 
-    public ?string $model_type = null;
-
-    public ?int $model_id = null;
-
-    public ?string $name = null;
-
-    public ?string $description = null;
-
     public ?string $start_date = null;
-
-    public ?string $due_date = null;
-
-    public ?int $priority = 0;
 
     public string $state = 'open';
 
-    public ?string $time_budget = null;
+    public array $tags = [];
 
-    public ?string $budget = null;
+    public ?string $time_budget = null;
 
     public array $users = [];
 
-    public array $additionalColumns = [];
+    public function fill($values): void
+    {
+        if ($values instanceof Task) {
+            $values->loadMissing(['tags:id', 'categories:id', 'users:id']);
 
-    public array $categories = [];
+            $values = $values->toArray();
+            $values['tags'] = array_column($values['tags'] ?? [], 'id');
+            $values['categories'] = array_column($values['categories'] ?? [], 'id');
+            $values['users'] = array_column($values['users'] ?? [], 'id');
+        }
 
-    public array $tags = [];
+        $values['start_date'] = ! is_null($values['start_date'] ?? null) ?
+            Carbon::parse($values['start_date'])->toDateString() : null;
+        $values['due_date'] = ! is_null($values['due_date'] ?? null) ?
+            Carbon::parse($values['due_date'])->toDateString() : null;
+
+        parent::fill($values);
+    }
 
     protected function getActions(): array
     {
@@ -69,24 +88,5 @@ class TaskForm extends FluxForm
         }
 
         return parent::makeAction($name, $data);
-    }
-
-    public function fill($values): void
-    {
-        if ($values instanceof Task) {
-            $values->loadMissing(['tags:id', 'categories:id', 'users:id']);
-
-            $values = $values->toArray();
-            $values['tags'] = array_column($values['tags'] ?? [], 'id');
-            $values['categories'] = array_column($values['categories'] ?? [], 'id');
-            $values['users'] = array_column($values['users'] ?? [], 'id');
-        }
-
-        $values['start_date'] = ! is_null($values['start_date'] ?? null) ?
-            Carbon::parse($values['start_date'])->toDateString() : null;
-        $values['due_date'] = ! is_null($values['due_date'] ?? null) ?
-            Carbon::parse($values['due_date'])->toDateString() : null;
-
-        parent::fill($values);
     }
 }

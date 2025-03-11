@@ -9,7 +9,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('order_positions', function (Blueprint $table) {
+        Schema::table('order_positions', function (Blueprint $table): void {
             $table->string('slug_position')->after('sort_number')->nullable();
         });
 
@@ -19,32 +19,11 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('order_positions', function (Blueprint $table) {
+        Schema::table('order_positions', function (Blueprint $table): void {
             $table->dropColumn('slug_position');
         });
 
         $this->updateSort(true);
-    }
-
-    private function updateSort(bool $rollback): void
-    {
-        DB::table('order_positions as child')
-            ->joinSub(
-                DB::table('order_positions')
-                    ->select('id', 'order_id', 'parent_id')
-                    ->addSelect(
-                        DB::raw('ROW_NUMBER() OVER(PARTITION BY order_id' .
-                            ($rollback ? '' : ', parent_id')
-                            . ' ORDER BY sort_number) AS new_sort_number')
-                    ),
-                'sorted_positions',
-                'child.id',
-                '=',
-                'sorted_positions.id'
-            )
-            ->update([
-                'child.sort_number' => DB::raw('sorted_positions.new_sort_number'),
-            ]);
     }
 
     private function setSlugPosition(): void
@@ -70,5 +49,26 @@ return new class() extends Migration
                     ),
                 ]);
         }
+    }
+
+    private function updateSort(bool $rollback): void
+    {
+        DB::table('order_positions as child')
+            ->joinSub(
+                DB::table('order_positions')
+                    ->select('id', 'order_id', 'parent_id')
+                    ->addSelect(
+                        DB::raw('ROW_NUMBER() OVER(PARTITION BY order_id' .
+                            ($rollback ? '' : ', parent_id')
+                            . ' ORDER BY sort_number) AS new_sort_number')
+                    ),
+                'sorted_positions',
+                'child.id',
+                '=',
+                'sorted_positions.id'
+            )
+            ->update([
+                'child.sort_number' => DB::raw('sorted_positions.new_sort_number'),
+            ]);
     }
 };

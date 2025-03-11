@@ -18,13 +18,13 @@ class TaskTest extends BaseSetup
         $this->task = Task::factory()->create();
     }
 
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(TaskView::class, ['id' => $this->task->id])
             ->assertStatus(200);
     }
 
-    public function test_switch_tabs()
+    public function test_switch_tabs(): void
     {
         $component = Livewire::actingAs($this->user)
             ->test(TaskView::class, ['id' => $this->task->id]);

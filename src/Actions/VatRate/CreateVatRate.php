@@ -8,14 +8,14 @@ use FluxErp\Rulesets\VatRate\CreateVatRateRuleset;
 
 class CreateVatRate extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateVatRateRuleset::class;
-    }
-
     public static function models(): array
     {
         return [VatRate::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateVatRateRuleset::class;
     }
 
     public function performAction(): VatRate

@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('work_times', function (Blueprint $table) {
+        Schema::table('work_times', function (Blueprint $table): void {
             $table->foreignId('contact_id')
                 ->after('user_id')
                 ->nullable()
@@ -39,7 +39,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('work_times', function (Blueprint $table) {
+        Schema::table('work_times', function (Blueprint $table): void {
             $table->dropConstrainedForeignId('contact_id');
             $table->dropConstrainedForeignId('parent_id');
             $table->dropColumn(['name', 'paused_time_ms', 'is_daily_work_time', 'is_locked', 'total_time_ms']);

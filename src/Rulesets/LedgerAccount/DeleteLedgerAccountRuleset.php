@@ -8,9 +8,9 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class DeleteLedgerAccountRuleset extends FluxRuleset
 {
-    protected static ?string $model = LedgerAccount::class;
-
     protected static bool $addAdditionalColumnRules = false;
+
+    protected static ?string $model = LedgerAccount::class;
 
     public function rules(): array
     {

@@ -38,13 +38,13 @@ use TeamNiftyGmbH\DataTable\Controllers\IconController;
 Route::middleware(['web', PortalMiddleware::class])
     ->domain(config('flux.portal_domain'))
     ->name('portal.')
-    ->group(function () {
+    ->group(function (): void {
 
         Route::get('/icons/{name}/{variant?}', IconController::class)
             ->where('variant', '(outline|solid)')
             ->name('icons');
 
-        Route::middleware(['guest:address'])->group(function () {
+        Route::middleware(['guest:address'])->group(function (): void {
             Route::get('/login', Login::class)
                 ->name('login');
             Route::post('/login', [AuthController::class, 'authenticatePortal']);
@@ -54,7 +54,7 @@ Route::middleware(['web', PortalMiddleware::class])
         Route::any('/logout', Logout::class)
             ->name('logout');
 
-        Route::middleware(['auth:address', 'permission'])->group(function () {
+        Route::middleware(['auth:address', 'permission'])->group(function (): void {
             Route::get('/', Dashboard::class)
                 ->name('dashboard');
             Route::get('/calendar', Calendar::class)

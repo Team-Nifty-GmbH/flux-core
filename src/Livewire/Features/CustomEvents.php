@@ -15,13 +15,13 @@ class CustomEvents extends Component
 {
     use Actions;
 
-    public array $customEvents = [];
-
     public ?array $additionalData = [];
 
-    public ?int $modelId;
+    public array $customEvents = [];
 
     public string|Model $model;
+
+    public ?int $modelId;
 
     public array|Model|null $record;
 

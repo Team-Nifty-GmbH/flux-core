@@ -8,14 +8,14 @@ use FluxErp\Rulesets\Industry\DeleteIndustryRuleset;
 
 class DeleteIndustry extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeleteIndustryRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Industry::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeleteIndustryRuleset::class;
     }
 
     public function performAction(): bool

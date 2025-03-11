@@ -9,14 +9,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class UpdateContactOption extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateContactOptionRuleset::class;
-    }
-
     public static function models(): array
     {
         return [ContactOption::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateContactOptionRuleset::class;
     }
 
     public function performAction(): Model

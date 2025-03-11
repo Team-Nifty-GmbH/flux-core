@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class ServiceTest extends BaseSetup
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(Service::class)
             ->assertStatus(200);

@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('product_properties', function (Blueprint $table) {
+        Schema::table('product_properties', function (Blueprint $table): void {
             $table->foreignId('product_property_group_id')
                 ->nullable()
                 ->after('uuid')
@@ -23,7 +23,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('product_properties', function (Blueprint $table) {
+        Schema::table('product_properties', function (Blueprint $table): void {
             $table->dropForeign(['product_property_group_id']);
             $table->dropColumn(['product_property_group_id', 'property_type_enum']);
         });

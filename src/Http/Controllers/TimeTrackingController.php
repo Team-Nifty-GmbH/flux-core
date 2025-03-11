@@ -20,23 +20,6 @@ class TimeTrackingController extends BaseController
         $this->model = app(WorkTime::class);
     }
 
-    public function userIndex(Request $request): JsonResponse
-    {
-        $page = max((int) $request->page, 1);
-        $perPage = $request->per_page > 500 || $request->per_page < 1 ? 25 : $request->per_page;
-
-        $query = QueryBuilder::filterModel($this->model, $request);
-        $data = $query
-            ->where('user_id', $request->user()->id)
-            ->paginate(perPage: $perPage, page: $page)
-            ->appends($request->query());
-
-        return ResponseHelper::createResponseFromBase(
-            statusCode: 200,
-            data: $data,
-        )->setEncodingOptions(JSON_UNESCAPED_SLASHES);
-    }
-
     public function create(Request $request): JsonResponse
     {
         $workTime = CreateWorkTime::make($request->all())
@@ -47,6 +30,23 @@ class TimeTrackingController extends BaseController
             statusCode: 201,
             data: $workTime,
             statusMessage: 'work time created'
+        );
+    }
+
+    public function delete(string $id): JsonResponse
+    {
+        try {
+            DeleteWorkTime::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
+            return ResponseHelper::createResponseFromBase(
+                statusCode: array_key_exists('id', $e->errors()) ? 404 : 423,
+                data: $e->errors()
+            );
+        }
+
+        return ResponseHelper::createResponseFromBase(
+            statusCode: 204,
+            statusMessage: 'work time deleted'
         );
     }
 
@@ -70,20 +70,20 @@ class TimeTrackingController extends BaseController
         );
     }
 
-    public function delete(string $id): JsonResponse
+    public function userIndex(Request $request): JsonResponse
     {
-        try {
-            DeleteWorkTime::make(['id' => $id])->validate()->execute();
-        } catch (ValidationException $e) {
-            return ResponseHelper::createResponseFromBase(
-                statusCode: array_key_exists('id', $e->errors()) ? 404 : 423,
-                data: $e->errors()
-            );
-        }
+        $page = max((int) $request->page, 1);
+        $perPage = $request->per_page > 500 || $request->per_page < 1 ? 25 : $request->per_page;
+
+        $query = QueryBuilder::filterModel($this->model, $request);
+        $data = $query
+            ->where('user_id', $request->user()->id)
+            ->paginate(perPage: $perPage, page: $page)
+            ->appends($request->query());
 
         return ResponseHelper::createResponseFromBase(
-            statusCode: 204,
-            statusMessage: 'work time deleted'
-        );
+            statusCode: 200,
+            data: $data,
+        )->setEncodingOptions(JSON_UNESCAPED_SLASHES);
     }
 }

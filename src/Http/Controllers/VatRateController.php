@@ -27,16 +27,16 @@ class VatRateController extends BaseController
         );
     }
 
-    public function update(Request $request, VatRateService $vatRateService): JsonResponse
+    public function delete(string $id, VatRateService $vatRateService): JsonResponse
     {
-        $response = $vatRateService->update($request->all());
+        $response = $vatRateService->delete($id);
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
-    public function delete(string $id, VatRateService $vatRateService): JsonResponse
+    public function update(Request $request, VatRateService $vatRateService): JsonResponse
     {
-        $response = $vatRateService->delete($id);
+        $response = $vatRateService->update($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }

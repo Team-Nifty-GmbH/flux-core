@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::create('queue_monitorables', function (Blueprint $table) {
+        Schema::create('queue_monitorables', function (Blueprint $table): void {
             $table->foreignId('queue_monitor_id')->constrained()->cascadeOnDelete();
             $table->morphs('queue_monitorable', 'queue_monitorable_index');
             $table->boolean('notify_on_finish')->default(false);

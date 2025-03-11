@@ -4,6 +4,61 @@
         "concat_space": {
             "spacing": "one"
         },
-        "new_with_parentheses": true
+        "no_extra_blank_lines": true,
+        "ordered_class_elements": {
+            "order": [
+                "use_trait",
+                "constant_public",
+                "constant_protected",
+                "constant_private",
+                "property_public_static",
+                "property_protected_static",
+                "property_private_static",
+                "property_public",
+                "property_protected",
+                "property_private",
+                "construct",
+                "destruct",
+                "magic",
+                "method_public_static",
+                "method_protected_static",
+                "method_private_static",
+
+                "phpunit",
+
+                "method:up",
+                "method:down",
+
+                "method:getRulesets",
+
+                "method:mount",
+                "method:render",
+                "method:hydrate",
+                "method:boot",
+                "method:updating",
+                "method:updated",
+                "method:rendering",
+                "method:rendered",
+                "method:dehydrate",
+                "method:exception",
+
+                "method:casts",
+
+                "method:getTableActions",
+                "method:getRowActions",
+                "method:getSelectedActions",
+
+                "method_public",
+                "method_protected",
+                "method_private"
+            ],
+            "sort_algorithm": "alpha"
+        },
+        "new_with_parentheses": true,
+        "return_type_declaration": {
+            "space_before": "none"
+        },
+        "fully_qualified_strict_types": true,
+        "void_return": true
     }
 }

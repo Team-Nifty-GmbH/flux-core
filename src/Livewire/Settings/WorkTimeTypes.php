@@ -58,6 +58,24 @@ class WorkTimeTypes extends WorkTimeTypeList
         ];
     }
 
+    public function delete(): bool
+    {
+        try {
+            DeleteWorkTimeType::make($this->workTimeType->toArray())
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
+    }
+
     public function edit(WorkTimeType $workTimeType): void
     {
         $this->workTimeType->reset();
@@ -72,24 +90,6 @@ class WorkTimeTypes extends WorkTimeTypeList
     {
         try {
             $this->workTimeType->save();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
-    }
-
-    public function delete(): bool
-    {
-        try {
-            DeleteWorkTimeType::make($this->workTimeType->toArray())
-                ->checkPermission()
-                ->validate()
-                ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 

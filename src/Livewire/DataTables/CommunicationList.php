@@ -7,8 +7,6 @@ use Illuminate\Support\Str;
 
 class CommunicationList extends BaseDataTable
 {
-    protected string $model = Communication::class;
-
     public array $enabledCols = [
         'date',
         'from',
@@ -23,6 +21,8 @@ class CommunicationList extends BaseDataTable
         'started_at' => 'datetime',
         'ended_at' => 'datetime',
     ];
+
+    protected string $model = Communication::class;
 
     public function getFormatters(): array
     {

@@ -15,11 +15,11 @@ class Currencies extends CurrencyList
 {
     use Actions;
 
-    protected ?string $includeBefore = 'flux::livewire.settings.currencies';
+    public bool $editModal = false;
 
     public CurrencyForm $selectedCurrency;
 
-    public bool $editModal = false;
+    protected ?string $includeBefore = 'flux::livewire.settings.currencies';
 
     protected function getTableActions(): array
     {
@@ -56,13 +56,22 @@ class Currencies extends CurrencyList
         ];
     }
 
-    public function showEditModal(Currency $currency): void
+    public function delete(Currency $currency): bool
     {
         $this->selectedCurrency->reset();
         $this->selectedCurrency->fill($currency);
 
-        $this->editModal = true;
-        $this->resetErrorBag();
+        try {
+            $this->selectedCurrency->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
     }
 
     public function save(): bool
@@ -80,21 +89,12 @@ class Currencies extends CurrencyList
         return true;
     }
 
-    public function delete(Currency $currency): bool
+    public function showEditModal(Currency $currency): void
     {
         $this->selectedCurrency->reset();
         $this->selectedCurrency->fill($currency);
 
-        try {
-            $this->selectedCurrency->delete();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
+        $this->editModal = true;
+        $this->resetErrorBag();
     }
 }

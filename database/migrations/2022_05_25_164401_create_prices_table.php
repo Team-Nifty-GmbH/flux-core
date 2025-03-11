@@ -8,7 +8,7 @@ class CreatePricesTable extends Migration
 {
     public function up(): void
     {
-        Schema::create('prices', function (Blueprint $table) {
+        Schema::create('prices', function (Blueprint $table): void {
             $table->id()
                 ->comment('An incrementing number to uniquely identify a record in this table. This also is the primary key of this table.');
             $table->string('uuid')
