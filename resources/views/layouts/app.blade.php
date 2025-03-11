@@ -61,8 +61,8 @@
         @endpersist
     @endauth
     <x-layout>
-        <x-slot:header>
-            @if(! $navigation && auth()->check())
+        @if(! $navigation && auth()->check() && ! request()->routeIs('logout'))
+            <x-slot:header>
                 <x-layout.header without-mobile-button>
                     <x-slot:left>
                         <x-button flat class="md:hidden" icon="bars-4" x-on:click="$dispatch('menu-force-open')"/>
@@ -84,18 +84,18 @@
                         @endpersist
                     </div>
                 </x-layout.header>
-            @endif
-        </x-slot:header>
-        <x-slot:menu>
-            @if(auth()->check() && method_exists(auth()->guard(), 'getName') && ! $navigation)
-                @php($navigation = true)
-                @persist('navigation')
-                    <div id="nav">
-                        <livewire:navigation />
-                    </div>
-                @endpersist
-            @endif
-        </x-slot:menu>
+            </x-slot:header>
+        @endif
+        @if(auth()->check() && ! request()->routeIs('logout') && method_exists(auth()->guard(), 'getName') && ! $navigation)
+            <x-slot:menu>
+                    @php($navigation = true)
+                    @persist('navigation')
+                        <div id="nav">
+                            <livewire:navigation />
+                        </div>
+                    @endpersist
+            </x-slot:menu>
+        @endif
         {{ $slot }}
     </x-layout>
 </body>

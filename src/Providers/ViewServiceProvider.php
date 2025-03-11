@@ -126,7 +126,8 @@ class ViewServiceProvider extends ServiceProvider
 
         TallStackUi::personalize()
             ->layout()
-            ->block('wrapper.second', 'md:pl-20');
+            ->block('wrapper.second', 'md:pl-20')
+            ->block('main', 'mx-auto max-w-full p-4 md:p-10');
 
         TallStackUi::personalize()
             ->layout('header')
