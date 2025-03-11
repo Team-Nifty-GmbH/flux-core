@@ -95,6 +95,12 @@ jobs:
           REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
           MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
 
+      - name: Pint
+        run: ./vendor/bin/pint --test
+
+      - name: Clear Orchestra Testbench Cache
+        run: ./vendor/bin/testbench view:clear
+
       - name: Create schema
         run: |
           cd $GITHUB_WORKSPACE
