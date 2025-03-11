@@ -113,7 +113,11 @@ export default function (content, debounceDelay = 0, searchModel = ['user', 'rol
                                 min-h-[85px] w-full  border p-3 shadow-sm transition duration-100 ease-in-out focus:outline-none dark:text-gray-50 sm:text-sm`,
                         },
                     },
-                    onSelectionUpdate: showTooltipDropdown ?  ({ editor }) => {
+                    onSelectionUpdate: ({ editor }) => {
+                        if (! showTooltipDropdown) {
+                            return;
+                        }
+
                         const { from, to } = editor.state.selection;
 
                         // init popUp if not
@@ -148,7 +152,7 @@ export default function (content, debounceDelay = 0, searchModel = ['user', 'rol
                             if(!parent.popUp.state.isVisible) return;
                             parent.popUp.hide();
                         }
-                    } : null,
+                    },
                     onUpdate: ({ editor }) => {
                         clearTimeout(this.timeout);
                         this.timeout = setTimeout(() => {
