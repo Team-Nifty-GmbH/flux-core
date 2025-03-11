@@ -9,7 +9,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('event_subscriptions', function (Blueprint $table) {
+        Schema::table('event_subscriptions', function (Blueprint $table): void {
             $table->dropForeign('event_notifications_user_id_foreign');
             $table->dropIndex('event_notifications_user_id_foreign');
             $table->renameColumn('user_id', 'subscribable_id');
@@ -18,7 +18,7 @@ return new class() extends Migration
 
         DB::table('event_subscriptions')->update(['subscribable_type' => 'user']);
 
-        Schema::table('event_subscriptions', function (Blueprint $table) {
+        Schema::table('event_subscriptions', function (Blueprint $table): void {
             $table->string('subscribable_type')->nullable(false)->change();
             $table->index(['subscribable_id', 'subscribable_type']);
         });
@@ -26,7 +26,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('event_subscriptions', function (Blueprint $table) {
+        Schema::table('event_subscriptions', function (Blueprint $table): void {
             $table->dropIndex(['subscribable_id', 'subscribable_type']);
             $table->renameColumn('subscribable_id', 'user_id');
             $table->dropColumn('subscribable_type');

@@ -8,14 +8,14 @@ use FluxErp\Rulesets\Currency\CreateCurrencyRuleset;
 
 class CreateCurrency extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateCurrencyRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Currency::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateCurrencyRuleset::class;
     }
 
     public function performAction(): Currency

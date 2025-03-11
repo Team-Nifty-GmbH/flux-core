@@ -89,24 +89,6 @@ class AuthController extends Controller
         );
     }
 
-    public function authenticateWeb(Request $request): RedirectResponse
-    {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
-        ]);
-
-        if (Auth::guard('web')->attempt(array_merge($credentials, ['is_active' => true]))) {
-            $request->session()->regenerate();
-
-            return redirect()->intended(route('dashboard'));
-        }
-
-        return back()->withErrors([
-            'email' => __('auth.failed'),
-        ])->onlyInput('email');
-    }
-
     public function authenticatePortal(Request $request): RedirectResponse
     {
         $credentials = $request->validate([
@@ -123,6 +105,24 @@ class AuthController extends Controller
             $request->session()->regenerate();
 
             return redirect()->intended(route('portal.dashboard'));
+        }
+
+        return back()->withErrors([
+            'email' => __('auth.failed'),
+        ])->onlyInput('email');
+    }
+
+    public function authenticateWeb(Request $request): RedirectResponse
+    {
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ]);
+
+        if (Auth::guard('web')->attempt(array_merge($credentials, ['is_active' => true]))) {
+            $request->session()->regenerate();
+
+            return redirect()->intended(route('dashboard'));
         }
 
         return back()->withErrors([

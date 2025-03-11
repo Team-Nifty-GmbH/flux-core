@@ -88,6 +88,14 @@ class AvailableValidationRule implements Rule
     }
 
     /**
+     * Get the validation error message.
+     */
+    public function message(): string
+    {
+        return __('invalid validation rule');
+    }
+
+    /**
      * Determine if the validation rule passes.
      *
      * @param  string  $attribute
@@ -112,13 +120,5 @@ class AvailableValidationRule implements Rule
         $validationRule = $exploded[0] . ':';
 
         return in_array($validationRule, $this->availableValidationRules);
-    }
-
-    /**
-     * Get the validation error message.
-     */
-    public function message(): string
-    {
-        return __('invalid validation rule');
     }
 }

@@ -16,9 +16,9 @@ class JobStartedNotification extends Notification implements HasToastNotificatio
         $this->id = Uuid::uuid5(Uuid::NAMESPACE_URL, $this->model->job_batch_id ?? $this->model->job_id);
     }
 
-    public function via(object $notifiable): array
+    public function toArray(object $notifiable): array
     {
-        return [BroadcastNowChannel::class];
+        return $this->toToastNotification($notifiable)->toArray();
     }
 
     public function toToastNotification(object $notifiable): ToastNotification
@@ -35,8 +35,8 @@ class JobStartedNotification extends Notification implements HasToastNotificatio
             ]);
     }
 
-    public function toArray(object $notifiable): array
+    public function via(object $notifiable): array
     {
-        return $this->toToastNotification($notifiable)->toArray();
+        return [BroadcastNowChannel::class];
     }
 }

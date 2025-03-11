@@ -10,14 +10,14 @@ use Illuminate\Support\Facades\Validator;
 
 class UpdateLanguage extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateLanguageRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Language::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateLanguageRuleset::class;
     }
 
     public function performAction(): Model

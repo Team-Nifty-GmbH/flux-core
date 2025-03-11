@@ -6,7 +6,14 @@ use FluxErp\Models\Permission;
 
 class SettingsCurrenciesTest extends BaseSetup
 {
-    public function test_settings_currencies_page()
+    public function test_settings_currencies_no_user(): void
+    {
+        $this->get('/settings/currencies')
+            ->assertStatus(302)
+            ->assertRedirect(route('login'));
+    }
+
+    public function test_settings_currencies_page(): void
     {
         $this->user->givePermissionTo(Permission::findOrCreate('settings.currencies.get', 'web'));
 
@@ -14,14 +21,7 @@ class SettingsCurrenciesTest extends BaseSetup
             ->assertStatus(200);
     }
 
-    public function test_settings_currencies_no_user()
-    {
-        $this->get('/settings/currencies')
-            ->assertStatus(302)
-            ->assertRedirect(route('login'));
-    }
-
-    public function test_settings_currencies_without_permission()
+    public function test_settings_currencies_without_permission(): void
     {
         Permission::findOrCreate('settings.currencies.get', 'web');
 

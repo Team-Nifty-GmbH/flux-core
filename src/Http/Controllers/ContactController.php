@@ -30,16 +30,16 @@ class ContactController extends BaseController
         );
     }
 
-    public function update(Request $request, ContactService $contactService): JsonResponse
+    public function delete(string $id, ContactService $contactService): JsonResponse
     {
-        $response = $contactService->update($request->all());
+        $response = $contactService->delete($id);
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
-    public function delete(string $id, ContactService $contactService): JsonResponse
+    public function update(Request $request, ContactService $contactService): JsonResponse
     {
-        $response = $contactService->delete($id);
+        $response = $contactService->update($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }

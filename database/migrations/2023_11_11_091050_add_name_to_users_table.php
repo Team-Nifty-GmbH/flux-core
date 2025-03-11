@@ -9,20 +9,20 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table): void {
             $table->string('name')->after('lastname')->nullable();
         });
 
         DB::statement('UPDATE users SET name = CONCAT(firstname, " ", lastname) WHERE name IS NULL');
 
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table): void {
             $table->string('name')->nullable(false)->change();
         });
     }
 
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table): void {
             $table->dropColumn(['name']);
         });
     }

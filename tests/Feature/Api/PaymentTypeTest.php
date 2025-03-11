@@ -33,88 +33,7 @@ class PaymentTypeTest extends BaseSetup
         ];
     }
 
-    public function test_get_payment_type()
-    {
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/payment-types/' . $this->paymentTypes[0]->id);
-        $response->assertStatus(200);
-
-        $json = json_decode($response->getContent());
-        $jsonPaymentType = $json->data;
-
-        // Check if controller returns the test payment type.
-        $this->assertNotEmpty($jsonPaymentType);
-        $this->assertEquals($this->paymentTypes[0]->id, $jsonPaymentType->id);
-        $this->assertEquals($this->paymentTypes[0]->name, $jsonPaymentType->name);
-        $this->assertEquals($this->paymentTypes[0]->description, $jsonPaymentType->description);
-        $this->assertEquals($this->paymentTypes[0]->payment_reminder_days_1, $jsonPaymentType->payment_reminder_days_1);
-        $this->assertEquals($this->paymentTypes[0]->payment_reminder_days_2, $jsonPaymentType->payment_reminder_days_2);
-        $this->assertEquals($this->paymentTypes[0]->payment_reminder_days_3, $jsonPaymentType->payment_reminder_days_3);
-        $this->assertEquals($this->paymentTypes[0]->payment_target, $jsonPaymentType->payment_target);
-        $this->assertEquals($this->paymentTypes[0]->payment_discount_target, $jsonPaymentType->payment_discount_target);
-        $this->assertEquals($this->paymentTypes[0]->payment_discount_percentage,
-            $jsonPaymentType->payment_discount_percentage);
-        $this->assertEquals($this->paymentTypes[0]->is_active, $jsonPaymentType->is_active);
-        $this->assertEquals(Carbon::parse($this->paymentTypes[0]->created_at),
-            Carbon::parse($jsonPaymentType->created_at));
-        $this->assertEquals(Carbon::parse($this->paymentTypes[0]->updated_at),
-            Carbon::parse($jsonPaymentType->updated_at));
-    }
-
-    public function test_get_payment_type_payment_type_not_found()
-    {
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/payment-types/' . ++$this->paymentTypes[1]->id);
-        $response->assertStatus(404);
-    }
-
-    public function test_get_payment_type_include_not_allowed()
-    {
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/payment-types/' . $this->paymentTypes[1]->id . '?include=test');
-        $response->assertStatus(422);
-    }
-
-    public function test_get_payment_types()
-    {
-        $this->user->givePermissionTo($this->permissions['index']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/payment-types');
-        $response->assertStatus(200);
-
-        $json = json_decode($response->getContent());
-        $jsonPaymentTypes = collect($json->data->data);
-
-        // Check the amount of test payment types.
-        $this->assertGreaterThanOrEqual(2, count($jsonPaymentTypes));
-
-        // Check if controller returns the test payment types.
-        foreach ($this->paymentTypes as $paymentType) {
-            $jsonPaymentTypes->contains(function ($jsonPaymentType) use ($paymentType) {
-                return $jsonPaymentType->id === $paymentType->id &&
-                    $jsonPaymentType->name === $paymentType->name &&
-                    $jsonPaymentType->description === $paymentType->description &&
-                    $jsonPaymentType->payment_reminder_days_1 === $paymentType->payment_reminder_days_1 &&
-                    $jsonPaymentType->payment_reminder_days_2 === $paymentType->payment_reminder_days_2 &&
-                    $jsonPaymentType->payment_reminder_days_3 === $paymentType->payment_reminder_days_3 &&
-                    $jsonPaymentType->payment_target === $paymentType->payment_target &&
-                    $jsonPaymentType->payment_discount_target === $paymentType->payment_discount_target &&
-                    $jsonPaymentType->payment_discount_percentage === $paymentType->payment_discount_percentage &&
-                    $jsonPaymentType->is_active === $paymentType->is_active &&
-                    Carbon::parse($jsonPaymentType->created_at) === Carbon::parse($paymentType->created_at) &&
-                    Carbon::parse($jsonPaymentType->updated_at) === Carbon::parse($paymentType->updated_at);
-            });
-        }
-    }
-
-    public function test_create_payment_type()
+    public function test_create_payment_type(): void
     {
         $paymentType = [
             'client_id' => $this->dbClient->getKey(),
@@ -147,7 +66,7 @@ class PaymentTypeTest extends BaseSetup
         $this->assertTrue($this->user->is($dbPaymentType->getUpdatedBy()));
     }
 
-    public function test_create_payment_type_maximum()
+    public function test_create_payment_type_maximum(): void
     {
         $paymentType = [
             'client_id' => $this->dbClient->getKey(),
@@ -188,7 +107,7 @@ class PaymentTypeTest extends BaseSetup
         $this->assertTrue($this->user->is($dbPaymentType->getUpdatedBy()));
     }
 
-    public function test_create_payment_type_validation_fails()
+    public function test_create_payment_type_validation_fails(): void
     {
         $paymentType = [
             'name' => 'Payment Type Name',
@@ -202,7 +121,110 @@ class PaymentTypeTest extends BaseSetup
         $response->assertStatus(422);
     }
 
-    public function test_update_payment_type()
+    public function test_delete_payment_type(): void
+    {
+        $this->user->givePermissionTo($this->permissions['delete']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->delete('/api/payment-types/' . $this->paymentTypes[1]->id);
+        $response->assertStatus(204);
+
+        $paymentType = $this->paymentTypes[1]->fresh();
+        $this->assertNotNull($paymentType->deleted_at);
+        $this->assertTrue($this->user->is($paymentType->getDeletedBy()));
+    }
+
+    public function test_delete_payment_type_payment_type_not_found(): void
+    {
+        $this->user->givePermissionTo($this->permissions['delete']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->delete('/api/payment-types/' . ++$this->paymentTypes[1]->id);
+        $response->assertStatus(404);
+    }
+
+    public function test_get_payment_type(): void
+    {
+        $this->user->givePermissionTo($this->permissions['show']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->get('/api/payment-types/' . $this->paymentTypes[0]->id);
+        $response->assertStatus(200);
+
+        $json = json_decode($response->getContent());
+        $jsonPaymentType = $json->data;
+
+        // Check if controller returns the test payment type.
+        $this->assertNotEmpty($jsonPaymentType);
+        $this->assertEquals($this->paymentTypes[0]->id, $jsonPaymentType->id);
+        $this->assertEquals($this->paymentTypes[0]->name, $jsonPaymentType->name);
+        $this->assertEquals($this->paymentTypes[0]->description, $jsonPaymentType->description);
+        $this->assertEquals($this->paymentTypes[0]->payment_reminder_days_1, $jsonPaymentType->payment_reminder_days_1);
+        $this->assertEquals($this->paymentTypes[0]->payment_reminder_days_2, $jsonPaymentType->payment_reminder_days_2);
+        $this->assertEquals($this->paymentTypes[0]->payment_reminder_days_3, $jsonPaymentType->payment_reminder_days_3);
+        $this->assertEquals($this->paymentTypes[0]->payment_target, $jsonPaymentType->payment_target);
+        $this->assertEquals($this->paymentTypes[0]->payment_discount_target, $jsonPaymentType->payment_discount_target);
+        $this->assertEquals($this->paymentTypes[0]->payment_discount_percentage,
+            $jsonPaymentType->payment_discount_percentage);
+        $this->assertEquals($this->paymentTypes[0]->is_active, $jsonPaymentType->is_active);
+        $this->assertEquals(Carbon::parse($this->paymentTypes[0]->created_at),
+            Carbon::parse($jsonPaymentType->created_at));
+        $this->assertEquals(Carbon::parse($this->paymentTypes[0]->updated_at),
+            Carbon::parse($jsonPaymentType->updated_at));
+    }
+
+    public function test_get_payment_type_include_not_allowed(): void
+    {
+        $this->user->givePermissionTo($this->permissions['show']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->get('/api/payment-types/' . $this->paymentTypes[1]->id . '?include=test');
+        $response->assertStatus(422);
+    }
+
+    public function test_get_payment_type_payment_type_not_found(): void
+    {
+        $this->user->givePermissionTo($this->permissions['show']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->get('/api/payment-types/' . ++$this->paymentTypes[1]->id);
+        $response->assertStatus(404);
+    }
+
+    public function test_get_payment_types(): void
+    {
+        $this->user->givePermissionTo($this->permissions['index']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->get('/api/payment-types');
+        $response->assertStatus(200);
+
+        $json = json_decode($response->getContent());
+        $jsonPaymentTypes = collect($json->data->data);
+
+        // Check the amount of test payment types.
+        $this->assertGreaterThanOrEqual(2, count($jsonPaymentTypes));
+
+        // Check if controller returns the test payment types.
+        foreach ($this->paymentTypes as $paymentType) {
+            $jsonPaymentTypes->contains(function ($jsonPaymentType) use ($paymentType) {
+                return $jsonPaymentType->id === $paymentType->id &&
+                    $jsonPaymentType->name === $paymentType->name &&
+                    $jsonPaymentType->description === $paymentType->description &&
+                    $jsonPaymentType->payment_reminder_days_1 === $paymentType->payment_reminder_days_1 &&
+                    $jsonPaymentType->payment_reminder_days_2 === $paymentType->payment_reminder_days_2 &&
+                    $jsonPaymentType->payment_reminder_days_3 === $paymentType->payment_reminder_days_3 &&
+                    $jsonPaymentType->payment_target === $paymentType->payment_target &&
+                    $jsonPaymentType->payment_discount_target === $paymentType->payment_discount_target &&
+                    $jsonPaymentType->payment_discount_percentage === $paymentType->payment_discount_percentage &&
+                    $jsonPaymentType->is_active === $paymentType->is_active &&
+                    Carbon::parse($jsonPaymentType->created_at) === Carbon::parse($paymentType->created_at) &&
+                    Carbon::parse($jsonPaymentType->updated_at) === Carbon::parse($paymentType->updated_at);
+            });
+        }
+    }
+
+    public function test_update_payment_type(): void
     {
         $paymentType = [
             'id' => $this->paymentTypes[0]->id,
@@ -234,7 +256,7 @@ class PaymentTypeTest extends BaseSetup
         $this->assertTrue($this->user->is($dbPaymentType->getUpdatedBy()));
     }
 
-    public function test_update_payment_type_maximum()
+    public function test_update_payment_type_maximum(): void
     {
         $paymentType = [
             'id' => $this->paymentTypes[0]->id,
@@ -274,7 +296,7 @@ class PaymentTypeTest extends BaseSetup
         $this->assertTrue($this->user->is($dbPaymentType->getUpdatedBy()));
     }
 
-    public function test_update_payment_type_validation_fails()
+    public function test_update_payment_type_validation_fails(): void
     {
         $paymentType = [
             'id' => $this->paymentTypes[0]->id,
@@ -287,27 +309,5 @@ class PaymentTypeTest extends BaseSetup
 
         $response = $this->actingAs($this->user)->put('/api/payment-types', $paymentType);
         $response->assertStatus(422);
-    }
-
-    public function test_delete_payment_type()
-    {
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->delete('/api/payment-types/' . $this->paymentTypes[1]->id);
-        $response->assertStatus(204);
-
-        $paymentType = $this->paymentTypes[1]->fresh();
-        $this->assertNotNull($paymentType->deleted_at);
-        $this->assertTrue($this->user->is($paymentType->getDeletedBy()));
-    }
-
-    public function test_delete_payment_type_payment_type_not_found()
-    {
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->delete('/api/payment-types/' . ++$this->paymentTypes[1]->id);
-        $response->assertStatus(404);
     }
 }

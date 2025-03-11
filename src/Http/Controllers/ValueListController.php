@@ -23,16 +23,16 @@ class ValueListController extends BaseController
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
-    public function update(Request $request, ValueListService $valueListService): JsonResponse
+    public function delete(string $id, ValueListService $valueListService): JsonResponse
     {
-        $response = $valueListService->update($request->all());
+        $response = $valueListService->delete($id);
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
-    public function delete(string $id, ValueListService $valueListService): JsonResponse
+    public function update(Request $request, ValueListService $valueListService): JsonResponse
     {
-        $response = $valueListService->delete($id);
+        $response = $valueListService->update($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }

@@ -7,10 +7,6 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class TaskList extends BaseDataTable
 {
-    protected string $model = Task::class;
-
-    public bool $showFilterInputs = true;
-
     public array $enabledCols = [
         'due_date',
         'name',
@@ -24,6 +20,10 @@ class TaskList extends BaseDataTable
         'due_date' => 'date',
         'progress' => 'percentage',
     ];
+
+    public bool $showFilterInputs = true;
+
+    protected string $model = Task::class;
 
     protected function getRowActions(): array
     {

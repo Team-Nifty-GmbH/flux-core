@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::create('payment_reminder_texts', function (Blueprint $table) {
+        Schema::create('payment_reminder_texts', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36)->unique();
             $table->json('mail_to')->nullable();

@@ -25,27 +25,6 @@ class SerialNumberRanges extends SerialNumberRangeList
 
     public SerialNumberRangeForm $serialNumberRange;
 
-    protected function getViewData(): array
-    {
-        return array_merge(
-            parent::getViewData(),
-            [
-                'models' => model_info_all()
-                    ->unique('morphClass')
-                    ->filter(fn (ModelInfo $modelInfo) => $modelInfo->traits->contains(HasSerialNumberRange::class))
-                    ->map(fn ($modelInfo) => [
-                        'label' => __(Str::headline($modelInfo->morphClass)),
-                        'value' => $modelInfo->morphClass,
-                    ])
-                    ->toArray(),
-                'clients' => resolve_static(Client::class, 'query')
-                    ->select('id', 'name')
-                    ->get()
-                    ->toArray(),
-            ]
-        );
-    }
-
     protected function getTableActions(): array
     {
         return [
@@ -83,6 +62,24 @@ class SerialNumberRanges extends SerialNumberRangeList
         ];
     }
 
+    public function delete(SerialNumberRange $serialNumberRange): bool
+    {
+        $this->serialNumberRange->reset();
+        $this->serialNumberRange->fill($serialNumberRange);
+
+        try {
+            $this->serialNumberRange->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
+    }
+
     public function edit(SerialNumberRange $serialNumberRange): void
     {
         $this->serialNumberRange->reset();
@@ -108,21 +105,24 @@ class SerialNumberRanges extends SerialNumberRangeList
         return true;
     }
 
-    public function delete(SerialNumberRange $serialNumberRange): bool
+    protected function getViewData(): array
     {
-        $this->serialNumberRange->reset();
-        $this->serialNumberRange->fill($serialNumberRange);
-
-        try {
-            $this->serialNumberRange->delete();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
+        return array_merge(
+            parent::getViewData(),
+            [
+                'models' => model_info_all()
+                    ->unique('morphClass')
+                    ->filter(fn (ModelInfo $modelInfo) => $modelInfo->traits->contains(HasSerialNumberRange::class))
+                    ->map(fn ($modelInfo) => [
+                        'label' => __(Str::headline($modelInfo->morphClass)),
+                        'value' => $modelInfo->morphClass,
+                    ])
+                    ->toArray(),
+                'clients' => resolve_static(Client::class, 'query')
+                    ->select('id', 'name')
+                    ->get()
+                    ->toArray(),
+            ]
+        );
     }
 }

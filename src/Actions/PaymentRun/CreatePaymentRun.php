@@ -10,14 +10,14 @@ use Illuminate\Support\Arr;
 
 class CreatePaymentRun extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreatePaymentRunRuleset::class;
-    }
-
     public static function models(): array
     {
         return [PaymentRun::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreatePaymentRunRuleset::class;
     }
 
     public function performAction(): Model

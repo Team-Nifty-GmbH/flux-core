@@ -9,10 +9,10 @@ use Livewire\Attributes\Modelable;
 
 class AllDiscounts extends DiscountList
 {
-    public bool $isFilterable = false;
-
     #[Modelable]
     public int $contactId;
+
+    public bool $isFilterable = false;
 
     public function loadData(): void
     {

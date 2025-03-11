@@ -8,7 +8,7 @@ class CreateStockPostingsTable extends Migration
 {
     public function up(): void
     {
-        Schema::create('stock_postings', function (Blueprint $table) {
+        Schema::create('stock_postings', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
             $table->unsignedBigInteger('warehouse_id');

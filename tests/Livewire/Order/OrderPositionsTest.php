@@ -87,13 +87,7 @@ class OrderPositionsTest extends BaseSetup
         $this->orderForm->fill($this->order);
     }
 
-    public function test_renders_successfully()
-    {
-        Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
-            ->assertStatus(200);
-    }
-
-    public function test_can_delete_order_position()
+    public function test_can_delete_order_position(): void
     {
         $orderPosition = $this->order->orderPositions->first();
 
@@ -115,19 +109,7 @@ class OrderPositionsTest extends BaseSetup
         $this->assertSoftDeleted('order_positions', ['id' => $orderPosition->id]);
     }
 
-    public function test_recalculate_prices()
-    {
-        Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
-            ->set('selected', ['*'])
-            ->call('recalculateOrderPositions')
-            ->assertStatus(200)
-            ->assertHasNoErrors()
-            ->assertExecutesJs(<<<'JS'
-                $wire.$parent.recalculateOrderTotals();
-            JS);
-    }
-
-    public function test_can_show_related_columns()
+    public function test_can_show_related_columns(): void
     {
         $component = Livewire::test(OrderPositions::class, ['order' => $this->orderForm]);
 
@@ -141,7 +123,7 @@ class OrderPositionsTest extends BaseSetup
         $this->assertEquals($this->order->uuid, $component->get('data.data.0')['order.uuid']);
     }
 
-    public function test_quick_add_order_position()
+    public function test_quick_add_order_position(): void
     {
         $this->order->priceList->update(['is_net' => false]);
         $product = Product::factory()
@@ -178,5 +160,23 @@ class OrderPositionsTest extends BaseSetup
         $this->assertNotEquals($netPrice, $grossPrice);
         $this->assertEquals($netPrice, $newOrderPosition->unit_net_price);
         $this->assertEquals($grossPrice, $newOrderPosition->unit_gross_price);
+    }
+
+    public function test_recalculate_prices(): void
+    {
+        Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
+            ->set('selected', ['*'])
+            ->call('recalculateOrderPositions')
+            ->assertStatus(200)
+            ->assertHasNoErrors()
+            ->assertExecutesJs(<<<'JS'
+                $wire.$parent.recalculateOrderTotals();
+            JS);
+    }
+
+    public function test_renders_successfully(): void
+    {
+        Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
+            ->assertStatus(200);
     }
 }

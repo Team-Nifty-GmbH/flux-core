@@ -27,16 +27,16 @@ class AddressTypeController extends BaseController
         );
     }
 
-    public function update(Request $request, AddressTypeService $addressTypeService): JsonResponse
+    public function delete(string $id, AddressTypeService $addressTypeService): JsonResponse
     {
-        $response = $addressTypeService->update($request->all());
+        $response = $addressTypeService->delete($id);
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
-    public function delete(string $id, AddressTypeService $addressTypeService): JsonResponse
+    public function update(Request $request, AddressTypeService $addressTypeService): JsonResponse
     {
-        $response = $addressTypeService->delete($id);
+        $response = $addressTypeService->update($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }

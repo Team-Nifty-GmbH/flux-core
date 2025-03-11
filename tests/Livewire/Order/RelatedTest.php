@@ -74,7 +74,7 @@ class RelatedTest extends BaseSetup
         ]);
     }
 
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         $form = new OrderForm(Livewire::new(Related::class), 'order');
         $form->fill($this->order);

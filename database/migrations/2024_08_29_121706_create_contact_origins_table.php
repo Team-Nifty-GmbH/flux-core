@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::create('contact_origins', function (Blueprint $table) {
+        Schema::create('contact_origins', function (Blueprint $table): void {
             $table->id();
             $table->string('name');
             $table->boolean('is_active')->default(true);

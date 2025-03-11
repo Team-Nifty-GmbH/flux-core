@@ -26,50 +26,7 @@ class PermissionTest extends BaseSetup
         ];
     }
 
-    public function test_get_user_permissions()
-    {
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/permissions/user/' . $this->user->id);
-        $response->assertStatus(200);
-
-        $permissions = json_decode($response->getContent())->data;
-
-        foreach ($permissions as $permission) {
-            $this->assertTrue($this->user->hasPermissionTo($permission->name));
-        }
-    }
-
-    public function test_get_user_permissions_user_not_found()
-    {
-        $this->user->givePermissionTo($this->permissions['show'])->load('permissions');
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/permissions/user/' . ++$this->user->id);
-        $response->assertStatus(404);
-    }
-
-    public function test_get_permissions()
-    {
-        $this->user->givePermissionTo($this->permissions['index']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/permissions');
-        $response->assertStatus(200);
-
-        $permissions = json_decode($response->getContent())->data;
-
-        foreach ($permissions->data as $permission) {
-            $this->assertEquals($permission->name, collect($this->permissions)
-                ->where('name', $permission->name)
-                ->first()
-                ->name
-            );
-        }
-    }
-
-    public function test_create_permission()
+    public function test_create_permission(): void
     {
         $permission = [
             'name' => Str::random(),
@@ -91,7 +48,7 @@ class PermissionTest extends BaseSetup
         $this->assertEquals($permission['guard_name'], $dbPermission->guard_name);
     }
 
-    public function test_create_permission_validation_fails()
+    public function test_create_permission_validation_fails(): void
     {
         $permission = [
             'guard_name' => Str::random(),
@@ -104,7 +61,88 @@ class PermissionTest extends BaseSetup
         $response->assertStatus(422);
     }
 
-    public function test_give_user_permission()
+    public function test_delete_permission(): void
+    {
+        $permission = Permission::create(['name' => Str::random(), 'guard_name' => 'api']);
+
+        $this->user->givePermissionTo($this->permissions['delete']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->delete('/api/permissions/' . $permission->id);
+        $response->assertStatus(204);
+
+        $this->assertFalse(Permission::query()->whereKey($permission->id)->exists());
+    }
+
+    public function test_delete_permission_permission_is_locked(): void
+    {
+        $permission = Permission::create(['name' => Str::random(), 'guard_name' => 'api']);
+        $permission = Permission::query()->whereKey($permission->id)->first();
+        $permission->is_locked = true;
+        $permission->save();
+
+        $this->user->givePermissionTo($this->permissions['delete']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->delete('/api/permissions/' . $permission->id);
+        $response->assertStatus(423);
+    }
+
+    public function test_delete_permission_permission_not_found(): void
+    {
+        $permission = Permission::create(['name' => Str::random(), 'guard_name' => 'api']);
+
+        $this->user->givePermissionTo($this->permissions['delete']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->delete('/api/permissions/' . ++$permission->id);
+        $response->assertStatus(404);
+    }
+
+    public function test_get_permissions(): void
+    {
+        $this->user->givePermissionTo($this->permissions['index']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->get('/api/permissions');
+        $response->assertStatus(200);
+
+        $permissions = json_decode($response->getContent())->data;
+
+        foreach ($permissions->data as $permission) {
+            $this->assertEquals($permission->name, collect($this->permissions)
+                ->where('name', $permission->name)
+                ->first()
+                ->name
+            );
+        }
+    }
+
+    public function test_get_user_permissions(): void
+    {
+        $this->user->givePermissionTo($this->permissions['show']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->get('/api/permissions/user/' . $this->user->id);
+        $response->assertStatus(200);
+
+        $permissions = json_decode($response->getContent())->data;
+
+        foreach ($permissions as $permission) {
+            $this->assertTrue($this->user->hasPermissionTo($permission->name));
+        }
+    }
+
+    public function test_get_user_permissions_user_not_found(): void
+    {
+        $this->user->givePermissionTo($this->permissions['show'])->load('permissions');
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->get('/api/permissions/user/' . ++$this->user->id);
+        $response->assertStatus(404);
+    }
+
+    public function test_give_user_permission(): void
     {
         $permissionInstance = Permission::create(['name' => Str::random(), 'guard_name' => 'sanctum']);
         $permission = [
@@ -125,7 +163,7 @@ class PermissionTest extends BaseSetup
         $this->assertTrue($this->user->hasPermissionTo($permissionInstance->name));
     }
 
-    public function test_revoke_user_permission()
+    public function test_revoke_user_permission(): void
     {
         $permissionInstance = Permission::create(['name' => Str::random(), 'guard_name' => 'sanctum']);
         $permission = [
@@ -151,7 +189,7 @@ class PermissionTest extends BaseSetup
             ->first());
     }
 
-    public function test_revoke_user_permission_validation_fails()
+    public function test_revoke_user_permission_validation_fails(): void
     {
         $permission = [
             'user_id' => Str::random(),
@@ -165,43 +203,5 @@ class PermissionTest extends BaseSetup
 
         $response = $this->actingAs($this->user)->put('/api/permissions/revoke', $permission);
         $response->assertStatus(422);
-    }
-
-    public function test_delete_permission()
-    {
-        $permission = Permission::create(['name' => Str::random(), 'guard_name' => 'api']);
-
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->delete('/api/permissions/' . $permission->id);
-        $response->assertStatus(204);
-
-        $this->assertFalse(Permission::query()->whereKey($permission->id)->exists());
-    }
-
-    public function test_delete_permission_permission_not_found()
-    {
-        $permission = Permission::create(['name' => Str::random(), 'guard_name' => 'api']);
-
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->delete('/api/permissions/' . ++$permission->id);
-        $response->assertStatus(404);
-    }
-
-    public function test_delete_permission_permission_is_locked()
-    {
-        $permission = Permission::create(['name' => Str::random(), 'guard_name' => 'api']);
-        $permission = Permission::query()->whereKey($permission->id)->first();
-        $permission->is_locked = true;
-        $permission->save();
-
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->delete('/api/permissions/' . $permission->id);
-        $response->assertStatus(423);
     }
 }

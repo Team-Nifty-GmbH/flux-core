@@ -19,9 +19,9 @@ class ContactTest extends BaseSetup
 {
     use WithFaker;
 
-    private Collection $paymentTypes;
-
     private Collection $contacts;
+
+    private Collection $paymentTypes;
 
     private array $permissions;
 
@@ -58,88 +58,7 @@ class ContactTest extends BaseSetup
         ];
     }
 
-    public function test_get_contact()
-    {
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/contacts/' . $this->contacts[0]->id);
-        $response->assertStatus(200);
-
-        $json = json_decode($response->getContent());
-        $jsonContact = $json->data;
-
-        // Check if controller returns the test contact.
-        $this->assertNotEmpty($jsonContact);
-        $this->assertEquals($this->contacts[0]->id, $jsonContact->id);
-        $this->assertEquals($this->contacts[0]->payment_type_id, $jsonContact->payment_type_id);
-        $this->assertEquals($this->contacts[0]->price_list_id, $jsonContact->price_list_id);
-        $this->assertEquals($this->contacts[0]->client_id, $jsonContact->client_id);
-        $this->assertEquals($this->contacts[0]->customer_number, $jsonContact->customer_number);
-        $this->assertEquals($this->contacts[0]->creditor_number, $jsonContact->creditor_number);
-        $this->assertEquals($this->contacts[0]->payment_target_days, $jsonContact->payment_target_days);
-        $this->assertEquals($this->contacts[0]->payment_reminder_days_1, $jsonContact->payment_reminder_days_1);
-        $this->assertEquals($this->contacts[0]->payment_reminder_days_2, $jsonContact->payment_reminder_days_2);
-        $this->assertEquals($this->contacts[0]->payment_reminder_days_3, $jsonContact->payment_reminder_days_3);
-        $this->assertEquals($this->contacts[0]->discount_days, $jsonContact->discount_days);
-        $this->assertEquals($this->contacts[0]->discount_percent, $jsonContact->discount_percent);
-        $this->assertEquals($this->contacts[0]->credit_line, $jsonContact->credit_line);
-        $this->assertEquals($this->contacts[0]->has_sensitive_reminder, $jsonContact->has_sensitive_reminder);
-        $this->assertEquals($this->contacts[0]->has_delivery_lock, $jsonContact->has_delivery_lock);
-        $this->assertEquals(Carbon::parse($this->contacts[0]->created_at),
-            Carbon::parse($jsonContact->created_at));
-        $this->assertEquals(Carbon::parse($this->contacts[0]->updated_at),
-            Carbon::parse($jsonContact->updated_at));
-    }
-
-    public function test_get_contact_contact_not_found()
-    {
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/contacts/' . ++$this->contacts[2]->id);
-        $response->assertStatus(404);
-    }
-
-    public function test_get_contacts()
-    {
-        $this->user->givePermissionTo($this->permissions['index']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/contacts');
-        $response->assertStatus(200);
-
-        $json = json_decode($response->getContent());
-        $jsonContacts = collect($json->data->data);
-
-        // Check the amount of test contacts.
-        $this->assertGreaterThanOrEqual(2, count($jsonContacts));
-
-        // Check if controller returns the test contacts.
-        foreach ($this->contacts as $contact) {
-            $jsonContacts->contains(function ($jsonContact) use ($contact) {
-                return $jsonContact->id === $contact->id &&
-                    $jsonContact->payment_type_id === $contact->payment_type_id &&
-                    $jsonContact->price_list_id === $contact->price_list_id &&
-                    $jsonContact->client_id === $contact->client_id &&
-                    $jsonContact->customer_number === $contact->customer_number &&
-                    $jsonContact->creditor_number === $contact->creditor_number &&
-                    $jsonContact->payment_target_days === $contact->payment_target_days &&
-                    $jsonContact->payment_reminder_days_1 === $contact->payment_reminder_days_1 &&
-                    $jsonContact->payment_reminder_days_2 === $contact->payment_reminder_days_2 &&
-                    $jsonContact->payment_reminder_days_3 === $contact->payment_reminder_days_3 &&
-                    $jsonContact->discount_days === $contact->discount_days &&
-                    $jsonContact->discount_percent === $contact->discount_percent &&
-                    $jsonContact->credit_line === $contact->credit_line &&
-                    $jsonContact->has_sensitive_reminder === $contact->has_sensitive_reminder &&
-                    $jsonContact->has_delivery_lock === $contact->has_delivery_lock &&
-                    Carbon::parse($jsonContact->created_at) === Carbon::parse($contact->created_at) &&
-                    Carbon::parse($jsonContact->updated_at) === Carbon::parse($contact->updated_at);
-            });
-        }
-    }
-
-    public function test_create_contact()
+    public function test_create_contact(): void
     {
         $contact = [
             'client_id' => $this->contacts[0]->client_id,
@@ -178,7 +97,7 @@ class ContactTest extends BaseSetup
         $this->assertTrue($this->user->is($dbContact->getUpdatedBy()));
     }
 
-    public function test_create_contact_maximum()
+    public function test_create_contact_maximum(): void
     {
         $contact = [
             'client_id' => $this->contacts[0]->client_id,
@@ -229,7 +148,7 @@ class ContactTest extends BaseSetup
         $this->assertTrue($this->user->is($dbContact->getUpdatedBy()));
     }
 
-    public function test_create_contact_validation_fails()
+    public function test_create_contact_validation_fails(): void
     {
         $contact = [
             'client_id' => $this->contacts[0]->client_id,
@@ -243,7 +162,115 @@ class ContactTest extends BaseSetup
         $response->assertStatus(422);
     }
 
-    public function test_update_contact()
+    public function test_delete_contact(): void
+    {
+        AdditionalColumn::factory()->create([
+            'name' => Str::random(),
+            'model_type' => Contact::class,
+        ]);
+
+        $this->user->givePermissionTo($this->permissions['delete']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->delete('/api/contacts/' . $this->contacts[2]->id);
+        $response->assertStatus(204);
+
+        $contact = $this->contacts[2]->fresh();
+        $this->assertNotNull($contact->deleted_at);
+        $this->assertTrue($this->user->is($contact->getDeletedBy()));
+    }
+
+    public function test_delete_contact_contact_not_found(): void
+    {
+        $this->user->givePermissionTo($this->permissions['delete']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->delete('/api/contacts/' . ++$this->contacts[2]->id);
+        $response->assertStatus(404);
+    }
+
+    public function test_get_contact(): void
+    {
+        $this->user->givePermissionTo($this->permissions['show']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->get('/api/contacts/' . $this->contacts[0]->id);
+        $response->assertStatus(200);
+
+        $json = json_decode($response->getContent());
+        $jsonContact = $json->data;
+
+        // Check if controller returns the test contact.
+        $this->assertNotEmpty($jsonContact);
+        $this->assertEquals($this->contacts[0]->id, $jsonContact->id);
+        $this->assertEquals($this->contacts[0]->payment_type_id, $jsonContact->payment_type_id);
+        $this->assertEquals($this->contacts[0]->price_list_id, $jsonContact->price_list_id);
+        $this->assertEquals($this->contacts[0]->client_id, $jsonContact->client_id);
+        $this->assertEquals($this->contacts[0]->customer_number, $jsonContact->customer_number);
+        $this->assertEquals($this->contacts[0]->creditor_number, $jsonContact->creditor_number);
+        $this->assertEquals($this->contacts[0]->payment_target_days, $jsonContact->payment_target_days);
+        $this->assertEquals($this->contacts[0]->payment_reminder_days_1, $jsonContact->payment_reminder_days_1);
+        $this->assertEquals($this->contacts[0]->payment_reminder_days_2, $jsonContact->payment_reminder_days_2);
+        $this->assertEquals($this->contacts[0]->payment_reminder_days_3, $jsonContact->payment_reminder_days_3);
+        $this->assertEquals($this->contacts[0]->discount_days, $jsonContact->discount_days);
+        $this->assertEquals($this->contacts[0]->discount_percent, $jsonContact->discount_percent);
+        $this->assertEquals($this->contacts[0]->credit_line, $jsonContact->credit_line);
+        $this->assertEquals($this->contacts[0]->has_sensitive_reminder, $jsonContact->has_sensitive_reminder);
+        $this->assertEquals($this->contacts[0]->has_delivery_lock, $jsonContact->has_delivery_lock);
+        $this->assertEquals(Carbon::parse($this->contacts[0]->created_at),
+            Carbon::parse($jsonContact->created_at));
+        $this->assertEquals(Carbon::parse($this->contacts[0]->updated_at),
+            Carbon::parse($jsonContact->updated_at));
+    }
+
+    public function test_get_contact_contact_not_found(): void
+    {
+        $this->user->givePermissionTo($this->permissions['show']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->get('/api/contacts/' . ++$this->contacts[2]->id);
+        $response->assertStatus(404);
+    }
+
+    public function test_get_contacts(): void
+    {
+        $this->user->givePermissionTo($this->permissions['index']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->get('/api/contacts');
+        $response->assertStatus(200);
+
+        $json = json_decode($response->getContent());
+        $jsonContacts = collect($json->data->data);
+
+        // Check the amount of test contacts.
+        $this->assertGreaterThanOrEqual(2, count($jsonContacts));
+
+        // Check if controller returns the test contacts.
+        foreach ($this->contacts as $contact) {
+            $jsonContacts->contains(function ($jsonContact) use ($contact) {
+                return $jsonContact->id === $contact->id &&
+                    $jsonContact->payment_type_id === $contact->payment_type_id &&
+                    $jsonContact->price_list_id === $contact->price_list_id &&
+                    $jsonContact->client_id === $contact->client_id &&
+                    $jsonContact->customer_number === $contact->customer_number &&
+                    $jsonContact->creditor_number === $contact->creditor_number &&
+                    $jsonContact->payment_target_days === $contact->payment_target_days &&
+                    $jsonContact->payment_reminder_days_1 === $contact->payment_reminder_days_1 &&
+                    $jsonContact->payment_reminder_days_2 === $contact->payment_reminder_days_2 &&
+                    $jsonContact->payment_reminder_days_3 === $contact->payment_reminder_days_3 &&
+                    $jsonContact->discount_days === $contact->discount_days &&
+                    $jsonContact->discount_percent === $contact->discount_percent &&
+                    $jsonContact->credit_line === $contact->credit_line &&
+                    $jsonContact->has_sensitive_reminder === $contact->has_sensitive_reminder &&
+                    $jsonContact->has_delivery_lock === $contact->has_delivery_lock &&
+                    Carbon::parse($jsonContact->created_at) === Carbon::parse($contact->created_at) &&
+                    Carbon::parse($jsonContact->updated_at) === Carbon::parse($contact->updated_at);
+            });
+        }
+    }
+
+    public function test_update_contact(): void
     {
         $contact = [
             'id' => $this->contacts[0]->id,
@@ -267,7 +294,7 @@ class ContactTest extends BaseSetup
         $this->assertTrue($this->user->is($dbContact->getUpdatedBy()));
     }
 
-    public function test_update_contact_maximum()
+    public function test_update_contact_maximum(): void
     {
         $contact = [
             'id' => $this->contacts[0]->id,
@@ -317,42 +344,7 @@ class ContactTest extends BaseSetup
         $this->assertTrue($this->user->is($dbContact->getUpdatedBy()));
     }
 
-    public function test_update_contact_multi_status_validation_fails()
-    {
-        $contact = [
-            'customer_number' => $this->contacts[1]->customer_number,
-        ];
-
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->put('/api/contacts', $contact);
-        $response->assertStatus(422);
-
-        $responseContact = json_decode($response->getContent());
-        $this->assertNull($responseContact->id);
-        $this->assertEquals(422, $responseContact->status);
-    }
-
-    public function test_update_contact_multi_status_customer_number_already_exists()
-    {
-        $contact = [
-            'id' => $this->contacts[0]->id,
-            'customer_number' => $this->contacts[1]->customer_number,
-        ];
-
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->put('/api/contacts', $contact);
-        $response->assertStatus(422);
-
-        $responseContact = json_decode($response->getContent());
-        $this->assertEquals($contact['id'], $responseContact->id);
-        $this->assertTrue(property_exists($responseContact->errors, 'customer_number'));
-    }
-
-    public function test_update_contact_multi_status_client_payment_type_not_exists()
+    public function test_update_contact_multi_status_client_payment_type_not_exists(): void
     {
         $contacts = [
             [
@@ -388,30 +380,38 @@ class ContactTest extends BaseSetup
         $this->assertTrue(property_exists($responses[2]->errors, 'payment_type_id'));
     }
 
-    public function test_delete_contact()
+    public function test_update_contact_multi_status_customer_number_already_exists(): void
     {
-        AdditionalColumn::factory()->create([
-            'name' => Str::random(),
-            'model_type' => Contact::class,
-        ]);
+        $contact = [
+            'id' => $this->contacts[0]->id,
+            'customer_number' => $this->contacts[1]->customer_number,
+        ];
 
-        $this->user->givePermissionTo($this->permissions['delete']);
+        $this->user->givePermissionTo($this->permissions['update']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/contacts/' . $this->contacts[2]->id);
-        $response->assertStatus(204);
+        $response = $this->actingAs($this->user)->put('/api/contacts', $contact);
+        $response->assertStatus(422);
 
-        $contact = $this->contacts[2]->fresh();
-        $this->assertNotNull($contact->deleted_at);
-        $this->assertTrue($this->user->is($contact->getDeletedBy()));
+        $responseContact = json_decode($response->getContent());
+        $this->assertEquals($contact['id'], $responseContact->id);
+        $this->assertTrue(property_exists($responseContact->errors, 'customer_number'));
     }
 
-    public function test_delete_contact_contact_not_found()
+    public function test_update_contact_multi_status_validation_fails(): void
     {
-        $this->user->givePermissionTo($this->permissions['delete']);
+        $contact = [
+            'customer_number' => $this->contacts[1]->customer_number,
+        ];
+
+        $this->user->givePermissionTo($this->permissions['update']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/contacts/' . ++$this->contacts[2]->id);
-        $response->assertStatus(404);
+        $response = $this->actingAs($this->user)->put('/api/contacts', $contact);
+        $response->assertStatus(422);
+
+        $responseContact = json_decode($response->getContent());
+        $this->assertNull($responseContact->id);
+        $this->assertEquals(422, $responseContact->status);
     }
 }

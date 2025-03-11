@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::create('notification_settings', function (Blueprint $table) {
+        Schema::create('notification_settings', function (Blueprint $table): void {
             $table->id();
             $table->nullableMorphs('notifiable');
             $table->string('notification_type')->index();

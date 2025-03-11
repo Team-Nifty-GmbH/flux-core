@@ -12,9 +12,16 @@ class Toast extends BaseToast
 
     protected string $eventName = 'toast';
 
+    protected int|string|null $id = null;
+
     protected ?int $progress = null;
 
-    protected int|string|null $id = null;
+    public function id(int|string|null $id): static
+    {
+        $this->id = $id;
+
+        return $this;
+    }
 
     public function progress(int $progress): static
     {
@@ -30,18 +37,6 @@ class Toast extends BaseToast
         return $this;
     }
 
-    protected function event(): string
-    {
-        return $this->eventName;
-    }
-
-    public function id(int|string|null $id): static
-    {
-        $this->id = $id;
-
-        return $this;
-    }
-
     protected function additional(): array
     {
         return [
@@ -51,5 +46,10 @@ class Toast extends BaseToast
             'progress' => $this->progress,
             'toastId' => $this->id,
         ];
+    }
+
+    protected function event(): string
+    {
+        return $this->eventName;
     }
 }

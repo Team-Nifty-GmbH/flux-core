@@ -20,9 +20,9 @@ class OrderTypes extends OrderTypeList
 {
     use Actions;
 
-    protected ?string $includeBefore = 'flux::livewire.settings.order-types';
-
     public OrderTypeForm $orderType;
+
+    protected ?string $includeBefore = 'flux::livewire.settings.order-types';
 
     protected function getTableActions(): array
     {
@@ -61,32 +61,11 @@ class OrderTypes extends OrderTypeList
         ];
     }
 
-    protected function getViewData(): array
-    {
-        $printViews = [];
-        foreach (app(Order::class)->getAvailableViews() as $view) {
-            $printViews[] = [
-                'value' => $view,
-                'label' => __($view),
-            ];
-        }
-
-        return array_merge(
-            parent::getViewData(),
-            [
-                'printViews' => $printViews,
-                'clients' => resolve_static(Client::class, 'query')
-                    ->get(['id', 'name'])
-                    ->toArray(),
-            ]
-        );
-    }
-
     #[Renderless]
-    public function save(): bool
+    public function delete(): bool
     {
         try {
-            $this->orderType->save();
+            $this->orderType->delete();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
@@ -110,10 +89,10 @@ class OrderTypes extends OrderTypeList
     }
 
     #[Renderless]
-    public function delete(): bool
+    public function save(): bool
     {
         try {
-            $this->orderType->delete();
+            $this->orderType->save();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
@@ -123,5 +102,26 @@ class OrderTypes extends OrderTypeList
         $this->loadData();
 
         return true;
+    }
+
+    protected function getViewData(): array
+    {
+        $printViews = [];
+        foreach (app(Order::class)->getAvailableViews() as $view) {
+            $printViews[] = [
+                'value' => $view,
+                'label' => __($view),
+            ];
+        }
+
+        return array_merge(
+            parent::getViewData(),
+            [
+                'printViews' => $printViews,
+                'clients' => resolve_static(Client::class, 'query')
+                    ->get(['id', 'name'])
+                    ->toArray(),
+            ]
+        );
     }
 }

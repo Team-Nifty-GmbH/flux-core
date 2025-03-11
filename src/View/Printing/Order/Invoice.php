@@ -18,9 +18,13 @@ class Invoice extends OrderView
         ]);
     }
 
-    public function getSubject(): string
+    public function afterPrinting(): void
     {
-        return __('Invoice') . ' ' . ($this->model->invoice_number ?: __('Preview'));
+        if ($this->preview) {
+            return;
+        }
+
+        $this->attachToModel();
     }
 
     public function beforePrinting(): void
@@ -40,12 +44,8 @@ class Invoice extends OrderView
         $this->model->save();
     }
 
-    public function afterPrinting(): void
+    public function getSubject(): string
     {
-        if ($this->preview) {
-            return;
-        }
-
-        $this->attachToModel();
+        return __('Invoice') . ' ' . ($this->model->invoice_number ?: __('Preview'));
     }
 }

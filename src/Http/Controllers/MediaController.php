@@ -14,14 +14,16 @@ use Spatie\MediaLibrary\Support\MediaStream;
 
 class MediaController extends Controller
 {
-    /**
-     * @throws \League\Flysystem\FilesystemException
-     */
-    public function downloadPublic(string $filename,
-        DownloadPublicMediaRequest $request,
-        MediaService $mediaService): JsonResponse
+    public function delete(string $id, MediaService $mediaService): JsonResponse
     {
-        $response = $mediaService->downloadPublic($filename, $request->validated());
+        $response = $mediaService->delete($id);
+
+        return ResponseHelper::createResponseFromArrayResponse($response);
+    }
+
+    public function deleteCollection(Request $request, MediaService $mediaService): JsonResponse
+    {
+        $response = $mediaService->deleteCollection($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
@@ -36,12 +38,31 @@ class MediaController extends Controller
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
-    public function upload(Request $request, MediaService $mediaService): JsonResponse
+    public function downloadMultiple(DownloadMultipleMediaRequest $request): MediaStream
     {
-        $response = $mediaService->upload($request->all());
+        $data = $request->validated();
 
-        return ResponseHelper::createResponseFromArrayResponse($response)
-            ->setEncodingOptions(JSON_UNESCAPED_SLASHES);
+        $fileName = Str::finish(data_get($data, 'filename') ?: 'media', '.zip');
+        $ids = explode(',', data_get($data, 'ids'));
+
+        $media = resolve_static(Media::class, 'query')
+            ->whereIntegerInRaw('id', $ids)
+            ->get();
+
+        return MediaStream::create($fileName)
+            ->addMedia($media);
+    }
+
+    /**
+     * @throws \League\Flysystem\FilesystemException
+     */
+    public function downloadPublic(string $filename,
+        DownloadPublicMediaRequest $request,
+        MediaService $mediaService): JsonResponse
+    {
+        $response = $mediaService->downloadPublic($filename, $request->validated());
+
+        return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
     public function replace(string $id, Request $request, MediaService $mediaService): JsonResponse
@@ -63,32 +84,11 @@ class MediaController extends Controller
         )->setEncodingOptions(JSON_UNESCAPED_SLASHES);
     }
 
-    public function delete(string $id, MediaService $mediaService): JsonResponse
+    public function upload(Request $request, MediaService $mediaService): JsonResponse
     {
-        $response = $mediaService->delete($id);
+        $response = $mediaService->upload($request->all());
 
-        return ResponseHelper::createResponseFromArrayResponse($response);
-    }
-
-    public function deleteCollection(Request $request, MediaService $mediaService): JsonResponse
-    {
-        $response = $mediaService->deleteCollection($request->all());
-
-        return ResponseHelper::createResponseFromArrayResponse($response);
-    }
-
-    public function downloadMultiple(DownloadMultipleMediaRequest $request): MediaStream
-    {
-        $data = $request->validated();
-
-        $fileName = Str::finish(data_get($data, 'filename') ?: 'media', '.zip');
-        $ids = explode(',', data_get($data, 'ids'));
-
-        $media = resolve_static(Media::class, 'query')
-            ->whereIntegerInRaw('id', $ids)
-            ->get();
-
-        return MediaStream::create($fileName)
-            ->addMedia($media);
+        return ResponseHelper::createResponseFromArrayResponse($response)
+            ->setEncodingOptions(JSON_UNESCAPED_SLASHES);
     }
 }

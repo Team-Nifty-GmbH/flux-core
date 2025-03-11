@@ -6,7 +6,14 @@ use FluxErp\Models\Permission;
 
 class SettingsUsersTest extends BaseSetup
 {
-    public function test_settings_users_page()
+    public function test_settings_users_no_user(): void
+    {
+        $this->get('/settings/users')
+            ->assertStatus(302)
+            ->assertRedirect(route('login'));
+    }
+
+    public function test_settings_users_page(): void
     {
         $this->user->givePermissionTo(Permission::findOrCreate('settings.users.get', 'web'));
 
@@ -14,14 +21,7 @@ class SettingsUsersTest extends BaseSetup
             ->assertStatus(200);
     }
 
-    public function test_settings_users_no_user()
-    {
-        $this->get('/settings/users')
-            ->assertStatus(302)
-            ->assertRedirect(route('login'));
-    }
-
-    public function test_settings_users_without_permission()
+    public function test_settings_users_without_permission(): void
     {
         Permission::findOrCreate('settings.users.get', 'web');
 

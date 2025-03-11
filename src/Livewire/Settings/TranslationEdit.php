@@ -19,19 +19,50 @@ class TranslationEdit extends Component
 {
     use Actions;
 
-    public array $translation = [
-        'group' => '*',
-    ];
+    public bool $isNew;
 
     public string $locale;
 
-    public bool $isNew;
+    public array $translation = [
+        'group' => '*',
+    ];
 
     protected $listeners = [
         'show',
         'save',
         'delete',
     ];
+
+    public function mount(): void
+    {
+        $this->translation = array_fill_keys(
+            array_keys(resolve_static(CreateTranslationRuleset::class, 'getRules')),
+            null
+        );
+
+        $this->translation['text'] = [];
+        $this->translation['translation'] = null;
+
+        $this->locale = app()->getLocale();
+        $this->isNew = true;
+    }
+
+    public function render(): View
+    {
+        return view('flux::livewire.settings.translation-edit');
+    }
+
+    public function delete(): void
+    {
+        if (! resolve_static(DeleteTranslation::class, 'canPerformAction', [false])) {
+            return;
+        }
+
+        (new TranslationService())->delete($this->translation['id']);
+
+        $this->skipRender();
+        $this->dispatch('closeModal', $this->translation, true);
+    }
 
     public function getRules(): array
     {
@@ -57,48 +88,6 @@ class TranslationEdit extends Component
         }
 
         return Arr::prependKeysWith($rules, 'translation.');
-    }
-
-    public function mount(): void
-    {
-        $this->translation = array_fill_keys(
-            array_keys(resolve_static(CreateTranslationRuleset::class, 'getRules')),
-            null
-        );
-
-        $this->translation['text'] = [];
-        $this->translation['translation'] = null;
-
-        $this->locale = app()->getLocale();
-        $this->isNew = true;
-    }
-
-    public function render(): View
-    {
-        return view('flux::livewire.settings.translation-edit');
-    }
-
-    public function show(string $locale, array $translation = []): void
-    {
-        $this->resetErrorBag();
-
-        $this->translation = $translation ?:
-            array_fill_keys(
-                array_keys(resolve_static(CreateTranslationRuleset::class, 'getRules')),
-                null
-            );
-
-        $this->translation['group'] ??= '*';
-
-        $this->locale = $locale;
-
-        if (is_null($this->translation['text'] ?? null)) {
-            $this->translation['text'] = [];
-        } else {
-            $this->translation['translation'] = $translation['text'][$locale] ?? null;
-        }
-
-        $this->isNew = ! array_key_exists('id', $this->translation);
     }
 
     public function save(): void
@@ -142,15 +131,26 @@ class TranslationEdit extends Component
         $this->dispatch('closeModal', $this->isNew ? $response : $response['data']);
     }
 
-    public function delete(): void
+    public function show(string $locale, array $translation = []): void
     {
-        if (! resolve_static(DeleteTranslation::class, 'canPerformAction', [false])) {
-            return;
+        $this->resetErrorBag();
+
+        $this->translation = $translation ?:
+            array_fill_keys(
+                array_keys(resolve_static(CreateTranslationRuleset::class, 'getRules')),
+                null
+            );
+
+        $this->translation['group'] ??= '*';
+
+        $this->locale = $locale;
+
+        if (is_null($this->translation['text'] ?? null)) {
+            $this->translation['text'] = [];
+        } else {
+            $this->translation['translation'] = $translation['text'][$locale] ?? null;
         }
 
-        (new TranslationService())->delete($this->translation['id']);
-
-        $this->skipRender();
-        $this->dispatch('closeModal', $this->translation, true);
+        $this->isNew = ! array_key_exists('id', $this->translation);
     }
 }

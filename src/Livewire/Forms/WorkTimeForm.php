@@ -10,37 +10,15 @@ use Livewire\Attributes\Locked;
 
 class WorkTimeForm extends FluxForm
 {
-    #[Locked]
-    public ?int $id = null;
-
-    public ?int $user_id = null;
-
     public ?int $contact_id = null;
 
-    #[Locked]
-    public ?int $order_position_id = null;
-
-    #[Locked]
-    public ?int $parent_id = null;
-
-    public ?int $work_time_type_id = null;
-
-    public ?string $trackable_type = null;
-
-    public ?int $trackable_id = null;
-
-    #[Locked]
-    public ?string $started_at = null;
+    public ?string $description = null;
 
     #[Locked]
     public ?string $ended_at = null;
 
     #[Locked]
-    public ?int $paused_time_ms = null;
-
-    public ?string $name = null;
-
-    public ?string $description = null;
+    public ?int $id = null;
 
     public ?bool $is_billable = null;
 
@@ -52,6 +30,33 @@ class WorkTimeForm extends FluxForm
 
     #[Locked]
     public bool $is_pause = false;
+
+    public ?string $name = null;
+
+    #[Locked]
+    public ?int $order_position_id = null;
+
+    #[Locked]
+    public ?int $parent_id = null;
+
+    #[Locked]
+    public ?int $paused_time_ms = null;
+
+    #[Locked]
+    public ?string $started_at = null;
+
+    public ?int $trackable_id = null;
+
+    public ?string $trackable_type = null;
+
+    public ?int $user_id = null;
+
+    public ?int $work_time_type_id = null;
+
+    public function __toString(): string
+    {
+        return (string) $this->id;
+    }
 
     protected function getActions(): array
     {
@@ -72,10 +77,5 @@ class WorkTimeForm extends FluxForm
         }
 
         return $this->getActions()[$name]::make($workTime);
-    }
-
-    public function __toString(): string
-    {
-        return (string) $this->id;
     }
 }

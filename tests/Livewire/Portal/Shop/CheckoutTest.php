@@ -47,14 +47,7 @@ class CheckoutTest extends BaseSetup
             ]);
     }
 
-    public function test_renders_successfully()
-    {
-        Livewire::actingAs($this->address)
-            ->test(Checkout::class)
-            ->assertStatus(200);
-    }
-
-    public function test_can_change_delivery_address()
+    public function test_can_change_delivery_address(): void
     {
         $newAddress = Address::factory()->make();
 
@@ -91,17 +84,7 @@ class CheckoutTest extends BaseSetup
             ->assertSee($newAddress->postal_address, false);
     }
 
-    public function test_cant_create_order_without_legal_accepted()
-    {
-        Livewire::actingAs($this->address)
-            ->test(Checkout::class)
-            ->set('termsAndConditions', false)
-            ->call('buy')
-            ->assertHasNoErrors(['terms_and_conditions'])
-            ->assertToastNotification(type: 'error');
-    }
-
-    public function test_can_create_order()
+    public function test_can_create_order(): void
     {
         $mail = Mail::fake();
 
@@ -135,5 +118,22 @@ class CheckoutTest extends BaseSetup
         Mail::assertSent(OrderConfirmation::class, function (OrderConfirmation $mail) {
             return $mail->hasTo($this->address->email);
         });
+    }
+
+    public function test_cant_create_order_without_legal_accepted(): void
+    {
+        Livewire::actingAs($this->address)
+            ->test(Checkout::class)
+            ->set('termsAndConditions', false)
+            ->call('buy')
+            ->assertHasNoErrors(['terms_and_conditions'])
+            ->assertToastNotification(type: 'error');
+    }
+
+    public function test_renders_successfully(): void
+    {
+        Livewire::actingAs($this->address)
+            ->test(Checkout::class)
+            ->assertStatus(200);
     }
 }

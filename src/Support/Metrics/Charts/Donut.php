@@ -21,22 +21,19 @@ class Donut extends Metric
 
     protected ?array $options = null;
 
-    /**
-     * @throws Exception
-     */
-    public function options(array|string $options): static
+    public function average(string $column, string $groupBy): Result
     {
-        if (is_string($options)) {
-            if (! enum_exists($options)) {
-                throw new Exception("Enum $options does not exist");
-            }
+        return $this->setType('avg', $column, $groupBy);
+    }
 
-            $options = Arr::pluck($options::cases(), 'value');
-        }
+    public function count(string $groupBy, string $column = '*'): Result
+    {
+        return $this->setType('count', $column, $groupBy);
+    }
 
-        $this->options = $options;
-
-        return $this;
+    public function getLabelKey(): ?string
+    {
+        return $this->labelKey;
     }
 
     /**
@@ -57,16 +54,9 @@ class Donut extends Metric
         return [];
     }
 
-    public function setLabelKey(string $labelKey): static
+    public function max(string $column, string $groupBy): Result
     {
-        $this->labelKey = $labelKey;
-
-        return $this;
-    }
-
-    public function getLabelKey(): ?string
-    {
-        return $this->labelKey;
+        return $this->setType('max', $column, $groupBy);
     }
 
     public function min(string $column, string $groupBy): Result
@@ -74,9 +64,29 @@ class Donut extends Metric
         return $this->setType('min', $column, $groupBy);
     }
 
-    public function max(string $column, string $groupBy): Result
+    /**
+     * @throws Exception
+     */
+    public function options(array|string $options): static
     {
-        return $this->setType('max', $column, $groupBy);
+        if (is_string($options)) {
+            if (! enum_exists($options)) {
+                throw new Exception("Enum $options does not exist");
+            }
+
+            $options = Arr::pluck($options::cases(), 'value');
+        }
+
+        $this->options = $options;
+
+        return $this;
+    }
+
+    public function setLabelKey(string $labelKey): static
+    {
+        $this->labelKey = $labelKey;
+
+        return $this;
     }
 
     public function sum(string $column, string $groupBy): Result
@@ -84,14 +94,57 @@ class Donut extends Metric
         return $this->setType('sum', $column, $groupBy);
     }
 
-    public function average(string $column, string $groupBy): Result
+    protected function resolve(): Result
     {
-        return $this->setType('avg', $column, $groupBy);
+        if (! $this->withGrowthRate) {
+            $data = $this->resolveCurrentValue();
+
+            return Result::make(
+                array_values($data),
+                array_keys($data),
+                null
+            );
+        }
+
+        $previousData = $this->resolvePreviousValue();
+        $currentData = $this->resolveCurrentValue();
+
+        return Result::make(
+            array_values($currentData),
+            array_keys($currentData),
+            $this->resolveGrowthRate($previousData, $currentData)
+        );
     }
 
-    public function count(string $groupBy, string $column = '*'): Result
+    protected function resolveCurrentValue(): array
     {
-        return $this->setType('count', $column, $groupBy);
+        return $this->resolveValue(
+            $this->currentRange()
+        );
+    }
+
+    protected function resolveGrowthRate(array $previousData, array $currentData): array
+    {
+        $growthRate = [];
+
+        foreach ($currentData as $key => $currentValue) {
+            $previousValue = $previousData[$key] ?? 0;
+
+            $growthRate[$key] = $this->growthRateType->getValue($previousValue, $currentValue);
+        }
+
+        return $growthRate;
+    }
+
+    protected function resolvePreviousValue(): array
+    {
+        $range = $this->previousRange();
+
+        if (! $range) {
+            return [];
+        }
+
+        return $this->resolveValue($range);
     }
 
     protected function resolveValue(?array $range): array
@@ -132,59 +185,6 @@ class Donut extends Metric
         }
 
         return $data;
-    }
-
-    protected function resolvePreviousValue(): array
-    {
-        $range = $this->previousRange();
-
-        if (! $range) {
-            return [];
-        }
-
-        return $this->resolveValue($range);
-    }
-
-    protected function resolveCurrentValue(): array
-    {
-        return $this->resolveValue(
-            $this->currentRange()
-        );
-    }
-
-    protected function resolveGrowthRate(array $previousData, array $currentData): array
-    {
-        $growthRate = [];
-
-        foreach ($currentData as $key => $currentValue) {
-            $previousValue = $previousData[$key] ?? 0;
-
-            $growthRate[$key] = $this->growthRateType->getValue($previousValue, $currentValue);
-        }
-
-        return $growthRate;
-    }
-
-    protected function resolve(): Result
-    {
-        if (! $this->withGrowthRate) {
-            $data = $this->resolveCurrentValue();
-
-            return Result::make(
-                array_values($data),
-                array_keys($data),
-                null
-            );
-        }
-
-        $previousData = $this->resolvePreviousValue();
-        $currentData = $this->resolveCurrentValue();
-
-        return Result::make(
-            array_values($currentData),
-            array_keys($currentData),
-            $this->resolveGrowthRate($previousData, $currentData)
-        );
     }
 
     protected function setType(string $type, string $column, string $groupBy): Result

@@ -9,7 +9,7 @@ class ChangeTranslatableColumnsToJsonOnOrdersTable extends Migration
 {
     public function up(): void
     {
-        Schema::table('orders', function (Blueprint $table) {
+        Schema::table('orders', function (Blueprint $table): void {
             $table->json('header')->nullable()->change();
             $table->json('footer')->nullable()->change();
             $table->json('logistic_note')->nullable()->change();
@@ -22,7 +22,7 @@ class ChangeTranslatableColumnsToJsonOnOrdersTable extends Migration
     {
         $this->rollbackTranslatable();
 
-        Schema::table('orders', function (Blueprint $table) {
+        Schema::table('orders', function (Blueprint $table): void {
             $table->text('header')->nullable()->change();
             $table->text('footer')->nullable()->change();
             $table->text('logistic_note')->nullable()->change();
@@ -33,7 +33,7 @@ class ChangeTranslatableColumnsToJsonOnOrdersTable extends Migration
     {
         $orders = DB::table('orders')->get()->toArray();
 
-        array_walk($orders, function (&$item) {
+        array_walk($orders, function (&$item): void {
             $item->header = json_encode([config('app.locale') => $item->header]);
             $item->footer = json_encode([config('app.locale') => $item->footer]);
             $item->logistic_note = json_encode([config('app.locale') => $item->logistic_note]);
@@ -47,7 +47,7 @@ class ChangeTranslatableColumnsToJsonOnOrdersTable extends Migration
     {
         $orders = DB::table('orders')->get()->toArray();
 
-        array_walk($orders, function (&$item) {
+        array_walk($orders, function (&$item): void {
             $item->header = json_decode($item->header)->{config('app.locale')};
             $item->footer = json_decode($item->footer)->{config('app.locale')};
             $item->logistic_note = json_decode($item->logistic_note)->{config('app.locale')};

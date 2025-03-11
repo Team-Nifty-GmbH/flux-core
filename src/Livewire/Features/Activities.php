@@ -15,12 +15,12 @@ class Activities extends Component
 {
     use WithPagination;
 
-    /** @var Model $this->modelType */
-    public string $modelType = '';
+    public array $activities = [];
 
     public int $modelId = 0;
 
-    public array $activities = [];
+    /** @var Model $this->modelType */
+    public string $modelType = '';
 
     public int $page = 1;
 
@@ -28,9 +28,9 @@ class Activities extends Component
 
     public int $total = 0;
 
-    public function updatedPage(): void
+    public function render(): View|Factory|Application
     {
-        $this->loadData();
+        return view('flux::livewire.features.activities');
     }
 
     public function loadData(): void
@@ -65,8 +65,8 @@ class Activities extends Component
             ->toArray();
     }
 
-    public function render(): View|Factory|Application
+    public function updatedPage(): void
     {
-        return view('flux::livewire.features.activities');
+        $this->loadData();
     }
 }

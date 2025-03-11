@@ -22,6 +22,23 @@ class SepaMandateService
         }
     }
 
+    public function delete(string $id): array
+    {
+        try {
+            DeleteSepaMandate::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
+            return ResponseHelper::createArrayResponse(
+                statusCode: 404,
+                data: $e->errors()
+            );
+        }
+
+        return ResponseHelper::createArrayResponse(
+            statusCode: 204,
+            statusMessage: 'sepa mandate deleted'
+        );
+    }
+
     public function update(array $data): array
     {
         if (! array_is_list($data)) {
@@ -56,23 +73,6 @@ class SepaMandateService
             data: $responses,
             statusMessage: $statusCode === 422 ? null : 'sepa mandates updated',
             bulk: true
-        );
-    }
-
-    public function delete(string $id): array
-    {
-        try {
-            DeleteSepaMandate::make(['id' => $id])->validate()->execute();
-        } catch (ValidationException $e) {
-            return ResponseHelper::createArrayResponse(
-                statusCode: 404,
-                data: $e->errors()
-            );
-        }
-
-        return ResponseHelper::createArrayResponse(
-            statusCode: 204,
-            statusMessage: 'sepa mandate deleted'
         );
     }
 }

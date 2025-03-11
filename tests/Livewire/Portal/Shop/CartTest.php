@@ -26,13 +26,7 @@ class CartTest extends BaseSetup
         ]);
     }
 
-    public function test_renders_successfully()
-    {
-        Livewire::test(Cart::class)
-            ->assertStatus(200);
-    }
-
-    public function test_can_add_cart_item()
+    public function test_can_add_cart_item(): void
     {
         /** @var Collection $products */
         $products = Product::factory()
@@ -66,5 +60,11 @@ class CartTest extends BaseSetup
             ->assertStatus(200)
             ->assertHasNoErrors()
             ->assertToastNotification(type: 'success');
+    }
+
+    public function test_renders_successfully(): void
+    {
+        Livewire::test(Cart::class)
+            ->assertStatus(200);
     }
 }

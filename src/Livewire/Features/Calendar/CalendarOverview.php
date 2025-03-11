@@ -20,22 +20,22 @@ class CalendarOverview extends Component
 {
     use Actions;
 
-    public CalendarForm $calendar;
-
     public array $availableModels = [];
 
+    public CalendarForm $calendar;
+
+    #[Locked]
+    public array $calendarGroups = [];
+
     public array $fieldTypes = [];
+
+    public array $parentCalendars = [];
+
+    public array $selectedCalendar;
 
     public bool $showCalendars = true;
 
     public bool $showInvites = true;
-
-    public array $selectedCalendar;
-
-    public array $parentCalendars = [];
-
-    #[Locked]
-    public array $calendarGroups = [];
 
     public function mount(): void
     {
@@ -80,6 +80,29 @@ class CalendarOverview extends Component
         return view('flux::livewire.features.calendar.calendar-overview');
     }
 
+    public function addCustomProperty(): void
+    {
+        $this->selectedCalendar['customProperties'][] = [
+            'field_type' => null,
+            'name' => null,
+        ];
+    }
+
+    public function deleteCalendar(array $attributes): bool
+    {
+        try {
+            $this->calendar->reset();
+            $this->calendar->fill($attributes);
+            $this->calendar->delete();
+        } catch (UnauthorizedException|ValidationException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        return true;
+    }
+
     public function editCalendar(?array $calendar = null): void
     {
         if (is_null($calendar)) {
@@ -98,6 +121,11 @@ class CalendarOverview extends Component
                 $modalOpen('calendar-modal');
             JS
         );
+    }
+
+    public function removeCustomProperty(int $index): void
+    {
+        unset($this->selectedCalendar['customProperties'][$index]);
     }
 
     public function saveCalendar(): array|false
@@ -135,34 +163,6 @@ class CalendarOverview extends Component
         }
 
         return $result;
-    }
-
-    public function deleteCalendar(array $attributes): bool
-    {
-        try {
-            $this->calendar->reset();
-            $this->calendar->fill($attributes);
-            $this->calendar->delete();
-        } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        return true;
-    }
-
-    public function addCustomProperty(): void
-    {
-        $this->selectedCalendar['customProperties'][] = [
-            'field_type' => null,
-            'name' => null,
-        ];
-    }
-
-    public function removeCustomProperty(int $index): void
-    {
-        unset($this->selectedCalendar['customProperties'][$index]);
     }
 
     protected function getAvailableParents(): array

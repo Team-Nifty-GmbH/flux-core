@@ -36,89 +36,22 @@ class Project extends FluxModel implements Calendarable, HasMedia, InteractsWith
         HasParentChildRelations, HasSerialNumberRange, HasStates, HasTags, HasUserModification, HasUuid,
         InteractsWithMedia, LogsActivity, Searchable, SoftDeletes;
 
-    protected ?string $detailRouteName = 'projects.id';
-
     protected static string $iconName = 'briefcase';
 
-    protected static function booted(): void
+    protected ?string $detailRouteName = 'projects.id';
+
+    public static function fromCalendarEvent(array $event): Model
     {
-        static::creating(function (Project $project) {
-            if (! $project->project_number) {
-                $project->getSerialNumber('project_number');
-            }
-        });
-    }
+        $project = new static();
+        $project->forceFill([
+            'id' => data_get($event, 'id'),
+            'name' => data_get($event, 'title'),
+            'start_date' => data_get($event, 'start'),
+            'end_date' => data_get($event, 'end'),
+            'description' => data_get($event, 'description'),
+        ]);
 
-    protected function casts(): array
-    {
-        return [
-            'start_date' => 'date:Y-m-d',
-            'end_date' => 'date:Y-m-d',
-            'state' => ProjectState::class,
-            'time_budget' => TimeDuration::class,
-        ];
-    }
-
-    public function client(): BelongsTo
-    {
-        return $this->belongsTo(Client::class, 'client_id');
-    }
-
-    public function contact(): BelongsTo
-    {
-        return $this->belongsTo(Contact::class, 'contact_id');
-    }
-
-    public function order(): BelongsTo
-    {
-        return $this->belongsTo(Order::class, 'order_id');
-    }
-
-    public function responsibleUser(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'responsible_user_id');
-    }
-
-    public function tasks(): HasMany
-    {
-        return $this->hasMany(Task::class);
-    }
-
-    public function getLabel(): ?string
-    {
-        return $this->name . ' (' . $this->project_number . ')';
-    }
-
-    public function getDescription(): ?string
-    {
-        return $this->description;
-    }
-
-    public function getUrl(): ?string
-    {
-        return $this->detailRoute();
-    }
-
-    public function getAvatarUrl(): ?string
-    {
-        return $this->getFirstMediaUrl('avatar', 'thumb')
-            ?: $this->contact?->getFirstMediaUrl('avatar', 'thumb')
-            ?: static::icon()->getUrl();
-    }
-
-    public function calculateProgress(): void
-    {
-        $this->progress = bcdiv(
-            $this->tasks()->sum('progress'),
-            $this->tasks()->count()
-        );
-        $this->total_cost = $this->tasks()->sum('total_cost');
-
-        $this->save();
-
-        if ($this->order) {
-            $this->order->calculateMargin()->save();
-        }
+        return $project;
     }
 
     public static function toCalendar(): array
@@ -136,6 +69,100 @@ class Project extends FluxModel implements Calendarable, HasMedia, InteractsWith
             'group' => 'other',
             'isVirtual' => true,
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (Project $project): void {
+            if (! $project->project_number) {
+                $project->getSerialNumber('project_number');
+            }
+        });
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'start_date' => 'date:Y-m-d',
+            'end_date' => 'date:Y-m-d',
+            'state' => ProjectState::class,
+            'time_budget' => TimeDuration::class,
+        ];
+    }
+
+    public function calculateProgress(): void
+    {
+        $this->progress = bcdiv(
+            $this->tasks()->sum('progress'),
+            $this->tasks()->count()
+        );
+        $this->total_cost = $this->tasks()->sum('total_cost');
+
+        $this->save();
+
+        if ($this->order) {
+            $this->order->calculateMargin()->save();
+        }
+    }
+
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class, 'client_id');
+    }
+
+    public function contact(): BelongsTo
+    {
+        return $this->belongsTo(Contact::class, 'contact_id');
+    }
+
+    public function getAvatarUrl(): ?string
+    {
+        return $this->getFirstMediaUrl('avatar', 'thumb')
+            ?: $this->contact?->getFirstMediaUrl('avatar', 'thumb')
+            ?: static::icon()->getUrl();
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function getLabel(): ?string
+    {
+        return $this->name . ' (' . $this->project_number . ')';
+    }
+
+    public function getUrl(): ?string
+    {
+        return $this->detailRoute();
+    }
+
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(Order::class, 'order_id');
+    }
+
+    public function responsibleUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'responsible_user_id');
+    }
+
+    public function scopeInTimeframe(
+        Builder $builder,
+        Carbon|string|null $start,
+        Carbon|string|null $end,
+        ?array $info = null
+    ): void {
+        $builder->where(function (Builder $query) use ($start, $end): void {
+            $query->whereBetween('start_date', [$start, $end])
+                ->orWhereBetween('end_date', [$start, $end])
+                ->orWhereBetween('created_at', [$start, $end]);
+        });
+    }
+
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class);
     }
 
     public function toCalendarEvent(?array $info = null): array
@@ -158,32 +185,5 @@ class Project extends FluxModel implements Calendarable, HasMedia, InteractsWith
             'is_public' => false,
             'is_repeatable' => false,
         ];
-    }
-
-    public static function fromCalendarEvent(array $event): Model
-    {
-        $project = new static();
-        $project->forceFill([
-            'id' => data_get($event, 'id'),
-            'name' => data_get($event, 'title'),
-            'start_date' => data_get($event, 'start'),
-            'end_date' => data_get($event, 'end'),
-            'description' => data_get($event, 'description'),
-        ]);
-
-        return $project;
-    }
-
-    public function scopeInTimeframe(
-        Builder $builder,
-        Carbon|string|null $start,
-        Carbon|string|null $end,
-        ?array $info = null
-    ): void {
-        $builder->where(function (Builder $query) use ($start, $end) {
-            $query->whereBetween('start_date', [$start, $end])
-                ->orWhereBetween('end_date', [$start, $end])
-                ->orWhereBetween('created_at', [$start, $end]);
-        });
     }
 }

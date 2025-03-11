@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('additional_columns', function (Blueprint $table) {
+        Schema::table('additional_columns', function (Blueprint $table): void {
             $table->string('field_type')->default('text')->after('model_type');
             $table->json('label')->nullable()->after('field_type');
             $table->json('config')->nullable()->after('label');
@@ -20,7 +20,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('additional_columns', function (Blueprint $table) {
+        Schema::table('additional_columns', function (Blueprint $table): void {
             $table->dropIndex('additional_columns_name_model_type_unique');
             $table->dropColumn(['field_type', 'label', 'config', 'validations']);
         });

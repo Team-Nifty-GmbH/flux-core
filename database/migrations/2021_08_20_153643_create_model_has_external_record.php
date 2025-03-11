@@ -8,7 +8,7 @@ class CreateModelHasExternalRecord extends Migration
 {
     public function up(): void
     {
-        Schema::create('model_has_external_record', function (Blueprint $table) {
+        Schema::create('model_has_external_record', function (Blueprint $table): void {
             $table->id();
             $table->string('external_id')->nullable()->index();
             $table->morphs('model');

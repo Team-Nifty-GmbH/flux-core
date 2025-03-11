@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('clients', function (Blueprint $table) {
+        Schema::table('clients', function (Blueprint $table): void {
             $table->dropColumn([
                 'bank_name',
                 'bank_code',
@@ -22,7 +22,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('clients', function (Blueprint $table) {
+        Schema::table('clients', function (Blueprint $table): void {
             $table->string('bank_name')->nullable()->after('website');
             $table->string('bank_code')->nullable()->after('bank_name');
             $table->string('bank_account')->nullable()->after('bank_code');

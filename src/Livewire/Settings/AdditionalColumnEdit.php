@@ -20,15 +20,15 @@ class AdditionalColumnEdit extends Component
 
     public AdditionalColumnForm $additionalColumn;
 
-    public array $models;
+    public array $availableValidationRules;
 
     public array $fieldTypes;
 
-    public bool $isNew = true;
-
     public bool $hideModel = false;
 
-    public array $availableValidationRules;
+    public bool $isNew = true;
+
+    public array $models;
 
     protected $listeners = [
         'show',
@@ -66,25 +66,23 @@ class AdditionalColumnEdit extends Component
         return view('flux::livewire.settings.additional-column-edit');
     }
 
-    public function show(array $additionalColumn = []): void
-    {
-        $additionalColumn['values'] ??= [];
-        $additionalColumn['validations'] ??= [];
-        $additionalColumn['field_type'] ??= 'text';
-        $additionalColumn['is_translatable'] ??= false;
-        $additionalColumn['is_customer_editable'] ??= false;
-        $additionalColumn['is_frontend_visible'] ??= true;
-
-        $this->additionalColumn->reset();
-        $this->additionalColumn->fill($additionalColumn);
-
-        $this->isNew = ! $this->additionalColumn->id;
-        $this->hideModel = $this->additionalColumn->model_type && $this->additionalColumn->model_id;
-    }
-
     public function addEntry(): void
     {
         $this->additionalColumn->values[] = null;
+    }
+
+    #[Renderless]
+    public function delete(): void
+    {
+        try {
+            $this->additionalColumn->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->dispatch('closeModal', $this->additionalColumn, true);
     }
 
     public function removeEntry(int $index): void
@@ -108,17 +106,19 @@ class AdditionalColumnEdit extends Component
         $this->dispatch('closeModal', $this->additionalColumn->toArray());
     }
 
-    #[Renderless]
-    public function delete(): void
+    public function show(array $additionalColumn = []): void
     {
-        try {
-            $this->additionalColumn->delete();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+        $additionalColumn['values'] ??= [];
+        $additionalColumn['validations'] ??= [];
+        $additionalColumn['field_type'] ??= 'text';
+        $additionalColumn['is_translatable'] ??= false;
+        $additionalColumn['is_customer_editable'] ??= false;
+        $additionalColumn['is_frontend_visible'] ??= true;
 
-            return;
-        }
+        $this->additionalColumn->reset();
+        $this->additionalColumn->fill($additionalColumn);
 
-        $this->dispatch('closeModal', $this->additionalColumn, true);
+        $this->isNew = ! $this->additionalColumn->id;
+        $this->hideModel = $this->additionalColumn->model_type && $this->additionalColumn->model_id;
     }
 }

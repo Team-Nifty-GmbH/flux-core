@@ -9,7 +9,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('orders', function (Blueprint $table) {
+        Schema::table('orders', function (Blueprint $table): void {
             $table->date('system_delivery_date_end')->after('system_delivery_date')->nullable();
 
             $table->decimal('total_base_net_price', 40, 10)
@@ -29,7 +29,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('orders', function (Blueprint $table) {
+        Schema::table('orders', function (Blueprint $table): void {
             $table->dropColumn(['system_delivery_date_end', 'total_base_net_price', 'total_base_gross_price']);
         });
     }

@@ -8,14 +8,14 @@ use FluxErp\Rulesets\Printer\DeletePrinterRuleset;
 
 class DeletePrinter extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeletePrinterRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Printer::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeletePrinterRuleset::class;
     }
 
     public function performAction(): bool

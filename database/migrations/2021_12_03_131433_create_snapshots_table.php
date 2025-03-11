@@ -8,7 +8,7 @@ class CreateSnapshotsTable extends Migration
 {
     public function up(): void
     {
-        Schema::create('snapshots', function (Blueprint $table) {
+        Schema::create('snapshots', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
             $table->morphs('model');

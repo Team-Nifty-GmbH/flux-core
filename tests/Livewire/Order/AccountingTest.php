@@ -62,7 +62,7 @@ class AccountingTest extends BaseSetup
         ]);
     }
 
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(Accounting::class, ['orderId' => $this->order->id])
             ->assertStatus(200);

@@ -27,16 +27,16 @@ class CountryRegionController extends BaseController
         );
     }
 
-    public function update(Request $request, CountryRegionService $countryRegionService): JsonResponse
+    public function delete(string $id, CountryRegionService $countryRegionService): JsonResponse
     {
-        $response = $countryRegionService->update($request->all());
+        $response = $countryRegionService->delete($id);
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
-    public function delete(string $id, CountryRegionService $countryRegionService): JsonResponse
+    public function update(Request $request, CountryRegionService $countryRegionService): JsonResponse
     {
-        $response = $countryRegionService->delete($id);
+        $response = $countryRegionService->update($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }

@@ -7,23 +7,28 @@ use Illuminate\Support\Arr;
 
 class NotificationAction implements Arrayable
 {
-    protected string $label;
-
-    protected ?string $style = null;
-
-    protected ?bool $solid = null;
-
-    protected ?string $url = null;
-
     protected ?string $execute = null;
+
+    protected string $label;
 
     protected ?string $method = null;
 
     protected mixed $params = null;
 
+    protected ?bool $solid = null;
+
+    protected ?string $style = null;
+
+    protected ?string $url = null;
+
     public function __construct()
     {
         $this->label = '';
+    }
+
+    public function __get($name)
+    {
+        return $this->$name;
     }
 
     public static function make(...$arguments): static
@@ -43,42 +48,16 @@ class NotificationAction implements Arrayable
         return $instance;
     }
 
-    public function label(string $label): static
-    {
-        $this->label = $label;
-
-        return $this;
-    }
-
-    public function style(string $style): static
-    {
-        $this->style = $style;
-
-        return $this;
-    }
-
-    public function solid(bool $solid): static
-    {
-        $this->solid = $solid;
-
-        return $this;
-    }
-
-    public function url(?string $url = null): static
-    {
-        $this->url = $url;
-
-        return $this;
-    }
-
-    public function route(string $route, array $params = []): static
-    {
-        return $this->url(route($route, $params));
-    }
-
     public function execute(string $execute): static
     {
         $this->execute = $execute;
+
+        return $this;
+    }
+
+    public function label(string $label): static
+    {
+        $this->label = $label;
 
         return $this;
     }
@@ -97,9 +76,23 @@ class NotificationAction implements Arrayable
         return $this;
     }
 
-    public function __get($name)
+    public function route(string $route, array $params = []): static
     {
-        return $this->$name;
+        return $this->url(route($route, $params));
+    }
+
+    public function solid(bool $solid): static
+    {
+        $this->solid = $solid;
+
+        return $this;
+    }
+
+    public function style(string $style): static
+    {
+        $this->style = $style;
+
+        return $this;
     }
 
     public function toArray(): array
@@ -113,5 +106,12 @@ class NotificationAction implements Arrayable
             'method' => $this->method,
             'params' => $this->params,
         ]);
+    }
+
+    public function url(?string $url = null): static
+    {
+        $this->url = $url;
+
+        return $this;
     }
 }

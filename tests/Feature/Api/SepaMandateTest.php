@@ -16,13 +16,13 @@ use Laravel\Sanctum\Sanctum;
 
 class SepaMandateTest extends BaseSetup
 {
-    private Collection $contacts;
-
     private Collection $contactBankConnections;
 
-    private Collection $sepaMandates;
+    private Collection $contacts;
 
     private array $permissions;
+
+    private Collection $sepaMandates;
 
     protected function setUp(): void
     {
@@ -71,7 +71,133 @@ class SepaMandateTest extends BaseSetup
         ];
     }
 
-    public function test_get_sepa_mandate()
+    public function test_create_sepa_mandate(): void
+    {
+        $sepaMandate = [
+            'client_id' => $this->sepaMandates[0]->client_id,
+            'contact_id' => $this->contacts[0]->id,
+            'contact_bank_connection_id' => $this->contactBankConnections[1]->id,
+        ];
+
+        $this->user->givePermissionTo($this->permissions['create']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->post('/api/sepa-mandates', $sepaMandate);
+        $response->assertStatus(201);
+
+        $responseSepaMandate = json_decode($response->getContent())->data;
+        $dbSepaMandate = SepaMandate::query()
+            ->whereKey($responseSepaMandate->id)
+            ->first();
+
+        $this->assertNotEmpty($dbSepaMandate);
+        $this->assertEquals($sepaMandate['client_id'], $dbSepaMandate->client_id);
+        $this->assertEquals($sepaMandate['contact_id'], $dbSepaMandate->contact_id);
+        $this->assertEquals($sepaMandate['contact_bank_connection_id'], $dbSepaMandate->contact_bank_connection_id);
+        $this->assertNull($dbSepaMandate->signed_date);
+        $this->assertTrue($this->user->is($dbSepaMandate->getCreatedBy()));
+        $this->assertTrue($this->user->is($dbSepaMandate->getUpdatedBy()));
+    }
+
+    public function test_create_sepa_mandate_client_contact_not_exists(): void
+    {
+        $sepaMandate = [
+            'client_id' => $this->sepaMandates[0]->client_id,
+            'contact_id' => $this->contacts[2]->id,
+            'contact_bank_connection_id' => $this->contactBankConnections[1]->id,
+            'signed_date' => date('Y-m-d'),
+        ];
+
+        $this->user->givePermissionTo($this->permissions['create']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->post('/api/sepa-mandates', $sepaMandate);
+        $response->assertStatus(422);
+    }
+
+    public function test_create_sepa_mandate_contact_bank_connection_not_exists(): void
+    {
+        $sepaMandate = [
+            'client_id' => $this->sepaMandates[0]->client_id,
+            'contact_id' => $this->contacts[0]->id,
+            'contact_bank_connection_id' => $this->contactBankConnections[2]->id,
+            'signed_date' => date('Y-m-d'),
+        ];
+
+        $this->user->givePermissionTo($this->permissions['create']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->post('/api/sepa-mandates', $sepaMandate);
+        $response->assertStatus(422);
+    }
+
+    public function test_create_sepa_mandate_maximum(): void
+    {
+        $sepaMandate = [
+            'client_id' => $this->sepaMandates[0]->client_id,
+            'contact_id' => $this->contacts[0]->id,
+            'contact_bank_connection_id' => $this->contactBankConnections[1]->id,
+            'signed_date' => date('Y-m-d'),
+        ];
+
+        $this->user->givePermissionTo($this->permissions['create']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->post('/api/sepa-mandates', $sepaMandate);
+        $response->assertStatus(201);
+
+        $responseSepaMandate = json_decode($response->getContent())->data;
+        $dbSepaMandate = SepaMandate::query()
+            ->whereKey($responseSepaMandate->id)
+            ->first();
+
+        $this->assertNotEmpty($dbSepaMandate);
+        $this->assertEquals($sepaMandate['client_id'], $dbSepaMandate->client_id);
+        $this->assertEquals($sepaMandate['contact_id'], $dbSepaMandate->contact_id);
+        $this->assertEquals($sepaMandate['contact_bank_connection_id'], $dbSepaMandate->contact_bank_connection_id);
+        $this->assertEquals($sepaMandate['signed_date'], $dbSepaMandate->signed_date->toDateString());
+        $this->assertTrue($this->user->is($dbSepaMandate->getCreatedBy()));
+        $this->assertTrue($this->user->is($dbSepaMandate->getUpdatedBy()));
+    }
+
+    public function test_create_sepa_mandate_validation_fails(): void
+    {
+        $sepaMandate = [
+            'client_id' => $this->sepaMandates[0]->client_id,
+            'contact_id' => 0,
+            'contact_bank_connection_id' => 0,
+        ];
+
+        $this->user->givePermissionTo($this->permissions['create']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->post('/api/sepa-mandates', $sepaMandate);
+        $response->assertStatus(422);
+    }
+
+    public function test_delete_sepa_mandate(): void
+    {
+        $this->user->givePermissionTo($this->permissions['delete']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->delete('/api/sepa-mandates/' . $this->sepaMandates[2]->id);
+        $response->assertStatus(204);
+
+        $sepaMandate = $this->sepaMandates[2]->fresh();
+        $this->assertNotNull($sepaMandate->deleted_at);
+        $this->assertTrue($this->user->is($sepaMandate->getDeletedBy()));
+    }
+
+    public function test_delete_sepa_mandate_sepa_mandate_not_found(): void
+    {
+        $this->user->givePermissionTo($this->permissions['delete']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->delete('/api/sepa-mandates/' . ++$this->sepaMandates[2]->id);
+        $response->assertStatus(404);
+    }
+
+    public function test_get_sepa_mandate(): void
     {
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
@@ -103,7 +229,7 @@ class SepaMandateTest extends BaseSetup
             Carbon::parse($jsonSepaMandate->updated_at)->toDateTimeString());
     }
 
-    public function test_get_sepa_mandate_sepa_mandate_not_found()
+    public function test_get_sepa_mandate_sepa_mandate_not_found(): void
     {
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
@@ -112,7 +238,7 @@ class SepaMandateTest extends BaseSetup
         $response->assertStatus(404);
     }
 
-    public function test_get_sepa_mandates()
+    public function test_get_sepa_mandates(): void
     {
         $this->user->givePermissionTo($this->permissions['index']);
         Sanctum::actingAs($this->user, ['user']);
@@ -140,111 +266,7 @@ class SepaMandateTest extends BaseSetup
         }
     }
 
-    public function test_create_sepa_mandate()
-    {
-        $sepaMandate = [
-            'client_id' => $this->sepaMandates[0]->client_id,
-            'contact_id' => $this->contacts[0]->id,
-            'contact_bank_connection_id' => $this->contactBankConnections[1]->id,
-        ];
-
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->post('/api/sepa-mandates', $sepaMandate);
-        $response->assertStatus(201);
-
-        $responseSepaMandate = json_decode($response->getContent())->data;
-        $dbSepaMandate = SepaMandate::query()
-            ->whereKey($responseSepaMandate->id)
-            ->first();
-
-        $this->assertNotEmpty($dbSepaMandate);
-        $this->assertEquals($sepaMandate['client_id'], $dbSepaMandate->client_id);
-        $this->assertEquals($sepaMandate['contact_id'], $dbSepaMandate->contact_id);
-        $this->assertEquals($sepaMandate['contact_bank_connection_id'], $dbSepaMandate->contact_bank_connection_id);
-        $this->assertNull($dbSepaMandate->signed_date);
-        $this->assertTrue($this->user->is($dbSepaMandate->getCreatedBy()));
-        $this->assertTrue($this->user->is($dbSepaMandate->getUpdatedBy()));
-    }
-
-    public function test_create_sepa_mandate_maximum()
-    {
-        $sepaMandate = [
-            'client_id' => $this->sepaMandates[0]->client_id,
-            'contact_id' => $this->contacts[0]->id,
-            'contact_bank_connection_id' => $this->contactBankConnections[1]->id,
-            'signed_date' => date('Y-m-d'),
-        ];
-
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->post('/api/sepa-mandates', $sepaMandate);
-        $response->assertStatus(201);
-
-        $responseSepaMandate = json_decode($response->getContent())->data;
-        $dbSepaMandate = SepaMandate::query()
-            ->whereKey($responseSepaMandate->id)
-            ->first();
-
-        $this->assertNotEmpty($dbSepaMandate);
-        $this->assertEquals($sepaMandate['client_id'], $dbSepaMandate->client_id);
-        $this->assertEquals($sepaMandate['contact_id'], $dbSepaMandate->contact_id);
-        $this->assertEquals($sepaMandate['contact_bank_connection_id'], $dbSepaMandate->contact_bank_connection_id);
-        $this->assertEquals($sepaMandate['signed_date'], $dbSepaMandate->signed_date->toDateString());
-        $this->assertTrue($this->user->is($dbSepaMandate->getCreatedBy()));
-        $this->assertTrue($this->user->is($dbSepaMandate->getUpdatedBy()));
-    }
-
-    public function test_create_sepa_mandate_validation_fails()
-    {
-        $sepaMandate = [
-            'client_id' => $this->sepaMandates[0]->client_id,
-            'contact_id' => 0,
-            'contact_bank_connection_id' => 0,
-        ];
-
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->post('/api/sepa-mandates', $sepaMandate);
-        $response->assertStatus(422);
-    }
-
-    public function test_create_sepa_mandate_client_contact_not_exists()
-    {
-        $sepaMandate = [
-            'client_id' => $this->sepaMandates[0]->client_id,
-            'contact_id' => $this->contacts[2]->id,
-            'contact_bank_connection_id' => $this->contactBankConnections[1]->id,
-            'signed_date' => date('Y-m-d'),
-        ];
-
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->post('/api/sepa-mandates', $sepaMandate);
-        $response->assertStatus(422);
-    }
-
-    public function test_create_sepa_mandate_contact_bank_connection_not_exists()
-    {
-        $sepaMandate = [
-            'client_id' => $this->sepaMandates[0]->client_id,
-            'contact_id' => $this->contacts[0]->id,
-            'contact_bank_connection_id' => $this->contactBankConnections[2]->id,
-            'signed_date' => date('Y-m-d'),
-        ];
-
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->post('/api/sepa-mandates', $sepaMandate);
-        $response->assertStatus(422);
-    }
-
-    public function test_update_sepa_mandate()
+    public function test_update_sepa_mandate(): void
     {
         $sepaMandate = [
             'id' => $this->sepaMandates[0]->id,
@@ -268,7 +290,7 @@ class SepaMandateTest extends BaseSetup
         $this->assertTrue($this->user->is($dbSepaMandate->getUpdatedBy()));
     }
 
-    public function test_update_sepa_mandate_maximum()
+    public function test_update_sepa_mandate_maximum(): void
     {
         $sepaMandate = [
             'id' => $this->sepaMandates[0]->id,
@@ -296,25 +318,7 @@ class SepaMandateTest extends BaseSetup
         $this->assertTrue($this->user->is($dbSepaMandate->getUpdatedBy()));
     }
 
-    public function test_update_sepa_mandate_multi_status_validation_fails()
-    {
-        $sepaMandate = [
-            'id' => $this->sepaMandates[0]->id,
-            'signed_date' => Str::random(),
-        ];
-
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->put('/api/sepa-mandates', $sepaMandate);
-        $response->assertStatus(422);
-
-        $responseSepaMandate = json_decode($response->getContent());
-        $this->assertEquals($sepaMandate['id'], $responseSepaMandate->id);
-        $this->assertEquals(422, $responseSepaMandate->status);
-    }
-
-    public function test_update_sepa_mandate_multi_status_contact_bank_connection_not_exists()
+    public function test_update_sepa_mandate_multi_status_contact_bank_connection_not_exists(): void
     {
         $sepaMandates = [
             [
@@ -342,25 +346,21 @@ class SepaMandateTest extends BaseSetup
         $this->assertTrue(property_exists($responses[1]->errors, 'contact_bank_connection_id'));
     }
 
-    public function test_delete_sepa_mandate()
+    public function test_update_sepa_mandate_multi_status_validation_fails(): void
     {
-        $this->user->givePermissionTo($this->permissions['delete']);
+        $sepaMandate = [
+            'id' => $this->sepaMandates[0]->id,
+            'signed_date' => Str::random(),
+        ];
+
+        $this->user->givePermissionTo($this->permissions['update']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/sepa-mandates/' . $this->sepaMandates[2]->id);
-        $response->assertStatus(204);
+        $response = $this->actingAs($this->user)->put('/api/sepa-mandates', $sepaMandate);
+        $response->assertStatus(422);
 
-        $sepaMandate = $this->sepaMandates[2]->fresh();
-        $this->assertNotNull($sepaMandate->deleted_at);
-        $this->assertTrue($this->user->is($sepaMandate->getDeletedBy()));
-    }
-
-    public function test_delete_sepa_mandate_sepa_mandate_not_found()
-    {
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->delete('/api/sepa-mandates/' . ++$this->sepaMandates[2]->id);
-        $response->assertStatus(404);
+        $responseSepaMandate = json_decode($response->getContent());
+        $this->assertEquals($sepaMandate['id'], $responseSepaMandate->id);
+        $this->assertEquals(422, $responseSepaMandate->status);
     }
 }

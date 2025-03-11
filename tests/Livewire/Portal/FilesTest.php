@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class FilesTest extends BaseSetup
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(Files::class)
             ->assertStatus(200);

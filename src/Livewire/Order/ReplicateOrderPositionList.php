@@ -29,27 +29,6 @@ class ReplicateOrderPositionList extends OrderPositionList
     #[Modelable]
     public ?int $orderId;
 
-    public function getSelectAttributes(): ComponentAttributeBag
-    {
-        return new ComponentAttributeBag([
-            'x-show' => '! record.is_bundle_position',
-        ]);
-    }
-
-    protected function getRowAttributes(): DataTableRowAttributes
-    {
-        return DataTableRowAttributes::make()
-            ->bind(
-                'class',
-                "{
-                    'bg-gray-200 dark:bg-secondary-700 font-bold': (record.is_free_text && record.depth === 0 && record.has_children),
-                    'opacity-90': record.is_alternative,
-                    'opacity-50 sortable-filter': record.is_bundle_position,
-                    'font-semibold': record.is_free_text
-                }"
-            );
-    }
-
     protected function getSelectedActions(): array
     {
         return [
@@ -60,15 +39,6 @@ class ReplicateOrderPositionList extends OrderPositionList
                     'x-on:click' => '$wire.$parent.takeOrderPositions($wire.selected).then(() => {$wire.selected = [];});',
                 ]),
         ];
-    }
-
-    protected function getBuilder(Builder $builder): Builder
-    {
-        return $builder
-            ->where('order_id', $this->orderId)
-            ->withSum('descendants as descendantsAmount', 'amount')
-            ->whereNull('parent_id')
-            ->orderBy('sort_number');
     }
 
     public function getFormatters(): array
@@ -82,25 +52,27 @@ class ReplicateOrderPositionList extends OrderPositionList
         );
     }
 
-    protected function getReturnKeys(): array
+    public function getSelectAttributes(): ComponentAttributeBag
     {
-        return array_merge(
-            parent::getReturnKeys(),
-            [
-                'amount',
-                'is_alternative',
-                'is_net',
-                'is_free_text',
-                'is_bundle_position',
-                'totalAmount',
-                'descendantsAmount',
-                'depth',
-                'has_children',
-                'unit_price',
-                'alternative_tag',
-                'indentation',
-            ]
-        );
+        return new ComponentAttributeBag([
+            'x-show' => '! record.is_bundle_position',
+        ]);
+    }
+
+    protected function getBuilder(Builder $builder): Builder
+    {
+        return $builder
+            ->where('order_id', $this->orderId)
+            ->withSum('descendants as descendantsAmount', 'amount')
+            ->whereNull('parent_id')
+            ->orderBy('sort_number');
+    }
+
+    protected function getLeftAppends(): array
+    {
+        return [
+            'name' => 'indentation',
+        ];
     }
 
     protected function getResultFromQuery(Builder $query): array
@@ -134,11 +106,25 @@ class ReplicateOrderPositionList extends OrderPositionList
         return $tree;
     }
 
-    protected function getLeftAppends(): array
+    protected function getReturnKeys(): array
     {
-        return [
-            'name' => 'indentation',
-        ];
+        return array_merge(
+            parent::getReturnKeys(),
+            [
+                'amount',
+                'is_alternative',
+                'is_net',
+                'is_free_text',
+                'is_bundle_position',
+                'totalAmount',
+                'descendantsAmount',
+                'depth',
+                'has_children',
+                'unit_price',
+                'alternative_tag',
+                'indentation',
+            ]
+        );
     }
 
     protected function getRightAppends(): array
@@ -146,6 +132,20 @@ class ReplicateOrderPositionList extends OrderPositionList
         return [
             'name' => 'alternative_tag',
         ];
+    }
+
+    protected function getRowAttributes(): DataTableRowAttributes
+    {
+        return DataTableRowAttributes::make()
+            ->bind(
+                'class',
+                "{
+                    'bg-gray-200 dark:bg-secondary-700 font-bold': (record.is_free_text && record.depth === 0 && record.has_children),
+                    'opacity-90': record.is_alternative,
+                    'opacity-50 sortable-filter': record.is_bundle_position,
+                    'font-semibold': record.is_free_text
+                }"
+            );
     }
 
     protected function getTopAppends(): array

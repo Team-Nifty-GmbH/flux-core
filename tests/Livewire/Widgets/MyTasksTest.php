@@ -10,14 +10,7 @@ use Livewire\Livewire;
 
 class MyTasksTest extends BaseSetup
 {
-    public function test_renders_successfully()
-    {
-        Livewire::actingAs($this->user)
-            ->test(MyTasks::class)
-            ->assertStatus(200);
-    }
-
-    public function test_can_open_work_time_modal()
+    public function test_can_open_work_time_modal(): void
     {
         $task = Task::factory()->create([
             'name' => Str::uuid(),
@@ -32,5 +25,12 @@ class MyTasksTest extends BaseSetup
             '/\$dispatch\(\s*[\'"]start-time-tracking[\'"]/',
             $component->html()
         );
+    }
+
+    public function test_renders_successfully(): void
+    {
+        Livewire::actingAs($this->user)
+            ->test(MyTasks::class)
+            ->assertStatus(200);
     }
 }

@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('calendar_events', function (Blueprint $table) {
+        Schema::table('calendar_events', function (Blueprint $table): void {
             $table->string('model_type')->nullable()->after('calendar_id');
             $table->unsignedBigInteger('model_id')->nullable()->after('model_type');
 
@@ -18,7 +18,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('calendar_events', function (Blueprint $table) {
+        Schema::table('calendar_events', function (Blueprint $table): void {
             $table->dropMorphs('model');
         });
     }

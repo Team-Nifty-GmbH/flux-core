@@ -16,11 +16,6 @@ class AddressLabel extends PrintableView
         return true;
     }
 
-    public function shouldStore(): bool
-    {
-        return false;
-    }
-
     public function render(): View
     {
         return view('print::address.address-label', [
@@ -28,19 +23,24 @@ class AddressLabel extends PrintableView
         ]);
     }
 
-    public function getModel(): ?Model
-    {
-        return $this->address;
-    }
-
     public function getFileName(): string
     {
         return $this->getSubject();
     }
 
+    public function getModel(): ?Model
+    {
+        return $this->address;
+    }
+
     public function getSubject(): string
     {
         return __('Address Label') . ' ' . $this->address->name;
+    }
+
+    public function shouldStore(): bool
+    {
+        return false;
     }
 
     protected function getPageCss(): array
@@ -60,12 +60,12 @@ class AddressLabel extends PrintableView
         return [0, 0, 252.28, 79.37];
     }
 
-    protected function renderHeader(): bool
+    protected function renderFooter(): bool
     {
         return false;
     }
 
-    protected function renderFooter(): bool
+    protected function renderHeader(): bool
     {
         return false;
     }

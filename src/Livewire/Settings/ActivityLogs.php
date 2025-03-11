@@ -8,9 +8,9 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class ActivityLogs extends ActivityLogList
 {
-    protected ?string $includeBefore = 'flux::livewire.settings.activity-logs';
-
     public array $activity = [];
+
+    protected ?string $includeBefore = 'flux::livewire.settings.activity-logs';
 
     protected function getRowActions(): array
     {

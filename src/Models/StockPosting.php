@@ -18,9 +18,9 @@ class StockPosting extends FluxModel
 
     protected static function booted(): void
     {
-        static::creating(function (StockPosting $stockPosting) {
+        static::creating(function (StockPosting $stockPosting): void {
             Cache::lock('stock-posting-' . $stockPosting->warehouse_id . '-' . $stockPosting->product_id, 10)
-                ->block(5, function () use ($stockPosting) {
+                ->block(5, function () use ($stockPosting): void {
                     $latestPosting = resolve_static(StockPosting::class, 'query')
                         ->where('warehouse_id', '=', $stockPosting->warehouse_id)
                         ->where('product_id', '=', $stockPosting->product_id)

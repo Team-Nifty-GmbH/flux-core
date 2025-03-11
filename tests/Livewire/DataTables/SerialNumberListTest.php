@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class SerialNumberListTest extends BaseSetup
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(SerialNumberList::class)
             ->assertStatus(200);

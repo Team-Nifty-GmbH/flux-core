@@ -23,7 +23,7 @@ class StockPostingListTest extends TestCase
             ->create();
     }
 
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(StockPostingList::class, ['productId' => $this->product->id])
             ->assertStatus(200);

@@ -8,14 +8,14 @@ use FluxErp\Rulesets\MailAccount\DeleteMailAccountRuleset;
 
 class DeleteMailAccount extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeleteMailAccountRuleset::class;
-    }
-
     public static function models(): array
     {
         return [MailAccount::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeleteMailAccountRuleset::class;
     }
 
     public function performAction(): ?bool

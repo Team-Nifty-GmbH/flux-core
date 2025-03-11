@@ -8,13 +8,13 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('product_bundle_product', function (Blueprint $table) {
+        Schema::table('product_bundle_product', function (Blueprint $table): void {
             $table->dropForeign('product_bundle_product_bundle_product_id_foreign');
             $table->dropForeign('product_bundle_product_product_id_foreign');
             $table->dropPrimary();
         });
 
-        Schema::table('product_bundle_product', function (Blueprint $table) {
+        Schema::table('product_bundle_product', function (Blueprint $table): void {
             $table->id()->first();
 
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
@@ -24,7 +24,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('product_bundle_product', function (Blueprint $table) {
+        Schema::table('product_bundle_product', function (Blueprint $table): void {
             $table->dropColumn('id');
 
             $table->primary(['product_id', 'bundle_product_id']);

@@ -10,9 +10,14 @@ use Symfony\Component\Console\Input\InputOption;
 
 class MakePrintableView extends ComponentMakeCommand
 {
+    protected $description = 'Create a new Printable view for a class';
+
     protected $name = 'make:printable-view';
 
-    protected $description = 'Create a new Printable view for a class';
+    public function getDefaultNamespace($rootNamespace): string
+    {
+        return $rootNamespace . '\View\Printing';
+    }
 
     public function handle(): void
     {
@@ -24,23 +29,6 @@ class MakePrintableView extends ComponentMakeCommand
         }
 
         parent::handle();
-    }
-
-    protected function getStub(): string
-    {
-        return $this->resolveStubPath('/stubs/printable-view.stub');
-    }
-
-    protected function resolveStubPath($stub): string
-    {
-        return file_exists($customPath = $this->laravel->basePath(trim($stub, '/')))
-            ? $customPath
-            : __DIR__ . $stub;
-    }
-
-    public function getDefaultNamespace($rootNamespace): string
-    {
-        return $rootNamespace . '\View\Printing';
     }
 
     public function viewPath($path = ''): string
@@ -75,6 +63,28 @@ class MakePrintableView extends ComponentMakeCommand
         );
     }
 
+    protected function getArguments(): array
+    {
+        return array_merge(
+            parent::getArguments(),
+            [
+                ['class', InputOption::VALUE_NONE, 'The Printable Class'],
+            ],
+        );
+    }
+
+    protected function getStub(): string
+    {
+        return $this->resolveStubPath('/stubs/printable-view.stub');
+    }
+
+    protected function resolveStubPath($stub): string
+    {
+        return file_exists($customPath = $this->laravel->basePath(trim($stub, '/')))
+            ? $customPath
+            : __DIR__ . $stub;
+    }
+
     protected function writeView($onSuccess = null): void
     {
         $path = $this->viewPath(
@@ -101,15 +111,5 @@ class MakePrintableView extends ComponentMakeCommand
         if ($onSuccess) {
             $onSuccess();
         }
-    }
-
-    protected function getArguments(): array
-    {
-        return array_merge(
-            parent::getArguments(),
-            [
-                ['class', InputOption::VALUE_NONE, 'The Printable Class'],
-            ],
-        );
     }
 }

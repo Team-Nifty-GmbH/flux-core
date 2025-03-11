@@ -14,20 +14,18 @@ class MyTickets extends Component
 {
     use Widgetable;
 
-    protected ?Collection $tickets = null;
-
     public ?array $rememberedEventListeners = null;
 
-    protected function getListeners(): array
+    protected ?Collection $tickets = null;
+
+    public static function getDefaultHeight(): int
     {
-        return $this->rememberedEventListeners = array_merge(
-            $this->rememberedEventListeners ?? [],
-            $this->getTickets()
-                ->mapWithKeys(fn (Ticket $ticket, int $key) => [
-                    'echo-private:' . $ticket->broadcastChannel() . ',.TicketUpdated' => '$refresh',
-                ])
-                ->toArray() ?? []
-        );
+        return 2;
+    }
+
+    public static function getDefaultWidth(): int
+    {
+        return 2;
     }
 
     public function render(): View|Factory
@@ -43,6 +41,18 @@ class MyTickets extends Component
     public function placeholder(): View|Factory
     {
         return view('flux::livewire.placeholders.horizontal-bar');
+    }
+
+    protected function getListeners(): array
+    {
+        return $this->rememberedEventListeners = array_merge(
+            $this->rememberedEventListeners ?? [],
+            $this->getTickets()
+                ->mapWithKeys(fn (Ticket $ticket, int $key) => [
+                    'echo-private:' . $ticket->broadcastChannel() . ',.TicketUpdated' => '$refresh',
+                ])
+                ->toArray() ?? []
+        );
     }
 
     protected function getTickets(): Collection
@@ -61,15 +71,5 @@ class MyTickets extends Component
             ->orderByRaw("state = 'escalated' DESC")
             ->orderBy('created_at')
             ->get();
-    }
-
-    public static function getDefaultWidth(): int
-    {
-        return 2;
-    }
-
-    public static function getDefaultHeight(): int
-    {
-        return 2;
     }
 }

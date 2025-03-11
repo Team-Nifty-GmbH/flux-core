@@ -17,18 +17,18 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class Mail extends CommunicationList
 {
-    protected string $view = 'flux::livewire.mail.mail';
-
-    public array $folders = [];
-
     public ?string $folderId = null;
 
-    public array $selectedFolderIds = [];
+    public array $folders = [];
 
     #[Locked]
     public array $mailAccounts = [];
 
     public CommunicationForm $mailMessage;
+
+    public array $selectedFolderIds = [];
+
+    protected string $view = 'flux::livewire.mail.mail';
 
     public function mount(): void
     {
@@ -47,19 +47,6 @@ class Mail extends CommunicationList
         ];
     }
 
-    #[Renderless]
-    public function showMail(Communication $message): void
-    {
-        $this->skipRender();
-        $this->mailMessage->fill($message);
-        $this->mailMessage->text_body = nl2br($this->mailMessage->text_body);
-
-        $this->js(<<<'JS'
-            writeHtml();
-            $modalOpen('show-mail');
-        JS);
-    }
-
     public function download(Media $mediaItem): false|BinaryFileResponse
     {
         if (! file_exists($mediaItem->getPath())) {
@@ -71,6 +58,30 @@ class Mail extends CommunicationList
         }
 
         return response()->download($mediaItem->getPath(), $mediaItem->file_name);
+    }
+
+    public function getNewMessages(): void
+    {
+        $mailAccounts = resolve_static(MailAccount::class, 'query')
+            ->whereIntegerInRaw('id', array_column($this->mailAccounts, 'id'))
+            ->get();
+
+        foreach ($mailAccounts as $mailAccount) {
+            SyncMailAccountJob::dispatch($mailAccount);
+        }
+    }
+
+    #[Renderless]
+    public function showMail(Communication $message): void
+    {
+        $this->skipRender();
+        $this->mailMessage->fill($message);
+        $this->mailMessage->text_body = nl2br($this->mailMessage->text_body);
+
+        $this->js(<<<'JS'
+            writeHtml();
+            $modalOpen('show-mail');
+        JS);
     }
 
     public function updatedFolderId(): void
@@ -93,27 +104,6 @@ class Mail extends CommunicationList
         $this->applyUserFilters();
     }
 
-    public function getNewMessages(): void
-    {
-        $mailAccounts = resolve_static(MailAccount::class, 'query')
-            ->whereIntegerInRaw('id', array_column($this->mailAccounts, 'id'))
-            ->get();
-
-        foreach ($mailAccounts as $mailAccount) {
-            SyncMailAccountJob::dispatch($mailAccount);
-        }
-    }
-
-    protected function getBuilder(Builder $builder): Builder
-    {
-        return $builder
-            ->where('communication_type_enum', 'mail')
-            ->whereIntegerInRaw('mail_account_id', array_column($this->mailAccounts, 'id'))
-            ->when($this->folderId, function (Builder $builder) {
-                $builder->whereIntegerInRaw('mail_folder_id', $this->selectedFolderIds);
-            });
-    }
-
     protected function findFolderIdById($folders, $id): ?array
     {
         foreach ($folders as $element) {
@@ -130,6 +120,16 @@ class Mail extends CommunicationList
         }
 
         return null;
+    }
+
+    protected function getBuilder(Builder $builder): Builder
+    {
+        return $builder
+            ->where('communication_type_enum', 'mail')
+            ->whereIntegerInRaw('mail_account_id', array_column($this->mailAccounts, 'id'))
+            ->when($this->folderId, function (Builder $builder): void {
+                $builder->whereIntegerInRaw('mail_folder_id', $this->selectedFolderIds);
+            });
     }
 
     protected function loadFolders(): void

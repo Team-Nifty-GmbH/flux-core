@@ -23,10 +23,6 @@ class PriceLists extends PriceListList
 {
     use Actions;
 
-    protected ?string $includeBefore = 'flux::livewire.settings.price-lists';
-
-    public PriceListForm $priceList;
-
     public array $discountedCategories = [];
 
     public array $newCategoryDiscount = [
@@ -34,6 +30,10 @@ class PriceLists extends PriceListList
         'discount' => null,
         'is_percentage' => true,
     ];
+
+    public PriceListForm $priceList;
+
+    protected ?string $includeBefore = 'flux::livewire.settings.price-lists';
 
     protected function getTableActions(): array
     {
@@ -72,31 +72,47 @@ class PriceLists extends PriceListList
         ];
     }
 
-    protected function getViewData(): array
+    #[Renderless]
+    public function addCategoryDiscount(): void
     {
-        return array_merge(
-            parent::getViewData(),
-            [
-                'priceLists' => resolve_static(PriceList::class, 'query')
-                    ->get(['id', 'name'])
-                    ->toArray(),
-                'roundingMethods' => RoundingMethodEnum::valuesLocalized(),
-                'roundingModes' => [
-                    [
-                        'label' => __('Round'),
-                        'value' => 'round',
-                    ],
-                    [
-                        'label' => __('Round up'),
-                        'value' => 'ceil',
-                    ],
-                    [
-                        'label' => __('Round down'),
-                        'value' => 'floor',
-                    ],
-                ],
-            ]
-        );
+        if ($this->newCategoryDiscount['category_id'] === null || ! $this->newCategoryDiscount['discount']) {
+            return;
+        }
+
+        $this->discountedCategories[] = [
+            'id' => $this->newCategoryDiscount['category_id'],
+            'name' => resolve_static(Category::class, 'query')
+                ->whereKey($this->newCategoryDiscount['category_id'])
+                ->value('name'),
+            'discounts' => [
+                $this->newCategoryDiscount,
+            ],
+        ];
+
+        $this->newCategoryDiscount = [
+            'category_id' => null,
+            'discount' => null,
+            'is_percentage' => true,
+        ];
+    }
+
+    #[Renderless]
+    public function delete(PriceList $priceList): bool
+    {
+        $this->priceList->reset();
+        $this->priceList->fill($priceList);
+
+        try {
+            $this->priceList->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
     }
 
     #[Renderless]
@@ -136,6 +152,12 @@ class PriceLists extends PriceListList
         $this->js(<<<'JS'
             $modalOpen('edit-price-list-modal');
         JS);
+    }
+
+    #[Renderless]
+    public function removeCategoryDiscount(int $index): void
+    {
+        unset($this->discountedCategories[$index]);
     }
 
     #[Renderless]
@@ -216,52 +238,30 @@ class PriceLists extends PriceListList
         return true;
     }
 
-    #[Renderless]
-    public function delete(PriceList $priceList): bool
+    protected function getViewData(): array
     {
-        $this->priceList->reset();
-        $this->priceList->fill($priceList);
-
-        try {
-            $this->priceList->delete();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
-    }
-
-    #[Renderless]
-    public function addCategoryDiscount(): void
-    {
-        if ($this->newCategoryDiscount['category_id'] === null || ! $this->newCategoryDiscount['discount']) {
-            return;
-        }
-
-        $this->discountedCategories[] = [
-            'id' => $this->newCategoryDiscount['category_id'],
-            'name' => resolve_static(Category::class, 'query')
-                ->whereKey($this->newCategoryDiscount['category_id'])
-                ->value('name'),
-            'discounts' => [
-                $this->newCategoryDiscount,
-            ],
-        ];
-
-        $this->newCategoryDiscount = [
-            'category_id' => null,
-            'discount' => null,
-            'is_percentage' => true,
-        ];
-    }
-
-    #[Renderless]
-    public function removeCategoryDiscount(int $index): void
-    {
-        unset($this->discountedCategories[$index]);
+        return array_merge(
+            parent::getViewData(),
+            [
+                'priceLists' => resolve_static(PriceList::class, 'query')
+                    ->get(['id', 'name'])
+                    ->toArray(),
+                'roundingMethods' => RoundingMethodEnum::valuesLocalized(),
+                'roundingModes' => [
+                    [
+                        'label' => __('Round'),
+                        'value' => 'round',
+                    ],
+                    [
+                        'label' => __('Round up'),
+                        'value' => 'ceil',
+                    ],
+                    [
+                        'label' => __('Round down'),
+                        'value' => 'floor',
+                    ],
+                ],
+            ]
+        );
     }
 }

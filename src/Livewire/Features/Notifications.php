@@ -30,6 +30,59 @@ class Notifications extends Component
     }
 
     #[Renderless]
+    public function acceptNotify(Notification $notification): void
+    {
+        $accept = data_get($notification->data, 'accept');
+        $notification->markAsRead();
+
+        $this->js(<<<'JS'
+            $slideClose('notifications-slide');
+        JS);
+
+        if (data_get($accept, 'url')) {
+            $this->redirect(data_get($accept, 'url'), navigate: true);
+
+            return;
+        }
+    }
+
+    #[Renderless]
+    public function closeNotifications(): void
+    {
+        $this->loaded = 0;
+
+        $this->js(<<<'JS'
+            removeAll();
+        JS);
+    }
+
+    #[Renderless]
+    public function markAllAsRead(): void
+    {
+        auth()->user()->unreadNotifications->markAsRead();
+        $this->unread = 0;
+
+        $this->js(<<<'JS'
+            $slideClose('notifications-slide');
+        JS);
+    }
+
+    #[Renderless]
+    public function markAsRead(Notification $notification): void
+    {
+        $notification->markAsRead();
+        $index = array_search($notification->getKey(), array_column($this->notifications, 'id'));
+        unset($this->notifications[$index]);
+
+        $this->unread = $this->unread - 1;
+        if (! $this->unread) {
+            $this->js(<<<'JS'
+                $slideClose('notifications-slide');
+            JS);
+        }
+    }
+
+    #[Renderless]
     public function sendNotify(array $notify): void
     {
         if (! is_null(data_get($notify, 'progress'))) {
@@ -63,23 +116,6 @@ class Notifications extends Component
     }
 
     #[Renderless]
-    public function acceptNotify(Notification $notification): void
-    {
-        $accept = data_get($notification->data, 'accept');
-        $notification->markAsRead();
-
-        $this->js(<<<'JS'
-            $slideClose('notifications-slide');
-        JS);
-
-        if (data_get($accept, 'url')) {
-            $this->redirect(data_get($accept, 'url'), navigate: true);
-
-            return;
-        }
-    }
-
-    #[Renderless]
     public function showNotifications(): void
     {
 
@@ -88,7 +124,7 @@ class Notifications extends Component
             ->offset($this->loaded)
             ->limit($this->loaded + 20)
             ?->get()
-            ->each(function (Notification $notification) {
+            ->each(function (Notification $notification): void {
                 $notification
                     ->toast($this)
                     ->setEventName('toast-list')
@@ -105,42 +141,6 @@ class Notifications extends Component
         $this->loaded = $this->loaded + 20;
         $this->js(<<<'JS'
             $slideOpen('notifications-slide');
-        JS);
-    }
-
-    #[Renderless]
-    public function markAsRead(Notification $notification): void
-    {
-        $notification->markAsRead();
-        $index = array_search($notification->getKey(), array_column($this->notifications, 'id'));
-        unset($this->notifications[$index]);
-
-        $this->unread = $this->unread - 1;
-        if (! $this->unread) {
-            $this->js(<<<'JS'
-                $slideClose('notifications-slide');
-            JS);
-        }
-    }
-
-    #[Renderless]
-    public function markAllAsRead(): void
-    {
-        auth()->user()->unreadNotifications->markAsRead();
-        $this->unread = 0;
-
-        $this->js(<<<'JS'
-            $slideClose('notifications-slide');
-        JS);
-    }
-
-    #[Renderless]
-    public function closeNotifications(): void
-    {
-        $this->loaded = 0;
-
-        $this->js(<<<'JS'
-            removeAll();
         JS);
     }
 }

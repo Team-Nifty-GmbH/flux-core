@@ -19,6 +19,23 @@ class CommentService
         );
     }
 
+    public function delete(string $id): array
+    {
+        try {
+            DeleteComment::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
+            return ResponseHelper::createArrayResponse(
+                statusCode: array_key_exists('id', $e->errors()) ? 404 : 403,
+                data: $e->errors()
+            );
+        }
+
+        return ResponseHelper::createArrayResponse(
+            statusCode: 204,
+            statusMessage: __('comment deleted')
+        );
+    }
+
     public function update(array $data): array
     {
         if (! array_is_list($data)) {
@@ -53,23 +70,6 @@ class CommentService
             data: $responses,
             statusMessage: $statusCode === 422 ? null : __('comment(s) updated'),
             bulk: true
-        );
-    }
-
-    public function delete(string $id): array
-    {
-        try {
-            DeleteComment::make(['id' => $id])->validate()->execute();
-        } catch (ValidationException $e) {
-            return ResponseHelper::createArrayResponse(
-                statusCode: array_key_exists('id', $e->errors()) ? 404 : 403,
-                data: $e->errors()
-            );
-        }
-
-        return ResponseHelper::createArrayResponse(
-            statusCode: 204,
-            statusMessage: __('comment deleted')
         );
     }
 }

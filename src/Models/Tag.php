@@ -18,7 +18,7 @@ class Tag extends BaseTag implements InteractsWithDataTables
 
     public static function bootHasSlug(): void
     {
-        static::saving(function (Tag $model) {
+        static::saving(function (Tag $model): void {
             $model->slug = Str::slug($model->name);
         });
     }
@@ -27,7 +27,7 @@ class Tag extends BaseTag implements InteractsWithDataTables
     {
         return static::query()
             ->where('type', $type)
-            ->where(function (Builder $query) use ($name) {
+            ->where(function (Builder $query) use ($name): void {
                 $query->where('name', $name)
                     ->orWhere('slug', $name);
             })
@@ -37,7 +37,7 @@ class Tag extends BaseTag implements InteractsWithDataTables
     public static function findFromStringOfAnyType(string $name, ?string $locale = null): Collection
     {
         return static::query()
-            ->where(function (Builder $query) use ($name) {
+            ->where(function (Builder $query) use ($name): void {
                 $query->where('name', $name)
                     ->orWhere('slug', $name);
             })
@@ -63,17 +63,9 @@ class Tag extends BaseTag implements InteractsWithDataTables
         return $tag;
     }
 
-    public function scopeContaining(Builder $query, string $name, $locale = null): Builder
+    public function getAvatarUrl(): ?string
     {
-        return $query->whereRaw(
-            'lower(' . $this->getQuery()->getGrammar()->wrap('name') . ') like ?',
-            ['%' . mb_strtolower($name) . '%']
-        );
-    }
-
-    public function getLabel(): ?string
-    {
-        return $this->name;
+        return null;
     }
 
     public function getDescription(): ?string
@@ -81,13 +73,21 @@ class Tag extends BaseTag implements InteractsWithDataTables
         return $this->slug;
     }
 
+    public function getLabel(): ?string
+    {
+        return $this->name;
+    }
+
     public function getUrl(): ?string
     {
         return null;
     }
 
-    public function getAvatarUrl(): ?string
+    public function scopeContaining(Builder $query, string $name, $locale = null): Builder
     {
-        return null;
+        return $query->whereRaw(
+            'lower(' . $this->getQuery()->getGrammar()->wrap('name') . ') like ?',
+            ['%' . mb_strtolower($name) . '%']
+        );
     }
 }

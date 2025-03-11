@@ -27,16 +27,16 @@ class PaymentTypeController extends BaseController
         );
     }
 
-    public function update(Request $request, PaymentTypeService $paymentTypeService): JsonResponse
+    public function delete(string $id, PaymentTypeService $paymentTypeService): JsonResponse
     {
-        $response = $paymentTypeService->update($request->all());
+        $response = $paymentTypeService->delete($id);
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
-    public function delete(string $id, PaymentTypeService $paymentTypeService): JsonResponse
+    public function update(Request $request, PaymentTypeService $paymentTypeService): JsonResponse
     {
-        $response = $paymentTypeService->delete($id);
+        $response = $paymentTypeService->update($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }

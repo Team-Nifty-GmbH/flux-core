@@ -18,29 +18,11 @@ class CommissionRates extends BaseDataTable
 {
     use Actions;
 
-    protected ?string $includeBefore = 'flux::livewire.features.commission-rates';
-
-    protected string $model = CommissionRate::class;
-
-    public array $enabledCols = [
-        'category.name',
-        'product.name',
-        'commission_rate',
-    ];
+    public array $categories;
 
     public array $columnLabels = [
         'user.name' => 'Commission Agent',
     ];
-
-    public string $orderBy = 'user_id';
-
-    public bool $orderAsc = true;
-
-    #[Locked]
-    public ?int $userId = null;
-
-    #[Locked]
-    public ?int $contactId = null;
 
     public array $commissionRate = [
         'user_id' => null,
@@ -50,16 +32,34 @@ class CommissionRates extends BaseDataTable
         'commission_rate' => null,
     ];
 
-    public array $categories;
+    #[Locked]
+    public ?int $contactId = null;
+
+    public bool $create = true;
+
+    public array $enabledCols = [
+        'category.name',
+        'product.name',
+        'commission_rate',
+    ];
+
+    public bool $orderAsc = true;
+
+    public string $orderBy = 'user_id';
 
     public bool $showModal = false;
 
-    public bool $create = true;
+    #[Locked]
+    public ?int $userId = null;
+
+    protected ?string $includeBefore = 'flux::livewire.features.commission-rates';
 
     protected $listeners = [
         'loadData',
         'setUserId',
     ];
+
+    protected string $model = CommissionRate::class;
 
     public function mount(): void
     {
@@ -88,13 +88,6 @@ class CommissionRates extends BaseDataTable
         );
     }
 
-    protected function getBottomAppends(): array
-    {
-        return [
-            'user.name' => 'user.email',
-        ];
-    }
-
     protected function getTableActions(): array
     {
         return [
@@ -108,28 +101,46 @@ class CommissionRates extends BaseDataTable
         ];
     }
 
-    public function show(?int $id = null): void
+    public function delete(): void
     {
-        if ($id) {
-            $this->commissionRate = resolve_static(CommissionRate::class, 'query')
-                ->whereKey($id)
-                ->first()
-                ->toArray();
+        try {
+            DeleteCommissionRate::make($this->commissionRate)
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
 
-            $this->commissionRate['commission_rate'] *= 100;
-        } else {
-            $this->commissionRate =
-                array_fill_keys(
-                    array_keys(resolve_static(CreateCommissionRateRuleset::class, 'getRules')),
-                    null
-                );
-
-            $this->commissionRate['user_id'] = ($this->userId ?? null);
-            $this->commissionRate['contact_id'] = ($this->contactId ?? null);
+            return;
         }
 
-        $this->create = is_null($id);
-        $this->showModal = true;
+        $this->loadData();
+
+        $this->showModal = false;
+    }
+
+    public function getFilters(): array
+    {
+        $filters = [];
+
+        $filters[] = ($this->contactId ?? null) ? [
+            'column' => 'contact_id',
+            'operator' => '=',
+            'value' => $this->contactId,
+        ] : [
+            'column' => 'contact_id',
+            'operator' => 'is null',
+        ];
+
+        if ($this->userId) {
+            $filters[] = [
+                'column' => 'user_id',
+                'operator' => '=',
+                'value' => $this->userId,
+            ];
+        }
+
+        return $filters;
     }
 
     public function save(): void
@@ -160,22 +171,41 @@ class CommissionRates extends BaseDataTable
         $this->showModal = false;
     }
 
-    public function delete(): void
+    public function setUserId(int $id): void
     {
-        try {
-            DeleteCommissionRate::make($this->commissionRate)
-                ->checkPermission()
-                ->validate()
-                ->execute();
-        } catch (\Exception $e) {
-            exception_to_notifications($e, $this);
-
+        if ($this->showModal) {
             return;
         }
 
-        $this->loadData();
+        $this->userId = $id;
 
-        $this->showModal = false;
+        $this->filters = $this->getFilters();
+
+        $this->loadData();
+    }
+
+    public function show(?int $id = null): void
+    {
+        if ($id) {
+            $this->commissionRate = resolve_static(CommissionRate::class, 'query')
+                ->whereKey($id)
+                ->first()
+                ->toArray();
+
+            $this->commissionRate['commission_rate'] *= 100;
+        } else {
+            $this->commissionRate =
+                array_fill_keys(
+                    array_keys(resolve_static(CreateCommissionRateRuleset::class, 'getRules')),
+                    null
+                );
+
+            $this->commissionRate['user_id'] = ($this->userId ?? null);
+            $this->commissionRate['contact_id'] = ($this->contactId ?? null);
+        }
+
+        $this->create = is_null($id);
+        $this->showModal = true;
     }
 
     public function updatedCommissionRateCategoryId(): void
@@ -192,40 +222,10 @@ class CommissionRates extends BaseDataTable
         $this->skipRender();
     }
 
-    public function getFilters(): array
+    protected function getBottomAppends(): array
     {
-        $filters = [];
-
-        $filters[] = ($this->contactId ?? null) ? [
-            'column' => 'contact_id',
-            'operator' => '=',
-            'value' => $this->contactId,
-        ] : [
-            'column' => 'contact_id',
-            'operator' => 'is null',
+        return [
+            'user.name' => 'user.email',
         ];
-
-        if ($this->userId) {
-            $filters[] = [
-                'column' => 'user_id',
-                'operator' => '=',
-                'value' => $this->userId,
-            ];
-        }
-
-        return $filters;
-    }
-
-    public function setUserId(int $id): void
-    {
-        if ($this->showModal) {
-            return;
-        }
-
-        $this->userId = $id;
-
-        $this->filters = $this->getFilters();
-
-        $this->loadData();
     }
 }

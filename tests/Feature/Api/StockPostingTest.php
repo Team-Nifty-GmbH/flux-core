@@ -15,13 +15,13 @@ use Laravel\Sanctum\Sanctum;
 
 class StockPostingTest extends BaseSetup
 {
-    private Collection $warehouses;
+    private array $permissions;
 
     private Collection $products;
 
     private Collection $stockPostings;
 
-    private array $permissions;
+    private Collection $warehouses;
 
     protected function setUp(): void
     {
@@ -59,52 +59,7 @@ class StockPostingTest extends BaseSetup
         ];
     }
 
-    public function test_get_stock_posting()
-    {
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/stock-postings/' . $this->stockPostings[0]->id);
-        $response->assertStatus(200);
-
-        $stockPosting = json_decode($response->getContent())->data;
-
-        $this->assertEquals($this->stockPostings[0]->id, $stockPosting->id);
-        $this->assertEquals($this->stockPostings[0]->stock, $stockPosting->stock);
-        $this->assertEquals($this->stockPostings[0]->posting, $stockPosting->posting);
-        $this->assertEquals($this->stockPostings[0]->product_id, $stockPosting->product_id);
-        $this->assertEquals($this->stockPostings[0]->warehouse_id, $stockPosting->warehouse_id);
-        $this->assertEquals($this->stockPostings[0]->description, $stockPosting->description);
-    }
-
-    public function test_get_stock_posting_stock_posting_not_found()
-    {
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/stock-postings/' . $this->stockPostings[2]->id + 10000);
-        $response->assertStatus(404);
-    }
-
-    public function test_get_stock_postings()
-    {
-        $this->user->givePermissionTo($this->permissions['index']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/stock-postings');
-        $response->assertStatus(200);
-
-        $stockPostings = json_decode($response->getContent())->data->data;
-
-        $this->assertEquals($this->stockPostings[0]->id, $stockPostings[0]->id);
-        $this->assertEquals($this->stockPostings[0]->stock, $stockPostings[0]->stock);
-        $this->assertEquals($this->stockPostings[0]->posting, $stockPostings[0]->posting);
-        $this->assertEquals($this->stockPostings[0]->product_id, $stockPostings[0]->product_id);
-        $this->assertEquals($this->stockPostings[0]->warehouse_id, $stockPostings[0]->warehouse_id);
-        $this->assertEquals($this->stockPostings[0]->description, $stockPostings[0]->description);
-    }
-
-    public function test_create_stock_posting()
+    public function test_create_stock_posting(): void
     {
         $stockPosting = [
             'warehouse_id' => $this->warehouses[0]->id,
@@ -141,7 +96,7 @@ class StockPostingTest extends BaseSetup
         $this->assertEquals($stockPosting['description'], $dbStockPosting->description);
     }
 
-    public function test_create_stock_posting_empty_stock()
+    public function test_create_stock_posting_empty_stock(): void
     {
         $latestPosting = StockPosting::query()
             ->where('warehouse_id', '=', $this->warehouses[0]->id)
@@ -178,7 +133,7 @@ class StockPostingTest extends BaseSetup
         $this->assertEquals($stockPosting['description'], $dbStockPosting->description);
     }
 
-    public function test_create_stock_posting_validation_fails()
+    public function test_create_stock_posting_validation_fails(): void
     {
         $stockPosting = [
             'product_id' => $this->products[0]->id,
@@ -194,7 +149,7 @@ class StockPostingTest extends BaseSetup
         $response->assertStatus(422);
     }
 
-    public function test_delete_stock_posting()
+    public function test_delete_stock_posting(): void
     {
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
@@ -205,12 +160,57 @@ class StockPostingTest extends BaseSetup
         $this->assertFalse(StockPosting::query()->whereKey($this->stockPostings[0]->id)->exists());
     }
 
-    public function test_delete_stock_posting_stock_posting_not_found()
+    public function test_delete_stock_posting_stock_posting_not_found(): void
     {
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->delete('/api/stock-postings/' . ++$this->stockPostings[2]->id);
         $response->assertStatus(404);
+    }
+
+    public function test_get_stock_posting(): void
+    {
+        $this->user->givePermissionTo($this->permissions['show']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->get('/api/stock-postings/' . $this->stockPostings[0]->id);
+        $response->assertStatus(200);
+
+        $stockPosting = json_decode($response->getContent())->data;
+
+        $this->assertEquals($this->stockPostings[0]->id, $stockPosting->id);
+        $this->assertEquals($this->stockPostings[0]->stock, $stockPosting->stock);
+        $this->assertEquals($this->stockPostings[0]->posting, $stockPosting->posting);
+        $this->assertEquals($this->stockPostings[0]->product_id, $stockPosting->product_id);
+        $this->assertEquals($this->stockPostings[0]->warehouse_id, $stockPosting->warehouse_id);
+        $this->assertEquals($this->stockPostings[0]->description, $stockPosting->description);
+    }
+
+    public function test_get_stock_posting_stock_posting_not_found(): void
+    {
+        $this->user->givePermissionTo($this->permissions['show']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->get('/api/stock-postings/' . $this->stockPostings[2]->id + 10000);
+        $response->assertStatus(404);
+    }
+
+    public function test_get_stock_postings(): void
+    {
+        $this->user->givePermissionTo($this->permissions['index']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->get('/api/stock-postings');
+        $response->assertStatus(200);
+
+        $stockPostings = json_decode($response->getContent())->data->data;
+
+        $this->assertEquals($this->stockPostings[0]->id, $stockPostings[0]->id);
+        $this->assertEquals($this->stockPostings[0]->stock, $stockPostings[0]->stock);
+        $this->assertEquals($this->stockPostings[0]->posting, $stockPostings[0]->posting);
+        $this->assertEquals($this->stockPostings[0]->product_id, $stockPostings[0]->product_id);
+        $this->assertEquals($this->stockPostings[0]->warehouse_id, $stockPostings[0]->warehouse_id);
+        $this->assertEquals($this->stockPostings[0]->description, $stockPostings[0]->description);
     }
 }

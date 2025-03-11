@@ -23,13 +23,13 @@ use Laravel\Sanctum\Sanctum;
 
 class ProjectTest extends BaseSetup
 {
-    private Collection $projects;
-
     private Contact $contact;
 
     private Order $order;
 
     private array $permissions;
+
+    private Collection $projects;
 
     protected function setUp(): void
     {
@@ -91,83 +91,7 @@ class ProjectTest extends BaseSetup
         ];
     }
 
-    public function test_get_project()
-    {
-        $this->projects[0] = $this->projects[0]->refresh();
-
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/projects/' . $this->projects[0]->id);
-        $response->assertStatus(200);
-
-        $json = json_decode($response->getContent());
-        $project = $json->data;
-        $this->assertNotEmpty($project);
-        $this->assertEquals($this->projects[0]->id, $project->id);
-        $this->assertEquals($this->projects[0]->client_id, $project->client_id);
-        $this->assertEquals($this->projects[0]->contact_id, $project->contact_id);
-        $this->assertEquals($this->projects[0]->order_id, $project->order_id);
-        $this->assertEquals($this->projects[0]->responsible_user_id, $project->responsible_user_id);
-        $this->assertEquals($this->projects[0]->parent_id, $project->parent_id);
-        $this->assertEquals($this->projects[0]->project_number, $project->project_number);
-        $this->assertEquals($this->projects[0]->name, $project->name);
-        $this->assertEquals(Carbon::parse($this->projects[0]->start_date)->toDateString(), $project->start_date);
-        $this->assertNull($project->end_date);
-        $this->assertEquals($this->projects[0]->description, $project->description);
-        $this->assertEquals($this->projects[0]->state, $project->state);
-        $this->assertEquals($this->projects[0]->progress, $project->progress);
-        $this->assertEquals($this->projects[0]->time_budget, $project->time_budget);
-        $this->assertEquals($this->projects[0]->budget, $project->budget);
-        $this->assertEquals(Carbon::parse($this->projects[0]->created_at),
-            Carbon::parse($project->created_at));
-        $this->assertEquals(Carbon::parse($this->projects[0]->updated_at),
-            Carbon::parse($project->updated_at));
-    }
-
-    public function test_get_project_project_not_found()
-    {
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/projects/' . ++$this->projects[1]->id);
-        $response->assertStatus(404);
-    }
-
-    public function test_get_projects()
-    {
-        $this->user->givePermissionTo($this->permissions['index']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/projects');
-        $response->assertStatus(200);
-
-        $json = json_decode($response->getContent());
-        $this->assertFalse(property_exists($json, 'templates'));
-        $projects = $json->data->data;
-        $referenceProject = Project::query()->first();
-        $this->assertNotEmpty($projects);
-        $this->assertEquals($referenceProject->id, $projects[0]->id);
-        $this->assertEquals($referenceProject->client_id, $projects[0]->client_id);
-        $this->assertEquals($referenceProject->contact_id, $projects[0]->contact_id);
-        $this->assertEquals($referenceProject->order_id, $projects[0]->order_id);
-        $this->assertEquals($referenceProject->responsible_user_id, $projects[0]->responsible_user_id);
-        $this->assertEquals($referenceProject->parent_id, $projects[0]->parent_id);
-        $this->assertEquals($referenceProject->project_number, $projects[0]->project_number);
-        $this->assertEquals($referenceProject->name, $projects[0]->name);
-        $this->assertEquals(Carbon::parse($referenceProject->start_date)->toDateString(), $projects[0]->start_date);
-        $this->assertEquals($referenceProject->end_date ?
-            Carbon::parse($referenceProject->end_date)->toDateString() : null, $projects[0]->end_date);
-        $this->assertEquals($referenceProject->description, $projects[0]->description);
-        $this->assertEquals($referenceProject->state, $projects[0]->state);
-        $this->assertEquals($referenceProject->progress, $projects[0]->progress);
-        $this->assertEquals($referenceProject->time_budget, $projects[0]->time_budget);
-        $this->assertEquals($referenceProject->budget, $projects[0]->budget);
-        $this->assertEquals(Carbon::parse($referenceProject->created_at), Carbon::parse($projects[0]->created_at));
-        $this->assertEquals(Carbon::parse($referenceProject->updated_at), Carbon::parse($projects[0]->updated_at));
-    }
-
-    public function test_create_project()
+    public function test_create_project(): void
     {
         $project = [
             'client_id' => $this->dbClient->getKey(),
@@ -211,7 +135,69 @@ class ProjectTest extends BaseSetup
         $this->assertTrue($this->user->is($dbProject->getUpdatedBy()));
     }
 
-    public function test_create_project_validation_fails()
+    public function test_create_project_contact_not_found(): void
+    {
+        $project = [
+            'client_id' => $this->dbClient->getKey(),
+            'contact_id' => ++$this->contact->id,
+            'name' => 'Project Name',
+        ];
+
+        $this->user->givePermissionTo($this->permissions['create']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->post('/api/projects', $project);
+        $response->assertStatus(422);
+    }
+
+    public function test_create_project_order_not_found(): void
+    {
+        $project = [
+            'client_id' => $this->dbClient->getKey(),
+            'parent_id' => $this->order->id + 1000,
+            'name' => 'Project Name',
+        ];
+
+        $this->user->givePermissionTo($this->permissions['create']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->post('/api/projects', $project);
+        $response->assertStatus(422);
+    }
+
+    public function test_create_project_parent_project_not_found(): void
+    {
+        $project = [
+            'client_id' => $this->dbClient->getKey(),
+            'parent_id' => ++$this->projects[1]->id,
+            'name' => 'Project Name',
+        ];
+
+        $this->user->givePermissionTo($this->permissions['create']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->post('/api/projects', $project);
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrorFor('parent_id');
+    }
+
+    public function test_create_project_responsible_user_not_found(): void
+    {
+        $project = [
+            'client_id' => $this->dbClient->getKey(),
+            'responsible_user_id' => ++$this->user->id,
+            'name' => 'Project Name',
+        ];
+
+        $this->user->givePermissionTo($this->permissions['create']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->post('/api/projects', $project);
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrorFor('responsible_user_id');
+    }
+
+    public function test_create_project_validation_fails(): void
     {
         $project = [
             'parent_id' => $this->projects[0]->id,
@@ -234,69 +220,197 @@ class ProjectTest extends BaseSetup
         $response->assertStatus(422);
     }
 
-    public function test_create_project_contact_not_found()
+    public function test_delete_project(): void
     {
-        $project = [
-            'client_id' => $this->dbClient->getKey(),
-            'contact_id' => ++$this->contact->id,
-            'name' => 'Project Name',
-        ];
+        AdditionalColumn::factory()->create([
+            'model_type' => Project::class,
+        ]);
 
-        $this->user->givePermissionTo($this->permissions['create']);
+        $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->post('/api/projects', $project);
+        $response = $this->actingAs($this->user)->delete('/api/projects/' . $this->projects[1]->id);
+        $response->assertStatus(204);
+
+        $project = $this->projects[1]->fresh();
+        $this->assertNotNull($project->deleted_at);
+        $this->assertTrue($this->user->is($project->getDeletedBy()));
+    }
+
+    public function test_delete_project_project_has_children(): void
+    {
+        $this->projects[0]->parent_id = $this->projects[1]->id;
+        $this->projects[0]->save();
+
+        $this->user->givePermissionTo($this->permissions['delete']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->delete('/api/projects/' . $this->projects[1]->id);
+        $response->assertStatus(423);
+    }
+
+    public function test_delete_project_project_not_found(): void
+    {
+        $this->user->givePermissionTo($this->permissions['delete']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->delete('/api/projects/' . ++$this->projects[1]->id);
+        $response->assertStatus(404);
+    }
+
+    public function test_finish_project(): void
+    {
+        AdditionalColumn::factory()->create([
+            'model_type' => Project::class,
+        ]);
+
+        $project = [
+            'id' => $this->projects[1]->id,
+            'finish' => true,
+        ];
+
+        $this->user->givePermissionTo($this->permissions['finish']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->post('/api/projects/finish', $project);
+        $response->assertStatus(200);
+
+        $responseProject = json_decode($response->getContent())->data;
+        $dbProject = Project::query()
+            ->whereKey($responseProject->id)
+            ->first();
+        $this->assertNotEmpty($dbProject);
+        $this->assertEquals($project['id'], $dbProject->id);
+        $this->assertEquals(Done::class, get_class($dbProject->state));
+    }
+
+    public function test_finish_project_project_not_found(): void
+    {
+        $project = [
+            'id' => ++$this->projects[1]->id,
+            'finish' => true,
+        ];
+
+        $this->user->givePermissionTo($this->permissions['finish']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->post('/api/projects/finish', $project);
         $response->assertStatus(422);
     }
 
-    public function test_create_project_order_not_found()
+    public function test_finish_project_validation_fails(): void
     {
         $project = [
-            'client_id' => $this->dbClient->getKey(),
-            'parent_id' => $this->order->id + 1000,
-            'name' => 'Project Name',
+            'id' => $this->projects[1]->id,
+            'finish' => 'True',
         ];
 
-        $this->user->givePermissionTo($this->permissions['create']);
+        $this->user->givePermissionTo($this->permissions['finish']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->post('/api/projects', $project);
+        $response = $this->actingAs($this->user)->post('/api/projects/finish', $project);
         $response->assertStatus(422);
     }
 
-    public function test_create_project_responsible_user_not_found()
+    public function test_get_project(): void
     {
-        $project = [
-            'client_id' => $this->dbClient->getKey(),
-            'responsible_user_id' => ++$this->user->id,
-            'name' => 'Project Name',
-        ];
+        $this->projects[0] = $this->projects[0]->refresh();
 
-        $this->user->givePermissionTo($this->permissions['create']);
+        $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->post('/api/projects', $project);
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrorFor('responsible_user_id');
+        $response = $this->actingAs($this->user)->get('/api/projects/' . $this->projects[0]->id);
+        $response->assertStatus(200);
+
+        $json = json_decode($response->getContent());
+        $project = $json->data;
+        $this->assertNotEmpty($project);
+        $this->assertEquals($this->projects[0]->id, $project->id);
+        $this->assertEquals($this->projects[0]->client_id, $project->client_id);
+        $this->assertEquals($this->projects[0]->contact_id, $project->contact_id);
+        $this->assertEquals($this->projects[0]->order_id, $project->order_id);
+        $this->assertEquals($this->projects[0]->responsible_user_id, $project->responsible_user_id);
+        $this->assertEquals($this->projects[0]->parent_id, $project->parent_id);
+        $this->assertEquals($this->projects[0]->project_number, $project->project_number);
+        $this->assertEquals($this->projects[0]->name, $project->name);
+        $this->assertEquals(Carbon::parse($this->projects[0]->start_date)->toDateString(), $project->start_date);
+        $this->assertNull($project->end_date);
+        $this->assertEquals($this->projects[0]->description, $project->description);
+        $this->assertEquals($this->projects[0]->state, $project->state);
+        $this->assertEquals($this->projects[0]->progress, $project->progress);
+        $this->assertEquals($this->projects[0]->time_budget, $project->time_budget);
+        $this->assertEquals($this->projects[0]->budget, $project->budget);
+        $this->assertEquals(Carbon::parse($this->projects[0]->created_at),
+            Carbon::parse($project->created_at));
+        $this->assertEquals(Carbon::parse($this->projects[0]->updated_at),
+            Carbon::parse($project->updated_at));
     }
 
-    public function test_create_project_parent_project_not_found()
+    public function test_get_project_project_not_found(): void
     {
-        $project = [
-            'client_id' => $this->dbClient->getKey(),
-            'parent_id' => ++$this->projects[1]->id,
-            'name' => 'Project Name',
-        ];
-
-        $this->user->givePermissionTo($this->permissions['create']);
+        $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->post('/api/projects', $project);
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrorFor('parent_id');
+        $response = $this->actingAs($this->user)->get('/api/projects/' . ++$this->projects[1]->id);
+        $response->assertStatus(404);
     }
 
-    public function test_update_project()
+    public function test_get_projects(): void
+    {
+        $this->user->givePermissionTo($this->permissions['index']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->get('/api/projects');
+        $response->assertStatus(200);
+
+        $json = json_decode($response->getContent());
+        $this->assertFalse(property_exists($json, 'templates'));
+        $projects = $json->data->data;
+        $referenceProject = Project::query()->first();
+        $this->assertNotEmpty($projects);
+        $this->assertEquals($referenceProject->id, $projects[0]->id);
+        $this->assertEquals($referenceProject->client_id, $projects[0]->client_id);
+        $this->assertEquals($referenceProject->contact_id, $projects[0]->contact_id);
+        $this->assertEquals($referenceProject->order_id, $projects[0]->order_id);
+        $this->assertEquals($referenceProject->responsible_user_id, $projects[0]->responsible_user_id);
+        $this->assertEquals($referenceProject->parent_id, $projects[0]->parent_id);
+        $this->assertEquals($referenceProject->project_number, $projects[0]->project_number);
+        $this->assertEquals($referenceProject->name, $projects[0]->name);
+        $this->assertEquals(Carbon::parse($referenceProject->start_date)->toDateString(), $projects[0]->start_date);
+        $this->assertEquals($referenceProject->end_date ?
+            Carbon::parse($referenceProject->end_date)->toDateString() : null, $projects[0]->end_date);
+        $this->assertEquals($referenceProject->description, $projects[0]->description);
+        $this->assertEquals($referenceProject->state, $projects[0]->state);
+        $this->assertEquals($referenceProject->progress, $projects[0]->progress);
+        $this->assertEquals($referenceProject->time_budget, $projects[0]->time_budget);
+        $this->assertEquals($referenceProject->budget, $projects[0]->budget);
+        $this->assertEquals(Carbon::parse($referenceProject->created_at), Carbon::parse($projects[0]->created_at));
+        $this->assertEquals(Carbon::parse($referenceProject->updated_at), Carbon::parse($projects[0]->updated_at));
+    }
+
+    public function test_reopen_project(): void
+    {
+        $project = [
+            'id' => $this->projects[1]->id,
+            'finish' => false,
+        ];
+
+        $this->user->givePermissionTo($this->permissions['finish']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->post('/api/projects/finish', $project);
+        $response->assertStatus(200);
+
+        $responseProject = json_decode($response->getContent())->data;
+        $dbProject = Project::query()
+            ->whereKey($responseProject->id)
+            ->first();
+        $this->assertNotEmpty($dbProject);
+        $this->assertEquals($project['id'], $dbProject->id);
+        $this->assertEquals(Project::getDefaultStateFor('state'), $dbProject->state);
+    }
+
+    public function test_update_project(): void
     {
         $project = [
             'id' => $this->projects[0]->id,
@@ -336,7 +450,80 @@ class ProjectTest extends BaseSetup
         $this->assertEquals($project['description'], $dbProject->description);
     }
 
-    public function test_update_project_with_additional_column()
+    public function test_update_project_contact_not_found(): void
+    {
+        $project = [
+            'id' => $this->projects[1]->id,
+            'contact_id' => ++$this->contact->id,
+        ];
+
+        $this->user->givePermissionTo($this->permissions['update']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->put('/api/projects', $project);
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrorFor('contact_id');
+    }
+
+    public function test_update_project_order_not_found(): void
+    {
+        $project = [
+            'id' => $this->projects[1]->id,
+            'order_id' => ++$this->order->id,
+        ];
+
+        $this->user->givePermissionTo($this->permissions['update']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->put('/api/projects', $project);
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrorFor('order_id');
+    }
+
+    public function test_update_project_project_not_found(): void
+    {
+        $project = [
+            'id' => ++$this->projects[1]->id,
+            'name' => 'Project Name',
+        ];
+
+        $this->user->givePermissionTo($this->permissions['update']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->put('/api/projects', $project);
+        $response->assertStatus(422);
+    }
+
+    public function test_update_project_responsible_user_not_found(): void
+    {
+        $project = [
+            'id' => $this->projects[1]->id,
+            'responsible_user_id' => ++$this->user->id,
+        ];
+
+        $this->user->givePermissionTo($this->permissions['update']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->put('/api/projects', $project);
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrorFor('responsible_user_id');
+    }
+
+    public function test_update_project_validation_fails(): void
+    {
+        $project = [
+            'id' => $this->projects[0]->id,
+            'state' => Str::random(),
+        ];
+
+        $this->user->givePermissionTo($this->permissions['update']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->put('/api/projects', $project);
+        $response->assertStatus(422);
+    }
+
+    public function test_update_project_with_additional_column(): void
     {
         $additionalColumns = AdditionalColumn::factory()->count(2)->create([
             'model_type' => morph_alias(Project::class),
@@ -388,192 +575,5 @@ class ProjectTest extends BaseSetup
         $this->assertEquals($project[$additionalColumns[0]->name], $dbProject->{$additionalColumns[0]->name});
         $this->assertNull($responseProject->{$additionalColumns[1]->name});
         $this->assertNull($dbProject->{$additionalColumns[1]->name});
-    }
-
-    public function test_update_project_validation_fails()
-    {
-        $project = [
-            'id' => $this->projects[0]->id,
-            'state' => Str::random(),
-        ];
-
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->put('/api/projects', $project);
-        $response->assertStatus(422);
-    }
-
-    public function test_update_project_project_not_found()
-    {
-        $project = [
-            'id' => ++$this->projects[1]->id,
-            'name' => 'Project Name',
-        ];
-
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->put('/api/projects', $project);
-        $response->assertStatus(422);
-    }
-
-    public function test_update_project_contact_not_found()
-    {
-        $project = [
-            'id' => $this->projects[1]->id,
-            'contact_id' => ++$this->contact->id,
-        ];
-
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->put('/api/projects', $project);
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrorFor('contact_id');
-    }
-
-    public function test_update_project_order_not_found()
-    {
-        $project = [
-            'id' => $this->projects[1]->id,
-            'order_id' => ++$this->order->id,
-        ];
-
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->put('/api/projects', $project);
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrorFor('order_id');
-    }
-
-    public function test_update_project_responsible_user_not_found()
-    {
-        $project = [
-            'id' => $this->projects[1]->id,
-            'responsible_user_id' => ++$this->user->id,
-        ];
-
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->put('/api/projects', $project);
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrorFor('responsible_user_id');
-    }
-
-    public function test_delete_project()
-    {
-        AdditionalColumn::factory()->create([
-            'model_type' => Project::class,
-        ]);
-
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->delete('/api/projects/' . $this->projects[1]->id);
-        $response->assertStatus(204);
-
-        $project = $this->projects[1]->fresh();
-        $this->assertNotNull($project->deleted_at);
-        $this->assertTrue($this->user->is($project->getDeletedBy()));
-    }
-
-    public function test_delete_project_project_not_found()
-    {
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->delete('/api/projects/' . ++$this->projects[1]->id);
-        $response->assertStatus(404);
-    }
-
-    public function test_delete_project_project_has_children()
-    {
-        $this->projects[0]->parent_id = $this->projects[1]->id;
-        $this->projects[0]->save();
-
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->delete('/api/projects/' . $this->projects[1]->id);
-        $response->assertStatus(423);
-    }
-
-    public function test_finish_project()
-    {
-        AdditionalColumn::factory()->create([
-            'model_type' => Project::class,
-        ]);
-
-        $project = [
-            'id' => $this->projects[1]->id,
-            'finish' => true,
-        ];
-
-        $this->user->givePermissionTo($this->permissions['finish']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->post('/api/projects/finish', $project);
-        $response->assertStatus(200);
-
-        $responseProject = json_decode($response->getContent())->data;
-        $dbProject = Project::query()
-            ->whereKey($responseProject->id)
-            ->first();
-        $this->assertNotEmpty($dbProject);
-        $this->assertEquals($project['id'], $dbProject->id);
-        $this->assertEquals(Done::class, get_class($dbProject->state));
-    }
-
-    public function test_reopen_project()
-    {
-        $project = [
-            'id' => $this->projects[1]->id,
-            'finish' => false,
-        ];
-
-        $this->user->givePermissionTo($this->permissions['finish']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->post('/api/projects/finish', $project);
-        $response->assertStatus(200);
-
-        $responseProject = json_decode($response->getContent())->data;
-        $dbProject = Project::query()
-            ->whereKey($responseProject->id)
-            ->first();
-        $this->assertNotEmpty($dbProject);
-        $this->assertEquals($project['id'], $dbProject->id);
-        $this->assertEquals(Project::getDefaultStateFor('state'), $dbProject->state);
-    }
-
-    public function test_finish_project_validation_fails()
-    {
-        $project = [
-            'id' => $this->projects[1]->id,
-            'finish' => 'True',
-        ];
-
-        $this->user->givePermissionTo($this->permissions['finish']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->post('/api/projects/finish', $project);
-        $response->assertStatus(422);
-    }
-
-    public function test_finish_project_project_not_found()
-    {
-        $project = [
-            'id' => ++$this->projects[1]->id,
-            'finish' => true,
-        ];
-
-        $this->user->givePermissionTo($this->permissions['finish']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->post('/api/projects/finish', $project);
-        $response->assertStatus(422);
     }
 }

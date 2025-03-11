@@ -11,14 +11,14 @@ use Illuminate\Validation\ValidationException;
 
 class DeleteCurrency extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeleteCurrencyRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Currency::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeleteCurrencyRuleset::class;
     }
 
     public function performAction(): ?bool

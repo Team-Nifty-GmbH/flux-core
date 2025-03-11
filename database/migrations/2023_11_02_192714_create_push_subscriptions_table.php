@@ -8,7 +8,7 @@ class CreatePushSubscriptionsTable extends Migration
 {
     public function up(): void
     {
-        Schema::create(config('webpush.table_name'), function (Blueprint $table) {
+        Schema::create(config('webpush.table_name'), function (Blueprint $table): void {
             $table->bigIncrements('id');
             $table->morphs('subscribable');
             $table->string('endpoint', 500)->unique();

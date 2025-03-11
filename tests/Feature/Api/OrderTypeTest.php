@@ -35,70 +35,7 @@ class OrderTypeTest extends BaseSetup
         ];
     }
 
-    public function test_get_order_type()
-    {
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/order-types/' . $this->orderTypes[0]->id);
-        $response->assertStatus(200);
-
-        $json = json_decode($response->getContent());
-        $jsonOrderType = $json->data;
-
-        // Check if controller returns the test order type.
-        $this->assertNotEmpty($jsonOrderType);
-        $this->assertEquals($this->orderTypes[0]->id, $jsonOrderType->id);
-        $this->assertEquals($this->orderTypes[0]->client_id, $jsonOrderType->client_id);
-        $this->assertEquals($this->orderTypes[0]->name, $jsonOrderType->name);
-        $this->assertEquals($this->orderTypes[0]->description, $jsonOrderType->description);
-        $this->assertEquals($this->orderTypes[0]->is_active, $jsonOrderType->is_active);
-        $this->assertEquals($this->orderTypes[0]->is_hidden, $jsonOrderType->is_hidden);
-        $this->assertEquals(Carbon::parse($this->orderTypes[0]->created_at),
-            Carbon::parse($jsonOrderType->created_at));
-        $this->assertEquals(Carbon::parse($this->orderTypes[0]->updated_at),
-            Carbon::parse($jsonOrderType->updated_at));
-    }
-
-    public function test_get_order_type_order_type_not_found()
-    {
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/order-types/' . ++$this->orderTypes[1]->id);
-        $response->assertStatus(404);
-    }
-
-    public function test_get_order_types()
-    {
-        $this->user->givePermissionTo($this->permissions['index']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/order-types');
-        $response->assertStatus(200);
-
-        $json = json_decode($response->getContent());
-        $jsonOrderTypes = collect($json->data->data);
-
-        // Check the amount of test order types.
-        $this->assertGreaterThanOrEqual(2, count($jsonOrderTypes));
-
-        // Check if controller returns the test order types.
-        foreach ($this->orderTypes as $orderType) {
-            $jsonOrderTypes->contains(function ($jsonOrderType) use ($orderType) {
-                return $jsonOrderType->id === $orderType->id &&
-                    $jsonOrderType->client_id === $orderType->client_id &&
-                    $jsonOrderType->name === $orderType->name &&
-                    $jsonOrderType->description === $orderType->description &&
-                    $jsonOrderType->is_active === $orderType->is_active &&
-                    $jsonOrderType->is_hidden === $orderType->is_hidden &&
-                    Carbon::parse($jsonOrderType->created_at) === Carbon::parse($orderType->created_at) &&
-                    Carbon::parse($jsonOrderType->updated_at) === Carbon::parse($orderType->updated_at);
-            });
-        }
-    }
-
-    public function test_create_order_type()
+    public function test_create_order_type(): void
     {
         $orderType = [
             'client_id' => $this->orderTypes[0]->client_id,
@@ -128,7 +65,7 @@ class OrderTypeTest extends BaseSetup
         $this->assertTrue($this->user->is($dbOrderType->getUpdatedBy()));
     }
 
-    public function test_create_order_type_maximum()
+    public function test_create_order_type_maximum(): void
     {
         $orderType = [
             'client_id' => $this->orderTypes[0]->client_id,
@@ -161,7 +98,7 @@ class OrderTypeTest extends BaseSetup
         $this->assertTrue($this->user->is($dbOrderType->getUpdatedBy()));
     }
 
-    public function test_create_order_type_validation_fails()
+    public function test_create_order_type_validation_fails(): void
     {
         $orderType = [
             'client_id' => 'client_id',
@@ -176,7 +113,92 @@ class OrderTypeTest extends BaseSetup
         $response->assertStatus(422);
     }
 
-    public function test_update_order_type()
+    public function test_delete_order_type(): void
+    {
+        $this->user->givePermissionTo($this->permissions['delete']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->delete('/api/order-types/' . $this->orderTypes[1]->id);
+        $response->assertStatus(204);
+
+        $orderType = $this->orderTypes[1]->fresh();
+        $this->assertNotNull($orderType->deleted_at);
+        $this->assertTrue($this->user->is($orderType->getDeletedBy()));
+    }
+
+    public function test_delete_order_type_order_type_not_found(): void
+    {
+        $this->user->givePermissionTo($this->permissions['delete']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->delete('/api/order-types/' . ++$this->orderTypes[1]->id);
+        $response->assertStatus(404);
+    }
+
+    public function test_get_order_type(): void
+    {
+        $this->user->givePermissionTo($this->permissions['show']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->get('/api/order-types/' . $this->orderTypes[0]->id);
+        $response->assertStatus(200);
+
+        $json = json_decode($response->getContent());
+        $jsonOrderType = $json->data;
+
+        // Check if controller returns the test order type.
+        $this->assertNotEmpty($jsonOrderType);
+        $this->assertEquals($this->orderTypes[0]->id, $jsonOrderType->id);
+        $this->assertEquals($this->orderTypes[0]->client_id, $jsonOrderType->client_id);
+        $this->assertEquals($this->orderTypes[0]->name, $jsonOrderType->name);
+        $this->assertEquals($this->orderTypes[0]->description, $jsonOrderType->description);
+        $this->assertEquals($this->orderTypes[0]->is_active, $jsonOrderType->is_active);
+        $this->assertEquals($this->orderTypes[0]->is_hidden, $jsonOrderType->is_hidden);
+        $this->assertEquals(Carbon::parse($this->orderTypes[0]->created_at),
+            Carbon::parse($jsonOrderType->created_at));
+        $this->assertEquals(Carbon::parse($this->orderTypes[0]->updated_at),
+            Carbon::parse($jsonOrderType->updated_at));
+    }
+
+    public function test_get_order_type_order_type_not_found(): void
+    {
+        $this->user->givePermissionTo($this->permissions['show']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->get('/api/order-types/' . ++$this->orderTypes[1]->id);
+        $response->assertStatus(404);
+    }
+
+    public function test_get_order_types(): void
+    {
+        $this->user->givePermissionTo($this->permissions['index']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->get('/api/order-types');
+        $response->assertStatus(200);
+
+        $json = json_decode($response->getContent());
+        $jsonOrderTypes = collect($json->data->data);
+
+        // Check the amount of test order types.
+        $this->assertGreaterThanOrEqual(2, count($jsonOrderTypes));
+
+        // Check if controller returns the test order types.
+        foreach ($this->orderTypes as $orderType) {
+            $jsonOrderTypes->contains(function ($jsonOrderType) use ($orderType) {
+                return $jsonOrderType->id === $orderType->id &&
+                    $jsonOrderType->client_id === $orderType->client_id &&
+                    $jsonOrderType->name === $orderType->name &&
+                    $jsonOrderType->description === $orderType->description &&
+                    $jsonOrderType->is_active === $orderType->is_active &&
+                    $jsonOrderType->is_hidden === $orderType->is_hidden &&
+                    Carbon::parse($jsonOrderType->created_at) === Carbon::parse($orderType->created_at) &&
+                    Carbon::parse($jsonOrderType->updated_at) === Carbon::parse($orderType->updated_at);
+            });
+        }
+    }
+
+    public function test_update_order_type(): void
     {
         $orderType = [
             'id' => $this->orderTypes[0]->id,
@@ -204,7 +226,7 @@ class OrderTypeTest extends BaseSetup
         $this->assertTrue($this->user->is($dbOrderType->getUpdatedBy()));
     }
 
-    public function test_update_order_type_maximum()
+    public function test_update_order_type_maximum(): void
     {
         $orderType = [
             'id' => $this->orderTypes[0]->id,
@@ -235,7 +257,7 @@ class OrderTypeTest extends BaseSetup
         $this->assertTrue($this->user->is($dbOrderType->getUpdatedBy()));
     }
 
-    public function test_update_order_type_validation_fails()
+    public function test_update_order_type_validation_fails(): void
     {
         $orderType = [
             'id' => $this->orderTypes[0]->id,
@@ -248,27 +270,5 @@ class OrderTypeTest extends BaseSetup
 
         $response = $this->actingAs($this->user)->put('/api/order-types', $orderType);
         $response->assertStatus(422);
-    }
-
-    public function test_delete_order_type()
-    {
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->delete('/api/order-types/' . $this->orderTypes[1]->id);
-        $response->assertStatus(204);
-
-        $orderType = $this->orderTypes[1]->fresh();
-        $this->assertNotNull($orderType->deleted_at);
-        $this->assertTrue($this->user->is($orderType->getDeletedBy()));
-    }
-
-    public function test_delete_order_type_order_type_not_found()
-    {
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->delete('/api/order-types/' . ++$this->orderTypes[1]->id);
-        $response->assertStatus(404);
     }
 }

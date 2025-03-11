@@ -45,13 +45,13 @@ class SearchController extends Controller
                     ->toEloquentBuilder();
         } elseif ($request->has('search')) {
             $query = resolve_static($model, 'query');
-            $query->where(function (Builder $query) use ($request) {
+            $query->where(function (Builder $query) use ($request): void {
                 foreach (Arr::wrap($request->get('searchFields')) as $field) {
                     $query->orWhere($field, 'like', '%' . $request->get('search') . '%');
                 }
             });
         } else {
-            /** @var \Illuminate\Database\Eloquent\Builder $query */
+            /** @var Builder $query */
             $query = resolve_static($model, 'query');
         }
 
@@ -141,7 +141,7 @@ class SearchController extends Controller
         $result = $query->latest()->get();
 
         if ($request->has('appends')) {
-            $result->each(function ($item) use ($request) {
+            $result->each(function ($item) use ($request): void {
                 $item->append(array_intersect($item->getAppends(), $request->get('appends')));
             });
         }

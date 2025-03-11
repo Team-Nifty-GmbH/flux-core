@@ -9,9 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class UpdateUserClients extends FluxAction
 {
-    protected function getRulesets(): string|array
+    public static function models(): array
     {
-        return UpdateUserClientsRuleset::class;
+        return [User::class];
     }
 
     public static function name(): string
@@ -19,9 +19,9 @@ class UpdateUserClients extends FluxAction
         return 'user.update-clients';
     }
 
-    public static function models(): array
+    protected function getRulesets(): string|array
     {
-        return [User::class];
+        return UpdateUserClientsRuleset::class;
     }
 
     public function performAction(): Model

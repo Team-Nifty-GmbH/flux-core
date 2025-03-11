@@ -16,14 +16,14 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateTicket extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateTicketRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Ticket::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateTicketRuleset::class;
     }
 
     public function performAction(): Model

@@ -8,14 +8,14 @@ use FluxErp\Rulesets\StockPosting\UpdateStockPostingRuleset;
 
 class UpdateStockPosting extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateStockPostingRuleset::class;
-    }
-
     public static function models(): array
     {
         return [StockPosting::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateStockPostingRuleset::class;
     }
 
     public function performAction(): StockPosting

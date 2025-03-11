@@ -10,14 +10,14 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateAdditionalColumn extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateAdditionalColumnRuleset::class;
-    }
-
     public static function models(): array
     {
         return [AdditionalColumn::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateAdditionalColumnRuleset::class;
     }
 
     public function performAction(): Model

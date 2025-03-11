@@ -20,14 +20,14 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class VariantList extends ProductList
 {
-    protected string $view = 'flux::livewire.product.variant-list';
-
     public array $enabledCols = [
         'name',
         'product_number',
         'product_options.name',
         'is_active',
     ];
+
+    public bool $isSelectable = true;
 
     #[Modelable]
     public ProductForm $product;
@@ -38,7 +38,7 @@ class VariantList extends ProductList
 
     public array $variants = [];
 
-    public bool $isSelectable = true;
+    protected string $view = 'flux::livewire.product.variant-list';
 
     public function mount(): void
     {
@@ -61,8 +61,8 @@ class VariantList extends ProductList
             ->with('children:id,parent_id')
             ->first()
             ->children
-            ?->each(function ($item) {
-                $item->productOptions->each(function ($item) {
+            ?->each(function ($item): void {
+                $item->productOptions->each(function ($item): void {
                     $this->selectedOptions[$item->product_option_group_id][] = $item->id;
                 });
             });
@@ -152,6 +152,33 @@ class VariantList extends ProductList
             ->toArray();
     }
 
+    #[Renderless]
+    public function recalculateNames(): void
+    {
+        $parent = resolve_static(Product::class, 'query')
+            ->whereKey($this->product->id)
+            ->first(['name']);
+
+        foreach ($this->getSelectedModelsQuery()->with('productOptions:id,name')->get(['id']) as $product) {
+            UpdateProduct::make([
+                'id' => $product->getKey(),
+                'name' => resolve_static(
+                    Product::class,
+                    'calculateVariantName',
+                    [
+                        'productOptions' => $product->productOptions,
+                        'parentName' => data_get($parent, 'name', ''),
+                    ]
+                ),
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        }
+
+        $this->loadData();
+    }
+
     public function save(): void
     {
         foreach (data_get($this->variants, 'delete', []) as $variantDelete) {
@@ -179,33 +206,6 @@ class VariantList extends ProductList
         }
 
         $this->variants = [];
-        $this->loadData();
-    }
-
-    #[Renderless]
-    public function recalculateNames(): void
-    {
-        $parent = resolve_static(Product::class, 'query')
-            ->whereKey($this->product->id)
-            ->first(['name']);
-
-        foreach ($this->getSelectedModelsQuery()->with('productOptions:id,name')->get(['id']) as $product) {
-            UpdateProduct::make([
-                'id' => $product->getKey(),
-                'name' => resolve_static(
-                    Product::class,
-                    'calculateVariantName',
-                    [
-                        'productOptions' => $product->productOptions,
-                        'parentName' => data_get($parent, 'name', ''),
-                    ]
-                ),
-            ])
-                ->checkPermission()
-                ->validate()
-                ->execute();
-        }
-
         $this->loadData();
     }
 }

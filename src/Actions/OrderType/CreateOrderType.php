@@ -9,14 +9,14 @@ use Illuminate\Support\Facades\Validator;
 
 class CreateOrderType extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateOrderTypeRuleset::class;
-    }
-
     public static function models(): array
     {
         return [OrderType::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateOrderTypeRuleset::class;
     }
 
     public function performAction(): OrderType

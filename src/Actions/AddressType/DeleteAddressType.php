@@ -9,14 +9,14 @@ use Illuminate\Validation\ValidationException;
 
 class DeleteAddressType extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeleteAddressTypeRuleset::class;
-    }
-
     public static function models(): array
     {
         return [AddressType::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeleteAddressTypeRuleset::class;
     }
 
     public function performAction(): ?bool

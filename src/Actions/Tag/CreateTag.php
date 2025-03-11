@@ -9,14 +9,14 @@ use Illuminate\Validation\ValidationException;
 
 class CreateTag extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateTagRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Tag::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateTagRuleset::class;
     }
 
     public function performAction(): Tag

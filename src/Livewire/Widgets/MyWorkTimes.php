@@ -17,16 +17,6 @@ class MyWorkTimes extends BarChart
 {
     use IsTimeFrameAwareWidget;
 
-    public bool $showTotals = true;
-
-    public ?array $plotOptions = [
-        'bar' => [
-            'horizontal' => true,
-            'endingShape' => 'rounded',
-            'columnWidth' => '55%',
-        ],
-    ];
-
     public ?array $chart = [
         'type' => 'bar',
         'stacked' => true,
@@ -36,6 +26,16 @@ class MyWorkTimes extends BarChart
         'enabled' => true,
     ];
 
+    public ?array $plotOptions = [
+        'bar' => [
+            'horizontal' => true,
+            'endingShape' => 'rounded',
+            'columnWidth' => '55%',
+        ],
+    ];
+
+    public bool $showTotals = true;
+
     #[Locked]
     public ?int $userId = null;
 
@@ -44,49 +44,6 @@ class MyWorkTimes extends BarChart
         $this->userId = $this->userId ?? auth()->id();
 
         parent::mount();
-    }
-
-    #[Js]
-    public function toolTipFormatter(): string
-    {
-        return <<<'JS'
-            let hours = val / 3600000;
-            return hours.toFixed(2) + 'h';
-        JS;
-    }
-
-    #[Js]
-    public function dataLabelsFormatter(): string
-    {
-        return <<<'JS'
-            if (val > 3600000) {
-                let hours = val / 3600000;
-                return hours.toFixed(2) + 'h';
-            } else {
-                let minutes = val / 60000;
-                return minutes.toFixed(0) + 'm';
-            }
-        JS;
-    }
-
-    #[Js]
-    public function yAxisFormatter(): string
-    {
-        return <<<'JS'
-            let name;
-            if (typeof val === 'string' && val.includes('->')) {
-                name = val.split('->')[1];
-                val = val.split('->')[0];
-            }
-
-            return new Date(val).toLocaleDateString(document.documentElement.lang) + (name ? ' (' + name + ')' : '')
-        JS;
-    }
-
-    #[Js]
-    public function xAxisFormatter(): string
-    {
-        return $this->toolTipFormatter();
     }
 
     #[Renderless]
@@ -103,10 +60,10 @@ class MyWorkTimes extends BarChart
         $baseQuery = resolve_static(WorkTime::class, 'query')
             ->where('user_id', $this->userId)
             ->where('is_locked', true)
-            ->when($this->timeFrame === TimeFrameEnum::Custom && $this->start, function ($query) {
+            ->when($this->timeFrame === TimeFrameEnum::Custom && $this->start, function ($query): void {
                 $query->where('started_at', '>=', Carbon::parse($this->start));
             })
-            ->when($this->timeFrame === TimeFrameEnum::Custom && $this->end, function ($query) {
+            ->when($this->timeFrame === TimeFrameEnum::Custom && $this->end, function ($query): void {
                 $query->where('started_at', '<=', Carbon::parse($this->end)->endOfDay());
             });
 
@@ -207,8 +164,51 @@ class MyWorkTimes extends BarChart
         $this->series = array_values($data);
     }
 
+    #[Js]
+    public function dataLabelsFormatter(): string
+    {
+        return <<<'JS'
+            if (val > 3600000) {
+                let hours = val / 3600000;
+                return hours.toFixed(2) + 'h';
+            } else {
+                let minutes = val / 60000;
+                return minutes.toFixed(0) + 'm';
+            }
+        JS;
+    }
+
     public function showTitle(): bool
     {
         return false;
+    }
+
+    #[Js]
+    public function toolTipFormatter(): string
+    {
+        return <<<'JS'
+            let hours = val / 3600000;
+            return hours.toFixed(2) + 'h';
+        JS;
+    }
+
+    #[Js]
+    public function xAxisFormatter(): string
+    {
+        return $this->toolTipFormatter();
+    }
+
+    #[Js]
+    public function yAxisFormatter(): string
+    {
+        return <<<'JS'
+            let name;
+            if (typeof val === 'string' && val.includes('->')) {
+                name = val.split('->')[1];
+                val = val.split('->')[0];
+            }
+
+            return new Date(val).toLocaleDateString(document.documentElement.lang) + (name ? ' (' + name + ')' : '')
+        JS;
     }
 }

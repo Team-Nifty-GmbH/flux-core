@@ -7,6 +7,14 @@ use Illuminate\Contracts\Validation\Rule;
 class ArrayIsKeyValuePair implements Rule
 {
     /**
+     * Get the validation error message.
+     */
+    public function message(): string
+    {
+        return __('The Array must consist of key value string pairs.');
+    }
+
+    /**
      * Determine if the validation rule passes.
      *
      * @param  string  $attribute
@@ -29,13 +37,5 @@ class ArrayIsKeyValuePair implements Rule
         }
 
         return true;
-    }
-
-    /**
-     * Get the validation error message.
-     */
-    public function message(): string
-    {
-        return __('The Array must consist of key value string pairs.');
     }
 }

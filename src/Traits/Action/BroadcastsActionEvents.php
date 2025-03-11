@@ -18,7 +18,7 @@ trait BroadcastsActionEvents
 
     public static function bootBroadcastsActionEvents(): void
     {
-        static::executed(function (FluxAction $action) {
+        static::executed(function (FluxAction $action): void {
             $action->broadcastExecuted();
         });
     }
@@ -28,24 +28,19 @@ trait BroadcastsActionEvents
         return 'action.' . class_to_broadcast_channel(static::class, false);
     }
 
+    public function broadcastConnection(): ?string
+    {
+        //
+    }
+
     public function broadcastExecuted(Channel|HasBroadcastChannel|array|null $channels = null): PendingBroadcast
     {
         return $this->broadcastEvent('executed', $channels);
     }
 
-    public function newBroadcastableEvent(string $event): BroadcastableActionEventOccurred
-    {
-        return new BroadcastableActionEventOccurred($this, $event);
-    }
-
     public function broadcastOn(): array|Channel
     {
         return new PrivateChannel(static::getBroadcastChannel());
-    }
-
-    public function broadcastConnection(): ?string
-    {
-        //
     }
 
     public function broadcastQueue(): ?string
@@ -75,6 +70,11 @@ trait BroadcastsActionEvents
         ];
 
         return $payload;
+    }
+
+    public function newBroadcastableEvent(string $event): BroadcastableActionEventOccurred
+    {
+        return new BroadcastableActionEventOccurred($this, $event);
     }
 
     protected function broadcastEvent(

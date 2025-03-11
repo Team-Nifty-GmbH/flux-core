@@ -10,13 +10,13 @@ class Inviteable extends FluxPivot
 {
     public $table = 'inviteables';
 
-    public function inviteable(): MorphTo
-    {
-        return $this->morphTo('inviteable');
-    }
-
     public function calendarEvent(): BelongsTo
     {
         return $this->belongsTo(CalendarEvent::class);
+    }
+
+    public function inviteable(): MorphTo
+    {
+        return $this->morphTo('inviteable');
     }
 }

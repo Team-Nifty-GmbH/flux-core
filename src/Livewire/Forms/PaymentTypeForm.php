@@ -11,14 +11,30 @@ use Livewire\Attributes\Locked;
 
 class PaymentTypeForm extends FluxForm
 {
+    public ?int $client_id = null;
+
+    public ?array $clients = [];
+
+    public ?string $description = null;
+
     #[Locked]
     public ?int $id = null;
 
-    public ?int $client_id = null;
+    public bool $is_active = true;
+
+    public bool $is_default = false;
+
+    public bool $is_direct_debit = false;
+
+    public bool $is_purchase = false;
+
+    public bool $is_sales = true;
 
     public ?string $name = null;
 
-    public ?string $description = null;
+    public ?float $payment_discount_percentage = null;
+
+    public ?int $payment_discount_target = null;
 
     public ?int $payment_reminder_days_1 = null;
 
@@ -26,29 +42,26 @@ class PaymentTypeForm extends FluxForm
 
     public ?int $payment_reminder_days_3 = null;
 
-    public ?int $payment_target = null;
-
-    public ?int $payment_discount_target = null;
-
-    public ?float $payment_discount_percentage = null;
+    public ?string $payment_reminder_email_text = null;
 
     public ?string $payment_reminder_text = null;
 
-    public ?string $payment_reminder_email_text = null;
-
-    public bool $is_active = true;
-
-    public bool $is_direct_debit = false;
-
-    public bool $is_default = false;
-
-    public bool $is_purchase = false;
-
-    public bool $is_sales = true;
+    public ?int $payment_target = null;
 
     public bool $requires_manual_transfer = false;
 
-    public ?array $clients = [];
+    public function fill($values): void
+    {
+        if ($values instanceof PaymentType) {
+            $values->loadMissing(['clients:id']);
+
+            $values = $values->toArray();
+            $values['clients'] = array_column($values['clients'] ?? [], 'id');
+        }
+
+        parent::fill($values);
+        $this->payment_discount_percentage = bcmul($this->payment_discount_percentage, 100);
+    }
 
     protected function getActions(): array
     {
@@ -67,18 +80,5 @@ class PaymentTypeForm extends FluxForm
         }
 
         return parent::makeAction($name, $data);
-    }
-
-    public function fill($values)
-    {
-        if ($values instanceof PaymentType) {
-            $values->loadMissing(['clients:id']);
-
-            $values = $values->toArray();
-            $values['clients'] = array_column($values['clients'] ?? [], 'id');
-        }
-
-        parent::fill($values);
-        $this->payment_discount_percentage = bcmul($this->payment_discount_percentage, 100);
     }
 }

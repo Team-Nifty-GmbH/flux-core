@@ -11,6 +11,16 @@ class UpdateCalendarEventRuleset extends FluxRuleset
 {
     protected static ?string $model = CalendarEvent::class;
 
+    public static function getRules(): array
+    {
+        return array_merge(
+            parent::getRules(),
+            resolve_static(RepeatRuleset::class, 'getRules'),
+            resolve_static(InvitedAddressRuleset::class, 'getRules'),
+            resolve_static(InvitedRuleset::class, 'getRules')
+        );
+    }
+
     public function rules(): array
     {
         return [
@@ -34,15 +44,5 @@ class UpdateCalendarEventRuleset extends FluxRuleset
             'confirm_option' => 'required|string|in:this,future,all',
             'original_start' => 'required_if:confirm_option,this|required_if:confirm_option,future|date',
         ];
-    }
-
-    public static function getRules(): array
-    {
-        return array_merge(
-            parent::getRules(),
-            resolve_static(RepeatRuleset::class, 'getRules'),
-            resolve_static(InvitedAddressRuleset::class, 'getRules'),
-            resolve_static(InvitedRuleset::class, 'getRules')
-        );
     }
 }

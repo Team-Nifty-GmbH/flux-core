@@ -21,36 +21,9 @@ class Permissions extends RoleList
 {
     public ?string $includeBefore = 'flux::livewire.settings.permissions';
 
-    public RoleForm $roleForm;
-
     public array $permissions = [];
 
-    #[Renderless]
-    public function getPermissionTree(): array
-    {
-        $permissions = Permission::query()
-            ->where('guard_name', $this->roleForm->guard_name)
-            ->pluck('id', 'name')
-            ->toArray();
-
-        return $this->preparePermissions(Arr::undotToTree(
-            array: $permissions,
-            translate: fn (string $key) => $key === 'get' ? __('permission.get') : __(Str::headline($key))
-        ));
-    }
-
-    protected function getViewData(): array
-    {
-        return array_merge(
-            parent::getViewData(),
-            [
-                'guards' => array_keys(config('auth.guards')),
-                'users' => resolve_static(User::class, 'query')
-                    ->get(['id', 'name'])
-                    ->toArray(),
-            ]
-        );
-    }
+    public RoleForm $roleForm;
 
     protected function getTableActions(): array
     {
@@ -99,9 +72,22 @@ class Permissions extends RoleList
     }
 
     #[Renderless]
-    public function editUsers(Role $role): void
+    public function delete(Role $role): bool
     {
-        $this->edit($role, 'edit-role-users-modal');
+        $this->roleForm->reset();
+        $this->roleForm->fill($role);
+
+        try {
+            $this->roleForm->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
     }
 
     #[Renderless]
@@ -114,6 +100,26 @@ class Permissions extends RoleList
         $this->js(<<<JS
             \$modalOpen('$modal');
         JS);
+    }
+
+    #[Renderless]
+    public function editUsers(Role $role): void
+    {
+        $this->edit($role, 'edit-role-users-modal');
+    }
+
+    #[Renderless]
+    public function getPermissionTree(): array
+    {
+        $permissions = Permission::query()
+            ->where('guard_name', $this->roleForm->guard_name)
+            ->pluck('id', 'name')
+            ->toArray();
+
+        return $this->preparePermissions(Arr::undotToTree(
+            array: $permissions,
+            translate: fn (string $key) => $key === 'get' ? __('permission.get') : __(Str::headline($key))
+        ));
     }
 
     #[Renderless]
@@ -132,23 +138,17 @@ class Permissions extends RoleList
         return true;
     }
 
-    #[Renderless]
-    public function delete(Role $role): bool
+    protected function getViewData(): array
     {
-        $this->roleForm->reset();
-        $this->roleForm->fill($role);
-
-        try {
-            $this->roleForm->delete();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
+        return array_merge(
+            parent::getViewData(),
+            [
+                'guards' => array_keys(config('auth.guards')),
+                'users' => resolve_static(User::class, 'query')
+                    ->get(['id', 'name'])
+                    ->toArray(),
+            ]
+        );
     }
 
     protected function preparePermissions(array $tree, array $parent = []): array

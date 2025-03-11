@@ -41,6 +41,24 @@ class PaymentReminderController extends BaseController
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
+    public function delete(string $id): JsonResponse
+    {
+        try {
+            DeletePaymentReminder::make(['id' => $id])->validate()->execute();
+            $response = ResponseHelper::createArrayResponse(
+                statusCode: 204,
+                statusMessage: 'payment reminder deleted'
+            );
+        } catch (ValidationException $e) {
+            $response = ResponseHelper::createArrayResponse(
+                statusCode: 404,
+                data: $e->errors()
+            );
+        }
+
+        return ResponseHelper::createResponseFromArrayResponse($response);
+    }
+
     public function update(Request $request): JsonResponse
     {
         try {
@@ -56,24 +74,6 @@ class PaymentReminderController extends BaseController
         } catch (ValidationException $e) {
             $response = ResponseHelper::createArrayResponse(
                 statusCode: 422,
-                data: $e->errors()
-            );
-        }
-
-        return ResponseHelper::createResponseFromArrayResponse($response);
-    }
-
-    public function delete(string $id): JsonResponse
-    {
-        try {
-            DeletePaymentReminder::make(['id' => $id])->validate()->execute();
-            $response = ResponseHelper::createArrayResponse(
-                statusCode: 204,
-                statusMessage: 'payment reminder deleted'
-            );
-        } catch (ValidationException $e) {
-            $response = ResponseHelper::createArrayResponse(
-                statusCode: 404,
                 data: $e->errors()
             );
         }

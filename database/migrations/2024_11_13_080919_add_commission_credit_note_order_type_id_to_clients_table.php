@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('clients', function (Blueprint $table) {
+        Schema::table('clients', function (Blueprint $table): void {
             $table->foreignId('commission_credit_note_order_type_id')
                 ->nullable()
                 ->after('country_id')
@@ -19,7 +19,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('clients', function (Blueprint $table) {
+        Schema::table('clients', function (Blueprint $table): void {
             $table->dropConstrainedForeignId('commission_credit_note_order_type_id');
         });
     }

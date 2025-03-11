@@ -27,21 +27,6 @@ class TicketCreatedNotification extends Notification implements ShouldQueue
         $this->model = $model;
     }
 
-    /**
-     * Get the mail representation of the notification.
-     *
-     * @param  mixed  $notifiable
-     */
-    public function toMail(object $notifiable): MailMessage
-    {
-        $notification = $this->toArray($notifiable);
-
-        return (new MailMessage())
-            ->subject($notification['title'])
-            ->line($notification['description'])
-            ->action($notification['accept']['label'] ?? '', $notification['accept']['url'] ?? '');
-    }
-
     public function toArray(object $notifiable): array
     {
         $user = $this->model->authenticatable;
@@ -55,6 +40,21 @@ class TicketCreatedNotification extends Notification implements ShouldQueue
                     ->url(config('app.url') . $this->model->detailRoute(false))
             )
             ->toArray();
+    }
+
+    /**
+     * Get the mail representation of the notification.
+     *
+     * @param  mixed  $notifiable
+     */
+    public function toMail(object $notifiable): MailMessage
+    {
+        $notification = $this->toArray($notifiable);
+
+        return (new MailMessage())
+            ->subject($notification['title'])
+            ->line($notification['description'])
+            ->action($notification['accept']['label'] ?? '', $notification['accept']['url'] ?? '');
     }
 
     public function toWebPush(object $notifiable): ?WebPushMessage

@@ -13,11 +13,11 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class TaskList extends BaseTaskList
 {
-    protected ?string $includeBefore = 'flux::livewire.task.task-list';
+    public array $availableStates = [];
 
     public TaskForm $task;
 
-    public array $availableStates = [];
+    protected ?string $includeBefore = 'flux::livewire.task.task-list';
 
     public function mount(): void
     {
@@ -52,6 +52,18 @@ class TaskList extends BaseTaskList
     }
 
     #[Renderless]
+    public function resetForm(): void
+    {
+        $this->task->reset();
+        $this->task->additionalColumns = array_fill_keys(
+            resolve_static(Task::class, 'additionalColumnsQuery')->pluck('name')?->toArray() ?? [],
+            null
+        );
+        $this->task->responsible_user_id ??= auth()?->id();
+        $this->task->users = array_filter([auth()?->id()]);
+    }
+
+    #[Renderless]
     public function save(): bool
     {
         try {
@@ -65,17 +77,5 @@ class TaskList extends BaseTaskList
         $this->loadData();
 
         return true;
-    }
-
-    #[Renderless]
-    public function resetForm(): void
-    {
-        $this->task->reset();
-        $this->task->additionalColumns = array_fill_keys(
-            resolve_static(Task::class, 'additionalColumnsQuery')->pluck('name')?->toArray() ?? [],
-            null
-        );
-        $this->task->responsible_user_id ??= auth()?->id();
-        $this->task->users = array_filter([auth()?->id()]);
     }
 }

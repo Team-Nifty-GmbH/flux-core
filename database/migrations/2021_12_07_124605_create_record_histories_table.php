@@ -8,7 +8,7 @@ class CreateRecordHistoriesTable extends Migration
 {
     public function up(): void
     {
-        Schema::create('record_histories', function (Blueprint $table) {
+        Schema::create('record_histories', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
             $table->morphs('model');

@@ -44,69 +44,7 @@ class ContactBankConnectionTest extends BaseSetup
         ];
     }
 
-    public function test_get_contact_bank_connection()
-    {
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)
-            ->get('/api/contact-bank-connections/' . $this->contactBankConnections[0]->id);
-        $response->assertStatus(200);
-
-        $json = json_decode($response->getContent());
-        $jsonContactBankConnection = $json->data;
-
-        $this->assertNotEmpty($jsonContactBankConnection);
-        $this->assertEquals($this->contactBankConnections[0]->id, $jsonContactBankConnection->id);
-        $this->assertEquals($this->contactBankConnections[0]->contact_id, $jsonContactBankConnection->contact_id);
-        $this->assertEquals($this->contactBankConnections[0]->iban, $jsonContactBankConnection->iban);
-        $this->assertEquals($this->contactBankConnections[0]->account_holder, $jsonContactBankConnection->account_holder);
-        $this->assertEquals($this->contactBankConnections[0]->bank_name, $jsonContactBankConnection->bank_name);
-        $this->assertEquals($this->contactBankConnections[0]->bic, $jsonContactBankConnection->bic);
-        $this->assertEquals(Carbon::parse($this->contactBankConnections[0]->created_at),
-            Carbon::parse($jsonContactBankConnection->created_at));
-        $this->assertEquals(Carbon::parse($this->contactBankConnections[0]->updated_at),
-            Carbon::parse($jsonContactBankConnection->updated_at));
-    }
-
-    public function test_get_contact_bank_connection_contact_bank_connection_not_found()
-    {
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)
-            ->get('/api/contact-bank-connections/' . ++$this->contactBankConnections[2]->id);
-        $response->assertStatus(404);
-    }
-
-    public function test_get_contact_bank_connections()
-    {
-        $this->user->givePermissionTo($this->permissions['index']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/contact-bank-connections');
-        $response->assertStatus(200);
-
-        $json = json_decode($response->getContent());
-        $jsonContactBankConnections = collect($json->data->data);
-
-        $this->assertGreaterThanOrEqual(2, count($jsonContactBankConnections));
-
-        foreach ($this->contactBankConnections as $bankConnection) {
-            $jsonContactBankConnections->contains(function ($jsonContactBankConnection) use ($bankConnection) {
-                return $jsonContactBankConnection->id === $bankConnection->id &&
-                    $jsonContactBankConnection->contact_id === $bankConnection->contact_id &&
-                    $jsonContactBankConnection->iban === $bankConnection->iban &&
-                    $jsonContactBankConnection->account_holder === $bankConnection->account_holder &&
-                    $jsonContactBankConnection->bank_name === $bankConnection->bank_name &&
-                    $jsonContactBankConnection->bic === $bankConnection->bic &&
-                    Carbon::parse($jsonContactBankConnection->created_at) === Carbon::parse($bankConnection->created_at) &&
-                    Carbon::parse($jsonContactBankConnection->updated_at) === Carbon::parse($bankConnection->updated_at);
-            });
-        }
-    }
-
-    public function test_create_contact_bank_connection()
+    public function test_create_contact_bank_connection(): void
     {
         $bankConnection = [
             'contact_id' => $this->contactBankConnections[0]->contact_id,
@@ -134,7 +72,7 @@ class ContactBankConnectionTest extends BaseSetup
         $this->assertTrue($this->user->is($dbBankConnection->getUpdatedBy()));
     }
 
-    public function test_create_contact_bank_connection_maximum()
+    public function test_create_contact_bank_connection_maximum(): void
     {
         $bankConnection = [
             'contact_id' => $this->contactBankConnections[0]->contact_id,
@@ -165,7 +103,7 @@ class ContactBankConnectionTest extends BaseSetup
         $this->assertTrue($this->user->is($dbBankConnection->getUpdatedBy()));
     }
 
-    public function test_create_contact_bank_connection_validation_fails()
+    public function test_create_contact_bank_connection_validation_fails(): void
     {
         $bankConnection = [
             'contact_id' => ++$this->contactBankConnections[2]->contact_id,
@@ -179,7 +117,93 @@ class ContactBankConnectionTest extends BaseSetup
         $response->assertStatus(422);
     }
 
-    public function test_update_contact_bank_connection()
+    public function test_delete_contact_bank_connection(): void
+    {
+        $this->user->givePermissionTo($this->permissions['delete']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)
+            ->delete('/api/contact-bank-connections/' . $this->contactBankConnections[1]->id);
+        $response->assertStatus(204);
+
+        $bankConnection = $this->contactBankConnections[1]->fresh();
+        $this->assertNotNull($bankConnection->deleted_at);
+        $this->assertTrue($this->user->is($bankConnection->getDeletedBy()));
+    }
+
+    public function test_delete_contact_bank_connection_bank_connection_not_found(): void
+    {
+        $this->user->givePermissionTo($this->permissions['delete']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)
+            ->delete('/api/contact-bank-connections/' . ++$this->contactBankConnections[2]->id);
+        $response->assertStatus(404);
+    }
+
+    public function test_get_contact_bank_connection(): void
+    {
+        $this->user->givePermissionTo($this->permissions['show']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)
+            ->get('/api/contact-bank-connections/' . $this->contactBankConnections[0]->id);
+        $response->assertStatus(200);
+
+        $json = json_decode($response->getContent());
+        $jsonContactBankConnection = $json->data;
+
+        $this->assertNotEmpty($jsonContactBankConnection);
+        $this->assertEquals($this->contactBankConnections[0]->id, $jsonContactBankConnection->id);
+        $this->assertEquals($this->contactBankConnections[0]->contact_id, $jsonContactBankConnection->contact_id);
+        $this->assertEquals($this->contactBankConnections[0]->iban, $jsonContactBankConnection->iban);
+        $this->assertEquals($this->contactBankConnections[0]->account_holder, $jsonContactBankConnection->account_holder);
+        $this->assertEquals($this->contactBankConnections[0]->bank_name, $jsonContactBankConnection->bank_name);
+        $this->assertEquals($this->contactBankConnections[0]->bic, $jsonContactBankConnection->bic);
+        $this->assertEquals(Carbon::parse($this->contactBankConnections[0]->created_at),
+            Carbon::parse($jsonContactBankConnection->created_at));
+        $this->assertEquals(Carbon::parse($this->contactBankConnections[0]->updated_at),
+            Carbon::parse($jsonContactBankConnection->updated_at));
+    }
+
+    public function test_get_contact_bank_connection_contact_bank_connection_not_found(): void
+    {
+        $this->user->givePermissionTo($this->permissions['show']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)
+            ->get('/api/contact-bank-connections/' . ++$this->contactBankConnections[2]->id);
+        $response->assertStatus(404);
+    }
+
+    public function test_get_contact_bank_connections(): void
+    {
+        $this->user->givePermissionTo($this->permissions['index']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->get('/api/contact-bank-connections');
+        $response->assertStatus(200);
+
+        $json = json_decode($response->getContent());
+        $jsonContactBankConnections = collect($json->data->data);
+
+        $this->assertGreaterThanOrEqual(2, count($jsonContactBankConnections));
+
+        foreach ($this->contactBankConnections as $bankConnection) {
+            $jsonContactBankConnections->contains(function ($jsonContactBankConnection) use ($bankConnection) {
+                return $jsonContactBankConnection->id === $bankConnection->id &&
+                    $jsonContactBankConnection->contact_id === $bankConnection->contact_id &&
+                    $jsonContactBankConnection->iban === $bankConnection->iban &&
+                    $jsonContactBankConnection->account_holder === $bankConnection->account_holder &&
+                    $jsonContactBankConnection->bank_name === $bankConnection->bank_name &&
+                    $jsonContactBankConnection->bic === $bankConnection->bic &&
+                    Carbon::parse($jsonContactBankConnection->created_at) === Carbon::parse($bankConnection->created_at) &&
+                    Carbon::parse($jsonContactBankConnection->updated_at) === Carbon::parse($bankConnection->updated_at);
+            });
+        }
+    }
+
+    public function test_update_contact_bank_connection(): void
     {
         $bankConnection = [
             'id' => $this->contactBankConnections[0]->id,
@@ -203,7 +227,7 @@ class ContactBankConnectionTest extends BaseSetup
         $this->assertTrue($this->user->is($dbBankConnection->getUpdatedBy()));
     }
 
-    public function test_update_contact_bank_connection_maximum()
+    public function test_update_contact_bank_connection_maximum(): void
     {
         $bankConnection = [
             'id' => $this->contactBankConnections[0]->id,
@@ -235,7 +259,7 @@ class ContactBankConnectionTest extends BaseSetup
         $this->assertTrue($this->user->is($dbBankConnection->getUpdatedBy()));
     }
 
-    public function test_update_contact_bank_connection_multi_status_validation_fails()
+    public function test_update_contact_bank_connection_multi_status_validation_fails(): void
     {
         $bankConnection = [
             'id' => $this->contactBankConnections[0]->id,
@@ -250,29 +274,5 @@ class ContactBankConnectionTest extends BaseSetup
 
         $responseBankConnection = json_decode($response->getContent());
         $this->assertEquals(422, $responseBankConnection->status);
-    }
-
-    public function test_delete_contact_bank_connection()
-    {
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)
-            ->delete('/api/contact-bank-connections/' . $this->contactBankConnections[1]->id);
-        $response->assertStatus(204);
-
-        $bankConnection = $this->contactBankConnections[1]->fresh();
-        $this->assertNotNull($bankConnection->deleted_at);
-        $this->assertTrue($this->user->is($bankConnection->getDeletedBy()));
-    }
-
-    public function test_delete_contact_bank_connection_bank_connection_not_found()
-    {
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)
-            ->delete('/api/contact-bank-connections/' . ++$this->contactBankConnections[2]->id);
-        $response->assertStatus(404);
     }
 }

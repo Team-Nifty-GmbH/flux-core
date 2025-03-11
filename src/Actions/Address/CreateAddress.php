@@ -17,14 +17,14 @@ use Illuminate\Support\Str;
 
 class CreateAddress extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateAddressRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Address::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateAddressRuleset::class;
     }
 
     public function performAction(): Address

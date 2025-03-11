@@ -9,7 +9,7 @@ class ChangeNameToJsonOnLanguagesTable extends Migration
 {
     public function up(): void
     {
-        Schema::table('languages', function (Blueprint $table) {
+        Schema::table('languages', function (Blueprint $table): void {
             $table->json('name')->change();
         });
 
@@ -20,16 +20,16 @@ class ChangeNameToJsonOnLanguagesTable extends Migration
     {
         $this->rollbackName();
 
-        Schema::table('languages', function (Blueprint $table) {
+        Schema::table('languages', function (Blueprint $table): void {
             $table->string('name')->change();
         });
     }
 
-    private function migrateName()
+    private function migrateName(): void
     {
         $languages = DB::table('languages')->get()->toArray();
 
-        array_walk($languages, function (&$item) {
+        array_walk($languages, function (&$item): void {
             $item->name = json_encode([config('app.locale') => $item->name]);
             $item = (array) $item;
         });
@@ -37,11 +37,11 @@ class ChangeNameToJsonOnLanguagesTable extends Migration
         DB::table('languages')->upsert($languages, ['id']);
     }
 
-    private function rollbackName()
+    private function rollbackName(): void
     {
         $languages = DB::table('languages')->get()->toArray();
 
-        array_walk($languages, function (&$item) {
+        array_walk($languages, function (&$item): void {
             $item->name = substr(json_decode($item->name)->{config('app.locale')}, 0, 255);
             $item = (array) $item;
         });

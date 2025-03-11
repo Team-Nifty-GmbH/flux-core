@@ -38,6 +38,36 @@ class TaskController extends BaseController
         );
     }
 
+    public function delete(string $id): JsonResponse
+    {
+        try {
+            DeleteTask::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
+            return ResponseHelper::createResponseFromBase(
+                statusCode: 404,
+                data: $e->errors()
+            );
+        }
+
+        return ResponseHelper::createResponseFromBase(
+            statusCode: 204,
+            statusMessage: __('task deleted')
+        );
+    }
+
+    public function finish(Request $request): JsonResponse
+    {
+        $task = FinishTask::make($request->all())
+            ->validate()
+            ->execute();
+
+        return ResponseHelper::createResponseFromBase(
+            statusCode: 200,
+            data: $task,
+            statusMessage: 'task ' . $request->finish ? 'finished' : 'reopened'
+        );
+    }
+
     public function update(Request $request): JsonResponse
     {
         $data = $request->all();
@@ -83,35 +113,5 @@ class TaskController extends BaseController
                 statusMessage: $statusCode === 422 ? null : __('task(s) updated'),
                 bulk: true
             );
-    }
-
-    public function delete(string $id): JsonResponse
-    {
-        try {
-            DeleteTask::make(['id' => $id])->validate()->execute();
-        } catch (ValidationException $e) {
-            return ResponseHelper::createResponseFromBase(
-                statusCode: 404,
-                data: $e->errors()
-            );
-        }
-
-        return ResponseHelper::createResponseFromBase(
-            statusCode: 204,
-            statusMessage: __('task deleted')
-        );
-    }
-
-    public function finish(Request $request): JsonResponse
-    {
-        $task = FinishTask::make($request->all())
-            ->validate()
-            ->execute();
-
-        return ResponseHelper::createResponseFromBase(
-            statusCode: 200,
-            data: $task,
-            statusMessage: 'task ' . $request->finish ? 'finished' : 'reopened'
-        );
     }
 }

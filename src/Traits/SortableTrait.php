@@ -7,17 +7,17 @@ use Spatie\EloquentSortable\SortableTrait as BaseSortableTrait;
 
 trait SortableTrait
 {
-    private bool $isSorted = false;
-
     use BaseSortableTrait {
         BaseSortableTrait::bootSortableTrait as bootParentSortableTrait;
     }
+
+    private bool $isSorted = false;
 
     protected static function bootSortableTrait(): void
     {
         static::bootParentSortableTrait();
 
-        static::saving(function (Model $model) {
+        static::saving(function (Model $model): void {
             $orderColumn = $model->determineOrderColumnName();
 
             if ($model->isDirty($orderColumn) && ! $model->getIsSorted() && $model->exists) {
@@ -28,7 +28,7 @@ trait SortableTrait
             }
         });
 
-        static::deleting(function (Model $model) {
+        static::deleting(function (Model $model): void {
             $orderColumn = $model->determineOrderColumnName();
 
             if (! $model->hasAttribute($orderColumn)) {
@@ -36,7 +36,7 @@ trait SortableTrait
             }
         });
 
-        static::deleted(function (Model $model) {
+        static::deleted(function (Model $model): void {
             $orderColumn = $model->determineOrderColumnName();
             $orderValue = $model->$orderColumn;
 
@@ -46,7 +46,7 @@ trait SortableTrait
         });
 
         if (in_array(\Illuminate\Database\Eloquent\SoftDeletes::class, class_uses_recursive(static::class))) {
-            static::restored(function (Model $model) {
+            static::restored(function (Model $model): void {
                 $orderColumn = $model->determineOrderColumnName();
                 $orderValue = $model->$orderColumn;
 
@@ -56,13 +56,6 @@ trait SortableTrait
                     ->increment($orderColumn);
             });
         }
-    }
-
-    protected function setIsSorted(bool $isSorted = true): static
-    {
-        $this->isSorted = $isSorted;
-
-        return $this;
     }
 
     public function getIsSorted(): bool
@@ -99,6 +92,13 @@ trait SortableTrait
         // Set the model's order column to the new position
         $this->$orderColumnName = $newPosition;
         $this->setIsSorted()->save();
+
+        return $this;
+    }
+
+    protected function setIsSorted(bool $isSorted = true): static
+    {
+        $this->isSorted = $isSorted;
 
         return $this;
     }

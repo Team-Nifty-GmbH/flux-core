@@ -8,14 +8,14 @@ use FluxErp\Rulesets\SerialNumber\DeleteSerialNumberRuleset;
 
 class DeleteSerialNumber extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeleteSerialNumberRuleset::class;
-    }
-
     public static function models(): array
     {
         return [SerialNumber::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeleteSerialNumberRuleset::class;
     }
 
     public function performAction(): ?bool

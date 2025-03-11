@@ -60,7 +60,7 @@ class CommentsTest extends BaseSetup
         ]);
     }
 
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         $class = new class() extends Comments
         {

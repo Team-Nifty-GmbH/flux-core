@@ -9,18 +9,18 @@ use Livewire\Attributes\Locked;
 
 class SerialNumberForm extends FluxForm
 {
+    public ?array $addresses = [];
+
     #[Locked]
     public ?int $id = null;
+
+    public ?array $product = [];
 
     public ?string $serial_number = null;
 
     public ?string $supplier_serial_number = null;
 
     public bool $use_supplier_serial_number = false;
-
-    public ?array $addresses = [];
-
-    public ?array $product = [];
 
     protected function getActions(): array
     {

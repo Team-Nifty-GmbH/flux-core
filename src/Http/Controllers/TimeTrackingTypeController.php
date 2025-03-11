@@ -32,6 +32,23 @@ class TimeTrackingTypeController extends BaseController
         );
     }
 
+    public function delete(string $id): JsonResponse
+    {
+        try {
+            DeleteWorkTimeType::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
+            return ResponseHelper::createResponseFromBase(
+                statusCode: array_key_exists('id', $e->errors()) ? 404 : 423,
+                data: $e->errors()
+            );
+        }
+
+        return ResponseHelper::createResponseFromBase(
+            statusCode: 204,
+            statusMessage: __('work time type deleted')
+        );
+    }
+
     public function update(Request $request): JsonResponse
     {
         $data = $request->all();
@@ -77,22 +94,5 @@ class TimeTrackingTypeController extends BaseController
                 statusMessage: $statusCode === 422 ? null : __('work time type(s) updated'),
                 bulk: true
             );
-    }
-
-    public function delete(string $id): JsonResponse
-    {
-        try {
-            DeleteWorkTimeType::make(['id' => $id])->validate()->execute();
-        } catch (ValidationException $e) {
-            return ResponseHelper::createResponseFromBase(
-                statusCode: array_key_exists('id', $e->errors()) ? 404 : 423,
-                data: $e->errors()
-            );
-        }
-
-        return ResponseHelper::createResponseFromBase(
-            statusCode: 204,
-            statusMessage: __('work time type deleted')
-        );
     }
 }

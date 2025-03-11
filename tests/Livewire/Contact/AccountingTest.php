@@ -13,13 +13,13 @@ class AccountingTest extends TestCase
 {
     private Contact $contact;
 
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(Accounting::class)
             ->assertStatus(200);
     }
 
-    public function test_switch_tabs()
+    public function test_switch_tabs(): void
     {
         $client = Client::factory()->create([
             'is_default' => true,

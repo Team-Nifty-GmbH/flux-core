@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class CalendarsTest extends BaseSetup
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(Calendars::class)
             ->assertStatus(200);

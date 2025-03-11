@@ -25,9 +25,9 @@ class Contact extends Component
 {
     use Actions, CreatesDocuments, WithFileUploads, WithTabs;
 
-    public ContactForm $contact;
-
     public $avatar;
+
+    public ContactForm $contact;
 
     public bool $edit = false;
 
@@ -45,6 +45,44 @@ class Contact extends Component
         $this->contact->fill($contact);
     }
 
+    public function render(): View|Factory|Application
+    {
+        return view('flux::livewire.contact.contact');
+    }
+
+    #[Renderless]
+    public function contactDeleted(): void
+    {
+        $this->redirectRoute('contacts.contacts', navigate: true);
+    }
+
+    #[Renderless]
+    public function contactUpdated(): void
+    {
+        $this->contact->fill(resolve_static(ContactModel::class, 'query')->whereKey($this->contact->id)->first());
+    }
+
+    public function createDocuments(): null|MediaStream|Media
+    {
+        return $this->createDocumentFromItems(
+            resolve_static(ContactModel::class, 'query')->whereKey($this->contact->id)->firstOrFail(),
+        );
+    }
+
+    #[Renderless]
+    public function delete(): void
+    {
+        try {
+            $this->contact->delete();
+        } catch (UnauthorizedException|ValidationException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->redirectRoute('contacts.contacts', navigate: true);
+    }
+
     #[Renderless]
     public function getListeners(): array
     {
@@ -56,23 +94,6 @@ class Contact extends Component
             'echo-private:' . $channel . ',.ContactUpdated' => 'contactUpdated',
             'echo-private:' . $channel . ',.ContactDeleted' => 'contactDeleted',
         ];
-    }
-
-    #[Renderless]
-    public function contactUpdated(): void
-    {
-        $this->contact->fill(resolve_static(ContactModel::class, 'query')->whereKey($this->contact->id)->first());
-    }
-
-    #[Renderless]
-    public function contactDeleted(): void
-    {
-        $this->redirectRoute('contacts.contacts', navigate: true);
-    }
-
-    public function render(): View|Factory|Application
-    {
-        return view('flux::livewire.contact.contact');
     }
 
     public function getTabs(): array
@@ -116,17 +137,14 @@ class Contact extends Component
     }
 
     #[Renderless]
-    public function delete(): void
+    public function reloadContact(): void
     {
-        try {
-            $this->contact->delete();
-        } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
+        $contact = resolve_static(ContactModel::class, 'query')
+            ->with(['mainAddress', 'categories:id'])
+            ->whereKey($this->contact->id)
+            ->firstOrFail();
 
-            return;
-        }
-
-        $this->redirectRoute('contacts.contacts', navigate: true);
+        $this->contact->fill($contact);
     }
 
     #[Renderless]
@@ -143,17 +161,6 @@ class Contact extends Component
         $this->edit = false;
 
         return true;
-    }
-
-    #[Renderless]
-    public function reloadContact(): void
-    {
-        $contact = resolve_static(ContactModel::class, 'query')
-            ->with(['mainAddress', 'categories:id'])
-            ->whereKey($this->contact->id)
-            ->firstOrFail();
-
-        $this->contact->fill($contact);
     }
 
     public function updatedAvatar(): void
@@ -177,16 +184,6 @@ class Contact extends Component
             ->getAvatarUrl();
     }
 
-    protected function getTo(OffersPrinting $item, array $documents): array
-    {
-        return [$item->invoiceAddress->email_primary ?? $item->mainAddress->email_primary];
-    }
-
-    protected function getSubject(OffersPrinting $item): string
-    {
-        return __('Balance Statement :date', ['date' => now()->format('d.m.Y')]);
-    }
-
     protected function getHtmlBody(OffersPrinting $item): string
     {
         return '';
@@ -197,10 +194,13 @@ class Contact extends Component
         return app(ContactModel::class)->resolvePrintViews();
     }
 
-    public function createDocuments(): null|MediaStream|Media
+    protected function getSubject(OffersPrinting $item): string
     {
-        return $this->createDocumentFromItems(
-            resolve_static(ContactModel::class, 'query')->whereKey($this->contact->id)->firstOrFail(),
-        );
+        return __('Balance Statement :date', ['date' => now()->format('d.m.Y')]);
+    }
+
+    protected function getTo(OffersPrinting $item, array $documents): array
+    {
+        return [$item->invoiceAddress->email_primary ?? $item->mainAddress->email_primary];
     }
 }

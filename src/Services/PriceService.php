@@ -16,6 +16,23 @@ class PriceService
         return CreatePrice::make($data)->validate()->execute();
     }
 
+    public function delete(string $id): array
+    {
+        try {
+            DeletePrice::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
+            return ResponseHelper::createArrayResponse(
+                statusCode: array_key_exists('id', $e->errors()) ? 404 : 423,
+                data: $e->errors()
+            );
+        }
+
+        return ResponseHelper::createArrayResponse(
+            statusCode: 204,
+            statusMessage: 'price deleted'
+        );
+    }
+
     public function update(array $data): array
     {
         if (! array_is_list($data)) {
@@ -50,23 +67,6 @@ class PriceService
             data: $responses,
             statusMessage: $statusCode === 422 ? null : 'price(s) updated',
             bulk: true
-        );
-    }
-
-    public function delete(string $id): array
-    {
-        try {
-            DeletePrice::make(['id' => $id])->validate()->execute();
-        } catch (ValidationException $e) {
-            return ResponseHelper::createArrayResponse(
-                statusCode: array_key_exists('id', $e->errors()) ? 404 : 423,
-                data: $e->errors()
-            );
-        }
-
-        return ResponseHelper::createArrayResponse(
-            statusCode: 204,
-            statusMessage: 'price deleted'
         );
     }
 }

@@ -10,13 +10,7 @@ use Livewire\Livewire;
 
 class TaskListTest extends BaseSetup
 {
-    public function test_renders_successfully()
-    {
-        Livewire::test(TaskList::class)
-            ->assertStatus(200);
-    }
-
-    public function test_create_new_task()
+    public function test_create_new_task(): void
     {
         Livewire::actingAs($this->user)
             ->test(TaskList::class)
@@ -44,5 +38,11 @@ class TaskListTest extends BaseSetup
             'user_id' => $this->user->id,
             'task_id' => Task::query()->where('name', $taskName)->value('id'),
         ]);
+    }
+
+    public function test_renders_successfully(): void
+    {
+        Livewire::test(TaskList::class)
+            ->assertStatus(200);
     }
 }

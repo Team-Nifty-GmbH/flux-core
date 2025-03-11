@@ -18,6 +18,18 @@ class CreateContactRuleset extends FluxRuleset
 {
     protected static ?string $model = Contact::class;
 
+    public static function getRules(): array
+    {
+        return array_merge(
+            parent::getRules(),
+            resolve_static(MainAddressRuleset::class, 'getRules'),
+            resolve_static(DiscountRuleset::class, 'getRules'),
+            resolve_static(DiscountGroupRuleset::class, 'getRules'),
+            resolve_static(CategoryRuleset::class, 'getRules'),
+            resolve_static(IndustryRuleset::class, 'getRules')
+        );
+    }
+
     public function rules(): array
     {
         return [
@@ -97,17 +109,5 @@ class CreateContactRuleset extends FluxRuleset
             'has_sensitive_reminder' => 'sometimes|boolean',
             'has_delivery_lock' => 'sometimes|boolean',
         ];
-    }
-
-    public static function getRules(): array
-    {
-        return array_merge(
-            parent::getRules(),
-            resolve_static(MainAddressRuleset::class, 'getRules'),
-            resolve_static(DiscountRuleset::class, 'getRules'),
-            resolve_static(DiscountGroupRuleset::class, 'getRules'),
-            resolve_static(CategoryRuleset::class, 'getRules'),
-            resolve_static(IndustryRuleset::class, 'getRules')
-        );
     }
 }

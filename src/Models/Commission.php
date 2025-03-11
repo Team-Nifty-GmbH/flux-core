@@ -26,19 +26,28 @@ class Commission extends FluxModel implements InteractsWithDataTables
         return $this->belongsTo(OrderPosition::class, 'credit_note_order_position_id');
     }
 
-    public function order(): BelongsTo
+    public function getAvatarUrl(): ?string
     {
-        return $this->belongsTo(Order::class);
+        return null;
     }
 
-    public function orderPosition(): BelongsTo
+    public function getDescription(): ?string
     {
-        return $this->belongsTo(OrderPosition::class);
-    }
-
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
+        return ($this->order_position_id ? $this->orderPosition?->name . ' ' : null) .
+            Number::currency(
+                number: $this->total_net_price,
+                in: Currency::default()?->iso ?? '',
+                locale: $this->user->contact?->country?->iso_alpha2
+                    ?? Country::default()?->iso_alpha2
+                    ?? app()->getLocale()
+            ) . ' - ' .
+            Number::percentage(
+                number: bcmul(data_get($this->commission_rate, 'commission_rate', 0), 100),
+                maxPrecision: 2,
+                locale: $this->user->contact?->country?->iso_alpha2
+                    ?? Country::default()?->iso_alpha2
+                    ?? app()->getLocale()
+            );
     }
 
     public function getLabel(): ?string
@@ -62,32 +71,23 @@ class Commission extends FluxModel implements InteractsWithDataTables
             ) . ' ' . __('Commission');
     }
 
-    public function getDescription(): ?string
-    {
-        return ($this->order_position_id ? $this->orderPosition?->name . ' ' : null) .
-            Number::currency(
-                number: $this->total_net_price,
-                in: Currency::default()?->iso ?? '',
-                locale: $this->user->contact?->country?->iso_alpha2
-                    ?? Country::default()?->iso_alpha2
-                    ?? app()->getLocale()
-            ) . ' - ' .
-            Number::percentage(
-                number: bcmul(data_get($this->commission_rate, 'commission_rate', 0), 100),
-                maxPrecision: 2,
-                locale: $this->user->contact?->country?->iso_alpha2
-                    ?? Country::default()?->iso_alpha2
-                    ?? app()->getLocale()
-            );
-    }
-
     public function getUrl(): ?string
     {
         return route('accounting.commissions');
     }
 
-    public function getAvatarUrl(): ?string
+    public function order(): BelongsTo
     {
-        return null;
+        return $this->belongsTo(Order::class);
+    }
+
+    public function orderPosition(): BelongsTo
+    {
+        return $this->belongsTo(OrderPosition::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }

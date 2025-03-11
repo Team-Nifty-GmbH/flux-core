@@ -8,7 +8,7 @@ use Spatie\QueryBuilder\Sorts\Sort;
 
 class AdditionalColumnSort implements Sort
 {
-    public function __invoke(Builder $query, bool $descending, string $property)
+    public function __invoke(Builder $query, bool $descending, string $property): void
     {
         $exploded = explode('.', $property);
         $className = $exploded[0];

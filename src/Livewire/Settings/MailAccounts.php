@@ -28,13 +28,13 @@ use Webklex\PHPIMAP\Exceptions\RuntimeException;
 #[Renderless]
 class MailAccounts extends MailAccountList
 {
-    protected ?string $includeBefore = 'flux::livewire.settings.mail-accounts';
+    public array $folders = [];
 
     public MailAccountForm $mailAccount;
 
     public MailFolderForm $mailFolder;
 
-    public array $folders = [];
+    protected ?string $includeBefore = 'flux::livewire.settings.mail-accounts';
 
     protected function getTableActions(): array
     {
@@ -81,6 +81,24 @@ class MailAccounts extends MailAccountList
         ];
     }
 
+    public function delete(int $id): bool
+    {
+        try {
+            DeleteMailAccount::make(['id' => $id])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
+    }
+
     public function edit(MailAccount $mailAccount): void
     {
         $this->mailAccount->reset();
@@ -109,24 +127,6 @@ class MailAccounts extends MailAccountList
         $this->mailFolder->fill($mailFolder);
     }
 
-    public function saveMailFolder(): void
-    {
-        try {
-            $this->mailFolder->save();
-            $this->mailFolder->reset();
-            $this->loadFolders();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-        }
-    }
-
-    public function syncFolders(MailAccount $mailAccount): void
-    {
-        SyncMailAccountJob::dispatchSync($mailAccount, true);
-
-        $this->editFolders($mailAccount);
-    }
-
     public function save(): bool
     {
         try {
@@ -143,22 +143,39 @@ class MailAccounts extends MailAccountList
         return true;
     }
 
-    public function delete(int $id): bool
+    public function saveMailFolder(): void
     {
         try {
-            DeleteMailAccount::make(['id' => $id])
-                ->checkPermission()
-                ->validate()
-                ->execute();
+            $this->mailFolder->save();
+            $this->mailFolder->reset();
+            $this->loadFolders();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
-
-            return false;
         }
+    }
 
-        $this->loadData();
+    #[Renderless]
+    public function sendTestMail(?string $to = null): void
+    {
+        try {
+            if (! is_null($to)) {
+                Validator::make(['to' => $to], ['to' => 'required|email'])
+                    ->validate();
+            }
 
-        return true;
+            $this->mailAccount->sendTestMail($to);
+
+            $this->notification()->success(__('Test mail sent'))->send();
+        } catch (ValidationException|TransportExceptionInterface $e) {
+            exception_to_notifications($e, $this);
+        }
+    }
+
+    public function syncFolders(MailAccount $mailAccount): void
+    {
+        SyncMailAccountJob::dispatchSync($mailAccount, true);
+
+        $this->editFolders($mailAccount);
     }
 
     #[Renderless]
@@ -188,23 +205,6 @@ class MailAccounts extends MailAccountList
             $this->mailAccount->testSmtpConnection();
 
             $this->notification()->success(__('Connection successful'))->send();
-        } catch (ValidationException|TransportExceptionInterface $e) {
-            exception_to_notifications($e, $this);
-        }
-    }
-
-    #[Renderless]
-    public function sendTestMail(?string $to = null): void
-    {
-        try {
-            if (! is_null($to)) {
-                Validator::make(['to' => $to], ['to' => 'required|email'])
-                    ->validate();
-            }
-
-            $this->mailAccount->sendTestMail($to);
-
-            $this->notification()->success(__('Test mail sent'))->send();
         } catch (ValidationException|TransportExceptionInterface $e) {
             exception_to_notifications($e, $this);
         }

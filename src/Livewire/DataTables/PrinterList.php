@@ -6,8 +6,6 @@ use FluxErp\Models\Printer;
 
 class PrinterList extends BaseDataTable
 {
-    protected string $model = Printer::class;
-
     public array $enabledCols = [
         'name',
         'spooler_name',
@@ -15,4 +13,6 @@ class PrinterList extends BaseDataTable
         'make_and_model',
         'is_active',
     ];
+
+    protected string $model = Printer::class;
 }

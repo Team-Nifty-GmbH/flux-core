@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class TransactionListTest extends BaseSetup
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(TransactionList::class)
             ->assertStatus(200);

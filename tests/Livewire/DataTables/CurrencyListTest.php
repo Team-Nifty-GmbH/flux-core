@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class CurrencyListTest extends BaseSetup
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(CurrencyList::class)
             ->assertStatus(200);

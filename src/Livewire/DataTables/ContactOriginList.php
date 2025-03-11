@@ -6,10 +6,10 @@ use FluxErp\Models\ContactOrigin;
 
 class ContactOriginList extends BaseDataTable
 {
-    protected string $model = ContactOrigin::class;
-
     public array $enabledCols = [
         'name',
         'is_active',
     ];
+
+    protected string $model = ContactOrigin::class;
 }

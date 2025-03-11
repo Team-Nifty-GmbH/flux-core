@@ -46,20 +46,6 @@ class BankConnections extends BankConnectionList
         ];
     }
 
-    protected function getViewData(): array
-    {
-        return array_merge(parent::getViewData(), [
-            'ledgerAccounts' => resolve_static(LedgerAccount::class, 'query')
-                ->select(['id', 'name'])
-                ->get()
-                ->toArray(),
-            'currencies' => resolve_static(Currency::class, 'query')
-                ->select(['id', 'name'])
-                ->get()
-                ->toArray(),
-        ]);
-    }
-
     public function edit(?BankConnection $record = null): void
     {
         $this->bankConnection->reset();
@@ -85,5 +71,19 @@ class BankConnections extends BankConnectionList
         $this->loadData();
 
         return true;
+    }
+
+    protected function getViewData(): array
+    {
+        return array_merge(parent::getViewData(), [
+            'ledgerAccounts' => resolve_static(LedgerAccount::class, 'query')
+                ->select(['id', 'name'])
+                ->get()
+                ->toArray(),
+            'currencies' => resolve_static(Currency::class, 'query')
+                ->select(['id', 'name'])
+                ->get()
+                ->toArray(),
+        ]);
     }
 }

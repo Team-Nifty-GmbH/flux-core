@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class LanguagesTest extends BaseSetup
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(Languages::class)
             ->assertStatus(200);

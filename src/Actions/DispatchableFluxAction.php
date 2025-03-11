@@ -12,13 +12,13 @@ abstract class DispatchableFluxAction extends FluxAction implements ShouldBeMoni
 {
     use Dispatchable, InteractsWithQueue, Queueable;
 
-    public function handle(): mixed
-    {
-        return $this->validate()->execute();
-    }
-
     final public function executeAsync(): void
     {
         static::dispatch($this->data, $this->keepEmptyStrings);
+    }
+
+    public function handle(): mixed
+    {
+        return $this->validate()->execute();
     }
 }

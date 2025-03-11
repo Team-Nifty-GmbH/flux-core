@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('schedules', function (Blueprint $table) {
+        Schema::table('schedules', function (Blueprint $table): void {
             $table->dateTime('ends_at')->nullable()->after('due_at');
             $table->unsignedInteger('recurrences')->nullable()->after('ends_at');
             $table->unsignedInteger('current_recurrence')->nullable()->after('recurrences');
@@ -17,7 +17,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('schedules', function (Blueprint $table) {
+        Schema::table('schedules', function (Blueprint $table): void {
             $table->dropColumn([
                 'ends_at',
                 'recurrences',

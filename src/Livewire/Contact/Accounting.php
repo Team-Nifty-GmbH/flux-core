@@ -16,10 +16,10 @@ class Accounting extends Component
 {
     use Actions, WithTabs;
 
-    public string $tab = 'contact.accounting.general';
-
     #[Modelable]
     public ContactForm $contact;
+
+    public string $tab = 'contact.accounting.general';
 
     public function render(): Factory|Application|View
     {

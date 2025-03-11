@@ -19,17 +19,12 @@ class BankConnections extends BaseContactBankConnectionList
 {
     use Actions;
 
-    protected string $view = 'flux::livewire.contact.accounting.bank-connections';
+    public ContactBankConnectionForm $contactBankConnection;
 
     #[Modelable]
     public int $contactId;
 
-    public ContactBankConnectionForm $contactBankConnection;
-
-    protected function getBuilder(Builder $builder): Builder
-    {
-        return $builder->where('contact_id', $this->contactId);
-    }
+    protected string $view = 'flux::livewire.contact.accounting.bank-connections';
 
     protected function getTableActions(): array
     {
@@ -64,23 +59,6 @@ class BankConnections extends BaseContactBankConnectionList
         ];
     }
 
-    public function save(): bool
-    {
-        $this->contactBankConnection->contact_id = $this->contactId;
-
-        try {
-            $this->contactBankConnection->save();
-        } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
-    }
-
     public function delete(ContactBankConnection $contactBankConnection): void
     {
         $this->contactBankConnection->fill($contactBankConnection);
@@ -104,5 +82,27 @@ class BankConnections extends BaseContactBankConnectionList
         $this->js(<<<'JS'
             $modalOpen('edit-contact-bank-connection');
         JS);
+    }
+
+    public function save(): bool
+    {
+        $this->contactBankConnection->contact_id = $this->contactId;
+
+        try {
+            $this->contactBankConnection->save();
+        } catch (UnauthorizedException|ValidationException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
+    }
+
+    protected function getBuilder(Builder $builder): Builder
+    {
+        return $builder->where('contact_id', $this->contactId);
     }
 }

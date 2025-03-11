@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::create('print_jobs', function (Blueprint $table) {
+        Schema::create('print_jobs', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('media_id')->constrained()->cascadeOnDelete();
             $table->foreignId('printer_id')->nullable()->constrained()->nullOnDelete();

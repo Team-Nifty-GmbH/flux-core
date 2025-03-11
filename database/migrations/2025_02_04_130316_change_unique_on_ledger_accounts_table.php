@@ -10,7 +10,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('ledger_accounts', function (Blueprint $table) {
+        Schema::table('ledger_accounts', function (Blueprint $table): void {
             $table->foreignId('client_id')
                 ->after('uuid')
                 ->nullable()
@@ -26,7 +26,7 @@ return new class() extends Migration
                     ->value('id'),
             ]);
 
-        Schema::table('ledger_accounts', function (Blueprint $table) {
+        Schema::table('ledger_accounts', function (Blueprint $table): void {
             $table->foreignId('client_id')
                 ->nullable(false)
                 ->change();
@@ -43,7 +43,7 @@ return new class() extends Migration
             )
             ->delete();
 
-        Schema::table('ledger_accounts', function (Blueprint $table) {
+        Schema::table('ledger_accounts', function (Blueprint $table): void {
             $table->dropConstrainedForeignId('client_id');
             $table->dropUnique(['number', 'ledger_account_type_enum', 'client_id']);
             $table->unique('number');

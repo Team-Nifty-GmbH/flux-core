@@ -11,11 +11,11 @@ use Illuminate\Support\Str;
 
 class InitEnv extends Command
 {
+    protected $description = 'Sets the .env file to the correct values for flux';
+
     protected $signature = 'flux:init-env
         {keyValues? : A comma-seperated list of key:value that should be set}
         {--use-default : Use the flux default env values}';
-
-    protected $description = 'Sets the .env file to the correct values for flux';
 
     public function handle(): void
     {

@@ -14,9 +14,9 @@ class ActionManager
 {
     use Macroable;
 
-    protected Collection $actions;
-
     protected static array $discoveries = [];
+
+    protected Collection $actions;
 
     public function __construct()
     {
@@ -27,36 +27,9 @@ class ActionManager
         }
     }
 
-    /**
-     * @throws \Exception
-     */
-    public function register(string $name, string $action): void
-    {
-        if (! is_a($action, FluxAction::class, true) || $action === FluxAction::class) {
-            throw new InvalidArgumentException('The provided action class is not a valid action class');
-        }
-
-        $this->actions[$name] = [
-            'name' => $action::name(),
-            'description' => $action::description(),
-            'models' => $action::models(),
-            'class' => $action,
-        ];
-    }
-
     public function all(): Collection
     {
         return $this->actions;
-    }
-
-    public function get(string $name): ?array
-    {
-        return $this->actions->get($name);
-    }
-
-    public function getByModel(string $model): Collection
-    {
-        return $this->actions->filter(fn ($item) => in_array($model, $item['models']));
     }
 
     public function autoDiscover(?string $directory = null, ?string $namespace = null): void
@@ -126,8 +99,35 @@ class ActionManager
         }
     }
 
+    public function get(string $name): ?array
+    {
+        return $this->actions->get($name);
+    }
+
+    public function getByModel(string $model): Collection
+    {
+        return $this->actions->filter(fn ($item) => in_array($model, $item['models']));
+    }
+
     public function getDiscoveries(): array
     {
         return static::$discoveries;
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function register(string $name, string $action): void
+    {
+        if (! is_a($action, FluxAction::class, true) || $action === FluxAction::class) {
+            throw new InvalidArgumentException('The provided action class is not a valid action class');
+        }
+
+        $this->actions[$name] = [
+            'name' => $action::name(),
+            'description' => $action::description(),
+            'models' => $action::models(),
+            'class' => $action,
+        ];
     }
 }

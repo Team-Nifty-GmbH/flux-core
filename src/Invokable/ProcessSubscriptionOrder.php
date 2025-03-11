@@ -69,6 +69,16 @@ class ProcessSubscriptionOrder implements Repeatable
         return true;
     }
 
+    public static function defaultCron(): ?CronExpression
+    {
+        return null;
+    }
+
+    public static function description(): ?string
+    {
+        return 'Process given Subscription Order.';
+    }
+
     public static function isRepeatable(): bool
     {
         return true;
@@ -79,21 +89,11 @@ class ProcessSubscriptionOrder implements Repeatable
         return class_basename(static::class);
     }
 
-    public static function description(): ?string
-    {
-        return 'Process given Subscription Order.';
-    }
-
     public static function parameters(): array
     {
         return [
             'orderId' => null,
             'orderTypeId' => null,
         ];
-    }
-
-    public static function defaultCron(): ?CronExpression
-    {
-        return null;
     }
 }

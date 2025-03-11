@@ -11,7 +11,7 @@ return new class() extends Migration
      */
     public function up(): void
     {
-        Schema::table('tickets', function (Blueprint $table) {
+        Schema::table('tickets', function (Blueprint $table): void {
             $table->string('ticket_number')->after('ticket_type_id');
         });
     }
@@ -21,7 +21,7 @@ return new class() extends Migration
      */
     public function down(): void
     {
-        Schema::table('tickets', function (Blueprint $table) {
+        Schema::table('tickets', function (Blueprint $table): void {
             $table->dropColumn('ticket_number');
         });
     }

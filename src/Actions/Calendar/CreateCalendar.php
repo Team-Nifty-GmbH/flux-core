@@ -9,14 +9,14 @@ use Illuminate\Support\Arr;
 
 class CreateCalendar extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateCalendarRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Calendar::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateCalendarRuleset::class;
     }
 
     public function performAction(): Calendar

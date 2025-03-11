@@ -15,9 +15,9 @@ use Spatie\Permission\Traits\HasRoles;
 
 class Settings extends Component
 {
-    public array $settings = [];
-
     public array $setting = [];
+
+    public array $settings = [];
 
     public function mount(): void
     {

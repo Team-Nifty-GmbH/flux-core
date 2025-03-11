@@ -6,7 +6,14 @@ use FluxErp\Models\Permission;
 
 class SettingsNotificationsTest extends BaseSetup
 {
-    public function test_settings_notifications_page()
+    public function test_settings_notifications_no_user(): void
+    {
+        $this->get('/settings/notifications')
+            ->assertStatus(302)
+            ->assertRedirect(route('login'));
+    }
+
+    public function test_settings_notifications_page(): void
     {
         $this->user->givePermissionTo(Permission::findOrCreate('settings.notifications.get', 'web'));
 
@@ -14,14 +21,7 @@ class SettingsNotificationsTest extends BaseSetup
             ->assertStatus(200);
     }
 
-    public function test_settings_notifications_no_user()
-    {
-        $this->get('/settings/notifications')
-            ->assertStatus(302)
-            ->assertRedirect(route('login'));
-    }
-
-    public function test_settings_notifications_without_permission()
+    public function test_settings_notifications_without_permission(): void
     {
         Permission::findOrCreate('settings.notifications.get', 'web');
 

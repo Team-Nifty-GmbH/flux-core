@@ -20,14 +20,14 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateProduct extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateProductRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Product::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateProductRuleset::class;
     }
 
     public function performAction(): Model
@@ -80,7 +80,7 @@ class UpdateProduct extends FluxAction
         if ($prices) {
             $priceCollection = collect($prices)->keyBy('price_list_id');
             $product->prices
-                ?->each(function ($price) use ($priceCollection) {
+                ?->each(function ($price) use ($priceCollection): void {
                     if ($priceCollection->has($price->price_list_id)) {
                         $price->update($priceCollection->get($price->price_list_id));
                         $priceCollection->forget($price->price_list_id);

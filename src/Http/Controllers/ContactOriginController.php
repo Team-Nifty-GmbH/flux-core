@@ -32,6 +32,24 @@ class ContactOriginController extends BaseController
         );
     }
 
+    public function delete(string $id): JsonResponse
+    {
+        try {
+            DeleteContactOrigin::make(['id' => $id])->validate()->execute();
+            $response = ResponseHelper::createArrayResponse(
+                statusCode: 204,
+                statusMessage: 'contact origin deleted'
+            );
+        } catch (ValidationException $e) {
+            $response = ResponseHelper::createArrayResponse(
+                statusCode: 404,
+                data: $e->errors()
+            );
+        }
+
+        return ResponseHelper::createResponseFromArrayResponse($response);
+    }
+
     public function update(Request $request): JsonResponse
     {
         $data = $request->all();
@@ -67,23 +85,5 @@ class ContactOriginController extends BaseController
             'responses' => $responses,
             'statusMessage' => $statusCode === 422 ? null : 'contact origin(s) updated',
         ]);
-    }
-
-    public function delete(string $id): JsonResponse
-    {
-        try {
-            DeleteContactOrigin::make(['id' => $id])->validate()->execute();
-            $response = ResponseHelper::createArrayResponse(
-                statusCode: 204,
-                statusMessage: 'contact origin deleted'
-            );
-        } catch (ValidationException $e) {
-            $response = ResponseHelper::createArrayResponse(
-                statusCode: 404,
-                data: $e->errors()
-            );
-        }
-
-        return ResponseHelper::createResponseFromArrayResponse($response);
     }
 }

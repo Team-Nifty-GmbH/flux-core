@@ -11,14 +11,7 @@ use Livewire\Livewire;
 
 class LoginTest extends TestCase
 {
-    public function test_renders_successfully()
-    {
-        Livewire::test(Login::class)
-            ->assertStatus(200)
-            ->assertNoRedirect();
-    }
-
-    public function test_redirect_to_dashboard_as_authenticated_user()
+    public function test_redirect_to_dashboard_as_authenticated_user(): void
     {
         $language = Language::query()->where('language_code', config('app.locale'))->first();
         if (! $language) {
@@ -34,5 +27,12 @@ class LoginTest extends TestCase
 
         Livewire::test(Login::class)
             ->assertRedirect(Dashboard::class);
+    }
+
+    public function test_renders_successfully(): void
+    {
+        Livewire::test(Login::class)
+            ->assertStatus(200)
+            ->assertNoRedirect();
     }
 }

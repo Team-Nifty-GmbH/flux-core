@@ -11,7 +11,7 @@ return new class() extends Migration
      */
     public function up(): void
     {
-        Schema::table('logs', function (Blueprint $table) {
+        Schema::table('logs', function (Blueprint $table): void {
             $table->boolean('is_done')->default(false)->after('formatted');
         });
     }
@@ -21,7 +21,7 @@ return new class() extends Migration
      */
     public function down(): void
     {
-        Schema::table('logs', function (Blueprint $table) {
+        Schema::table('logs', function (Blueprint $table): void {
             $table->dropColumn('is_done');
         });
     }

@@ -8,9 +8,9 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class DeleteDiscountGroupRuleset extends FluxRuleset
 {
-    protected static ?string $model = DiscountGroup::class;
-
     protected static bool $addAdditionalColumnRules = false;
+
+    protected static ?string $model = DiscountGroup::class;
 
     public function rules(): array
     {

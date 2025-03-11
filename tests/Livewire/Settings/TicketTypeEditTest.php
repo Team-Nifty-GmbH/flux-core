@@ -10,13 +10,7 @@ use Livewire\Livewire;
 
 class TicketTypeEditTest extends TestCase
 {
-    public function test_renders_successfully()
-    {
-        Livewire::test(TicketTypeEdit::class)
-            ->assertStatus(200);
-    }
-
-    public function test_create_new_ticket_type()
+    public function test_create_new_ticket_type(): void
     {
         Livewire::test(TicketTypeEdit::class)
             ->set('ticketType.name', $ticketTypeName = Str::uuid())
@@ -32,25 +26,7 @@ class TicketTypeEditTest extends TestCase
         ]);
     }
 
-    public function test_edit_ticket_type()
-    {
-        $ticketType = TicketType::factory()->create();
-
-        Livewire::test(TicketTypeEdit::class)
-            ->call('show', $ticketType->toArray())
-            ->set('ticketType.name', $ticketTypeName = Str::uuid())
-            ->call('save')
-            ->assertHasNoErrors()
-            ->assertDispatchedTo('settings.ticket-types', 'closeModal')
-            ->assertToastNotification(type: 'success');
-
-        $this->assertDatabaseHas('ticket_types', [
-            'id' => $ticketType->id,
-            'name' => $ticketTypeName,
-        ]);
-    }
-
-    public function test_delete_ticket_type()
+    public function test_delete_ticket_type(): void
     {
         $ticketType = TicketType::factory()->create();
 
@@ -67,5 +43,29 @@ class TicketTypeEditTest extends TestCase
         $this->assertSoftDeleted('ticket_types', [
             'id' => $ticketType->id,
         ]);
+    }
+
+    public function test_edit_ticket_type(): void
+    {
+        $ticketType = TicketType::factory()->create();
+
+        Livewire::test(TicketTypeEdit::class)
+            ->call('show', $ticketType->toArray())
+            ->set('ticketType.name', $ticketTypeName = Str::uuid())
+            ->call('save')
+            ->assertHasNoErrors()
+            ->assertDispatchedTo('settings.ticket-types', 'closeModal')
+            ->assertToastNotification(type: 'success');
+
+        $this->assertDatabaseHas('ticket_types', [
+            'id' => $ticketType->id,
+            'name' => $ticketTypeName,
+        ]);
+    }
+
+    public function test_renders_successfully(): void
+    {
+        Livewire::test(TicketTypeEdit::class)
+            ->assertStatus(200);
     }
 }

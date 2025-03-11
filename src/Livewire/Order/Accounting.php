@@ -13,32 +13,16 @@ use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class Accounting extends TransactionList
 {
-    #[Modelable]
-    public OrderForm $order;
-
-    protected string $view = 'flux::livewire.order.accounting';
-
     public array $enabledCols = [
         'value_date',
         'amount',
         'purpose',
     ];
 
-    protected function getBuilder(Builder $builder): Builder
-    {
-        return $builder->where('order_id', $this->order->id);
-    }
+    #[Modelable]
+    public OrderForm $order;
 
-    #[Renderless]
-    public function editTransaction(?Transaction $transaction): void
-    {
-        parent::editTransaction($transaction);
-
-        $this->transactionForm->order_id = $this->order->id;
-        if (! $transaction) {
-            $this->transactionForm->amount = $this->order->balance;
-        }
-    }
+    protected string $view = 'flux::livewire.order.accounting';
 
     public function deleteTransaction(): bool
     {
@@ -54,5 +38,21 @@ class Accounting extends TransactionList
         $this->loadData();
 
         return true;
+    }
+
+    #[Renderless]
+    public function editTransaction(?Transaction $transaction): void
+    {
+        parent::editTransaction($transaction);
+
+        $this->transactionForm->order_id = $this->order->id;
+        if (! $transaction) {
+            $this->transactionForm->amount = $this->order->balance;
+        }
+    }
+
+    protected function getBuilder(Builder $builder): Builder
+    {
+        return $builder->where('order_id', $this->order->id);
     }
 }

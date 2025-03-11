@@ -8,7 +8,7 @@ class CreateAddressProductTable extends Migration
 {
     public function up(): void
     {
-        Schema::create('address_product', function (Blueprint $table) {
+        Schema::create('address_product', function (Blueprint $table): void {
             $table->unsignedBigInteger('address_id');
             $table->unsignedBigInteger('product_id');
 

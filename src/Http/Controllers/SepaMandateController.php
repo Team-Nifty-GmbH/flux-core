@@ -23,16 +23,16 @@ class SepaMandateController extends BaseController
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
-    public function update(Request $request, SepaMandateService $sepaMandateService): JsonResponse
+    public function delete(string $id, SepaMandateService $sepaMandateService): JsonResponse
     {
-        $response = $sepaMandateService->update($request->all());
+        $response = $sepaMandateService->delete($id);
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
-    public function delete(string $id, SepaMandateService $sepaMandateService): JsonResponse
+    public function update(Request $request, SepaMandateService $sepaMandateService): JsonResponse
     {
-        $response = $sepaMandateService->delete($id);
+        $response = $sepaMandateService->update($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }

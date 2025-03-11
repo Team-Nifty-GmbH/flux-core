@@ -9,14 +9,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class UpdatePaymentReminderText extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdatePaymentReminderTextRuleset::class;
-    }
-
     public static function models(): array
     {
         return [PaymentReminderText::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdatePaymentReminderTextRuleset::class;
     }
 
     public function performAction(): Model

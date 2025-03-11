@@ -13,7 +13,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::create('paid_commissions', function (Blueprint $table) {
+        Schema::create('paid_commissions', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
             $table->unsignedBigInteger('commission_id');

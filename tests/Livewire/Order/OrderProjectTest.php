@@ -66,20 +66,7 @@ class OrderProjectTest extends BaseSetup
         ]);
     }
 
-    public function test_renders_successfully()
-    {
-        Livewire::withoutLazyLoading()
-            ->test(OrderProject::class, ['order' => $this->order])
-            ->assertStatus(200)
-            ->assertSet('form.order_id', $this->order->id)
-            ->assertSet('form.client_id', $this->order->client_id)
-            ->assertSet('form.contact_id', $this->order->contact_id)
-            ->assertSet('form.start_date', $this->order->system_delivery_date)
-            ->assertSet('form.end_date', $this->order->system_delivery_date_end)
-            ->assertSet('form.name', $this->order->getLabel());
-    }
-
-    public function test_can_create_project_from_order()
+    public function test_can_create_project_from_order(): void
     {
         $projectName = Str::uuid();
         /** @var Testable $component */
@@ -113,7 +100,7 @@ class OrderProjectTest extends BaseSetup
         ]);
     }
 
-    public function test_create_tasks_for_existing_project()
+    public function test_create_tasks_for_existing_project(): void
     {
         $projects = Project::factory(3)->create([
             'client_id' => $this->dbClient->getKey(),
@@ -144,5 +131,18 @@ class OrderProjectTest extends BaseSetup
             ->assertDispatchedTo('order.order-positions', 'create-tasks', $component->get('form.id'));
 
         $this->assertEquals($currentProjectCount, Project::query()->count());
+    }
+
+    public function test_renders_successfully(): void
+    {
+        Livewire::withoutLazyLoading()
+            ->test(OrderProject::class, ['order' => $this->order])
+            ->assertStatus(200)
+            ->assertSet('form.order_id', $this->order->id)
+            ->assertSet('form.client_id', $this->order->client_id)
+            ->assertSet('form.contact_id', $this->order->contact_id)
+            ->assertSet('form.start_date', $this->order->system_delivery_date)
+            ->assertSet('form.end_date', $this->order->system_delivery_date_end)
+            ->assertSet('form.name', $this->order->getLabel());
     }
 }

@@ -8,14 +8,14 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('calendar_events', function (Blueprint $table) {
+        Schema::table('calendar_events', function (Blueprint $table): void {
             $table->boolean('has_taken_place')->default(false)->after('is_all_day');
         });
     }
 
     public function down(): void
     {
-        Schema::table('calendar_events', function (Blueprint $table) {
+        Schema::table('calendar_events', function (Blueprint $table): void {
             $table->dropColumn('has_taken_place');
         });
     }

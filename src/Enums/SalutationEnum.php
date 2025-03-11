@@ -8,15 +8,14 @@ enum SalutationEnum: string
 {
     use EnumTrait;
 
-    case MR = 'mr';
-
-    case MRS = 'mrs';
-
-    case COMPANY = 'company';
-
-    case FAMILY = 'family';
-
-    case NO_SALUTATION = 'no_salutation';
+    public function gender(): string
+    {
+        return match ($this) {
+            SalutationEnum::MRS => 'female',
+            SalutationEnum::MR => 'male',
+            default => 'neutral',
+        };
+    }
 
     public function salutation(object|array $address): string
     {
@@ -45,12 +44,13 @@ enum SalutationEnum: string
         }
     }
 
-    public function gender(): string
-    {
-        return match ($this) {
-            SalutationEnum::MRS => 'female',
-            SalutationEnum::MR => 'male',
-            default => 'neutral',
-        };
-    }
+    case COMPANY = 'company';
+
+    case FAMILY = 'family';
+
+    case MR = 'mr';
+
+    case MRS = 'mrs';
+
+    case NO_SALUTATION = 'no_salutation';
 }

@@ -10,14 +10,14 @@ use Illuminate\Validation\ValidationException;
 
 class CreateProject extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateProjectRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Project::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateProjectRuleset::class;
     }
 
     public function performAction(): Project

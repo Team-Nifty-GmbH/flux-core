@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::create('inviteables', function (Blueprint $table) {
+        Schema::create('inviteables', function (Blueprint $table): void {
             $table->id();
             $table->unsignedBigInteger('calendar_event_id');
             $table->unsignedBigInteger('model_calendar_id')->nullable();

@@ -11,6 +11,19 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class DiscountGroupList extends BaseDiscountGroupList
 {
+    protected function getTableActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->text(__('Create'))
+                ->icon('plus')
+                ->color('indigo')
+                ->attributes([
+                    'x-on:click' => 'editItem(null)',
+                ]),
+        ];
+    }
+
     protected function getRowActions(): array
     {
         return [
@@ -30,39 +43,6 @@ class DiscountGroupList extends BaseDiscountGroupList
                     'wire:loading.attr' => 'disabled',
                 ]),
         ];
-    }
-
-    protected function getTableActions(): array
-    {
-        return [
-            DataTableButton::make()
-                ->text(__('Create'))
-                ->icon('plus')
-                ->color('indigo')
-                ->attributes([
-                    'x-on:click' => 'editItem(null)',
-                ]),
-        ];
-    }
-
-    public function saveItem(array $discountGroup): bool
-    {
-        $discountGroup['discounts'] = array_map(fn ($discount) => $discount['id'], $discountGroup['discounts']);
-        $action = ($discountGroup['id'] ?? false)
-            ? UpdateDiscountGroup::make($discountGroup)
-            : CreateDiscountGroup::make($discountGroup);
-
-        try {
-            $action->checkPermission()->validate()->execute();
-        } catch (\Exception $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
     }
 
     public function deleteItem(DiscountGroup $discountGroup): void
@@ -86,5 +66,25 @@ class DiscountGroupList extends BaseDiscountGroupList
     public function loadDiscountGroup(DiscountGroup $discountGroup): array
     {
         return $discountGroup?->load('discounts.model')->toArray();
+    }
+
+    public function saveItem(array $discountGroup): bool
+    {
+        $discountGroup['discounts'] = array_map(fn ($discount) => $discount['id'], $discountGroup['discounts']);
+        $action = ($discountGroup['id'] ?? false)
+            ? UpdateDiscountGroup::make($discountGroup)
+            : CreateDiscountGroup::make($discountGroup);
+
+        try {
+            $action->checkPermission()->validate()->execute();
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
     }
 }

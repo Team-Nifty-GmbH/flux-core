@@ -8,14 +8,14 @@ use FluxErp\Rulesets\CommissionRate\CreateCommissionRateRuleset;
 
 class CreateCommissionRate extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateCommissionRateRuleset::class;
-    }
-
     public static function models(): array
     {
         return [CommissionRate::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateCommissionRateRuleset::class;
     }
 
     public function performAction(): CommissionRate

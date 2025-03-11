@@ -15,9 +15,9 @@ use FluxErp\Traits\Trackable;
 
 class UpdateLockedWorkTimeRuleset extends FluxRuleset
 {
-    protected static ?string $model = WorkTime::class;
-
     protected static bool $addAdditionalColumnRules = false;
+
+    protected static ?string $model = WorkTime::class;
 
     public function rules(): array
     {

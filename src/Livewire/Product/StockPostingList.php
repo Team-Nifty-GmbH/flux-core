@@ -20,18 +20,18 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class StockPostingList extends BaseStockPostingList
 {
-    protected ?string $includeBefore = 'flux::livewire.product.stock-posting-list';
-
-    #[Modelable]
-    public ?int $warehouseId = null;
-
-    public StockPostingForm $stockPosting;
+    #[Locked]
+    public bool $hasSerialNumbers = false;
 
     #[Locked]
     public int $productId;
 
-    #[Locked]
-    public bool $hasSerialNumbers = false;
+    public StockPostingForm $stockPosting;
+
+    #[Modelable]
+    public ?int $warehouseId = null;
+
+    protected ?string $includeBefore = 'flux::livewire.product.stock-posting-list';
 
     public function mount(): void
     {
@@ -42,15 +42,30 @@ class StockPostingList extends BaseStockPostingList
         parent::mount();
     }
 
-    public function updatedWarehouseId(): void
+    protected function getTableActions(): array
     {
-        $this->userFilters = [[
-            [
-                'column' => 'warehouse_id',
-                'operator' => '=',
-                'value' => $this->warehouseId,
-            ],
-        ]];
+        return [
+            DataTableButton::make()
+                ->text(__('New Stock Posting'))
+                ->icon('plus')
+                ->color('indigo')
+                ->wireClick('create')
+                ->when(resolve_static(CreateStockPosting::class, 'canPerformAction', [false])),
+        ];
+    }
+
+    protected function getRowActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->text(__('View Order'))
+                ->color('indigo')
+                ->icon('eye')
+                ->attributes([
+                    'x-show' => 'record.order_position_id',
+                    'x-on:click' => '$wire.viewOrder(record.order_position_id)',
+                ]),
+        ];
     }
 
     public function create(): void
@@ -86,6 +101,17 @@ class StockPostingList extends BaseStockPostingList
         return true;
     }
 
+    public function updatedWarehouseId(): void
+    {
+        $this->userFilters = [[
+            [
+                'column' => 'warehouse_id',
+                'operator' => '=',
+                'value' => $this->warehouseId,
+            ],
+        ]];
+    }
+
     #[Renderless]
     public function viewOrder(int $orderPositionId): void
     {
@@ -96,6 +122,33 @@ class StockPostingList extends BaseStockPostingList
         if ($orderId) {
             $this->redirect(route('orders.id', $orderId));
         }
+    }
+
+    protected function getBuilder(Builder $builder): Builder
+    {
+        return $builder
+            ->where('product_id', $this->productId);
+    }
+
+    protected function getComponentAttributes(): ComponentAttributeBag
+    {
+        return new ComponentAttributeBag([
+            'x-init' => <<<'JS'
+                $watch('$wire.warehouseId', () => {
+                    $wire.loadData();
+                })
+            JS,
+        ]);
+    }
+
+    protected function getReturnKeys(): array
+    {
+        return array_merge(
+            parent::getReturnKeys(),
+            [
+                'order_position_id',
+            ]
+        );
     }
 
     protected function getViewData(): array
@@ -117,59 +170,6 @@ class StockPostingList extends BaseStockPostingList
         return array_merge(
             parent::getViewData(),
             $viewData
-        );
-    }
-
-    protected function getTableActions(): array
-    {
-        return [
-            DataTableButton::make()
-                ->text(__('New Stock Posting'))
-                ->icon('plus')
-                ->color('indigo')
-                ->wireClick('create')
-                ->when(resolve_static(CreateStockPosting::class, 'canPerformAction', [false])),
-        ];
-    }
-
-    protected function getRowActions(): array
-    {
-        return [
-            DataTableButton::make()
-                ->text(__('View Order'))
-                ->color('indigo')
-                ->icon('eye')
-                ->attributes([
-                    'x-show' => 'record.order_position_id',
-                    'x-on:click' => '$wire.viewOrder(record.order_position_id)',
-                ]),
-        ];
-    }
-
-    protected function getComponentAttributes(): ComponentAttributeBag
-    {
-        return new ComponentAttributeBag([
-            'x-init' => <<<'JS'
-                $watch('$wire.warehouseId', () => {
-                    $wire.loadData();
-                })
-            JS,
-        ]);
-    }
-
-    protected function getBuilder(Builder $builder): Builder
-    {
-        return $builder
-            ->where('product_id', $this->productId);
-    }
-
-    protected function getReturnKeys(): array
-    {
-        return array_merge(
-            parent::getReturnKeys(),
-            [
-                'order_position_id',
-            ]
         );
     }
 }

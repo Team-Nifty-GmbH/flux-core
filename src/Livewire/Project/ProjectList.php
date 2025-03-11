@@ -14,11 +14,11 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class ProjectList extends BaseProjectList
 {
-    protected ?string $includeBefore = 'flux::livewire.project.project-list';
-
     public array $availableStates = [];
 
     public ProjectForm $project;
+
+    protected ?string $includeBefore = 'flux::livewire.project.project-list';
 
     public function mount(): void
     {
@@ -53,22 +53,6 @@ class ProjectList extends BaseProjectList
     }
 
     #[Renderless]
-    public function save(): bool
-    {
-        try {
-            $this->project->save();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
-    }
-
-    #[Renderless]
     public function createProject(): void
     {
         $this->project->reset();
@@ -82,5 +66,21 @@ class ProjectList extends BaseProjectList
         $this->js(<<<'JS'
             $modalOpen('edit-project');
         JS);
+    }
+
+    #[Renderless]
+    public function save(): bool
+    {
+        try {
+            $this->project->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
     }
 }

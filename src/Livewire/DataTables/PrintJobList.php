@@ -6,8 +6,6 @@ use FluxErp\Models\PrintJob;
 
 class PrintJobList extends BaseDataTable
 {
-    protected string $model = PrintJob::class;
-
     public array $enabledCols = [
         'user.name',
         'media.name',
@@ -16,4 +14,6 @@ class PrintJobList extends BaseDataTable
         'size',
         'is_completed',
     ];
+
+    protected string $model = PrintJob::class;
 }

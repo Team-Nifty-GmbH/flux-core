@@ -13,13 +13,11 @@ abstract class ValueList extends Component
 {
     use Widgetable;
 
-    public bool $shouldBePositive = true;
-
     public array $items = [];
 
     public int $limit = 10;
 
-    abstract public function calculateList(): void;
+    public bool $shouldBePositive = true;
 
     public function mount(): void
     {
@@ -31,12 +29,12 @@ abstract class ValueList extends Component
         return view('flux::support.widgets.value-list');
     }
 
-    public function updatedTimeFrame(): void
+    public function calculateByTimeFrame(): void
     {
         $this->calculateList();
     }
 
-    public function showMore(): void {}
+    abstract public function calculateList(): void;
 
     #[Renderless]
     public function hasMore(): bool
@@ -44,18 +42,20 @@ abstract class ValueList extends Component
         return false;
     }
 
-    public function calculateByTimeFrame(): void
+    public function showMore(): void {}
+
+    public function updatedTimeFrame(): void
     {
         $this->calculateList();
-    }
-
-    protected function title(): ?string
-    {
-        return static::getLabel();
     }
 
     protected function hasLoadMore(): bool
     {
         return false;
+    }
+
+    protected function title(): ?string
+    {
+        return static::getLabel();
     }
 }

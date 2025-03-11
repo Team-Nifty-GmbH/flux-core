@@ -15,9 +15,9 @@ class MagicLoginLink extends Mailable
 {
     use Makeable, Queueable, SerializesModels;
 
-    private string $plaintextToken;
-
     private Carbon $expiresAt;
+
+    private string $plaintextToken;
 
     /**
      * Create a new message instance.
@@ -26,16 +26,6 @@ class MagicLoginLink extends Mailable
     {
         $this->plaintextToken = $plaintextToken;
         $this->expiresAt = $expiresAt;
-    }
-
-    /**
-     * Get the message envelope.
-     */
-    public function envelope(): Envelope
-    {
-        return new Envelope(
-            subject: config('app.name') . ' ' . __('Login Link')
-        );
     }
 
     /**
@@ -54,6 +44,16 @@ class MagicLoginLink extends Mailable
                     ]
                 ),
             ],
+        );
+    }
+
+    /**
+     * Get the message envelope.
+     */
+    public function envelope(): Envelope
+    {
+        return new Envelope(
+            subject: config('app.name') . ' ' . __('Login Link')
         );
     }
 }

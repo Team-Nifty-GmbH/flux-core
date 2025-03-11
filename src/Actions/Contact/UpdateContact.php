@@ -14,14 +14,14 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateContact extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateContactRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Contact::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateContactRuleset::class;
     }
 
     public function performAction(): Model

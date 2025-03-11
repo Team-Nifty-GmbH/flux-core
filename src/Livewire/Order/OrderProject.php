@@ -19,11 +19,11 @@ class OrderProject extends Component
 {
     use Actions;
 
+    public bool $existingProject = true;
+
     public ProjectForm $form;
 
     public ?int $projectId = null;
-
-    public bool $existingProject = true;
 
     public function mount(Order $order): void
     {

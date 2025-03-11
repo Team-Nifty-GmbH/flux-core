@@ -65,7 +65,7 @@ class ActivitiesTest extends TestCase
         ]);
     }
 
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(Activities::class, ['modelId' => $this->order->id])
             ->assertStatus(200);

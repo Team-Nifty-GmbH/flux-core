@@ -10,9 +10,9 @@ use Illuminate\Support\Facades\Notification;
 
 class NotificationEloquentEventSubscriber
 {
-    public Collection $notifiables;
-
     public Model $model;
+
+    public Collection $notifiables;
 
     /**
      * Handle incoming events.

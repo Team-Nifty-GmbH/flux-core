@@ -22,11 +22,11 @@ class Task extends Component
 {
     use Actions, WithTabs;
 
+    public array $availableStates = [];
+
     public TaskForm $task;
 
     public string $taskTab = 'task.general';
-
-    public array $availableStates = [];
 
     public function mount(string $id): void
     {
@@ -60,70 +60,6 @@ class Task extends Component
         return view('flux::livewire.task.task');
     }
 
-    public function getTabs(): array
-    {
-        return [
-            TabButton::make('task.general')->text(__('General')),
-            TabButton::make('task.comments')->text(__('Comments'))
-                ->attributes([
-                    'x-bind:disabled' => '! $wire.task.id',
-                ]),
-            TabButton::make('task.media')->text(__('Media'))
-                ->attributes([
-                    'x-bind:disabled' => '! $wire.task.id',
-                ]),
-        ];
-    }
-
-    public function save(): array|bool
-    {
-        try {
-            $this->task->save();
-        } catch (\Exception $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->notification()->success(__(':model saved', ['model' => __('Task')]))->send();
-        $this->skipRender();
-
-        return true;
-    }
-
-    public function resetForm(): void
-    {
-        $task = resolve_static(TaskModel::class, 'query')
-            ->whereKey($this->task->id)
-            ->firstOrFail();
-
-        $this->task->reset();
-        $this->task->fill($task);
-        $this->task->users = $task->users()->pluck('users.id')->toArray();
-        $this->task->additionalColumns = array_intersect_key(
-            $task->toArray(),
-            array_fill_keys(
-                $task->additionalColumns()->pluck('name')?->toArray() ?? [],
-                null
-            )
-        );
-    }
-
-    #[Renderless]
-    public function delete(): void
-    {
-        try {
-            DeleteTask::make($this->task->toArray())
-                ->checkPermission()
-                ->validate()
-                ->execute();
-
-            $this->redirect(route('tasks'));
-        } catch (\Exception $e) {
-            exception_to_notifications($e, $this);
-        }
-    }
-
     #[Renderless]
     public function addTag(string $name): void
     {
@@ -145,5 +81,69 @@ class Task extends Component
         $this->js(<<<'JS'
             edit = true;
         JS);
+    }
+
+    #[Renderless]
+    public function delete(): void
+    {
+        try {
+            DeleteTask::make($this->task->toArray())
+                ->checkPermission()
+                ->validate()
+                ->execute();
+
+            $this->redirect(route('tasks'));
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
+        }
+    }
+
+    public function getTabs(): array
+    {
+        return [
+            TabButton::make('task.general')->text(__('General')),
+            TabButton::make('task.comments')->text(__('Comments'))
+                ->attributes([
+                    'x-bind:disabled' => '! $wire.task.id',
+                ]),
+            TabButton::make('task.media')->text(__('Media'))
+                ->attributes([
+                    'x-bind:disabled' => '! $wire.task.id',
+                ]),
+        ];
+    }
+
+    public function resetForm(): void
+    {
+        $task = resolve_static(TaskModel::class, 'query')
+            ->whereKey($this->task->id)
+            ->firstOrFail();
+
+        $this->task->reset();
+        $this->task->fill($task);
+        $this->task->users = $task->users()->pluck('users.id')->toArray();
+        $this->task->additionalColumns = array_intersect_key(
+            $task->toArray(),
+            array_fill_keys(
+                $task->additionalColumns()->pluck('name')?->toArray() ?? [],
+                null
+            )
+        );
+    }
+
+    public function save(): array|bool
+    {
+        try {
+            $this->task->save();
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->notification()->success(__(':model saved', ['model' => __('Task')]))->send();
+        $this->skipRender();
+
+        return true;
     }
 }

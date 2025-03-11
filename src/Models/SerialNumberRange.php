@@ -20,9 +20,14 @@ class SerialNumberRange extends FluxModel
 {
     use Filterable, HasClientAssignment, HasPackageFactory, HasUserModification, HasUuid, LogsActivity, SoftDeletes;
 
+    public static function hasPermission(): bool
+    {
+        return false;
+    }
+
     protected static function booted(): void
     {
-        static::creating(function (SerialNumberRange $serialNumberRange) {
+        static::creating(function (SerialNumberRange $serialNumberRange): void {
             $serialNumberRange->unique_key = implode('.', [
                 $serialNumberRange->model_type,
                 $serialNumberRange->model_id,
@@ -39,19 +44,9 @@ class SerialNumberRange extends FluxModel
         ];
     }
 
-    public static function hasPermission(): bool
-    {
-        return false;
-    }
-
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
-    }
-
-    public function model(): MorphTo
-    {
-        return $this->morphTo('model');
     }
 
     public function getCurrentStyled(): array|string|Translator|Application|null
@@ -62,6 +57,11 @@ class SerialNumberRange extends FluxModel
             $this->suffix,
             $this->variables()
         );
+    }
+
+    public function model(): MorphTo
+    {
+        return $this->morphTo('model');
     }
 
     private function variables(): array

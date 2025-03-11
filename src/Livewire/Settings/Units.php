@@ -54,6 +54,24 @@ class Units extends UnitList
         ];
     }
 
+    public function delete(Unit $unit): bool
+    {
+        $this->unit->reset();
+        $this->unit->fill($unit);
+
+        try {
+            $this->unit->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
+    }
+
     public function edit(Unit $unit): void
     {
         $this->unit->reset();
@@ -68,24 +86,6 @@ class Units extends UnitList
     {
         try {
             $this->unit->save();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
-    }
-
-    public function delete(Unit $unit): bool
-    {
-        $this->unit->reset();
-        $this->unit->fill($unit);
-
-        try {
-            $this->unit->delete();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 

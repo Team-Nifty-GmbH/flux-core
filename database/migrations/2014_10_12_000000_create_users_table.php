@@ -13,7 +13,7 @@ return new class() extends Migration
     {
         // crate table if it doesnt exist
         if (! Schema::hasTable('users')) {
-            Schema::create('users', function (Blueprint $table) {
+            Schema::create('users', function (Blueprint $table): void {
                 $table->id();
                 $table->string('name');
                 $table->string('email')->unique();

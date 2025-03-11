@@ -6,7 +6,7 @@ use FluxErp\Livewire\Forms\DiscountForm as BaseDiscountForm;
 
 class DiscountForm extends BaseDiscountForm
 {
-    public ?string $model_type = null;
-
     public ?int $model_id = null;
+
+    public ?string $model_type = null;
 }

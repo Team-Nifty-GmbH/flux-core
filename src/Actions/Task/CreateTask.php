@@ -11,14 +11,14 @@ use Illuminate\Support\Facades\Validator;
 
 class CreateTask extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateTaskRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Task::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateTaskRuleset::class;
     }
 
     public function performAction(): Task

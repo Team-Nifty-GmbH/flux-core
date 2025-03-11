@@ -20,6 +20,16 @@ class Calendar extends FluxCalendar
     #[Locked]
     public bool $showInvites = false;
 
+    public static function getDefaultHeight(): int
+    {
+        return 2;
+    }
+
+    public static function getDefaultWidth(): int
+    {
+        return 2;
+    }
+
     #[Renderless]
     public function getConfig(): array
     {
@@ -35,15 +45,5 @@ class Calendar extends FluxCalendar
                 )
             )
         );
-    }
-
-    public static function getDefaultWidth(): int
-    {
-        return 2;
-    }
-
-    public static function getDefaultHeight(): int
-    {
-        return 2;
     }
 }

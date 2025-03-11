@@ -9,9 +9,9 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class UpdateUserClientsRuleset extends FluxRuleset
 {
-    protected static ?string $model = User::class;
-
     protected static bool $addAdditionalColumnRules = false;
+
+    protected static ?string $model = User::class;
 
     public function rules(): array
     {

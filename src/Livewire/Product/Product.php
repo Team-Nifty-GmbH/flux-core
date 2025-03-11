@@ -36,21 +36,21 @@ class Product extends Component
 {
     use Actions, WithTabs;
 
-    public ProductForm $product;
-
-    public ?array $priceLists = null;
-
-    public ?array $productCrossSellings = null;
-
     public array $additionalColumns = [];
 
     public ?array $currency = null;
 
+    public array $displayedProductProperties = [];
+
+    public ?array $priceLists = null;
+
+    public ProductForm $product;
+
+    public ?array $productCrossSellings = null;
+
     public array $productProperties = [];
 
     public array $selectedProductProperties = [];
-
-    public array $displayedProductProperties = [];
 
     #[Url]
     public string $tab = 'product.general';
@@ -62,7 +62,7 @@ class Product extends Component
         $html = null;
 
         $layoutConfig = SupportPageComponents::interceptTheRenderOfTheComponentAndRetreiveTheLayoutConfiguration(
-            function () use (&$html) {
+            function () use (&$html): void {
                 $params = SupportPageComponents::gatherMountMethodParamsFromRouteParameters($this);
 
                 $productType = resolve_static(ProductModel::class, 'query')
@@ -120,20 +120,69 @@ class Product extends Component
         ]);
     }
 
-    #[Computed]
-    public function vatRates(): array
+    #[Renderless]
+    public function addProductProperties(): bool
     {
-        return app(VatRate::class)->all(['id', 'name', 'rate_percentage'])->toArray();
+        $this->selectedProductProperties = array_filter($this->selectedProductProperties);
+
+        if (! $this->selectedProductProperties) {
+            $this->product->product_properties = [];
+
+            return true;
+        }
+
+        $added = [];
+        $keep = [];
+        foreach (array_keys($this->selectedProductProperties) as $id) {
+            if (! in_array($id, array_column($this->product->product_properties, 'id'))) {
+                $added[] = data_get(
+                    $this->productProperties,
+                    $id,
+                    array_merge(
+                        resolve_static(ProductProperty::class, 'query')
+                            ->whereKey($id)
+                            ->with('productPropertyGroup:id,name')
+                            ->first(['id', 'product_property_group_id', 'name', 'property_type_enum'])
+                            ->toArray(),
+                        ['value' => null]
+                    )
+                );
+            } else {
+                $keep[] = $id;
+            }
+        }
+
+        $this->product->product_properties = Arr::keyBy(
+            array_merge(
+                array_intersect_key($this->product->product_properties, array_flip($keep)),
+                array_filter($added)
+            ),
+            'id'
+        );
+
+        $this->recalculateDisplayedProductProperties();
+
+        return true;
     }
 
-    #[Computed(persist: true)]
-    public function viewName()
+    #[Renderless]
+    public function addSupplier(Contact $contact): void
     {
-        $productType = resolve_static(ProductModel::class, 'query')
-            ->whereKey($this->product->id)
-            ->value('product_type');
+        if (in_array($contact->id, array_column($this->product->suppliers, 'contact_id'))) {
+            return;
+        }
 
-        return data_get(ProductType::get($productType) ?? ProductType::getDefault(), 'view') ?? $this->view;
+        $this->product->suppliers[] = [
+            'contact_id' => $contact->id,
+            'customer_number' => $contact->customer_number,
+            'manufacturer_product_number' => null,
+            'purchase_price' => null,
+            'main_address' => [
+                'name' => $contact->mainAddress->name,
+            ],
+        ];
+
+        $this->product->suppliers = array_values($this->product->suppliers);
     }
 
     #[Renderless]
@@ -157,6 +206,83 @@ class Product extends Component
         $this->js(<<<'JS'
             edit = true;
         JS);
+    }
+
+    #[Renderless]
+    public function delete(): bool
+    {
+        try {
+            $this->product->delete();
+
+            $this->redirect(route('products.products'), true);
+
+            return true;
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
+        }
+
+        return false;
+    }
+
+    #[Renderless]
+    public function getPriceLists(): void
+    {
+        $product = resolve_static(ProductModel::class, 'query')
+            ->whereKey($this->product->id)
+            ->first();
+        $priceListHelper = PriceHelper::make($product)->useDefault(false);
+
+        $priceLists = resolve_static(PriceList::class, 'query')
+            ->with('parent')
+            ->get([
+                'id',
+                'parent_id',
+                'name',
+                'price_list_code',
+                'rounding_method_enum',
+                'rounding_precision',
+                'rounding_number',
+                'rounding_mode',
+                'is_net',
+                'is_default',
+                'is_purchase',
+            ])
+            ->map(function (PriceList $priceList) use ($priceListHelper) {
+                $price = $priceListHelper
+                    ->setPriceList($priceList)
+                    ->price();
+
+                return [
+                    'id' => $priceList->id,
+                    'price_id' => $price?->id,
+                    'price_net' => $price
+                        ?->getNet(data_get($this->product->vat_rate, 'rate_percentage', 0)),
+                    'price_gross' => $price
+                        ?->getGross(data_get($this->product->vat_rate, 'rate_percentage', 0)),
+                    'parent' => $priceList->parent?->toArray(),
+                    'name' => $priceList->name,
+                    'is_net' => $priceList->is_net,
+                    'is_default' => $priceList->is_default,
+                    'is_purchase' => $priceList->is_purchase,
+                    'is_editable' => ! is_null(data_get($price, 'id')) || ! is_null($price?->parent) || is_null($price),
+                ];
+            });
+
+        $this->priceLists = $priceLists->toArray();
+    }
+
+    #[Renderless]
+    public function getProductCrossSellings(): void
+    {
+        $this->productCrossSellings = resolve_static(ProductCrossSelling::class, 'query')
+            ->where('product_id', $this->product->id)
+            ->with('products:id,name,product_number')
+            ->get()
+            ->each(function (ProductCrossSelling $productCrossSelling): void {
+                $productCrossSelling->products
+                    ->each(fn ($product) => $product->append('avatar_url'));
+            })
+            ->toArray();
     }
 
     public function getTabs(): array
@@ -185,6 +311,51 @@ class Product extends Component
                 ->isLivewireComponent()
                 ->wireModel('product.id'),
         ];
+    }
+
+    #[Renderless]
+    public function loadProductProperties(ProductPropertyGroup $propertyGroup): void
+    {
+        $this->productProperties = $propertyGroup
+            ->productProperties()
+            ->select(['id', 'product_property_group_id', 'name', 'property_type_enum'])
+            ->get()
+            ->map(fn ($productProperty) => array_merge(
+                $productProperty->toArray(),
+                [
+                    'value' => null,
+                    'product_property_group' => [
+                        'id' => $propertyGroup->id,
+                        'name' => $propertyGroup->name,
+                    ],
+                ]
+            ))
+            ->keyBy('id')
+            ->toArray();
+    }
+
+    public function resetProduct(): void
+    {
+        $product = resolve_static(ProductModel::class, 'query')
+            ->whereKey($this->product->id)
+            ->with([
+                'categories:id',
+                'tags:id',
+                'bundleProducts:id',
+                'vatRate:id,rate_percentage',
+                'parent',
+                'coverMedia',
+                'clients:id',
+            ])
+            ->withCount('children')
+            ->firstOrFail();
+        $product->append('avatar_url');
+
+        $this->product->reset();
+        $this->product->fill($product);
+        $this->product->product_properties = Arr::keyBy($this->product->product_properties, 'id');
+
+        $this->recalculateDisplayedProductProperties();
     }
 
     public function save(): bool
@@ -251,127 +422,6 @@ class Product extends Component
     }
 
     #[Renderless]
-    public function delete(): bool
-    {
-        try {
-            $this->product->delete();
-
-            $this->redirect(route('products.products'), true);
-
-            return true;
-        } catch (\Exception $e) {
-            exception_to_notifications($e, $this);
-        }
-
-        return false;
-    }
-
-    public function resetProduct(): void
-    {
-        $product = resolve_static(ProductModel::class, 'query')
-            ->whereKey($this->product->id)
-            ->with([
-                'categories:id',
-                'tags:id',
-                'bundleProducts:id',
-                'vatRate:id,rate_percentage',
-                'parent',
-                'coverMedia',
-                'clients:id',
-            ])
-            ->withCount('children')
-            ->firstOrFail();
-        $product->append('avatar_url');
-
-        $this->product->reset();
-        $this->product->fill($product);
-        $this->product->product_properties = Arr::keyBy($this->product->product_properties, 'id');
-
-        $this->recalculateDisplayedProductProperties();
-    }
-
-    #[Renderless]
-    public function getPriceLists(): void
-    {
-        $product = resolve_static(ProductModel::class, 'query')
-            ->whereKey($this->product->id)
-            ->first();
-        $priceListHelper = PriceHelper::make($product)->useDefault(false);
-
-        $priceLists = resolve_static(PriceList::class, 'query')
-            ->with('parent')
-            ->get([
-                'id',
-                'parent_id',
-                'name',
-                'price_list_code',
-                'rounding_method_enum',
-                'rounding_precision',
-                'rounding_number',
-                'rounding_mode',
-                'is_net',
-                'is_default',
-                'is_purchase',
-            ])
-            ->map(function (PriceList $priceList) use ($priceListHelper) {
-                $price = $priceListHelper
-                    ->setPriceList($priceList)
-                    ->price();
-
-                return [
-                    'id' => $priceList->id,
-                    'price_id' => $price?->id,
-                    'price_net' => $price
-                        ?->getNet(data_get($this->product->vat_rate, 'rate_percentage', 0)),
-                    'price_gross' => $price
-                        ?->getGross(data_get($this->product->vat_rate, 'rate_percentage', 0)),
-                    'parent' => $priceList->parent?->toArray(),
-                    'name' => $priceList->name,
-                    'is_net' => $priceList->is_net,
-                    'is_default' => $priceList->is_default,
-                    'is_purchase' => $priceList->is_purchase,
-                    'is_editable' => ! is_null(data_get($price, 'id')) || ! is_null($price?->parent) || is_null($price),
-                ];
-            });
-
-        $this->priceLists = $priceLists->toArray();
-    }
-
-    #[Renderless]
-    public function getProductCrossSellings(): void
-    {
-        $this->productCrossSellings = resolve_static(ProductCrossSelling::class, 'query')
-            ->where('product_id', $this->product->id)
-            ->with('products:id,name,product_number')
-            ->get()
-            ->each(function (ProductCrossSelling $productCrossSelling) {
-                $productCrossSelling->products
-                    ->each(fn ($product) => $product->append('avatar_url'));
-            })
-            ->toArray();
-    }
-
-    #[Renderless]
-    public function addSupplier(Contact $contact): void
-    {
-        if (in_array($contact->id, array_column($this->product->suppliers, 'contact_id'))) {
-            return;
-        }
-
-        $this->product->suppliers[] = [
-            'contact_id' => $contact->id,
-            'customer_number' => $contact->customer_number,
-            'manufacturer_product_number' => null,
-            'purchase_price' => null,
-            'main_address' => [
-                'name' => $contact->mainAddress->name,
-            ],
-        ];
-
-        $this->product->suppliers = array_values($this->product->suppliers);
-    }
-
-    #[Renderless]
     public function showProductPropertiesModal(): void
     {
         $this->productProperties = [];
@@ -385,70 +435,20 @@ class Product extends Component
         JS);
     }
 
-    #[Renderless]
-    public function loadProductProperties(ProductPropertyGroup $propertyGroup): void
+    #[Computed]
+    public function vatRates(): array
     {
-        $this->productProperties = $propertyGroup
-            ->productProperties()
-            ->select(['id', 'product_property_group_id', 'name', 'property_type_enum'])
-            ->get()
-            ->map(fn ($productProperty) => array_merge(
-                $productProperty->toArray(),
-                [
-                    'value' => null,
-                    'product_property_group' => [
-                        'id' => $propertyGroup->id,
-                        'name' => $propertyGroup->name,
-                    ],
-                ]
-            ))
-            ->keyBy('id')
-            ->toArray();
+        return app(VatRate::class)->all(['id', 'name', 'rate_percentage'])->toArray();
     }
 
-    #[Renderless]
-    public function addProductProperties(): bool
+    #[Computed(persist: true)]
+    public function viewName()
     {
-        $this->selectedProductProperties = array_filter($this->selectedProductProperties);
+        $productType = resolve_static(ProductModel::class, 'query')
+            ->whereKey($this->product->id)
+            ->value('product_type');
 
-        if (! $this->selectedProductProperties) {
-            $this->product->product_properties = [];
-
-            return true;
-        }
-
-        $added = [];
-        $keep = [];
-        foreach (array_keys($this->selectedProductProperties) as $id) {
-            if (! in_array($id, array_column($this->product->product_properties, 'id'))) {
-                $added[] = data_get(
-                    $this->productProperties,
-                    $id,
-                    array_merge(
-                        resolve_static(ProductProperty::class, 'query')
-                            ->whereKey($id)
-                            ->with('productPropertyGroup:id,name')
-                            ->first(['id', 'product_property_group_id', 'name', 'property_type_enum'])
-                            ->toArray(),
-                        ['value' => null]
-                    )
-                );
-            } else {
-                $keep[] = $id;
-            }
-        }
-
-        $this->product->product_properties = Arr::keyBy(
-            array_merge(
-                array_intersect_key($this->product->product_properties, array_flip($keep)),
-                array_filter($added)
-            ),
-            'id'
-        );
-
-        $this->recalculateDisplayedProductProperties();
-
-        return true;
+        return data_get(ProductType::get($productType) ?? ProductType::getDefault(), 'view') ?? $this->view;
     }
 
     protected function recalculateDisplayedProductProperties(): void
@@ -467,9 +467,9 @@ class Product extends Component
         }
 
         ksort($this->displayedProductProperties);
-        array_walk($this->displayedProductProperties, function (&$propertyTypes) {
+        array_walk($this->displayedProductProperties, function (&$propertyTypes): void {
             ksort($propertyTypes);
-            array_walk($propertyTypes, function (&$properties) {
+            array_walk($propertyTypes, function (&$properties): void {
                 $properties = Arr::sort($properties, ['name']);
             });
         });

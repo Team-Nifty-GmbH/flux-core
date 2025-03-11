@@ -10,11 +10,6 @@ use Illuminate\Support\Arr;
 
 class UpdateLockedOrder extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateLockedOrderRuleset::class;
-    }
-
     public static function description(): ?string
     {
         return 'Update an order regardless of its locked state.';
@@ -23,6 +18,11 @@ class UpdateLockedOrder extends FluxAction
     public static function models(): array
     {
         return [Order::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateLockedOrderRuleset::class;
     }
 
     public function performAction(): Model

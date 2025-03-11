@@ -14,14 +14,6 @@ class RevenuePurchasesProfitChart extends LineChart
 {
     use IsTimeFrameAwareWidget, MoneyChartFormattingTrait;
 
-    protected function getListeners(): array
-    {
-        return [
-            'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
-                . ',.OrderLocked' => 'calculateByTimeFrame',
-        ];
-    }
-
     #[Renderless]
     public function calculateByTimeFrame(): void
     {
@@ -100,5 +92,13 @@ class RevenuePurchasesProfitChart extends LineChart
         ];
 
         $this->xaxis['categories'] = $keys;
+    }
+
+    protected function getListeners(): array
+    {
+        return [
+            'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
+                . ',.OrderLocked' => 'calculateByTimeFrame',
+        ];
     }
 }

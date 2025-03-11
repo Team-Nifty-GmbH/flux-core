@@ -9,8 +9,6 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class OrderList extends DataTableOrderList
 {
-    public bool $isSelectable = true;
-
     public array $enabledCols = [
         'invoice_number',
         'contact.customer_number',
@@ -20,12 +18,9 @@ class OrderList extends DataTableOrderList
         'commission',
     ];
 
-    public int $perPage = 10;
+    public bool $isSelectable = true;
 
-    protected function getBuilder(Builder $builder): Builder
-    {
-        return $builder->whereNotNull('invoice_number');
-    }
+    public int $perPage = 10;
 
     protected function getSelectedActions(): array
     {
@@ -38,5 +33,10 @@ class OrderList extends DataTableOrderList
                 ])
                 ->when(fn () => resolve_static(CreateTransaction::class, 'canPerformAction', [false])),
         ];
+    }
+
+    protected function getBuilder(Builder $builder): Builder
+    {
+        return $builder->whereNotNull('invoice_number');
     }
 }

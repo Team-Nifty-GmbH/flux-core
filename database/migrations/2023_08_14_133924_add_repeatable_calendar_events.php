@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('calendar_events', function (Blueprint $table) {
+        Schema::table('calendar_events', function (Blueprint $table): void {
             $table->dateTime('repeat_end')->nullable()->after('repeat');
             $table->unsignedInteger('recurrences')->nullable()->after('repeat_end');
             $table->json('excluded')->nullable()->after('recurrences');
@@ -17,7 +17,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('calendar_events', function (Blueprint $table) {
+        Schema::table('calendar_events', function (Blueprint $table): void {
             $table->dropColumn(['repeat_end', 'recurrences', 'excluded']);
         });
     }

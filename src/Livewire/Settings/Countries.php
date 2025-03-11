@@ -19,9 +19,9 @@ class Countries extends CountryList
 {
     use Actions;
 
-    protected ?string $includeBefore = 'flux::livewire.settings.countries';
-
     public CountryForm $country;
+
+    protected ?string $includeBefore = 'flux::livewire.settings.countries';
 
     protected function getTableActions(): array
     {
@@ -56,19 +56,22 @@ class Countries extends CountryList
         ];
     }
 
-    protected function getViewData(): array
+    public function delete(Country $country): bool
     {
-        return array_merge(
-            parent::getViewData(),
-            [
-                'languages' => resolve_static(Language::class, 'query')
-                    ->get(['id', 'name'])
-                    ->toArray(),
-                'currencies' => resolve_static(Currency::class, 'query')
-                    ->get(['id', 'name'])
-                    ->toArray(),
-            ]
-        );
+        $this->country->reset();
+        $this->country->fill($country);
+
+        try {
+            $this->country->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
     }
 
     public function edit(Country $country): void
@@ -96,21 +99,18 @@ class Countries extends CountryList
         return true;
     }
 
-    public function delete(Country $country): bool
+    protected function getViewData(): array
     {
-        $this->country->reset();
-        $this->country->fill($country);
-
-        try {
-            $this->country->delete();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
+        return array_merge(
+            parent::getViewData(),
+            [
+                'languages' => resolve_static(Language::class, 'query')
+                    ->get(['id', 'name'])
+                    ->toArray(),
+                'currencies' => resolve_static(Currency::class, 'query')
+                    ->get(['id', 'name'])
+                    ->toArray(),
+            ]
+        );
     }
 }

@@ -14,12 +14,6 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class TransactionList extends BaseDataTable
 {
-    protected string $model = Transaction::class;
-
-    protected ?string $includeBefore = 'flux::livewire.transactions.transactions';
-
-    public TransactionForm $transactionForm;
-
     public array $enabledCols = [
         'bank_connection.name',
         'value_date',
@@ -33,6 +27,12 @@ class TransactionList extends BaseDataTable
         'amount' => 'coloredMoney',
     ];
 
+    public TransactionForm $transactionForm;
+
+    protected ?string $includeBefore = 'flux::livewire.transactions.transactions';
+
+    protected string $model = Transaction::class;
+
     protected function getTableActions(): array
     {
         return [
@@ -44,17 +44,6 @@ class TransactionList extends BaseDataTable
         ];
     }
 
-    protected function getViewData(): array
-    {
-        return array_merge(
-            parent::getViewData(),
-            [
-                'bankConnections' => resolve_static(BankConnection::class, 'query')
-                    ->get(['bank_connections.id', 'name', 'iban']),
-            ]
-        );
-    }
-
     protected function getRowActions(): array
     {
         return [
@@ -64,6 +53,22 @@ class TransactionList extends BaseDataTable
                 ->wireClick('editTransaction(record.id)')
                 ->when(fn () => resolve_static(UpdateTransaction::class, 'canPerformAction', [false])),
         ];
+    }
+
+    #[Renderless]
+    public function deleteTransaction(): bool
+    {
+        try {
+            $this->transactionForm->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
     }
 
     #[Renderless]
@@ -100,19 +105,14 @@ class TransactionList extends BaseDataTable
         return true;
     }
 
-    #[Renderless]
-    public function deleteTransaction(): bool
+    protected function getViewData(): array
     {
-        try {
-            $this->transactionForm->delete();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
+        return array_merge(
+            parent::getViewData(),
+            [
+                'bankConnections' => resolve_static(BankConnection::class, 'query')
+                    ->get(['bank_connections.id', 'name', 'iban']),
+            ]
+        );
     }
 }

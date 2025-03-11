@@ -12,9 +12,9 @@ use Livewire\Component;
 #[Lazy]
 class ProductListCard extends Component
 {
-    public ProductForm $productForm;
-
     public ?int $cartItemId = null;
+
+    public ProductForm $productForm;
 
     public function mount(array $product): void
     {

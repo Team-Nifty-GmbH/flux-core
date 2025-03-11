@@ -11,14 +11,14 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateSepaMandate extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateSepaMandateRuleset::class;
-    }
-
     public static function models(): array
     {
         return [SepaMandate::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateSepaMandateRuleset::class;
     }
 
     public function performAction(): Model

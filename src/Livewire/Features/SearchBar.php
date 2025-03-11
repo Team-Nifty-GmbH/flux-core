@@ -20,17 +20,17 @@ class SearchBar extends Component
 {
     use Actions, WithPagination;
 
+    public ?array $load = null;
+
+    public array $modelLabels = [];
+
+    public array $return = [];
+
     public string $search = '';
 
     public array|string $searchModel = '';
 
     public bool $show = false;
-
-    public array $return = [];
-
-    public array $modelLabels = [];
-
-    public ?array $load = null;
 
     public function mount(): void
     {
@@ -61,6 +61,21 @@ class SearchBar extends Component
     public function render(): View|Factory|Application
     {
         return view('flux::livewire.features.search-bar', ['results' => $this->return]);
+    }
+
+    #[Renderless]
+    public function showDetail(string $model, int $id): void
+    {
+        /** @var Model $model */
+        $modelInstance = resolve_static($model, 'query')->whereKey($id)->first();
+
+        if (! $modelInstance) {
+            $this->notification()->error(__('Record not found'))->send();
+
+            return;
+        }
+
+        $this->redirect($modelInstance->detailRoute(), true);
     }
 
     public function updatedSearch(): void
@@ -112,20 +127,5 @@ class SearchBar extends Component
         }
 
         $this->skipRender();
-    }
-
-    #[Renderless]
-    public function showDetail(string $model, int $id): void
-    {
-        /** @var Model $model */
-        $modelInstance = resolve_static($model, 'query')->whereKey($id)->first();
-
-        if (! $modelInstance) {
-            $this->notification()->error(__('Record not found'))->send();
-
-            return;
-        }
-
-        $this->redirect($modelInstance->detailRoute(), true);
     }
 }

@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class AdditionalColumnsTest extends BaseSetup
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(AdditionalColumns::class)
             ->assertStatus(200);

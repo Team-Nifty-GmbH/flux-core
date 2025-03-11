@@ -11,7 +11,7 @@ return new class() extends Migration
     {
         $this->migrateCategorizablesTable();
 
-        Schema::table('project_tasks', function (Blueprint $table) {
+        Schema::table('project_tasks', function (Blueprint $table): void {
             $table->dropForeign('project_tasks_category_id_foreign');
             $table->dropColumn('category_id');
         });
@@ -19,18 +19,18 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('project_tasks', function (Blueprint $table) {
+        Schema::table('project_tasks', function (Blueprint $table): void {
             $table->unsignedBigInteger('category_id')->after('project_id');
         });
 
         $this->rollbackCategorizablesTable();
 
-        Schema::table('project_tasks', function (Blueprint $table) {
+        Schema::table('project_tasks', function (Blueprint $table): void {
             $table->foreign('category_id')->references('id')->on('categories');
         });
     }
 
-    private function migrateCategorizablesTable()
+    private function migrateCategorizablesTable(): void
     {
         DB::statement('INSERT INTO categorizables(category_id, categorizable_type, categorizable_id)
             SELECT category_id, \'' . trim(
@@ -40,7 +40,7 @@ return new class() extends Migration
         );
     }
 
-    private function rollbackCategorizablesTable()
+    private function rollbackCategorizablesTable(): void
     {
         DB::statement('UPDATE project_tasks
             INNER JOIN categorizables

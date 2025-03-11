@@ -20,9 +20,9 @@ class CommentTest extends BaseSetup
 {
     private Comment $comment;
 
-    private Ticket $ticket;
-
     private array $permissions;
+
+    private Ticket $ticket;
 
     protected function setUp(): void
     {
@@ -47,48 +47,7 @@ class CommentTest extends BaseSetup
         Role::findOrCreate('Super Admin');
     }
 
-    public function test_get_ticket_comments()
-    {
-        $dbComment = new Comment();
-        $dbComment->model_type = morph_alias(Ticket::class);
-        $dbComment->model_id = $this->ticket->id;
-        $dbComment->comment = 'User Comment from a Test!';
-        $dbComment->save();
-
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/ticket/comments/' . $this->ticket->id);
-        $response->assertStatus(200);
-
-        $json = json_decode($response->getContent());
-        $this->assertFalse(property_exists($json, 'templates'));
-        $ticketComment = $json->data->data;
-        $this->assertNotEmpty($ticketComment);
-        $this->assertEquals($dbComment->id, $ticketComment[0]->id);
-        $this->assertEquals($dbComment->model_id, $ticketComment[0]->model_id);
-        $this->assertEquals($dbComment->comment, $ticketComment[0]->comment);
-    }
-
-    public function test_get_comments_route_not_found()
-    {
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/notExistingTestModel/comments/' . $this->user->id);
-        $response->assertStatus(404);
-    }
-
-    public function test_get_comments_model_instance_not_found()
-    {
-        $this->user->givePermissionTo($this->permissions['show'])->load('permissions');
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/user/comments/' . ++$this->user->id);
-        $response->assertStatus(404);
-    }
-
-    public function test_create_comment()
+    public function test_create_comment(): void
     {
         $comment = [
             'model_id' => $this->ticket->id,
@@ -114,21 +73,7 @@ class CommentTest extends BaseSetup
         $this->assertTrue($this->user->is($dbComment->getUpdatedBy()));
     }
 
-    public function test_create_comment_validation_fails()
-    {
-        $comment = [
-            'model_id' => $this->user->id,
-            'comment' => 'test comment',
-        ];
-
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->post('/api/comments', $comment);
-        $response->assertStatus(422);
-    }
-
-    public function test_create_comment_model_class_not_found()
+    public function test_create_comment_model_class_not_found(): void
     {
         $comment = [
             'model_id' => 1,
@@ -143,22 +88,7 @@ class CommentTest extends BaseSetup
         $response->assertStatus(422);
     }
 
-    public function test_create_comment_not_commentable()
-    {
-        $comment = [
-            'model_id' => 1,
-            'model_type' => morph_alias(Unit::class),
-            'comment' => 'test comment',
-        ];
-
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->post('/api/comments', $comment);
-        $response->assertStatus(422);
-    }
-
-    public function test_create_comment_model_instance_not_found()
+    public function test_create_comment_model_instance_not_found(): void
     {
         $comment = [
             'model_id' => ++$this->ticket->id,
@@ -173,38 +103,12 @@ class CommentTest extends BaseSetup
         $response->assertStatus(422);
     }
 
-    public function test_create_comment_with_parent()
+    public function test_create_comment_not_commentable(): void
     {
         $comment = [
-            'model_id' => $this->ticket->id,
-            'model_type' => morph_alias(Ticket::class),
-            'parent_id' => $this->comment->id,
-            'comment' => 'child comment',
-        ];
-
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->post('/api/comments', $comment);
-        $response->assertStatus(201);
-
-        $userComment = json_decode($response->getContent())->data;
-        $dbComment = Comment::query()->whereKey($userComment->id)->first();
-
-        $this->assertNotNull($dbComment);
-        $this->assertEquals($comment['model_id'], $dbComment->model_id);
-        $this->assertEquals($comment['model_type'], $dbComment->model_type);
-        $this->assertEquals($comment['parent_id'], $dbComment->parent_id);
-        $this->assertEquals($comment['comment'], $dbComment->comment);
-    }
-
-    public function test_create_comment_with_parent_not_found()
-    {
-        $comment = [
-            'model_id' => $this->ticket->id,
-            'model_type' => morph_alias(Ticket::class),
-            'parent_id' => ++$this->comment->id,
-            'comment' => 'child comment',
+            'model_id' => 1,
+            'model_type' => morph_alias(Unit::class),
+            'comment' => 'test comment',
         ];
 
         $this->user->givePermissionTo($this->permissions['create']);
@@ -214,91 +118,7 @@ class CommentTest extends BaseSetup
         $response->assertStatus(422);
     }
 
-    public function test_update_comment()
-    {
-        $comment = [
-            'id' => $this->comment->id,
-            'is_sticky' => true,
-        ];
-
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->put('/api/comments', $comment);
-        $response->assertStatus(200);
-
-        $dbComment = Comment::query()->whereKey($this->comment->id)->first();
-
-        $this->assertEquals($this->comment->model_id, $dbComment->model_id);
-        $this->assertEquals($this->comment->model_type, $dbComment->model_type);
-        $this->assertEquals($this->comment->parent_id, $dbComment->parent_id);
-        $this->assertEquals($this->comment->comment, $dbComment->comment);
-        $this->assertEquals($comment['is_sticky'], $dbComment->is_sticky);
-    }
-
-    public function test_delete_comment()
-    {
-        DB::table($this->comment->getTable())
-            ->where($this->comment->getKeyName(), $this->comment->getKey())
-            ->update([
-                'created_by' => $this->user->getMorphClass() . ':' . $this->user->getKey(),
-            ]);
-
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->delete('/api/comments/' . $this->comment->id);
-        $response->assertStatus(204);
-
-        $dbComment = $this->comment->fresh();
-        $this->assertNotNull($dbComment->deleted_at);
-        $this->assertTrue($this->user->is($dbComment->getDeletedBy()));
-    }
-
-    public function test_delete_comment_different_user()
-    {
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->delete('/api/comments/' . $this->comment->id);
-        $response->assertStatus(403);
-
-        $dbComment = Comment::query()->whereKey($this->comment->id)->first();
-        $this->assertNotNull($dbComment);
-    }
-
-    public function test_delete_comment_comment_not_found()
-    {
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->delete('/api/comments/' . $this->comment->id + 1);
-        $response->assertStatus(404);
-    }
-
-    public function test_delete_comment_as_super_admin()
-    {
-        $user = User::factory()->create([
-            'language_id' => $this->user->language_id,
-        ]);
-
-        $activity = $this->comment->activities()->where('event', 'created')->first();
-        $activity->causer()->associate($user);
-        $activity->save();
-
-        $this->user->assignRole('Super Admin');
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->delete('/api/comments/' . $this->comment->id);
-        $response->assertStatus(204);
-
-        $dbComment = $this->comment->fresh();
-        $this->assertFalse($this->user->is($dbComment->getCreatedBy()));
-        $this->assertNotNull($dbComment->deleted_at);
-        $this->assertTrue($this->user->is($dbComment->getDeletedBy()));
-    }
-
-    public function test_create_comment_sends_notification()
+    public function test_create_comment_sends_notification(): void
     {
         Notification::fake();
         $user = new User([
@@ -348,5 +168,185 @@ class CommentTest extends BaseSetup
 
         Notification::assertSentTo($user, CommentCreatedNotification::class);
         Notification::assertNothingSentTo($this->user);
+    }
+
+    public function test_create_comment_validation_fails(): void
+    {
+        $comment = [
+            'model_id' => $this->user->id,
+            'comment' => 'test comment',
+        ];
+
+        $this->user->givePermissionTo($this->permissions['create']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->post('/api/comments', $comment);
+        $response->assertStatus(422);
+    }
+
+    public function test_create_comment_with_parent(): void
+    {
+        $comment = [
+            'model_id' => $this->ticket->id,
+            'model_type' => morph_alias(Ticket::class),
+            'parent_id' => $this->comment->id,
+            'comment' => 'child comment',
+        ];
+
+        $this->user->givePermissionTo($this->permissions['create']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->post('/api/comments', $comment);
+        $response->assertStatus(201);
+
+        $userComment = json_decode($response->getContent())->data;
+        $dbComment = Comment::query()->whereKey($userComment->id)->first();
+
+        $this->assertNotNull($dbComment);
+        $this->assertEquals($comment['model_id'], $dbComment->model_id);
+        $this->assertEquals($comment['model_type'], $dbComment->model_type);
+        $this->assertEquals($comment['parent_id'], $dbComment->parent_id);
+        $this->assertEquals($comment['comment'], $dbComment->comment);
+    }
+
+    public function test_create_comment_with_parent_not_found(): void
+    {
+        $comment = [
+            'model_id' => $this->ticket->id,
+            'model_type' => morph_alias(Ticket::class),
+            'parent_id' => ++$this->comment->id,
+            'comment' => 'child comment',
+        ];
+
+        $this->user->givePermissionTo($this->permissions['create']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->post('/api/comments', $comment);
+        $response->assertStatus(422);
+    }
+
+    public function test_delete_comment(): void
+    {
+        DB::table($this->comment->getTable())
+            ->where($this->comment->getKeyName(), $this->comment->getKey())
+            ->update([
+                'created_by' => $this->user->getMorphClass() . ':' . $this->user->getKey(),
+            ]);
+
+        $this->user->givePermissionTo($this->permissions['delete']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->delete('/api/comments/' . $this->comment->id);
+        $response->assertStatus(204);
+
+        $dbComment = $this->comment->fresh();
+        $this->assertNotNull($dbComment->deleted_at);
+        $this->assertTrue($this->user->is($dbComment->getDeletedBy()));
+    }
+
+    public function test_delete_comment_as_super_admin(): void
+    {
+        $user = User::factory()->create([
+            'language_id' => $this->user->language_id,
+        ]);
+
+        $activity = $this->comment->activities()->where('event', 'created')->first();
+        $activity->causer()->associate($user);
+        $activity->save();
+
+        $this->user->assignRole('Super Admin');
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->delete('/api/comments/' . $this->comment->id);
+        $response->assertStatus(204);
+
+        $dbComment = $this->comment->fresh();
+        $this->assertFalse($this->user->is($dbComment->getCreatedBy()));
+        $this->assertNotNull($dbComment->deleted_at);
+        $this->assertTrue($this->user->is($dbComment->getDeletedBy()));
+    }
+
+    public function test_delete_comment_comment_not_found(): void
+    {
+        $this->user->givePermissionTo($this->permissions['delete']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->delete('/api/comments/' . $this->comment->id + 1);
+        $response->assertStatus(404);
+    }
+
+    public function test_delete_comment_different_user(): void
+    {
+        $this->user->givePermissionTo($this->permissions['delete']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->delete('/api/comments/' . $this->comment->id);
+        $response->assertStatus(403);
+
+        $dbComment = Comment::query()->whereKey($this->comment->id)->first();
+        $this->assertNotNull($dbComment);
+    }
+
+    public function test_get_comments_model_instance_not_found(): void
+    {
+        $this->user->givePermissionTo($this->permissions['show'])->load('permissions');
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->get('/api/user/comments/' . ++$this->user->id);
+        $response->assertStatus(404);
+    }
+
+    public function test_get_comments_route_not_found(): void
+    {
+        $this->user->givePermissionTo($this->permissions['show']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->get('/api/notExistingTestModel/comments/' . $this->user->id);
+        $response->assertStatus(404);
+    }
+
+    public function test_get_ticket_comments(): void
+    {
+        $dbComment = new Comment();
+        $dbComment->model_type = morph_alias(Ticket::class);
+        $dbComment->model_id = $this->ticket->id;
+        $dbComment->comment = 'User Comment from a Test!';
+        $dbComment->save();
+
+        $this->user->givePermissionTo($this->permissions['show']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->get('/api/ticket/comments/' . $this->ticket->id);
+        $response->assertStatus(200);
+
+        $json = json_decode($response->getContent());
+        $this->assertFalse(property_exists($json, 'templates'));
+        $ticketComment = $json->data->data;
+        $this->assertNotEmpty($ticketComment);
+        $this->assertEquals($dbComment->id, $ticketComment[0]->id);
+        $this->assertEquals($dbComment->model_id, $ticketComment[0]->model_id);
+        $this->assertEquals($dbComment->comment, $ticketComment[0]->comment);
+    }
+
+    public function test_update_comment(): void
+    {
+        $comment = [
+            'id' => $this->comment->id,
+            'is_sticky' => true,
+        ];
+
+        $this->user->givePermissionTo($this->permissions['update']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->put('/api/comments', $comment);
+        $response->assertStatus(200);
+
+        $dbComment = Comment::query()->whereKey($this->comment->id)->first();
+
+        $this->assertEquals($this->comment->model_id, $dbComment->model_id);
+        $this->assertEquals($this->comment->model_type, $dbComment->model_type);
+        $this->assertEquals($this->comment->parent_id, $dbComment->parent_id);
+        $this->assertEquals($this->comment->comment, $dbComment->comment);
+        $this->assertEquals($comment['is_sticky'], $dbComment->is_sticky);
     }
 }

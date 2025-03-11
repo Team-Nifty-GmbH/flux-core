@@ -27,16 +27,16 @@ class ContactBankConnectionController extends BaseController
         );
     }
 
-    public function update(Request $request, ContactBankConnectionService $contactBankConnectionService): JsonResponse
+    public function delete(string $id, ContactBankConnectionService $contactBankConnectionService): JsonResponse
     {
-        $response = $contactBankConnectionService->update($request->all());
+        $response = $contactBankConnectionService->delete($id);
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
-    public function delete(string $id, ContactBankConnectionService $contactBankConnectionService): JsonResponse
+    public function update(Request $request, ContactBankConnectionService $contactBankConnectionService): JsonResponse
     {
-        $response = $contactBankConnectionService->delete($id);
+        $response = $contactBankConnectionService->update($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }

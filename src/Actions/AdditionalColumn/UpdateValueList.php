@@ -10,14 +10,14 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateValueList extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateValueListRuleset::class;
-    }
-
     public static function models(): array
     {
         return [AdditionalColumn::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateValueListRuleset::class;
     }
 
     public function performAction(): Model

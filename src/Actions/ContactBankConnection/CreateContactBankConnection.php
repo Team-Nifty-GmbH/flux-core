@@ -8,14 +8,14 @@ use FluxErp\Rulesets\ContactBankConnection\CreateContactBankConnectionRuleset;
 
 class CreateContactBankConnection extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateContactBankConnectionRuleset::class;
-    }
-
     public static function models(): array
     {
         return [ContactBankConnection::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateContactBankConnectionRuleset::class;
     }
 
     public function performAction(): ContactBankConnection

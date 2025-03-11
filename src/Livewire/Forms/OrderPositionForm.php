@@ -11,12 +11,44 @@ use Livewire\Attributes\Locked;
 
 class OrderPositionForm extends FluxForm
 {
-    #[Locked]
-    public ?int $id = null;
+    public ?string $alternative_tag = null;
+
+    public null|float|string $amount = 1;
+
+    public ?string $amount_bundle = null;
+
+    public ?string $amount_packed_products = null;
 
     public ?int $client_id = null;
 
+    public ?int $contact_id = null;
+
+    public ?string $customer_delivery_date = null;
+
+    public ?string $description = null;
+
+    public ?string $discount_percentage = null;
+
+    public ?string $ean_code = null;
+
+    #[Locked]
+    public ?int $id = null;
+
+    public ?string $indentation = null;
+
+    public ?bool $is_alternative = false;
+
+    public bool $is_bundle_position = false;
+
+    public bool $is_free_text = false;
+
+    public bool $is_net = true;
+
     public ?int $ledger_account_id = null;
+
+    public ?string $margin = null;
+
+    public ?string $name = null;
 
     public ?int $order_id = null;
 
@@ -24,27 +56,24 @@ class OrderPositionForm extends FluxForm
 
     public ?int $parent_id = null;
 
+    public ?string $possible_delivery_date = null;
+
     public ?int $price_id = null;
 
     public ?int $price_list_id = null;
 
     public ?int $product_id = null;
 
-    public ?int $vat_rate_id = null;
-
-    public ?int $warehouse_id = null;
-
-    public null|float|string $amount = 1;
-
-    public ?string $amount_bundle = null;
-
-    public ?string $discount_percentage = null;
-
-    public ?string $margin = null;
+    public ?string $product_number = null;
 
     public ?string $provision = null;
 
     public null|string|float $purchase_price = 0;
+
+    // Virtual attributes
+    public ?string $slug_position = null;
+
+    public ?int $sort_number = null;
 
     public null|string|float $total_base_gross_price = null;
 
@@ -54,61 +83,23 @@ class OrderPositionForm extends FluxForm
 
     public null|string|float $total_net_price = null;
 
-    public null|string|float $vat_price = null;
-
-    public null|string|float $unit_price = null;
-
-    public null|string|float $unit_net_price = null;
+    public ?string $unit_gram_weight = null;
 
     public null|string|float $unit_gross_price = null;
 
+    public null|string|float $unit_net_price = null;
+
+    public null|string|float $unit_price = null;
+
+    public null|string|float $vat_price = null;
+
+    public ?int $vat_rate_id = null;
+
     public ?float $vat_rate_percentage = null;
 
-    public ?string $amount_packed_products = null;
-
-    public ?string $customer_delivery_date = null;
-
-    public ?string $ean_code = null;
-
-    public ?string $possible_delivery_date = null;
-
-    public ?string $unit_gram_weight = null;
-
-    public ?string $description = null;
-
-    public ?string $name = null;
-
-    public ?string $product_number = null;
-
-    public ?int $sort_number = null;
-
-    public ?bool $is_alternative = false;
-
-    public bool $is_net = true;
-
-    public bool $is_free_text = false;
-
-    public bool $is_bundle_position = false;
-
-    // Virtual attributes
-    public ?string $slug_position = null;
-
-    public ?int $contact_id = null;
-
-    public ?string $indentation = null;
-
-    public ?string $alternative_tag = null;
+    public ?int $warehouse_id = null;
 
     protected Product $product;
-
-    protected function getActions(): array
-    {
-        return [
-            'create' => CreateOrderPosition::class,
-            'update' => UpdateOrderPosition::class,
-            'delete' => DeleteOrderPosition::class,
-        ];
-    }
 
     public function fill($values): void
     {
@@ -159,5 +150,14 @@ class OrderPositionForm extends FluxForm
             : null;
 
         return $data;
+    }
+
+    protected function getActions(): array
+    {
+        return [
+            'create' => CreateOrderPosition::class,
+            'update' => UpdateOrderPosition::class,
+            'delete' => DeleteOrderPosition::class,
+        ];
     }
 }

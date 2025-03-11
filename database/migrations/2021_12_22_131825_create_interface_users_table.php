@@ -8,7 +8,7 @@ class CreateInterfaceUsersTable extends Migration
 {
     public function up(): void
     {
-        Schema::create('interface_users', function (Blueprint $table) {
+        Schema::create('interface_users', function (Blueprint $table): void {
             $table->id();
             $table->string('name');
             $table->string('password');

@@ -64,10 +64,17 @@ class Frequency implements DataAwareRule, ValidationRule
 
     public function __construct(protected string $frequencyKey) {}
 
+    public function setData(array $data): static
+    {
+        $this->data = $data;
+
+        return $this;
+    }
+
     /**
      * Run the validation rule.
      *
-     * @param  \Closure(string): \Illuminate\Translation\PotentiallyTranslatedString  $fail
+     * @param  Closure(string): \Illuminate\Translation\PotentiallyTranslatedString  $fail
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
@@ -228,12 +235,5 @@ class Frequency implements DataAwareRule, ValidationRule
                 }
                 break;
         }
-    }
-
-    public function setData(array $data): static
-    {
-        $this->data = $data;
-
-        return $this;
     }
 }

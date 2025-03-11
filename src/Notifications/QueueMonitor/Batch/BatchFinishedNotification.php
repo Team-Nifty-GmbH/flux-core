@@ -20,20 +20,14 @@ class BatchFinishedNotification extends Notification implements HasToastNotifica
         $this->id = Uuid::uuid5(Uuid::NAMESPACE_URL, $this->model->getKey());
     }
 
-    public function via(object $notifiable): array
+    public function toArray(object $notifiable): array
     {
-        $via = [BroadcastNowChannel::class, DatabaseChannel::class];
-        if ($this->model
-            ->jobBatchables()
-            ->where('job_batchable_type', morph_alias($notifiable::class))
-            ->where('job_batchable_id', $notifiable->id)
-            ->where('notify_on_finish', true)
-            ->exists()
-        ) {
-            $via[] = MailChannel::class;
-        }
+        return $this->toToastNotification($notifiable)->toArray();
+    }
 
-        return $via;
+    public function toMail(object $notifiable): MailMessage
+    {
+        return $this->toToastNotification($notifiable)->toMail();
     }
 
     public function toToastNotification(object $notifiable): ToastNotification
@@ -54,18 +48,24 @@ class BatchFinishedNotification extends Notification implements HasToastNotifica
             ->progress($this->model->getProgress());
     }
 
-    public function toMail(object $notifiable): MailMessage
-    {
-        return $this->toToastNotification($notifiable)->toMail();
-    }
-
-    public function toArray(object $notifiable): array
-    {
-        return $this->toToastNotification($notifiable)->toArray();
-    }
-
     public function toWebPush(object $notifiable): ?WebPushMessage
     {
         return $this->toToastNotification($notifiable)->toWebPush();
+    }
+
+    public function via(object $notifiable): array
+    {
+        $via = [BroadcastNowChannel::class, DatabaseChannel::class];
+        if ($this->model
+            ->jobBatchables()
+            ->where('job_batchable_type', morph_alias($notifiable::class))
+            ->where('job_batchable_id', $notifiable->id)
+            ->where('notify_on_finish', true)
+            ->exists()
+        ) {
+            $via[] = MailChannel::class;
+        }
+
+        return $via;
     }
 }

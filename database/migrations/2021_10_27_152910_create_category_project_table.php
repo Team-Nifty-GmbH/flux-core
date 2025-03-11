@@ -8,7 +8,7 @@ class CreateCategoryProjectTable extends Migration
 {
     public function up(): void
     {
-        Schema::create('category_project', function (Blueprint $table) {
+        Schema::create('category_project', function (Blueprint $table): void {
             $table->unsignedBigInteger('category_id');
             $table->unsignedBigInteger('project_id');
 

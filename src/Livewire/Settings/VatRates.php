@@ -58,6 +58,24 @@ class VatRates extends VatRateList
         ];
     }
 
+    public function delete(VatRate $vatRate): bool
+    {
+        $this->vatRate->reset();
+        $this->vatRate->fill($vatRate);
+
+        try {
+            $this->vatRate->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
+    }
+
     public function edit(VatRate $vatRate): void
     {
         $this->vatRate->reset();
@@ -72,24 +90,6 @@ class VatRates extends VatRateList
     {
         try {
             $this->vatRate->save();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
-    }
-
-    public function delete(VatRate $vatRate): bool
-    {
-        $this->vatRate->reset();
-        $this->vatRate->fill($vatRate);
-
-        try {
-            $this->vatRate->delete();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 

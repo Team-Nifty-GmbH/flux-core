@@ -24,11 +24,11 @@ class AddressMediaScope implements Scope
             return;
         }
 
-        $builder->where(function (Builder $query) {
+        $builder->where(function (Builder $query): void {
             $query->whereNot('model_type', morph_alias(Order::class))
-                ->orWhere(function (Builder $query) {
+                ->orWhere(function (Builder $query): void {
                     $query->where('model_type', morph_alias(Order::class))
-                        ->whereIn('model_id', function (QueryBuilder $query) {
+                        ->whereIn('model_id', function (QueryBuilder $query): void {
                             $query->select('id')
                                 ->from('orders')
                                 ->where('contact_id', Auth::user()->contact_id)

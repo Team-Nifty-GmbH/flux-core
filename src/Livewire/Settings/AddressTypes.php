@@ -55,15 +55,22 @@ class AddressTypes extends AddressTypeList
         ];
     }
 
-    protected function getViewData(): array
+    public function delete(AddressType $addressType): bool
     {
-        return array_merge(
-            parent::getViewData(),
-            [
-                'clients' => resolve_static(Client::class, 'query')
-                    ->get(['id', 'name'])
-                    ->toArray(),
-            ]);
+        $this->addressType->reset();
+        $this->addressType->fill($addressType);
+
+        try {
+            $this->addressType->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
     }
 
     public function edit(AddressType $addressType): void
@@ -91,21 +98,14 @@ class AddressTypes extends AddressTypeList
         return true;
     }
 
-    public function delete(AddressType $addressType): bool
+    protected function getViewData(): array
     {
-        $this->addressType->reset();
-        $this->addressType->fill($addressType);
-
-        try {
-            $this->addressType->delete();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
+        return array_merge(
+            parent::getViewData(),
+            [
+                'clients' => resolve_static(Client::class, 'query')
+                    ->get(['id', 'name'])
+                    ->toArray(),
+            ]);
     }
 }

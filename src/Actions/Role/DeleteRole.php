@@ -9,14 +9,14 @@ use Illuminate\Validation\ValidationException;
 
 class DeleteRole extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeleteRoleRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Role::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeleteRoleRuleset::class;
     }
 
     public function performAction(): ?bool

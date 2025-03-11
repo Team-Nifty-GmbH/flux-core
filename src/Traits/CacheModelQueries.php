@@ -22,13 +22,13 @@ trait CacheModelQueries
         static::deleted(fn (Model $model) => $model->flushModelQueryCache());
     }
 
-    public function getModelQueryCacheTtl(): ?int
-    {
-        return 86400;
-    }
-
     public function flushModelQueryCache(): void
     {
         Cache::forget(resolve_static(CachedBuilder::class, 'cacheKey', ['class' => static::class]));
+    }
+
+    public function getModelQueryCacheTtl(): ?int
+    {
+        return 86400;
     }
 }

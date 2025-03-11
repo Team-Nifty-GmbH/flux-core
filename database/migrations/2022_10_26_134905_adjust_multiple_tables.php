@@ -16,7 +16,7 @@ return new class() extends Migration
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\Address", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM addresses WHERE updated_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "deleted", "FluxErp\\\\Models\\\\Address", "deleted", id, "FluxErp\\\\Models\\\\User", deleted_by, deleted_at, deleted_at FROM addresses WHERE deleted_by IS NOT NULL');
-        Schema::table('addresses', function (Blueprint $table) {
+        Schema::table('addresses', function (Blueprint $table): void {
             $table->dropForeign('addresses_created_by_foreign');
             $table->dropForeign('addresses_updated_by_foreign');
             $table->dropForeign('addresses_deleted_by_foreign');
@@ -29,7 +29,7 @@ return new class() extends Migration
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\AddressType", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM address_types WHERE updated_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "deleted", "FluxErp\\\\Models\\\\AddressType", "deleted", id, "FluxErp\\\\Models\\\\User", deleted_by, deleted_at, deleted_at FROM address_types WHERE deleted_by IS NOT NULL');
-        Schema::table('address_types', function (Blueprint $table) {
+        Schema::table('address_types', function (Blueprint $table): void {
             $table->dropForeign('address_types_created_by_foreign');
             $table->dropForeign('address_types_updated_by_foreign');
             $table->dropForeign('address_types_deleted_by_foreign');
@@ -40,7 +40,7 @@ return new class() extends Migration
             'SELECT "model_events", "created", "FluxErp\\\\Models\\\\Calendar", "created", id, "FluxErp\\\\Models\\\\User", created_by, created_at, created_at FROM calendars WHERE created_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\Calendar", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM calendars WHERE updated_by IS NOT NULL');
-        Schema::table('calendars', function (Blueprint $table) {
+        Schema::table('calendars', function (Blueprint $table): void {
             $table->dropForeign('calendars_created_by_foreign');
             $table->dropForeign('calendars_updated_by_foreign');
             $table->dropColumn(['created_by', 'updated_by']);
@@ -50,7 +50,7 @@ return new class() extends Migration
             'SELECT "model_events", "created", "FluxErp\\\\Models\\\\CalendarEvent", "created", id, "FluxErp\\\\Models\\\\User", created_by, created_at, created_at FROM calendar_events WHERE created_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\CalendarEvent", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM calendar_events WHERE updated_by IS NOT NULL');
-        Schema::table('calendar_events', function (Blueprint $table) {
+        Schema::table('calendar_events', function (Blueprint $table): void {
             $table->dropForeign('calendar_events_created_by_foreign');
             $table->dropForeign('calendar_events_updated_by_foreign');
             $table->dropColumn(['created_by', 'updated_by']);
@@ -60,7 +60,7 @@ return new class() extends Migration
             'SELECT "model_events", "created", "FluxErp\\\\Models\\\\Category", "created", id, "FluxErp\\\\Models\\\\User", created_by, created_at, created_at FROM categories WHERE created_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\Category", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM categories WHERE updated_by IS NOT NULL');
-        Schema::table('categories', function (Blueprint $table) {
+        Schema::table('categories', function (Blueprint $table): void {
             $table->dropForeign('categories_created_by_foreign');
             $table->dropForeign('categories_updated_by_foreign');
             $table->dropColumn(['created_by', 'updated_by']);
@@ -72,7 +72,7 @@ return new class() extends Migration
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\Client", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM clients WHERE updated_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "deleted", "FluxErp\\\\Models\\\\Client", "deleted", id, "FluxErp\\\\Models\\\\User", deleted_by, deleted_at, deleted_at FROM clients WHERE deleted_by IS NOT NULL');
-        Schema::table('clients', function (Blueprint $table) {
+        Schema::table('clients', function (Blueprint $table): void {
             $table->dropForeign('clients_created_by_foreign');
             $table->dropForeign('clients_updated_by_foreign');
             $table->dropForeign('clients_deleted_by_foreign');
@@ -85,7 +85,7 @@ return new class() extends Migration
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\Comment", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM comments WHERE updated_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "deleted", "FluxErp\\\\Models\\\\Comment", "deleted", id, "FluxErp\\\\Models\\\\User", deleted_by, deleted_at, deleted_at FROM comments WHERE deleted_by IS NOT NULL');
-        Schema::table('comments', function (Blueprint $table) {
+        Schema::table('comments', function (Blueprint $table): void {
             $table->dropForeign('comments_created_by_foreign');
             $table->dropForeign('comments_updated_by_foreign');
             $table->dropForeign('comments_deleted_by_foreign');
@@ -98,7 +98,7 @@ return new class() extends Migration
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\Contact", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM contacts WHERE updated_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "deleted", "FluxErp\\\\Models\\\\Contact", "deleted", id, "FluxErp\\\\Models\\\\User", deleted_by, deleted_at, deleted_at FROM contacts WHERE deleted_by IS NOT NULL');
-        Schema::table('contacts', function (Blueprint $table) {
+        Schema::table('contacts', function (Blueprint $table): void {
             $table->dropForeign('contacts_created_by_foreign');
             $table->dropForeign('contacts_updated_by_foreign');
             $table->dropForeign('contacts_deleted_by_foreign');
@@ -111,7 +111,7 @@ return new class() extends Migration
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\ContactBankConnection", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM contact_bank_connections WHERE updated_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "deleted", "FluxErp\\\\Models\\\\ContactBankConnection", "deleted", id, "FluxErp\\\\Models\\\\User", deleted_by, deleted_at, deleted_at FROM contact_bank_connections WHERE deleted_by IS NOT NULL');
-        Schema::table('contact_bank_connections', function (Blueprint $table) {
+        Schema::table('contact_bank_connections', function (Blueprint $table): void {
             $table->dropForeign('contact_bank_connections_created_by_foreign');
             $table->dropForeign('contact_bank_connections_updated_by_foreign');
             $table->dropForeign('contact_bank_connections_deleted_by_foreign');
@@ -122,7 +122,7 @@ return new class() extends Migration
             'SELECT "model_events", "created", "FluxErp\\\\Models\\\\ContactOption", "created", id, "FluxErp\\\\Models\\\\User", created_by, created_at, created_at FROM contact_options WHERE created_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\ContactOption", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM contact_options WHERE updated_by IS NOT NULL');
-        Schema::table('contact_options', function (Blueprint $table) {
+        Schema::table('contact_options', function (Blueprint $table): void {
             $table->dropForeign('contact_options_created_by_foreign');
             $table->dropForeign('contact_options_updated_by_foreign');
             $table->dropColumn(['created_by', 'updated_by']);
@@ -134,7 +134,7 @@ return new class() extends Migration
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\Country", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM countries WHERE updated_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "deleted", "FluxErp\\\\Models\\\\Country", "deleted", id, "FluxErp\\\\Models\\\\User", deleted_by, deleted_at, deleted_at FROM countries WHERE deleted_by IS NOT NULL');
-        Schema::table('countries', function (Blueprint $table) {
+        Schema::table('countries', function (Blueprint $table): void {
             $table->dropForeign('countries_created_by_foreign');
             $table->dropForeign('countries_updated_by_foreign');
             $table->dropForeign('countries_deleted_by_foreign');
@@ -147,7 +147,7 @@ return new class() extends Migration
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\CountryRegion", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM country_regions WHERE updated_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "deleted", "FluxErp\\\\Models\\\\CountryRegion", "deleted", id, "FluxErp\\\\Models\\\\User", deleted_by, deleted_at, deleted_at FROM country_regions WHERE deleted_by IS NOT NULL');
-        Schema::table('country_regions', function (Blueprint $table) {
+        Schema::table('country_regions', function (Blueprint $table): void {
             $table->dropForeign('country_regions_created_by_foreign');
             $table->dropForeign('country_regions_updated_by_foreign');
             $table->dropForeign('country_regions_deleted_by_foreign');
@@ -160,7 +160,7 @@ return new class() extends Migration
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\Currency", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM currencies WHERE updated_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "deleted", "FluxErp\\\\Models\\\\Currency", "deleted", id, "FluxErp\\\\Models\\\\User", deleted_by, deleted_at, deleted_at FROM currencies WHERE deleted_by IS NOT NULL');
-        Schema::table('currencies', function (Blueprint $table) {
+        Schema::table('currencies', function (Blueprint $table): void {
             $table->dropForeign('currencies_created_by_foreign');
             $table->dropForeign('currencies_updated_by_foreign');
             $table->dropForeign('currencies_deleted_by_foreign');
@@ -173,7 +173,7 @@ return new class() extends Migration
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\Discount", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM discounts WHERE updated_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "deleted", "FluxErp\\\\Models\\\\Discount", "deleted", id, "FluxErp\\\\Models\\\\User", deleted_by, deleted_at, deleted_at FROM discounts WHERE deleted_by IS NOT NULL');
-        Schema::table('discounts', function (Blueprint $table) {
+        Schema::table('discounts', function (Blueprint $table): void {
             $table->dropForeign('discounts_created_by_foreign');
             $table->dropForeign('discounts_updated_by_foreign');
             $table->dropForeign('discounts_deleted_by_foreign');
@@ -186,7 +186,7 @@ return new class() extends Migration
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\DocumentGenerationSetting", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM document_generation_settings WHERE updated_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "deleted", "FluxErp\\\\Models\\\\DocumentGenerationSetting", "deleted", id, "FluxErp\\\\Models\\\\User", deleted_by, deleted_at, deleted_at FROM document_generation_settings WHERE deleted_by IS NOT NULL');
-        Schema::table('document_generation_settings', function (Blueprint $table) {
+        Schema::table('document_generation_settings', function (Blueprint $table): void {
             $table->dropForeign('document_generation_settings_created_by_foreign');
             $table->dropForeign('document_generation_settings_updated_by_foreign');
             $table->dropForeign('document_generation_settings_deleted_by_foreign');
@@ -199,7 +199,7 @@ return new class() extends Migration
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\DocumentType", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM document_types WHERE updated_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "deleted", "FluxErp\\\\Models\\\\DocumentType", "deleted", id, "FluxErp\\\\Models\\\\User", deleted_by, deleted_at, deleted_at FROM document_types WHERE deleted_by IS NOT NULL');
-        Schema::table('document_types', function (Blueprint $table) {
+        Schema::table('document_types', function (Blueprint $table): void {
             $table->dropForeign('document_types_created_by_foreign');
             $table->dropForeign('document_types_updated_by_foreign');
             $table->dropForeign('document_types_deleted_by_foreign');
@@ -212,7 +212,7 @@ return new class() extends Migration
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\Email", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM emails WHERE updated_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "deleted", "FluxErp\\\\Models\\\\Email", "deleted", id, "FluxErp\\\\Models\\\\User", deleted_by, deleted_at, deleted_at FROM emails WHERE deleted_by IS NOT NULL');
-        Schema::table('emails', function (Blueprint $table) {
+        Schema::table('emails', function (Blueprint $table): void {
             $table->dropForeign('emails_created_by_foreign');
             $table->dropForeign('emails_updated_by_foreign');
             $table->dropForeign('emails_deleted_by_foreign');
@@ -225,7 +225,7 @@ return new class() extends Migration
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\EmailTemplate", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM email_templates WHERE updated_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "deleted", "FluxErp\\\\Models\\\\EmailTemplate", "deleted", id, "FluxErp\\\\Models\\\\User", deleted_by, deleted_at, deleted_at FROM email_templates WHERE deleted_by IS NOT NULL');
-        Schema::table('email_templates', function (Blueprint $table) {
+        Schema::table('email_templates', function (Blueprint $table): void {
             $table->dropForeign('email_templates_created_by_foreign');
             $table->dropForeign('email_templates_updated_by_foreign');
             $table->dropForeign('email_templates_deleted_by_foreign');
@@ -238,7 +238,7 @@ return new class() extends Migration
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\InterfaceUser", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM interface_users WHERE updated_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "deleted", "FluxErp\\\\Models\\\\InterfaceUser", "deleted", id, "FluxErp\\\\Models\\\\User", deleted_by, deleted_at, deleted_at FROM interface_users WHERE deleted_by IS NOT NULL');
-        Schema::table('interface_users', function (Blueprint $table) {
+        Schema::table('interface_users', function (Blueprint $table): void {
             $table->dropForeign('interface_users_created_by_foreign');
             $table->dropForeign('interface_users_updated_by_foreign');
             $table->dropForeign('interface_users_deleted_by_foreign');
@@ -251,7 +251,7 @@ return new class() extends Migration
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\Language", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM languages WHERE updated_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "deleted", "FluxErp\\\\Models\\\\Language", "deleted", id, "FluxErp\\\\Models\\\\User", deleted_by, deleted_at, deleted_at FROM languages WHERE deleted_by IS NOT NULL');
-        Schema::table('languages', function (Blueprint $table) {
+        Schema::table('languages', function (Blueprint $table): void {
             $table->dropForeign('languages_created_by_foreign');
             $table->dropForeign('languages_updated_by_foreign');
             $table->dropForeign('languages_deleted_by_foreign');
@@ -262,7 +262,7 @@ return new class() extends Migration
             'SELECT "model_events", "created", "FluxErp\\\\Models\\\\Lock", "created", id, "FluxErp\\\\Models\\\\User", created_by, created_at, created_at FROM locks WHERE created_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\Lock", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM locks WHERE updated_by IS NOT NULL');
-        Schema::table('locks', function (Blueprint $table) {
+        Schema::table('locks', function (Blueprint $table): void {
             $table->dropForeign('locks_created_by_foreign');
             $table->dropForeign('locks_updated_by_foreign');
             $table->dropColumn(['created_by', 'updated_by']);
@@ -274,7 +274,7 @@ return new class() extends Migration
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\Order", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM orders WHERE updated_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "deleted", "FluxErp\\\\Models\\\\Order", "deleted", id, "FluxErp\\\\Models\\\\User", deleted_by, deleted_at, deleted_at FROM orders WHERE deleted_by IS NOT NULL');
-        Schema::table('orders', function (Blueprint $table) {
+        Schema::table('orders', function (Blueprint $table): void {
             $table->dropForeign('orders_created_by_foreign');
             $table->dropForeign('orders_updated_by_foreign');
             $table->dropForeign('orders_deleted_by_foreign');
@@ -287,7 +287,7 @@ return new class() extends Migration
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\OrderPosition", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM order_positions WHERE updated_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "deleted", "FluxErp\\\\Models\\\\OrderPosition", "deleted", id, "FluxErp\\\\Models\\\\User", deleted_by, deleted_at, deleted_at FROM order_positions WHERE deleted_by IS NOT NULL');
-        Schema::table('order_positions', function (Blueprint $table) {
+        Schema::table('order_positions', function (Blueprint $table): void {
             $table->dropForeign('order_positions_created_by_foreign');
             $table->dropForeign('order_positions_updated_by_foreign');
             $table->dropForeign('order_positions_deleted_by_foreign');
@@ -300,7 +300,7 @@ return new class() extends Migration
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\OrderType", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM order_types WHERE updated_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "deleted", "FluxErp\\\\Models\\\\OrderType", "deleted", id, "FluxErp\\\\Models\\\\User", deleted_by, deleted_at, deleted_at FROM order_types WHERE deleted_by IS NOT NULL');
-        Schema::table('order_types', function (Blueprint $table) {
+        Schema::table('order_types', function (Blueprint $table): void {
             $table->dropForeign('order_types_created_by_foreign');
             $table->dropForeign('order_types_updated_by_foreign');
             $table->dropForeign('order_types_deleted_by_foreign');
@@ -313,7 +313,7 @@ return new class() extends Migration
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\PaymentNotice", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM payment_notices WHERE updated_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "deleted", "FluxErp\\\\Models\\\\PaymentNotice", "deleted", id, "FluxErp\\\\Models\\\\User", deleted_by, deleted_at, deleted_at FROM payment_notices WHERE deleted_by IS NOT NULL');
-        Schema::table('payment_notices', function (Blueprint $table) {
+        Schema::table('payment_notices', function (Blueprint $table): void {
             $table->dropForeign('payment_notices_created_by_foreign');
             $table->dropForeign('payment_notices_updated_by_foreign');
             $table->dropForeign('payment_notices_deleted_by_foreign');
@@ -326,7 +326,7 @@ return new class() extends Migration
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\PaymentType", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM payment_types WHERE updated_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "deleted", "FluxErp\\\\Models\\\\PaymentType", "deleted", id, "FluxErp\\\\Models\\\\User", deleted_by, deleted_at, deleted_at FROM payment_types WHERE deleted_by IS NOT NULL');
-        Schema::table('payment_types', function (Blueprint $table) {
+        Schema::table('payment_types', function (Blueprint $table): void {
             $table->dropForeign('payment_types_created_by_foreign');
             $table->dropForeign('payment_types_updated_by_foreign');
             $table->dropForeign('payment_types_deleted_by_foreign');
@@ -339,7 +339,7 @@ return new class() extends Migration
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\Presentation", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM presentations WHERE updated_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "deleted", "FluxErp\\\\Models\\\\Presentation", "deleted", id, "FluxErp\\\\Models\\\\User", deleted_by, deleted_at, deleted_at FROM presentations WHERE deleted_by IS NOT NULL');
-        Schema::table('presentations', function (Blueprint $table) {
+        Schema::table('presentations', function (Blueprint $table): void {
             $table->dropForeign('presentations_created_by_foreign');
             $table->dropForeign('presentations_updated_by_foreign');
             $table->dropForeign('presentations_deleted_by_foreign');
@@ -352,7 +352,7 @@ return new class() extends Migration
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\Price", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM prices WHERE updated_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "deleted", "FluxErp\\\\Models\\\\Price", "deleted", id, "FluxErp\\\\Models\\\\User", deleted_by, deleted_at, deleted_at FROM prices WHERE deleted_by IS NOT NULL');
-        Schema::table('prices', function (Blueprint $table) {
+        Schema::table('prices', function (Blueprint $table): void {
             $table->dropForeign('prices_created_by_foreign');
             $table->dropForeign('prices_updated_by_foreign');
             $table->dropForeign('prices_deleted_by_foreign');
@@ -365,7 +365,7 @@ return new class() extends Migration
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\PriceList", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM price_lists WHERE updated_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "deleted", "FluxErp\\\\Models\\\\PriceList", "deleted", id, "FluxErp\\\\Models\\\\User", deleted_by, deleted_at, deleted_at FROM price_lists WHERE deleted_by IS NOT NULL');
-        Schema::table('price_lists', function (Blueprint $table) {
+        Schema::table('price_lists', function (Blueprint $table): void {
             $table->dropForeign('price_lists_created_by_foreign');
             $table->dropForeign('price_lists_updated_by_foreign');
             $table->dropForeign('price_lists_deleted_by_foreign');
@@ -376,7 +376,7 @@ return new class() extends Migration
             'SELECT "model_events", "created", "FluxErp\\\\Models\\\\PrintData", "created", id, "FluxErp\\\\Models\\\\User", created_by, created_at, created_at FROM print_data WHERE created_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\PrintData", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM print_data WHERE updated_by IS NOT NULL');
-        Schema::table('print_data', function (Blueprint $table) {
+        Schema::table('print_data', function (Blueprint $table): void {
             $table->dropForeign('print_data_created_by_foreign');
             $table->dropForeign('print_data_updated_by_foreign');
             $table->dropColumn(['created_by', 'updated_by']);
@@ -388,7 +388,7 @@ return new class() extends Migration
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\Product", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM products WHERE updated_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "deleted", "FluxErp\\\\Models\\\\Product", "deleted", id, "FluxErp\\\\Models\\\\User", deleted_by, deleted_at, deleted_at FROM products WHERE deleted_by IS NOT NULL');
-        Schema::table('products', function (Blueprint $table) {
+        Schema::table('products', function (Blueprint $table): void {
             $table->dropForeign('products_created_by_foreign');
             $table->dropForeign('products_updated_by_foreign');
             $table->dropForeign('products_deleted_by_foreign');
@@ -401,7 +401,7 @@ return new class() extends Migration
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\ProductOption", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM product_options WHERE updated_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "deleted", "FluxErp\\\\Models\\\\ProductOption", "deleted", id, "FluxErp\\\\Models\\\\User", deleted_by, deleted_at, deleted_at FROM product_options WHERE deleted_by IS NOT NULL');
-        Schema::table('product_options', function (Blueprint $table) {
+        Schema::table('product_options', function (Blueprint $table): void {
             $table->dropForeign('product_options_created_by_foreign');
             $table->dropForeign('product_options_updated_by_foreign');
             $table->dropForeign('product_options_deleted_by_foreign');
@@ -414,7 +414,7 @@ return new class() extends Migration
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\ProductOptionGroup", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM product_option_groups WHERE updated_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "deleted", "FluxErp\\\\Models\\\\ProductOptionGroup", "deleted", id, "FluxErp\\\\Models\\\\User", deleted_by, deleted_at, deleted_at FROM product_option_groups WHERE deleted_by IS NOT NULL');
-        Schema::table('product_option_groups', function (Blueprint $table) {
+        Schema::table('product_option_groups', function (Blueprint $table): void {
             $table->dropForeign('product_option_groups_created_by_foreign');
             $table->dropForeign('product_option_groups_updated_by_foreign');
             $table->dropForeign('product_option_groups_deleted_by_foreign');
@@ -427,7 +427,7 @@ return new class() extends Migration
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\ProductProperty", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM product_properties WHERE updated_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "deleted", "FluxErp\\\\Models\\\\ProductProperty", "deleted", id, "FluxErp\\\\Models\\\\User", deleted_by, deleted_at, deleted_at FROM product_properties WHERE deleted_by IS NOT NULL');
-        Schema::table('product_properties', function (Blueprint $table) {
+        Schema::table('product_properties', function (Blueprint $table): void {
             $table->dropForeign('product_properties_created_by_foreign');
             $table->dropForeign('product_properties_updated_by_foreign');
             $table->dropForeign('product_properties_deleted_by_foreign');
@@ -440,7 +440,7 @@ return new class() extends Migration
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\Project", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM projects WHERE updated_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "deleted", "FluxErp\\\\Models\\\\Project", "deleted", id, "FluxErp\\\\Models\\\\User", deleted_by, deleted_at, deleted_at FROM projects WHERE deleted_by IS NOT NULL');
-        Schema::table('projects', function (Blueprint $table) {
+        Schema::table('projects', function (Blueprint $table): void {
             $table->dropForeign('projects_created_by_foreign');
             $table->dropForeign('projects_updated_by_foreign');
             $table->dropForeign('projects_deleted_by_foreign');
@@ -451,7 +451,7 @@ return new class() extends Migration
             'SELECT "model_events", "created", "FluxErp\\\\Models\\\\ProjectCategoryTemplate", "created", id, "FluxErp\\\\Models\\\\User", created_by, created_at, created_at FROM project_category_templates WHERE created_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\ProjectCategoryTemplate", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM project_category_templates WHERE updated_by IS NOT NULL');
-        Schema::table('project_category_templates', function (Blueprint $table) {
+        Schema::table('project_category_templates', function (Blueprint $table): void {
             $table->dropForeign('project_category_templates_created_by_foreign');
             $table->dropForeign('project_category_templates_updated_by_foreign');
             $table->dropColumn(['created_by', 'updated_by']);
@@ -463,7 +463,7 @@ return new class() extends Migration
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\ProjectTask", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM project_tasks WHERE updated_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "deleted", "FluxErp\\\\Models\\\\ProjectTask", "deleted", id, "FluxErp\\\\Models\\\\User", deleted_by, deleted_at, deleted_at FROM project_tasks WHERE deleted_by IS NOT NULL');
-        Schema::table('project_tasks', function (Blueprint $table) {
+        Schema::table('project_tasks', function (Blueprint $table): void {
             $table->dropForeign('project_tasks_created_by_foreign');
             $table->dropForeign('project_tasks_updated_by_foreign');
             $table->dropForeign('project_tasks_deleted_by_foreign');
@@ -476,7 +476,7 @@ return new class() extends Migration
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\SepaMandate", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM sepa_mandates WHERE updated_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "deleted", "FluxErp\\\\Models\\\\SepaMandate", "deleted", id, "FluxErp\\\\Models\\\\User", deleted_by, deleted_at, deleted_at FROM sepa_mandates WHERE deleted_by IS NOT NULL');
-        Schema::table('sepa_mandates', function (Blueprint $table) {
+        Schema::table('sepa_mandates', function (Blueprint $table): void {
             $table->dropForeign('sepa_mandates_created_by_foreign');
             $table->dropForeign('sepa_mandates_updated_by_foreign');
             $table->dropForeign('sepa_mandates_deleted_by_foreign');
@@ -487,7 +487,7 @@ return new class() extends Migration
             'SELECT "model_events", "created", "FluxErp\\\\Models\\\\SerialNumber", "created", id, "FluxErp\\\\Models\\\\User", created_by, created_at, created_at FROM serial_numbers WHERE created_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\SerialNumber", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM serial_numbers WHERE updated_by IS NOT NULL');
-        Schema::table('serial_numbers', function (Blueprint $table) {
+        Schema::table('serial_numbers', function (Blueprint $table): void {
             $table->dropForeign('serial_numbers_created_by_foreign');
             $table->dropForeign('serial_numbers_updated_by_foreign');
             $table->dropColumn(['created_by', 'updated_by']);
@@ -499,7 +499,7 @@ return new class() extends Migration
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\SerialNumberRange", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM serial_number_ranges WHERE updated_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "deleted", "FluxErp\\\\Models\\\\SerialNumberRange", "deleted", id, "FluxErp\\\\Models\\\\User", deleted_by, deleted_at, deleted_at FROM serial_number_ranges WHERE deleted_by IS NOT NULL');
-        Schema::table('serial_number_ranges', function (Blueprint $table) {
+        Schema::table('serial_number_ranges', function (Blueprint $table): void {
             $table->dropForeign('serial_number_ranges_created_by_foreign');
             $table->dropForeign('serial_number_ranges_updated_by_foreign');
             $table->dropForeign('serial_number_ranges_deleted_by_foreign');
@@ -510,7 +510,7 @@ return new class() extends Migration
             'SELECT "model_events", "created", "FluxErp\\\\Models\\\\Snapshot", "created", id, "FluxErp\\\\Models\\\\User", created_by, created_at, created_at FROM snapshots WHERE created_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\Snapshot", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM snapshots WHERE updated_by IS NOT NULL');
-        Schema::table('snapshots', function (Blueprint $table) {
+        Schema::table('snapshots', function (Blueprint $table): void {
             $table->dropForeign('snapshots_created_by_foreign');
             $table->dropForeign('snapshots_updated_by_foreign');
             $table->dropColumn(['created_by', 'updated_by']);
@@ -522,7 +522,7 @@ return new class() extends Migration
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\StockPosting", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM stock_postings WHERE updated_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "deleted", "FluxErp\\\\Models\\\\StockPosting", "deleted", id, "FluxErp\\\\Models\\\\User", deleted_by, deleted_at, deleted_at FROM stock_postings WHERE deleted_by IS NOT NULL');
-        Schema::table('stock_postings', function (Blueprint $table) {
+        Schema::table('stock_postings', function (Blueprint $table): void {
             $table->dropForeign('stock_postings_created_by_foreign');
             $table->dropForeign('stock_postings_updated_by_foreign');
             $table->dropForeign('stock_postings_deleted_by_foreign');
@@ -535,7 +535,7 @@ return new class() extends Migration
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\Ticket", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM tickets WHERE updated_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "deleted", "FluxErp\\\\Models\\\\Ticket", "deleted", id, "FluxErp\\\\Models\\\\User", deleted_by, deleted_at, deleted_at FROM tickets WHERE deleted_by IS NOT NULL');
-        Schema::table('tickets', function (Blueprint $table) {
+        Schema::table('tickets', function (Blueprint $table): void {
             $table->dropForeign('tickets_created_by_foreign');
             $table->dropForeign('tickets_updated_by_foreign');
             $table->dropForeign('tickets_deleted_by_foreign');
@@ -548,7 +548,7 @@ return new class() extends Migration
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\TicketType", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM ticket_types WHERE updated_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "deleted", "FluxErp\\\\Models\\\\TicketType", "deleted", id, "FluxErp\\\\Models\\\\User", deleted_by, deleted_at, deleted_at FROM ticket_types WHERE deleted_by IS NOT NULL');
-        Schema::table('ticket_types', function (Blueprint $table) {
+        Schema::table('ticket_types', function (Blueprint $table): void {
             $table->dropColumn(['created_by', 'updated_by', 'deleted_by']);
         });
 
@@ -558,7 +558,7 @@ return new class() extends Migration
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\Unit", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM units WHERE updated_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "deleted", "FluxErp\\\\Models\\\\Unit", "deleted", id, "FluxErp\\\\Models\\\\User", deleted_by, deleted_at, deleted_at FROM units WHERE deleted_by IS NOT NULL');
-        Schema::table('units', function (Blueprint $table) {
+        Schema::table('units', function (Blueprint $table): void {
             $table->dropForeign('units_created_by_foreign');
             $table->dropForeign('units_updated_by_foreign');
             $table->dropForeign('units_deleted_by_foreign');
@@ -571,7 +571,7 @@ return new class() extends Migration
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\User", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM users WHERE updated_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "deleted", "FluxErp\\\\Models\\\\User", "deleted", id, "FluxErp\\\\Models\\\\User", deleted_by, deleted_at, deleted_at FROM users WHERE deleted_by IS NOT NULL');
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table): void {
             $table->dropForeign('users_created_by_foreign');
             $table->dropForeign('users_updated_by_foreign');
             $table->dropForeign('users_deleted_by_foreign');
@@ -584,7 +584,7 @@ return new class() extends Migration
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\VatRate", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM vat_rates WHERE updated_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "deleted", "FluxErp\\\\Models\\\\VatRate", "deleted", id, "FluxErp\\\\Models\\\\User", deleted_by, deleted_at, deleted_at FROM vat_rates WHERE deleted_by IS NOT NULL');
-        Schema::table('vat_rates', function (Blueprint $table) {
+        Schema::table('vat_rates', function (Blueprint $table): void {
             $table->dropForeign('vat_rates_created_by_foreign');
             $table->dropForeign('vat_rates_updated_by_foreign');
             $table->dropForeign('vat_rates_deleted_by_foreign');
@@ -597,7 +597,7 @@ return new class() extends Migration
             'SELECT "model_events", "updated", "FluxErp\\\\Models\\\\Warehouse", "updated", id, "FluxErp\\\\Models\\\\User", updated_by, updated_at, updated_at FROM warehouses WHERE updated_by IS NOT NULL');
         DB::statement('INSERT INTO activity_logs (log_name, description, subject_type, event, subject_id, causer_type, causer_id, created_at, updated_at)' .
             'SELECT "model_events", "deleted", "FluxErp\\\\Models\\\\Warehouse", "deleted", id, "FluxErp\\\\Models\\\\User", deleted_by, deleted_at, deleted_at FROM warehouses WHERE deleted_by IS NOT NULL');
-        Schema::table('warehouses', function (Blueprint $table) {
+        Schema::table('warehouses', function (Blueprint $table): void {
             $table->dropForeign('warehouses_created_by_foreign');
             $table->dropForeign('warehouses_updated_by_foreign');
             $table->dropForeign('warehouses_deleted_by_foreign');
@@ -607,7 +607,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('addresses', function (Blueprint $table) {
+        Schema::table('addresses', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -658,7 +658,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('address_types', function (Blueprint $table) {
+        Schema::table('address_types', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -709,7 +709,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('calendars', function (Blueprint $table) {
+        Schema::table('calendars', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -744,7 +744,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('calendar_events', function (Blueprint $table) {
+        Schema::table('calendar_events', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -779,7 +779,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('categories', function (Blueprint $table) {
+        Schema::table('categories', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -814,7 +814,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('clients', function (Blueprint $table) {
+        Schema::table('clients', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -865,7 +865,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('comments', function (Blueprint $table) {
+        Schema::table('comments', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -916,7 +916,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('contacts', function (Blueprint $table) {
+        Schema::table('contacts', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -967,7 +967,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('contact_bank_connections', function (Blueprint $table) {
+        Schema::table('contact_bank_connections', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -1018,7 +1018,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('contact_options', function (Blueprint $table) {
+        Schema::table('contact_options', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -1053,7 +1053,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('countries', function (Blueprint $table) {
+        Schema::table('countries', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -1104,7 +1104,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('country_regions', function (Blueprint $table) {
+        Schema::table('country_regions', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -1155,7 +1155,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('currencies', function (Blueprint $table) {
+        Schema::table('currencies', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -1206,7 +1206,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('discounts', function (Blueprint $table) {
+        Schema::table('discounts', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -1257,7 +1257,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('document_generation_settings', function (Blueprint $table) {
+        Schema::table('document_generation_settings', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -1308,7 +1308,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('document_types', function (Blueprint $table) {
+        Schema::table('document_types', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -1359,7 +1359,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('emails', function (Blueprint $table) {
+        Schema::table('emails', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -1410,7 +1410,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('email_templates', function (Blueprint $table) {
+        Schema::table('email_templates', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -1461,7 +1461,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('interface_users', function (Blueprint $table) {
+        Schema::table('interface_users', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -1512,7 +1512,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('languages', function (Blueprint $table) {
+        Schema::table('languages', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -1563,7 +1563,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('locks', function (Blueprint $table) {
+        Schema::table('locks', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -1598,7 +1598,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('orders', function (Blueprint $table) {
+        Schema::table('orders', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -1649,7 +1649,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('order_positions', function (Blueprint $table) {
+        Schema::table('order_positions', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -1700,7 +1700,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('order_types', function (Blueprint $table) {
+        Schema::table('order_types', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -1751,7 +1751,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('payment_notices', function (Blueprint $table) {
+        Schema::table('payment_notices', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -1802,7 +1802,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('payment_types', function (Blueprint $table) {
+        Schema::table('payment_types', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -1853,7 +1853,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('presentations', function (Blueprint $table) {
+        Schema::table('presentations', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -1904,7 +1904,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('prices', function (Blueprint $table) {
+        Schema::table('prices', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -1955,7 +1955,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('price_lists', function (Blueprint $table) {
+        Schema::table('price_lists', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -2006,7 +2006,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('print_data', function (Blueprint $table) {
+        Schema::table('print_data', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('updated_at');
@@ -2041,7 +2041,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('products', function (Blueprint $table) {
+        Schema::table('products', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -2092,7 +2092,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('product_options', function (Blueprint $table) {
+        Schema::table('product_options', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -2143,7 +2143,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('product_option_groups', function (Blueprint $table) {
+        Schema::table('product_option_groups', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -2194,7 +2194,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('product_properties', function (Blueprint $table) {
+        Schema::table('product_properties', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -2245,7 +2245,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('projects', function (Blueprint $table) {
+        Schema::table('projects', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -2296,7 +2296,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('project_category_templates', function (Blueprint $table) {
+        Schema::table('project_category_templates', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -2331,7 +2331,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('project_tasks', function (Blueprint $table) {
+        Schema::table('project_tasks', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -2382,7 +2382,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('sepa_mandates', function (Blueprint $table) {
+        Schema::table('sepa_mandates', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -2433,7 +2433,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('serial_numbers', function (Blueprint $table) {
+        Schema::table('serial_numbers', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -2468,7 +2468,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('serial_number_ranges', function (Blueprint $table) {
+        Schema::table('serial_number_ranges', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -2519,7 +2519,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('snapshots', function (Blueprint $table) {
+        Schema::table('snapshots', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -2554,7 +2554,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('stock_postings', function (Blueprint $table) {
+        Schema::table('stock_postings', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -2605,7 +2605,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('tickets', function (Blueprint $table) {
+        Schema::table('tickets', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -2656,7 +2656,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('ticket_types', function (Blueprint $table) {
+        Schema::table('ticket_types', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -2704,7 +2704,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('units', function (Blueprint $table) {
+        Schema::table('units', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -2755,7 +2755,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -2806,7 +2806,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('vat_rates', function (Blueprint $table) {
+        Schema::table('vat_rates', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');
@@ -2857,7 +2857,7 @@ return new class() extends Migration
                 )'
         );
 
-        Schema::table('warehouses', function (Blueprint $table) {
+        Schema::table('warehouses', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable()
                 ->comment('A unique identifier number for the table users of the user that created this record.')
                 ->after('created_at');

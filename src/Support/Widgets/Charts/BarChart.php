@@ -19,13 +19,13 @@ abstract class BarChart extends Chart
         ],
     ];
 
+    public bool $showTotals = true;
+
     public ?array $stroke = [
         'show' => true,
         'width' => 2,
         'colors' => ['transparent'],
     ];
-
-    public bool $showTotals = true;
 
     public function render(): View|Factory
     {

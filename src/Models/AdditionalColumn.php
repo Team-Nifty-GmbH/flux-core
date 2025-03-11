@@ -18,7 +18,7 @@ class AdditionalColumn extends FluxModel
 
     protected static function booted(): void
     {
-        static::created(function (AdditionalColumn $additionalColumn) {
+        static::created(function (AdditionalColumn $additionalColumn): void {
             Cache::store('array')->forget('meta_casts_' . $additionalColumn->model_type);
             Cache::store('array')->forget('meta_additional_columns_' . $additionalColumn->model_type);
         });

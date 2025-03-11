@@ -9,7 +9,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('work_times', function (Blueprint $table) {
+        Schema::table('work_times', function (Blueprint $table): void {
             $table->boolean('is_billable')->after('description')->default(false);
         });
 
@@ -23,7 +23,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('work_times', function (Blueprint $table) {
+        Schema::table('work_times', function (Blueprint $table): void {
             $table->dropColumn('is_billable');
         });
     }

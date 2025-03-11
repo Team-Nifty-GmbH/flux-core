@@ -18,9 +18,9 @@ class LedgerAccounts extends LedgerAccountList
 {
     use Actions;
 
-    protected ?string $includeBefore = 'flux::livewire.settings.ledger-accounts';
-
     public LedgerAccountForm $ledgerAccount;
+
+    protected ?string $includeBefore = 'flux::livewire.settings.ledger-accounts';
 
     protected function getTableActions(): array
     {
@@ -55,14 +55,22 @@ class LedgerAccounts extends LedgerAccountList
         ];
     }
 
-    protected function getViewData(): array
+    public function delete(LedgerAccount $ledgerAccount): bool
     {
-        return array_merge(
-            parent::getViewData(),
-            [
-                'ledgerAccountTypes' => LedgerAccountTypeEnum::valuesLocalized(),
-            ]
-        );
+        $this->ledgerAccount->reset();
+        $this->ledgerAccount->fill($ledgerAccount);
+
+        try {
+            $this->ledgerAccount->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
     }
 
     public function edit(LedgerAccount $ledgerAccount): void
@@ -90,21 +98,13 @@ class LedgerAccounts extends LedgerAccountList
         return true;
     }
 
-    public function delete(LedgerAccount $ledgerAccount): bool
+    protected function getViewData(): array
     {
-        $this->ledgerAccount->reset();
-        $this->ledgerAccount->fill($ledgerAccount);
-
-        try {
-            $this->ledgerAccount->delete();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
+        return array_merge(
+            parent::getViewData(),
+            [
+                'ledgerAccountTypes' => LedgerAccountTypeEnum::valuesLocalized(),
+            ]
+        );
     }
 }

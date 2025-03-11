@@ -63,26 +63,26 @@ class EventServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        Event::listen(JobQueued::class, function (JobQueued $event) {
+        Event::listen(JobQueued::class, function (JobQueued $event): void {
             QueueMonitorManager::handle($event);
         });
 
         /** @var QueueManager $manager */
         $manager = app(QueueManager::class);
 
-        $manager->before(static function (JobProcessing $event) {
+        $manager->before(static function (JobProcessing $event): void {
             QueueMonitorManager::handle($event);
         });
 
-        $manager->after(static function (JobProcessed $event) {
+        $manager->after(static function (JobProcessed $event): void {
             QueueMonitorManager::handle($event);
         });
 
-        $manager->failing(static function (JobFailed $event) {
+        $manager->failing(static function (JobFailed $event): void {
             QueueMonitorManager::handle($event);
         });
 
-        $manager->exceptionOccurred(static function (JobExceptionOccurred $event) {
+        $manager->exceptionOccurred(static function (JobExceptionOccurred $event): void {
             QueueMonitorManager::handle($event);
         });
     }

@@ -18,15 +18,15 @@ class ToggleDarkMode extends Component
         $this->dark = session('dark', false);
     }
 
+    public function render(): Factory|Application|View
+    {
+        return view('flux::livewire.toggle-dark-mode');
+    }
+
     public function updatedDark(bool $enabled): void
     {
         session()->put('dark', $enabled);
 
         auth()->user()?->update(['is_dark_mode' => $enabled]);
-    }
-
-    public function render(): Factory|Application|View
-    {
-        return view('flux::livewire.toggle-dark-mode');
     }
 }

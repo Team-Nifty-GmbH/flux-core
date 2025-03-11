@@ -18,12 +18,6 @@ class MediaList extends BaseDataTable
 {
     use Actions;
 
-    protected string $model = Media::class;
-
-    public ?string $includeBefore = 'flux::livewire.datatables.media-list';
-
-    public MediaForm $mediaForm;
-
     public array $enabledCols = [
         'file_name',
         'collection_name',
@@ -33,27 +27,11 @@ class MediaList extends BaseDataTable
         'url' => 'image',
     ];
 
-    protected function getBuilder(Builder $builder): Builder
-    {
-        return $builder->addSelect('model_type', 'disk', 'conversions_disk');
-    }
+    public ?string $includeBefore = 'flux::livewire.datatables.media-list';
 
-    protected function itemToArray($item): array
-    {
-        /** @var Media $item */
-        $item->makeVisible('collection_name');
+    public MediaForm $mediaForm;
 
-        $itemArray = parent::itemToArray($item);
-        $itemArray['url'] = $item->hasGeneratedConversion('thumb')
-            ? $item->getUrl('thumb')
-            : (
-                Str::startsWith($item->mime_type, 'image/')
-                    ? $item->getUrl('thumb')
-                    : route('icons', ['name' => 'document'])
-            );
-
-        return $itemArray;
-    }
+    protected string $model = Media::class;
 
     protected function getRowActions(): array
     {
@@ -88,15 +66,6 @@ class MediaList extends BaseDataTable
         ];
     }
 
-    protected function getLeftAppends(): array
-    {
-        return [
-            'name' => [
-                'url',
-            ],
-        ];
-    }
-
     public function downloadMedia(Media $media): false|BinaryFileResponse
     {
         if (! file_exists($media->getPath())) {
@@ -106,21 +75,6 @@ class MediaList extends BaseDataTable
         }
 
         return response()->download($media->getPath(), $media->file_name);
-    }
-
-    public function save(): bool
-    {
-        try {
-            $this->mediaForm->save();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
     }
 
     #[Renderless]
@@ -141,5 +95,51 @@ class MediaList extends BaseDataTable
         $this->js(<<<'JS'
             $modalOpen('edit-media');
         JS);
+    }
+
+    public function save(): bool
+    {
+        try {
+            $this->mediaForm->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
+    }
+
+    protected function getBuilder(Builder $builder): Builder
+    {
+        return $builder->addSelect('model_type', 'disk', 'conversions_disk');
+    }
+
+    protected function getLeftAppends(): array
+    {
+        return [
+            'name' => [
+                'url',
+            ],
+        ];
+    }
+
+    protected function itemToArray($item): array
+    {
+        /** @var Media $item */
+        $item->makeVisible('collection_name');
+
+        $itemArray = parent::itemToArray($item);
+        $itemArray['url'] = $item->hasGeneratedConversion('thumb')
+            ? $item->getUrl('thumb')
+            : (
+                Str::startsWith($item->mime_type, 'image/')
+                    ? $item->getUrl('thumb')
+                    : route('icons', ['name' => 'document'])
+            );
+
+        return $itemArray;
     }
 }
