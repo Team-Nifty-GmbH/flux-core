@@ -3,6 +3,7 @@
 namespace FluxErp\Tests\Livewire;
 
 use FluxErp\Livewire\WorkTime;
+use FluxErp\Models\Task;
 use FluxErp\Models\WorkTime as WorkTimeModel;
 use FluxErp\Models\WorkTimeType;
 use Illuminate\Support\Carbon;
@@ -15,6 +16,35 @@ class WorkTimeTest extends BaseSetup
     {
         Livewire::test(WorkTime::class)
             ->assertStatus(200);
+    }
+
+    public function test_can_open_work_time_modal_on_start()
+    {
+        $task = Task::factory()->create([
+            'name' => Str::uuid()->toString(),
+            'description' => Str::uuid()->toString(),
+        ]);
+
+        $data = [
+            'name' => $task->name,
+            'description' => $task->description,
+            'trackable_type' => $task->getMorphClass(),
+            'trackable_id' => $task->getKey(),
+        ];
+
+        Livewire::test(WorkTime::class)
+            ->call('toggleWorkDay', true)
+            ->call('start', $data)
+            ->assertStatus(200)
+            ->assertHasNoErrors()
+            ->assertSet('workTime.name', $data['name'])
+            ->assertSet('workTime.description', $data['description'])
+            ->assertSet('workTime.trackable_type', $data['trackable_type'])
+            ->assertSet('workTime.trackable_id', $data['trackable_id'])
+            ->call('save')
+            ->assertStatus(200)
+            ->assertHasNoErrors()
+            ->assertCount('activeWorkTimes', 1);
     }
 
     public function test_toggle_daily_work_time()
