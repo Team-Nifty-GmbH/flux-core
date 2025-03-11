@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Task;
 
+use FluxErp\Actions\Task\CreateTask;
 use FluxErp\Livewire\DataTables\TaskList as BaseTaskList;
 use FluxErp\Livewire\Forms\TaskForm;
 use FluxErp\Models\Task;
@@ -43,12 +44,28 @@ class TaskList extends BaseTaskList
     {
         return [
             DataTableButton::make()
-                ->text(__('New'))
+                ->text(__('Create'))
                 ->color('indigo')
-                ->attributes([
-                    'x-on:click' => "\$dispatch('new-task')",
-                ]),
+                ->icon('plus')
+                ->when(resolve_static(CreateTask::class, 'canPerformAction', [false]))
+                ->wireClick('show'),
         ];
+    }
+
+    #[Renderless]
+    public function show(): void
+    {
+        $this->task->reset();
+        $this->task->additionalColumns = array_fill_keys(
+            resolve_static(Task::class, 'additionalColumnsQuery')->pluck('name')?->toArray() ?? [],
+            null
+        );
+        $this->task->responsible_user_id ??= auth()?->id();
+        $this->task->users = array_filter([auth()?->id()]);
+
+        $this->js(<<<'JS'
+            $modalOpen('new-task-modal');
+        JS);
     }
 
     #[Renderless]
@@ -65,17 +82,5 @@ class TaskList extends BaseTaskList
         $this->loadData();
 
         return true;
-    }
-
-    #[Renderless]
-    public function resetForm(): void
-    {
-        $this->task->reset();
-        $this->task->additionalColumns = array_fill_keys(
-            resolve_static(Task::class, 'additionalColumnsQuery')->pluck('name')?->toArray() ?? [],
-            null
-        );
-        $this->task->responsible_user_id ??= auth()?->id();
-        $this->task->users = array_filter([auth()?->id()]);
     }
 }
