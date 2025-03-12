@@ -16,29 +16,42 @@ trait WithFilePond
 
     public array $latestUploads = [];
 
-    #[Renderless]
-    public function validateOnDemand(string $fileId, ?string $collectionName = null): bool
+    public function getRulesSingleFile(int $index, string $collectionName): array
     {
-        // find the index of the file in the files array - which invokes the validation
-        $index = array_search($fileId, array_map(function ($item) {
-            return $item->getFilename();
-        }, $this->files));
+        // get the base collection name - ignore subfolders
+        $baseCollection = str_contains($collectionName, '.') ?
+            explode('.', $collectionName)[0] : $collectionName;
 
-        if ($index === false) {
-            return false;
-        }
+        // get the validation rules for the model type
+        $mimeTypes = data_get(
+            resolve_static($this->modelType, 'query')
+                ->whereKey($this->modelId)
+                ->first()
+                ?->getMediaCollection($baseCollection),
+            'acceptsMimeTypes'
+        );
 
-        if (! is_null($collectionName)) {
-            try {
-                $this->validate($this->getRulesSingleFile($index, $collectionName));
-            } catch (ValidationException $e) {
-                exception_to_notifications($e, $this);
+        $uploadRules = config('livewire.temporary_file_upload.rules')
+            ?? 'file|max:' . min(
+                (int) Number::fromFileSizeToBytes(ini_get('upload_max_filesize')),
+                (int) Number::fromFileSizeToBytes(ini_get('post_max_size')),
+            );
 
-                return false;
+        if (is_array($uploadRules)) {
+            $uploadRules = Arr::prepend($uploadRules, 'required');
+            if ($mimeTypes) {
+                $uploadRules['mimetypes'] = implode(',', $mimeTypes);
+            }
+        } else {
+            $uploadRules = Str::start($uploadRules, 'required|');
+            if ($mimeTypes) {
+                $uploadRules .= '|mimetypes:' . implode(',', $mimeTypes);
             }
         }
 
-        return true;
+        return [
+            'files.' . $index => $uploadRules,
+        ];
     }
 
     #[Renderless]
@@ -77,41 +90,28 @@ trait WithFilePond
         return true;
     }
 
-    public function getRulesSingleFile(int $index, string $collectionName): array
+    #[Renderless]
+    public function validateOnDemand(string $fileId, ?string $collectionName = null): bool
     {
-        // get the base collection name - ignore subfolders
-        $baseCollection = str_contains($collectionName, '.') ?
-            explode('.', $collectionName)[0] : $collectionName;
+        // find the index of the file in the files array - which invokes the validation
+        $index = array_search($fileId, array_map(function ($item) {
+            return $item->getFilename();
+        }, $this->files));
 
-        // get the validation rules for the model type
-        $mimeTypes = data_get(
-            resolve_static($this->modelType, 'query')
-                ->whereKey($this->modelId)
-                ->first()
-                ?->getMediaCollection($baseCollection),
-            'acceptsMimeTypes'
-        );
+        if ($index === false) {
+            return false;
+        }
 
-        $uploadRules = config('livewire.temporary_file_upload.rules')
-            ?? 'file|max:' . min(
-                (int) Number::fromFileSizeToBytes(ini_get('upload_max_filesize')),
-                (int) Number::fromFileSizeToBytes(ini_get('post_max_size')),
-            );
+        if (! is_null($collectionName)) {
+            try {
+                $this->validate($this->getRulesSingleFile($index, $collectionName));
+            } catch (ValidationException $e) {
+                exception_to_notifications($e, $this);
 
-        if (is_array($uploadRules)) {
-            $uploadRules = Arr::prepend($uploadRules, 'required');
-            if ($mimeTypes) {
-                $uploadRules['mimetypes'] = implode(',', $mimeTypes);
-            }
-        } else {
-            $uploadRules = Str::start($uploadRules, 'required|');
-            if ($mimeTypes) {
-                $uploadRules .= '|mimetypes:' . implode(',', $mimeTypes);
+                return false;
             }
         }
 
-        return [
-            'files.' . $index => $uploadRules,
-        ];
+        return true;
     }
 }

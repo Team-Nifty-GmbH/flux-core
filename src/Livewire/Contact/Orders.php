@@ -11,26 +11,21 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class Orders extends OrderList
 {
-    protected string $view = 'flux::livewire.contact.orders';
-
     #[Modelable]
     public ContactForm $contact;
 
-    protected function getBuilder(Builder $builder): Builder
-    {
-        return $builder->where('contact_id', $this->contact->id);
-    }
+    protected ?string $includeBefore = 'flux::livewire.contact.orders';
 
     protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
-                ->label(__('Balance Statement'))
+                ->text(__('Balance Statement'))
                 ->wireClick('$parent.openCreateDocumentsModal()'),
             DataTableButton::make()
                 ->icon('plus')
-                ->color('primary')
-                ->label(__('New order'))
+                ->color('indigo')
+                ->text(__('New order'))
                 ->wireClick('createOrder'),
         ];
     }
@@ -42,7 +37,7 @@ class Orders extends OrderList
         $this->order->contact_id = $this->contact->id;
 
         $this->js(<<<'JS'
-            $openModal('create-order');
+            $modalOpen('create-order-modal');
         JS);
     }
 
@@ -50,5 +45,10 @@ class Orders extends OrderList
     public function getCacheKey(): string
     {
         return parent::getCacheKey() . $this->contact->id;
+    }
+
+    protected function getBuilder(Builder $builder): Builder
+    {
+        return $builder->where('contact_id', $this->contact->id);
     }
 }

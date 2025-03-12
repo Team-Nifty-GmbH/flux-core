@@ -30,13 +30,13 @@ class UserEdit extends Component
 {
     use Actions, WithPagination;
 
-    public UserForm $userForm;
-
-    public string $searchPermission = '';
+    public bool $isSuperAdmin = false;
 
     public array $lockedPermissions = [];
 
-    public bool $isSuperAdmin = false;
+    public string $searchPermission = '';
+
+    public UserForm $userForm;
 
     public function mount(User $user): void
     {
@@ -84,6 +84,26 @@ class UserEdit extends Component
     }
 
     #[Renderless]
+    public function cancel(): void
+    {
+        $this->redirectRoute('settings.users', navigate: true);
+    }
+
+    #[Renderless]
+    public function delete(): void
+    {
+        try {
+            $this->userForm->delete();
+        } catch (\Exception $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->redirectRoute('settings.users', navigate: true);
+    }
+
+    #[Renderless]
     public function save(): void
     {
         try {
@@ -114,7 +134,7 @@ class UserEdit extends Component
             return;
         }
 
-        $this->notification()->success(__(':model saved', ['model' => __('User')]));
+        $this->notification()->success(__(':model saved', ['model' => __('User')]))->send();
 
         try {
             UpdateUserPermissions::make([
@@ -156,26 +176,6 @@ class UserEdit extends Component
 
         $user->loadMissing(['roles', 'permissions', 'clients:id']);
         $this->userForm->fill($user);
-    }
-
-    #[Renderless]
-    public function delete(): void
-    {
-        try {
-            $this->userForm->delete();
-        } catch (\Exception $e) {
-            exception_to_notifications($e, $this);
-
-            return;
-        }
-
-        $this->redirectRoute('settings.users', navigate: true);
-    }
-
-    #[Renderless]
-    public function cancel(): void
-    {
-        $this->redirectRoute('settings.users', navigate: true);
     }
 
     #[Renderless]

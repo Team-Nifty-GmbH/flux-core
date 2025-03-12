@@ -5,6 +5,7 @@ namespace FluxErp\Livewire\Accounting;
 use FluxErp\Actions\PaymentRun\CreatePaymentRun;
 use FluxErp\Enums\PaymentRunTypeEnum;
 use FluxErp\Models\OrderType;
+use FluxErp\States\Order\PaymentState\Paid;
 use FluxErp\States\PaymentRun\Open;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
@@ -21,34 +22,6 @@ class MoneyTransfer extends DirectDebit
         'balance',
         'commission',
     ];
-
-    protected function getBuilder(Builder $builder): Builder
-    {
-        $orderTypes = resolve_static(OrderType::class, 'query')
-            ->where('is_active', true)
-            ->get(['id', 'order_type_enum'])
-            ->filter(fn (OrderType $orderType) => $orderType->order_type_enum->isPurchase()
-                && $orderType->order_type_enum->multiplier() < 0
-            )
-            ->pluck('id');
-
-        return $builder
-            ->whereHas('paymentType', function (Builder $query) {
-                $query->where('is_direct_debit', false)
-                    ->where('requires_manual_transfer', true);
-            })
-            ->where(function (Builder $query) {
-                $query
-                    ->whereHas(
-                        'paymentRuns',
-                        fn (Builder $builder) => $builder->whereNotIn('state', ['open', 'successful', 'pending'])
-                    )
-                    ->orWhereDoesntHave('paymentRuns');
-            })
-            ->where('balance', '<', 0)
-            ->whereNotNull('invoice_number')
-            ->whereIntegerInRaw('order_type_id', $orderTypes);
-    }
 
     public function createPaymentRun(): void
     {
@@ -76,7 +49,34 @@ class MoneyTransfer extends DirectDebit
 
         $this->reset('selected');
 
-        $this->notification()->success(__('Payment Run created.'));
+        $this->notification()->success(__('Payment Run created.'))->send();
         $this->loadData();
+    }
+
+    protected function getBuilder(Builder $builder): Builder
+    {
+        $orderTypes = resolve_static(OrderType::class, 'query')
+            ->where('is_active', true)
+            ->get(['id', 'order_type_enum'])
+            ->filter(fn (OrderType $orderType) => $orderType->order_type_enum->multiplier() < 0)
+            ->pluck('id');
+
+        return $builder
+            ->whereHas('paymentType', function (Builder $query): void {
+                $query->where('is_direct_debit', false)
+                    ->where('requires_manual_transfer', true);
+            })
+            ->where(function (Builder $query): void {
+                $query
+                    ->whereHas(
+                        'paymentRuns',
+                        fn (Builder $builder) => $builder->whereNotIn('state', ['open', 'successful', 'pending'])
+                    )
+                    ->orWhereDoesntHave('paymentRuns');
+            })
+            ->where('balance', '<', 0)
+            ->whereNotState('payment_state', Paid::class)
+            ->whereNotNull('invoice_number')
+            ->whereIntegerInRaw('order_type_id', $orderTypes);
     }
 }

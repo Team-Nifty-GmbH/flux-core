@@ -12,21 +12,21 @@
                     @if($task->due_date)
                         <x-badge
                             :color="$task->due_date->diffInDays(now(), false) > 0
-                                ? 'negative'
-                                : ($task->due_date->diffInDays(now(), false) === 0 ? 'warning' : 'positive')
+                                ? 'red'
+                                : ($task->due_date->diffInDays(now(), false) === 0 ? 'amber' : 'emerald')
                             "
-                            :label="__('Due At') . ' ' . $task->due_date->locale(app()->getLocale())->isoFormat('L')"
+                            :text="__('Due At') . ' ' . $task->due_date->locale(app()->getLocale())->isoFormat('L')"
                         />
                     @endif
                     @foreach($task->users as $user)
                         <x-badge
-                            :color="$user->id === auth()->id() ? 'primary' : 'secondary'"
-                            :label="$user->name"
+                            :color="$user->id === auth()->id() ? 'indigo' : 'gray'"
+                            :text="$user->name"
                         />
                     @endforeach
                 </x-slot:sub-value>
                 <x-slot:actions>
-                    <x-button
+                    <x-button color="secondary" light
                         icon="clock"
                         x-on:click="
                             $dispatch(
@@ -41,7 +41,7 @@
                         >
                         <div class="hidden sm:block">{{ __('Track Time') }}</div>
                     </x-button>
-                    <x-button icon="eye" wire:navigate :href="route('tasks.id', $task->id)">
+                    <x-button color="secondary" light icon="eye" wire:navigate :href="route('tasks.id', $task->id)">
                         <div class="hidden sm:block">{{ __('View') }}</div>
                     </x-button>
                 </x-slot:actions>

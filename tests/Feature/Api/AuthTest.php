@@ -8,21 +8,18 @@ use FluxErp\Models\Permission;
 use FluxErp\Models\User;
 use FluxErp\Tests\TestCase;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
 class AuthTest extends TestCase
 {
-    use DatabaseTransactions;
-
-    private User $user;
-
     private Model $interfaceUser;
+
+    private string $interfaceUserPassword;
 
     private string $password;
 
-    private string $interfaceUserPassword;
+    private User $user;
 
     protected function setUp(): void
     {
@@ -49,7 +46,7 @@ class AuthTest extends TestCase
         $this->interfaceUser->save();
     }
 
-    public function test_authenticate()
+    public function test_authenticate(): void
     {
         $response = $this->post('/api/auth/token', [
             'email' => $this->user->email,
@@ -61,27 +58,7 @@ class AuthTest extends TestCase
         $this->assertNotEmpty($token);
     }
 
-    public function test_authenticate_validation_fails()
-    {
-        $response = $this->post('/api/auth/token', [
-            'email' => 42,
-            'password' => 42,
-        ]);
-
-        $response->assertStatus(422);
-    }
-
-    public function test_authenticate_invalid_credentials()
-    {
-        $response = $this->post('/api/auth/token', [
-            'email' => $this->user->email,
-            'password' => Str::random(),
-        ]);
-
-        $response->assertStatus(401);
-    }
-
-    public function test_authenticate_interface_user()
+    public function test_authenticate_interface_user(): void
     {
         $response = $this->post('/api/auth/token', [
             'email' => $this->interfaceUser->name,
@@ -93,7 +70,17 @@ class AuthTest extends TestCase
         $this->assertNotEmpty($token);
     }
 
-    public function test_authenticate_interface_user_user_inactive()
+    public function test_authenticate_interface_user_invalid_credentials(): void
+    {
+        $response = $this->post('/api/auth/token', [
+            'email' => $this->interfaceUser->name,
+            'password' => Str::random() . $this->interfaceUserPassword,
+        ]);
+
+        $response->assertStatus(401);
+    }
+
+    public function test_authenticate_interface_user_user_inactive(): void
     {
         $this->interfaceUser->is_active = false;
         $this->interfaceUser->save();
@@ -106,17 +93,27 @@ class AuthTest extends TestCase
         $response->assertStatus(401);
     }
 
-    public function test_authenticate_interface_user_invalid_credentials()
+    public function test_authenticate_invalid_credentials(): void
     {
         $response = $this->post('/api/auth/token', [
-            'email' => $this->interfaceUser->name,
-            'password' => Str::random() . $this->interfaceUserPassword,
+            'email' => $this->user->email,
+            'password' => Str::random(),
         ]);
 
         $response->assertStatus(401);
     }
 
-    public function test_validate_token()
+    public function test_authenticate_validation_fails(): void
+    {
+        $response = $this->post('/api/auth/token', [
+            'email' => 42,
+            'password' => 42,
+        ]);
+
+        $response->assertStatus(422);
+    }
+
+    public function test_validate_token(): void
     {
         $permission = Permission::findOrCreate('api.auth.token.validate.get');
         $this->user->givePermissionTo($permission);

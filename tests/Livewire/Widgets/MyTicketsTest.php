@@ -12,7 +12,7 @@ use Livewire\Livewire;
 
 class MyTicketsTest extends BaseSetup
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         $tickets = Ticket::factory()
             ->count(3)

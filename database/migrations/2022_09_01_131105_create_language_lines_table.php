@@ -11,7 +11,7 @@ return new class() extends Migration
      */
     public function up(): void
     {
-        Schema::create('language_lines', function (Blueprint $table) {
+        Schema::create('language_lines', function (Blueprint $table): void {
             $table->bigIncrements('id');
             $table->string('group')->index();
             $table->string('key');

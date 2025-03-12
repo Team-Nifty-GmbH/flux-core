@@ -6,12 +6,23 @@ use FluxErp\Support\MediaLibrary\MediaCollection;
 use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\ResolvesRelationsThroughContainer;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Spatie\MediaLibrary\MediaCollections\Models\Media as BaseMedia;
 
 class Media extends BaseMedia
 {
     use LogsActivity, ResolvesRelationsThroughContainer;
+
+    public bool $isTemporary = false;
+
+    public ?string $path = null;
+
+    protected $guarded = [
+        'id',
+        'created_at',
+        'updated_at',
+    ];
 
     protected $hidden = [
         'disk',
@@ -21,26 +32,9 @@ class Media extends BaseMedia
         'order_column',
     ];
 
-    protected $guarded = [
-        'id',
-        'created_at',
-        'updated_at',
-    ];
-
-    public ?string $path = null;
-
-    public bool $isTemporary = false;
-
     public function category(): MorphToMany
     {
         return $this->morphToMany(Category::class, 'categorizable');
-    }
-
-    public function temporaryUpload(): BelongsTo
-    {
-        // When using the base method from spatie media this method throws an exception.
-        // Thats why we override the method here and return an empty BelongsTo.
-        return new BelongsTo(static::query(), new static(), '', '', '');
     }
 
     public function getCollection(): ?MediaCollection
@@ -48,11 +42,14 @@ class Media extends BaseMedia
         return $this->model->getMediaCollection($this->collection_name);
     }
 
-    public function setPath(string $path): static
+    public function getPath(string $conversionName = ''): string
     {
-        $this->path = $path;
+        return $this->path ?? parent::getPath($conversionName);
+    }
 
-        return $this;
+    public function printJobs(): HasMany
+    {
+        return $this->hasMany(PrintJob::class);
     }
 
     public function setIsTemporary(bool $isTemporary = true): static
@@ -62,9 +59,11 @@ class Media extends BaseMedia
         return $this;
     }
 
-    public function getPath(string $conversionName = ''): string
+    public function setPath(string $path): static
     {
-        return $this->path ?? parent::getPath($conversionName);
+        $this->path = $path;
+
+        return $this;
     }
 
     public function stream()
@@ -75,5 +74,12 @@ class Media extends BaseMedia
         }
 
         return parent::stream();
+    }
+
+    public function temporaryUpload(): BelongsTo
+    {
+        // When using the base method from spatie media this method throws an exception.
+        // Thats why we override the method here and return an empty BelongsTo.
+        return new BelongsTo(static::query(), new static(), '', '', '');
     }
 }

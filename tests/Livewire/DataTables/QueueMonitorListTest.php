@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class QueueMonitorListTest extends TestCase
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(QueueMonitorList::class)
             ->assertStatus(200);

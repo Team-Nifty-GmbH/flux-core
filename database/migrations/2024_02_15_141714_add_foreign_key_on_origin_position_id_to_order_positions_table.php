@@ -16,14 +16,14 @@ return new class() extends Migration
             ->whereNotNull('op1.origin_position_id')
             ->update(['op1.origin_position_id' => null]);
 
-        Schema::table('order_positions', function (Blueprint $table) {
+        Schema::table('order_positions', function (Blueprint $table): void {
             $table->foreign('origin_position_id')->references('id')->on('order_positions')->nullOnDelete();
         });
     }
 
     public function down(): void
     {
-        Schema::table('order_positions', function (Blueprint $table) {
+        Schema::table('order_positions', function (Blueprint $table): void {
             $table->dropForeign('order_positions_origin_position_id_foreign');
         });
     }

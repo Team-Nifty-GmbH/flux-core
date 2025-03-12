@@ -26,53 +26,26 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
 {
     use CreatesDocuments;
 
-    protected ?string $includeBefore = 'flux::livewire.order.order-list';
-
     public ?string $cacheKey = 'order.order-list';
 
     public OrderForm $order;
 
     public ?int $orderType = null;
 
+    protected ?string $includeBefore = 'flux::livewire.order.order-list';
+
     protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
-                ->color('primary')
-                ->label(__('New order'))
+                ->color('indigo')
+                ->text(__('New order'))
                 ->icon('plus')
                 ->when(resolve_static(CreateOrder::class, 'canPerformAction', [false]))
                 ->attributes([
-                    'x-on:click' => "\$openModal('create-order')",
+                    'x-on:click' => "\$modalOpen('create-order-modal')",
                 ]),
         ];
-    }
-
-    protected function getViewData(): array
-    {
-        return array_merge(
-            parent::getViewData(),
-            [
-                'priceLists' => resolve_static(PriceList::class, 'query')
-                    ->get(['id', 'name'])
-                    ->toArray(),
-                'paymentTypes' => resolve_static(PaymentType::class, 'query')
-                    ->get(['id', 'name'])
-                    ->toArray(),
-                'languages' => resolve_static(Language::class, 'query')
-                    ->get(['id', 'name'])
-                    ->toArray(),
-                'clients' => resolve_static(Client::class, 'query')
-                    ->where('is_active', true)
-                    ->get(['id', 'name'])
-                    ->toArray(),
-                'orderTypes' => resolve_static(OrderType::class, 'query')
-                    ->where('is_hidden', false)
-                    ->where('is_active', true)
-                    ->get(['id', 'name'])
-                    ->toArray(),
-            ]
-        );
     }
 
     protected function getSelectedActions(): array
@@ -80,19 +53,29 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         return [
             DataTableButton::make()
                 ->icon('document-text')
-                ->label(__('Create Documents'))
-                ->color('primary')
+                ->text(__('Create Documents'))
+                ->color('indigo')
                 ->wireClick('openCreateDocumentsModal'),
             DataTableButton::make()
                 ->icon('trash')
-                ->label(__('Delete'))
-                ->color('negative')
+                ->text(__('Delete'))
+                ->color('red')
                 ->when(fn () => resolve_static(DeleteOrder::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'delete',
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Orders')]),
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Orders')]),
                 ]),
         ];
+    }
+
+    #[Renderless]
+    public function createDocuments(): null|MediaStream|Media
+    {
+        $response = $this->createDocumentFromItems($this->getSelectedModels(), true);
+        $this->loadData();
+        $this->reset('selected');
+
+        return $response;
     }
 
     #[Renderless]
@@ -127,14 +110,36 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         return null;
     }
 
-    #[Renderless]
-    public function createDocuments(): null|MediaStream|Media
+    protected function getBladeParameters(OffersPrinting $item): array|SerializableClosure|null
     {
-        $response = $this->createDocumentFromItems($this->getSelectedModels(), true);
-        $this->loadData();
-        $this->reset('selected');
+        return new SerializableClosure(
+            fn () => [
+                'order' => resolve_static(Order::class, 'query')
+                    ->whereKey($item->getKey())
+                    ->first(),
+            ]
+        );
+    }
 
-        return $response;
+    protected function getHtmlBody(OffersPrinting $item): string
+    {
+        return html_entity_decode($item->orderType->mail_body);
+    }
+
+    protected function getPrintLayouts(): array
+    {
+        return resolve_static(Order::class, 'query')
+            ->whereIntegerInRaw('id', $this->selected)
+            ->with('orderType')
+            ->get(['id', 'order_type_id'])
+            ->printLayouts();
+    }
+
+    protected function getSubject(OffersPrinting $item): string
+    {
+        return html_entity_decode(
+            $item->orderType->mail_subject ?? '{{ $order->orderType->name }} {{ $order->order_number }}'
+        );
     }
 
     protected function getTo(OffersPrinting $item, array $documents): array
@@ -161,35 +166,30 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
         return array_values(array_unique(array_filter($to)));
     }
 
-    protected function getSubject(OffersPrinting $item): string
+    protected function getViewData(): array
     {
-        return html_entity_decode(
-            $item->orderType->mail_subject ?? '{{ $order->orderType->name }} {{ $order->order_number }}'
-        );
-    }
-
-    protected function getHtmlBody(OffersPrinting $item): string
-    {
-        return html_entity_decode($item->orderType->mail_body);
-    }
-
-    protected function getBladeParameters(OffersPrinting $item): array|SerializableClosure|null
-    {
-        return new SerializableClosure(
-            fn () => [
-                'order' => resolve_static(Order::class, 'query')
-                    ->whereKey($item->getKey())
-                    ->first(),
+        return array_merge(
+            parent::getViewData(),
+            [
+                'priceLists' => resolve_static(PriceList::class, 'query')
+                    ->get(['id', 'name'])
+                    ->toArray(),
+                'paymentTypes' => resolve_static(PaymentType::class, 'query')
+                    ->get(['id', 'name'])
+                    ->toArray(),
+                'languages' => resolve_static(Language::class, 'query')
+                    ->get(['id', 'name'])
+                    ->toArray(),
+                'clients' => resolve_static(Client::class, 'query')
+                    ->where('is_active', true)
+                    ->get(['id', 'name'])
+                    ->toArray(),
+                'orderTypes' => resolve_static(OrderType::class, 'query')
+                    ->where('is_hidden', false)
+                    ->where('is_active', true)
+                    ->get(['id', 'name'])
+                    ->toArray(),
             ]
         );
-    }
-
-    protected function getPrintLayouts(): array
-    {
-        return resolve_static(Order::class, 'query')
-            ->whereIntegerInRaw('id', $this->selected)
-            ->with('orderType')
-            ->get(['id', 'order_type_id'])
-            ->printLayouts();
     }
 }

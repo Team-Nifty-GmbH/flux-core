@@ -3,13 +3,17 @@
 namespace FluxErp\Tests\Feature\Web\Portal;
 
 use FluxErp\Models\Permission;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class CalendarTest extends PortalSetup
 {
-    use DatabaseTransactions;
+    public function test_portal_calendar_no_user(): void
+    {
+        $this->get(route('portal.calendar'))
+            ->assertStatus(302)
+            ->assertRedirect($this->portalDomain . '/login');
+    }
 
-    public function test_portal_calendar_page()
+    public function test_portal_calendar_page(): void
     {
         $this->user->givePermissionTo(Permission::findOrCreate('calendar.get', 'address'));
 
@@ -17,14 +21,7 @@ class CalendarTest extends PortalSetup
             ->assertStatus(200);
     }
 
-    public function test_portal_calendar_no_user()
-    {
-        $this->get(route('portal.calendar'))
-            ->assertStatus(302)
-            ->assertRedirect($this->portalDomain . '/login');
-    }
-
-    public function test_portal_calendar_without_permission()
+    public function test_portal_calendar_without_permission(): void
     {
         Permission::findOrCreate('calendar.get', 'address');
 

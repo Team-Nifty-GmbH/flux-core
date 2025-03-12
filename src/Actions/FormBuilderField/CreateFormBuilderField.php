@@ -8,14 +8,14 @@ use FluxErp\Rulesets\FormBuilderField\CreateFormBuilderFieldRuleset;
 
 class CreateFormBuilderField extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateFormBuilderFieldRuleset::class;
-    }
-
     public static function models(): array
     {
         return [FormBuilderField::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateFormBuilderFieldRuleset::class;
     }
 
     public function performAction(): FormBuilderField

@@ -9,10 +9,10 @@ use Livewire\Attributes\Modelable;
 
 class Tasks extends TaskList
 {
-    protected ?string $modelType = Address::class;
-
     #[Modelable]
     public int $modelId;
+
+    protected ?string $modelType = Address::class;
 
     public function save(): bool
     {

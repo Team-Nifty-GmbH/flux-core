@@ -8,7 +8,7 @@ class AddCommoncolumnsToPrintDataTable extends Migration
 {
     public function up(): void
     {
-        Schema::table('print_data', function (Blueprint $table) {
+        Schema::table('print_data', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->nullable();
             $table->unsignedBigInteger('updated_by')->nullable();
 
@@ -19,7 +19,7 @@ class AddCommoncolumnsToPrintDataTable extends Migration
 
     public function down(): void
     {
-        Schema::table('print_data', function (Blueprint $table) {
+        Schema::table('print_data', function (Blueprint $table): void {
             $table->dropForeign('print_data_created_by_foreign');
             $table->dropForeign('print_data_updated_by_foreign');
 

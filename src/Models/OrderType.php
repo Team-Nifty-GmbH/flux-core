@@ -20,6 +20,11 @@ class OrderType extends FluxModel
     use CacheModelQueries, Filterable, HasClientAssignment, HasEnums, HasPackageFactory, HasUserModification, HasUuid,
         LogsActivity, SoftDeletes;
 
+    public static function hasPermission(): bool
+    {
+        return false;
+    }
+
     protected function casts(): array
     {
         return [

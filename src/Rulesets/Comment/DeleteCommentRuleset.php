@@ -8,9 +8,9 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class DeleteCommentRuleset extends FluxRuleset
 {
-    protected static ?string $model = Comment::class;
-
     protected static bool $addAdditionalColumnRules = false;
+
+    protected static ?string $model = Comment::class;
 
     public function rules(): array
     {

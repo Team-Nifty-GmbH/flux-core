@@ -9,14 +9,14 @@ use Serializable;
  */
 class SerializableHandler implements HandlerInterface
 {
-    public function getDataType(): string
-    {
-        return 'serializable';
-    }
-
     public function canHandleValue(mixed $value): bool
     {
         return $value instanceof Serializable;
+    }
+
+    public function getDataType(): string
+    {
+        return 'serializable';
     }
 
     public function serializeValue(mixed $value): string

@@ -19,6 +19,23 @@ class AdditionalColumnService
         );
     }
 
+    public function delete(string $id): array
+    {
+        try {
+            DeleteAdditionalColumn::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
+            return ResponseHelper::createArrayResponse(
+                statusCode: 404,
+                data: $e->errors()
+            );
+        }
+
+        return ResponseHelper::createArrayResponse(
+            statusCode: 204,
+            statusMessage: 'additional column deleted'
+        );
+    }
+
     public function update(array $data): array
     {
         try {
@@ -34,23 +51,6 @@ class AdditionalColumnService
             statusCode: 200,
             data: $additionalColumn,
             statusMessage: 'additional column updated'
-        );
-    }
-
-    public function delete(string $id): array
-    {
-        try {
-            DeleteAdditionalColumn::make(['id' => $id])->validate()->execute();
-        } catch (ValidationException $e) {
-            return ResponseHelper::createArrayResponse(
-                statusCode: 404,
-                data: $e->errors()
-            );
-        }
-
-        return ResponseHelper::createArrayResponse(
-            statusCode: 204,
-            statusMessage: 'additional column deleted'
         );
     }
 }

@@ -9,6 +9,15 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class ProductPricesUpdateRuleset extends FluxRuleset
 {
+    public static function getRules(): array
+    {
+        return array_merge(
+            parent::getRules(),
+            resolve_static(ProductsRuleset::class, 'getRules'),
+            resolve_static(RoundingRuleset::class, 'getRules')
+        );
+    }
+
     public function rules(): array
     {
         return [
@@ -28,14 +37,5 @@ class ProductPricesUpdateRuleset extends FluxRuleset
             ],
             'is_percent' => 'boolean',
         ];
-    }
-
-    public static function getRules(): array
-    {
-        return array_merge(
-            parent::getRules(),
-            resolve_static(ProductsRuleset::class, 'getRules'),
-            resolve_static(RoundingRuleset::class, 'getRules')
-        );
     }
 }

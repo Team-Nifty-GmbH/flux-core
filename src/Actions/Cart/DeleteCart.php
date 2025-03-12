@@ -10,14 +10,14 @@ class DeleteCart extends FluxAction
 {
     protected static bool $hasPermission = false;
 
-    protected function getRulesets(): string|array
-    {
-        return DeleteCartRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Cart::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeleteCartRuleset::class;
     }
 
     public function performAction(): mixed

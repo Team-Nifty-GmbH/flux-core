@@ -20,7 +20,7 @@ class TicketTypesTest extends BaseSetup
             ->create();
     }
 
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(TicketTypes::class)
             ->assertStatus(200);

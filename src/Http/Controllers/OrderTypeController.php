@@ -27,16 +27,16 @@ class OrderTypeController extends BaseController
         );
     }
 
-    public function update(Request $request, OrderTypeService $orderTypeService): JsonResponse
+    public function delete(string $id, OrderTypeService $orderTypeService): JsonResponse
     {
-        $response = $orderTypeService->update($request->all());
+        $response = $orderTypeService->delete($id);
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
-    public function delete(string $id, OrderTypeService $orderTypeService): JsonResponse
+    public function update(Request $request, OrderTypeService $orderTypeService): JsonResponse
     {
-        $response = $orderTypeService->delete($id);
+        $response = $orderTypeService->update($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }

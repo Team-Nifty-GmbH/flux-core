@@ -19,33 +19,24 @@ class Result
         ]);
     }
 
-    public function getData(): array
-    {
-        return $this->data;
-    }
-
-    public function setData(array $data): static
-    {
-        $this->data = $data;
-
-        return $this;
-    }
-
     public function getCombinedData(): array
     {
         return array_combine($this->labels, $this->data);
     }
 
+    public function getData(): array
+    {
+        return $this->data;
+    }
+
+    public function getGrowthRate(): null|string|float|array
+    {
+        return $this->growthRate;
+    }
+
     public function getLabels(): array
     {
         return $this->labels;
-    }
-
-    public function setLabels(array $labels): static
-    {
-        $this->labels = $labels;
-
-        return $this;
     }
 
     public function mergeLabels(array $labels, float|int|string $default = 0): static
@@ -69,8 +60,17 @@ class Result
         return $this->setData(array_values($data))->setLabels(array_keys($data));
     }
 
-    public function getGrowthRate(): null|string|float|array
+    public function setData(array $data): static
     {
-        return $this->growthRate;
+        $this->data = $data;
+
+        return $this;
+    }
+
+    public function setLabels(array $labels): static
+    {
+        $this->labels = $labels;
+
+        return $this;
     }
 }

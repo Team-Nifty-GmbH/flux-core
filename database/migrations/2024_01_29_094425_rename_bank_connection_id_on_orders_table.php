@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('orders', function (Blueprint $table) {
+        Schema::table('orders', function (Blueprint $table): void {
             $table->dropForeign('orders_bank_connection_id_foreign');
             $table->renameColumn('bank_connection_id', 'contact_bank_connection_id');
             $table->foreign('contact_bank_connection_id')
@@ -20,7 +20,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('orders', function (Blueprint $table) {
+        Schema::table('orders', function (Blueprint $table): void {
             $table->dropForeign('orders_contact_bank_connection_id_foreign');
             $table->renameColumn('contact_bank_connection_id', 'bank_connection_id');
             $table->foreign('bank_connection_id')

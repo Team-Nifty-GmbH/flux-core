@@ -6,13 +6,10 @@ use FluxErp\Livewire\Ticket\Ticket as TicketView;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\User;
 use FluxErp\Tests\Livewire\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;
 
 class TicketTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Ticket $ticket;
 
     protected function setUp(): void
@@ -25,13 +22,13 @@ class TicketTest extends BaseSetup
         ]);
     }
 
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(TicketView::class, ['id' => $this->ticket->id])
             ->assertStatus(200);
     }
 
-    public function test_switch_tabs()
+    public function test_switch_tabs(): void
     {
         $component = Livewire::test(TicketView::class, ['id' => $this->ticket->id]);
 

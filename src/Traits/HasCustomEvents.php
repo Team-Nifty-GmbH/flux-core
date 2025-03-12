@@ -8,9 +8,19 @@ use Illuminate\Support\Collection;
 
 trait HasCustomEvents
 {
-    public function getRelatedCustomEvents(): array
+    public function customEvents(): MorphMany
     {
-        return $this->relatedCustomEvents ?? [];
+        return $this->morphMany(CustomEvent::class, 'model')
+            ->setQuery(
+                CustomEvent::query()
+                    ->where('model_type', self::class)
+                    ->whereNull('model_id')
+                    ->toBase()
+                    ->orWhere(function (\Illuminate\Database\Query\Builder $query): void {
+                        $query->where('model_type', $this->getMorphClass())
+                            ->where('model_id', $this->getKey());
+                    })
+            );
     }
 
     public function getCustomEventsAttribute(): Collection
@@ -30,18 +40,8 @@ trait HasCustomEvents
         return $customEvents;
     }
 
-    public function customEvents(): MorphMany
+    public function getRelatedCustomEvents(): array
     {
-        return $this->morphMany(CustomEvent::class, 'model')
-            ->setQuery(
-                CustomEvent::query()
-                    ->where('model_type', self::class)
-                    ->whereNull('model_id')
-                    ->toBase()
-                    ->orWhere(function (\Illuminate\Database\Query\Builder $query) {
-                        $query->where('model_type', $this->getMorphClass())
-                            ->where('model_id', $this->getKey());
-                    })
-            );
+        return $this->relatedCustomEvents ?? [];
     }
 }

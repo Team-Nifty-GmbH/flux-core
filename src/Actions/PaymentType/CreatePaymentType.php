@@ -11,14 +11,14 @@ use Illuminate\Support\Facades\Validator;
 
 class CreatePaymentType extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreatePaymentTypeRuleset::class;
-    }
-
     public static function models(): array
     {
         return [PaymentType::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreatePaymentTypeRuleset::class;
     }
 
     public function performAction(): PaymentType
@@ -35,18 +35,18 @@ class CreatePaymentType extends FluxAction
         return $paymentType->fresh();
     }
 
+    protected function prepareForValidation(): void
+    {
+        $this->data['clients'] ??= [
+            data_get($this->data, 'client_id') ?? resolve_static(Client::class, 'default')?->id,
+        ];
+    }
+
     protected function validateData(): void
     {
         $validator = Validator::make($this->data, $this->rules);
         $validator->addModel(app(PaymentType::class));
 
         $this->data = $validator->validate();
-    }
-
-    protected function prepareForValidation(): void
-    {
-        $this->data['clients'] ??= [
-            data_get($this->data, 'client_id') ?? resolve_static(Client::class, 'default')?->id,
-        ];
     }
 }

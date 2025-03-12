@@ -49,18 +49,9 @@ class PriceHelper
         return app(static::class, ['product' => $product]);
     }
 
-    public function getProduct(): Product
+    public function addDiscount(Discount $discount): static
     {
-        return $this->product;
-    }
-
-    public function setContact(Contact $contact): static
-    {
-        $this->contact = $contact;
-
-        if (is_null($this->priceList)) {
-            $this->priceList = $contact->priceList;
-        }
+        $this->discount = $discount;
 
         return $this;
     }
@@ -70,42 +61,19 @@ class PriceHelper
         return $this->contact;
     }
 
-    public function addDiscount(Discount $discount): static
-    {
-        $this->discount = $discount;
-
-        return $this;
-    }
-
-    public function setPriceList(PriceList $priceList): static
-    {
-        $this->priceList = $priceList;
-
-        return $this;
-    }
-
     public function getPriceList(): ?PriceList
     {
         return $this->priceList;
     }
 
-    public function setTimestamp(string $timestamp): static
+    public function getProduct(): Product
     {
-        $this->timestamp = Carbon::parse($timestamp)->toDateTimeString();
-
-        return $this;
+        return $this->product;
     }
 
     public function getTimestamp(): ?string
     {
         return $this->timestamp;
-    }
-
-    public function useDefault(bool $useDefault): static
-    {
-        $this->useDefault = $useDefault;
-
-        return $this;
     }
 
     public function price(): ?Price
@@ -315,6 +283,75 @@ class PriceHelper
         return $this->price;
     }
 
+    public function setContact(Contact $contact): static
+    {
+        $this->contact = $contact;
+
+        if (is_null($this->priceList)) {
+            $this->priceList = $contact->priceList;
+        }
+
+        return $this;
+    }
+
+    public function setPriceList(PriceList $priceList): static
+    {
+        $this->priceList = $priceList;
+
+        return $this;
+    }
+
+    public function setTimestamp(string $timestamp): static
+    {
+        $this->timestamp = Carbon::parse($timestamp)->toDateTimeString();
+
+        return $this;
+    }
+
+    public function useDefault(bool $useDefault): static
+    {
+        $this->useDefault = $useDefault;
+
+        return $this;
+    }
+
+    protected function calculateLowestDiscountedPrice(Price $price, Collection $discounts): void
+    {
+        if (! $price->basePrice && $discounts->count()) {
+            $price->basePrice = clone $price;
+        }
+
+        $maxPercentageDiscount = $discounts->reduce(function (?Discount $carry, Discount $item) {
+            return ($item->is_percentage && $item->discount > $carry?->discount) ? $item : $carry;
+        });
+
+        $maxFlatDiscount = $discounts->reduce(function (?Discount $carry, Discount $item) {
+            return (! $item->is_percentage && $item->discount > $carry?->discount) ? $item : $carry;
+        });
+
+        $discountedPercentage = bcmul($price->price, (1 - ($maxPercentageDiscount->discount ?? 0)));
+        $discountedFlat = bcsub($price->price, $maxFlatDiscount->discount ?? 0);
+
+        if (! $this->contact && $discounts->count() === 1) {
+            $price->price = $discounts->first()->is_percentage ? $discountedPercentage : $discountedFlat;
+            $price->appliedDiscounts = $discounts->all();
+
+            return;
+        }
+
+        if (bccomp($discountedPercentage, $discountedFlat) === -1) {
+            $price->price = $discountedPercentage;
+            if ($maxPercentageDiscount) {
+                $price->appliedDiscounts[] = $maxPercentageDiscount;
+            }
+        } else {
+            $price->price = $discountedFlat;
+            if ($maxFlatDiscount) {
+                $price->appliedDiscounts[] = $maxFlatDiscount;
+            }
+        }
+    }
+
     /**
      * Calculate price from price list based on price list parent(s) and discount per price list
      */
@@ -373,41 +410,9 @@ class PriceHelper
         return $price;
     }
 
-    protected function calculateLowestDiscountedPrice(Price $price, Collection $discounts): void
+    protected function fireEvent(string $event): void
     {
-        if (! $price->basePrice && $discounts->count()) {
-            $price->basePrice = clone $price;
-        }
-
-        $maxPercentageDiscount = $discounts->reduce(function (?Discount $carry, Discount $item) {
-            return ($item->is_percentage && $item->discount > $carry?->discount) ? $item : $carry;
-        });
-
-        $maxFlatDiscount = $discounts->reduce(function (?Discount $carry, Discount $item) {
-            return (! $item->is_percentage && $item->discount > $carry?->discount) ? $item : $carry;
-        });
-
-        $discountedPercentage = bcmul($price->price, (1 - ($maxPercentageDiscount->discount ?? 0)));
-        $discountedFlat = bcsub($price->price, $maxFlatDiscount->discount ?? 0);
-
-        if (! $this->contact && $discounts->count() === 1) {
-            $price->price = $discounts->first()->is_percentage ? $discountedPercentage : $discountedFlat;
-            $price->appliedDiscounts = $discounts->all();
-
-            return;
-        }
-
-        if (bccomp($discountedPercentage, $discountedFlat) === -1) {
-            $price->price = $discountedPercentage;
-            if ($maxPercentageDiscount) {
-                $price->appliedDiscounts[] = $maxPercentageDiscount;
-            }
-        } else {
-            $price->price = $discountedFlat;
-            if ($maxFlatDiscount) {
-                $price->appliedDiscounts[] = $maxFlatDiscount;
-            }
-        }
+        event($event, $this);
     }
 
     protected function getRootPrice(?PriceList $priceList, ?Price $price): ?Price
@@ -425,10 +430,5 @@ class PriceHelper
         }
 
         return $parentPrice ?? $price;
-    }
-
-    protected function fireEvent(string $event): void
-    {
-        event($event, $this);
     }
 }

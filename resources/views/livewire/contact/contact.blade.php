@@ -7,7 +7,7 @@
                 @section('contact.title')
                     @section('contact.title.avatar')
                         <label for="avatar" class="cursor-pointer">
-                            <x-avatar xl src="{{ $avatar }}" />
+                            <x-avatar xl :image="$avatar" />
                         </label>
                         <input type="file" accept="image/*" id="avatar" class="hidden" wire:model.live="avatar"/>
                     @show
@@ -21,31 +21,31 @@
                     @show
                 @show
             </div>
-            <div class="justify-stretch mt-6 flex flex-col-reverse space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3">
+            <div class="justify-stretch mt-6 flex flex-col-reverse gap-2 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:gap-x-2 sm:space-x-reverse md:mt-0 md:flex-row md:gap-x-2">
                 @section('contact.buttons')
                     @canAction(\FluxErp\Actions\Contact\UpdateContact::class)
-                        <div x-cloak x-show="$wire.edit">
-                            <x-button
+                        <div x-cloak x-show="$wire.edit" class="flex gap-x-2">
+                            <x-button color="secondary" light
                                 x-on:click="$wire.edit = false; $wire.reloadContact()"
-                                :label="__('Cancel')"
+                                :text="__('Cancel')"
                             />
                             <x-button
                                 x-on:click="$wire.save()"
-                                primary
-                                :label="__('Save')"
+                                color="indigo"
+                                :text="__('Save')"
                             />
                         </div>
                         <div x-cloak x-show="! $wire.edit">
                             <x-button
                                 x-on:click="$wire.edit = true;"
-                                primary
-                                :label="__('Edit')"
+                                color="indigo"
+                                :text="__('Edit')"
                             />
                         </div>
                     @endCanAction
                     @canAction(\FluxErp\Actions\Contact\DeleteContact::class)
-                        <x-button negative label="{{ __('Delete') }}"
-                                  wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Contact')]) }}"
+                        <x-button color="red" :text="__('Delete') "
+                                  wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Contact')]) }}"
                                   wire:click="delete()"
                         />
                     @endCanAction

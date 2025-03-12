@@ -14,6 +14,8 @@ use Livewire\Component;
 
 class SignatureLinkGenerator extends Component
 {
+    public array $generatedUrls = [];
+
     #[Modelable]
     public int $modelId;
 
@@ -23,8 +25,6 @@ class SignatureLinkGenerator extends Component
     public array $signedViews = [];
 
     public array $unsignedViews = [];
-
-    public array $generatedUrls = [];
 
     public function mount(): void
     {
@@ -45,6 +45,11 @@ class SignatureLinkGenerator extends Component
         $this->unsignedViews = array_diff($signable, $this->signedViews);
     }
 
+    public function render(): View
+    {
+        return view('flux::livewire.features.signature-link-generator');
+    }
+
     public function setPublicLink(string $printView): void
     {
         $this->generatedUrls[$printView] = URL::signedRoute(
@@ -55,11 +60,6 @@ class SignatureLinkGenerator extends Component
                 'print-view' => $printView,
             ]
         );
-    }
-
-    public function render(): View
-    {
-        return view('flux::livewire.features.signature-link-generator');
     }
 
     protected function getModel(): OffersPrinting

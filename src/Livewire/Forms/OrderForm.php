@@ -16,85 +16,104 @@ use Livewire\Attributes\Locked;
 
 class OrderForm extends FluxForm
 {
-    #[Locked]
-    public ?int $id = null;
-
-    #[Locked]
-    public ?string $uuid = null;
-
-    public ?int $approval_user_id = null;
-
-    public ?int $parent_id = null;
-
-    public ?int $client_id = null;
-
-    public ?int $agent_id = null;
-
-    public ?int $contact_id = null;
-
-    public ?int $contact_bank_connection_id = null;
-
-    public ?int $address_invoice_id = null;
-
-    public ?int $address_delivery_id = null;
-
-    public ?int $language_id = null;
-
-    public ?int $order_type_id = null;
-
-    public ?int $price_list_id = null;
-
-    public ?int $payment_type_id = null;
-
-    public ?int $responsible_user_id = null;
-
-    public ?int $vat_rate_id = null;
-
-    public ?array $address_invoice = null;
+    public ?string $account_holder = null;
 
     public ?array $address_delivery = null;
 
-    public ?string $state = null;
+    public ?int $address_delivery_id = null;
 
-    public ?string $payment_state = null;
+    public ?array $address_invoice = null;
+
+    public ?int $address_invoice_id = null;
+
+    public ?int $agent_id = null;
+
+    public ?int $approval_user_id = null;
+
+    #[Locked]
+    public ?string $avatarUrl = null;
+
+    public ?string $balance = null;
+
+    public ?string $bank_name = null;
+
+    public ?string $bic = null;
+
+    public ?int $client_id = null;
+
+    public ?string $commission = null;
+
+    public ?int $contact_bank_connection_id = null;
+
+    public ?int $contact_id = null;
+
+    public ?string $created_at = null;
+
+    public ?string $created_by = null;
+
+    #[Locked]
+    public ?array $created_from = null;
+
+    public ?array $currency = null;
 
     public ?string $delivery_state = null;
 
-    public ?int $payment_target = null;
+    public array $discounts = [];
 
-    public ?int $payment_discount_target = null;
-
-    public ?float $payment_discount_percent = null;
-
-    public ?string $total_base_net_price = null;
-
-    public ?string $total_base_gross_price = null;
-
-    public ?string $total_base_discounted_net_price = null;
-
-    public ?string $total_base_discounted_gross_price = null;
+    public ?string $footer = null;
 
     #[ExcludeFromActionData]
     public ?float $gross_profit = 0;
 
+    #[Locked]
+    public bool $hasContactDeliveryLock = false;
+
+    public ?string $header = null;
+
+    public ?string $iban = null;
+
+    #[Locked]
+    public ?int $id = null;
+
+    #[Locked]
+    public ?array $invoice = null;
+
+    public ?string $invoice_date = null;
+
+    public ?string $invoice_number = null;
+
+    public bool $is_confirmed = false;
+
+    public bool $is_locked = false;
+
+    #[Locked]
+    public bool $isPurchase = false;
+
+    public ?int $language_id = null;
+
+    public ?string $logistic_note = null;
+
     #[ExcludeFromActionData]
     public ?float $margin = 0;
 
-    public ?string $total_net_price = null;
+    public ?string $order_date = null;
 
-    public ?string $total_gross_price = null;
+    public ?string $order_number = null;
 
-    public ?array $total_vats = null;
+    public ?array $order_type = null;
 
-    public ?string $total_discount_flat = null;
+    public ?int $order_type_id = null;
 
-    public ?string $total_discount_percentage = null;
+    #[Locked]
+    public ?array $parent = null;
 
-    public ?string $total_position_discount_flat = null;
+    public ?int $parent_id = null;
 
-    public ?string $total_position_discount_percentage = null;
+    public ?float $payment_discount_percent = null;
 
-    public ?string $balance = null;
+    public ?int $payment_discount_target = null;
+
+    public ?int $payment_reminder_current_level = null;
 
     public ?int $payment_reminder_days_1 = null;
 
@@ -102,51 +121,47 @@ class OrderForm extends FluxForm
 
     public ?int $payment_reminder_days_3 = null;
 
-    public ?int $payment_reminder_current_level = null;
-
     public ?string $payment_reminder_next_date = null;
 
-    public ?string $order_number = null;
+    public ?string $payment_state = null;
 
-    public ?string $commission = null;
-
-    public ?string $iban = null;
-
-    public ?string $account_holder = null;
-
-    public ?string $bank_name = null;
-
-    public ?string $bic = null;
-
-    public ?string $header = null;
-
-    public ?string $footer = null;
-
-    public ?string $logistic_note = null;
+    public ?int $payment_target = null;
 
     public ?array $payment_texts = [];
 
-    public ?string $order_date = null;
+    public ?int $payment_type_id = null;
 
-    public ?string $invoice_date = null;
+    public ?int $price_list_id = null;
 
-    public ?string $invoice_number = null;
+    public ?int $responsible_user_id = null;
+
+    public ?string $state = null;
 
     public ?string $system_delivery_date = null;
 
     public ?string $system_delivery_date_end = null;
 
-    public bool $is_locked = false;
+    public ?string $total_base_discounted_gross_price = null;
 
-    public bool $is_confirmed = false;
+    public ?string $total_base_discounted_net_price = null;
 
-    public ?array $currency = null;
+    public ?string $total_base_gross_price = null;
 
-    public ?array $order_type = null;
+    public ?string $total_base_net_price = null;
 
-    public ?string $created_at = null;
+    public ?string $total_discount_flat = null;
 
-    public ?string $created_by = null;
+    public ?string $total_discount_percentage = null;
+
+    public ?string $total_gross_price = null;
+
+    public ?string $total_net_price = null;
+
+    public ?string $total_position_discount_flat = null;
+
+    public ?string $total_position_discount_percentage = null;
+
+    public ?array $total_vats = null;
 
     public ?string $updated_at = null;
 
@@ -154,37 +169,12 @@ class OrderForm extends FluxForm
 
     public array $users = [];
 
-    public array $discounts = [];
-
     #[Locked]
-    public ?array $invoice = null;
+    public ?string $uuid = null;
 
-    #[Locked]
-    public ?array $parent = null;
-
-    #[Locked]
-    public ?array $created_from = null;
-
-    #[Locked]
-    public bool $isPurchase = false;
-
-    #[Locked]
-    public bool $hasContactDeliveryLock = false;
-
-    #[Locked]
-    public ?string $avatarUrl = null;
+    public ?int $vat_rate_id = null;
 
     protected PriceList $priceList;
-
-    protected function getActions(): array
-    {
-        return [
-            'create' => CreateOrder::class,
-            'update' => UpdateOrder::class,
-            'update_locked' => UpdateLockedOrder::class,
-            'delete' => DeleteOrder::class,
-        ];
-    }
 
     public function fill($values): void
     {
@@ -233,7 +223,7 @@ class OrderForm extends FluxForm
                     : [],
                 [
                     'isPurchase' => $values->orderType->order_type_enum->isPurchase(),
-                    'avatarUrl' => $values->contact->getFirstMediaUrl('avatar'),
+                    'avatarUrl' => $values->contact?->getFirstMediaUrl('avatar'),
                 ],
             );
         }
@@ -241,6 +231,28 @@ class OrderForm extends FluxForm
         parent::fill($values);
 
         $this->hasContactDeliveryLock = data_get($values, 'contact.has_delivery_lock', false);
+    }
+
+    public function getContact(): ?Contact
+    {
+        return resolve_static(Contact::class, 'query')
+            ->whereKey($this->contact_id)
+            ->first(['id', 'price_list_id']);
+    }
+
+    public function getPriceList(): ?PriceList
+    {
+        return $this->priceList = resolve_static(PriceList::class, 'query')
+            ->whereKey($this->price_list_id)
+            ->first([
+                'id',
+                'parent_id',
+                'rounding_method_enum',
+                'rounding_precision',
+                'rounding_number',
+                'rounding_mode',
+                'is_net',
+            ]);
     }
 
     public function save(): void
@@ -266,26 +278,14 @@ class OrderForm extends FluxForm
         $this->fill($response);
     }
 
-    public function getContact(): ?Contact
+    protected function getActions(): array
     {
-        return resolve_static(Contact::class, 'query')
-            ->whereKey($this->contact_id)
-            ->first(['id', 'price_list_id']);
-    }
-
-    public function getPriceList(): ?PriceList
-    {
-        return $this->priceList = resolve_static(PriceList::class, 'query')
-            ->whereKey($this->price_list_id)
-            ->first([
-                'id',
-                'parent_id',
-                'rounding_method_enum',
-                'rounding_precision',
-                'rounding_number',
-                'rounding_mode',
-                'is_net',
-            ]);
+        return [
+            'create' => CreateOrder::class,
+            'update' => UpdateOrder::class,
+            'update_locked' => UpdateLockedOrder::class,
+            'delete' => DeleteOrder::class,
+        ];
     }
 
     protected function makeAction(string $name, ?array $data = null): FluxAction

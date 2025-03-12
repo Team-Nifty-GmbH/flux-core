@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class SerialNumberRangesTest extends TestCase
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(SerialNumberRanges::class)
             ->assertStatus(200);

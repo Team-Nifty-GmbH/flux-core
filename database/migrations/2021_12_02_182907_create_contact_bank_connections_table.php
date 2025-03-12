@@ -8,7 +8,7 @@ class CreateContactBankConnectionsTable extends Migration
 {
     public function up(): void
     {
-        Schema::create('contact_bank_connections', function (Blueprint $table) {
+        Schema::create('contact_bank_connections', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
             $table->unsignedBigInteger('contact_id');

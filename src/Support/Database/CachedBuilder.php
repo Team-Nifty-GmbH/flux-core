@@ -9,11 +9,13 @@ class CachedBuilder extends Builder
 {
     protected bool $withoutCache = false;
 
-    public function withoutCache(bool $withoutCache = true): static
+    public static function cacheKey(string|object $class): string
     {
-        $this->withoutCache = $withoutCache;
+        $class = is_object($class) ? get_class($class) : $class;
 
-        return $this;
+        return 'model-query-cache:' . str(resolve_static($class, 'class'))
+            ->lower()
+            ->replace('\\', '-');
     }
 
     public function get($columns = ['*'])
@@ -50,13 +52,11 @@ class CachedBuilder extends Builder
         return $result;
     }
 
-    public static function cacheKey(string|object $class): string
+    public function withoutCache(bool $withoutCache = true): static
     {
-        $class = is_object($class) ? get_class($class) : $class;
+        $this->withoutCache = $withoutCache;
 
-        return 'model-query-cache:' . str(resolve_static($class, 'class'))
-            ->lower()
-            ->replace('\\', '-');
+        return $this;
     }
 
     protected function queryCacheKey(array|string $columns): string

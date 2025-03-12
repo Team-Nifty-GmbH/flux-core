@@ -17,6 +17,16 @@ class ViewExists implements Rule
     }
 
     /**
+     * Get the validation error message.
+     *
+     * @return string
+     */
+    public function message()
+    {
+        return __('The given view does not exist.');
+    }
+
+    /**
      * Determine if the validation rule passes.
      *
      * @param  string  $attribute
@@ -26,15 +36,5 @@ class ViewExists implements Rule
     public function passes($attribute, $value)
     {
         return view()->exists($value);
-    }
-
-    /**
-     * Get the validation error message.
-     *
-     * @return string
-     */
-    public function message()
-    {
-        return __('The given view does not exist.');
     }
 }

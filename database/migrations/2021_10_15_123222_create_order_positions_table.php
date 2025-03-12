@@ -8,7 +8,7 @@ class CreateOrderPositionsTable extends Migration
 {
     public function up(): void
     {
-        Schema::create('order_positions', function (Blueprint $table) {
+        Schema::create('order_positions', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
             $table->unsignedBigInteger('order_id');

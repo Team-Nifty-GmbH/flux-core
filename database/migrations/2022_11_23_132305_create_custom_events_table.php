@@ -14,7 +14,7 @@ return new class() extends Migration
      */
     public function up(): void
     {
-        Schema::create('custom_events', function (Blueprint $table) {
+        Schema::create('custom_events', function (Blueprint $table): void {
             $table->id();
             $table->string('name')->unique()->index();
             $table->nullableMorphs('model');

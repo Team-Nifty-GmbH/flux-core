@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class WorkTimeTypesTest extends TestCase
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(WorkTimeTypes::class)
             ->assertStatus(200);

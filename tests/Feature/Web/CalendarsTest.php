@@ -3,13 +3,17 @@
 namespace FluxErp\Tests\Feature\Web;
 
 use FluxErp\Models\Permission;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class CalendarsTest extends BaseSetup
 {
-    use DatabaseTransactions;
+    public function test_calendars_no_user(): void
+    {
+        $this->get('/calendars')
+            ->assertStatus(302)
+            ->assertRedirect(route('login'));
+    }
 
-    public function test_calendars_page()
+    public function test_calendars_page(): void
     {
         $this->user->givePermissionTo(Permission::findOrCreate('calendars.get', 'web'));
 
@@ -17,14 +21,7 @@ class CalendarsTest extends BaseSetup
             ->assertStatus(200);
     }
 
-    public function test_calendars_no_user()
-    {
-        $this->get('/calendars')
-            ->assertStatus(302)
-            ->assertRedirect(route('login'));
-    }
-
-    public function test_calendars_without_permission()
+    public function test_calendars_without_permission(): void
     {
         Permission::findOrCreate('calendars.get', 'web');
 

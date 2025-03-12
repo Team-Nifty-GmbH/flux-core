@@ -7,13 +7,10 @@ use FluxErp\Models\Client;
 use FluxErp\Models\Permission;
 use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Laravel\Sanctum\Sanctum;
 
 class ClientTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Collection $clients;
 
     private array $permissions;
@@ -32,7 +29,7 @@ class ClientTest extends BaseSetup
         ];
     }
 
-    public function test_get_client()
+    public function test_get_client(): void
     {
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
@@ -59,7 +56,7 @@ class ClientTest extends BaseSetup
         $this->assertEquals($this->clients[0]->is_active, $client->is_active);
     }
 
-    public function test_get_client_client_not_found()
+    public function test_get_client_client_not_found(): void
     {
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
@@ -68,7 +65,7 @@ class ClientTest extends BaseSetup
         $response->assertStatus(404);
     }
 
-    public function test_get_clients()
+    public function test_get_clients(): void
     {
         $this->user->givePermissionTo($this->permissions['index']);
         Sanctum::actingAs($this->user, ['user']);

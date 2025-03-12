@@ -21,14 +21,14 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateAddress extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateAddressRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Address::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateAddressRuleset::class;
     }
 
     public function performAction(): Model

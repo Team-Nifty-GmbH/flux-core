@@ -8,14 +8,14 @@ use FluxErp\Rulesets\SerialNumberRange\CreateSerialNumberRangeRuleset;
 
 class CreateSerialNumberRange extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateSerialNumberRangeRuleset::class;
-    }
-
     public static function models(): array
     {
         return [SerialNumberRange::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateSerialNumberRangeRuleset::class;
     }
 
     public function performAction(): SerialNumberRange

@@ -11,7 +11,7 @@ class RefactorEventNotificationsTableAndRenameTableToEventSubscriptions extends 
     {
         $this->renameEventNotificationsTableToEventSubscriptions();
 
-        Schema::table('event_subscriptions', function (Blueprint $table) {
+        Schema::table('event_subscriptions', function (Blueprint $table): void {
             $table->boolean('is_notifiable')->after('model_id')->default(false);
             $table->boolean('is_broadcast')->after('model_id')->default(false);
         });
@@ -19,19 +19,19 @@ class RefactorEventNotificationsTableAndRenameTableToEventSubscriptions extends 
 
     public function down(): void
     {
-        Schema::table('event_subscriptions', function (Blueprint $table) {
+        Schema::table('event_subscriptions', function (Blueprint $table): void {
             $table->dropColumn(['is_notifiable', 'is_broadcast']);
         });
 
         $this->renameEventSubscriptionsTableToEventNotifications();
     }
 
-    private function renameEventNotificationsTableToEventSubscriptions()
+    private function renameEventNotificationsTableToEventSubscriptions(): void
     {
         DB::statement('RENAME TABLE event_notifications TO event_subscriptions');
     }
 
-    private function renameEventSubscriptionsTableToEventNotifications()
+    private function renameEventSubscriptionsTableToEventNotifications(): void
     {
         DB::statement('RENAME TABLE event_subscriptions TO event_notifications');
     }

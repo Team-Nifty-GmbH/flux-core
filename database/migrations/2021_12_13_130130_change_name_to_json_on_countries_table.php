@@ -9,7 +9,7 @@ class ChangeNameToJsonOnCountriesTable extends Migration
 {
     public function up(): void
     {
-        Schema::table('countries', function (Blueprint $table) {
+        Schema::table('countries', function (Blueprint $table): void {
             $table->json('name')->change();
         });
 
@@ -20,16 +20,16 @@ class ChangeNameToJsonOnCountriesTable extends Migration
     {
         $this->rollbackName();
 
-        Schema::table('countries', function (Blueprint $table) {
+        Schema::table('countries', function (Blueprint $table): void {
             $table->string('name')->change();
         });
     }
 
-    private function migrateName()
+    private function migrateName(): void
     {
         $countries = DB::table('countries')->get()->toArray();
 
-        array_walk($countries, function (&$item) {
+        array_walk($countries, function (&$item): void {
             $item->name = json_encode([config('app.locale') => $item->name]);
             $item = (array) $item;
         });
@@ -37,11 +37,11 @@ class ChangeNameToJsonOnCountriesTable extends Migration
         DB::table('countries')->upsert($countries, ['id']);
     }
 
-    private function rollbackName()
+    private function rollbackName(): void
     {
         $countries = DB::table('countries')->get()->toArray();
 
-        array_walk($countries, function (&$item) {
+        array_walk($countries, function (&$item): void {
             $item->name = substr(json_decode($item->name)->{config('app.locale')}, 0, 255);
             $item = (array) $item;
         });

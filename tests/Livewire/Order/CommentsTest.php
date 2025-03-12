@@ -13,13 +13,10 @@ use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Tests\Livewire\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;
 
 class CommentsTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Order $order;
 
     protected function setUp(): void
@@ -63,7 +60,7 @@ class CommentsTest extends BaseSetup
         ]);
     }
 
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         $class = new class() extends Comments
         {

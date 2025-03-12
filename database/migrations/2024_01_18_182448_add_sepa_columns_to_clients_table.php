@@ -11,7 +11,7 @@ return new class() extends Migration
      */
     public function up(): void
     {
-        Schema::table('clients', function (Blueprint $table) {
+        Schema::table('clients', function (Blueprint $table): void {
             $table->string('creditor_identifier')->nullable()->after('website');
             $table->text('sepa_text')->nullable()->after('creditor_identifier');
         });
@@ -22,7 +22,7 @@ return new class() extends Migration
      */
     public function down(): void
     {
-        Schema::table('clients', function (Blueprint $table) {
+        Schema::table('clients', function (Blueprint $table): void {
             $table->dropColumn(['creditor_identifier', 'sepa_text']);
         });
     }

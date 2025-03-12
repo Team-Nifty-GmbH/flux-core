@@ -12,6 +12,16 @@ class MyTasks extends Component
 {
     use Widgetable;
 
+    public static function getDefaultHeight(): int
+    {
+        return 2;
+    }
+
+    public static function getDefaultWidth(): int
+    {
+        return 2;
+    }
+
     public function render(): View|Factory
     {
         $endStates = TaskState::all()
@@ -37,15 +47,5 @@ class MyTasks extends Component
     public function placeholder(): View|Factory
     {
         return view('flux::livewire.placeholders.horizontal-bar');
-    }
-
-    public static function getDefaultWidth(): int
-    {
-        return 2;
-    }
-
-    public static function getDefaultHeight(): int
-    {
-        return 2;
     }
 }

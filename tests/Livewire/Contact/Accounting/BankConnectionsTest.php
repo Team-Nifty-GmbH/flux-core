@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class BankConnectionsTest extends TestCase
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(BankConnections::class)
             ->assertStatus(200);

@@ -9,28 +9,28 @@ use Livewire\Attributes\Locked;
 
 class SerialNumberRangeForm extends FluxForm
 {
-    #[Locked]
-    public ?int $id = null;
-
     public ?int $client_id = null;
-
-    public ?string $model_type = null;
-
-    public ?string $type = null;
 
     public ?int $current_number = 0;
 
-    public ?string $prefix = null;
-
-    public ?string $suffix = null;
-
     public ?string $description = null;
 
-    public ?int $length = 4;
+    #[Locked]
+    public ?int $id = null;
 
     public bool $is_pre_filled = false;
 
+    public ?int $length = 4;
+
+    public ?string $model_type = null;
+
+    public ?string $prefix = null;
+
     public bool $stores_serial_numbers = false;
+
+    public ?string $suffix = null;
+
+    public ?string $type = null;
 
     protected function getActions(): array
     {

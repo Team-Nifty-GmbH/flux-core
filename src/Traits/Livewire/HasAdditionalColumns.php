@@ -8,13 +8,13 @@ trait HasAdditionalColumns
 
     public array $additionalColumns = [];
 
-    public function mountHasAdditionalColumns(): void
-    {
-        $this->additionalColumns = $this->getAdditionalColumns();
-    }
-
     public function getAdditionalColumns(): array
     {
         return [];
+    }
+
+    public function mountHasAdditionalColumns(): void
+    {
+        $this->additionalColumns = $this->getAdditionalColumns();
     }
 }

@@ -18,14 +18,14 @@ class CreateOrderFromPurchaseInvoice extends FluxAction
 {
     public ?PurchaseInvoice $purchaseInvoice;
 
-    protected function getRulesets(): string|array
-    {
-        return CreateOrderFromPurchaseInvoiceRuleset::class;
-    }
-
     public static function models(): array
     {
         return [PurchaseInvoice::class, Order::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateOrderFromPurchaseInvoiceRuleset::class;
     }
 
     public function performAction(): Order

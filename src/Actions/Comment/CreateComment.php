@@ -12,14 +12,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class CreateComment extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateCommentRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Comment::class, EventSubscription::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateCommentRuleset::class;
     }
 
     public function performAction(): Comment

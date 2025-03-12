@@ -8,9 +8,9 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class DeleteValueListRuleset extends FluxRuleset
 {
-    protected static ?string $model = AdditionalColumn::class;
-
     protected static bool $addAdditionalColumnRules = false;
+
+    protected static ?string $model = AdditionalColumn::class;
 
     public function rules(): array
     {

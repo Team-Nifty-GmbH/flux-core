@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class CheckoutFinishTest extends TestCase
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(CheckoutFinish::class)
             ->assertStatus(200);

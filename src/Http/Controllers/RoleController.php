@@ -17,22 +17,14 @@ class RoleController extends BaseController
         $this->model = app(Role::class);
     }
 
-    public function showUserRoles(string $id): JsonResponse
+    public function assignUsers(Request $request, RoleService $roleService): JsonResponse
     {
-        $user = resolve_static(User::class, 'query')
-            ->whereKey($id)
-            ->first();
-
-        if (! $user) {
-            return ResponseHelper::createResponseFromBase(
-                statusCode: 404,
-                data: ['id' => 'user not found']
-            );
-        }
+        $users = $roleService->editRoleUsers($request->all(), true);
 
         return ResponseHelper::createResponseFromBase(
             statusCode: 200,
-            data: $user->roles
+            data: $users,
+            statusMessage: 'role users updated'
         );
     }
 
@@ -47,9 +39,9 @@ class RoleController extends BaseController
         );
     }
 
-    public function update(Request $request, RoleService $roleService): JsonResponse
+    public function delete(string $id, RoleService $roleService): JsonResponse
     {
-        $response = $roleService->update($request->all());
+        $response = $roleService->delete($id);
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
@@ -76,28 +68,6 @@ class RoleController extends BaseController
         );
     }
 
-    public function syncUserRoles(Request $request, RoleService $roleService): JsonResponse
-    {
-        $roles = $roleService->syncUserRoles($request->all());
-
-        return ResponseHelper::createResponseFromBase(
-            statusCode: 200,
-            data: $roles,
-            statusMessage: 'user roles updated'
-        );
-    }
-
-    public function assignUsers(Request $request, RoleService $roleService): JsonResponse
-    {
-        $users = $roleService->editRoleUsers($request->all(), true);
-
-        return ResponseHelper::createResponseFromBase(
-            statusCode: 200,
-            data: $users,
-            statusMessage: 'role users updated'
-        );
-    }
-
     public function revokeUsers(Request $request, RoleService $roleService): JsonResponse
     {
         $users = $roleService->editRoleUsers($request->all(), false);
@@ -109,9 +79,39 @@ class RoleController extends BaseController
         );
     }
 
-    public function delete(string $id, RoleService $roleService): JsonResponse
+    public function showUserRoles(string $id): JsonResponse
     {
-        $response = $roleService->delete($id);
+        $user = resolve_static(User::class, 'query')
+            ->whereKey($id)
+            ->first();
+
+        if (! $user) {
+            return ResponseHelper::createResponseFromBase(
+                statusCode: 404,
+                data: ['id' => 'user not found']
+            );
+        }
+
+        return ResponseHelper::createResponseFromBase(
+            statusCode: 200,
+            data: $user->roles
+        );
+    }
+
+    public function syncUserRoles(Request $request, RoleService $roleService): JsonResponse
+    {
+        $roles = $roleService->syncUserRoles($request->all());
+
+        return ResponseHelper::createResponseFromBase(
+            statusCode: 200,
+            data: $roles,
+            statusMessage: 'user roles updated'
+        );
+    }
+
+    public function update(Request $request, RoleService $roleService): JsonResponse
+    {
+        $response = $roleService->update($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }

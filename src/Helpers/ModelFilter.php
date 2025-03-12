@@ -9,27 +9,43 @@ use Illuminate\Support\Facades\Schema;
 
 class ModelFilter
 {
-    private string $subject;
-
-    private $query;
-
-    private array $operators;
-
-    private string $searchString = '';
-
-    private array $collectionFilters = [];
-
-    private array $queryFilters = [];
-
-    private ?array $includes = null;
-
-    private array $sorts = [];
-
     private array $allowedFilters;
 
     private array $allowedIncludes;
 
     private array $allowedSorts;
+
+    private array $collectionFilters = [];
+
+    private ?array $includes = null;
+
+    private array $operators;
+
+    private $query;
+
+    private array $queryFilters = [];
+
+    private string $searchString = '';
+
+    private array $sorts = [];
+
+    private string $subject;
+
+    public function __construct(string $subject, array $operators)
+    {
+        $allowedOperators = ['=', '!', '<', '>', '<>', '><', '%'];
+        $this->subject = $subject;
+        $this->operators = array_intersect($allowedOperators, $operators);
+        $this->query = null;
+
+        $model = app($subject);
+        $this->allowedFilters = array_values(array_diff(
+            Schema::getColumnListing($model->getTable()),
+            $model->getHidden()
+        ));
+        $this->allowedSorts = array_values($this->allowedFilters);
+        $this->allowedIncludes = [];
+    }
 
     public static function filterModel(string $model,
         ?array $allowedFilters = null,
@@ -66,7 +82,7 @@ class ModelFilter
                 $modelInstance->$includeItem()->getRelated()->getHidden()
             );
 
-            array_walk($includeAttributes, function (&$item, $key, $prefix) {
+            array_walk($includeAttributes, function (&$item, $key, $prefix): void {
                 $item = $prefix . $item;
             }, $includeItem . '.');
             $relatedAllowedFilters = array_merge($relatedAllowedFilters, $includeAttributes);
@@ -108,22 +124,6 @@ class ModelFilter
         ];
     }
 
-    public function __construct(string $subject, array $operators)
-    {
-        $allowedOperators = ['=', '!', '<', '>', '<>', '><', '%'];
-        $this->subject = $subject;
-        $this->operators = array_intersect($allowedOperators, $operators);
-        $this->query = null;
-
-        $model = app($subject);
-        $this->allowedFilters = array_values(array_diff(
-            Schema::getColumnListing($model->getTable()),
-            $model->getHidden()
-        ));
-        $this->allowedSorts = array_values($this->allowedFilters);
-        $this->allowedIncludes = [];
-    }
-
     public static function for(string $subject, array $allowedOperators = ['=', '!', '<', '>', '<>', '><', '%']): ?self
     {
         if (is_subclass_of($subject, Model::class)) {
@@ -133,59 +133,49 @@ class ModelFilter
         return null;
     }
 
-    public function getAllowedFilters(): array
+    private static function calculateUrlParameters(ModelFilter $modelFilter): string
     {
-        return $this->allowedFilters;
-    }
+        $urlParams = '';
+        $i = 0;
+        $filters = array_merge($modelFilter->getQueryFilters(), $modelFilter->getCollectionFilters());
+        $includes = $modelFilter->getIncludes();
+        $searchString = $modelFilter->getSearch();
+        $sorts = $modelFilter->getSorts();
 
-    public function getAllowedIncludes(): array
-    {
-        return $this->allowedIncludes;
-    }
+        foreach ($filters as $filter) {
+            $conditions = '';
+            foreach ($filter as $condition) {
+                $conditions .= implode('|', $condition) . ',';
+            }
 
-    public function getAllowedSorts(): array
-    {
-        return $this->allowedSorts;
-    }
+            $urlParams .= 'filter[' . $i . ']=' . rtrim($conditions, ',') . '&';
+            $i++;
+        }
 
-    public function getCollectionFilters(): array
-    {
-        return $this->collectionFilters;
-    }
+        if (! is_null($includes) && count($includes) > 0) {
+            $urlParams .= 'include=' . implode(',', $includes) . '&';
+        }
 
-    public function getQueryFilters(): array
-    {
-        return $this->queryFilters;
-    }
+        if ($searchString) {
+            $urlParams .= 'search=' . $searchString . '&';
+        }
 
-    public function getIncludes(): ?array
-    {
-        return $this->includes;
-    }
+        if (count($sorts) === 1) {
+            $urlParams .= 'sort=' . implode('|', $sorts[0]);
+        } elseif (count($sorts) > 1) {
+            $j = 0;
+            foreach ($sorts as $sort) {
+                $args = implode('|', $sort) . ',';
+                $urlParams .= 'sort[' . $j . ']=' . rtrim($args, ',') . '&';
+                $j++;
+            }
+        }
 
-    public function getSearch(): string
-    {
-        return $this->searchString;
-    }
+        if ($urlParams) {
+            $urlParams = '?' . rtrim($urlParams, '&');
+        }
 
-    public function getSorts(): array
-    {
-        return $this->sorts;
-    }
-
-    public function allowedFilters(array $allowedFilters): void
-    {
-        $this->allowedFilters = $allowedFilters;
-    }
-
-    public function allowedIncludes(array $allowedIncludes): void
-    {
-        $this->allowedIncludes = $allowedIncludes;
-    }
-
-    public function allowedSorts(array $allowedSorts): void
-    {
-        $this->allowedSorts = $allowedSorts;
+        return $urlParams;
     }
 
     public function addAllowedFilters(array $allowedFilters): void
@@ -203,10 +193,19 @@ class ModelFilter
         $this->allowedSorts(array_unique(array_merge($this->allowedSorts, $allowedSorts)));
     }
 
-    public function addSearchString(string $searchString): void
+    public function addCollectionFilters($filters): void
     {
-        if ($searchString) {
-            $this->searchString = $searchString;
+        if (! $filters) {
+            $filters = [];
+        }
+
+        foreach ($filters as $filter) {
+            $params = explode(',', $filter);
+            array_walk($params, function (&$item): void {
+                $item = explode('|', $item);
+            });
+
+            $this->collectionFilters[] = $this->sanitizeFilters($params);
         }
     }
 
@@ -221,7 +220,7 @@ class ModelFilter
         $filterParams = [];
         foreach ($filters as $filter) {
             $params = explode(',', $filter);
-            array_walk($params, function (&$item) {
+            array_walk($params, function (&$item): void {
                 $item = explode('|', $item);
             });
 
@@ -245,38 +244,6 @@ class ModelFilter
         }
     }
 
-    public function addQueryFilters($filters): void
-    {
-        if (! $filters) {
-            $filters = [];
-        }
-
-        foreach ($filters as $filter) {
-            $params = explode(',', $filter);
-            array_walk($params, function (&$item) {
-                $item = explode('|', $item);
-            });
-
-            $this->queryFilters[] = $this->sanitizeFilters($params);
-        }
-    }
-
-    public function addCollectionFilters($filters): void
-    {
-        if (! $filters) {
-            $filters = [];
-        }
-
-        foreach ($filters as $filter) {
-            $params = explode(',', $filter);
-            array_walk($params, function (&$item) {
-                $item = explode('|', $item);
-            });
-
-            $this->collectionFilters[] = $this->sanitizeFilters($params);
-        }
-    }
-
     public function addIncludes(array|string $includes): void
     {
         if (is_string($includes)) {
@@ -286,9 +253,47 @@ class ModelFilter
         $this->includes = array_intersect($this->allowedIncludes, $includes);
     }
 
+    public function addQueryFilters($filters): void
+    {
+        if (! $filters) {
+            $filters = [];
+        }
+
+        foreach ($filters as $filter) {
+            $params = explode(',', $filter);
+            array_walk($params, function (&$item): void {
+                $item = explode('|', $item);
+            });
+
+            $this->queryFilters[] = $this->sanitizeFilters($params);
+        }
+    }
+
+    public function addSearchString(string $searchString): void
+    {
+        if ($searchString) {
+            $this->searchString = $searchString;
+        }
+    }
+
     public function addSorts(array|string $sorts): void
     {
         $this->sorts = $this->sanitizeSorts(is_string($sorts) ? [$sorts] : $sorts);
+    }
+
+    public function allowedFilters(array $allowedFilters): void
+    {
+        $this->allowedFilters = $allowedFilters;
+    }
+
+    public function allowedIncludes(array $allowedIncludes): void
+    {
+        $this->allowedIncludes = $allowedIncludes;
+    }
+
+    public function allowedSorts(array $allowedSorts): void
+    {
+        $this->allowedSorts = $allowedSorts;
     }
 
     public function filter(): Collection
@@ -329,6 +334,46 @@ class ModelFilter
         }
 
         return $collection->sortBy($this->sorts);
+    }
+
+    public function getAllowedFilters(): array
+    {
+        return $this->allowedFilters;
+    }
+
+    public function getAllowedIncludes(): array
+    {
+        return $this->allowedIncludes;
+    }
+
+    public function getAllowedSorts(): array
+    {
+        return $this->allowedSorts;
+    }
+
+    public function getCollectionFilters(): array
+    {
+        return $this->collectionFilters;
+    }
+
+    public function getIncludes(): ?array
+    {
+        return $this->includes;
+    }
+
+    public function getQueryFilters(): array
+    {
+        return $this->queryFilters;
+    }
+
+    public function getSearch(): string
+    {
+        return $this->searchString;
+    }
+
+    public function getSorts(): array
+    {
+        return $this->sorts;
     }
 
     private function addWhereClauses($query, array $params, bool &$or = false, bool $collection = false): mixed
@@ -412,7 +457,7 @@ class ModelFilter
     private function sanitizeFilters(array $params): array
     {
         if (in_array('=', $this->operators)) {
-            array_walk($params, function (&$item) {
+            array_walk($params, function (&$item): void {
                 if (count($item) === 2) {
                     $item[2] = $item[1];
                     $item[1] = '=';
@@ -479,50 +524,5 @@ class ModelFilter
         }
 
         return $sanitizedSorts;
-    }
-
-    private static function calculateUrlParameters(ModelFilter $modelFilter): string
-    {
-        $urlParams = '';
-        $i = 0;
-        $filters = array_merge($modelFilter->getQueryFilters(), $modelFilter->getCollectionFilters());
-        $includes = $modelFilter->getIncludes();
-        $searchString = $modelFilter->getSearch();
-        $sorts = $modelFilter->getSorts();
-
-        foreach ($filters as $filter) {
-            $conditions = '';
-            foreach ($filter as $condition) {
-                $conditions .= implode('|', $condition) . ',';
-            }
-
-            $urlParams .= 'filter[' . $i . ']=' . rtrim($conditions, ',') . '&';
-            $i++;
-        }
-
-        if (! is_null($includes) && count($includes) > 0) {
-            $urlParams .= 'include=' . implode(',', $includes) . '&';
-        }
-
-        if ($searchString) {
-            $urlParams .= 'search=' . $searchString . '&';
-        }
-
-        if (count($sorts) === 1) {
-            $urlParams .= 'sort=' . implode('|', $sorts[0]);
-        } elseif (count($sorts) > 1) {
-            $j = 0;
-            foreach ($sorts as $sort) {
-                $args = implode('|', $sort) . ',';
-                $urlParams .= 'sort[' . $j . ']=' . rtrim($args, ',') . '&';
-                $j++;
-            }
-        }
-
-        if ($urlParams) {
-            $urlParams = '?' . rtrim($urlParams, '&');
-        }
-
-        return $urlParams;
     }
 }

@@ -9,14 +9,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class UpdatePrice extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdatePriceRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Price::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdatePriceRuleset::class;
     }
 
     public function performAction(): Model

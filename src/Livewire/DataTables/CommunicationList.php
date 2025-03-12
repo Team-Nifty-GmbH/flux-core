@@ -7,8 +7,6 @@ use Illuminate\Support\Str;
 
 class CommunicationList extends BaseDataTable
 {
-    protected string $model = Communication::class;
-
     public array $enabledCols = [
         'date',
         'from',
@@ -24,6 +22,8 @@ class CommunicationList extends BaseDataTable
         'ended_at' => 'datetime',
     ];
 
+    protected string $model = Communication::class;
+
     public function getFormatters(): array
     {
         return array_merge(parent::getFormatters(), [
@@ -33,9 +33,9 @@ class CommunicationList extends BaseDataTable
             'communication_type_enum' => [
                 'state',
                 [
-                    __('Letter') => 'secondary',
-                    __('Mail') => 'primary',
-                    __('Phone Call') => 'positive',
+                    __('Letter') => 'gray',
+                    __('Mail') => 'indigo',
+                    __('Phone Call') => 'emerald',
                 ],
             ],
         ]);

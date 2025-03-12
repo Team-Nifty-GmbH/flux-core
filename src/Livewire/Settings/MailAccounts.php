@@ -28,20 +28,20 @@ use Webklex\PHPIMAP\Exceptions\RuntimeException;
 #[Renderless]
 class MailAccounts extends MailAccountList
 {
-    protected ?string $includeBefore = 'flux::livewire.settings.mail-accounts';
+    public array $folders = [];
 
     public MailAccountForm $mailAccount;
 
     public MailFolderForm $mailFolder;
 
-    public array $folders = [];
+    protected ?string $includeBefore = 'flux::livewire.settings.mail-accounts';
 
     protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
-                ->label(__('Create'))
-                ->color('primary')
+                ->text(__('Create'))
+                ->color('indigo')
                 ->icon('plus')
                 ->attributes([
                     'x-on:click' => '$wire.edit()',
@@ -54,93 +54,31 @@ class MailAccounts extends MailAccountList
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
-                ->color('primary')
+                ->text(__('Edit'))
+                ->color('indigo')
                 ->icon('pencil')
                 ->attributes([
                     'x-on:click' => '$wire.edit(record.id)',
                 ])
                 ->when(fn () => resolve_static(UpdateMailAccount::class, 'canPerformAction', [false])),
             DataTableButton::make()
-                ->label(__('Edit Folders'))
-                ->color('primary')
+                ->text(__('Edit Folders'))
+                ->color('indigo')
                 ->icon('pencil')
                 ->attributes([
                     'x-on:click' => '$wire.editFolders(record.id)',
                 ])
                 ->when(fn () => resolve_static(UpdateMailFolder::class, 'canPerformAction', [false])),
             DataTableButton::make()
-                ->label(__('Delete'))
-                ->color('negative')
+                ->text(__('Delete'))
+                ->color('red')
                 ->icon('trash')
                 ->attributes([
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Mail Account')]),
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Mail Account')]),
                     'wire:click' => 'delete(record.id)',
                 ])
                 ->when(fn () => resolve_static(DeleteMailAccount::class, 'canPerformAction', [false])),
         ];
-    }
-
-    public function edit(MailAccount $mailAccount): void
-    {
-        $this->mailAccount->reset();
-        $this->mailAccount->fill($mailAccount);
-
-        $this->js(<<<'JS'
-            $openModal('edit-mail-account');
-        JS);
-    }
-
-    public function editFolders(MailAccount $mailAccount): void
-    {
-        $this->mailAccount->reset();
-        $this->mailAccount->fill($mailAccount);
-
-        $this->loadFolders();
-
-        $this->js(<<<'JS'
-            $openModal('edit-mail-folders');
-        JS);
-    }
-
-    public function editMailFolder(MailFolder $mailFolder): void
-    {
-        $this->mailFolder->reset();
-        $this->mailFolder->fill($mailFolder);
-    }
-
-    public function saveMailFolder(): void
-    {
-        try {
-            $this->mailFolder->save();
-            $this->mailFolder->reset();
-            $this->loadFolders();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-        }
-    }
-
-    public function syncFolders(MailAccount $mailAccount): void
-    {
-        SyncMailAccountJob::dispatchSync($mailAccount, true);
-
-        $this->editFolders($mailAccount);
-    }
-
-    public function save(): bool
-    {
-        try {
-            $this->mailAccount->save();
-            $this->mailAccount->reset();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
     }
 
     public function delete(int $id): bool
@@ -161,13 +99,92 @@ class MailAccounts extends MailAccountList
         return true;
     }
 
+    public function edit(MailAccount $mailAccount): void
+    {
+        $this->mailAccount->reset();
+        $this->mailAccount->fill($mailAccount);
+
+        $this->js(<<<'JS'
+            $modalOpen('edit-mail-account');
+        JS);
+    }
+
+    public function editFolders(MailAccount $mailAccount): void
+    {
+        $this->mailAccount->reset();
+        $this->mailAccount->fill($mailAccount);
+
+        $this->loadFolders();
+
+        $this->js(<<<'JS'
+            $modalOpen('edit-mail-folders');
+        JS);
+    }
+
+    public function editMailFolder(MailFolder $mailFolder): void
+    {
+        $this->mailFolder->reset();
+        $this->mailFolder->fill($mailFolder);
+    }
+
+    public function save(): bool
+    {
+        try {
+            $this->mailAccount->save();
+            $this->mailAccount->reset();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
+    }
+
+    public function saveMailFolder(): void
+    {
+        try {
+            $this->mailFolder->save();
+            $this->mailFolder->reset();
+            $this->loadFolders();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+        }
+    }
+
+    #[Renderless]
+    public function sendTestMail(?string $to = null): void
+    {
+        try {
+            if (! is_null($to)) {
+                Validator::make(['to' => $to], ['to' => 'required|email'])
+                    ->validate();
+            }
+
+            $this->mailAccount->sendTestMail($to);
+
+            $this->notification()->success(__('Test mail sent'))->send();
+        } catch (ValidationException|TransportExceptionInterface $e) {
+            exception_to_notifications($e, $this);
+        }
+    }
+
+    public function syncFolders(MailAccount $mailAccount): void
+    {
+        SyncMailAccountJob::dispatchSync($mailAccount, true);
+
+        $this->editFolders($mailAccount);
+    }
+
     #[Renderless]
     public function testImapConnection(): void
     {
         try {
             $this->mailAccount->testImapConnection();
 
-            $this->notification()->success(__('Connection successful'));
+            $this->notification()->success(__('Connection successful'))->send();
         } catch (
             ValidationException
             |ImapBadRequestException
@@ -187,24 +204,7 @@ class MailAccounts extends MailAccountList
         try {
             $this->mailAccount->testSmtpConnection();
 
-            $this->notification()->success(__('Connection successful'));
-        } catch (ValidationException|TransportExceptionInterface $e) {
-            exception_to_notifications($e, $this);
-        }
-    }
-
-    #[Renderless]
-    public function sendTestMail(?string $to = null): void
-    {
-        try {
-            if (! is_null($to)) {
-                Validator::make(['to' => $to], ['to' => 'required|email'])
-                    ->validate();
-            }
-
-            $this->mailAccount->sendTestMail($to);
-
-            $this->notification()->success(__('Test mail sent'));
+            $this->notification()->success(__('Connection successful'))->send();
         } catch (ValidationException|TransportExceptionInterface $e) {
             exception_to_notifications($e, $this);
         }

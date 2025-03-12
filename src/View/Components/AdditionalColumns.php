@@ -15,9 +15,9 @@ class AdditionalColumns extends Component
 
     public string|Model $model;
 
-    public ?string $wire;
-
     public bool $table;
+
+    public ?string $wire;
 
     public function __construct(
         string|Model $model,

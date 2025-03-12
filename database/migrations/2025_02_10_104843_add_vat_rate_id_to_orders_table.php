@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('orders', function (Blueprint $table) {
+        Schema::table('orders', function (Blueprint $table): void {
             $table->foreignId('vat_rate_id')
                 ->after('responsible_user_id')
                 ->nullable()
@@ -21,7 +21,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('orders', function (Blueprint $table) {
+        Schema::table('orders', function (Blueprint $table): void {
             $table->unsignedBigInteger('tax_exemption_id')->nullable();
             $table->dropConstrainedForeignId('vat_rate_id');
         });

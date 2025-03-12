@@ -25,7 +25,7 @@
     }
 }" x-on:batch-id="window.Echo.channel('job-batch.' + $event.detail).listen('.FluxErp\\Events\\InstallProcessOutputEvent', (e) => {updateProgress(e)})">
     <x-flux::logo fill="#000000" class="h-24"/>
-    <x-card :title="$this->title">
+    <x-card :header="$this->title">
         <div class="flex flex-col gap-4">
             @include('flux::livewire.install-wizard.' . $this->steps[$step]['view'])
         </div>
@@ -33,16 +33,16 @@
                 <div class="flex justify-between" x-cloak x-show="progress.progress === 100">
                     <div>
                         @if($step > 0)
-                            <x-button
+                            <x-button color="secondary" light
                                 flat
-                                :label="__('Back')"
+                                :text="__('Back')"
                                 x-on:click="$wire.step--; $wire.$refresh();"
                             />
                        @endif
                     </div>
                     <x-button
-                        spinner
-                        primary
+                        loading
+                        color="indigo"
                         wire:click="continue"
                     >
                         {{ __('Continue') }}

@@ -9,7 +9,7 @@ class RefactorCountriesTable extends Migration
 {
     public function up(): void
     {
-        Schema::table('countries', function (Blueprint $table) {
+        Schema::table('countries', function (Blueprint $table): void {
             $table->boolean('is_default')->default(false)->change();
         });
 
@@ -18,14 +18,14 @@ class RefactorCountriesTable extends Migration
 
     public function down(): void
     {
-        Schema::table('countries', function (Blueprint $table) {
+        Schema::table('countries', function (Blueprint $table): void {
             $table->boolean('is_default')->default(true)->change();
         });
 
         $this->moveIsoNumeric('currency_id');
     }
 
-    private function moveIsoNumeric($after)
+    private function moveIsoNumeric($after): void
     {
         DB::statement('ALTER TABLE countries MODIFY COLUMN iso_numeric VARCHAR(255) AFTER ' . $after);
     }

@@ -11,6 +11,14 @@ class UpdatePaymentTypeRuleset extends FluxRuleset
 {
     protected static ?string $model = PaymentType::class;
 
+    public static function getRules(): array
+    {
+        return array_merge(
+            parent::getRules(),
+            resolve_static(ClientRuleset::class, 'getRules'),
+        );
+    }
+
     public function rules(): array
     {
         return [
@@ -39,13 +47,5 @@ class UpdatePaymentTypeRuleset extends FluxRuleset
             'is_sales' => 'boolean',
             'requires_manual_transfer' => 'boolean',
         ];
-    }
-
-    public static function getRules(): array
-    {
-        return array_merge(
-            parent::getRules(),
-            resolve_static(ClientRuleset::class, 'getRules'),
-        );
     }
 }

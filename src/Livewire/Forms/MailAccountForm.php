@@ -20,51 +20,65 @@ use Webklex\PHPIMAP\Exceptions\RuntimeException;
 
 class MailAccountForm extends FluxForm
 {
-    #[Locked]
-    public ?int $id = null;
-
-    public ?string $protocol = 'imap';
-
     public ?string $email = null;
-
-    public ?string $password = null;
-
-    public ?string $host = null;
-
-    public int $port = 993;
 
     public string $encryption = 'ssl';
 
-    public ?string $smtp_email = null;
+    public bool $has_valid_certificate = true;
 
-    public ?string $smtp_password = null;
+    public ?string $host = null;
 
-    public ?string $smtp_host = null;
-
-    public ?int $smtp_port = 587;
-
-    public ?string $smtp_encryption = null;
+    #[Locked]
+    public ?int $id = null;
 
     public bool $is_auto_assign = false;
 
     public bool $is_o_auth = false;
 
-    public bool $has_valid_certificate = true;
+    public ?string $password = null;
 
-    protected function getActions(): array
-    {
-        return [
-            'create' => CreateMailAccount::class,
-            'update' => UpdateMailAccount::class,
-            'delete' => DeleteMailAccount::class,
-        ];
-    }
+    public int $port = 993;
+
+    public ?string $protocol = 'imap';
+
+    public ?string $smtp_email = null;
+
+    public ?string $smtp_encryption = null;
+
+    public ?string $smtp_host = null;
+
+    public ?string $smtp_password = null;
+
+    public ?int $smtp_port = 587;
 
     public function save(): void
     {
         $this->smtp_email = $this->smtp_email ?: $this->email;
 
         parent::save();
+    }
+
+    public function sendTestMail(?string $to = null): void
+    {
+        $to ??= auth()->user()->email;
+
+        $mailer = Mail::build([
+            'transport' => 'smtp',
+            'host' => $this->smtp_host,
+            'port' => $this->smtp_port ?? 587,
+            'encryption' => $this->smtp_encryption,
+            'username' => $this->smtp_email,
+            'password' => $this->smtp_password,
+            'timeout' => 15,
+        ]);
+        $mailer->alwaysFrom($this->smtp_email ?: config('mail.from.address'), config('mail.from.name'));
+        $mailer->to($to)
+            ->sendNow(
+                GenericMail::make([
+                    'subject' => __('Test mail'),
+                    'html_body' => new HtmlString('<p>' . __('This is a test mail') . '</p>'),
+                ])
+            );
     }
 
     /**
@@ -92,26 +106,12 @@ class MailAccountForm extends FluxForm
         $transport->start();
     }
 
-    public function sendTestMail(?string $to = null): void
+    protected function getActions(): array
     {
-        $to ??= auth()->user()->email;
-
-        $mailer = Mail::build([
-            'transport' => 'smtp',
-            'host' => $this->smtp_host,
-            'port' => $this->smtp_port ?? 587,
-            'encryption' => $this->smtp_encryption,
-            'username' => $this->smtp_email,
-            'password' => $this->smtp_password,
-            'timeout' => 15,
-        ]);
-        $mailer->alwaysFrom($this->smtp_email ?: config('mail.from.address'), config('mail.from.name'));
-        $mailer->to($to)
-            ->sendNow(
-                GenericMail::make([
-                    'subject' => __('Test mail'),
-                    'html_body' => new HtmlString('<p>' . __('This is a test mail') . '</p>'),
-                ])
-            );
+        return [
+            'create' => CreateMailAccount::class,
+            'update' => UpdateMailAccount::class,
+            'delete' => DeleteMailAccount::class,
+        ];
     }
 }

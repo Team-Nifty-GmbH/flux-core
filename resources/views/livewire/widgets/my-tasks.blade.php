@@ -14,25 +14,25 @@
                         @if($task->due_date)
                             <x-badge
                                 :color="($diff = $task->due_date->diffInDays(now(), false)) > 0
-                                    ? 'negative'
-                                    : ($diff === 0 ? 'warning' : 'positive')
+                                    ? 'red'
+                                    : ($diff === 0 ? 'amber' : 'emerald')
                                 "
-                                :label="__('Due At') . ' ' . $task->due_date->locale(app()->getLocale())->isoFormat('L')"
+                                :text="__('Due At') . ' ' . $task->due_date->locale(app()->getLocale())->isoFormat('L')"
                             />
                         @endif
                         <x-badge
                             :color="match (true) {
-                                $task->priority === 0 => 'secondary',
-                                $task->priority < 5 => 'primary',
-                                $task->priority < 8 => 'warning',
-                                default => 'negative',
+                                $task->priority === 0 => 'gray',
+                                $task->priority < 5 => 'indigo',
+                                $task->priority < 8 => 'amber',
+                                default => 'red',
                             }"
-                            :label="__('Priority') . ': ' . $task->priority"
+                            :text="__('Priority') . ': ' . $task->priority"
                         />
                     </div>
                 </x-slot:sub-value>
                 <x-slot:actions>
-                    <x-button
+                    <x-button color="secondary" light
                         icon="clock"
                         x-on:click="
                             $dispatch(
@@ -47,7 +47,7 @@
                         >
                         <div class="hidden sm:block">{{ __('Track Time') }}</div>
                     </x-button>
-                    <x-button icon="eye" wire:navigate :href="route('tasks.id', $task->id)">
+                    <x-button color="secondary" light icon="eye" wire:navigate :href="route('tasks.id', $task->id)">
                         <div class="hidden sm:block">{{ __('View') }}</div>
                     </x-button>
                 </x-slot:actions>

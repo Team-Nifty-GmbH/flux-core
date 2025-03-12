@@ -8,8 +8,8 @@ use Livewire\Attributes\Modelable;
 
 class Attachments extends FolderTree
 {
-    public ?string $modelType = Address::class;
-
     #[Modelable]
     public ?int $modelId = null;
+
+    public ?string $modelType = Address::class;
 }

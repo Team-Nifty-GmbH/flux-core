@@ -7,6 +7,14 @@ use Illuminate\Contracts\Validation\Rule;
 class ArrayIsList implements Rule
 {
     /**
+     * Get the validation error message.
+     */
+    public function message(): string
+    {
+        return __('Array must be a list');
+    }
+
+    /**
      * Determine if the validation rule passes.
      *
      * @param  string  $attribute
@@ -27,13 +35,5 @@ class ArrayIsList implements Rule
         }
 
         return true;
-    }
-
-    /**
-     * Get the validation error message.
-     */
-    public function message(): string
-    {
-        return __('Array must be a list');
     }
 }

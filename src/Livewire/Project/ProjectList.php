@@ -14,11 +14,11 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class ProjectList extends BaseProjectList
 {
-    protected ?string $includeBefore = 'flux::livewire.project.project-list';
-
     public array $availableStates = [];
 
     public ProjectForm $project;
+
+    protected ?string $includeBefore = 'flux::livewire.project.project-list';
 
     public function mount(): void
     {
@@ -44,12 +44,28 @@ class ProjectList extends BaseProjectList
     {
         return [
             DataTableButton::make()
-                ->color('primary')
-                ->label(__('Create'))
+                ->color('indigo')
+                ->text(__('Create'))
                 ->icon('plus')
                 ->wireClick('createProject')
                 ->when(fn () => resolve_static(CreateProject::class, 'canPerformAction', [false])),
         ];
+    }
+
+    #[Renderless]
+    public function createProject(): void
+    {
+        $this->project->reset();
+        $this->project->additionalColumns = array_fill_keys(
+            resolve_static(Project::class, 'additionalColumnsQuery')
+                ->pluck('name')
+                ?->toArray() ?? [],
+            null
+        );
+
+        $this->js(<<<'JS'
+            $modalOpen('edit-project');
+        JS);
     }
 
     #[Renderless]
@@ -66,21 +82,5 @@ class ProjectList extends BaseProjectList
         $this->loadData();
 
         return true;
-    }
-
-    #[Renderless]
-    public function createProject(): void
-    {
-        $this->project->reset();
-        $this->project->additionalColumns = array_fill_keys(
-            resolve_static(Project::class, 'additionalColumnsQuery')
-                ->pluck('name')
-                ?->toArray() ?? [],
-            null
-        );
-
-        $this->js(<<<'JS'
-            $openModal('edit-project');
-        JS);
     }
 }

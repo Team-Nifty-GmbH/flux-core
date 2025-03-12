@@ -9,7 +9,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('addresses', function (Blueprint $table) {
+        Schema::table('addresses', function (Blueprint $table): void {
             $table->string('email')->after('url')->nullable();
             $table->string('phone')->after('email')->nullable();
 
@@ -61,7 +61,7 @@ return new class() extends Migration
             SELECT id, 'website', url, 1, 'Webseite' FROM addresses WHERE url IS NOT NULL
         ");
 
-        Schema::table('addresses', function (Blueprint $table) {
+        Schema::table('addresses', function (Blueprint $table): void {
             $table->dropColumn([
                 'email',
                 'phone',

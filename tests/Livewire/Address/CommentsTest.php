@@ -24,7 +24,7 @@ class CommentsTest extends BaseSetup
         ]);
     }
 
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::actingAs($this->user)
             ->test(Comments::class, ['modelId' => $this->address->id])

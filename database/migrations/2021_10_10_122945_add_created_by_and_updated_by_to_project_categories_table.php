@@ -8,7 +8,7 @@ class AddCreatedByAndUpdatedByToProjectCategoriesTable extends Migration
 {
     public function up(): void
     {
-        Schema::table('project_categories', function (Blueprint $table) {
+        Schema::table('project_categories', function (Blueprint $table): void {
             $table->unsignedBigInteger('created_by')->after('created_at')->nullable();
             $table->unsignedBigInteger('updated_by')->after('updated_at')->nullable();
         });
@@ -16,7 +16,7 @@ class AddCreatedByAndUpdatedByToProjectCategoriesTable extends Migration
 
     public function down(): void
     {
-        Schema::table('project_categories', function (Blueprint $table) {
+        Schema::table('project_categories', function (Blueprint $table): void {
             $table->dropColumn(['created_by', 'updated_by']);
         });
     }

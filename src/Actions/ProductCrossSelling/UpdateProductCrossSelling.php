@@ -9,14 +9,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class UpdateProductCrossSelling extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateProductCrossSellingRuleset::class;
-    }
-
     public static function models(): array
     {
         return [ProductCrossSelling::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateProductCrossSellingRuleset::class;
     }
 
     public function performAction(): ProductCrossSelling|Model

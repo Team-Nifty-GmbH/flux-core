@@ -8,26 +8,17 @@ use FluxErp\Actions\Tag\UpdateTag;
 
 class TagForm extends FluxForm
 {
+    public ?string $color = null;
+
     public ?int $id = null;
 
     public ?string $name = null;
 
+    public ?int $order_column = null;
+
     public ?string $slug = null;
 
     public ?string $type = null;
-
-    public ?string $color = null;
-
-    public ?int $order_column = null;
-
-    protected function getActions(): array
-    {
-        return [
-            'create' => CreateTag::class,
-            'update' => UpdateTag::class,
-            'delete' => DeleteTag::class,
-        ];
-    }
 
     public function fill($values): void
     {
@@ -36,5 +27,14 @@ class TagForm extends FluxForm
         $valueArray['slug'] = data_get($values, 'slug');
 
         parent::fill($valueArray);
+    }
+
+    protected function getActions(): array
+    {
+        return [
+            'create' => CreateTag::class,
+            'update' => UpdateTag::class,
+            'delete' => DeleteTag::class,
+        ];
     }
 }

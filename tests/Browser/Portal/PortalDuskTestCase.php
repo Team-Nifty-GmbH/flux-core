@@ -14,20 +14,9 @@ use FluxErp\Tests\DuskTestCase;
 
 class PortalDuskTestCase extends DuskTestCase
 {
-    public Client $dbClient;
-
     protected static string $guard = 'address';
 
-    public function defineEnvironment($app): void
-    {
-        parent::defineEnvironment($app);
-        $app['config']->set('auth.defaults.guard', 'address');
-    }
-
-    protected function baseUrl(): string
-    {
-        return config('flux.portal_domain') . ':' . static::getBaseServePort();
-    }
+    public Client $dbClient;
 
     public function createLoginUser(): void
     {
@@ -76,5 +65,16 @@ class PortalDuskTestCase extends DuskTestCase
             'password' => $this->password,
             'is_main_address' => true,
         ]);
+    }
+
+    public function defineEnvironment($app): void
+    {
+        parent::defineEnvironment($app);
+        $app['config']->set('auth.defaults.guard', 'address');
+    }
+
+    protected function baseUrl(): string
+    {
+        return config('flux.portal_domain') . ':' . static::getBaseServePort();
     }
 }

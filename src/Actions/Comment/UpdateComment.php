@@ -9,14 +9,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class UpdateComment extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateCommentRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Comment::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateCommentRuleset::class;
     }
 
     public function performAction(): Model

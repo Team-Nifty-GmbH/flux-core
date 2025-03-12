@@ -17,22 +17,22 @@ class ProcessWebhook implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
-     * The number of times the job may be attempted.
-     */
-    public int $tries = 1;
-
-    /**
      * The maximum number of unhandled exceptions to allow before failing.
      */
     public int $maxExceptions = 1;
 
-    private string $url;
+    /**
+     * The number of times the job may be attempted.
+     */
+    public int $tries = 1;
 
-    private string $signingKey;
+    private string $event;
 
     private object $model;
 
-    private string $event;
+    private string $signingKey;
+
+    private string $url;
 
     private User $user;
 
@@ -54,10 +54,8 @@ class ProcessWebhook implements ShouldQueue
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
-    public function handle()
+    public function handle(): void
     {
         if (empty($url)) {
             return;

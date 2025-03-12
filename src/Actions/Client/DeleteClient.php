@@ -8,14 +8,14 @@ use FluxErp\Rulesets\Client\DeleteClientRuleset;
 
 class DeleteClient extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeleteClientRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Client::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeleteClientRuleset::class;
     }
 
     public function performAction(): ?bool

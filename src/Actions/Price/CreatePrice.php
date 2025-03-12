@@ -8,14 +8,14 @@ use FluxErp\Rulesets\Price\CreatePriceRuleset;
 
 class CreatePrice extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreatePriceRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Price::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreatePriceRuleset::class;
     }
 
     public function performAction(): Price

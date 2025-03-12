@@ -6,10 +6,6 @@ use FluxErp\Support\Calculation\Rounding;
 
 enum GrowthRateTypeEnum: string
 {
-    case Percentage = 'percentage';
-
-    case Value = 'value';
-
     public function getValue(string|int|float|null $previousValue, string|int|float|null $currentValue): string
     {
         $previousValue ??= 0;
@@ -24,4 +20,7 @@ enum GrowthRateTypeEnum: string
 
         return Rounding::round($value);
     }
+    case Percentage = 'percentage';
+
+    case Value = 'value';
 }

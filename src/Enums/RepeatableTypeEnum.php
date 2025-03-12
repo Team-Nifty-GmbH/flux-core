@@ -9,7 +9,7 @@ enum RepeatableTypeEnum: string
     use EnumTrait;
 
     case Command = 'command';
-    case Job = 'job';
     case Invokable = 'invokable';
+    case Job = 'job';
     case Shell = 'shell';
 }

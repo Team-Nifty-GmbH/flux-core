@@ -9,14 +9,14 @@ use FluxErp\Rulesets\CalendarEvent\DeleteCalendarEventRuleset;
 
 class DeleteCalendarEvent extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeleteCalendarEventRuleset::class;
-    }
-
     public static function models(): array
     {
         return [CalendarEvent::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeleteCalendarEventRuleset::class;
     }
 
     public function performAction(): ?bool

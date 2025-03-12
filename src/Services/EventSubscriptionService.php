@@ -28,6 +28,23 @@ class EventSubscriptionService
         );
     }
 
+    public function delete(string $id): array
+    {
+        try {
+            DeleteEventSubscription::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
+            return ResponseHelper::createArrayResponse(
+                statusCode: 404,
+                data: $e->errors()
+            );
+        }
+
+        return ResponseHelper::createArrayResponse(
+            statusCode: 204,
+            statusMessage: 'subscription deleted'
+        );
+    }
+
     public function update(array $data): array
     {
         try {
@@ -43,23 +60,6 @@ class EventSubscriptionService
             statusCode: 200,
             data: $subscription,
             statusMessage: 'subscription updated'
-        );
-    }
-
-    public function delete(string $id): array
-    {
-        try {
-            DeleteEventSubscription::make(['id' => $id])->validate()->execute();
-        } catch (ValidationException $e) {
-            return ResponseHelper::createArrayResponse(
-                statusCode: 404,
-                data: $e->errors()
-            );
-        }
-
-        return ResponseHelper::createArrayResponse(
-            statusCode: 204,
-            statusMessage: 'subscription deleted'
         );
     }
 }

@@ -7,13 +7,13 @@ use Illuminate\Database\Eloquent\Builder;
 
 class DiscountList extends BaseDataTable
 {
-    protected string $model = Discount::class;
-
     public array $enabledCols = [
         'model.name',
         'discount',
         'is_percentage',
     ];
+
+    protected string $model = Discount::class;
 
     protected function getBuilder(Builder $builder): Builder
     {

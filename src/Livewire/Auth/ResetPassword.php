@@ -16,20 +16,20 @@ class ResetPassword extends Component
 {
     use Actions;
 
-    protected string $updateAction = UpdateUser::class;
-
-    protected string $passwordBroker = 'users';
-
     #[Url]
     public ?string $email = null;
-
-    #[Url]
-    public ?string $token = null;
 
     #[Rule(['required', 'string', 'confirmed'])]
     public ?string $password = null;
 
     public ?string $password_confirmation = null;
+
+    #[Url]
+    public ?string $token = null;
+
+    protected string $passwordBroker = 'users';
+
+    protected string $updateAction = UpdateUser::class;
 
     public function render(): View
     {
@@ -47,7 +47,7 @@ class ResetPassword extends Component
                 'token' => $this->token,
                 'password' => $this->password,
             ],
-            function (CanResetPassword $user, string $password) use (&$success) {
+            function (CanResetPassword $user, string $password) use (&$success): void {
                 $success = $this->updateUser($user, $password);
             }
         );

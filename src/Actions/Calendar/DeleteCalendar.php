@@ -9,14 +9,14 @@ use Illuminate\Validation\ValidationException;
 
 class DeleteCalendar extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeleteCalendarRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Calendar::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeleteCalendarRuleset::class;
     }
 
     public function performAction(): ?bool

@@ -14,13 +14,13 @@ class Categorizable extends MorphPivot
 
     protected $table = 'categorizables';
 
-    public function category(): BelongsTo
-    {
-        return $this->belongsTo(Category::class);
-    }
-
     public function categorizable(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
     }
 }

@@ -10,28 +10,28 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('addresses', function (Blueprint $table) {
+        Schema::table('addresses', function (Blueprint $table): void {
             $table->unsignedBigInteger('client_id')->after('uuid')
                 ->comment('A unique identifier number for the table clients.');
         });
 
         $this->migrateClientId();
 
-        Schema::table('addresses', function (Blueprint $table) {
+        Schema::table('addresses', function (Blueprint $table): void {
             $table->foreign('client_id')->references('id')->on('clients');
         });
     }
 
     public function down(): void
     {
-        Schema::table('addresses', function (Blueprint $table) {
+        Schema::table('addresses', function (Blueprint $table): void {
             $table->dropForeign('addresses_client_id_foreign');
 
             $table->dropColumn('client_id');
         });
     }
 
-    private function migrateClientId()
+    private function migrateClientId(): void
     {
         $clientId = DB::table('clients')
             ->first()

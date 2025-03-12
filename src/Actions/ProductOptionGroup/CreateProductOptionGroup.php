@@ -11,14 +11,14 @@ use Illuminate\Support\Facades\Validator;
 
 class CreateProductOptionGroup extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateProductOptionGroupRuleset::class;
-    }
-
     public static function models(): array
     {
         return [ProductOptionGroup::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateProductOptionGroupRuleset::class;
     }
 
     public function performAction(): ProductOptionGroup

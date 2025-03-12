@@ -8,7 +8,7 @@ class CreateAddressAddressTypeOrderTable extends Migration
 {
     public function up(): void
     {
-        Schema::create('address_address_type_order', function (Blueprint $table) {
+        Schema::create('address_address_type_order', function (Blueprint $table): void {
             $table->unsignedBigInteger('order_id')
                 ->comment('A unique identifier number for the table orders.');
             $table->unsignedBigInteger('address_id')

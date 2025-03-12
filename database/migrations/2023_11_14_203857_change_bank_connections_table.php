@@ -15,7 +15,7 @@ return new class() extends Migration
             ->whereNull('contact_id')
             ->delete();
 
-        Schema::table('contact_bank_connections', function (Blueprint $table) {
+        Schema::table('contact_bank_connections', function (Blueprint $table): void {
             $table->unsignedBigInteger('contact_id')->nullable(false)->change();
         });
     }
@@ -24,7 +24,7 @@ return new class() extends Migration
     {
         Schema::rename('contact_bank_connections', 'bank_connections');
 
-        Schema::table('contact_bank_connections', function (Blueprint $table) {
+        Schema::table('contact_bank_connections', function (Blueprint $table): void {
             $table->unsignedBigInteger('contact_id')->nullable()->change();
         });
     }

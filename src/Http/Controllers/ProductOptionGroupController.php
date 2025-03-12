@@ -37,6 +37,36 @@ class ProductOptionGroupController extends BaseController
         );
     }
 
+    public function delete(string $id): JsonResponse
+    {
+        try {
+            $response = DeleteProductOptionGroup::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
+            return ResponseHelper::createResponseFromBase(
+                statusCode: array_key_exists('id', $e->errors()) ? 404 : 423,
+                data: $e->errors()
+            );
+        }
+
+        $responses = [];
+        if (is_array($response)) {
+            foreach ($response['product_options'] as $productOption => $success) {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: $success ? 200 : 409,
+                    data: ! $success ? ['id' => ['Product with given Product Option exists.']] : null,
+                    additions: ['product_option' => $productOption]
+                );
+            }
+        }
+
+        return ResponseHelper::createResponseFromBase(
+            statusCode: ! $responses ? 204 : 207,
+            data: $responses ?: null,
+            statusMessage: ! $responses ? 'product option deleted' : 'not all product options could be deleted',
+            bulk: (bool) $responses
+        );
+    }
+
     public function update(Request $request): JsonResponse
     {
         $data = $request->all();
@@ -82,35 +112,5 @@ class ProductOptionGroupController extends BaseController
                 statusMessage: $statusCode === 422 ? null : 'product option group(s) updated',
                 bulk: true
             );
-    }
-
-    public function delete(string $id): JsonResponse
-    {
-        try {
-            $response = DeleteProductOptionGroup::make(['id' => $id])->validate()->execute();
-        } catch (ValidationException $e) {
-            return ResponseHelper::createResponseFromBase(
-                statusCode: array_key_exists('id', $e->errors()) ? 404 : 423,
-                data: $e->errors()
-            );
-        }
-
-        $responses = [];
-        if (is_array($response)) {
-            foreach ($response['product_options'] as $productOption => $success) {
-                $responses[] = ResponseHelper::createArrayResponse(
-                    statusCode: $success ? 200 : 409,
-                    data: ! $success ? ['id' => ['Product with given Product Option exists.']] : null,
-                    additions: ['product_option' => $productOption]
-                );
-            }
-        }
-
-        return ResponseHelper::createResponseFromBase(
-            statusCode: ! $responses ? 204 : 207,
-            data: $responses ?: null,
-            statusMessage: ! $responses ? 'product option deleted' : 'not all product options could be deleted',
-            bulk: (bool) $responses
-        );
     }
 }

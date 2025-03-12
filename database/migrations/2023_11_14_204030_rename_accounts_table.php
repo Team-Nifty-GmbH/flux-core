@@ -10,7 +10,7 @@ return new class() extends Migration
     {
         Schema::rename('accounts', 'bank_connections');
 
-        Schema::table('bank_connections', function (Blueprint $table) {
+        Schema::table('bank_connections', function (Blueprint $table): void {
             $table->dropForeign('accounts_bank_connection_id_foreign');
             $table->dropColumn(['bank_connection_id', 'type', 'account_number']);
             $table->foreignId('ledger_account_id')
@@ -30,7 +30,7 @@ return new class() extends Migration
     {
         Schema::rename('bank_connections', 'accounts');
 
-        Schema::table('accounts', function (Blueprint $table) {
+        Schema::table('accounts', function (Blueprint $table): void {
             $table->dropForeign('bank_connections_ledger_account_id_foreign');
             $table->dropColumn(['ledger_account_id', 'bank_name', 'bic', 'credit_limit', 'is_active']);
             $table->dropIndex('bank_connections_iban_unique');

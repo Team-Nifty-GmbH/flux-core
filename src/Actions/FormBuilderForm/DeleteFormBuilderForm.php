@@ -8,14 +8,14 @@ use FluxErp\Rulesets\FormBuilderForm\DeleteFormBuilderFormRuleset;
 
 class DeleteFormBuilderForm extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeleteFormBuilderFormRuleset::class;
-    }
-
     public static function models(): array
     {
         return [FormBuilderForm::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeleteFormBuilderFormRuleset::class;
     }
 
     public function performAction(): ?bool

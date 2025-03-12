@@ -10,14 +10,14 @@ use Illuminate\Support\Facades\Validator;
 
 class CreateCategory extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateCategoryRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Category::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateCategoryRuleset::class;
     }
 
     public function performAction(): Category

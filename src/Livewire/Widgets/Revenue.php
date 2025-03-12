@@ -14,14 +14,6 @@ class Revenue extends ValueBox
 {
     use IsTimeFrameAwareWidget;
 
-    protected function getListeners(): array
-    {
-        return [
-            'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
-                . ',.OrderLocked' => 'calculateSum',
-        ];
-    }
-
     #[Renderless]
     public function calculateSum(): void
     {
@@ -32,8 +24,8 @@ class Revenue extends ValueBox
                 ->revenue()
         )
             ->setRange($this->timeFrame)
-            ->setEndingDate($this->end)
-            ->setStartingDate($this->start)
+            ->setEndingDate($this->end?->endOfDay())
+            ->setStartingDate($this->start?->startOfDay())
             ->setDateColumn('invoice_date')
             ->withGrowthRate()
             ->sum('total_net_price');
@@ -42,5 +34,13 @@ class Revenue extends ValueBox
         $this->sum = Number::abbreviate($metric->getValue(), 2) . ' ' . $symbol;
         $this->previousSum = Number::abbreviate($metric->getPreviousValue(), 2) . ' ' . $symbol;
         $this->growthRate = $metric->getGrowthRate();
+    }
+
+    protected function getListeners(): array
+    {
+        return [
+            'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
+                . ',.OrderLocked' => 'calculateSum',
+        ];
     }
 }

@@ -11,7 +11,7 @@ return new class() extends Migration
      */
     public function up(): void
     {
-        Schema::create('product_bundle_product', function (Blueprint $table) {
+        Schema::create('product_bundle_product', function (Blueprint $table): void {
             $table->unsignedBigInteger('product_id')
                 ->comment('Main bundle product containing other products.');
             $table->unsignedBigInteger('bundle_product_id')

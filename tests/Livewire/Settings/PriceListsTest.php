@@ -6,14 +6,11 @@ use FluxErp\Livewire\Forms\PriceListForm;
 use FluxErp\Livewire\Settings\PriceLists;
 use FluxErp\Models\PriceList;
 use FluxErp\Tests\Livewire\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 
 class PriceListsTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private PriceList $priceList;
 
     protected function setUp(): void
@@ -22,13 +19,7 @@ class PriceListsTest extends BaseSetup
         $this->priceList = PriceList::factory()->create();
     }
 
-    public function test_renders_successfully()
-    {
-        Livewire::test(PriceLists::class)
-            ->assertStatus(200);
-    }
-
-    public function test_can_create_price_list()
+    public function test_can_create_price_list(): void
     {
         Livewire::test(PriceLists::class)
             ->assertStatus(200)
@@ -44,7 +35,7 @@ class PriceListsTest extends BaseSetup
         ]);
     }
 
-    public function test_can_update_price_list()
+    public function test_can_update_price_list(): void
     {
         $child = PriceList::factory()
             ->create([
@@ -73,5 +64,11 @@ class PriceListsTest extends BaseSetup
         $this->assertEquals('New Name', $dbPriceList->name);
         $this->assertEquals(0.1, $dbPriceList->discount->discount);
         $this->assertTrue($dbPriceList->discount->is_percentage);
+    }
+
+    public function test_renders_successfully(): void
+    {
+        Livewire::test(PriceLists::class)
+            ->assertStatus(200);
     }
 }

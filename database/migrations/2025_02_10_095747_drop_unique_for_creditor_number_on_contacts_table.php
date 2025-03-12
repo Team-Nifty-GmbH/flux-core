@@ -9,7 +9,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('contacts', function (Blueprint $table) {
+        Schema::table('contacts', function (Blueprint $table): void {
             $table->dropUnique('contacts_creditor_number_client_id_unique');
         });
     }
@@ -25,7 +25,7 @@ return new class() extends Migration
                 WHERE c.creditor_number IS NOT NULL AND c.id > j.id"
         );
 
-        Schema::table('contacts', function (Blueprint $table) {
+        Schema::table('contacts', function (Blueprint $table): void {
             $table->unique(['creditor_number', 'client_id']);
         });
     }

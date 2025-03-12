@@ -9,14 +9,14 @@ use Illuminate\Support\Str;
 
 class CreateFormBuilderForm extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateFormBuilderFormRuleset::class;
-    }
-
     public static function models(): array
     {
         return [FormBuilderForm::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateFormBuilderFormRuleset::class;
     }
 
     public function performAction(): FormBuilderForm

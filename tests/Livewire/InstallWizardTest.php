@@ -11,15 +11,7 @@ use Livewire\Livewire;
 
 class InstallWizardTest extends TestCase
 {
-    public function test_renders_successfully()
-    {
-        Config::set('flux.install_done', false);
-
-        Livewire::test(InstallWizard::class)
-            ->assertStatus(200);
-    }
-
-    public function test_forbidden_when_done()
+    public function test_forbidden_when_done(): void
     {
         Config::set('flux.install_done', true);
 
@@ -27,7 +19,7 @@ class InstallWizardTest extends TestCase
             ->assertStatus(403);
     }
 
-    public function test_install_wizard()
+    public function test_install_wizard(): void
     {
         // Set the configuration value
         Config::set('flux.install_done', false);
@@ -173,5 +165,13 @@ class InstallWizardTest extends TestCase
             'name' => 'Default',
             'is_default' => true,
         ]);
+    }
+
+    public function test_renders_successfully(): void
+    {
+        Config::set('flux.install_done', false);
+
+        Livewire::test(InstallWizard::class)
+            ->assertStatus(200);
     }
 }

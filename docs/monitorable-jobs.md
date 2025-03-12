@@ -31,7 +31,7 @@ class CreateUser extends Job implements ShouldBeMonitored
         $this->message('All users created');
         $this->accept(
             NotificationAction::make()
-                ->label('View users')
+                ->text('View users')
                 ->route('users.index')
         );
     }
@@ -64,7 +64,7 @@ The methods both accept a `NotificationAction` instance as a parameter.
 ```php
 use FluxErp\NotificationAction;
 
-$this->accept(NotificationAction::make()->label('Accept')->route('users.index'));
+$this->accept(NotificationAction::make()->text('Accept')->route('users.index'));
 ```
 
 You can also add js code to the button by calling the `execute` method on the `NotificationAction` instance.
@@ -72,7 +72,7 @@ You can also add js code to the button by calling the `execute` method on the `N
 ```php
 $this->accept(
     NotificationAction::make()
-        ->label('Accept')
+        ->text('Accept')
         ->execute(<<<'JS'
             alert("Hello World")
         JS);

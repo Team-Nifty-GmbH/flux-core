@@ -8,14 +8,14 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('vat_rates', function (Blueprint $table) {
+        Schema::table('vat_rates', function (Blueprint $table): void {
             $table->renameColumn('rate', 'rate_percentage');
         });
     }
 
     public function down(): void
     {
-        Schema::table('vat_rates', function (Blueprint $table) {
+        Schema::table('vat_rates', function (Blueprint $table): void {
             $table->renameColumn('rate_percentage', 'rate');
         });
     }

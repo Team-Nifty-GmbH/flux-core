@@ -11,14 +11,14 @@ class UpdateMailFolder extends FluxAction
 {
     protected static bool $hasPermission = false;
 
-    protected function getRulesets(): string|array
-    {
-        return UpdateMailFolderRuleset::class;
-    }
-
     public static function models(): array
     {
         return [MailFolder::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateMailFolderRuleset::class;
     }
 
     public function performAction(): Model

@@ -25,6 +25,86 @@ class SerialNumberRanges extends SerialNumberRangeList
 
     public SerialNumberRangeForm $serialNumberRange;
 
+    protected function getTableActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->text(__('New'))
+                ->icon('plus')
+                ->color('indigo')
+                ->when(resolve_static(CreateSerialNumberRange::class, 'canPerformAction', [false]))
+                ->attributes([
+                    'wire:click' => 'edit',
+                ]),
+        ];
+    }
+
+    protected function getRowActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->text(__('Edit'))
+                ->icon('pencil')
+                ->color('indigo')
+                ->when(resolve_static(UpdateSerialNumberRange::class, 'canPerformAction', [false]))
+                ->attributes([
+                    'wire:click' => 'edit(record.id)',
+                ]),
+            DataTableButton::make()
+                ->text(__('Delete'))
+                ->color('red')
+                ->icon('trash')
+                ->when(resolve_static(DeleteSerialNumberRange::class, 'canPerformAction', [false]))
+                ->attributes([
+                    'wire:click' => 'delete(record.id)',
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Serial Number Range')]),
+                ]),
+        ];
+    }
+
+    public function delete(SerialNumberRange $serialNumberRange): bool
+    {
+        $this->serialNumberRange->reset();
+        $this->serialNumberRange->fill($serialNumberRange);
+
+        try {
+            $this->serialNumberRange->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
+    }
+
+    public function edit(SerialNumberRange $serialNumberRange): void
+    {
+        $this->serialNumberRange->reset();
+        $this->serialNumberRange->fill($serialNumberRange);
+
+        $this->js(<<<'JS'
+            $modalOpen('edit-serial-number-range-modal');
+        JS);
+    }
+
+    public function save(): bool
+    {
+        try {
+            $this->serialNumberRange->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
+    }
+
     protected function getViewData(): array
     {
         return array_merge(
@@ -44,76 +124,5 @@ class SerialNumberRanges extends SerialNumberRangeList
                     ->toArray(),
             ]
         );
-    }
-
-    protected function getTableActions(): array
-    {
-        return [
-            DataTableButton::make()
-                ->label(__('New'))
-                ->icon('plus')
-                ->color('primary')
-                ->when(resolve_static(CreateSerialNumberRange::class, 'canPerformAction', [false]))
-                ->attributes([
-                    'wire:click' => 'edit',
-                ]),
-        ];
-    }
-
-    protected function getRowActions(): array
-    {
-        return [
-            DataTableButton::make()
-                ->label(__('Edit'))
-                ->icon('pencil')
-                ->color('primary')
-                ->when(resolve_static(UpdateSerialNumberRange::class, 'canPerformAction', [false]))
-                ->attributes([
-                    'wire:click' => 'edit(record.id)',
-                ]),
-        ];
-    }
-
-    public function edit(SerialNumberRange $serialNumberRange): void
-    {
-        $this->serialNumberRange->reset();
-        $this->serialNumberRange->fill($serialNumberRange);
-
-        $this->js(<<<'JS'
-            $openModal('edit-serial-number-range');
-        JS);
-    }
-
-    public function save(): bool
-    {
-        try {
-            $this->serialNumberRange->save();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
-    }
-
-    public function delete(): bool
-    {
-        try {
-            DeleteSerialNumberRange::make($this->serialNumberRange->toArray())
-                ->checkPermission()
-                ->validate()
-                ->execute();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
     }
 }

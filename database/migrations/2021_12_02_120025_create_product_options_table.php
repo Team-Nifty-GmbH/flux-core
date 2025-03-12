@@ -8,7 +8,7 @@ class CreateProductOptionsTable extends Migration
 {
     public function up(): void
     {
-        Schema::create('product_options', function (Blueprint $table) {
+        Schema::create('product_options', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
             $table->unsignedBigInteger('product_option_group_id');

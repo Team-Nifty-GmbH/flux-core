@@ -10,14 +10,14 @@ use Illuminate\Validation\Rule;
 
 class UpdateProductBundleProduct extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateProductBundleProductRuleset::class;
-    }
-
     public static function models(): array
     {
         return [ProductBundleProduct::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateProductBundleProductRuleset::class;
     }
 
     public function performAction(): Model

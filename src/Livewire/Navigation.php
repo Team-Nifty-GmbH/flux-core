@@ -18,12 +18,8 @@ class Navigation extends Component
 
     public ?array $setting;
 
-    public bool $showSearchBar = true;
-
-    public function mount(?array $setting = null, bool $showSearchBar = true): void
+    public function mount(?array $setting = null): void
     {
-        $this->showSearchBar = $showSearchBar;
-
         if ($setting) {
             $setting = $setting['settings'];
             $this->setting = $setting;
@@ -71,6 +67,18 @@ class Navigation extends Component
             ->delete();
     }
 
+    protected function getFavorites(): ?array
+    {
+        if (! method_exists(auth()->user(), 'favorites')) {
+            return null;
+        }
+
+        return auth()->user()
+            ->favorites()
+            ->get(['id', 'name', 'url'])
+            ->toArray();
+    }
+
     protected function getMenu(): Collection
     {
         $menuAll = Menu::all();
@@ -93,7 +101,7 @@ class Navigation extends Component
             }
         }
 
-        array_walk_recursive($navigations, function (&$item, $key) {
+        array_walk_recursive($navigations, function (&$item, $key): void {
             if ($key === 'label') {
                 $item = __(Str::headline($item));
             }
@@ -125,18 +133,6 @@ class Navigation extends Component
             ->orderByDesc('count')
             ->limit(5)
             ->pluck('description')
-            ->toArray();
-    }
-
-    protected function getFavorites(): ?array
-    {
-        if (! method_exists(auth()->user(), 'favorites')) {
-            return null;
-        }
-
-        return auth()->user()
-            ->favorites()
-            ->get(['id', 'name', 'url'])
             ->toArray();
     }
 }

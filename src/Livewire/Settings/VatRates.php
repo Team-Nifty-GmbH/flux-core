@@ -25,9 +25,9 @@ class VatRates extends VatRateList
     {
         return [
             DataTableButton::make()
-                ->label(__('New'))
+                ->text(__('New'))
                 ->icon('plus')
-                ->color('primary')
+                ->color('indigo')
                 ->when(resolve_static(CreateVatRate::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'edit',
@@ -39,30 +39,32 @@ class VatRates extends VatRateList
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
+                ->text(__('Edit'))
                 ->icon('pencil')
-                ->color('primary')
+                ->color('indigo')
                 ->when(resolve_static(UpdateVatRate::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'edit(record.id)',
                 ]),
+            DataTableButton::make()
+                ->text(__('Delete'))
+                ->icon('trash')
+                ->color('red')
+                ->when(resolve_static(DeleteVatRate::class, 'canPerformAction', [false]))
+                ->attributes([
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Vat Rate')]),
+                    'wire:click' => 'delete(record.id)',
+                ]),
         ];
     }
 
-    public function edit(VatRate $vatRate): void
+    public function delete(VatRate $vatRate): bool
     {
         $this->vatRate->reset();
         $this->vatRate->fill($vatRate);
 
-        $this->js(<<<'JS'
-            $openModal('edit-vat-rate');
-        JS);
-    }
-
-    public function save(): bool
-    {
         try {
-            $this->vatRate->save();
+            $this->vatRate->delete();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
@@ -74,13 +76,20 @@ class VatRates extends VatRateList
         return true;
     }
 
-    public function delete(): bool
+    public function edit(VatRate $vatRate): void
+    {
+        $this->vatRate->reset();
+        $this->vatRate->fill($vatRate);
+
+        $this->js(<<<'JS'
+            $modalOpen('edit-vat-rate-modal');
+        JS);
+    }
+
+    public function save(): bool
     {
         try {
-            DeleteVatRate::make($this->vatRate->toArray())
-                ->checkPermission()
-                ->validate()
-                ->execute();
+            $this->vatRate->save();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 

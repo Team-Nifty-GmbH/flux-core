@@ -5,12 +5,9 @@ namespace FluxErp\Tests\Feature\Web\Portal;
 use FluxErp\Models\Address;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Ticket;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class TicketsTest extends PortalSetup
 {
-    use DatabaseTransactions;
-
     private Ticket $ticket;
 
     protected function setUp(): void
@@ -23,30 +20,14 @@ class TicketsTest extends PortalSetup
         ]);
     }
 
-    public function test_portal_tickets_page()
+    public function test_portal_tickets_id_no_user(): void
     {
-        $this->user->givePermissionTo(Permission::findOrCreate('tickets.get', 'address'));
-
-        $this->actingAs($this->user, 'address')->get(route('portal.tickets'))
-            ->assertStatus(200);
-    }
-
-    public function test_portal_tickets_no_user()
-    {
-        $this->get(route('portal.tickets'))
+        $this->get(route('portal.tickets.id', ['id' => $this->ticket->id]))
             ->assertStatus(302)
             ->assertRedirect($this->portalDomain . '/login');
     }
 
-    public function test_portal_tickets_without_permission()
-    {
-        Permission::findOrCreate('tickets.get', 'address');
-
-        $this->actingAs($this->user, 'address')->get(route('portal.tickets'))
-            ->assertStatus(403);
-    }
-
-    public function test_portal_tickets_id_page()
+    public function test_portal_tickets_id_page(): void
     {
         $this->user->givePermissionTo(Permission::findOrCreate('tickets.{id}.get', 'address'));
 
@@ -54,22 +35,7 @@ class TicketsTest extends PortalSetup
             ->assertStatus(200);
     }
 
-    public function test_portal_tickets_id_no_user()
-    {
-        $this->get(route('portal.tickets.id', ['id' => $this->ticket->id]))
-            ->assertStatus(302)
-            ->assertRedirect($this->portalDomain . '/login');
-    }
-
-    public function test_portal_tickets_id_without_permission()
-    {
-        Permission::findOrCreate('tickets.{id}.get', 'address');
-
-        $this->actingAs($this->user, 'address')->get(route('portal.tickets.id', ['id' => $this->ticket->id]))
-            ->assertStatus(403);
-    }
-
-    public function test_portal_tickets_id_ticket_not_found()
+    public function test_portal_tickets_id_ticket_not_found(): void
     {
         $this->ticket->delete();
 
@@ -77,5 +43,36 @@ class TicketsTest extends PortalSetup
 
         $this->actingAs($this->user, 'address')->get(route('portal.tickets.id', ['id' => $this->ticket->id]))
             ->assertStatus(404);
+    }
+
+    public function test_portal_tickets_id_without_permission(): void
+    {
+        Permission::findOrCreate('tickets.{id}.get', 'address');
+
+        $this->actingAs($this->user, 'address')->get(route('portal.tickets.id', ['id' => $this->ticket->id]))
+            ->assertStatus(403);
+    }
+
+    public function test_portal_tickets_no_user(): void
+    {
+        $this->get(route('portal.tickets'))
+            ->assertStatus(302)
+            ->assertRedirect($this->portalDomain . '/login');
+    }
+
+    public function test_portal_tickets_page(): void
+    {
+        $this->user->givePermissionTo(Permission::findOrCreate('tickets.get', 'address'));
+
+        $this->actingAs($this->user, 'address')->get(route('portal.tickets'))
+            ->assertStatus(200);
+    }
+
+    public function test_portal_tickets_without_permission(): void
+    {
+        Permission::findOrCreate('tickets.get', 'address');
+
+        $this->actingAs($this->user, 'address')->get(route('portal.tickets'))
+            ->assertStatus(403);
     }
 }

@@ -22,16 +22,6 @@ class BaseFormRequest extends FormRequest
         return true;
     }
 
-    protected function failedValidation(Validator $validator): void
-    {
-        throw new HttpResponseException(
-            ResponseHelper::createResponseFromBase(
-                statusCode: Response::HTTP_UNPROCESSABLE_ENTITY,
-                data: $validator->errors()->toArray()
-            )
-        );
-    }
-
     public function getRules(array|Model $model): array
     {
         if (! method_exists($this, 'rules')) {
@@ -95,5 +85,15 @@ class BaseFormRequest extends FormRequest
         }
 
         return $rules;
+    }
+
+    protected function failedValidation(Validator $validator): void
+    {
+        throw new HttpResponseException(
+            ResponseHelper::createResponseFromBase(
+                statusCode: Response::HTTP_UNPROCESSABLE_ENTITY,
+                data: $validator->errors()->toArray()
+            )
+        );
     }
 }

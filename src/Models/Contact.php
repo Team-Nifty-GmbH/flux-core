@@ -39,13 +39,13 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
         HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasSerialNumberRange, HasUserModification,
         HasUuid, InteractsWithMedia, Lockable, LogsActivity, Printable, SoftDeletes;
 
-    protected string $detailRouteName = 'contacts.id?';
-
     public static string $iconName = 'users';
+
+    protected string $detailRouteName = 'contacts.id?';
 
     protected static function booted(): void
     {
-        static::saving(function (Contact $contact) {
+        static::saving(function (Contact $contact): void {
             // reset to original
             if ($contact->wasChanged(['customer_number', 'creditor_number', 'debtor_number'])) {
                 $contact->customer_number = $contact->getOriginal('customer_number');
@@ -58,7 +58,7 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
             }
         });
 
-        static::deleting(function (Contact $contact) {
+        static::deleting(function (Contact $contact): void {
             $contact->addresses()->delete();
         });
     }
@@ -134,6 +134,78 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
         return $this->belongsToMany(Discount::class, 'contact_discount')->using(ContactDiscount::class);
     }
 
+    public function getAllDiscounts(): Collection
+    {
+        return $this->getAllDiscountsQuery()
+            ->get()
+            ->sortByDesc('discount')
+            ->unique(fn ($item) => $item->model_id . $item->model_type . $item->is_percentage)
+            ->values();
+    }
+
+    public function getAllDiscountsQuery(): Builder
+    {
+        $directDiscountsQuery = $this->discounts()
+            ->select('discounts.*')
+            ->where(function ($query): void {
+                $query->whereNull('from')
+                    ->orWhere('from', '<=', now());
+            })
+            ->where(function ($query): void {
+                $query->whereNull('till')
+                    ->orWhere('till', '>=', now());
+            })
+            ->getQuery();
+
+        $discountsThroughGroupsQuery = $this->discountGroups()
+            ->join('discount_discount_group', 'discount_groups.id', '=', 'discount_discount_group.discount_group_id')
+            ->join('discounts', 'discounts.id', '=', 'discount_discount_group.discount_id')
+            ->select('discounts.*')
+            ->where('discount_groups.is_active', true)
+            ->where(function ($query): void {
+                $query->whereNull('from')
+                    ->orWhere('from', '<=', now());
+            })
+            ->where(function ($query): void {
+                $query->whereNull('till')
+                    ->orWhere('till', '>=', now());
+            })
+            ->getQuery();
+
+        return app(Discount::class)->newModelQuery()
+            ->fromSub($directDiscountsQuery->union($discountsThroughGroupsQuery), 'union_sub');
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function getAvatarUrl(): ?string
+    {
+        return $this->getFirstMediaUrl('avatar', 'thumb') ?: static::icon()->getUrl();
+    }
+
+    public function getDescription(): ?string
+    {
+        return null;
+    }
+
+    public function getLabel(): ?string
+    {
+        return $this->customer_number;
+    }
+
+    public function getPrintViews(): array
+    {
+        return [
+            'balance-statement' => BalanceStatement::class,
+        ];
+    }
+
+    public function getUrl(): ?string
+    {
+        return $this->detailRoute();
+    }
+
     public function industries(): BelongsToMany
     {
         return $this->belongsToMany(Industry::class, 'contact_industry')->using(ContactIndustry::class);
@@ -174,6 +246,16 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
         return $this->belongsToMany(Product::class, 'product_supplier');
     }
 
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('avatar')
+            ->acceptsFile(function (File $file) {
+                return str_starts_with($file->mimeType, 'image/');
+            })
+            ->useDisk('public')
+            ->singleFile();
+    }
+
     public function sepaMandates(): HasMany
     {
         return $this->hasMany(SepaMandate::class);
@@ -187,87 +269,5 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
     public function workTimes(): HasMany
     {
         return $this->hasMany(WorkTime::class);
-    }
-
-    public function getAllDiscountsQuery(): Builder
-    {
-        $directDiscountsQuery = $this->discounts()
-            ->select('discounts.*')
-            ->where(function ($query) {
-                $query->whereNull('from')
-                    ->orWhere('from', '<=', now());
-            })
-            ->where(function ($query) {
-                $query->whereNull('till')
-                    ->orWhere('till', '>=', now());
-            })
-            ->getQuery();
-
-        $discountsThroughGroupsQuery = $this->discountGroups()
-            ->join('discount_discount_group', 'discount_groups.id', '=', 'discount_discount_group.discount_group_id')
-            ->join('discounts', 'discounts.id', '=', 'discount_discount_group.discount_id')
-            ->select('discounts.*')
-            ->where('discount_groups.is_active', true)
-            ->where(function ($query) {
-                $query->whereNull('from')
-                    ->orWhere('from', '<=', now());
-            })
-            ->where(function ($query) {
-                $query->whereNull('till')
-                    ->orWhere('till', '>=', now());
-            })
-            ->getQuery();
-
-        return app(Discount::class)->newModelQuery()
-            ->fromSub($directDiscountsQuery->union($discountsThroughGroupsQuery), 'union_sub');
-    }
-
-    public function getAllDiscounts(): Collection
-    {
-        return $this->getAllDiscountsQuery()
-            ->get()
-            ->sortByDesc('discount')
-            ->unique(fn ($item) => $item->model_id . $item->model_type . $item->is_percentage)
-            ->values();
-    }
-
-    public function registerMediaCollections(): void
-    {
-        $this->addMediaCollection('avatar')
-            ->acceptsFile(function (File $file) {
-                return str_starts_with($file->mimeType, 'image/');
-            })
-            ->useDisk('public')
-            ->singleFile();
-    }
-
-    public function getLabel(): ?string
-    {
-        return $this->customer_number;
-    }
-
-    public function getDescription(): ?string
-    {
-        return null;
-    }
-
-    public function getUrl(): ?string
-    {
-        return $this->detailRoute();
-    }
-
-    /**
-     * @throws \Exception
-     */
-    public function getAvatarUrl(): ?string
-    {
-        return $this->getFirstMediaUrl('avatar', 'thumb') ?: static::icon()->getUrl();
-    }
-
-    public function getPrintViews(): array
-    {
-        return [
-            'balance-statement' => BalanceStatement::class,
-        ];
     }
 }

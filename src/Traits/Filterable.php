@@ -19,6 +19,13 @@ trait Filterable
      */
     protected static array $availableRelations = [];
 
+    public static function getColumns(bool $showHidden = false): Collection
+    {
+        $collection = collect(DB::select('DESCRIBE `' . (app(static::class))->getTable() . '`;'));
+
+        return $showHidden ? $collection : $collection->whereNotIn('Field', (app(static::class))->getHidden());
+    }
+
     /**
      * Gets list of available relations for this model
      * And stores it in the variable for future use
@@ -57,11 +64,46 @@ trait Filterable
         return $relations;
     }
 
-    public static function getColumns(bool $showHidden = false): Collection
+    public function scopeBetween(Builder $query, $item): Builder
     {
-        $collection = collect(DB::select('DESCRIBE `' . (app(static::class))->getTable() . '`;'));
+        $disableException = config('query-builder.disable_invalid_filter_query_exception');
+        $scopeColumnTypes = [
+            'int',
+            'time',
+            'date',
+            'decimal',
+            'double',
+        ];
+        $exploded = explode('|', $item);
 
-        return $showHidden ? $collection : $collection->whereNotIn('Field', (app(static::class))->getHidden());
+        if (count($exploded) !== 2) {
+            if ($disableException) {
+                return $query;
+            } else {
+                throw InvalidFilter::invalidFilterScheme($item, 'between');
+            }
+        }
+
+        $allowedColumns = QueryBuilder::allowedScopeFilters($this, $scopeColumnTypes);
+        $column = $allowedColumns->where('Field', $exploded[0])->first();
+        if (! $column) {
+            if ($disableException) {
+                return $query;
+            } else {
+                throw InvalidFilter::filterNotAllowed($exploded[0], $allowedColumns);
+            }
+        }
+
+        $values = explode(';', $exploded[1]);
+        if (count($values) !== 2) {
+            if ($disableException) {
+                return $query;
+            } else {
+                throw InvalidFilter::invalidFilterScheme($item, 'between');
+            }
+        }
+
+        return $query->whereBetween($column->Field, $values);
     }
 
     public function scopeScope(Builder $query, $item): Builder
@@ -111,47 +153,5 @@ trait Filterable
         };
 
         return $query->where($column->Field, $operator, $exploded[2]);
-    }
-
-    public function scopeBetween(Builder $query, $item): Builder
-    {
-        $disableException = config('query-builder.disable_invalid_filter_query_exception');
-        $scopeColumnTypes = [
-            'int',
-            'time',
-            'date',
-            'decimal',
-            'double',
-        ];
-        $exploded = explode('|', $item);
-
-        if (count($exploded) !== 2) {
-            if ($disableException) {
-                return $query;
-            } else {
-                throw InvalidFilter::invalidFilterScheme($item, 'between');
-            }
-        }
-
-        $allowedColumns = QueryBuilder::allowedScopeFilters($this, $scopeColumnTypes);
-        $column = $allowedColumns->where('Field', $exploded[0])->first();
-        if (! $column) {
-            if ($disableException) {
-                return $query;
-            } else {
-                throw InvalidFilter::filterNotAllowed($exploded[0], $allowedColumns);
-            }
-        }
-
-        $values = explode(';', $exploded[1]);
-        if (count($values) !== 2) {
-            if ($disableException) {
-                return $query;
-            } else {
-                throw InvalidFilter::invalidFilterScheme($item, 'between');
-            }
-        }
-
-        return $query->whereBetween($column->Field, $values);
     }
 }

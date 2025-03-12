@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::create('order_payment_run', function (Blueprint $table) {
+        Schema::create('order_payment_run', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('order_id')
                 ->constrained()

@@ -8,8 +8,6 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class OrderTypeList extends BaseDataTable
 {
-    protected string $model = OrderType::class;
-
     public array $enabledCols = [
         'name',
         'description',
@@ -18,12 +16,14 @@ class OrderTypeList extends BaseDataTable
         'print_layouts',
     ];
 
+    protected string $model = OrderType::class;
+
     protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
-                ->color('primary')
-                ->label(__('Create'))
+                ->color('indigo')
+                ->text(__('Create'))
                 ->icon('plus')
                 ->attributes([
                     'x-on:click' => '$dispatch(\'data-table-row-clicked\')',

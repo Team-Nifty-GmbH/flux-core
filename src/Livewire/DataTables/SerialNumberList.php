@@ -7,8 +7,6 @@ use Illuminate\Database\Eloquent\Builder;
 
 class SerialNumberList extends BaseDataTable
 {
-    protected string $model = SerialNumber::class;
-
     public array $enabledCols = [
         'id',
         'avatar',
@@ -20,6 +18,8 @@ class SerialNumberList extends BaseDataTable
     public array $formatters = [
         'avatar' => 'image',
     ];
+
+    protected string $model = SerialNumber::class;
 
     protected function getBuilder(Builder $builder): Builder
     {

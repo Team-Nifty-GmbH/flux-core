@@ -9,14 +9,14 @@ use Illuminate\Validation\ValidationException;
 
 class DeleteProduct extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeleteProductRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Product::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeleteProductRuleset::class;
     }
 
     public function performAction(): ?bool

@@ -30,13 +30,13 @@ class SearchController extends Controller
 
         Event::dispatch('tall-datatables-searching', $request);
 
-        if ($request->has('selected')) {
+        if ($request->has('selected') && ! $request->has('search')) {
             $selected = $request->get('selected');
             $optionValue = $request->get('option-value') ?: (app($model))->getKeyName();
 
             $query = resolve_static($model, 'query');
             is_array($selected)
-                ? $query->whereIn($optionValue, $selected)
+                ? $query->whereIn($optionValue, Arr::wrap($selected))
                 : $query->where($optionValue, $selected);
         } elseif ($request->has('search') && $isSearchable) {
             $query = ! is_string($request->get('search'))
@@ -45,13 +45,13 @@ class SearchController extends Controller
                     ->toEloquentBuilder();
         } elseif ($request->has('search')) {
             $query = resolve_static($model, 'query');
-            $query->where(function (Builder $query) use ($request) {
+            $query->where(function (Builder $query) use ($request): void {
                 foreach (Arr::wrap($request->get('searchFields')) as $field) {
                     $query->orWhere($field, 'like', '%' . $request->get('search') . '%');
                 }
             });
         } else {
-            /** @var \Illuminate\Database\Eloquent\Builder $query */
+            /** @var Builder $query */
             $query = resolve_static($model, 'query');
         }
 
@@ -79,6 +79,7 @@ class SearchController extends Controller
 
         if ($request->has('whereIn')) {
             foreach ($request->get('whereIn') as $whereIn) {
+                $whereIn[1] = Arr::wrap($whereIn[1]);
                 $query->whereIn(...$whereIn);
             }
         }
@@ -140,7 +141,7 @@ class SearchController extends Controller
         $result = $query->latest()->get();
 
         if ($request->has('appends')) {
-            $result->each(function ($item) use ($request) {
+            $result->each(function ($item) use ($request): void {
                 $item->append(array_intersect($item->getAppends(), $request->get('appends')));
             });
         }
@@ -152,7 +153,7 @@ class SearchController extends Controller
                         'id' => $item->getKey(),
                         'label' => $item->getLabel(),
                         'description' => $item->getDescription(),
-                        'src' => $item->getAvatarUrl(),
+                        'image' => $item->getAvatarUrl(),
                     ],
                     $item->only($request->get('fields', [])),
                     $item->only($request->get('appends', [])),

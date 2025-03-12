@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::create('tokens', function (Blueprint $table) {
+        Schema::create('tokens', function (Blueprint $table): void {
             $table->id();
             $table->string('url')->nullable();
             $table->unsignedInteger('max_uses')->nullable();

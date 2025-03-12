@@ -8,14 +8,14 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('address_address_type_order', function (Blueprint $table) {
+        Schema::table('address_address_type_order', function (Blueprint $table): void {
             $table->json('address')->nullable()->after('address_type_id');
         });
     }
 
     public function down(): void
     {
-        Schema::table('address_address_type_order', function (Blueprint $table) {
+        Schema::table('address_address_type_order', function (Blueprint $table): void {
             $table->dropColumn('address');
         });
     }

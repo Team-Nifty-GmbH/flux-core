@@ -11,7 +11,7 @@ return new class() extends Migration
      */
     public function up(): void
     {
-        Schema::table('sepa_mandates', function (Blueprint $table) {
+        Schema::table('sepa_mandates', function (Blueprint $table): void {
             $table->dropForeign('sepa_mandates_contact_bank_connection_id_foreign');
             $table->dropIndex('sepa_mandates_contact_bank_connection_id_foreign');
             $table->renameColumn('contact_bank_connection_id', 'bank_connection_id');
@@ -24,7 +24,7 @@ return new class() extends Migration
      */
     public function down(): void
     {
-        Schema::table('sepa_mandates', function (Blueprint $table) {
+        Schema::table('sepa_mandates', function (Blueprint $table): void {
             $table->dropForeign('sepa_mandates_bank_connection_id_foreign');
             $table->dropIndex('sepa_mandates_bank_connection_id_foreign');
             $table->renameColumn('bank_connection_id', 'contact_bank_connection_id');

@@ -8,9 +8,9 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class DeleteCommunicationRuleset extends FluxRuleset
 {
-    protected static ?string $model = Communication::class;
-
     protected static bool $addAdditionalColumnRules = false;
+
+    protected static ?string $model = Communication::class;
 
     public function rules(): array
     {

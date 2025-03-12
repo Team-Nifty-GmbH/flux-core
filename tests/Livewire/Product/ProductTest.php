@@ -7,13 +7,10 @@ use FluxErp\Models\Client;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Product;
 use FluxErp\Tests\TestCase;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;
 
 class ProductTest extends TestCase
 {
-    use DatabaseTransactions;
-
     private Product $product;
 
     protected function setUp(): void
@@ -29,13 +26,13 @@ class ProductTest extends TestCase
         Currency::factory()->create(['is_default' => true]);
     }
 
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(ProductView::class, ['id' => $this->product->id])
             ->assertStatus(200);
     }
 
-    public function test_switch_tabs()
+    public function test_switch_tabs(): void
     {
         $component = Livewire::test(ProductView::class, ['id' => $this->product->id]);
 

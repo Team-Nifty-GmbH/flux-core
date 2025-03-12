@@ -11,14 +11,14 @@ class UpdateCartItem extends FluxAction
 {
     protected static bool $hasPermission = false;
 
-    protected function getRulesets(): string|array
-    {
-        return UpdateCartItemRuleset::class;
-    }
-
     public static function models(): array
     {
         return [CartItem::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateCartItemRuleset::class;
     }
 
     public function performAction(): Model

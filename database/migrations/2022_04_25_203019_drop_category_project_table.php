@@ -12,14 +12,14 @@ return new class() extends Migration
     {
         $this->migrateCategorizablesTable();
 
-        Schema::table('category_project', function (Blueprint $table) {
+        Schema::table('category_project', function (Blueprint $table): void {
             $table->dropIfExists();
         });
     }
 
     public function down(): void
     {
-        Schema::create('category_project', function (Blueprint $table) {
+        Schema::create('category_project', function (Blueprint $table): void {
             $table->unsignedBigInteger('category_id');
             $table->unsignedBigInteger('project_id');
 
@@ -31,7 +31,7 @@ return new class() extends Migration
         $this->rollbackCategorizablesTable();
     }
 
-    private function migrateCategorizablesTable()
+    private function migrateCategorizablesTable(): void
     {
         DB::statement('INSERT INTO categorizables(category_id, categorizable_type, categorizable_id)
             SELECT category_id, \'' . trim(
@@ -41,7 +41,7 @@ return new class() extends Migration
         );
     }
 
-    private function rollbackCategorizablesTable()
+    private function rollbackCategorizablesTable(): void
     {
         DB::statement('INSERT INTO category_project(category_id, project_id)
             SELECT category_id, categorizable_id

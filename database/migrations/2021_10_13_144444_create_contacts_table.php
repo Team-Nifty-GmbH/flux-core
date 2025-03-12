@@ -8,7 +8,7 @@ class CreateContactsTable extends Migration
 {
     public function up(): void
     {
-        Schema::create('contacts', function (Blueprint $table) {
+        Schema::create('contacts', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
             $table->timestamp('created_at')->nullable()

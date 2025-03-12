@@ -6,20 +6,17 @@ use FluxErp\Models\Permission;
 use FluxErp\Models\ProductOption;
 use FluxErp\Models\ProductOptionGroup;
 use FluxErp\Tests\Feature\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
 class ProductOptionTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
-    private Collection $productOptions;
+    private array $permissions;
 
     private Collection $productOptionGroups;
 
-    private array $permissions;
+    private Collection $productOptions;
 
     protected function setUp(): void
     {
@@ -40,48 +37,7 @@ class ProductOptionTest extends BaseSetup
         ];
     }
 
-    public function test_get_product_option()
-    {
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/product-options/' . $this->productOptions[0]->id);
-        $response->assertStatus(200);
-
-        $productOption = json_decode($response->getContent())->data;
-
-        $this->assertEquals($this->productOptions[0]->id, $productOption->id);
-        $this->assertEquals($this->productOptions[0]->name, $productOption->name);
-        $this->assertEquals($this->productOptions[0]->product_option_group_id, $productOption->product_option_group_id);
-    }
-
-    public function test_get_product_option_product_option_not_found()
-    {
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)
-            ->get('/api/product-options/' . $this->productOptions[2]->id + 10000);
-        $response->assertStatus(404);
-    }
-
-    public function test_get_product_options()
-    {
-        $this->user->givePermissionTo($this->permissions['index']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/product-options');
-        $response->assertStatus(200);
-
-        $productOptions = json_decode($response->getContent())->data;
-
-        $this->assertEquals($this->productOptions[0]->id, $productOptions->data[0]->id);
-        $this->assertEquals($this->productOptions[0]->name, $productOptions->data[0]->name);
-        $this->assertEquals($this->productOptions[0]->product_option_group_id,
-            $productOptions->data[0]->product_option_group_id);
-    }
-
-    public function test_create_product_option()
+    public function test_create_product_option(): void
     {
         $productOption = [
             'product_option_group_id' => $this->productOptionGroups[0]->id,
@@ -104,7 +60,7 @@ class ProductOptionTest extends BaseSetup
         $this->assertEquals($productOption['name'], $dbProductOption->name);
     }
 
-    public function test_create_product_option_validation_fails()
+    public function test_create_product_option_validation_fails(): void
     {
         $productOption = [
             'product_option_group_id' => $this->productOptionGroups[0]->id,
@@ -117,7 +73,68 @@ class ProductOptionTest extends BaseSetup
         $response->assertStatus(422);
     }
 
-    public function test_update_product_option()
+    public function test_delete_product_option(): void
+    {
+        $this->user->givePermissionTo($this->permissions['delete']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->delete('/api/product-options/' . $this->productOptions[0]->id);
+        $response->assertStatus(204);
+
+        $this->assertFalse(ProductOption::query()->whereKey($this->productOptions[0]->id)->exists());
+    }
+
+    public function test_delete_product_option_product_option_not_found(): void
+    {
+        $this->user->givePermissionTo($this->permissions['delete']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->delete('/api/product-options/' . ++$this->productOptions[2]->id);
+        $response->assertStatus(404);
+    }
+
+    public function test_get_product_option(): void
+    {
+        $this->user->givePermissionTo($this->permissions['show']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->get('/api/product-options/' . $this->productOptions[0]->id);
+        $response->assertStatus(200);
+
+        $productOption = json_decode($response->getContent())->data;
+
+        $this->assertEquals($this->productOptions[0]->id, $productOption->id);
+        $this->assertEquals($this->productOptions[0]->name, $productOption->name);
+        $this->assertEquals($this->productOptions[0]->product_option_group_id, $productOption->product_option_group_id);
+    }
+
+    public function test_get_product_option_product_option_not_found(): void
+    {
+        $this->user->givePermissionTo($this->permissions['show']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)
+            ->get('/api/product-options/' . $this->productOptions[2]->id + 10000);
+        $response->assertStatus(404);
+    }
+
+    public function test_get_product_options(): void
+    {
+        $this->user->givePermissionTo($this->permissions['index']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->get('/api/product-options');
+        $response->assertStatus(200);
+
+        $productOptions = json_decode($response->getContent())->data;
+
+        $this->assertEquals($this->productOptions[0]->id, $productOptions->data[0]->id);
+        $this->assertEquals($this->productOptions[0]->name, $productOptions->data[0]->name);
+        $this->assertEquals($this->productOptions[0]->product_option_group_id,
+            $productOptions->data[0]->product_option_group_id);
+    }
+
+    public function test_update_product_option(): void
     {
         $productOption = [
             'id' => $this->productOptions[0]->id,
@@ -142,7 +159,7 @@ class ProductOptionTest extends BaseSetup
         $this->assertEquals($productOption['name'], $dbProductOption->name);
     }
 
-    public function test_update_product_option_validation_fails()
+    public function test_update_product_option_validation_fails(): void
     {
         $productOption = [
             'product_option_group_id' => $this->productOptionGroups[0]->id,
@@ -153,25 +170,5 @@ class ProductOptionTest extends BaseSetup
 
         $response = $this->actingAs($this->user)->put('/api/product-options', $productOption);
         $response->assertStatus(422);
-    }
-
-    public function test_delete_product_option()
-    {
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->delete('/api/product-options/' . $this->productOptions[0]->id);
-        $response->assertStatus(204);
-
-        $this->assertFalse(ProductOption::query()->whereKey($this->productOptions[0]->id)->exists());
-    }
-
-    public function test_delete_product_option_product_option_not_found()
-    {
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->delete('/api/product-options/' . ++$this->productOptions[2]->id);
-        $response->assertStatus(404);
     }
 }

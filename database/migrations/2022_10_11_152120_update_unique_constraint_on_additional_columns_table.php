@@ -11,7 +11,7 @@ return new class() extends Migration
      */
     public function up(): void
     {
-        Schema::table('additional_columns', function (Blueprint $table) {
+        Schema::table('additional_columns', function (Blueprint $table): void {
             $table->dropUnique('additional_columns_name_model_type_unique');
 
             $table->unique(['name', 'model_type', 'model_id']);
@@ -23,7 +23,7 @@ return new class() extends Migration
      */
     public function down(): void
     {
-        Schema::table('additional_columns', function (Blueprint $table) {
+        Schema::table('additional_columns', function (Blueprint $table): void {
             $table->dropUnique('additional_columns_name_model_type_model_id_unique');
 
             $table->unique(['name', 'model_type']);

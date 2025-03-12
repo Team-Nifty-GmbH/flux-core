@@ -4,12 +4,9 @@ namespace FluxErp\Tests\Feature\Web;
 
 use FluxErp\Models\Permission;
 use FluxErp\Models\Task;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class TasksTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Task $task;
 
     protected function setUp(): void
@@ -19,30 +16,14 @@ class TasksTest extends BaseSetup
         $this->task = Task::factory()->create();
     }
 
-    public function test_tasks_list_page()
+    public function test_tasks_id_no_user(): void
     {
-        $this->user->givePermissionTo(Permission::findOrCreate('tasks.get', 'web'));
-
-        $this->actingAs($this->user, 'web')->get('/tasks')
-            ->assertStatus(200);
-    }
-
-    public function test_tasks_list_no_user()
-    {
-        $this->get('/tasks')
+        $this->get('/tasks/' . $this->task->id)
             ->assertStatus(302)
             ->assertRedirect(route('login'));
     }
 
-    public function test_tasks_list_without_permission()
-    {
-        Permission::findOrCreate('tasks.get', 'web');
-
-        $this->actingAs($this->user, 'web')->get('/tasks')
-            ->assertStatus(403);
-    }
-
-    public function test_tasks_id_page()
+    public function test_tasks_id_page(): void
     {
         $this->user->givePermissionTo(Permission::findOrCreate('tasks.{id}.get', 'web'));
 
@@ -50,22 +31,7 @@ class TasksTest extends BaseSetup
             ->assertStatus(200);
     }
 
-    public function test_tasks_id_no_user()
-    {
-        $this->get('/tasks/' . $this->task->id)
-            ->assertStatus(302)
-            ->assertRedirect(route('login'));
-    }
-
-    public function test_tasks_id_without_permission()
-    {
-        Permission::findOrCreate('tasks.{id}.get', 'web');
-
-        $this->actingAs($this->user, 'web')->get('/tasks/' . $this->task->id)
-            ->assertStatus(403);
-    }
-
-    public function test_tasks_id_task_not_found()
+    public function test_tasks_id_task_not_found(): void
     {
         $this->task->delete();
 
@@ -73,5 +39,36 @@ class TasksTest extends BaseSetup
 
         $this->actingAs($this->user, 'web')->get('/tasks/' . $this->task->id)
             ->assertStatus(404);
+    }
+
+    public function test_tasks_id_without_permission(): void
+    {
+        Permission::findOrCreate('tasks.{id}.get', 'web');
+
+        $this->actingAs($this->user, 'web')->get('/tasks/' . $this->task->id)
+            ->assertStatus(403);
+    }
+
+    public function test_tasks_list_no_user(): void
+    {
+        $this->get('/tasks')
+            ->assertStatus(302)
+            ->assertRedirect(route('login'));
+    }
+
+    public function test_tasks_list_page(): void
+    {
+        $this->user->givePermissionTo(Permission::findOrCreate('tasks.get', 'web'));
+
+        $this->actingAs($this->user, 'web')->get('/tasks')
+            ->assertStatus(200);
+    }
+
+    public function test_tasks_list_without_permission(): void
+    {
+        Permission::findOrCreate('tasks.get', 'web');
+
+        $this->actingAs($this->user, 'web')->get('/tasks')
+            ->assertStatus(403);
     }
 }

@@ -8,7 +8,7 @@ class AddFieldsToContactsTable extends Migration
 {
     public function up(): void
     {
-        Schema::table('contacts', function (Blueprint $table) {
+        Schema::table('contacts', function (Blueprint $table): void {
             $table->boolean('is_delivery_lock')->default(false)->after('uuid');
             $table->boolean('is_sensitive_reminder')->default(false)->after('uuid');
             $table->decimal('credit_line')->nullable()->after('uuid');
@@ -28,7 +28,7 @@ class AddFieldsToContactsTable extends Migration
 
     public function down(): void
     {
-        Schema::table('contacts', function (Blueprint $table) {
+        Schema::table('contacts', function (Blueprint $table): void {
             $table->dropColumn([
                 'customer_number',
                 'creditor_number',

@@ -12,9 +12,9 @@ use Illuminate\Validation\ValidationException;
 
 class UpdatePaymentReminder extends FluxAction
 {
-    protected function getRulesets(): string|array
+    public static function models(): array
     {
-        return UpdatePaymentReminderRuleset::class;
+        return [PaymentReminder::class];
     }
 
     public static function name(): string
@@ -22,9 +22,9 @@ class UpdatePaymentReminder extends FluxAction
         return resolve_static(CreatePaymentReminder::class, 'name');
     }
 
-    public static function models(): array
+    protected function getRulesets(): string|array
     {
-        return [PaymentReminder::class];
+        return UpdatePaymentReminderRuleset::class;
     }
 
     public function performAction(): Model

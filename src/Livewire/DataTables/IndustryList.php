@@ -6,9 +6,9 @@ use FluxErp\Models\Industry;
 
 class IndustryList extends BaseDataTable
 {
-    protected string $model = Industry::class;
-
     public array $enabledCols = [
         'name',
     ];
+
+    protected string $model = Industry::class;
 }

@@ -11,7 +11,7 @@ return new class() extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table): void {
             $table->unsignedBigInteger('currency_id')->nullable()->after('language_id');
             $table->foreign('currency_id')->references('id')->on('currencies');
         });
@@ -22,7 +22,7 @@ return new class() extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table): void {
             $table->dropConstrainedForeignId('currency_id');
         });
     }

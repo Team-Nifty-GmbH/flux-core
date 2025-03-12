@@ -8,7 +8,7 @@ class CreateModelHasValuesTable extends Migration
 {
     public function up(): void
     {
-        Schema::create('model_has_values', function (Blueprint $table) {
+        Schema::create('model_has_values', function (Blueprint $table): void {
             $table->unsignedBigInteger('model_id');
             $table->unsignedBigInteger('additional_column_id');
             $table->string('value')->nullable();

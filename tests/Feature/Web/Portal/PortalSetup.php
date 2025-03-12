@@ -13,13 +13,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class PortalSetup extends TestCase
 {
-    protected Address $user;
-
     protected Model $dbClient;
 
     protected string $defaultLanguageCode;
 
     protected string $portalDomain;
+
+    protected Address $user;
 
     protected function setUp(): void
     {

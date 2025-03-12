@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::create('industries', function (Blueprint $table) {
+        Schema::create('industries', function (Blueprint $table): void {
             $table->id();
             $table->string('name');
             $table->integer('order_column')->default(0);

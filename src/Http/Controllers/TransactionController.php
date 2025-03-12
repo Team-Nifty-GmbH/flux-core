@@ -27,16 +27,16 @@ class TransactionController extends BaseController
         );
     }
 
-    public function update(Request $request, TransactionService $transactionService): JsonResponse
+    public function delete(string $id, TransactionService $transactionService): JsonResponse
     {
-        $response = $transactionService->update($request->all());
+        $response = $transactionService->delete($id);
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
-    public function delete(string $id, TransactionService $transactionService): JsonResponse
+    public function update(Request $request, TransactionService $transactionService): JsonResponse
     {
-        $response = $transactionService->delete($id);
+        $response = $transactionService->update($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }

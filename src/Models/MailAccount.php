@@ -36,16 +36,6 @@ class MailAccount extends FluxModel
         ];
     }
 
-    public function mailFolders(): HasMany
-    {
-        return $this->hasMany(MailFolder::class);
-    }
-
-    public function mailMessages(): HasMany
-    {
-        return $this->hasMany(Communication::class);
-    }
-
     /**
      * @throws ImapBadRequestException
      * @throws RuntimeException
@@ -73,5 +63,15 @@ class MailAccount extends FluxModel
         }
 
         return null;
+    }
+
+    public function mailFolders(): HasMany
+    {
+        return $this->hasMany(MailFolder::class);
+    }
+
+    public function mailMessages(): HasMany
+    {
+        return $this->hasMany(Communication::class);
     }
 }

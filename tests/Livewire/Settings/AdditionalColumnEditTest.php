@@ -6,20 +6,11 @@ use FluxErp\Livewire\Settings\AdditionalColumnEdit;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\TicketType;
 use FluxErp\Tests\TestCase;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;
 
 class AdditionalColumnEditTest extends TestCase
 {
-    use DatabaseTransactions;
-
-    public function test_renders_successfully()
-    {
-        Livewire::test(AdditionalColumnEdit::class)
-            ->assertStatus(200);
-    }
-
-    public function test_create_additional_column()
+    public function test_create_additional_column(): void
     {
         Livewire::test(AdditionalColumnEdit::class)
             ->call('show')
@@ -33,10 +24,10 @@ class AdditionalColumnEditTest extends TestCase
             ->assertStatus(200)
             ->assertHasNoErrors()
             ->assertDispatched('closeModal')
-            ->assertWireuiNotification(icon: 'success');
+            ->assertToastNotification(type: 'success');
     }
 
-    public function test_edit_additional_column()
+    public function test_edit_additional_column(): void
     {
         $additionalColumn = AdditionalColumn::factory()->create([
             'model_type' => morph_alias(TicketType::class),
@@ -56,6 +47,12 @@ class AdditionalColumnEditTest extends TestCase
             ->assertStatus(200)
             ->assertHasNoErrors()
             ->assertDispatched('closeModal', $component->get('additionalColumn')->toArray())
-            ->assertWireuiNotification(icon: 'success');
+            ->assertToastNotification(type: 'success');
+    }
+
+    public function test_renders_successfully(): void
+    {
+        Livewire::test(AdditionalColumnEdit::class)
+            ->assertStatus(200);
     }
 }

@@ -7,11 +7,11 @@ use Illuminate\View\ComponentAttributeBag;
 
 class ProductPropertyGroupList extends BaseProductPropertyGroupList
 {
-    public bool $showFilterInputs = false;
+    public bool $hasSidebar = false;
 
     public ?bool $isSearchable = true;
 
-    public bool $hasSidebar = false;
+    public bool $showFilterInputs = false;
 
     public function startSearch(): void
     {
@@ -24,17 +24,17 @@ class ProductPropertyGroupList extends BaseProductPropertyGroupList
         parent::startSearch();
     }
 
+    protected function allowSoftDeletes(): bool
+    {
+        return false;
+    }
+
     protected function getRowAttributes(): ComponentAttributeBag
     {
         return new ComponentAttributeBag([
             'x-bind:class' => <<<'JS'
-                record.id === productPropertyGroup?.id && 'bg-primary-100 dark:bg-primary-800'
+                record.id === productPropertyGroup?.id && 'bg-indigo-100 dark:bg-indigo-800'
             JS,
         ]);
-    }
-
-    protected function allowSoftDeletes(): bool
-    {
-        return false;
     }
 }

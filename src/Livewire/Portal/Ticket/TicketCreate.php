@@ -20,15 +20,7 @@ class TicketCreate extends Component
 {
     use Actions, WithFileUploads;
 
-    public array $ticket;
-
-    public array $ticketTypes;
-
     public array $additionalColumns;
-
-    public array $selectedAdditionalColumns = [];
-
-    public ?int $ticketTypeId = null;
 
     public $attachments = [];
 
@@ -36,6 +28,14 @@ class TicketCreate extends Component
 
     #[Locked]
     public ?int $oldTicketTypeId = null;
+
+    public array $selectedAdditionalColumns = [];
+
+    public array $ticket;
+
+    public ?int $ticketTypeId = null;
+
+    public array $ticketTypes;
 
     protected $listeners = [
         'show',
@@ -62,7 +62,7 @@ class TicketCreate extends Component
             ->when(
                 $modelType,
                 fn (Builder $query) => $query->where(
-                    function (Builder $query) use ($modelType) {
+                    function (Builder $query) use ($modelType): void {
                         $query->where('model_type', $modelType)
                             ->orWhereNull('model_type');
                     }),
@@ -79,36 +79,14 @@ class TicketCreate extends Component
             ->toArray();
     }
 
-    public function getRules(): array
-    {
-        return Arr::prependKeysWith(resolve_static(CreateTicketRuleset::class, 'getRules'), 'ticket.');
-    }
-
     public function render(): View
     {
         return view('flux::livewire.portal.ticket.ticket-create');
     }
 
-    public function updatedAttachments(): void
+    public function getRules(): array
     {
-        $this->prepareForMediaLibrary('attachments');
-
-        $this->skipRender();
-    }
-
-    public function show(): void
-    {
-        $this->ticket = [
-            'title' => null,
-            'description' => null,
-        ];
-
-        $this->ticketTypeId = null;
-
-        $this->attachments = [];
-        $this->filesArray = [];
-
-        $this->skipRender();
+        return Arr::prependKeysWith(resolve_static(CreateTicketRuleset::class, 'getRules'), 'ticket.');
     }
 
     public function save(): bool
@@ -135,13 +113,35 @@ class TicketCreate extends Component
             exception_to_notifications($e, $this);
         }
 
-        $this->notification()->success(__('Ticket created…'));
+        $this->notification()->success(__('Ticket created…'))->send();
 
         $this->skipRender();
         $this->dispatch('closeModal', $ticket->toArray());
         $this->dispatch('loadData')->to('portal.data-tables.ticket-list');
 
         return true;
+    }
+
+    public function show(): void
+    {
+        $this->ticket = [
+            'title' => null,
+            'description' => null,
+        ];
+
+        $this->ticketTypeId = null;
+
+        $this->attachments = [];
+        $this->filesArray = [];
+
+        $this->skipRender();
+    }
+
+    public function updatedAttachments(): void
+    {
+        $this->prepareForMediaLibrary('attachments');
+
+        $this->skipRender();
     }
 
     public function updatedTicketTypeId(): void

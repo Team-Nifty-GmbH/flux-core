@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('order_positions', function (Blueprint $table) {
+        Schema::table('order_positions', function (Blueprint $table): void {
             $table->dropForeign('order_positions_parent_id_foreign');
             $table->foreign('parent_id')
                 ->references('id')
@@ -24,7 +24,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('order_positions', function (Blueprint $table) {
+        Schema::table('order_positions', function (Blueprint $table): void {
             $table->dropForeign('order_positions_parent_id_foreign');
             $table->foreign('parent_id')
                 ->references('id')

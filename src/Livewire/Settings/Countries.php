@@ -19,16 +19,16 @@ class Countries extends CountryList
 {
     use Actions;
 
-    protected ?string $includeBefore = 'flux::livewire.settings.countries';
-
     public CountryForm $country;
+
+    protected ?string $includeBefore = 'flux::livewire.settings.countries';
 
     protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
-                ->label(__('Create'))
-                ->color('primary')
+                ->text(__('Create'))
+                ->color('indigo')
                 ->icon('plus')
                 ->when(resolve_static(CreateCountry::class, 'canPerformAction', [false]))
                 ->wireClick('edit'),
@@ -39,59 +39,21 @@ class Countries extends CountryList
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
+                ->text(__('Edit'))
                 ->icon('pencil')
-                ->color('primary')
+                ->color('indigo')
                 ->when(resolve_static(UpdateCountry::class, 'canPerformAction', [false]))
                 ->wireClick('edit(record.id)'),
             DataTableButton::make()
-                ->label(__('Delete'))
-                ->color('negative')
+                ->text(__('Delete'))
+                ->color('red')
                 ->icon('trash')
                 ->when(resolve_static(DeleteCountry::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'delete(record.id)',
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Country')]),
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Country')]),
                 ]),
         ];
-    }
-
-    protected function getViewData(): array
-    {
-        return array_merge(
-            parent::getViewData(),
-            [
-                'languages' => resolve_static(Language::class, 'query')
-                    ->pluck('name', 'id'),
-                'currencies' => resolve_static(Currency::class, 'query')
-                    ->pluck('name', 'id'),
-            ]
-        );
-    }
-
-    public function edit(Country $country): void
-    {
-        $this->country->reset();
-        $this->country->fill($country);
-
-        $this->js(<<<'JS'
-            $openModal('edit-country');
-        JS);
-    }
-
-    public function save(): bool
-    {
-        try {
-            $this->country->save();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
     }
 
     public function delete(Country $country): bool
@@ -110,5 +72,45 @@ class Countries extends CountryList
         $this->loadData();
 
         return true;
+    }
+
+    public function edit(Country $country): void
+    {
+        $this->country->reset();
+        $this->country->fill($country);
+
+        $this->js(<<<'JS'
+            $modalOpen('edit-country-modal');
+        JS);
+    }
+
+    public function save(): bool
+    {
+        try {
+            $this->country->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
+    }
+
+    protected function getViewData(): array
+    {
+        return array_merge(
+            parent::getViewData(),
+            [
+                'languages' => resolve_static(Language::class, 'query')
+                    ->get(['id', 'name'])
+                    ->toArray(),
+                'currencies' => resolve_static(Currency::class, 'query')
+                    ->get(['id', 'name'])
+                    ->toArray(),
+            ]
+        );
     }
 }

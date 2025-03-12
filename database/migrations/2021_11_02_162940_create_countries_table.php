@@ -8,7 +8,7 @@ class CreateCountriesTable extends Migration
 {
     public function up(): void
     {
-        Schema::create('countries', function (Blueprint $table) {
+        Schema::create('countries', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
             $table->unsignedBigInteger('language_id');

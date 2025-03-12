@@ -31,14 +31,13 @@
     }"
     class="space-y-5"
 >
-    <x-card :title="__('Calculation')">
-        <x-select
-            :options="$this->vatRates"
-            x-on:selected="$wire.product.vat_rate = $event.detail"
+    <x-card :header="__('Calculation')">
+        <x-select.styled
+            x-on:select="$wire.product.vat_rate = $event.detail.select"
             label="{{ __('VAT rate') }}"
             wire:model="product.vat_rate_id"
-            option-label="name"
-            option-value="id"
+            :options="$this->vatRates"
+            select="label:name|value:id"
         />
     </x-card>
     <template x-for="priceList in $wire.priceLists">
@@ -46,9 +45,9 @@
             <x-slot:title>
                 <div class="flex gap-1.5">
                     <span x-text="priceList.name"></span>
-                    <x-badge x-show="priceList.is_default" primary label="{{ __('Default') }}" />
-                    <x-badge x-show="priceList.is_purchase" negative label="{{ __('Purchase Price') }}" />
-                    <x-badge x-show="priceList.parent && ! priceList.price_id" warning x-text="'{{ __('Inherited from :parent_name') }}'.replace(':parent_name', priceList.parent?.name)" />
+                    <x-badge x-show="priceList.is_default" color="indigo" label="{{ __('Default') }}" />
+                    <x-badge x-show="priceList.is_purchase" color="red" label="{{ __('Purchase Price') }}" />
+                    <x-badge x-show="priceList.parent && ! priceList.price_id" color="amber" x-text="'{{ __('Inherited from :parent_name') }}'.replace(':parent_name', priceList.parent?.name)" />
                     <div x-show="priceList.parent">
                         <x-toggle
                             x-model.boolean="priceList.is_editable"

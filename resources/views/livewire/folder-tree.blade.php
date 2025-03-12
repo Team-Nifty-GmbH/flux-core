@@ -15,16 +15,16 @@
                 <x-slot:afterTree>
                     @section('folder-tree.after-tree')
                         @canAction(\FluxErp\Actions\Media\UploadMedia::class)
-                            <x-button
+                            <x-button color="secondary" light
                                 class="w-full whitespace-nowrap my-2"
-                                :label="__('Add folder')"
+                                :text="__('Add folder')"
                                 x-on:click="addFolder(null, {
-                                        is_static: false,
-                                        is_new: true,
-                                        collection_name: 'new_folder',
-                                        name: '{{ __('New folder') }}',
-                                        children: [],
-                                    })"
+                                    is_static: false,
+                                    is_new: true,
+                                    collection_name: 'new_folder',
+                                    name: '{{ __('New folder') }}',
+                                    children: [],
+                                })"
                             />
                         @endCanAction
                     @show
@@ -65,24 +65,17 @@
 
                             // on folder change, clear temp files - if confirmation is accepted
                             if (this.tempFilesId.length !== 0) {
-                                window.$wireui.confirmDialog({
-                                    title: '{{ __('Selected files not submitted') }}',
-                                    description: '{{ __('Selected files will be deleted on folder change') }}',
-                                    icon: 'warning',
-                                    accept: {
-                                        label: '{{ __('Confirm') }}',
-                                        execute: () => {
-                                            this.clearFilesOnLeave();
-                                            this.selectionProxy = level;
-                                            this.selection = JSON.parse(JSON.stringify(level));
-                                            this.selected = true;
-                                            this.setCollection(this.selection?.collection_name);
-                                        },
-                                    },
-                                    reject: {
-                                        label: '{{ __('Cancel') }}',
-                                    }
-                                }, $wire.__instance.id);
+                                $interaction('dialog')
+                                    .wireable($wire.__instance.id)
+                                    .warning('{{ __('Selected files not submitted') }}', '{{ __('Selected files will be deleted on folder change') }}', 'amber')
+                                    .confirm('{{ __('Confirm') }}', () => {
+                                        this.clearFilesOnLeave();
+                                        this.selectionProxy = level;
+                                        this.selection = JSON.parse(JSON.stringify(level));
+                                        this.selected = true;
+                                        this.setCollection(this.selection?.collection_name);
+                                    });
+
 
                                 return;
                             }
@@ -125,9 +118,9 @@
                                     <x-button
                                         x-cloak
                                         x-show="! selected?.is_static"
-                                        :label="__('Delete')"
-                                        negative
-                                        wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Folder')]) }}"
+                                        :text="__('Delete')"
+                                        color="red"
+                                        wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Folder')]) }}"
                                         wire:click="deleteCollection(getNodePath('collection_name')).then(() => {
                                                     try {
                                                             selected = null;
@@ -139,10 +132,10 @@
                                     />
                                 @endCanAction
                                 @canAction(\FluxErp\Actions\Media\UploadMedia::class)
-                                    <x-button
+                                    <x-button color="secondary" light
                                         x-cloak
                                         x-show="multipleFileUpload && !readOnly"
-                                        :label="__('Add folder')"
+                                        :text="__('Add folder')"
                                         x-on:click="addFolder(
                                                 selected,
                                                 {
@@ -155,9 +148,9 @@
                                             )"
                                     />
                                 @endCanAction
-                                <x-button
-                                    spinner
-                                    :label="__('Download folder')"
+                                <x-button color="secondary" light
+                                    loading
+                                    :text="__('Download folder')"
                                     x-on:click="$wire.downloadCollection(getNodePath())"
                                 />
                             @show
@@ -169,15 +162,15 @@
                                         <x-input
                                             class="flex-1"
                                             x-bind:disabled="selected?.is_static"
-                                            :label="__('Name')"
+                                            :text="__('Name')"
                                             x-model="selection.name"
                                         />
                                     </div>
                                     <x-button
                                         x-cloak
                                         x-show="! selected?.is_static"
-                                        primary
-                                        :label="__('Save')"
+                                        color="indigo"
+                                        :text="__('Save')"
                                         x-on:click="saveFolder()"
                                     />
                                 </div>
@@ -190,8 +183,8 @@
                                     <x-button
                                         x-cloak
                                         x-show="tempFilesId.length !== 0 && isLoadingFiles.length === 0"
-                                        :label="__('Save')"
-                                        primary
+                                        :text="__('Save')"
+                                        color="indigo"
                                         x-on:click="submitFiles(selected.is_new ? getNodePath(null, 'collection_name') : selected.collection_name, uploadSuccess)"
                                     />
                                 </div>
@@ -200,12 +193,12 @@
                     </div>
                     <div x-show="selection.file_name && selected" x-cloak class="flex flex-col gap-3">
                         <div class="pb-1.5">
-                            <x-button primary :label="__('Download')" x-on:click="$wire.download(selected.id)"/>
+                            <x-button color="indigo" :text="__('Download')" x-on:click="$wire.download(selected.id)"/>
                             @canAction(\FluxErp\Actions\Media\DeleteMedia::class)
                                 <x-button
-                                    negative
-                                    :label="__('Delete')"
-                                    wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Media')]) }}"
+                                    color="red"
+                                    :text="__('Delete')"
+                                    wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Media')]) }}"
                                     wire:click="delete(selected.id).then(() => {
                                         try {
                                                 this.selected = null;
@@ -221,7 +214,7 @@
                         <div class="flex flex-col gap-1.5">
                             @section('folder-tree.upload.media')
                                 @canAction(\FluxErp\Actions\Media\UploadMedia::class)
-                                    <x-input :label="__('Name')" disabled x-model="selection.name"/>
+                                    <x-input :text="__('Name')" disabled x-model="selection.name"/>
                                     <x-input :label="__('Path')" disabled x-model="selection.collection_name"/>
                                     <x-input :label="__('File type')" disabled x-bind:value="selection.file_name?.split('.').pop()"/>
                                     <x-input :label="__('MIME-Type')" disabled x-bind:value="selection.mime_type"/>
@@ -242,14 +235,14 @@
                                                     x-on:click="$openDetailModal(selection.original_url)"
                                                     icon="eye"
                                                     class="h-full rounded-l-md"
-                                                    primary
+                                                    color="indigo"
                                                     squared
                                                 />
                                                 <x-button
                                                     x-on:click="$refs.originalLink.select(); document.execCommand('copy');"
                                                     class="h-full rounded-r-md"
-                                                    icon="clipboard-copy"
-                                                    primary
+                                                    icon="clipboard-document"
+                                                    color="indigo"
                                                     squared
                                                 />
                                             </div>

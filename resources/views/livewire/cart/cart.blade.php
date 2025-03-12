@@ -2,29 +2,29 @@
 @section('cart-sidebar.footer.buttons')
     @parent
     @section('cart-sidebar.footer.buttons.buy')
-        <x-button wire:click="addToCurrentOrder()" primary class="w-full" :label="__('Add to current order')"/>
+        <x-button wire:click="addToCurrentOrder()" color="indigo" class="w-full" :text="__('Add to current order')"/>
         <x-button
-            :label="__('Clear cart')"
+            light
+            :text="__('Clear cart')"
             wire:click="clear()"
-            wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Cart Items')]) }}"
-            negative
+            wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Cart Items')]) }}"
+            color="red"
             class="w-full"
         />
     @endsection
-    <x-select
+    <x-select.styled
         class="w-full"
         :label="__('Load a watchlist')"
-        option-label="name"
-        option-value="id"
-        :options="array_filter($watchlists, fn (array $watchlist) => $watchlist['id'] ?? false)"
         wire:model.live.numeric="loadWatchlist"
+        select="label:name|value:id"
+        :options="array_filter($watchlists, fn (array $watchlist) => $watchlist['id'] ?? false)"
     />
     <x-button
-        :label="__('Edit watchlists')"
+        :text="__('Edit watchlists')"
         :href="route('watchlists')"
         wire:navigate
         x-on:click="show = false"
-        primary
+        color="indigo"
         class="w-full"
     />
 @endsection

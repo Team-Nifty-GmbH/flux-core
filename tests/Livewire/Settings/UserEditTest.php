@@ -12,14 +12,7 @@ use Livewire\Livewire;
 
 class UserEditTest extends BaseSetup
 {
-    public function test_renders_successfully()
-    {
-        Livewire::actingAs($this->user)
-            ->test(UserEdit::class, ['user' => $this->user])
-            ->assertStatus(200);
-    }
-
-    public function test_can_save_user()
+    public function test_can_save_user(): void
     {
         $user = User::factory()
             ->for(Language::factory())
@@ -52,9 +45,16 @@ class UserEditTest extends BaseSetup
             ->set('userForm.password_confirmation', 'Password123!')
             ->call('save')
             ->assertHasNoErrors()
-            ->assertWireuiNotification(icon: 'success');
+            ->assertToastNotification(type: 'success');
 
         $this->assertEquals($newFirstName, $user->fresh()->firstname);
         $this->assertNotEquals($user->password, $user->fresh()->password);
+    }
+
+    public function test_renders_successfully(): void
+    {
+        Livewire::actingAs($this->user)
+            ->test(UserEdit::class, ['user' => $this->user])
+            ->assertStatus(200);
     }
 }

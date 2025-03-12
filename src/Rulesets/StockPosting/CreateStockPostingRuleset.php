@@ -15,6 +15,15 @@ class CreateStockPostingRuleset extends FluxRuleset
 {
     protected static ?string $model = StockPosting::class;
 
+    public static function getRules(): array
+    {
+        return array_merge(
+            parent::getRules(),
+            resolve_static(SerialNumberRuleset::class, 'getRules'),
+            resolve_static(AddressRuleset::class, 'getRules')
+        );
+    }
+
     public function rules(): array
     {
         return [
@@ -54,14 +63,5 @@ class CreateStockPostingRuleset extends FluxRuleset
             ],
             'description' => 'string|nullable',
         ];
-    }
-
-    public static function getRules(): array
-    {
-        return array_merge(
-            parent::getRules(),
-            resolve_static(SerialNumberRuleset::class, 'getRules'),
-            resolve_static(AddressRuleset::class, 'getRules')
-        );
     }
 }

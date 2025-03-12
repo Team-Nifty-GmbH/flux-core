@@ -8,9 +8,9 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class JobBatchable extends FluxPivot
 {
-    protected $table = 'job_batchables';
-
     public $timestamps = false;
+
+    protected $table = 'job_batchables';
 
     protected function casts(): array
     {

@@ -8,14 +8,14 @@ use FluxErp\Rulesets\Setting\CreateSettingRuleset;
 
 class CreateSetting extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateSettingRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Setting::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateSettingRuleset::class;
     }
 
     public function performAction(): Setting

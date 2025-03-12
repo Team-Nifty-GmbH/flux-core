@@ -15,13 +15,10 @@ use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Tests\Livewire\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;
 
 class OrderPositionListTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Order $order;
 
     protected function setUp(): void
@@ -71,7 +68,7 @@ class OrderPositionListTest extends BaseSetup
         (new OrderPositionTableSeeder())->run();
     }
 
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(OrderPositionList::class, ['orderId' => $this->order->id])
             ->assertStatus(200);

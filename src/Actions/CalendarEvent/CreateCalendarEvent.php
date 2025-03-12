@@ -12,14 +12,14 @@ use Illuminate\Validation\ValidationException;
 
 class CreateCalendarEvent extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateCalendarEventRuleset::class;
-    }
-
     public static function models(): array
     {
         return [CalendarEvent::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateCalendarEventRuleset::class;
     }
 
     public function performAction(): CalendarEvent

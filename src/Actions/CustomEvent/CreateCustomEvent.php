@@ -11,15 +11,15 @@ use FluxErp\Models\CustomEvent;
  */
 class CreateCustomEvent extends FluxAction
 {
+    public static function models(): array
+    {
+        return [CustomEvent::class];
+    }
+
     protected function boot(array $data): void
     {
         parent::boot($data);
         $this->rules = (new CreateCustomEventRequest())->rules();
-    }
-
-    public static function models(): array
-    {
-        return [CustomEvent::class];
     }
 
     public function performAction(): CustomEvent

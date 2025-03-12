@@ -13,7 +13,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::create('websockets_statistics_entries', function (Blueprint $table) {
+        Schema::create('websockets_statistics_entries', function (Blueprint $table): void {
             $table->increments('id');
             $table->string('app_id');
             $table->integer('peak_connection_count');

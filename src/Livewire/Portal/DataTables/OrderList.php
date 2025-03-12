@@ -8,7 +8,9 @@ use Laravel\Scout\Builder;
 
 class OrderList extends BaseDataTable
 {
-    protected string $model = Order::class;
+    public array $aggregatable = [];
+
+    public array $availableRelations = [];
 
     public array $enabledCols = [
         'order_number',
@@ -17,13 +19,11 @@ class OrderList extends BaseDataTable
         'payment_state',
     ];
 
+    public bool $showFilterInputs = true;
+
     public array $sortable = ['*'];
 
-    public array $availableRelations = [];
-
-    public array $aggregatable = [];
-
-    public bool $showFilterInputs = true;
+    protected string $model = Order::class;
 
     public function mount(): void
     {
@@ -52,7 +52,7 @@ class OrderList extends BaseDataTable
     {
         $formatters = parent::getFormatters();
 
-        array_walk($formatters, function (&$formatter) {
+        array_walk($formatters, function (&$formatter): void {
             if ($formatter === 'money') {
                 $formatter = ['money', ['property' => 'currency.iso']];
             }

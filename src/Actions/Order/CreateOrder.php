@@ -21,14 +21,14 @@ use Illuminate\Validation\ValidationException;
 
 class CreateOrder extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateOrderRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Order::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateOrderRuleset::class;
     }
 
     public function performAction(): Order

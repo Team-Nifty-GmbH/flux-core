@@ -8,9 +8,9 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class DeleteProductPropertyGroupRuleset extends FluxRuleset
 {
-    protected static ?string $model = ProductPropertyGroup::class;
-
     protected static bool $addAdditionalColumnRules = false;
+
+    protected static ?string $model = ProductPropertyGroup::class;
 
     public function rules(): array
     {

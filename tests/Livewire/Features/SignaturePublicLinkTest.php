@@ -68,7 +68,7 @@ class SignaturePublicLinkTest extends TestCase
         ]);
     }
 
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         $this->withoutVite();
 
@@ -88,7 +88,7 @@ class SignaturePublicLinkTest extends TestCase
             ->assertSet('signature.id', null);
     }
 
-    public function test_upload_signature()
+    public function test_upload_signature(): void
     {
         $this->withoutVite();
 

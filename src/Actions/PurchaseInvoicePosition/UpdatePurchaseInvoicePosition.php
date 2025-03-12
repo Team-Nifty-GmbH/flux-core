@@ -8,14 +8,14 @@ use FluxErp\Rulesets\PurchaseInvoicePosition\UpdatePurchaseInvoicePositionRulese
 
 class UpdatePurchaseInvoicePosition extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdatePurchaseInvoicePositionRuleset::class;
-    }
-
     public static function models(): array
     {
         return [PurchaseInvoicePosition::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdatePurchaseInvoicePositionRuleset::class;
     }
 
     public function performAction(): PurchaseInvoicePosition

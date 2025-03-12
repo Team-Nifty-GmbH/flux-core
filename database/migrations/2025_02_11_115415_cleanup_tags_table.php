@@ -11,7 +11,7 @@ return new class() extends Migration
     {
         // Fix name = id records
         $tags = DB::table('tags')
-            ->join('tags AS joined_tags', function (JoinClause $join) {
+            ->join('tags AS joined_tags', function (JoinClause $join): void {
                 $join->on('tags.id', '=', 'joined_tags.name')
                     ->whereNull('joined_tags.type');
             })

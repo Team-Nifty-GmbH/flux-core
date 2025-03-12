@@ -7,14 +7,11 @@ use FluxErp\Facades\Menu;
 use FluxErp\Livewire\Navigation;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PriceList;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 
 class NavigationTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -22,13 +19,13 @@ class NavigationTest extends BaseSetup
         PriceList::factory()->create(['is_default' => true]);
     }
 
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(Navigation::class)
             ->assertStatus(200);
     }
 
-    public function test_shows_order_types()
+    public function test_shows_order_types(): void
     {
         $orderTypes = OrderType::factory(5)
             ->create([

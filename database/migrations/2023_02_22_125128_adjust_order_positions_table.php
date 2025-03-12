@@ -12,13 +12,13 @@ return new class() extends Migration
      */
     public function up(): void
     {
-        Schema::table('order_positions', function (Blueprint $table) {
+        Schema::table('order_positions', function (Blueprint $table): void {
             $table->decimal('amount_bundle', 40, 10)->after('amount')->nullable();
         });
 
         $this->multiplyOrderPositions();
 
-        Schema::table('order_positions', function (Blueprint $table) {
+        Schema::table('order_positions', function (Blueprint $table): void {
             $table->dropColumn('is_positive_operator');
         });
     }
@@ -28,7 +28,7 @@ return new class() extends Migration
      */
     public function down(): void
     {
-        Schema::table('order_positions', function (Blueprint $table) {
+        Schema::table('order_positions', function (Blueprint $table): void {
             $table->dropColumn('amount_bundle');
             $table->boolean('is_positive_operator')->after('is_bundle_position')->default(1);
         });

@@ -17,14 +17,14 @@ class PurchaseInvoicePosition extends FluxModel
         return $this->belongsTo(LedgerAccount::class);
     }
 
-    public function purchaseInvoice(): BelongsTo
-    {
-        return $this->belongsTo(PurchaseInvoice::class);
-    }
-
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function purchaseInvoice(): BelongsTo
+    {
+        return $this->belongsTo(PurchaseInvoice::class);
     }
 
     public function vatRate(): BelongsTo

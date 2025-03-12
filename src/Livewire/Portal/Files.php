@@ -12,13 +12,13 @@ class Files extends Component
 {
     use WithAddressAuth, WithFileUploads;
 
-    public array $serialNumbers = [];
-
     public array $attachments = [];
 
-    public array $slugs = [];
-
     public array $filterSlug = [];
+
+    public array $serialNumbers = [];
+
+    public array $slugs = [];
 
     public function mount(): void
     {

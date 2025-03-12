@@ -8,7 +8,7 @@ enum PropertyTypeEnum: string
 {
     use EnumTrait;
 
-    case Text = 'text';
-
     case Option = 'option';
+
+    case Text = 'text';
 }

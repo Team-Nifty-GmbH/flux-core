@@ -19,21 +19,11 @@ class CustomerPortal extends Component
 {
     use Actions;
 
-    public array $setting = [];
+    public array $calendars = [];
 
     public array $modules = [];
 
-    public array $calendars = [];
-
-    public function getRules(): array
-    {
-        return Arr::prependKeysWith(
-            ($this->setting['id'] ?? false)
-            ? resolve_static(UpdateSettingRuleset::class, 'getRules')
-            : resolve_static(CreateSettingRuleset::class, 'getRules'),
-            'setting.'
-        );
-    }
+    public array $setting = [];
 
     public function mount(Client $client): void
     {
@@ -78,6 +68,16 @@ class CustomerPortal extends Component
         return view('flux::livewire.settings.customer-portal');
     }
 
+    public function getRules(): array
+    {
+        return Arr::prependKeysWith(
+            ($this->setting['id'] ?? false)
+            ? resolve_static(UpdateSettingRuleset::class, 'getRules')
+            : resolve_static(CreateSettingRuleset::class, 'getRules'),
+            'setting.'
+        );
+    }
+
     public function save(): void
     {
         $validated = $this->validate();
@@ -89,14 +89,14 @@ class CustomerPortal extends Component
             $this->notification()->error(
                 implode(',', array_keys($response['errors'])),
                 implode(', ', Arr::dot($response['errors']))
-            );
+            )->send();
 
             return;
         }
 
         $this->setting = $isNew ? $response->toArray() : $response['data']->toArray();
 
-        $this->notification()->success(__(':model saved', ['model' => __('Customer Portal Settings')]));
+        $this->notification()->success(__(':model saved', ['model' => __('Customer Portal Settings')]))->send();
 
         $this->skipRender();
     }

@@ -8,17 +8,17 @@
                     <x-input :label="__('Email')" wire:model="userForm.email"/>
                     <x-input :label="__('Phone')" wire:model="userForm.phone"/>
                     <x-input :label="__('User code')" wire:model="userForm.user_code"/>
-                    <x-color-picker :label="__('Color')" wire:model="userForm.color"/>
+                    <x-color :label="__('Color')" wire:model="userForm.color"/>
                 @show
             </div>
             <hr>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 @section('user-edit.employment')
-                    <x-datetime-picker :without-time="true" :label="__('Date Of Birth')" wire:model="userForm.date_of_birth"/>
+                    <x-date :without-time="true" :label="__('Date Of Birth')" wire:model="userForm.date_of_birth"/>
                     <x-input :label="__('Employee Number')" wire:model="userForm.employee_number"/>
-                    <x-datetime-picker :without-time="true" :label="__('Employment Date')" wire:model="userForm.employment_date"/>
-                    <x-datetime-picker :without-time="true" :label="__('Termination Date')" wire:model="userForm.termination_date"/>
-                    <x-inputs.number
+                    <x-date :without-time="true" :label="__('Employment Date')" wire:model="userForm.employment_date"/>
+                    <x-date :without-time="true" :label="__('Termination Date')" wire:model="userForm.termination_date"/>
+                    <x-number
                         :prefix="\FluxErp\Models\Currency::default()?->symbol"
                         :label="__('Cost Per Hour')"
                         wire:model="userForm.cost_per_hour"
@@ -27,31 +27,28 @@
             </div>
             <hr>
             @section('user-edit.selects')
-                <x-select
+                <x-select.styled
                     wire:model="userForm.language_id"
                     :label="__('Language')"
+                    select="label:name|value:id"
                     :options="$languages"
-                    option-label="name"
-                    option-value="id"
                 />
-                <x-select
+                <x-select.styled
                     wire:model="userForm.timezone"
                     :label="__('Timezone')"
                     :options="timezone_identifiers_list()"
                 />
-                <x-select
+                <x-select.styled
                     wire:model="userForm.parent_id"
                     :label="__('Parent')"
+                    select="label:name|value:id|description:email"
                     :options="$users"
-                    option-label="name"
-                    option-value="id"
-                    option-description="email"
                 />
             @show
             @section('user-edit.attributes')
                 <x-checkbox :label="__('Active')" wire:model="userForm.is_active"/>
-                <x-inputs.password :label="__('New password')" wire:model="userForm.password"/>
-                <x-inputs.password :label="__('Repeat password')" wire:model="userForm.password_confirmation"/>
+                <x-password :label="__('New password')" wire:model="userForm.password"/>
+                <x-password :label="__('Repeat password')" wire:model="userForm.password_confirmation"/>
             @show
             <hr>
             @section('user-edit.bank-connection')
@@ -61,7 +58,13 @@
                 <x-input wire:model="userForm.bank_name" :label="__('Bank Name')"/>
             @show
             @section('user-edit.mail-accounts')
-                <x-select :options="$mailAccounts" option-label="email" option-value="id" multiselect :label="__('Mail Accounts')" wire:model="userForm.mail_accounts" />
+                <x-select.styled
+                    :label="__('Mail Accounts')"
+                    wire:model="userForm.mail_accounts"
+                    multiple
+                    select="label:email|value:id"
+                    :options="$mailAccounts"
+                />
             @show
         </form>
     @show
@@ -114,7 +117,7 @@
         @canAction(\FluxErp\Actions\Permission\UpdateUserPermissions::class)
             <div x-show="active === 'permissions'" x-cloak>
                 <div class="pb-3">
-                    <x-input wire:model.live.debounce.500ms="searchPermission" icon="search"/>
+                    <x-input wire:model.live.debounce.500ms="searchPermission" icon="magnifying-glass"/>
                 </div>
                 <div class="max-h-96 space-y-3 overflow-y-auto pt-3">
                     <div class="grid grid-cols-6 gap-3">
@@ -149,16 +152,13 @@
             </div>
         @endCanAction
         <div x-show="active === 'commission-rates'" x-cloak>
-            <x-select
+            <x-select.styled
                 :label="__('Commission credit contact')"
                 class="pb-4"
                 wire:model="userForm.contact_id"
-                option-value="contact_id"
-                option-label="label"
-                option-description="description"
-                template="user-option"
-                :async-data="[
-                    'api' => route('search', \FluxErp\Models\Address::class),
+                select="label:label|value:contact_id"
+                :request="[
+                    'url' => route('search', \FluxErp\Models\Address::class),
                     'method' => 'POST',
                     'params' => [
                         'option-value' => 'contact_id',
@@ -191,16 +191,15 @@
             <div class="flex justify-between gap-x-4">
                 @canAction(\FluxErp\Actions\User\DeleteUser::class)
                     <x-button
-                        flat
-                        negative
-                        :label="__('Delete')"
+                        color="red"
+                        :text="__('Delete')"
                         wire:click="delete"
-                        wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('User')]) }}"
+                        wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('User')]) }}"
                     />
                 @endCanAction
-                <div class="flex space-x-2">
-                    <x-button :label="__('Cancel')" wire:click="cancel()"/>
-                    <x-button primary :label="__('Save')" wire:click="save()"/>
+                <div class="flex gap-x-2">
+                    <x-button color="secondary" light :text="__('Cancel')" wire:click="cancel()"/>
+                    <x-button color="indigo" :text="__('Save')" wire:click="save()"/>
                 </div>
             </div>
         </div>

@@ -6,8 +6,6 @@ use FluxErp\Models\SerialNumberRange;
 
 class SerialNumberRangeList extends BaseDataTable
 {
-    protected string $model = SerialNumberRange::class;
-
     public array $enabledCols = [
         'client.name',
         'type',
@@ -15,4 +13,6 @@ class SerialNumberRangeList extends BaseDataTable
         'prefix',
         'suffix',
     ];
+
+    protected string $model = SerialNumberRange::class;
 }

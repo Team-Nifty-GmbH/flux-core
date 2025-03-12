@@ -15,14 +15,14 @@ use Illuminate\Support\Facades\Validator;
 
 class UpdateProductOptionGroup extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateProductOptionGroupRuleset::class;
-    }
-
     public static function models(): array
     {
         return [ProductOptionGroup::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateProductOptionGroupRuleset::class;
     }
 
     public function performAction(): Model

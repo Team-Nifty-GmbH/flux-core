@@ -10,9 +10,9 @@ use Illuminate\Support\Arr;
 
 class SyncCalendarEventInvites extends FluxAction
 {
-    protected function getRulesets(): string|array
+    public static function models(): array
     {
-        return SyncCalendarEventInvitesRuleset::class;
+        return [CalendarEvent::class];
     }
 
     public static function name(): string
@@ -20,9 +20,9 @@ class SyncCalendarEventInvites extends FluxAction
         return 'calendar-event.sync-invites';
     }
 
-    public static function models(): array
+    protected function getRulesets(): string|array
     {
-        return [CalendarEvent::class];
+        return SyncCalendarEventInvitesRuleset::class;
     }
 
     public function performAction(): Model

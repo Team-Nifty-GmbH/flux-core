@@ -10,17 +10,17 @@ use FluxErp\Models\CustomEvent;
  */
 class DeleteCustomEvent extends FluxAction
 {
+    public static function models(): array
+    {
+        return [CustomEvent::class];
+    }
+
     protected function boot(array $data): void
     {
         parent::boot($data);
         $this->rules = [
             'id' => 'required|integer|exists:custom_events,id',
         ];
-    }
-
-    public static function models(): array
-    {
-        return [CustomEvent::class];
     }
 
     public function performAction(): ?bool

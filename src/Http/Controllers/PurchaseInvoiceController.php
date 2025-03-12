@@ -42,6 +42,37 @@ class PurchaseInvoiceController extends BaseController
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
+    public function delete(string $id): JsonResponse
+    {
+        try {
+            DeletePurchaseInvoice::make(['id' => $id])->validate()->execute();
+            $response = ResponseHelper::createArrayResponse(
+                statusCode: 204,
+                statusMessage: 'purchase invoice deleted'
+            );
+        } catch (ValidationException $e) {
+            $response = ResponseHelper::createArrayResponse(
+                statusCode: 404,
+                data: $e->errors()
+            );
+        }
+
+        return ResponseHelper::createResponseFromArrayResponse($response);
+    }
+
+    public function finish(Request $request): JsonResponse
+    {
+        $order = CreateOrderFromPurchaseInvoice::make($request->all())
+            ->validate()
+            ->execute();
+
+        return ResponseHelper::createResponseFromBase(
+            statusCode: 200,
+            data: $order,
+            statusMessage: 'order from purchase invoice created'
+        );
+    }
+
     public function update(Request $request): JsonResponse
     {
         $data = $request->all();
@@ -77,36 +108,5 @@ class PurchaseInvoiceController extends BaseController
             'responses' => $responses,
             'statusMessage' => $statusCode === 422 ? null : 'purchase invoice(s) updated',
         ]);
-    }
-
-    public function delete(string $id): JsonResponse
-    {
-        try {
-            DeletePurchaseInvoice::make(['id' => $id])->validate()->execute();
-            $response = ResponseHelper::createArrayResponse(
-                statusCode: 204,
-                statusMessage: 'purchase invoice deleted'
-            );
-        } catch (ValidationException $e) {
-            $response = ResponseHelper::createArrayResponse(
-                statusCode: 404,
-                data: $e->errors()
-            );
-        }
-
-        return ResponseHelper::createResponseFromArrayResponse($response);
-    }
-
-    public function finish(Request $request): JsonResponse
-    {
-        $order = CreateOrderFromPurchaseInvoice::make($request->all())
-            ->validate()
-            ->execute();
-
-        return ResponseHelper::createResponseFromBase(
-            statusCode: 200,
-            data: $order,
-            statusMessage: 'order from purchase invoice created'
-        );
     }
 }

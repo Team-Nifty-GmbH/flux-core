@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('media', function (Blueprint $table) {
+        Schema::table('media', function (Blueprint $table): void {
             $table->unsignedBigInteger('category_id')->nullable()->after('uuid');
 
             $table->foreign('category_id')->references('id')->on('categories');
@@ -17,7 +17,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('media', function (Blueprint $table) {
+        Schema::table('media', function (Blueprint $table): void {
             $table->dropForeign('media_category_id_foreign');
 
             $table->dropColumn('category_id');

@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::create('cart_items', function (Blueprint $table) {
+        Schema::create('cart_items', function (Blueprint $table): void {
             $table->id();
             $table->uuid();
             $table->foreignId('cart_id')->constrained()->cascadeOnDelete();

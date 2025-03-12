@@ -10,39 +10,30 @@ use Livewire\Attributes\Locked;
 
 class CalendarForm extends FluxForm
 {
-    #[Locked]
-    public ?int $id = null;
-
-    public ?int $parent_id = null;
-
-    public ?string $model_type = null;
-
-    public ?string $name = null;
-
-    public ?string $description = null;
-
     public ?string $color = null;
 
     public ?array $custom_properties = null;
+
+    public ?string $description = null;
 
     public bool $has_notifications = true;
 
     public bool $has_repeatable_events = true;
 
+    #[Locked]
+    public ?int $id = null;
+
     public bool $is_editable = true;
 
     public bool $is_public = false;
 
-    public ?int $user_id = null;
+    public ?string $model_type = null;
 
-    protected function getActions(): array
-    {
-        return [
-            'create' => CreateCalendar::class,
-            'update' => UpdateCalendar::class,
-            'delete' => DeleteCalendar::class,
-        ];
-    }
+    public ?string $name = null;
+
+    public ?int $parent_id = null;
+
+    public ?int $user_id = null;
 
     public function fill($values): void
     {
@@ -53,5 +44,14 @@ class CalendarForm extends FluxForm
         }
 
         parent::fill($values);
+    }
+
+    protected function getActions(): array
+    {
+        return [
+            'create' => CreateCalendar::class,
+            'update' => UpdateCalendar::class,
+            'delete' => DeleteCalendar::class,
+        ];
     }
 }

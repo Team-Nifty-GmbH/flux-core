@@ -4,14 +4,11 @@ namespace FluxErp\Tests\Livewire\DataTables;
 
 use FluxErp\Livewire\DataTables\MediaList;
 use FluxErp\Tests\Livewire\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;
 
 class MediaListTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(MediaList::class)
             ->assertStatus(200);
