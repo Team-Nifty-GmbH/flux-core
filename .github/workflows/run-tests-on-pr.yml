@@ -101,13 +101,13 @@ jobs:
           MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
 
       - name: Install node dependencies
-        run: ./vendor/bin/testbench flux:install-assets . --force
+        run: ./vendor/bin/testbench flux:install-assets . --force --no-build
 
       - name: Pint
         run: ./vendor/bin/pint --test
 
       - name: Prettier
-        run: prettier . --check
+        run: npm prettier . --check
 
       - name: Clear Orchestra Testbench Cache
         run: ./vendor/bin/testbench view:clear

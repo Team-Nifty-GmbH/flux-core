@@ -24,7 +24,8 @@ class InstallAssets extends Command
     protected $signature = 'flux:install-assets
         {directory? : The directory to install the assets}
         {--force : Overwrite existing files}
-        {--merge-json : If a file is json parsable merge it recursively}';
+        {--merge-json : If a file is json parsable merge it recursively}
+        {--no-build : Skip building the assets}';
 
     public static function copyStubs(
         ?array $files = null,
@@ -151,7 +152,12 @@ class InstallAssets extends Command
             unlink(resource_path('views/welcome.blade.php'));
         }
 
-        $this->runCommands(['npm install', 'npm run build']);
+        $commands = ['npm install'];
+        if (! $this->option('no-build')) {
+            $commands[] = 'npm run build';
+        }
+
+        $this->runCommands($commands);
     }
 
     protected function runCommands($commands): void
