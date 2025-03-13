@@ -24,7 +24,7 @@
                                 $wire.address.id === addressItem.id &&
                                     'rounded-lg ring-2 ring-inset ring-primary-500 bg-blue-100 dark:bg-secondary-700'
                             "
-                            class="cursor-pointer space-y-2 p-1.5 hover:bg-blue-50 dark:hover:bg-secondary-800"
+                            class="dark:hover:bg-secondary-800 cursor-pointer space-y-2 p-1.5 hover:bg-blue-50"
                         >
                             <div
                                 class="flex w-full justify-between gap-1.5 dark:text-gray-50"

@@ -144,7 +144,7 @@
             @if ($this->project->additionalColumns)
                 <div class="space-y-2.5">
                     <h3
-                        class="text-md mt-4 whitespace-normal font-medium text-secondary-700 dark:text-secondary-400"
+                        class="text-md text-secondary-700 dark:text-secondary-400 mt-4 whitespace-normal font-medium"
                     >
                         {{ __("Additional Columns") }}
                     </h3>

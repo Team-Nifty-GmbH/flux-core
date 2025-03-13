@@ -7,7 +7,7 @@
         <div class="flex flex-wrap gap-4 pt-4">
             @foreach (auth()->user()->contact->addresses as $address)
                 <div
-                    class="cursor-pointer rounded-md bg-secondary-100 p-2"
+                    class="bg-secondary-100 cursor-pointer rounded-md p-2"
                     x-on:click="$wire.loadAddress({{ $address->id }})"
                     x-bind:class="
                         $wire.address.id === {{ $address->id }} &&
@@ -19,7 +19,7 @@
             @endforeach
 
             <div
-                class="flex cursor-pointer flex-col items-center justify-center rounded-md bg-secondary-100 p-2"
+                class="bg-secondary-100 flex cursor-pointer flex-col items-center justify-center rounded-md p-2"
                 x-on:click="$wire.loadAddress()"
                 x-bind:class="$wire.address.id === null && 'ring-2 ring-offset-2 ring-primary-500'"
             >
@@ -55,7 +55,7 @@
             </div>
             <div
                 wire:click="loadTermsAndConditions().then((text) => {document.getElementById('terms-and-conditions').innerHTML = text; $modalOpen('terms-and-conditions')})"
-                class="cursor-pointer text-primary-500 underline"
+                class="text-primary-500 cursor-pointer underline"
             >
                 {{ __("Read terms and conditions") }}
             </div>

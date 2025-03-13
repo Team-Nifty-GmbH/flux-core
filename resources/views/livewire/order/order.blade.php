@@ -30,7 +30,7 @@
                 },
             }"
         >
-            <div class="space-y-2.5 divide-y divide-secondary-200">
+            <div class="divide-secondary-200 space-y-2.5 divide-y">
                 <x-select.styled
                     :label="__('Order type')"
                     wire:model="replicateOrder.order_type_id"
@@ -1032,7 +1032,7 @@
                                 </div>
                             </template>
                             <div
-                                class="flex justify-between bg-gray-50 p-2.5 dark:bg-secondary-700"
+                                class="dark:bg-secondary-700 flex justify-between bg-gray-50 p-2.5"
                             >
                                 <div>
                                     {{ __("Total Gross") }}
@@ -1044,7 +1044,7 @@
                                 </div>
                             </div>
                             <div
-                                class="flex justify-between bg-gray-50 p-2.5 opacity-50 dark:bg-secondary-700"
+                                class="dark:bg-secondary-700 flex justify-between bg-gray-50 p-2.5 opacity-50"
                             >
                                 <div>
                                     {{ __("Balance") }}

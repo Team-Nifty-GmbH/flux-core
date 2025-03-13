@@ -25,7 +25,7 @@
                         :key="$product['id']"
                     />
                 @empty
-                    <div class="text-center text-secondary-400">
+                    <div class="text-secondary-400 text-center">
                         {{ __("No products found") }}
                     </div>
                 @endforelse

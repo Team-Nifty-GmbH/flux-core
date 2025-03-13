@@ -1,7 +1,7 @@
 <div class="flex h-full w-full gap-6 p-6">
     <x-flux::spinner />
     <div class="flex flex-col justify-center">
-        <x-icon :name="$this->icon()" class="h-12 w-12 text-primary-500" />
+        <x-icon :name="$this->icon()" class="text-primary-500 h-12 w-12" />
     </div>
     <div class="flex w-full grow flex-col justify-between">
         <div class="flex w-full justify-between">

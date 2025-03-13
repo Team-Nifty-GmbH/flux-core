@@ -40,7 +40,7 @@
     >
         <template
             x-ref="popWindow"
-            class="flex w-full flex-wrap items-stretch divide-x rounded-t-md placeholder-secondary-400 transition duration-100 ease-in-out focus:border-primary-500 focus:outline-none focus:ring-primary-500 sm:text-sm dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-400 dark:placeholder-secondary-500"
+            class="placeholder-secondary-400 focus:border-primary-500 focus:ring-primary-500 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-400 dark:placeholder-secondary-500 flex w-full flex-wrap items-stretch divide-x rounded-t-md transition duration-100 ease-in-out focus:outline-none sm:text-sm"
         ></template>
         <div
             x-cloak
@@ -48,7 +48,7 @@
             x-show="proxy.isEditable"
             x-ref="controlPanel"
             id="controlPanel"
-            class="{{ $tooltipDropdown ? "" : "border border-b-0" }} flex w-full flex-wrap items-stretch divide-x rounded-t-md border-secondary-300 placeholder-secondary-400 transition duration-100 ease-in-out focus:border-primary-500 focus:outline-none focus:ring-primary-500 sm:text-sm dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-400 dark:placeholder-secondary-500"
+            class="{{ $tooltipDropdown ? "" : "border border-b-0" }} border-secondary-300 placeholder-secondary-400 focus:border-primary-500 focus:ring-primary-500 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-400 dark:placeholder-secondary-500 flex w-full flex-wrap items-stretch divide-x rounded-t-md transition duration-100 ease-in-out focus:outline-none sm:text-sm"
         ></div>
         <div class="list-disc" x-ref="editor"></div>
     </div>

@@ -25,7 +25,7 @@
     <div {{ $attributes->whereDoesntStartWith(['wire', 'tabs'])->merge(['class' => 'relative pt-6']) }}>
         {{ $prepend ?? '' }}
         @if($attributes->has('wire:loading'))
-            <x-flux::spinner {{ $attributes->thatStartWith('wire:loading') }} />
+            <x-spinner {{ $attributes->thatStartWith('wire:loading') }} />
         @endif
         <div class="w-full">
             @if($slot->isNotEmpty())

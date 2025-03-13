@@ -254,7 +254,7 @@
     </div>
     <div wire:ignore class="w-full overflow-y-scroll">
         <div
-            class="border-l dark:border-secondary-600 dark:text-gray-50"
+            class="dark:border-secondary-600 border-l dark:text-gray-50"
             x-bind:id="id"
         ></div>
     </div>

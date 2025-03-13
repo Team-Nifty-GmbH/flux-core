@@ -9,7 +9,7 @@
             @forelse ($this->availableWidgets as $widget)
                 <div
                     x-on:click="selectWidget('{{ $widget["component_name"] }}')"
-                    class="mb-2 w-full cursor-pointer rounded border p-2 hover:bg-gray-100 dark:hover:bg-secondary-900"
+                    class="dark:hover:bg-secondary-900 mb-2 w-full cursor-pointer rounded border p-2 hover:bg-gray-100"
                 >
                     {{ __($widget["label"]) }}
                 </div>

@@ -23,7 +23,7 @@
             </style>
         </x-flux::layouts.head.head>
     </head>
-    <body class="h-full bg-gray-50 text-xs dark:bg-secondary-900">
+    <body class="dark:bg-secondary-900 h-full bg-gray-50 text-xs">
         <x-toast z-index="z-50"></x-toast>
         <x-dialog z-index="z-40" blur="md" align="center" />
         <x-dialog z-index="z-40" blur="md" align="center" id="prompt">

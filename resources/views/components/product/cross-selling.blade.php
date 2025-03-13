@@ -73,7 +73,7 @@
                         >
                             <div class="flex items-center gap-1.5">
                                 <div
-                                    class="inline-flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-gray-200 text-sm dark:border-secondary-500"
+                                    class="dark:border-secondary-500 inline-flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-gray-200 text-sm"
                                 >
                                     <img
                                         class="shrink-0 object-cover object-center"

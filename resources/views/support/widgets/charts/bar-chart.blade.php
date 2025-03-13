@@ -26,7 +26,7 @@
     @section("chart")
         <div class="px-6">
             <div
-                class="h-20 w-full gap-12 overflow-x-auto rounded soft-scrollbar md:flex"
+                class="soft-scrollbar h-20 w-full gap-12 overflow-x-auto rounded md:flex"
             >
                 <template
                     x-for="seriesData in livewireOptions.series?.filter((series) => ! series.hideFromTotals)"
