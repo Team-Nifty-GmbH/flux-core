@@ -7,9 +7,6 @@
         "format": "prettier --write ."
     },
     "devDependencies": {
-        "prettier-plugin-blade": "^2.1.21",
-        "prettier": "3.5.3",
-        "prettier-plugin-tailwindcss": "^0.6.11",
         "@alpinejs/sort": "^3.14.1",
         "@floating-ui/dom": "^1.5.3",
         "@fontsource/inter": "^5.0.18",
@@ -44,6 +41,9 @@
         "lodash.kebabcase": "^4.1.1",
         "postcss": "^8.4.32",
         "postcss-import": "^15.1.0",
+        "prettier": "3.5.3",
+        "prettier-plugin-blade": "^2.1.21",
+        "prettier-plugin-tailwindcss": "^0.6.11",
         "pusher-js": "^8.4.0-rc2",
         "qs": "^6.11.2",
         "signature_pad": "^5.0.1",
