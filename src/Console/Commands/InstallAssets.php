@@ -131,7 +131,11 @@ class InstallAssets extends Command
         // require npm packages
         $this->info('Installing npm packages...');
 
-        static::copyStubs(force: $this->option('force'), merge: $this->option('merge-json'));
+        static::copyStubs(
+            force: $this->option('force'),
+            merge: $this->option('merge-json'),
+            basePath: $target ? fn ($path = '') => $target . '/' . $path : null,
+        );
 
         $this->updateNodePackages(function ($packages) {
             return data_get(
