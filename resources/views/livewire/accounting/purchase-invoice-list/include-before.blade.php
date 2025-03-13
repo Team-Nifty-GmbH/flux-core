@@ -18,7 +18,7 @@
                 </div>
             @show
         @show
-        <div class="flex flex-col gap-1.5 overflow-auto">
+        <div class="px-2 flex flex-col gap-1.5 overflow-auto">
             @section('client')
                 @if(count($clients ?? []) > 1)
                     <div x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'">
@@ -207,8 +207,8 @@
                                     <x-select.styled
                                         :label="__('Product')"
                                         x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
-                                        x-on:select="position.name = $event.detail.select?.label; position.product_id = $event.detail.select?.value"
-                                        required
+                                        x-model.number="position.product_id"
+                                        x-on:select="position.name = $event.detail.select?.label"
                                         select="label:label|value:id|description:product_number"
                                         :request="[
                                             'url' => route('search', \FluxErp\Models\Product::class),
@@ -243,7 +243,6 @@
                                             x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
                                             :label="__('Vat Rate')"
                                             x-model.number="position.vat_rate_id"
-                                            x-on:select="position.vat_rate_id = $event.detail.select?.value"
                                             x-init="$el.value = position.vat_rate_id; fillSelectedFromInputValue();"
                                             select="label:name|value:id"
                                             :options="$vatRates"
