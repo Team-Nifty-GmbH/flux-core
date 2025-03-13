@@ -3,7 +3,7 @@
 namespace FluxErp\Traits\Action;
 
 use Exception;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Arr;
@@ -15,7 +15,7 @@ trait SupportsApiRequests
 {
     public static ?int $successCode = null;
 
-    public function __invoke(Request $request): Response|JsonResponse
+    public function __invoke(Request $request): mixed
     {
         $routeParams = $request->route()->parameters();
         $data = array_merge(
@@ -51,6 +51,10 @@ trait SupportsApiRequests
                     ->checkPermission()
                     ->validate()
                     ->execute();
+
+                if ($result instanceof Htmlable) {
+                    return $result;
+                }
 
                 if (is_bool($result) || is_null($result)) {
                     if (! $isBulk) {
