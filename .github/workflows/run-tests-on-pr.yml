@@ -107,7 +107,7 @@ jobs:
         run: ./vendor/bin/pint --test
 
       - name: Prettier
-        run: npm prettier . --check
+        run: npx prettier . --check
 
       - name: Clear Orchestra Testbench Cache
         run: ./vendor/bin/testbench view:clear
