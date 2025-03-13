@@ -5,6 +5,13 @@
             "spacing": "one"
         },
         "no_extra_blank_lines": true,
+        "ordered_imports": true,
+        "no_unused_imports": true,
+        "global_namespace_import": {
+            "import_classes": true,
+            "import_constants": true,
+            "import_functions": true
+        },
         "ordered_class_elements": {
             "order": [
                 "use_trait",
@@ -17,6 +24,7 @@
                 "property_public",
                 "property_protected",
                 "property_private",
+                "method_abstract",
                 "construct",
                 "destruct",
                 "magic",

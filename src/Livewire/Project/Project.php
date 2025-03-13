@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Project;
 
+use Exception;
 use FluxErp\Actions\Project\DeleteProject;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Forms\ProjectForm;
@@ -91,7 +92,7 @@ class Project extends Component
                 ->execute();
 
             $this->redirect(route('projects'));
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             exception_to_notifications($e, $this);
         }
     }
@@ -126,7 +127,7 @@ class Project extends Component
     {
         try {
             $this->project->save();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             exception_to_notifications($e, $this);
 
             return false;
@@ -147,7 +148,7 @@ class Project extends Component
                 $this->project->id,
                 morph_alias(ProjectModel::class)
             );
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             exception_to_notifications($e, $this);
 
             return;

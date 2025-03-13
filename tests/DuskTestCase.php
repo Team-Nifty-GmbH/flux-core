@@ -20,6 +20,9 @@ use Laravel\Scout\ScoutServiceProvider;
 use Livewire\LivewireServiceProvider;
 use NotificationChannels\WebPush\WebPushServiceProvider;
 use Orchestra\Testbench\Dusk\TestCase;
+
+use function Orchestra\Testbench\package_path;
+
 use Spatie\Activitylog\ActivitylogServiceProvider;
 use Spatie\MediaLibrary\MediaLibraryServiceProvider;
 use Spatie\Permission\PermissionRegistrar;
@@ -30,9 +33,8 @@ use Spatie\Translatable\TranslatableServiceProvider;
 use Spatie\TranslationLoader\TranslationServiceProvider;
 use Symfony\Component\Process\Process;
 use TallStackUi\TallStackUiServiceProvider;
-use TeamNiftyGmbH\DataTable\DataTableServiceProvider;
 
-use function Orchestra\Testbench\package_path;
+use TeamNiftyGmbH\DataTable\DataTableServiceProvider;
 
 abstract class DuskTestCase extends TestCase
 {

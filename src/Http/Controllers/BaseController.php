@@ -16,8 +16,9 @@ class BaseController extends Controller
 {
     protected object $model;
 
-    public function index(Request $request): JsonResponse
+    public function index(Request $request, string $model): JsonResponse
     {
+        $this->model = app($model);
         if ($request->filled('search') && ! in_array(Searchable::class, class_uses($this->model))) {
             return ResponseHelper::createResponseFromBase(
                 statusCode: 400,
@@ -55,8 +56,9 @@ class BaseController extends Controller
     /**
      * @throws ValidationException
      */
-    public function show(string $id, Request $request): JsonResponse
+    public function show(string $id, string $model, Request $request): JsonResponse
     {
+        $this->model = app($model);
         $validation = [
             'include' => 'string',
         ];

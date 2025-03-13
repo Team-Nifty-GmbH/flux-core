@@ -5,6 +5,7 @@ namespace FluxErp\Actions;
 use FluxErp\Models\Permission;
 use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\Traits\Action\HasActionEvents;
+use FluxErp\Traits\Action\SupportsApiRequests;
 use FluxErp\Traits\Makeable;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Events\Dispatcher;
@@ -19,7 +20,7 @@ use Spatie\Permission\Exceptions\UnauthorizedException;
 
 abstract class FluxAction
 {
-    use Conditionable, HasActionEvents, Makeable;
+    use Conditionable, HasActionEvents, Makeable, SupportsApiRequests;
 
     protected static ?Dispatcher $dispatcher;
 
@@ -34,6 +35,10 @@ abstract class FluxAction
     protected mixed $result = null;
 
     protected array $rules = [];
+
+    abstract public static function models(): array;
+
+    abstract public function performAction(): mixed;
 
     public function __construct(Arrayable|array $data = [], bool $keepEmptyStrings = false)
     {
@@ -240,10 +245,6 @@ abstract class FluxAction
 
         return $this;
     }
-
-    abstract public static function models(): array;
-
-    abstract public function performAction(): mixed;
 
     public function setData(array|Arrayable $data, bool $keepEmptyStrings = false): static
     {

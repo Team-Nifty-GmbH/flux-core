@@ -59,7 +59,9 @@ class DeleteCountry extends FluxAction
         }
 
         if ($errors) {
-            throw ValidationException::withMessages($errors)->errorBag('deleteCountry');
+            throw ValidationException::withMessages($errors)
+                ->errorBag('deleteCountry')
+                ->status(423);
         }
     }
 }

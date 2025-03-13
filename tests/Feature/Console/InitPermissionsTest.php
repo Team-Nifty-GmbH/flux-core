@@ -12,10 +12,12 @@ use FluxErp\Traits\Livewire\WithTabs;
 use FluxErp\Traits\Widgetable;
 use Illuminate\Support\Facades\Event;
 use Livewire\Component;
-use Livewire\Livewire;
-use Livewire\Mechanisms\ComponentRegistry;
 
 use function Livewire\invade;
+
+use Livewire\Livewire;
+
+use Livewire\Mechanisms\ComponentRegistry;
 
 class InitPermissionsTest extends BaseSetup
 {
@@ -76,7 +78,8 @@ class InitPermissionsTest extends BaseSetup
         // Execute artisan command
         $this->artisan('init:permissions')
             ->assertExitCode(0)
-            ->expectsOutput('Registering action permissions…')
+            ->expectsOutput('Registering action permissions for guard web…')
+            ->expectsOutput('Registering action permissions for guard sanctum…')
             ->expectsOutput('Registering route permissions…')
             ->expectsOutput('Registering widget permissions…')
             ->expectsOutput('Registering tab permissions…');

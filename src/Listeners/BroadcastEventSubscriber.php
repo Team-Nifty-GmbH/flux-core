@@ -2,6 +2,8 @@
 
 namespace FluxErp\Listeners;
 
+use ReflectionClass;
+
 class BroadcastEventSubscriber
 {
     /**
@@ -9,7 +11,7 @@ class BroadcastEventSubscriber
      */
     public function broadcastEvent($event): void
     {
-        $classReflection = new \ReflectionClass(get_class($event));
+        $classReflection = new ReflectionClass(get_class($event));
         ('FluxErp\\Events\\Broadcast' . $classReflection->getShortName())::dispatch($event->model);
     }
 

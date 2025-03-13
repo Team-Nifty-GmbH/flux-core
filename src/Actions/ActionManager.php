@@ -2,6 +2,7 @@
 
 namespace FluxErp\Actions;
 
+use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Traits\Macroable;
@@ -9,6 +10,7 @@ use InvalidArgumentException;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use ReflectionClass;
+use Throwable;
 
 class ActionManager
 {
@@ -50,7 +52,7 @@ class ActionManager
 
         try {
             $actions = Cache::get('flux.actions.' . $cacheKey);
-        } catch (\Throwable) {
+        } catch (Throwable) {
             $actions = null;
         }
 
@@ -87,14 +89,14 @@ class ActionManager
         foreach ($actions as $name => $class) {
             try {
                 $this->register($name, $class);
-            } catch (\Exception) {
+            } catch (Exception) {
                 // Ignore exceptions during auto-discovery
             }
         }
 
         try {
             Cache::put('flux.actions.' . $cacheKey, $actions);
-        } catch (\Throwable) {
+        } catch (Throwable) {
             // Ignore exceptions during cache put
         }
     }
@@ -115,7 +117,7 @@ class ActionManager
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function register(string $name, string $action): void
     {

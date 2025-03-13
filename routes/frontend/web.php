@@ -1,8 +1,7 @@
 <?php
 
+use FluxErp\Actions\PushSubscription\UpsertPushSubscription;
 use FluxErp\Http\Controllers\AuthController;
-use FluxErp\Http\Controllers\PrintController;
-use FluxErp\Http\Controllers\PushSubscriptionController;
 use FluxErp\Http\Controllers\SearchController;
 use FluxErp\Http\Middleware\NoAuth;
 use FluxErp\Http\Middleware\TrackVisits;
@@ -231,7 +230,7 @@ Route::middleware('web')
                     ->name('watchlists');
             });
 
-            Route::post('/push-subscription', [PushSubscriptionController::class, 'upsert']);
+            Route::post('/push-subscription', UpsertPushSubscription::class);
 
             Route::get('/media/{media}/{filename}', function (Media $media) {
                 return $media;
@@ -242,8 +241,12 @@ Route::middleware('web')
             Route::any('/search/{model}', SearchController::class)
                 ->where('model', '(.*)')
                 ->name('search');
-            Route::match(['get', 'post'], '/print/render', [PrintController::class, 'render'])->name('print.render');
-            Route::match(['get', 'post'], '/print/pdf', [PrintController::class, 'renderPdf']);
+            Route::match(['get', 'post'], '/print/render', FluxErp\Actions\Printing::class)
+                ->defaults('html', true)
+                ->defaults('preview', false)
+                ->name('print.render');
+            Route::match(['get', 'post'], '/print/pdf', FluxErp\Actions\Printing::class)
+                ->defaults('html', false);
         });
 
         Route::middleware('signed')->group(function (): void {

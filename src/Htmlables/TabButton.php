@@ -2,6 +2,7 @@
 
 namespace FluxErp\Htmlables;
 
+use Closure;
 use FluxErp\Models\Permission;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\View\Compilers\BladeCompiler;
@@ -9,6 +10,7 @@ use Illuminate\View\ComponentAttributeBag;
 use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TallStackUi\View\Components\Button\Button;
+use Throwable;
 
 class TabButton implements Htmlable
 {
@@ -235,7 +237,7 @@ class TabButton implements Htmlable
         return true;
     }
 
-    public function when(\Closure|bool $condition): static
+    public function when(Closure|bool $condition): static
     {
         // when running in console, dont call the closure
         if (app()->runningInConsole()) {
@@ -246,7 +248,7 @@ class TabButton implements Htmlable
 
         try {
             $this->shouldRender = (bool) value($condition);
-        } catch (\Throwable) {
+        } catch (Throwable) {
             $this->shouldRender = false;
         }
 
