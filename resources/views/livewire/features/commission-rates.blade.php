@@ -37,6 +37,7 @@
                                 select="label:label|value:id|description:product_number"
                                 :request="[
                                     'url' => route('search', \FluxErp\Models\Product::class),
+                                    'method' => 'POST',
                                     'params' => [
                                         'fields' => [
                                             'id',
