@@ -1,18 +1,25 @@
 import defaultTheme from 'tailwindcss/defaultTheme';
 import forms from '@tailwindcss/forms';
 import typography from '@tailwindcss/typography';
+import tallstackuiConfig from './vendor/tallstackui/tallstackui/tailwind.config.js';
+import dataTablesConfig from './vendor/team-nifty-gmbh/tall-datatables/tailwind.config.mjs';
 
 export default {
-    darkMode: 'selector',
-    content: [
-        __dirname + '/resources/**/*.blade.php',
-        __dirname + '/resources/**/*.js',
-        __dirname + '/resources/**/*.vue',
-        __dirname + '/src/Htmlables/**/*.php',
-        __dirname + '/src/Providers/*.php',
-        __dirname + '/src/View/Components/**/*.php',
-        __dirname + '/src/Livewire/**/*.php',
+    presets: [
+        tallstackuiConfig,
+        dataTablesConfig,
     ],
+    content: [
+        __dirname + './resources/**/*.blade.php',
+        __dirname + './resources/**/*.js',
+        __dirname + './resources/**/*.vue',
+        __dirname + './src/Htmlables/**/*.php',
+        __dirname + './src/Providers/*.php',
+        __dirname + './src/View/Components/**/*.php',
+        __dirname + './src/Livewire/**/*.php',
+    ].concat(
+        dataTablesConfig.content,
+    ),
     theme: {
         extend: {
             colors: {

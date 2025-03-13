@@ -3,9 +3,13 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "build": "vite build"
+        "build": "vite build",
+        "format": "prettier --write ."
     },
     "devDependencies": {
+        "prettier-plugin-blade": "^2.1.21",
+        "prettier": "3.5.3",
+        "prettier-plugin-tailwindcss": "^0.6.11",
         "@alpinejs/sort": "^3.14.1",
         "@floating-ui/dom": "^1.5.3",
         "@fontsource/inter": "^5.0.18",

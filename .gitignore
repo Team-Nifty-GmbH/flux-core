@@ -13,3 +13,4 @@ postcss.config.js
 package.json
 package-lock.json
 !/stubs/tailwind/package.json
+/public/build/
