@@ -101,7 +101,7 @@ jobs:
           MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
 
       - name: Install node dependencies
-        run: npm ci
+        run: npm i
 
       - name: Pint
         run: ./vendor/bin/pint --test
