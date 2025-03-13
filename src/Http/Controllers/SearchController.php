@@ -2,6 +2,7 @@
 
 namespace FluxErp\Http\Controllers;
 
+use FluxErp\Models\Scopes\UserClientScope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Http\Request;
@@ -47,6 +48,7 @@ class SearchController extends Controller
                 [
                     SoftDeletingScope::class,
                     SearchableScope::class,
+                    UserClientScope::class,
                 ]
             )) === 0 ? 20 : 1000;
 
