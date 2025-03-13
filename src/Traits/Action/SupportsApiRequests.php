@@ -52,7 +52,7 @@ trait SupportsApiRequests
                     ->validate()
                     ->execute();
 
-                if ($result instanceof Htmlable) {
+                if ($result instanceof Htmlable && $request->acceptsHtml()) {
                     return $result;
                 }
 
