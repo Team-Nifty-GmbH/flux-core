@@ -1,17 +1,28 @@
-@props(['collapsed' => false])
-<div x-data="{expanded: false}" class="space-y-8 divide-y divide-gray-200">
+@props(["collapsed" => false])
+<div x-data="{ expanded: false }" class="space-y-8 divide-y divide-gray-200">
     <div class="space-y-2.5">
-        @section('general')
-            <x-input
-                :placeholder="__('Leave empty to generate a new :attribute.', ['attribute' => __('Project Number')])"
-                x-bind:readonly="!edit"
-                wire:model="project.project_number"
-                label="{{ __('Project Number') }}"
-            />
-            <x-input x-bind:readonly="!edit" wire:model="project.name" label="{{ __('Name') }}" />
+        @section("general")
+        <x-input
+            :placeholder="__('Leave empty to generate a new :attribute.', ['attribute' => __('Project Number')])"
+            x-bind:readonly="!edit"
+            wire:model="project.project_number"
+            label="{{ __('Project Number') }}"
+        />
+        <x-input
+            x-bind:readonly="!edit"
+            wire:model="project.name"
+            label="{{ __('Name') }}"
+        />
         @show
-        <div @if($collapsed) x-collapse x-show="expanded" x-cloak @endif class="space-y-2.5">
-            <div x-bind:class="! edit && 'pointer-events-none'" x-show="! $wire.project.id" x-cloak>
+        <div
+            @if($collapsed) x-collapse x-show="expanded" x-cloak @endif
+            class="space-y-2.5"
+        >
+            <div
+                x-bind:class="! edit && 'pointer-events-none'"
+                x-show="! $wire.project.id"
+                x-cloak
+            >
                 <x-select.styled
                     x-bind:readonly="!edit"
                     :label="__('Client')"
@@ -24,21 +35,21 @@
                 />
             </div>
             <div class="flex justify-between gap-x-4">
-                @section('dates')
-                    <x-date
-                        without-time
-                        x-bind:readonly="!edit"
-                        x-bind:class="! edit && 'pointer-events-none'"
-                        wire:model="project.start_date"
-                        :label="__('Start Date')"
-                    />
-                    <x-date
-                        without-time
-                        x-bind:readonly="!edit"
-                        x-bind:class="! edit && 'pointer-events-none'"
-                        wire:model="project.end_date"
-                        :label="__('End Date')"
-                    />
+                @section("dates")
+                <x-date
+                    without-time
+                    x-bind:readonly="!edit"
+                    x-bind:class="! edit && 'pointer-events-none'"
+                    wire:model="project.start_date"
+                    :label="__('Start Date')"
+                />
+                <x-date
+                    without-time
+                    x-bind:readonly="!edit"
+                    x-bind:class="! edit && 'pointer-events-none'"
+                    wire:model="project.end_date"
+                    :label="__('End Date')"
+                />
                 @show
             </div>
             <div x-bind:class="! edit && 'pointer-events-none'">
@@ -57,96 +68,115 @@
                 wire:model="project.description"
                 :label="__('Description')"
             />
-            @section('connections')
-                <div x-bind:class="! edit && 'pointer-events-none'">
-                    <x-select.styled
-                        x-bind:readonly="!edit"
-                        :label="__('Responsible User')"
-                        autocomplete="off"
-                        wire:model="project.responsible_user_id"
-                        select="label:name|value:id"
-                        :request="[
-                            'url' => route('search', \FluxErp\Models\User::class),
-                            'method' => 'POST',
-                            'params' => [
-                                'with' => 'media',
-                            ],
-                        ]"
-                    />
-                </div>
-                <div x-bind:class="! edit && 'pointer-events-none'">
-                    <x-select.styled :label="__('Contact')"
-                        x-bind:readonly="!edit"
-                        wire:model="project.contact_id"
-                        select="label:label|value:contact_id"
-                        :request="[
-                            'url' => route('search', \FluxErp\Models\Address::class),
-                            'method' => 'POST',
-                            'params' => [
-                                'where' => [
-                                    [
-                                        'is_main_address',
-                                        '=',
-                                        true,
-                                    ],
-                                ],
-                                'option-value' => 'contact_id',
-                                'fields' => [
-                                    'contact_id',
-                                    'name',
-                                ],
-                                'with' => 'contact.media',
-                            ],
-                        ]"
-                    />
-                </div>
-                <div x-bind:class="! edit && 'pointer-events-none'">
-                    <x-select.styled
-                        x-bind:readonly="!edit"
-                        :label="__('Order')"
-                        wire:model="project.order_id"
-                        select="label:label|value:id"
-                        :request="[
-                            'url' => route('search', \FluxErp\Models\Order::class),
-                            'method' => 'POST',
-                        ]"
-                    />
-                </div>
-            @show
-            @section('budget')
-                <x-number
-                    :label="__('Budget')"
+            @section("connections")
+            <div x-bind:class="! edit && 'pointer-events-none'">
+                <x-select.styled
                     x-bind:readonly="!edit"
-                    wire:model="project.budget"
-                    step="0.01"
+                    :label="__('Responsible User')"
+                    autocomplete="off"
+                    wire:model="project.responsible_user_id"
+                    select="label:name|value:id"
+                    :request="[
+                        'url' => route('search', \FluxErp\Models\User::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'with' => 'media',
+                        ],
+                    ]"
                 />
-                <x-input
+            </div>
+            <div x-bind:class="! edit && 'pointer-events-none'">
+                <x-select.styled
+                    :label="__('Contact')"
                     x-bind:readonly="!edit"
-                    :label="__('Time Budget')"
-                    wire:model.blur="project.time_budget"
-                    :corner-hint="__('Hours:Minutes')"
-                    placeholder="02:30"
+                    wire:model="project.contact_id"
+                    select="label:label|value:contact_id"
+                    :request="[
+                        'url' => route('search', \FluxErp\Models\Address::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'where' => [
+                                [
+                                    'is_main_address',
+                                    '=',
+                                    true,
+                                ],
+                            ],
+                            'option-value' => 'contact_id',
+                            'fields' => [
+                                'contact_id',
+                                'name',
+                            ],
+                            'with' => 'contact.media',
+                        ],
+                    ]"
                 />
+            </div>
+            <div x-bind:class="! edit && 'pointer-events-none'">
+                <x-select.styled
+                    x-bind:readonly="!edit"
+                    :label="__('Order')"
+                    wire:model="project.order_id"
+                    select="label:label|value:id"
+                    :request="[
+                        'url' => route('search', \FluxErp\Models\Order::class),
+                        'method' => 'POST',
+                    ]"
+                />
+            </div>
             @show
-            @section('additional-columns')
-                @if($this->project->additionalColumns)
-                    <div class="space-y-2.5">
-                        <h3 class="font-medium whitespace-normal text-md text-secondary-700 dark:text-secondary-400 mt-4">
-                            {{ __('Additional Columns') }}
-                        </h3>
-                        <x-flux::additional-columns :model="\FluxErp\Models\Project::class" :id="$this->project->id" wire="project.additionalColumns"/>
-                    </div>
-                @endif
+            @section("budget")
+            <x-number
+                :label="__('Budget')"
+                x-bind:readonly="!edit"
+                wire:model="project.budget"
+                step="0.01"
+            />
+            <x-input
+                x-bind:readonly="!edit"
+                :label="__('Time Budget')"
+                wire:model.blur="project.time_budget"
+                :corner-hint="__('Hours:Minutes')"
+                placeholder="02:30"
+            />
+            @show
+            @section("additional-columns")
+            @if ($this->project->additionalColumns)
+                <div class="space-y-2.5">
+                    <h3
+                        class="text-md mt-4 whitespace-normal font-medium text-secondary-700 dark:text-secondary-400"
+                    >
+                        {{ __("Additional Columns") }}
+                    </h3>
+                    <x-flux::additional-columns
+                        :model="\FluxErp\Models\Project::class"
+                        :id="$this->project->id"
+                        wire="project.additionalColumns"
+                    />
+                </div>
+            @endif
+
             @show
         </div>
-        @if($collapsed)
-            <x-badge outline md label="Prepend" class="w-full cursor-pointer gap-x-4 py-2" x-on:click="expanded = !expanded">
+        @if ($collapsed)
+            <x-badge
+                outline
+                md
+                label="Prepend"
+                class="w-full cursor-pointer gap-x-4 py-2"
+                x-on:click="expanded = !expanded"
+            >
                 <x-slot:text>
-                    <span x-text="expanded ? '{{ __('Show less') }}' : '{{ __('Show more') }}'"></span>
-                </x-slot:text>
-                <x-slot:left class="relative flex items-center w-2 h-2 transition-transform" x-bind:class="expanded && '-rotate-180'">
-                    <x-icon name="chevron-down" class="w-4 h-4 shrink-0" />
-                </x-slot:left>
+                    <span
+                        x-text="expanded ? '{{ __("Show less") }}' : '{{ __("Show more") }}'"
+                    ></span>
+                </x-slot>
+                <x-slot:left
+                    class="relative flex h-2 w-2 items-center transition-transform"
+                    x-bind:class="expanded && '-rotate-180'"
+                >
+                    <x-icon name="chevron-down" class="h-4 w-4 shrink-0" />
+                </x-slot>
             </x-badge>
         @endif
     </div>

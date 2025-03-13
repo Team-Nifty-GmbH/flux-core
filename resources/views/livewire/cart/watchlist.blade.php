@@ -1,1 +1,1 @@
-@extends('flux::livewire.portal.shop.watchlists')
+@extends("flux::livewire.portal.shop.watchlists")

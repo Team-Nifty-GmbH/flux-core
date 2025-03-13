@@ -124,8 +124,19 @@
             </div>
         </section>
         <x-slot:footer>
-            <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('create-order-modal')" />
-            <x-button loading color="indigo" :text="__('Save')" wire:click="save" />
-        </x-slot:footer>
+            <x-button
+                color="secondary"
+                light
+                flat
+                :text="__('Cancel')"
+                x-on:click="$modalClose('create-order-modal')"
+            />
+            <x-button
+                loading
+                color="indigo"
+                :text="__('Save')"
+                wire:click="save"
+            />
+        </x-slot>
     </x-modal>
 </div>

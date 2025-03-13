@@ -1,5 +1,5 @@
-@extends('flux::livewire.order.order')
-@section('modals')
+@extends("flux::livewire.order.order")
+@section("modals")
     @parent
     <x-modal id="edit-schedule" :title="__('Edit Schedule')">
         <div class="flex flex-col gap-1.5">
@@ -41,14 +41,21 @@
                 wire:model="schedule.cron.methods.basic"
                 :options="$frequencies"
             />
-            <div x-cloak x-show="['dailyAt', 'lastDayOfMonth'].indexOf($wire.schedule.cron.methods.basic) >= 0">
+            <div
+                x-cloak
+                x-show="['dailyAt', 'lastDayOfMonth'].indexOf($wire.schedule.cron.methods.basic) >= 0"
+            >
                 <x-time
                     :label="__('Time')"
                     format="24"
                     wire:model="schedule.cron.parameters.basic.0"
                 />
             </div>
-            <div x-cloak x-show="$wire.schedule.cron.methods.basic === 'weeklyOn'" class="flex flex-col gap-4">
+            <div
+                x-cloak
+                x-show="$wire.schedule.cron.methods.basic === 'weeklyOn'"
+                class="flex flex-col gap-4"
+            >
                 <x-select.styled
                     :label="__('Weekday')"
                     wire:model="schedule.cron.parameters.basic.0"
@@ -69,18 +76,41 @@
                     wire:model="schedule.cron.parameters.basic.1"
                 />
             </div>
-            <div x-cloak x-show="['monthlyOn', 'quarterlyOn'].indexOf($wire.schedule.cron.methods.basic) >= 0" class="flex flex-col gap-4">
-                <x-number :max="31" :min="0" wire:model="schedule.cron.parameters.basic.0" :label="__('Day')" />
+            <div
+                x-cloak
+                x-show="['monthlyOn', 'quarterlyOn'].indexOf($wire.schedule.cron.methods.basic) >= 0"
+                class="flex flex-col gap-4"
+            >
+                <x-number
+                    :max="31"
+                    :min="0"
+                    wire:model="schedule.cron.parameters.basic.0"
+                    :label="__('Day')"
+                />
                 <x-time
                     :label="__('Time')"
                     format="24"
                     wire:model="schedule.cron.parameters.basic.1"
                 />
             </div>
-            <div x-cloak x-show="$wire.schedule.cron.methods.basic === 'twiceMonthly'" class="flex flex-col gap-4">
-                <x-number :max="31" :min="0" wire:model="schedule.cron.parameters.basic.0" :label="__('Day')" />
+            <div
+                x-cloak
+                x-show="$wire.schedule.cron.methods.basic === 'twiceMonthly'"
+                class="flex flex-col gap-4"
+            >
+                <x-number
+                    :max="31"
+                    :min="0"
+                    wire:model="schedule.cron.parameters.basic.0"
+                    :label="__('Day')"
+                />
                 <div class="mt-4">
-                    <x-number :max="31" :min="0" wire:model="schedule.cron.parameters.basic.1" :label="__('Day')" />
+                    <x-number
+                        :max="31"
+                        :min="0"
+                        wire:model="schedule.cron.parameters.basic.1"
+                        :label="__('Day')"
+                    />
                 </div>
                 <x-time
                     :label="__('Time')"
@@ -88,7 +118,11 @@
                     wire:model="schedule.cron.parameters.basic.2"
                 />
             </div>
-            <div x-cloak x-show="$wire.schedule.cron.methods.basic === 'yearlyOn'" class="flex flex-col gap-4">
+            <div
+                x-cloak
+                x-show="$wire.schedule.cron.methods.basic === 'yearlyOn'"
+                class="flex flex-col gap-4"
+            >
                 <x-select.styled
                     :label="__('Month')"
                     wire:model="schedule.cron.parameters.basic.0"
@@ -109,42 +143,85 @@
                         ['id' => 12, 'name' => __('December'), 'days' => 31],
                     ]"
                 />
-                <x-number id="month-day-input" :max="31" :min="0" wire:model.blur="schedule.cron.parameters.basic.1" :label="__('Day')" />
+                <x-number
+                    id="month-day-input"
+                    :max="31"
+                    :min="0"
+                    wire:model.blur="schedule.cron.parameters.basic.1"
+                    :label="__('Day')"
+                />
                 <x-time
                     :label="__('Time')"
                     format="24"
                     wire:model="schedule.cron.parameters.basic.2"
                 />
             </div>
-            <x-date wire:model="schedule.due_at" :label="__('Due At')" timezone="UTC"/>
+            <x-date
+                wire:model="schedule.due_at"
+                :label="__('Due At')"
+                timezone="UTC"
+            />
             <x-label :label="__('End')" />
-            <x-radio :label="__('Never')" value="never" wire:model="schedule.end_radio" />
+            <x-radio
+                :label="__('Never')"
+                value="never"
+                wire:model="schedule.end_radio"
+            />
             <div class="grid grid-cols-2 items-center gap-1.5">
-                <x-radio :label="__('Ends At')" value="ends_at" wire:model="schedule.end_radio" />
-                <x-date wire:model="schedule.ends_at" timezone="UTC" x-bind:disabled="$wire.schedule.end_radio !== 'ends_at'"/>
-                <x-radio :label="__('After number of recurrences')" value="recurrences" wire:model="schedule.end_radio" />
-                <x-number wire:model="schedule.recurrences" :min="1" x-bind:disabled="$wire.schedule.end_radio !== 'recurrences'" />
+                <x-radio
+                    :label="__('Ends At')"
+                    value="ends_at"
+                    wire:model="schedule.end_radio"
+                />
+                <x-date
+                    wire:model="schedule.ends_at"
+                    timezone="UTC"
+                    x-bind:disabled="$wire.schedule.end_radio !== 'ends_at'"
+                />
+                <x-radio
+                    :label="__('After number of recurrences')"
+                    value="recurrences"
+                    wire:model="schedule.end_radio"
+                />
+                <x-number
+                    wire:model="schedule.recurrences"
+                    :min="1"
+                    x-bind:disabled="$wire.schedule.end_radio !== 'recurrences'"
+                />
             </div>
-            <div class="grid grid-cols-2 items-center gap-1.5 mb-2" x-cloak x-show="$wire.schedule.id && $wire.schedule.end_radio === 'recurrences'">
+            <div
+                class="mb-2 grid grid-cols-2 items-center gap-1.5"
+                x-cloak
+                x-show="$wire.schedule.id && $wire.schedule.end_radio === 'recurrences'"
+            >
                 <x-label :label="__('Current Recurrence')" />
-                <span class="flex justify-center">{{ $schedule->current_recurrence ?? 0 }}</span>
+                <span class="flex justify-center">
+                    {{ $schedule->current_recurrence ?? 0 }}
+                </span>
             </div>
-            <x-toggle wire:model="schedule.is_active" :label="__('Is Active')" />
+            <x-toggle
+                wire:model="schedule.is_active"
+                :label="__('Is Active')"
+            />
         </div>
         <x-slot:footer>
-            <x-button color="secondary" light
+            <x-button
+                color="secondary"
+                light
                 x-on:click="$modalClose('edit-schedule')"
                 :text="__('Cancel')"
             />
-            <x-button color="indigo"
+            <x-button
+                color="indigo"
                 wire:click="saveSchedule().then((success) => { if(success) $modalClose('edit-schedule'); })"
                 primary
                 :text="__('Save')"
             />
-        </x-slot:footer>
+        </x-slot>
     </x-modal>
 @endsection
-@section('actions')
+
+@section("actions")
     @parent
     <x-button
         color="indigo"

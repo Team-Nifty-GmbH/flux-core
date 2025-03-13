@@ -1,17 +1,25 @@
-@teleport('body')
+@teleport("body")
     <x-modal id="widget-list">
-        <div class="h-full p-2.5 overflow-auto">
-            <h2 class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400 pb-6">{{ __('Available Widgets') }}</h2>
-            @forelse($this->availableWidgets as $widget)
+        <div class="h-full overflow-auto p-2.5">
+            <h2
+                class="truncate pb-6 text-lg font-semibold text-gray-700 dark:text-gray-400"
+            >
+                {{ __("Available Widgets") }}
+            </h2>
+            @forelse ($this->availableWidgets as $widget)
                 <div
-                    x-on:click="selectWidget('{{ $widget['component_name'] }}')"
-                    class="w-full cursor-pointer mb-2 p-2 border rounded hover:bg-gray-100 dark:hover:bg-secondary-900"
+                    x-on:click="selectWidget('{{ $widget["component_name"] }}')"
+                    class="mb-2 w-full cursor-pointer rounded border p-2 hover:bg-gray-100 dark:hover:bg-secondary-900"
                 >
-                    {{ __($widget['label']) }}
+                    {{ __($widget["label"]) }}
                 </div>
             @empty
-                <div class="h-full mx-auto flex flex-col justify-center items-center">
-                    <h2 class="text-2xl font-medium">{{ __('No widgets available') }}</h2>
+                <div
+                    class="mx-auto flex h-full flex-col items-center justify-center"
+                >
+                    <h2 class="text-2xl font-medium">
+                        {{ __("No widgets available") }}
+                    </h2>
                 </div>
             @endforelse
         </div>

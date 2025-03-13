@@ -1,8 +1,8 @@
-import _ from 'lodash';
-import axios from 'axios';
-import Echo from 'laravel-echo'
-import Pusher from 'pusher-js';
-import tippy from 'tippy.js';
+import _ from "lodash";
+import axios from "axios";
+import Echo from "laravel-echo";
+import Pusher from "pusher-js";
+import tippy from "tippy.js";
 
 window.tippy = tippy;
 
@@ -14,18 +14,25 @@ window._ = _;
  * CSRF token as a header based on the value of the "XSRF" token cookie.
  */
 window.axios = axios;
-window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+window.axios.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest";
 
 window.Pusher = Pusher;
 
 window.Echo = new Echo({
-    broadcaster: document.head.querySelector('meta[name="ws-broadcaster"]')?.content || 'reverb',
+    broadcaster:
+        document.head.querySelector('meta[name="ws-broadcaster"]')?.content ||
+        "reverb",
     key: document.head.querySelector('meta[name="ws-key"]')?.content,
-    wsHost: document.head.querySelector('meta[name="ws-host"]')?.content || window.location.hostname, // <-- important if you dont build the js file on the prod server
+    wsHost:
+        document.head.querySelector('meta[name="ws-host"]')?.content ||
+        window.location.hostname, // <-- important if you dont build the js file on the prod server
     wsPort: document.head.querySelector('meta[name="ws-port"]')?.content || 80, // <-- this ensures that nginx will receive the request
-    wssPort: document.head.querySelector('meta[name="ws-port"]')?.content || 443, // <-- this ensures that nginx will receive the request
-    forceTLS: document.head.querySelector('meta[name="ws-protocol"]')?.content === 'https',
-    enabledTransports: ['ws', 'wss'],
+    wssPort:
+        document.head.querySelector('meta[name="ws-port"]')?.content || 443, // <-- this ensures that nginx will receive the request
+    forceTLS:
+        document.head.querySelector('meta[name="ws-protocol"]')?.content ===
+        "https",
+    enabledTransports: ["ws", "wss"],
 });
 
 window.parseNumber = function (number) {
@@ -34,34 +41,37 @@ window.parseNumber = function (number) {
         parsedNumber = 0;
     }
     const trimmedNumber = parsedNumber.toString();
-    const decimalIndex = trimmedNumber.indexOf('.');
+    const decimalIndex = trimmedNumber.indexOf(".");
 
     if (decimalIndex !== -1) {
         let parsedNumber = trimmedNumber;
-        while (parsedNumber.endsWith('0')) {
+        while (parsedNumber.endsWith("0")) {
             parsedNumber = parsedNumber.slice(0, -1);
         }
-        if (parsedNumber.endsWith('.')) {
+        if (parsedNumber.endsWith(".")) {
             parsedNumber = parsedNumber.slice(0, -1);
         }
-        if (parsedNumber.includes('.') && parsedNumber.split('.')[1].length < 2) {
-            parsedNumber = parsedNumber + '0';
+        if (
+            parsedNumber.includes(".") &&
+            parsedNumber.split(".")[1].length < 2
+        ) {
+            parsedNumber = parsedNumber + "0";
         }
         return parsedNumber;
     }
 
-    return trimmedNumber + '.00';
-}
+    return trimmedNumber + ".00";
+};
 
 window.fileSizeHumanReadable = function (sizeBytes) {
     if (sizeBytes === null || sizeBytes === undefined) {
         return null;
     }
 
-    const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
+    const units = ["B", "KB", "MB", "GB", "TB", "PB"];
 
     if (sizeBytes <= 0) {
-        return '0B';
+        return "0B";
     }
 
     let i = 0;
@@ -72,19 +82,22 @@ window.fileSizeHumanReadable = function (sizeBytes) {
 
     const sizeStr = sizeBytes.toFixed(2);
 
-    if (sizeStr.endsWith('.00')) {
+    if (sizeStr.endsWith(".00")) {
         return sizeStr.slice(0, -3) + units[i];
-    } else if (sizeStr.endsWith('0')) {
+    } else if (sizeStr.endsWith("0")) {
         return sizeStr.slice(0, -1) + units[i];
     }
 
     return sizeStr + units[i];
-}
+};
 
 window.$openDetailModal = (url, hideNavigation = true) => {
     let urlObj = new URL(url);
-    urlObj.searchParams.set('no-navigation', hideNavigation === true ? 'true' : 'false');
+    urlObj.searchParams.set(
+        "no-navigation",
+        hideNavigation === true ? "true" : "false",
+    );
 
-    document.getElementById('detail-modal-iframe').src = urlObj.href;
-    $modalOpen('detail-modal');
-}
+    document.getElementById("detail-modal-iframe").src = urlObj.href;
+    $modalOpen("detail-modal");
+};

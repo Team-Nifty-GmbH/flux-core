@@ -1,24 +1,31 @@
-<div class="flex p-6 gap-6 h-full w-full">
+<div class="flex h-full w-full gap-6 p-6">
     <x-flux::spinner />
     <div class="flex flex-col justify-center">
-        <x-icon :name="$this->icon()" class="w-12 h-12 text-primary-500" />
+        <x-icon :name="$this->icon()" class="h-12 w-12 text-primary-500" />
     </div>
-    <div class="flex flex-col justify-between w-full grow">
-        <div class="flex justify-between w-full">
-            <h2 class="truncate text-lg font-semibold text-gray-400">{{ __($this->title()) }}</h2>
-            @if(class_implements($this, \FluxErp\Contracts\HasWidgetOptions::class))
+    <div class="flex w-full grow flex-col justify-between">
+        <div class="flex w-full justify-between">
+            <h2 class="truncate text-lg font-semibold text-gray-400">
+                {{ __($this->title()) }}
+            </h2>
+            @if (class_implements($this, \FluxErp\Contracts\HasWidgetOptions::class))
                 <x-dropdown icon="ellipsis-vertical" static>
-                    @foreach($this->options() as $option)
-                        <x-dropdown.items :text="data_get($option, 'label')" wire:click="{{ data_get($option, 'method') }}" />
+                    @foreach ($this->options() as $option)
+                        <x-dropdown.items
+                            :text="data_get($option, 'label')"
+                            wire:click="{{ data_get($option, 'method') }}"
+                        />
                     @endforeach
                 </x-dropdown>
             @endif
         </div>
         <div>
-            <div class="grow flex flex-wrap gap-4 max-w-full items-center">
-                <div class="font-bold text-2xl whitespace-nowrap truncate flex-none" x-text="$wire.sum">
-                </div>
-                @if($shouldBePositive)
+            <div class="flex max-w-full grow flex-wrap items-center gap-4">
+                <div
+                    class="flex-none truncate whitespace-nowrap text-2xl font-bold"
+                    x-text="$wire.sum"
+                ></div>
+                @if ($shouldBePositive)
                     <template x-if="$wire.growthRate !== null">
                         <div>
                             <x-badge
@@ -29,9 +36,8 @@
                             >
                                 <x-slot:left>
                                     <i class="ph ph-caret-up"></i>
-                                </x-slot:left>
-                                <span x-text="$wire.growthRate + '%'">
-                                </span>
+                                </x-slot>
+                                <span x-text="$wire.growthRate + '%'"></span>
                             </x-badge>
                             <x-badge
                                 x-cloak
@@ -41,9 +47,8 @@
                             >
                                 <x-slot:left>
                                     <i class="ph ph-caret-down"></i>
-                                </x-slot:left>
-                                <span x-text="$wire.growthRate + '%'">
-                                </span>
+                                </x-slot>
+                                <span x-text="$wire.growthRate + '%'"></span>
                             </x-badge>
                         </div>
                     </template>
@@ -58,9 +63,8 @@
                             >
                                 <x-slot:left>
                                     <i class="ph ph-caret-up"></i>
-                                </x-slot:left>
-                                <span x-text="$wire.growthRate + '%'">
-                                </span>
+                                </x-slot>
+                                <span x-text="$wire.growthRate + '%'"></span>
                             </x-badge>
                             <x-badge
                                 x-cloak
@@ -70,20 +74,25 @@
                             >
                                 <x-slot:left>
                                     <i class="ph ph-caret-down"></i>
-                                </x-slot:left>
-                                <span x-text="$wire.growthRate + '%'">
-                                </span>
+                                </x-slot>
+                                <span x-text="$wire.growthRate + '%'"></span>
                             </x-badge>
                         </div>
                     </template>
                 @endif
             </div>
-            <div class="text-lg font-semibold whitespace-nowrap truncate flex-none" x-html="$wire.subValue">
-            </div>
+            <div
+                class="flex-none truncate whitespace-nowrap text-lg font-semibold"
+                x-html="$wire.subValue"
+            ></div>
         </div>
         <div class="min-h-6">
-            <span class="text-gray-400" x-cloak x-show="$wire.previousSum" x-text="'{{ __('Previous Period') }} ' + $wire.previousSum">
-            </span>
+            <span
+                class="text-gray-400"
+                x-cloak
+                x-show="$wire.previousSum"
+                x-text="'{{ __("Previous Period") }} ' + $wire.previousSum"
+            ></span>
         </div>
     </div>
 </div>

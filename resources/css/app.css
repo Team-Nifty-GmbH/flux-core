@@ -6,13 +6,13 @@
 @import "/node_modules/leaflet.markercluster/dist/MarkerCluster.css";
 @import "/node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css";
 
-@import '/node_modules/gridstack/dist/gridstack.min.css';
-@import '/node_modules/gridstack/dist/gridstack-extra.min.css';
-@import './components/grid-stack.css';
-@import './components/apex-charts.css';
-@import './components/full-calendar.css';
+@import "/node_modules/gridstack/dist/gridstack.min.css";
+@import "/node_modules/gridstack/dist/gridstack-extra.min.css";
+@import "./components/grid-stack.css";
+@import "./components/apex-charts.css";
+@import "./components/full-calendar.css";
 
-@import '/node_modules/@phosphor-icons/web/src/regular/style.css';
+@import "/node_modules/@phosphor-icons/web/src/regular/style.css";
 
 @import "/node_modules/filepond/dist/filepond.css";
 @import "/node_modules/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css";
@@ -35,18 +35,19 @@
     }
 
     .sortable-chosen {
-        @apply !border-dashed border-2 !border-primary-500 !bg-indigo-100;
+        @apply border-2 !border-dashed !border-primary-500 !bg-indigo-100;
     }
 
     .sortable-selected {
-        @apply !border-dashed border-2 !border-primary-500 !bg-indigo-100;
+        @apply border-2 !border-dashed !border-primary-500 !bg-indigo-100;
     }
 
     .sortable-to {
-        @apply !border-dashed border-2 !border-primary-500 !bg-indigo-100;
+        @apply border-2 !border-dashed !border-primary-500 !bg-indigo-100;
     }
 
-    .text-secondary-400, .text-gray-400 {
+    .text-secondary-400,
+    .text-gray-400 {
         @apply text-gray-200;
     }
 
@@ -76,22 +77,22 @@
     }
 
     #map {
-        @apply h-96 z-0;
+        @apply z-0 h-96;
     }
 
     .mention {
-        @apply rounded-md bg-indigo-100 text-primary-500 p-1;
+        @apply rounded-md bg-indigo-100 p-1 text-primary-500;
     }
 
     .tippy-box {
-        @apply w-full rounded-t-md sm:rounded-xl border border-secondary-200 bg-white shadow-lg dark:bg-secondary-800 dark:border-secondary-600 transition-all relative overflow-hidden pointer-events-auto;
+        @apply pointer-events-auto relative w-full overflow-hidden rounded-t-md border border-secondary-200 bg-white shadow-lg transition-all sm:rounded-xl dark:border-secondary-600 dark:bg-secondary-800;
     }
 
     .suggestion-item {
-        @apply py-2 px-3 focus:outline-none ease-in-out duration-150 relative text-secondary-600 dark:text-secondary-400 flex items-center justify-between cursor-pointer focus:bg-indigo-100 focus:text-primary-800 hover:text-white dark:focus:bg-secondary-700 hover:bg-indigo-500 dark:hover:bg-secondary-700;
+        @apply relative flex cursor-pointer items-center justify-between px-3 py-2 text-secondary-600 duration-150 ease-in-out hover:bg-indigo-500 hover:text-white focus:bg-indigo-100 focus:text-primary-800 focus:outline-none dark:text-secondary-400 dark:hover:bg-secondary-700 dark:focus:bg-secondary-700;
     }
 }
 
 .sortable-ghost {
-    @apply !opacity-75 !border-dashed border-2 !border-primary-500 !bg-indigo-100;
+    @apply border-2 !border-dashed !border-primary-500 !bg-indigo-100 !opacity-75;
 }

@@ -34,7 +34,9 @@
             />
         </div>
         <x-slot:footer>
-            <x-button color="secondary" light
+            <x-button
+                color="secondary"
+                light
                 flat
                 :text="__('Cancel')"
                 x-on:click="$modalClose('edit-bundle-product-modal')"
@@ -45,9 +47,9 @@
                 :text="__('Save')"
                 wire:click="save().then((success) => { if(success) $modalClose('edit-bundle-product-modal'); })"
             />
-        </x-slot:footer>
+        </x-slot>
     </x-modal>
     <div wire:ignore>
-        @include('tall-datatables::livewire.data-table')
+        @include("tall-datatables::livewire.data-table")
     </div>
 </div>

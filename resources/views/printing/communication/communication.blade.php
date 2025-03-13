@@ -1,5 +1,5 @@
 <x-flux::print.first-page-header>
-    {!! nl2br(implode('<br>', $model->to)) !!}
+    {!! nl2br(implode("<br>", $model->to)) !!}
 </x-flux::print.first-page-header>
 <main>
     <div>

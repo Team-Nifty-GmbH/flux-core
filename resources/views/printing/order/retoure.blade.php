@@ -1,1 +1,1 @@
-@extends('flux::printing.order.order')
+@extends("flux::printing.order.order")

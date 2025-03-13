@@ -1,1 +1,1 @@
-@extends('flux::livewire.order.purchase')
+@extends("flux::livewire.order.purchase")

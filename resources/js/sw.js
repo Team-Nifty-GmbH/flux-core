@@ -1,5 +1,5 @@
-self.addEventListener('push', function (e) {
-    if (!(self.Notification && self.Notification.permission === 'granted')) {
+self.addEventListener("push", function (e) {
+    if (!(self.Notification && self.Notification.permission === "granted")) {
         return;
     }
 
@@ -9,7 +9,7 @@ self.addEventListener('push', function (e) {
     }
 });
 
-self.addEventListener('notificationclick', function (e) {
+self.addEventListener("notificationclick", function (e) {
     e.notification.close();
 
     if (e.notification.data.url) {

@@ -1,11 +1,18 @@
 <div>
-    <x-modal id="edit-project" x-on:create-project.window="$wire.resetForm(); $modalClose('edit-project');">
+    <x-modal
+        id="edit-project"
+        x-on:create-project.window="$wire.resetForm(); $modalClose('edit-project');"
+    >
         <x-card>
-            <div x-data="{edit: true, formatter: @js(resolve_static(\FluxErp\Models\Project::class, 'typeScriptAttributes'))}">
-                <x-project.edit/>
+            <div
+                x-data="{ edit: true, formatter: @js(resolve_static(\FluxErp\Models\Project::class, "typeScriptAttributes")) }"
+            >
+                <x-project.edit />
             </div>
             <x-slot:footer>
-                <x-button color="secondary" light
+                <x-button
+                    color="secondary"
+                    light
                     flat
                     :text="__('Cancel')"
                     x-on:click="$modalClose('edit-project')"
@@ -21,7 +28,7 @@
                         }
                     });"
                 />
-            </x-slot:footer>
+            </x-slot>
         </x-card>
     </x-modal>
 </div>

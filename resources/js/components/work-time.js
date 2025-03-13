@@ -1,10 +1,10 @@
 export default function ($wire, route) {
     return {
-        currentWorkTime: $wire.entangle('workTime'),
+        currentWorkTime: $wire.entangle("workTime"),
         time: 0,
         open: false,
-        activeWorkTimes: $wire.entangle('activeWorkTimes'),
-        trackable_type: $wire.entangle('workTime.trackable_type'),
+        activeWorkTimes: $wire.entangle("activeWorkTimes"),
+        trackable_type: $wire.entangle("workTime.trackable_type"),
         runningTimers: {},
         destroy() {
             const keys = Object.keys(this.runningTimers);
@@ -26,8 +26,7 @@ export default function ($wire, route) {
                 return this.calculateTime(workTime) + acc;
             }, 0);
 
-
-            this.$watch('activeWorkTimes', (value) => {
+            this.$watch("activeWorkTimes", (value) => {
                 this.activeWorkTimes.forEach((workTime) => {
                     if (workTime.ended_at) {
                         if (this.runningTimers[workTime.id]) {
@@ -42,17 +41,17 @@ export default function ($wire, route) {
                 });
             });
 
-            this.$watch('trackable_type', () => {
+            this.$watch("trackable_type", () => {
                 this.relatedSelected(this.trackable_type);
             });
         },
         relatedSelected(type) {
-            if (! type) return;
+            if (!type) return;
 
             let searchRoute = route;
             $wire.workTime.trackable_id = null;
-            searchRoute = searchRoute + '/' + type;
-            $tallstackuiSelect('trackable-id').setRequestUrl(searchRoute);
+            searchRoute = searchRoute + "/" + type;
+            $tallstackuiSelect("trackable-id").setRequestUrl(searchRoute);
         },
         recordSelected(data) {
             if (!data) {
@@ -63,7 +62,9 @@ export default function ($wire, route) {
         },
         calculateTime(workTime) {
             const startedAt = new Date(workTime.started_at);
-            const endedAt = workTime.ended_at ? new Date(workTime.ended_at) : new Date();
+            const endedAt = workTime.ended_at
+                ? new Date(workTime.ended_at)
+                : new Date();
             let diff = endedAt - startedAt;
             return diff - workTime.paused_time_ms;
         },
@@ -75,14 +76,17 @@ export default function ($wire, route) {
             this.runningTimers[workTime.id] = setInterval(() => {
                 // the greatest work time id should calculate time sum of all active work times
                 const greatestId = Object.keys(this.runningTimers)
-                    .map(e => Number.parseInt(e))
-                    .sort((a, b) => a - b).pop();
+                    .map((e) => Number.parseInt(e))
+                    .sort((a, b) => a - b)
+                    .pop();
                 if (greatestId === workTime.id) {
                     this.time = this.activeWorkTimes.reduce((acc, workTime) => {
                         return this.calculateTime(workTime) + acc;
                     }, 0);
                 }
-                document.querySelector(`#active-work-times [data-id='${workTime.id}']`).innerHTML = this.msTimeToString(this.calculateTime(workTime));
+                document.querySelector(
+                    `#active-work-times [data-id='${workTime.id}']`,
+                ).innerHTML = this.msTimeToString(this.calculateTime(workTime));
             }, 1000);
         },
         msTimeToString(time) {
@@ -92,9 +96,9 @@ export default function ($wire, route) {
             let hours = Math.floor(minutes / 60);
             minutes = minutes % 60;
 
-            hours = hours.toString().padStart(2, '0');
-            minutes = minutes.toString().padStart(2, '0');
-            seconds = seconds.toString().padStart(2, '0');
+            hours = hours.toString().padStart(2, "0");
+            minutes = minutes.toString().padStart(2, "0");
+            seconds = seconds.toString().padStart(2, "0");
 
             return `${hours}:${minutes}:${seconds}`;
         },
@@ -130,6 +134,6 @@ export default function ($wire, route) {
         async continueWorkTime(workTime) {
             // timer start takes place in watcher
             await $wire.continue(workTime.id);
-        }
-    }
+        },
+    };
 }

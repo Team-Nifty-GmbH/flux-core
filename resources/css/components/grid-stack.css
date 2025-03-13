@@ -1,9 +1,9 @@
 .grid-stack {
-    @apply w-full
+    @apply w-full;
 }
 
 .grid-stack-item-content {
-    @apply flex place-content-center col-span-full dark:text-gray-50 m-0 rounded-lg shadow-md bg-white dark:bg-secondary-800;
+    @apply col-span-full m-0 flex place-content-center rounded-lg bg-white shadow-md dark:bg-secondary-800 dark:text-gray-50;
 }
 
 .grid-stack > .grid-stack-item > .grid-stack-item-content {
@@ -11,15 +11,15 @@
 }
 
 ::-webkit-scrollbar {
-    width: .5rem;
+    width: 0.5rem;
 }
 
 ::-webkit-scrollbar-track {
-    @apply bg-gray-200 dark:bg-gray-700 rounded;
+    @apply rounded bg-gray-200 dark:bg-gray-700;
 }
 
 ::-webkit-scrollbar-thumb {
-    @apply bg-gray-400 rounded;
+    @apply rounded bg-gray-400;
 }
 
 ::-webkit-scrollbar-thumb:hover {
