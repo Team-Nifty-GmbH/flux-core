@@ -164,7 +164,7 @@
             <div>
                 @include('tall-datatables::livewire.data-table')
                 @section('order-positions-footer-card')
-                    <div x-show="! $wire.order.is_locked" x-cloak class="sticky bottom-6 pt-6">
+                    <div x-show="! $wire.order.is_locked" x-cloak class="sticky bottom-6 pt-6 z-10">
                         <x-card>
                             <form class="flex flex-col gap-4" x-on:submit.prevent="$wire.quickAdd().then(() => Alpine.$data($el.querySelector('[x-data]')).show = true)">
                                 <div class="flex flex-col gap-4">
