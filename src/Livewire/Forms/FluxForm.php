@@ -17,6 +17,11 @@ abstract class FluxForm extends BaseForm
 
     protected ?string $modelClass = null;
 
+    public function canAction(string $action): bool
+    {
+        return resolve_static(data_get($this->getActions(), $action), 'canPerformAction', [false]);
+    }
+
     public function create(): void
     {
         $response = $this->makeAction('create')
