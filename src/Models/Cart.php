@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use InvalidArgumentException;
 
 class Cart extends FluxModel
 {
@@ -84,7 +85,7 @@ class Cart extends FluxModel
             $address = $this->authenticatable ?? auth()->user();
 
             if (! $address instanceof Address) {
-                throw new \InvalidArgumentException('Address must be an instance of ' . Address::class);
+                throw new InvalidArgumentException('Address must be an instance of ' . Address::class);
             }
         }
 

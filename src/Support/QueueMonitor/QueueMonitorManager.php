@@ -16,6 +16,7 @@ use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Queue\Events\JobQueued;
 use Illuminate\Support\Carbon;
+use Throwable;
 
 class QueueMonitorManager
 {
@@ -57,7 +58,7 @@ class QueueMonitorManager
         static::jobFinished($event->job, Failed::class);
     }
 
-    protected static function jobFinished(Job $job, string $state, ?\Throwable $exception = null): void
+    protected static function jobFinished(Job $job, string $state, ?Throwable $exception = null): void
     {
         $monitor = resolve_static(QueueMonitor::class, 'query')
             ->where('job_id', static::getJobId($job))

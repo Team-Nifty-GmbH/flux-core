@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use Exception;
 use FluxErp\Mail\MagicLoginLink;
 use FluxErp\Models\Pivots\PrinterUser;
 use FluxErp\Traits\CacheModelQueries;
@@ -128,7 +129,7 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function getAvatarUrl(): ?string
     {

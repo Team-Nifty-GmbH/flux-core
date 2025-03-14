@@ -2,6 +2,7 @@
 
 namespace FluxErp\Traits\Livewire;
 
+use Exception;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Number;
 use Illuminate\Support\Str;
@@ -81,7 +82,7 @@ trait WithFilePond
 
             $this->latestUploads = $media;
             $this->files = [];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             exception_to_notifications($e, $this);
 
             return false;

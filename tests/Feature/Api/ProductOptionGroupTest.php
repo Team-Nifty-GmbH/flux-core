@@ -97,7 +97,7 @@ class ProductOptionGroupTest extends BaseSetup
 
         $response = $this->actingAs($this->user)
             ->delete('/api/product-option-groups/' . $this->productOptionGroups[1]->id);
-        $response->assertStatus(207);
+        $response->assertStatus(423);
     }
 
     public function test_delete_product_option_group_product_option_group_not_found(): void

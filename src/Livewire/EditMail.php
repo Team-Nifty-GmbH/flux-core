@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire;
 
+use Exception;
 use FluxErp\Livewire\Forms\CommunicationForm;
 use FluxErp\Mail\GenericMail;
 use FluxErp\Models\Media;
@@ -199,7 +200,7 @@ class EditMail extends Component
                     $message->queue($mail);
                 }
 
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 exception_to_notifications(
                     exception: $e,
                     component: $this,

@@ -161,7 +161,7 @@ class ValueListTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->delete('/api/value-lists/' . $valueList->id);
-        $response->assertStatus(404);
+        $response->assertStatus(422);
     }
 
     public function test_get_value_list(): void

@@ -15,6 +15,7 @@ use Illuminate\Support\Traits\Macroable;
 use InvalidArgumentException;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use Throwable;
 
 class RepeatableManager
 {
@@ -76,7 +77,7 @@ class RepeatableManager
             // if the cache is not available, we will iterate over the directory
             try {
                 $repeatables = Cache::get('flux.repeatable.' . $cacheKey);
-            } catch (\Throwable) {
+            } catch (Throwable) {
                 $repeatables = null;
             }
 
@@ -119,7 +120,7 @@ class RepeatableManager
 
             try {
                 Cache::put('flux.repeatable.' . $cacheKey, $repeatables);
-            } catch (\Throwable) {
+            } catch (Throwable) {
                 // Ignore exceptions during cache put
             }
         }

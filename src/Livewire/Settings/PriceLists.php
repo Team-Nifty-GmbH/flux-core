@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Settings;
 
+use Exception;
 use FluxErp\Actions\Discount\CreateDiscount;
 use FluxErp\Actions\Discount\UpdateDiscount;
 use FluxErp\Actions\PriceList\CreatePriceList;
@@ -200,7 +201,7 @@ class PriceLists extends PriceListList
                         ->checkPermission()
                         ->validate()
                         ->execute();
-                } catch (\Exception) {
+                } catch (Exception) {
                     continue;
                 }
 
@@ -219,7 +220,7 @@ class PriceLists extends PriceListList
                         ->checkPermission()
                         ->validate()
                         ->execute();
-                } catch (\Exception) {
+                } catch (Exception) {
                     continue;
                 }
 

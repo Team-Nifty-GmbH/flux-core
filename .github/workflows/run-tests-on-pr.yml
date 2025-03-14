@@ -98,8 +98,11 @@ jobs:
       - name: Pint
         run: ./vendor/bin/pint --test
 
-      - name: Clear Orchestra Testbench Cache
+      - name: Clear Orchestra Testbench View Cache
         run: ./vendor/bin/testbench view:clear
+
+      - name: Clear Orchestra Testbench Cache
+        run: ./vendor/bin/testbench cache:clear
 
       - name: Create schema
         run: |

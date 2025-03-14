@@ -12,6 +12,8 @@ trait WithTabs
 
     protected array $_tabs = [];
 
+    abstract public function getTabs(): array;
+
     public function getTabButton(string $component): TabButton
     {
         $this->setTabsToRender($this->getTabs());
@@ -21,8 +23,6 @@ trait WithTabs
 
         return collect($this->getTabsToRender())->keyBy('component')->toArray()[$component];
     }
-
-    abstract public function getTabs(): array;
 
     public function getTabsToRender(): array
     {

@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Features\Communications;
 
+use Exception;
 use FluxErp\Actions\Communication\CreateCommunication;
 use FluxErp\Actions\Communication\DeleteCommunication;
 use FluxErp\Actions\Communication\UpdateCommunication;
@@ -269,7 +270,7 @@ class Communication extends CommunicationList
                 ->cc($this->communication->cc)
                 ->bcc($this->communication->bcc)
                 ->send(GenericMail::make($this->communication));
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             exception_to_notifications($e, $this);
 
             return false;

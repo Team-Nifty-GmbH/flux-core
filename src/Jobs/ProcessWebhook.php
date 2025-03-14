@@ -11,6 +11,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Str;
+use ReflectionClass;
 
 class ProcessWebhook implements ShouldQueue
 {
@@ -48,7 +49,7 @@ class ProcessWebhook implements ShouldQueue
         $this->model = $event->model;
         $this->user = $user->withoutRelations();
 
-        $classReflection = new \ReflectionClass(get_class($event));
+        $classReflection = new ReflectionClass(get_class($event));
         $this->event = $classReflection->getShortName();
     }
 
@@ -64,7 +65,7 @@ class ProcessWebhook implements ShouldQueue
         $timestamp = Carbon::now()->unix();
         $token = Str::random(50);
 
-        $classReflection = new \ReflectionClass(get_class($this->model));
+        $classReflection = new ReflectionClass(get_class($this->model));
 
         $body = [
             'signature' => [

@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Context;
+use Throwable;
 
 class AuthContextMiddleware
 {
@@ -13,7 +14,7 @@ class AuthContextMiddleware
     {
         try {
             Context::add('user', Auth::user()->getMorphClass() . ':' . Auth::id());
-        } catch (\Throwable) {
+        } catch (Throwable) {
             Context::forget('user');
         }
 

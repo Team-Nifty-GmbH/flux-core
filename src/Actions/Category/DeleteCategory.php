@@ -49,7 +49,9 @@ class DeleteCategory extends FluxAction
         }
 
         if ($errors) {
-            throw ValidationException::withMessages($errors)->errorBag('deleteCategory');
+            throw ValidationException::withMessages($errors)
+                ->errorBag('deleteCategory')
+                ->status(423);
         }
     }
 }

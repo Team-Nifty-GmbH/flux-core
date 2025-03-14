@@ -2,13 +2,13 @@
 
 namespace FluxErp\Livewire\Settings;
 
-use FluxErp\Actions\Translation\CreateTranslation;
-use FluxErp\Actions\Translation\DeleteTranslation;
-use FluxErp\Actions\Translation\UpdateTranslation;
+use FluxErp\Actions\LanguageLine\CreateLanguageLine;
+use FluxErp\Actions\LanguageLine\DeleteLanguageLine;
+use FluxErp\Actions\LanguageLine\UpdateLanguageLine;
 use FluxErp\Models\LanguageLine;
 use FluxErp\Rules\UniqueInFieldDependence;
-use FluxErp\Rulesets\Translation\CreateTranslationRuleset;
-use FluxErp\Rulesets\Translation\UpdateTranslationRuleset;
+use FluxErp\Rulesets\LanguageLine\CreateLanguageLineRuleset;
+use FluxErp\Rulesets\LanguageLine\UpdateLanguageLineRuleset;
 use FluxErp\Services\TranslationService;
 use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\View\View;
@@ -36,7 +36,7 @@ class TranslationEdit extends Component
     public function mount(): void
     {
         $this->translation = array_fill_keys(
-            array_keys(resolve_static(CreateTranslationRuleset::class, 'getRules')),
+            array_keys(resolve_static(CreateLanguageLineRuleset::class, 'getRules')),
             null
         );
 
@@ -54,7 +54,7 @@ class TranslationEdit extends Component
 
     public function delete(): void
     {
-        if (! resolve_static(DeleteTranslation::class, 'canPerformAction', [false])) {
+        if (! resolve_static(DeleteLanguageLine::class, 'canPerformAction', [false])) {
             return;
         }
 
@@ -67,8 +67,8 @@ class TranslationEdit extends Component
     public function getRules(): array
     {
         $rules = $this->isNew ?
-            resolve_static(CreateTranslationRuleset::class, 'getRules') :
-            resolve_static(UpdateTranslationRuleset::class, 'getRules');
+            resolve_static(CreateLanguageLineRuleset::class, 'getRules') :
+            resolve_static(UpdateLanguageLineRuleset::class, 'getRules');
 
         foreach ($rules['key'] as $key => $rule) {
             if ($rule instanceof UniqueInFieldDependence) {
@@ -92,8 +92,8 @@ class TranslationEdit extends Component
 
     public function save(): void
     {
-        if (($this->isNew && ! resolve_static(CreateTranslation::class, 'canPerformAction', [false])) ||
-            (! $this->isNew && ! resolve_static(UpdateTranslation::class, 'canPerformAction', [false]))
+        if (($this->isNew && ! resolve_static(CreateLanguageLine::class, 'canPerformAction', [false])) ||
+            (! $this->isNew && ! resolve_static(UpdateLanguageLine::class, 'canPerformAction', [false]))
         ) {
             $this->notification()->error(
                 __('insufficient permissions'),
@@ -137,7 +137,7 @@ class TranslationEdit extends Component
 
         $this->translation = $translation ?:
             array_fill_keys(
-                array_keys(resolve_static(CreateTranslationRuleset::class, 'getRules')),
+                array_keys(resolve_static(CreateLanguageLineRuleset::class, 'getRules')),
                 null
             );
 

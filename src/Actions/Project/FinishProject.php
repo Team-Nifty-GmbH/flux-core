@@ -7,9 +7,12 @@ use FluxErp\Models\Project;
 use FluxErp\Rulesets\Project\FinishProjectRuleset;
 use FluxErp\States\Project\Done;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Response;
 
 class FinishProject extends FluxAction
 {
+    public static ?int $successCode = Response::HTTP_OK;
+
     public static function models(): array
     {
         return [Project::class];

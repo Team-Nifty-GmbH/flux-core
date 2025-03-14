@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\DataTables;
 
+use Exception;
 use FluxErp\Actions\Ticket\CreateTicket;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Ticket;
@@ -118,7 +119,7 @@ class TicketList extends BaseDataTable
                 ->checkPermission()
                 ->validate()
                 ->execute();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             exception_to_notifications($e, $this);
 
             return;
@@ -126,7 +127,7 @@ class TicketList extends BaseDataTable
 
         try {
             $this->saveFileUploadsToMediaLibrary('attachments', $ticket->id, morph_alias(Ticket::class));
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             exception_to_notifications($e, $this);
         }
 

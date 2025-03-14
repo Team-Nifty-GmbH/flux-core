@@ -2,6 +2,7 @@
 
 namespace FluxErp\Menu;
 
+use Closure;
 use FluxErp\Models\Permission;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Arr;
@@ -87,7 +88,7 @@ class MenuManager
         ?string $icon = null,
         ?string $label = null,
         ?int $order = null,
-        ?\Closure $closure = null): void
+        ?Closure $closure = null): void
     {
         data_set($this->registeredGroups, $path, [
             'label' => $label ?? data_get($this->registeredGroups, $path . '.label'),
@@ -197,7 +198,7 @@ class MenuManager
         }
     }
 
-    private function sortMultiDimensional(array $array, ?\Closure $filter = null): array
+    private function sortMultiDimensional(array $array, ?Closure $filter = null): array
     {
         $array = array_filter($array, $filter);
 

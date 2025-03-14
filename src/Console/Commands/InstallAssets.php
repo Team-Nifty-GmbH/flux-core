@@ -2,8 +2,10 @@
 
 namespace FluxErp\Console\Commands;
 
+use Closure;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
+use InvalidArgumentException;
 use RuntimeException;
 use Symfony\Component\Process\Process;
 
@@ -30,7 +32,7 @@ class InstallAssets extends Command
         ?array $files = null,
         bool $force = false,
         bool $merge = true,
-        ?\Closure $basePath = null
+        ?Closure $basePath = null
     ): void {
         $files = is_array($files)
             ? $files
@@ -123,7 +125,7 @@ class InstallAssets extends Command
     {
         $target = $this->argument('directory');
         if ($target && ! file_exists($target)) {
-            throw new \InvalidArgumentException('The target directory does not exist.');
+            throw new InvalidArgumentException('The target directory does not exist.');
         }
 
         $this->callSilent('storage:link');

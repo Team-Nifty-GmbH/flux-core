@@ -2,11 +2,13 @@
 
 namespace FluxErp\Traits;
 
+use Closure;
+
 trait Printable
 {
     public static array $registeredPrintViews = [];
 
-    public static function registerPrintView(string $name, \Closure|string $viewClass): void
+    public static function registerPrintView(string $name, Closure|string $viewClass): void
     {
         static::$registeredPrintViews[$name] = $viewClass;
     }
@@ -35,7 +37,7 @@ trait Printable
                 continue;
             }
 
-            if ($view instanceof \Closure) {
+            if ($view instanceof Closure) {
                 $resolvedClosure = $view($this);
                 $printViews[$name] = $resolvedClosure ?: null;
             }

@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\DataTables\Settings;
 
+use Exception;
 use FluxErp\Actions\DiscountGroup\CreateDiscountGroup;
 use FluxErp\Actions\DiscountGroup\DeleteDiscountGroup;
 use FluxErp\Actions\DiscountGroup\UpdateDiscountGroup;
@@ -54,7 +55,7 @@ class DiscountGroupList extends BaseDiscountGroupList
                 ->checkPermission()
                 ->validate()
                 ->execute();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             exception_to_notifications($e, $this);
 
             return;
@@ -77,7 +78,7 @@ class DiscountGroupList extends BaseDiscountGroupList
 
         try {
             $action->checkPermission()->validate()->execute();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             exception_to_notifications($e, $this);
 
             return false;

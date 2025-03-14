@@ -6,6 +6,7 @@ use FluxErp\Enums\ComposerRepositoryTypeEnum;
 use FluxErp\Rulesets\Plugin\UploadPluginRuleset;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+use ZipArchive;
 
 class Upload extends BasePluginAction
 {
@@ -27,11 +28,11 @@ class Upload extends BasePluginAction
         $packages = [];
         foreach ($this->data['packages'] as $package) {
             /** @var \Illuminate\Http\UploadedFile $package */
-            $zip = new \ZipArchive();
+            $zip = new ZipArchive();
             $res = $zip->open($package->getRealPath());
             if ($res === true) {
                 // get content of composer.json before extracting
-                $fileIndex = $zip->locateName('composer.json', \ZipArchive::FL_NODIR);
+                $fileIndex = $zip->locateName('composer.json', ZipArchive::FL_NODIR);
                 if ($fileIndex === false) {
                     continue;
                 }

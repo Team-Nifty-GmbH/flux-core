@@ -2,6 +2,7 @@
 
 namespace FluxErp\Console\Commands;
 
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Console\ConfirmableTrait;
 use Illuminate\Foundation\Console\KeyGenerateCommand;
@@ -133,7 +134,7 @@ class Init extends Command
         if (! empty($filter)) {
             try {
                 $this->call($filter . ':init', []);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $this->error($filter . ' not found');
             }
         } else {

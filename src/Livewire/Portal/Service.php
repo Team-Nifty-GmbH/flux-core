@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Portal;
 
+use Exception;
 use FluxErp\Actions\Ticket\CreateTicket;
 use FluxErp\Models\SerialNumber;
 use FluxErp\Models\Ticket;
@@ -67,7 +68,7 @@ class Service extends Component
             $ticket = CreateTicket::make($this->ticket)
                 ->validate()
                 ->execute();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             exception_to_notifications($e, $this);
 
             return false;
@@ -75,7 +76,7 @@ class Service extends Component
 
         try {
             $this->saveFileUploadsToMediaLibrary('attachments', $ticket->id, app(Ticket::class)->getMorphClass());
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             exception_to_notifications($e, $this);
         }
 

@@ -2,6 +2,7 @@
 
 namespace FluxErp\Tests\Feature\Api;
 
+use FluxErp\Actions\Media\UploadMedia;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Address;
 use FluxErp\Models\Client;
@@ -161,7 +162,7 @@ class MediaTest extends BaseSetup
 
         $queryParams = '?model_type=notExistingModelType' . Str::random() . '&model_id=' . $this->task->id;
         $response = $this->actingAs($this->user)->get('/api/media/filename' . $queryParams);
-        $response->assertStatus(422);
+        $response->assertStatus(404);
     }
 
     public function test_download_media_private_media(): void
@@ -216,33 +217,46 @@ class MediaTest extends BaseSetup
     public function test_download_media_unauthenticated_private_media(): void
     {
         $modelType = $this->task->getMorphClass();
-        $media = [
+        UploadMedia::make([
             'model_type' => $modelType,
             'model_id' => $this->task->id,
             'media' => $this->file,
             'disk' => 'local',
-        ];
-
-        $this->user->givePermissionTo($this->permissions['upload']);
-        $this->user->givePermissionTo($this->permissions['download']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->post('/api/media', $media);
-        $response->assertStatus(201);
+        ])
+            ->validate()
+            ->execute();
 
         $uploadedMedia = $this->task->getFirstMedia();
         $queryParams = '?model_type=' . $modelType . '&model_id=' . $this->task->id;
 
         $download = $this->get('/api/media/' . $uploadedMedia->file_name . $queryParams);
-        $download->assertStatus(404);
+        $download->assertStatus(403);
     }
 
     public function test_download_media_validation_fails(): void
     {
         $this->user->givePermissionTo($this->permissions['download']);
+        $this->user->givePermissionTo($this->permissions['upload']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/media/notExistingFileName');
+        $media = [
+            'model_type' => $this->task->getMorphClass(),
+            'model_id' => $this->task->id,
+            'media' => $this->file,
+            'file_name' => $fileName = Str::uuid()->toString(),
+            'disk' => 'local',
+        ];
+
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->post('/api/media', $media);
+        $response->assertStatus(201);
+
+        $response = $this->actingAs($this->user)
+            ->get('/api/media/' . $fileName
+                . '?model_type=task&model_id=' . $this->task->id
+                . '&as=someInvalidValue'
+            );
         $response->assertStatus(422);
     }
 

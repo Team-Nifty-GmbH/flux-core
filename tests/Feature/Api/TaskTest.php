@@ -100,7 +100,7 @@ class TaskTest extends BaseSetup
         $response = $this->actingAs($this->user)->put('/api/tasks', $tasks);
         $response->assertStatus(200);
 
-        $responseTasks = collect(json_decode($response->getContent())->responses);
+        $responseTasks = collect(json_decode($response->getContent())->data->items);
         $this->assertEquals(2, count($responseTasks));
 
         $dbTasks = Task::query()

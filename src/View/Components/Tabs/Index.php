@@ -2,6 +2,7 @@
 
 namespace FluxErp\View\Components\Tabs;
 
+use Closure;
 use Illuminate\View\Component;
 
 class Index extends Component
@@ -18,7 +19,7 @@ class Index extends Component
     /**
      * Get the view / contents that represent the component.
      *
-     * @return \Illuminate\Contracts\View\View|\Closure|string
+     * @return \Illuminate\Contracts\View\View|Closure|string
      */
     public function render()
     {

@@ -474,7 +474,7 @@ class AddressTest extends BaseSetup
         $response = $this->actingAs($this->user)->put('/api/addresses', $address);
         $response->assertStatus(422);
 
-        $responses = json_decode($response->getContent())->responses;
+        $responses = json_decode($response->getContent())->data->items;
         $this->assertEquals($address[0]['id'], $responses[0]->id);
         $this->assertEquals(422, $responses[0]->status);
         $this->assertEquals($address[1]['id'], $responses[1]->id);

@@ -9,6 +9,7 @@ use Illuminate\Bus\Batch;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Facades\Bus;
+use Throwable;
 
 class JobBatch extends FluxModel
 {
@@ -70,7 +71,7 @@ class JobBatch extends FluxModel
             return CarbonInterval::seconds(
                 (1 - $this->getProgress()) / ($this->getProgress() / $timeDiff)
             )->cascade();
-        } catch (\Throwable) {
+        } catch (Throwable) {
             return CarbonInterval::seconds(0);
         }
     }

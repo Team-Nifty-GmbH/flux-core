@@ -5,6 +5,7 @@ namespace FluxErp\States;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 use Spatie\ModelStates\State as BaseState;
 use Spatie\ModelStates\StateConfig;
 
@@ -19,7 +20,7 @@ abstract class State extends BaseState implements Arrayable
         $stateClass = $baseStateClass ?? $config->baseStateClass;
 
         if (! is_a($stateClass, static::class, true)) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 "The state class `{$stateClass}` must be a subclass of `" . static::class . '`'
             );
         }

@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads as WithFileUploadsBase;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use ZipArchive;
 
 trait WithFileUploads
 {
@@ -48,12 +49,12 @@ trait WithFileUploads
             ->get();
 
         // add files to a zip file
-        $zip = new \ZipArchive();
+        $zip = new ZipArchive();
         $zipFileName = explode('.', $collection);
         $zipFileName = array_pop($zipFileName);
         $zipFileName = $zipFileName . '.zip';
 
-        $zip->open($zipFileName, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+        $zip->open($zipFileName, ZipArchive::CREATE | ZipArchive::OVERWRITE);
         foreach ($media as $file) {
             /** @var Media $file */
             if (! file_exists($file->getPath())) {

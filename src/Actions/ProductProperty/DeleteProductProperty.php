@@ -39,7 +39,9 @@ class DeleteProductProperty extends FluxAction
         ) {
             throw ValidationException::withMessages([
                 'products' => [__('Product property has products')],
-            ])->errorBag('deleteProductProperty');
+            ])
+                ->errorBag('deleteProductProperty')
+                ->status(423);
         }
     }
 }

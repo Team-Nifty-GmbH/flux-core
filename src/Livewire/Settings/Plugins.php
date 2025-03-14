@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Settings;
 
+use Exception;
 use FluxErp\Actions\Plugins\Install;
 use FluxErp\Actions\Plugins\ToggleActive;
 use FluxErp\Actions\Plugins\Uninstall;
@@ -21,6 +22,7 @@ use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
+use RuntimeException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 
 #[Lazy]
@@ -122,7 +124,7 @@ class Plugins extends Component
                 ->checkPermission()
                 ->validate()
                 ->execute();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             exception_to_notifications($e, $this);
 
             return false;
@@ -169,7 +171,7 @@ class Plugins extends Component
         try {
             $readme = file_get_contents($packageInfo['path'] . DIRECTORY_SEPARATOR . 'README.md');
             $this->readme = Str::markdown($readme);
-        } catch (\Exception) {
+        } catch (Exception) {
             $this->readme = null;
         }
 
@@ -212,7 +214,7 @@ class Plugins extends Component
                 ->checkPermission()
                 ->validate()
                 ->execute();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             exception_to_notifications($e, $this);
 
             return;
@@ -231,7 +233,7 @@ class Plugins extends Component
                 ->validate()
                 ->checkPermission()
                 ->execute();
-        } catch (\RuntimeException|UnauthorizedException|ValidationException $e) {
+        } catch (RuntimeException|UnauthorizedException|ValidationException $e) {
             exception_to_notifications($e, $this);
 
             return;
@@ -255,7 +257,7 @@ class Plugins extends Component
                 ->checkPermission()
                 ->validate()
                 ->execute();
-        } catch (\RuntimeException|UnauthorizedException|ValidationException $e) {
+        } catch (RuntimeException|UnauthorizedException|ValidationException $e) {
             exception_to_notifications($e, $this);
 
             return;
@@ -297,7 +299,7 @@ class Plugins extends Component
                 ->checkPermission()
                 ->validate()
                 ->execute();
-        } catch (\RuntimeException|UnauthorizedException|ValidationException $e) {
+        } catch (RuntimeException|UnauthorizedException|ValidationException $e) {
             exception_to_notifications($e, $this);
 
             return;

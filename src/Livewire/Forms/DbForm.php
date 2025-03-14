@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Forms;
 
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Rule;
 use Livewire\Form;
@@ -38,7 +39,7 @@ class DbForm extends Form
 
         try {
             DB::connection('mysql')->getPdo();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->addError(null, $e->getMessage());
         }
 

@@ -39,7 +39,9 @@ class DeleteProduct extends FluxAction
         ) {
             throw ValidationException::withMessages([
                 'children' => [__('The given product has children')],
-            ])->errorBag('deleteProduct');
+            ])
+                ->errorBag('deleteProduct')
+                ->status(423);
         }
     }
 }

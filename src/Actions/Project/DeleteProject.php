@@ -39,7 +39,9 @@ class DeleteProject extends FluxAction
         ) {
             throw ValidationException::withMessages([
                 'children' => [__('The given project has children')],
-            ])->errorBag('deleteProject');
+            ])
+                ->errorBag('deleteProject')
+                ->status(423);
         }
     }
 }

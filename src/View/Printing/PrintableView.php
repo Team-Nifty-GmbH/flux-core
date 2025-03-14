@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Str;
 use Illuminate\View\Component;
+use Imagick;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
@@ -31,7 +32,13 @@ abstract class PrintableView extends Component
 
     public bool $preview = false;
 
-    private ?\Imagick $imagick = null;
+    private ?Imagick $imagick = null;
+
+    abstract public function getFileName(): string;
+
+    abstract public function getModel(): ?Model;
+
+    abstract public function getSubject(): string;
 
     public static function getLayout(): ?string
     {
@@ -92,12 +99,6 @@ abstract class PrintableView extends Component
             ->validate()
             ->execute();
     }
-
-    abstract public function getFileName(): string;
-
-    abstract public function getModel(): ?Model;
-
-    abstract public function getSubject(): string;
 
     public function preview(bool $preview = true): static
     {

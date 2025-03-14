@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Settings;
 
+use Exception;
 use FluxErp\Actions\Permission\UpdateUserPermissions;
 use FluxErp\Actions\Role\UpdateUserRoles;
 use FluxErp\Actions\User\CreateUser;
@@ -94,7 +95,7 @@ class UserEdit extends Component
     {
         try {
             $this->userForm->delete();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             exception_to_notifications($e, $this);
 
             return;

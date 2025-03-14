@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Product;
 
+use Exception;
 use FluxErp\Actions\Tag\CreateTag;
 use FluxErp\Enums\PropertyTypeEnum;
 use FluxErp\Facades\ProductType;
@@ -217,7 +218,7 @@ class Product extends Component
             $this->redirect(route('products.products'), true);
 
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             exception_to_notifications($e, $this);
         }
 

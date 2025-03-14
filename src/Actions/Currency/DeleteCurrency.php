@@ -45,7 +45,9 @@ class DeleteCurrency extends FluxAction
         ) {
             throw ValidationException::withMessages([
                 'country' => [__('Currency referenced by a country')],
-            ])->errorBag('deleteCurrency');
+            ])
+                ->errorBag('deleteCurrency')
+                ->status(423);
         }
     }
 }

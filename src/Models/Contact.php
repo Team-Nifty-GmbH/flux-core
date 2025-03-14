@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use Exception;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Models\Pivots\ContactDiscount;
 use FluxErp\Models\Pivots\ContactDiscountGroup;
@@ -177,7 +178,7 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function getAvatarUrl(): ?string
     {

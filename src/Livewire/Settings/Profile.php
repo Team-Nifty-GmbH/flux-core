@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Settings;
 
+use Exception;
 use FluxErp\Actions\NotificationSetting\UpdateNotificationSetting;
 use FluxErp\Actions\User\UpdateUser;
 use FluxErp\Models\Language;
@@ -142,7 +143,7 @@ class Profile extends Component
                 auth()->id(),
                 app(User::class)->getMorphClass()
             );
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             exception_to_notifications($e, $this);
 
             return;

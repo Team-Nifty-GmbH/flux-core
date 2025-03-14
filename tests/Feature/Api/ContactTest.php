@@ -294,6 +294,23 @@ class ContactTest extends BaseSetup
         $this->assertTrue($this->user->is($dbContact->getUpdatedBy()));
     }
 
+    public function test_update_contact_customer_number_already_exists(): void
+    {
+        $contact = [
+            'id' => $this->contacts[0]->id,
+            'customer_number' => $this->contacts[1]->customer_number,
+        ];
+
+        $this->user->givePermissionTo($this->permissions['update']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->put('/api/contacts', $contact);
+        $response->assertStatus(422);
+
+        $responseContact = json_decode($response->getContent());
+        $this->assertTrue(property_exists($responseContact->errors, 'customer_number'));
+    }
+
     public function test_update_contact_maximum(): void
     {
         $contact = [
@@ -368,7 +385,7 @@ class ContactTest extends BaseSetup
         $response = $this->actingAs($this->user)->put('/api/contacts', $contacts);
         $response->assertStatus(422);
 
-        $responses = json_decode($response->getContent())->responses;
+        $responses = json_decode($response->getContent())->data->items;
         $this->assertEquals($contacts[0]['id'], $responses[0]->id);
         $this->assertEquals(422, $responses[0]->status);
         $this->assertTrue(property_exists($responses[0]->errors, 'payment_type_id'));
@@ -380,25 +397,7 @@ class ContactTest extends BaseSetup
         $this->assertTrue(property_exists($responses[2]->errors, 'payment_type_id'));
     }
 
-    public function test_update_contact_multi_status_customer_number_already_exists(): void
-    {
-        $contact = [
-            'id' => $this->contacts[0]->id,
-            'customer_number' => $this->contacts[1]->customer_number,
-        ];
-
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->put('/api/contacts', $contact);
-        $response->assertStatus(422);
-
-        $responseContact = json_decode($response->getContent());
-        $this->assertEquals($contact['id'], $responseContact->id);
-        $this->assertTrue(property_exists($responseContact->errors, 'customer_number'));
-    }
-
-    public function test_update_contact_multi_status_validation_fails(): void
+    public function test_update_contact_validation_fails(): void
     {
         $contact = [
             'customer_number' => $this->contacts[1]->customer_number,
@@ -411,7 +410,6 @@ class ContactTest extends BaseSetup
         $response->assertStatus(422);
 
         $responseContact = json_decode($response->getContent());
-        $this->assertNull($responseContact->id);
         $this->assertEquals(422, $responseContact->status);
     }
 }

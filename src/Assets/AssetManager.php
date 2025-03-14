@@ -2,6 +2,7 @@
 
 namespace FluxErp\Assets;
 
+use Exception;
 use FluxErp\Helpers\Vite;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Arr;
@@ -47,7 +48,7 @@ class AssetManager implements Htmlable
     public function register(string $name, string $path, array $attributes): void
     {
         if (! is_file($path) || ! file_exists($path)) {
-            throw new \Exception("Unable to locate asset file: {$path}");
+            throw new Exception("Unable to locate asset file: {$path}");
         }
 
         static::$assets[$name] = array_merge($attributes, ['path' => $path, 'name' => $name]);

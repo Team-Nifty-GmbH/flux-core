@@ -10,6 +10,8 @@ abstract class TaskState extends State implements HasFrontendFormatter
 {
     public static bool $isEndState;
 
+    abstract public function color(): string;
+
     public static function config(): StateConfig
     {
         return data_get(static::$config, static::class) ?? parent::config()
@@ -55,6 +57,4 @@ abstract class TaskState extends State implements HasFrontendFormatter
                 ->map(fn ($key) => (new $key(''))->color()),
         ];
     }
-
-    abstract public function color(): string;
 }
