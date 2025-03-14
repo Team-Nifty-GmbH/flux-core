@@ -1,5 +1,6 @@
 @props([
     'editable' => true,
+    'font' => true,
 ])
 
 <div>
@@ -87,6 +88,10 @@
         @if($codeBlock)
             <x-button flat color="secondary" icon="code-bracket-square" x-on:click="editor().chain().focus().toggleCodeBlock().run()">
             </x-button>
+        @endif
+        @if($font)
+                <x-button flat color="secondary" text="PX" x-on:click="console.log(editor().chain().focus().setFontSize({ size: 12 }))">
+                </x-button>
         @endif
     </template>
 </div>

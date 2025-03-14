@@ -23,5 +23,6 @@
             <x-flux::dashboard.edit-dashboard />
         @show
     </div>
+        <x-flux::editor transparent />
     <x-flux::dashboard.grid />
 </div>

@@ -1,6 +1,7 @@
 import { Editor } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import Mention from '@tiptap/extension-mention';
+import TextStyle from '@tiptap/extension-text-style';
 import axios from 'axios';
 
 export default function (content, debounceDelay = 0, searchModel = ['user', 'role']) {
@@ -22,6 +23,31 @@ export default function (content, debounceDelay = 0, searchModel = ['user', 'rol
                 const commands = this.$refs?.commands;
                 let actions = null;
 
+                const FontSize = TextStyle.extend({
+                    addAttributes() {
+                        return {
+                            fontSize: {
+                                default: '16px',
+                                parseHTML: element => element.style.fontSize,
+                                renderHTML: attributes => {
+                                    if (!attributes.fontSize) {
+                                        return {};
+                                    }
+                                    return { style: `font-size: ${attributes.fontSize}` };
+                                },
+                            },
+                        };
+                    },
+                    addCommands() {
+                        console.log('addCommands');
+                        return {
+                            setFontSize: fontSize => ({ chain }) => {
+                                return chain().setMark('fontSize', { fontSize }).run();
+                            }
+                        }
+                    }
+                })
+
                 if(showTooltipDropdown && popUp !== null) {
                     // append controllers to tiptap
                     const popUpNode = popUp.content.cloneNode(true);
@@ -40,6 +66,7 @@ export default function (content, debounceDelay = 0, searchModel = ['user', 'rol
                     element: element,
                     extensions: [
                         StarterKit,
+                        FontSize,
                         Mention.configure({
                             HTMLAttributes: { 'class': 'mention' },
                             suggestion: {
