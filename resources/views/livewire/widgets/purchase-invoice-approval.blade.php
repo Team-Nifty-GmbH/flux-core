@@ -3,12 +3,12 @@
         <h2
             class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400"
         >
-            {{ __("Purchase Invoice Approval") }}
+            {{ __('Purchase Invoice Approval') }}
         </h2>
     </div>
     <div
         class="flex-1 overflow-auto"
-        x-data="{ formatter: @js(resolve_static(\FluxErp\Models\Ticket::class, "typeScriptAttributes")) }"
+        x-data="{ formatter: @js(resolve_static(\FluxErp\Models\Ticket::class, 'typeScriptAttributes')) }"
     >
         @forelse ($invoices as $invoice)
             <x-flux::list-item :item="$invoice">
@@ -34,7 +34,7 @@
                             {{ $invoice->invoice_number }}
                         </div>
                         <div>
-                            {{ $invoice->invoice_date->locale(app()->getLocale())->isoFormat("L") }}
+                            {{ $invoice->invoice_date->locale(app()->getLocale())->isoFormat('L') }}
                         </div>
                     </div>
                 </x-slot>
@@ -46,13 +46,13 @@
                         wire:navigate
                         :href="route('orders.id', $invoice->id)"
                     >
-                        <div class="hidden sm:block">{{ __("View") }}</div>
+                        <div class="hidden sm:block">{{ __('View') }}</div>
                     </x-button>
                 </x-slot>
             </x-flux::list-item>
         @empty
             <div class="p-4 text-center text-gray-500 dark:text-gray-400">
-                {{ __("No invoices found") }}
+                {{ __('No invoices found') }}
             </div>
         @endforelse
     </div>

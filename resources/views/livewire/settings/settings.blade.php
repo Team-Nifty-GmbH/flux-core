@@ -17,7 +17,7 @@
             <div x-text="$wire.setting.path" />
         </x-slot>
         <x-flux::spinner />
-        @if ($settingComponent = data_get($setting, "component"))
+        @if ($settingComponent = data_get($setting, 'component'))
             <livewire:is
                 :component="$settingComponent"
                 :key="$settingComponent"

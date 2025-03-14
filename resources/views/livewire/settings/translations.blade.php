@@ -2,17 +2,17 @@
     class="py-6"
     x-data="{
         translations: $wire.entangle('translations'),
-        locale: @entangle("locale").live,
+        locale: @entangle('locale').live,
     }"
 >
     <div class="px-4 sm:px-6 lg:px-8">
         <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">
                 <h1 class="text-xl font-semibold dark:text-white">
-                    {{ __("Translations") }}
+                    {{ __('Translations') }}
                 </h1>
                 <div class="mt-2 text-sm text-gray-300">
-                    {{ __("Here you can manage your translations...") }}
+                    {{ __('Here you can manage your translations...') }}
                 </div>
             </div>
             <div class="mt-6 sm:ml-16">
@@ -56,13 +56,13 @@
                                         scope="col"
                                         class="py-3.5 pl-4 pr-4 text-left text-sm font-semibold text-gray-900 sm:pl-6"
                                     >
-                                        {{ __("Name") }}
+                                        {{ __('Name') }}
                                     </th>
                                     <th
                                         scope="col"
                                         class="px-4 py-3.5 text-left text-sm font-semibold text-gray-900"
                                     >
-                                        {{ __("Translations") }}
+                                        {{ __('Translations') }}
                                     </th>
                                     <th
                                         scope="col"
@@ -111,9 +111,9 @@
     >
         <livewire:settings.translation-edit />
         <x-slot:footer>
-            <div x-data="{ index: @entangle("index") }" class="w-full">
+            <div x-data="{ index: @entangle('index') }" class="w-full">
                 <div class="flex justify-between gap-x-4">
-                    @if (user_can("action.translation.delete"))
+                    @if (user_can('action.translation.delete'))
                         <x-button
                             color="red"
                             light

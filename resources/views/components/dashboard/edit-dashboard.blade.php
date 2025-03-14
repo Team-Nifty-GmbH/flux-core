@@ -1,4 +1,4 @@
-@use("FluxErp\Enums\TimeFrameEnum")
+@use('FluxErp\Enums\TimeFrameEnum')
 <div class="flex flex-col gap-2 md:flex-row">
     <div
         x-cloak
@@ -18,7 +18,7 @@
         >
             <x-date wire:model.live="params.start" :without-time="true" />
             <div>
-                <span class="px-2">{{ __("Till") }}</span>
+                <span class="px-2">{{ __('Till') }}</span>
             </div>
             <x-date wire:model.live="params.end" :without-time="true" />
         </div>

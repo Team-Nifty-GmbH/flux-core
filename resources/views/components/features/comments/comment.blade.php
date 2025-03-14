@@ -12,7 +12,7 @@
         <div class="flex justify-between text-sm">
             <div class="flex gap-1.5">
                 <div
-                    x-text="comment.created_by ?? '{{ __("Unknown") }}'"
+                    x-text="comment.created_by ?? '{{ __('Unknown') }}'"
                     class="font-medium text-gray-500"
                 ></div>
                 @if ($this->isPublic === true)
@@ -26,14 +26,15 @@
             @if (auth()->check())
                 <x-dropdown icon="ellipsis-vertical" static>
                     @canAction(\FluxErp\Actions\Comment\UpdateComment::class)
-                    <x-dropdown.items
-                        x-on:click="toggleSticky(comment); show = false;"
-                    >
-                        <span
-                            x-text="comment.is_sticky ? '{{ __("Unsticky") }}' : '{{ __("Sticky") }}'"
-                        ></span>
-                    </x-dropdown.items>
-                    @endCanAction
+                        <x-dropdown.items
+                            x-on:click="toggleSticky(comment); show = false;"
+                        >
+                            <span
+                                x-text="comment.is_sticky ? '{{ __('Unsticky') }}' : '{{ __('Sticky') }}'"
+                            ></span>
+                        </x-dropdown.items>
+                    @endcanAction
+
                     <x-dropdown.items
                         :text="__('Delete')"
                         x-bind:disabled="! comment.is_current_user"
@@ -56,7 +57,7 @@
                         <img
                             x-bind:src="
                                 file.preview_url === ''
-                                    ? '{{ route("icons", ["name" => "document", "variant" => "outline"]) }}'
+                                    ? '{{ route('icons', ['name' => 'document', 'variant' => 'outline']) }}'
                                     : file.preview_url
                             "
                             class="h-6 w-6"
@@ -95,20 +96,20 @@
                 x-text="'(' + window.formatters.datetime(new Date(comment.created_at)) + ')'"
             ></span>
             @canAction(\FluxErp\Actions\Comment\CreateComment::class)
-            <span class="">&middot;</span>
-            <button
-                type="button"
-                x-on:click.prevent="
-                    $refs.comments.querySelectorAll('.comment-input').forEach(function (el) {
-                        el.remove()
-                    })
-                    $el.parentNode.insertAdjacentHTML('beforeend', $refs.textarea.innerHTML)
-                    $wire.commentId = comment.id
-                "
-            >
-                {{ __("Answer") }}
-            </button>
-            @endCanAction
+                <span class="">&middot;</span>
+                <button
+                    type="button"
+                    x-on:click.prevent="
+                        $refs.comments.querySelectorAll('.comment-input').forEach(function (el) {
+                            el.remove()
+                        })
+                        $el.parentNode.insertAdjacentHTML('beforeend', $refs.textarea.innerHTML)
+                        $wire.commentId = comment.id
+                    "
+                >
+                    {{ __('Answer') }}
+                </button>
+            @endcanAction
         </div>
     </div>
 </div>

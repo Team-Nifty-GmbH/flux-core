@@ -1,5 +1,5 @@
 @props([
-    "supportsDocumentPreview" => false,
+    'supportsDocumentPreview' => false,
 ])
 @if ($supportsDocumentPreview)
     <x-modal
@@ -41,22 +41,22 @@
             <div
                 class="overflow-hidden text-ellipsis whitespace-nowrap font-bold"
             >
-                {{ __("Print") }}
+                {{ __('Print') }}
             </div>
             <div
                 class="overflow-hidden text-ellipsis whitespace-nowrap font-bold"
             >
-                {{ __("Email") }}
+                {{ __('Email') }}
             </div>
             <div
                 class="overflow-hidden text-ellipsis whitespace-nowrap font-bold"
             >
-                {{ __("Download") }}
+                {{ __('Download') }}
             </div>
             <div
                 class="overflow-hidden text-ellipsis whitespace-nowrap font-bold"
             >
-                {{ __("Force Create") }}
+                {{ __('Force Create') }}
             </div>
         </div>
         <div class="w-full divide-y divide-slate-300 dark:divide-slate-700">

@@ -2,7 +2,7 @@
     <defs>
         <style>
             .e {
-                fill: {{ $attributes->get("fill") ?? "url(#d)" }};
+                fill: {{ $attributes->get('fill') ?? 'url(#d)' }};
             }
         </style>
         <linearGradient

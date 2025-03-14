@@ -1,10 +1,10 @@
 <div
     class="fixed inset-0 z-30 overflow-y-auto p-4"
-    {{ $attributes->only("x-show") }}
+    {{ $attributes->only('x-show') }}
     x-cloak
 >
     <div
-        x-on:click="{{ $attributes->get("x-show") }} = false"
+        x-on:click="{{ $attributes->get('x-show') }} = false"
         class="bg-secondary-400 dark:bg-secondary-700 fixed inset-0 transform bg-opacity-60 transition-opacity dark:bg-opacity-60"
         {{ $attributes }}
         x-transition:enter="duration-300 ease-out"
@@ -16,7 +16,7 @@
     ></div>
     <aside
         x-cloak
-        {{ $attributes->merge(["class" => "fixed right-0 top-0 bottom-0 w-full sm:w-96 h-full backdrop-blur sm:backdrop-blur-none z-30 overflow-auto max-h-full soft-scrollbar shadow-md rounded-xl bg-white dark:bg-secondary-800"]) }}
+        {{ $attributes->merge(['class' => 'fixed right-0 top-0 bottom-0 w-full sm:w-96 h-full backdrop-blur sm:backdrop-blur-none z-30 overflow-auto max-h-full soft-scrollbar shadow-md rounded-xl bg-white dark:bg-secondary-800']) }}
         x-transition:enter="transform transition duration-500 ease-in-out"
         x-transition:enter-start="translate-x-full"
         x-transition:enter-end="translate-x-0"
@@ -31,7 +31,7 @@
             class="bg-secondary-50 dark:border-secondary-600 dark:bg-secondary-800 absolute sticky bottom-0 w-full rounded-xl rounded-t-none border-t px-4 py-4 sm:px-6"
         >
             <div class="flex justify-end gap-x-4">
-                {{ $footer ?? "" }}
+                {{ $footer ?? '' }}
             </div>
         </div>
     </aside>

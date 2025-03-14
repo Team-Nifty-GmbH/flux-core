@@ -1,5 +1,5 @@
-<div x-data="{ show: @entangle("show").live }">
-    {{ $prepend ?? "" }}
+<div x-data="{ show: @entangle('show').live }">
+    {{ $prepend ?? '' }}
     <div
         x-on:click.outside="show = false"
         x-on:keydown.escape.window="show = false"
@@ -22,7 +22,7 @@
             <div wire:loading.class="opacity-60" x-on:click="show = false">
                 <template x-for="result in $wire.return">
                     <x-dynamic-component
-                        {{ $attributes->merge(["wire:click" => "", "x-on:click" => ""]) }}
+                        {{ $attributes->merge(['wire:click' => '', 'x-on:click' => '']) }}
                         component="{{ $searchResultComponent }}"
                     />
                 </template>
@@ -32,7 +32,7 @@
                 >
                     <x-icon name="magnifying-glass" class="h-4 w-4" />
                     <span>
-                        {{ __("No results…") }}
+                        {{ __('No results…') }}
                     </span>
                 </div>
             </div>

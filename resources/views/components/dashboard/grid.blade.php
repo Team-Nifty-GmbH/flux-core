@@ -2,11 +2,11 @@
     @forelse ($this->widgets as $widget)
         <div
             class="grid-stack-item relative z-0 rounded-lg"
-            gs-id="{{ $widget["id"] }}"
-            gs-w="{{ $widget["width"] }}"
-            gs-h="{{ $widget["height"] }}"
-            gs-x="{{ $widget["order_column"] }}"
-            gs-y="{{ $widget["order_row"] }}"
+            gs-id="{{ $widget['id'] }}"
+            gs-w="{{ $widget['width'] }}"
+            gs-h="{{ $widget['height'] }}"
+            gs-x="{{ $widget['order_column'] }}"
+            gs-y="{{ $widget['order_row'] }}"
         >
             <div
                 class="grid-stack-item-content"

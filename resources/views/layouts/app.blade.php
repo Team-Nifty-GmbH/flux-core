@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 
-@props(["navigation" => request()->boolean("no-navigation")])
+@props(['navigation' => request()->boolean('no-navigation')])
 <html
     x-data="tallstackui_darkTheme()"
     @class([
-        "sort-scrollbar",
-        "h-full",
-        "text-sm",
+        'sort-scrollbar',
+        'h-full',
+        'text-sm',
     ])
-    lang="{{ str_replace("_", "-", app()->getLocale()) }}"
+    lang="{{ str_replace('_', '-', app()->getLocale()) }}"
 >
     <head>
-        <title>{{ $title ?? config("app.name", "Flux ERP") }}</title>
+        <title>{{ $title ?? config('app.name', 'Flux ERP') }}</title>
         <x-flux::layouts.head.head />
     </head>
     <body
@@ -21,8 +21,8 @@
         }"
         class="text-secondary-600 dark:text-secondary-50 h-full transition duration-300"
     >
-        @section("wire.navigate.spinner")
-        @persist("spinner")
+        @section('wire.navigate.spinner')
+        @persist('spinner')
             <div
                 id="loading-overlay"
                 class="fixed inset-0 hidden overflow-y-auto p-4"
@@ -38,7 +38,7 @@
         @endpersist
 
         @show
-        @persist("notifications")
+        @persist('notifications')
             <div
                 id="{{ \Illuminate\Support\Str::uuid() }}"
                 x-on:tallstackui:toast-upsert.window="$tallstackuiToast($el.id).upsertToast($event)"
@@ -48,8 +48,8 @@
             <x-dialog z-index="z-40" blur="md" align="center" />
         @endpersist
 
-        @auth("web")
-            @persist("mail")
+        @auth('web')
+            @persist('mail')
                 <div id="mail">
                     <livewire:edit-mail lazy />
                 </div>
@@ -97,7 +97,7 @@
         @endauth
 
         <x-layout>
-            @if (! $navigation && auth()->check() && ! request()->routeIs("logout"))
+            @if (! $navigation && auth()->check() && ! request()->routeIs('logout'))
                 <x-slot:header>
                     <x-layout.header without-mobile-button>
                         <x-slot:left>
@@ -115,16 +115,17 @@
                             <livewire:features.search-bar />
                         </div>
                         <div class="flex gap-2 overflow-hidden">
-                            @persist("layout.header.cart")
+                            @persist('layout.header.cart')
                                 @canAction(\FluxErp\Actions\Cart\CreateCart::class)
-                                <livewire:cart.cart lazy />
-                                @endCanAction
+                                    <livewire:cart.cart lazy />
+                                @endcanAction
                             @endpersist
 
                             @canAction(\FluxErp\Actions\WorkTime\CreateWorkTime::class)
-                            <livewire:work-time lazy />
-                            @endCanAction
-                            @persist("layout.header.notifications")
+                                <livewire:work-time lazy />
+                            @endcanAction
+
+                            @persist('layout.header.notifications')
                                 <livewire:features.notifications lazy />
                             @endpersist
                         </div>
@@ -132,10 +133,10 @@
                 </x-slot>
             @endif
 
-            @if (auth()->check() && ! request()->routeIs("logout") && method_exists(auth()->guard(), "getName") && ! $navigation)
+            @if (auth()->check() && ! request()->routeIs('logout') && method_exists(auth()->guard(), 'getName') && ! $navigation)
                 <x-slot:menu>
                     @php($navigation = true)
-                    @persist("navigation")
+                    @persist('navigation')
                         <div id="nav">
                             <livewire:navigation />
                         </div>

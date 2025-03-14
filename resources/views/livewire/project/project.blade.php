@@ -5,8 +5,8 @@
         class="mx-auto md:flex md:items-center md:justify-between md:space-x-5"
     >
         <div class="flex items-center space-x-5">
-            @section("project.title")
-            @section("project.title.avatar")
+            @section('project.title')
+            @section('project.title.avatar')
             <label for="avatar" class="cursor-pointer">
                 <x-avatar xl :image="$avatar" />
             </label>
@@ -18,7 +18,7 @@
                 wire:model.live="avatar"
             />
             @show
-            @section("project.title.name")
+            @section('project.title.name')
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">
                     <div class="flex">
@@ -50,13 +50,14 @@
             class="mt-6 flex flex-col-reverse justify-stretch space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-x-3 sm:space-y-0 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3"
         >
             @canAction(\FluxErp\Actions\Project\DeleteProject::class)
-            <x-button
-                wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Project')]) }}"
-                color="red"
-                :text="__('Delete')"
-                wire:click="delete()"
-            />
-            @endCanAction
+                <x-button
+                    wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Project')]) }}"
+                    color="red"
+                    :text="__('Delete')"
+                    wire:click="delete()"
+                />
+            @endcanAction
+
             <x-button
                 color="indigo"
                 x-cloak

@@ -1,5 +1,5 @@
-@extends("flux::livewire.order.order")
-@section("state-card")
+@extends('flux::livewire.order.order')
+@section('state-card')
     <x-card>
         <div class="space-y-3">
             <x-select.styled
@@ -48,13 +48,13 @@
     @parent
 @endsection
 
-@section("content.right")
+@section('content.right')
 @parent
-@section("content.right.summary.profit")
+@section('content.right.summary.profit')
     
 @endsection
 
-@section("content.right.order_dates")
+@section('content.right.order_dates')
     <x-input
         wire:model="order.invoice_number"
         :label="__('Invoice number')"
@@ -90,15 +90,15 @@
     <x-input wire:model="order.commission" :label="__('Commission')" />
 @endsection
 
-@section("content.right.invoice_preview")
+@section('content.right.invoice_preview')
     <x-card class="space-y-3">
         <div>
             <iframe
                 class="object-contain"
                 width="100%"
                 height="400px"
-                type="{{ $order->invoice["mime_type"] ?? null }}"
-                src="{{ $order->invoice["url"] ?? null }}"
+                type="{{ $order->invoice['mime_type'] ?? null }}"
+                src="{{ $order->invoice['url'] ?? null }}"
             ></iframe>
         </div>
         <x-button

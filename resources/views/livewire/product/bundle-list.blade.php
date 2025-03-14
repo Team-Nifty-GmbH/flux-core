@@ -50,6 +50,6 @@
         </x-slot>
     </x-modal>
     <div wire:ignore>
-        @include("tall-datatables::livewire.data-table")
+        @include('tall-datatables::livewire.data-table')
     </div>
 </div>

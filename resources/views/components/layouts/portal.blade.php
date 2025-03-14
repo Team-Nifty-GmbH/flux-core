@@ -3,7 +3,7 @@
     $setting =
         $client
             ?->settings()
-            ->where("key", "customerPortal")
+            ->where('key', 'customerPortal')
             ->first()
             ?->toArray() ?? [];
 @endphp
@@ -11,15 +11,15 @@
 <!DOCTYPE html>
 <html
     class="font-portal h-full"
-    lang="{{ str_replace("_", "-", app()->getLocale()) }}"
+    lang="{{ str_replace('_', '-', app()->getLocale()) }}"
 >
     <head>
         <x-flux::layouts.head.head>
             <x-slot:title>
-                {{ $client?->name . " Portal" }}
+                {{ $client?->name . ' Portal' }}
             </x-slot>
             <style>
-                {{ $setting["settings"]["custom_css"] ?? "" }}
+                {{ $setting['settings']['custom_css'] ?? '' }}
             </style>
         </x-flux::layouts.head.head>
     </head>
@@ -38,11 +38,11 @@
             >
                 <x-icon name="arrow-up-right" class="h-4 w-4" />
                 <div class="return-to-website pl-4 font-bold">
-                    {{ __("Return to website") }}
+                    {{ __('Return to website') }}
                 </div>
             </a>
-            @auth("address")
-                @can(route_to_permission("portal.checkout"))
+            @auth('address')
+                @can(route_to_permission('portal.checkout'))
                     <x-button
                         color="secondary"
                         light
@@ -50,13 +50,13 @@
                         wire:navigate
                         :href="route('portal.watchlists')"
                     />
-                    @persist("cart")
+                    @persist('cart')
                         <livewire:portal.shop.cart />
                     @endpersist
                 @endcan
             @endauth
         </div>
-        @auth("address")
+        @auth('address')
             <div id="nav">
                 <livewire:navigation
                     :show-search-bar="false"
@@ -66,7 +66,7 @@
         @endauth
 
         <div class="flex flex-1 flex-col md:pl-20">
-            @section("main")
+            @section('main')
             <div class="h-full w-full p-4 lg:p-8">
                 {{ $slot }}
             </div>

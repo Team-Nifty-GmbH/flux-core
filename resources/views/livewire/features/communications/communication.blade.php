@@ -48,7 +48,7 @@
             }
         },
         relatedSelected(type) {
-            let searchRoute = '{{ route("search", "") }}'
+            let searchRoute = '{{ route('search', '') }}'
             searchRoute = searchRoute + '/' + type
             $tallstackuiSelect('communicatable-id').setRequestUrl(searchRoute)
         },
@@ -169,7 +169,7 @@
                 class="flex flex-col gap-1.5"
                 x-show="$wire.communication.communication_type_enum === 'mail'"
             >
-                <x-label>{{ __("To") }}</x-label>
+                <x-label>{{ __('To') }}</x-label>
                 <div class="flex gap-1">
                     <template x-for="to in $wire.communication.to">
                         <x-badge flat color="indigo" cl>
@@ -304,16 +304,16 @@
             >
                 <x-slot:after>
                     @canAction(\FluxErp\Actions\Tag\CreateTag::class)
-                    <div class="px-1">
-                        <x-button
-                            color="emerald"
-                            full
-                            :text="__('Add')"
-                            wire:click="addTag($promptValue())"
-                            wire:flux-confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}"
-                        />
-                    </div>
-                    @endCanAction
+                        <div class="px-1">
+                            <x-button
+                                color="emerald"
+                                full
+                                :text="__('Add')"
+                                wire:click="addTag($promptValue())"
+                                wire:flux-confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}"
+                            />
+                        </div>
+                    @endcanAction
                 </x-slot>
             </x-select.styled>
             <x-flux::features.media.upload-form-object
@@ -351,9 +351,9 @@
     </x-modal>
     <x-modal id="create-preview" :title="__('Create Preview')">
         <div class="grid grid-cols-3 gap-1.5">
-            <div class="text-sm font-semibold">{{ __("Print") }}</div>
-            <div class="text-sm font-semibold">{{ __("Email") }}</div>
-            <div class="text-sm font-semibold">{{ __("Download") }}</div>
+            <div class="text-sm font-semibold">{{ __('Print') }}</div>
+            <div class="text-sm font-semibold">{{ __('Email') }}</div>
+            <div class="text-sm font-semibold">{{ __('Download') }}</div>
             @foreach ($printLayouts as $printLayout)
                 <x-checkbox
                     wire:model.boolean="selectedPrintLayouts.print.{{ $printLayout }}"

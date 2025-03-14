@@ -4,16 +4,16 @@ export default function () {
             'a[href]:not([wire\\:navigate]):not([target="_blank"])',
         ),
     ].filter((link) => {
-        let hrefValue = link.getAttribute("href").trim();
+        let hrefValue = link.getAttribute('href').trim();
         return (
-            hrefValue !== "" &&
-            hrefValue !== "#" &&
+            hrefValue !== '' &&
+            hrefValue !== '#' &&
             (hrefValue.startsWith(window.location.origin) ||
-                hrefValue.startsWith("/"))
+                hrefValue.startsWith('/'))
         );
     });
 
     links.forEach((link) => {
-        link.setAttribute("wire:navigate", "true");
+        link.setAttribute('wire:navigate', 'true');
     });
 }

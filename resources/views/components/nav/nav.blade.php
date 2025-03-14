@@ -40,7 +40,7 @@
                                     class="easy-in-out flex content-center pl-2 text-white transition"
                                 >
                                     <div>
-                                        <div>{{ __("Logged in as:") }}</div>
+                                        <div>{{ __('Logged in as:') }}</div>
                                         <div class="font-bold">
                                             {{ auth()->user()->name }}
                                         </div>
@@ -54,7 +54,7 @@
                                 </div>
                             </div>
                         </x-slot>
-                        <a href="{{ route("my-profile") }}">
+                        <a href="{{ route('my-profile') }}">
                             <x-dropdown.items :text="__('My profile')" />
                         </a>
                         <x-dropdown.items
@@ -71,7 +71,7 @@
                             id="logout-form-desktop"
                             method="POST"
                             class="text-white hover:bg-gray-500"
-                            action="{{ route("logout", absolute: false) }}"
+                            action="{{ route('logout', absolute: false) }}"
                         >
                             @csrf
                         </form>

@@ -1,11 +1,12 @@
 <div>
     <div class="flex flex-col gap-1.5">
         @canAction(\FluxErp\Actions\Project\CreateProject::class)
-        <x-toggle
-            :label="__('Existing project')"
-            wire:model="existingProject"
-        />
-        @endCanAction
+            <x-toggle
+                :label="__('Existing project')"
+                wire:model="existingProject"
+            />
+        @endcanAction
+
         <div x-cloak x-show="$wire.existingProject">
             <x-select.styled
                 wire:model="projectId"
@@ -18,24 +19,24 @@
             />
         </div>
         @canAction(\FluxErp\Actions\Project\CreateProject::class)
-        <div
-            class="flex flex-col gap-1.5"
-            x-cloak
-            x-show="! $wire.existingProject"
-        >
-            <x-input :label="__('Project Name')" wire:model="form.name" />
-            <x-date
-                without-time
-                :label="__('Start Date')"
-                wire:model="form.start_date"
-            />
-            <x-date
-                without-time
-                :label="__('End Date')"
-                wire:model="form.end_date"
-            />
-        </div>
-        @endCanAction
+            <div
+                class="flex flex-col gap-1.5"
+                x-cloak
+                x-show="! $wire.existingProject"
+            >
+                <x-input :label="__('Project Name')" wire:model="form.name" />
+                <x-date
+                    without-time
+                    :label="__('Start Date')"
+                    wire:model="form.start_date"
+                />
+                <x-date
+                    without-time
+                    :label="__('End Date')"
+                    wire:model="form.end_date"
+                />
+            </div>
+        @endcanAction
     </div>
     <div class="flex justify-end gap-2 pt-6">
         <x-button

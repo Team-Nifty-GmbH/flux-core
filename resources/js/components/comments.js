@@ -44,7 +44,7 @@ export default function comments() {
 
         async saveComment(content, files, sticky, internal, parentNode = null) {
             const editor = Alpine.$data(
-                content.querySelector("[x-data]"),
+                content.querySelector('[x-data]'),
             ).editor();
 
             let child = await this.$wire.saveComment(
@@ -62,7 +62,7 @@ export default function comments() {
             }
 
             if (parentNode !== null) {
-                if (!parentNode.hasOwnProperty("children")) {
+                if (!parentNode.hasOwnProperty('children')) {
                     parentNode.children = [];
                 }
 
@@ -71,11 +71,11 @@ export default function comments() {
                 this.comments.unshift(child);
             }
 
-            editor.commands.setContent("", false);
+            editor.commands.setContent('', false);
 
             sticky.checked = false;
             this.$refs.comments
-                .querySelectorAll(".comment-input")
+                .querySelectorAll('.comment-input')
                 .forEach(function (el) {
                     el.remove();
                 });
@@ -83,7 +83,7 @@ export default function comments() {
             return true;
         },
         removeNode(node) {
-            const nodeId = typeof node === "object" ? node.id : node;
+            const nodeId = typeof node === 'object' ? node.id : node;
 
             const traverseAndRemove = (nodes, parent = null) => {
                 for (let i = 0; i < nodes.length; i++) {
@@ -92,12 +92,12 @@ export default function comments() {
                         return true; // Node found and removed
                     }
 
-                    if (nodes[i]["children"]) {
-                        const childNodes = nodes[i]["children"];
+                    if (nodes[i]['children']) {
+                        const childNodes = nodes[i]['children'];
                         if (traverseAndRemove(childNodes, nodes[i])) {
                             // Remove the parent node if it has no more children
                             if (childNodes.length === 0) {
-                                delete nodes[i]["children"];
+                                delete nodes[i]['children'];
                             }
                             return true;
                         }

@@ -4,11 +4,11 @@
             <h2
                 class="pt-5 text-base font-bold uppercase md:pt-0 dark:text-white"
             >
-                {{ __("Edit profiles") }}
+                {{ __('Edit profiles') }}
             </h2>
         </div>
         <h1 class="pt-5 text-5xl font-bold dark:text-white">
-            {{ __("Manage users") }}
+            {{ __('Manage users') }}
         </h1>
         <div class="flex w-full justify-end pt-8">
             <x-button
@@ -22,7 +22,7 @@
         class="pt-8"
         x-data="{
             addresses: $wire.entangle('addresses'),
-            editUserUrl: '{{ route("portal.profiles.id?", ["id" => ":addressId"]) }}',
+            editUserUrl: '{{ route('portal.profiles.id?', ['id' => ':addressId']) }}',
         }"
     >
         <table class="min-w-full divide-y divide-gray-300">
@@ -32,19 +32,19 @@
                         scope="col"
                         class="py-3.5 pl-4 pr-4 text-left text-sm font-semibold text-gray-900 sm:pl-6"
                     >
-                        {{ __("Firstname") }}
+                        {{ __('Firstname') }}
                     </th>
                     <th
                         scope="col"
                         class="px-4 py-3.5 text-left text-sm font-semibold text-gray-900"
                     >
-                        {{ __("Lastname") }}
+                        {{ __('Lastname') }}
                     </th>
                     <th
                         scope="col"
                         class="px-4 py-3.5 text-left text-sm font-semibold text-gray-900"
                     >
-                        {{ __("Email") }}
+                        {{ __('Email') }}
                     </th>
                     <th
                         scope="col"

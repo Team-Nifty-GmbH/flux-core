@@ -7,5 +7,6 @@
                 "parser": "blade"
             }
         }
-    ]
+    ],
+    "singleQuote": true
 }

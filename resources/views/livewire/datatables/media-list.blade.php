@@ -1,6 +1,6 @@
 <x-modal id="edit-media">
     <div class="flex flex-col gap-1.5">
-        @section("media-attributes")
+        @section('media-attributes')
         <x-input :label="__('Name')" wire:model="mediaForm.name" />
         <x-input :label="__('File Name')" wire:model="mediaForm.file_name" />
         <x-input

@@ -46,6 +46,6 @@
         wire:ignore
         x-on:data-table-row-clicked="$wire.edit($event.detail.id)"
     >
-        @include("tall-datatables::livewire.data-table")
+        @include('tall-datatables::livewire.data-table')
     </div>
 </div>

@@ -1,22 +1,25 @@
 <div class="flex flex-col gap-4 md:flex-row">
     <div class="flex flex-col gap-6" wire:ignore>
-        @section("left-side-bar")
+        @section('left-side-bar')
         <div class="max-h-56 min-w-96 overflow-auto md:max-h-none">
             <x-card>
                 @canAction(\FluxErp\Actions\Address\CreateAddress::class)
-                <x-slot:header>
-                    <div class="flex w-full items-center justify-between gap-4">
-                        <div>{{ __("Addresses") }}</div>
-                        <x-button
-                            wire:click="new()"
-                            color="indigo"
-                            :text="__('New')"
-                        />
-                    </div>
-                </x-slot>
-                @endCanAction
+                    <x-slot:header>
+                        <div
+                            class="flex w-full items-center justify-between gap-4"
+                        >
+                            <div>{{ __('Addresses') }}</div>
+                            <x-button
+                                wire:click="new()"
+                                color="indigo"
+                                :text="__('New')"
+                            />
+                        </div>
+                    </x-slot>
+                @endcanAction
+
                 <div class="flex flex-col gap-1.5">
-                    @section("left-side-bar.address-list")
+                    @section('left-side-bar.address-list')
                     <template x-for="addressItem in $wire.addresses">
                         <div
                             wire:click="select(addressItem.id)"
@@ -33,7 +36,7 @@
                                 <div
                                     class="text-ellipsis whitespace-nowrap text-sm"
                                 >
-                                    @section("left-side-bar.address-list.address")
+                                    @section('left-side-bar.address-list.address')
                                     <div
                                         class="font-semibold"
                                         x-text="addressItem.company"
@@ -48,7 +51,7 @@
                                     @show
                                 </div>
                                 <div class="flex flex-col gap-0.5">
-                                    @section("left-side-bar.address-list.badges")
+                                    @section('left-side-bar.address-list.badges')
                                     <x-badge
                                         x-show="addressItem.is_main_address"
                                         x-cloak
@@ -76,7 +79,7 @@
                 </div>
             </x-card>
         </div>
-        @section("left-lide-bar.contact-attributes")
+        @section('left-lide-bar.contact-attributes')
         <x-card>
             <div
                 class="flex flex-col gap-1.5"
@@ -127,7 +130,7 @@
             </div>
         </x-card>
         @show
-        @section("left-lide-bar.address-widget")
+        @section('left-lide-bar.address-widget')
         <x-card>
             <livewire:widgets.address
                 lazy
@@ -140,61 +143,62 @@
     </div>
     <div
         class="w-full"
-        x-data="{ formatter: @js(resolve_static(\FluxErp\Models\Address::class, "typeScriptAttributes")) }"
+        x-data="{ formatter: @js(resolve_static(\FluxErp\Models\Address::class, 'typeScriptAttributes')) }"
     >
         <x-card>
             <x-slot:header>
                 <div class="flex w-full items-center justify-between gap-4">
-                    <div>{{ __("Details") }}</div>
-                    @section("address-details.actions")
+                    <div>{{ __('Details') }}</div>
+                    @section('address-details.actions')
                     <div class="flex gap-2">
                         @canAction(\FluxErp\Actions\Address\UpdateAddress::class)
-                        <div
-                            x-cloak
-                            x-show="$wire.edit"
-                            class="flex gap-x-2"
-                        >
-                            <x-button
-                                color="secondary"
-                                light
-                                x-on:click="$wire.edit = false; $wire.reloadAddress()"
-                                :text="__('Cancel')"
-                            />
-                            <x-button
-                                x-on:click="$wire.save()"
-                                color="indigo"
-                                :text="__('Save')"
-                            />
-                        </div>
-                        <div x-cloak x-show="! $wire.edit">
-                            <x-button
-                                color="secondary"
-                                light
-                                wire:click="replicate()"
-                                :text="__('Duplicate')"
-                            />
-                        </div>
-                        <div x-cloak x-show="! $wire.edit">
-                            <x-button
-                                x-on:click="$wire.edit = true;"
-                                color="indigo"
-                                :text="__('Edit')"
-                            />
-                        </div>
-                        @endCanAction
+                            <div
+                                x-cloak
+                                x-show="$wire.edit"
+                                class="flex gap-x-2"
+                            >
+                                <x-button
+                                    color="secondary"
+                                    light
+                                    x-on:click="$wire.edit = false; $wire.reloadAddress()"
+                                    :text="__('Cancel')"
+                                />
+                                <x-button
+                                    x-on:click="$wire.save()"
+                                    color="indigo"
+                                    :text="__('Save')"
+                                />
+                            </div>
+                            <div x-cloak x-show="! $wire.edit">
+                                <x-button
+                                    color="secondary"
+                                    light
+                                    wire:click="replicate()"
+                                    :text="__('Duplicate')"
+                                />
+                            </div>
+                            <div x-cloak x-show="! $wire.edit">
+                                <x-button
+                                    x-on:click="$wire.edit = true;"
+                                    color="indigo"
+                                    :text="__('Edit')"
+                                />
+                            </div>
+                        @endcanAction
+
                         @canAction(\FluxErp\Actions\Address\DeleteAddress::class)
-                        <div
-                            x-cloak
-                            x-show="! $wire.address.is_main_address"
-                        >
-                            <x-button
-                                wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Address')]) }}"
-                                wire:click="delete()"
-                                color="red"
-                                :text="__('Delete')"
-                            />
-                        </div>
-                        @endCanAction
+                            <div
+                                x-cloak
+                                x-show="! $wire.address.is_main_address"
+                            >
+                                <x-button
+                                    wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Address')]) }}"
+                                    wire:click="delete()"
+                                    color="red"
+                                    :text="__('Delete')"
+                                />
+                            </div>
+                        @endcanAction
                     </div>
                     @show
                 </div>

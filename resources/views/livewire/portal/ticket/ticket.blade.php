@@ -1,14 +1,14 @@
 <div>
     <div class="pl-8 pr-6 pt-5">
         <h1 class="pt-5 text-3xl font-bold dark:text-gray-50">
-            {{ __("Ticket") . ": " . $ticket["ticket_number"] }}
+            {{ __('Ticket') . ': ' . $ticket['ticket_number'] }}
         </h1>
         <h2 class="pb-8 pt-10 text-base font-bold uppercase dark:text-gray-50">
-            {{ __("Information") }}
+            {{ __('Information') }}
         </h2>
         <div
             class="md:flex md:space-x-12"
-            x-data="{ additionalColumns: @entangle("additionalColumns"), ticket: @entangle("ticket") }"
+            x-data="{ additionalColumns: @entangle('additionalColumns'), ticket: @entangle('ticket') }"
         >
             <div class="flex-1">
                 <div class="space-y-5 dark:text-gray-50">
@@ -19,10 +19,10 @@
                     />
                     @if (
 
-                        $ticket["model_type"] &&
+                        $ticket['model_type'] &&
                         ($widgetComponent = resolve_static(
-                            morphed_model($ticket["model_type"]),
-                            "getLivewireComponentWidget"
+                            morphed_model($ticket['model_type']),
+                            'getLivewireComponentWidget'
                         ))                    )
                         <x-card>
                             <livewire:is
@@ -32,7 +32,7 @@
                         </x-card>
                     @endif
 
-                    @section("additional-columns")
+                    @section('additional-columns')
                     <template x-for="additionalColumn in additionalColumns">
                         <div>
                             <x-label
@@ -50,7 +50,7 @@
                     <h2
                         class="pb-8 pt-10 text-base font-bold uppercase dark:text-gray-50"
                     >
-                        {{ __("Attachments") }}
+                        {{ __('Attachments') }}
                     </h2>
                     <livewire:folder-tree
                         :model-type="\FluxErp\Models\Ticket::class"

@@ -1,19 +1,19 @@
 const swReady = navigator.serviceWorker.ready;
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener('DOMContentLoaded', function () {
     initSW();
 });
 
 window.initSW = function initSW() {
-    if ((!"serviceWorker") in navigator) {
+    if ((!'serviceWorker') in navigator) {
         return;
     }
 
-    if ((!"PushManager") in window) {
+    if ((!'PushManager') in window) {
         return;
     }
 
-    let url = "/pwa-service-worker";
+    let url = '/pwa-service-worker';
     navigator.serviceWorker.register(url).then((registration) => {
         initPush();
     });
@@ -35,7 +35,7 @@ function initPush() {
             permissionResult.then(resolve, reject);
         }
     }).then((permissionResult) => {
-        if (permissionResult !== "granted") {
+        if (permissionResult !== 'granted') {
             return;
         }
         subscribeUser();
@@ -62,7 +62,7 @@ function subscribeUser() {
             storePushSubscription(pushSubscription);
         })
         .catch((err) => {
-            console.log("Failed to subscribe the user: ", err);
+            console.log('Failed to subscribe the user: ', err);
         });
 }
 
@@ -72,16 +72,16 @@ function subscribeUser() {
  */
 function storePushSubscription(pushSubscription) {
     const token = document
-        .querySelector("meta[name=csrf-token]")
-        .getAttribute("content");
+        .querySelector('meta[name=csrf-token]')
+        .getAttribute('content');
 
-    fetch("/push-subscription", {
-        method: "POST",
+    fetch('/push-subscription', {
+        method: 'POST',
         body: JSON.stringify(pushSubscription),
         headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-            "X-CSRF-Token": token,
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': token,
         },
     }).then((res) => {
         return res.json();
@@ -94,8 +94,8 @@ function storePushSubscription(pushSubscription) {
  * @param {string} base64String a public vapid key
  */
 function urlBase64ToUint8Array(base64String) {
-    let padding = "=".repeat((4 - (base64String.length % 4)) % 4);
-    let base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+    let padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+    let base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
 
     let rawData = window.atob(base64);
     let outputArray = new Uint8Array(rawData.length);

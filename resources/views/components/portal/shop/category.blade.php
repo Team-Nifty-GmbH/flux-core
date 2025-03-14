@@ -1,7 +1,7 @@
 @props([
-    "category",
-    "level" => 0,
-    "path" => $path??false?"null":$category->id,
+    'category',
+    'level' => 0,
+    'path' => $path??false?'null':$category->id,
 ])
 <div
     class="cursor-pointer whitespace-nowrap"
@@ -10,8 +10,8 @@
 >
     <div
         class="flex justify-between gap-1.5"
-        x-on:click="selectCategory({{ $category->id ?? "null" }}, '{{ $path }}')"
-        x-bind:class="$wire.$parent.category === {{ $category->id ?? "null" }} && 'font-bold'"
+        x-on:click="selectCategory({{ $category->id ?? 'null' }}, '{{ $path }}')"
+        x-bind:class="$wire.$parent.category === {{ $category->id ?? 'null' }} && 'font-bold'"
     >
         <div>{{ $category->name }}</div>
         @if ($category->children_count > 0)
@@ -22,7 +22,7 @@
             />
         @endif
     </div>
-    @if ($category->relationLoaded("children"))
+    @if ($category->relationLoaded('children'))
         <div class="flex flex-col gap-1.5">
             @foreach ($category->children ?? [] as $child)
                 <x-portal.shop.category

@@ -1,7 +1,7 @@
 <div
     x-data="{
         address: $wire.entangle('address', true),
-        formatter: @js(resolve_static(\FluxErp\Models\Address::class, "typeScriptAttributes")),
+        formatter: @js(resolve_static(\FluxErp\Models\Address::class, 'typeScriptAttributes')),
         hrefFromContactOption(type, value) {
             switch (type) {
                 case 'phone':
@@ -27,7 +27,7 @@
                         <div
                             class="text-sm font-semibold text-gray-900 dark:text-gray-50"
                         >
-                            {{ data_get($address, "label") }}
+                            {{ data_get($address, 'label') }}
                         </div>
                         <x-label
                             class="opacity-60"
@@ -49,7 +49,7 @@
     @endif
 
     <div class="pb-2 font-semibold uppercase">
-        {{ __("Purchase activity") }}
+        {{ __('Purchase activity') }}
     </div>
     <div class="grid grid-cols-2 gap-2">
         <x-label :label="__('Total net')" />
@@ -88,7 +88,7 @@
         </div>
         <hr class="col-span-2" />
         <div class="col-span-2 flex flex-col gap-2">
-            <div class="pb-2 font-semibold uppercase">{{ __("Orders") }}</div>
+            <div class="pb-2 font-semibold uppercase">{{ __('Orders') }}</div>
             <template x-for="order in address.orders" :key="order.id">
                 <div class="grid grid-cols-2 gap-2">
                     <x-label>
@@ -107,7 +107,7 @@
     </div>
     <hr class="col-span-2" />
     <div class="pb-2 pt-8 font-semibold uppercase">
-        {{ __("Contact options") }}
+        {{ __('Contact options') }}
     </div>
     <div class="grid grid-cols-2 gap-2">
         <x-label :label="__('Phone')" />

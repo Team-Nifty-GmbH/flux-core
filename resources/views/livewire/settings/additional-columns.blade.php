@@ -8,7 +8,7 @@
     <x-slot:footer>
         <div x-data="{ create: $wire.entangle('create') }" class="w-full">
             <div class="flex justify-between gap-x-4">
-                @if (resolve_static(\FluxErp\Actions\AdditionalColumn\DeleteAdditionalColumn::class, "canPerformAction", [false]))
+                @if (resolve_static(\FluxErp\Actions\AdditionalColumn\DeleteAdditionalColumn::class, 'canPerformAction', [false]))
                     <x-button
                         x-bind:class="! create || 'invisible'"
                         flat

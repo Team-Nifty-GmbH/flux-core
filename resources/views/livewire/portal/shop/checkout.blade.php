@@ -14,7 +14,7 @@
                             'ring-2 ring-offset-2 ring-primary-500'
                     "
                 >
-                    {!! implode("<br />", $address->postal_address) !!}
+                    {!! implode('<br />', $address->postal_address) !!}
                 </div>
             @endforeach
 
@@ -25,7 +25,7 @@
             >
                 <x-icon class="h-5 w-5" name="plus" />
                 <div>
-                    {{ __("Add new address") }}
+                    {{ __('Add new address') }}
                 </div>
             </div>
         </div>
@@ -35,7 +35,7 @@
                 light
                 x-on:click="$modalClose('edit-delivery-address')"
             >
-                {{ __("Cancel") }}
+                {{ __('Cancel') }}
             </x-button>
             <x-button
                 color="secondary"
@@ -43,7 +43,7 @@
                 wire:click="saveDeliveryAddress().then((success) => success ? $modalClose('edit-delivery-address') : null)"
                 primary
             >
-                {{ __("Save") }}
+                {{ __('Save') }}
             </x-button>
         </x-slot>
     </x-modal>
@@ -51,20 +51,20 @@
         <div class="flex items-center gap-1.5">
             <x-checkbox wire:model.boolean="termsAndConditions" />
             <div>
-                {{ __("I accept the terms and conditions") }}
+                {{ __('I accept the terms and conditions') }}
             </div>
             <div
                 wire:click="loadTermsAndConditions().then((text) => {document.getElementById('terms-and-conditions').innerHTML = text; $modalOpen('terms-and-conditions')})"
                 class="text-primary-500 cursor-pointer underline"
             >
-                {{ __("Read terms and conditions") }}
+                {{ __('Read terms and conditions') }}
             </div>
         </div>
     </x-card>
     <div class="flex flex-col justify-between gap-4 sm:flex-row">
         <x-card :header="__('Invoice Address')">
             <p>
-                {!! implode("</p><p>", auth()->user()->contact->invoiceAddress?->postal_address ?? []) !!}
+                {!! implode('</p><p>', auth()->user()->contact->invoiceAddress?->postal_address ?? []) !!}
             </p>
         </x-card>
         <x-card :header="__('Delivery Address')">
@@ -78,7 +78,7 @@
                 />
             </x-slot>
             <p>
-                {!! implode("</p><p>", $this->deliveryAddress->postalAddress() ?? []) !!}
+                {!! implode('</p><p>', $this->deliveryAddress->postalAddress() ?? []) !!}
             </p>
         </x-card>
     </div>
@@ -109,7 +109,7 @@
     <x-card :header="__('Summary')">
         <div class="flex flex-col gap-1.5">
             <div class="flex justify-between gap-2">
-                <div>{{ __("Total Net") }}</div>
+                <div>{{ __('Total Net') }}</div>
                 <div>
                     {{ Number::currency(number: $this->cart->cart_items_sum_total_net ?? 0, locale: app()->getLocale()) }}
                 </div>
@@ -117,16 +117,16 @@
             @foreach ($this->cart->vatRates() as $vatRate)
                 <div class="flex justify-between gap-2">
                     <div>
-                        {{ __("Plus :percentage% VAT", ["percentage" => bcmul($vatRate["vat_rate_percentage"], 100, 2)]) }}
+                        {{ __('Plus :percentage% VAT', ['percentage' => bcmul($vatRate['vat_rate_percentage'], 100, 2)]) }}
                     </div>
                     <div>
-                        {{ Number::currency(number: $vatRate["vat_sum"], locale: app()->getLocale()) }}
+                        {{ Number::currency(number: $vatRate['vat_sum'], locale: app()->getLocale()) }}
                     </div>
                 </div>
             @endforeach
 
             <div class="flex justify-between gap-2 font-semibold">
-                <div>{{ __("Total Gross") }}</div>
+                <div>{{ __('Total Gross') }}</div>
                 <div>
                     {{ Number::currency(number: $this->cart->cart_items_sum_total_gross ?? 0, locale: app()->getLocale()) }}
                 </div>
@@ -134,14 +134,14 @@
         </div>
         <x-slot:footer>
             <x-button class="w-full" wire:click="buy()" color="indigo">
-                {{ __("Buy now") }}
+                {{ __('Buy now') }}
             </x-button>
         </x-slot>
     </x-card>
 
     @if (auth()->user()->priceList?->is_net)
-        * {{ __("All prices net plus VAT") }}
+        * {{ __('All prices net plus VAT') }}
     @else
-        * {{ __("All prices gross including VAT") }}
+        * {{ __('All prices gross including VAT') }}
     @endif
 </div>

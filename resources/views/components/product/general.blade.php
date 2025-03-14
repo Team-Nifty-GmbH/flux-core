@@ -1,6 +1,6 @@
 <div class="space-y-5" x-data wire:key="products-general">
     <x-card class="space-y-2.5" :header="__('General')">
-        @section("general")
+        @section('general')
         <x-input
             x-bind:readonly="!edit"
             label="{{ __('Product number') }}"
@@ -19,8 +19,8 @@
         @show
     </x-card>
     <x-card class="space-y-2.5" :header="__('Attributes')">
-        @section("attributes")
-        @section("bools")
+        @section('attributes')
+        @section('bools')
         <x-checkbox
             x-bind:disabled="!edit"
             label="{{ __('Is active') }}"
@@ -83,10 +83,10 @@
                 <x-slot:label>
                     <div class="flex items-center justify-between">
                         <div>
-                            {{ __("Length") }}
+                            {{ __('Length') }}
                         </div>
                         <div>
-                            {{ __("mm") }}
+                            {{ __('mm') }}
                         </div>
                     </div>
                 </x-slot>
@@ -98,10 +98,10 @@
                 <x-slot:label>
                     <div class="flex items-center justify-between">
                         <div>
-                            {{ __("Width") }}
+                            {{ __('Width') }}
                         </div>
                         <div>
-                            {{ __("mm") }}
+                            {{ __('mm') }}
                         </div>
                     </div>
                 </x-slot>
@@ -113,10 +113,10 @@
                 <x-slot:label>
                     <div class="flex items-center justify-between">
                         <div>
-                            {{ __("Height") }}
+                            {{ __('Height') }}
                         </div>
                         <div>
-                            {{ __("mm") }}
+                            {{ __('mm') }}
                         </div>
                     </div>
                 </x-slot>
@@ -128,10 +128,10 @@
                 <x-slot:label>
                     <div class="flex items-center justify-between">
                         <div>
-                            {{ __("Weight") }}
+                            {{ __('Weight') }}
                         </div>
                         <div>
-                            {{ __("Gram") }}
+                            {{ __('Gram') }}
                         </div>
                     </div>
                 </x-slot>
@@ -143,7 +143,7 @@
                 <x-slot:label>
                     <div class="flex items-center justify-between">
                         <div>
-                            {{ __("Selling Unit") }}
+                            {{ __('Selling Unit') }}
                         </div>
                         <div>
                             <x-tooltip
@@ -160,7 +160,7 @@
                 <x-slot:label>
                     <div class="flex items-center justify-between">
                         <div>
-                            {{ __("Basic Unit") }}
+                            {{ __('Basic Unit') }}
                         </div>
                         <div>
                             <x-tooltip
@@ -228,16 +228,16 @@
         >
             <x-slot:after>
                 @canAction(\FluxErp\Actions\Tag\CreateTag::class)
-                <div class="px-1">
-                    <x-button
-                        color="emerald"
-                        full
-                        :text="__('Add')"
-                        wire:click="addTag($promptValue())"
-                        wire:flux-confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}"
-                    />
-                </div>
-                @endCanAction
+                    <div class="px-1">
+                        <x-button
+                            color="emerald"
+                            full
+                            :text="__('Add')"
+                            wire:click="addTag($promptValue())"
+                            wire:flux-confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}"
+                        />
+                    </div>
+                @endcanAction
             </x-slot>
         </x-select.styled>
     </x-card>
@@ -245,7 +245,7 @@
         class="dark:bg-secondary-700 space-y-2.5 bg-gray-50"
         :header="__('Product Properties')"
     >
-        @section("product-properties")
+        @section('product-properties')
         <x-modal
             id="edit-product-properties-modal"
             size="6xl"
@@ -374,7 +374,7 @@
     </x-card>
     @if ($this->additionalColumns)
         <x-card :header="__('Additional columns')">
-            @section("additional-columns")
+            @section('additional-columns')
             <div class="flex flex-col gap-4">
                 <x-flux::additional-columns
                     :table="false"
@@ -388,7 +388,7 @@
     @endif
 
     <x-card class="flex flex-col gap-4" :header="__('Suppliers')">
-        @section("suppliers")
+        @section('suppliers')
         <template x-for="(supplier, index) in $wire.product.suppliers">
             <x-flux::list-item :item="[]">
                 <x-slot:value>
@@ -396,7 +396,7 @@
                 </x-slot>
                 <x-slot:sub-value>
                     <div class="flex gap-2">
-                        <span>{{ __("Customer Number") . ":" }}</span>
+                        <span>{{ __('Customer Number') . ':' }}</span>
                         <span x-text="supplier.customer_number"></span>
                     </div>
                 </x-slot>

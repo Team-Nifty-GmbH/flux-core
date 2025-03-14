@@ -1,12 +1,12 @@
-import { Editor } from "@tiptap/core";
-import StarterKit from "@tiptap/starter-kit";
-import Mention from "@tiptap/extension-mention";
-import axios from "axios";
+import { Editor } from '@tiptap/core';
+import StarterKit from '@tiptap/starter-kit';
+import Mention from '@tiptap/extension-mention';
+import axios from 'axios';
 
 export default function (
     content,
     debounceDelay = 0,
-    searchModel = ["user", "role"],
+    searchModel = ['user', 'role'],
 ) {
     return (() => {
         let _editor;
@@ -44,7 +44,7 @@ export default function (
                     extensions: [
                         StarterKit,
                         Mention.configure({
-                            HTMLAttributes: { class: "mention" },
+                            HTMLAttributes: { class: 'mention' },
                             suggestion: {
                                 items: async ({ query }) => {
                                     return (
@@ -58,7 +58,7 @@ export default function (
                                                     return {
                                                         id:
                                                             model +
-                                                            ":" +
+                                                            ':' +
                                                             item.id,
                                                         label: item.label,
                                                         src: item.src,
@@ -71,9 +71,9 @@ export default function (
 
                                 render: () => {
                                     let suggestionElement =
-                                        document.createElement("div");
+                                        document.createElement('div');
                                     suggestionElement.className =
-                                        "suggestion-popup";
+                                        'suggestion-popup';
 
                                     return {
                                         onStart: (props) => {
@@ -83,8 +83,8 @@ export default function (
                                                     content: suggestionElement,
                                                     showOnCreate: true,
                                                     interactive: true,
-                                                    trigger: "manual",
-                                                    placement: "bottom-start",
+                                                    trigger: 'manual',
+                                                    placement: 'bottom-start',
                                                 },
                                             );
 
@@ -111,7 +111,7 @@ export default function (
                                         },
 
                                         onKeyDown: (props) => {
-                                            if (props.event.key === "Escape") {
+                                            if (props.event.key === 'Escape') {
                                                 suggestionPopup.hide();
                                                 return true;
                                             }
@@ -133,7 +133,7 @@ export default function (
                     editable: this.editable,
                     editorProps: {
                         attributes: {
-                            class: `${isTransparent ? "bg-transparent" : "dark:bg-secondary-800"} ${showTooltipDropdown ? "rounded-md" : "rounded-b-md"} \
+                            class: `${isTransparent ? 'bg-transparent' : 'dark:bg-secondary-800'} ${showTooltipDropdown ? 'rounded-md' : 'rounded-b-md'} \
                                 prose prose-sm dark:prose-invert max-w-full content-editable-placeholder placeholder-secondary-400 dark:placeholder-secondary-500 \
                                 border-secondary-300 focus:ring-primary-500 focus:border-primary-500 dark:border-secondary-600 form-input block \
                                 min-h-[85px] w-full  border p-3 shadow-sm transition duration-100 ease-in-out focus:outline-none dark:text-gray-50 sm:text-sm`,
@@ -149,11 +149,11 @@ export default function (
                         // init popUp if not
                         if (parent.popUp === null) {
                             parent.popUp = window.tippy(element, {
-                                content: actions ?? "not defined",
+                                content: actions ?? 'not defined',
                                 showOnCreate: true,
                                 interactive: true,
-                                trigger: "manual",
-                                placement: "top",
+                                trigger: 'manual',
+                                placement: 'top',
                             });
                         }
 
@@ -190,11 +190,11 @@ export default function (
 
                 this.proxy = Alpine.raw(_editor);
 
-                this.$watch("editable", (editable) => {
+                this.$watch('editable', (editable) => {
                     this.proxy.setOptions({ editable: editable });
                 });
 
-                this.$watch("content", (content) => {
+                this.$watch('content', (content) => {
                     if (content === this.editor().getHTML()) return;
                     this.editor().commands.setContent(content, false);
                 });
@@ -205,18 +205,18 @@ export default function (
                 }
 
                 props.items.forEach((item) => {
-                    const div = document.createElement("div");
-                    div.className = "suggestion-item flex gap-1 justify-start";
-                    const img = document.createElement("img");
+                    const div = document.createElement('div');
+                    div.className = 'suggestion-item flex gap-1 justify-start';
+                    const img = document.createElement('img');
                     img.src = item.src;
-                    img.className = "h-6 w-6 rounded-full";
-                    const span = document.createElement("span");
+                    img.className = 'h-6 w-6 rounded-full';
+                    const span = document.createElement('span');
                     span.textContent = item.label;
 
                     div.appendChild(img);
                     div.appendChild(span);
 
-                    div.addEventListener("click", () => {
+                    div.addEventListener('click', () => {
                         props.command({ id: item.id, label: item.label });
                         suggestionPopup.hide();
                     });

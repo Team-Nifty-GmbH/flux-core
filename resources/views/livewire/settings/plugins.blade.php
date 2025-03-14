@@ -15,16 +15,16 @@
         },
     }"
 >
-    @if (resolve_static(\FluxErp\Actions\Plugins\Uninstall::class, "canPerformAction", [false]))
+    @if (resolve_static(\FluxErp\Actions\Plugins\Uninstall::class, 'canPerformAction', [false]))
         <x-dialog id="uninstall">
             <x-checkbox id="delete-data" label="{{ __('Delete all data') }}" />
         </x-dialog>
     @endif
 
-    @if (resolve_static(\FluxErp\Actions\Plugins\Update::class, "canPerformAction", [false]))
+    @if (resolve_static(\FluxErp\Actions\Plugins\Update::class, 'canPerformAction', [false]))
         <x-modal id="update-plugin-modal" size="7xl">
             <x-slot:title>
-                <span>{{ __("Update") }}</span>
+                <span>{{ __('Update') }}</span>
                 <span x-text="$wire.update.package"></span>
                 <span x-text="$wire.update.version"></span>
             </x-slot>
@@ -65,7 +65,7 @@
             />
         </x-slot>
     </x-modal>
-    @if (resolve_static(\FluxErp\Actions\Plugins\Install::class, "canPerformAction", [false]))
+    @if (resolve_static(\FluxErp\Actions\Plugins\Install::class, 'canPerformAction', [false]))
         <x-modal
             id="install-plugin-modal"
             size="7xl"
@@ -106,7 +106,7 @@
                                 x-bind:src="
                                     plugin.url
                                         ? new URL(plugin.url).origin + '/favicon.ico'
-                                        : '{{ route("icons", ["name" => "archive-box", "variant" => "outline"]) }}'
+                                        : '{{ route('icons', ['name' => 'archive-box', 'variant' => 'outline']) }}'
                                 "
                                 alt="Plugin Image"
                                 class="h-12 w-12 rounded-lg"
@@ -128,7 +128,7 @@
                                         />
                                         <span
                                             class="text-xs font-semibold"
-                                            x-text="plugin.downloads + ' ' + '{{ __("Downloads") }}'"
+                                            x-text="plugin.downloads + ' ' + '{{ __('Downloads') }}'"
                                         ></span>
                                     </x-badge>
                                     <x-badge>
@@ -185,7 +185,7 @@
 
     <div x-show="$wire.offerRefresh" x-transition x-cloak>
         <x-card class="gap-4 rounded-xl bg-emerald-500 text-white">
-            {{ __("You have to refresh the page to see the changes.") }}
+            {{ __('You have to refresh the page to see the changes.') }}
             <x-button
                 x-on:click="window.location.reload(true)"
                 color="indigo"
@@ -193,7 +193,7 @@
             />
         </x-card>
     </div>
-    @error("checkForUpdates")
+    @error('checkForUpdates')
         <div>
             <x-card class="gap-4 rounded-xl bg-red-500 text-white">
                 <span>{!! $message !!}</span>
@@ -201,7 +201,7 @@
         </div>
     @enderror
 
-    @error("update")
+    @error('update')
         <div>
             <x-card class="gap-4 rounded-xl bg-red-500 text-white">
                 <span>{!! $message !!}</span>
@@ -215,7 +215,7 @@
             x-model="showOnlyFluxPlugins"
         />
         <div class="flex gap-1.5">
-            @if (resolve_static(\FluxErp\Actions\Plugins\Install::class, "canPerformAction", [false]))
+            @if (resolve_static(\FluxErp\Actions\Plugins\Install::class, 'canPerformAction', [false]))
                 <x-button
                     color="indigo"
                     :text="__('Install')"
@@ -223,7 +223,7 @@
                 />
             @endif
 
-            @if (resolve_static(\FluxErp\Actions\Plugins\Update::class, "canPerformAction", [false]))
+            @if (resolve_static(\FluxErp\Actions\Plugins\Update::class, 'canPerformAction', [false]))
                 <div x-transition x-show="$wire.outdated === 0">
                     <x-button
                         color="emerald"
@@ -247,7 +247,7 @@
         <x-card>
             <div class="flex justify-between gap-4">
                 <div class="flex flex-none items-center gap-1.5">
-                    @if (resolve_static(\FluxErp\Actions\Plugins\ToggleActive::class, "canPerformAction", [false]))
+                    @if (resolve_static(\FluxErp\Actions\Plugins\ToggleActive::class, 'canPerformAction', [false]))
                         <div
                             x-cloak
                             x-bind:class="! (plugin.can_uninstall && ! plugin.offer_install) && 'invisible'"
@@ -266,13 +266,13 @@
                         x-bind:src="
                             plugin.homepage
                                 ? new URL(plugin.homepage).origin + '/favicon.ico'
-                                : '{{ route("icons", ["name" => "archive-box", "variant" => "outline"]) }}'
+                                : '{{ route('icons', ['name' => 'archive-box', 'variant' => 'outline']) }}'
                         "
                         alt="Plugin Image"
                         class="h-12 w-12 rounded-lg"
                         x-on:error="
                             $el.src =
-                                '{{ route("icons", ["name" => "archive-box", "variant" => "outline"]) }}'
+                                '{{ route('icons', ['name' => 'archive-box', 'variant' => 'outline']) }}'
                         "
                     />
                     <div class="flex flex-col">
@@ -293,7 +293,7 @@
                         </div>
                         <div
                             class="text-xs font-semibold"
-                            x-text="'{{ __("Version") }}' + ': ' + plugin.version"
+                            x-text="'{{ __('Version') }}' + ': ' + plugin.version"
                         ></div>
                         <div
                             class="text-xs"
@@ -321,7 +321,7 @@
                             :text="__('More')"
                             wire:click="more(key)"
                         />
-                        @if (resolve_static(\FluxErp\Actions\Plugins\Install::class, "canPerformAction", [false]))
+                        @if (resolve_static(\FluxErp\Actions\Plugins\Install::class, 'canPerformAction', [false]))
                             <div x-cloak x-show="plugin.offer_install">
                                 <x-button
                                     color="emerald"
@@ -331,7 +331,7 @@
                             </div>
                         @endif
 
-                        @if (resolve_static(\FluxErp\Actions\Plugins\Uninstall::class, "canPerformAction", [false]))
+                        @if (resolve_static(\FluxErp\Actions\Plugins\Uninstall::class, 'canPerformAction', [false]))
                             <div x-cloak x-show="plugin.can_uninstall">
                                 <x-button
                                     color="red"
@@ -342,7 +342,7 @@
                             </div>
                         @endif
 
-                        @if (resolve_static(\FluxErp\Actions\Plugins\Update::class, "canPerformAction", [false]))
+                        @if (resolve_static(\FluxErp\Actions\Plugins\Update::class, 'canPerformAction', [false]))
                             <div x-cloak x-show="plugin.latest">
                                 <x-button
                                     color="emerald"
@@ -350,7 +350,7 @@
                                     wire:click="showChangeLog(key, plugin.latest)"
                                 >
                                     <x-slot:label>
-                                        <span>{{ __("Update to") }}</span>
+                                        <span>{{ __('Update to') }}</span>
                                         <span x-text="plugin.latest" />
                                     </x-slot>
                                 </x-button>

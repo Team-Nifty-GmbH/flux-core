@@ -1,5 +1,5 @@
-@extends("flux::livewire.features.calendar.flux-calendar")
-@section("calendar-data")
+@extends('flux::livewire.features.calendar.flux-calendar')
+@section('calendar-data')
         attendEvent() { $wire.attendEvent(this.calendarEvent.id).then(() => {
         this.calendarEvent.is_attending = true; this.close(); }); },
         notAttendEvent() { $wire.notAttendEvent(this.calendarEvent.id).then(()
@@ -7,7 +7,7 @@
         dateClick() { }
 @endsection
 
-@section("calendar-event-modal")
+@section('calendar-event-modal')
     <x-modal
         :title="__('Edit Event')"
         x-on:close="this.calendarEventItemProxy = {};"
@@ -28,6 +28,6 @@
     </x-modal>
 @endsection
 
-@section("calendar-list")
+@section('calendar-list')
     <x-flux::calendar.calendar-list group="public" />
 @endsection

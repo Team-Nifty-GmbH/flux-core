@@ -22,12 +22,12 @@
                 class="text-sm uppercase leading-normal text-gray-600"
                 x-text="log.message"
             >
-                {{ __("Message") }}
+                {{ __('Message') }}
             </div>
         </div>
         <div class="px-6 py-3">
             <div class="text-sm uppercase leading-normal text-gray-600">
-                {{ __("Extra") }}
+                {{ __('Extra') }}
             </div>
             <div
                 class="overflow-scroll rounded-md bg-black p-1 font-mono text-white"
@@ -36,7 +36,7 @@
         </div>
         <div class="relative overflow-hidden px-6 py-3">
             <div class="text-sm uppercase leading-normal text-gray-600">
-                {{ __("Formatted") }}
+                {{ __('Formatted') }}
             </div>
             <div
                 class="overflow-auto rounded-md bg-black p-1 font-mono text-white"
@@ -45,7 +45,7 @@
         </div>
         <div class="relative overflow-hidden px-6 py-3">
             <div class="text-sm uppercase leading-normal text-gray-600">
-                {{ __("Context") }}
+                {{ __('Context') }}
             </div>
             <div
                 class="overflow-auto whitespace-pre rounded-md bg-black p-1 font-mono text-white"
@@ -64,7 +64,7 @@
     </x-modal>
     <div class="mb-6 sm:flex sm:items-center">
         <div class="sm:flex-auto">
-            <h1 class="text-xl font-semibold">{{ __("Logs") }}</h1>
+            <h1 class="text-xl font-semibold">{{ __('Logs') }}</h1>
         </div>
     </div>
     <div wire:ignore>

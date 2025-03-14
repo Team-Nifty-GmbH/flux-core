@@ -1,21 +1,21 @@
-@import "/node_modules/@fontsource/inter/latin-300.css";
-@import "/node_modules/@fontsource/inter/latin-400.css";
-@import "/node_modules/@fontsource/inter/latin-600.css";
-@import "/node_modules/@fontsource/inter/latin-900.css";
-@import "/node_modules/leaflet/dist/leaflet.css";
-@import "/node_modules/leaflet.markercluster/dist/MarkerCluster.css";
-@import "/node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css";
+@import '/node_modules/@fontsource/inter/latin-300.css';
+@import '/node_modules/@fontsource/inter/latin-400.css';
+@import '/node_modules/@fontsource/inter/latin-600.css';
+@import '/node_modules/@fontsource/inter/latin-900.css';
+@import '/node_modules/leaflet/dist/leaflet.css';
+@import '/node_modules/leaflet.markercluster/dist/MarkerCluster.css';
+@import '/node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css';
 
-@import "/node_modules/gridstack/dist/gridstack.min.css";
-@import "/node_modules/gridstack/dist/gridstack-extra.min.css";
-@import "./components/grid-stack.css";
-@import "./components/apex-charts.css";
-@import "./components/full-calendar.css";
+@import '/node_modules/gridstack/dist/gridstack.min.css';
+@import '/node_modules/gridstack/dist/gridstack-extra.min.css';
+@import './components/grid-stack.css';
+@import './components/apex-charts.css';
+@import './components/full-calendar.css';
 
-@import "/node_modules/@phosphor-icons/web/src/regular/style.css";
+@import '/node_modules/@phosphor-icons/web/src/regular/style.css';
 
-@import "/node_modules/filepond/dist/filepond.css";
-@import "/node_modules/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css";
+@import '/node_modules/filepond/dist/filepond.css';
+@import '/node_modules/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css';
 
 @tailwind base;
 @tailwind components;
@@ -59,7 +59,7 @@
         @apply dark:bg-secondary-600 bg-gray-50;
     }
 
-    input[type="checkbox"]:disabled {
+    input[type='checkbox']:disabled {
         @apply text-gray-400;
     }
 

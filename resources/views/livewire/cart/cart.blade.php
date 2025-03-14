@@ -1,7 +1,7 @@
-@extends("flux::livewire.portal.shop.cart")
-@section("cart-sidebar.footer.buttons")
+@extends('flux::livewire.portal.shop.cart')
+@section('cart-sidebar.footer.buttons')
     @parent
-    @section("cart-sidebar.footer.buttons.buy")
+    @section('cart-sidebar.footer.buttons.buy')
         <x-button
             wire:click="addToCurrentOrder()"
             color="indigo"

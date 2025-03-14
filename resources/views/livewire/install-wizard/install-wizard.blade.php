@@ -40,7 +40,7 @@
     <x-flux::logo fill="#000000" class="h-24" />
     <x-card :header="$this->title">
         <div class="flex flex-col gap-4">
-            @include("flux::livewire.install-wizard." . $this->steps[$step]["view"])
+            @include('flux::livewire.install-wizard.' . $this->steps[$step]['view'])
         </div>
         <x-slot:footer>
             <div
@@ -60,7 +60,7 @@
                     @endif
                 </div>
                 <x-button loading color="indigo" wire:click="continue">
-                    {{ __("Continue") }}
+                    {{ __('Continue') }}
                 </x-button>
             </div>
         </x-slot>

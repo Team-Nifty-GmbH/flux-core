@@ -1,7 +1,7 @@
 // import the original module
-import { timer } from "@/notifications/timer";
-import uuid from "@/utils/uuid";
-import originalNotifications from "@/components/notifications";
+import { timer } from '@/notifications/timer';
+import uuid from '@/utils/uuid';
+import originalNotifications from '@/components/notifications';
 
 const customNotifications = () => {
     const notifications = originalNotifications();

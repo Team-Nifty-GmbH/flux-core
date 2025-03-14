@@ -1,1 +1,1 @@
-@extends("flux::livewire.order.order")
+@extends('flux::livewire.order.order')

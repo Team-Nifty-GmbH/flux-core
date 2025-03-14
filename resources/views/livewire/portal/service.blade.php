@@ -1,12 +1,12 @@
 <div>
     <h2 class="text-base font-bold uppercase dark:text-gray-50">
-        {{ $customerClient["name"] }} {{ __("Connect") }}
+        {{ $customerClient['name'] }} {{ __('Connect') }}
     </h2>
     <h1 class="pt-5 text-5xl font-bold dark:text-gray-50">
-        {{ __("Service request") }}
+        {{ __('Service request') }}
     </h1>
     <h2 class="pb-8 pt-20 text-base font-bold uppercase dark:text-gray-50">
-        01. {{ __("Information") }}
+        01. {{ __('Information') }}
     </h2>
     <div class="md:flex md:space-x-12">
         <div class="flex-1">
@@ -46,10 +46,10 @@
                     :placeholder="__('Your subject')"
                 />
                 <h2 class="pb-8 pt-20 text-base font-bold uppercase">
-                    02. {{ __("Attachments") }}
+                    02. {{ __('Attachments') }}
                 </h2>
                 <div class="text-portal-font-color font-bold">
-                    {{ __("Photos and videos help us analyze the errors") }}
+                    {{ __('Photos and videos help us analyze the errors') }}
                 </div>
                 <div>
                     <x-flux::features.media.upload
@@ -57,10 +57,10 @@
                     />
                 </div>
                 <div class="text-portal-font-color pt-12 font-bold">
-                    {{ __(":client_name is committed to protecting and respecting your privacy. We will only use your personal information to manage your account and to provide you with the products and services you have requested.", ["client_name" => $customerClient["name"]]) }}
+                    {{ __(':client_name is committed to protecting and respecting your privacy. We will only use your personal information to manage your account and to provide you with the products and services you have requested.', ['client_name' => $customerClient['name']]) }}
                 </div>
                 <x-button color="indigo" wire:click.prevent="save()">
-                    {{ __("Send") }}
+                    {{ __('Send') }}
                 </x-button>
                 <x-errors />
             </div>
@@ -69,24 +69,24 @@
             class="m-0 flex-none pt-16 md:max-w-[220px] md:pt-0 dark:text-gray-50"
         >
             <h2 class="text-base font-bold uppercase">
-                {!! __("Urgent request?") !!}
+                {!! __('Urgent request?') !!}
             </h2>
             <div class="pt-8">
-                {!! __("Your service request will be processed by our team immediately upon receipt. Do you have an acute problem, feel free to call us.") !!}
+                {!! __('Your service request will be processed by our team immediately upon receipt. Do you have an acute problem, feel free to call us.') !!}
             </div>
             <div class="py-5 font-bold">
-                <a href="tel:+{{ $customerClient["phone"] }}">
-                    {{ $customerClient["phone"] }}
+                <a href="tel:+{{ $customerClient['phone'] }}">
+                    {{ $customerClient['phone'] }}
                 </a>
             </div>
             <div class="grid grid-cols-2">
-                @foreach ($customerClient["opening_hours"] ?? [] as $openingHour)
+                @foreach ($customerClient['opening_hours'] ?? [] as $openingHour)
                     <div class="">
-                        {{ $openingHour["day"] }}
+                        {{ $openingHour['day'] }}
                     </div>
                     <div class="">
-                        {{ $openingHour["start"] }} -
-                        {{ $openingHour["end"] }}
+                        {{ $openingHour['start'] }} -
+                        {{ $openingHour['end'] }}
                     </div>
                 @endforeach
             </div>

@@ -6,8 +6,8 @@
         notificationSettings: $wire.entangle('notificationSettings'),
     }"
 >
-    @section("profile")
-    @section("profile.form")
+    @section('profile')
+    @section('profile.form')
     <form class="space-y-5">
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div class="w-full md:flex md:space-x-6">
@@ -57,16 +57,16 @@
         />
     </form>
     @show
-    @section("profile.notifications")
+    @section('profile.notifications')
     <x-flux::table>
         <x-slot:title>
-            <h2 class="pt-6 dark:text-white">{{ __("Notifications") }}</h2>
+            <h2 class="pt-6 dark:text-white">{{ __('Notifications') }}</h2>
             <x-button color="indigo" x-on:click="initSW()">
-                {{ __("Activate Web Push") }}
+                {{ __('Activate Web Push') }}
             </x-button>
         </x-slot>
         <x-slot:header>
-            <th>{{ __("Notification") }}</th>
+            <th>{{ __('Notification') }}</th>
             <template
                 x-for="(notificationChannel, name) in notificationChannels"
             >

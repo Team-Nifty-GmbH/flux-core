@@ -1,12 +1,12 @@
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4 } from 'uuid';
 
 export default function folders(
     getTreePromise,
     property = null,
     checked = [],
     multiSelect = false,
-    nameAttribute = "label",
-    childrenAttribute = "children",
+    nameAttribute = 'label',
+    childrenAttribute = 'children',
     selectedCallback = null,
     checkedCallback = null,
     searchAttributes = null,
@@ -30,7 +30,7 @@ export default function folders(
             await this.refresh();
             this.checkedCallback = this.checkedCallback?.bind(this);
 
-            if (typeof this.property === "string") {
+            if (typeof this.property === 'string') {
                 this.$watch(property, (newFolders) => {
                     this.tree = newFolders;
                 });
@@ -41,7 +41,7 @@ export default function folders(
             try {
                 this.tree = await getTreePromise;
             } catch (error) {
-                console.error("Error fetching the tree structure:", error);
+                console.error('Error fetching the tree structure:', error);
                 this.tree = [];
             }
         },
@@ -103,7 +103,7 @@ export default function folders(
                     this.unCheck(currentNode);
                 }
                 this.$dispatch(
-                    "folder-tree-check-toggle",
+                    'folder-tree-check-toggle',
                     currentNode,
                     isChecked,
                 );
@@ -114,18 +114,18 @@ export default function folders(
             };
             traverse(node, isChecked);
 
-            this.$dispatch("folder-tree-check-updated", this.checked);
+            this.$dispatch('folder-tree-check-updated', this.checked);
         },
         unCheck(node) {
             this.checked = this.checked.filter((id) => id !== node.id);
-            this.$dispatch("folder-tree-uncheck", node, this.checked);
+            this.$dispatch('folder-tree-uncheck', node, this.checked);
         },
         check(node) {
             this.checked.push(node.id);
-            this.$dispatch("folder-tree-check", node, this.checked);
+            this.$dispatch('folder-tree-check', node, this.checked);
         },
         isChecked(node) {
-            if (typeof this.checkedCallback === "function") {
+            if (typeof this.checkedCallback === 'function') {
                 return this.checkedCallback(node);
             }
 
@@ -159,7 +159,7 @@ export default function folders(
         },
         toggleSelect(node) {
             this.selected?.id === node.id ? this.unselect() : this.select(node);
-            this.$dispatch("folder-tree-select-toggle", node, this.selected);
+            this.$dispatch('folder-tree-select-toggle', node, this.selected);
         },
         select(node) {
             this.selected = node;
@@ -167,14 +167,14 @@ export default function folders(
                 this.selectedCallback(node, this.selected);
             }
 
-            this.$dispatch("folder-tree-select", node);
+            this.$dispatch('folder-tree-select', node);
         },
         unselect() {
-            this.$dispatch("folder-tree-unselect", this.selected);
+            this.$dispatch('folder-tree-unselect', this.selected);
             this.selected = null;
         },
         removeNode(node) {
-            const nodeId = typeof node === "object" ? node.id : node;
+            const nodeId = typeof node === 'object' ? node.id : node;
 
             const traverseAndRemove = (nodes, parent = null) => {
                 for (let i = 0; i < nodes.length; i++) {
@@ -201,7 +201,7 @@ export default function folders(
             this.unselect();
         },
         searchNodes(data, search = null) {
-            if (!Array.isArray(data) && typeof data !== "object") {
+            if (!Array.isArray(data) && typeof data !== 'object') {
                 return [];
             }
 
@@ -260,7 +260,7 @@ export default function folders(
             } else {
                 // add name and children attribute if not in attributes
                 if (!attributes.hasOwnProperty(this.nameAttribute)) {
-                    attributes[this.nameAttribute] = "New Folder";
+                    attributes[this.nameAttribute] = 'New Folder';
                 }
                 if (!attributes.hasOwnProperty(this.childrenAttribute)) {
                     attributes[this.childrenAttribute] = [];
@@ -275,7 +275,7 @@ export default function folders(
 
             this.select(newNode);
             this.openFolder(target);
-            this.$dispatch("folder-tree-folder-added", this.selected, target);
+            this.$dispatch('folder-tree-folder-added', this.selected, target);
         },
         updateNode(attributes) {
             const traverseAndUpdate = (nodes) => {
@@ -284,7 +284,7 @@ export default function folders(
                         Object.assign(nodes[i], attributes);
 
                         this.$dispatch(
-                            "folder-tree-folder-updated",
+                            'folder-tree-folder-updated',
                             nodes[i],
                             attributes,
                         );
@@ -304,7 +304,7 @@ export default function folders(
 
             traverseAndUpdate(this.tree);
         },
-        getNodePath(node, attribute = "id") {
+        getNodePath(node, attribute = 'id') {
             node = node || this.selected;
 
             if (!node) {

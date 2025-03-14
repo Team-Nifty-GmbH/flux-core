@@ -49,7 +49,7 @@
             >
                 <x-icon name="magnifying-glass" class="mr-2 h-5 w-5" />
                 <div>
-                    {{ __("No results…") }}
+                    {{ __('No results…') }}
                 </div>
             </div>
             <x-flux::spinner />

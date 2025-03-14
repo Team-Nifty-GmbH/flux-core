@@ -23,10 +23,10 @@
     </x-modal>
     <div class="dark:text-white">
         <h2 class="text-base font-bold uppercase">
-            {{ __("Welcome") }}
+            {{ __('Welcome') }}
         </h2>
         <h1 class="pb-10 pt-5 text-5xl font-bold">
-            {{ __("My Tickets") }}
+            {{ __('My Tickets') }}
         </h1>
         <div class="mt-4 justify-end pb-2 pr-2 sm:ml-16 sm:mt-0 sm:flex">
             <x-button

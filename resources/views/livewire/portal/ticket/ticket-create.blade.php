@@ -3,9 +3,9 @@
         <div class="space-y-8 divide-y divide-gray-200">
             <div
                 x-data="{
-                    selectedAdditionalColumns: @entangle("selectedAdditionalColumns"),
-                    additionalColumns: @entangle("additionalColumns"),
-                    ticket: @entangle("ticket"),
+                    selectedAdditionalColumns: @entangle('selectedAdditionalColumns'),
+                    additionalColumns: @entangle('additionalColumns'),
+                    ticket: @entangle('ticket'),
                     save() {
                         this.$wire.save().then((result) => {
                             if (result === true) {
@@ -57,7 +57,7 @@
                                     x-bind:options="ticketTypeAdditionalColumn.values"
                                 >
                                     <option selected>
-                                        {{ __("Please select") }}
+                                        {{ __('Please select') }}
                                     </option>
                                     <template
                                         x-for="value in ticketTypeAdditionalColumn.values"
@@ -92,10 +92,10 @@
                         </div>
                     </template>
                     <h2 class="text-base font-bold uppercase sm:col-span-6">
-                        {{ __("Attachments") }}
+                        {{ __('Attachments') }}
                     </h2>
                     <div class="text-portal-font-color sm:col-span-6">
-                        {{ __("Photos and videos help us analyze the errors") }}
+                        {{ __('Photos and videos help us analyze the errors') }}
                     </div>
                     <div class="sm:col-span-6">
                         <x-flux::features.media.upload

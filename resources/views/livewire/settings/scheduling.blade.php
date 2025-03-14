@@ -299,7 +299,7 @@
             x-cloak
             x-show="$wire.schedule.id && $wire.schedule.end_radio === 'recurrences'"
         >
-            <x-label>{{ __("Current Recurrence") }}</x-label>
+            <x-label>{{ __('Current Recurrence') }}</x-label>
             <span class="flex justify-center">
                 {{ $schedule->current_recurrence ?? 0 }}
             </span>

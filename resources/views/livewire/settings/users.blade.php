@@ -1,9 +1,9 @@
 <div class="py-6">
     <x-modal size="6xl" id="create-user-modal" :title="__('Create User')">
-        @section("user-edit")
+        @section('user-edit')
         <form class="space-y-5">
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                @section("user-edit.personal-data")
+                @section('user-edit.personal-data')
                 <x-input
                     :label="__('Firstname')"
                     wire:model="userForm.firstname"
@@ -27,7 +27,7 @@
                 @show
             </div>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                @section("user-edit.employment")
+                @section('user-edit.employment')
                 <x-date
                     :without-time="true"
                     :label="__('Date Of Birth')"
@@ -50,7 +50,7 @@
                 @show
             </div>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                @section("user-edit.attributes")
+                @section('user-edit.attributes')
                 <x-checkbox
                     :label="__('Active')"
                     wire:model="userForm.is_active"

@@ -1,11 +1,11 @@
 <x-mail::message>
-    {{ __("Thank you for your order!") }}
+    {{ __('Thank you for your order!') }}
 
-    {{ __("We received your order dated :order_date.", ["order_date" => $order->order_date->isoFormat("L")]) }}
+    {{ __('We received your order dated :order_date.', ['order_date' => $order->order_date->isoFormat('L')]) }}
 
     <x-mail::table>
-        | | {{ __("Product number") }} | {{ __("Name") }} |
-        {{ __("Amount") }} | {{ __("Total") }} | | :------------- |
+        | | {{ __('Product number') }} | {{ __('Name') }} |
+        {{ __('Amount') }} | {{ __('Total') }} | | :------------- |
         :------------- | :------------- |:-------------:| --------:|
         @foreach ($order->orderPositions as $orderPosition)
             |
@@ -16,59 +16,59 @@
             />
             | {{ $orderPosition->product_number }} |
             {{ $orderPosition->name }}|
-            {{ $orderPosition->amount ? bcround($orderPosition->amount, 2) : "" }}|
-            {{ $orderPosition->total_net_price ? Number::currency($orderPosition->total_net_price, $orderPosition->currency->iso, app()->getLocale()) : "" }}
+            {{ $orderPosition->amount ? bcround($orderPosition->amount, 2) : '' }}|
+            {{ $orderPosition->total_net_price ? Number::currency($orderPosition->total_net_price, $orderPosition->currency->iso, app()->getLocale()) : '' }}
             |
         @endforeach
     </x-mail::table>
 
     <x-mail::panel>
-        **{{ __("Total Net") }}:**
+        **{{ __('Total Net') }}:**
         {{ Number::currency($order->total_net_price, $order->currency->iso, app()->getLocale()) }}
         <br />
         @foreach ($order->total_vats ?? [] as $vat)
-            **{{ __("Plus ") }}:**
-            {{ format_number($vat["vat_rate_percentage"], NumberFormatter::PERCENT) }}
-            {{ Number::currency($vat["total_vat_price"], $order->currency->iso, app()->getLocale()) }}
+            **{{ __('Plus ') }}:**
+            {{ format_number($vat['vat_rate_percentage'], NumberFormatter::PERCENT) }}
+            {{ Number::currency($vat['total_vat_price'], $order->currency->iso, app()->getLocale()) }}
             <br />
         @endforeach
 
-        **{{ __("Total Gross") }}:**
+        **{{ __('Total Gross') }}:**
         {{ Number::currency($order->total_gross_price, $order->currency->iso, app()->getLocale()) }}
         <br />
 
-        **{{ __("Invoice Address") }}**
+        **{{ __('Invoice Address') }}**
         <br />
-        {{ data_get($order->address_invoice, "company") }}
+        {{ data_get($order->address_invoice, 'company') }}
         <br />
-        {{ data_get($order->address_invoice, "firstname") }}
-        {{ data_get($order->address_invoice, "lastname") }}
+        {{ data_get($order->address_invoice, 'firstname') }}
+        {{ data_get($order->address_invoice, 'lastname') }}
         <br />
-        {{ data_get($order->address_invoice, "addition") }}
+        {{ data_get($order->address_invoice, 'addition') }}
         <br />
-        {{ data_get($order->address_invoice, "street") }}
+        {{ data_get($order->address_invoice, 'street') }}
         <br />
-        {{ data_get($order->address_invoice, "zip") }}
-        {{ data_get($order->address_invoice, "city") }}
+        {{ data_get($order->address_invoice, 'zip') }}
+        {{ data_get($order->address_invoice, 'city') }}
         <br />
-        {{ data_get($order->address_invoice, "country") }}
+        {{ data_get($order->address_invoice, 'country') }}
         <br />
 
-        **{{ __("Delivery Address") }}**
+        **{{ __('Delivery Address') }}**
         <br />
-        {{ data_get($order->address_delivery, "company") }}
+        {{ data_get($order->address_delivery, 'company') }}
         <br />
-        {{ data_get($order->address_delivery, "firstname") }}
-        {{ data_get($order->address_delivery, "lastname") }}
+        {{ data_get($order->address_delivery, 'firstname') }}
+        {{ data_get($order->address_delivery, 'lastname') }}
         <br />
-        {{ data_get($order->address_delivery, "addition") }}
+        {{ data_get($order->address_delivery, 'addition') }}
         <br />
-        {{ data_get($order->address_delivery, "street") }}
+        {{ data_get($order->address_delivery, 'street') }}
         <br />
-        {{ data_get($order->address_delivery, "zip") }}
-        {{ data_get($order->address_delivery, "city") }}
+        {{ data_get($order->address_delivery, 'zip') }}
+        {{ data_get($order->address_delivery, 'city') }}
         <br />
-        {{ data_get($order->address_delivery, "country") }}
+        {{ data_get($order->address_delivery, 'country') }}
         <br />
     </x-mail::panel>
 </x-mail::message>

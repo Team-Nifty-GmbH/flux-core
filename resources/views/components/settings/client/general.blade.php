@@ -86,13 +86,13 @@
                 <x-flux::table>
                     <x-slot:header>
                         <x-flux::table.head-cell>
-                            {{ __("Days") }}
+                            {{ __('Days') }}
                         </x-flux::table.head-cell>
                         <x-flux::table.head-cell>
-                            {{ __("Start") }}
+                            {{ __('Start') }}
                         </x-flux::table.head-cell>
                         <x-flux::table.head-cell>
-                            {{ __("End") }}
+                            {{ __('End') }}
                         </x-flux::table.head-cell>
                         <x-flux::table.head-cell></x-flux::table.head-cell>
                     </x-slot>
@@ -126,7 +126,7 @@
                             color="indigo"
                             x-on:click="$wire.client.opening_hours.push({})"
                         >
-                            {{ __("Add") }}
+                            {{ __('Add') }}
                         </x-button>
                     </div>
                 </div>

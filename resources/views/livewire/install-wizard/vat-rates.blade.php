@@ -19,18 +19,18 @@
 <x-flux::table>
     <x-slot:header>
         <x-flux::table.head-cell>
-            {{ __("Name") }}
+            {{ __('Name') }}
         </x-flux::table.head-cell>
         <x-flux::table.head-cell>
-            {{ __("Vat rate") }}
+            {{ __('Vat rate') }}
         </x-flux::table.head-cell>
         <x-flux::table.head-cell></x-flux::table.head-cell>
     </x-slot>
     @foreach ($vatRates as $index => $vatRate)
         <x-flux::table.row>
-            <x-flux::table.cell>{{ $vatRate["name"] }}</x-flux::table.cell>
+            <x-flux::table.cell>{{ $vatRate['name'] }}</x-flux::table.cell>
             <x-flux::table.cell>
-                {{ $vatRate["rate_percentage_frontend"] }}%
+                {{ $vatRate['rate_percentage_frontend'] }}%
             </x-flux::table.cell>
             <x-flux::table.cell>
                 <x-button

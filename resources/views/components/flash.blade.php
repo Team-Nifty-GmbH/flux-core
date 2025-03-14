@@ -1,4 +1,4 @@
-@if (session()->has("flash"))
+@if (session()->has('flash'))
     <script>
         window.addEventListener('livewire:navigated', () => {
             @foreach(\Illuminate\Support\Arr::wrap(session('flash')) as $type => $flash)

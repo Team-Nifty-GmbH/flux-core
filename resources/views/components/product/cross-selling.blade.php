@@ -103,7 +103,7 @@
                         color="red"
                         x-on:click="$wire.productCrossSellings.splice(index, 1)"
                     >
-                        {{ __("Delete") }}
+                        {{ __('Delete') }}
                     </x-button>
                 </div>
             </x-slot>
@@ -114,7 +114,7 @@
             color="indigo"
             x-on:click="edit = true; $wire.productCrossSellings.push({'name': '{{ __('New Cross Selling') }}', 'is_active': true, 'is_new': true, 'products': []})"
         >
-            {{ __("Add product cross selling") }}
+            {{ __('Add product cross selling') }}
         </x-button>
     </div>
 </div>

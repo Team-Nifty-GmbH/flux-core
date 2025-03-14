@@ -40,7 +40,7 @@
             </div>
         </div>
         <div class="flex items-center gap-1">
-            <div class="text-sm">{{ __("To") }}:</div>
+            <div class="text-sm">{{ __('To') }}:</div>
             <template x-for="to in $wire.mailMessage.to">
                 <span
                     x-html="window.formatters.badge(to.full, 'neutral')"
@@ -52,7 +52,7 @@
             x-cloak
             x-show="$wire.mailMessage.bcc.length"
         >
-            <div class="text-sm">{{ __("CC") }}:</div>
+            <div class="text-sm">{{ __('CC') }}:</div>
             <template x-for="cc in $wire.mailMessage.cc">
                 <span
                     x-html="window.formatters.badge(cc.full, 'neutral')"
@@ -64,7 +64,7 @@
             x-cloak
             x-show="$wire.mailMessage.bcc.length"
         >
-            <div class="text-sm">{{ __("BCC") }}:</div>
+            <div class="text-sm">{{ __('BCC') }}:</div>
             <template x-for="bcc in $wire.mailMessage.bcc">
                 <span
                     x-html="window.formatters.badge(bcc.full, 'neutral')"
@@ -119,6 +119,6 @@
         class="grow"
         x-on:data-table-row-clicked="$wire.showMail($event.detail.id)"
     >
-        @include("tall-datatables::livewire.data-table")
+        @include('tall-datatables::livewire.data-table')
     </section>
 </div>

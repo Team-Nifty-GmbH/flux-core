@@ -3,10 +3,10 @@
         <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">
                 <h1 class="text-xl font-semibold dark:text-white">
-                    {{ __("Ticket Types") }}
+                    {{ __('Ticket Types') }}
                 </h1>
                 <div class="mt-2 text-sm text-gray-300">
-                    {{ __("Here you can manage all ticket types...") }}
+                    {{ __('Here you can manage all ticket types...') }}
                 </div>
             </div>
             <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
@@ -32,31 +32,31 @@
                                         scope="col"
                                         class="py-3.5 pl-4 pr-4 text-left text-sm font-semibold text-gray-900 sm:pl-6"
                                     >
-                                        {{ __("Name") }}
+                                        {{ __('Name') }}
                                     </th>
                                     <th
                                         scope="col"
                                         class="px-4 py-3.5 text-left text-sm font-semibold text-gray-900"
                                     >
-                                        {{ __("Model") . " / " . __("Field type") }}
+                                        {{ __('Model') . ' / ' . __('Field type') }}
                                     </th>
                                     <th
                                         scope="col"
                                         class="px-4 py-3.5 text-left text-sm font-semibold text-gray-900"
                                     >
-                                        {{ __("Label") }}
+                                        {{ __('Label') }}
                                     </th>
                                     <th
                                         scope="col"
                                         class="px-4 py-3.5 text-left text-sm font-semibold text-gray-900"
                                     >
-                                        {{ __("Validations") }}
+                                        {{ __('Validations') }}
                                     </th>
                                     <th
                                         scope="col"
                                         class="px-4 py-3.5 text-left text-sm font-semibold text-gray-900"
                                     >
-                                        {{ __("Values") }}
+                                        {{ __('Values') }}
                                     </th>
                                     <th
                                         scope="col"
@@ -66,7 +66,7 @@
                             </thead>
                             <tbody
                                 class="divide-y divide-gray-200 bg-white"
-                                x-data="{ ticketTypes: @entangle("ticketTypes") }"
+                                x-data="{ ticketTypes: @entangle('ticketTypes') }"
                             >
                                 <template
                                     x-for="(ticketType, index) in ticketTypes"
@@ -137,11 +137,11 @@
         <livewire:settings.ticket-type-edit />
         <x-slot:footer>
             <div
-                x-data="{ ticketTypeIndex: @entangle("ticketTypeIndex") }"
+                x-data="{ ticketTypeIndex: @entangle('ticketTypeIndex') }"
                 class="w-full"
             >
                 <div class="flex justify-between gap-x-4">
-                    @if (user_can("action.ticket-type.delete"))
+                    @if (user_can('action.ticket-type.delete'))
                         <x-button
                             color="red"
                             light
@@ -181,11 +181,11 @@
         <livewire:settings.additional-column-edit />
         <x-slot:footer>
             <div
-                x-data="{ additionalColumnIndex: @entangle("additionalColumnIndex") }"
+                x-data="{ additionalColumnIndex: @entangle('additionalColumnIndex') }"
                 class="w-full"
             >
                 <div class="flex justify-between gap-x-4">
-                    @if (user_can("action.additional-column.delete"))
+                    @if (user_can('action.additional-column.delete'))
                         <x-button
                             color="red"
                             light

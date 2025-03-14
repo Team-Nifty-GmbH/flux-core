@@ -98,7 +98,7 @@
                                 <x-slot:left>
                                     <i class="ph ph-caret-right"></i>
                                 </x-slot>
-                                <span>{{ __("New") }}</span>
+                                <span>{{ __('New') }}</span>
                             </x-badge>
                             <template x-if="isNaN(item.growthRate)">
                                 <div x-html="item.growthRate ?? null"></div>
@@ -110,7 +110,7 @@
                     <tr>
                         <td colspan="3" class="p-4 text-center text-gray-400">
                             <h2 class="text-2xl font-medium">
-                                {{ __("No data available") }}
+                                {{ __('No data available') }}
                             </h2>
                         </td>
                     </tr>

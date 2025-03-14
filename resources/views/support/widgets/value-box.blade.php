@@ -91,7 +91,7 @@
                 class="text-gray-400"
                 x-cloak
                 x-show="$wire.previousSum"
-                x-text="'{{ __("Previous Period") }} ' + $wire.previousSum"
+                x-text="'{{ __('Previous Period') }} ' + $wire.previousSum"
             ></span>
         </div>
     </div>

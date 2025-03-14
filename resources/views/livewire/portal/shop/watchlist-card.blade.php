@@ -4,7 +4,7 @@
             class="w-full font-semibold"
             x-on:click="
                 showCart =
-                    showCart === {{ $cartForm->id ?? "null" }} ? null : {{ $cartForm->id }}
+                    showCart === {{ $cartForm->id ?? 'null' }} ? null : {{ $cartForm->id }}
             "
         >
             {{ $cartForm->name }}
@@ -22,7 +22,7 @@
         class="flex gap-4 px-2 py-5 md:px-4"
         @if($cartForm->isUserOwned()) x-sort="$wire.reOrder($item, $position)" @endif
         x-cloak
-        x-show="showCart === {{ $cartForm->id ?? "null" }}"
+        x-show="showCart === {{ $cartForm->id ?? 'null' }}"
         x-collapse
     >
         @foreach ($cartForm->cart_items ?? [] as $cartFormItem)
@@ -52,7 +52,7 @@
             </div>
         @endforeach
     </div>
-    @if (auth()->user()?->getMorphClass() === "user" && $cartForm->isUserOwned())
+    @if (auth()->user()?->getMorphClass() === 'user' && $cartForm->isUserOwned())
         <hr />
         <div class="p-4">
             <x-toggle

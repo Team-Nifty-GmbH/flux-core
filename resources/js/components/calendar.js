@@ -6,17 +6,17 @@ const calendar = () => {
             let config = null;
             if (event.is_all_day === true) {
                 config = {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit",
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
                 };
             } else {
                 config = {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit",
-                    hour: "2-digit",
-                    minute: "2-digit",
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
                 };
             }
 
@@ -35,14 +35,14 @@ const calendar = () => {
             );
 
             if (
-                (status === "accepted" || status === "maybe") &&
+                (status === 'accepted' || status === 'maybe') &&
                 !existingEvent
             ) {
                 this.calendar.addEvent(
                     calendarEvent.calendar_event,
                     this.calendar.getEventSourceById(this.calendarId),
                 );
-            } else if (status === "declined" && existingEvent) {
+            } else if (status === 'declined' && existingEvent) {
                 existingEvent.remove();
             }
 
@@ -58,7 +58,7 @@ const calendar = () => {
                     return false;
                 }
 
-                calendar.group = calendar.group || "my";
+                calendar.group = calendar.group || 'my';
 
                 let index = this.calendars.findIndex(
                     (c) => c.id === calendar.id,
@@ -107,7 +107,7 @@ const calendar = () => {
 
                 this.calendarId = calendar.id;
 
-                calendar.permission = calendar.is_editable ? "owner" : "reader";
+                calendar.permission = calendar.is_editable ? 'owner' : 'reader';
                 this.calendar
                     .getEventSourceById(this.calendarItem.id)
                     ?.remove();
@@ -117,7 +117,7 @@ const calendar = () => {
 
                 this.$wire.$parent.updateSelectableCalendars(calendar);
 
-                $modalClose("calendar-modal");
+                $modalClose('calendar-modal');
             });
         },
         deleteCalendar() {
@@ -128,7 +128,7 @@ const calendar = () => {
             );
             this.$wire.$parent.removeSelectableCalendar(this.calendarItem);
 
-            $modalClose("calendar-modal");
+            $modalClose('calendar-modal');
         },
         saveEvent() {
             this.$wire.saveEvent(this.$wire.calendarEvent).then((event) => {
@@ -138,7 +138,7 @@ const calendar = () => {
 
                 if (event instanceof Array) {
                     event
-                        .map((item) => String(item.id).split("|")[0])
+                        .map((item) => String(item.id).split('|')[0])
                         .filter(
                             (value, index, self) =>
                                 self.indexOf(value) === index,
@@ -148,7 +148,7 @@ const calendar = () => {
                                 .getEvents()
                                 .filter(
                                     (filter) =>
-                                        filter.id.split("|")[0] === String(id),
+                                        filter.id.split('|')[0] === String(id),
                                 )
                                 .forEach((e) => e.remove());
                         });
@@ -167,7 +167,7 @@ const calendar = () => {
                     );
                 }
 
-                $modalClose("calendar-event-modal");
+                $modalClose('calendar-event-modal');
             });
         },
         setDateTime(type, event) {
@@ -181,12 +181,12 @@ const calendar = () => {
                 ).value;
 
             if (this.$wire.calendarEvent.allDay) {
-                time = "00:00:00";
+                time = '00:00:00';
             }
 
-            let dateTime = dayjs(date + " " + time);
+            let dateTime = dayjs(date + ' ' + time);
 
-            if (type === "start") {
+            if (type === 'start') {
                 this.$wire.calendarEvent.start = dateTime.format(); // Use the default ISO 8601 format
             } else {
                 this.$wire.calendarEvent.end = dateTime.format(); // Use the default ISO 8601 format
@@ -201,18 +201,18 @@ const calendar = () => {
                 case event.repetition === null:
                     this.calendar.getEventById(event.id)?.remove();
                     break;
-                case event.confirmOption === "this":
+                case event.confirmOption === 'this':
                     this.calendar
-                        .getEventById(event.id + "|" + event.repetition)
+                        .getEventById(event.id + '|' + event.repetition)
                         ?.remove();
                     break;
-                case event.confirmOption === "future":
-                case event.confirmOption === "all":
+                case event.confirmOption === 'future':
+                case event.confirmOption === 'all':
                     this.calendar
                         .getEvents()
                         .filter((e) => {
-                            const split = e.id.split("|");
-                            if (event.confirmOption === "future") {
+                            const split = e.id.split('|');
+                            if (event.confirmOption === 'future') {
                                 return (
                                     split[0] === String(event.id) &&
                                     split[1] >= event.repetition
@@ -225,7 +225,7 @@ const calendar = () => {
                     break;
             }
 
-            $modalClose("calendar-event-modal");
+            $modalClose('calendar-event-modal');
         },
         calendar: null,
         config: {},
@@ -236,7 +236,7 @@ const calendar = () => {
         calendarEvent: {},
         dispatchCalendarEvents(eventName, params) {
             const eventNameKebap = eventName
-                .replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, "$1-$2")
+                .replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, '$1-$2')
                 .toLowerCase();
             this.$wire.dispatch(`calendar-${eventNameKebap}`, params);
         },
@@ -274,7 +274,7 @@ const calendar = () => {
             }
 
             this.dispatchCalendarEvents(
-                "toggleEventSource",
+                'toggleEventSource',
                 this.calendar
                     .getEventSources()
                     .map((source) => source.internalEventSource),
@@ -287,7 +287,7 @@ const calendar = () => {
             this.calendar.getEventSourceById(calendar.id)?.remove();
         },
         init() {
-            this.id = this.$id("calendar");
+            this.id = this.$id('calendar');
             this.$wire.getCalendars().then((calendars) => {
                 this.calendars = calendars;
             });
@@ -309,8 +309,8 @@ const calendar = () => {
                     listPlugin,
                     interactionPlugin,
                 ],
-                initialView: "dayGridMonth",
-                slotDuration: "00:15:00",
+                initialView: 'dayGridMonth',
+                slotDuration: '00:15:00',
                 initialDate: new Date(),
                 editable: true,
                 selectable: true,
@@ -318,128 +318,128 @@ const calendar = () => {
                 dayMaxEvents: true,
                 eventSources: [],
                 select: (selectionInfo) => {
-                    this.dispatchCalendarEvents("select", selectionInfo);
+                    this.dispatchCalendarEvents('select', selectionInfo);
                 },
                 unselect: (jsEvent, view) => {
-                    this.dispatchCalendarEvents("unselect", { jsEvent, view });
+                    this.dispatchCalendarEvents('unselect', { jsEvent, view });
                 },
                 dateClick: (dateClickInfo) => {
                     dateClickInfo.view.dateEnv.timeZone =
                         Intl.DateTimeFormat().resolvedOptions().timeZone;
                     this.$wire.onDateClick(dateClickInfo, this.calendarItem);
-                    this.dispatchCalendarEvents("dateClick", dateClickInfo);
+                    this.dispatchCalendarEvents('dateClick', dateClickInfo);
                 },
                 viewDidMount: (viewDidMountInfo) => {
                     this.dispatchCalendarEvents(
-                        "viewDidMount",
+                        'viewDidMount',
                         viewDidMountInfo,
                     );
                 },
                 eventDidMount: (eventDidMountInfo) => {
                     this.dispatchCalendarEvents(
-                        "eventDidMount",
+                        'eventDidMount',
                         eventDidMountInfo,
                     );
                 },
                 eventClick: (eventClickInfo) => {
                     this.$wire.onEventClick(eventClickInfo);
-                    this.dispatchCalendarEvents("eventClick", eventClickInfo);
+                    this.dispatchCalendarEvents('eventClick', eventClickInfo);
                 },
                 eventMouseEnter: (eventMouseEnterInfo) => {
                     this.dispatchCalendarEvents(
-                        "eventMouseEnter",
+                        'eventMouseEnter',
                         eventMouseEnterInfo,
                     );
                 },
                 eventMouseLeave: (eventMouseLeaveInfo) => {
                     this.dispatchCalendarEvents(
-                        "eventMouseLeave",
+                        'eventMouseLeave',
                         eventMouseLeaveInfo,
                     );
                 },
                 eventDragStart: (eventDragStartInfo) => {
                     this.$wire.onEventDragStart(eventDragStartInfo);
                     this.dispatchCalendarEvents(
-                        "eventDragStart",
+                        'eventDragStart',
                         eventDragStartInfo,
                     );
                 },
                 eventDragStop: (eventDragStopInfo) => {
                     this.$wire.onEventDragStop(eventDragStopInfo);
                     this.dispatchCalendarEvents(
-                        "eventDragStop",
+                        'eventDragStop',
                         eventDragStopInfo,
                     );
                 },
                 eventDrop: (eventDropInfo) => {
                     this.$wire.onEventDrop(eventDropInfo);
-                    this.dispatchCalendarEvents("eventDrop", eventDropInfo);
+                    this.dispatchCalendarEvents('eventDrop', eventDropInfo);
                 },
                 eventResizeStart: (eventResizeStartInfo) => {
                     this.dispatchCalendarEvents(
-                        "eventResizeStart",
+                        'eventResizeStart',
                         eventResizeStartInfo,
                     );
                 },
                 eventResizeStop: (eventResizeStopInfo) => {
                     this.dispatchCalendarEvents(
-                        "eventResizeStop",
+                        'eventResizeStop',
                         eventResizeStopInfo,
                     );
                 },
                 eventResize: (eventResizeInfo) => {
-                    this.dispatchCalendarEvents("eventResize", eventResizeInfo);
+                    this.dispatchCalendarEvents('eventResize', eventResizeInfo);
                 },
                 drop: (dropInfo) => {
-                    this.dispatchCalendarEvents("drop", dropInfo);
+                    this.dispatchCalendarEvents('drop', dropInfo);
                 },
                 eventReceive: (eventReceiveInfo) => {
                     this.dispatchCalendarEvents(
-                        "eventReceive",
+                        'eventReceive',
                         eventReceiveInfo,
                     );
                 },
                 eventLeave: (eventLeaveInfo) => {
-                    this.dispatchCalendarEvents("eventLeave", eventLeaveInfo);
+                    this.dispatchCalendarEvents('eventLeave', eventLeaveInfo);
                 },
                 eventAdd: (eventAddInfo) => {
-                    this.dispatchCalendarEvents("eventAdd", eventAddInfo);
+                    this.dispatchCalendarEvents('eventAdd', eventAddInfo);
                 },
                 eventChange: (eventChangeInfo) => {
-                    this.dispatchCalendarEvents("eventChange", eventChangeInfo);
+                    this.dispatchCalendarEvents('eventChange', eventChangeInfo);
                 },
                 eventRemove: (eventRemoveInfo) => {
-                    this.dispatchCalendarEvents("eventRemove", eventRemoveInfo);
+                    this.dispatchCalendarEvents('eventRemove', eventRemoveInfo);
                 },
                 eventsSet: (eventsSetInfo) => {
-                    this.dispatchCalendarEvents("eventsSet", eventsSetInfo);
+                    this.dispatchCalendarEvents('eventsSet', eventsSetInfo);
                 },
                 eventContent(info) {
-                    let eventContent = document.createElement("div");
+                    let eventContent = document.createElement('div');
                     eventContent.className =
-                        "flex gap-1 justify-between px-1 w-full";
+                        'flex gap-1 justify-between px-1 w-full';
 
-                    let textNode = document.createElement("div");
+                    let textNode = document.createElement('div');
                     textNode.className =
-                        "flex gap-1 flex-wrap w-full items-center";
+                        'flex gap-1 flex-wrap w-full items-center';
                     if (!info.event.allDay) {
-                        let calendarBadge = document.createElement("div");
+                        let calendarBadge = document.createElement('div');
                         calendarBadge.className =
-                            "h-3 w-3 rounded-full text-xs";
+                            'h-3 w-3 rounded-full text-xs';
                         calendarBadge.style.backgroundColor =
                             info.backgroundColor;
 
                         textNode.appendChild(calendarBadge);
                     }
 
-                    let titleContainer = document.createElement("span");
-                    titleContainer.className = "truncate";
+                    let titleContainer = document.createElement('span');
+                    titleContainer.className = 'truncate';
                     titleContainer.innerHTML = info.event.title;
                     textNode.appendChild(titleContainer);
 
                     if (info.event.extendedProps.appendTitle) {
-                        let appendTitle = document.createElement("div");
-                        appendTitle.className = "flex flex-wrap gap-1 px-1";
+                        let appendTitle = document.createElement('div');
+                        appendTitle.className = 'flex flex-wrap gap-1 px-1';
                         appendTitle.innerHTML =
                             info.event.extendedProps.appendTitle;
                         textNode.appendChild(appendTitle);
@@ -448,7 +448,7 @@ const calendar = () => {
                     eventContent.appendChild(textNode);
 
                     if (!info.event.allDay && info.timeText) {
-                        let timeNode = document.createElement("div");
+                        let timeNode = document.createElement('div');
                         timeNode.innerHTML = info.timeText;
 
                         eventContent.appendChild(timeNode);
@@ -481,7 +481,7 @@ const calendar = () => {
             );
 
             this.calendar.render();
-            this.$dispatch("calendar-initialized", this.calendar);
+            this.$dispatch('calendar-initialized', this.calendar);
         },
         traverseCalendars(calendars, callback) {
             calendars.forEach((calendar) => {

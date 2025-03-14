@@ -1,10 +1,10 @@
-@use("\FluxErp\Enums\SalutationEnum")
+@use('\FluxErp\Enums\SalutationEnum')
 <div>
     {{ $this->renderCreateDocumentsModal() }}
-    @can("action.contact.create")
-        @section("modals")
+    @can('action.contact.create')
+        @section('modals')
         <x-modal id="new-contact-modal">
-            @if (resolve_static(\FluxErp\Models\Client::class, "query")->count() > 1)
+            @if (resolve_static(\FluxErp\Models\Client::class, 'query')->count() > 1)
                 <x-select.styled
                     wire:model="contact.client_id"
                     label="{{ __('Client') }}"
@@ -14,15 +14,15 @@
             @endif
 
             <div class="flex flex-col gap-1.5 pt-1.5">
-                @section("contact")
+                @section('contact')
                 <div
                     class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-gray-200"
                 >
                     <label
-                        for="{{ md5("contact.company") }}"
+                        for="{{ md5('contact.company') }}"
                         class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2 dark:text-gray-50"
                     >
-                        {{ __("Company") }}
+                        {{ __('Company') }}
                     </label>
                     <div class="col-span-2">
                         <x-input
@@ -33,10 +33,10 @@
                 </div>
                 <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4">
                     <label
-                        for="{{ md5("address.salutation") }}"
+                        for="{{ md5('address.salutation') }}"
                         class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2 dark:text-gray-50"
                     >
-                        {{ __("Salutation") }}
+                        {{ __('Salutation') }}
                     </label>
                     <div class="col-span-2 w-full">
                         <x-select.styled
@@ -48,10 +48,10 @@
                 </div>
                 <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4">
                     <label
-                        for="{{ md5("address.title") }}"
+                        for="{{ md5('address.title') }}"
                         class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2 dark:text-gray-50"
                     >
-                        {{ __("Title") }}
+                        {{ __('Title') }}
                     </label>
                     <div class="col-span-2">
                         <x-input wire:model="contact.main_address.title" />
@@ -59,10 +59,10 @@
                 </div>
                 <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4">
                     <label
-                        for="{{ md5("address.firstname") }}"
+                        for="{{ md5('address.firstname') }}"
                         class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2 dark:text-gray-50"
                     >
-                        {{ __("Firstname") }}
+                        {{ __('Firstname') }}
                     </label>
                     <div class="col-span-2">
                         <x-input wire:model="contact.main_address.firstname" />
@@ -70,23 +70,23 @@
                 </div>
                 <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4">
                     <label
-                        for="{{ md5("address.lastname") }}"
+                        for="{{ md5('address.lastname') }}"
                         class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2 dark:text-gray-50"
                     >
-                        {{ __("Lastname") }}
+                        {{ __('Lastname') }}
                     </label>
                     <div class="col-span-2">
                         <x-input wire:model="contact.main_address.lastname" />
                     </div>
                 </div>
                 @show
-                @section("address")
+                @section('address')
                 <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4">
                     <label
-                        for="{{ md5("address.street") }}"
+                        for="{{ md5('address.street') }}"
                         class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2 dark:text-gray-50"
                     >
-                        {{ __("Street") }}
+                        {{ __('Street') }}
                     </label>
                     <div class="col-span-2">
                         <x-input wire:model="contact.main_address.street" />
@@ -97,7 +97,7 @@
                         for="postal-code"
                         class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2 dark:text-gray-50"
                     >
-                        {{ __("Zip / City") }}
+                        {{ __('Zip / City') }}
                     </label>
                     <div
                         class="mt-1 w-full items-center space-x-2 sm:col-span-2 sm:mt-0 sm:flex sm:space-x-2"
@@ -112,10 +112,10 @@
                 </div>
                 <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4">
                     <label
-                        for="{{ md5("address.countryId") }}"
+                        for="{{ md5('address.countryId') }}"
                         class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2 dark:text-gray-50"
                     >
-                        {{ __("Country") }}
+                        {{ __('Country') }}
                     </label>
                     <div class="col-span-2">
                         <x-select.styled
@@ -128,10 +128,10 @@
                 </div>
                 <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4">
                     <label
-                        for="{{ md5("address.language_id") }}"
+                        for="{{ md5('address.language_id') }}"
                         class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2 dark:text-gray-50"
                     >
-                        {{ __("Language") }}
+                        {{ __('Language') }}
                     </label>
                     <div class="col-span-2">
                         <x-select.styled
@@ -143,13 +143,13 @@
                     </div>
                 </div>
                 @show
-                @section("contact-channels")
+                @section('contact-channels')
                 <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4">
                     <label
-                        for="{{ md5("contact.main_address.email_primary") }}"
+                        for="{{ md5('contact.main_address.email_primary') }}"
                         class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2 dark:text-gray-50"
                     >
-                        {{ __("Email") }}
+                        {{ __('Email') }}
                     </label>
                     <div class="col-span-2">
                         <x-input
@@ -160,10 +160,10 @@
                 </div>
                 <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4">
                     <label
-                        for="{{ md5("contact.main_address.phone") }}"
+                        for="{{ md5('contact.main_address.phone') }}"
                         class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2 dark:text-gray-50"
                     >
-                        {{ __("Phone") }}
+                        {{ __('Phone') }}
                     </label>
                     <div class="col-span-2">
                         <x-input
@@ -174,10 +174,10 @@
                 </div>
                 <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4">
                     <label
-                        for="{{ md5("contact.main_address.phone_mobile") }}"
+                        for="{{ md5('contact.main_address.phone_mobile') }}"
                         class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2 dark:text-gray-50"
                     >
-                        {{ __("Phone Mobile") }}
+                        {{ __('Phone Mobile') }}
                     </label>
                     <div class="col-span-2">
                         <x-input
@@ -187,13 +187,13 @@
                     </div>
                 </div>
                 @show
-                @section("contact-origin")
+                @section('contact-origin')
                 <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4">
                     <label
-                        for="{{ md5("contact.contact_origin_id") }}"
+                        for="{{ md5('contact.contact_origin_id') }}"
                         class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2 dark:text-gray-50"
                     >
-                        {{ __("Contact Origin") }}
+                        {{ __('Contact Origin') }}
                     </label>
                     <div class="col-span-2">
                         <x-select.styled
@@ -224,7 +224,7 @@
         @show
     @endcan
 
-    @section("map")
+    @section('map')
     <div>
         <div
             x-on:load-map.window="$nextTick(() => onChange())"

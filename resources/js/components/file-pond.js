@@ -1,11 +1,11 @@
-import FilePondPluginImagePreview from "filepond-plugin-image-preview";
-import { create, registerPlugin, setOptions } from "filepond";
+import FilePondPluginImagePreview from 'filepond-plugin-image-preview';
+import { create, registerPlugin, setOptions } from 'filepond';
 
-const BASE_LANGUAGE_PATH = "/node_modules/filepond/locale/";
+const BASE_LANGUAGE_PATH = '/node_modules/filepond/locale/';
 
 // load all available languages from filepond
 const availableLanguages = import.meta.glob(
-    "/node_modules/filepond/locale/*.js",
+    '/node_modules/filepond/locale/*.js',
 );
 
 //  TODO: error on tree refresh - renderLevel undefined - and is called several times
@@ -54,7 +54,7 @@ export default function (
                 lang === null
                     ? undefined
                     : Object.keys(availableLanguages).find((key) =>
-                          key.split("/").pop().includes(lang),
+                          key.split('/').pop().includes(lang),
                       );
             // fallback is english
             const moduleLanguage =
@@ -67,7 +67,7 @@ export default function (
             this.fileCount = fileCountGetter.bind(this);
             registerPlugin(FilePondPluginImagePreview);
 
-            const inputElement = $ref.querySelector("#filepond-drop");
+            const inputElement = $ref.querySelector('#filepond-drop');
 
             if (!inputElement) {
                 return;
@@ -108,7 +108,7 @@ export default function (
                             this.fileCount() !== undefined &&
                             this.fileCount() > 0
                         ) {
-                            $interaction("dialog")
+                            $interaction('dialog')
                                 .wireable($wire.id)
                                 .question(
                                     modalTranslations.title,
@@ -153,7 +153,7 @@ export default function (
                         };
 
                         await $wire.upload(
-                            "files",
+                            'files',
                             file,
                             onSuccess,
                             onError,

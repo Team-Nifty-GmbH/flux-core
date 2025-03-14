@@ -76,20 +76,20 @@ You should build the Pusher config with port 443 as it should be the production 
 
 ```js
 // resources/js/bootstrap.js
-import Echo from "laravel-echo";
-import Pusher from "pusher-js";
+import Echo from 'laravel-echo';
+import Pusher from 'pusher-js';
 
 window.Pusher = Pusher;
 
 window.Echo = new Echo({
-    broadcaster: "pusher",
+    broadcaster: 'pusher',
     key: import.meta.env.VITE_PUSHER_APP_KEY,
     cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
     wsHost: window.location.hostname, // <-- important if you dont build the js file on the prod server
     wsPort: 80, // <-- this ensures that nginx will receive the request
     wssPort: 443, // <-- this ensures that nginx will receive the request
     disableStats: true,
-    enabledTransports: ["ws", "wss"],
+    enabledTransports: ['ws', 'wss'],
 });
 ```
 

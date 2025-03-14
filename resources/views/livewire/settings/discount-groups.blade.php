@@ -32,13 +32,13 @@
             $interaction()
                 .wireable()
                 .error(
-                    '{{ __("Delete discount group") }}',
-                    '{{ __("Do you really want to delete this discount group?") }}',
+                    '{{ __('Delete discount group') }}',
+                    '{{ __('Do you really want to delete this discount group?') }}',
                 )
-                .confirm('{{ __("Delete") }}', () => {
+                .confirm('{{ __('Delete') }}', () => {
                     this.dataTable.$wire.deleteItem(recordId)
                 })
-                .cancel('{{ __("Cancel") }}')
+                .cancel('{{ __('Cancel') }}')
                 .send()
         },
     }"
@@ -57,10 +57,10 @@
                 <x-slot:header>
                     <table.row>
                         <th class="text-left">
-                            {{ __("Name") }}
+                            {{ __('Name') }}
                         </th>
                         <th class="text-left">
-                            {{ __("Discount") }}
+                            {{ __('Discount') }}
                         </th>
                     </table.row>
                 </x-slot>
@@ -85,10 +85,10 @@
                 flat
                 x-on:click="$modalClose('manage-discount-group-modal')"
             >
-                {{ __("Cancel") }}
+                {{ __('Cancel') }}
             </x-button>
             <x-button color="indigo" class="mr-2" x-on:click="saveItem()">
-                {{ __("Save") }}
+                {{ __('Save') }}
             </x-button>
         </x-slot>
     </x-modal>

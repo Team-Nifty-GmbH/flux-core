@@ -1,16 +1,16 @@
-@use("\FluxErp\Enums\SalutationEnum")
+@use('\FluxErp\Enums\SalutationEnum')
 
 @props([
-    "onlyPostal" => false,
-    "countries" => resolve_static(\FluxErp\Models\Country::class, "query")
-        ->get(["id", "name"])
+    'onlyPostal' => false,
+    'countries' => resolve_static(\FluxErp\Models\Country::class, 'query')
+        ->get(['id', 'name'])
         ->toArray(),
-    "languages" => resolve_static(\FluxErp\Models\Language::class, "query")
-        ->get(["id", "name"])
+    'languages' => resolve_static(\FluxErp\Models\Language::class, 'query')
+        ->get(['id', 'name'])
         ->toArray(),
 ])
 <div class="table w-full table-auto gap-1.5" x-ref="address">
-    @section("contact")
+    @section('contact')
     <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
         <x-label :label="__('Company')" for="{{ md5('address.company') }}" />
         <div class="col-span-2 w-full">
@@ -95,7 +95,7 @@
         </div>
     </div>
     @show
-    @section("address")
+    @section('address')
     <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
         <x-label :label="__('Street')" for="{{ md5('address.street') }}" />
         <div class="col-span-2">
@@ -143,7 +143,7 @@
         </div>
     </div>
     @show
-    @section("contact-channels")
+    @section('contact-channels')
     @if (! $onlyPostal)
         <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
             <x-label
@@ -160,7 +160,7 @@
         </div>
     @endif
 
-    @section("contact-channels.email")
+    @section('contact-channels.email')
     <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
         <x-label
             :label="__('Email')"
@@ -190,7 +190,7 @@
         </div>
     </div>
     @show
-    @section("contact-channels.phone")
+    @section('contact-channels.phone')
     <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
         <x-label :label="__('Phone')" for="{{ md5('address.phone') }}" />
         <div class="col-span-2">
@@ -217,7 +217,7 @@
         </div>
     </div>
     @show
-    @section("contact-channels.phone_mobile")
+    @section('contact-channels.phone_mobile')
     <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
         <x-label
             :label="__('Phone Mobile')"
@@ -248,7 +248,7 @@
     </div>
     @show
     @if (! $onlyPostal)
-        @section("contact-channels.url")
+        @section('contact-channels.url')
         <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2">
             <x-label :label="__('URL')" for="{{ md5('address.url') }}" />
             <div class="col-span-2">
@@ -321,16 +321,16 @@
                 >
                     <x-slot:after>
                         @canAction(\FluxErp\Actions\Tag\CreateTag::class)
-                        <div class="px-1">
-                            <x-button
-                                class="w-full"
-                                color="emerald"
-                                :text="__('Add')"
-                                wire:click="addTag($promptValue())"
-                                wire:flux-confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}"
-                            />
-                        </div>
-                        @endCanAction
+                            <div class="px-1">
+                                <x-button
+                                    class="w-full"
+                                    color="emerald"
+                                    :text="__('Add')"
+                                    wire:click="addTag($promptValue())"
+                                    wire:flux-confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}"
+                                />
+                            </div>
+                        @endcanAction
                     </x-slot>
                 </x-select.styled>
             </div>
@@ -358,16 +358,16 @@
 
     @show
 </div>
-@section("attributes")
+@section('attributes')
 @if (! $onlyPostal)
     <h3
         class="pt-12 text-lg font-medium leading-6 text-gray-900 dark:text-gray-50"
     >
-        {{ __("Attributes") }}
+        {{ __('Attributes') }}
     </h3>
     <hr class="py-2" />
     <div class="flex flex-col gap-1.5">
-        @section("attributes.toggles")
+        @section('attributes.toggles')
         <x-toggle
             :label="__('Active')"
             x-bind:disabled="!$wire.edit"
@@ -393,10 +393,10 @@
     <h3
         class="pt-12 text-lg font-medium leading-6 text-gray-900 dark:text-gray-50"
     >
-        {{ __("Contact options") }}
+        {{ __('Contact options') }}
     </h3>
     <hr class="py-2" />
-    @section("attributes.contact-options")
+    @section('attributes.contact-options')
     <div
         class="flex flex-col gap-1.5"
         x-data="{
@@ -477,7 +477,7 @@
         </div>
     </div>
     @show
-    @section("attributes.map")
+    @section('attributes.map')
     <div
         x-data="addressMap($wire, 'address', true, '{{ auth()->user() ?->getAvatarUrl() }}')"
         class="pt-6"

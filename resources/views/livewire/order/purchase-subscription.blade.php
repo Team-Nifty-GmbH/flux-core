@@ -1,5 +1,5 @@
-@extends("flux::livewire.order.purchase")
-@section("modals")
+@extends('flux::livewire.order.purchase')
+@section('modals')
     @parent
     @use(FluxErp\Enums\OrderTypeEnum)
     <x-modal id="edit-schedule" :title="__('Edit Schedule')">
@@ -192,7 +192,7 @@
     </x-modal>
 @endsection
 
-@section("actions")
+@section('actions')
     @parent
     <x-button
         color="indigo"

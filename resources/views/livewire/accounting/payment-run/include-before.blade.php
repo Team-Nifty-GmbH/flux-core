@@ -3,7 +3,7 @@
         class="flex flex-col gap-4 text-sm"
         x-data="{
             getRoute(order) {
-                return '{{ route("orders.id", ["id" => ":id"]) }}'.replace(
+                return '{{ route('orders.id', ['id' => ':id']) }}'.replace(
                     ':id',
                     order.id,
                 )
@@ -44,14 +44,14 @@
                 </template>
             </div>
             <div class="flex justify-end gap-1.5 pt-4">
-                <div>{{ __("Total") }}</div>
+                <div>{{ __('Total') }}</div>
                 <div
                     x-html="window.formatters.coloredMoney($wire.paymentRunForm.total_amount)"
                 ></div>
             </div>
             <hr class="py-4" />
             <div class="flex flex-col gap-4">
-                @section("payment-properties")
+                @section('payment-properties')
                 <x-select.styled
                     wire:model="paymentRunForm.bank_connection_id"
                     :label="__('Account')"

@@ -3,7 +3,7 @@
         $client = app(\FluxErp\Models\Client::class)->first();
     @endphp
 
-    @section("password-reset-dialog")
+    @section('password-reset-dialog')
     <x-modal id="password-reset">
         <x-card :header="__('Reset password')">
             <x-input
@@ -26,10 +26,10 @@
     </x-modal>
     @show
     <x-slot:title>
-        {{ $client?->name . " Portal" }}
+        {{ $client?->name . ' Portal' }}
     </x-slot>
     <style>
-        {{ $client?->settings()->first()["settings"]["custom_css"] ?? "" }}
+        {{ $client?->settings()->first()['settings']['custom_css'] ?? '' }}
     </style>
     <div class="md:text-portal-font-color absolute right-4 top-6 text-white">
         <a
@@ -39,23 +39,23 @@
         >
             <x-icon name="arrow-up-right" class="h-4 w-4" />
             <div class="return-to-website pl-4 font-bold">
-                {{ __("Return to website") }}
+                {{ __('Return to website') }}
             </div>
         </a>
     </div>
     <div
         class="md:text-portal-font-color absolute left-4 top-6 max-h-80 max-w-80 text-white"
     >
-        {{ $client?->getFirstMedia("logo") }}
+        {{ $client?->getFirstMedia('logo') }}
     </div>
     <div class="flex min-h-full justify-center">
         <div
             class="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24"
         >
-            @section("headline")
-            <h1 class="pb-16 text-center text-5xl">{{ __("Login") }}</h1>
+            @section('headline')
+            <h1 class="pb-16 text-center text-5xl">{{ __('Login') }}</h1>
             <h2 class="text-center text-2xl">
-                {{ __("For more transparency, quality and speed in all service processes") }}
+                {{ __('For more transparency, quality and speed in all service processes') }}
             </h2>
             @show
             <div class="mx-auto w-full max-w-sm pt-16 lg:w-96">
@@ -67,7 +67,7 @@
                     @endif
 
                     <div class="mt-6">
-                        @section("login-form")
+                        @section('login-form')
                         <form class="flex flex-col gap-6" wire:submit="login()">
                             <x-input
                                 id="email"
@@ -90,7 +90,7 @@
                                         x-on:click="$modalOpen('password-reset')"
                                         class="cursor-pointer font-medium text-indigo-600 hover:text-indigo-500"
                                     >
-                                        {{ __("Reset password") }}
+                                        {{ __('Reset password') }}
                                     </a>
                                 </div>
                             </div>

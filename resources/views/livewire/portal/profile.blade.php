@@ -12,15 +12,15 @@
                 <h2
                     class="pt-5 text-base font-bold uppercase md:pt-0 dark:text-white"
                 >
-                    {{ __("Edit profile") }}
+                    {{ __('Edit profile') }}
                 </h2>
             </div>
             <h1 class="pt-5 text-5xl font-bold dark:text-white">
-                {{ $address["id"] ?? false ? trim($address["firstname"] . " " . $address["lastname"]) : __("New address") }}
+                {{ $address['id'] ?? false ? trim($address['firstname'] . ' ' . $address['lastname']) : __('New address') }}
             </h1>
         </div>
         <form class="pt-12">
-            @if (auth()->user()->can("profiles.{id?}.get"))
+            @if (auth()->user()->can('profiles.{id?}.get'))
                 <div class="flex w-full justify-end">
                     <x-button
                         color="indigo"
@@ -34,10 +34,10 @@
                 class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-gray-200 sm:pt-5"
             >
                 <label
-                    for="{{ md5("address.salutation") }}"
+                    for="{{ md5('address.salutation') }}"
                     class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2 dark:text-gray-50"
                 >
-                    {{ __("Salutation") }}
+                    {{ __('Salutation') }}
                 </label>
                 <div class="col-span-2">
                     <x-input wire:model="address.salutation" />
@@ -47,10 +47,10 @@
                 class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5"
             >
                 <label
-                    for="{{ md5("address.title") }}"
+                    for="{{ md5('address.title') }}"
                     class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2 dark:text-gray-50"
                 >
-                    {{ __("Title") }}
+                    {{ __('Title') }}
                 </label>
                 <div class="col-span-2">
                     <x-input wire:model="address.title" />
@@ -60,10 +60,10 @@
                 class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5"
             >
                 <label
-                    for="{{ md5("address.firstname") }}"
+                    for="{{ md5('address.firstname') }}"
                     class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2 dark:text-gray-50"
                 >
-                    {{ __("Firstname") }}
+                    {{ __('Firstname') }}
                 </label>
                 <div class="col-span-2">
                     <x-input wire:model="address.firstname" />
@@ -73,10 +73,10 @@
                 class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5"
             >
                 <label
-                    for="{{ md5("address.lastname") }}"
+                    for="{{ md5('address.lastname') }}"
                     class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2 dark:text-gray-50"
                 >
-                    {{ __("Lastname") }}
+                    {{ __('Lastname') }}
                 </label>
                 <div class="col-span-2">
                     <x-input wire:model="address.lastname" />
@@ -86,10 +86,10 @@
                 class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5"
             >
                 <label
-                    for="{{ md5("address.street") }}"
+                    for="{{ md5('address.street') }}"
                     class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2 dark:text-gray-50"
                 >
-                    {{ __("Street") }}
+                    {{ __('Street') }}
                 </label>
                 <div class="col-span-2">
                     <x-input wire:model="address.street" />
@@ -99,10 +99,10 @@
                 class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5"
             >
                 <label
-                    for="{{ md5("address.country_id") }}"
+                    for="{{ md5('address.country_id') }}"
                     class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2 dark:text-gray-50"
                 >
-                    {{ __("Country") }}
+                    {{ __('Country') }}
                 </label>
                 <div class="col-span-2">
                     <x-select.styled
@@ -120,7 +120,7 @@
                     for="postal-code"
                     class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2 dark:text-gray-50"
                 >
-                    {{ __("Zip / City") }}
+                    {{ __('Zip / City') }}
                 </label>
                 <div
                     class="mt-1 w-full items-center space-x-2 sm:col-span-2 sm:mt-0 sm:flex sm:space-x-2"
@@ -137,10 +137,10 @@
                 class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5"
             >
                 <label
-                    for="{{ md5("address.language_id") }}"
+                    for="{{ md5('address.language_id') }}"
                     class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2 dark:text-gray-50"
                 >
-                    {{ __("Language") }}
+                    {{ __('Language') }}
                 </label>
                 <div class="col-span-2">
                     <x-select.styled
@@ -155,25 +155,25 @@
                 class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5"
             >
                 <label
-                    for="{{ md5("password") }}"
+                    for="{{ md5('password') }}"
                     class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2 dark:text-gray-50"
                 >
-                    {{ __("Password") }}
+                    {{ __('Password') }}
                 </label>
                 <div class="col-span-2">
                     <x-password wire:model="loginPassword" />
                 </div>
             </div>
         </form>
-        @if (auth()->user()->can("profiles.{id?}.get") && auth()->id() !== ($address["id"] ?? ""))
+        @if (auth()->user()->can('profiles.{id?}.get') && auth()->id() !== ($address['id'] ?? ''))
             <div
                 class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-gray-200 sm:pt-5"
             >
                 <label
-                    for="{{ md5("address.can_login") }}"
+                    for="{{ md5('address.can_login') }}"
                     class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2 dark:text-gray-50"
                 >
-                    {{ __("Active") }}
+                    {{ __('Active') }}
                 </label>
                 <div class="col-span-2">
                     <x-toggle md wire:model="address.can_login" />
@@ -183,10 +183,10 @@
                 class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5"
             >
                 <label
-                    for="{{ md5("address.email") }}"
+                    for="{{ md5('address.email') }}"
                     class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2 dark:text-gray-50"
                 >
-                    {{ __("Email") }}
+                    {{ __('Email') }}
                 </label>
                 <div class="col-span-2">
                     <x-input wire:model="address.email" />
@@ -196,10 +196,10 @@
                 class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5"
             >
                 <label
-                    for="{{ md5("permissions") }}"
+                    for="{{ md5('permissions') }}"
                     class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2 dark:text-gray-50"
                 >
-                    {{ __("Permissions") }}
+                    {{ __('Permissions') }}
                 </label>
                 <div class="col-span-2 space-y-3">
                     @foreach ($permissions as $permission)
@@ -218,7 +218,7 @@
         <h3
             class="pt-12 text-lg font-medium leading-6 text-gray-900 dark:text-gray-50"
         >
-            {{ __("Contact options") }}
+            {{ __('Contact options') }}
         </h3>
         <div
             x-data="{

@@ -7,7 +7,7 @@
             wire:model="productOptionGroupForm.name"
             label="{{ __('Name') }}"
         />
-        <x-label>{{ __("Product Options") }}</x-label>
+        <x-label>{{ __('Product Options') }}</x-label>
         <template
             x-for="(option, index) in $wire.productOptionGroupForm.product_options"
         >
@@ -26,7 +26,7 @@
             color="indigo"
             x-on:click="$wire.productOptionGroupForm.product_options.push({name: ''})"
         >
-            {{ __("Add Product Option") }}
+            {{ __('Add Product Option') }}
         </x-button>
     </div>
     <x-slot:footer>

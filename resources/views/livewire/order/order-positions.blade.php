@@ -35,13 +35,13 @@
         id="edit-order-position"
         x-on:close="$wire.resetOrderPosition()"
     >
-        @section("order-position-detail-modal.content")
+        @section('order-position-detail-modal.content')
         <div class="relative">
             <x-flux::spinner wire:target="position" />
             <div class="space-y-2 p-4" colspan="100%">
                 <div class="flex w-full justify-items-stretch gap-3">
                     <div class="flex-auto space-y-2">
-                        @section("order-position-detail-modal.content.left")
+                        @section('order-position-detail-modal.content.left')
                         <x-checkbox
                             wire:model.boolean="orderPosition.is_free_text"
                             :label="__('Comment / Block')"
@@ -103,7 +103,7 @@
                         x-cloak
                         x-show="$wire.orderPosition.is_free_text !== true"
                     >
-                        @section("order-position-detail-modal.content.right")
+                        @section('order-position-detail-modal.content.right')
                         <x-input
                             type="number"
                             min="0"
@@ -162,7 +162,7 @@
                         @show
                     </div>
                 </div>
-                @section("order-position-detail-modal.content.bottom")
+                @section('order-position-detail-modal.content.bottom')
                 <x-flux::editor
                     :label="__('Description')"
                     wire:model="orderPosition.description"
@@ -205,8 +205,8 @@
     <div class="w-full xl:space-x-6">
         <div class="ml:p-10 relative min-h-full space-y-6">
             <div>
-                @include("tall-datatables::livewire.data-table")
-                @section("order-positions-footer-card")
+                @include('tall-datatables::livewire.data-table')
+                @section('order-positions-footer-card')
                 <div
                     x-show="! $wire.order.is_locked"
                     x-cloak
@@ -222,7 +222,7 @@
                             "
                         >
                             <div class="flex flex-col gap-4">
-                                @section("order-positions-footer-card.inputs")
+                                @section('order-positions-footer-card.inputs')
                                 <x-select.styled
                                     class="pb-4"
                                     :label="__('Product')"
@@ -266,7 +266,7 @@
                             <div
                                 class="flex w-full items-center justify-end gap-2 pt-2"
                             >
-                                @section("order-positions-footer-card.buttons")
+                                @section('order-positions-footer-card.buttons')
                                 <div
                                     x-transition
                                     x-cloak

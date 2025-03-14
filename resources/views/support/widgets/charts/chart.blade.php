@@ -7,7 +7,7 @@
     @endif
 
     <div>
-        @section("title")
+        @section('title')
         @if ($this->showTitle())
             <div class="flex w-full justify-between px-6">
                 <h2 class="truncate text-lg font-semibold text-gray-400">
@@ -18,13 +18,13 @@
         @endif
 
         @show
-        @section("options")
+        @section('options')
         @show
     </div>
     <div
         class="flex h-full flex-1 flex-grow flex-col justify-between gap-4 dark:text-gray-400"
     >
-        @section("chart")
+        @section('chart')
         <div class="chart h-full w-full"></div>
         @show
     </div>

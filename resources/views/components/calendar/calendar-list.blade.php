@@ -1,5 +1,5 @@
 <div class="whitespace-nowrap">
-    @if ($group === "my" && resolve_static(\FluxErp\Actions\Calendar\CreateCalendar::class, "canPerformAction", [false]))
+    @if ($group === 'my' && resolve_static(\FluxErp\Actions\Calendar\CreateCalendar::class, 'canPerformAction', [false]))
         <x-button
             color="secondary"
             light
@@ -7,7 +7,7 @@
             class="w-full"
             x-on:click="calendarItem = {}; $wire.editCalendar();"
         >
-            {{ __("Create Calendar") }}
+            {{ __('Create Calendar') }}
         </x-button>
     @endif
 
@@ -86,27 +86,27 @@
                     </svg>
                 </div>
                 @canAction(\FluxErp\Actions\Calendar\UpdateCalendar::class)
-                <div
-                    class="flex cursor-pointer items-center"
-                    x-cloak
-                    x-show="node.resourceEditable === true"
-                >
-                    <i
-                        x-on:click="
-                            calendarItem = node
-                            $wire.editCalendar(node)
-                        "
-                        class="ph ph-note-pencil size-"
+                    <div
+                        class="flex cursor-pointer items-center"
                         x-cloak
                         x-show="node.resourceEditable === true"
-                    ></i>
-                    <i
-                        class="ph ph-rss size-6"
-                        x-cloak
-                        x-show="node.isShared"
-                    ></i>
-                </div>
-                @endCanAction
+                    >
+                        <i
+                            x-on:click="
+                                calendarItem = node
+                                $wire.editCalendar(node)
+                            "
+                            class="ph ph-note-pencil size-"
+                            x-cloak
+                            x-show="node.resourceEditable === true"
+                        ></i>
+                        <i
+                            class="ph ph-rss size-6"
+                            x-cloak
+                            x-show="node.isShared"
+                        ></i>
+                    </div>
+                @endcanAction
             </x-slot>
         </x-flux::checkbox-tree>
     </div>

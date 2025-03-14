@@ -1,6 +1,6 @@
-{{ $title ?? "" }}
+{{ $title ?? '' }}
 <div
-    {{ $attributes->merge(["class" => "mt-3 flex flex-col"])->except("wire:sortable") }}
+    {{ $attributes->merge(['class' => 'mt-3 flex flex-col'])->except('wire:sortable') }}
 >
     <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
         <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
@@ -12,18 +12,18 @@
                 >
                     <thead class="sticky top-0 font-semibold">
                         <tr>
-                            {{ $header ?? "" }}
+                            {{ $header ?? '' }}
                         </tr>
                     </thead>
                     <tbody
                         class="relative"
-                        {{ $attributes->thatStartWith("wire:sortable") }}
+                        {{ $attributes->thatStartWith('wire:sortable') }}
                     >
-                        {{ $slot ?? "" }}
+                        {{ $slot ?? '' }}
                     </tbody>
                     <tfoot>
                         <tr>
-                            {{ $footer ?? "" }}
+                            {{ $footer ?? '' }}
                         </tr>
                     </tfoot>
                 </table>

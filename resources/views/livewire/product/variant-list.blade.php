@@ -55,21 +55,21 @@
                         class="font-bold"
                         x-text="$wire.variants?.new?.length ?? 0"
                     ></span>
-                    <span>{{ __("Variants will be created.") }}</span>
+                    <span>{{ __('Variants will be created.') }}</span>
                 </div>
                 <div>
                     <span
                         class="font-bold"
                         x-text="$wire.variants?.delete?.length ?? 0"
                     ></span>
-                    <span>{{ __("Variants will be deleted.") }}</span>
+                    <span>{{ __('Variants will be deleted.') }}</span>
                 </div>
                 <div>
                     <span
                         class="font-bold"
                         x-text="$wire.variants?.existing?.length ?? 0"
                     ></span>
-                    <span>{{ __("Variants already exist.") }}</span>
+                    <span>{{ __('Variants already exist.') }}</span>
                 </div>
             </div>
         </div>
@@ -114,6 +114,6 @@
         </x-slot>
     </x-modal>
     <div wire:ignore>
-        @include("tall-datatables::livewire.data-table")
+        @include('tall-datatables::livewire.data-table')
     </div>
 </div>

@@ -3,7 +3,7 @@
         <div
             class="space-y-8 divide-y divide-gray-200"
             x-data="{
-                formatter: @js(resolve_static(\FluxErp\Models\Task::class, "typeScriptAttributes")),
+                formatter: @js(resolve_static(\FluxErp\Models\Task::class, 'typeScriptAttributes')),
             }"
         >
             <div class="space-y-2.5">
@@ -108,7 +108,7 @@
                 <h3
                     class="text-md text-secondary-700 dark:text-secondary-400 mt-4 whitespace-normal font-medium"
                 >
-                    {{ __("Additional Columns") }}
+                    {{ __('Additional Columns') }}
                 </h3>
                 <x-flux::additional-columns
                     :model="\FluxErp\Models\Task::class"

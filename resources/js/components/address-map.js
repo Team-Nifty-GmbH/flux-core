@@ -1,8 +1,8 @@
-import L from "leaflet";
-import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
-import markerIcon from "leaflet/dist/images/marker-icon.png";
-import markerShadow from "leaflet/dist/images/marker-shadow.png";
-import "leaflet.markercluster";
+import L from 'leaflet';
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+import 'leaflet.markercluster';
 
 // remove default icon - take what vite generated
 delete L.Icon.Default.prototype._getIconUrl;
@@ -24,9 +24,9 @@ export default function (
         zoom: zoom,
         init() {
             // init map
-            this.map = L.map("map");
+            this.map = L.map('map');
             this.markers = L.markerClusterGroup();
-            L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
                 attribution:
                     '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
@@ -39,22 +39,22 @@ export default function (
                 });
             }
 
-            if (typeof $wire[propertyName] !== "function") {
+            if (typeof $wire[propertyName] !== 'function') {
                 // side-effect -> update map on address change
-                this.$watch("$wire." + propertyName, this.onChange.bind(this));
+                this.$watch('$wire.' + propertyName, this.onChange.bind(this));
             }
         },
         addMarkers(addresses = null) {
             let address = addresses ?? $wire[propertyName];
-            if (propertyName.includes(".") && !addresses) {
-                const props = propertyName.split(".");
+            if (propertyName.includes('.') && !addresses) {
+                const props = propertyName.split('.');
                 address = $wire;
                 props.forEach((prop) => {
                     address = address[prop];
                 });
             }
 
-            if (typeof address === "function") {
+            if (typeof address === 'function') {
                 address = address();
             }
 
@@ -82,9 +82,9 @@ export default function (
 
                 let icon = null;
                 let options = {};
-                if (address.hasOwnProperty("icon")) {
+                if (address.hasOwnProperty('icon')) {
                     icon = L.divIcon({
-                        className: "custom-icon",
+                        className: 'custom-icon',
                         html: address.icon,
                     });
                     options.icon = icon;
@@ -164,7 +164,7 @@ export default function (
                 let options = {};
                 if (userIcon) {
                     options.icon = L.divIcon({
-                        className: "", // Remove default class styling for full customization
+                        className: '', // Remove default class styling for full customization
                         html: `<div class="shrink-0 inline-flex items-center justify-center overflow-hidden rounded-full border border-gray-200 dark:border-secondary-500">
                                 <img class="shrink-0 object-cover object-center rounded-full w-12 h-12 text-lg" src="${userIcon}">
                             </div>`,

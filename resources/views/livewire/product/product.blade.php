@@ -37,7 +37,7 @@
         <div
             class="mt-6 flex flex-col-reverse justify-stretch space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-x-3 sm:space-y-0 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3"
         >
-            @if (resolve_static(\FluxErp\Actions\CartItem\CreateCartItem::class, "canPerformAction", [false]) && ! $product->children_count > 0)
+            @if (resolve_static(\FluxErp\Actions\CartItem\CreateCartItem::class, 'canPerformAction', [false]) && ! $product->children_count > 0)
                 <x-button
                     x-on:click="$wire.$dispatch('cart:add', {products: $wire.product.id})"
                     color="indigo"
@@ -47,40 +47,41 @@
             @endif
 
             @canAction(\FluxErp\Actions\Product\DeleteProduct::class)
-            <x-button
-                color="red"
-                :text="__('Delete') "
-                wire:click="delete()"
-                wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Product')]) }}"
-            />
-            @endCanAction
+                <x-button
+                    color="red"
+                    :text="__('Delete') "
+                    wire:click="delete()"
+                    wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Product')]) }}"
+                />
+            @endcanAction
+
             @canAction(\FluxErp\Actions\Product\UpdateProduct::class)
-            <x-button
-                color="indigo"
-                x-show="!edit"
-                class="w-full"
-                x-on:click="edit = true"
-                :text="__('Edit')"
-            />
-            <x-button
-                x-cloak
-                color="indigo"
-                x-show="edit"
-                class="w-full"
-                x-on:click="$wire.save().then((success) => {
+                <x-button
+                    color="indigo"
+                    x-show="!edit"
+                    class="w-full"
+                    x-on:click="edit = true"
+                    :text="__('Edit')"
+                />
+                <x-button
+                    x-cloak
+                    color="indigo"
+                    x-show="edit"
+                    class="w-full"
+                    x-on:click="$wire.save().then((success) => {
                         edit = false;
                     });"
-                :text="__('Save')"
-            />
-            <x-button
-                x-cloak
-                color="indigo"
-                x-show="edit"
-                class="w-full"
-                x-on:click="edit = false; $wire.resetProduct()"
-                :text="__('Cancel')"
-            />
-            @endCanAction
+                    :text="__('Save')"
+                />
+                <x-button
+                    x-cloak
+                    color="indigo"
+                    x-show="edit"
+                    class="w-full"
+                    x-on:click="edit = false; $wire.resetProduct()"
+                    :text="__('Cancel')"
+                />
+            @endcanAction
         </div>
     </div>
     <x-flux::tabs wire:model.live="tab" wire:loading="tab" :$tabs wire:ignore />

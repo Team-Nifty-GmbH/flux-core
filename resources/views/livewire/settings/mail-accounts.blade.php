@@ -63,7 +63,7 @@
 </x-modal>
 <x-modal id="edit-mail-account">
     <x-slot:title>
-        {{ __("Edit Mail Account") }}
+        {{ __('Edit Mail Account') }}
     </x-slot>
     <div class="flex flex-col gap-1.5">
         <x-card

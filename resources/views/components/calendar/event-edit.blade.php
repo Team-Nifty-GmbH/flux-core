@@ -2,8 +2,8 @@
     class="grid grid-cols-1 space-y-2.5"
     x-data="{ errors: $wire.entangle('validationErrors') }"
 >
-    @section("event-edit.content")
-    @section("event-edit.calendar-select")
+    @section('event-edit.content')
+    @section('event-edit.calendar-select')
     <div x-show="!$wire.calendarEvent.calendar_type">
         <x-select.styled
             wire:model="calendarEvent.calendar_id"
@@ -15,7 +15,7 @@
         />
     </div>
     @show
-    @section("event-edit.input-fields")
+    @section('event-edit.input-fields')
     <x-input
         x-ref="autofocus"
         :label="__('Title') . '*'"
@@ -33,10 +33,10 @@
         x-bind:disabled="! $wire.calendarEvent.is_editable ?? false"
     />
     @show
-    @section("event-edit.timespan")
+    @section('event-edit.timespan')
     <div class="grid grid-cols-3 items-center gap-1.5">
         <x-label>
-            {{ __("Start") }}
+            {{ __('Start') }}
         </x-label>
         <x-input
             id="calendar-event-start-date"
@@ -73,7 +73,7 @@
         />
     </div>
     @show
-    @section("event-edit.custom-properties")
+    @section('event-edit.custom-properties')
     <template
         x-for="(customProperty, propertyName) in $wire.calendarEvent.customProperties"
     >
@@ -128,7 +128,7 @@
         </div>
     </template>
     @show
-    @section("event-edit.repeatable")
+    @section('event-edit.repeatable')
     <div class="mb-2" x-show="$wire.calendarEvent.is_repeatable">
         <x-checkbox
             :label="__('Repeatable')"
@@ -262,38 +262,38 @@
                         {
                             value: 'day',
                             label:
-                                '{{ __("Monthly on") }} ' +
+                                '{{ __('Monthly on') }} ' +
                                 dayjs($wire.calendarEvent.start).format('DD') +
                                 '.',
                         },
                         {
                             value: 'first',
                             label:
-                                '{{ __("Monthly on first") }} ' +
+                                '{{ __('Monthly on first') }} ' +
                                 dayjs($wire.calendarEvent.start).format('dddd'),
                         },
                         {
                             value: 'second',
                             label:
-                                '{{ __("Monthly on second") }} ' +
+                                '{{ __('Monthly on second') }} ' +
                                 dayjs($wire.calendarEvent.start).format('dddd'),
                         },
                         {
                             value: 'third',
                             label:
-                                '{{ __("Monthly on third") }} ' +
+                                '{{ __('Monthly on third') }} ' +
                                 dayjs($wire.calendarEvent.start).format('dddd'),
                         },
                         {
                             value: 'fourth',
                             label:
-                                '{{ __("Monthly on fourth") }} ' +
+                                '{{ __('Monthly on fourth') }} ' +
                                 dayjs($wire.calendarEvent.start).format('dddd'),
                         },
                         {
                             value: 'last',
                             label:
-                                '{{ __("Monthly on last") }} ' +
+                                '{{ __('Monthly on last') }} ' +
                                 dayjs($wire.calendarEvent.start).format('dddd'),
                         },
                     ],
@@ -303,7 +303,7 @@
                     <x-slot:action>
                         <x-button class="w-full" x-on:click="show = ! show">
                             <span
-                                x-text="selectedOption?.label ?? '{{ __("Please select") }}'"
+                                x-text="selectedOption?.label ?? '{{ __('Please select') }}'"
                             ></span>
                         </x-button>
                     </x-slot>
@@ -339,13 +339,13 @@
             >
                 <calendar-option value="day">
                     <span
-                        x-text="'{{ __("Monthly on") }} ' + dayjs($wire.calendarEvent.start).format('DD') + '.'"
+                        x-text="'{{ __('Monthly on') }} ' + dayjs($wire.calendarEvent.start).format('DD') + '.'"
                     ></span>
                 </calendar-option>
                 <calendar-option value="first">
                     <span
                         x-text="
-                            '{{ __("Monthly on first") }} ' +
+                            '{{ __('Monthly on first') }} ' +
                                 dayjs($wire.calendarEvent.start).format('dddd')
                         "
                     ></span>
@@ -353,7 +353,7 @@
                 <calendar-option value="second">
                     <span
                         x-text="
-                            '{{ __("Monthly on second") }} ' +
+                            '{{ __('Monthly on second') }} ' +
                                 dayjs($wire.calendarEvent.start).format('dddd')
                         "
                     ></span>
@@ -361,7 +361,7 @@
                 <calendar-option value="third">
                     <span
                         x-text="
-                            '{{ __("Monthly on third") }} ' +
+                            '{{ __('Monthly on third') }} ' +
                                 dayjs($wire.calendarEvent.start).format('dddd')
                         "
                     ></span>
@@ -369,7 +369,7 @@
                 <calendar-option value="fourth">
                     <span
                         x-text="
-                            '{{ __("Monthly on fourth") }} ' +
+                            '{{ __('Monthly on fourth') }} ' +
                                 dayjs($wire.calendarEvent.start).format('dddd')
                         "
                     ></span>
@@ -377,7 +377,7 @@
                 <calendar-option value="last">
                     <span
                         x-text="
-                            '{{ __("Monthly on last") }} ' +
+                            '{{ __('Monthly on last') }} ' +
                                 dayjs($wire.calendarEvent.start).format('dddd')
                         "
                     ></span>
@@ -421,7 +421,7 @@
         </div>
     </div>
     @show
-    @section("event-edit.has-taken-place")
+    @section('event-edit.has-taken-place')
     <div class="mb-2">
         <x-checkbox
             :label="__('Has taken place')"
@@ -430,7 +430,7 @@
         />
     </div>
     @show
-    @section("event-edit.invites")
+    @section('event-edit.invites')
     <div x-show="calendarEvent.is_invited">
         <x-select.styled
             x-model="calendarEvent.status"
@@ -453,19 +453,19 @@
                         xs
                         icon="check-circle"
                     />
-                    {{ __("Accepted") }}
+                    {{ __('Accepted') }}
                 </div>
             </calendar-option>
             <calendar-option :label="__('Declined')" value="declined">
                 <div>
                     <x-button.circle disabled color="red" xs icon="x-mark" />
-                    {{ __("Declined") }}
+                    {{ __('Declined') }}
                 </div>
             </calendar-option>
             <calendar-option :label="__('Maybe')" value="maybe">
                 <div>
                     <x-button.circle disabled color="amber" xs label="?" />
-                    {{ __("Maybe") }}
+                    {{ __('Maybe') }}
                 </div>
             </calendar-option>
         </x-select.styled>

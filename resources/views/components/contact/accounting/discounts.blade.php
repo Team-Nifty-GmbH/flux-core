@@ -57,13 +57,13 @@
                                 <x-flux::table>
                                     <x-slot:header>
                                         <th class="text-left">
-                                            {{ __("Type") }}
+                                            {{ __('Type') }}
                                         </th>
                                         <th class="text-left">
-                                            {{ __("Name") }}
+                                            {{ __('Name') }}
                                         </th>
                                         <th class="text-left">
-                                            {{ __("Discount") }}
+                                            {{ __('Discount') }}
                                         </th>
                                     </x-slot>
                                     <template x-for="discount in discounts">

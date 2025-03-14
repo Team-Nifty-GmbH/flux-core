@@ -1,5 +1,5 @@
 <div x-data="{ show: false, showWatchlist: false }">
-    @section("icon")
+    @section('icon')
     <x-button
         color="secondary"
         light
@@ -11,15 +11,15 @@
         x-on:click="show = true"
     />
     @show
-    @section("cart-sidebar")
+    @section('cart-sidebar')
     <x-flux::sidebar x-show="show">
         <div class="flex flex-col gap-4 text-gray-900 dark:text-gray-50">
-            @section("cart-sidebar.header")
+            @section('cart-sidebar.header')
             <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">
-                {{ __("Cart :item_count positions", ["item_count" => count($this->cart->cartItems)]) }}
+                {{ __('Cart :item_count positions', ['item_count' => count($this->cart->cartItems)]) }}
             </h1>
             @show
-            @section("cart-sidebar.content")
+            @section('cart-sidebar.content')
             @foreach ($this->cart?->cartItems ?? [] as $key => $cartItem)
                 <x-flux::shop.cart-item
                     :cartItem="$cartItem"
@@ -29,9 +29,9 @@
 
             @show
             <hr />
-            @section("cart-sidebar.total")
+            @section('cart-sidebar.total')
             <div class="flex justify-between gap-2 font-semibold">
-                <div>{{ __("Total") }}</div>
+                <div>{{ __('Total') }}</div>
                 <div>
                     {{ Number::currency(number: $this->cart->cart_items_sum_total ?? 0, locale: app()->getLocale()) }}
                     *
@@ -39,17 +39,17 @@
             </div>
             <div class="text-2xs text-secondary-400">
                 @if (auth()->user()?->priceList?->is_net || \FluxErp\Models\PriceList::default()->is_net)
-                    * {{ __("All prices net plus VAT") }}
+                    * {{ __('All prices net plus VAT') }}
                 @else
-                    * {{ __("All prices gross including VAT") }}
+                    * {{ __('All prices gross including VAT') }}
                 @endif
             </div>
             @show
         </div>
         <x-slot:footer>
-            @section("cart-sidebar.footer")
+            @section('cart-sidebar.footer')
             <div class="flex w-full flex-col gap-x-2">
-                @section("cart-sidebar.footer.buttons")
+                @section('cart-sidebar.footer.buttons')
                 <x-button
                     color="secondary"
                     light
@@ -58,7 +58,7 @@
                     x-on:click="show = false;"
                 />
                 @if ($this->cart->cartItems->isNotEmpty())
-                    @section("cart-sidebar.footer.buttons.buy")
+                    @section('cart-sidebar.footer.buttons.buy')
                     <x-button
                         class="w-full"
                         :text="__('Checkout')"
@@ -68,7 +68,7 @@
                         color="indigo"
                     />
                     @show
-                    @section("cart-sidebar.footer.buttons.watchlist")
+                    @section('cart-sidebar.footer.buttons.watchlist')
                     <x-button
                         color="secondary"
                         light

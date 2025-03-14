@@ -24,7 +24,7 @@ export default function (element, metadata, framework) {
     // template with a comment hook. This isn't necessary; but, I think it leaves
     // the DOM more pleasant looking.
     let domHook = document.createComment(
-        ` Template outlet hook (${metadata.expression}) with bindings (${element.getAttribute("x-data")}). `,
+        ` Template outlet hook (${metadata.expression}) with bindings (${element.getAttribute('x-data')}). `,
     );
     domHook._template_outlet_ref = templateRef;
     domHook._template_outlet_clone = clone;

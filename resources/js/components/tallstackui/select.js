@@ -13,10 +13,10 @@ class TallstackUISelect {
                 if (source.hasOwnProperty(key)) {
                     if (
                         source[key] &&
-                        typeof source[key] === "object" &&
+                        typeof source[key] === 'object' &&
                         !Array.isArray(source[key]) &&
                         target[key] &&
-                        typeof target[key] === "object" &&
+                        typeof target[key] === 'object' &&
                         !Array.isArray(target[key])
                     ) {
                         target[key] = mergeDeep(

@@ -1,8 +1,8 @@
 <div
     class="py-6"
     x-data="{
-        productCategories: @entangle("discountedCategories").live,
-        newCategoryDiscount: @entangle("newCategoryDiscount").live,
+        productCategories: @entangle('discountedCategories').live,
+        newCategoryDiscount: @entangle('newCategoryDiscount').live,
     }"
 >
     <x-modal id="edit-price-list-modal">
@@ -10,7 +10,7 @@
             name="title"
             class="text-lg font-medium leading-6 text-gray-900 dark:text-white"
         >
-            {{ __("Edit Price List") }}
+            {{ __('Edit Price List') }}
         </x-slot>
         <div class="space-y-8 divide-y divide-gray-200">
             <div class="space-y-8 divide-y divide-gray-200">
@@ -66,7 +66,7 @@
                     </div>
                 </div>
                 <div class="space-y-2.5 pt-4">
-                    <h2>{{ __("Rounding") }}</h2>
+                    <h2>{{ __('Rounding') }}</h2>
                     <x-select.styled
                         wire:model="priceList.rounding_method_enum"
                         :label="__('Rounding Method')"
@@ -104,13 +104,13 @@
                     <x-table>
                         <x-slot name="title">
                             <h2 class="pt-4">
-                                {{ __("Product category discounts") }}
+                                {{ __('Product category discounts') }}
                             </h2>
                         </x-slot>
                         <x-slot name="header">
-                            <th>{{ __("Category") }}</th>
-                            <th class="w-44">{{ __("Discount") }}</th>
-                            <th class="w-16">{{ __("%") }}</th>
+                            <th>{{ __('Category') }}</th>
+                            <th class="w-44">{{ __('Discount') }}</th>
+                            <th class="w-16">{{ __('%') }}</th>
                             <th class="w-14"></th>
                         </x-slot>
                         <template
@@ -141,7 +141,7 @@
                                 </td>
 
                                 <td class="text-right">
-                                    @if ($priceList->id ? resolve_static(\FluxErp\Actions\Discount\UpdateDiscount::class, "canPerformAction", [false]) : resolve_static(\FluxErp\Actions\Discount\CreateDiscount::class, "canPerformAction", [false]))
+                                    @if ($priceList->id ? resolve_static(\FluxErp\Actions\Discount\UpdateDiscount::class, 'canPerformAction', [false]) : resolve_static(\FluxErp\Actions\Discount\CreateDiscount::class, 'canPerformAction', [false]))
                                         <div class="mt-1">
                                             <x-button
                                                 icon="trash"
@@ -155,7 +155,7 @@
                         </template>
                     </x-table>
                     <div class="mt-4 flex justify-between">
-                        @if (resolve_static(\FluxErp\Actions\Discount\CreateDiscount::class, "canPerformAction", [false]) && $priceList->id ? resolve_static(\FluxErp\Actions\PriceList\UpdatePriceList::class, "canPerformAction", [false]) : resolve_static(\FluxErp\Actions\PriceList\CreatePriceList::class, "canPerformAction", [false]))
+                        @if (resolve_static(\FluxErp\Actions\Discount\CreateDiscount::class, 'canPerformAction', [false]) && $priceList->id ? resolve_static(\FluxErp\Actions\PriceList\UpdatePriceList::class, 'canPerformAction', [false]) : resolve_static(\FluxErp\Actions\PriceList\CreatePriceList::class, 'canPerformAction', [false]))
                             <div>
                                 <x-select.styled
                                     wire:model="newCategoryDiscount.category_id"

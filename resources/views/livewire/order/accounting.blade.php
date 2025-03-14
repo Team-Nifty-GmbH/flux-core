@@ -16,7 +16,7 @@
                 <div
                     class="block text-sm font-medium text-gray-700 dark:text-gray-400"
                 >
-                    <span>{{ __("Payment target") }}</span>
+                    <span>{{ __('Payment target') }}</span>
                     <span
                         x-text="baseDate($wire.$parent.order.payment_target)"
                     ></span>
@@ -31,7 +31,7 @@
                 <div
                     class="block text-sm font-medium text-gray-700 dark:text-gray-400"
                 >
-                    <span>{{ __("Payment Discount Target") }}</span>
+                    <span>{{ __('Payment Discount Target') }}</span>
                     <span
                         x-text="baseDate($wire.$parent.order.payment_discount_target)"
                     ></span>
@@ -46,7 +46,7 @@
                 <div
                     class="block text-sm font-medium text-gray-700 dark:text-gray-400"
                 >
-                    <span>{{ __("Payment Discount Percentage") }}</span>
+                    <span>{{ __('Payment Discount Percentage') }}</span>
                 </div>
                 <x-number
                     step="0.01"
@@ -58,7 +58,7 @@
                 <div
                     class="block text-sm font-medium text-gray-700 dark:text-gray-400"
                 >
-                    <span>{{ __("Payment Reminder Days 1") }}</span>
+                    <span>{{ __('Payment Reminder Days 1') }}</span>
                     <span
                         x-text="
                             baseDate(
@@ -78,7 +78,7 @@
                 <div
                     class="block text-sm font-medium text-gray-700 dark:text-gray-400"
                 >
-                    <span>{{ __("Payment Reminder Days 2") }}</span>
+                    <span>{{ __('Payment Reminder Days 2') }}</span>
                     <span
                         x-text="
                             baseDate(
@@ -99,7 +99,7 @@
                 <div
                     class="block text-sm font-medium text-gray-700 dark:text-gray-400"
                 >
-                    <span>{{ __("Payment Reminder Days 3") }}</span>
+                    <span>{{ __('Payment Reminder Days 3') }}</span>
                     <span
                         x-text="
                             baseDate(
@@ -134,6 +134,6 @@
         </div>
     </x-card>
     <div wire:ignore>
-        @include("tall-datatables::livewire.data-table")
+        @include('tall-datatables::livewire.data-table')
     </div>
 </div>

@@ -1,11 +1,11 @@
 @php
-    $wireModel = $attributes->wire("model")->value;
-    $target = $wireModel . ".file";
+    $wireModel = $attributes->wire('model')->value;
+    $target = $wireModel . '.file';
 @endphp
 
 @props([
-    "multiple" => true,
-    "label" => null,
+    'multiple' => true,
+    'label' => null,
 ])
 <div>
     <div
@@ -29,8 +29,8 @@
                 this.progress = 0
                 $interaction()
                     .error(
-                        '{{ __("File upload failed") }}',
-                        '{{ __("Your file upload failed. Please try again.") }}',
+                        '{{ __('File upload failed') }}',
+                        '{{ __('Your file upload failed. Please try again.') }}',
                     )
                     .send()
             },
@@ -64,7 +64,7 @@
         }"
     >
         <div>
-            {{ $label ?? "" }}
+            {{ $label ?? '' }}
         </div>
         <div
             class="relative flex flex-col items-center justify-center"
@@ -79,7 +79,7 @@
                 x-cloak
             >
                 <span class="text-3xl text-white">
-                    {{ __("Release to upload!") }}
+                    {{ __('Release to upload!') }}
                 </span>
             </div>
             <label
@@ -89,9 +89,9 @@
                 <div class="pb-3">
                     <x-icon name="arrow-up-on-square" class="h-12 w-12" />
                 </div>
-                <p>{{ __("Click here to select files to upload") }}</p>
+                <p>{{ __('Click here to select files to upload') }}</p>
                 <em class="italic text-slate-400">
-                    {{ __("(Or drag files to the page)") }}
+                    {{ __('(Or drag files to the page)') }}
                 </em>
                 <div
                     class="mt-3 h-[2px] w-1/2 bg-gray-200"
@@ -106,7 +106,7 @@
                 </div>
             </label>
             <input
-                {{ $attributes->whereDoesntStartWith("wire") }}
+                {{ $attributes->whereDoesntStartWith('wire') }}
                 type="file"
                 x-bind:id="uploadObjectId"
                 class="hidden"
@@ -156,7 +156,7 @@
                     </div>
                 </x-card>
             </template>
-            {{ $footer ?? "" }}
+            {{ $footer ?? '' }}
         </div>
     </div>
 </div>

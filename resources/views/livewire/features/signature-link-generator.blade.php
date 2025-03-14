@@ -1,7 +1,7 @@
 <div class="text-sm">
     @if ($signedViews)
         <div class="mb-4 flex flex-col">
-            <p>{{ __("Signed Documents") }}:</p>
+            <p>{{ __('Signed Documents') }}:</p>
             @foreach ($signedViews as $signedView)
                 <p class="mt-2">{{ __($signedView) }}</p>
             @endforeach
@@ -19,7 +19,7 @@
                         class="w-full"
                         icon="document"
                     >
-                        {{ __("Add Signature") }}
+                        {{ __('Add Signature') }}
                     </x-button>
                 </x-slot>
                 @foreach ($unsignedViews as $unsignedView)

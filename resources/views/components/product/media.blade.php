@@ -1,7 +1,7 @@
 <div class="flex flex-col gap-6">
     <x-card>
         <x-slot:title>
-            {{ __("Images") }}
+            {{ __('Images') }}
         </x-slot>
         <livewire:product.media-grid
             :is-searchable="false"

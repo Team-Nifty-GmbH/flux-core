@@ -9,7 +9,7 @@
             <defs>
                 <style>
                     .f {
-                        fill: {{ $attributes->get("fill") ?? "url(#d)" }};
+                        fill: {{ $attributes->get('fill') ?? 'url(#d)' }};
                     }
                 </style>
             </defs>

@@ -10,10 +10,10 @@
             <x-card>
                 <div class="py-6">
                     <div>
-                        {{ __("The login link is invalid or has expired.") }}
+                        {{ __('The login link is invalid or has expired.') }}
                     </div>
                     <div>
-                        {{ __("Please request a new one.") }}
+                        {{ __('Please request a new one.') }}
                     </div>
                 </div>
                 <x-button

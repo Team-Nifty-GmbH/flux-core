@@ -1,9 +1,9 @@
 <x-card padding="none" class="whitespace-nowrap lg:flex">
     <div>
         @if ($showCalendars)
-            @section("calendar-modal")
+            @section('calendar-modal')
             <x-modal id="calendar-modal" :title="__('Edit Calendar')">
-                @section("calendar-edit")
+                @section('calendar-edit')
                 <div class="flex flex-col gap-4">
                     <div
                         x-cloak
@@ -58,7 +58,7 @@
                                 icon="plus"
                                 wire:click="addCustomProperty"
                             />
-                            @foreach ($selectedCalendar["customProperties"] ?? [] as $index => $customProperty)
+                            @foreach ($selectedCalendar['customProperties'] ?? [] as $index => $customProperty)
                                 <div class="flex gap-x-4">
                                     <div class="pt-6">
                                         <x-button.circle
@@ -116,9 +116,9 @@
                 </x-slot>
             </x-modal>
             @show
-            @section("calendar-overview")
+            @section('calendar-overview')
             <div class="space-y-4 p-1.5">
-                @section("calendar-overview.items")
+                @section('calendar-overview.items')
                 @foreach ($calendarGroups ?? [] as $group => $label)
                     <div
                         x-data="{ show: true }"
@@ -159,7 +159,7 @@
         @endif
 
         @if ($showInvites)
-            @section("invites")
+            @section('invites')
             <div
                 x-data="{ tab: { name: 'new', status: [null] } }"
                 x-cloak
@@ -169,7 +169,7 @@
                 <div
                     class="flex justify-between pb-1.5 font-semibold dark:text-gray-50"
                 >
-                    <div>{{ __("Invites") }}</div>
+                    <div>{{ __('Invites') }}</div>
                 </div>
                 <div>
                     <div class="pb-2.5">
@@ -183,7 +183,7 @@
                                     x-bind:class="{ 'border-indigo-500 text-indigo-600': tab.name === 'new' }"
                                     class="cursor-pointer whitespace-nowrap border-b-2 border-transparent px-1 py-4 text-sm text-xs font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-50"
                                 >
-                                    {{ __("New") }}
+                                    {{ __('New') }}
                                 </div>
                                 <div
                                     x-on:click="tab = { name: 'accepted', status: ['accepted', 'maybe'] }"
@@ -192,7 +192,7 @@
                                     }"
                                     class="cursor-pointer whitespace-nowrap border-b-2 border-transparent px-1 py-4 text-sm text-xs font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-50"
                                 >
-                                    {{ __("Accepted") }}
+                                    {{ __('Accepted') }}
                                 </div>
                                 <div
                                     x-on:click="tab = { name: 'declined', status: ['declined'] }"
@@ -201,7 +201,7 @@
                                     }"
                                     class="cursor-pointer whitespace-nowrap border-b-2 border-transparent px-1 py-4 text-sm text-xs font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-50"
                                 >
-                                    {{ __("Declined") }}
+                                    {{ __('Declined') }}
                                 </div>
                             </nav>
                         </div>

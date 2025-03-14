@@ -8,7 +8,7 @@
     <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div class="bg-white px-4 py-8 shadow sm:rounded-lg sm:px-10">
             <div class="mt-6">
-                @section("password-reset-dialog")
+                @section('password-reset-dialog')
                 <x-modal id="password-reset" :title="__('Reset password')">
                     <x-input
                         wire:model="email"
@@ -28,7 +28,7 @@
                     </x-slot>
                 </x-modal>
                 @show
-                @section("login-form")
+                @section('login-form')
                 <form class="flex flex-col gap-6" wire:submit="login()">
                     <x-input
                         id="email"
@@ -51,7 +51,7 @@
                                 x-on:click="$modalOpen('password-reset')"
                                 class="cursor-pointer font-medium text-indigo-600 hover:text-indigo-500"
                             >
-                                {{ __("Reset password") }}
+                                {{ __('Reset password') }}
                             </a>
                         </div>
                     </div>

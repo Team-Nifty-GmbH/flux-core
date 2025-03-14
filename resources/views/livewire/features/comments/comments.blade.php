@@ -11,14 +11,14 @@
                 <template x-ref="textarea">
                     <x-flux::features.comments.input />
                 </template>
-                @if (resolve_static(\FluxErp\Actions\Comment\CreateComment::class, "canPerformAction", [false]) || $this->isPublic === false)
+                @if (resolve_static(\FluxErp\Actions\Comment\CreateComment::class, 'canPerformAction', [false]) || $this->isPublic === false)
                     <x-flux::features.comments.input />
                 @endcan
 
                 <div class="relative flex flex-col gap-12" x-ref="comments">
                     <x-spinner />
                     <div x-cloak x-show="stickyComments.length > 0">
-                        <h3 class="pb-4">{{ __("Sticky comments") }}</h3>
+                        <h3 class="pb-4">{{ __('Sticky comments') }}</h3>
                         <template
                             x-for="comment in stickyComments"
                             :key="comment.id"
@@ -35,7 +35,7 @@
                     <div
                         class="soft-scrollbar dark:divide-secondary-700 overflow-auto"
                     >
-                        <h3 class="pb-4">{{ __("All comments") }}</h3>
+                        <h3 class="pb-4">{{ __('All comments') }}</h3>
                         <div class="tree-container w-full gap-4">
                             <ul class="tree" role="list">
                                 <template

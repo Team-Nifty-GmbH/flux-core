@@ -15,10 +15,10 @@
                 <x-slot:sub-value>
                     <div>
                         <div>
-                            {{ data_get($ticket, "authenticatable.name") }}
+                            {{ data_get($ticket, 'authenticatable.name') }}
                         </div>
                         <div>
-                            {{ \Illuminate\Support\Str::limit(strip_tags($ticket?->description, "")) }}
+                            {{ \Illuminate\Support\Str::limit(strip_tags($ticket?->description, '')) }}
                         </div>
                         @if ($ticket->created_at)
                             <x-badge
@@ -48,7 +48,7 @@
                             )"
                     >
                         <div class="hidden sm:block">
-                            {{ __("Track Time") }}
+                            {{ __('Track Time') }}
                         </div>
                     </x-button>
                     <x-button
@@ -58,13 +58,13 @@
                         wire:navigate
                         :href="route('tickets.id', $ticket->id)"
                     >
-                        <div class="hidden sm:block">{{ __("View") }}</div>
+                        <div class="hidden sm:block">{{ __('View') }}</div>
                     </x-button>
                 </x-slot>
             </x-flux::list-item>
         @empty
             <div class="p-4 text-center text-gray-500 dark:text-gray-400">
-                {{ __("No tickets found") }}
+                {{ __('No tickets found') }}
             </div>
         @endforelse
     </div>

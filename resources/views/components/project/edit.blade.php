@@ -1,7 +1,7 @@
-@props(["collapsed" => false])
+@props(['collapsed' => false])
 <div x-data="{ expanded: false }" class="space-y-8 divide-y divide-gray-200">
     <div class="space-y-2.5">
-        @section("general")
+        @section('general')
         <x-input
             :placeholder="__('Leave empty to generate a new :attribute.', ['attribute' => __('Project Number')])"
             x-bind:readonly="!edit"
@@ -35,7 +35,7 @@
                 />
             </div>
             <div class="flex justify-between gap-x-4">
-                @section("dates")
+                @section('dates')
                 <x-date
                     without-time
                     x-bind:readonly="!edit"
@@ -68,7 +68,7 @@
                 wire:model="project.description"
                 :label="__('Description')"
             />
-            @section("connections")
+            @section('connections')
             <div x-bind:class="! edit && 'pointer-events-none'">
                 <x-select.styled
                     x-bind:readonly="!edit"
@@ -125,7 +125,7 @@
                 />
             </div>
             @show
-            @section("budget")
+            @section('budget')
             <x-number
                 :label="__('Budget')"
                 x-bind:readonly="!edit"
@@ -140,13 +140,13 @@
                 placeholder="02:30"
             />
             @show
-            @section("additional-columns")
+            @section('additional-columns')
             @if ($this->project->additionalColumns)
                 <div class="space-y-2.5">
                     <h3
                         class="text-md text-secondary-700 dark:text-secondary-400 mt-4 whitespace-normal font-medium"
                     >
-                        {{ __("Additional Columns") }}
+                        {{ __('Additional Columns') }}
                     </h3>
                     <x-flux::additional-columns
                         :model="\FluxErp\Models\Project::class"
@@ -168,7 +168,7 @@
             >
                 <x-slot:text>
                     <span
-                        x-text="expanded ? '{{ __("Show less") }}' : '{{ __("Show more") }}'"
+                        x-text="expanded ? '{{ __('Show less') }}' : '{{ __('Show more') }}'"
                     ></span>
                 </x-slot>
                 <x-slot:left

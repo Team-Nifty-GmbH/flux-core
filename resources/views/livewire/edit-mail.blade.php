@@ -188,14 +188,14 @@
                 x-on:click="$modalClose('edit-mail')"
                 class="mr-2"
             >
-                {{ __("Cancel") }}
+                {{ __('Cancel') }}
             </x-button>
             <x-button
                 color="indigo"
                 wire:click="send().then((success) => {if(success) $modalClose('edit-mail');})"
                 class="ml-auto"
             >
-                {{ __("Send") }}
+                {{ __('Send') }}
             </x-button>
         </x-slot>
     </x-modal>

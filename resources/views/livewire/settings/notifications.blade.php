@@ -13,7 +13,7 @@
         x-on:close="$wire.closeModal()"
     >
         <x-slot name="title">
-            {{ __("Notification Settings") }}
+            {{ __('Notification Settings') }}
         </x-slot>
         <template x-for="(notificationChannel, name) in notification">
             <div
@@ -69,16 +69,16 @@
         <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">
                 <h1 class="text-xl font-semibold dark:text-white">
-                    {{ __("Notifications") }}
+                    {{ __('Notifications') }}
                 </h1>
                 <div class="mt-2 text-sm text-gray-300">
-                    {{ __("Here you can manage notification settings...") }}
+                    {{ __('Here you can manage notification settings...') }}
                 </div>
             </div>
         </div>
         <x-table>
             <x-slot name="header">
-                <th class="col-span-2">{{ __("Notification") }}</th>
+                <th class="col-span-2">{{ __('Notification') }}</th>
             </x-slot>
             <template x-for="(notification, key) in notificationSettings">
                 <x-table.row>

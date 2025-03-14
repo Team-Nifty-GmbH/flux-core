@@ -3,7 +3,7 @@
         relatedSelected($event.detail.trackable_type)
         $wire.start($event.detail)
     "
-    x-data="workTime($wire, '{{ route("search", "") }}')"
+    x-data="workTime($wire, '{{ route('search', '') }}')"
     x-init.once="load()"
 >
     <x-modal id="work-time-modal" persistent x-on:close="$wire.resetWorkTime()">
@@ -94,7 +94,7 @@
             >
                 <x-slot:label>
                     <span
-                        x-text="$wire.workTime.id ? '{{ __("Save") }}' : '{{ __("Start") }}'"
+                        x-text="$wire.workTime.id ? '{{ __('Save') }}' : '{{ __('Start') }}'"
                     ></span>
                 </x-slot>
             </x-button>
@@ -129,7 +129,7 @@
         >
             <x-slot:header>
                 <div class="flex w-full items-center justify-between gap-4">
-                    <div>{{ __("Active Work Times") }}</div>
+                    <div>{{ __('Active Work Times') }}</div>
                     <x-button.circle
                         color="secondary"
                         light

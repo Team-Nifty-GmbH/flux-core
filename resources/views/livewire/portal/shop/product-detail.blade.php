@@ -3,7 +3,7 @@
     x-data="{
         showMeta: null,
         showCrossSelling:
-            {{ $productForm->product_cross_sellings[0]["id"] ?? "null" }},
+            {{ $productForm->product_cross_sellings[0]['id'] ?? 'null' }},
         showMedia: null,
     }"
 >
@@ -13,7 +13,7 @@
             <div class="w-full">
                 <div class="w-full">
                     <img
-                        src="{{ route("icons", ["name" => "photo"]) }}"
+                        src="{{ route('icons', ['name' => 'photo']) }}"
                         x-bind:src="$wire.productForm.cover_url"
                         alt="{{ $productForm->name }}"
                         class="max-h-96 w-full rounded-lg object-contain"
@@ -46,7 +46,7 @@
                     {{ $productForm->name }}
                 </h1>
                 <h2 class="font-semibold">
-                    {{ __("Product Number") . ": " . $productForm->product_number }}
+                    {{ __('Product Number') . ': ' . $productForm->product_number }}
                 </h2>
             </div>
             <p>
@@ -57,10 +57,10 @@
                     @foreach ($productForm->productOptionGroups as $group)
                         <div class="flex flex-col gap-1.5">
                             <h3 class="font-semibold">
-                                {{ $group["name"] }}
+                                {{ $group['name'] }}
                             </h3>
                             <div class="flex flex-wrap gap-1.5">
-                                @foreach ($group["product_options"] as $option)
+                                @foreach ($group['product_options'] as $option)
                                     <x-button
                                         color="secondary"
                                         light
@@ -77,8 +77,8 @@
             @endif
 
             @if (! is_null($productForm->parent_id) || ! $productForm->children_count)
-                @can(route_to_permission("portal.checkout"))
-                    @section("price")
+                @can(route_to_permission('portal.checkout'))
+                    @section('price')
                     <div class="flex flex-col gap-1.5 text-center">
                         <div
                             class="flex w-full content-center justify-center gap-4"
@@ -87,18 +87,18 @@
                                 {{ Number::currency(number: $productForm->buy_price ?? 0, locale: app()->getLocale()) }}
                                 *
                             </div>
-                            @if (bccomp(data_get($productForm, "root_discount_percentage"), 0) === 1)
+                            @if (bccomp(data_get($productForm, 'root_discount_percentage'), 0) === 1)
                                 <x-badge color="red" xs :text="__('%')" />
                             @endif
                         </div>
-                        @if (bccomp(data_get($productForm, "root_discount_percentage"), 0) === 1)
+                        @if (bccomp(data_get($productForm, 'root_discount_percentage'), 0) === 1)
                             <div>
                                 <span class="line-through">
                                     {{ Number::currency(number: $productForm->root_price_flat ?? 0, locale: app()->getLocale()) }}
                                     *
                                 </span>
                                 <span>
-                                    {{ __("Total discount of :percentage %", ["percentage" => bcmul($productForm->root_discount_percentage, 100, 2)]) }}
+                                    {{ __('Total discount of :percentage %', ['percentage' => bcmul($productForm->root_discount_percentage, 100, 2)]) }}
                                 </span>
                             </div>
                         @endif
@@ -106,9 +106,9 @@
                     @show
                     <div class="text-2xs text-secondary-400">
                         @if (auth()->user()?->priceList?->is_net)
-                            * {{ __("All prices net plus VAT") }}
+                            * {{ __('All prices net plus VAT') }}
                         @else
-                            * {{ __("All prices gross including VAT") }}
+                            * {{ __('All prices gross including VAT') }}
                         @endif
                     </div>
                     <div
@@ -160,13 +160,13 @@
                     <x-card :header="__('Bundle Products')">
                         @foreach ($productForm->bundle_products as $bundleProduct)
                             <a
-                                href="{{ route("portal.products.show", [$bundleProduct["id"]]) }}"
+                                href="{{ route('portal.products.show', [$bundleProduct['id']]) }}"
                             >
                                 <div class="flex gap-4">
                                     <div class="flex flex-col gap-1.5">
                                         <h3 class="font-semibold">
-                                            {{ bcround($bundleProduct["count"] ?? 1) }}
-                                            x {{ $bundleProduct["name"] }}
+                                            {{ bcround($bundleProduct['count'] ?? 1) }}
+                                            x {{ $bundleProduct['name'] }}
                                         </h3>
                                     </div>
                                 </div>
@@ -177,7 +177,7 @@
 
                 @if ($productForm->additionalMedia)
                     <h2 class="font-semibold">
-                        {{ __("Additional Media") }}
+                        {{ __('Additional Media') }}
                     </h2>
                     @foreach ($productForm->additionalMedia ?? [] as $collection => $media)
                         <x-card class="!px-0 !py-0">
@@ -213,10 +213,10 @@
                             >
                                 @foreach ($media as $item)
                                     <div
-                                        wire:click="downloadMedia({{ $item["id"] }})"
+                                        wire:click="downloadMedia({{ $item['id'] }})"
                                         class="cursor-pointer"
                                     >
-                                        {{ $item["name"] }}
+                                        {{ $item['name'] }}
                                     </div>
                                 @endforeach
                             </div>
@@ -231,11 +231,11 @@
             @foreach ($productForm->product_cross_sellings ?? [] as $crossSelling)
                 <div>
                     <h2
-                        x-bind:class="showCrossSelling === {{ $crossSelling["id"] }} && 'underline'"
+                        x-bind:class="showCrossSelling === {{ $crossSelling['id'] }} && 'underline'"
                         class="cursor-pointer text-xl font-semibold"
-                        x-on:click="showCrossSelling = {{ $crossSelling["id"] }}"
+                        x-on:click="showCrossSelling = {{ $crossSelling['id'] }}"
                     >
-                        {{ $crossSelling["name"] }}
+                        {{ $crossSelling['name'] }}
                     </h2>
                 </div>
             @endforeach
@@ -243,10 +243,10 @@
         @foreach ($productForm->product_cross_sellings ?? [] as $crossSellingProducts)
             <div
                 x-cloak
-                x-show="showCrossSelling === {{ $crossSellingProducts["id"] }}"
+                x-show="showCrossSelling === {{ $crossSellingProducts['id'] }}"
                 class="grid grid-cols-1 gap-4 pt-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6"
             >
-                @foreach ($crossSellingProducts["products"] as $product)
+                @foreach ($crossSellingProducts['products'] as $product)
                     <livewire:portal.shop.product-list-card
                         :product="$product"
                         :key="$crossSelling['id'] . '-' . $product['id']"

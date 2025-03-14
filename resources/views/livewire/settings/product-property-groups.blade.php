@@ -9,7 +9,7 @@
         />
         <div class="grid grid-cols-6 space-x-2">
             <div class="col-span-3">
-                <x-label>{{ __("Product Properties") }}</x-label>
+                <x-label>{{ __('Product Properties') }}</x-label>
             </div>
             <div
                 class="col-span-2"
@@ -49,7 +49,7 @@
             color="indigo"
             x-on:click="$wire.productPropertyGroup.product_properties.push({name: '', property_type_enum: 'text'})"
         >
-            {{ __("Add Product Property") }}
+            {{ __('Add Product Property') }}
         </x-button>
     </div>
     <x-slot:footer>

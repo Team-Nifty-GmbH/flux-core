@@ -4,7 +4,7 @@
         childOrders: $wire.entangle('childOrders'),
         detail: $wire.entangle('positionDetails'),
         positionsSummary: $wire.entangle('positionsSummary'),
-        detailRoute: '{{ route("portal.orders.id", ["id" => ":id"]) }}',
+        detailRoute: '{{ route('portal.orders.id', ['id' => ':id']) }}',
         selected: null,
     }"
     x-init="
@@ -30,10 +30,10 @@
     "
 >
     <x-modal id="detail-modal" wire="detailModal">
-        @section("product-modal.content")
+        @section('product-modal.content')
         <div class="grid grid-cols-3 gap-5">
             <div class="col-span-1">
-                @section("product-modal.content.image")
+                @section('product-modal.content.image')
                 <div class="bg-portal-light w-full rounded-md">
                     <div x-html="detail.image"></div>
                     <div
@@ -56,7 +56,7 @@
                 @show
             </div>
             <div class="col-span-2">
-                @section("product-modal.content.detail")
+                @section('product-modal.content.detail')
                 <div
                     class="text-lg"
                     x-text="detail.product?.product_number"
@@ -66,7 +66,7 @@
                     class="pt-5 text-sm"
                     x-show="detail.serial_number?.length"
                 >
-                    <span>{{ __("Serial numbers:") }}</span>
+                    <span>{{ __('Serial numbers:') }}</span>
                     <ul>
                         <template
                             x-for="serialNumber in detail.serial_number"
@@ -80,7 +80,7 @@
             </div>
         </div>
         <div id="folder-tree" class="pt-3">
-            @section("product-modal.content.media")
+            @section('product-modal.content.media')
             <livewire:folder-tree
                 :model-type="\FluxErp\Models\Product::class"
             />
@@ -111,20 +111,20 @@
         </x-modal>
     </div>
     <h2 class="text-base font-bold uppercase">
-        {{ __("Order details") }}
+        {{ __('Order details') }}
     </h2>
     <h1 class="py-5 text-5xl font-semibold">
         {{
-            __(":order_type :order_number dated :order_date", [
-                "order_type" => data_get($order, "order_type.name"),
-                "order_number" => data_get($order, "order_number"),
-                "order_date" => \Illuminate\Support\Carbon::parse(data_get($order, "order_date"))->isoFormat("L"),
+            __(':order_type :order_number dated :order_date', [
+                'order_type' => data_get($order, 'order_type.name'),
+                'order_number' => data_get($order, 'order_number'),
+                'order_date' => \Illuminate\Support\Carbon::parse(data_get($order, 'order_date'))->isoFormat('L'),
             ])
         }}
     </h1>
     <div class="flex justify-end gap-1.5 pb-5">
-        @section("actions")
-        @if ($order["invoice_number"])
+        @section('actions')
+        @if ($order['invoice_number'])
             <x-button
                 color="indigo"
                 :text="__('Download invoice')"
@@ -133,7 +133,7 @@
             />
         @endif
 
-        @if ($order["parent_id"])
+        @if ($order['parent_id'])
             <x-button
                 color="indigo"
                 :href="route('portal.orders.id', data_get($order, 'parent_id'))"
@@ -153,16 +153,16 @@
         <div class="flex gap-8">
             <x-card :header="__('Invoice Address')">
                 <div>
-                    {{ data_get($order, "address_invoice.company", "") }}
+                    {{ data_get($order, 'address_invoice.company', '') }}
                 </div>
                 <div>
-                    {{ Str::squish(data_get($order, "address_invoice.firstname", "") . " " . data_get($order, "address_invoice.lastname", "")) }}
+                    {{ Str::squish(data_get($order, 'address_invoice.firstname', '') . ' ' . data_get($order, 'address_invoice.lastname', '')) }}
                 </div>
                 <div>
-                    {{ data_get($order, "address_invoice.street", "") }}
+                    {{ data_get($order, 'address_invoice.street', '') }}
                 </div>
                 <div>
-                    {{ trim(($order["address_invoice"]["zip"] ?? "") . " " . ($order["address_invoice"]["city"] ?? "")) }}
+                    {{ trim(($order['address_invoice']['zip'] ?? '') . ' ' . ($order['address_invoice']['city'] ?? '')) }}
                 </div>
             </x-card>
             <template x-for="address in order.addresses">
@@ -179,7 +179,7 @@
                 </x-card>
             </template>
         </div>
-        @section("attachments")
+        @section('attachments')
         @if ($attachments)
             <x-card :header="__('Attachments')">
                 @foreach ($attachments as $attachment)
@@ -187,9 +187,9 @@
                         <div class="flex items-center justify-center gap-1">
                             <div target="_blank">
                                 <span class="font-semibold">
-                                    {{ __(\Illuminate\Support\Str::headline($attachment["collection_name"])) }}
+                                    {{ __(\Illuminate\Support\Str::headline($attachment['collection_name'])) }}
                                 </span>
-                                {{ $attachment["file_name"] }}
+                                {{ $attachment['file_name'] }}
                             </div>
                             <x-button
                                 color="indigo"
@@ -205,51 +205,51 @@
         @endif
 
         @show
-        @section("attributes")
+        @section('attributes')
         <x-card>
             <div class="grid grid-cols-1 lg:grid-cols-2">
                 <div class="grid grid-cols-2 gap-5">
-                    @section("attributes.left")
-                    <div class="text-right">{{ __("Commission") }}:</div>
+                    @section('attributes.left')
+                    <div class="text-right">{{ __('Commission') }}:</div>
                     <div>
-                        {{ data_get($order, "commission") }}
+                        {{ data_get($order, 'commission') }}
                     </div>
-                    <div class="text-right">{{ __("Customer no.") }}:</div>
+                    <div class="text-right">{{ __('Customer no.') }}:</div>
                     <div>
-                        {{ data_get($order, "address_invoice.contact.customer_number") }}
+                        {{ data_get($order, 'address_invoice.contact.customer_number') }}
                     </div>
-                    <div class="text-right">{{ __("Logistics note") }}:</div>
+                    <div class="text-right">{{ __('Logistics note') }}:</div>
                     <div>
-                        {{ data_get($order, "logistic_note") }}
+                        {{ data_get($order, 'logistic_note') }}
                     </div>
                     @show
                 </div>
                 <div class="grid grid-cols-2 gap-5">
-                    @section("attributes.right")
-                    <div class="text-right">{{ __("Clerk") }}:</div>
+                    @section('attributes.right')
+                    <div class="text-right">{{ __('Clerk') }}:</div>
                     <div>
-                        {{ data_get($order, "user_created.name") }}
+                        {{ data_get($order, 'user_created.name') }}
                     </div>
                     <div class="text-right">
-                        {{ __("Responsible representative") }}:
+                        {{ __('Responsible representative') }}:
                     </div>
                     <div>
-                        {{ data_get($order, "agent.name") }}
+                        {{ data_get($order, 'agent.name') }}
                     </div>
                     <div class="text-right">
-                        {{ __("Performance/Delivery date") }}:
+                        {{ __('Performance/Delivery date') }}:
                     </div>
                     <div>
-                        {{ data_get($order, "system_delivery_date") }}
+                        {{ data_get($order, 'system_delivery_date') }}
                     </div>
                     @show
                 </div>
             </div>
         </x-card>
         @show
-        @if ($order["header"])
+        @if ($order['header'])
             <x-card>
-                {!! $order["header"] !!}
+                {!! $order['header'] !!}
             </x-card>
         @endif
 
@@ -267,7 +267,7 @@
                 <x-flux::table>
                     <x-slot name="title">
                         <h2 class="text-base font-bold uppercase">
-                            {{ __("Summary") }}
+                            {{ __('Summary') }}
                         </h2>
                     </x-slot>
                     <template x-for="item in positionsSummary">
@@ -288,7 +288,7 @@
                 <div class="text-sm">
                     <div class="flex justify-between py-2.5">
                         <div>
-                            {{ __("Sum net") }}
+                            {{ __('Sum net') }}
                         </div>
                         <div>
                             <span
@@ -299,7 +299,7 @@
                     <template x-for="vat in order.total_vats">
                         <div class="flex justify-between py-2.5">
                             <div
-                                x-text="'{{ __("Plus ") }}' + ' ' + formatters.percentage(vat.vat_rate_percentage)"
+                                x-text="'{{ __('Plus ') }}' + ' ' + formatters.percentage(vat.vat_rate_percentage)"
                             ></div>
                             <div>
                                 <span
@@ -310,7 +310,7 @@
                     </template>
                     <div class="flex justify-between py-2.5">
                         <div>
-                            {{ __("Total Gross") }}
+                            {{ __('Total Gross') }}
                         </div>
                         <div>
                             <span
@@ -322,12 +322,12 @@
             </x-card>
             <div>
                 <h2 class="text-base font-bold uppercase">
-                    {{ __("Payment information") }}
+                    {{ __('Payment information') }}
                 </h2>
                 <x-card>
-                    {!! data_get($order, "footer") !!}
+                    {!! data_get($order, 'footer') !!}
                     <br />
-                    {!! is_array(data_get($order, "payment_texts")) ? nl2br(implode("<br />", data_get($order, "payment_texts"))) : data_get($order, "payment_texts") !!}
+                    {!! is_array(data_get($order, 'payment_texts')) ? nl2br(implode('<br />', data_get($order, 'payment_texts'))) : data_get($order, 'payment_texts') !!}
                 </x-card>
             </div>
         </div>
@@ -335,7 +335,7 @@
     @if ($childOrders)
         <div class="pt-6">
             <h2 class="text-base font-bold uppercase">
-                {{ __("Related orders") }}
+                {{ __('Related orders') }}
             </h2>
             <div class="mt-3">
                 <livewire:portal.data-tables.order-list

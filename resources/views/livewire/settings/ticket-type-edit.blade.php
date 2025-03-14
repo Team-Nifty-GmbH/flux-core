@@ -1,7 +1,7 @@
 <div>
     <div
         class="grid grid-cols-1 gap-1.5 sm:grid-cols-6"
-        x-data="{ isNew: @entangle("isNew") }"
+        x-data="{ isNew: @entangle('isNew') }"
     >
         <div class="sm:col-span-6">
             <x-input

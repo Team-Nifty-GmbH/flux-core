@@ -5,25 +5,25 @@
     content="width=device-width, initial-scale=1, maximum-scale=1"
 />
 <meta name="mobile-web-app-capable" content="yes" />
-<link rel="manifest" href="{{ route("manifest") }}" />
+<link rel="manifest" href="{{ route('manifest') }}" />
 <meta name="csrf-token" content="{{ csrf_token() }}" />
-<meta name="ws-key" content="{{ config("flux.vite.reverb_app_key") }}" />
+<meta name="ws-key" content="{{ config('flux.vite.reverb_app_key') }}" />
 <meta
     name="ws-broadcaster"
-    content="{{ config("broadcasting.default", "reverb") }}"
+    content="{{ config('broadcasting.default', 'reverb') }}"
 />
-<meta name="ws-host" content="{{ config("flux.vite.reverb_host") }}" />
-<meta name="ws-port" content="{{ config("flux.vite.reverb_port") }}" />
-<meta name="ws-protocol" content="{{ config("flux.vite.reverb_protocol") }}" />
-<meta name="webpush-key" content="{{ config("webpush.vapid.public_key") }}" />
+<meta name="ws-host" content="{{ config('flux.vite.reverb_host') }}" />
+<meta name="ws-port" content="{{ config('flux.vite.reverb_port') }}" />
+<meta name="ws-protocol" content="{{ config('flux.vite.reverb_protocol') }}" />
+<meta name="webpush-key" content="{{ config('webpush.vapid.public_key') }}" />
 <meta name="currency-code" content="{{ $defaultCurrency?->iso }}" />
-<link rel="icon" href="{{ route("favicon") }}" />
+<link rel="icon" href="{{ route('favicon') }}" />
 <meta
     http-equiv="refresh"
-    content="{{ config("session.lifetime") * 60 + 1 }}"
+    content="{{ config('session.lifetime') * 60 + 1 }}"
 />
-@stack("meta")
+@stack('meta')
 <tallstackui:script />
 {{ \FluxErp\Facades\Asset::toHtml() }}
-@stack("scripts")
+@stack('scripts')
 {{ $slot }}

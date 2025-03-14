@@ -15,14 +15,14 @@
         },
     }"
 >
-    @section("modals")
+    @section('modals')
     <x-modal
         id="edit-category-modal"
         x-on:open="setCategorySearch()"
         :title="$category->id ? __('Edit Category') : __('Create Category')"
     >
         <div class="flex flex-col gap-1.5">
-            @section("modals.edit-category.content")
+            @section('modals.edit-category.content')
             <x-input wire:model="category.name" :label="__('Name')"></x-input>
             <div class="mt-2">
                 <x-toggle

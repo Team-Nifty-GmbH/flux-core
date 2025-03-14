@@ -1,13 +1,13 @@
-@use("FluxErp\Providers\ViewServiceProvider")
+@use('FluxErp\Providers\ViewServiceProvider')
 <div>
     @vite([
         ViewServiceProvider::getRealPackageAssetPath(
-            "/resources/js/alpine.js",
-            "team-nifty-gmbh/flux-erp",
+            '/resources/js/alpine.js',
+            'team-nifty-gmbh/flux-erp',
         ),
         ViewServiceProvider::getRealPackageAssetPath(
-            "/resources/css/app.css",
-            "team-nifty-gmbh/flux-erp",
+            '/resources/css/app.css',
+            'team-nifty-gmbh/flux-erp',
         ),
     ])
     <div
@@ -35,18 +35,18 @@
                             </template>
                         </div>
                         <template x-if="error">
-                            <p class="text-2xl">{{ __("Upload Failed") }}</p>
+                            <p class="text-2xl">{{ __('Upload Failed') }}</p>
                         </template>
                         <template x-if="id && !error">
                             <p class="text-2xl">
-                                {{ __(":model saved", ["model" => __("Signature")]) }}
+                                {{ __(':model saved', ['model' => __('Signature')]) }}
                             </p>
                         </template>
                     </div>
                 </div>
                 <div class="flex w-full flex-col items-end gap-6 pt-10 lg:pt-0">
                     <div class="w-full max-w-96">
-                        <h1 class="mb-2 text-xl">{{ __("Sign here") }}</h1>
+                        <h1 class="mb-2 text-xl">{{ __('Sign here') }}</h1>
                         <x-input
                             errorless
                             :placeholder="__('Name')"

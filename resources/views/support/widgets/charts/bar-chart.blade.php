@@ -1,5 +1,5 @@
-@extends("flux::support.widgets.charts.chart")
-@section("options")
+@extends('flux::support.widgets.charts.chart')
+@section('options')
     @parent
     @if ($chartTypes)
         <x-select.native
@@ -23,7 +23,7 @@
 @endsection
 
 @if ($showTotals)
-    @section("chart")
+    @section('chart')
         <div class="px-6">
             <div
                 class="soft-scrollbar h-20 w-full gap-12 overflow-x-auto rounded md:flex"

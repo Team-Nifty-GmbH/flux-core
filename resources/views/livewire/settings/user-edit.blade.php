@@ -1,8 +1,8 @@
 <x-card>
-    @section("user-edit")
+    @section('user-edit')
     <form class="space-y-5">
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            @section("user-edit.personal-data")
+            @section('user-edit.personal-data')
             <x-input
                 :label="__('Firstname')"
                 wire:model="userForm.firstname"
@@ -19,7 +19,7 @@
         </div>
         <hr />
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            @section("user-edit.employment")
+            @section('user-edit.employment')
             <x-date
                 :without-time="true"
                 :label="__('Date Of Birth')"
@@ -47,7 +47,7 @@
             @show
         </div>
         <hr />
-        @section("user-edit.selects")
+        @section('user-edit.selects')
         <x-select.styled
             wire:model="userForm.language_id"
             :label="__('Language')"
@@ -66,7 +66,7 @@
             :options="$users"
         />
         @show
-        @section("user-edit.attributes")
+        @section('user-edit.attributes')
         <x-checkbox :label="__('Active')" wire:model="userForm.is_active" />
         <x-password
             :label="__('New password')"
@@ -78,7 +78,7 @@
         />
         @show
         <hr />
-        @section("user-edit.bank-connection")
+        @section('user-edit.bank-connection')
         <x-input
             wire:model="userForm.account_holder"
             :label="__('Account Holder')"
@@ -87,7 +87,7 @@
         <x-input wire:model="userForm.bic" :label="__('BIC')" />
         <x-input wire:model="userForm.bank_name" :label="__('Bank Name')" />
         @show
-        @section("user-edit.mail-accounts")
+        @section('user-edit.mail-accounts')
         <x-select.styled
             :label="__('Mail Accounts')"
             wire:model="userForm.mail_accounts"
@@ -112,7 +112,7 @@
                 "
                 class="cursor-pointer whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium hover:border-gray-200 hover:text-gray-700"
             >
-                {{ __("Roles") }}
+                {{ __('Roles') }}
             </div>
             <div
                 x-on:click="active = 'permissions'"
@@ -123,7 +123,7 @@
                 "
                 class="cursor-pointer whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium hover:border-gray-200 hover:text-gray-700"
             >
-                {{ __("Permissions") }}
+                {{ __('Permissions') }}
             </div>
             <div
                 x-on:click="active = 'clients'"
@@ -134,7 +134,7 @@
                 "
                 class="cursor-pointer whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium hover:border-gray-200 hover:text-gray-700"
             >
-                {{ __("Clients") }}
+                {{ __('Clients') }}
             </div>
             <div
                 x-on:click="active = 'commission-rates'"
@@ -146,98 +146,103 @@
                 class="cursor-pointer whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium hover:border-gray-200 hover:text-gray-700"
                 x-show="$wire.userForm.id"
             >
-                {{ __("Commission Rates") }}
+                {{ __('Commission Rates') }}
             </div>
         </nav>
         @canAction(\FluxErp\Actions\Role\UpdateUserRoles::class)
-        <div x-show="active === 'roles'" x-cloak>
-            <div class="max-h-96 space-y-3 overflow-y-auto">
-                @php
-                    $superAdmin = auth()
-                        ->user()
-                        ->hasRole("Super Admin");
-                @endphp
+            <div x-show="active === 'roles'" x-cloak>
+                <div class="max-h-96 space-y-3 overflow-y-auto">
+                    @php
+                        $superAdmin = auth()
+                            ->user()
+                            ->hasRole('Super Admin');
+                    @endphp
 
-                @foreach ($roles as $role)
-                    @if ($role["name"] === "Super Admin" && ! $superAdmin)
-                        @continue
-                    @endif
+                    @foreach ($roles as $role)
+                        @if ($role['name'] === 'Super Admin' && ! $superAdmin)
+                            @continue
+                        @endif
 
-                    <div class="flex">
-                        <div class="flex-1 text-sm">
-                            {{ __($role["name"]) }}
+                        <div class="flex">
+                            <div class="flex-1 text-sm">
+                                {{ __($role['name']) }}
+                            </div>
+                            <div class="flex-1 text-sm">
+                                {{ __($role['guard_name']) }}
+                            </div>
+                            <div class="pr-4">
+                                <x-checkbox
+                                    wire:model.number.live="userForm.roles"
+                                    :value="$role['id']"
+                                />
+                            </div>
                         </div>
-                        <div class="flex-1 text-sm">
-                            {{ __($role["guard_name"]) }}
-                        </div>
-                        <div class="pr-4">
-                            <x-checkbox
-                                wire:model.number.live="userForm.roles"
-                                :value="$role['id']"
-                            />
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-        @endCanAction
-        @canAction(\FluxErp\Actions\Permission\UpdateUserPermissions::class)
-        <div x-show="active === 'permissions'" x-cloak>
-            <div class="pb-3">
-                <x-input
-                    wire:model.live.debounce.500ms="searchPermission"
-                    icon="magnifying-glass"
-                />
-            </div>
-            <div class="max-h-96 space-y-3 overflow-y-auto pt-3">
-                <div class="grid grid-cols-6 gap-3">
-                    @foreach ($permissions as $permission)
-                        <div class="col-span-3 font-medium">
-                            {{ __($permission["name"]) }}
-                        </div>
-                        <div class="font-medium">
-                            {{ __($permission["guard_name"]) }}
-                        </div>
-                        <x-checkbox
-                            readonly
-                            :label="__('Role')"
-                            disabled
-                            wire:model.number="lockedPermissions"
-                            :value="$permission['id']"
-                        />
-                        <x-checkbox
-                            :label="__('Direct')"
-                            wire:model.number="userForm.permissions"
-                            :value="$permission['id']"
-                        />
                     @endforeach
                 </div>
             </div>
-            <div class="pt-3">
-                {{ $permissions->links() }}
-            </div>
-        </div>
-        @endCanAction
-        @canAction(\FluxErp\Actions\User\UpdateUserClients::class)
-        <div x-show="active === 'clients'" x-cloak>
-            <div class="max-h-96 space-y-3 overflow-y-auto">
-                @foreach ($clients as $client)
-                    <div class="flex">
-                        <div class="flex-1 text-sm">{{ $client["name"] }}</div>
-                        <div class="flex-1 text-sm">
-                            {{ $client["client_code"] }}
-                        </div>
-                        <div class="pr-4">
+        @endcanAction
+
+        @canAction(\FluxErp\Actions\Permission\UpdateUserPermissions::class)
+            <div x-show="active === 'permissions'" x-cloak>
+                <div class="pb-3">
+                    <x-input
+                        wire:model.live.debounce.500ms="searchPermission"
+                        icon="magnifying-glass"
+                    />
+                </div>
+                <div class="max-h-96 space-y-3 overflow-y-auto pt-3">
+                    <div class="grid grid-cols-6 gap-3">
+                        @foreach ($permissions as $permission)
+                            <div class="col-span-3 font-medium">
+                                {{ __($permission['name']) }}
+                            </div>
+                            <div class="font-medium">
+                                {{ __($permission['guard_name']) }}
+                            </div>
                             <x-checkbox
-                                wire:model.number="userForm.clients"
-                                :value="$client['id']"
+                                readonly
+                                :label="__('Role')"
+                                disabled
+                                wire:model.number="lockedPermissions"
+                                :value="$permission['id']"
                             />
-                        </div>
+                            <x-checkbox
+                                :label="__('Direct')"
+                                wire:model.number="userForm.permissions"
+                                :value="$permission['id']"
+                            />
+                        @endforeach
                     </div>
-                @endforeach
+                </div>
+                <div class="pt-3">
+                    {{ $permissions->links() }}
+                </div>
             </div>
-        </div>
-        @endCanAction
+        @endcanAction
+
+        @canAction(\FluxErp\Actions\User\UpdateUserClients::class)
+            <div x-show="active === 'clients'" x-cloak>
+                <div class="max-h-96 space-y-3 overflow-y-auto">
+                    @foreach ($clients as $client)
+                        <div class="flex">
+                            <div class="flex-1 text-sm">
+                                {{ $client['name'] }}
+                            </div>
+                            <div class="flex-1 text-sm">
+                                {{ $client['client_code'] }}
+                            </div>
+                            <div class="pr-4">
+                                <x-checkbox
+                                    wire:model.number="userForm.clients"
+                                    :value="$client['id']"
+                                />
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endcanAction
+
         <div x-show="active === 'commission-rates'" x-cloak>
             <x-select.styled
                 :label="__('Commission credit contact')"
@@ -282,13 +287,14 @@
         <div class="w-full">
             <div class="flex justify-between gap-x-4">
                 @canAction(\FluxErp\Actions\User\DeleteUser::class)
-                <x-button
-                    color="red"
-                    :text="__('Delete')"
-                    wire:click="delete"
-                    wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('User')]) }}"
-                />
-                @endCanAction
+                    <x-button
+                        color="red"
+                        :text="__('Delete')"
+                        wire:click="delete"
+                        wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('User')]) }}"
+                    />
+                @endcanAction
+
                 <div class="flex gap-x-2">
                     <x-button
                         color="secondary"

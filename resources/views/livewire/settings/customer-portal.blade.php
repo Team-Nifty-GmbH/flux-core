@@ -9,10 +9,10 @@
     <div class="py-8 sm:flex sm:items-center">
         <div class="sm:flex-auto">
             <h1 class="text-xl font-semibold dark:text-white">
-                {{ __("Customer Portal") }}
+                {{ __('Customer Portal') }}
             </h1>
             <div class="mt-2 text-sm text-gray-300">
-                {{ __("Here you can manage all customer portal settings...") }}
+                {{ __('Here you can manage all customer portal settings...') }}
             </div>
         </div>
     </div>
@@ -51,7 +51,7 @@
                         <x-label>
                             <x-slot:word>
                                 <span
-                                    x-text="'{{ __("Angle") }} ' + setting.settings.nav.background.angle + '°'"
+                                    x-text="'{{ __('Angle') }} ' + setting.settings.nav.background.angle + '°'"
                                 ></span>
                             </x-slot>
                         </x-label>

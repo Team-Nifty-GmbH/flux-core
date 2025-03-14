@@ -34,5 +34,5 @@
             />
         </x-slot>
     </x-modal>
-    @include("tall-datatables::livewire.data-table")
+    @include('tall-datatables::livewire.data-table')
 </div>

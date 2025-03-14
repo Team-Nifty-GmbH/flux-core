@@ -60,7 +60,7 @@
                                     x-bind:options="ticketTypeAdditionalColumn.values"
                                 >
                                     <option value="" disabled selected>
-                                        {{ __("Please select") }}
+                                        {{ __('Please select') }}
                                     </option>
                                     <template
                                         x-for="value in ticketTypeAdditionalColumn.values"
@@ -95,10 +95,10 @@
                         </div>
                     </template>
                     <h2 class="text-base font-bold uppercase sm:col-span-6">
-                        {{ __("Attachments") }}
+                        {{ __('Attachments') }}
                     </h2>
                     <div class="text-portal-font-color sm:col-span-6">
-                        {{ __("Photos and videos help us analyze the errors") }}
+                        {{ __('Photos and videos help us analyze the errors') }}
                     </div>
                     <div class="sm:col-span-6">
                         <x-flux::features.media.upload

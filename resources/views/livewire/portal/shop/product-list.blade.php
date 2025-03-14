@@ -15,7 +15,7 @@
             <div>
                 {{ $products->links() }}
             </div>
-            @section("products")
+            @section('products')
             <div
                 class="grid grid-cols-1 gap-4 pt-4 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-5"
             >
@@ -26,7 +26,7 @@
                     />
                 @empty
                     <div class="text-secondary-400 text-center">
-                        {{ __("No products found") }}
+                        {{ __('No products found') }}
                     </div>
                 @endforelse
             </div>

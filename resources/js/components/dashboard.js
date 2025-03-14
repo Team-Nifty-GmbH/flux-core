@@ -1,5 +1,5 @@
-import { GridStack } from "gridstack";
-import { v4 as uuidv4 } from "uuid";
+import { GridStack } from 'gridstack';
+import { v4 as uuidv4 } from 'uuid';
 
 export default function () {
     return {
@@ -74,7 +74,7 @@ export default function () {
                     (w) => w.id.toString() === item.gridstackNode.id.toString(),
                 );
                 // remove from snapshot if not on the screen and recalculate x,y coordinates
-                if (item.style.display !== "none" && widget !== undefined) {
+                if (item.style.display !== 'none' && widget !== undefined) {
                     widget.height = item.gridstackNode.h;
                     widget.width = item.gridstackNode.w;
                     widget.order_column = item.gridstackNode.x;
@@ -173,7 +173,7 @@ export default function () {
                 );
             if (el !== undefined) {
                 // remove from grid - keep in snapshot
-                el.style.display = "none";
+                el.style.display = 'none';
                 await this.grid.compact();
 
                 await this.syncGridOnDelete();

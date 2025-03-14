@@ -2,17 +2,17 @@
     <div
         class="space-y-2.5"
         x-data="{
-            formatter: @js(resolve_static(\FluxErp\Models\Task::class, "typeScriptAttributes")),
+            formatter: @js(resolve_static(\FluxErp\Models\Task::class, 'typeScriptAttributes')),
         }"
     >
-        @section("task-content")
+        @section('task-content')
         <x-input
             x-bind:readonly="!edit"
             wire:model="task.name"
             label="{{ __('Name') }}"
         />
-        @section("task-content.selects")
-        @section("task-content.selects.project")
+        @section('task-content.selects')
+        @section('task-content.selects.project')
         <div
             x-show="task.id"
             x-bind:class="!edit && 'pointer-events-none'"
@@ -29,7 +29,7 @@
             />
         </div>
         @show
-        @section("task-content.selects.responsible-users")
+        @section('task-content.selects.responsible-users')
         <div x-bind:class="!edit && 'pointer-events-none'">
             <x-select.styled
                 :label="__('Responsible User')"
@@ -52,7 +52,7 @@
             class="flex justify-between gap-x-4"
             x-bind:class="!edit && 'pointer-events-none'"
         >
-            @section("task-content.dates")
+            @section('task-content.dates')
             <x-date
                 x-bind:readonly="!edit"
                 :without-time="true"
@@ -67,7 +67,7 @@
             />
             @show
         </div>
-        @section("task-content.multi-selects")
+        @section('task-content.multi-selects')
         <x-flux::state
             x-bind:class="!edit && 'pointer-events-none'"
             class="w-full"
@@ -155,16 +155,16 @@
             >
                 <x-slot:after>
                     @canAction(\FluxErp\Actions\Tag\CreateTag::class)
-                    <div class="px-1">
-                        <x-button
-                            color="emerald"
-                            full
-                            :text="__('Add')"
-                            wire:click="addTag($promptValue())"
-                            wire:flux-confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}"
-                        />
-                    </div>
-                    @endCanAction
+                        <div class="px-1">
+                            <x-button
+                                color="emerald"
+                                full
+                                :text="__('Add')"
+                                wire:click="addTag($promptValue())"
+                                wire:flux-confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}"
+                            />
+                        </div>
+                    @endcanAction
                 </x-slot>
             </x-select.styled>
         </div>
@@ -183,12 +183,12 @@
         />
         @show
     </div>
-    @section("task-additional-columns")
+    @section('task-additional-columns')
     <div class="space-y-2.5">
         <h3
             class="text-md text-secondary-700 dark:text-secondary-400 mt-4 whitespace-normal font-medium"
         >
-            {{ __("Additional Columns") }}
+            {{ __('Additional Columns') }}
         </h3>
         <x-flux::additional-columns
             :model="\FluxErp\Models\Task::class"

@@ -1,4 +1,4 @@
-@extends("flux::livewire.transactions.transactions")
+@extends('flux::livewire.transactions.transactions')
 <x-modal id="assign-order-modal" size="7xl">
     <x-card>
         <div class="grid grid-cols-2 gap-1.5">
@@ -71,14 +71,14 @@
                                 ></span>
                                 <span
                                     x-html="
-                                        '{{ __("Total") }}' +
+                                        '{{ __('Total') }}' +
                                             ': ' +
                                             window.formatters.coloredMoney(child.order?.total_gross_price)
                                     "
                                 ></span>
                                 <span
                                     x-html="
-                                        '{{ __("Balance") }}' +
+                                        '{{ __('Balance') }}' +
                                             ': ' +
                                             window.formatters.coloredMoney(child.order?.balance)
                                     "
@@ -96,7 +96,7 @@
                     </x-flux::list-item>
                 </template>
                 <div class="flex justify-end gap-1.5">
-                    <div>{{ __("Difference") }}</div>
+                    <div>{{ __('Difference') }}</div>
                     <div
                         x-html="window.formatters.coloredMoney($wire.transactionForm.difference)"
                     ></div>

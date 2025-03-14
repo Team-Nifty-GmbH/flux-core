@@ -4,7 +4,7 @@
         init() {
             $watch('trackable_type', () => {
                 $wire.workTime.trackable_id = null
-                let searchRoute = {{ '\'' . route("search", "__model__") . '\'' }}
+                let searchRoute = {{ '\'' . route('search', '__model__') . '\'' }}
                 searchRoute = searchRoute.replace('__model__', this.trackable_type)
                 $tallstackuiSelect('invoice-address-id').setRequestUrl(searchRoute)
             })

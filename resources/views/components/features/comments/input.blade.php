@@ -7,13 +7,13 @@
             $refs.upload,
             '{{ Auth::user()?->language?->language_code }}',
             {
-                title: '{{ __("File will be replaced") }}',
-                description: '{{ __("Do you want to proceed?") }}',
-                labelAccept: '{{ __("Accept") }}',
-                labelReject: '{{ __("Undo") }}',
+                title: '{{ __('File will be replaced') }}',
+                description: '{{ __('Do you want to proceed?') }}',
+                labelAccept: '{{ __('Accept') }}',
+                labelReject: '{{ __('Undo') }}',
             },
             {
-                uploadDisabled: '{{ __("Upload not allowed - Read Only") }}',
+                uploadDisabled: '{{ __('Upload not allowed - Read Only') }}',
             },
         ),
         selectionProxy: {},
@@ -55,16 +55,16 @@
                 </div>
                 <div class="grow pt-4">
                     @canAction(\FluxErp\Actions\Media\UploadMedia::class)
-                    <div class="flex flex-col items-end">
-                        <div class="mb-4 w-full">
-                            <input
-                                x-init="loadFilePond(countChildren)"
-                                id="filepond-drop"
-                                type="file"
-                            />
+                        <div class="flex flex-col items-end">
+                            <div class="mb-4 w-full">
+                                <input
+                                    x-init="loadFilePond(countChildren)"
+                                    id="filepond-drop"
+                                    type="file"
+                                />
+                            </div>
                         </div>
-                    </div>
-                    @endCanAction
+                    @endcanAction
                 </div>
                 <div class="flex flex-wrap justify-end">
                     <div class="flex items-center justify-end gap-x-2">

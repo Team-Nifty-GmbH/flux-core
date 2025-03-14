@@ -3,7 +3,7 @@
         <h2
             class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400"
         >
-            {{ __("My Tasks") }}
+            {{ __('My Tasks') }}
         </h2>
     </div>
     <div class="flex-1 overflow-auto">
@@ -53,7 +53,7 @@
                             )"
                     >
                         <div class="hidden sm:block">
-                            {{ __("Track Time") }}
+                            {{ __('Track Time') }}
                         </div>
                     </x-button>
                     <x-button
@@ -63,13 +63,13 @@
                         wire:navigate
                         :href="route('tasks.id', $task->id)"
                     >
-                        <div class="hidden sm:block">{{ __("View") }}</div>
+                        <div class="hidden sm:block">{{ __('View') }}</div>
                     </x-button>
                 </x-slot>
             </x-flux::list-item>
         @empty
             <div class="p-4 text-center text-gray-500 dark:text-gray-400">
-                {{ __("No tasks found") }}
+                {{ __('No tasks found') }}
             </div>
         @endforelse
     </div>

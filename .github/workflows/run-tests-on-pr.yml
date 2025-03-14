@@ -25,9 +25,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-versions: ["8.3"]
-        browser: ["chrome"]
-        laravel: ["12.*"]
+        php-versions: ['8.3']
+        browser: ['chrome']
+        laravel: ['12.*']
         include:
           - laravel: 12.*
             testbench: 10.*
@@ -77,7 +77,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: '22'
 
       - name: Cache composer dependencies
         run: |

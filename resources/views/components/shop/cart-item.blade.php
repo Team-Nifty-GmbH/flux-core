@@ -29,7 +29,7 @@
         </div>
         <div class="text-secondary-400">
             {{ Number::currency(number: $cartItem->price, locale: app()->getLocale()) }}
-            / {{ __("Piece") }} *
+            / {{ __('Piece') }} *
         </div>
     </div>
 </div>

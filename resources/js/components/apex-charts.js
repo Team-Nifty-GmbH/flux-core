@@ -1,5 +1,5 @@
-import ApexCharts from "apexcharts";
-import colors from "tailwindcss/colors";
+import ApexCharts from 'apexcharts';
+import colors from 'tailwindcss/colors';
 
 window.colors = colors;
 window.ApexCharts = ApexCharts;
@@ -11,29 +11,29 @@ export default function ($wire) {
         livewireOptions: {},
         height: null,
         init() {
-            this.$el.setAttribute("apex_chart", "");
+            this.$el.setAttribute('apex_chart', '');
 
-            if (this.$el.querySelector(".chart").clientHeight === 0) {
+            if (this.$el.querySelector('.chart').clientHeight === 0) {
                 return;
             }
 
-            this.height = this.$el.querySelector(".chart").clientHeight;
-            document.addEventListener("livewire:navigating", () => {
+            this.height = this.$el.querySelector('.chart').clientHeight;
+            document.addEventListener('livewire:navigating', () => {
                 this.chart.destroy();
             });
 
             this.mapLivewireData($wire.options);
             this.chartType = this.livewireOptions.chart.type;
             this.chart = new ApexCharts(
-                this.$el.querySelector(".chart"),
+                this.$el.querySelector('.chart'),
                 this.options,
             );
 
             this.chart.render();
 
-            this.$watch("chartType", () => {
+            this.$watch('chartType', () => {
                 this.options.chart.type = this.chartType;
-                if (this.chartType === "area") {
+                if (this.chartType === 'area') {
                     this.options.fill.opacity = 0.9;
                 } else {
                     this.options.fill.opacity = 1;
@@ -44,12 +44,12 @@ export default function ($wire) {
         get dataLabelsFormatter() {
             if (
                 $wire.__instance.originalEffects.js?.hasOwnProperty(
-                    "dataLabelsFormatter",
+                    'dataLabelsFormatter',
                 )
             ) {
                 return new Function(
-                    "val",
-                    "opts",
+                    'val',
+                    'opts',
                     $wire.__instance.originalEffects.js.dataLabelsFormatter,
                 );
             }
@@ -59,11 +59,11 @@ export default function ($wire) {
         get xAxisFormatter() {
             if (
                 $wire.__instance.originalEffects.js?.hasOwnProperty(
-                    "xAxisFormatter",
+                    'xAxisFormatter',
                 )
             ) {
                 return new Function(
-                    "val",
+                    'val',
                     $wire.__instance.originalEffects.js.xAxisFormatter,
                 );
             }
@@ -71,11 +71,11 @@ export default function ($wire) {
         get yAxisFormatter() {
             if (
                 $wire.__instance.originalEffects.js?.hasOwnProperty(
-                    "yAxisFormatter",
+                    'yAxisFormatter',
                 )
             ) {
                 return new Function(
-                    "val",
+                    'val',
                     $wire.__instance.originalEffects.js.yAxisFormatter,
                 );
             }
@@ -85,11 +85,11 @@ export default function ($wire) {
         get toolTipFormatter() {
             if (
                 $wire.__instance.originalEffects.js?.hasOwnProperty(
-                    "toolTipFormatter",
+                    'toolTipFormatter',
                 )
             ) {
                 return new Function(
-                    "val",
+                    'val',
                     $wire.__instance.originalEffects.js.toolTipFormatter,
                 );
             }
@@ -99,11 +99,11 @@ export default function ($wire) {
         get plotOptionsTotalFormatter() {
             if (
                 $wire.__instance.originalEffects.js?.hasOwnProperty(
-                    "plotOptionsTotalFormatter",
+                    'plotOptionsTotalFormatter',
                 )
             ) {
                 return new Function(
-                    "w",
+                    'w',
                     $wire.__instance.originalEffects.js.plotOptionsTotalFormatter,
                 );
             }
@@ -126,8 +126,8 @@ export default function ($wire) {
             options.chart.type = this.chartType || options.chart.type;
 
             options.series = options.series?.map((series) => {
-                if (typeof series !== "object") {
-                    return typeof series === "string"
+                if (typeof series !== 'object') {
+                    return typeof series === 'string'
                         ? parseFloat(series)
                         : series;
                 }
@@ -137,13 +137,13 @@ export default function ($wire) {
                     0,
                 );
 
-                if (!series.hasOwnProperty("color")) {
+                if (!series.hasOwnProperty('color')) {
                     return series;
                 }
 
-                if (!series.color.startsWith("#")) {
-                    const colorString = series.color.split("-");
-                    const color = colorString[0] || "blue";
+                if (!series.color.startsWith('#')) {
+                    const colorString = series.color.split('-');
+                    const color = colorString[0] || 'blue';
                     const weight = colorString[1] || 500;
                     series.color = window.colors[color][weight];
                     series.colorName = color;
@@ -155,10 +155,10 @@ export default function ($wire) {
             this.livewireOptions = options;
         },
         mergeDeep(target, ...sources) {
-            const isObject = (obj) => obj && typeof obj === "object";
+            const isObject = (obj) => obj && typeof obj === 'object';
 
             if (!isObject(target)) {
-                throw new Error("Target must be an object");
+                throw new Error('Target must be an object');
             }
 
             for (const source of sources) {
@@ -170,7 +170,7 @@ export default function ($wire) {
                     const targetValue = target[key];
                     const sourceValue = source[key];
 
-                    if (key === "data" || targetValue === undefined) {
+                    if (key === 'data' || targetValue === undefined) {
                         // If the key doesn't exist in target or key is 'data', replace it
                         target[key] = sourceValue;
                     } else if (
@@ -205,25 +205,25 @@ export default function ($wire) {
             return {
                 noData: {
                     text: undefined,
-                    align: "center",
-                    verticalAlign: "middle",
+                    align: 'center',
+                    verticalAlign: 'middle',
                     offsetX: 0,
                     offsetY: 0,
                     style: {
                         color: undefined,
-                        fontSize: "14px",
+                        fontSize: '14px',
                         fontFamily: undefined,
                     },
                 },
                 legend: {
-                    position: "top",
-                    horizontalAlign: "left",
+                    position: 'top',
+                    horizontalAlign: 'left',
                 },
                 chart: {
                     redrawOnParentResize: true,
                     type: null,
                     height: this.height,
-                    fontFamily: "inherit",
+                    fontFamily: 'inherit',
                 },
                 dataLabels: {
                     formatter:

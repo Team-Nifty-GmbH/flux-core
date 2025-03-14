@@ -1,7 +1,7 @@
 <tbody class="bg-uneven">
     <tr>
         <td class="pos py-4 pr-8 align-top">
-            {{ $position->total_net_price ? $position->slug_position : "" }}
+            {{ $position->total_net_price ? $position->slug_position : '' }}
         </td>
         <td
             class="py-4 pr-8 align-top"
@@ -28,7 +28,7 @@
         </td>
         <td class="py-4 pr-8 text-center align-top">
             {{ format_number($position->amount) }}
-            {{ data_get($position, "product.unit.abbreviation") }}
+            {{ data_get($position, 'product.unit.abbreviation') }}
         </td>
         <td class="py-4 text-right align-top">
             @if ($position->total_base_net_price > $position->total_net_price)

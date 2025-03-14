@@ -12,10 +12,11 @@
     @section("modals")
     {{ $this->renderCreateDocumentsModal() }}
     @canAction(\FluxErp\Actions\Task\CreateTask::class)
-    <x-modal id="create-tasks">
-        <livewire:order.order-project lazy :order="$order->id" />
-    </x-modal>
-    @endCanAction
+        <x-modal id="create-tasks">
+            <livewire:order.order-project lazy :order="$order->id" />
+        </x-modal>
+    @endcanAction
+
     <x-modal id="replicate-order">
         <section
             x-data="{
@@ -336,10 +337,10 @@
                     <div class="flex items-center gap-1.5">
                         <div
                             @canAction(\FluxErp\Actions\Order\ToggleLock::class)
-                            wire:click="toggleLock()"
-                            class="size-5 cursor-pointer"
-                            wire:flux-confirm.icon.warning="{{ __("Change order lock state") }}|{{ __("Manually locking or unlocking orders can have unexpected side effects.<br><br>Are you Sure?") }}|{{ __("Cancel") }}|{{ __("Continue") }}"
-                            @endCanAction
+                                wire:click="toggleLock()"
+                                class="size-5 cursor-pointer"
+                                wire:flux-confirm.icon.warning="{{ __("Change order lock state") }}|{{ __("Manually locking or unlocking orders can have unexpected side effects.<br><br>Are you Sure?") }}|{{ __("Cancel") }}|{{ __("Continue") }}"
+                            @endcanAction
                         >
                             <x-icon
                                 x-cloak

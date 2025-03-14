@@ -1,11 +1,11 @@
 <div>
-    @section("content")
+    @section('content')
     <div class="flex justify-between">
         <div>
             <h3
                 class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-50"
             >
-                {{ __("Customer portal") }}
+                {{ __('Customer portal') }}
             </h3>
         </div>
     </div>
@@ -14,10 +14,10 @@
             class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-5"
         >
             <label
-                for="{{ md5("address.can_login") }}"
+                for="{{ md5('address.can_login') }}"
                 class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2 dark:text-gray-50"
             >
-                {{ __("Active") }}
+                {{ __('Active') }}
             </label>
             <div class="col-span-2">
                 <x-toggle
@@ -31,10 +31,10 @@
             class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-5"
         >
             <label
-                for="{{ md5("address.email") }}"
+                for="{{ md5('address.email') }}"
                 class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2 dark:text-gray-50"
             >
-                {{ __("Login Email") }}
+                {{ __('Login Email') }}
             </label>
             <div class="col-span-2">
                 <x-input
@@ -47,10 +47,10 @@
             class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-5"
         >
             <label
-                for="{{ md5("password") }}"
+                for="{{ md5('password') }}"
                 class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2 dark:text-gray-50"
             >
-                {{ __("Password") }}
+                {{ __('Password') }}
             </label>
             <div class="col-span-2">
                 <x-password
@@ -63,10 +63,10 @@
             class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-5"
         >
             <label
-                for="{{ md5("permissions") }}"
+                for="{{ md5('permissions') }}"
                 class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2 dark:text-gray-50"
             >
-                {{ __("Permissions") }}
+                {{ __('Permissions') }}
             </label>
             <div class="col-span-2 space-y-3">
                 <x-button

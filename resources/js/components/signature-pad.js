@@ -1,4 +1,4 @@
-import SignaturePad from "signature_pad";
+import SignaturePad from 'signature_pad';
 
 // resizing canvas - data get lost - hence need for tempData during drawing
 // and existingData for already saved signature
@@ -14,7 +14,7 @@ export default function ($wire, $refs) {
         async init() {
             // init signature pad
             this.signaturePad = new SignaturePad($refs.canvas, {
-                backgroundColor: "rgba(255, 255, 255, 1)",
+                backgroundColor: 'rgba(255, 255, 255, 1)',
             });
 
             // if signature is already saved - order->print will inject it
@@ -26,17 +26,17 @@ export default function ($wire, $refs) {
             // resize func ref - to remove event listener
             this.resizeFuncRef = this.resizeCanvas.bind(this);
             // resize event listener
-            window.addEventListener("resize", this.resizeFuncRef);
+            window.addEventListener('resize', this.resizeFuncRef);
             this.resizeCanvas();
             // if signature is not saved - allow to draw and clear after first stroke
             this.signaturePad.addEventListener(
-                "afterUpdateStroke",
+                'afterUpdateStroke',
                 this.strokeHandler.bind(this),
             );
         },
         destroy() {
             if (this.resizeFuncRef !== null) {
-                window.removeEventListener("resize", this.resizeFuncRef);
+                window.removeEventListener('resize', this.resizeFuncRef);
             }
         },
         clear() {
@@ -45,9 +45,9 @@ export default function ($wire, $refs) {
         },
         get iconName() {
             if (this.error) {
-                return "exclamation";
+                return 'exclamation';
             } else {
-                return "check";
+                return 'check';
             }
         },
         strokeHandler() {
@@ -70,7 +70,7 @@ export default function ($wire, $refs) {
             const data = await (
                 await fetch(this.signaturePad.toDataURL())
             ).blob();
-            await $wire.upload("signature.file", data, this.upload.bind(this));
+            await $wire.upload('signature.file', data, this.upload.bind(this));
         },
         resizeCanvas() {
             if (window.innerWidth < 700) {
@@ -79,9 +79,9 @@ export default function ($wire, $refs) {
                 $refs.canvas.width =
                     width - (this.prevWidth - window.innerWidth);
                 this.prevWidth = window.innerWidth;
-                const ctx = $refs.canvas.getContext("2d");
+                const ctx = $refs.canvas.getContext('2d');
                 ctx.scale(1, 1);
-                ctx.fillStyle = "rgba(255, 255, 255, 1)";
+                ctx.fillStyle = 'rgba(255, 255, 255, 1)';
                 ctx.fillRect(0, 0, $refs.canvas.width, $refs.canvas.height);
                 // redraw signature on resize - since canvas removes all data on resize
                 this.debounce();
@@ -89,9 +89,9 @@ export default function ($wire, $refs) {
                 // going to big screen - resize canvas to default size
                 this.prevWidth = 700;
                 $refs.canvas.width = 500;
-                const ctx = $refs.canvas.getContext("2d");
+                const ctx = $refs.canvas.getContext('2d');
                 ctx.scale(1, 1);
-                ctx.fillStyle = "rgba(255, 255, 255, 1)";
+                ctx.fillStyle = 'rgba(255, 255, 255, 1)';
                 ctx.fillRect(0, 0, $refs.canvas.width, $refs.canvas.height);
                 this.debounce();
             }

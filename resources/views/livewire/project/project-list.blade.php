@@ -5,7 +5,7 @@
     >
         <x-card>
             <div
-                x-data="{ edit: true, formatter: @js(resolve_static(\FluxErp\Models\Project::class, "typeScriptAttributes")) }"
+                x-data="{ edit: true, formatter: @js(resolve_static(\FluxErp\Models\Project::class, 'typeScriptAttributes')) }"
             >
                 <x-project.edit />
             </div>

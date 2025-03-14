@@ -7,7 +7,7 @@
     }"
 >
     <div>
-        @section("calendar-event-modal")
+        @section('calendar-event-modal')
         <x-modal id="calendar-event-modal" :title="__('Edit Event')">
             <x-flux::calendar.event-edit />
             <x-slot:footer>

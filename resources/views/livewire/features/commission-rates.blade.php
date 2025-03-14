@@ -71,7 +71,7 @@
         <x-slot:footer>
             <div class="w-full">
                 <div class="flex justify-between gap-x-4">
-                    @if (user_can("action.commission-rates.delete"))
+                    @if (user_can('action.commission-rates.delete'))
                         <x-button
                             x-bind:class="! $wire.create || 'invisible'"
                             flat

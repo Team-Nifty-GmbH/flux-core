@@ -7,7 +7,7 @@
         >
             <div>
                 <h1 class="pb-10 pt-5 text-center text-5xl font-bold">
-                    {{ __("Your watchlist is empty") }}
+                    {{ __('Your watchlist is empty') }}
                 </h1>
             </div>
         </div>

@@ -2,7 +2,7 @@
     x-data="{
         order: $wire.entangle('order', true),
         orderPositions: $wire.entangle('orderPositions', true),
-        formatter: @js(resolve_static(\FluxErp\Models\Order::class, "typeScriptAttributes")),
+        formatter: @js(resolve_static(\FluxErp\Models\Order::class, 'typeScriptAttributes')),
     }"
 >
     <x-slot:header>
@@ -15,11 +15,11 @@
                     <div
                         class="text-sm font-semibold text-gray-900 dark:text-gray-50"
                     >
-                        {{ $order["order_number"] }}
-                        {{ $order["address_invoice"]["label"] }}
+                        {{ $order['order_number'] }}
+                        {{ $order['address_invoice']['label'] }}
                     </div>
                     <x-label class="opacity-60">
-                        {{ __($order["order_type"]["name"]) }}
+                        {{ __($order['order_type']['name']) }}
                     </x-label>
                 </div>
             </div>
@@ -34,7 +34,7 @@
             </div>
         </div>
     </x-slot>
-    <div class="pb-2 font-semibold uppercase">{{ __("General") }}</div>
+    <div class="pb-2 font-semibold uppercase">{{ __('General') }}</div>
     <div class="grid grid-cols-2 gap-2">
         <x-label :label="__('Customer')" />
         <div
@@ -62,7 +62,7 @@
             x-text="order.invoice_number"
         ></div>
     </div>
-    <div class="pb-2 pt-8 font-semibold uppercase">{{ __("Accounting") }}</div>
+    <div class="pb-2 pt-8 font-semibold uppercase">{{ __('Accounting') }}</div>
     <div class="grid grid-cols-2 gap-2">
         <x-label :label="__('Payment state')" />
         <div
@@ -76,7 +76,7 @@
         ></div>
     </div>
     <div class="pb-2 pt-8 font-semibold uppercase">
-        {{ __("Order positions") }}
+        {{ __('Order positions') }}
     </div>
     <div
         class="w-full pb-2"
@@ -87,13 +87,13 @@
         <x-flux::table>
             <x-slot:header>
                 <x-flux::table.head-cell>
-                    {{ __("Name") }}
+                    {{ __('Name') }}
                 </x-flux::table.head-cell>
                 <x-flux::table.head-cell>
-                    {{ __("Amount") }}
+                    {{ __('Amount') }}
                 </x-flux::table.head-cell>
                 <x-flux::table.head-cell>
-                    {{ __("Total Net Price") }}
+                    {{ __('Total Net Price') }}
                 </x-flux::table.head-cell>
             </x-slot>
             <template x-for="orderPosition in orderPositions">
@@ -119,7 +119,7 @@
         x-on:click="orderPositions.length < 1 ? $wire.loadOrderPositions() : orderPositions = []"
     >
         <span
-            x-text="orderPositions.length < 1 ? '{{ __("Show") }}' : '{{ __("Hide") }}'"
+            x-text="orderPositions.length < 1 ? '{{ __('Show') }}' : '{{ __('Hide') }}'"
         ></span>
     </x-button>
 </div>
