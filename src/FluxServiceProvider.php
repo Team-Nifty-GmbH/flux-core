@@ -623,8 +623,7 @@ class FluxServiceProvider extends ServiceProvider
             if (! Testable::hasMacro('cycleTabs')) {
                 Testable::macro(
                     'cycleTabs',
-                    function (string $tabPropertyName = 'tab'): void
-                    {
+                    function (string $tabPropertyName = 'tab'): void {
                         $tabs = $this->instance()->getTabs();
 
                         foreach ($tabs as $tab) {
