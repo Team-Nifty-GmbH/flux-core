@@ -1,25 +1,21 @@
-<div x-data="{
+<div
+    x-data="{
         updateContactId(id) {
-            $tallstackuiSelect('invoice-address-id')
-                .mergeRequestParams({
-                    where: [
-                        ['contact_id', '=', id]
-                    ]}
-                );
-            $tallstackuiSelect('delivery-address-id')
-                .mergeRequestParams({
-                    where: [
-                        ['contact_id', '=', id]
-                    ]}
-                );
+            $tallstackuiSelect('invoice-address-id').mergeRequestParams({
+                where: [['contact_id', '=', id]],
+            })
+            $tallstackuiSelect('delivery-address-id').mergeRequestParams({
+                where: [['contact_id', '=', id]],
+            })
 
-            $wire.fetchContactData();
-        }
-    }">
+            $wire.fetchContactData()
+        },
+    }"
+>
     <x-modal id="create-order-modal" :title="__('New Order')">
         <section>
-            <div class="space-y-2.5 divide-y divide-secondary-200">
-                @if(! $orderType ?? true)
+            <div class="divide-secondary-200 space-y-2.5 divide-y">
+                @if (! $orderType ?? true)
                     <x-select.styled
                         :label="__('Order type')"
                         required
@@ -28,7 +24,8 @@
                         :options="$orderTypes"
                     />
                 @endif
-                <div class="pt-4 flex flex-col gap-4">
+
+                <div class="flex flex-col gap-4 pt-4">
                     <x-select.styled
                         :label="__('Contact')"
                         class="pb-4"
@@ -106,7 +103,7 @@
                         />
                     </div>
                 </div>
-                <div class="pt-4 flex flex-col gap-4">
+                <div class="flex flex-col gap-4 pt-4">
                     <x-select.styled
                         :label="__('Client')"
                         required
@@ -144,9 +141,20 @@
         </section>
         <x-errors />
         <x-slot:footer>
-            <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('create-order-modal')" />
-            <x-button loading="save" color="indigo" :text="__('Save')" wire:click="save" />
-        </x-slot:footer>
+            <x-button
+                color="secondary"
+                light
+                flat
+                :text="__('Cancel')"
+                x-on:click="$modalClose('create-order-modal')"
+            />
+            <x-button
+                loading="save"
+                color="indigo"
+                :text="__('Save')"
+                wire:click="save"
+            />
+        </x-slot>
     </x-modal>
     {{ $this->renderCreateDocumentsModal() }}
 </div>

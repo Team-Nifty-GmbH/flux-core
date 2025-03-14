@@ -9,7 +9,7 @@
                 src="{{ $logo?->getUrl() ?? '#' }}"
             />
         </x-mail::header>
-    </x-slot:header>
+    </x-slot>
     {{-- Body --}}
     {!! data_get($mailMessageForm, 'html_body') !!}
 
@@ -19,13 +19,14 @@
             <x-mail::subcopy>
                 {{ $subcopy }}
             </x-mail::subcopy>
-        </x-slot:subcopy>
+        </x-slot>
     @endisset
 
     {{-- Footer --}}
     <x-slot:footer>
         <x-mail::footer>
-            © {{ date('Y') }} {{ $client->name }}. @lang('All rights reserved.')
+            © {{ date('Y') }} {{ $client->name }}.
+            @lang('All rights reserved.')
         </x-mail::footer>
-    </x-slot:footer>
+    </x-slot>
 </x-mail::layout>

@@ -1,10 +1,10 @@
-@import "/node_modules/@fontsource/inter/latin-300.css";
-@import "/node_modules/@fontsource/inter/latin-400.css";
-@import "/node_modules/@fontsource/inter/latin-600.css";
-@import "/node_modules/@fontsource/inter/latin-900.css";
-@import "/node_modules/leaflet/dist/leaflet.css";
-@import "/node_modules/leaflet.markercluster/dist/MarkerCluster.css";
-@import "/node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css";
+@import '/node_modules/@fontsource/inter/latin-300.css';
+@import '/node_modules/@fontsource/inter/latin-400.css';
+@import '/node_modules/@fontsource/inter/latin-600.css';
+@import '/node_modules/@fontsource/inter/latin-900.css';
+@import '/node_modules/leaflet/dist/leaflet.css';
+@import '/node_modules/leaflet.markercluster/dist/MarkerCluster.css';
+@import '/node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css';
 
 @import '/node_modules/gridstack/dist/gridstack.min.css';
 @import '/node_modules/gridstack/dist/gridstack-extra.min.css';
@@ -14,8 +14,8 @@
 
 @import '/node_modules/@phosphor-icons/web/src/regular/style.css';
 
-@import "/node_modules/filepond/dist/filepond.css";
-@import "/node_modules/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css";
+@import '/node_modules/filepond/dist/filepond.css';
+@import '/node_modules/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css';
 
 @tailwind base;
 @tailwind components;
@@ -35,18 +35,19 @@
     }
 
     .sortable-chosen {
-        @apply !border-dashed border-2 !border-primary-500 !bg-indigo-100;
+        @apply !border-primary-500 border-2 !border-dashed !bg-indigo-100;
     }
 
     .sortable-selected {
-        @apply !border-dashed border-2 !border-primary-500 !bg-indigo-100;
+        @apply !border-primary-500 border-2 !border-dashed !bg-indigo-100;
     }
 
     .sortable-to {
-        @apply !border-dashed border-2 !border-primary-500 !bg-indigo-100;
+        @apply !border-primary-500 border-2 !border-dashed !bg-indigo-100;
     }
 
-    .text-secondary-400, .text-gray-400 {
+    .text-secondary-400,
+    .text-gray-400 {
         @apply text-gray-200;
     }
 
@@ -55,20 +56,20 @@
     }
 
     input:read-only {
-        @apply bg-gray-50 dark:bg-secondary-600;
+        @apply dark:bg-secondary-600 bg-gray-50;
     }
 
-    input[type="checkbox"]:disabled {
+    input[type='checkbox']:disabled {
         @apply text-gray-400;
     }
 
     textarea:read-only {
-        @apply bg-gray-50 dark:bg-secondary-600;
+        @apply dark:bg-secondary-600 bg-gray-50;
     }
 
     .content-editable-placeholder:empty:before {
         content: attr(placeholder);
-        @apply pointer-events-none text-secondary-400;
+        @apply text-secondary-400 pointer-events-none;
     }
 
     .prose-xs {
@@ -76,22 +77,22 @@
     }
 
     #map {
-        @apply h-96 z-0;
+        @apply z-0 h-96;
     }
 
     .mention {
-        @apply rounded-md bg-indigo-100 text-primary-500 p-1;
+        @apply text-primary-500 rounded-md bg-indigo-100 p-1;
     }
 
     .tippy-box {
-        @apply w-full rounded-t-md sm:rounded-xl border border-secondary-200 bg-white shadow-lg dark:bg-secondary-800 dark:border-secondary-600 transition-all relative overflow-hidden pointer-events-auto;
+        @apply border-secondary-200 dark:border-secondary-600 dark:bg-secondary-800 pointer-events-auto relative w-full overflow-hidden rounded-t-md border bg-white shadow-lg transition-all sm:rounded-xl;
     }
 
     .suggestion-item {
-        @apply py-2 px-3 focus:outline-none ease-in-out duration-150 relative text-secondary-600 dark:text-secondary-400 flex items-center justify-between cursor-pointer focus:bg-indigo-100 focus:text-primary-800 hover:text-white dark:focus:bg-secondary-700 hover:bg-indigo-500 dark:hover:bg-secondary-700;
+        @apply text-secondary-600 focus:text-primary-800 dark:text-secondary-400 dark:hover:bg-secondary-700 dark:focus:bg-secondary-700 relative flex cursor-pointer items-center justify-between px-3 py-2 duration-150 ease-in-out hover:bg-indigo-500 hover:text-white focus:bg-indigo-100 focus:outline-none;
     }
 }
 
 .sortable-ghost {
-    @apply !opacity-75 !border-dashed border-2 !border-primary-500 !bg-indigo-100;
+    @apply !border-primary-500 border-2 !border-dashed !bg-indigo-100 !opacity-75;
 }

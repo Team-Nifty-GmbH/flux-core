@@ -5,14 +5,8 @@ import dataTablesConfig from './vendor/team-nifty-gmbh/tall-datatables/tailwind.
 import forms from '@tailwindcss/forms';
 
 export default {
-    presets: [
-        tallstackuiConfig,
-        dataTablesConfig,
-        fluxConfig,
-    ],
-    plugins: [
-        forms,
-    ],
+    presets: [tallstackuiConfig, dataTablesConfig, fluxConfig],
+    plugins: [forms],
     content: [
         './resources/**/*.blade.php',
         './resources/**/*.js',
@@ -20,8 +14,5 @@ export default {
         './app/Livewire/**/*.php',
         './app/Components/**/*.php',
         './vendor/tallstackui/tallstackui/src/**/*.php',
-    ].concat(
-        dataTablesConfig.content,
-        fluxConfig.content
-    ),
-}
+    ].concat(dataTablesConfig.content, fluxConfig.content),
+};

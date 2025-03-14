@@ -19,12 +19,28 @@
             :options="$ledgerAccountTypes"
         />
         <div class="mt-2">
-            <x-toggle wire:model.boolean="ledgerAccount.is_automatic" :label="__('Is Automatic')" />
+            <x-toggle
+                wire:model.boolean="ledgerAccount.is_automatic"
+                :label="__('Is Automatic')"
+            />
         </div>
-        <x-textarea wire:model="ledgerAccount.description" :label="__('Description')" />
+        <x-textarea
+            wire:model="ledgerAccount.description"
+            :label="__('Description')"
+        />
     </div>
     <x-slot:footer>
-        <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('edit-ledger-account-modal')"/>
-        <x-button color="indigo" :text="__('Save')" wire:click="save().then((success) => { if(success) $modalClose('edit-ledger-account-modal')})"/>
-    </x-slot:footer>
+        <x-button
+            color="secondary"
+            light
+            flat
+            :text="__('Cancel')"
+            x-on:click="$modalClose('edit-ledger-account-modal')"
+        />
+        <x-button
+            color="indigo"
+            :text="__('Save')"
+            wire:click="save().then((success) => { if(success) $modalClose('edit-ledger-account-modal')})"
+        />
+    </x-slot>
 </x-modal>

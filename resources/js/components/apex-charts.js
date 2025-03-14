@@ -1,10 +1,10 @@
-import ApexCharts from "apexcharts";
-import colors from 'tailwindcss/colors'
+import ApexCharts from 'apexcharts';
+import colors from 'tailwindcss/colors';
 
 window.colors = colors;
 window.ApexCharts = ApexCharts;
 
-export default function($wire) {
+export default function ($wire) {
     return {
         chart: null,
         chartType: null,
@@ -24,7 +24,10 @@ export default function($wire) {
 
             this.mapLivewireData($wire.options);
             this.chartType = this.livewireOptions.chart.type;
-            this.chart = new ApexCharts(this.$el.querySelector('.chart'), this.options);
+            this.chart = new ApexCharts(
+                this.$el.querySelector('.chart'),
+                this.options,
+            );
 
             this.chart.render();
 
@@ -39,34 +42,70 @@ export default function($wire) {
             });
         },
         get dataLabelsFormatter() {
-            if ($wire.__instance.originalEffects.js?.hasOwnProperty('dataLabelsFormatter')) {
-                return new Function('val', 'opts', $wire.__instance.originalEffects.js.dataLabelsFormatter);
+            if (
+                $wire.__instance.originalEffects.js?.hasOwnProperty(
+                    'dataLabelsFormatter',
+                )
+            ) {
+                return new Function(
+                    'val',
+                    'opts',
+                    $wire.__instance.originalEffects.js.dataLabelsFormatter,
+                );
             }
 
             return null;
         },
         get xAxisFormatter() {
-            if ($wire.__instance.originalEffects.js?.hasOwnProperty('xAxisFormatter')) {
-                return new Function('val', $wire.__instance.originalEffects.js.xAxisFormatter);
+            if (
+                $wire.__instance.originalEffects.js?.hasOwnProperty(
+                    'xAxisFormatter',
+                )
+            ) {
+                return new Function(
+                    'val',
+                    $wire.__instance.originalEffects.js.xAxisFormatter,
+                );
             }
         },
         get yAxisFormatter() {
-            if ($wire.__instance.originalEffects.js?.hasOwnProperty('yAxisFormatter')) {
-                return new Function('val', $wire.__instance.originalEffects.js.yAxisFormatter);
+            if (
+                $wire.__instance.originalEffects.js?.hasOwnProperty(
+                    'yAxisFormatter',
+                )
+            ) {
+                return new Function(
+                    'val',
+                    $wire.__instance.originalEffects.js.yAxisFormatter,
+                );
             }
 
             return null;
         },
         get toolTipFormatter() {
-            if ($wire.__instance.originalEffects.js?.hasOwnProperty('toolTipFormatter')) {
-                return new Function('val', $wire.__instance.originalEffects.js.toolTipFormatter);
+            if (
+                $wire.__instance.originalEffects.js?.hasOwnProperty(
+                    'toolTipFormatter',
+                )
+            ) {
+                return new Function(
+                    'val',
+                    $wire.__instance.originalEffects.js.toolTipFormatter,
+                );
             }
 
             return null;
         },
         get plotOptionsTotalFormatter() {
-            if ($wire.__instance.originalEffects.js?.hasOwnProperty('plotOptionsTotalFormatter')) {
-                return new Function('w', $wire.__instance.originalEffects.js.plotOptionsTotalFormatter);
+            if (
+                $wire.__instance.originalEffects.js?.hasOwnProperty(
+                    'plotOptionsTotalFormatter',
+                )
+            ) {
+                return new Function(
+                    'w',
+                    $wire.__instance.originalEffects.js.plotOptionsTotalFormatter,
+                );
             }
 
             return null;
@@ -88,16 +127,21 @@ export default function($wire) {
 
             options.series = options.series?.map((series) => {
                 if (typeof series !== 'object') {
-                    return typeof series === 'string' ? parseFloat(series) : series;
+                    return typeof series === 'string'
+                        ? parseFloat(series)
+                        : series;
                 }
 
-                series.sum = series.data?.reduce((a, b) => parseFloat(a) + parseFloat(b), 0);
+                series.sum = series.data?.reduce(
+                    (a, b) => parseFloat(a) + parseFloat(b),
+                    0,
+                );
 
-                if (! series.hasOwnProperty('color')) {
+                if (!series.hasOwnProperty('color')) {
                     return series;
                 }
 
-                if (! series.color.startsWith('#')) {
+                if (!series.color.startsWith('#')) {
                     const colorString = series.color.split('-');
                     const color = colorString[0] || 'blue';
                     const weight = colorString[1] || 500;
@@ -122,17 +166,23 @@ export default function($wire) {
                     continue; // Skip non-object sources
                 }
 
-                Object.keys(source).forEach(key => {
+                Object.keys(source).forEach((key) => {
                     const targetValue = target[key];
                     const sourceValue = source[key];
 
                     if (key === 'data' || targetValue === undefined) {
                         // If the key doesn't exist in target or key is 'data', replace it
                         target[key] = sourceValue;
-                    } else if (Array.isArray(targetValue) && Array.isArray(sourceValue)) {
+                    } else if (
+                        Array.isArray(targetValue) &&
+                        Array.isArray(sourceValue)
+                    ) {
                         target[key] = targetValue.concat(sourceValue);
                     } else if (isObject(targetValue) && isObject(sourceValue)) {
-                        target[key] = this.mergeDeep(Object.assign({}, targetValue), sourceValue);
+                        target[key] = this.mergeDeep(
+                            Object.assign({}, targetValue),
+                            sourceValue,
+                        );
                     } else {
                         target[key] = sourceValue;
                     }
@@ -142,7 +192,11 @@ export default function($wire) {
             return target;
         },
         get options() {
-            let options = this.mergeDeep({}, this.defaultOptions, this.livewireOptions);
+            let options = this.mergeDeep(
+                {},
+                this.defaultOptions,
+                this.livewireOptions,
+            );
             options.chart.type = this.chartType || options?.chart?.type;
 
             return options;
@@ -158,8 +212,8 @@ export default function($wire) {
                     style: {
                         color: undefined,
                         fontSize: '14px',
-                        fontFamily: undefined
-                    }
+                        fontFamily: undefined,
+                    },
                 },
                 legend: {
                     position: 'top',
@@ -172,30 +226,38 @@ export default function($wire) {
                     fontFamily: 'inherit',
                 },
                 dataLabels: {
-                    formatter: this.dataLabelsFormatter ?? function(val) {
-                        return val;
-                    }
+                    formatter:
+                        this.dataLabelsFormatter ??
+                        function (val) {
+                            return val;
+                        },
                 },
                 xaxis: {
                     labels: {
-                        formatter: this.xAxisFormatter ?? function(val) {
-                            return val;
-                        }
-                    }
+                        formatter:
+                            this.xAxisFormatter ??
+                            function (val) {
+                                return val;
+                            },
+                    },
                 },
                 yaxis: {
                     labels: {
-                        formatter: this.yAxisFormatter ?? function(val) {
-                            return val;
-                        }
-                    }
+                        formatter:
+                            this.yAxisFormatter ??
+                            function (val) {
+                                return val;
+                            },
+                    },
                 },
                 tooltip: {
                     y: {
-                        formatter: this.toolTipFormatter ?? function(val) {
-                            return val;
-                        }
-                    }
+                        formatter:
+                            this.toolTipFormatter ??
+                            function (val) {
+                                return val;
+                            },
+                    },
                 },
                 plotOptions: {
                     pie: {
@@ -203,23 +265,30 @@ export default function($wire) {
                             labels: {
                                 show: true,
                                 value: {
-                                    formatter: this.dataLabelsFormatter ?? function(val) {
-                                        return val;
-                                    }
+                                    formatter:
+                                        this.dataLabelsFormatter ??
+                                        function (val) {
+                                            return val;
+                                        },
                                 },
                                 total: {
                                     show: true,
-                                    formatter: this.plotOptionsTotalFormatter ?? function (w) {
-                                        return w.globals.seriesTotals.reduce((a, b) => {
-                                            return a + b
-                                        }, 0);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                                    formatter:
+                                        this.plotOptionsTotalFormatter ??
+                                        function (w) {
+                                            return w.globals.seriesTotals.reduce(
+                                                (a, b) => {
+                                                    return a + b;
+                                                },
+                                                0,
+                                            );
+                                        },
+                                },
+                            },
+                        },
+                    },
+                },
             };
         },
-    }
+    };
 }

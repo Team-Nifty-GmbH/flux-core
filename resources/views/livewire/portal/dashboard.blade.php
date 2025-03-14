@@ -1,5 +1,5 @@
 <div>
-    @if($view)
+    @if ($view)
         <livewire:is :component="$view" />
     @endif
 </div>

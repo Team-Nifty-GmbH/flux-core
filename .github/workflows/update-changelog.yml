@@ -56,5 +56,5 @@ jobs:
       - name: Upload Release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "release_${{ github.event.release.tag_name }}.tar.gz"
+          artifacts: 'release_${{ github.event.release.tag_name }}.tar.gz'
           token: ${{ secrets.GITHUB_TOKEN }}

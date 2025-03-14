@@ -16,18 +16,18 @@ class CreateUser extends Job implements ShouldBeMonitored
     public function handle(): void
     {
         // Do something
-        
+
         for ($i = 0; $i < 100; $i++) {
             $this->queueProgress($i);
             $this->message('Creating user ' . $i + 1);
-            
+
             // if you want to update multiple times in one loop, you can use the update method
             $this->queueUpdate([
                 'progress' => $i,
                 'message' => 'Creating user ' . $i + 1
             ]);
         }
-      
+
         $this->message('All users created');
         $this->accept(
             NotificationAction::make()

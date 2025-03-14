@@ -108,12 +108,8 @@ class ViewServiceProvider extends ServiceProvider
 
     protected function bootBladeDirectives(): void
     {
-        Blade::directive('canAction', function ($expression) {
-            return "<?php if (resolve_static($expression, 'canPerformAction', [false])): ?>";
-        });
-
-        Blade::directive('endCanAction', function () {
-            return '<?php endif; ?>';
+        Blade::if('canAction', function (string $action) {
+            return resolve_static($action, 'canPerformAction', [false]);
         });
     }
 

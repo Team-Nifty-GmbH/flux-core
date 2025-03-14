@@ -34,13 +34,24 @@
                     />
                 </div>
                 <x-slot:footer>
-                    <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('edit-address-assignment')" />
-                    <x-button color="indigo" loading="save" x-on:click="$wire.save().then((success) => {if(success) $modalClose('edit-address-assignment');})" :text="__('Save')" />
-                </x-slot:footer>
+                    <x-button
+                        color="secondary"
+                        light
+                        flat
+                        :text="__('Cancel')"
+                        x-on:click="$modalClose('edit-address-assignment')"
+                    />
+                    <x-button
+                        color="indigo"
+                        loading="save"
+                        x-on:click="$wire.save().then((success) => {if(success) $modalClose('edit-address-assignment');})"
+                        :text="__('Save')"
+                    />
+                </x-slot>
             </x-modal>
         @endteleport
     </div>
-    @foreach($form->addresses as $address)
+    @foreach ($form->addresses as $address)
         <x-card :header="$address['address_type']">
             <div class="text-sm">
                 {!! implode('<br>', $address['address']) !!}
@@ -62,8 +73,13 @@
                         wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Address assignment')]) }}"
                     />
                 </div>
-            </x-slot:header>
+            </x-slot>
         </x-card>
     @endforeach
-    <x-button color="indigo" :text="__('Add additional address')" x-on:click="$modalOpen('edit-address-assignment')" />
+
+    <x-button
+        color="indigo"
+        :text="__('Add additional address')"
+        x-on:click="$modalOpen('edit-address-assignment')"
+    />
 </div>

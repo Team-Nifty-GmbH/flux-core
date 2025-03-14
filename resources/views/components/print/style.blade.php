@@ -1,5 +1,4 @@
 <style>
-
     @section('style.font')
         html {
             font-family: 'Montserrat';

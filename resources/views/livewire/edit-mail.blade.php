@@ -1,23 +1,36 @@
-<div x-data="{
-    addReceiver($event, type) {
-        let value = $event.target.value;
-        if ($event instanceof KeyboardEvent && $event.which !== 13) {
-            value = value.slice(0, -1);
-        }
-
-        value = value.trim();
-
-        if (value && ($event instanceof FocusEvent || ($event.code === 'Comma' || $event.code === 'Enter' || $event.code === 'Space'))) {
-            const email = value.match(/<([^>]*)>/);
-            if (email && email[1]) {
-                value = email[1];
+<div
+    x-data="{
+        addReceiver($event, type) {
+            let value = $event.target.value
+            if ($event instanceof KeyboardEvent && $event.which !== 13) {
+                value = value.slice(0, -1)
             }
-            $wire.mailMessage[type].push(value);
-            $event.target.value = null;
-        }
-    }
-}">
-    <x-modal size="7xl" id="edit-mail" x-on:close="$wire.clear()" class="flex flex-col gap-4">
+
+            value = value.trim()
+
+            if (
+                value &&
+                ($event instanceof FocusEvent ||
+                    $event.code === 'Comma' ||
+                    $event.code === 'Enter' ||
+                    $event.code === 'Space')
+            ) {
+                const email = value.match(/<([^>]*)>/)
+                if (email && email[1]) {
+                    value = email[1]
+                }
+                $wire.mailMessage[type].push(value)
+                $event.target.value = null
+            }
+        },
+    }"
+>
+    <x-modal
+        size="7xl"
+        id="edit-mail"
+        x-on:close="$wire.clear()"
+        class="flex flex-col gap-4"
+    >
         <div class="flex flex-col gap-1.5">
             <x-label :label="__('To')" />
             <div class="flex gap-1" x-cloak x-show="! $wire.multiple">
@@ -25,20 +38,17 @@
                     <x-badge flat color="indigo" cl>
                         <x-slot:text>
                             <span x-text="to"></span>
-                        </x-slot:text>
+                        </x-slot>
                         <x-slot
                             name="right"
-                            class="relative flex items-center w-2 h-2"
+                            class="relative flex h-2 w-2 items-center"
                         >
                             <button
                                 type="button"
                                 x-on:click="$wire.mailMessage.to.splice($wire.mailMessage.to.indexOf(to), 1)"
                                 x-bind:disabled="$wire.multiple"
                             >
-                                <x-icon
-                                    name="x-mark"
-                                    class="w-4 h-4"
-                                />
+                                <x-icon name="x-mark" class="h-4 w-4" />
                             </button>
                         </x-slot>
                     </x-badge>
@@ -59,25 +69,27 @@
                     <x-badge flat color="indigo" cl>
                         <x-slot:text>
                             <span x-text="cc"></span>
-                        </x-slot:text>
+                        </x-slot>
                         <x-slot
                             name="right"
-                            class="relative flex items-center w-2 h-2"
+                            class="relative flex h-2 w-2 items-center"
                         >
                             <button
                                 type="button"
                                 x-on:click="$wire.mailMessage.cc.splice($wire.mailMessage.cc.indexOf(to), 1)"
                             >
-                                <x-icon
-                                    name="x-mark"
-                                    class="w-4 h-4"
-                                />
+                                <x-icon name="x-mark" class="h-4 w-4" />
                             </button>
                         </x-slot>
                     </x-badge>
                 </template>
             </div>
-            <x-input :placeholder="__('Add a new cc')" x-on:blur="addReceiver($event, 'cc')" x-on:keyup="addReceiver($event, 'cc')" class="w-full" />
+            <x-input
+                :placeholder="__('Add a new cc')"
+                x-on:blur="addReceiver($event, 'cc')"
+                x-on:keyup="addReceiver($event, 'cc')"
+                class="w-full"
+            />
         </div>
         <div class="flex flex-col gap-1.5">
             <x-label :label="__('BCC')" />
@@ -86,28 +98,34 @@
                     <x-badge flat color="indigo" cl>
                         <x-slot:text>
                             <span x-text="bcc"></span>
-                        </x-slot:text>
+                        </x-slot>
                         <x-slot
                             name="right"
-                            class="relative flex items-center w-2 h-2"
+                            class="relative flex h-2 w-2 items-center"
                         >
                             <button
                                 type="button"
                                 x-on:click="$wire.mailMessage.bcc.splice($wire.mailMessage.bcc.indexOf(to), 1)"
                             >
-                                <x-icon
-                                    name="x-mark"
-                                    class="w-4 h-4"
-                                />
+                                <x-icon name="x-mark" class="h-4 w-4" />
                             </button>
                         </x-slot>
                     </x-badge>
                 </template>
             </div>
-            <x-input :placeholder="__('Add a new bcc')" x-on:blur="addReceiver($event, 'bcc')" x-on:keyup="addReceiver($event, 'bcc')" class="w-full" />
+            <x-input
+                :placeholder="__('Add a new bcc')"
+                x-on:blur="addReceiver($event, 'bcc')"
+                x-on:keyup="addReceiver($event, 'bcc')"
+                class="w-full"
+            />
         </div>
         <div class="grow">
-            <x-input wire:model="mailMessage.subject" class="w-full" :label="__('Subject')"/>
+            <x-input
+                wire:model="mailMessage.subject"
+                class="w-full"
+                :label="__('Subject')"
+            />
         </div>
         <x-select.styled
             label=""
@@ -120,32 +138,65 @@
         <div>
             <x-label :label="__('Attachments')" />
             <label for="files">
-                <div class="flex gap-1 min-h-[2rem] w-full rounded-md bg-gray-100 p-1.5">
+                <div
+                    class="flex min-h-[2rem] w-full gap-1 rounded-md bg-gray-100 p-1.5"
+                >
                     <template x-for="file in $wire.mailMessage.attachments">
                         <x-badge white rounded>
                             <x-slot:left>
-                                <x-icon name="paper-clip" class="w-4 h-4"/>
-                            </x-slot:left>
+                                <x-icon name="paper-clip" class="h-4 w-4" />
+                            </x-slot>
                             <x-slot:text>
-                                <div wire:click.prevent="downloadAttachment(file.id)" class="cursor-pointer">
+                                <div
+                                    wire:click.prevent="downloadAttachment(file.id)"
+                                    class="cursor-pointer"
+                                >
                                     <span x-text="file.name"></span>
                                 </div>
-                            </x-slot:text>
+                            </x-slot>
                             <x-slot:right>
-                                <button type="button" x-on:click.prevent="$wire.mailMessage.attachments.splice($wire.mailMessage.attachments.indexOf(file), 1)">
-                                    <x-icon name="x-mark" class="w-4 h-4"/>
+                                <button
+                                    type="button"
+                                    x-on:click.prevent="
+                                        $wire.mailMessage.attachments.splice(
+                                            $wire.mailMessage.attachments.indexOf(file),
+                                            1,
+                                        )
+                                    "
+                                >
+                                    <x-icon name="x-mark" class="h-4 w-4" />
                                 </button>
-                            </x-slot:right>
+                            </x-slot>
                         </x-badge>
                     </template>
                 </div>
             </label>
-            <input class="hidden" wire:model="files" id="files" type="file" multiple x-bind:disabled="$wire.multiple"/>
+            <input
+                class="hidden"
+                wire:model="files"
+                id="files"
+                type="file"
+                multiple
+                x-bind:disabled="$wire.multiple"
+            />
         </div>
         <x-flux::editor wire:model="mailMessage.html_body" />
         <x-slot:footer>
-            <x-button color="secondary" light x-on:click="$modalClose('edit-mail')" class="mr-2">{{ __('Cancel') }}</x-button>
-            <x-button color="indigo" wire:click="send().then((success) => {if(success) $modalClose('edit-mail');})" class="ml-auto">{{ __('Send') }}</x-button>
-        </x-slot:footer>
+            <x-button
+                color="secondary"
+                light
+                x-on:click="$modalClose('edit-mail')"
+                class="mr-2"
+            >
+                {{ __('Cancel') }}
+            </x-button>
+            <x-button
+                color="indigo"
+                wire:click="send().then((success) => {if(success) $modalClose('edit-mail');})"
+                class="ml-auto"
+            >
+                {{ __('Send') }}
+            </x-button>
+        </x-slot>
     </x-modal>
 </div>

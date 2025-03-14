@@ -1,4 +1,6 @@
-<div class="flex items-center justify-center gap-x-2" x-data="{
+<div
+    class="flex items-center justify-center gap-x-2"
+    x-data="{
         dark: $wire.entangle('dark', true),
         browserDarkMode() {
             return window.matchMedia('(prefers-color-scheme: dark)').matches
@@ -17,9 +19,9 @@
             this.dark ? this.enable() : this.disable()
         },
         init() {
-            this.syncDarkMode();
-            $watch('dark', () => this.syncDarkMode());
-        }
+            this.syncDarkMode()
+            $watch('dark', () => this.syncDarkMode())
+        },
     }"
 >
     <x-icon

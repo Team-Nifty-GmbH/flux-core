@@ -1,4 +1,4 @@
-import {v4 as uuidv4} from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 export default function folders(
     getTreePromise,
@@ -9,7 +9,7 @@ export default function folders(
     childrenAttribute = 'children',
     selectedCallback = null,
     checkedCallback = null,
-    searchAttributes = null
+    searchAttributes = null,
 ) {
     return {
         checked: checked,
@@ -69,21 +69,21 @@ export default function folders(
             }
         },
         closeFolder(node) {
-            this.openFolders = this.openFolders.filter(id => id !== node.id);
+            this.openFolders = this.openFolders.filter((id) => id !== node.id);
         },
         openAllSubfolders(node) {
             const traverse = (currentNode) => {
                 if (!this.openFolders.includes(currentNode.id)) {
                     this.openFolder(currentNode);
                 }
-                currentNode.children?.forEach(child => traverse(child));
+                currentNode.children?.forEach((child) => traverse(child));
             };
             traverse(node);
         },
         closeAllSubfolders(node) {
             const traverse = (currentNode) => {
                 this.closeFolder(currentNode);
-                currentNode.children?.forEach(child => traverse(child));
+                currentNode.children?.forEach((child) => traverse(child));
             };
             traverse(node);
         },
@@ -91,7 +91,7 @@ export default function folders(
             return this.openFolders.includes(node.id);
         },
         isLeaf(node) {
-            return ! Array.isArray(node.children) || node.children.length === 0;
+            return !Array.isArray(node.children) || node.children.length === 0;
         },
         toggleCheck(node, isChecked) {
             const traverse = (currentNode, check) => {
@@ -102,16 +102,22 @@ export default function folders(
                 } else {
                     this.unCheck(currentNode);
                 }
-                this.$dispatch('folder-tree-check-toggle', currentNode, isChecked);
+                this.$dispatch(
+                    'folder-tree-check-toggle',
+                    currentNode,
+                    isChecked,
+                );
 
-                currentNode.children?.forEach(child => traverse(child, check));
+                currentNode.children?.forEach((child) =>
+                    traverse(child, check),
+                );
             };
             traverse(node, isChecked);
 
             this.$dispatch('folder-tree-check-updated', this.checked);
         },
         unCheck(node) {
-            this.checked = this.checked.filter(id => id !== node.id);
+            this.checked = this.checked.filter((id) => id !== node.id);
             this.$dispatch('folder-tree-uncheck', node, this.checked);
         },
         check(node) {
@@ -127,23 +133,27 @@ export default function folders(
                 return this.checked.includes(node.id);
             }
 
-            if (! Array.isArray(node.children)) {
+            if (!Array.isArray(node.children)) {
                 node.children = [];
             }
 
-            return (node.children || []).every(child => this.isChecked(child));
+            return (node.children || []).every((child) =>
+                this.isChecked(child),
+            );
         },
         isIndeterminate(node) {
             if (this.isLeaf(node)) {
                 return false; // Leaf nodes can't be indeterminate
             }
 
-            if (! Array.isArray(node.children)) {
+            if (!Array.isArray(node.children)) {
                 node.children = [];
             }
-            const childStates = (node.children || []).map(child => this.isChecked(child) || this.isIndeterminate(child));
-            const allChecked = childStates.every(state => state);
-            const anyChecked = childStates.some(state => state);
+            const childStates = (node.children || []).map(
+                (child) => this.isChecked(child) || this.isIndeterminate(child),
+            );
+            const allChecked = childStates.every((state) => state);
+            const anyChecked = childStates.some((state) => state);
 
             return anyChecked && !allChecked;
         },
@@ -191,7 +201,7 @@ export default function folders(
             this.unselect();
         },
         searchNodes(data, search = null) {
-            if (! Array.isArray(data) && typeof data !== 'object') {
+            if (!Array.isArray(data) && typeof data !== 'object') {
                 return [];
             }
 
@@ -208,22 +218,29 @@ export default function folders(
                 if (Array.isArray(node[this.childrenAttribute])) {
                     filteredChildren = node[this.childrenAttribute]
                         .map(traverse)
-                        .filter(child => child !== null); // Remove non-matching children
+                        .filter((child) => child !== null); // Remove non-matching children
                 }
 
                 // Check if the current node matches the search term (in the `nameAttribute`)
-                const matches = this.getSearchAttributes().some(attribute => {
+                const matches = this.getSearchAttributes().some((attribute) => {
                     return node[attribute].toLowerCase().includes(lowerSearch);
                 });
 
                 // If the node matches, include it along with ALL its children
                 if (matches) {
-                    return { ...node, [this.childrenAttribute]: node[this.childrenAttribute] || [] };
+                    return {
+                        ...node,
+                        [this.childrenAttribute]:
+                            node[this.childrenAttribute] || [],
+                    };
                 }
 
                 // If children match but the node itself does not, include the filtered children
                 if (filteredChildren.length > 0) {
-                    return { ...node, [this.childrenAttribute]: filteredChildren };
+                    return {
+                        ...node,
+                        [this.childrenAttribute]: filteredChildren,
+                    };
                 }
 
                 return null; // Exclude non-matching nodes
@@ -232,7 +249,7 @@ export default function folders(
             // Convert data to an array if it's an object, then filter
             return (Array.isArray(data) ? data : Object.values(data))
                 .map(traverse)
-                .filter(node => node !== null); // Remove null (non-matching) nodes
+                .filter((node) => node !== null); // Remove null (non-matching) nodes
         },
         addFolder(node = null, attributes = {}) {
             let id = uuidv4();
@@ -266,12 +283,18 @@ export default function folders(
                     if (nodes[i].id === attributes.id) {
                         Object.assign(nodes[i], attributes);
 
-                        this.$dispatch('folder-tree-folder-updated', nodes[i], attributes);
+                        this.$dispatch(
+                            'folder-tree-folder-updated',
+                            nodes[i],
+                            attributes,
+                        );
                         return true; // Node found and updated
                     }
 
                     if (nodes[i][this.childrenAttribute]) {
-                        if (traverseAndUpdate(nodes[i][this.childrenAttribute])) {
+                        if (
+                            traverseAndUpdate(nodes[i][this.childrenAttribute])
+                        ) {
                             return true;
                         }
                     }
@@ -284,7 +307,7 @@ export default function folders(
         getNodePath(node, attribute = 'id') {
             node = node || this.selected;
 
-            if (! node) {
+            if (!node) {
                 return null;
             }
 
@@ -298,8 +321,13 @@ export default function folders(
                         }
 
                         if (currentNode[this.childrenAttribute]) {
-                            for (const child of currentNode[this.childrenAttribute]) {
-                                const result = traverse(child, [...currentPath, currentNode[attribute]]);
+                            for (const child of currentNode[
+                                this.childrenAttribute
+                            ]) {
+                                const result = traverse(child, [
+                                    ...currentPath,
+                                    currentNode[attribute],
+                                ]);
                                 if (result) {
                                     return result;
                                 }
@@ -319,6 +347,6 @@ export default function folders(
             };
 
             return findPath(node);
-        }
+        },
     };
 }

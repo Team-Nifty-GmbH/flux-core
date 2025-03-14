@@ -23,6 +23,7 @@ public function register(): void
 This ensures that methods that are called on the User model are also present on your customized model.
 
 ## Models
+
 To customize the models extend the model you want to customize and add an alias in your AppServiceProvider.
 
 ```php
@@ -45,6 +46,7 @@ class User extends \FluxErp\Models\User
 ```
 
 ## Actions
+
 All Flux actions are resolved via the app container, therefore you can simply add an alias in your AppServiceProvider, or do other shenanigans whilst the action class is getting resolved.
 
 ```php
@@ -56,6 +58,7 @@ public function register(): void
 ```
 
 ## Validation
+
 Sometimes you need to add or change validation rules. The rules are placed in the Ruleset classes. You can extend the original ruleset and add your own rules.
 
 ```php
@@ -78,7 +81,6 @@ public function register(): void
     $this->app->bind(\FluxErp\Rulesets\CreateUserRuleset::class, \App\Rulesets\CreateUserRuleset::class);
 }
 ```
-
 
 ## Adding your own relationships
 
@@ -130,5 +132,3 @@ public function register(): void
     );
 }
 ```
-
-

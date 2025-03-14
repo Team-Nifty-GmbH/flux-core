@@ -1,7 +1,7 @@
 <div>
     <x-modal id="create-order-modal" :title="__('New Order')">
         <section>
-            <div class="space-y-2.5 divide-y divide-secondary-200">
+            <div class="divide-secondary-200 space-y-2.5 divide-y">
                 <x-select.styled
                     :label="__('Order type')"
                     wire:model="order.order_type_id"
@@ -124,8 +124,19 @@
             </div>
         </section>
         <x-slot:footer>
-            <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('create-order-modal')" />
-            <x-button loading color="indigo" :text="__('Save')" wire:click="save" />
-        </x-slot:footer>
+            <x-button
+                color="secondary"
+                light
+                flat
+                :text="__('Cancel')"
+                x-on:click="$modalClose('create-order-modal')"
+            />
+            <x-button
+                loading
+                color="indigo"
+                :text="__('Save')"
+                wire:click="save"
+            />
+        </x-slot>
     </x-modal>
 </div>

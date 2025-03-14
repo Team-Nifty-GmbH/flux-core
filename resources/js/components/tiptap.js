@@ -3,7 +3,11 @@ import StarterKit from '@tiptap/starter-kit';
 import Mention from '@tiptap/extension-mention';
 import axios from 'axios';
 
-export default function (content, debounceDelay = 0, searchModel = ['user', 'role']) {
+export default function (
+    content,
+    debounceDelay = 0,
+    searchModel = ['user', 'role'],
+) {
     return (() => {
         let _editor;
         let suggestionPopup;
@@ -22,13 +26,12 @@ export default function (content, debounceDelay = 0, searchModel = ['user', 'rol
                 const commands = this.$refs?.commands;
                 let actions = null;
 
-                if(showTooltipDropdown && popUp !== null) {
+                if (showTooltipDropdown && popUp !== null) {
                     // append controllers to tiptap
                     const popUpNode = popUp.content.cloneNode(true);
                     const commandsNode = commands.content.cloneNode(true);
                     popUpNode.appendChild(commandsNode);
                     actions = popUpNode;
-
                 } else {
                     // append to controls to div
                     controlPanel.appendChild(commands.content.cloneNode(true));
@@ -41,50 +44,73 @@ export default function (content, debounceDelay = 0, searchModel = ['user', 'rol
                     extensions: [
                         StarterKit,
                         Mention.configure({
-                            HTMLAttributes: { 'class': 'mention' },
+                            HTMLAttributes: { class: 'mention' },
                             suggestion: {
                                 items: async ({ query }) => {
-                                    return (await Promise.all(searchModel.map(async model => {
-                                        return (await axios.get(`/search/${model}?search=${query}`)).data.map(item => {
-                                            return {
-                                                id: model + ':' + item.id,
-                                                label: item.label,
-                                                src: item.src,
-                                            };
-                                        });
-                                    }))).flat();
+                                    return (
+                                        await Promise.all(
+                                            searchModel.map(async (model) => {
+                                                return (
+                                                    await axios.get(
+                                                        `/search/${model}?search=${query}`,
+                                                    )
+                                                ).data.map((item) => {
+                                                    return {
+                                                        id:
+                                                            model +
+                                                            ':' +
+                                                            item.id,
+                                                        label: item.label,
+                                                        src: item.src,
+                                                    };
+                                                });
+                                            }),
+                                        )
+                                    ).flat();
                                 },
 
                                 render: () => {
-                                    let suggestionElement = document.createElement('div');
-                                    suggestionElement.className = 'suggestion-popup';
+                                    let suggestionElement =
+                                        document.createElement('div');
+                                    suggestionElement.className =
+                                        'suggestion-popup';
 
                                     return {
-                                        onStart: props => {
-                                            suggestionPopup = window.tippy(element, {
-                                                content: suggestionElement,
-                                                showOnCreate: true,
-                                                interactive: true,
-                                                trigger: 'manual',
-                                                placement: 'bottom-start',
-                                            });
+                                        onStart: (props) => {
+                                            suggestionPopup = window.tippy(
+                                                element,
+                                                {
+                                                    content: suggestionElement,
+                                                    showOnCreate: true,
+                                                    interactive: true,
+                                                    trigger: 'manual',
+                                                    placement: 'bottom-start',
+                                                },
+                                            );
 
-                                            this.updateSuggestionItems(suggestionElement, props);
+                                            this.updateSuggestionItems(
+                                                suggestionElement,
+                                                props,
+                                            );
                                         },
 
-                                        onUpdate: props => {
+                                        onUpdate: (props) => {
                                             if (!props.clientRect) {
                                                 return;
                                             }
 
-                                            this.updateSuggestionItems(suggestionElement, props);
+                                            this.updateSuggestionItems(
+                                                suggestionElement,
+                                                props,
+                                            );
 
                                             suggestionPopup.setProps({
-                                                getReferenceClientRect: props.clientRect,
+                                                getReferenceClientRect:
+                                                    props.clientRect,
                                             });
                                         },
 
-                                        onKeyDown: props => {
+                                        onKeyDown: (props) => {
                                             if (props.event.key === 'Escape') {
                                                 suggestionPopup.hide();
                                                 return true;
@@ -107,49 +133,50 @@ export default function (content, debounceDelay = 0, searchModel = ['user', 'rol
                     editable: this.editable,
                     editorProps: {
                         attributes: {
-                            class: `${isTransparent ? 'bg-transparent' : 'dark:bg-secondary-800'} ${showTooltipDropdown ? 'rounded-md' : 'rounded-b-md' } \
+                            class: `${isTransparent ? 'bg-transparent' : 'dark:bg-secondary-800'} ${showTooltipDropdown ? 'rounded-md' : 'rounded-b-md'} \
                                 prose prose-sm dark:prose-invert max-w-full content-editable-placeholder placeholder-secondary-400 dark:placeholder-secondary-500 \
                                 border-secondary-300 focus:ring-primary-500 focus:border-primary-500 dark:border-secondary-600 form-input block \
                                 min-h-[85px] w-full  border p-3 shadow-sm transition duration-100 ease-in-out focus:outline-none dark:text-gray-50 sm:text-sm`,
                         },
                     },
                     onSelectionUpdate: ({ editor }) => {
-                        if (! showTooltipDropdown) {
+                        if (!showTooltipDropdown) {
                             return;
                         }
 
                         const { from, to } = editor.state.selection;
 
                         // init popUp if not
-                        if(parent.popUp === null) {
-                            parent.popUp =  window.tippy(element, {
+                        if (parent.popUp === null) {
+                            parent.popUp = window.tippy(element, {
                                 content: actions ?? 'not defined',
                                 showOnCreate: true,
                                 interactive: true,
                                 trigger: 'manual',
                                 placement: 'top',
-                            })
+                            });
                         }
 
                         if (from !== to) {
-                            if(parent.popUp.state.isVisible) return;
+                            if (parent.popUp.state.isVisible) return;
                             // in case it is not visible determine the cursor position
-                            const cursorPosition = editor.view.coordsAtPos(from);
+                            const cursorPosition =
+                                editor.view.coordsAtPos(from);
                             // update the position if cursorPosition is defined
-                            cursorPosition && parent.popUp.setProps({
-                                getReferenceClientRect: () => ({
-                                    width:0,
-                                    height:0,
-                                    top: cursorPosition.top,
-                                    left: cursorPosition.left,
-                                    bottom: cursorPosition.bottom,
-                                    right: cursorPosition.right,
-                                })
-                            })
+                            cursorPosition &&
+                                parent.popUp.setProps({
+                                    getReferenceClientRect: () => ({
+                                        width: 0,
+                                        height: 0,
+                                        top: cursorPosition.top,
+                                        left: cursorPosition.left,
+                                        bottom: cursorPosition.bottom,
+                                        right: cursorPosition.right,
+                                    }),
+                                });
                             parent.popUp.show();
-
                         } else {
-                            if(!parent.popUp.state.isVisible) return;
+                            if (!parent.popUp.state.isVisible) return;
                             parent.popUp.hide();
                         }
                     },
@@ -159,7 +186,6 @@ export default function (content, debounceDelay = 0, searchModel = ['user', 'rol
                             this.content = editor.getHTML();
                         }, debounceDelay);
                     },
-
                 });
 
                 this.proxy = Alpine.raw(_editor);
@@ -178,7 +204,7 @@ export default function (content, debounceDelay = 0, searchModel = ['user', 'rol
                     element.removeChild(element.firstChild);
                 }
 
-                props.items.forEach(item => {
+                props.items.forEach((item) => {
                     const div = document.createElement('div');
                     div.className = 'suggestion-item flex gap-1 justify-start';
                     const img = document.createElement('img');

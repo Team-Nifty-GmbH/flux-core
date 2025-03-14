@@ -1,5 +1,5 @@
-import {GridStack} from 'gridstack';
-import {v4 as uuidv4} from 'uuid';
+import { GridStack } from 'gridstack';
+import { v4 as uuidv4 } from 'uuid';
 
 export default function () {
     return {
@@ -33,7 +33,7 @@ export default function () {
             // update x,y coordinates and type of widget if selected
             onScreen.forEach((item) => {
                 const widget = snapshot.find(
-                    (w) => w.id.toString() === item.gridstackNode.id.toString()
+                    (w) => w.id.toString() === item.gridstackNode.id.toString(),
                 );
                 if (widget !== undefined) {
                     widget.height = item.gridstackNode.h;
@@ -58,7 +58,7 @@ export default function () {
                         width: item.gridstackNode.w,
                         order_column: item.gridstackNode.x,
                         order_row: item.gridstackNode.y,
-                        component_name: item.gridstackNode.component_name
+                        component_name: item.gridstackNode.component_name,
                     });
                 }
             });
@@ -71,7 +71,7 @@ export default function () {
             const newSnapshot = [];
             onScreen.forEach((item) => {
                 const widget = snapshot.find(
-                    (w) => w.id.toString() === item.gridstackNode.id.toString()
+                    (w) => w.id.toString() === item.gridstackNode.id.toString(),
                 );
                 // remove from snapshot if not on the screen and recalculate x,y coordinates
                 if (item.style.display !== 'none' && widget !== undefined) {
@@ -93,7 +93,7 @@ export default function () {
             // update x,y coordinates on save
             onScreen.forEach((item) => {
                 const widget = snapshot.find(
-                    (w) => w.id.toString() === item.gridstackNode.id.toString()
+                    (w) => w.id.toString() === item.gridstackNode.id.toString(),
                 );
                 if (widget !== undefined) {
                     widget.height = item.gridstackNode.h;
@@ -125,7 +125,8 @@ export default function () {
                 h: selectedWidget.defaultHeight,
                 w: selectedWidget.defaultWidth,
             });
-            placeholder.gridstackNode.order_column = placeholder.gridstackNode.x;
+            placeholder.gridstackNode.order_column =
+                placeholder.gridstackNode.x;
             placeholder.gridstackNode.order_row = placeholder.gridstackNode.y;
             placeholder.gridstackNode.component_name = key;
 
@@ -155,10 +156,10 @@ export default function () {
                 columnOpts: {
                     breakpointForWindow: true,
                     breakpoints: [
-                        {w: 1100, c: 1},
-                        {w: 2000000, c: 6}
-                    ]
-                }
+                        { w: 1100, c: 1 },
+                        { w: 2000000, c: 6 },
+                    ],
+                },
             });
             return this.grid;
         },
@@ -168,7 +169,7 @@ export default function () {
                 .getGridItems()
                 .find(
                     (item) =>
-                        item.gridstackNode.id.toString() === id.toString()
+                        item.gridstackNode.id.toString() === id.toString(),
                 );
             if (el !== undefined) {
                 // remove from grid - keep in snapshot
@@ -184,6 +185,6 @@ export default function () {
             if (this.isLoading) {
                 this.isLoading = false;
             }
-        }
+        },
     };
 }
