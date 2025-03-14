@@ -96,10 +96,26 @@ class InitPermissionsTest extends BaseSetup
         );
 
         // Assert all action permissions created
-        $this->assertEquals($actionsWithPermission, Permission::query()->where('name', 'like', 'action.%')->count());
+        $this->assertEquals(
+            $actionsWithPermission,
+            Permission::query()
+                ->where('guard_name', 'web')
+                ->where('name', 'like', 'action.%')
+                ->count()
+        );
+        $this->assertEquals(
+            $actionsWithPermission,
+            Permission::query()
+                ->where('guard_name', 'sanctum')
+                ->where('name', 'like', 'action.%')
+                ->count()
+        );
 
         // Assert all widget permissions created
-        $this->assertEquals(count(Widget::all()), Permission::query()->where('name', 'like', 'widget.%')->count());
+        $this->assertEquals(
+            count(Widget::all()),
+            Permission::query()->where('name', 'like', 'widget.%')->count()
+        );
 
         // Assert all tab permissions created (plus one for custom tab)
         $this->assertEquals(
