@@ -152,7 +152,7 @@ class FluxServiceProvider extends ServiceProvider
         $this->loadJsonTranslationsFrom(__DIR__ . '/../lang');
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'flux');
         $this->registerConfig();
-        $this->registerMarcos();
+        $this->registerMacros();
         $this->registerExtensions();
 
         Translatable::fallback(
@@ -516,7 +516,7 @@ class FluxServiceProvider extends ServiceProvider
         }
     }
 
-    protected function registerMarcos(): void
+    protected function registerMacros(): void
     {
         if (! Arr::hasMacro('sortByPattern')) {
             Arr::macro('sortByPattern', function (array $array, array $pattern) {
@@ -620,6 +620,28 @@ class FluxServiceProvider extends ServiceProvider
         }
 
         if ($this->app->runningUnitTests()) {
+            if (! Testable::hasMacro('cycleTabs')) {
+                Testable::macro(
+                    'cycleTabs',
+                    function (string $tabPropertyName = 'tab'): void
+                    {
+                        $tabs = $this->instance()->getTabs();
+
+                        foreach ($tabs as $tab) {
+                            $this
+                                ->set($tabPropertyName, $tab->component)
+                                ->assertStatus(200);
+
+                            if ($tab->isLivewireComponent) {
+                                $this->assertSeeLivewire($tab->component);
+                            }
+                        }
+
+                        $this->set($tabPropertyName, $tabs[0]->component);
+                    }
+                );
+            }
+
             if (! Testable::hasMacro('assertToastNotification')) {
                 Testable::macro(
                     'assertToastNotification',
