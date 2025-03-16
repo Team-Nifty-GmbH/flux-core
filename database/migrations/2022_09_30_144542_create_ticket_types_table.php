@@ -11,7 +11,7 @@ return new class() extends Migration
      */
     public function up(): void
     {
-        Schema::create('ticket_types', function (Blueprint $table) {
+        Schema::create('ticket_types', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
             $table->json('name');

@@ -9,14 +9,14 @@ use Illuminate\Validation\ValidationException;
 
 class DeleteWorkTime extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeleteWorkTimeRuleset::class;
-    }
-
     public static function models(): array
     {
         return [WorkTime::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeleteWorkTimeRuleset::class;
     }
 
     public function performAction(): ?bool

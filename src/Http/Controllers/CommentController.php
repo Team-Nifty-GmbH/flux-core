@@ -16,6 +16,20 @@ class CommentController extends Controller
         parent::__construct();
     }
 
+    public function create(Request $request, CommentService $commentService): JsonResponse
+    {
+        $response = $commentService->create($request->all());
+
+        return ResponseHelper::createResponseFromArrayResponse($response);
+    }
+
+    public function delete(string $id, CommentService $commentService): JsonResponse
+    {
+        $response = $commentService->delete($id);
+
+        return ResponseHelper::createResponseFromArrayResponse($response);
+    }
+
     public function show(string $modelType, string $id): JsonResponse
     {
         $model = Helper::classExists(classString: $modelType, isModel: $modelType);
@@ -40,23 +54,9 @@ class CommentController extends Controller
         );
     }
 
-    public function create(Request $request, CommentService $commentService): JsonResponse
-    {
-        $response = $commentService->create($request->all());
-
-        return ResponseHelper::createResponseFromArrayResponse($response);
-    }
-
     public function update(Request $request, CommentService $commentService): JsonResponse
     {
         $response = $commentService->update($request->all());
-
-        return ResponseHelper::createResponseFromArrayResponse($response);
-    }
-
-    public function delete(string $id, CommentService $commentService): JsonResponse
-    {
-        $response = $commentService->delete($id);
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }

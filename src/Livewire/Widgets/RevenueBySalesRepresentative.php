@@ -19,31 +19,6 @@ class RevenueBySalesRepresentative extends CircleChart
 
     public bool $showTotals = false;
 
-    protected function getListeners(): array
-    {
-        return [
-            'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
-                . ',.OrderLocked' => 'calculateByTimeFrame',
-        ];
-    }
-
-    public function getPlotOptions(): array
-    {
-        return [
-            'pie' => [
-                'donut' => [
-                    'labels' => [
-                        'show' => true,
-                        'total' => [
-                            'show' => true,
-                            'label' => __('Total'),
-                        ],
-                    ],
-                ],
-            ],
-        ];
-    }
-
     #[Renderless]
     public function calculateByTimeFrame(): void
     {
@@ -63,12 +38,42 @@ class RevenueBySalesRepresentative extends CircleChart
         )
             ->setDateColumn('invoice_date')
             ->setRange($this->timeFrame)
-            ->setEndingDate($this->end)
-            ->setStartingDate($this->start)
+            ->setEndingDate($this->end?->endOfDay())
+            ->setStartingDate($this->start?->startOfDay())
             ->setLabelKey('agent.name')
             ->sum('total_net_price', 'agent_id');
 
         $this->series = $metrics->getData();
         $this->labels = $metrics->getLabels();
+    }
+
+    public function getPlotOptions(): array
+    {
+        return [
+            'pie' => [
+                'donut' => [
+                    'labels' => [
+                        'show' => true,
+                        'total' => [
+                            'show' => true,
+                            'label' => __('Total'),
+                        ],
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    public function showTitle(): bool
+    {
+        return true;
+    }
+
+    protected function getListeners(): array
+    {
+        return [
+            'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
+                . ',.OrderLocked' => 'calculateByTimeFrame',
+        ];
     }
 }

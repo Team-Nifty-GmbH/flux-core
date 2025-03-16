@@ -25,7 +25,7 @@ return new class() extends Migration
             DB::statement('ALTER TABLE tags DROP CHECK tags_chk_2');
         }
 
-        Schema::table('tags', function (Blueprint $table) {
+        Schema::table('tags', function (Blueprint $table): void {
             $table->string('name')->change();
             $table->string('slug')->change();
         });
@@ -67,7 +67,7 @@ return new class() extends Migration
                 'slug' => DB::raw('JSON_OBJECT("' . config('app.locale') . '", slug)'),
             ]);
 
-        Schema::table('tags', function (Blueprint $table) {
+        Schema::table('tags', function (Blueprint $table): void {
             $table->json('name')->change();
             $table->json('slug')->change();
         });

@@ -13,12 +13,9 @@ use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
 use FluxErp\Models\PriceList;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class OrderPositionsTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -69,7 +66,14 @@ class OrderPositionsTest extends BaseSetup
         ]);
     }
 
-    public function test_order_positions_page()
+    public function test_order_positions_no_user(): void
+    {
+        $this->get('/orders/order-positions/list')
+            ->assertStatus(302)
+            ->assertRedirect(route('login'));
+    }
+
+    public function test_order_positions_page(): void
     {
         $this->user->givePermissionTo(Permission::findOrCreate('orders.order-positions.list.get', 'web'));
 
@@ -77,14 +81,7 @@ class OrderPositionsTest extends BaseSetup
             ->assertStatus(200);
     }
 
-    public function test_order_positions_no_user()
-    {
-        $this->get('/orders/order-positions/list')
-            ->assertStatus(302)
-            ->assertRedirect(route('login'));
-    }
-
-    public function test_order_positions_without_permission()
+    public function test_order_positions_without_permission(): void
     {
         Permission::findOrCreate('orders.order-positions.list.get', 'web');
 

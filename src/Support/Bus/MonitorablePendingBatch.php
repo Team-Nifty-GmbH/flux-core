@@ -20,7 +20,7 @@ class MonitorablePendingBatch extends PendingBatch
     {
         parent::__construct($container, $jobs);
 
-        $this->before(function (Batch $batch) {
+        $this->before(function (Batch $batch): void {
             $jobBatch = app(JobBatch::class)->whereKey($batch->id)->first();
 
             $user = auth()->user();
@@ -41,10 +41,10 @@ class MonitorablePendingBatch extends PendingBatch
             }
         });
 
-        $this->progress(function (Batch $batch) {
+        $this->progress(function (Batch $batch): void {
             $jobBatch = app(JobBatch::class)->whereKey($batch->id)->first();
 
-            $jobBatch->users->each(function ($user) use ($jobBatch) {
+            $jobBatch->users->each(function ($user) use ($jobBatch): void {
                 try {
                     $user->notify(
                         $jobBatch->isFinished()
@@ -57,10 +57,10 @@ class MonitorablePendingBatch extends PendingBatch
             });
         });
 
-        $this->finally(function (Batch $batch) {
+        $this->finally(function (Batch $batch): void {
             $jobBatch = app(JobBatch::class)->whereKey($batch->id)->first();
 
-            $jobBatch->users->each(function ($user) use ($jobBatch) {
+            $jobBatch->users->each(function ($user) use ($jobBatch): void {
                 try {
                     $user->notify(new BatchFinishedNotification($jobBatch));
                 } catch (Throwable $e) {

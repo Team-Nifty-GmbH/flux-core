@@ -9,14 +9,14 @@ use Spatie\TranslationLoader\LanguageLine;
 
 class UpdateTranslation extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateTranslationRuleset::class;
-    }
-
     public static function models(): array
     {
         return [LanguageLine::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateTranslationRuleset::class;
     }
 
     public function performAction(): Model

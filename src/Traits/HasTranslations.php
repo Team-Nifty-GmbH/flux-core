@@ -12,38 +12,6 @@ trait HasTranslations
 
     public bool $hasAdditionalColumns;
 
-    public function initializeHasTranslations(): void
-    {
-        $this->hasAdditionalColumns = in_array(HasAdditionalColumns::class, class_uses_recursive($this));
-    }
-
-    public function getLocale(): string
-    {
-        return app()->getLocale();
-    }
-
-    public function toArray(): array
-    {
-        $attributes = parent::toArray();
-        foreach ($this->getTranslatableAttributes() as $field) {
-            $attributes[$field] = $this->getTranslation(
-                $field,
-                app()->getLocale()
-            ) ?: null;
-        }
-
-        return $attributes;
-    }
-
-    public function getTranslatableAttributes(): array
-    {
-        if (! property_exists($this, 'translatable')) {
-            return [];
-        }
-
-        return is_array($this->translatable) ? $this->translatable : [];
-    }
-
     /**
      * Fill the model with an array of attributes.
      *
@@ -94,6 +62,43 @@ trait HasTranslations
         return $this;
     }
 
+    public function getLocale(): string
+    {
+        return app()->getLocale();
+    }
+
+    public function getTranslatableAttributes(): array
+    {
+        if (! property_exists($this, 'translatable')) {
+            return [];
+        }
+
+        return is_array($this->translatable) ? $this->translatable : [];
+    }
+
+    /**
+     * @throws \Spatie\Translatable\Exceptions\AttributeIsNotTranslatable
+     */
+    public function getTranslations(?string $key = null, ?array $allowedLocales = null): array
+    {
+        if ($key !== null) {
+            $this->guardAgainstNonTranslatableAttribute($key);
+            $value = json_decode($this->getAttributes()[$key] ?? '' ?: '{}', true);
+
+            return array_filter(
+                is_array($value) ? $value : [],
+                fn ($value, $locale) => $this->filterTranslations($value, $locale, $allowedLocales),
+                ARRAY_FILTER_USE_BOTH,
+            );
+        }
+
+        return array_reduce($this->getTranslatableAttributes(), function ($result, $item) use ($allowedLocales) {
+            $result[$item] = $this->getTranslations($item, $allowedLocales);
+
+            return $result;
+        });
+    }
+
     public function hasTranslationsValidationRules(array $rules, ?array $data = null): array
     {
         $availableLocales = app(Language::class)->all()
@@ -133,26 +138,21 @@ trait HasTranslations
         return $translationRules;
     }
 
-    /**
-     * @throws \Spatie\Translatable\Exceptions\AttributeIsNotTranslatable
-     */
-    public function getTranslations(?string $key = null, ?array $allowedLocales = null): array
+    public function initializeHasTranslations(): void
     {
-        if ($key !== null) {
-            $this->guardAgainstNonTranslatableAttribute($key);
-            $value = json_decode($this->getAttributes()[$key] ?? '' ?: '{}', true);
+        $this->hasAdditionalColumns = in_array(HasAdditionalColumns::class, class_uses_recursive($this));
+    }
 
-            return array_filter(
-                is_array($value) ? $value : [],
-                fn ($value, $locale) => $this->filterTranslations($value, $locale, $allowedLocales),
-                ARRAY_FILTER_USE_BOTH,
-            );
+    public function toArray(): array
+    {
+        $attributes = parent::toArray();
+        foreach ($this->getTranslatableAttributes() as $field) {
+            $attributes[$field] = $this->getTranslation(
+                $field,
+                app()->getLocale()
+            ) ?: null;
         }
 
-        return array_reduce($this->getTranslatableAttributes(), function ($result, $item) use ($allowedLocales) {
-            $result[$item] = $this->getTranslations($item, $allowedLocales);
-
-            return $result;
-        });
+        return $attributes;
     }
 }

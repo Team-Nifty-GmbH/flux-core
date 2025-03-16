@@ -20,13 +20,6 @@ class ContactOption extends FluxModel
         ];
     }
 
-    public function siblings(): HasMany
-    {
-        return $this->hasMany(static::class, 'address_id', 'address_id')
-            ->where('type', $this->type)
-            ->where('id', '!=', $this->id);
-    }
-
     public function address(): BelongsTo
     {
         return $this->belongsTo(Address::class);
@@ -42,5 +35,12 @@ class ContactOption extends FluxModel
             'address_id',
             'contact_id'
         );
+    }
+
+    public function siblings(): HasMany
+    {
+        return $this->hasMany(static::class, 'address_id', 'address_id')
+            ->where('type', $this->type)
+            ->where('id', '!=', $this->id);
     }
 }

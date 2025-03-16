@@ -11,19 +11,31 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Locked;
+use Livewire\Component;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use TeamNiftyGmbH\Calendar\Livewire\CalendarOverview as TallCalendarOverview;
 use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 
-class CalendarOverview extends TallCalendarOverview
+class CalendarOverview extends Component
 {
     use Actions;
 
-    public CalendarForm $calendar;
-
     public array $availableModels = [];
 
+    public CalendarForm $calendar;
+
+    #[Locked]
+    public array $calendarGroups = [];
+
     public array $fieldTypes = [];
+
+    public array $parentCalendars = [];
+
+    public array $selectedCalendar;
+
+    public bool $showCalendars = true;
+
+    public bool $showInvites = true;
 
     public function mount(): void
     {
@@ -42,10 +54,22 @@ class CalendarOverview extends TallCalendarOverview
             ->toArray();
 
         $this->fieldTypes = [
-            'text' => __('Text'),
-            'textarea' => __('Textarea'),
-            'checkbox' => __('Checkbox'),
-            'date' => __('Date'),
+            [
+                'label' => __('Text'),
+                'value' => 'text',
+            ],
+            [
+                'label' => __('Textarea'),
+                'value' => 'textarea',
+            ],
+            [
+                'label' => __('Checkbox'),
+                'value' => 'checkbox',
+            ],
+            [
+                'label' => __('Date'),
+                'value' => 'date',
+            ],
         ];
 
         // Todo: add 'select', 'datetime', 'toggle' to available field types
@@ -54,6 +78,54 @@ class CalendarOverview extends TallCalendarOverview
     public function render(): Factory|Application|View
     {
         return view('flux::livewire.features.calendar.calendar-overview');
+    }
+
+    public function addCustomProperty(): void
+    {
+        $this->selectedCalendar['customProperties'][] = [
+            'field_type' => null,
+            'name' => null,
+        ];
+    }
+
+    public function deleteCalendar(array $attributes): bool
+    {
+        try {
+            $this->calendar->reset();
+            $this->calendar->fill($attributes);
+            $this->calendar->delete();
+        } catch (UnauthorizedException|ValidationException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        return true;
+    }
+
+    public function editCalendar(?array $calendar = null): void
+    {
+        if (is_null($calendar)) {
+            $calendar = app(Calendar::class)
+                ->toCalendarObject();
+
+            $calendar['color'] = '#' . dechex(rand(0x000000, 0xFFFFFF));
+        }
+
+        $this->selectedCalendar = $calendar;
+
+        $this->parentCalendars = $this->getAvailableParents();
+
+        $this->js(
+            <<<'JS'
+                $modalOpen('calendar-modal');
+            JS
+        );
+    }
+
+    public function removeCustomProperty(int $index): void
+    {
+        unset($this->selectedCalendar['customProperties'][$index]);
     }
 
     public function saveCalendar(): array|false
@@ -93,31 +165,16 @@ class CalendarOverview extends TallCalendarOverview
         return $result;
     }
 
-    public function deleteCalendar(array $attributes): bool
+    protected function getAvailableParents(): array
     {
-        try {
-            $this->calendar->reset();
-            $this->calendar->fill($attributes);
-            $this->calendar->delete();
-        } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        return true;
-    }
-
-    public function addCustomProperty(): void
-    {
-        $this->selectedCalendar['customProperties'][] = [
-            'field_type' => null,
-            'name' => null,
-        ];
-    }
-
-    public function removeCustomProperty(int $index): void
-    {
-        unset($this->selectedCalendar['customProperties'][$index]);
+        return resolve_static(Calendar::class, 'query')
+            ->whereKeyNot(data_get($this->selectedCalendar, 'id'))
+            ->whereNull('parent_id')
+            ->when(
+                data_get($this->selectedCalendar, 'id'),
+                fn ($query) => $query->where('model_type', data_get($this->selectedCalendar, 'modelType'))
+            )
+            ->get(['id', 'name', 'description'])
+            ->toArray();
     }
 }

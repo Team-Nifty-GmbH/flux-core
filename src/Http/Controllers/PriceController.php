@@ -27,16 +27,16 @@ class PriceController extends BaseController
         );
     }
 
-    public function update(Request $request, PriceService $priceService): JsonResponse
+    public function delete(string $id, PriceService $priceService): JsonResponse
     {
-        $response = $priceService->update($request->all());
+        $response = $priceService->delete($id);
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
-    public function delete(string $id, PriceService $priceService): JsonResponse
+    public function update(Request $request, PriceService $priceService): JsonResponse
     {
-        $response = $priceService->delete($id);
+        $response = $priceService->update($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }

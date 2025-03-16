@@ -8,14 +8,14 @@ use FluxErp\Rulesets\Transaction\CreateTransactionRuleset;
 
 class CreateTransaction extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateTransactionRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Transaction::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateTransactionRuleset::class;
     }
 
     public function performAction(): Transaction

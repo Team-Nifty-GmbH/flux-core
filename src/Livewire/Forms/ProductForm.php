@@ -10,116 +10,107 @@ use Livewire\Attributes\Locked;
 
 class ProductForm extends FluxForm
 {
-    #[Locked]
-    public ?int $id = null;
+    public ?string $avatar_url = null;
 
-    public ?string $name = null;
+    public ?float $basic_unit = null;
+
+    public array $bundle_products = [];
+
+    public array $categories = [];
+
+    public ?int $children_count = null;
 
     public ?int $client_id = null;
 
+    public array $clients = [];
+
     public ?int $cover_media_id = null;
-
-    public ?int $parent_id = null;
-
-    public ?int $vat_rate_id = null;
-
-    public ?int $unit_id = null;
-
-    public ?int $purchase_unit_id = null;
-
-    public ?int $reference_unit_id = null;
-
-    public ?string $product_number = null;
-
-    public ?string $product_type = null;
 
     public ?string $description = null;
 
-    public ?float $weight_gram = null;
+    public ?float $dimension_height_mm = null;
 
     public ?float $dimension_length_mm = null;
 
     public ?float $dimension_width_mm = null;
 
-    public ?float $dimension_height_mm = null;
-
-    public ?float $selling_unit = null;
-
-    public ?float $basic_unit = null;
-
-    public ?string $time_unit_enum = null;
-
     public ?string $ean = null;
 
-    public ?int $stock = null;
+    public ?bool $has_serial_numbers = false;
 
-    public ?int $min_delivery_time = null;
-
-    public ?int $max_delivery_time = null;
-
-    public ?int $restock_time = null;
-
-    public ?float $purchase_steps = null;
-
-    public ?float $min_purchase = null;
-
-    public ?float $max_purchase = null;
-
-    public ?string $seo_keywords = null;
-
-    public ?string $posting_account = null;
-
-    public ?float $warning_stock_amount = null;
+    #[Locked]
+    public ?int $id = null;
 
     public ?bool $is_active = true;
 
-    public ?bool $is_highlight = false;
+    public ?bool $is_active_export_to_web_shop = false;
 
     #[Locked]
     public ?bool $is_bundle = false;
+
+    public ?bool $is_highlight = false;
+
+    public ?bool $is_nos = false;
 
     public ?bool $is_service = false;
 
     public ?bool $is_shipping_free = false;
 
-    public ?bool $has_serial_numbers = false;
+    public ?int $max_delivery_time = null;
 
-    public ?bool $is_nos = false;
+    public ?float $max_purchase = null;
 
-    public ?bool $is_active_export_to_web_shop = false;
+    public ?int $min_delivery_time = null;
 
-    public array $product_cross_sellings = [];
+    public ?float $min_purchase = null;
 
-    public array $product_properties = [];
-
-    public array $suppliers = [];
-
-    public array $categories = [];
-
-    public array $tags = [];
-
-    public array $bundle_products = [];
-
-    public array $clients = [];
-
-    public ?array $vat_rate = null;
-
-    public array $prices = [];
-
-    public ?string $avatar_url = null;
-
-    public ?int $children_count = null;
+    public ?string $name = null;
 
     public ?array $parent = null;
 
-    protected function getActions(): array
-    {
-        return [
-            'create' => CreateProduct::class,
-            'update' => UpdateProduct::class,
-            'delete' => DeleteProduct::class,
-        ];
-    }
+    public ?int $parent_id = null;
+
+    public ?string $posting_account = null;
+
+    public array $prices = [];
+
+    public array $product_cross_sellings = [];
+
+    public ?string $product_number = null;
+
+    public array $product_properties = [];
+
+    public ?string $product_type = null;
+
+    public ?float $purchase_steps = null;
+
+    public ?int $purchase_unit_id = null;
+
+    public ?int $reference_unit_id = null;
+
+    public ?int $restock_time = null;
+
+    public ?float $selling_unit = null;
+
+    public ?string $seo_keywords = null;
+
+    public ?int $stock = null;
+
+    public array $suppliers = [];
+
+    public array $tags = [];
+
+    public ?string $time_unit_enum = null;
+
+    public ?int $unit_id = null;
+
+    public ?array $vat_rate = null;
+
+    public ?int $vat_rate_id = null;
+
+    public ?float $warning_stock_amount = null;
+
+    public ?float $weight_gram = null;
 
     public function fill($values): void
     {
@@ -162,5 +153,14 @@ class ProductForm extends FluxForm
                 'count' => $bundleProduct['pivot']['count'] ?? 0,
             ];
         }, $this->bundle_products);
+    }
+
+    protected function getActions(): array
+    {
+        return [
+            'create' => CreateProduct::class,
+            'update' => UpdateProduct::class,
+            'delete' => DeleteProduct::class,
+        ];
     }
 }

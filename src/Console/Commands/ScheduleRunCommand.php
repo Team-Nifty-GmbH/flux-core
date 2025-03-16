@@ -87,12 +87,12 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
             $repeatable->cron_expression = $event->expression;
             $repeatable->save();
 
-            $event->before(function () use ($repeatable) {
+            $event->before(function () use ($repeatable): void {
                 $repeatable->last_run = now();
                 $repeatable->save();
             });
 
-            $event->onSuccess(function () use ($repeatable) {
+            $event->onSuccess(function () use ($repeatable): void {
                 if ($repeatable->recurrences) {
                     $repeatable->current_recurrence++;
                 }
@@ -101,7 +101,7 @@ class ScheduleRunCommand extends BaseScheduleRunCommand
                 $repeatable->save();
             });
 
-            $event->after(function () use ($repeatable, $nextRunDate) {
+            $event->after(function () use ($repeatable, $nextRunDate): void {
                 $repeatable->due_at = $nextRunDate;
                 $repeatable->save();
             });

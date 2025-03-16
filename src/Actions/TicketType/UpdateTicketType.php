@@ -11,14 +11,14 @@ use Illuminate\Support\Facades\Validator;
 
 class UpdateTicketType extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateTicketTypeRuleset::class;
-    }
-
     public static function models(): array
     {
         return [TicketType::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateTicketTypeRuleset::class;
     }
 
     public function performAction(): Model

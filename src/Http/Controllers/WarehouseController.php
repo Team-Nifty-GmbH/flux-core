@@ -27,16 +27,16 @@ class WarehouseController extends BaseController
         );
     }
 
-    public function update(Request $request, WarehouseService $warehouseService): JsonResponse
+    public function delete(string $id, WarehouseService $warehouseService): JsonResponse
     {
-        $response = $warehouseService->update($request->all());
+        $response = $warehouseService->delete($id);
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
-    public function delete(string $id, WarehouseService $warehouseService): JsonResponse
+    public function update(Request $request, WarehouseService $warehouseService): JsonResponse
     {
-        $response = $warehouseService->delete($id);
+        $response = $warehouseService->update($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }

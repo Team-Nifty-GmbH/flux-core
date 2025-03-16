@@ -8,14 +8,14 @@ use FluxErp\Rulesets\AdditionalColumn\CreateAdditionalColumnRuleset;
 
 class CreateAdditionalColumn extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateAdditionalColumnRuleset::class;
-    }
-
     public static function models(): array
     {
         return [AdditionalColumn::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateAdditionalColumnRuleset::class;
     }
 
     public function performAction(): AdditionalColumn

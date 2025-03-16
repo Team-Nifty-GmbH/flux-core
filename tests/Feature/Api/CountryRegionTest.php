@@ -10,14 +10,11 @@ use FluxErp\Models\Language;
 use FluxErp\Models\Permission;
 use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Laravel\Sanctum\Sanctum;
 
 class CountryRegionTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Model $country;
 
     private Collection $countryRegions;
@@ -48,7 +45,68 @@ class CountryRegionTest extends BaseSetup
         ];
     }
 
-    public function test_get_country_region()
+    public function test_create_country_region(): void
+    {
+        $countryRegion = [
+            'country_id' => $this->country->id,
+            'name' => 'Country Region Name',
+        ];
+
+        $this->user->givePermissionTo($this->permissions['create']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->post('/api/country-regions', $countryRegion);
+        $response->assertStatus(201);
+
+        $responseCountryRegion = json_decode($response->getContent())->data;
+        $dbCountryRegion = CountryRegion::query()
+            ->whereKey($responseCountryRegion->id)
+            ->first();
+
+        $this->assertNotEmpty($dbCountryRegion);
+        $this->assertEquals($countryRegion['country_id'], $dbCountryRegion->country_id);
+        $this->assertEquals($countryRegion['name'], $dbCountryRegion->name);
+        $this->assertTrue($this->user->is($dbCountryRegion->getCreatedBy()));
+        $this->assertTrue($this->user->is($dbCountryRegion->getUpdatedBy()));
+    }
+
+    public function test_create_country_region_validation_fails(): void
+    {
+        $countryRegion = [
+            'country_id' => 'country_id',
+            'name' => 'Country Region Name',
+        ];
+
+        $this->user->givePermissionTo($this->permissions['create']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->post('/api/country-regions', $countryRegion);
+        $response->assertStatus(422);
+    }
+
+    public function test_delete_country_region(): void
+    {
+        $this->user->givePermissionTo($this->permissions['delete']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->delete('/api/country-regions/' . $this->countryRegions[1]->id);
+        $response->assertStatus(204);
+
+        $countryRegion = $this->countryRegions[1]->fresh();
+        $this->assertNotNull($countryRegion->deleted_at);
+        $this->assertTrue($this->user->is($countryRegion->getDeletedBy()));
+    }
+
+    public function test_delete_country_region_country_region_not_found(): void
+    {
+        $this->user->givePermissionTo($this->permissions['delete']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->delete('/api/country-regions/' . ++$this->countryRegions[1]->id);
+        $response->assertStatus(404);
+    }
+
+    public function test_get_country_region(): void
     {
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
@@ -70,7 +128,7 @@ class CountryRegionTest extends BaseSetup
             Carbon::parse($jsonCountryRegion->updated_at));
     }
 
-    public function test_get_country_region_country_region_not_found()
+    public function test_get_country_region_country_region_not_found(): void
     {
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
@@ -79,7 +137,7 @@ class CountryRegionTest extends BaseSetup
         $response->assertStatus(404);
     }
 
-    public function test_get_country_regions()
+    public function test_get_country_regions(): void
     {
         $this->user->givePermissionTo($this->permissions['index']);
         Sanctum::actingAs($this->user, ['user']);
@@ -105,46 +163,7 @@ class CountryRegionTest extends BaseSetup
         }
     }
 
-    public function test_create_country_region()
-    {
-        $countryRegion = [
-            'country_id' => $this->country->id,
-            'name' => 'Country Region Name',
-        ];
-
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->post('/api/country-regions', $countryRegion);
-        $response->assertStatus(201);
-
-        $responseCountryRegion = json_decode($response->getContent())->data;
-        $dbCountryRegion = CountryRegion::query()
-            ->whereKey($responseCountryRegion->id)
-            ->first();
-
-        $this->assertNotEmpty($dbCountryRegion);
-        $this->assertEquals($countryRegion['country_id'], $dbCountryRegion->country_id);
-        $this->assertEquals($countryRegion['name'], $dbCountryRegion->name);
-        $this->assertTrue($this->user->is($dbCountryRegion->getCreatedBy()));
-        $this->assertTrue($this->user->is($dbCountryRegion->getUpdatedBy()));
-    }
-
-    public function test_create_country_region_validation_fails()
-    {
-        $countryRegion = [
-            'country_id' => 'country_id',
-            'name' => 'Country Region Name',
-        ];
-
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->post('/api/country-regions', $countryRegion);
-        $response->assertStatus(422);
-    }
-
-    public function test_update_country_region()
+    public function test_update_country_region(): void
     {
         $countryRegion = [
             'id' => $this->countryRegions[0]->id,
@@ -168,7 +187,7 @@ class CountryRegionTest extends BaseSetup
         $this->assertTrue($this->user->is($dbCountryRegion->getUpdatedBy()));
     }
 
-    public function test_update_country_region_maximum()
+    public function test_update_country_region_maximum(): void
     {
         $countryRegion = [
             'id' => $this->countryRegions[0]->id,
@@ -194,7 +213,7 @@ class CountryRegionTest extends BaseSetup
         $this->assertTrue($this->user->is($dbCountryRegion->getUpdatedBy()));
     }
 
-    public function test_update_country_region_validation_fails()
+    public function test_update_country_region_validation_fails(): void
     {
         $countryRegions = [
             'id' => $this->countryRegions[0]->id,
@@ -206,27 +225,5 @@ class CountryRegionTest extends BaseSetup
 
         $response = $this->actingAs($this->user)->put('/api/country-regions', $countryRegions);
         $response->assertStatus(422);
-    }
-
-    public function test_delete_country_region()
-    {
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->delete('/api/country-regions/' . $this->countryRegions[1]->id);
-        $response->assertStatus(204);
-
-        $countryRegion = $this->countryRegions[1]->fresh();
-        $this->assertNotNull($countryRegion->deleted_at);
-        $this->assertTrue($this->user->is($countryRegion->getDeletedBy()));
-    }
-
-    public function test_delete_country_region_country_region_not_found()
-    {
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->delete('/api/country-regions/' . ++$this->countryRegions[1]->id);
-        $response->assertStatus(404);
     }
 }

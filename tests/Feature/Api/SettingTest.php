@@ -6,21 +6,18 @@ use FluxErp\Models\Permission;
 use FluxErp\Models\Setting;
 use FluxErp\Models\User;
 use FluxErp\Tests\Feature\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
 class SettingTest extends BaseSetup
 {
-    use DatabaseTransactions;
+    private array $permissions;
 
     private Setting $settings;
 
     private Setting $settings2;
 
     private Setting $userSettings;
-
-    private array $permissions;
 
     protected function setUp(): void
     {
@@ -56,7 +53,7 @@ class SettingTest extends BaseSetup
         ];
     }
 
-    public function test_get_settings()
+    public function test_get_settings(): void
     {
         $this->user->givePermissionTo($this->permissions['index']);
         Sanctum::actingAs($this->user, ['user']);
@@ -80,7 +77,7 @@ class SettingTest extends BaseSetup
         $this->assertEquals($this->settings2->settings, $responseData[$count]['settings']);
     }
 
-    public function test_get_user_settings()
+    public function test_get_user_settings(): void
     {
         $this->user->givePermissionTo($this->permissions['user-settings']);
         Sanctum::actingAs($this->user, ['user']);
@@ -96,7 +93,7 @@ class SettingTest extends BaseSetup
         $this->assertEquals((object) $this->userSettings->settings, $responseData[0]->settings);
     }
 
-    public function test_update_setting()
+    public function test_update_setting(): void
     {
         $settings = [
             'string' => 'Value',
@@ -124,7 +121,20 @@ class SettingTest extends BaseSetup
         $this->assertEquals($settings['array'], $setting->settings['array']);
     }
 
-    public function test_update_setting_validation_error()
+    public function test_update_setting_setting_not_found(): void
+    {
+        $this->user->givePermissionTo($this->permissions['update']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->put('/api/settings', [
+            'id' => ++$this->userSettings->id,
+            'settings' => ['Value'],
+        ]);
+
+        $response->assertStatus(422);
+    }
+
+    public function test_update_setting_validation_error(): void
     {
         $settings = 'string';
 
@@ -134,19 +144,6 @@ class SettingTest extends BaseSetup
         $response = $this->actingAs($this->user)->put('/api/settings', [
             'id' => $this->settings->id,
             'settings' => $settings,
-        ]);
-
-        $response->assertStatus(422);
-    }
-
-    public function test_update_setting_setting_not_found()
-    {
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->put('/api/settings', [
-            'id' => ++$this->userSettings->id,
-            'settings' => ['Value'],
         ]);
 
         $response->assertStatus(422);

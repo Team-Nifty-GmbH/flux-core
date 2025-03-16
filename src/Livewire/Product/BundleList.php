@@ -17,12 +17,12 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class BundleList extends ProductBundleProductList
 {
-    protected string $view = 'flux::livewire.product.bundle-list';
-
     #[Modelable]
     public ProductForm $product;
 
     public ProductBundleProductForm $productBundleProductForm;
+
+    protected string $view = 'flux::livewire.product.bundle-list';
 
     public function mount(): void
     {
@@ -41,12 +41,12 @@ class BundleList extends ProductBundleProductList
     {
         return [
             DataTableButton::make()
-                ->color('primary')
-                ->label(__('Add'))
+                ->color('indigo')
+                ->text(__('Add'))
                 ->icon('plus')
                 ->attributes([
                     'x-on:click' => <<<'JS'
-                        $openModal('edit-bundle-product-modal')
+                        $modalOpen('edit-bundle-product-modal')
                     JS,
                 ])
                 ->when(
@@ -59,71 +59,25 @@ class BundleList extends ProductBundleProductList
     {
         return [
             DataTableButton::make()
-                ->color('primary')
-                ->label(__('Edit'))
+                ->color('indigo')
+                ->text(__('Edit'))
                 ->icon('pencil')
                 ->wireClick('edit(record.id)')
                 ->when(
                     fn () => resolve_static(UpdateProductBundleProduct::class, 'canPerformAction', [false])
                 ),
             DataTableButton::make()
-                ->color('negative')
-                ->label(__('Delete'))
+                ->color('red')
+                ->text(__('Delete'))
                 ->icon('trash')
                 ->attributes([
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Bundle Product')]),
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Bundle Product')]),
                     'wire:click' => 'delete(record.id)',
                 ])
                 ->when(
                     fn () => resolve_static(DeleteProductBundleProduct::class, 'canPerformAction', [false])
                 ),
         ];
-    }
-
-    protected function getReturnKeys(): array
-    {
-        return array_merge(
-            parent::getReturnKeys(),
-            [
-                'product_id',
-                'bundle_product_id',
-            ]
-        );
-    }
-
-    public function edit(ProductBundleProduct $productBundleProduct): void
-    {
-        $this->productBundleProductForm->reset();
-        $this->productBundleProductForm->fill($productBundleProduct);
-
-        $this->js(<<<'JS'
-            $openModal('edit-bundle-product-modal');
-        JS);
-    }
-
-    public function save(): bool
-    {
-        $this->productBundleProductForm->product_id = $this->product->id;
-
-        try {
-            $this->productBundleProductForm->save();
-        } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->productBundleProductForm->reset();
-        $this->loadData();
-
-        if ($this->product->is_bundle === false) {
-            $this->product->is_bundle = true;
-            $this->js(<<<'JS'
-                Livewire.navigate(window.location.href);
-            JS);
-        }
-
-        return true;
     }
 
     public function delete(int $id): void
@@ -152,5 +106,51 @@ class BundleList extends ProductBundleProductList
         } else {
             $this->loadData();
         }
+    }
+
+    public function edit(ProductBundleProduct $productBundleProduct): void
+    {
+        $this->productBundleProductForm->reset();
+        $this->productBundleProductForm->fill($productBundleProduct);
+
+        $this->js(<<<'JS'
+            $modalOpen('edit-bundle-product-modal');
+        JS);
+    }
+
+    public function save(): bool
+    {
+        $this->productBundleProductForm->product_id = $this->product->id;
+
+        try {
+            $this->productBundleProductForm->save();
+        } catch (UnauthorizedException|ValidationException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->productBundleProductForm->reset();
+        $this->loadData();
+
+        if ($this->product->is_bundle === false) {
+            $this->product->is_bundle = true;
+            $this->js(<<<'JS'
+                Livewire.navigate(window.location.href);
+            JS);
+        }
+
+        return true;
+    }
+
+    protected function getReturnKeys(): array
+    {
+        return array_merge(
+            parent::getReturnKeys(),
+            [
+                'product_id',
+                'bundle_product_id',
+            ]
+        );
     }
 }

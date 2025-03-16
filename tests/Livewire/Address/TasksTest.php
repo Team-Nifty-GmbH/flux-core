@@ -10,7 +10,7 @@ use Livewire\Livewire;
 
 class TasksTest extends BaseSetup
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         $contact = Contact::factory()->create([
             'client_id' => $this->dbClient->getKey(),

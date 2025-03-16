@@ -18,28 +18,9 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class TransactionList extends BaseTransactionList
 {
-    public bool $isSelectable = true;
-
     public ?string $includeBefore = 'flux::livewire.accounting.transaction-list.include-before';
 
-    #[Renderless]
-    public function deleteSelected(): void
-    {
-        try {
-            $this->getSelectedModelsQuery()->pluck('id')->each(function (int $id) {
-                DeleteTransaction::make(['id' => $id])
-                    ->checkPermission()
-                    ->validate()
-                    ->execute();
-            });
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-        }
-
-        $this->loadData();
-
-        $this->reset('selected');
-    }
+    public bool $isSelectable = true;
 
     protected function getTableActions(): array
     {
@@ -47,8 +28,8 @@ class TransactionList extends BaseTransactionList
             parent::getTableActions(),
             [
                 DataTableButton::make()
-                    ->label(__('Show unassigned payments'))
-                    ->color('primary')
+                    ->text(__('Show unassigned payments'))
+                    ->color('indigo')
                     ->wireClick('showUnassignedPayments'),
             ]
         );
@@ -60,7 +41,7 @@ class TransactionList extends BaseTransactionList
             parent::getRowActions(),
             [
                 DataTableButton::make()
-                    ->label(__('Show Order'))
+                    ->text(__('Show Order'))
                     ->attributes(
                         [
                             'x-on:click' => <<<'JS'
@@ -71,8 +52,8 @@ class TransactionList extends BaseTransactionList
                         ]
                     ),
                 DataTableButton::make()
-                    ->label(__('Assign'))
-                    ->color('primary')
+                    ->text(__('Assign'))
+                    ->color('indigo')
                     ->attributes(
                         [
                             'wire:click' => 'assign(record.id)',
@@ -89,68 +70,19 @@ class TransactionList extends BaseTransactionList
     {
         return [
             DataTableButton::make()
-                ->label(__('Start automatic assignment'))
-                ->color('primary')
+                ->text(__('Start automatic assignment'))
+                ->color('indigo')
                 ->wireClick('matchTransactions()')
                 ->when(fn () => resolve_static(UpdateTransaction::class, 'canPerformAction', [false])),
             DataTableButton::make()
-                ->label(__('Delete'))
-                ->color('negative')
+                ->text(__('Delete'))
+                ->color('red')
                 ->when(fn () => resolve_static(DeleteTransaction::class, 'canPerformAction', [false]))
                 ->attributes([
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Transaction')]),
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Transaction')]),
                     'wire:click' => 'deleteSelected()',
                 ]),
         ];
-    }
-
-    protected function getReturnKeys(): array
-    {
-        return array_merge(
-            parent::getReturnKeys(),
-            [
-                'order_id',
-            ],
-        );
-    }
-
-    #[Renderless]
-    public function showOrder(Order $order): void
-    {
-        $this->redirectRoute(name: 'orders.id', parameters: ['id' => $order->id], navigate: true);
-    }
-
-    #[Renderless]
-    public function showUnassignedPayments(): void
-    {
-        session()
-            ->put(
-                $this->getCacheKey() . '_query',
-                SessionFilter::make(
-                    $this->getCacheKey(),
-                    fn (Builder $query) => $query->whereNull('order_id'),
-                    __('Unassigned payments'),
-                )
-            );
-
-        $this->loadData();
-    }
-
-    #[Renderless]
-    public function editTransaction(?Transaction $transaction): void
-    {
-        $transaction?->loadMissing('children.order.contact.invoiceAddress:id,name');
-
-        parent::editTransaction($transaction);
-    }
-
-    public function matchTransactions(): void
-    {
-        foreach (array_chunk($this->selected, 20) as $chunk) {
-            MatchTransactionsWithOrderJob::dispatchSync($chunk);
-        }
-
-        $this->notification()->success(__('The transactions are being matched with the orders.'));
     }
 
     #[Renderless]
@@ -160,7 +92,7 @@ class TransactionList extends BaseTransactionList
         $this->transactionForm->fill($transaction);
 
         $this->js(<<<'JS'
-            $openModal('assign-order');
+            $modalOpen('assign-order-modal');
         JS);
     }
 
@@ -194,6 +126,42 @@ class TransactionList extends BaseTransactionList
                 'order' => $order,
             ];
         }
+    }
+
+    #[Renderless]
+    public function deleteSelected(): void
+    {
+        try {
+            $this->getSelectedModelsQuery()->pluck('id')->each(function (int $id): void {
+                DeleteTransaction::make(['id' => $id])
+                    ->checkPermission()
+                    ->validate()
+                    ->execute();
+            });
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+        }
+
+        $this->loadData();
+
+        $this->reset('selected');
+    }
+
+    #[Renderless]
+    public function editTransaction(?Transaction $transaction): void
+    {
+        $transaction?->loadMissing('children.order.contact.invoiceAddress:id,name');
+
+        parent::editTransaction($transaction);
+    }
+
+    public function matchTransactions(): void
+    {
+        foreach (array_chunk($this->selected, 20) as $chunk) {
+            MatchTransactionsWithOrderJob::dispatchSync($chunk);
+        }
+
+        $this->notification()->success(__('The transactions are being matched with the orders.'))->send();
     }
 
     public function recalculateDifference(): void
@@ -265,5 +233,37 @@ class TransactionList extends BaseTransactionList
         $this->loadData();
 
         return true;
+    }
+
+    #[Renderless]
+    public function showOrder(Order $order): void
+    {
+        $this->redirectRoute(name: 'orders.id', parameters: ['id' => $order->id], navigate: true);
+    }
+
+    #[Renderless]
+    public function showUnassignedPayments(): void
+    {
+        session()
+            ->put(
+                $this->getCacheKey() . '_query',
+                SessionFilter::make(
+                    $this->getCacheKey(),
+                    fn (Builder $query) => $query->whereNull('order_id'),
+                    __('Unassigned payments'),
+                )
+            );
+
+        $this->loadData();
+    }
+
+    protected function getReturnKeys(): array
+    {
+        return array_merge(
+            parent::getReturnKeys(),
+            [
+                'order_id',
+            ],
+        );
     }
 }

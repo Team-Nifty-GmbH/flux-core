@@ -7,14 +7,6 @@ use FluxErp\Support\Widgets\ValueList;
 
 class ActiveTaskTimes extends ValueList
 {
-    protected function getListeners(): array
-    {
-        return [
-            'echo-private:' . resolve_static(WorkTime::class, 'getBroadcastChannel')
-                . ',.WorkTimeTaskUpdated' => 'calculateList',
-        ];
-    }
-
     public function calculateList(): void
     {
         $query = resolve_static(WorkTime::class, 'query')
@@ -34,5 +26,13 @@ class ActiveTaskTimes extends ValueList
                 ->isoFormat('L LT'),
         ])
             ->toArray();
+    }
+
+    protected function getListeners(): array
+    {
+        return [
+            'echo-private:' . resolve_static(WorkTime::class, 'getBroadcastChannel')
+                . ',.WorkTimeTaskUpdated' => 'calculateList',
+        ];
     }
 }

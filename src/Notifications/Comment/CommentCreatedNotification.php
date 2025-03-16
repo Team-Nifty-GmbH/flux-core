@@ -31,15 +31,9 @@ class CommentCreatedNotification extends Notification implements HasToastNotific
         $this->route = request()->header('referer');
     }
 
-    public function via(object $notifiable): array
+    public function toArray(object $notifiable): array
     {
-        if ($this->model->is_internal
-            && ! is_a($notifiable, resolve_static(User::class, 'class'), true)
-        ) {
-            return [];
-        }
-
-        return parent::via($notifiable);
+        return $this->toToastNotification($notifiable)->toArray();
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -59,20 +53,6 @@ class CommentCreatedNotification extends Notification implements HasToastNotific
                 . ']</span>'
             )
             );
-    }
-
-    public function toArray(object $notifiable): array
-    {
-        return $this->toToastNotification($notifiable)->toArray();
-    }
-
-    public function toWebPush(object $notifiable): ?WebPushMessage
-    {
-        if (! method_exists($notifiable, 'pushSubscriptions') || ! $notifiable->pushSubscriptions()->exists()) {
-            return null;
-        }
-
-        return $this->toToastNotification($notifiable)->toWebPush();
     }
 
     public function toToastNotification(object $notifiable): ToastNotification
@@ -102,13 +82,12 @@ class CommentCreatedNotification extends Notification implements HasToastNotific
                     ->deduplicate()
                     ->toString()
             )
-            ->icon('chat')
             ->when(
                 $createdBy
                 && method_exists($createdBy, 'getAvatarUrl')
                 && $createdBy->getAvatarUrl(),
                 function (ToastNotification $toast) use ($createdBy) {
-                    return $toast->img($createdBy->getAvatarUrl());
+                    return $toast->image($createdBy->getAvatarUrl());
                 }
             )
             ->description($this->model->comment)
@@ -127,5 +106,25 @@ class CommentCreatedNotification extends Notification implements HasToastNotific
                     );
                 }
             );
+    }
+
+    public function toWebPush(object $notifiable): ?WebPushMessage
+    {
+        if (! method_exists($notifiable, 'pushSubscriptions') || ! $notifiable->pushSubscriptions()->exists()) {
+            return null;
+        }
+
+        return $this->toToastNotification($notifiable)->toWebPush();
+    }
+
+    public function via(object $notifiable): array
+    {
+        if ($this->model->is_internal
+            && ! is_a($notifiable, resolve_static(User::class, 'class'), true)
+        ) {
+            return [];
+        }
+
+        return parent::via($notifiable);
     }
 }

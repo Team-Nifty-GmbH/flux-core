@@ -40,6 +40,24 @@ class ProductBundleProductController extends BaseController
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
+    public function delete(string $id): JsonResponse
+    {
+        try {
+            DeleteProductBundleProduct::make(['id' => $id])->validate()->execute();
+            $response = ResponseHelper::createArrayResponse(
+                statusCode: 204,
+                statusMessage: 'bundle product deleted'
+            );
+        } catch (ValidationException $e) {
+            $response = ResponseHelper::createArrayResponse(
+                statusCode: 404,
+                data: $e->errors()
+            );
+        }
+
+        return ResponseHelper::createResponseFromArrayResponse($response);
+    }
+
     public function update(Request $request): JsonResponse
     {
         $data = $request->all();
@@ -75,23 +93,5 @@ class ProductBundleProductController extends BaseController
             'responses' => $responses,
             'statusMessage' => $statusCode === 422 ? null : 'bundle product(s) updated',
         ]);
-    }
-
-    public function delete(string $id): JsonResponse
-    {
-        try {
-            DeleteProductBundleProduct::make(['id' => $id])->validate()->execute();
-            $response = ResponseHelper::createArrayResponse(
-                statusCode: 204,
-                statusMessage: 'bundle product deleted'
-            );
-        } catch (ValidationException $e) {
-            $response = ResponseHelper::createArrayResponse(
-                statusCode: 404,
-                data: $e->errors()
-            );
-        }
-
-        return ResponseHelper::createResponseFromArrayResponse($response);
     }
 }

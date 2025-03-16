@@ -12,7 +12,7 @@ return new class() extends Migration
      */
     public function up(): void
     {
-        Schema::table('price_lists', function (Blueprint $table) {
+        Schema::table('price_lists', function (Blueprint $table): void {
             $table->boolean('is_default')->default(false)->after('is_net');
         });
 
@@ -26,7 +26,7 @@ return new class() extends Migration
      */
     public function down(): void
     {
-        Schema::table('price_lists', function (Blueprint $table) {
+        Schema::table('price_lists', function (Blueprint $table): void {
             $table->dropColumn('is_default');
         });
     }

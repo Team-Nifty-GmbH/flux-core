@@ -32,19 +32,9 @@ class JobBatch extends FluxModel
         return Bus::findBatch($this->id);
     }
 
-    public function jobBatchables(): HasMany
+    public function getProcessedJobs(): int
     {
-        return $this->hasMany(JobBatchable::class);
-    }
-
-    public function queueMonitors(): HasMany
-    {
-        return $this->hasMany(QueueMonitor::class);
-    }
-
-    public function users(): MorphToMany
-    {
-        return $this->morphedByMany(User::class, 'job_batchable', 'job_batchables');
+        return $this->total_jobs - $this->pending_jobs - $this->failed_jobs;
     }
 
     public function getProgress(): float
@@ -58,11 +48,6 @@ class JobBatch extends FluxModel
         }
 
         return 0;
-    }
-
-    public function getProcessedJobs(): int
-    {
-        return $this->total_jobs - $this->pending_jobs - $this->failed_jobs;
     }
 
     public function getRemainingInterval(?Carbon $now = null): CarbonInterval
@@ -93,5 +78,20 @@ class JobBatch extends FluxModel
     public function isFinished(): bool
     {
         return ! is_null($this->finished_at);
+    }
+
+    public function jobBatchables(): HasMany
+    {
+        return $this->hasMany(JobBatchable::class);
+    }
+
+    public function queueMonitors(): HasMany
+    {
+        return $this->hasMany(QueueMonitor::class);
+    }
+
+    public function users(): MorphToMany
+    {
+        return $this->morphedByMany(User::class, 'job_batchable', 'job_batchables');
     }
 }

@@ -9,26 +9,26 @@ use Livewire\Attributes\Locked;
 
 class PaymentRunForm extends FluxForm
 {
-    #[Locked]
-    public ?int $id = null;
-
     public ?int $bank_connection_id = null;
 
+    public string $direct_debit_type = 'BASIC';
+
     #[Locked]
-    public ?string $payment_run_type_enum = null;
+    public ?int $id = null;
 
     public ?string $instructed_execution_date = null;
 
     public ?bool $is_collective = true;
 
-    public ?bool $is_single_booking = true;
-
     public ?bool $is_instant_payment = false;
 
-    public string $direct_debit_type = 'BASIC';
+    public ?bool $is_single_booking = true;
 
     #[Locked]
     public array $orders = [];
+
+    #[Locked]
+    public ?string $payment_run_type_enum = null;
 
     #[Locked]
     public ?string $total_amount = null;

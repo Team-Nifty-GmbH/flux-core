@@ -8,14 +8,14 @@ use FluxErp\Rulesets\Address\DeleteAddressRuleset;
 
 class DeleteAddress extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeleteAddressRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Address::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeleteAddressRuleset::class;
     }
 
     public function performAction(): ?bool

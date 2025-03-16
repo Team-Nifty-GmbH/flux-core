@@ -13,14 +13,14 @@ class CreateCart extends FluxAction
 {
     protected static bool $hasPermission = false;
 
-    protected function getRulesets(): string|array
-    {
-        return CreateCartRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Cart::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateCartRuleset::class;
     }
 
     public function performAction(): mixed

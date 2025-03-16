@@ -8,14 +8,14 @@ class AddClientIdForeignKeyOnContactsTable extends Migration
 {
     public function up(): void
     {
-        Schema::table('contacts', function (Blueprint $table) {
+        Schema::table('contacts', function (Blueprint $table): void {
             $table->foreign('client_id')->references('id')->on('clients');
         });
     }
 
     public function down(): void
     {
-        Schema::table('contacts', function (Blueprint $table) {
+        Schema::table('contacts', function (Blueprint $table): void {
             $table->dropForeign('contacts_client_id_foreign');
         });
     }

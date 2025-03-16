@@ -8,7 +8,7 @@ class CreateEventNotificationsTable extends Migration
 {
     public function up(): void
     {
-        Schema::create('event_notifications', function (Blueprint $table) {
+        Schema::create('event_notifications', function (Blueprint $table): void {
             $table->id();
             $table->string('event')->index();
             $table->unsignedBigInteger('user_id');

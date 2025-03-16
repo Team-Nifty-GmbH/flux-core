@@ -13,28 +13,26 @@ class BatchStartedNotification extends Notification implements HasToastNotificat
 {
     public function __construct(public JobBatch $model)
     {
-        $this->id = Uuid::uuid5(Uuid::NAMESPACE_URL, static::class . ':' . $this->model->getKey());
-    }
-
-    public function via(object $notifiable): array
-    {
-        return [BroadcastNowChannel::class];
-    }
-
-    public function toToastNotification(object $notifiable): ToastNotification
-    {
-        return ToastNotification::make()
-            ->notifiable($notifiable)
-            ->title(__(':job_name started', ['job_name' => __($this->model->name)]))
-            ->icon('info')
-            ->timeout(0)
-            ->attributes([
-                'progress' => $this->model->jobBatch?->progress ?? $this->model->getProgress(),
-            ]);
+        $this->id = Uuid::uuid5(Uuid::NAMESPACE_URL, $this->model->getKey());
     }
 
     public function toArray(object $notifiable): array
     {
         return $this->toToastNotification($notifiable)->toArray();
+    }
+
+    public function toToastNotification(object $notifiable): ToastNotification
+    {
+        return ToastNotification::make()
+            ->id($this->id)
+            ->notifiable($notifiable)
+            ->title(__(':job_name started', ['job_name' => __($this->model->name)]))
+            ->persistent()
+            ->progress($this->model->jobBatch?->progress ?? $this->model->getProgress());
+    }
+
+    public function via(object $notifiable): array
+    {
+        return [BroadcastNowChannel::class];
     }
 }

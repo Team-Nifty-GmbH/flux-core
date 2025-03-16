@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::create('product_property_groups', function (Blueprint $table) {
+        Schema::create('product_property_groups', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
             $table->string('name');

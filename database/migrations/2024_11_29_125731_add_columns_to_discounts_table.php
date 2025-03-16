@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('discounts', function (Blueprint $table) {
+        Schema::table('discounts', function (Blueprint $table): void {
             $table->string('name')->nullable()->after('model_id');
             $table->decimal('discount_percentage', 40, 10)
                 ->nullable()
@@ -23,7 +23,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('discounts', function (Blueprint $table) {
+        Schema::table('discounts', function (Blueprint $table): void {
             $table->renameColumn('order_column', 'sort_number');
 
             $table->dropColumn([

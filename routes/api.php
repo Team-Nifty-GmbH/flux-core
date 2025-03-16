@@ -89,13 +89,13 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('api')
     ->middleware(['throttle:api', SetAcceptHeaders::class])
-    ->group(function () {
+    ->group(function (): void {
         Route::get('/media/{filename}', [MediaController::class, 'downloadPublic'])->name('media.public');
         Route::post('/auth/token', [AuthController::class, 'authenticate']);
 
         Route::middleware(['auth:sanctum', 'abilities:user', 'localization', 'permission', 'api'])
             ->name('api.')
-            ->group(function () {
+            ->group(function (): void {
                 // Validate Token
                 Route::get('/auth/token/validate', [AuthController::class, 'validateToken']);
                 Route::post('/logout', [AuthController::class, 'logout']);

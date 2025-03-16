@@ -6,12 +6,9 @@ use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class ContactsTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Contact $contact;
 
     protected function setUp(): void
@@ -36,61 +33,7 @@ class ContactsTest extends BaseSetup
         ]);
     }
 
-    public function test_contacts_page()
-    {
-        $this->user->givePermissionTo(Permission::findOrCreate('contacts.get', 'web'));
-
-        $this->actingAs($this->user, 'web')->get('/contacts')
-            ->assertStatus(200);
-    }
-
-    public function test_contacts_no_user()
-    {
-        $this->get('/contacts')
-            ->assertStatus(302)
-            ->assertRedirect(route('login'));
-    }
-
-    public function test_contacts_without_permission()
-    {
-        Permission::findOrCreate('contacts.get', 'web');
-
-        $this->actingAs($this->user, 'web')->get('/contacts')
-            ->assertStatus(403);
-    }
-
-    public function test_contacts_id_page()
-    {
-        $this->user->givePermissionTo(Permission::findOrCreate('contacts.{id?}.get', 'web'));
-
-        $this->actingAs($this->user, 'web')->get('/contacts/' . $this->contact->id)
-            ->assertStatus(200);
-    }
-
-    public function test_contacts_id_page_without_id()
-    {
-        $this->user->givePermissionTo(Permission::findOrCreate('contacts.{id?}.get', 'web'));
-
-        $this->actingAs($this->user, 'web')->get('/contacts/0')
-            ->assertStatus(404);
-    }
-
-    public function test_contacts_id_no_user()
-    {
-        $this->get('/contacts/' . $this->contact->id)
-            ->assertStatus(302)
-            ->assertRedirect(route('login'));
-    }
-
-    public function test_contacts_id_without_permission()
-    {
-        Permission::findOrCreate('contacts.{id?}.get', 'web');
-
-        $this->actingAs($this->user, 'web')->get('/contacts/' . $this->contact->id)
-            ->assertStatus(403);
-    }
-
-    public function test_contacts_id_contact_not_found()
+    public function test_contacts_id_contact_not_found(): void
     {
         $this->contact->delete();
 
@@ -98,5 +41,59 @@ class ContactsTest extends BaseSetup
 
         $this->actingAs($this->user, 'web')->get('/contacts/' . $this->contact->id)
             ->assertStatus(404);
+    }
+
+    public function test_contacts_id_no_user(): void
+    {
+        $this->get('/contacts/' . $this->contact->id)
+            ->assertStatus(302)
+            ->assertRedirect(route('login'));
+    }
+
+    public function test_contacts_id_page(): void
+    {
+        $this->user->givePermissionTo(Permission::findOrCreate('contacts.{id?}.get', 'web'));
+
+        $this->actingAs($this->user, 'web')->get('/contacts/' . $this->contact->id)
+            ->assertStatus(200);
+    }
+
+    public function test_contacts_id_page_without_id(): void
+    {
+        $this->user->givePermissionTo(Permission::findOrCreate('contacts.{id?}.get', 'web'));
+
+        $this->actingAs($this->user, 'web')->get('/contacts/0')
+            ->assertStatus(404);
+    }
+
+    public function test_contacts_id_without_permission(): void
+    {
+        Permission::findOrCreate('contacts.{id?}.get', 'web');
+
+        $this->actingAs($this->user, 'web')->get('/contacts/' . $this->contact->id)
+            ->assertStatus(403);
+    }
+
+    public function test_contacts_no_user(): void
+    {
+        $this->get('/contacts')
+            ->assertStatus(302)
+            ->assertRedirect(route('login'));
+    }
+
+    public function test_contacts_page(): void
+    {
+        $this->user->givePermissionTo(Permission::findOrCreate('contacts.get', 'web'));
+
+        $this->actingAs($this->user, 'web')->get('/contacts')
+            ->assertStatus(200);
+    }
+
+    public function test_contacts_without_permission(): void
+    {
+        Permission::findOrCreate('contacts.get', 'web');
+
+        $this->actingAs($this->user, 'web')->get('/contacts')
+            ->assertStatus(403);
     }
 }

@@ -8,7 +8,7 @@ class AddFieldsAndRelationsToOrderPositionsTable extends Migration
 {
     public function up(): void
     {
-        Schema::table('order_positions', function (Blueprint $table) {
+        Schema::table('order_positions', function (Blueprint $table): void {
             // Foreign Keys
             $table->unsignedBigInteger('client_id')->after('uuid')
                 ->comment('A unique identifier number for the table clients.');
@@ -129,7 +129,7 @@ class AddFieldsAndRelationsToOrderPositionsTable extends Migration
 
     public function down(): void
     {
-        Schema::table('order_positions', function (Blueprint $table) {
+        Schema::table('order_positions', function (Blueprint $table): void {
             $table->dropForeign('order_positions_client_id_foreign');
             $table->dropForeign('order_positions_order_id_foreign');
             $table->dropForeign('order_positions_parent_id_foreign');

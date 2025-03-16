@@ -22,13 +22,13 @@ class Transaction extends FluxModel implements InteractsWithDataTables
 
     protected static function booted(): void
     {
-        static::saving(function (Transaction $transaction) {
+        static::saving(function (Transaction $transaction): void {
             $transaction->currency_id = $transaction->currency_id
                 ?? Auth::user()?->currency_id
                 ?? Currency::default()?->getKey();
         });
 
-        static::saved(function (Transaction $transaction) {
+        static::saved(function (Transaction $transaction): void {
             $originalOrderId = $transaction->getRawOriginal('order_id');
             if ($originalOrderId) {
                 resolve_static(Order::class, 'query')
@@ -43,7 +43,7 @@ class Transaction extends FluxModel implements InteractsWithDataTables
             }
         });
 
-        static::deleted(function (Transaction $transaction) {
+        static::deleted(function (Transaction $transaction): void {
             if ($transaction->order_id) {
                 $transaction->order->calculatePaymentState()->save();
             }
@@ -53,10 +53,9 @@ class Transaction extends FluxModel implements InteractsWithDataTables
     protected function casts(): array
     {
         return [
-            'value_date' => 'date:Y-md',
-            'booking_date' => 'date:Y-md',
+            'value_date' => 'date:Y-m-d',
+            'booking_date' => 'date:Y-m-d',
             'amount' => Money::class,
-            'created_at' => 'datetime:Y-m-d H:i:s',
         ];
     }
 
@@ -65,14 +64,9 @@ class Transaction extends FluxModel implements InteractsWithDataTables
         return $this->belongsTo(BankConnection::class);
     }
 
-    public function order(): BelongsTo
+    public function getAvatarUrl(): ?string
     {
-        return $this->belongsTo(Order::class);
-    }
-
-    public function getLabel(): ?string
-    {
-        return $this->counterpart_name;
+        return null;
     }
 
     public function getDescription(): ?string
@@ -80,13 +74,18 @@ class Transaction extends FluxModel implements InteractsWithDataTables
         return $this->purpose;
     }
 
+    public function getLabel(): ?string
+    {
+        return $this->counterpart_name;
+    }
+
     public function getUrl(): ?string
     {
         return null;
     }
 
-    public function getAvatarUrl(): ?string
+    public function order(): BelongsTo
     {
-        return null;
+        return $this->belongsTo(Order::class);
     }
 }

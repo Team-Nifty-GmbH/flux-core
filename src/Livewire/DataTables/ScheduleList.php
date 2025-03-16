@@ -6,8 +6,6 @@ use FluxErp\Models\Schedule;
 
 class ScheduleList extends BaseDataTable
 {
-    protected string $model = Schedule::class;
-
     public array $enabledCols = [
         'name',
         'description',
@@ -15,4 +13,6 @@ class ScheduleList extends BaseDataTable
         'due_at',
         'is_active',
     ];
+
+    protected string $model = Schedule::class;
 }

@@ -10,29 +10,27 @@ use Livewire\Attributes\Validate;
 
 class VatRateForm extends FluxForm
 {
+    public ?string $footer_text = null;
+
     #[Locked]
     public ?int $id = null;
-
-    public ?string $name = null;
-
-    public ?float $rate_percentage = null;
-
-    public ?string $footer_text = null;
 
     public bool $is_default = false;
 
     public bool $is_tax_exemption = false;
 
+    public ?string $name = null;
+
+    public ?float $rate_percentage = null;
+
     #[Validate(['required', 'numeric', 'min:0', 'max:99.99'])]
     public ?float $rate_percentage_frontend = null;
 
-    protected function getActions(): array
+    public function fill($values): void
     {
-        return [
-            'create' => CreateVatRate::class,
-            'update' => UpdateVatRate::class,
-            'delete' => DeleteVatRate::class,
-        ];
+        parent::fill($values);
+
+        $this->rate_percentage_frontend = bcmul($this->rate_percentage, 100);
     }
 
     public function save(): void
@@ -42,10 +40,12 @@ class VatRateForm extends FluxForm
         parent::save();
     }
 
-    public function fill($values): void
+    protected function getActions(): array
     {
-        parent::fill($values);
-
-        $this->rate_percentage_frontend = bcmul($this->rate_percentage, 100);
+        return [
+            'create' => CreateVatRate::class,
+            'update' => UpdateVatRate::class,
+            'delete' => DeleteVatRate::class,
+        ];
     }
 }

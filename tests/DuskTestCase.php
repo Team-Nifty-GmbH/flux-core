@@ -29,27 +29,18 @@ use Spatie\Tags\TagsServiceProvider;
 use Spatie\Translatable\TranslatableServiceProvider;
 use Spatie\TranslationLoader\TranslationServiceProvider;
 use Symfony\Component\Process\Process;
-use TeamNiftyGmbH\Calendar\CalendarServiceProvider;
+use TallStackUi\TallStackUiServiceProvider;
 use TeamNiftyGmbH\DataTable\DataTableServiceProvider;
-use WireUi\Heroicons\HeroiconsServiceProvider;
-use WireUi\Providers\WireUiServiceProvider;
 
 use function Orchestra\Testbench\package_path;
 
 abstract class DuskTestCase extends TestCase
 {
-    public Model $user;
+    protected static string $guard = 'web';
 
     public string $password = '#Password123';
 
-    protected static string $guard = 'web';
-
-    public static function setUpBeforeClass(): void
-    {
-        static::installAssets();
-
-        parent::setUpBeforeClass();
-    }
+    public Model $user;
 
     protected static function deleteDirectory(string $dir): bool
     {
@@ -104,6 +95,13 @@ abstract class DuskTestCase extends TestCase
         }
     }
 
+    public static function setUpBeforeClass(): void
+    {
+        static::installAssets();
+
+        parent::setUpBeforeClass();
+    }
+
     protected function setUp(): void
     {
         if (file_exists(__DIR__ . '/../../../.env')) {
@@ -128,59 +126,6 @@ abstract class DuskTestCase extends TestCase
         $this->login();
     }
 
-    protected function getApplicationProviders($app): array
-    {
-        return array_merge(parent::getApplicationProviders($app), [
-            TranslatableServiceProvider::class,
-            TranslationServiceProvider::class,
-            LivewireServiceProvider::class,
-            ViewServiceProvider::class,
-            PermissionServiceProvider::class,
-            TagsServiceProvider::class,
-            ScoutServiceProvider::class,
-            HeroiconsServiceProvider::class,
-            WireUiServiceProvider::class,
-            MediaLibraryServiceProvider::class,
-            CalendarServiceProvider::class,
-            QueryBuilderServiceProvider::class,
-            DataTableServiceProvider::class,
-            ActivitylogServiceProvider::class,
-            MediaLibraryServiceProvider::class,
-            FluxServiceProvider::class,
-            BindingServiceProvider::class,
-            SanctumServiceProvider::class,
-            WebPushServiceProvider::class,
-            MorphMapServiceProvider::class,
-        ]);
-    }
-
-    public function defineEnvironment($app): void
-    {
-        $app['config']->set('database.default', 'mysql');
-        $app['config']->set('app.debug', true);
-        $app['config']->set('database.connections.mysql.database', 'testing');
-        $app['config']->set('auth.defaults.guard', 'web');
-        $app['config']->set('flux.install_done', true);
-        $app['config']->set('session.driver', 'file');
-    }
-
-    public function openMenu(): void
-    {
-        $this->browse(function ($browser) {
-            $browser->script("window.Alpine.\$data(document.getElementById('main-navigation')).menuOpen = true;");
-            $browser->waitForText(__('Logged in as:'));
-        });
-    }
-
-    public function login(): void
-    {
-        $this->createLoginUser();
-
-        $this->browse(function (Browser $browser) {
-            $browser->loginAs($this->user->id, static::$guard);
-        });
-    }
-
     public function createLoginUser(): void
     {
         $language = Language::factory()->create();
@@ -201,5 +146,56 @@ abstract class DuskTestCase extends TestCase
         $this->user->password = $this->password;
         $this->user->is_active = true;
         $this->user->save();
+    }
+
+    public function defineEnvironment($app): void
+    {
+        $app['config']->set('database.default', 'mysql');
+        $app['config']->set('app.debug', true);
+        $app['config']->set('database.connections.mysql.database', 'testing');
+        $app['config']->set('auth.defaults.guard', 'web');
+        $app['config']->set('flux.install_done', true);
+        $app['config']->set('session.driver', 'file');
+    }
+
+    public function login(): void
+    {
+        $this->createLoginUser();
+
+        $this->browse(function (Browser $browser): void {
+            $browser->loginAs($this->user->id, static::$guard);
+        });
+    }
+
+    public function openMenu(): void
+    {
+        $this->browse(function ($browser): void {
+            $browser->script("window.Alpine.\$data(document.getElementById('main-navigation')).menuOpen = true;");
+            $browser->waitForText(__('Logged in as:'));
+        });
+    }
+
+    protected function getApplicationProviders($app): array
+    {
+        return array_merge(parent::getApplicationProviders($app), [
+            TranslatableServiceProvider::class,
+            TranslationServiceProvider::class,
+            LivewireServiceProvider::class,
+            ViewServiceProvider::class,
+            PermissionServiceProvider::class,
+            TagsServiceProvider::class,
+            ScoutServiceProvider::class,
+            TallStackUiServiceProvider::class,
+            MediaLibraryServiceProvider::class,
+            QueryBuilderServiceProvider::class,
+            DataTableServiceProvider::class,
+            ActivitylogServiceProvider::class,
+            MediaLibraryServiceProvider::class,
+            FluxServiceProvider::class,
+            BindingServiceProvider::class,
+            SanctumServiceProvider::class,
+            WebPushServiceProvider::class,
+            MorphMapServiceProvider::class,
+        ]);
     }
 }

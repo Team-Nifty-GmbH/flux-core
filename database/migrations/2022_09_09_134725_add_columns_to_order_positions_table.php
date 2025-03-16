@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('order_positions', function (Blueprint $table) {
+        Schema::table('order_positions', function (Blueprint $table): void {
             $table->boolean('is_alternative')->default(false)->after('sort_number');
 
             $table->decimal('unit_gross_price', 40, 10)
@@ -56,7 +56,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('order_positions', function (Blueprint $table) {
+        Schema::table('order_positions', function (Blueprint $table): void {
             $table->renameColumn('unit_net_price', 'unit_price');
             $table->renameColumn('vat_rate_percentage', 'vat_rate');
 

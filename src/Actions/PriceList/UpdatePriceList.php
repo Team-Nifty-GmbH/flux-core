@@ -14,14 +14,14 @@ use Illuminate\Validation\ValidationException;
 
 class UpdatePriceList extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdatePriceListRuleset::class;
-    }
-
     public static function models(): array
     {
         return [PriceList::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdatePriceListRuleset::class;
     }
 
     public function performAction(): Model

@@ -1,4 +1,4 @@
-<div class="py-6"  x-data="{translations: $wire.entangle('translations'), locale: @entangle('locale').live}">
+<div class="py-6" x-data="{translations: $wire.entangle('translations'), locale: @entangle('locale').live}">
     <div class="px-4 sm:px-6 lg:px-8">
         <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">
@@ -7,19 +7,19 @@
             </div>
             <div class="mt-6 sm:ml-16">
                 <div class="flex items-center py-3">
-                    <x-input spinner icon="search" placeholder="{{ __('Search…') }}" wire:model.live="search" />
+                    <x-input spinner icon="magnifying-glass" placeholder="{{ __('Search…') }}" wire:model.live="search" />
                 </div>
             </div>
             <div class="sm:ml-16">
-                <x-select
+                <x-select.styled
                     :label="__('Language')"
                     wire:model.live="locale"
+                    required
                     :options="$locales"
-                    :clearable="false"
                 />
             </div>
             <div class="mt-6 sm:ml-16">
-                <x-button primary :label="__('Create')" wire:click="show()" />
+                <x-button color="indigo" :text="__('Create')" wire:click="show()" />
             </div>
         </div>
         <div class="mt-8 flex flex-col">
@@ -46,7 +46,7 @@
                                     <td x-text="translation.group + '.' + translation.key" class="whitespace-nowrap py-4 pl-4 pr-4 text-sm font-medium text-gray-900 sm:pl-6" />
                                     <td x-text="translation.text[locale]" class="whitespace-nowrap py-4 pl-4 pr-4 text-sm font-medium text-gray-900 sm:pl-6" />
                                     <td class="whitespace-nowrap py-2 pl-2 pr-2 text-center text-sm text-gray-500">
-                                        <x-button x-on:click="$wire.show(index)" :label="__('Edit')" />
+                                        <x-button color="secondary" light x-on:click="$wire.show(index)" :text="__('Edit')" />
                                     </td>
                                 </tr>
                             </template>
@@ -58,34 +58,29 @@
         </div>
     </div>
 
-    <x-modal.card z-index="z-30" wire:model="showTranslationModal" :title="$index === -1 ? __('Create Translation') : __('Edit Translation')">
+    <x-modal id="edit-translation-modal" z-index="z-30" wire="showTranslationModal" :title="$index === -1 ? __('Create Translation') : __('Edit Translation')">
         <livewire:settings.translation-edit/>
-        <x-slot name="footer">
+        <x-slot:footer>
             <div x-data="{index: @entangle('index')}" class="w-full">
                 <div
                     class="flex justify-between gap-x-4">
                     @if(user_can('action.translation.delete'))
-                        <x-button x-bind:class="index > -1 || 'invisible'" flat negative label="{{ __('Delete') }}"
-                                  @click="window.$wireui.confirmDialog({
-                                                            title: '{{ __('Delete translation') }}',
-                                                            description: '{{ __('Do you really want to delete this translation entry?') }}',
-                                                            icon: 'error',
-                                                            accept: {
-                                                                label: '{{ __('Delete') }}',
-                                                                method: 'delete',
-                                                            },
-                                                            reject: {
-                                                                label: '{{ __('Cancel') }}',
-                                                            }
-                                                        }, $wire.__instance.id)
-                                                        " label="{{ __('Delete') }}"/>
+                        <x-button
+                            color="red"
+                            light
+                            x-bind:class="index > -1 || 'invisible'"
+                            flat
+                            :text="__('Delete')"
+                            wire:click="delete()"
+                            wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Translation')]) }}"
+                        />
                     @endif
-                    <div class="flex">
-                        <x-button flat :label="__('Cancel')" x-on:click="close"/>
-                        <x-button primary :label="__('Save')" wire:click="$dispatchTo('settings.translation-edit', 'save')"/>
+                    <div class="flex gap-x-2">
+                        <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('edit-translation-modal')"/>
+                        <x-button color="indigo" :text="__('Save')" wire:click="$dispatchTo('settings.translation-edit', 'save')"/>
                     </div>
                 </div>
             </div>
-        </x-slot>
-    </x-modal.card>
+        </x-slot:footer>
+    </x-modal>
 </div>

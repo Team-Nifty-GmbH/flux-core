@@ -9,14 +9,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class CreateRole extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateRoleRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Role::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateRoleRuleset::class;
     }
 
     public function performAction(): Model

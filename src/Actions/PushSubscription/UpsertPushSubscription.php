@@ -8,14 +8,14 @@ use NotificationChannels\WebPush\PushSubscription;
 
 class UpsertPushSubscription extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpsertPushSubscriptionRuleset::class;
-    }
-
     public static function models(): array
     {
         return [PushSubscription::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpsertPushSubscriptionRuleset::class;
     }
 
     public function performAction(): PushSubscription

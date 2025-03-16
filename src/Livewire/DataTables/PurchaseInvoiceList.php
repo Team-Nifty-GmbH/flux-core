@@ -26,10 +26,6 @@ class PurchaseInvoiceList extends BaseDataTable
 {
     use WithFileUploads;
 
-    protected string $model = PurchaseInvoice::class;
-
-    public ?string $includeBefore = 'flux::livewire.accounting.purchase-invoice-list.include-before';
-
     public array $enabledCols = [
         'url',
         'media.file_name',
@@ -41,107 +37,48 @@ class PurchaseInvoiceList extends BaseDataTable
         'url' => 'image',
     ];
 
-    public PurchaseInvoiceForm $purchaseInvoiceForm;
+    public ?string $includeBefore = 'flux::livewire.accounting.purchase-invoice-list.include-before';
 
     public MediaUploadForm $mediaForm;
 
-    public function mountSupportsCache(): void
-    {
-        parent::mountSupportsCache();
+    public PurchaseInvoiceForm $purchaseInvoiceForm;
 
-        if (! $this->userFilters) {
-            $this->userFilters = [
-                [
-                    [
-                        'column' => 'order_id',
-                        'operator' => 'is null',
-                        'value' => null,
-                    ],
-                ],
-            ];
-        }
-    }
-
-    protected function getBuilder(Builder $builder): Builder
-    {
-        return $builder->with(['media', 'invoice']);
-    }
-
-    public function downloadMedia(Media $media): false|BinaryFileResponse
-    {
-        if (! file_exists($media->getPath())) {
-            $this->notification()->error(__('The file does not exist anymore.'));
-
-            return false;
-        }
-
-        return response()->download($media->getPath(), $media->file_name);
-    }
-
-    protected function getLayout(): string
-    {
-        return 'tall-datatables::layouts.grid';
-    }
+    protected string $model = PurchaseInvoice::class;
 
     protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
-                ->color('primary')
-                ->label(__('Upload'))
+                ->color('indigo')
+                ->text(__('Upload'))
                 ->wireClick('edit'),
         ];
     }
 
-    protected function getViewData(): array
+    public function delete(): bool
     {
-        $purchaseOrderTypes = array_filter(
-            OrderTypeEnum::cases(),
-            fn (OrderTypeEnum $orderTypeEnum) => $orderTypeEnum->isPurchase()
-        );
+        try {
+            $this->purchaseInvoiceForm->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
 
-        return array_merge(
-            parent::getViewData(),
-            [
-                'clients' => resolve_static(Client::class, 'query')->pluck('name', 'id'),
-                'currencies' => resolve_static(Currency::class, 'query')->pluck('name', 'id'),
-                'orderTypes' => resolve_static(OrderType::class, 'query')
-                    ->whereIn('order_type_enum', $purchaseOrderTypes)
-                    ->pluck('name', 'id'),
-                'paymentTypes' => resolve_static(PaymentType::class, 'query')
-                    ->where('is_purchase', true)
-                    ->pluck('name', 'id'),
-                'vatRates' => resolve_static(VatRate::class, 'query')->pluck('name', 'id'),
-            ]
-        );
-    }
-
-    protected function getRowAttributes(): ComponentAttributeBag
-    {
-        return new ComponentAttributeBag(
-            [
-                'wire:click' => <<<'JS'
-                    edit(record.id)
-                JS,
-                'class' => 'cursor-pointer',
-            ]
-        );
-    }
-
-    protected function itemToArray($item): array
-    {
-        $itemArray = parent::itemToArray($item);
-
-        $media = $item->media->first() ?? $item->invoice;
-        if ($media?->hasGeneratedConversion('thumb_400x400')) {
-            $itemArray['url'] = $media?->getUrl('thumb_400x400');
-        } else {
-            $itemArray['url'] = $media?->getUrl();
+            return false;
         }
 
-        $itemArray['media.file_name'] = $media?->file_name;
+        $this->loadData();
 
-        return $itemArray;
+        return true;
+    }
+
+    public function downloadMedia(Media $media): false|BinaryFileResponse
+    {
+        if (! file_exists($media->getPath())) {
+            $this->notification()->error(__('The file does not exist anymore.'))->send();
+
+            return false;
+        }
+
+        return response()->download($media->getPath(), $media->file_name);
     }
 
     #[Renderless]
@@ -159,54 +96,8 @@ class PurchaseInvoiceList extends BaseDataTable
         }
 
         $this->js(<<<'JS'
-            $openModal('edit-purchase-invoice');
+            $modalOpen('edit-purchase-invoice-modal');
         JS);
-    }
-
-    public function save(): bool
-    {
-        $this->purchaseInvoiceForm->media = $this->mediaForm->uploadedFile[0] ?? null;
-        try {
-            $this->purchaseInvoiceForm->save();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
-    }
-
-    public function finish(): bool
-    {
-        try {
-            $this->purchaseInvoiceForm->finish();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
-    }
-
-    public function delete(): bool
-    {
-        try {
-            $this->purchaseInvoiceForm->delete();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
     }
 
     #[Renderless]
@@ -225,5 +116,116 @@ class PurchaseInvoiceList extends BaseDataTable
         $this->purchaseInvoiceForm->iban = $bankConnection?->iban;
 
         $this->purchaseInvoiceForm->findMostUsedLedgerAccountId();
+    }
+
+    public function finish(): bool
+    {
+        try {
+            $this->purchaseInvoiceForm->finish();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
+    }
+
+    public function mountSupportsCache(): void
+    {
+        parent::mountSupportsCache();
+
+        if (! $this->userFilters) {
+            $this->userFilters = [
+                [
+                    [
+                        'column' => 'order_id',
+                        'operator' => 'is null',
+                        'value' => null,
+                    ],
+                ],
+            ];
+        }
+    }
+
+    public function save(): bool
+    {
+        $this->purchaseInvoiceForm->media = $this->mediaForm->uploadedFile[0] ?? null;
+        try {
+            $this->purchaseInvoiceForm->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
+    }
+
+    protected function getBuilder(Builder $builder): Builder
+    {
+        return $builder->with(['media', 'invoice']);
+    }
+
+    protected function getLayout(): string
+    {
+        return 'tall-datatables::layouts.grid';
+    }
+
+    protected function getRowAttributes(): ComponentAttributeBag
+    {
+        return new ComponentAttributeBag(
+            [
+                'wire:click' => <<<'JS'
+                    edit(record.id)
+                JS,
+                'class' => 'cursor-pointer',
+            ]
+        );
+    }
+
+    protected function getViewData(): array
+    {
+        $purchaseOrderTypes = array_filter(
+            OrderTypeEnum::cases(),
+            fn (OrderTypeEnum $orderTypeEnum) => $orderTypeEnum->isPurchase()
+        );
+
+        return array_merge(
+            parent::getViewData(),
+            [
+                'clients' => resolve_static(Client::class, 'query')->get(['id', 'name'])->toArray(),
+                'currencies' => resolve_static(Currency::class, 'query')->get(['id', 'name'])->toArray(),
+                'orderTypes' => resolve_static(OrderType::class, 'query')
+                    ->whereIn('order_type_enum', $purchaseOrderTypes)
+                    ->get(['id', 'name'])
+                    ->toArray(),
+                'paymentTypes' => resolve_static(PaymentType::class, 'query')
+                    ->where('is_purchase', true)
+                    ->get(['id', 'name'])
+                    ->toArray(),
+                'vatRates' => resolve_static(VatRate::class, 'query')->get(['id', 'name'])->toArray(),
+            ]
+        );
+    }
+
+    protected function itemToArray($item): array
+    {
+        $itemArray = parent::itemToArray($item);
+
+        $media = $item->media->first() ?? $item->invoice;
+        if ($media?->hasGeneratedConversion('thumb_400x400')) {
+            $itemArray['url'] = $media?->getUrl('thumb_400x400');
+        } else {
+            $itemArray['url'] = $media?->getUrl();
+        }
+
+        $itemArray['media.file_name'] = $media?->file_name;
+
+        return $itemArray;
     }
 }

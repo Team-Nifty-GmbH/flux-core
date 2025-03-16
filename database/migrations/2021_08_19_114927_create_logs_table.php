@@ -8,7 +8,7 @@ class CreateLogsTable extends Migration
 {
     public function up(): void
     {
-        Schema::create('logs', function (Blueprint $table) {
+        Schema::create('logs', function (Blueprint $table): void {
             $table->id();
             $table->uuid('foreign_uuid')->nullable()->index();
             $table->longText('message');

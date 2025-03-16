@@ -30,16 +30,16 @@ class ProductController extends BaseController
         );
     }
 
-    public function update(Request $request, ProductService $productService): JsonResponse
+    public function delete(string $id, ProductService $productService): JsonResponse
     {
-        $response = $productService->update($request->all());
+        $response = $productService->delete($id);
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
-    public function delete(string $id, ProductService $productService): JsonResponse
+    public function update(Request $request, ProductService $productService): JsonResponse
     {
-        $response = $productService->delete($id);
+        $response = $productService->update($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }

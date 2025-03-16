@@ -24,8 +24,8 @@ class BankConnections extends BankConnectionList
     {
         return [
             DataTableButton::make()
-                ->label(__('Create'))
-                ->color('primary')
+                ->text(__('Create'))
+                ->color('indigo')
                 ->icon('plus')
                 ->attributes([
                     'x-on:click' => '$wire.edit()',
@@ -37,27 +37,13 @@ class BankConnections extends BankConnectionList
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
-                ->color('primary')
+                ->text(__('Edit'))
+                ->color('indigo')
                 ->icon('pencil')
                 ->attributes([
                     'x-on:click' => '$wire.edit(record.id)',
                 ]),
         ];
-    }
-
-    protected function getViewData(): array
-    {
-        return array_merge(parent::getViewData(), [
-            'ledgerAccounts' => resolve_static(LedgerAccount::class, 'query')
-                ->select(['id', 'name'])
-                ->get()
-                ->toArray(),
-            'currencies' => resolve_static(Currency::class, 'query')
-                ->select(['id', 'name'])
-                ->get()
-                ->toArray(),
-        ]);
     }
 
     public function edit(?BankConnection $record = null): void
@@ -67,7 +53,7 @@ class BankConnections extends BankConnectionList
 
         $this->js(
             <<<'JS'
-               $openModal('bank-connection-modal');
+               $modalOpen('bank-connection-modal');
             JS
         );
     }
@@ -85,5 +71,19 @@ class BankConnections extends BankConnectionList
         $this->loadData();
 
         return true;
+    }
+
+    protected function getViewData(): array
+    {
+        return array_merge(parent::getViewData(), [
+            'ledgerAccounts' => resolve_static(LedgerAccount::class, 'query')
+                ->select(['id', 'name'])
+                ->get()
+                ->toArray(),
+            'currencies' => resolve_static(Currency::class, 'query')
+                ->select(['id', 'name'])
+                ->get()
+                ->toArray(),
+        ]);
     }
 }

@@ -10,14 +10,14 @@ use Illuminate\Support\Facades\Validator;
 
 class UpdateProductOption extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateProductOptionRuleset::class;
-    }
-
     public static function models(): array
     {
         return [ProductOption::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateProductOptionRuleset::class;
     }
 
     public function performAction(): Model

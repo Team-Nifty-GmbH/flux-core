@@ -10,14 +10,14 @@ use Illuminate\Support\Facades\Validator;
 
 class UpdateAddressType extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateAddressTypeRuleset::class;
-    }
-
     public static function models(): array
     {
         return [AddressType::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateAddressTypeRuleset::class;
     }
 
     public function performAction(): Model

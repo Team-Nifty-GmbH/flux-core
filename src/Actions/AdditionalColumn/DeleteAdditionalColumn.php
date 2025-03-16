@@ -8,14 +8,14 @@ use FluxErp\Rulesets\AdditionalColumn\DeleteAdditionalColumnRuleset;
 
 class DeleteAdditionalColumn extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeleteAdditionalColumnRuleset::class;
-    }
-
     public static function models(): array
     {
         return [AdditionalColumn::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeleteAdditionalColumnRuleset::class;
     }
 
     public function performAction(): ?bool

@@ -15,7 +15,7 @@ class CartItem extends FluxModel implements Sortable
 
     protected static function booted(): void
     {
-        static::saving(function (CartItem $cartItem) {
+        static::saving(function (CartItem $cartItem): void {
             $cartItem->loadMissing([
                 'cart.priceList:id,is_net',
                 'vatRate:id,rate_percentage',
@@ -30,7 +30,7 @@ class CartItem extends FluxModel implements Sortable
                 : $cartItem->total;
         });
 
-        static::saved(function (CartItem $cartItem) {
+        static::saved(function (CartItem $cartItem): void {
             // Update the cart's updated_at timestamp to reflect the change in the cart item
             // it also triggers the broadcasting of the cart update
             $cartItem->cart->touch();

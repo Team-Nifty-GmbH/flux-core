@@ -8,7 +8,7 @@ class CreateAddressAddressTypeTable extends Migration
 {
     public function up(): void
     {
-        Schema::create('address_address_type', function (Blueprint $table) {
+        Schema::create('address_address_type', function (Blueprint $table): void {
             $table->unsignedBigInteger('address_id')
                 ->comment('A unique identifier number for the table addresses.');
             $table->unsignedBigInteger('address_type_id')

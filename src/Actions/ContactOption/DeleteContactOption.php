@@ -8,14 +8,14 @@ use FluxErp\Rulesets\ContactOption\DeleteContactOptionRuleset;
 
 class DeleteContactOption extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeleteContactOptionRuleset::class;
-    }
-
     public static function models(): array
     {
         return [ContactOption::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeleteContactOptionRuleset::class;
     }
 
     public function performAction(): ?bool

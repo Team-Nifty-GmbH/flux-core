@@ -11,14 +11,19 @@ trait Printable
         static::$registeredPrintViews[$name] = $viewClass;
     }
 
+    public function getAvailableViews(): array
+    {
+        return array_keys(array_merge($this->getPrintViews(), static::$registeredPrintViews));
+    }
+
     public function getPrintViews(): array
     {
         return [];
     }
 
-    public function getAvailableViews(): array
+    public function print(): \FluxErp\Printing\Printable
     {
-        return array_keys(array_merge($this->getPrintViews(), static::$registeredPrintViews));
+        return new \FluxErp\Printing\Printable($this);
     }
 
     public function resolvePrintViews(): array
@@ -37,10 +42,5 @@ trait Printable
         }
 
         return array_filter($printViews);
-    }
-
-    public function print(): \FluxErp\Printing\Printable
-    {
-        return new \FluxErp\Printing\Printable($this);
     }
 }

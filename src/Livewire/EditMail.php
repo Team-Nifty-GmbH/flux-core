@@ -23,9 +23,9 @@ class EditMail extends Component
 {
     use Actions, WithFileUploads;
 
-    public CommunicationForm $mailMessage;
-
     public array $files = [];
+
+    public CommunicationForm $mailMessage;
 
     public array $mailMessages = [];
 
@@ -62,6 +62,14 @@ class EditMail extends Component
     }
 
     #[Renderless]
+    public function clear(): void
+    {
+        $this->mailMessage->reset();
+
+        $this->cleanupOldUploads();
+    }
+
+    #[Renderless]
     public function create(array|CommunicationForm|Model $values): void
     {
         $this->multiple = false;
@@ -75,25 +83,8 @@ class EditMail extends Component
         }
 
         $this->js(<<<'JS'
-            $openModal('edit-mail');
+            $modalOpen('edit-mail');
         JS);
-    }
-
-    #[Renderless]
-    public function createMany(Collection|array $mailMessages): void
-    {
-        $sessionKey = $this->sessionKey;
-        $this->create($mailMessages[0]);
-        $this->sessionKey = $sessionKey;
-        $this->mailMessage->reset('attachments');
-
-        if (! $sessionKey) {
-            $this->mailMessages = $mailMessages;
-        }
-
-        if (count($mailMessages) > 1) {
-            $this->multiple = true;
-        }
     }
 
     #[Renderless]
@@ -140,17 +131,26 @@ class EditMail extends Component
     }
 
     #[Renderless]
-    public function updatedFiles(): void
+    public function createMany(Collection|array $mailMessages): void
     {
-        $files = array_map(function ($file) {
-            /** @var TemporaryUploadedFile $file */
-            return [
-                'name' => $file->getClientOriginalName(),
-                'path' => $file->getRealPath(),
-            ];
-        }, $this->files);
+        $sessionKey = $this->sessionKey;
+        $this->create($mailMessages[0]);
+        $this->sessionKey = $sessionKey;
+        $this->mailMessage->reset('attachments');
 
-        $this->mailMessage->attachments = array_merge($this->mailMessage->attachments, $files);
+        if (! $sessionKey) {
+            $this->mailMessages = $mailMessages;
+        }
+
+        if (count($mailMessages) > 1) {
+            $this->multiple = true;
+        }
+    }
+
+    #[Renderless]
+    public function downloadAttachment(Media $media): BinaryFileResponse
+    {
+        return response()->download($media->getPath());
     }
 
     #[Renderless]
@@ -217,28 +217,28 @@ class EditMail extends Component
         }
 
         if ($exceptions === 0) {
-            $this->notification()->success(__('Email(s) sent successfully!'));
+            $this->notification()->success(__('Email(s) sent successfully!'))->send();
         }
 
         if (count($this->mailMessages) === $exceptions) {
-            $this->notification()->error(__('Failed to send emails!'));
+            $this->notification()->error(__('Failed to send emails!'))->send();
         }
 
         return true;
     }
 
     #[Renderless]
-    public function downloadAttachment(Media $media): BinaryFileResponse
+    public function updatedFiles(): void
     {
-        return response()->download($media->getPath());
-    }
+        $files = array_map(function ($file) {
+            /** @var TemporaryUploadedFile $file */
+            return [
+                'name' => $file->getClientOriginalName(),
+                'path' => $file->getRealPath(),
+            ];
+        }, $this->files);
 
-    #[Renderless]
-    public function clear(): void
-    {
-        $this->mailMessage->reset();
-
-        $this->cleanupOldUploads();
+        $this->mailMessage->attachments = array_merge($this->mailMessage->attachments, $files);
     }
 
     protected function getBladeParameters(array|CommunicationForm $mailMessage): array|SerializableClosure|null

@@ -18,11 +18,6 @@ class TicketService
         return CreateTicket::make($data)->validate()->execute();
     }
 
-    public function update(array $data): Model
-    {
-        return UpdateTicket::make($data)->validate()->execute();
-    }
-
     public function delete(string $id): array
     {
         try {
@@ -48,5 +43,10 @@ class TicketService
                 ToggleTicketUser::make($data)->validate()->execute()['attached'] ? 'attached' : 'detached'
             )
         );
+    }
+
+    public function update(array $data): Model
+    {
+        return UpdateTicket::make($data)->validate()->execute();
     }
 }

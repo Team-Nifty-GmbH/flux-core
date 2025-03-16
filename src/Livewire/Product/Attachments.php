@@ -7,9 +7,9 @@ use FluxErp\Models\Product;
 
 class Attachments extends FolderTree
 {
-    public ?string $modelType = Product::class;
-
     public bool $card = true;
+
+    public ?string $modelType = Product::class;
 
     public ?string $title = 'Product Attachments';
 

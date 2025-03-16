@@ -11,14 +11,14 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateCountry extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateCountryRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Country::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateCountryRuleset::class;
     }
 
     public function performAction(): Model

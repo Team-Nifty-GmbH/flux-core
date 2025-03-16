@@ -13,16 +13,6 @@ class ExistsWithForeign implements DataAwareRule, InvokableRule
     protected array $data;
 
     /**
-     * @return $this|ExistsWithForeign
-     */
-    public function setData($data): self
-    {
-        $this->data = $data;
-
-        return $this;
-    }
-
-    /**
      * @param  string  $foreignAttribute  Example: client_id, the value is retrieved from the validation data array
      *                                    and has to match $attributeColumn on $table (or $throughTable if set).
      * @param  string  $table  Example: addresses, table used for the regular exists.
@@ -98,7 +88,7 @@ class ExistsWithForeign implements DataAwareRule, InvokableRule
             $query->where($this->table . '.' . $this->column, $value);
             $query->join(
                 $this->throughTable,
-                function ($join) use ($foreignAttributeValue) {
+                function ($join) use ($foreignAttributeValue): void {
                     $join->on(
                         $this->table . '.' . $this->throughLocal,
                         '=',
@@ -131,5 +121,15 @@ class ExistsWithForeign implements DataAwareRule, InvokableRule
                 )->translate();
             }
         }
+    }
+
+    /**
+     * @return $this|ExistsWithForeign
+     */
+    public function setData($data): self
+    {
+        $this->data = $data;
+
+        return $this;
     }
 }

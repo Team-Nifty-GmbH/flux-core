@@ -20,17 +20,17 @@ class ProductPropertyGroups extends ProductPropertyGroupList
 {
     use Actions;
 
-    protected ?string $includeBefore = 'flux::livewire.settings.product-property-groups';
-
     public ProductPropertyGroupForm $productPropertyGroup;
+
+    protected ?string $includeBefore = 'flux::livewire.settings.product-property-groups';
 
     protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
-                ->label(__('Add'))
+                ->text(__('New'))
                 ->icon('plus')
-                ->color('primary')
+                ->color('indigo')
                 ->wireClick('edit')
                 ->when(
                     fn () => resolve_static(CreateProductPropertyGroup::class, 'canPerformAction', [false])
@@ -42,41 +42,40 @@ class ProductPropertyGroups extends ProductPropertyGroupList
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
+                ->text(__('Edit'))
                 ->icon('pencil')
-                ->color('primary')
+                ->color('indigo')
                 ->wireClick('edit(record.id)')
                 ->when(
                     fn () => resolve_static(UpdateProductPropertyGroup::class, 'canPerformAction', [false])
                 ),
             DataTableButton::make()
-                ->label(__('Delete'))
+                ->text(__('Delete'))
+                ->color('red')
                 ->icon('trash')
-                ->color('negative')
+                ->when(resolve_static(DeleteProductPropertyGroup::class, 'canPerformAction', [false]))
                 ->attributes([
-                    'wire:flux-confirm.icon.error' => __(
-                        'wire:confirm.delete',
-                        ['model' => __('Product Property Group')]
-                    ),
                     'wire:click' => 'delete(record.id)',
-                ])
-                ->when(
-                    fn () => resolve_static(DeleteProductPropertyGroup::class, 'canPerformAction', [false])
-                ),
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Product Property Group')]),
+                ]),
         ];
     }
 
-    protected function getViewData(): array
+    #[Renderless]
+    public function delete(ProductPropertyGroup $productPropertyGroup): void
     {
-        return array_merge(
-            parent::getViewData(),
-            [
-                'propertyTypes' => array_map(
-                    fn ($item) => ['name' => $item, 'label' => __(Str::headline($item))],
-                    PropertyTypeEnum::values()
-                ),
-            ]
-        );
+        $this->productPropertyGroup->reset();
+        $this->productPropertyGroup->fill($productPropertyGroup);
+
+        try {
+            $this->productPropertyGroup->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->loadData();
     }
 
     #[Renderless]
@@ -87,7 +86,7 @@ class ProductPropertyGroups extends ProductPropertyGroupList
         $this->productPropertyGroup->fill($productPropertyGroup);
 
         $this->js(<<<'JS'
-            $openModal('edit-product-property-group');
+            $modalOpen('edit-product-property-group-modal');
         JS);
     }
 
@@ -107,18 +106,16 @@ class ProductPropertyGroups extends ProductPropertyGroupList
         return true;
     }
 
-    #[Renderless]
-    public function delete(ProductPropertyGroup $productPropertyGroup): void
+    protected function getViewData(): array
     {
-        $this->productPropertyGroup->fill($productPropertyGroup);
-        try {
-            $this->productPropertyGroup->delete();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return;
-        }
-
-        $this->loadData();
+        return array_merge(
+            parent::getViewData(),
+            [
+                'propertyTypes' => array_map(
+                    fn ($item) => ['name' => $item, 'label' => __(Str::headline($item))],
+                    PropertyTypeEnum::values()
+                ),
+            ]
+        );
     }
 }

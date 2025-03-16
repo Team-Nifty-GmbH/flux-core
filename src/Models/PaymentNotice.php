@@ -23,13 +23,13 @@ class PaymentNotice extends FluxModel
         return $this->belongsTo(Client::class);
     }
 
-    public function paymentType(): BelongsTo
-    {
-        return $this->belongsTo(PaymentType::class, 'payment_type_id');
-    }
-
     public function documentType(): BelongsTo
     {
         return $this->belongsTo(DocumentType::class, 'document_type_id');
+    }
+
+    public function paymentType(): BelongsTo
+    {
+        return $this->belongsTo(PaymentType::class, 'payment_type_id');
     }
 }

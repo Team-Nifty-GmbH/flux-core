@@ -11,14 +11,14 @@ use Illuminate\Support\Facades\Validator;
 
 class UpdateClient extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateClientRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Client::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateClientRuleset::class;
     }
 
     public function performAction(): Model

@@ -10,7 +10,7 @@ class WatchlistCardTest extends TestCase
 {
     protected string $livewireComponent = WatchlistCard::class;
 
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test($this->livewireComponent)
             ->assertStatus(200);

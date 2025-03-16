@@ -7,14 +7,14 @@ namespace FluxErp\DataType;
  */
 class ObjectHandler implements HandlerInterface
 {
-    public function getDataType(): string
-    {
-        return 'object';
-    }
-
     public function canHandleValue(mixed $value): bool
     {
         return is_object($value);
+    }
+
+    public function getDataType(): string
+    {
+        return 'object';
     }
 
     public function serializeValue(mixed $value): string

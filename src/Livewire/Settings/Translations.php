@@ -9,17 +9,17 @@ use Livewire\Component;
 
 class Translations extends Component
 {
-    public array $translations;
-
-    public array $locales;
+    public int $index = -1;
 
     public string $locale;
 
-    public int $index = -1;
+    public array $locales;
+
+    public string $search = '';
 
     public bool $showTranslationModal = false;
 
-    public string $search = '';
+    public array $translations;
 
     protected $listeners = [
         'closeModal',
@@ -39,19 +39,6 @@ class Translations extends Component
     public function render(): View
     {
         return view('flux::livewire.settings.translations');
-    }
-
-    public function show(?int $index = null): void
-    {
-        $this->index = is_null($index) ? -1 : $index;
-
-        if (! is_null($index)) {
-            $this->dispatch('show', $this->locale, $this->translations[$index])->to('settings.translation-edit');
-        } else {
-            $this->dispatch('show', $this->locale)->to('settings.translation-edit');
-        }
-
-        $this->showTranslationModal = true;
     }
 
     public function closeModal(array $translation, bool $delete = false): void
@@ -76,6 +63,19 @@ class Translations extends Component
     public function delete(): void
     {
         $this->dispatch('delete')->to('settings.translation-edit');
+    }
+
+    public function show(?int $index = null): void
+    {
+        $this->index = is_null($index) ? -1 : $index;
+
+        if (! is_null($index)) {
+            $this->dispatch('show', $this->locale, $this->translations[$index])->to('settings.translation-edit');
+        } else {
+            $this->dispatch('show', $this->locale)->to('settings.translation-edit');
+        }
+
+        $this->showTranslationModal = true;
     }
 
     public function updatedLocale(): void

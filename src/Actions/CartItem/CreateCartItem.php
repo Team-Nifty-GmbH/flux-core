@@ -12,20 +12,20 @@ use FluxErp\Rulesets\CartItem\CreateCartItemRuleset;
 
 class CreateCartItem extends FluxAction
 {
+    protected static bool $hasPermission = false;
+
     protected ?Cart $cart;
 
     protected ?Product $product = null;
 
-    protected static bool $hasPermission = false;
+    public static function models(): array
+    {
+        return [CartItem::class];
+    }
 
     protected function getRulesets(): string|array
     {
         return CreateCartItemRuleset::class;
-    }
-
-    public static function models(): array
-    {
-        return [CartItem::class];
     }
 
     public function performAction(): mixed

@@ -6,11 +6,9 @@ use FluxErp\Traits\HasAdditionalColumns;
 
 abstract class FluxRuleset
 {
-    protected static ?string $model = null;
-
     protected static bool $addAdditionalColumnRules = true;
 
-    abstract public function rules(): array;
+    protected static ?string $model = null;
 
     public static function getRules(): array
     {
@@ -26,4 +24,6 @@ abstract class FluxRuleset
 
         return $rules;
     }
+
+    abstract public function rules(): array;
 }

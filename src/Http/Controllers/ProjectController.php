@@ -38,6 +38,36 @@ class ProjectController extends BaseController
         );
     }
 
+    public function delete(string $id): JsonResponse
+    {
+        try {
+            DeleteProject::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
+            return ResponseHelper::createResponseFromBase(
+                statusCode: array_key_exists('id', $e->errors()) ? 404 : 423,
+                data: $e->errors()
+            );
+        }
+
+        return ResponseHelper::createResponseFromBase(
+            statusCode: 204,
+            statusMessage: __('project deleted')
+        );
+    }
+
+    public function finish(Request $request): JsonResponse
+    {
+        $project = FinishProject::make($request->all())
+            ->validate()
+            ->execute();
+
+        return ResponseHelper::createResponseFromBase(
+            statusCode: 200,
+            data: $project,
+            statusMessage: 'project ' . ($request->finish ? 'finished' : 'reopened')
+        );
+    }
+
     public function update(Request $request): JsonResponse
     {
         $data = $request->all();
@@ -83,35 +113,5 @@ class ProjectController extends BaseController
                 statusMessage: $statusCode === 422 ? null : __('project(s) updated'),
                 bulk: true
             );
-    }
-
-    public function delete(string $id): JsonResponse
-    {
-        try {
-            DeleteProject::make(['id' => $id])->validate()->execute();
-        } catch (ValidationException $e) {
-            return ResponseHelper::createResponseFromBase(
-                statusCode: array_key_exists('id', $e->errors()) ? 404 : 423,
-                data: $e->errors()
-            );
-        }
-
-        return ResponseHelper::createResponseFromBase(
-            statusCode: 204,
-            statusMessage: __('project deleted')
-        );
-    }
-
-    public function finish(Request $request): JsonResponse
-    {
-        $project = FinishProject::make($request->all())
-            ->validate()
-            ->execute();
-
-        return ResponseHelper::createResponseFromBase(
-            statusCode: 200,
-            data: $project,
-            statusMessage: 'project ' . ($request->finish ? 'finished' : 'reopened')
-        );
     }
 }

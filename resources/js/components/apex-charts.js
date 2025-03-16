@@ -82,6 +82,7 @@ export default function($wire) {
         mapLivewireData(options) {
             options = JSON.parse(JSON.stringify(options));
             options.series = options.series || [];
+            options.labels = options.labels || [];
 
             options.chart.type = this.chartType || options.chart.type;
 
@@ -96,11 +97,13 @@ export default function($wire) {
                     return series;
                 }
 
-                const colorString = series.color.split('-');
-                const color = colorString[0] || 'blue';
-                const weight = colorString[1] || 500;
-                series.color = window.colors[color][weight];
-                series.colorName = color;
+                if (! series.color.startsWith('#')) {
+                    const colorString = series.color.split('-');
+                    const color = colorString[0] || 'blue';
+                    const weight = colorString[1] || 500;
+                    series.color = window.colors[color][weight];
+                    series.colorName = color;
+                }
 
                 return series;
             });

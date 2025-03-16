@@ -17,17 +17,17 @@ class ProductOptionGroups extends ProductOptionGroupList
 {
     use Actions;
 
-    protected ?string $includeBefore = 'flux::livewire.settings.product-option-groups';
-
     public ProductOptionGroupForm $productOptionGroupForm;
+
+    protected ?string $includeBefore = 'flux::livewire.settings.product-option-groups';
 
     protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
-                ->label(__('Add'))
+                ->text(__('New'))
                 ->icon('plus')
-                ->color('primary')
+                ->color('indigo')
                 ->wireClick('edit')
                 ->when(
                     fn () => resolve_static(CreateProductOptionGroup::class, 'canPerformAction', [false])
@@ -39,19 +39,19 @@ class ProductOptionGroups extends ProductOptionGroupList
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
+                ->text(__('Edit'))
                 ->icon('pencil')
-                ->color('primary')
+                ->color('indigo')
                 ->wireClick('edit(record.id)')
                 ->when(
                     fn () => resolve_static(UpdateProductOptionGroup::class, 'canPerformAction', [false])
                 ),
             DataTableButton::make()
-                ->label(__('Delete'))
+                ->text(__('Delete'))
                 ->icon('trash')
-                ->color('negative')
+                ->color('red')
                 ->attributes([
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Product Option Group')]),
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Product Option Group')]),
                     'wire:click' => 'delete(record.id)',
                 ])
                 ->when(
@@ -60,20 +60,11 @@ class ProductOptionGroups extends ProductOptionGroupList
         ];
     }
 
-    public function edit(?ProductOptionGroup $productOptionGroup = null): void
+    public function delete(ProductOptionGroup $productOptionGroup): void
     {
-        $productOptionGroup->loadMissing('productOptions:id,product_option_group_id,name');
         $this->productOptionGroupForm->reset();
         $this->productOptionGroupForm->fill($productOptionGroup);
 
-        $this->js(<<<'JS'
-            $openModal('edit-product-option-group');
-        JS);
-    }
-
-    public function delete(ProductOptionGroup $productOptionGroup): void
-    {
-        $this->productOptionGroupForm->fill($productOptionGroup);
         try {
             $this->productOptionGroupForm->delete();
         } catch (ValidationException|UnauthorizedException $e) {
@@ -83,6 +74,17 @@ class ProductOptionGroups extends ProductOptionGroupList
         }
 
         $this->loadData();
+    }
+
+    public function edit(?ProductOptionGroup $productOptionGroup = null): void
+    {
+        $productOptionGroup->loadMissing('productOptions:id,product_option_group_id,name');
+        $this->productOptionGroupForm->reset();
+        $this->productOptionGroupForm->fill($productOptionGroup);
+
+        $this->js(<<<'JS'
+            $modalOpen('edit-product-option-group-modal');
+        JS);
     }
 
     public function save(): bool

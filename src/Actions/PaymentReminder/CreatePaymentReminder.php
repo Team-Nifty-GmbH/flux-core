@@ -11,14 +11,14 @@ use Illuminate\Validation\ValidationException;
 
 class CreatePaymentReminder extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreatePaymentReminderRuleset::class;
-    }
-
     public static function models(): array
     {
         return [PaymentReminder::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreatePaymentReminderRuleset::class;
     }
 
     public function performAction(): PaymentReminder

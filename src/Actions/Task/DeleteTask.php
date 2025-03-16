@@ -8,14 +8,14 @@ use FluxErp\Rulesets\Task\DeleteTaskRuleset;
 
 class DeleteTask extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeleteTaskRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Task::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeleteTaskRuleset::class;
     }
 
     public function performAction(): ?bool

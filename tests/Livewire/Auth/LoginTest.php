@@ -18,25 +18,22 @@ class LoginTest extends BaseSetup
         app('auth')->logout();
     }
 
-    public function test_renders_successfully()
+    public function test_login_link(): void
     {
-        Livewire::test(Login::class)
-            ->assertStatus(200);
-    }
+        Mail::fake();
 
-    public function test_login_wrong_password()
-    {
         Livewire::test(Login::class)
-            ->set('email', 'noexistingmail@example.com')
-            ->set('password', 'wrongpassword')
+            ->set('email', $this->user->email)
             ->call('login')
             ->assertNoRedirect()
-            ->assertDispatched('wireui:notification');
+            ->assertDispatched('tallstackui:toast');
 
         $this->assertGuest();
+
+        Mail::assertQueued(MagicLoginLink::class);
     }
 
-    public function test_login_successful()
+    public function test_login_successful(): void
     {
         Livewire::test(Login::class)
             ->set('email', $this->user->email)
@@ -47,18 +44,21 @@ class LoginTest extends BaseSetup
         $this->assertAuthenticatedAs($this->user);
     }
 
-    public function test_login_link()
+    public function test_login_wrong_password(): void
     {
-        Mail::fake();
-
         Livewire::test(Login::class)
-            ->set('email', $this->user->email)
+            ->set('email', 'noexistingmail@example.com')
+            ->set('password', 'wrongpassword')
             ->call('login')
             ->assertNoRedirect()
-            ->assertDispatched('wireui:notification');
+            ->assertDispatched('tallstackui:toast');
 
         $this->assertGuest();
+    }
 
-        Mail::assertQueued(MagicLoginLink::class);
+    public function test_renders_successfully(): void
+    {
+        Livewire::test(Login::class)
+            ->assertStatus(200);
     }
 }

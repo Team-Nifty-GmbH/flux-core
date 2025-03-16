@@ -19,14 +19,14 @@ use Illuminate\Validation\ValidationException;
 
 class CreateOrdersFromWorkTimes extends DispatchableFluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateOrdersFromWorkTimesRuleset::class;
-    }
-
     public static function models(): array
     {
         return [WorkTime::class, Order::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateOrdersFromWorkTimesRuleset::class;
     }
 
     public function performAction(): OrderCollection
@@ -41,7 +41,7 @@ class CreateOrdersFromWorkTimes extends DispatchableFluxAction
         $selectedIds = array_column($this->getData('work_times'), 'id');
 
         $contacts = resolve_static(Contact::class, 'query')
-            ->withWhereHas('workTimes', function ($query) use ($selectedIds) {
+            ->withWhereHas('workTimes', function ($query) use ($selectedIds): void {
                 $query->whereKey($selectedIds)
                     ->where('is_locked', true)
                     ->where('is_daily_work_time', false)

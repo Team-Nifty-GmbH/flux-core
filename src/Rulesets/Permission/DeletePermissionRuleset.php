@@ -8,9 +8,9 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class DeletePermissionRuleset extends FluxRuleset
 {
-    protected static ?string $model = Permission::class;
-
     protected static bool $addAdditionalColumnRules = false;
+
+    protected static ?string $model = Permission::class;
 
     public function rules(): array
     {

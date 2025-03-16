@@ -8,9 +8,9 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class DeleteWorkTimeTypeRuleset extends FluxRuleset
 {
-    protected static ?string $model = WorkTimeType::class;
-
     protected static bool $addAdditionalColumnRules = false;
+
+    protected static ?string $model = WorkTimeType::class;
 
     public function rules(): array
     {

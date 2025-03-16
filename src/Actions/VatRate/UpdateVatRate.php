@@ -9,14 +9,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class UpdateVatRate extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateVatRateRuleset::class;
-    }
-
     public static function models(): array
     {
         return [VatRate::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateVatRateRuleset::class;
     }
 
     public function performAction(): Model

@@ -8,14 +8,14 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('print_data', function (Blueprint $table) {
+        Schema::table('print_data', function (Blueprint $table): void {
             $table->integer('sort')->after('template_name')->nullable();
         });
     }
 
     public function down(): void
     {
-        Schema::table('print_data', function (Blueprint $table) {
+        Schema::table('print_data', function (Blueprint $table): void {
             $table->dropColumn('sort');
         });
     }

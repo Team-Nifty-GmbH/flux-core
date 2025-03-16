@@ -18,6 +18,18 @@ trait SoftDeletes
         BaseSoftDeletes::restore as restoreBase;
     }
 
+    public function getDeletedBy(): ?Model
+    {
+        $user = $this->getRawOriginal($this->getDeletedByColumn());
+
+        return $user ? morph_to($user) : null;
+    }
+
+    public function getDeletedByColumn(): string
+    {
+        return defined(static::class . '::DELETED_BY') ? static::DELETED_BY : 'deleted_by';
+    }
+
     public function initializeSoftDeletes(): void
     {
         $this->initializeSoftDeletesBase();
@@ -25,6 +37,13 @@ trait SoftDeletes
         $this->mergeCasts([
             $this->getDeletedByColumn() => MorphTo::class . ':name',
         ]);
+    }
+
+    public function restore(): bool
+    {
+        $this->{$this->getDeletedByColumn()} = null;
+
+        return $this->restoreBase();
     }
 
     protected function runSoftDelete(): void
@@ -37,24 +56,5 @@ trait SoftDeletes
                 ? auth()->user()->getMorphClass() . ':' . auth()->user()->getKey()
                 : null,
         ]);
-    }
-
-    public function restore(): bool
-    {
-        $this->{$this->getDeletedByColumn()} = null;
-
-        return $this->restoreBase();
-    }
-
-    public function getDeletedByColumn(): string
-    {
-        return defined(static::class . '::DELETED_BY') ? static::DELETED_BY : 'deleted_by';
-    }
-
-    public function getDeletedBy(): ?Model
-    {
-        $user = $this->getRawOriginal($this->getDeletedByColumn());
-
-        return $user ? morph_to($user) : null;
     }
 }

@@ -9,14 +9,14 @@ use Illuminate\Database\Eloquent\Collection;
  */
 class ModelCollectionHandler implements HandlerInterface
 {
-    public function getDataType(): string
-    {
-        return 'collection';
-    }
-
     public function canHandleValue(mixed $value): bool
     {
         return $value instanceof Collection;
+    }
+
+    public function getDataType(): string
+    {
+        return 'collection';
     }
 
     public function serializeValue(mixed $value): string

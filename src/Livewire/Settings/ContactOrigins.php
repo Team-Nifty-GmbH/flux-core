@@ -15,16 +15,16 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class ContactOrigins extends ContactOriginList
 {
-    protected ?string $includeBefore = 'flux::livewire.settings.contact-origins';
-
     public ContactOriginForm $contactOriginForm;
+
+    protected ?string $includeBefore = 'flux::livewire.settings.contact-origins';
 
     protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
-                ->label(__('Create'))
-                ->color('primary')
+                ->text(__('Create'))
+                ->color('indigo')
                 ->icon('plus')
                 ->when(resolve_static(CreateContactOrigin::class, 'canPerformAction', [false]))
                 ->wireClick('edit'),
@@ -35,19 +35,19 @@ class ContactOrigins extends ContactOriginList
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
+                ->text(__('Edit'))
                 ->icon('pencil')
-                ->color('primary')
+                ->color('indigo')
                 ->when(resolve_static(UpdateContactOrigin::class, 'canPerformAction', [false]))
                 ->wireClick('edit(record.id)'),
             DataTableButton::make()
-                ->label(__('Delete'))
-                ->color('negative')
+                ->text(__('Delete'))
+                ->color('red')
                 ->icon('trash')
                 ->when(resolve_static(DeleteContactOrigin::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'delete(record.id)',
-                    'wire:flux-confirm.icon.error' => __(
+                    'wire:flux-confirm.type.error' => __(
                         'wire:confirm.delete',
                         ['model' => __('Contact Origin')]
                     ),
@@ -56,21 +56,13 @@ class ContactOrigins extends ContactOriginList
     }
 
     #[Renderless]
-    public function edit(ContactOrigin $contactOrigin): void
+    public function delete(ContactOrigin $contactOrigin): bool
     {
         $this->contactOriginForm->reset();
         $this->contactOriginForm->fill($contactOrigin);
 
-        $this->js(<<<'JS'
-            $openModal('edit-contact-origin');
-        JS);
-    }
-
-    #[Renderless]
-    public function save(): bool
-    {
         try {
-            $this->contactOriginForm->save();
+            $this->contactOriginForm->delete();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
@@ -83,13 +75,21 @@ class ContactOrigins extends ContactOriginList
     }
 
     #[Renderless]
-    public function delete(ContactOrigin $contactOrigin): bool
+    public function edit(ContactOrigin $contactOrigin): void
     {
         $this->contactOriginForm->reset();
         $this->contactOriginForm->fill($contactOrigin);
 
+        $this->js(<<<'JS'
+            $modalOpen('edit-contact-origin-modal');
+        JS);
+    }
+
+    #[Renderless]
+    public function save(): bool
+    {
         try {
-            $this->contactOriginForm->delete();
+            $this->contactOriginForm->save();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 

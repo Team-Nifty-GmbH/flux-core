@@ -37,6 +37,23 @@ class ProductOptionController extends BaseController
         );
     }
 
+    public function delete(string $id): JsonResponse
+    {
+        try {
+            DeleteProductOption::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
+            return ResponseHelper::createResponseFromBase(
+                statusCode: array_key_exists('id', $e->errors()) ? 404 : 423,
+                data: $e->errors()
+            );
+        }
+
+        return ResponseHelper::createResponseFromBase(
+            statusCode: 204,
+            statusMessage: 'product option deleted'
+        );
+    }
+
     public function update(Request $request): JsonResponse
     {
         $data = $request->all();
@@ -82,22 +99,5 @@ class ProductOptionController extends BaseController
                 statusMessage: $statusCode === 422 ? null : 'product option(s) updated',
                 bulk: true
             );
-    }
-
-    public function delete(string $id): JsonResponse
-    {
-        try {
-            DeleteProductOption::make(['id' => $id])->validate()->execute();
-        } catch (ValidationException $e) {
-            return ResponseHelper::createResponseFromBase(
-                statusCode: array_key_exists('id', $e->errors()) ? 404 : 423,
-                data: $e->errors()
-            );
-        }
-
-        return ResponseHelper::createResponseFromBase(
-            statusCode: 204,
-            statusMessage: 'product option deleted'
-        );
     }
 }

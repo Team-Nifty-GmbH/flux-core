@@ -33,43 +33,6 @@ class OrderPositionController extends BaseController
         );
     }
 
-    public function update(Request $request): JsonResponse
-    {
-        $data = $request->all();
-        if (! array_is_list($data)) {
-            $data = [$data];
-        }
-
-        $responses = [];
-        foreach ($data as $key => $item) {
-            try {
-                $responses[] = ResponseHelper::createArrayResponse(
-                    statusCode: 200,
-                    data: $orderPosition = UpdateOrderPosition::make($item)->validate()->execute(),
-                    additions: ['id' => $orderPosition->id]
-                );
-            } catch (ValidationException $e) {
-                $responses[] = ResponseHelper::createArrayResponse(
-                    statusCode: 422,
-                    data: $e->errors(),
-                    additions: [
-                        'id' => array_key_exists('id', $item) ? $item['id'] : null,
-                    ]
-                );
-
-                unset($data[$key]);
-            }
-        }
-
-        $statusCode = count($responses) === count($data) ? 200 : (count($data) < 1 ? 422 : 207);
-
-        return ResponseHelper::createResponseFromArrayResponse([
-            'status' => $statusCode,
-            'responses' => $responses,
-            'statusMessage' => $statusCode === 422 ? null : 'order position(s) updated',
-        ]);
-    }
-
     public function delete(string $id): JsonResponse
     {
         try {
@@ -105,5 +68,42 @@ class OrderPositionController extends BaseController
             statusCode: 200,
             data: $orderPositions
         );
+    }
+
+    public function update(Request $request): JsonResponse
+    {
+        $data = $request->all();
+        if (! array_is_list($data)) {
+            $data = [$data];
+        }
+
+        $responses = [];
+        foreach ($data as $key => $item) {
+            try {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 200,
+                    data: $orderPosition = UpdateOrderPosition::make($item)->validate()->execute(),
+                    additions: ['id' => $orderPosition->id]
+                );
+            } catch (ValidationException $e) {
+                $responses[] = ResponseHelper::createArrayResponse(
+                    statusCode: 422,
+                    data: $e->errors(),
+                    additions: [
+                        'id' => array_key_exists('id', $item) ? $item['id'] : null,
+                    ]
+                );
+
+                unset($data[$key]);
+            }
+        }
+
+        $statusCode = count($responses) === count($data) ? 200 : (count($data) < 1 ? 422 : 207);
+
+        return ResponseHelper::createResponseFromArrayResponse([
+            'status' => $statusCode,
+            'responses' => $responses,
+            'statusMessage' => $statusCode === 422 ? null : 'order position(s) updated',
+        ]);
     }
 }

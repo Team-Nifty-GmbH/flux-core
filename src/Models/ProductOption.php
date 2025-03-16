@@ -17,9 +17,9 @@ class ProductOption extends FluxModel
 {
     use Filterable, HasPackageFactory, HasUserModification, HasUuid, LogsActivity, SoftDeletes;
 
-    public function products(): BelongsToMany
+    public function newCollection(array $models = []): Collection
     {
-        return $this->belongsToMany(Product::class, 'product_product_option');
+        return app(ProductOptionCollection::class, ['items' => $models]);
     }
 
     public function productOptionGroup(): BelongsTo
@@ -27,8 +27,8 @@ class ProductOption extends FluxModel
         return $this->belongsTo(ProductOptionGroup::class);
     }
 
-    public function newCollection(array $models = []): Collection
+    public function products(): BelongsToMany
     {
-        return app(ProductOptionCollection::class, ['items' => $models]);
+        return $this->belongsToMany(Product::class, 'product_product_option');
     }
 }

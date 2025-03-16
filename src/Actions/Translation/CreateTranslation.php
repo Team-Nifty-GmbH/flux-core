@@ -8,14 +8,14 @@ use Spatie\TranslationLoader\LanguageLine;
 
 class CreateTranslation extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateTranslationRuleset::class;
-    }
-
     public static function models(): array
     {
         return [LanguageLine::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateTranslationRuleset::class;
     }
 
     public function performAction(): LanguageLine

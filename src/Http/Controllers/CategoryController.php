@@ -30,16 +30,16 @@ class CategoryController extends BaseController
         );
     }
 
-    public function update(Request $request, CategoryService $categoryService): JsonResponse
+    public function delete(string $id, CategoryService $categoryService): JsonResponse
     {
-        $response = $categoryService->update($request->all());
+        $response = $categoryService->delete($id);
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
-    public function delete(string $id, CategoryService $categoryService): JsonResponse
+    public function update(Request $request, CategoryService $categoryService): JsonResponse
     {
-        $response = $categoryService->delete($id);
+        $response = $categoryService->update($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }

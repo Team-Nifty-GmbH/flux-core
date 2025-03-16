@@ -27,16 +27,16 @@ class TranslationController extends BaseController
         );
     }
 
-    public function update(Request $request, TranslationService $languageLineService): JsonResponse
+    public function delete(string $id, TranslationService $languageLineService): JsonResponse
     {
-        $response = $languageLineService->update($request->all());
+        $response = $languageLineService->delete($id);
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
-    public function delete(string $id, TranslationService $languageLineService): JsonResponse
+    public function update(Request $request, TranslationService $languageLineService): JsonResponse
     {
-        $response = $languageLineService->delete($id);
+        $response = $languageLineService->update($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }

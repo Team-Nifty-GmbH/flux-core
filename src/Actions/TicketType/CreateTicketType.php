@@ -10,14 +10,14 @@ use Illuminate\Support\Facades\Validator;
 
 class CreateTicketType extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateTicketTypeRuleset::class;
-    }
-
     public static function models(): array
     {
         return [TicketType::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateTicketTypeRuleset::class;
     }
 
     public function performAction(): TicketType

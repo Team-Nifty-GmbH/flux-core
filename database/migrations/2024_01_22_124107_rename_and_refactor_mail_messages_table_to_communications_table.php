@@ -11,7 +11,7 @@ return new class() extends Migration
     {
         Schema::rename('mail_messages', 'communications');
 
-        Schema::table('communications', function (Blueprint $table) {
+        Schema::table('communications', function (Blueprint $table): void {
             $table->unsignedBigInteger('mail_account_id')->nullable()->change();
             $table->unsignedBigInteger('mail_folder_id')->nullable()->change();
 
@@ -24,7 +24,7 @@ return new class() extends Migration
 
         $this->migrateCommunicationsTable();
 
-        Schema::table('communications', function (Blueprint $table) {
+        Schema::table('communications', function (Blueprint $table): void {
             $table->string('communication_type_enum')->nullable(false)->change();
         });
     }
@@ -33,7 +33,7 @@ return new class() extends Migration
     {
         $this->rollbackCommunicationsTable();
 
-        Schema::table('communications', function (Blueprint $table) {
+        Schema::table('communications', function (Blueprint $table): void {
             $table->unsignedBigInteger('mail_account_id')->nullable(false)->change();
             $table->unsignedBigInteger('mail_folder_id')->nullable(false)->change();
 

@@ -10,14 +10,14 @@ use Illuminate\Support\Facades\Validator;
 
 class UpdateOrderType extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateOrderTypeRuleset::class;
-    }
-
     public static function models(): array
     {
         return [OrderType::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateOrderTypeRuleset::class;
     }
 
     public function performAction(): Model

@@ -6,11 +6,6 @@ use Illuminate\Foundation\Vite as BaseVite;
 
 class Vite extends BaseVite
 {
-    protected function manifestPath($buildDirectory): string
-    {
-        return $buildDirectory . '/manifest.json';
-    }
-
     public function content($asset, $buildDirectory = null): false|string
     {
         $buildDirectory ??= $this->buildDirectory;
@@ -24,5 +19,10 @@ class Vite extends BaseVite
         }
 
         return file_get_contents($path);
+    }
+
+    protected function manifestPath($buildDirectory): string
+    {
+        return $buildDirectory . '/manifest.json';
     }
 }

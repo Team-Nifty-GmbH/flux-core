@@ -8,17 +8,17 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class ActivityLogs extends ActivityLogList
 {
-    protected ?string $includeBefore = 'flux::livewire.settings.activity-logs';
-
     public array $activity = [];
+
+    protected ?string $includeBefore = 'flux::livewire.settings.activity-logs';
 
     protected function getRowActions(): array
     {
         return [
             DataTableButton::make()
                 ->icon('eye')
-                ->label(__('Show'))
-                ->color('primary')
+                ->text(__('Show'))
+                ->color('indigo')
                 ->wireClick('show(record.id)'),
         ];
     }
@@ -29,7 +29,7 @@ class ActivityLogs extends ActivityLogList
         $this->activity['causer'] = $activity->causer?->name;
 
         $this->js(<<<'JS'
-            $openModal('activity-log-detail');
+            $modalOpen('activity-log-detail');
         JS);
     }
 }

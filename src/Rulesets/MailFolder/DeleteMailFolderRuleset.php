@@ -8,9 +8,9 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class DeleteMailFolderRuleset extends FluxRuleset
 {
-    protected static ?string $model = MailFolder::class;
-
     protected static bool $addAdditionalColumnRules = false;
+
+    protected static ?string $model = MailFolder::class;
 
     public function rules(): array
     {

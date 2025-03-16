@@ -8,18 +8,18 @@ use FluxErp\Actions\AddressType\UpdateAddressType;
 
 class AddressTypeForm extends FluxForm
 {
-    #[Locked]
-    public ?int $id = null;
+    public ?string $address_type_code = null;
 
     public ?int $client_id = null;
 
-    public ?string $name = null;
-
-    public ?string $address_type_code = null;
+    #[Locked]
+    public ?int $id = null;
 
     public bool $is_locked = false;
 
     public bool $is_unique = false;
+
+    public ?string $name = null;
 
     protected function getActions(): array
     {

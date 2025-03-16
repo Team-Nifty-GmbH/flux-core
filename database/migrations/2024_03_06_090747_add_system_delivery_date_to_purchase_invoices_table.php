@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('purchase_invoices', function (Blueprint $table) {
+        Schema::table('purchase_invoices', function (Blueprint $table): void {
             $table->date('system_delivery_date_end')->nullable()->after('invoice_date');
             $table->date('system_delivery_date')->nullable()->after('invoice_date');
         });
@@ -16,7 +16,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('purchase_invoices', function (Blueprint $table) {
+        Schema::table('purchase_invoices', function (Blueprint $table): void {
             $table->dropColumn(['system_delivery_date', 'system_delivery_date_end']);
         });
     }

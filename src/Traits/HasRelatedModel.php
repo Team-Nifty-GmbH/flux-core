@@ -14,7 +14,7 @@ trait HasRelatedModel
 {
     public static function bootHasRelatedModel(): void
     {
-        self::relatedModelsChanged(function (Model $model) {
+        self::relatedModelsChanged(function (Model $model): void {
             Cache::putMany([
                 $model->getMorphClass() . '.' . $model->getKey() . '.related.models' => DB::table('model_related')
                     ->where('model_type', $model->getMorphClass())
@@ -37,19 +37,40 @@ trait HasRelatedModel
         static::registerModelEvent('relatedModelsChanged', $callback);
     }
 
-    public function relatedModel(?string $model = null): MorphToMorph
+    public function fireModelEvent($event, $halt = true): mixed
     {
-        if (is_null($model)) {
-            $model = Cache::get($this->getMorphClass() . '.' . $this->getKey() . '.related.models');
-
-            $model = $model ? array_shift($model) : $this->getMorphClass();
+        if (! isset(static::$dispatcher)) {
+            return true;
         }
 
-        return $this->morphToMorph(
-            related: $model,
-            name: 'model',
-            relatedMorph: 'related',
-            table: 'model_related',
+        $method = $halt ? 'until' : 'dispatch';
+
+        $result = $this->filterModelEventResults(
+            $this->fireCustomModelEvent($event, $method)
+        );
+
+        if ($result === false) {
+            return false;
+        }
+
+        $payload = [$this];
+
+        return ! empty($result) ? $result : static::$dispatcher->{$method}(
+            "eloquent.{$event}: " . static::class, $payload
+        );
+    }
+
+    /**
+     * Get the observable event names.
+     */
+    public function getObservableEvents(): array
+    {
+        return array_merge(
+            parent::getObservableEvents(),
+            [
+                'relatedModelsChanged',
+            ],
+            $this->observables
         );
     }
 
@@ -66,6 +87,42 @@ trait HasRelatedModel
             name: 'model',
             relatedMorph: 'related',
             table: 'model_related'
+        );
+    }
+
+    public function relatedByModels(): Collection
+    {
+        $relatedByModels = Cache::rememberForever(
+            $this->getMorphClass() . '.' . $this->getKey() . '.related.by',
+            fn () => DB::table('model_related')
+                ->where('related_type', $this->getMorphClass())
+                ->where('related_id', $this->getKey())
+                ->groupBy('model_type')
+                ->pluck('model_type')
+                ->toArray()
+        );
+
+        $relatedBy = new Collection([]);
+        foreach ($relatedByModels as $relatedByModel) {
+            $relatedBy = $relatedBy->merge($this->relatedBy($relatedByModel)->get());
+        }
+
+        return $relatedBy;
+    }
+
+    public function relatedModel(?string $model = null): MorphToMorph
+    {
+        if (is_null($model)) {
+            $model = Cache::get($this->getMorphClass() . '.' . $this->getKey() . '.related.models');
+
+            $model = $model ? array_shift($model) : $this->getMorphClass();
+        }
+
+        return $this->morphToMorph(
+            related: $model,
+            name: 'model',
+            relatedMorph: 'related',
+            table: 'model_related',
         );
     }
 
@@ -89,60 +146,21 @@ trait HasRelatedModel
         return $related;
     }
 
-    public function relatedByModels(): Collection
-    {
-        $relatedByModels = Cache::rememberForever(
-            $this->getMorphClass() . '.' . $this->getKey() . '.related.by',
-            fn () => DB::table('model_related')
-                ->where('related_type', $this->getMorphClass())
-                ->where('related_id', $this->getKey())
-                ->groupBy('model_type')
-                ->pluck('model_type')
-                ->toArray()
-        );
-
-        $relatedBy = new Collection([]);
-        foreach ($relatedByModels as $relatedByModel) {
-            $relatedBy = $relatedBy->merge($this->relatedBy($relatedByModel)->get());
-        }
-
-        return $relatedBy;
-    }
-
     /**
-     * Get the observable event names.
+     * Define a polymorphic, inverse many-to-many relationship with polymorphic related records.
      */
-    public function getObservableEvents(): array
+    protected function morphedByMorph(
+        string $related, string $name, string $relatedMorph, ?string $table = null,
+        ?string $foreignPivotKey = null, ?string $relatedPivotKey = null, ?string $parentKey = null,
+        ?string $relatedKey = null): MorphToMorph
     {
-        return array_merge(
-            parent::getObservableEvents(),
-            [
-                'relatedModelsChanged',
-            ],
-            $this->observables
-        );
-    }
+        $foreignPivotKey = $foreignPivotKey ?: $relatedMorph . '_id';
 
-    public function fireModelEvent($event, $halt = true): mixed
-    {
-        if (! isset(static::$dispatcher)) {
-            return true;
-        }
+        $relatedPivotKey = $relatedPivotKey ?: $name . '_id';
 
-        $method = $halt ? 'until' : 'dispatch';
-
-        $result = $this->filterModelEventResults(
-            $this->fireCustomModelEvent($event, $method)
-        );
-
-        if ($result === false) {
-            return false;
-        }
-
-        $payload = [$this];
-
-        return ! empty($result) ? $result : static::$dispatcher->{$method}(
-            "eloquent.{$event}: " . static::class, $payload
+        return $this->morphToMorph(
+            $related, $name, $relatedMorph, $table, $foreignPivotKey,
+            $relatedPivotKey, $parentKey, $relatedKey, true
         );
     }
 
@@ -187,24 +205,6 @@ trait HasRelatedModel
         return new MorphToMorph(
             $query, $parent, $name, $related, $table, $foreignPivotKey, $relatedPivotKey, $parentKey, $relatedKey,
             $relationName, $inverse
-        );
-    }
-
-    /**
-     * Define a polymorphic, inverse many-to-many relationship with polymorphic related records.
-     */
-    protected function morphedByMorph(
-        string $related, string $name, string $relatedMorph, ?string $table = null,
-        ?string $foreignPivotKey = null, ?string $relatedPivotKey = null, ?string $parentKey = null,
-        ?string $relatedKey = null): MorphToMorph
-    {
-        $foreignPivotKey = $foreignPivotKey ?: $relatedMorph . '_id';
-
-        $relatedPivotKey = $relatedPivotKey ?: $name . '_id';
-
-        return $this->morphToMorph(
-            $related, $name, $relatedMorph, $table, $foreignPivotKey,
-            $relatedPivotKey, $parentKey, $relatedKey, true
         );
     }
 }

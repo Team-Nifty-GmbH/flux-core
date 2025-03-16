@@ -15,10 +15,13 @@ use Livewire\Attributes\Locked;
 
 class PurchaseInvoiceForm extends FluxForm
 {
-    #[Locked]
-    public ?int $id = null;
+    public ?string $account_holder = null;
 
     public ?int $approval_user_id = null;
+
+    public ?string $bank_name = null;
+
+    public ?string $bic = null;
 
     public ?int $client_id = null;
 
@@ -26,7 +29,26 @@ class PurchaseInvoiceForm extends FluxForm
 
     public ?int $currency_id = null;
 
+    public ?string $iban = null;
+
+    #[Locked]
+    public ?int $id = null;
+
+    public ?string $invoice_date = null;
+
+    public ?string $invoice_number = null;
+
+    public bool $is_net = false;
+
+    #[Locked]
+    public ?int $lastLedgerAccountId = null;
+
     public ?int $lay_out_user_id = null;
+
+    #[Locked]
+    public $media = null;
+
+    public ?string $mediaUrl = null;
 
     public ?int $order_id = null;
 
@@ -34,42 +56,23 @@ class PurchaseInvoiceForm extends FluxForm
 
     public ?int $payment_type_id = null;
 
-    public ?string $invoice_date = null;
+    public array $purchase_invoice_positions = [];
 
     public ?string $system_delivery_date = null;
 
     public ?string $system_delivery_date_end = null;
 
-    public ?string $invoice_number = null;
-
-    public ?string $iban = null;
-
-    public ?string $account_holder = null;
-
-    public ?string $bank_name = null;
-
-    public ?string $bic = null;
-
-    public bool $is_net = false;
-
-    #[Locked]
-    public $media = null;
-
-    public array $purchase_invoice_positions = [];
-
-    public ?string $mediaUrl = null;
-
-    #[Locked]
-    public ?int $lastLedgerAccountId = null;
-
-    protected function getActions(): array
+    public function findMostUsedLedgerAccountId(): void
     {
-        return [
-            'create' => CreatePurchaseInvoice::class,
-            'update' => UpdatePurchaseInvoice::class,
-            'delete' => ForceDeletePurchaseInvoice::class,
-            'create-order' => CreateOrderFromPurchaseInvoice::class,
-        ];
+        $this->lastLedgerAccountId = resolve_static(OrderPosition::class, 'query')
+            ->whereHas(
+                'ledgerAccount',
+                fn ($query) => $query->where('ledger_account_type_enum', LedgerAccountTypeEnum::Expense)
+            )
+            ->whereHas('order', fn ($query) => $query->where('contact_id', $this->contact_id))
+            ->groupBy('ledger_account_id')
+            ->orderByRaw('COUNT(ledger_account_id) DESC')
+            ->value('ledger_account_id');
     }
 
     public function finish(): void
@@ -91,16 +94,13 @@ class PurchaseInvoiceForm extends FluxForm
         $this->currency_id = Currency::default()?->getKey();
     }
 
-    public function findMostUsedLedgerAccountId(): void
+    protected function getActions(): array
     {
-        $this->lastLedgerAccountId = resolve_static(OrderPosition::class, 'query')
-            ->whereHas(
-                'ledgerAccount',
-                fn ($query) => $query->where('ledger_account_type_enum', LedgerAccountTypeEnum::Expense)
-            )
-            ->whereHas('order', fn ($query) => $query->where('contact_id', $this->contact_id))
-            ->groupBy('ledger_account_id')
-            ->orderByRaw('COUNT(ledger_account_id) DESC')
-            ->value('ledger_account_id');
+        return [
+            'create' => CreatePurchaseInvoice::class,
+            'update' => UpdatePurchaseInvoice::class,
+            'delete' => ForceDeletePurchaseInvoice::class,
+            'create-order' => CreateOrderFromPurchaseInvoice::class,
+        ];
     }
 }

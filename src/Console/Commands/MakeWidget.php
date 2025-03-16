@@ -10,18 +10,18 @@ use Illuminate\Support\Str;
 class MakeWidget extends Command
 {
     /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'make:widget {name : The name of the Livewire component}';
-
-    /**
      * The console command description.
      *
      * @var string
      */
     protected $description = 'Create a new Livewire component implementing the UserWidget contract';
+
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'make:widget {name : The name of the Livewire component}';
 
     /**
      * Execute the console command.

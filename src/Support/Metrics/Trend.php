@@ -13,21 +13,6 @@ class Trend extends Metric
 {
     protected string $unit;
 
-    public function min(string $column, ?string $unit = null): Result
-    {
-        return $this->setType('min', $column, $unit);
-    }
-
-    public function max(string $column, ?string $unit = null): Result
-    {
-        return $this->setType('max', $column, $unit);
-    }
-
-    public function sum(string $column, ?string $unit = null): Result
-    {
-        return $this->setType('sum', $column, $unit);
-    }
-
     public function avg(string $column, ?string $unit = null): Result
     {
         return $this->setType('avg', $column, $unit);
@@ -38,23 +23,32 @@ class Trend extends Metric
         return $this->setType('count', $column, $unit);
     }
 
-    protected function setType(string $type, string $column, ?string $unit = null): Result
+    public function max(string $column, ?string $unit = null): Result
     {
-        if (is_null($unit) && ! ($unit = $this->getRange()->getUnit())) {
-            $diff = $this->startingDate?->diffInDays($this->endingDate ?? now()->addCenturies(2));
+        return $this->setType('max', $column, $unit);
+    }
 
-            $unit = match (true) {
-                $diff < 30 => 'day',
-                $diff < 365 => 'month',
-                default => 'year',
-            };
+    public function min(string $column, ?string $unit = null): Result
+    {
+        return $this->setType('min', $column, $unit);
+    }
+
+    public function sum(string $column, ?string $unit = null): Result
+    {
+        return $this->setType('sum', $column, $unit);
+    }
+
+    protected function getEndingDate(): CarbonImmutable
+    {
+        if ($this->getRange() instanceof TimeFrameEnum && $timeFrameRange = $this->getRange()->getRange()) {
+            return $timeFrameRange[1];
         }
 
-        $this->type = $type;
-        $this->unit = $unit;
-        $this->column = $column;
+        if ($this->endingDate && $this->getRange() === TimeFrameEnum::Custom) {
+            return $this->endingDate;
+        }
 
-        return $this->resolve();
+        return CarbonImmutable::now();
     }
 
     protected function getExpression(): string
@@ -148,19 +142,6 @@ class Trend extends Metric
         };
     }
 
-    protected function getEndingDate(): CarbonImmutable
-    {
-        if ($this->getRange() instanceof TimeFrameEnum && $timeFrameRange = $this->getRange()->getRange()) {
-            return $timeFrameRange[1];
-        }
-
-        if ($this->endingDate && $this->getRange() === TimeFrameEnum::Custom) {
-            return $this->endingDate;
-        }
-
-        return CarbonImmutable::now();
-    }
-
     protected function resolve(): Result
     {
         $dateColumn = $this->getDateColumn();
@@ -199,5 +180,24 @@ class Trend extends Metric
             array_keys($data),
             $growth
         );
+    }
+
+    protected function setType(string $type, string $column, ?string $unit = null): Result
+    {
+        if (is_null($unit) && ! ($unit = $this->getRange()->getUnit())) {
+            $diff = $this->startingDate?->diffInDays($this->endingDate ?? now()->addCenturies(2));
+
+            $unit = match (true) {
+                $diff < 30 => 'day',
+                $diff < 365 => 'month',
+                default => 'year',
+            };
+        }
+
+        $this->type = $type;
+        $this->unit = $unit;
+        $this->column = $column;
+
+        return $this->resolve();
     }
 }

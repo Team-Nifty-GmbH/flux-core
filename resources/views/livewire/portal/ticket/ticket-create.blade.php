@@ -25,13 +25,12 @@
                                     wire:model="ticket.description"/>
                     </div>
                     <div class="sm:col-span-6">
-                        <x-select
+                        <x-select.styled
                             :label="__('Ticket Type')"
                             :placeholder="__('Ticket Type')"
                             wire:model.live="ticketTypeId"
+                            select="label:name|value:id"
                             :options="$ticketTypes"
-                            option-label="name"
-                            option-value="id"
                         />
                     </div>
                     <template x-for="ticketTypeAdditionalColumn in selectedAdditionalColumns">
@@ -41,7 +40,7 @@
                                 x-bind:for="ticketTypeAdditionalColumn.name"
                             />
                             <template x-if="ticketTypeAdditionalColumn.field_type === 'select'">
-                                <x-native-select
+                                <x-select.native
                                     x-model="ticket[ticketTypeAdditionalColumn.name]"
                                     x-bind:options="ticketTypeAdditionalColumn.values"
                                 >
@@ -51,7 +50,7 @@
                                     <template x-for="value in ticketTypeAdditionalColumn.values">
                                         <option x-bind:value="value" x-text="value"></option>
                                     </template>
-                                </x-native-select>
+                                </x-select.native>
                             </template>
                             <template x-if="ticketTypeAdditionalColumn.field_type !== 'select'">
                                 <x-input x-bind:type="ticketTypeAdditionalColumn.field_type" x-model="ticket[ticketTypeAdditionalColumn.name]"/>

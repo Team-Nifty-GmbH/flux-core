@@ -10,12 +10,9 @@ use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
 use FluxErp\Models\PriceList;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class OrdersTest extends PortalSetup
 {
-    use DatabaseTransactions;
-
     private Order $order;
 
     protected function setUp(): void
@@ -58,53 +55,24 @@ class OrdersTest extends PortalSetup
         ]);
     }
 
-    public function test_portal_orders_page()
-    {
-        $this->user->givePermissionTo(Permission::findOrCreate('orders.get', 'address'));
-
-        $this->actingAs($this->user, 'address')->get(route('portal.orders'))
-            ->assertStatus(200);
-    }
-
-    public function test_portal_orders_no_user()
-    {
-        $this->get(route('portal.orders'))
-            ->assertStatus(302)
-            ->assertRedirect($this->portalDomain . '/login');
-    }
-
-    public function test_portal_orders_without_permission()
-    {
-        Permission::findOrCreate('orders.get', 'address');
-
-        $this->actingAs($this->user, 'address')->get(route('portal.orders'))
-            ->assertStatus(403);
-    }
-
-    public function test_portal_orders_id_page()
-    {
-        $this->user->givePermissionTo(Permission::findOrCreate('orders.{id}.get', 'address'));
-
-        $this->actingAs($this->user, 'address')->get(route('portal.orders.id', ['id' => $this->order->id]))
-            ->assertStatus(200);
-    }
-
-    public function test_portal_orders_id_no_user()
+    public function test_portal_orders_id_no_user(): void
     {
         $this->get(route('portal.orders.id', ['id' => $this->order->id]))
             ->assertStatus(302)
             ->assertRedirect($this->portalDomain . '/login');
     }
 
-    public function test_portal_orders_id_without_permission()
+    public function test_portal_orders_id_order_not_contact_id(): void
     {
-        Permission::findOrCreate('orders.{id}.get', 'address');
+        $this->order->update(['contact_id' => null]);
+
+        $this->user->givePermissionTo(Permission::findOrCreate('orders.{id}.get', 'address'));
 
         $this->actingAs($this->user, 'address')->get(route('portal.orders.id', ['id' => $this->order->id]))
-            ->assertStatus(403);
+            ->assertStatus(404);
     }
 
-    public function test_portal_orders_id_order_not_found()
+    public function test_portal_orders_id_order_not_found(): void
     {
         $this->order->delete();
 
@@ -114,7 +82,7 @@ class OrdersTest extends PortalSetup
             ->assertStatus(404);
     }
 
-    public function test_portal_orders_id_order_not_locked()
+    public function test_portal_orders_id_order_not_locked(): void
     {
         $this->order->update(['is_locked' => false, 'is_imported' => false]);
 
@@ -124,13 +92,42 @@ class OrdersTest extends PortalSetup
             ->assertStatus(404);
     }
 
-    public function test_portal_orders_id_order_not_contact_id()
+    public function test_portal_orders_id_page(): void
     {
-        $this->order->update(['contact_id' => null]);
-
         $this->user->givePermissionTo(Permission::findOrCreate('orders.{id}.get', 'address'));
 
         $this->actingAs($this->user, 'address')->get(route('portal.orders.id', ['id' => $this->order->id]))
-            ->assertStatus(404);
+            ->assertStatus(200);
+    }
+
+    public function test_portal_orders_id_without_permission(): void
+    {
+        Permission::findOrCreate('orders.{id}.get', 'address');
+
+        $this->actingAs($this->user, 'address')->get(route('portal.orders.id', ['id' => $this->order->id]))
+            ->assertStatus(403);
+    }
+
+    public function test_portal_orders_no_user(): void
+    {
+        $this->get(route('portal.orders'))
+            ->assertStatus(302)
+            ->assertRedirect($this->portalDomain . '/login');
+    }
+
+    public function test_portal_orders_page(): void
+    {
+        $this->user->givePermissionTo(Permission::findOrCreate('orders.get', 'address'));
+
+        $this->actingAs($this->user, 'address')->get(route('portal.orders'))
+            ->assertStatus(200);
+    }
+
+    public function test_portal_orders_without_permission(): void
+    {
+        Permission::findOrCreate('orders.get', 'address');
+
+        $this->actingAs($this->user, 'address')->get(route('portal.orders'))
+            ->assertStatus(403);
     }
 }

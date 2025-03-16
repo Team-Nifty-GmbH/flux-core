@@ -8,14 +8,14 @@ use Spatie\TranslationLoader\LanguageLine;
 
 class DeleteTranslation extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeleteTranslationRuleset::class;
-    }
-
     public static function models(): array
     {
         return [LanguageLine::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeleteTranslationRuleset::class;
     }
 
     public function performAction(): ?bool

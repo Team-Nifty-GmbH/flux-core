@@ -22,17 +22,17 @@ class Ticket extends Component
 {
     use Actions, WithTabs;
 
-    public TicketForm $ticket;
+    public bool $authorTypeContact = true;
 
     public array $availableStates;
 
-    public array $ticketTypes;
-
     public array $states;
 
-    public bool $authorTypeContact = true;
-
     public string $tab = 'ticket.comments';
+
+    public TicketForm $ticket;
+
+    public array $ticketTypes;
 
     public function mount(int $id): void
     {
@@ -83,37 +83,34 @@ class Ticket extends Component
         return view('flux::livewire.ticket.ticket');
     }
 
+    #[Renderless]
+    public function delete(): void
+    {
+        try {
+            $this->ticket->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->redirect(route('tickets'), navigate: true);
+    }
+
     public function getTabs(): array
     {
         return [
             TabButton::make('ticket.comments')
-                ->label(__('Comments'))
+                ->text(__('Comments'))
                 ->isLivewireComponent(),
             TabButton::make('ticket.communication')
-                ->label(__('Communication'))
+                ->text(__('Communication'))
                 ->wireModel('ticket.id')
                 ->isLivewireComponent(),
             TabButton::make('ticket.activities')
-                ->label(__('Activities'))
+                ->text(__('Activities'))
                 ->isLivewireComponent(),
         ];
-    }
-
-    public function updateAdditionalColumns(?int $id): void
-    {
-        $this->additionalColumns = resolve_static(AdditionalColumn::class, 'query')
-            ->where('is_frontend_visible', true)
-            ->where(function (Builder $query) use ($id) {
-                $query->where('model_type', morph_alias(TicketModel::class))
-                    ->when($id, function (Builder $query) use ($id) {
-                        $query->orWhere(function (Builder $query) use ($id) {
-                            $query->where('model_type', morph_alias(TicketType::class))
-                                ->where('model_id', $id);
-                        });
-                    });
-            })
-            ->get()
-            ->toArray();
     }
 
     #[Renderless]
@@ -137,23 +134,26 @@ class Ticket extends Component
             )
             ->toArray();
 
-        $this->notification()->success(__(':model saved', ['model' => __('Ticket')]));
+        $this->notification()->success(__(':model saved', ['model' => __('Ticket')]))->send();
 
         return true;
     }
 
-    #[Renderless]
-    public function delete(): void
+    public function updateAdditionalColumns(?int $id): void
     {
-        try {
-            $this->ticket->delete();
-        } catch (\Exception $e) {
-            exception_to_notifications($e, $this);
-
-            return;
-        }
-
-        $this->redirect(route('tickets'), navigate: true);
+        $this->additionalColumns = resolve_static(AdditionalColumn::class, 'query')
+            ->where('is_frontend_visible', true)
+            ->where(function (Builder $query) use ($id): void {
+                $query->where('model_type', morph_alias(TicketModel::class))
+                    ->when($id, function (Builder $query) use ($id): void {
+                        $query->orWhere(function (Builder $query) use ($id): void {
+                            $query->where('model_type', morph_alias(TicketType::class))
+                                ->where('model_id', $id);
+                        });
+                    });
+            })
+            ->get()
+            ->toArray();
     }
 
     public function updatedAuthorTypeContact(): void
@@ -167,7 +167,7 @@ class Ticket extends Component
 
         $this->js(<<<JS
             let component = Alpine.\$data(document.getElementById('author-select').querySelector('[x-data]'));
-            component.asyncData.api = '$route';
+            component.request.url = '$route';
         JS);
 
         $this->skipRender();

@@ -11,7 +11,7 @@ return new class() extends Migration
      */
     public function up(): void
     {
-        Schema::table('order_positions', function (Blueprint $table) {
+        Schema::table('order_positions', function (Blueprint $table): void {
             $table->foreignId('ledger_account_id')
                 ->nullable()
                 ->after('client_id')
@@ -25,7 +25,7 @@ return new class() extends Migration
      */
     public function down(): void
     {
-        Schema::table('order_positions', function (Blueprint $table) {
+        Schema::table('order_positions', function (Blueprint $table): void {
             $table->dropForeign(['ledger_account_id']);
             $table->dropColumn('ledger_account_id');
         });

@@ -29,7 +29,7 @@
                 <div class="text-portal-font-color pt-12 font-bold">
                     {{ __(':client_name is committed to protecting and respecting your privacy. We will only use your personal information to manage your account and to provide you with the products and services you have requested.', ['client_name' => $customerClient['name']]) }}
                 </div>
-                <x-button primary wire:click.prevent="save()">{{ __('Send') }}</x-button>
+                <x-button color="indigo" wire:click.prevent="save()">{{ __('Send') }}</x-button>
                 <x-errors/>
             </div>
         </div>

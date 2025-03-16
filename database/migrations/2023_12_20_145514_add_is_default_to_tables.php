@@ -9,7 +9,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('payment_types', function (Blueprint $table) {
+        Schema::table('payment_types', function (Blueprint $table): void {
             $table->boolean('is_default')
                 ->after('is_active')
                 ->default(false);
@@ -20,7 +20,7 @@ return new class() extends Migration
             ->limit(1)
             ->update(['is_default' => true]);
 
-        Schema::table('languages', function (Blueprint $table) {
+        Schema::table('languages', function (Blueprint $table): void {
             $table->boolean('is_default')
                 ->after('language_code')
                 ->default(false);
@@ -31,7 +31,7 @@ return new class() extends Migration
             ->limit(1)
             ->update(['is_default' => true]);
 
-        Schema::table('clients', function (Blueprint $table) {
+        Schema::table('clients', function (Blueprint $table): void {
             $table->boolean('is_default')
                 ->after('is_active')
                 ->default(false);
@@ -42,7 +42,7 @@ return new class() extends Migration
             ->limit(1)
             ->update(['is_default' => true]);
 
-        Schema::table('warehouses', function (Blueprint $table) {
+        Schema::table('warehouses', function (Blueprint $table): void {
             $table->boolean('is_default')
                 ->after('name')
                 ->default(false);
@@ -56,19 +56,19 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('payment_types', function (Blueprint $table) {
+        Schema::table('payment_types', function (Blueprint $table): void {
             $table->dropColumn('is_default');
         });
 
-        Schema::table('languages', function (Blueprint $table) {
+        Schema::table('languages', function (Blueprint $table): void {
             $table->dropColumn('is_default');
         });
 
-        Schema::table('clients', function (Blueprint $table) {
+        Schema::table('clients', function (Blueprint $table): void {
             $table->dropColumn('is_default');
         });
 
-        Schema::table('warehouses', function (Blueprint $table) {
+        Schema::table('warehouses', function (Blueprint $table): void {
             $table->dropColumn('is_default');
         });
     }

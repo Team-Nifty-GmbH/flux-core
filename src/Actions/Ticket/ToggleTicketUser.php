@@ -8,9 +8,9 @@ use FluxErp\Rulesets\Ticket\ToggleTicketUserRuleset;
 
 class ToggleTicketUser extends FluxAction
 {
-    protected function getRulesets(): string|array
+    public static function models(): array
     {
-        return ToggleTicketUserRuleset::class;
+        return [Ticket::class];
     }
 
     public static function name(): string
@@ -18,9 +18,9 @@ class ToggleTicketUser extends FluxAction
         return 'ticket.toggle-user';
     }
 
-    public static function models(): array
+    protected function getRulesets(): string|array
     {
-        return [Ticket::class];
+        return ToggleTicketUserRuleset::class;
     }
 
     public function performAction(): array

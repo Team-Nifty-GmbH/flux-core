@@ -3,13 +3,17 @@
 namespace FluxErp\Tests\Feature\Web;
 
 use FluxErp\Models\Permission;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class SettingsLogsTest extends BaseSetup
 {
-    use DatabaseTransactions;
+    public function test_settings_logs_no_user(): void
+    {
+        $this->get('/settings/logs')
+            ->assertStatus(302)
+            ->assertRedirect(route('login'));
+    }
 
-    public function test_settings_logs_page()
+    public function test_settings_logs_page(): void
     {
         $this->user->givePermissionTo(Permission::findOrCreate('settings.logs.get', 'web'));
 
@@ -17,14 +21,7 @@ class SettingsLogsTest extends BaseSetup
             ->assertStatus(200);
     }
 
-    public function test_settings_logs_no_user()
-    {
-        $this->get('/settings/logs')
-            ->assertStatus(302)
-            ->assertRedirect(route('login'));
-    }
-
-    public function test_settings_logs_without_permission()
+    public function test_settings_logs_without_permission(): void
     {
         Permission::findOrCreate('settings.logs.get', 'web');
 

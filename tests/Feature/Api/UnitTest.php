@@ -6,14 +6,11 @@ use FluxErp\Models\Permission;
 use FluxErp\Models\Unit;
 use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
 class UnitTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Model $unit;
 
     protected function setUp(): void
@@ -31,47 +28,7 @@ class UnitTest extends BaseSetup
         ];
     }
 
-    public function test_get_unit()
-    {
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/units/' . $this->unit->id);
-        $response->assertStatus(200);
-
-        $unit = json_decode($response->getContent())->data;
-
-        $this->assertEquals($this->unit->id, $unit->id);
-        $this->assertEquals($this->unit->name, $unit->name);
-        $this->assertEquals($this->unit->abbreviation, $unit->abbreviation);
-    }
-
-    public function test_get_unit_unit_not_found()
-    {
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/units/' . $this->unit->id + 10000);
-        $response->assertStatus(404);
-    }
-
-    public function test_get_units()
-    {
-        $this->user->givePermissionTo($this->permissions['index']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/units');
-        $response->assertStatus(200);
-
-        $units = json_decode($response->getContent())->data;
-
-        $this->assertEquals(1, $units->total);
-        $this->assertEquals($this->unit->id, $units->data[0]->id);
-        $this->assertEquals($this->unit->name, $units->data[0]->name);
-        $this->assertEquals($this->unit->abbreviation, $units->data[0]->abbreviation);
-    }
-
-    public function test_create_unit()
+    public function test_create_unit(): void
     {
         $unit = [
             'name' => Str::random(),
@@ -94,7 +51,7 @@ class UnitTest extends BaseSetup
         $this->assertEquals($unit['abbreviation'], $dbUnit->abbreviation);
     }
 
-    public function test_create_unit_validation_fails()
+    public function test_create_unit_validation_fails(): void
     {
         $unit = [
             'abbreviation' => Str::random(),
@@ -107,7 +64,7 @@ class UnitTest extends BaseSetup
         $response->assertStatus(422);
     }
 
-    public function test_delete_unit()
+    public function test_delete_unit(): void
     {
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
@@ -118,12 +75,52 @@ class UnitTest extends BaseSetup
         $this->assertFalse(Unit::query()->whereKey($this->unit->id)->exists());
     }
 
-    public function test_delete_unit_unit_not_found()
+    public function test_delete_unit_unit_not_found(): void
     {
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->delete('/api/units/' . ++$this->unit->id);
         $response->assertStatus(404);
+    }
+
+    public function test_get_unit(): void
+    {
+        $this->user->givePermissionTo($this->permissions['show']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->get('/api/units/' . $this->unit->id);
+        $response->assertStatus(200);
+
+        $unit = json_decode($response->getContent())->data;
+
+        $this->assertEquals($this->unit->id, $unit->id);
+        $this->assertEquals($this->unit->name, $unit->name);
+        $this->assertEquals($this->unit->abbreviation, $unit->abbreviation);
+    }
+
+    public function test_get_unit_unit_not_found(): void
+    {
+        $this->user->givePermissionTo($this->permissions['show']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->get('/api/units/' . $this->unit->id + 10000);
+        $response->assertStatus(404);
+    }
+
+    public function test_get_units(): void
+    {
+        $this->user->givePermissionTo($this->permissions['index']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->get('/api/units');
+        $response->assertStatus(200);
+
+        $units = json_decode($response->getContent())->data;
+
+        $this->assertEquals(1, $units->total);
+        $this->assertEquals($this->unit->id, $units->data[0]->id);
+        $this->assertEquals($this->unit->name, $units->data[0]->name);
+        $this->assertEquals($this->unit->abbreviation, $units->data[0]->abbreviation);
     }
 }

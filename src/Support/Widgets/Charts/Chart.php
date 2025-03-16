@@ -7,11 +7,11 @@ use Livewire\Component;
 
 abstract class Chart extends Component
 {
-    public ?array $series = null;
-
     public ?array $annotations = null;
 
     public ?array $chart = null;
+
+    public array $chartTypes = [];
 
     public ?array $colors = null;
 
@@ -35,9 +35,13 @@ abstract class Chart extends Component
 
     public ?array $noData = null;
 
+    public ?array $options = null;
+
     public ?array $plotOptions = null;
 
     public ?array $responsive = null;
+
+    public ?array $series = null;
 
     public ?array $states = null;
 
@@ -49,26 +53,34 @@ abstract class Chart extends Component
 
     public ?array $tooltip = null;
 
+    public bool $withSpinner = false;
+
     public ?array $xaxis = null;
 
     public ?array $yaxis = null;
 
-    public array $chartTypes = [];
-
-    public ?array $options = null;
-
-    public bool $withSpinner = false;
-
-    abstract public function calculateChart(): void;
+    public static function getDefaultHeight(): int
+    {
+        return 2;
+    }
 
     public static function getDefaultWidth(): int
     {
         return 2;
     }
 
-    public static function getDefaultHeight(): int
+    public static function getNoData(): array
     {
-        return 2;
+        return [
+            'text' => __('No data available'),
+            'align' => 'center',
+            'verticalAlign' => 'middle',
+            'offsetY' => 0,
+            'style' => [
+                'color' => '#888',
+                'fontSize' => '14px',
+            ],
+        ];
     }
 
     public function mount(): void
@@ -89,6 +101,8 @@ abstract class Chart extends Component
         $this->options ??= $this->getOptions();
     }
 
+    abstract public function calculateChart(): void;
+
     #[Renderless]
     public function updateData(): void
     {
@@ -103,7 +117,7 @@ abstract class Chart extends Component
     protected function getOptions(): array
     {
         $public = [];
-        $reflection = new \ReflectionClass(Chart::class);
+        $reflection = new \ReflectionClass(static::class);
         $properties = array_filter(
             $reflection->getProperties(\ReflectionProperty::IS_PUBLIC),
             fn ($property) => ! in_array($property->getName(), ['timeFrame', 'options'])

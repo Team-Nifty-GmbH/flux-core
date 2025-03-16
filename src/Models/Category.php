@@ -26,21 +26,14 @@ class Category extends FluxModel implements InteractsWithDataTables, Sortable
     use Filterable, HasAdditionalColumns, HasPackageFactory, HasParentChildRelations, HasUserModification,
         HasUuid, LogsActivity, Searchable, SortableTrait;
 
-    protected $hidden = [
-        'pivot',
-    ];
-
     public array $sortable = [
         'order_column_name' => 'sort_number',
         'sort_when_creating' => true,
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'is_active' => 'boolean',
-        ];
-    }
+    protected $hidden = [
+        'pivot',
+    ];
 
     public static function booted(): void
     {
@@ -49,7 +42,7 @@ class Category extends FluxModel implements InteractsWithDataTables, Sortable
                 Categorizable::class,
                 class_uses_recursive($modelInfo->class)
             ))
-            ->each(function (ModelInfo $modelInfo) {
+            ->each(function (ModelInfo $modelInfo): void {
                 $relationName = Str::of(class_basename($modelInfo->class))->camel()->plural()->toString();
 
                 if (method_exists(static::class, $relationName)) {
@@ -65,6 +58,13 @@ class Category extends FluxModel implements InteractsWithDataTables, Sortable
             });
     }
 
+    protected function casts(): array
+    {
+        return [
+            'is_active' => 'boolean',
+        ];
+    }
+
     public function assigned(): Attribute
     {
         return Attribute::make(
@@ -77,25 +77,9 @@ class Category extends FluxModel implements InteractsWithDataTables, Sortable
         return $this->belongsToMany(Discount::class, 'category_price_list');
     }
 
-    public function media(): HasMany
+    public function getAvatarUrl(): ?string
     {
-        return $this->hasMany(Media::class);
-    }
-
-    public function model(): MorphToMany
-    {
-        return $this->model_type
-            ? $this->morphedByMany(morphed_model($this->model_type), 'categorizable')
-            : new MorphToMany(
-                static::query(),
-                $this,
-                '',
-                '',
-                '',
-                '',
-                '',
-                ''
-            );
+        return null;
     }
 
     public function getDescription(): ?string
@@ -121,8 +105,24 @@ class Category extends FluxModel implements InteractsWithDataTables, Sortable
         return null;
     }
 
-    public function getAvatarUrl(): ?string
+    public function media(): HasMany
     {
-        return null;
+        return $this->hasMany(Media::class);
+    }
+
+    public function model(): MorphToMany
+    {
+        return $this->model_type
+            ? $this->morphedByMany(morphed_model($this->model_type), 'categorizable')
+            : new MorphToMany(
+                static::query(),
+                $this,
+                '',
+                '',
+                '',
+                '',
+                '',
+                ''
+            );
     }
 }

@@ -27,16 +27,16 @@ class TicketTypeController extends BaseController
         );
     }
 
-    public function update(Request $request, TicketTypeService $ticketTypeService): JsonResponse
+    public function delete(string $id, TicketTypeService $ticketTypeService): JsonResponse
     {
-        $response = $ticketTypeService->update($request->all());
+        $response = $ticketTypeService->delete($id);
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
-    public function delete(string $id, TicketTypeService $ticketTypeService): JsonResponse
+    public function update(Request $request, TicketTypeService $ticketTypeService): JsonResponse
     {
-        $response = $ticketTypeService->delete($id);
+        $response = $ticketTypeService->update($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }

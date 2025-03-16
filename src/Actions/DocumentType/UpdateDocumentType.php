@@ -13,15 +13,15 @@ use Illuminate\Support\Facades\Validator;
  */
 class UpdateDocumentType extends FluxAction
 {
+    public static function models(): array
+    {
+        return [DocumentType::class];
+    }
+
     protected function boot(array $data): void
     {
         parent::boot($data);
         $this->rules = (new UpdateDocumentTypeRequest())->rules();
-    }
-
-    public static function models(): array
-    {
-        return [DocumentType::class];
     }
 
     public function performAction(): Model

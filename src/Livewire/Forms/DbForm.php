@@ -9,19 +9,19 @@ use Livewire\Form;
 class DbForm extends Form
 {
     #[Rule('required|string')]
+    public ?string $database = null;
+
+    #[Rule('required|string')]
     public ?string $host = null;
+
+    #[Rule('nullable|string')]
+    public ?string $password = null;
 
     #[Rule('required|integer')]
     public int $port = 3306;
 
     #[Rule('required|string')]
-    public ?string $database = null;
-
-    #[Rule('required|string')]
     public ?string $username = null;
-
-    #[Rule('nullable|string')]
-    public ?string $password = null;
 
     public function validate($rules = null, $messages = [], $attributes = []): void
     {

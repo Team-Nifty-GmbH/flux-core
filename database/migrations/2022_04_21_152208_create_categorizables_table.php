@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::create('categorizables', function (Blueprint $table) {
+        Schema::create('categorizables', function (Blueprint $table): void {
             $table->unsignedBigInteger('category_id');
             $table->morphs('categorizable');
 

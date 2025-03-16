@@ -27,7 +27,7 @@ class OrderInvoiceAddedSubscriber
 
         // If user has no commission rates return
         $commissionRates = $agent->commissionRates()
-            ->where(function (Builder $query) use ($order) {
+            ->where(function (Builder $query) use ($order): void {
                 $query->where('contact_id', $order->addressInvoice->contact_id)
                     ->orWhereNull('contact_id');
             })

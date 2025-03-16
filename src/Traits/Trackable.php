@@ -7,11 +7,6 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 trait Trackable
 {
-    public function workTimes(): MorphMany
-    {
-        return $this->morphMany(WorkTime::class, 'trackable');
-    }
-
     /**
      * adds the calculated costs to the column
      * override per model if applicable
@@ -24,5 +19,10 @@ trait Trackable
     public function getContactId(): ?int
     {
         return null;
+    }
+
+    public function workTimes(): MorphMany
+    {
+        return $this->morphMany(WorkTime::class, 'trackable');
     }
 }

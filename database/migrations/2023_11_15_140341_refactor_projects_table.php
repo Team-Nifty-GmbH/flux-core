@@ -9,7 +9,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('projects', function (Blueprint $table) {
+        Schema::table('projects', function (Blueprint $table): void {
             $table->dropForeign('projects_category_id_foreign');
             $table->dropColumn(['category_id', 'display_name']);
 
@@ -46,7 +46,7 @@ return new class() extends Migration
             $table->renameColumn('deadline', 'end_date');
         });
 
-        Schema::table('projects', function (Blueprint $table) {
+        Schema::table('projects', function (Blueprint $table): void {
             $table->string('name')->change();
             $table->date('start_date')
                 ->nullable()
@@ -56,7 +56,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('projects', function (Blueprint $table) {
+        Schema::table('projects', function (Blueprint $table): void {
             $table->renameColumn('name', 'project_name');
             $table->renameColumn('start_date', 'release_date');
             $table->renameColumn('end_date', 'deadline');
@@ -88,7 +88,7 @@ return new class() extends Migration
             . '": "\', REPLACE(project_name, \'"\', \'\\\\"\'), \'"}\')'
         );
 
-        Schema::table('projects', function (Blueprint $table) {
+        Schema::table('projects', function (Blueprint $table): void {
             $table->json('project_name')->change();
         });
     }

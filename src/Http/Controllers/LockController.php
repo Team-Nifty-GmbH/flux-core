@@ -19,15 +19,6 @@ class LockController extends BaseController
         parent::__construct();
     }
 
-    public function showUserLocks(Request $request): JsonResponse
-    {
-        $locks = resolve_static(Lock::class, 'query')
-            ->where('created_by', Auth::id())
-            ->get();
-
-        return ResponseHelper::createResponseFromBase(statusCode: 200, data: $locks);
-    }
-
     public function index(Request $request): JsonResponse
     {
         $perPage = $request->per_page > 500 || $request->per_page < 1 ? 25 : $request->per_page;
@@ -109,5 +100,14 @@ class LockController extends BaseController
             data: $instances->pluck('id'),
             statusMessage: $lock ? 'records locked' : 'records unlocked'
         );
+    }
+
+    public function showUserLocks(Request $request): JsonResponse
+    {
+        $locks = resolve_static(Lock::class, 'query')
+            ->where('created_by', Auth::id())
+            ->get();
+
+        return ResponseHelper::createResponseFromBase(statusCode: 200, data: $locks);
     }
 }

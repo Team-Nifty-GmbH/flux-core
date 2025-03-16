@@ -10,14 +10,14 @@ use Illuminate\Support\Arr;
 
 class CreateSchedule extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateScheduleRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Schedule::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateScheduleRuleset::class;
     }
 
     public function performAction(): Schedule

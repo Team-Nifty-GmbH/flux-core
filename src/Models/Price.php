@@ -18,6 +18,22 @@ class Price extends FluxModel
 {
     use HasFrontendAttributes, HasPackageFactory, HasUserModification, HasUuid, LogsActivity, SoftDeletes;
 
+    public array $appliedDiscounts = [];
+
+    public ?Price $basePrice = null;
+
+    public ?string $discountFlat = null;
+
+    public ?string $discountPercentage = null;
+
+    public bool $isInherited = false;
+
+    public ?string $rootDiscountFlat = null;
+
+    public ?string $rootDiscountPercentage = null;
+
+    public ?Price $rootPrice = null;
+
     protected $appends = [
         'base_price',
         'base_price_flat',
@@ -40,22 +56,6 @@ class Price extends FluxModel
         'product.vatRate:id,rate_percentage',
     ];
 
-    public array $appliedDiscounts = [];
-
-    public ?string $discountFlat = null;
-
-    public ?string $discountPercentage = null;
-
-    public ?string $rootDiscountFlat = null;
-
-    public ?string $rootDiscountPercentage = null;
-
-    public bool $isInherited = false;
-
-    public ?Price $basePrice = null;
-
-    public ?Price $rootPrice = null;
-
     protected function casts(): array
     {
         return [
@@ -68,10 +68,10 @@ class Price extends FluxModel
         ];
     }
 
-    public function basePriceFlat(): Attribute
+    public function appliedDiscounts(): Attribute
     {
         return Attribute::get(
-            fn () => $this->basePrice?->price
+            fn () => $this->appliedDiscounts
         );
     }
 
@@ -82,66 +82,10 @@ class Price extends FluxModel
         );
     }
 
-    public function rootPrice(): Attribute
+    public function basePriceFlat(): Attribute
     {
         return Attribute::get(
-            fn () => $this->rootPrice
-        );
-    }
-
-    public function rootPriceFlat(): Attribute
-    {
-        return Attribute::get(
-            fn () => $this->rootPrice?->price
-        );
-    }
-
-    public function rootDiscountFlat(): Attribute
-    {
-        return Attribute::get(
-            fn () => $this->rootDiscountFlat
-        );
-    }
-
-    public function rootDiscountPercentage(): Attribute
-    {
-        return Attribute::get(
-            fn () => $this->rootDiscountPercentage
-        );
-    }
-
-    public function isNet(): Attribute
-    {
-        return Attribute::get(
-            fn () => $this->priceList?->is_net
-        );
-    }
-
-    public function gross(): Attribute
-    {
-        return Attribute::get(
-            fn () => $this->getGross(data_get($this->product, 'vatRate.rate_percentage') ?: 0)
-        );
-    }
-
-    public function net(): Attribute
-    {
-        return Attribute::get(
-            fn () => $this->getNet(data_get($this->product, 'vatRate.rate_percentage') ?: 0)
-        );
-    }
-
-    public function isInherited(): Attribute
-    {
-        return Attribute::get(
-            fn () => $this->isInherited
-        );
-    }
-
-    public function discountPercentage(): Attribute
-    {
-        return Attribute::get(
-            fn () => $this->discountPercentage
+            fn () => $this->basePrice?->price
         );
     }
 
@@ -152,10 +96,48 @@ class Price extends FluxModel
         );
     }
 
-    public function appliedDiscounts(): Attribute
+    public function discountPercentage(): Attribute
     {
         return Attribute::get(
-            fn () => $this->appliedDiscounts
+            fn () => $this->discountPercentage
+        );
+    }
+
+    public function getGross($vat): string
+    {
+        return $this->is_net ? net_to_gross($this->price, $vat) : $this->price;
+    }
+
+    public function getNet($vat): string
+    {
+        return $this->is_net ? $this->price : gross_to_net($this->price, $vat);
+    }
+
+    public function gross(): Attribute
+    {
+        return Attribute::get(
+            fn () => $this->getGross(data_get($this->product, 'vatRate.rate_percentage') ?: 0)
+        );
+    }
+
+    public function isInherited(): Attribute
+    {
+        return Attribute::get(
+            fn () => $this->isInherited
+        );
+    }
+
+    public function isNet(): Attribute
+    {
+        return Attribute::get(
+            fn () => $this->priceList?->is_net
+        );
+    }
+
+    public function net(): Attribute
+    {
+        return Attribute::get(
+            fn () => $this->getNet(data_get($this->product, 'vatRate.rate_percentage') ?: 0)
         );
     }
 
@@ -174,13 +156,31 @@ class Price extends FluxModel
         return $this->belongsTo(Product::class);
     }
 
-    public function getGross($vat): string
+    public function rootDiscountFlat(): Attribute
     {
-        return $this->is_net ? net_to_gross($this->price, $vat) : $this->price;
+        return Attribute::get(
+            fn () => $this->rootDiscountFlat
+        );
     }
 
-    public function getNet($vat): string
+    public function rootDiscountPercentage(): Attribute
     {
-        return $this->is_net ? $this->price : gross_to_net($this->price, $vat);
+        return Attribute::get(
+            fn () => $this->rootDiscountPercentage
+        );
+    }
+
+    public function rootPrice(): Attribute
+    {
+        return Attribute::get(
+            fn () => $this->rootPrice
+        );
+    }
+
+    public function rootPriceFlat(): Attribute
+    {
+        return Attribute::get(
+            fn () => $this->rootPrice?->price
+        );
     }
 }

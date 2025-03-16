@@ -8,9 +8,9 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class DeletePaymentRunRuleset extends FluxRuleset
 {
-    protected static ?string $model = PaymentRun::class;
-
     protected static bool $addAdditionalColumnRules = false;
+
+    protected static ?string $model = PaymentRun::class;
 
     public function rules(): array
     {

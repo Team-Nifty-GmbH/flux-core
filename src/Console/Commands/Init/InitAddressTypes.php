@@ -8,9 +8,9 @@ use Illuminate\Console\Command;
 
 class InitAddressTypes extends Command
 {
-    protected $signature = 'init:address-types';
-
     protected $description = 'Initializes a default set of address types.';
+
+    protected $signature = 'init:address-types';
 
     public function handle(): void
     {

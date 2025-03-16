@@ -61,6 +61,8 @@ use FluxErp\Livewire\Settings\PaymentTypes;
 use FluxErp\Livewire\Settings\Permissions;
 use FluxErp\Livewire\Settings\Plugins;
 use FluxErp\Livewire\Settings\PriceLists;
+use FluxErp\Livewire\Settings\Printers;
+use FluxErp\Livewire\Settings\PrintJobs;
 use FluxErp\Livewire\Settings\ProductOptionGroups;
 use FluxErp\Livewire\Settings\ProductPropertyGroups;
 use FluxErp\Livewire\Settings\Profile;
@@ -97,14 +99,14 @@ use TeamNiftyGmbH\DataTable\Controllers\IconController;
 */
 Route::middleware('web')
     ->domain(config('flux.flux_url'))
-    ->group(function () {
+    ->group(function (): void {
         Route::middleware(NoAuth::class)->get('/install', InstallWizard::class)
             ->name('flux.install');
 
         Route::get('/icons/{name}/{variant?}', IconController::class)
             ->where('variant', '(outline|solid)')
             ->name('icons');
-        Route::middleware(['guest:web'])->group(function () {
+        Route::middleware(['guest:web'])->group(function (): void {
             Route::get('/login', Login::class)
                 ->name('login');
             Route::post('/login', [AuthController::class, 'authenticateWeb']);
@@ -114,15 +116,15 @@ Route::middleware('web')
         Route::post('/logout', Logout::class)
             ->name('logout');
 
-        Route::middleware(['auth:web', 'permission'])->group(function () {
+        Route::middleware(['auth:web', 'permission'])->group(function (): void {
             Route::get('/', Dashboard::class)->name('dashboard');
 
-            Route::middleware(TrackVisits::class)->group(function () {
+            Route::middleware(TrackVisits::class)->group(function (): void {
                 Route::get('/mail', Mail::class)->name('mail');
                 Route::get('/calendars', Calendar::class)->name('calendars');
 
                 Route::name('contacts.')->prefix('contacts')
-                    ->group(function () {
+                    ->group(function (): void {
                         Route::get('/', AddressList::class)->name('contacts');
                         Route::get('/{id?}', Contact::class)->where('id', '[0-9]+')->name('id?');
                         Route::get('/communications', CommunicationList::class)->name('communications');
@@ -141,7 +143,7 @@ Route::middleware('web')
                     ->name('address.id');
 
                 Route::name('orders.')->prefix('orders')
-                    ->group(function () {
+                    ->group(function (): void {
                         Route::get('/list', OrderList::class)->name('orders');
                         Route::get('/list/{orderType}', OrderListByOrderType::class)->name('order-type');
                         Route::get('/order-positions/list', OrderPositionList::class)->name('order-positions');
@@ -156,7 +158,7 @@ Route::middleware('web')
                 Route::get('/projects/{id}', Project::class)->name('projects.id');
 
                 Route::name('products.')->prefix('products')
-                    ->group(function () {
+                    ->group(function (): void {
                         Route::get('/list', ProductList::class)->name('products');
                         Route::get('/serial-numbers', SerialNumberList::class)->name('serial-numbers');
                         Route::get('/serial-numbers/{id?}', SerialNumber::class)->name('serial-numbers.id?');
@@ -164,7 +166,7 @@ Route::middleware('web')
                     });
 
                 Route::name('accounting.')->prefix('accounting')
-                    ->group(function () {
+                    ->group(function (): void {
                         Route::get('/work-times', WorkTimeList::class)->name('work-times');
                         Route::get('/commissions', CommissionList::class)->name('commissions');
                         Route::get('/payment-reminders', PaymentReminder::class)->name('payment-reminders');
@@ -179,7 +181,7 @@ Route::middleware('web')
 
                 Route::get('/settings', Settings::class)->name('settings');
                 Route::name('settings.')->prefix('settings')
-                    ->group(function () {
+                    ->group(function (): void {
                         Route::get('/activity-logs', ActivityLogs::class)->name('activity-logs');
                         Route::get('/additional-columns', AdditionalColumns::class)->name('additional-columns');
                         Route::get('/address-types', AddressTypes::class)->name('address-types');
@@ -204,6 +206,8 @@ Route::middleware('web')
                         Route::get('/permissions', Permissions::class)->name('permissions');
                         Route::get('/plugins', Plugins::class)->name('plugins');
                         Route::get('/price-lists', PriceLists::class)->name('price-lists');
+                        Route::get('/print-jobs', PrintJobs::class)->name('print-jobs');
+                        Route::get('/printers', Printers::class)->name('printers');
                         Route::get('/product-option-groups', ProductOptionGroups::class)->name('product-option-groups');
                         Route::get('/product-properties', ProductPropertyGroups::class)->name('product-properties');
                         Route::get('/queue-monitor', QueueMonitor::class)->name('queue-monitor');
@@ -234,7 +238,7 @@ Route::middleware('web')
             })->name('media');
         });
 
-        Route::group(['middleware' => ['auth:web']], function () {
+        Route::group(['middleware' => ['auth:web']], function (): void {
             Route::any('/search/{model}', SearchController::class)
                 ->where('model', '(.*)')
                 ->name('search');
@@ -242,7 +246,7 @@ Route::middleware('web')
             Route::match(['get', 'post'], '/print/pdf', [PrintController::class, 'renderPdf']);
         });
 
-        Route::middleware('signed')->group(function () {
+        Route::middleware('signed')->group(function (): void {
             Route::get('/media-private/{media}/{filename}', function (Media $media) {
                 return $media;
             })->name('media.private');

@@ -22,9 +22,9 @@ class ValueResult
         ]);
     }
 
-    public function getValue(): float|string
+    public function getGrowthRate(): float|string|null
     {
-        return $this->value;
+        return $this->growthRate;
     }
 
     public function getPreviousValue(): float|string|null
@@ -32,8 +32,8 @@ class ValueResult
         return $this->previousValue;
     }
 
-    public function getGrowthRate(): float|string|null
+    public function getValue(): float|string
     {
-        return $this->growthRate;
+        return $this->value;
     }
 }

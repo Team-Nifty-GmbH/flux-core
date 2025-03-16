@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class ProductOptionGroupListTest extends TestCase
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(ProductOptionGroupList::class)
             ->assertStatus(200);

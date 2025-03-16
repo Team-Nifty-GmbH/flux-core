@@ -17,11 +17,6 @@ class PaymentReminderView extends PrintableView
         $this->model = $paymentReminder;
     }
 
-    public function getModel(): PaymentReminder
-    {
-        return $this->model;
-    }
-
     public function render(): View|Factory
     {
         return view('print::payment-reminder.payment-reminder', [
@@ -42,6 +37,11 @@ class PaymentReminderView extends PrintableView
     public function getFileName(): string
     {
         return $this->getSubject();
+    }
+
+    public function getModel(): PaymentReminder
+    {
+        return $this->model;
     }
 
     public function getSubject(): string

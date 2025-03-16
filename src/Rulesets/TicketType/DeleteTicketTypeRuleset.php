@@ -8,9 +8,9 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class DeleteTicketTypeRuleset extends FluxRuleset
 {
-    protected static ?string $model = TicketType::class;
-
     protected static bool $addAdditionalColumnRules = false;
+
+    protected static ?string $model = TicketType::class;
 
     public function rules(): array
     {

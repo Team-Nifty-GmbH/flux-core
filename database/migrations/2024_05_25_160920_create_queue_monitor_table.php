@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::create('queue_monitors', function (Blueprint $table) {
+        Schema::create('queue_monitors', function (Blueprint $table): void {
             $table->id();
             $table->uuid('job_uuid')->nullable();
             $table->string('job_batch_id')->index()->nullable();

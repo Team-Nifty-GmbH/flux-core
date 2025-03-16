@@ -16,14 +16,14 @@ use Illuminate\Support\Facades\Validator;
 
 class CreateContact extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateContactRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Contact::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateContactRuleset::class;
     }
 
     public function performAction(): Contact

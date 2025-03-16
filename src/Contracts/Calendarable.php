@@ -8,9 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 
 interface Calendarable
 {
-    public static function toCalendar(): array;
+    public static function fromCalendarEvent(array $event): Model;
 
-    public function toCalendarEvent(?array $info = null): array;
+    public static function toCalendar(): array;
 
     public function scopeInTimeframe(
         Builder $builder,
@@ -19,5 +19,5 @@ interface Calendarable
         ?array $info = null
     ): void;
 
-    public static function fromCalendarEvent(array $event): Model;
+    public function toCalendarEvent(?array $info = null): array;
 }

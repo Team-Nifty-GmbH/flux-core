@@ -16,8 +16,6 @@ trait RendersWidgets
 {
     use EnsureUsedInLivewire;
 
-    public array $widgets = [];
-
     public array $availableWidgets = [];
 
     public array $params = [
@@ -26,11 +24,7 @@ trait RendersWidgets
         'end' => null,
     ];
 
-    public function mountRendersWidgets(): void
-    {
-        $this->availableWidgets = $this->filterWidgets(Widget::all());
-        $this->widgets();
-    }
+    public array $widgets = [];
 
     #[Computed]
     public function availableWidgets(): array
@@ -38,21 +32,24 @@ trait RendersWidgets
         return $this->filterWidgets(Widget::all());
     }
 
-    public function updatedParams(): void
+    #[Js]
+    public function disableEditMode(): void
     {
-        $this->skipRender();
+        $this->js(<<<'JS'
+            isLoading = true;
+            editGridMode(false);
+        JS);
     }
 
-    #[Renderless]
-    public function widgets(): void
+    public function mountRendersWidgets(): void
     {
-        $this->widgets = $this->filterWidgets(auth()->user()->widgets()->get()->toArray());
+        $this->availableWidgets = $this->filterWidgets(Widget::all());
+        $this->widgets();
     }
 
-    #[Renderless]
-    public function syncWidgets(array $widgets): void
+    public function resetWidgets(): void
     {
-        $this->widgets = $widgets;
+        $this->widgets();
     }
 
     #[Renderless]
@@ -78,18 +75,21 @@ trait RendersWidgets
         $this->widgets();
     }
 
-    public function resetWidgets(): void
+    #[Renderless]
+    public function syncWidgets(array $widgets): void
     {
-        $this->widgets();
+        $this->widgets = $widgets;
     }
 
-    #[Js]
-    public function disableEditMode(): void
+    public function updatedParams(): void
     {
-        $this->js(<<<'JS'
-            isLoading = true;
-            editGridMode(false);
-        JS);
+        $this->skipRender();
+    }
+
+    #[Renderless]
+    public function widgets(): void
+    {
+        $this->widgets = $this->filterWidgets(auth()->user()->widgets()->get()->toArray());
     }
 
     protected function filterWidgets(array $widgets): array

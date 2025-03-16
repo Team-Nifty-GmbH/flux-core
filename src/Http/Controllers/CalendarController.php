@@ -27,16 +27,16 @@ class CalendarController extends BaseController
         );
     }
 
-    public function update(Request $request, CalendarService $calendarService): JsonResponse
+    public function delete(string $id, CalendarService $calendarService): JsonResponse
     {
-        $response = $calendarService->update($request->all());
+        $response = $calendarService->delete($id);
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
-    public function delete(string $id, CalendarService $calendarService): JsonResponse
+    public function update(Request $request, CalendarService $calendarService): JsonResponse
     {
-        $response = $calendarService->delete($id);
+        $response = $calendarService->update($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }

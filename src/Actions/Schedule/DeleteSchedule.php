@@ -8,14 +8,14 @@ use FluxErp\Rulesets\Schedule\DeleteScheduleRuleset;
 
 class DeleteSchedule extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeleteScheduleRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Schedule::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeleteScheduleRuleset::class;
     }
 
     public function performAction(): ?bool

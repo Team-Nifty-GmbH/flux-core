@@ -8,14 +8,14 @@ use FluxErp\Rulesets\Warehouse\CreateWarehouseRuleset;
 
 class CreateWarehouse extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateWarehouseRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Warehouse::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateWarehouseRuleset::class;
     }
 
     public function performAction(): Warehouse

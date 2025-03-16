@@ -10,7 +10,7 @@ return new class() extends Migration
     {
         Schema::rename('mailables', 'communicatable');
 
-        Schema::table('communicatable', function (Blueprint $table) {
+        Schema::table('communicatable', function (Blueprint $table): void {
             $table->dropUnique('mailables_ids_type_unique');
             $table->dropForeign('mailables_mail_message_id_foreign');
             $table->dropIndex('mailables_mail_message_id_foreign');
@@ -35,7 +35,7 @@ return new class() extends Migration
     {
         Schema::rename('communicatable', 'mailables');
 
-        Schema::table('mailables', function (Blueprint $table) {
+        Schema::table('mailables', function (Blueprint $table): void {
             $table->dropUnique('communicatable_type_id_communication_id_unique');
             $table->dropForeign('communicatable_communication_id_foreign');
             $table->dropIndex('communicatable_communication_id_foreign');

@@ -12,7 +12,7 @@ return new class() extends Migration
     {
         $this->migrateCategorizablesTable();
 
-        Schema::table('media', function (Blueprint $table) {
+        Schema::table('media', function (Blueprint $table): void {
             $table->dropForeign('media_category_id_foreign');
             $table->dropColumn('category_id');
         });
@@ -20,18 +20,18 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('media', function (Blueprint $table) {
+        Schema::table('media', function (Blueprint $table): void {
             $table->unsignedBigInteger('category_id')->nullable()->after('uuid');
         });
 
         $this->rollbackCategorizablesTable();
 
-        Schema::table('media', function (Blueprint $table) {
+        Schema::table('media', function (Blueprint $table): void {
             $table->foreign('category_id')->references('id')->on('categories');
         });
     }
 
-    private function migrateCategorizablesTable()
+    private function migrateCategorizablesTable(): void
     {
         DB::statement('INSERT INTO categorizables(category_id, categorizable_type, categorizable_id)
             SELECT category_id, \'' . trim(
@@ -41,7 +41,7 @@ return new class() extends Migration
         );
     }
 
-    private function rollbackCategorizablesTable()
+    private function rollbackCategorizablesTable(): void
     {
         DB::statement('UPDATE media
             INNER JOIN categorizables

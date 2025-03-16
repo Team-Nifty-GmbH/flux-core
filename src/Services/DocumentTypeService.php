@@ -16,6 +16,23 @@ class DocumentTypeService
         return CreateDocumentType::make($data)->execute();
     }
 
+    public function delete(string $id): array
+    {
+        try {
+            DeleteDocumentType::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
+            return ResponseHelper::createArrayResponse(
+                statusCode: 404,
+                data: $e->errors()
+            );
+        }
+
+        return ResponseHelper::createArrayResponse(
+            statusCode: 204,
+            statusMessage: 'document type deleted'
+        );
+    }
+
     public function update(array $data): array
     {
         if (! array_is_list($data)) {
@@ -50,23 +67,6 @@ class DocumentTypeService
             data: $responses,
             statusMessage: $statusCode === 422 ? null : 'document type(s) updated',
             bulk: true
-        );
-    }
-
-    public function delete(string $id): array
-    {
-        try {
-            DeleteDocumentType::make(['id' => $id])->validate()->execute();
-        } catch (ValidationException $e) {
-            return ResponseHelper::createArrayResponse(
-                statusCode: 404,
-                data: $e->errors()
-            );
-        }
-
-        return ResponseHelper::createArrayResponse(
-            statusCode: 204,
-            statusMessage: 'document type deleted'
         );
     }
 }

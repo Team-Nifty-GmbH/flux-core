@@ -8,7 +8,11 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::create('job_batches', function (Blueprint $table) {
+        if (Schema::hasTable('job_batches')) {
+            return;
+        }
+
+        Schema::create('job_batches', function (Blueprint $table): void {
             $table->string('id')->primary();
             $table->string('name');
             $table->integer('total_jobs');

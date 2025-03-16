@@ -9,7 +9,7 @@ class ChangePaymentNoticeToJsonOnPaymentNoticesTable extends Migration
 {
     public function up(): void
     {
-        Schema::table('payment_notices', function (Blueprint $table) {
+        Schema::table('payment_notices', function (Blueprint $table): void {
             $table->json('payment_notice')->change();
         });
 
@@ -20,16 +20,16 @@ class ChangePaymentNoticeToJsonOnPaymentNoticesTable extends Migration
     {
         $this->rollbackPaymentNotice();
 
-        Schema::table('payment_notices', function (Blueprint $table) {
+        Schema::table('payment_notices', function (Blueprint $table): void {
             $table->string('payment_notice')->change();
         });
     }
 
-    private function migratePaymentNotice()
+    private function migratePaymentNotice(): void
     {
         $paymentNotices = DB::table('payment_notices')->get()->toArray();
 
-        array_walk($paymentNotices, function (&$item) {
+        array_walk($paymentNotices, function (&$item): void {
             $item->payment_notice = json_encode([config('app.locale') => $item->payment_notice]);
             $item = (array) $item;
         });
@@ -37,11 +37,11 @@ class ChangePaymentNoticeToJsonOnPaymentNoticesTable extends Migration
         DB::table('payment_notices')->upsert($paymentNotices, ['id']);
     }
 
-    private function rollbackPaymentNotice()
+    private function rollbackPaymentNotice(): void
     {
         $paymentNotices = DB::table('payment_notices')->get()->toArray();
 
-        array_walk($paymentNotices, function (&$item) {
+        array_walk($paymentNotices, function (&$item): void {
             $item->payment_notice = substr(json_decode($item->payment_notice)->{config('app.locale')}, 0, 255);
             $item = (array) $item;
         });

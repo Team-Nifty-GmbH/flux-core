@@ -8,7 +8,7 @@ class CreateProductProductPropertiesTable extends Migration
 {
     public function up(): void
     {
-        Schema::create('product_product_property', function (Blueprint $table) {
+        Schema::create('product_product_property', function (Blueprint $table): void {
             $table->unsignedBigInteger('product_id');
             $table->unsignedBigInteger('product_prop_id');
             $table->text('value')->nullable();

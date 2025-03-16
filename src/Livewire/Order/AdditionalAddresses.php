@@ -15,15 +15,15 @@ class AdditionalAddresses extends Component
 {
     use Actions;
 
-    public int $orderId;
+    public ?int $address_id = null;
+
+    public ?int $address_type_id = null;
 
     public int $clientId;
 
     public OrderAddressesForm $form;
 
-    public ?int $address_id = null;
-
-    public ?int $address_type_id = null;
+    public int $orderId;
 
     public function render(): View
     {
@@ -44,11 +44,6 @@ class AdditionalAddresses extends Component
         return view('flux::livewire.order.additional-addresses');
     }
 
-    public function placeholder(): View
-    {
-        return view('flux::livewire.placeholders.box');
-    }
-
     public function delete(int $id): void
     {
         $current = $this->form->addresses;
@@ -65,6 +60,11 @@ class AdditionalAddresses extends Component
 
             return;
         }
+    }
+
+    public function placeholder(): View
+    {
+        return view('flux::livewire.placeholders.box');
     }
 
     public function save(): bool

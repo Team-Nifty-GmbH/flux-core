@@ -10,11 +10,6 @@ use TeamNiftyGmbH\DataTable\Helpers\AggregatableRelationColumn;
 
 class WarehouseList extends BaseWarehouseList
 {
-    protected string $view = 'flux::livewire.product.warehouse-list';
-
-    #[Modelable]
-    public ProductForm $product;
-
     public array $enabledCols = [
         'name',
         'stock_postings_sum_posting',
@@ -22,7 +17,24 @@ class WarehouseList extends BaseWarehouseList
 
     public ?bool $isSearchable = false;
 
+    #[Modelable]
+    public ProductForm $product;
+
     public ?int $warehouseId = null;
+
+    protected string $view = 'flux::livewire.product.warehouse-list';
+
+    public function getColLabels(?array $cols = null): array
+    {
+        return array_merge(parent::getColLabels($cols), [
+            'stock_postings_sum_posting' => __('Stock'),
+        ]);
+    }
+
+    public function getFilterableColumns(?string $name = null): array
+    {
+        return $this->enabledCols;
+    }
 
     public function getFormatters(): array
     {
@@ -34,24 +46,12 @@ class WarehouseList extends BaseWarehouseList
         );
     }
 
-    public function getFilterableColumns(?string $name = null): array
-    {
-        return $this->enabledCols;
-    }
-
-    public function getColLabels(?array $cols = null): array
-    {
-        return array_merge(parent::getColLabels($cols), [
-            'stock_postings_sum_posting' => __('Stock'),
-        ]);
-    }
-
     protected function getAggregatableRelationCols(): array
     {
         return [
             AggregatableRelationColumn::make(
                 [
-                    'stockPostings' => function ($query) {
+                    'stockPostings' => function ($query): void {
                         $query->where('product_id', $this->product->id);
                     },
                 ],
@@ -64,7 +64,7 @@ class WarehouseList extends BaseWarehouseList
     {
         return new ComponentAttributeBag([
             'x-bind:class' => <<<'JS'
-                    record.id === $wire.warehouseId && 'bg-primary-100 dark:bg-primary-800'
+                    record.id === $wire.warehouseId && 'bg-indigo-100 dark:bg-indigo-800'
                 JS,
         ]);
     }

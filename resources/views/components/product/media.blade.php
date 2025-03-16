@@ -24,7 +24,7 @@
                 ],
             ]" />
     </x-card>
-    <x-card :title="__('Other media')">
+    <x-card :header="__('Other media')">
         <livewire:product.attachments :model-id="$this->product->id" />
     </x-card>
 </div>

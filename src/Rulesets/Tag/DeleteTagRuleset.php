@@ -8,9 +8,9 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class DeleteTagRuleset extends FluxRuleset
 {
-    protected static ?string $model = Tag::class;
-
     protected static bool $addAdditionalColumnRules = false;
+
+    protected static ?string $model = Tag::class;
 
     public function rules(): array
     {

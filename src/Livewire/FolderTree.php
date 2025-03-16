@@ -22,179 +22,16 @@ class FolderTree extends Component
 {
     use Actions, WithFilePond;
 
-    /** @var class-string<Model> */
-    public ?string $modelType = null;
+    public $files = [];
 
     public ?int $modelId = null;
 
-    public $files = [];
-
-    public function getListeners(): array
-    {
-        return [
-            'folder-tree:loadModel' => 'loadModel',
-        ];
-    }
+    /** @var class-string<Model> */
+    public ?string $modelType = null;
 
     public function render(): View|Factory|Application
     {
         return view('flux::livewire.folder-tree');
-    }
-
-    public function loadModel(array $arguments): void
-    {
-        $this->fill($arguments);
-
-        $this->js(
-            <<<'JS'
-                selected = false;
-                loadLevels();
-            JS
-        );
-    }
-
-    public function getRules(): array
-    {
-        return [
-            'files.*' => 'required|' . (config('livewire.temporary_file_upload.rules') ?? 'file|max:12288'),
-        ];
-    }
-
-    #[Renderless]
-    public function updatedFiles(): void
-    {
-        try {
-            resolve_static(UpdateMedia::class, 'canPerformAction', [false]);
-        } catch (UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return;
-        }
-    }
-
-    #[Renderless]
-    public function hasSingleFile(string $collectionName): bool
-    {
-        // get the base collection name - ignore subfolders
-        $baseCollection = str_contains($collectionName, '.') ?
-            explode('.', $collectionName)[0] : $collectionName;
-
-        return data_get(
-            resolve_static($this->modelType, 'query')
-                ->whereKey($this->modelId)
-                ->first()
-                ?->getMediaCollection($baseCollection),
-            'singleFile',
-            false
-        );
-    }
-
-    #[Renderless]
-    public function readOnly(string $collectionName): bool
-    {
-        // get the base collection name - ignore subfolders
-        $baseCollection = str_contains($collectionName, '.') ?
-            explode('.', $collectionName)[0] : $collectionName;
-
-        // in case there is no rule for the folder - $baseCollection
-        // enable upload
-        return data_get(
-            resolve_static($this->modelType, 'query')
-                ->whereKey($this->modelId)
-                ->first()
-                ?->getMediaCollection($baseCollection),
-            'readOnly',
-            false
-        );
-    }
-
-    public function getTree(): array
-    {
-        if (! $this->modelType || ! $this->modelId) {
-            return [];
-        }
-
-        return resolve_static($this->modelType, 'query')
-            ->whereKey($this->modelId)
-            ->first()
-            ?->getMediaAsTree() ?? [];
-    }
-
-    public function save(array $item): bool
-    {
-        try {
-            resolve_static(UpdateMedia::class, 'canPerformAction');
-        } catch (UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        return ($item['file_name'] ?? false) ? $this->saveFile($item) : $this->saveFolder($item);
-    }
-
-    #[Renderless]
-    public function saveFolder(array $collection): true
-    {
-        $newCollectionName = explode('.', $collection['collection_name']);
-
-        array_pop($newCollectionName);
-        $newCollectionName[] = Str::of($collection['name'])
-            ->ascii(config('app.locale'))
-            ->snake();
-        $newCollectionName = implode('.', $newCollectionName);
-
-        $model = resolve_static($this->modelType, 'query')
-            ->whereKey($this->modelId)
-            ->first();
-
-        resolve_static(MediaModel::class, 'query')
-            ->where('model_type', morph_alias($this->modelType))
-            ->where('model_id', $this->modelId)
-            ->where('collection_name', 'LIKE', $collection['collection_name'] . '%')
-            ->get()
-            ->each(function (MediaModel $media) use ($newCollectionName, $model, $collection) {
-                $collectionName = $media->collection_name;
-                $collectionName = Str::replaceFirst($collection['collection_name'], $newCollectionName, $collectionName);
-
-                $media->move($model, $collectionName);
-            });
-
-        return true;
-    }
-
-    #[Renderless]
-    public function moveItem(string $mediaId, array|string $targetCollectionName): void
-    {
-        $targetCollectionName = is_array($targetCollectionName)
-            ? implode('.', $targetCollectionName)
-            : $targetCollectionName;
-        $model = resolve_static($this->modelType, 'query')
-            ->whereKey($this->modelId)
-            ->first();
-
-        if (! is_numeric($mediaId)) {
-            resolve_static(MediaModel::class, 'query')
-                ->where('model_type', morph_alias($this->modelType))
-                ->where('model_id', $this->modelId)
-                ->where('collection_name', 'LIKE', $mediaId . '%')
-                ->get()
-                ->each(function (MediaModel $media) use ($mediaId, $targetCollectionName, $model) {
-                    $collectionName = $media->collection_name;
-                    $collectionName = Str::replaceFirst(Str::beforeLast($mediaId, '.'), $targetCollectionName, $collectionName);
-
-                    $media->move($model, $collectionName);
-                });
-        } else {
-            resolve_static(MediaModel::class, 'query')
-                ->where('model_type', morph_alias($this->modelType))
-                ->where('model_id', $this->modelId)
-                ->with('model')
-                ->whereKey($mediaId)
-                ->first()
-                ?->move($model, $targetCollectionName);
-        }
-
     }
 
     public function delete(MediaModel $media): bool
@@ -235,6 +72,169 @@ class FolderTree extends Component
         }
     }
 
+    public function getListeners(): array
+    {
+        return [
+            'folder-tree:loadModel' => 'loadModel',
+        ];
+    }
+
+    public function getRules(): array
+    {
+        return [
+            'files.*' => 'required|' . (config('livewire.temporary_file_upload.rules') ?? 'file|max:12288'),
+        ];
+    }
+
+    public function getTree(): array
+    {
+        if (! $this->modelType || ! $this->modelId) {
+            return [];
+        }
+
+        return resolve_static($this->modelType, 'query')
+            ->whereKey($this->modelId)
+            ->first()
+            ?->getMediaAsTree() ?? [];
+    }
+
+    #[Renderless]
+    public function hasSingleFile(string $collectionName): bool
+    {
+        // get the base collection name - ignore subfolders
+        $baseCollection = str_contains($collectionName, '.') ?
+            explode('.', $collectionName)[0] : $collectionName;
+
+        return data_get(
+            resolve_static($this->modelType, 'query')
+                ->whereKey($this->modelId)
+                ->first()
+                ?->getMediaCollection($baseCollection),
+            'singleFile',
+            false
+        );
+    }
+
+    public function loadModel(array $arguments): void
+    {
+        $this->fill($arguments);
+
+        $this->js(
+            <<<'JS'
+                selected = false;
+                loadLevels();
+            JS
+        );
+    }
+
+    #[Renderless]
+    public function moveItem(string $mediaId, array|string $targetCollectionName): void
+    {
+        $targetCollectionName = is_array($targetCollectionName)
+            ? implode('.', $targetCollectionName)
+            : $targetCollectionName;
+        $model = resolve_static($this->modelType, 'query')
+            ->whereKey($this->modelId)
+            ->first();
+
+        if (! is_numeric($mediaId)) {
+            resolve_static(MediaModel::class, 'query')
+                ->where('model_type', morph_alias($this->modelType))
+                ->where('model_id', $this->modelId)
+                ->where('collection_name', 'LIKE', $mediaId . '%')
+                ->get()
+                ->each(function (MediaModel $media) use ($mediaId, $targetCollectionName, $model): void {
+                    $collectionName = $media->collection_name;
+                    $collectionName = Str::replaceFirst(Str::beforeLast($mediaId, '.'), $targetCollectionName, $collectionName);
+
+                    $media->move($model, $collectionName);
+                });
+        } else {
+            resolve_static(MediaModel::class, 'query')
+                ->where('model_type', morph_alias($this->modelType))
+                ->where('model_id', $this->modelId)
+                ->with('model')
+                ->whereKey($mediaId)
+                ->first()
+                ?->move($model, $targetCollectionName);
+        }
+
+    }
+
+    #[Renderless]
+    public function readOnly(string $collectionName): bool
+    {
+        // get the base collection name - ignore subfolders
+        $baseCollection = str_contains($collectionName, '.') ?
+            explode('.', $collectionName)[0] : $collectionName;
+
+        // in case there is no rule for the folder - $baseCollection
+        // enable upload
+        return data_get(
+            resolve_static($this->modelType, 'query')
+                ->whereKey($this->modelId)
+                ->first()
+                ?->getMediaCollection($baseCollection),
+            'readOnly',
+            false
+        );
+    }
+
+    public function save(array $item): bool
+    {
+        try {
+            resolve_static(UpdateMedia::class, 'canPerformAction');
+        } catch (UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        return ($item['file_name'] ?? false) ? $this->saveFile($item) : $this->saveFolder($item);
+    }
+
+    #[Renderless]
+    public function saveFolder(array $collection): true
+    {
+        $newCollectionName = explode('.', $collection['collection_name']);
+
+        array_pop($newCollectionName);
+        $newCollectionName[] = Str::of($collection['name'])
+            ->ascii(config('app.locale'))
+            ->snake();
+        $newCollectionName = implode('.', $newCollectionName);
+
+        $model = resolve_static($this->modelType, 'query')
+            ->whereKey($this->modelId)
+            ->first();
+
+        resolve_static(MediaModel::class, 'query')
+            ->where('model_type', morph_alias($this->modelType))
+            ->where('model_id', $this->modelId)
+            ->where('collection_name', 'LIKE', $collection['collection_name'] . '%')
+            ->get()
+            ->each(function (MediaModel $media) use ($newCollectionName, $model, $collection): void {
+                $collectionName = $media->collection_name;
+                $collectionName = Str::replaceFirst($collection['collection_name'], $newCollectionName, $collectionName);
+
+                $media->move($model, $collectionName);
+            });
+
+        return true;
+    }
+
+    #[Renderless]
+    public function updatedFiles(): void
+    {
+        try {
+            resolve_static(UpdateMedia::class, 'canPerformAction', [false]);
+        } catch (UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+    }
+
     private function saveFile(array $media): bool
     {
         try {
@@ -248,7 +248,7 @@ class FolderTree extends Component
             return false;
         }
 
-        $this->notification()->success(__('File saved!'));
+        $this->notification()->success(__('File saved!'))->send();
 
         return $response instanceof Media;
     }

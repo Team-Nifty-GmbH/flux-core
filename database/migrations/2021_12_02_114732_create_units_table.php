@@ -8,7 +8,7 @@ class CreateUnitsTable extends Migration
 {
     public function up(): void
     {
-        Schema::create('units', function (Blueprint $table) {
+        Schema::create('units', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
 

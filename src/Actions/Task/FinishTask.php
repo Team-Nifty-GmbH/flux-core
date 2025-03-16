@@ -9,14 +9,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class FinishTask extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return FinishTaskRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Task::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return FinishTaskRuleset::class;
     }
 
     public function performAction(): Model

@@ -7,19 +7,7 @@ use Livewire\Attributes\Js;
 trait MoneyChartFormattingTrait
 {
     #[Js]
-    public function toolTipFormatter(): string
-    {
-        return $this->moneyFormatterJs();
-    }
-
-    #[Js]
     public function dataLabelsFormatter(): string
-    {
-        return $this->moneyFormatterJs();
-    }
-
-    #[Js]
-    public function yAxisFormatter(): string
     {
         return $this->moneyFormatterJs();
     }
@@ -32,6 +20,18 @@ trait MoneyChartFormattingTrait
               return a + b
             }, 0))
         JS;
+    }
+
+    #[Js]
+    public function toolTipFormatter(): string
+    {
+        return $this->moneyFormatterJs();
+    }
+
+    #[Js]
+    public function yAxisFormatter(): string
+    {
+        return $this->moneyFormatterJs();
     }
 
     protected function moneyFormatterJs(): string

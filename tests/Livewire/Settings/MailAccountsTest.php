@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class MailAccountsTest extends TestCase
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(MailAccounts::class)
             ->assertStatus(200);
