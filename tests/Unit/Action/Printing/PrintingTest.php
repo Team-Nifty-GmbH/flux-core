@@ -19,6 +19,8 @@ use Illuminate\Support\Str;
 
 class PrintingTest extends BaseSetup
 {
+    public Order $order;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -30,7 +32,7 @@ class PrintingTest extends BaseSetup
         $address = Address::factory()->create([
             'company' => Str::uuid()->toString(),
             'client_id' => $this->dbClient->getKey(),
-            'contact_id' => $contact->id,
+            'contact_id' => $contact->getKey(),
         ]);
 
         $priceList = PriceList::factory()->create();
@@ -56,13 +58,13 @@ class PrintingTest extends BaseSetup
 
         $this->order = Order::factory()->create([
             'client_id' => $this->dbClient->getKey(),
-            'language_id' => $language->id,
-            'order_type_id' => $orderType->id,
-            'payment_type_id' => $paymentType->id,
-            'price_list_id' => $priceList->id,
-            'currency_id' => $currency->id,
-            'address_invoice_id' => $address->id,
-            'address_delivery_id' => $address->id,
+            'language_id' => $language->getKey(),
+            'order_type_id' => $orderType->getKey(),
+            'payment_type_id' => $paymentType->getKey(),
+            'price_list_id' => $priceList->getKey(),
+            'currency_id' => $currency->getKey(),
+            'address_invoice_id' => $address->getKey(),
+            'address_delivery_id' => $address->getKey(),
             'is_locked' => false,
         ]);
     }
@@ -73,7 +75,7 @@ class PrintingTest extends BaseSetup
 
         $result = Printing::make([
             'model_type' => $this->order->getMorphClass(),
-            'model_id' => $this->order->id,
+            'model_id' => $this->order->getKey(),
             'view' => 'offer',
             'preview' => false,
             'html' => true,
@@ -96,7 +98,7 @@ class PrintingTest extends BaseSetup
 
         $result = Printing::make([
             'model_type' => $this->order->getMorphClass(),
-            'model_id' => $this->order->id,
+            'model_id' => $this->order->getKey(),
             'view' => 'offer',
             'preview' => true,
             'html' => false,
@@ -111,14 +113,10 @@ class PrintingTest extends BaseSetup
 
         $this->assertNotEmpty($pdf);
         $this->assertStringStartsWith('%PDF-', $pdf);
-
         $this->assertStringContainsString('%%EOF', $pdf);
-
         $this->assertStringContainsString('/Pages', $pdf);
         $this->assertStringContainsString('/Type /Page', $pdf);
         $this->assertStringContainsString('/Contents', $pdf);
-
         $this->assertGreaterThan(1000, strlen($pdf));
-
     }
 }

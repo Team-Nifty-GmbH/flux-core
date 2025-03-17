@@ -89,7 +89,7 @@ class ActionManager
         foreach ($actions as $name => $class) {
             try {
                 $this->register($name, $class);
-            } catch (Exception) {
+            } catch (Throwable) {
                 // Ignore exceptions during auto-discovery
             }
         }

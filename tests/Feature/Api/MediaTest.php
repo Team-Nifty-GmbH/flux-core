@@ -239,18 +239,17 @@ class MediaTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['upload']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $media = [
+        UploadMedia::make([
             'model_type' => $this->task->getMorphClass(),
             'model_id' => $this->task->id,
             'media' => $this->file,
             'file_name' => $fileName = Str::uuid()->toString(),
             'disk' => 'local',
-        ];
+        ])
+            ->validate()
+            ->execute();
 
         Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->post('/api/media', $media);
-        $response->assertStatus(201);
 
         $response = $this->actingAs($this->user)
             ->get('/api/media/' . $fileName

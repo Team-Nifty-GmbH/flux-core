@@ -2,15 +2,17 @@
 
 namespace FluxErp\Tests\Livewire\Settings;
 
-use FluxErp\Livewire\Settings\TranslationEdit;
+use FluxErp\Livewire\Settings\LanguageLines;
 use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
-class TranslationEditTest extends TestCase
+class LanguageLinesTest extends TestCase
 {
+    protected string $livewireComponent = LanguageLines::class;
+
     public function test_renders_successfully(): void
     {
-        Livewire::test(TranslationEdit::class)
+        Livewire::test($this->livewireComponent)
             ->assertStatus(200);
     }
 }

@@ -9,13 +9,14 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 trait SupportsApiRequests
 {
     public static ?int $successCode = null;
 
-    public function __invoke(Request $request): mixed
+    public function __invoke(Request $request): Htmlable|Response|JsonResponse
     {
         $routeParams = $request->route()->parameters();
         $data = array_merge(
@@ -26,6 +27,7 @@ trait SupportsApiRequests
 
         if (
             $request->isMethod('DELETE')
+            && $routeParams
             && resolve_static(static::models()[0], 'query')->where($routeParams)->doesntExist()
         ) {
             throw HttpException::fromStatusCode(Response::HTTP_NOT_FOUND);
@@ -52,7 +54,7 @@ trait SupportsApiRequests
                     ->validate()
                     ->execute();
 
-                if ($result instanceof Htmlable && $request->acceptsHtml()) {
+                if ($result instanceof Htmlable && $request->acceptsHtml() && ! $isBulk) {
                     return $result;
                 }
 
@@ -89,9 +91,12 @@ trait SupportsApiRequests
             } catch (Exception $e) {
                 $statusCode = Response::HTTP_INTERNAL_SERVER_ERROR;
                 $itemResult['message'] = 'internal server error';
-                $itemResult['errors'] = $e->getMessage();
+                $itemResult['errors'] = app()->isProduction()
+                    ? null
+                    : $e->getMessage();
                 $failed++;
             }
+
             $itemResult['status'] = $statusCode;
 
             if ($statusCode > $worstStatusCode) {

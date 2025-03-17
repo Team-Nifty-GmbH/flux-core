@@ -42,6 +42,7 @@ class DeleteUser extends FluxAction
             throw ValidationException::withMessages([
                 'id' => [__('Cannot delete yourself')],
             ])
+                ->status(403)
                 ->errorBag('deleteUser');
         }
     }

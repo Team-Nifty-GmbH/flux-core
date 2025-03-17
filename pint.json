@@ -4,8 +4,25 @@
         "concat_space": {
             "spacing": "one"
         },
-        "no_extra_blank_lines": true,
-        "ordered_imports": true,
+        "no_extra_blank_lines": {
+            "tokens": [
+                "use",
+                "use_trait",
+                "extra",
+                "return",
+                "throw",
+                "curly_brace_block",
+                "parenthesis_brace_block",
+                "square_brace_block",
+                "switch",
+                "case",
+                "default"
+            ]
+        },
+        "ordered_imports": {
+            "sort_algorithm": "alpha",
+            "imports_order": ["class", "function", "const"]
+        },
         "no_unused_imports": true,
         "global_namespace_import": {
             "import_classes": true,
@@ -62,6 +79,7 @@
             ],
             "sort_algorithm": "alpha"
         },
+        "blank_line_between_import_groups": false,
         "new_with_parentheses": true,
         "return_type_declaration": {
             "space_before": "none"

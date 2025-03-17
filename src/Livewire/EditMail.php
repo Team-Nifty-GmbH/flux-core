@@ -199,7 +199,6 @@ class EditMail extends Component
                 } else {
                     $message->queue($mail);
                 }
-
             } catch (Exception $e) {
                 exception_to_notifications(
                     exception: $e,

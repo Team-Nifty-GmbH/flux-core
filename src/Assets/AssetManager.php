@@ -10,7 +10,6 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Macroable;
-
 use function Livewire\invade;
 
 class AssetManager implements Htmlable

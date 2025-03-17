@@ -11,10 +11,8 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Vite;
 use Livewire\Drawer\Utils;
-
-use function Livewire\invade;
-
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use function Livewire\invade;
 
 class AssetController extends Controller
 {

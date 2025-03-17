@@ -5,7 +5,7 @@ namespace FluxErp\Actions\Address;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Address;
 
-class GenerateLoginToken extends FluxAction
+class GenerateAddressLoginToken extends FluxAction
 {
     public static function models(): array
     {

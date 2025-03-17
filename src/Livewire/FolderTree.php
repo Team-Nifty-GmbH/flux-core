@@ -159,7 +159,6 @@ class FolderTree extends Component
                 ->first()
                 ?->move($model, $targetCollectionName);
         }
-
     }
 
     #[Renderless]

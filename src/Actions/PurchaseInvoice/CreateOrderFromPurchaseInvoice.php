@@ -17,7 +17,7 @@ use Illuminate\Validation\ValidationException;
 
 class CreateOrderFromPurchaseInvoice extends FluxAction
 {
-    public static ?int $successCode = Response::HTTP_OK;
+    public static ?int $successCode = Response::HTTP_CREATED;
 
     public ?PurchaseInvoice $purchaseInvoice;
 

@@ -5,13 +5,12 @@ namespace FluxErp\Actions\Media;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Media;
 use FluxErp\Rulesets\Media\DownloadMediaRuleset;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class DownloadMedia extends FluxAction
 {
-    private ?Media $media = null;
-
     public static function models(): array
     {
         return [Media::class];
@@ -24,43 +23,46 @@ class DownloadMedia extends FluxAction
 
     public function performAction(): mixed
     {
-        $mediaPath = $this->media->getPath();
-        $fileName = $this->media->file_name;
+        $media = resolve_static(Media::class, 'query')
+            ->whereKey($this->getData('id'))
+            ->first();
+
+        $mediaPath = $media->getPath();
+        $fileName = $media->file_name;
 
         if ($conversion = $this->getData('conversion')) {
-            $mediaPath = $this->media->getPath($conversion);
-            $fileName .= '_' . $conversion;
+            $mediaPath = $media->getPath($conversion);
+            $fileName = $conversion . '_' . $fileName;
         }
 
         return match (strtolower($this->getData('as'))) {
             'base64' => base64_encode(file_get_contents($mediaPath)),
-            'url' => $this->media->getUrl($conversion),
+            'url' => $media->getUrl($conversion),
             'path' => $mediaPath,
             default => response()->download($mediaPath, $fileName)
         };
     }
 
-    protected function prepareForValidation(): void
-    {
-        $this->data['id'] ??= resolve_static(Media::class, 'query')
-            ->where('file_name', $this->getData('file_name'))
-            ->where('model_type', $this->getData('model_type'))
-            ->where('model_id', $this->getData('model_id'))
-            ->value('id');
-    }
-
     protected function validateData(): void
     {
-        $this->media = resolve_static(Media::class, 'query')
-            ->whereKey($this->getData('id'))
+        $media = resolve_static(Media::class, 'query')
+            ->when(
+                $this->getData('id'),
+                fn (Builder $query) => $query->whereKey($this->getData('id')),
+                fn (Builder $query) => $query->where('file_name', $this->getData('file_name'))
+                    ->where('model_type', $this->getData('model_type'))
+                    ->where('model_id', $this->getData('model_id'))
+            )
             ->first();
+
+        $this->data['id'] ??= $media?->getKey();
 
         if (
             (
                 $this->getData('conversion')
-                && ! $this->media->hasGeneratedConversion($this->getData('conversion'))
+                && ! $media?->hasGeneratedConversion($this->getData('conversion'))
             )
-            || ! $this->media
+            || ! $media
         ) {
             throw ValidationException::withMessages([
                 'media' => 'File not found',
@@ -68,10 +70,10 @@ class DownloadMedia extends FluxAction
                 ->status(404);
         }
 
-        parent::validateData();
-
-        if (! auth()->check() && $this->media->disk !== 'public') {
+        if (! auth()->check() && $media->disk !== 'public') {
             throw UnauthorizedException::forPermissions(['action.' . static::name()]);
         }
+
+        parent::validateData();
     }
 }

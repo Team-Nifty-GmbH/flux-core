@@ -8,20 +8,14 @@ use FluxErp\Models\WorkTime;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class WorkTimeController extends BaseController
+class WorkTimeController extends Controller
 {
-    public function __construct()
-    {
-        parent::__construct();
-        $this->model = app(WorkTime::class);
-    }
-
     public function userIndex(Request $request): JsonResponse
     {
         $page = max((int) $request->page, 1);
         $perPage = $request->per_page > 500 || $request->per_page < 1 ? 25 : $request->per_page;
 
-        $query = QueryBuilder::filterModel($this->model, $request);
+        $query = QueryBuilder::filterModel(app(WorkTime::class), $request);
         $data = $query
             ->where('user_id', $request->user()->id)
             ->paginate(perPage: $perPage, page: $page)
@@ -30,6 +24,7 @@ class WorkTimeController extends BaseController
         return ResponseHelper::createResponseFromBase(
             statusCode: 200,
             data: $data,
-        )->setEncodingOptions(JSON_UNESCAPED_SLASHES);
+        )
+            ->setEncodingOptions(JSON_UNESCAPED_SLASHES);
     }
 }

@@ -24,6 +24,7 @@ class DownloadMultipleMediaRuleset extends FluxRuleset
                 'array',
             ],
             'ids.*' => [
+                'required',
                 'integer',
                 app(ModelExists::class, ['model' => Media::class]),
             ],

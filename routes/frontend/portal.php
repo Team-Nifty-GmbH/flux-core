@@ -39,7 +39,6 @@ Route::middleware(['web', PortalMiddleware::class])
     ->domain(config('flux.portal_domain'))
     ->name('portal.')
     ->group(function (): void {
-
         Route::get('/icons/{name}/{variant?}', IconController::class)
             ->where('variant', '(outline|solid)')
             ->name('icons');

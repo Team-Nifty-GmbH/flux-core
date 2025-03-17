@@ -25,7 +25,7 @@ class DownloadMultipleMedia extends FluxAction
         return MediaStream::create(Str::finish($this->getData('file_name') ?? 'media', '.zip'))
             ->addMedia(
                 resolve_static(Media::class, 'query')
-                    ->whereIntegerInRaw('id', $this->getData('ids'))
+                    ->whereKey($this->getData('ids'))
                     ->get()
             );
     }

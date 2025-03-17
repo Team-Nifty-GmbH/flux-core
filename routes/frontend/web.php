@@ -1,5 +1,6 @@
 <?php
 
+use FluxErp\Actions\Printing;
 use FluxErp\Actions\PushSubscription\UpsertPushSubscription;
 use FluxErp\Http\Controllers\AuthController;
 use FluxErp\Http\Controllers\SearchController;
@@ -49,6 +50,7 @@ use FluxErp\Livewire\Settings\CustomerPortal;
 use FluxErp\Livewire\Settings\DiscountGroups;
 use FluxErp\Livewire\Settings\FailedJobs;
 use FluxErp\Livewire\Settings\Industries;
+use FluxErp\Livewire\Settings\LanguageLines;
 use FluxErp\Livewire\Settings\Languages;
 use FluxErp\Livewire\Settings\LedgerAccounts;
 use FluxErp\Livewire\Settings\Logs;
@@ -71,7 +73,6 @@ use FluxErp\Livewire\Settings\SerialNumberRanges;
 use FluxErp\Livewire\Settings\Settings;
 use FluxErp\Livewire\Settings\Tags;
 use FluxErp\Livewire\Settings\TicketTypes;
-use FluxErp\Livewire\Settings\Translations;
 use FluxErp\Livewire\Settings\Units;
 use FluxErp\Livewire\Settings\UserEdit;
 use FluxErp\Livewire\Settings\Users;
@@ -214,7 +215,7 @@ Route::middleware('web')
                         Route::get('/serial-number-ranges', SerialNumberRanges::class)->name('serial-number-ranges');
                         Route::get('/tags', Tags::class)->name('tags');
                         Route::get('/ticket-types', TicketTypes::class)->name('ticket-types');
-                        Route::get('/translations', Translations::class)->name('translations');
+                        Route::get('/translations', LanguageLines::class)->name('translations');
                         Route::get('/units', Units::class)->name('units');
                         Route::get('/users', Users::class)->name('users');
                         Route::get('/users/{user}', UserEdit::class)->name('users.edit');
@@ -241,11 +242,11 @@ Route::middleware('web')
             Route::any('/search/{model}', SearchController::class)
                 ->where('model', '(.*)')
                 ->name('search');
-            Route::match(['get', 'post'], '/print/render', FluxErp\Actions\Printing::class)
+            Route::match(['get', 'post'], '/print/render', Printing::class)
                 ->defaults('html', true)
                 ->defaults('preview', false)
                 ->name('print.render');
-            Route::match(['get', 'post'], '/print/pdf', FluxErp\Actions\Printing::class)
+            Route::match(['get', 'post'], '/print/pdf', Printing::class)
                 ->defaults('html', false);
         });
 

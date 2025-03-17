@@ -7,7 +7,7 @@ use FluxErp\Models\EventSubscription;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class EventSubscriptionController extends BaseController
+class EventSubscriptionController extends Controller
 {
     public function getEvents(): JsonResponse
     {

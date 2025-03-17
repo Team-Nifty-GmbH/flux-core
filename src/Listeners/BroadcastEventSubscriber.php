@@ -24,7 +24,6 @@ class BroadcastEventSubscriber
     public function subscribe($events): array
     {
         return [
-
         ];
     }
 }

@@ -14,12 +14,10 @@ use Laravel\Scout\Searchable;
 
 class BaseController extends Controller
 {
-    protected object $model;
-
     public function index(Request $request, string $model): JsonResponse
     {
-        $this->model = app($model);
-        if ($request->filled('search') && ! in_array(Searchable::class, class_uses($this->model))) {
+        $model = app($model);
+        if ($request->filled('search') && ! in_array(Searchable::class, class_uses($model))) {
             return ResponseHelper::createResponseFromBase(
                 statusCode: 400,
                 data: ['search' => 'Search not allowed on given model.']
@@ -31,7 +29,7 @@ class BaseController extends Controller
 
         if ($request->search) {
             $result = ModelFilter::filterModel(
-                model: $this->model::class,
+                model: $model::class,
                 search: $request->search,
                 filter: $request->filter,
                 include: $request->include,
@@ -40,9 +38,9 @@ class BaseController extends Controller
 
             $data = $result['data']->paginate($perPage, $page, [], $result['urlParams']);
         } else {
-            $query = in_array(Filterable::class, class_uses_recursive($this->model)) ?
-                QueryBuilder::filterModel($this->model, $request) :
-                $this->model::query();
+            $query = in_array(Filterable::class, class_uses_recursive($model)) ?
+                QueryBuilder::filterModel($model, $request) :
+                $model::query();
             $data = $query->paginate($perPage)->appends($request->query());
         }
 
@@ -58,7 +56,7 @@ class BaseController extends Controller
      */
     public function show(string $id, string $model, Request $request): JsonResponse
     {
-        $this->model = app($model);
+        $model = app($model);
         $validation = [
             'include' => 'string',
         ];
@@ -74,7 +72,7 @@ class BaseController extends Controller
         $includes = [];
         if ($validated['include'] ?? false) {
             $includes = explode(',', trim($validated['include'], " \t\n\r\0\x0B,"));
-            $allowedIncludes = array_diff(array_keys($this->model->relationships()), ['additionalColumns']);
+            $allowedIncludes = array_diff(array_keys($model->relationships()), ['additionalColumns']);
             $notAllowedIncludes = array_diff($includes, $allowedIncludes);
 
             if (count($notAllowedIncludes) > 0) {
@@ -88,7 +86,7 @@ class BaseController extends Controller
             }
         }
 
-        $instance = $this->model::query()
+        $instance = $model::query()
             ->whereKey($id)
             ->when($validated['include'] ?? false, function ($query) use ($includes) {
                 return $query->with($includes);

@@ -3,6 +3,7 @@
 namespace FluxErp\Console\Commands\Init;
 
 use Closure;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Facades\Action;
 use FluxErp\Facades\Widget;
 use FluxErp\Models\Permission;
@@ -12,16 +13,13 @@ use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Route;
-
-use function Livewire\invade;
-
 use Livewire\Mechanisms\ComponentRegistry;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionFunction;
 use Spatie\Permission\Models\Role;
-
 use Spatie\Permission\PermissionRegistrar;
+use function Livewire\invade;
 
 class InitPermissions extends Command
 {
@@ -196,7 +194,7 @@ class InitPermissions extends Command
             $guard = array_shift($guards);
 
             // omit api routes
-            if (! $guard || str_contains($route->uri(), 'api')) {
+            if (! $guard || is_a($route->getAction('controller'), FluxAction::class, true)) {
                 continue;
             }
 

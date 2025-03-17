@@ -12,12 +12,9 @@ use FluxErp\Traits\Livewire\WithTabs;
 use FluxErp\Traits\Widgetable;
 use Illuminate\Support\Facades\Event;
 use Livewire\Component;
-
-use function Livewire\invade;
-
 use Livewire\Livewire;
-
 use Livewire\Mechanisms\ComponentRegistry;
+use function Livewire\invade;
 
 class InitPermissionsTest extends BaseSetup
 {
