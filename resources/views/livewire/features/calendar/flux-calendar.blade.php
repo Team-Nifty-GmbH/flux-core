@@ -3,6 +3,7 @@
         @section('calendar-data')
         @show
     }"
+     class="h-full"
 >
     <div>
         @section('calendar-event-modal')
@@ -49,25 +50,30 @@
                     </div>
                 </x-slot:footer>
             </x-modal>
-            <x-dialog id="edit-repeatable-event-dialog" :title="__('Edit Repeatable Event')">
+            <x-modal persistent id="edit-repeatable-event-dialog" :title="__('Edit Repeatable Event')">
                 <div x-show="! $wire.calendarEvent.has_repeats">
                     <x-radio :label="__('This event')" value="this" wire:model="confirmSave"/>
                 </div>
                 <x-radio :label="__('This event and following')" value="future" wire:model="confirmSave"/>
                 <x-radio :label="__('All events')" value="all" wire:model="confirmSave"/>
-            </x-dialog>
-            <x-dialog id="delete-event-dialog" :title="__('Confirm Delete Event')">
+            </x-modal>
+            <x-modal persistent id="delete-event-dialog" :title="__('Confirm Delete Event')">
                 <div x-show="$wire.calendarEventWasRepeatable">
                     <x-radio :label="__('This event')" value="this" wire:model="confirmDelete"/>
                     <x-radio :label="__('This event and following')" value="future" wire:model="confirmDelete"/>
                     <x-radio :label="__('All events')" value="all" wire:model="confirmDelete"/>
                 </div>
-            </x-dialog>
+            </x-modal>
         @show
     </div>
-    <livewire:calendar-overview
-        :show-calendars="$showCalendars"
-        :show-invites="$showInvites"
-        :calendar-groups="$this->getCalendarGroups()"
-    />
+    <x-card scope="min-h-full" class="lg:flex whitespace-nowrap">
+        <livewire:calendar-overview
+            :show-calendars="$showCalendars"
+            :show-invites="$showInvites"
+            :calendar-groups="$this->getCalendarGroups()"
+        />
+        <div wire:ignore class="w-full">
+            <div class="dark:text-gray-50 border-l dark:border-secondary-600 !h-full" x-bind:id="id"></div>
+        </div>
+    </x-card>
 </div>
