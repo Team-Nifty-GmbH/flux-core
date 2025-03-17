@@ -1,4 +1,4 @@
-<x-card padding="none" class="lg:flex whitespace-nowrap">
+<div class="h-full">
     <div>
         @if($showCalendars)
             @section('calendar-modal')
@@ -81,7 +81,7 @@
                 </x-modal>
             @show
             @section('calendar-overview')
-                <div class="p-1.5 space-y-4">
+                <div class="p-1.5 space-y-4 overflow-auto">
                     @section('calendar-overview.items')
                         @foreach($calendarGroups ?? [] as $group => $label)
                             <div x-data="{show: true}" @if($group !== 'my') x-cloak x-show="calendars?.filter(calendar => calendar.group === '{{ $group }}').length > 0" @endif>
@@ -141,8 +141,5 @@
             @show
         @endif
     </div>
-    <div wire:ignore class="w-full overflow-y-scroll">
-        <div class="dark:text-gray-50 border-l dark:border-secondary-600" x-bind:id="id"></div>
-    </div>
-</x-card>
+</div>
 
