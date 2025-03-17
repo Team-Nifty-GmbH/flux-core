@@ -21,7 +21,7 @@ class CommentsTest extends BaseSetup
         ]);
     }
 
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(Comments::class, ['modelId' => $this->ticket->id])
             ->assertStatus(200);

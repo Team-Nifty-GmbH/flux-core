@@ -15,13 +15,13 @@ class BroadcastableActionEventOccurred implements ShouldBroadcast
 
     public FluxAction $action;
 
-    protected string $event;
-
-    protected array $channels = [];
-
     public string $connection;
 
     public string $queue;
+
+    protected array $channels = [];
+
+    protected string $event;
 
     public function __construct(FluxAction $action, string $event)
     {
@@ -49,6 +49,15 @@ class BroadcastableActionEventOccurred implements ShouldBroadcast
         $this->event = $event;
     }
 
+    public function broadcastAs(): string
+    {
+        $default = class_basename($this->action) . ucfirst($this->event);
+
+        return method_exists($this->action, 'broadcastAs')
+            ? ($this->action->broadcastAs($this->event) ?: $default)
+            : $default;
+    }
+
     public function broadcastOn(): array
     {
         $channels = ! $this->channels
@@ -60,15 +69,6 @@ class BroadcastableActionEventOccurred implements ShouldBroadcast
             ->all();
     }
 
-    public function broadcastAs(): string
-    {
-        $default = class_basename($this->action) . ucfirst($this->event);
-
-        return method_exists($this->action, 'broadcastAs')
-            ? ($this->action->broadcastAs($this->event) ?: $default)
-            : $default;
-    }
-
     public function broadcastWith(): ?array
     {
         return method_exists($this->action, 'broadcastWith')
@@ -76,15 +76,15 @@ class BroadcastableActionEventOccurred implements ShouldBroadcast
             : null;
     }
 
+    public function event(): string
+    {
+        return $this->event;
+    }
+
     public function onChannels(array $channels): static
     {
         $this->channels = $channels;
 
         return $this;
-    }
-
-    public function event(): string
-    {
-        return $this->event;
     }
 }

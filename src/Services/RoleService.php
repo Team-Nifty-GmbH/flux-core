@@ -19,6 +19,38 @@ class RoleService
         return CreateRole::make($data)->validate()->execute();
     }
 
+    public function delete(string $id): array
+    {
+        try {
+            DeleteRole::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
+            return ResponseHelper::createArrayResponse(
+                statusCode: array_key_exists('id', $e->errors()) ? 404 : 423,
+                data: $e->errors()
+            );
+        }
+
+        return ResponseHelper::createArrayResponse(
+            statusCode: 204,
+            statusMessage: 'role deleted'
+        );
+    }
+
+    public function editRolePermissions(array $data, bool $give): array
+    {
+        return UpdateRolePermissions::make(array_merge($data, ['give' => $give]))->validate()->execute();
+    }
+
+    public function editRoleUsers(array $data, bool $assign): array
+    {
+        return UpdateRoleUsers::make(array_merge($data, ['assign' => $assign]))->validate()->execute();
+    }
+
+    public function syncUserRoles(array $data): array
+    {
+        return UpdateUserRoles::make(array_merge($data, ['sync' => true]))->validate()->execute();
+    }
+
     public function update(array $data): array
     {
         if (! array_is_list($data)) {
@@ -53,38 +85,6 @@ class RoleService
             data: $responses,
             statusMessage: $statusCode === 422 ? null : 'role(s) updated',
             bulk: true
-        );
-    }
-
-    public function editRolePermissions(array $data, bool $give): array
-    {
-        return UpdateRolePermissions::make(array_merge($data, ['give' => $give]))->validate()->execute();
-    }
-
-    public function editRoleUsers(array $data, bool $assign): array
-    {
-        return UpdateRoleUsers::make(array_merge($data, ['assign' => $assign]))->validate()->execute();
-    }
-
-    public function syncUserRoles(array $data): array
-    {
-        return UpdateUserRoles::make(array_merge($data, ['sync' => true]))->validate()->execute();
-    }
-
-    public function delete(string $id): array
-    {
-        try {
-            DeleteRole::make(['id' => $id])->validate()->execute();
-        } catch (ValidationException $e) {
-            return ResponseHelper::createArrayResponse(
-                statusCode: array_key_exists('id', $e->errors()) ? 404 : 423,
-                data: $e->errors()
-            );
-        }
-
-        return ResponseHelper::createArrayResponse(
-            statusCode: 204,
-            statusMessage: 'role deleted'
         );
     }
 }

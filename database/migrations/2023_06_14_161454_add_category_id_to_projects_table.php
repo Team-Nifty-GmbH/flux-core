@@ -11,7 +11,7 @@ return new class() extends Migration
      */
     public function up(): void
     {
-        Schema::table('projects', function (Blueprint $table) {
+        Schema::table('projects', function (Blueprint $table): void {
             $table->unsignedBigInteger('category_id')
                 ->after('uuid')
                 ->nullable();
@@ -28,7 +28,7 @@ return new class() extends Migration
      */
     public function down(): void
     {
-        Schema::table('projects', function (Blueprint $table) {
+        Schema::table('projects', function (Blueprint $table): void {
             $table->unsignedBigInteger('project_category_template_id')
                 ->nullable()
                 ->after('uuid');

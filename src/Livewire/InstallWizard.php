@@ -38,35 +38,29 @@ class InstallWizard extends Component
 {
     public ?string $batchId = null;
 
+    public ClientForm $clientForm;
+
+    public CurrencyForm $currencyForm;
+
+    #[Url]
+    public bool $databaseConnectionSuccessful = false;
+
     public DbForm $dbForm;
 
     public LanguageForm $languageForm;
 
-    public CurrencyForm $currencyForm;
+    public PaymentTypeForm $paymentTypeForm;
 
-    public ClientForm $clientForm;
+    #[Url]
+    public bool $requestRefresh = false;
+
+    public int $step = 0;
 
     public UserForm $userForm;
 
     public VatRateForm $vatRateForm;
 
     public array $vatRates = [];
-
-    public PaymentTypeForm $paymentTypeForm;
-
-    public int $step = 0;
-
-    #[Url]
-    public bool $databaseConnectionSuccessful = false;
-
-    #[Url]
-    public bool $requestRefresh = false;
-
-    public function boot(): void
-    {
-        // disable database translations
-        config(['translation-loader.translation_loaders' => null]);
-    }
 
     public function mount(): void
     {
@@ -81,75 +75,15 @@ class InstallWizard extends Component
         $this->dbForm->password = config('database.connections.mysql.password');
     }
 
-    #[Computed]
-    public function title(): string
+    public function render(): View
     {
-        return $this->steps[$this->step]['title'] ?? __('Welcome to the Installation Process of Flux ERP');
+        return view('flux::livewire.install-wizard.install-wizard')->title('Install Wizard');
     }
 
-    #[Computed]
-    public function steps(): array
+    public function boot(): void
     {
-        return [
-            [
-                'view' => 'start',
-            ],
-            [
-                'view' => 'language',
-                'property' => 'languageForm',
-                'title' => __('Language'),
-                'callback' => function () {
-                    $browserLanguage = Str::before(
-                        explode(',', request()->server('HTTP_ACCEPT_LANGUAGE'))[1],
-                        ';'
-                    );
-
-                    data_set($this->languageForm, 'language_code', $browserLanguage, false);
-                    data_set($this->languageForm, 'iso_name', $browserLanguage, false);
-                },
-            ],
-            [
-                'view' => 'currency',
-                'property' => 'currencyForm',
-                'title' => __('Currency'),
-            ],
-            [
-                'view' => 'client',
-                'property' => 'clientForm',
-                'title' => __('Client'),
-            ],
-            [
-                'view' => 'vat-rates',
-                'title' => __('Vat Rates'),
-                'validation' => function () {
-                    if (! $this->vatRates) {
-                        throw ValidationException::withMessages([
-                            'vatRates' => [__('At least one vat rate is required.')],
-                        ]);
-                    }
-                },
-            ],
-            [
-                'view' => 'payment-type',
-                'property' => 'paymentTypeForm',
-                'title' => __('Payment Type'),
-                'rules' => function () {
-                    $rules = CreatePaymentType::make([])->setRulesFromRulesets()->getRules();
-                    $rules['clients'] = 'array|nullable';
-
-                    return $rules;
-                },
-            ],
-            [
-                'view' => 'user',
-                'property' => 'userForm',
-                'title' => __('User'),
-            ],
-            [
-                'view' => 'finish',
-                'title' => __('Installation Complete!'),
-            ],
-        ];
+        // disable database translations
+        config(['translation-loader.translation_loaders' => null]);
     }
 
     public function rendering(): void
@@ -159,80 +93,14 @@ class InstallWizard extends Component
         }
     }
 
-    public function render(): View
+    public function addVatRate(): void
     {
-        return view('flux::livewire.install-wizard.install-wizard')->title('Install Wizard');
-    }
+        $this->vatRateForm->rate_percentage = bcdiv($this->vatRateForm->rate_percentage_frontend, 100);
+        $this->vatRateForm->validateSave();
 
-    public function testDatabaseConnection(): void
-    {
-        $this->dbForm->validate();
+        $this->vatRates[] = $this->vatRateForm->toArray();
 
-        CommandJob::dispatchSync('flux:init-env', [
-            'keyValues' => 'app_url:' . request()->getSchemeAndHttpHost() . ',' .
-                'log_channel:single' . ',' .
-                'app_debug:true' . ',' .
-                'db_host:' . $this->dbForm->host . ',' .
-                'db_port:' . $this->dbForm->port . ',' .
-                'db_database:' . $this->dbForm->database . ',' .
-                'db_username:' . $this->dbForm->username . ',' .
-                'db_password:' . ($this->dbForm->password ?? null),
-            '--use-default' => true,
-        ]);
-
-        CommandJob::dispatchSync('migrate', ['--force' => true]);
-
-        $this->databaseConnectionSuccessful = true;
-
-        $this->requestRefresh = true;
-    }
-
-    public function reload(): void
-    {
-        $this->requestRefresh = false;
-    }
-
-    #[Renderless]
-    public function start(): void
-    {
-        $batch = Bus::batch([[
-            new CommandJob('migrate', ['--force' => true]),
-            new CommandJob('init:permissions'),
-            new CommandJob('storage:link'),
-            new CommandJob(VapidKeysGenerateCommand::class, ['--force' => true]),
-            new CommandJob('cache:clear'),
-            new CommandJob('route:clear'),
-            new CommandJob('view:clear'),
-            new CommandJob('config:clear'),
-        ]])
-            ->progress(function (Batch $batch) {
-                InstallProcessOutputEvent::dispatch(
-                    $batch->id,
-                    $batch->progress()
-                );
-            })
-            ->then(function (Batch $batch) {
-                InstallProcessOutputEvent::dispatch(
-                    $batch->id,
-                    $batch->progress(),
-                    'Finished',
-                    ['Installation finished.']
-                );
-            })->catch(
-                function (Batch $batch, Throwable $e) {
-                    InstallProcessOutputEvent::dispatch(
-                        $batch->id,
-                        $batch->progress(),
-                        'Error',
-                        [$e->getMessage()]
-                    );
-                }
-            )
-            ->dispatch();
-
-        $this->batchId = $batch->id;
-
-        $this->dispatch('batch-id', $batch->id);
+        $this->vatRateForm->reset();
     }
 
     public function continue(): void
@@ -276,19 +144,151 @@ class InstallWizard extends Component
         JS);
     }
 
-    public function addVatRate(): void
+    public function reload(): void
     {
-        $this->vatRateForm->rate_percentage = bcdiv($this->vatRateForm->rate_percentage_frontend, 100);
-        $this->vatRateForm->validateSave();
-
-        $this->vatRates[] = $this->vatRateForm->toArray();
-
-        $this->vatRateForm->reset();
+        $this->requestRefresh = false;
     }
 
     public function removeVatRate(int $index): void
     {
         unset($this->vatRates[$index]);
+    }
+
+    #[Renderless]
+    public function start(): void
+    {
+        $batch = Bus::batch([[
+            new CommandJob('migrate', ['--force' => true]),
+            new CommandJob('init:permissions'),
+            new CommandJob('storage:link'),
+            new CommandJob(VapidKeysGenerateCommand::class, ['--force' => true]),
+            new CommandJob('cache:clear'),
+            new CommandJob('route:clear'),
+            new CommandJob('view:clear'),
+            new CommandJob('config:clear'),
+        ]])
+            ->progress(function (Batch $batch): void {
+                InstallProcessOutputEvent::dispatch(
+                    $batch->id,
+                    $batch->progress()
+                );
+            })
+            ->then(function (Batch $batch): void {
+                InstallProcessOutputEvent::dispatch(
+                    $batch->id,
+                    $batch->progress(),
+                    'Finished',
+                    ['Installation finished.']
+                );
+            })->catch(
+                function (Batch $batch, Throwable $e): void {
+                    InstallProcessOutputEvent::dispatch(
+                        $batch->id,
+                        $batch->progress(),
+                        'Error',
+                        [$e->getMessage()]
+                    );
+                }
+            )
+            ->dispatch();
+
+        $this->batchId = $batch->id;
+
+        $this->dispatch('batch-id', $batch->id);
+    }
+
+    #[Computed]
+    public function steps(): array
+    {
+        return [
+            [
+                'view' => 'start',
+            ],
+            [
+                'view' => 'language',
+                'property' => 'languageForm',
+                'title' => __('Language'),
+                'callback' => function (): void {
+                    $browserLanguage = Str::before(
+                        explode(',', request()->server('HTTP_ACCEPT_LANGUAGE'))[1],
+                        ';'
+                    );
+
+                    data_set($this->languageForm, 'language_code', $browserLanguage, false);
+                    data_set($this->languageForm, 'iso_name', $browserLanguage, false);
+                },
+            ],
+            [
+                'view' => 'currency',
+                'property' => 'currencyForm',
+                'title' => __('Currency'),
+            ],
+            [
+                'view' => 'client',
+                'property' => 'clientForm',
+                'title' => __('Client'),
+            ],
+            [
+                'view' => 'vat-rates',
+                'title' => __('Vat Rates'),
+                'validation' => function (): void {
+                    if (! $this->vatRates) {
+                        throw ValidationException::withMessages([
+                            'vatRates' => [__('At least one vat rate is required.')],
+                        ]);
+                    }
+                },
+            ],
+            [
+                'view' => 'payment-type',
+                'property' => 'paymentTypeForm',
+                'title' => __('Payment Type'),
+                'rules' => function () {
+                    $rules = CreatePaymentType::make([])->setRulesFromRulesets()->getRules();
+                    $rules['clients'] = 'array|nullable';
+
+                    return $rules;
+                },
+            ],
+            [
+                'view' => 'user',
+                'property' => 'userForm',
+                'title' => __('User'),
+            ],
+            [
+                'view' => 'finish',
+                'title' => __('Installation Complete!'),
+            ],
+        ];
+    }
+
+    public function testDatabaseConnection(): void
+    {
+        $this->dbForm->validate();
+
+        CommandJob::dispatchSync('flux:init-env', [
+            'keyValues' => 'app_url:' . request()->getSchemeAndHttpHost() . ',' .
+                'log_channel:single' . ',' .
+                'app_debug:true' . ',' .
+                'db_host:' . $this->dbForm->host . ',' .
+                'db_port:' . $this->dbForm->port . ',' .
+                'db_database:' . $this->dbForm->database . ',' .
+                'db_username:' . $this->dbForm->username . ',' .
+                'db_password:' . ($this->dbForm->password ?? null),
+            '--use-default' => true,
+        ]);
+
+        CommandJob::dispatchSync('migrate', ['--force' => true]);
+
+        $this->databaseConnectionSuccessful = true;
+
+        $this->requestRefresh = true;
+    }
+
+    #[Computed]
+    public function title(): string
+    {
+        return $this->steps[$this->step]['title'] ?? __('Welcome to the Installation Process of Flux ERP');
     }
 
     private function finish(): void

@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::create('form_builder_fields', function (Blueprint $table) {
+        Schema::create('form_builder_fields', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
             $table->foreignId('section_id')->constrained('form_builder_sections')->cascadeOnDelete();

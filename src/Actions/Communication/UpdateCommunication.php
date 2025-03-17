@@ -14,14 +14,14 @@ use Illuminate\Support\Carbon;
 
 class UpdateCommunication extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateCommunicationRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Communication::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateCommunicationRuleset::class;
     }
 
     public function performAction(): Model

@@ -7,11 +7,11 @@ use Illuminate\Contracts\Validation\ValidationRule;
 
 class ClassExists implements ValidationRule
 {
-    private array|string $uses;
+    private ?string $implements;
 
     private ?string $instanceOf;
 
-    private ?string $implements;
+    private array|string $uses;
 
     public function __construct(array|string $uses = [], ?string $instanceOf = null, ?string $implements = null)
     {

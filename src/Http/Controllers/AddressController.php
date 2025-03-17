@@ -27,13 +27,6 @@ class AddressController extends BaseController
         );
     }
 
-    public function update(Request $request, AddressService $addressService): JsonResponse
-    {
-        $response = $addressService->update($request->all());
-
-        return ResponseHelper::createResponseFromArrayResponse($response);
-    }
-
     public function delete(string $id, AddressService $addressService): JsonResponse
     {
         $response = $addressService->delete($id);
@@ -50,5 +43,12 @@ class AddressController extends BaseController
             data: $token,
             statusMessage: 'login token generated'
         );
+    }
+
+    public function update(Request $request, AddressService $addressService): JsonResponse
+    {
+        $response = $addressService->update($request->all());
+
+        return ResponseHelper::createResponseFromArrayResponse($response);
     }
 }

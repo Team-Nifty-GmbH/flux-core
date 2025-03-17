@@ -8,14 +8,14 @@ use FluxErp\Rulesets\PrintJob\UpdatePrintJobRuleset;
 
 class UpdatePrintJob extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdatePrintJobRuleset::class;
-    }
-
     public static function models(): array
     {
         return [PrintJob::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdatePrintJobRuleset::class;
     }
 
     public function performAction(): PrintJob

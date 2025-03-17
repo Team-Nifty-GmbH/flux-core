@@ -9,22 +9,22 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ClientPaymentType extends FluxPivot
 {
-    protected $table = 'client_payment_type';
+    public $incrementing = true;
 
     public $timestamps = false;
 
-    public $incrementing = true;
-
     protected $primaryKey = 'pivot_id';
 
-    public function paymentType(): BelongsTo
-    {
-        return $this->belongsTo(PaymentType::class, 'payment_type_id');
-    }
+    protected $table = 'client_payment_type';
 
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class, 'client_id');
+    }
+
+    public function paymentType(): BelongsTo
+    {
+        return $this->belongsTo(PaymentType::class, 'payment_type_id');
     }
 
     public function siblings(): HasMany

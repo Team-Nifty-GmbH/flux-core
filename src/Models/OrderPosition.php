@@ -40,30 +40,22 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
             SortableTrait::setHighestOrderNumber as protected parentSetHighestOrderNumber;
         }
 
-    protected $appends = [
-        'unit_price',
-    ];
-
     public array $sortable = [
         'order_column_name' => 'sort_number',
         'sort_when_creating' => true,
     ];
 
+    protected $appends = [
+        'unit_price',
+    ];
+
     protected static function booted(): void
     {
-        static::deleted(function (OrderPosition $orderPosition) {
+        static::deleted(function (OrderPosition $orderPosition): void {
             $orderPosition->workTime()->update(['order_position_id' => null]);
             $orderPosition->creditNoteCommission()->update(['credit_note_order_position_id' => null]);
             $orderPosition->commission()->delete();
         });
-    }
-
-    public function setHighestOrderNumber(): void
-    {
-        $this->parentSetHighestOrderNumber();
-
-        $this->slug_position = ($this->parent ? $this->parent->slug_position . '.' : null)
-            . $this->sort_number;
     }
 
     protected function casts(): array
@@ -93,55 +85,11 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
         ];
     }
 
-    public function getChildrenAttribute(): Collection
+    public function buildSortQuery(): Builder
     {
-        return $this->children()->get()->append('children');
-    }
-
-    public function getTagsAttribute(): Collection
-    {
-        return $this->tags()->get();
-    }
-
-    protected function slugPosition(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => array_reduce(
-                explode('.', $value),
-                fn ($carry, $item) => (is_null($carry) ? '' : $carry . '.') . ltrim($item, '0')
-            ),
-            set: fn ($value) => array_reduce(
-                explode('.', $value),
-                fn ($carry, $item) => (is_null($carry) ? '' : $carry . '.') . Str::padLeft($item, 8, '0')
-            ),
-        );
-    }
-
-    protected function totalNetPrice(): Attribute
-    {
-        return Attribute::get(
-            fn ($value) => $this->is_free_text && ! $value
-                ? $this->subTotalNet() ?: null
-                : $value
-        );
-    }
-
-    protected function totalGrossPrice(): Attribute
-    {
-        return Attribute::get(
-            fn ($value) => $this->is_free_text && ! $value
-                ? $this->subTotalGross() ?: null
-                : $value
-        );
-    }
-
-    protected function unitPrice(): Attribute
-    {
-        return Attribute::get(
-            fn ($value) => $this->is_net
-                ? $this->unit_net_price
-                : $this->unit_gross_price
-        );
+        return static::query()
+            ->where('order_id', $this->order_id)
+            ->where('parent_id', $this->parent_id);
     }
 
     public function client(): BelongsTo
@@ -189,6 +137,36 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
     public function discounts(): MorphMany
     {
         return $this->morphMany(Discount::class, 'model');
+    }
+
+    public function getAvatarUrl(): ?string
+    {
+        return $this->product?->getAvatarUrl();
+    }
+
+    public function getChildrenAttribute(): Collection
+    {
+        return $this->children()->get()->append('children');
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function getLabel(): ?string
+    {
+        return $this->name;
+    }
+
+    public function getTagsAttribute(): Collection
+    {
+        return $this->tags()->get();
+    }
+
+    public function getUrl(): ?string
+    {
+        return $this->order?->getUrl();
     }
 
     public function ledgerAccount(): BelongsTo
@@ -239,6 +217,14 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
         );
     }
 
+    public function setHighestOrderNumber(): void
+    {
+        $this->parentSetHighestOrderNumber();
+
+        $this->slug_position = ($this->parent ? $this->parent->slug_position . '.' : null)
+            . $this->sort_number;
+    }
+
     public function siblings(): HasMany
     {
         return $this->hasMany(
@@ -273,11 +259,45 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
         return $this->hasOne(WorkTime::class);
     }
 
-    private function subTotalNet(): string
+    protected function slugPosition(): Attribute
     {
-        return (string) (($this->relations['children'] ?? $this->children())
-            ->where('is_alternative', false)
-            ->sum('total_net_price'));
+        return Attribute::make(
+            get: fn ($value) => array_reduce(
+                explode('.', $value),
+                fn ($carry, $item) => (is_null($carry) ? '' : $carry . '.') . ltrim($item, '0')
+            ),
+            set: fn ($value) => array_reduce(
+                explode('.', $value),
+                fn ($carry, $item) => (is_null($carry) ? '' : $carry . '.') . Str::padLeft($item, 8, '0')
+            ),
+        );
+    }
+
+    protected function totalGrossPrice(): Attribute
+    {
+        return Attribute::get(
+            fn ($value) => $this->is_free_text && ! $value
+                ? $this->subTotalGross() ?: null
+                : $value
+        );
+    }
+
+    protected function totalNetPrice(): Attribute
+    {
+        return Attribute::get(
+            fn ($value) => $this->is_free_text && ! $value
+                ? $this->subTotalNet() ?: null
+                : $value
+        );
+    }
+
+    protected function unitPrice(): Attribute
+    {
+        return Attribute::get(
+            fn ($value) => $this->is_net
+                ? $this->unit_net_price
+                : $this->unit_gross_price
+        );
     }
 
     private function subTotalGross(): string
@@ -287,30 +307,10 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
             ->sum('total_gross_price'));
     }
 
-    public function buildSortQuery(): Builder
+    private function subTotalNet(): string
     {
-        return static::query()
-            ->where('order_id', $this->order_id)
-            ->where('parent_id', $this->parent_id);
-    }
-
-    public function getLabel(): ?string
-    {
-        return $this->name;
-    }
-
-    public function getDescription(): ?string
-    {
-        return $this->description;
-    }
-
-    public function getUrl(): ?string
-    {
-        return $this->order?->getUrl();
-    }
-
-    public function getAvatarUrl(): ?string
-    {
-        return $this->product?->getAvatarUrl();
+        return (string) (($this->relations['children'] ?? $this->children())
+            ->where('is_alternative', false)
+            ->sum('total_net_price'));
     }
 }

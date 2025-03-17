@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('clients', function (Blueprint $table) {
+        Schema::table('clients', function (Blueprint $table): void {
             $table->longText('terms_and_conditions')
                 ->after('opening_hours')
                 ->nullable();
@@ -17,7 +17,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('clients', function (Blueprint $table) {
+        Schema::table('clients', function (Blueprint $table): void {
             $table->dropColumn('terms_and_conditions');
         });
     }

@@ -2,9 +2,9 @@ name: tests
 
 on:
   push:
-    branches: [ dev ]
+    branches: [dev]
   pull_request:
-    branches: [ main, dev ]
+    branches: [main, dev]
 
 jobs:
   laravel:
@@ -25,13 +25,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-versions: [ '8.3' ]
-        browser: [ 'chrome' ]
-        laravel: [ '11.*' ]
+        php-versions: ['8.3']
+        browser: ['chrome']
+        laravel: ['12.*']
         include:
-          - laravel: 11.*
-            testbench: 9.*
-
+          - laravel: 12.*
+            testbench: 10.*
 
     # Docs: https://docs.github.com/en/actions/using-containerized-services
     services:
@@ -75,6 +74,11 @@ jobs:
           extensions: mbstring, dom, fileinfo, mysql
           coverage: xdebug
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
       - name: Cache composer dependencies
         run: |
           echo "COMPOSER_CACHE_DIR=$(composer config cache-files-dir)" >> $GITHUB_ENV
@@ -94,6 +98,18 @@ jobs:
           DB_PORT: ${{ job.services.mysql.ports['3306'] }}
           REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
           MEILISEARCH_HOST: http://0.0.0.0:${{ job.services.meilisearch.ports['7700'] }}
+
+      - name: Install node dependencies
+        run: npm i
+
+      - name: Pint
+        run: ./vendor/bin/pint --test
+
+      - name: Prettier
+        run: npx prettier . --check
+
+      - name: Clear Orchestra Testbench Cache
+        run: ./vendor/bin/testbench view:clear
 
       - name: Create schema
         run: |

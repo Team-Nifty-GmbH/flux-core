@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('mail_folders', function (Blueprint $table) {
+        Schema::table('mail_folders', function (Blueprint $table): void {
             $table->boolean('can_create_ticket')->after('slug')->default(false);
             $table->boolean('can_create_purchase_invoice')->after('can_create_ticket')->default(false);
         });
@@ -16,7 +16,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('mail_folders', function (Blueprint $table) {
+        Schema::table('mail_folders', function (Blueprint $table): void {
             $table->dropColumn(['can_create_ticket', 'can_create_purchase_invoice']);
         });
     }

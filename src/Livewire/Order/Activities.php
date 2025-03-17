@@ -10,24 +10,24 @@ use Livewire\Attributes\Modelable;
 
 class Activities extends BaseActivities
 {
-    public string $modelType = \FluxErp\Models\Order::class;
+    public bool $initialized = false;
 
     #[Modelable]
     public int $modelId;
 
-    public bool $initialized = false;
-
-    public function boot(): void
-    {
-        if ($this->initialized) {
-            $this->skipRender();
-        }
-    }
+    public string $modelType = \FluxErp\Models\Order::class;
 
     public function render(): View|Factory|Application
     {
         $this->initialized = true;
 
         return parent::render();
+    }
+
+    public function boot(): void
+    {
+        if ($this->initialized) {
+            $this->skipRender();
+        }
     }
 }

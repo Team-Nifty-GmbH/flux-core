@@ -6,10 +6,10 @@ use FluxErp\Models\Unit;
 
 class UnitList extends BaseDataTable
 {
-    protected string $model = Unit::class;
-
     public array $enabledCols = [
         'name',
         'abbreviation',
     ];
+
+    protected string $model = Unit::class;
 }

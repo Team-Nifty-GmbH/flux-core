@@ -9,14 +9,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class UpdatePaymentRun extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdatePaymentRunRuleset::class;
-    }
-
     public static function models(): array
     {
         return [PaymentRun::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdatePaymentRunRuleset::class;
     }
 
     public function performAction(): Model

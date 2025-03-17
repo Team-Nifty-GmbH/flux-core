@@ -5,25 +5,16 @@ namespace FluxErp\Tests\Livewire\Task;
 use FluxErp\Livewire\Task\TaskList;
 use FluxErp\Models\Task;
 use FluxErp\Tests\Livewire\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 
 class TaskListTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
-    public function test_renders_successfully()
-    {
-        Livewire::test(TaskList::class)
-            ->assertStatus(200);
-    }
-
-    public function test_create_new_task()
+    public function test_create_new_task(): void
     {
         Livewire::actingAs($this->user)
             ->test(TaskList::class)
-            ->call('resetForm')
+            ->call('show')
             ->assertSet('task.responsible_user_id', $this->user->id)
             ->set('task.name', $taskName = Str::uuid())
             ->set('task.description', $taskDescription = Str::uuid())
@@ -47,5 +38,11 @@ class TaskListTest extends BaseSetup
             'user_id' => $this->user->id,
             'task_id' => Task::query()->where('name', $taskName)->value('id'),
         ]);
+    }
+
+    public function test_renders_successfully(): void
+    {
+        Livewire::test(TaskList::class)
+            ->assertStatus(200);
     }
 }

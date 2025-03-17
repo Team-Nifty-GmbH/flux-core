@@ -8,7 +8,7 @@ class CreateCategoryProductTable extends Migration
 {
     public function up(): void
     {
-        Schema::create('category_product', function (Blueprint $table) {
+        Schema::create('category_product', function (Blueprint $table): void {
             $table->unsignedBigInteger('product_id');
             $table->unsignedBigInteger('category_id');
 

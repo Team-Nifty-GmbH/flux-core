@@ -12,14 +12,14 @@ use Illuminate\Support\Facades\Validator;
 
 class UpdateTask extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateTaskRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Task::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateTaskRuleset::class;
     }
 
     public function performAction(): Model

@@ -27,19 +27,6 @@ class Comments extends Component
 {
     use Actions, WithFilePond, WithPagination;
 
-    /** @var Model $this->modelType */
-    public string $modelType = '';
-
-    #[Modelable]
-    public int $modelId = 0;
-
-    /**
-     * Setting this to true means that the component is public used.
-     * This means that the user has to decide if he wants non-users to see his comment.
-     */
-    #[Locked]
-    public bool $isPublic = true;
-
     public CommentForm $commentForm;
 
     public int $commentPage = 1;
@@ -49,18 +36,17 @@ class Comments extends Component
     public int $commentsPerPage = 10;
 
     /**
-     * @return string[]
+     * Setting this to true means that the component is public used.
+     * This means that the user has to decide if he wants non-users to see his comment.
      */
-    public function getListeners(): array
-    {
-        $channel = app($this->modelType)->broadcastChannel() . $this->modelId;
+    #[Locked]
+    public bool $isPublic = true;
 
-        return [
-            'echo-private:' . $channel . ',.CommentCreated' => 'loadComments',
-            'echo-private:' . $channel . ',.CommentUpdated' => 'loadComments',
-            'echo-private:' . $channel . ',.CommentDeleted' => 'loadComments',
-        ];
-    }
+    #[Modelable]
+    public int $modelId = 0;
+
+    /** @var Model $this->modelType */
+    public string $modelType = '';
 
     public function mount(): void
     {
@@ -76,6 +62,119 @@ class Comments extends Component
     public function render(): View|Factory|Application
     {
         return view('flux::livewire.features.comments.comments', $this->loadUsersAndRoles());
+    }
+
+    #[Renderless]
+    public function delete(int $id): bool
+    {
+        $this->commentForm->reset();
+        $this->commentForm->id = $id;
+
+        try {
+            $this->commentForm->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getListeners(): array
+    {
+        $channel = app($this->modelType)->broadcastChannel() . $this->modelId;
+
+        return [
+            'echo-private:' . $channel . ',.CommentCreated' => 'loadComments',
+            'echo-private:' . $channel . ',.CommentUpdated' => 'loadComments',
+            'echo-private:' . $channel . ',.CommentDeleted' => 'loadComments',
+        ];
+    }
+
+    #[Renderless]
+    public function loadComments(): array
+    {
+        /** @var Model $record */
+        $record = resolve_static($this->modelType, 'query')
+            ->whereKey($this->modelId)
+            ->firstOrFail();
+
+        resolve_static(Comment::class, 'addGlobalScopes', [
+            'scopes' => [
+                'media' => function (Builder $query): void {
+                    $query->with('media');
+                },
+                'ordered' => function (Builder $query): void {
+                    $query->orderBy('id', 'desc');
+                },
+                FamilyTreeScope::class,
+            ],
+        ]);
+
+        $comments = $record
+            ->comments()
+            ->whereNull('parent_id')
+            ->when(
+                ! Auth::user() instanceof User,
+                function ($query): void {
+                    $query->where('is_internal', false);
+                }
+            )
+            ->paginate(page: $this->commentPage);
+
+        $data = $comments->getCollection()->map(function ($comment) {
+            $comment->is_current_user = $comment->getCreatedBy()?->is(Auth::user());
+
+            return $comment;
+        });
+
+        return $comments->setCollection($data)->toArray();
+    }
+
+    #[Renderless]
+    public function loadMoreComments(): array
+    {
+        $this->commentPage++;
+
+        return $this->loadComments();
+    }
+
+    #[Renderless]
+    public function loadStickyComments(): array
+    {
+        resolve_static(Comment::class, 'addGlobalScopes', [
+            'scopes' => [
+                'media' => function (Builder $query): void {
+                    $query->with('media:id,name,model_type,model_id,disk');
+                },
+                'ordered' => function (Builder $query): void {
+                    $query->orderBy('id', 'desc');
+                },
+            ],
+        ]);
+
+        return resolve_static($this->modelType, 'query')
+            ->whereKey($this->modelId)
+            ->firstOrFail()
+            ->comments()
+            ->when(
+                ! Auth::user() instanceof User,
+                function ($query): void {
+                    $query->where('is_internal', false);
+                }
+            )
+            ->where('is_sticky', true)
+            ->get()
+            ->map(function (Comment $comment) {
+                $comment->is_current_user = $comment->getCreatedBy()?->is(auth()->user());
+
+                return $comment;
+            })
+            ->toArray();
     }
 
     #[Renderless]
@@ -116,14 +215,6 @@ class Comments extends Component
     }
 
     #[Renderless]
-    public function loadMoreComments(): array
-    {
-        $this->commentPage++;
-
-        return $this->loadComments();
-    }
-
-    #[Renderless]
     public function toggleSticky(int $id): void
     {
         $this->commentForm->reset();
@@ -139,97 +230,6 @@ class Comments extends Component
         } catch (ValidationException $e) {
             exception_to_notifications($e, $this);
         }
-    }
-
-    #[Renderless]
-    public function delete(int $id): bool
-    {
-        $this->commentForm->reset();
-        $this->commentForm->id = $id;
-
-        try {
-            $this->commentForm->delete();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        return true;
-    }
-
-    #[Renderless]
-    public function loadComments(): array
-    {
-        /** @var Model $record */
-        $record = resolve_static($this->modelType, 'query')
-            ->whereKey($this->modelId)
-            ->firstOrFail();
-
-        resolve_static(Comment::class, 'addGlobalScopes', [
-            'scopes' => [
-                'media' => function (Builder $query) {
-                    $query->with('media');
-                },
-                'ordered' => function (Builder $query) {
-                    $query->orderBy('id', 'desc');
-                },
-                FamilyTreeScope::class,
-            ],
-        ]);
-
-        $comments = $record
-            ->comments()
-            ->whereNull('parent_id')
-            ->when(
-                ! Auth::user() instanceof User,
-                function ($query) {
-                    $query->where('is_internal', false);
-                }
-            )
-            ->paginate(page: $this->commentPage);
-
-        $data = $comments->getCollection()->map(function ($comment) {
-            $comment->is_current_user = $comment->getCreatedBy()?->is(Auth::user());
-
-            return $comment;
-        });
-
-        return $comments->setCollection($data)->toArray();
-    }
-
-    #[Renderless]
-    public function loadStickyComments(): array
-    {
-        resolve_static(Comment::class, 'addGlobalScopes', [
-            'scopes' => [
-                'media' => function (Builder $query) {
-                    $query->with('media:id,name,model_type,model_id,disk');
-                },
-                'ordered' => function (Builder $query) {
-                    $query->orderBy('id', 'desc');
-                },
-            ],
-        ]);
-
-        return resolve_static($this->modelType, 'query')
-            ->whereKey($this->modelId)
-            ->firstOrFail()
-            ->comments()
-            ->when(
-                ! Auth::user() instanceof User,
-                function ($query) {
-                    $query->where('is_internal', false);
-                }
-            )
-            ->where('is_sticky', true)
-            ->get()
-            ->map(function (Comment $comment) {
-                $comment->is_current_user = $comment->getCreatedBy()?->is(auth()->user());
-
-                return $comment;
-            })
-            ->toArray();
     }
 
     protected function loadUsersAndRoles(): array

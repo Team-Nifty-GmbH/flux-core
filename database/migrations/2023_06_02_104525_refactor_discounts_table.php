@@ -12,7 +12,7 @@ return new class() extends Migration
      */
     public function up(): void
     {
-        Schema::table('discounts', function (Blueprint $table) {
+        Schema::table('discounts', function (Blueprint $table): void {
             $table->string('model_type')->after('uuid');
             $table->unsignedBigInteger('model_id')->after('model_type');
             $table->timestamp('from')->nullable()->after('discount');
@@ -23,7 +23,7 @@ return new class() extends Migration
 
         $this->migrateDiscounts();
 
-        Schema::table('discounts', function (Blueprint $table) {
+        Schema::table('discounts', function (Blueprint $table): void {
             $table->dropForeign(['order_position_id']);
             $table->dropColumn('order_position_id');
         });
@@ -34,13 +34,13 @@ return new class() extends Migration
      */
     public function down(): void
     {
-        Schema::table('discounts', function (Blueprint $table) {
+        Schema::table('discounts', function (Blueprint $table): void {
             $table->unsignedBigInteger('order_position_id')->nullable()->after('uuid');
         });
 
         $this->rollbackDiscounts();
 
-        Schema::table('discounts', function (Blueprint $table) {
+        Schema::table('discounts', function (Blueprint $table): void {
             $table->dropIndex('discounts_model_type_model_id_index');
             $table->dropColumn([
                 'model_type',

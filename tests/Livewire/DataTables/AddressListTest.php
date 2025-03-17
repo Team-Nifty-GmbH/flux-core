@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class AddressListTest extends TestCase
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(AddressList::class)
             ->assertStatus(200);

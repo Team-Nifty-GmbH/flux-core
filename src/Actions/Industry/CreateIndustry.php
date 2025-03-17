@@ -8,14 +8,14 @@ use FluxErp\Rulesets\Industry\CreateIndustryRuleset;
 
 class CreateIndustry extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateIndustryRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Industry::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateIndustryRuleset::class;
     }
 
     public function performAction(): Industry

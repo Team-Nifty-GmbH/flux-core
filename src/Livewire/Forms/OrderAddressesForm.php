@@ -7,10 +7,10 @@ use Livewire\Attributes\Locked;
 
 class OrderAddressesForm extends FluxForm
 {
+    public array $addresses = [];
+
     #[Locked]
     public ?int $id = null;
-
-    public array $addresses = [];
 
     protected function getActions(): array
     {

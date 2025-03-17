@@ -7,8 +7,6 @@ use Illuminate\Database\Eloquent\Builder;
 
 class OrderPositionList extends BaseDataTable
 {
-    protected string $model = OrderPosition::class;
-
     public array $enabledCols = [
         'product_number',
         'order.order_number',
@@ -18,10 +16,7 @@ class OrderPositionList extends BaseDataTable
         'total_net_price',
     ];
 
-    protected function getBuilder(Builder $builder): Builder
-    {
-        return $builder->orderBy('order_id');
-    }
+    protected string $model = OrderPosition::class;
 
     public function getFormatters(): array
     {
@@ -37,5 +32,10 @@ class OrderPositionList extends BaseDataTable
                 'margin' => 'coloredMoney',
             ]
         );
+    }
+
+    protected function getBuilder(Builder $builder): Builder
+    {
+        return $builder->orderBy('order_id');
     }
 }

@@ -6,8 +6,6 @@ use FluxErp\Models\QueueMonitor;
 
 class QueueMonitorList extends BaseDataTable
 {
-    protected string $model = QueueMonitor::class;
-
     public array $enabledCols = [
         'job_batch.name',
         'name',
@@ -21,4 +19,6 @@ class QueueMonitorList extends BaseDataTable
     public array $formatters = [
         'progress' => 'progressPercentage',
     ];
+
+    protected string $model = QueueMonitor::class;
 }

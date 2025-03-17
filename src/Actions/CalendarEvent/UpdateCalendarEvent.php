@@ -11,14 +11,14 @@ use Illuminate\Support\Arr;
 
 class UpdateCalendarEvent extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateCalendarEventRuleset::class;
-    }
-
     public static function models(): array
     {
         return [CalendarEvent::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateCalendarEventRuleset::class;
     }
 
     public function performAction(): array

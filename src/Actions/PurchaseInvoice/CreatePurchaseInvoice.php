@@ -17,14 +17,14 @@ use Illuminate\Validation\ValidationException;
 
 class CreatePurchaseInvoice extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreatePurchaseInvoiceRuleset::class;
-    }
-
     public static function models(): array
     {
         return [PurchaseInvoice::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreatePurchaseInvoiceRuleset::class;
     }
 
     public function performAction(): PurchaseInvoice

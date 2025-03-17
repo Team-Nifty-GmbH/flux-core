@@ -10,6 +10,15 @@ class CreatePriceListRuleset extends FluxRuleset
 {
     protected static ?string $model = PriceList::class;
 
+    public static function getRules(): array
+    {
+        return array_merge(
+            parent::getRules(),
+            resolve_static(DiscountRuleset::class, 'getRules'),
+            resolve_static(RoundingRuleset::class, 'getRules')
+        );
+    }
+
     public function rules(): array
     {
         return [
@@ -25,14 +34,5 @@ class CreatePriceListRuleset extends FluxRuleset
             'is_default' => 'boolean',
             'is_purchase' => 'boolean',
         ];
-    }
-
-    public static function getRules(): array
-    {
-        return array_merge(
-            parent::getRules(),
-            resolve_static(DiscountRuleset::class, 'getRules'),
-            resolve_static(RoundingRuleset::class, 'getRules')
-        );
     }
 }

@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class LedgerAccountsTest extends TestCase
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(LedgerAccounts::class)
             ->assertStatus(200);

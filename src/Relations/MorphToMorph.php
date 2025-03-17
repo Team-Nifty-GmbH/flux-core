@@ -10,9 +10,9 @@ use Illuminate\Support\Arr;
 
 class MorphToMorph extends MorphToMany
 {
-    protected string $relatedMorphType;
-
     protected string $relatedMorphClass;
+
+    protected string $relatedMorphType;
 
     public function __construct(
         Builder $query, Model $parent, string $name, string $relatedMorph, string $table, string $foreignPivotKey,
@@ -27,41 +27,11 @@ class MorphToMorph extends MorphToMany
         );
     }
 
-    protected function addWhereConstraints(): MorphToMorph
-    {
-        parent::addWhereConstraints();
-
-        $this->query->where($this->qualifyPivotColumn($this->relatedMorphType), $this->relatedMorphClass);
-
-        return $this;
-    }
-
-    public function addEagerConstraints(array $models)
+    public function addEagerConstraints(array $models): void
     {
         parent::addEagerConstraints($models);
 
         $this->query->where($this->qualifyPivotColumn($this->relatedMorphType), $this->relatedMorphClass);
-    }
-
-    protected function baseAttachRecord($id, $timed): array
-    {
-        return Arr::add(
-            parent::baseAttachRecord($id, $timed), $this->relatedMorphType, $this->relatedMorphClass
-        );
-    }
-
-    public function getRelationExistenceQuery(Builder $query, Builder $parentQuery, $columns = ['*']): Builder
-    {
-        return parent::getRelationExistenceQuery($query, $parentQuery, $columns)
-            ->where($this->qualifyPivotColumn($this->morphType), $this->morphClass)
-            ->where($this->qualifyPivotColumn($this->relatedMorphType), $this->relatedMorphClass);
-    }
-
-    public function newPivotQuery(): \Illuminate\Database\Query\Builder
-    {
-        return parent::newPivotQuery()
-            ->where($this->morphType, $this->morphClass)
-            ->where($this->relatedMorphType, $this->relatedMorphClass);
     }
 
     public function attach($id, array $attributes = [], $touch = true): void
@@ -90,6 +60,20 @@ class MorphToMorph extends MorphToMany
         return $detached;
     }
 
+    public function getRelationExistenceQuery(Builder $query, Builder $parentQuery, $columns = ['*']): Builder
+    {
+        return parent::getRelationExistenceQuery($query, $parentQuery, $columns)
+            ->where($this->qualifyPivotColumn($this->morphType), $this->morphClass)
+            ->where($this->qualifyPivotColumn($this->relatedMorphType), $this->relatedMorphClass);
+    }
+
+    public function newPivotQuery(): \Illuminate\Database\Query\Builder
+    {
+        return parent::newPivotQuery()
+            ->where($this->morphType, $this->morphClass)
+            ->where($this->relatedMorphType, $this->relatedMorphClass);
+    }
+
     public function sync($ids, $detaching = true): array
     {
         $changes = parent::sync($ids, $detaching);
@@ -103,5 +87,21 @@ class MorphToMorph extends MorphToMany
         }
 
         return $changes;
+    }
+
+    protected function addWhereConstraints(): MorphToMorph
+    {
+        parent::addWhereConstraints();
+
+        $this->query->where($this->qualifyPivotColumn($this->relatedMorphType), $this->relatedMorphClass);
+
+        return $this;
+    }
+
+    protected function baseAttachRecord($id, $timed): array
+    {
+        return Arr::add(
+            parent::baseAttachRecord($id, $timed), $this->relatedMorphType, $this->relatedMorphClass
+        );
     }
 }

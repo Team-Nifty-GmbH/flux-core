@@ -8,7 +8,7 @@ class AddFieldsToAddresses extends Migration
 {
     public function up(): void
     {
-        Schema::table('addresses', function (Blueprint $table) {
+        Schema::table('addresses', function (Blueprint $table): void {
             $table->date('date_of_birth')->nullable()->after('url');
             $table->unsignedBigInteger('language_id')->nullable()->after('uuid');
             $table->unsignedBigInteger('country_id')->nullable()->after('language_id');
@@ -27,7 +27,7 @@ class AddFieldsToAddresses extends Migration
 
     public function down(): void
     {
-        Schema::table('addresses', function (Blueprint $table) {
+        Schema::table('addresses', function (Blueprint $table): void {
             $table->dropForeign('addresses_country_id_foreign');
             $table->dropForeign('addresses_language_id_foreign');
 

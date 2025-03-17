@@ -12,7 +12,7 @@ return new class() extends Migration
      */
     public function up(): void
     {
-        Schema::table('orders', function (Blueprint $table) {
+        Schema::table('orders', function (Blueprint $table): void {
             $table->decimal('total_net_price', 40, 10)
                 ->default(0)
                 ->after('margin');
@@ -32,7 +32,7 @@ return new class() extends Migration
      */
     public function down(): void
     {
-        Schema::table('orders', function (Blueprint $table) {
+        Schema::table('orders', function (Blueprint $table): void {
             $table->dropColumn(['total_net_price', 'total_gross_price', 'total_vats']);
         });
     }

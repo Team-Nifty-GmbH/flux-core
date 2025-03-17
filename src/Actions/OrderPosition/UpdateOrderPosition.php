@@ -16,14 +16,14 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateOrderPosition extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateOrderPositionRuleset::class;
-    }
-
     public static function models(): array
     {
         return [OrderPosition::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateOrderPositionRuleset::class;
     }
 
     public function performAction(): Model
@@ -110,7 +110,7 @@ class UpdateOrderPosition extends FluxAction
                         'is_bundle_position' => true,
                     ];
                 })
-                ->each(function (array $bundleProduct) {
+                ->each(function (array $bundleProduct): void {
                     CreateOrderPosition::make($bundleProduct)
                         ->validate()
                         ->execute();

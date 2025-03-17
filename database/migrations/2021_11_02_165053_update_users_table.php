@@ -10,12 +10,12 @@ class UpdateUsersTable extends Migration
 {
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table): void {
             $table->dropColumn('created_at');
             $table->dropColumn('updated_at');
         });
 
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table): void {
             $table->unsignedBigInteger('language_id')->after('uuid');
             $table->boolean('is_active')->default(true)->after('user_code');
             $table->timestamp('created_at')->nullable()
@@ -38,14 +38,14 @@ class UpdateUsersTable extends Migration
 
         $this->migrateUserLanguage();
 
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table): void {
             $table->foreign('language_id')->references('id')->on('languages');
         });
     }
 
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table): void {
             $table->dropForeign('users_language_id_foreign');
             $table->dropForeign('users_created_by_foreign');
             $table->dropForeign('users_updated_by_foreign');
@@ -62,7 +62,7 @@ class UpdateUsersTable extends Migration
         });
     }
 
-    private function migrateUserLanguage()
+    private function migrateUserLanguage(): void
     {
         $users = DB::table('users')->exists();
 

@@ -22,7 +22,7 @@ class Install extends BasePluginAction
             ['--no-progress', '--no-interaction', '--no-ansi'],
             $this->data['options'] ?? []
         );
-        $run = $composer->requirePackages($command, false, function ($type, $buffer) use (&$output) {
+        $run = $composer->requirePackages($command, false, function ($type, $buffer) use (&$output): void {
             $output .= $buffer;
         });
 

@@ -11,14 +11,14 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateSerialNumberRange extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateSerialNumberRangeRuleset::class;
-    }
-
     public static function models(): array
     {
         return [SerialNumberRange::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateSerialNumberRangeRuleset::class;
     }
 
     public function performAction(): Model

@@ -37,24 +37,24 @@ class Communication extends CommunicationList
 {
     use CreatesDocuments, WithFileUploads;
 
-    protected ?string $includeBefore = 'flux::livewire.features.communications.communication';
+    public MediaUploadForm $attachments;
+
+    public CommunicationForm $communication;
 
     #[Modelable]
     public ?int $modelId = null;
 
+    protected ?string $includeBefore = 'flux::livewire.features.communications.communication';
+
     protected ?string $modelType = null;
-
-    public CommunicationForm $communication;
-
-    public MediaUploadForm $attachments;
 
     protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
-                ->label(__('New'))
+                ->text(__('New'))
                 ->icon('plus')
-                ->color('primary')
+                ->color('indigo')
                 ->wireClick('edit')
                 ->when(resolve_static(CreateCommunication::class, 'canPerformAction', [false])),
         ];
@@ -64,23 +64,23 @@ class Communication extends CommunicationList
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
+                ->text(__('Edit'))
                 ->icon('pencil')
-                ->color('primary')
+                ->color('indigo')
                 ->wireClick('edit(record.id)')
                 ->when(resolve_static(UpdateCommunication::class, 'canPerformAction', [false])),
             DataTableButton::make()
-                ->label(__('Preview'))
+                ->text(__('Preview'))
                 ->icon('document-text')
-                ->color('primary')
+                ->color('indigo')
                 ->wireClick('createPreview(record.id)'),
             DataTableButton::make()
-                ->label(__('Delete'))
+                ->text(__('Delete'))
                 ->icon('trash')
-                ->color('negative')
+                ->color('red')
                 ->attributes([
                     'wire:click' => 'delete(record.id)',
-                    'wire:flux-confirm.icon.error' => __(
+                    'wire:flux-confirm.type.error' => __(
                         'wire:confirm.delete',
                         ['model' => __('Communication')]
                     ),
@@ -89,35 +89,40 @@ class Communication extends CommunicationList
         ];
     }
 
-    protected function getViewData(): array
+    #[Renderless]
+    public function addCommunicatable(string $modelType, string|int $modelId): void
     {
-        return array_merge(
-            parent::getViewData(),
-            [
-                'communicationTypes' => array_map(
-                    fn ($item) => ['name' => $item, 'label' => __(Str::headline($item))],
-                    CommunicationTypeEnum::values()
-                ),
-            ]
-        );
+        $model = morph_to($modelType, $modelId);
+        $this->communication->communicatables[] = [
+            'communicatable_type' => $modelType,
+            'communicatable_id' => $modelId,
+            'href' => method_exists($model, 'getUrl') ? $model->getUrl() : null,
+            'label' => __(Str::headline($modelType)) . ': '
+                . (method_exists($model, 'getLabel') ? $model->getLabel() : $model->getKey()),
+        ];
     }
 
-    protected function getBuilder(Builder $builder): Builder
+    #[Renderless]
+    public function addTag(string $name): void
     {
-        return $builder
-            ->when(
-                $this->modelId && $this->modelType,
-                fn (Builder $query) => $query->whereHas(
-                    'communicatables',
-                    fn ($query) => $query->where('communicatable_id', $this->modelId)
-                        ->where('communicatable_type', morph_alias($this->modelType))
-                )
-            );
-    }
+        try {
+            $tag = CreateTag::make([
+                'name' => $name,
+                'type' => morph_alias(CommunicationModel::class),
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
 
-    protected function getReturnKeys(): array
-    {
-        return array_merge(parent::getReturnKeys(), ['communication_type_enum']);
+            return;
+        }
+
+        $this->communication->tags[] = $tag->id;
+        $this->js(<<<'JS'
+            edit = true;
+        JS);
     }
 
     #[Computed(cache: true)]
@@ -135,21 +140,67 @@ class Communication extends CommunicationList
                 ARRAY_FILTER_USE_BOTH
             )
         )
-            ->mapWithKeys(fn ($value, $key) => [$key => __(Str::headline($key))])
+            ->mapWithKeys(fn ($value, $key) => [$key => ['value' => $key, 'label' => __(Str::headline($key))]])
             ->toArray();
     }
 
     #[Renderless]
-    public function addCommunicatable(string $modelType, string|int $modelId): void
+    public function createDocuments(): null|MediaStream|Media
     {
-        $model = morph_to($modelType, $modelId);
-        $this->communication->communicatables[] = [
-            'communicatable_type' => $modelType,
-            'communicatable_id' => $modelId,
-            'href' => method_exists($model, 'getUrl') ? $model->getUrl() : null,
-            'label' => __(Str::headline($modelType)) . ': '
-                . (method_exists($model, 'getLabel') ? $model->getLabel() : $model->getKey()),
-        ];
+        $response = $this->createDocumentFromItems(
+            resolve_static(CommunicationModel::class, 'query')
+                ->whereKey($this->communication->id)
+                ->first()
+        );
+        $this->loadData();
+
+        return $response;
+    }
+
+    #[Renderless]
+    public function createPreview(?CommunicationModel $communication = null): void
+    {
+        $this->communication->reset();
+        $this->communication->fill($communication);
+
+        $this->attachments->reset();
+        if ($communication->id) {
+            $this->attachments->fill($communication->getMedia('attachments'));
+        }
+
+        $this->openCreateDocumentsModal();
+    }
+
+    #[Renderless]
+    public function delete(CommunicationModel $communication): void
+    {
+        $this->communication->fill($communication);
+
+        try {
+            $this->communication->delete();
+        } catch (UnauthorizedException|ValidationException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->loadData();
+    }
+
+    #[Renderless]
+    public function edit(?CommunicationModel $communication = null): void
+    {
+        $this->communication->reset();
+        $this->communication->fill($communication);
+
+        $this->attachments->reset();
+        if ($communication->id) {
+            $this->attachments->fill($communication->getMedia('attachments'));
+        }
+
+        $this->js(<<<'JS'
+            $modalOpen('edit-communication');
+        JS);
     }
 
     #[Renderless]
@@ -185,22 +236,6 @@ class Communication extends CommunicationList
         $this->loadData();
 
         return true;
-    }
-
-    #[Renderless]
-    public function delete(CommunicationModel $communication): void
-    {
-        $this->communication->fill($communication);
-
-        try {
-            $this->communication->delete();
-        } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
-
-            return;
-        }
-
-        $this->loadData();
     }
 
     #[Renderless]
@@ -240,27 +275,11 @@ class Communication extends CommunicationList
             return false;
         }
 
-        $this->notification()->success(__('Email sent successfully!'));
+        $this->notification()->success(__('Email sent successfully!'))->send();
 
         $this->loadData();
 
         return true;
-    }
-
-    #[Renderless]
-    public function edit(?CommunicationModel $communication = null): void
-    {
-        $this->communication->reset();
-        $this->communication->fill($communication);
-
-        $this->attachments->reset();
-        if ($communication->id) {
-            $this->attachments->fill($communication->getMedia('attachments'));
-        }
-
-        $this->js(<<<'JS'
-            $openModal('edit-communication');
-        JS);
     }
 
     #[Renderless]
@@ -280,64 +299,17 @@ class Communication extends CommunicationList
         ];
     }
 
-    #[Renderless]
-    public function addTag(string $name): void
+    protected function getBuilder(Builder $builder): Builder
     {
-        try {
-            $tag = CreateTag::make([
-                'name' => $name,
-                'type' => morph_alias(CommunicationModel::class),
-            ])
-                ->checkPermission()
-                ->validate()
-                ->execute();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return;
-        }
-
-        $this->communication->tags[] = $tag->id;
-        $this->js(<<<'JS'
-            edit = true;
-        JS);
-    }
-
-    #[Renderless]
-    public function createPreview(?CommunicationModel $communication = null): void
-    {
-        $this->communication->reset();
-        $this->communication->fill($communication);
-
-        $this->attachments->reset();
-        if ($communication->id) {
-            $this->attachments->fill($communication->getMedia('attachments'));
-        }
-
-        $this->openCreateDocumentsModal();
-    }
-
-    #[Renderless]
-    public function createDocuments(): null|MediaStream|Media
-    {
-        $response = $this->createDocumentFromItems(
-            resolve_static(CommunicationModel::class, 'query')
-                ->whereKey($this->communication->id)
-                ->first()
-        );
-        $this->loadData();
-
-        return $response;
-    }
-
-    protected function getTo(OffersPrinting $item, array $documents): array
-    {
-        return Arr::wrap($item->to);
-    }
-
-    protected function getSubject(OffersPrinting $item): string
-    {
-        return $item->subject;
+        return $builder
+            ->when(
+                $this->modelId && $this->modelType,
+                fn (Builder $query) => $query->whereHas(
+                    'communicatables',
+                    fn ($query) => $query->where('communicatable_id', $this->modelId)
+                        ->where('communicatable_type', morph_alias($this->modelType))
+                )
+            );
     }
 
     protected function getHtmlBody(OffersPrinting $item): string
@@ -351,5 +323,33 @@ class Communication extends CommunicationList
             ->whereKey($this->communication->id)
             ->first(['id'])
             ->resolvePrintViews();
+    }
+
+    protected function getReturnKeys(): array
+    {
+        return array_merge(parent::getReturnKeys(), ['communication_type_enum']);
+    }
+
+    protected function getSubject(OffersPrinting $item): string
+    {
+        return $item->subject;
+    }
+
+    protected function getTo(OffersPrinting $item, array $documents): array
+    {
+        return Arr::wrap($item->to);
+    }
+
+    protected function getViewData(): array
+    {
+        return array_merge(
+            parent::getViewData(),
+            [
+                'communicationTypes' => array_map(
+                    fn ($item) => ['name' => $item, 'label' => __(Str::headline($item))],
+                    CommunicationTypeEnum::values()
+                ),
+            ]
+        );
     }
 }

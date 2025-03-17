@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class RevenueBySalesRepresentativeTest extends TestCase
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(RevenueBySalesRepresentative::class)
             ->assertStatus(200);

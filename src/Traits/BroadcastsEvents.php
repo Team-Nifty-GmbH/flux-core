@@ -29,6 +29,11 @@ trait BroadcastsEvents
         static::baseBootBroadcastsEvents();
     }
 
+    public static function getBroadcastOnlyKey(): bool
+    {
+        return static::$broadcastOnlyKey;
+    }
+
     public static function getGenericChannelEvents(): array
     {
         return ['created'];
@@ -39,50 +44,9 @@ trait BroadcastsEvents
         return static::$withoutBroadcasting;
     }
 
-    public static function getBroadcastOnlyKey(): bool
-    {
-        return static::$broadcastOnlyKey;
-    }
-
     public function broadcastChannel(): string
     {
         return parent::broadcastChannel();
-    }
-
-    protected function newBroadcastableEvent(string $event): BroadcastableModelEventOccurred
-    {
-        $event = new BroadcastableModelEventOccurred($this, $event);
-
-        if ($this->broadcastToEveryone()) {
-            $event->broadcastToEveryone();
-        } else {
-            $event->dontBroadcastToCurrentUser();
-        }
-
-        return $event;
-    }
-
-    protected function broadcastToEveryone(): bool
-    {
-        return false;
-    }
-
-    public function broadcastWith(): array
-    {
-        return static::getBroadcastOnlyKey() && method_exists($this, 'getKey')
-            ? ['model' => [$this->getKeyName() => $this->getKey()]]
-            : $this->baseBroadcastWith();
-    }
-
-    public function broadcastOn(string $event): array|Channel
-    {
-        $channel = $this->broadcastChannel();
-
-        return new PrivateChannel(
-            in_array($event, static::getGenericChannelEvents())
-                ? Str::beforeLast($channel, '.') . '.'
-                : $channel
-        );
     }
 
     public function broadcastEvent(string $event, $channels = null, bool $toEveryone = false): ?PendingBroadcast
@@ -97,5 +61,41 @@ trait BroadcastsEvents
         }
 
         return $this->broadcastIfBroadcastChannelsExistForEvent($eventClass, $event, $channels);
+    }
+
+    public function broadcastOn(string $event): array|Channel
+    {
+        $channel = $this->broadcastChannel();
+
+        return new PrivateChannel(
+            in_array($event, static::getGenericChannelEvents())
+                ? Str::beforeLast($channel, '.') . '.'
+                : $channel
+        );
+    }
+
+    public function broadcastWith(): array
+    {
+        return static::getBroadcastOnlyKey() && method_exists($this, 'getKey')
+            ? ['model' => [$this->getKeyName() => $this->getKey()]]
+            : $this->baseBroadcastWith();
+    }
+
+    protected function broadcastToEveryone(): bool
+    {
+        return false;
+    }
+
+    protected function newBroadcastableEvent(string $event): BroadcastableModelEventOccurred
+    {
+        $event = new BroadcastableModelEventOccurred($this, $event);
+
+        if ($this->broadcastToEveryone()) {
+            $event->broadcastToEveryone();
+        } else {
+            $event->dontBroadcastToCurrentUser();
+        }
+
+        return $event;
     }
 }

@@ -16,14 +16,6 @@ class AverageOrderValue extends LineChart
 {
     use IsTimeFrameAwareWidget, MoneyChartFormattingTrait;
 
-    protected function getListeners(): array
-    {
-        return [
-            'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
-                . ',.OrderLocked' => 'calculateByTimeFrame',
-        ];
-    }
-
     #[Renderless]
     public function calculateByTimeFrame(): void
     {
@@ -42,8 +34,8 @@ class AverageOrderValue extends LineChart
         $metric = Line::make($query)
             ->setDateColumn('invoice_date')
             ->setRange($this->timeFrame)
-            ->setEndingDate($this->end)
-            ->setStartingDate($this->start);
+            ->setEndingDate($this->end?->endOfDay())
+            ->setStartingDate($this->start?->startOfDay());
         $previousMetric = Trend::make($query)
             ->setDateColumn('invoice_date')
             ->setEndingDate($metric->previousRange()[1])
@@ -52,8 +44,8 @@ class AverageOrderValue extends LineChart
 
         $growth = Value::make($query)
             ->setRange($this->timeFrame)
-            ->setEndingDate($this->end)
-            ->setStartingDate($this->start)
+            ->setEndingDate($this->end?->endOfDay())
+            ->setStartingDate($this->start?->startOfDay())
             ->setDateColumn('invoice_date')
             ->withGrowthRate()
             ->avg('total_net_price');
@@ -77,5 +69,13 @@ class AverageOrderValue extends LineChart
         ];
 
         $this->xaxis['categories'] = $revenue->getLabels();
+    }
+
+    protected function getListeners(): array
+    {
+        return [
+            'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
+                . ',.OrderLocked' => 'calculateByTimeFrame',
+        ];
     }
 }

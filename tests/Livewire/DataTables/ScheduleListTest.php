@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class ScheduleListTest extends TestCase
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(ScheduleList::class)
             ->assertStatus(200);

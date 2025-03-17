@@ -19,14 +19,6 @@ class Outstanding extends ValueBox implements HasWidgetOptions
 {
     public bool $shouldBePositive = false;
 
-    protected function getListeners(): array
-    {
-        return [
-            'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
-                . ',.OrderLocked' => 'calculateSum',
-        ];
-    }
-
     #[Renderless]
     public function calculateSum(): void
     {
@@ -45,7 +37,7 @@ class Outstanding extends ValueBox implements HasWidgetOptions
             ->revenue();
 
         $symbol = Currency::default()->symbol;
-        $this->subValue = '<span class="text-negative-600">'
+        $this->subValue = '<span class="text-red-600">'
             . Number::abbreviate($overDueQuery->sum('balance'), 2)
             . ' ' . $symbol . ' ' . __('Overdue')
             . '</span>';
@@ -97,5 +89,13 @@ class Outstanding extends ValueBox implements HasWidgetOptions
             ->store();
 
         $this->redirectRoute('accounting.payment-reminders', navigate: true);
+    }
+
+    protected function getListeners(): array
+    {
+        return [
+            'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
+                . ',.OrderLocked' => 'calculateSum',
+        ];
     }
 }

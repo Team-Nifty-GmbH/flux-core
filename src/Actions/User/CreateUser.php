@@ -10,14 +10,14 @@ use Illuminate\Support\Arr;
 
 class CreateUser extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateUserRuleset::class;
-    }
-
     public static function models(): array
     {
         return [User::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateUserRuleset::class;
     }
 
     public function performAction(): User

@@ -16,6 +16,14 @@ class UpdateTicketRuleset extends FluxRuleset
 {
     protected static ?string $model = Ticket::class;
 
+    public static function getRules(): array
+    {
+        return array_merge(
+            parent::getRules(),
+            resolve_static(UserRuleset::class, 'getRules')
+        );
+    }
+
     public function rules(): array
     {
         return [
@@ -46,13 +54,5 @@ class UpdateTicketRuleset extends FluxRuleset
                 ValidStateRule::make(TicketState::class),
             ],
         ];
-    }
-
-    public static function getRules(): array
-    {
-        return array_merge(
-            parent::getRules(),
-            resolve_static(UserRuleset::class, 'getRules')
-        );
     }
 }

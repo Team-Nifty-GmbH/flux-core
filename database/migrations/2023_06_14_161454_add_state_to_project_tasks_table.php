@@ -11,11 +11,11 @@ return new class() extends Migration
      */
     public function up(): void
     {
-        Schema::table('project_tasks', function (Blueprint $table) {
+        Schema::table('project_tasks', function (Blueprint $table): void {
             $table->string('state')->after('name')->default('open');
         });
 
-        \Illuminate\Support\Facades\DB::update('UPDATE project_tasks SET state = "done" WHERE is_done = 1');
+        Illuminate\Support\Facades\DB::update('UPDATE project_tasks SET state = "done" WHERE is_done = 1');
     }
 
     /**
@@ -23,7 +23,7 @@ return new class() extends Migration
      */
     public function down(): void
     {
-        Schema::table('project_tasks', function (Blueprint $table) {
+        Schema::table('project_tasks', function (Blueprint $table): void {
             $table->dropColumn('state');
         });
     }

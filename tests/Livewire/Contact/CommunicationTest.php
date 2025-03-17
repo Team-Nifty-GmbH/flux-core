@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class CommunicationTest extends TestCase
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(Communication::class)
             ->assertStatus(200);

@@ -16,10 +16,8 @@ class SyncIndexSettingsCommand extends BaseSyncIndexSettingsCommand
 
     /**
      * Execute the console command.
-     *
-     * @return void
      */
-    public function handle(EngineManager $manager)
+    public function handle(EngineManager $manager): void
     {
         $engine = $manager->engine();
 

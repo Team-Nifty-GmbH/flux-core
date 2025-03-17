@@ -10,14 +10,14 @@ use Illuminate\Validation\ValidationException;
 
 class CreateLedgerAccount extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateLedgerAccountRuleset::class;
-    }
-
     public static function models(): array
     {
         return [LedgerAccount::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateLedgerAccountRuleset::class;
     }
 
     public function performAction(): mixed

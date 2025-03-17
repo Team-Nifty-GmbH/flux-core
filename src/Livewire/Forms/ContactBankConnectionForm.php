@@ -9,18 +9,18 @@ use Livewire\Attributes\Locked;
 
 class ContactBankConnectionForm extends FluxForm
 {
-    #[Locked]
-    public ?int $id = null;
-
-    public ?int $contact_id = null;
-
-    public ?string $iban = null;
-
     public ?string $account_holder = null;
 
     public ?string $bank_name = null;
 
     public ?string $bic = null;
+
+    public ?int $contact_id = null;
+
+    public ?string $iban = null;
+
+    #[Locked]
+    public ?int $id = null;
 
     protected function getActions(): array
     {

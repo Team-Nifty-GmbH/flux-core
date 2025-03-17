@@ -11,7 +11,7 @@ return new class() extends Migration
      */
     public function up(): void
     {
-        Schema::table('product_bundle_product', function (Blueprint $table) {
+        Schema::table('product_bundle_product', function (Blueprint $table): void {
             $table->decimal('count', 40, 10, true)->default(1)->change();
         });
     }
@@ -21,7 +21,7 @@ return new class() extends Migration
      */
     public function down(): void
     {
-        Schema::table('product_bundle_product', function (Blueprint $table) {
+        Schema::table('product_bundle_product', function (Blueprint $table): void {
             $table->unsignedInteger('count')->default(1)->change();
         });
     }

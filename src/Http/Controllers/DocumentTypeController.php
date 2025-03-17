@@ -31,16 +31,16 @@ class DocumentTypeController extends BaseController
         );
     }
 
-    public function update(Request $request, DocumentTypeService $documentTypeService): JsonResponse
+    public function delete(string $id, DocumentTypeService $documentTypeService): JsonResponse
     {
-        $response = $documentTypeService->update($request->all());
+        $response = $documentTypeService->delete($id);
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
-    public function delete(string $id, DocumentTypeService $documentTypeService): JsonResponse
+    public function update(Request $request, DocumentTypeService $documentTypeService): JsonResponse
     {
-        $response = $documentTypeService->delete($id);
+        $response = $documentTypeService->update($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }

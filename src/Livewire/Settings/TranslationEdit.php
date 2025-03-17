@@ -19,19 +19,50 @@ class TranslationEdit extends Component
 {
     use Actions;
 
-    public array $translation = [
-        'group' => '*',
-    ];
+    public bool $isNew;
 
     public string $locale;
 
-    public bool $isNew;
+    public array $translation = [
+        'group' => '*',
+    ];
 
     protected $listeners = [
         'show',
         'save',
         'delete',
     ];
+
+    public function mount(): void
+    {
+        $this->translation = array_fill_keys(
+            array_keys(resolve_static(CreateTranslationRuleset::class, 'getRules')),
+            null
+        );
+
+        $this->translation['text'] = [];
+        $this->translation['translation'] = null;
+
+        $this->locale = app()->getLocale();
+        $this->isNew = true;
+    }
+
+    public function render(): View
+    {
+        return view('flux::livewire.settings.translation-edit');
+    }
+
+    public function delete(): void
+    {
+        if (! resolve_static(DeleteTranslation::class, 'canPerformAction', [false])) {
+            return;
+        }
+
+        (new TranslationService())->delete($this->translation['id']);
+
+        $this->skipRender();
+        $this->dispatch('closeModal', $this->translation, true);
+    }
 
     public function getRules(): array
     {
@@ -59,23 +90,45 @@ class TranslationEdit extends Component
         return Arr::prependKeysWith($rules, 'translation.');
     }
 
-    public function mount(): void
+    public function save(): void
     {
-        $this->translation = array_fill_keys(
-            array_keys(resolve_static(CreateTranslationRuleset::class, 'getRules')),
-            null
-        );
+        if (($this->isNew && ! resolve_static(CreateTranslation::class, 'canPerformAction', [false])) ||
+            (! $this->isNew && ! resolve_static(UpdateTranslation::class, 'canPerformAction', [false]))
+        ) {
+            $this->notification()->error(
+                __('insufficient permissions'),
+                __('You have not the rights to modify this record')
+            )->send();
 
-        $this->translation['text'] = [];
-        $this->translation['translation'] = null;
+            return;
+        }
 
-        $this->locale = app()->getLocale();
-        $this->isNew = true;
-    }
+        if ($this->translation['translation'] ?? false) {
+            if ($this->isNew) {
+                $this->translation['text'] = [$this->locale => $this->translation['translation']];
+            } else {
+                $this->translation['text'][$this->locale] = $this->translation['translation'];
+            }
+        }
 
-    public function render(): View
-    {
-        return view('flux::livewire.settings.translation-edit');
+        $validated = $this->validate();
+
+        $translationService = app(TranslationService::class);
+        $response = $translationService->{$this->isNew ? 'create' : 'update'}($validated['translation']);
+
+        if (! $this->isNew && $response['status'] > 299) {
+            $this->notification()->error(
+                implode(',', array_keys($response['errors'])),
+                implode(', ', Arr::dot($response['errors']))
+            )->send();
+
+            return;
+        }
+
+        $this->notification()->success(__(':model saved', ['model' => __('Translation')]))->send();
+
+        $this->skipRender();
+        $this->dispatch('closeModal', $this->isNew ? $response : $response['data']);
     }
 
     public function show(string $locale, array $translation = []): void
@@ -99,58 +152,5 @@ class TranslationEdit extends Component
         }
 
         $this->isNew = ! array_key_exists('id', $this->translation);
-    }
-
-    public function save(): void
-    {
-        if (($this->isNew && ! resolve_static(CreateTranslation::class, 'canPerformAction', [false])) ||
-            (! $this->isNew && ! resolve_static(UpdateTranslation::class, 'canPerformAction', [false]))
-        ) {
-            $this->notification()->error(
-                __('insufficient permissions'),
-                __('You have not the rights to modify this record')
-            );
-
-            return;
-        }
-
-        if ($this->translation['translation'] ?? false) {
-            if ($this->isNew) {
-                $this->translation['text'] = [$this->locale => $this->translation['translation']];
-            } else {
-                $this->translation['text'][$this->locale] = $this->translation['translation'];
-            }
-        }
-
-        $validated = $this->validate();
-
-        $translationService = app(TranslationService::class);
-        $response = $translationService->{$this->isNew ? 'create' : 'update'}($validated['translation']);
-
-        if (! $this->isNew && $response['status'] > 299) {
-            $this->notification()->error(
-                implode(',', array_keys($response['errors'])),
-                implode(', ', Arr::dot($response['errors']))
-            );
-
-            return;
-        }
-
-        $this->notification()->success(__(':model saved', ['model' => __('Translation')]));
-
-        $this->skipRender();
-        $this->dispatch('closeModal', $this->isNew ? $response : $response['data']);
-    }
-
-    public function delete(): void
-    {
-        if (! resolve_static(DeleteTranslation::class, 'canPerformAction', [false])) {
-            return;
-        }
-
-        (new TranslationService())->delete($this->translation['id']);
-
-        $this->skipRender();
-        $this->dispatch('closeModal', $this->translation, true);
     }
 }

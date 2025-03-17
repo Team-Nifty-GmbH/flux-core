@@ -13,7 +13,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::create('state_settings', function (Blueprint $table) {
+        Schema::create('state_settings', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36)->unique();
             $table->string('model');

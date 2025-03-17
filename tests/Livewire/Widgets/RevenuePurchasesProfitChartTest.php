@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class RevenuePurchasesProfitChartTest extends TestCase
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(RevenuePurchasesProfitChart::class)
             ->assertStatus(200);

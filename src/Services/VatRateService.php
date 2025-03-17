@@ -16,6 +16,23 @@ class VatRateService
         return CreateVatRate::make($data)->validate()->execute();
     }
 
+    public function delete(string $id): array
+    {
+        try {
+            DeleteVatRate::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
+            return ResponseHelper::createArrayResponse(
+                statusCode: 404,
+                data: $e->errors()
+            );
+        }
+
+        return ResponseHelper::createArrayResponse(
+            statusCode: 204,
+            statusMessage: 'vat rate deleted'
+        );
+    }
+
     public function update(array $data): array
     {
         if (! array_is_list($data)) {
@@ -50,23 +67,6 @@ class VatRateService
             data: $responses,
             statusMessage: $statusCode === 422 ? null : 'vat rate(s) updated',
             bulk: true
-        );
-    }
-
-    public function delete(string $id): array
-    {
-        try {
-            DeleteVatRate::make(['id' => $id])->validate()->execute();
-        } catch (ValidationException $e) {
-            return ResponseHelper::createArrayResponse(
-                statusCode: 404,
-                data: $e->errors()
-            );
-        }
-
-        return ResponseHelper::createArrayResponse(
-            statusCode: 204,
-            statusMessage: 'vat rate deleted'
         );
     }
 }

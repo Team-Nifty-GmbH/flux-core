@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class UnitListTest extends TestCase
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(UnitList::class)
             ->assertStatus(200);

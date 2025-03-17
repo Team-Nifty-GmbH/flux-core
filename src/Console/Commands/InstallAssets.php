@@ -10,16 +10,6 @@ use Symfony\Component\Process\Process;
 class InstallAssets extends Command
 {
     /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'flux:install-assets
-        {directory? : The directory to install the assets}
-        {--force : Overwrite existing files}
-        {--merge-json : If a file is json parsable merge it recursively}';
-
-    /**
      * The console command description.
      *
      * @var string
@@ -27,78 +17,15 @@ class InstallAssets extends Command
     protected $description = 'Command description';
 
     /**
-     * Execute the console command.
+     * The name and signature of the console command.
+     *
+     * @var string
      */
-    public function handle(): void
-    {
-        $target = $this->argument('directory');
-        if ($target && ! file_exists($target)) {
-            throw new \InvalidArgumentException('The target directory does not exist.');
-        }
-
-        $this->callSilent('storage:link');
-
-        // require npm packages
-        $this->info('Installing npm packages...');
-
-        static::copyStubs(force: $this->option('force'), merge: $this->option('merge-json'));
-
-        $this->updateNodePackages(function ($packages) {
-            return data_get(
-                json_decode(
-                    file_get_contents(__DIR__ . '/../../../stubs/tailwind/package.json'),
-                    true
-                ),
-                'devDependencies'
-            ) + $packages;
-        });
-
-        if (file_exists(resource_path('views/welcome.blade.php'))) {
-            unlink(resource_path('views/welcome.blade.php'));
-        }
-
-        $this->runCommands(['npm install', 'npm run build']);
-    }
-
-    protected static function updateNodePackages(callable $callback, $dev = true): void
-    {
-        if (! file_exists(base_path('package.json'))) {
-            return;
-        }
-
-        $configurationKey = $dev ? 'devDependencies' : 'dependencies';
-
-        $packages = json_decode(file_get_contents(base_path('package.json')), true);
-
-        $packages[$configurationKey] = $callback(
-            array_key_exists($configurationKey, $packages) ? $packages[$configurationKey] : [],
-            $configurationKey
-        );
-
-        ksort($packages[$configurationKey]);
-
-        file_put_contents(
-            base_path('package.json'),
-            json_encode($packages, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) . PHP_EOL
-        );
-    }
-
-    protected function runCommands($commands): void
-    {
-        $process = Process::fromShellCommandline(implode(' && ', $commands), null, null, null, 180);
-
-        if ('\\' !== DIRECTORY_SEPARATOR && file_exists('/dev/tty') && is_readable('/dev/tty')) {
-            try {
-                $process->setTty(true);
-            } catch (RuntimeException $e) {
-                $this->output->writeln('  <bg=yellow;fg=black> WARN </> ' . $e->getMessage() . PHP_EOL);
-            }
-        }
-
-        $process->run(function ($type, $line) {
-            $this->output->write('    ' . $line);
-        });
-    }
+    protected $signature = 'flux:install-assets
+        {directory? : The directory to install the assets}
+        {--force : Overwrite existing files}
+        {--merge-json : If a file is json parsable merge it recursively}
+        {--no-build : Skip building the assets}';
 
     public static function copyStubs(
         ?array $files = null,
@@ -165,5 +92,88 @@ class InstallAssets extends Command
                 file_put_contents($basePath($file), $content);
             }
         }
+    }
+
+    protected static function updateNodePackages(callable $callback, $dev = true): void
+    {
+        if (! file_exists(base_path('package.json'))) {
+            return;
+        }
+
+        $configurationKey = $dev ? 'devDependencies' : 'dependencies';
+
+        $packages = json_decode(file_get_contents(base_path('package.json')), true);
+
+        $packages[$configurationKey] = $callback(
+            array_key_exists($configurationKey, $packages) ? $packages[$configurationKey] : [],
+            $configurationKey
+        );
+
+        ksort($packages[$configurationKey]);
+
+        file_put_contents(
+            base_path('package.json'),
+            json_encode($packages, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) . PHP_EOL
+        );
+    }
+
+    /**
+     * Execute the console command.
+     */
+    public function handle(): void
+    {
+        $target = $this->argument('directory');
+        if ($target && ! file_exists($target)) {
+            throw new \InvalidArgumentException('The target directory does not exist.');
+        }
+
+        $this->callSilent('storage:link');
+
+        // require npm packages
+        $this->info('Installing npm packages...');
+
+        static::copyStubs(
+            force: $this->option('force'),
+            merge: $this->option('merge-json'),
+            basePath: $target ? fn ($path = '') => $target . '/' . $path : null,
+        );
+
+        $this->updateNodePackages(function ($packages) {
+            return data_get(
+                json_decode(
+                    file_get_contents(__DIR__ . '/../../../stubs/tailwind/package.json'),
+                    true
+                ),
+                'devDependencies'
+            ) + $packages;
+        });
+
+        if (file_exists(resource_path('views/welcome.blade.php'))) {
+            unlink(resource_path('views/welcome.blade.php'));
+        }
+
+        $commands = ['npm install'];
+        if (! $this->option('no-build')) {
+            $commands[] = 'npm run build';
+        }
+
+        $this->runCommands($commands);
+    }
+
+    protected function runCommands($commands): void
+    {
+        $process = Process::fromShellCommandline(implode(' && ', $commands), null, null, null, 180);
+
+        if ('\\' !== DIRECTORY_SEPARATOR && file_exists('/dev/tty') && is_readable('/dev/tty')) {
+            try {
+                $process->setTty(true);
+            } catch (RuntimeException $e) {
+                $this->output->writeln('  <bg=yellow;fg=black> WARN </> ' . $e->getMessage() . PHP_EOL);
+            }
+        }
+
+        $process->run(function ($type, $line): void {
+            $this->output->write('    ' . $line);
+        });
     }
 }

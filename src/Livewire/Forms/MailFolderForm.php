@@ -9,16 +9,16 @@ use Livewire\Attributes\Locked;
 
 class MailFolderForm extends FluxForm
 {
-    #[Locked]
-    public ?int $id = null;
-
-    public ?string $name = null;
+    public ?bool $can_create_purchase_invoice = false;
 
     public ?bool $can_create_ticket = false;
 
-    public ?bool $can_create_purchase_invoice = false;
+    #[Locked]
+    public ?int $id = null;
 
     public bool $is_active = true;
+
+    public ?string $name = null;
 
     protected function getActions(): array
     {

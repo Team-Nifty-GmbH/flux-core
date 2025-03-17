@@ -11,14 +11,14 @@ use Illuminate\Support\Facades\Validator;
 
 class UpdatePaymentType extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdatePaymentTypeRuleset::class;
-    }
-
     public static function models(): array
     {
         return [PaymentType::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdatePaymentTypeRuleset::class;
     }
 
     public function performAction(): Model

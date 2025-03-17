@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class BundleListTest extends TestCase
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(BundleList::class)
             ->assertStatus(200);

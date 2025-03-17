@@ -13,6 +13,14 @@ class UpdateClientRuleset extends FluxRuleset
 {
     protected static ?string $model = Client::class;
 
+    public static function getRules(): array
+    {
+        return array_merge(
+            parent::getRules(),
+            resolve_static(BankConnectionRuleset::class, 'getRules')
+        );
+    }
+
     public function rules(): array
     {
         return [
@@ -51,13 +59,5 @@ class UpdateClientRuleset extends FluxRuleset
             'is_active' => 'boolean',
             'is_default' => 'boolean',
         ];
-    }
-
-    public static function getRules(): array
-    {
-        return array_merge(
-            parent::getRules(),
-            resolve_static(BankConnectionRuleset::class, 'getRules')
-        );
     }
 }

@@ -19,16 +19,14 @@ class SyncAllMailAccountsJob implements Repeatable, ShouldQueue
         //
     }
 
-    /**
-     * Execute the job.
-     */
-    public function handle(): void
+    public static function defaultCron(): ?CronExpression
     {
-        $mailAccounts = MailAccount::all();
+        return new CronExpression('*/15 * * * *');
+    }
 
-        foreach ($mailAccounts as $mailAccount) {
-            SyncMailAccountJob::dispatch($mailAccount);
-        }
+    public static function description(): ?string
+    {
+        return 'Import Mails from all Mail Accounts.';
     }
 
     public static function isRepeatable(): bool
@@ -41,18 +39,20 @@ class SyncAllMailAccountsJob implements Repeatable, ShouldQueue
         return class_basename(self::class);
     }
 
-    public static function description(): ?string
-    {
-        return 'Import Mails from all Mail Accounts.';
-    }
-
     public static function parameters(): array
     {
         return [];
     }
 
-    public static function defaultCron(): ?CronExpression
+    /**
+     * Execute the job.
+     */
+    public function handle(): void
     {
-        return new CronExpression('*/15 * * * *');
+        $mailAccounts = MailAccount::all();
+
+        foreach ($mailAccounts as $mailAccount) {
+            SyncMailAccountJob::dispatch($mailAccount);
+        }
     }
 }

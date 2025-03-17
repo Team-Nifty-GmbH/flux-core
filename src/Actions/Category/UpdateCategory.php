@@ -12,14 +12,14 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateCategory extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateCategoryRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Category::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateCategoryRuleset::class;
     }
 
     public function performAction(): Model

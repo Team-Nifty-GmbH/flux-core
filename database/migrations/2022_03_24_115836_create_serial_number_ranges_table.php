@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::create('serial_number_ranges', function (Blueprint $table) {
+        Schema::create('serial_number_ranges', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
             $table->unsignedBigInteger('product_id');

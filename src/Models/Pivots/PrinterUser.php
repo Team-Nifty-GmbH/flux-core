@@ -8,13 +8,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PrinterUser extends FluxPivot
 {
-    protected $table = 'printer_user';
+    public $incrementing = true;
 
     public $timestamps = false;
 
-    public $incrementing = true;
-
     protected $primaryKey = 'pivot_id';
+
+    protected $table = 'printer_user';
 
     public function printer(): BelongsTo
     {

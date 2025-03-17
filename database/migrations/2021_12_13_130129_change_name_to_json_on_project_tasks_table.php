@@ -9,7 +9,7 @@ class ChangeNameToJsonOnProjectTasksTable extends Migration
 {
     public function up(): void
     {
-        Schema::table('project_tasks', function (Blueprint $table) {
+        Schema::table('project_tasks', function (Blueprint $table): void {
             $table->json('name')->change();
         });
 
@@ -20,16 +20,16 @@ class ChangeNameToJsonOnProjectTasksTable extends Migration
     {
         $this->rollbackName();
 
-        Schema::table('project_tasks', function (Blueprint $table) {
+        Schema::table('project_tasks', function (Blueprint $table): void {
             $table->string('name')->change();
         });
     }
 
-    private function migrateName()
+    private function migrateName(): void
     {
         $tasks = DB::table('project_tasks')->get()->toArray();
 
-        array_walk($tasks, function (&$item) {
+        array_walk($tasks, function (&$item): void {
             $item->name = json_encode([config('app.locale') => $item->name]);
             $item = (array) $item;
         });
@@ -37,11 +37,11 @@ class ChangeNameToJsonOnProjectTasksTable extends Migration
         DB::table('project_tasks')->upsert($tasks, ['id']);
     }
 
-    private function rollbackName()
+    private function rollbackName(): void
     {
         $tasks = DB::table('project_tasks')->get()->toArray();
 
-        array_walk($tasks, function (&$item) {
+        array_walk($tasks, function (&$item): void {
             $item->name = substr(json_decode($item->name)->{config('app.locale')}, 0, 255);
             $item = (array) $item;
         });

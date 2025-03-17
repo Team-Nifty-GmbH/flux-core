@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::create('email_templates', function (Blueprint $table) {
+        Schema::create('email_templates', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
             $table->string('name');

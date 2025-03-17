@@ -8,14 +8,14 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('mail_folders', function (Blueprint $table) {
+        Schema::table('mail_folders', function (Blueprint $table): void {
             $table->boolean('is_active')->after('slug')->default(true);
         });
     }
 
     public function down(): void
     {
-        Schema::table('mail_folders', function (Blueprint $table) {
+        Schema::table('mail_folders', function (Blueprint $table): void {
             $table->dropColumn('is_active');
         });
     }

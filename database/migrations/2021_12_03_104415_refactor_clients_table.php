@@ -9,7 +9,7 @@ class RefactorClientsTable extends Migration
 {
     public function up(): void
     {
-        Schema::table('clients', function (Blueprint $table) {
+        Schema::table('clients', function (Blueprint $table): void {
             $table->string('ceo')->nullable()->change();
             $table->string('street')->nullable()->change();
             $table->string('city')->nullable()->change();
@@ -33,7 +33,7 @@ class RefactorClientsTable extends Migration
 
     public function down(): void
     {
-        Schema::table('clients', function (Blueprint $table) {
+        Schema::table('clients', function (Blueprint $table): void {
             $table->string('ceo')->nullable(false)->change();
             $table->string('street')->nullable(false)->change();
             $table->string('city')->nullable(false)->change();
@@ -55,7 +55,7 @@ class RefactorClientsTable extends Migration
         $this->moveCountryId('deleted_by');
     }
 
-    private function moveCountryId($after)
+    private function moveCountryId($after): void
     {
         DB::statement('ALTER TABLE clients MODIFY COLUMN country_id BIGINT UNSIGNED AFTER ' . $after);
     }

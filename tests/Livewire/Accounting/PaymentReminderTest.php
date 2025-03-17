@@ -20,13 +20,7 @@ use Livewire\Livewire;
 
 class PaymentReminderTest extends BaseSetup
 {
-    public function test_renders_successfully()
-    {
-        Livewire::test(PaymentReminder::class)
-            ->assertStatus(200);
-    }
-
-    public function test_mark_selected_as_paid()
+    public function test_mark_selected_as_paid(): void
     {
         $contact = Contact::factory()
             ->state(['client_id' => $this->dbClient->getKey()])
@@ -75,5 +69,11 @@ class PaymentReminderTest extends BaseSetup
 
         $this->assertDatabaseHas('orders', ['id' => $orders[0]->id, 'payment_state' => Paid::$name]);
         $this->assertDatabaseHas('orders', ['id' => $orders[1]->id, 'payment_state' => Paid::$name]);
+    }
+
+    public function test_renders_successfully(): void
+    {
+        Livewire::test(PaymentReminder::class)
+            ->assertStatus(200);
     }
 }

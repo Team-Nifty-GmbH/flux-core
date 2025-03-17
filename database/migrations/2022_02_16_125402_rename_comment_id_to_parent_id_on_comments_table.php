@@ -8,7 +8,7 @@ class RenameCommentIdToParentIdOnCommentsTable extends Migration
 {
     public function up(): void
     {
-        Schema::table('comments', function (Blueprint $table) {
+        Schema::table('comments', function (Blueprint $table): void {
             $table->dropForeign('comments_comment_id_foreign');
             $table->dropIndex('comments_comment_id_foreign');
 
@@ -20,7 +20,7 @@ class RenameCommentIdToParentIdOnCommentsTable extends Migration
 
     public function down(): void
     {
-        Schema::table('comments', function (Blueprint $table) {
+        Schema::table('comments', function (Blueprint $table): void {
             $table->dropForeign('comments_parent_id_foreign');
             $table->dropIndex('comments_parent_id_foreign');
 

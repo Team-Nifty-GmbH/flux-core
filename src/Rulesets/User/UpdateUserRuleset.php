@@ -15,6 +15,16 @@ class UpdateUserRuleset extends FluxRuleset
 {
     protected static ?string $model = User::class;
 
+    public static function getRules(): array
+    {
+        return array_merge(
+            parent::getRules(),
+            resolve_static(BankConnectionRuleset::class, 'getRules'),
+            resolve_static(MailAccountRuleset::class, 'getRules'),
+            resolve_static(PrinterRuleset::class, 'getRules')
+        );
+    }
+
     public function rules(): array
     {
         return [
@@ -61,15 +71,5 @@ class UpdateUserRuleset extends FluxRuleset
             ],
             'is_active' => 'sometimes|required|boolean',
         ];
-    }
-
-    public static function getRules(): array
-    {
-        return array_merge(
-            parent::getRules(),
-            resolve_static(BankConnectionRuleset::class, 'getRules'),
-            resolve_static(MailAccountRuleset::class, 'getRules'),
-            resolve_static(PrinterRuleset::class, 'getRules')
-        );
     }
 }

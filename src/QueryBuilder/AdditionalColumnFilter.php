@@ -8,7 +8,7 @@ use Spatie\QueryBuilder\Filters\Filter;
 
 class AdditionalColumnFilter implements Filter
 {
-    public function __invoke(Builder $query, $value, string $property)
+    public function __invoke(Builder $query, $value, string $property): void
     {
         $exploded = explode('.', $property);
 
@@ -32,7 +32,7 @@ class AdditionalColumnFilter implements Filter
             ->join('additional_columns AS ' . $acAlias, $mhvAlias . '.additional_column_id', '=', $acAlias . '.id')
             ->where($acAlias . '.model_type', $className)
             ->where($acAlias . '.name', $exploded[1])
-            ->when($exact, function ($query) use ($value, $mhvAlias) {
+            ->when($exact, function ($query) use ($value, $mhvAlias): void {
                 $query->where(function ($query) use ($value, $mhvAlias) {
                     $query->where($mhvAlias . '.value', array_shift($value));
 
@@ -43,7 +43,7 @@ class AdditionalColumnFilter implements Filter
                     return $query;
                 });
             })
-            ->when(! $exact, function ($query) use ($value, $mhvAlias) {
+            ->when(! $exact, function ($query) use ($value, $mhvAlias): void {
                 $query->where(function ($query) use ($value, $mhvAlias) {
                     $query->where($mhvAlias . '.value', 'LIKE', '%' . array_shift($value) . '%');
 

@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class MailFolderListTest extends TestCase
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(MailFolderList::class)
             ->assertStatus(200);

@@ -12,14 +12,14 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateUser extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateUserRuleset::class;
-    }
-
     public static function models(): array
     {
         return [User::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateUserRuleset::class;
     }
 
     public function performAction(): Model

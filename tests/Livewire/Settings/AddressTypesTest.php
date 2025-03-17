@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class AddressTypesTest extends TestCase
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(AddressTypes::class)
             ->assertStatus(200);

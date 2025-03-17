@@ -27,16 +27,16 @@ class DiscountController extends BaseController
         );
     }
 
-    public function update(Request $request, DiscountService $discountService): JsonResponse
+    public function delete(string $id, DiscountService $discountService): JsonResponse
     {
-        $response = $discountService->update($request->all());
+        $response = $discountService->delete($id);
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
-    public function delete(string $id, DiscountService $discountService): JsonResponse
+    public function update(Request $request, DiscountService $discountService): JsonResponse
     {
-        $response = $discountService->delete($id);
+        $response = $discountService->update($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }

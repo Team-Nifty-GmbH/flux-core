@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class TranslationEditTest extends TestCase
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(TranslationEdit::class)
             ->assertStatus(200);

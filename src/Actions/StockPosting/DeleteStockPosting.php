@@ -8,14 +8,14 @@ use FluxErp\Rulesets\StockPosting\DeleteStockPostingRuleset;
 
 class DeleteStockPosting extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeleteStockPostingRuleset::class;
-    }
-
     public static function models(): array
     {
         return [StockPosting::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeleteStockPostingRuleset::class;
     }
 
     public function performAction(): ?bool

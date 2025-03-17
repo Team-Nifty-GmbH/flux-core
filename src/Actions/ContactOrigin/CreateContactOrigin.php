@@ -8,14 +8,14 @@ use FluxErp\Rulesets\ContactOrigin\CreateContactOriginRuleset;
 
 class CreateContactOrigin extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateContactOriginRuleset::class;
-    }
-
     public static function models(): array
     {
         return [ContactOrigin::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateContactOriginRuleset::class;
     }
 
     public function performAction(): ContactOrigin

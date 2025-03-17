@@ -18,13 +18,13 @@ class SerialNumber extends Component
 {
     use Actions, WithTabs;
 
-    public SerialNumberForm $serialNumber;
+    public bool $edit = false;
 
     public ?string $productImage = '';
 
-    public string $tab = 'product.serial-number.general';
+    public SerialNumberForm $serialNumber;
 
-    public bool $edit = false;
+    public string $tab = 'product.serial-number.general';
 
     protected array $queryString = [
         'tab' => ['except' => 'general'],
@@ -49,11 +49,21 @@ class SerialNumber extends Component
         return view('flux::livewire.product.serial-number.serial-number');
     }
 
+    #[Renderless]
+    public function cancel(): void
+    {
+        $this->skipRender();
+        $this->serialNumber->reset();
+        $this->mount($this->serialNumber->id);
+
+        $this->edit = false;
+    }
+
     public function getTabs(): array
     {
         return [
-            TabButton::make('product.serial-number.general')->label(__('General')),
-            TabButton::make('product.serial-number.comments')->label(__('Comments')),
+            TabButton::make('product.serial-number.general')->text(__('General')),
+            TabButton::make('product.serial-number.comments')->text(__('Comments')),
         ];
     }
 
@@ -73,7 +83,7 @@ class SerialNumber extends Component
         $response->load('product');
         $this->serialNumber = $response->toArray();
 
-        $this->notification()->success(__(':model saved', ['model' => __('Serial Number')]));
+        $this->notification()->success(__(':model saved', ['model' => __('Serial Number')]))->send();
         $this->edit = false;
     }
 
@@ -81,15 +91,5 @@ class SerialNumber extends Component
     public function startEdit(): void
     {
         $this->edit = true;
-    }
-
-    #[Renderless]
-    public function cancel(): void
-    {
-        $this->skipRender();
-        $this->serialNumber->reset();
-        $this->mount($this->serialNumber->id);
-
-        $this->edit = false;
     }
 }

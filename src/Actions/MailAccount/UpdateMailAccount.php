@@ -9,14 +9,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class UpdateMailAccount extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateMailAccountRuleset::class;
-    }
-
     public static function models(): array
     {
         return [MailAccount::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateMailAccountRuleset::class;
     }
 
     public function performAction(): Model

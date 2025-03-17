@@ -43,42 +43,7 @@ class CreateMailMessageTest extends TestCase
             ->create();
     }
 
-    public function test_create_ticket_from_mail_message()
-    {
-        $dispatcher = Event::fake('action.executed: ' . CreateMailMessage::class);
-        FluxAction::setEventDispatcher($dispatcher);
-
-        $action = CreateMailMessage::make([
-            'mail_account_id' => $this->mailAccount->id,
-            'mail_folder_id' => $this->mailAccount->mailFolders->first()->id,
-            'from' => 'Tester McTestFace <' . $this->address->email . '>',
-            'to' => [$this->mailAccount->email],
-            'subject' => $subject = Str::uuid()->toString(),
-            'text_body' => faker()->text(),
-            'html_body' => '<p>' . faker()->text() . '</p>',
-            'communication_type_enum' => 'mail',
-            'date' => now()->format('Y-m-d H:i:s'),
-            'tags' => [],
-        ]);
-        $result = $action->validate()->execute();
-
-        $this->assertNotNull($result);
-        $this->assertNotNull($result->id);
-        Event::assertDispatched('action.executed: ' . CreateMailMessage::class);
-
-        $listener = new CreateMailExecutedSubscriber();
-        $listener->handle($action);
-
-        $this->assertDatabaseHas('tickets', [
-            'title' => $subject,
-            'description' => $action->getData('text_body'),
-            'created_by' => $this->address->getMorphClass() . ':' . $this->address->getKey(),
-        ]);
-
-        $this->assertTrue($result->communications()->where('communications.id', $result->id)->exists());
-    }
-
-    public function test_add_comment_to_ticket_from_mail_message()
+    public function test_add_comment_to_ticket_from_mail_message(): void
     {
         $dispatcher = Event::fake('action.executed: ' . CreateMailMessage::class);
         FluxAction::setEventDispatcher($dispatcher);
@@ -117,5 +82,40 @@ class CreateMailMessageTest extends TestCase
         ]);
 
         $this->assertTrue($ticket->communications()->where('communications.id', $result->id)->exists());
+    }
+
+    public function test_create_ticket_from_mail_message(): void
+    {
+        $dispatcher = Event::fake('action.executed: ' . CreateMailMessage::class);
+        FluxAction::setEventDispatcher($dispatcher);
+
+        $action = CreateMailMessage::make([
+            'mail_account_id' => $this->mailAccount->id,
+            'mail_folder_id' => $this->mailAccount->mailFolders->first()->id,
+            'from' => 'Tester McTestFace <' . $this->address->email . '>',
+            'to' => [$this->mailAccount->email],
+            'subject' => $subject = Str::uuid()->toString(),
+            'text_body' => faker()->text(),
+            'html_body' => '<p>' . faker()->text() . '</p>',
+            'communication_type_enum' => 'mail',
+            'date' => now()->format('Y-m-d H:i:s'),
+            'tags' => [],
+        ]);
+        $result = $action->validate()->execute();
+
+        $this->assertNotNull($result);
+        $this->assertNotNull($result->id);
+        Event::assertDispatched('action.executed: ' . CreateMailMessage::class);
+
+        $listener = new CreateMailExecutedSubscriber();
+        $listener->handle($action);
+
+        $this->assertDatabaseHas('tickets', [
+            'title' => $subject,
+            'description' => $action->getData('text_body'),
+            'created_by' => $this->address->getMorphClass() . ':' . $this->address->getKey(),
+        ]);
+
+        $this->assertTrue($result->communications()->where('communications.id', $result->id)->exists());
     }
 }

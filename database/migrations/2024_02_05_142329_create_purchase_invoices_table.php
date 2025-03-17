@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::create('purchase_invoices', function (Blueprint $table) {
+        Schema::create('purchase_invoices', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
             $table->foreignId('client_id')->nullable()->constrained()->nullOnDelete();

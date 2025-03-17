@@ -14,6 +14,14 @@ class CreateBankConnectionRuleset extends FluxRuleset
 {
     protected static ?string $model = BankConnection::class;
 
+    public static function getRules(): array
+    {
+        return array_merge(
+            resolve_static(BankConnectionRuleset::class, 'getRules'),
+            parent::getRules()
+        );
+    }
+
     public function rules(): array
     {
         return [
@@ -33,13 +41,5 @@ class CreateBankConnectionRuleset extends FluxRuleset
             'credit_limit' => 'nullable|numeric|min:0',
             'is_active' => 'boolean',
         ];
-    }
-
-    public static function getRules(): array
-    {
-        return array_merge(
-            resolve_static(BankConnectionRuleset::class, 'getRules'),
-            parent::getRules()
-        );
     }
 }

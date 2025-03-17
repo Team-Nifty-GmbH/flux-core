@@ -8,14 +8,14 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('interface_users', function (Blueprint $table) {
+        Schema::table('interface_users', function (Blueprint $table): void {
             $table->string('name')->unique()->change();
         });
     }
 
     public function down(): void
     {
-        Schema::table('interface_users', function (Blueprint $table) {
+        Schema::table('interface_users', function (Blueprint $table): void {
             $table->dropUnique('interface_users_name_unique');
         });
     }

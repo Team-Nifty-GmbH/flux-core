@@ -8,9 +8,9 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class DeleteTranslationRuleset extends FluxRuleset
 {
-    protected static ?string $model = LanguageLine::class;
-
     protected static bool $addAdditionalColumnRules = false;
+
+    protected static ?string $model = LanguageLine::class;
 
     public function rules(): array
     {

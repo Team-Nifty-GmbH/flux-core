@@ -27,16 +27,16 @@ class DiscountGroupController extends BaseController
         );
     }
 
-    public function update(Request $request, DiscountGroupService $discountGroupService): JsonResponse
+    public function delete(string $id, DiscountGroupService $discountGroupService): JsonResponse
     {
-        $response = $discountGroupService->update($request->all());
+        $response = $discountGroupService->delete($id);
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
-    public function delete(string $id, DiscountGroupService $discountGroupService): JsonResponse
+    public function update(Request $request, DiscountGroupService $discountGroupService): JsonResponse
     {
-        $response = $discountGroupService->delete($id);
+        $response = $discountGroupService->update($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }

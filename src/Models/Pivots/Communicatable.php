@@ -12,21 +12,21 @@ class Communicatable extends MorphPivot
 {
     use ResolvesRelationsThroughContainer;
 
-    protected $table = 'communicatable';
+    public $timestamps = false;
 
     protected $guarded = [
         'id',
     ];
 
-    public $timestamps = false;
-
-    public function communication(): BelongsTo
-    {
-        return $this->belongsTo(Communication::class);
-    }
+    protected $table = 'communicatable';
 
     public function communicatable(): MorphTo
     {
         return $this->morphTo('communicatable');
+    }
+
+    public function communication(): BelongsTo
+    {
+        return $this->belongsTo(Communication::class);
     }
 }

@@ -12,22 +12,19 @@ use FluxErp\Models\Language;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
 use FluxErp\Tests\Feature\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
 class AddressTest extends BaseSetup
 {
-    use DatabaseTransactions;
+    private Collection $addresses;
 
     private Collection $contacts;
 
     private Collection $countries;
 
     private Collection $languages;
-
-    private Collection $addresses;
 
     private array $permissions;
 
@@ -90,103 +87,7 @@ class AddressTest extends BaseSetup
         ];
     }
 
-    public function test_get_address()
-    {
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/addresses/' . $this->addresses[0]->id);
-        $response->assertStatus(200);
-
-        $json = json_decode($response->getContent());
-        $jsonAddress = $json->data;
-
-        // Check if controller returns the test address.
-        $this->assertNotEmpty($jsonAddress);
-        $this->assertEquals($this->addresses[0]->id, $jsonAddress->id);
-        $this->assertEquals($this->addresses[0]->language_id, $jsonAddress->language_id);
-        $this->assertEquals($this->addresses[0]->country_id, $jsonAddress->country_id);
-        $this->assertEquals($this->addresses[0]->contact_id, $jsonAddress->contact_id);
-        $this->assertEquals($this->addresses[0]->company, $jsonAddress->company);
-        $this->assertEquals($this->addresses[0]->title, $jsonAddress->title);
-        $this->assertEquals($this->addresses[0]->salutation, $jsonAddress->salutation);
-        $this->assertEquals($this->addresses[0]->firstname, $jsonAddress->firstname);
-        $this->assertEquals($this->addresses[0]->lastname, $jsonAddress->lastname);
-        $this->assertEquals($this->addresses[0]->addition, $jsonAddress->addition);
-        $this->assertEquals($this->addresses[0]->mailbox, $jsonAddress->mailbox);
-        $this->assertEquals($this->addresses[0]->latitude, $jsonAddress->latitude);
-        $this->assertEquals($this->addresses[0]->longitude, $jsonAddress->longitude);
-        $this->assertEquals($this->addresses[0]->zip, $jsonAddress->zip);
-        $this->assertEquals($this->addresses[0]->city, $jsonAddress->city);
-        $this->assertEquals($this->addresses[0]->street, $jsonAddress->street);
-        $this->assertEquals($this->addresses[0]->url, $jsonAddress->url);
-        $this->assertEquals(
-            $this->addresses[0]->date_of_birth?->toDateString(),
-            $jsonAddress->date_of_birth ? Carbon::parse($jsonAddress->date_of_birth)->toDateString() : null
-        );
-        $this->assertEquals($this->addresses[0]->department, $jsonAddress->department);
-        $this->assertEquals($this->addresses[0]->is_main_address, $jsonAddress->is_main_address);
-        $this->assertEquals($this->addresses[0]->is_active, $jsonAddress->is_active);
-        $this->assertEquals(Carbon::parse($this->addresses[0]->created_at),
-            Carbon::parse($jsonAddress->created_at));
-        $this->assertEquals(Carbon::parse($this->addresses[0]->updated_at),
-            Carbon::parse($jsonAddress->updated_at));
-    }
-
-    public function test_get_address_address_not_found()
-    {
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/addresses/' . ++$this->addresses[3]->id);
-        $response->assertStatus(404);
-    }
-
-    public function test_get_addresses()
-    {
-        $this->user->givePermissionTo($this->permissions['index']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/addresses');
-        $response->assertStatus(200);
-
-        $json = json_decode($response->getContent());
-        $jsonAddresses = collect($json->data->data);
-
-        // Check the amount of test addresses.
-        $this->assertGreaterThanOrEqual(2, count($jsonAddresses));
-
-        // Check if controller returns the test addresses.
-        foreach ($this->addresses as $address) {
-            $jsonAddresses->contains(function ($jsonAddress) use ($address) {
-                return $jsonAddress->id === $address->id &&
-                    $jsonAddress->language_id === $address->language_id &&
-                    $jsonAddress->country_id === $address->country_id &&
-                    $jsonAddress->contact_id === $address->contact_id &&
-                    $jsonAddress->company === $address->company &&
-                    $jsonAddress->title === $address->title &&
-                    $jsonAddress->salutation === $address->salutation &&
-                    $jsonAddress->firstname === $address->firstname &&
-                    $jsonAddress->lastname === $address->lastname &&
-                    $jsonAddress->addition === $address->addition &&
-                    $jsonAddress->mailbox === $address->mailbox &&
-                    $jsonAddress->latitude === $address->latitude &&
-                    $jsonAddress->longitude === $address->longitude &&
-                    $jsonAddress->zip === $address->zip &&
-                    $jsonAddress->city === $address->city &&
-                    $jsonAddress->street === $address->street &&
-                    $jsonAddress->url === $address->url &&
-                    $jsonAddress->date_of_birth === $address->date_of_birth &&
-                    $jsonAddress->department === $address->department &&
-                    $jsonAddress->is_main_address === $address->is_main_address &&
-                    $jsonAddress->is_active === $address->is_active &&
-                    Carbon::parse($jsonAddress->created_at) === Carbon::parse($address->created_at) &&
-                    Carbon::parse($jsonAddress->updated_at) === Carbon::parse($address->updated_at);
-            });
-        }
-    }
-
-    public function test_create_address()
+    public function test_create_address(): void
     {
         $address = [
             'client_id' => $this->contacts[2]->client_id,
@@ -230,7 +131,7 @@ class AddressTest extends BaseSetup
         $this->assertTrue($this->user->is($dbAddress->getUpdatedBy()));
     }
 
-    public function test_create_address_maximum()
+    public function test_create_address_maximum(): void
     {
         $address = [
             'client_id' => $this->contacts[1]->client_id,
@@ -293,7 +194,7 @@ class AddressTest extends BaseSetup
         $this->assertTrue($this->user->is($dbAddress->getUpdatedBy()));
     }
 
-    public function test_create_address_validation_fails()
+    public function test_create_address_validation_fails(): void
     {
         $address = [
             'client_id' => $this->addresses[2]->client_id,
@@ -313,7 +214,125 @@ class AddressTest extends BaseSetup
         ]);
     }
 
-    public function test_update_address()
+    public function test_delete_address(): void
+    {
+        $this->user->givePermissionTo($this->permissions['delete']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->delete('/api/addresses/' . $this->addresses[2]->id);
+        $response->assertStatus(204);
+
+        $address = $this->addresses[2]->fresh();
+        $this->assertNotNull($address->deleted_at);
+        $this->assertTrue($this->user->is($address->getDeletedBy()));
+    }
+
+    public function test_delete_address_address_not_found(): void
+    {
+        $this->user->givePermissionTo($this->permissions['delete']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->delete('/api/addresses/' . ++$this->addresses[3]->id);
+        $response->assertStatus(404);
+    }
+
+    public function test_get_address(): void
+    {
+        $this->user->givePermissionTo($this->permissions['show']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->get('/api/addresses/' . $this->addresses[0]->id);
+        $response->assertStatus(200);
+
+        $json = json_decode($response->getContent());
+        $jsonAddress = $json->data;
+
+        // Check if controller returns the test address.
+        $this->assertNotEmpty($jsonAddress);
+        $this->assertEquals($this->addresses[0]->id, $jsonAddress->id);
+        $this->assertEquals($this->addresses[0]->language_id, $jsonAddress->language_id);
+        $this->assertEquals($this->addresses[0]->country_id, $jsonAddress->country_id);
+        $this->assertEquals($this->addresses[0]->contact_id, $jsonAddress->contact_id);
+        $this->assertEquals($this->addresses[0]->company, $jsonAddress->company);
+        $this->assertEquals($this->addresses[0]->title, $jsonAddress->title);
+        $this->assertEquals($this->addresses[0]->salutation, $jsonAddress->salutation);
+        $this->assertEquals($this->addresses[0]->firstname, $jsonAddress->firstname);
+        $this->assertEquals($this->addresses[0]->lastname, $jsonAddress->lastname);
+        $this->assertEquals($this->addresses[0]->addition, $jsonAddress->addition);
+        $this->assertEquals($this->addresses[0]->mailbox, $jsonAddress->mailbox);
+        $this->assertEquals($this->addresses[0]->latitude, $jsonAddress->latitude);
+        $this->assertEquals($this->addresses[0]->longitude, $jsonAddress->longitude);
+        $this->assertEquals($this->addresses[0]->zip, $jsonAddress->zip);
+        $this->assertEquals($this->addresses[0]->city, $jsonAddress->city);
+        $this->assertEquals($this->addresses[0]->street, $jsonAddress->street);
+        $this->assertEquals($this->addresses[0]->url, $jsonAddress->url);
+        $this->assertEquals(
+            $this->addresses[0]->date_of_birth?->toDateString(),
+            $jsonAddress->date_of_birth ? Carbon::parse($jsonAddress->date_of_birth)->toDateString() : null
+        );
+        $this->assertEquals($this->addresses[0]->department, $jsonAddress->department);
+        $this->assertEquals($this->addresses[0]->is_main_address, $jsonAddress->is_main_address);
+        $this->assertEquals($this->addresses[0]->is_active, $jsonAddress->is_active);
+        $this->assertEquals(Carbon::parse($this->addresses[0]->created_at),
+            Carbon::parse($jsonAddress->created_at));
+        $this->assertEquals(Carbon::parse($this->addresses[0]->updated_at),
+            Carbon::parse($jsonAddress->updated_at));
+    }
+
+    public function test_get_address_address_not_found(): void
+    {
+        $this->user->givePermissionTo($this->permissions['show']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->get('/api/addresses/' . ++$this->addresses[3]->id);
+        $response->assertStatus(404);
+    }
+
+    public function test_get_addresses(): void
+    {
+        $this->user->givePermissionTo($this->permissions['index']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->get('/api/addresses');
+        $response->assertStatus(200);
+
+        $json = json_decode($response->getContent());
+        $jsonAddresses = collect($json->data->data);
+
+        // Check the amount of test addresses.
+        $this->assertGreaterThanOrEqual(2, count($jsonAddresses));
+
+        // Check if controller returns the test addresses.
+        foreach ($this->addresses as $address) {
+            $jsonAddresses->contains(function ($jsonAddress) use ($address) {
+                return $jsonAddress->id === $address->id &&
+                    $jsonAddress->language_id === $address->language_id &&
+                    $jsonAddress->country_id === $address->country_id &&
+                    $jsonAddress->contact_id === $address->contact_id &&
+                    $jsonAddress->company === $address->company &&
+                    $jsonAddress->title === $address->title &&
+                    $jsonAddress->salutation === $address->salutation &&
+                    $jsonAddress->firstname === $address->firstname &&
+                    $jsonAddress->lastname === $address->lastname &&
+                    $jsonAddress->addition === $address->addition &&
+                    $jsonAddress->mailbox === $address->mailbox &&
+                    $jsonAddress->latitude === $address->latitude &&
+                    $jsonAddress->longitude === $address->longitude &&
+                    $jsonAddress->zip === $address->zip &&
+                    $jsonAddress->city === $address->city &&
+                    $jsonAddress->street === $address->street &&
+                    $jsonAddress->url === $address->url &&
+                    $jsonAddress->date_of_birth === $address->date_of_birth &&
+                    $jsonAddress->department === $address->department &&
+                    $jsonAddress->is_main_address === $address->is_main_address &&
+                    $jsonAddress->is_active === $address->is_active &&
+                    Carbon::parse($jsonAddress->created_at) === Carbon::parse($address->created_at) &&
+                    Carbon::parse($jsonAddress->updated_at) === Carbon::parse($address->updated_at);
+            });
+        }
+    }
+
+    public function test_update_address(): void
     {
         $address = [
             'id' => $this->addresses[0]->id,
@@ -338,7 +357,35 @@ class AddressTest extends BaseSetup
         $this->assertTrue($this->user->is($dbAddress->getUpdatedBy()));
     }
 
-    public function test_update_address_maximum()
+    public function test_update_address_delete_tokens(): void
+    {
+        $this->addresses[3]->can_login = true;
+        $this->addresses[3]->save();
+
+        $address = [
+            'id' => $this->addresses[3]->id,
+            'can_login' => false,
+        ];
+
+        $this->user->givePermissionTo($this->permissions['update']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->put('/api/addresses', $address);
+        $response->assertStatus(200);
+
+        $responseAddress = json_decode($response->getContent())->data;
+
+        $dbAddress = Address::query()
+            ->whereKey($responseAddress->id)
+            ->first();
+
+        $this->assertNotEmpty($dbAddress);
+        $this->assertEquals($address['id'], $dbAddress->id);
+        $this->assertFalse($dbAddress->can_login);
+        $this->assertFalse($dbAddress->tokens()->exists());
+    }
+
+    public function test_update_address_maximum(): void
     {
         $address = [
             'id' => $this->addresses[0]->id,
@@ -400,7 +447,7 @@ class AddressTest extends BaseSetup
         $this->assertTrue($this->user->is($dbAddress->getUpdatedBy()));
     }
 
-    public function test_update_address_multi_status_validation_fails()
+    public function test_update_address_multi_status_validation_fails(): void
     {
         $address = [
             [
@@ -436,55 +483,5 @@ class AddressTest extends BaseSetup
         $this->assertEquals(422, $responses[2]->status);
         $this->assertEquals($address[3]['id'], $responses[3]->id);
         $this->assertEquals(422, $responses[3]->status);
-    }
-
-    public function test_update_address_delete_tokens()
-    {
-        $this->addresses[3]->can_login = true;
-        $this->addresses[3]->save();
-
-        $address = [
-            'id' => $this->addresses[3]->id,
-            'can_login' => false,
-        ];
-
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->put('/api/addresses', $address);
-        $response->assertStatus(200);
-
-        $responseAddress = json_decode($response->getContent())->data;
-
-        $dbAddress = Address::query()
-            ->whereKey($responseAddress->id)
-            ->first();
-
-        $this->assertNotEmpty($dbAddress);
-        $this->assertEquals($address['id'], $dbAddress->id);
-        $this->assertFalse($dbAddress->can_login);
-        $this->assertFalse($dbAddress->tokens()->exists());
-    }
-
-    public function test_delete_address()
-    {
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->delete('/api/addresses/' . $this->addresses[2]->id);
-        $response->assertStatus(204);
-
-        $address = $this->addresses[2]->fresh();
-        $this->assertNotNull($address->deleted_at);
-        $this->assertTrue($this->user->is($address->getDeletedBy()));
-    }
-
-    public function test_delete_address_address_not_found()
-    {
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->delete('/api/addresses/' . ++$this->addresses[3]->id);
-        $response->assertStatus(404);
     }
 }

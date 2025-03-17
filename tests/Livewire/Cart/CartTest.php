@@ -32,13 +32,7 @@ class CartTest extends BaseSetup
         $this->vatRate = VatRate::factory()->create();
     }
 
-    public function test_renders_successfully()
-    {
-        Livewire::test(Cart::class)
-            ->assertStatus(200);
-    }
-
-    public function test_can_load_watchlist()
+    public function test_can_load_watchlist(): void
     {
         $watchList = $this->createFilledCartFactory()
             ->create([
@@ -54,10 +48,10 @@ class CartTest extends BaseSetup
             ->assertSet('loadWatchlist', null)
             ->assertStatus(200)
             ->assertCount('cart.cartItems', 3)
-            ->assertWireuiNotification(icon: 'success');
+            ->assertToastNotification(type: 'success');
     }
 
-    public function test_can_save_cart_to_watchlist()
+    public function test_can_save_cart_to_watchlist(): void
     {
         $this->createFilledCartFactory()
             ->create([
@@ -74,7 +68,7 @@ class CartTest extends BaseSetup
             ->call('saveToWatchlist')
             ->assertHasNoErrors()
             ->assertReturned(true)
-            ->assertWireuiNotification(icon: 'success');
+            ->assertToastNotification(type: 'success');
 
         $this->assertDatabaseHas('carts', [
             'authenticatable_type' => $this->user->getMorphClass(),
@@ -85,6 +79,12 @@ class CartTest extends BaseSetup
         ]);
     }
 
+    public function test_renders_successfully(): void
+    {
+        Livewire::test(Cart::class)
+            ->assertStatus(200);
+    }
+
     private function createFilledCartFactory(): CartFactory
     {
         return CartModel::factory()
@@ -92,7 +92,7 @@ class CartTest extends BaseSetup
                 CartItem::factory()
                     ->count(3)
                     ->set('vat_rate_id', $this->vatRate->id)
-                    ->afterCreating(function (CartItem $cartItem) {
+                    ->afterCreating(function (CartItem $cartItem): void {
                         $cartItem->product_id = Product::factory(['vat_rate_id' => $this->vatRate->id])
                             ->has(Price::factory()->set('price_list_id', PriceList::default()->id))
                             ->create()

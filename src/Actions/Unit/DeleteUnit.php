@@ -8,14 +8,14 @@ use FluxErp\Rulesets\Unit\DeleteUnitRuleset;
 
 class DeleteUnit extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeleteUnitRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Unit::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeleteUnitRuleset::class;
     }
 
     public function performAction(): ?bool

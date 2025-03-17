@@ -9,11 +9,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ProductProductOption extends FluxPivot
 {
-    protected $table = 'product_product_option';
+    public $incrementing = true;
 
     public $timestamps = false;
 
-    public $incrementing = true;
+    protected $table = 'product_product_option';
 
     public function product(): BelongsTo
     {

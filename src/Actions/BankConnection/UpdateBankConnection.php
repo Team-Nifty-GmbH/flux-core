@@ -9,14 +9,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class UpdateBankConnection extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateBankConnectionRuleset::class;
-    }
-
     public static function models(): array
     {
         return [BankConnection::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateBankConnectionRuleset::class;
     }
 
     public function performAction(): Model

@@ -18,7 +18,7 @@ class ProjectsTest extends BaseSetup
         ]);
     }
 
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(Projects::class, ['contactId' => $this->contact->id])
             ->assertStatus(200);

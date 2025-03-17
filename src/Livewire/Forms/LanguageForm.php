@@ -12,13 +12,13 @@ class LanguageForm extends FluxForm
     #[Locked]
     public ?int $id = null;
 
-    public ?string $name = null;
+    public ?bool $is_default = false;
 
     public ?string $iso_name = null;
 
     public ?string $language_code = null;
 
-    public ?bool $is_default = false;
+    public ?string $name = null;
 
     protected function getActions(): array
     {

@@ -7,7 +7,7 @@ use Illuminate\Auth\RequestGuard;
 
 class SanctumServiceProvider extends \Laravel\Sanctum\SanctumServiceProvider
 {
-    public function register()
+    public function register(): void
     {
         parent::register();
 

@@ -66,17 +66,27 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
             HasSerialNumberRange::getSerialNumber as protected hasSerialNumberRangeGetSerialNumber;
         }
 
+    public static string $iconName = 'shopping-bag';
+
+    protected ?string $detailRouteName = 'orders.id';
+
     protected $with = [
         'currency',
     ];
 
-    protected ?string $detailRouteName = 'orders.id';
-
-    public static string $iconName = 'shopping-bag';
+    public static function getGenericChannelEvents(): array
+    {
+        return array_merge(
+            parent::getGenericChannelEvents(),
+            [
+                'locked',
+            ]
+        );
+    }
 
     protected static function booted(): void
     {
-        static::saving(function (Order $order) {
+        static::saving(function (Order $order): void {
             if ($order->isDirty('address_invoice_id')) {
                 $addressInvoice = $order->addressInvoice()->first();
                 $order->address_invoice = $addressInvoice;
@@ -151,29 +161,19 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
             }
         });
 
-        static::saved(function (Order $order) {
+        static::saved(function (Order $order): void {
             if ($order->wasChanged('is_locked')) {
                 $order->broadcastEvent('locked');
             }
         });
 
-        static::deleted(function (Order $order) {
+        static::deleted(function (Order $order): void {
             foreach ($order->orderPositions()->get('id') as $orderPosition) {
                 $orderPosition->delete();
             }
 
             $order->purchaseInvoice()->update(['order_id' => null]);
         });
-    }
-
-    public static function getGenericChannelEvents(): array
-    {
-        return array_merge(
-            parent::getGenericChannelEvents(),
-            [
-                'locked',
-            ]
-        );
     }
 
     protected function casts(): array
@@ -224,29 +224,9 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
         ];
     }
 
-    public function getSerialNumber(string|array $types, ?int $clientId = null): static
+    public function addressDelivery(): BelongsTo
     {
-        if (in_array('invoice_number', Arr::wrap($types))) {
-            $rules = [
-                'has_contact_delivery_lock' => 'declined',
-            ];
-            $data = [
-                'has_contact_delivery_lock' => $this->contact->has_delivery_lock,
-            ];
-            $messages = [
-                'has_contact_delivery_lock.declined' => __('The contact has a delivery lock'),
-            ];
-
-            if (! is_null($creditLine = $this->contact->credit_line)) {
-                $rules['balance'] = app(Numeric::class, ['max' => $creditLine]);
-                $data['balance'] = bcadd($this->contact->orders()->unpaid()->sum('balance'), $this->total_gross_price);
-                $messages['balance'][get_class($rules['balance'])] = __('The credit line of the contact is exceeded');
-            }
-
-            Validator::make($data, $rules, $messages)->validate();
-        }
-
-        return $this->hasSerialNumberRangeGetSerialNumber($types, $clientId);
+        return $this->belongsTo(Address::class, 'address_delivery_id');
     }
 
     public function addresses(): BelongsToMany
@@ -254,11 +234,6 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
         return $this->belongsToMany(Address::class, 'address_address_type_order')
             ->using(AddressAddressTypeOrder::class)
             ->withPivot(['address_type_id', 'address']);
-    }
-
-    public function addressDelivery(): BelongsTo
-    {
-        return $this->belongsTo(Address::class, 'address_delivery_id');
     }
 
     public function addressInvoice(): BelongsTo
@@ -277,173 +252,66 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
         return $this->belongsTo(User::class, 'agent_id');
     }
 
-    public function client(): BelongsTo
+    public function calculateBalance(): static
     {
-        return $this->belongsTo(Client::class);
-    }
-
-    public function commissions(): HasMany
-    {
-        return $this->hasMany(Commission::class);
-    }
-
-    public function contact(): BelongsTo
-    {
-        return $this->belongsTo(Contact::class);
-    }
-
-    public function contactBankConnection(): BelongsTo
-    {
-        return $this->belongsTo(ContactBankConnection::class);
-    }
-
-    public function createdFrom(): BelongsTo
-    {
-        return $this->belongsTo(Order::class, 'created_from_id');
-    }
-
-    public function createdOrders(): HasMany
-    {
-        return $this->hasMany(Order::class, 'created_from_id');
-    }
-
-    public function currency(): BelongsTo
-    {
-        return $this->belongsTo(Currency::class);
-    }
-
-    public function discounts(): MorphMany
-    {
-        return $this->morphMany(Discount::class, 'model');
-    }
-
-    public function language(): BelongsTo
-    {
-        return $this->belongsTo(Language::class);
-    }
-
-    public function orderPositions(): HasMany
-    {
-        return $this->hasMany(OrderPosition::class);
-    }
-
-    public function orderType(): BelongsTo
-    {
-        return $this->belongsTo(OrderType::class);
-    }
-
-    public function paymentReminders(): HasMany
-    {
-        return $this->hasMany(PaymentReminder::class);
-    }
-
-    public function paymentRuns(): BelongsToMany
-    {
-        return $this->belongsToMany(PaymentRun::class, 'order_payment_run');
-    }
-
-    public function paymentType(): BelongsTo
-    {
-        return $this->belongsTo(PaymentType::class);
-    }
-
-    public function priceList(): BelongsTo
-    {
-        return $this->belongsTo(PriceList::class);
-    }
-
-    public function projects(): HasMany
-    {
-        return $this->hasMany(Project::class);
-    }
-
-    public function purchaseInvoice(): HasOne
-    {
-        return $this->hasOne(PurchaseInvoice::class);
-    }
-
-    public function responsibleUser(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'responsible_user_id');
-    }
-
-    public function schedules(): BelongsToMany
-    {
-        return $this->belongsToMany(Schedule::class)->using(OrderSchedule::class);
-    }
-
-    public function tasks(): HasManyThrough
-    {
-        return $this->hasManyThrough(Task::class, Project::class);
-    }
-
-    public function transactions(): HasMany
-    {
-        return $this->hasMany(Transaction::class);
-    }
-
-    public function users(): BelongsToMany
-    {
-        return $this->belongsToMany(User::class, 'order_user');
-    }
-
-    public function vatRate(): BelongsTo
-    {
-        return $this->belongsTo(VatRate::class);
-    }
-
-    public function vatRates(): HasManyThrough
-    {
-        return $this->hasManyThrough(
-            VatRate::class,
-            OrderPosition::class,
-            'order_id',
-            'id',
-            'id',
-            'vat_rate_id'
+        $this->balance = bcround(
+            bcsub($this->total_gross_price, $this->transactions()->sum('amount'), 9),
+            2
         );
+
+        return $this;
     }
 
-    public function scopeRevenue(Builder $query): Builder
+    public function calculateDiscounts(): static
     {
-        return $query->whereHas(
-            'orderType',
-            fn (Builder $query) => $query->whereIn(
-                'order_type_enum',
-                array_filter(OrderTypeEnum::cases(), fn (OrderTypeEnum $enum) => ! $enum->isPurchase())
-            )
+        $this->total_net_price = $this->discounts()
+            ->ordered()
+            ->get(['id', 'discount', 'is_percentage'])
+            ->reduce(
+                function (string|float|int $previous, Discount $discount): string|float|int {
+                    $new = $discount->is_percentage
+                        ? discount($previous, $discount->discount)
+                        : bcsub($previous, $discount->discount, 9);
+
+                    $discount->update([
+                        'discount_percentage' => diff_percentage($previous, $new),
+                        'discount_flat' => bcsub($previous, $new, 9),
+                    ]);
+
+                    return $new;
+                },
+                $this->total_net_price ?? 0
+            );
+
+        $this->total_discount_percentage = diff_percentage($this->total_base_net_price, $this->total_net_price);
+        $this->total_discount_flat = bcsub($this->total_base_net_price, $this->total_net_price, 9);
+
+        return $this;
+    }
+
+    public function calculateMargin(): static
+    {
+        $this->total_purchase_price = $this->orderPositions()
+            ->where('is_alternative', false)
+            ->sum('purchase_price');
+
+        $this->margin = Rounding::round(
+            bcsub($this->total_net_price, $this->total_purchase_price, 9),
+            2
         );
-    }
 
-    public function scopePurchase(Builder $query): Builder
-    {
-        return $query->whereHas(
-            'orderType',
-            fn (Builder $query) => $query->whereIn(
-                'order_type_enum',
-                array_filter(OrderTypeEnum::cases(), fn (OrderTypeEnum $enum) => $enum->isPurchase())
-            )
+        $variableCosts = 0;
+        $variableCosts = bcadd($variableCosts, $this->commissions()->sum('commission'));
+        $variableCosts = bcadd($variableCosts, $this->workTimes()->sum('total_cost'));
+        $variableCosts = bcadd($variableCosts, $this->projects()->sum('total_cost'));
+        $this->total_cost = $variableCosts;
+
+        $this->gross_profit = Rounding::round(
+            bcsub($this->margin, $this->total_cost, 9),
+            2
         );
-    }
 
-    public function scopeUnpaid(Builder $query): Builder
-    {
-        return $query
-            ->whereNotNull('invoice_number')
-            ->whereNotState('payment_state', Paid::class)
-            ->whereNot('balance', 0);
-    }
-
-    public function scopePaid(Builder $query): Builder
-    {
-        return $query
-            ->whereNotNull('invoice_number')
-            ->whereNotState('payment_state', Open::class);
-    }
-
-    public function newCollection(array $models = []): Collection
-    {
-        return app(OrderCollection::class, ['items' => $models]);
+        return $this;
     }
 
     public function calculatePaymentState(): static
@@ -473,37 +341,6 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
         $this->calculateBalance();
 
         return $this;
-    }
-
-    protected function makeAllSearchableUsing(Builder $query): Builder
-    {
-        return $query->with(
-            [
-                'addresses',
-            ]
-        );
-    }
-
-    public function invoice(): ?\Spatie\MediaLibrary\MediaCollections\Models\Media
-    {
-        return $this->getFirstMedia('invoice');
-    }
-
-    public function registerMediaCollections(): void
-    {
-        $this->addMediaCollection('invoice')
-            ->acceptsMimeTypes(['application/pdf', 'image/jpeg', 'image/png', 'application/xml', 'text/xml'])
-            ->singleFile()
-            ->readOnly();
-
-        $this->addMediaCollection('payment-reminders')
-            ->acceptsMimeTypes(['application/pdf'])
-            ->readOnly();
-
-        $this->addMediaCollection('signature')
-            ->acceptsMimeTypes(['image/jpeg', 'image/png'])
-            ->useDisk('local')
-            ->readOnly();
     }
 
     public function calculatePrices(): static
@@ -571,33 +408,6 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
         return $this;
     }
 
-    public function calculateDiscounts(): static
-    {
-        $this->total_net_price = $this->discounts()
-            ->ordered()
-            ->get(['id', 'discount', 'is_percentage'])
-            ->reduce(
-                function (string|float|int $previous, Discount $discount): string|float|int {
-                    $new = $discount->is_percentage
-                        ? discount($previous, $discount->discount)
-                        : bcsub($previous, $discount->discount, 9);
-
-                    $discount->update([
-                        'discount_percentage' => diff_percentage($previous, $new),
-                        'discount_flat' => bcsub($previous, $new, 9),
-                    ]);
-
-                    return $new;
-                },
-                $this->total_net_price ?? 0
-            );
-
-        $this->total_discount_percentage = diff_percentage($this->total_base_net_price, $this->total_net_price);
-        $this->total_discount_flat = bcsub($this->total_base_net_price, $this->total_net_price, 9);
-
-        return $this;
-    }
-
     public function calculateTotalVats(): static
     {
         $totalVats = $this->orderPositions()
@@ -657,54 +467,49 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
         return $this;
     }
 
-    public function calculateBalance(): static
+    public function client(): BelongsTo
     {
-        $this->balance = bcround(
-            bcsub($this->total_gross_price, $this->transactions()->sum('amount'), 9),
-            2
-        );
-
-        return $this;
+        return $this->belongsTo(Client::class);
     }
 
-    public function calculateMargin(): static
+    public function commissions(): HasMany
     {
-        $this->total_purchase_price = $this->orderPositions()
-            ->where('is_alternative', false)
-            ->sum('purchase_price');
-
-        $this->margin = Rounding::round(
-            bcsub($this->total_net_price, $this->total_purchase_price, 9),
-            2
-        );
-
-        $variableCosts = 0;
-        $variableCosts = bcadd($variableCosts, $this->commissions()->sum('commission'));
-        $variableCosts = bcadd($variableCosts, $this->workTimes()->sum('total_cost'));
-        $variableCosts = bcadd($variableCosts, $this->projects()->sum('total_cost'));
-        $this->total_cost = $variableCosts;
-
-        $this->gross_profit = Rounding::round(
-            bcsub($this->margin, $this->total_cost, 9),
-            2
-        );
-
-        return $this;
+        return $this->hasMany(Commission::class);
     }
 
-    public function getLabel(): ?string
+    public function contact(): BelongsTo
     {
-        return $this->orderType?->name . ' - ' . $this->order_number . ' - ' . data_get($this->address_invoice, 'name');
+        return $this->belongsTo(Contact::class);
     }
 
-    public function getDescription(): ?string
+    public function contactBankConnection(): BelongsTo
     {
-        return null;
+        return $this->belongsTo(ContactBankConnection::class);
     }
 
-    public function getUrl(): ?string
+    public function costColumn(): ?string
     {
-        return $this->detailRoute();
+        return 'total_cost';
+    }
+
+    public function createdFrom(): BelongsTo
+    {
+        return $this->belongsTo(Order::class, 'created_from_id');
+    }
+
+    public function createdOrders(): HasMany
+    {
+        return $this->hasMany(Order::class, 'created_from_id');
+    }
+
+    public function currency(): BelongsTo
+    {
+        return $this->belongsTo(Currency::class);
+    }
+
+    public function discounts(): MorphMany
+    {
+        return $this->morphMany(Discount::class, 'model');
     }
 
     /**
@@ -713,6 +518,16 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
     public function getAvatarUrl(): ?string
     {
         return $this->contact?->getAvatarUrl() ?: static::icon()->getUrl();
+    }
+
+    public function getDescription(): ?string
+    {
+        return null;
+    }
+
+    public function getLabel(): ?string
+    {
+        return $this->orderType?->name . ' - ' . $this->order_number . ' - ' . data_get($this->address_invoice, 'name');
     }
 
     public function getPortalDetailRoute(): string
@@ -735,6 +550,108 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
             ];
     }
 
+    public function getSerialNumber(string|array $types, ?int $clientId = null): static
+    {
+        if (in_array('invoice_number', Arr::wrap($types))) {
+            $rules = [
+                'has_contact_delivery_lock' => 'declined',
+            ];
+            $data = [
+                'has_contact_delivery_lock' => $this->contact->has_delivery_lock,
+            ];
+            $messages = [
+                'has_contact_delivery_lock.declined' => __('The contact has a delivery lock'),
+            ];
+
+            if (! is_null($creditLine = $this->contact->credit_line)) {
+                $rules['balance'] = app(Numeric::class, ['max' => $creditLine]);
+                $data['balance'] = bcadd($this->contact->orders()->unpaid()->sum('balance'), $this->total_gross_price);
+                $messages['balance'][get_class($rules['balance'])] = __('The credit line of the contact is exceeded');
+            }
+
+            Validator::make($data, $rules, $messages)->validate();
+        }
+
+        return $this->hasSerialNumberRangeGetSerialNumber($types, $clientId);
+    }
+
+    public function getUrl(): ?string
+    {
+        return $this->detailRoute();
+    }
+
+    public function invoice(): ?\Spatie\MediaLibrary\MediaCollections\Models\Media
+    {
+        return $this->getFirstMedia('invoice');
+    }
+
+    public function language(): BelongsTo
+    {
+        return $this->belongsTo(Language::class);
+    }
+
+    public function newCollection(array $models = []): Collection
+    {
+        return app(OrderCollection::class, ['items' => $models]);
+    }
+
+    public function orderPositions(): HasMany
+    {
+        return $this->hasMany(OrderPosition::class);
+    }
+
+    public function orderType(): BelongsTo
+    {
+        return $this->belongsTo(OrderType::class);
+    }
+
+    public function paymentReminders(): HasMany
+    {
+        return $this->hasMany(PaymentReminder::class);
+    }
+
+    public function paymentRuns(): BelongsToMany
+    {
+        return $this->belongsToMany(PaymentRun::class, 'order_payment_run');
+    }
+
+    public function paymentType(): BelongsTo
+    {
+        return $this->belongsTo(PaymentType::class);
+    }
+
+    public function priceList(): BelongsTo
+    {
+        return $this->belongsTo(PriceList::class);
+    }
+
+    public function projects(): HasMany
+    {
+        return $this->hasMany(Project::class);
+    }
+
+    public function purchaseInvoice(): HasOne
+    {
+        return $this->hasOne(PurchaseInvoice::class);
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('invoice')
+            ->acceptsMimeTypes(['application/pdf', 'image/jpeg', 'image/png', 'application/xml', 'text/xml'])
+            ->singleFile()
+            ->readOnly();
+
+        $this->addMediaCollection('payment-reminders')
+            ->acceptsMimeTypes(['application/pdf'])
+            ->readOnly();
+
+        $this->addMediaCollection('signature')
+            ->acceptsMimeTypes(['image/jpeg', 'image/png'])
+            ->useDisk('local')
+            ->readOnly();
+    }
+
     public function resolvePrintViews(): array
     {
         $printViews = $this->printableResolvePrintViews();
@@ -742,8 +659,91 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
         return array_intersect_key($printViews, array_flip($this->orderType?->print_layouts ?: []));
     }
 
-    public function costColumn(): ?string
+    public function responsibleUser(): BelongsTo
     {
-        return 'total_cost';
+        return $this->belongsTo(User::class, 'responsible_user_id');
+    }
+
+    public function schedules(): BelongsToMany
+    {
+        return $this->belongsToMany(Schedule::class)->using(OrderSchedule::class);
+    }
+
+    public function scopePaid(Builder $query): Builder
+    {
+        return $query
+            ->whereNotNull('invoice_number')
+            ->whereNotState('payment_state', Open::class);
+    }
+
+    public function scopePurchase(Builder $query): Builder
+    {
+        return $query->whereHas(
+            'orderType',
+            fn (Builder $query) => $query->whereIn(
+                'order_type_enum',
+                array_filter(OrderTypeEnum::cases(), fn (OrderTypeEnum $enum) => $enum->isPurchase())
+            )
+        );
+    }
+
+    public function scopeRevenue(Builder $query): Builder
+    {
+        return $query->whereHas(
+            'orderType',
+            fn (Builder $query) => $query->whereIn(
+                'order_type_enum',
+                array_filter(OrderTypeEnum::cases(), fn (OrderTypeEnum $enum) => ! $enum->isPurchase())
+            )
+        );
+    }
+
+    public function scopeUnpaid(Builder $query): Builder
+    {
+        return $query
+            ->whereNotNull('invoice_number')
+            ->whereNotState('payment_state', Paid::class)
+            ->whereNot('balance', 0);
+    }
+
+    public function tasks(): HasManyThrough
+    {
+        return $this->hasManyThrough(Task::class, Project::class);
+    }
+
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'order_user');
+    }
+
+    public function vatRate(): BelongsTo
+    {
+        return $this->belongsTo(VatRate::class);
+    }
+
+    public function vatRates(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            VatRate::class,
+            OrderPosition::class,
+            'order_id',
+            'id',
+            'id',
+            'vat_rate_id'
+        );
+    }
+
+    protected function makeAllSearchableUsing(Builder $query): Builder
+    {
+        return $query->with(
+            [
+                'addresses',
+            ]
+        );
     }
 }

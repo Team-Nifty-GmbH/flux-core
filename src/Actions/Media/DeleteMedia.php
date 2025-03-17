@@ -11,14 +11,14 @@ class DeleteMedia extends FluxAction
 {
     protected bool $force = false;
 
-    protected function getRulesets(): string|array
-    {
-        return DeleteMediaRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Media::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeleteMediaRuleset::class;
     }
 
     public function force($force = true): static

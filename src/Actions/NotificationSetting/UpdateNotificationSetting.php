@@ -11,10 +11,9 @@ use Illuminate\Support\Facades\Auth;
 
 class UpdateNotificationSetting extends FluxAction
 {
-    protected function boot(array $data): void
+    public static function models(): array
     {
-        parent::boot($data);
-        $this->setData(array_merge(['is_anonymous' => false], $this->data));
+        return [NotificationSetting::class];
     }
 
     protected function getRulesets(): string|array
@@ -24,9 +23,10 @@ class UpdateNotificationSetting extends FluxAction
             UpdateUserNotificationSettingRuleset::class;
     }
 
-    public static function models(): array
+    protected function boot(array $data): void
     {
-        return [NotificationSetting::class];
+        parent::boot($data);
+        $this->setData(array_merge(['is_anonymous' => false], $this->data));
     }
 
     public function performAction(): Model

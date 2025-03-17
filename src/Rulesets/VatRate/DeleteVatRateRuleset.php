@@ -8,9 +8,9 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class DeleteVatRateRuleset extends FluxRuleset
 {
-    protected static ?string $model = VatRate::class;
-
     protected static bool $addAdditionalColumnRules = false;
+
+    protected static ?string $model = VatRate::class;
 
     public function rules(): array
     {

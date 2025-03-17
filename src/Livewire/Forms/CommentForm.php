@@ -9,23 +9,23 @@ use Livewire\Attributes\Locked;
 
 class CommentForm extends FluxForm
 {
+    public ?string $comment = null;
+
     #[Locked]
     public ?int $id = null;
 
-    #[Locked]
-    public ?string $model_type = null;
+    public ?bool $is_internal = null;
+
+    public ?bool $is_sticky = null;
 
     #[Locked]
     public ?int $model_id = null;
 
     #[Locked]
+    public ?string $model_type = null;
+
+    #[Locked]
     public ?int $parent_id = null;
-
-    public ?string $comment = null;
-
-    public ?bool $is_internal = null;
-
-    public ?bool $is_sticky = null;
 
     public function getActions(): array
     {

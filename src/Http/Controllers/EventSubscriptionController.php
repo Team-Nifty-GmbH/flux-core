@@ -16,6 +16,20 @@ class EventSubscriptionController extends BaseController
         $this->model = app(EventSubscription::class);
     }
 
+    public function create(Request $request, EventSubscriptionService $eventSubscriptionService): JsonResponse
+    {
+        $response = $eventSubscriptionService->create($request->all());
+
+        return ResponseHelper::createResponseFromArrayResponse($response);
+    }
+
+    public function delete(string $id, EventSubscriptionService $eventSubscriptionService): JsonResponse
+    {
+        $response = $eventSubscriptionService->delete($id);
+
+        return ResponseHelper::createResponseFromArrayResponse($response);
+    }
+
     public function getEvents(): JsonResponse
     {
         $events = array_keys(app('events')->getRawListeners());
@@ -34,23 +48,9 @@ class EventSubscriptionController extends BaseController
         return ResponseHelper::createResponseFromBase(statusCode: 200, data: $subscriptions);
     }
 
-    public function create(Request $request, EventSubscriptionService $eventSubscriptionService): JsonResponse
-    {
-        $response = $eventSubscriptionService->create($request->all());
-
-        return ResponseHelper::createResponseFromArrayResponse($response);
-    }
-
     public function update(Request $request, EventSubscriptionService $eventSubscriptionService): JsonResponse
     {
         $response = $eventSubscriptionService->update($request->all());
-
-        return ResponseHelper::createResponseFromArrayResponse($response);
-    }
-
-    public function delete(string $id, EventSubscriptionService $eventSubscriptionService): JsonResponse
-    {
-        $response = $eventSubscriptionService->delete($id);
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }

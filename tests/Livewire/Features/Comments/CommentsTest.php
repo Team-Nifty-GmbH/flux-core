@@ -5,13 +5,10 @@ namespace FluxErp\Tests\Livewire\Features\Comments;
 use FluxErp\Livewire\Features\Comments\Comments;
 use FluxErp\Models\Product;
 use FluxErp\Tests\Livewire\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;
 
 class CommentsTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Product $product;
 
     protected function setUp(): void
@@ -23,7 +20,7 @@ class CommentsTest extends BaseSetup
             ->create();
     }
 
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(Comments::class, ['modelType' => Product::class, 'modelId' => $this->product->id])
             ->assertStatus(200);

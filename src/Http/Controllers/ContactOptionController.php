@@ -10,17 +10,6 @@ use Illuminate\Http\Request;
 
 class ContactOptionController extends Controller
 {
-    public function index(string $addressId): JsonResponse
-    {
-        $contactOptions = resolve_static(ContactOption::class, 'query')
-            ->where('address_id', $addressId)
-            ->orderBy('type', 'ASC')
-            ->orderBy('label', 'ASC')
-            ->get();
-
-        return ResponseHelper::createResponseFromBase(statusCode: 200, data: $contactOptions);
-    }
-
     public function create(Request $request, ContactOptionService $contactOptionService): JsonResponse
     {
         $contactOption = $contactOptionService->create($request->all());
@@ -32,16 +21,27 @@ class ContactOptionController extends Controller
         );
     }
 
-    public function update(Request $request, ContactOptionService $contactOptionService): JsonResponse
+    public function delete(string $id, ContactOptionService $contactOptionService): JsonResponse
     {
-        $response = $contactOptionService->update($request->all());
+        $response = $contactOptionService->delete($id);
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }
 
-    public function delete(string $id, ContactOptionService $contactOptionService): JsonResponse
+    public function index(string $addressId): JsonResponse
     {
-        $response = $contactOptionService->delete($id);
+        $contactOptions = resolve_static(ContactOption::class, 'query')
+            ->where('address_id', $addressId)
+            ->orderBy('type', 'ASC')
+            ->orderBy('label', 'ASC')
+            ->get();
+
+        return ResponseHelper::createResponseFromBase(statusCode: 200, data: $contactOptions);
+    }
+
+    public function update(Request $request, ContactOptionService $contactOptionService): JsonResponse
+    {
+        $response = $contactOptionService->update($request->all());
 
         return ResponseHelper::createResponseFromArrayResponse($response);
     }

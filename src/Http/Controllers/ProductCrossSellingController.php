@@ -32,6 +32,24 @@ class ProductCrossSellingController extends BaseController
         );
     }
 
+    public function delete(string $id): JsonResponse
+    {
+        try {
+            DeleteProductCrossSelling::make(['id' => $id])->validate()->execute();
+            $response = ResponseHelper::createArrayResponse(
+                statusCode: 204,
+                statusMessage: 'product cross selling deleted'
+            );
+        } catch (ValidationException $e) {
+            $response = ResponseHelper::createArrayResponse(
+                statusCode: array_key_exists('id', $e->errors()) ? 404 : 423,
+                data: $e->errors()
+            );
+        }
+
+        return ResponseHelper::createResponseFromArrayResponse($response);
+    }
+
     public function update(Request $request): JsonResponse
     {
         $data = $request->all();
@@ -67,23 +85,5 @@ class ProductCrossSellingController extends BaseController
             'responses' => $responses,
             'statusMessage' => $statusCode === 422 ? null : 'product cross selling(s) updated',
         ]);
-    }
-
-    public function delete(string $id): JsonResponse
-    {
-        try {
-            DeleteProductCrossSelling::make(['id' => $id])->validate()->execute();
-            $response = ResponseHelper::createArrayResponse(
-                statusCode: 204,
-                statusMessage: 'product cross selling deleted'
-            );
-        } catch (ValidationException $e) {
-            $response = ResponseHelper::createArrayResponse(
-                statusCode: array_key_exists('id', $e->errors()) ? 404 : 423,
-                data: $e->errors()
-            );
-        }
-
-        return ResponseHelper::createResponseFromArrayResponse($response);
     }
 }

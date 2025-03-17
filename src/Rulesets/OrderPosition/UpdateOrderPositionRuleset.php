@@ -22,6 +22,15 @@ class UpdateOrderPositionRuleset extends FluxRuleset
 {
     protected static ?string $model = OrderPosition::class;
 
+    public static function getRules(): array
+    {
+        return array_merge(
+            parent::getRules(),
+            resolve_static(DiscountRuleset::class, 'getRules'),
+            resolve_static(TagRuleset::class, 'getRules')
+        );
+    }
+
     public function rules(): array
     {
         return [
@@ -131,14 +140,5 @@ class UpdateOrderPositionRuleset extends FluxRuleset
             'is_net' => 'boolean',
             'is_free_text' => 'boolean',
         ];
-    }
-
-    public static function getRules(): array
-    {
-        return array_merge(
-            parent::getRules(),
-            resolve_static(DiscountRuleset::class, 'getRules'),
-            resolve_static(TagRuleset::class, 'getRules')
-        );
     }
 }

@@ -11,7 +11,7 @@ return new class() extends Migration
      */
     public function up(): void
     {
-        Schema::table('products', function (Blueprint $table) {
+        Schema::table('products', function (Blueprint $table): void {
             $table->boolean('is_bundle')->default(false)->after('is_active');
 
             $table->dropColumn(['is_pre_packed', 'is_valid_bundle_status']);
@@ -23,7 +23,7 @@ return new class() extends Migration
      */
     public function down(): void
     {
-        Schema::table('products', function (Blueprint $table) {
+        Schema::table('products', function (Blueprint $table): void {
             $table->dropColumn('is_bundle');
 
             $table->unsignedInteger('is_pre_packed')->nullable()->after('warning_stock_amount');

@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('settings', function (Blueprint $table) {
+        Schema::table('settings', function (Blueprint $table): void {
             $table->dropForeign('settings_user_id_foreign');
             $table->dropUnique('settings_user_id_key_unique');
             $table->dropUnique('settings_key_unique');
@@ -24,7 +24,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('settings', function (Blueprint $table) {
+        Schema::table('settings', function (Blueprint $table): void {
             $table->dropUnique('settings_model_id_model_type_key_unique');
             $table->dropMorphs('model');
             $table->unsignedBigInteger('user_id')->nullable()->after('uuid');

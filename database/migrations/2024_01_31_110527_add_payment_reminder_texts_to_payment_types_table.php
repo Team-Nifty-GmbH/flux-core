@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('payment_types', function (Blueprint $table) {
+        Schema::table('payment_types', function (Blueprint $table): void {
             $table->text('payment_reminder_text')->nullable()->after('payment_discount_percentage');
             $table->text('payment_reminder_email_text')->nullable()->after('payment_reminder_text');
         });
@@ -16,7 +16,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('payment_types', function (Blueprint $table) {
+        Schema::table('payment_types', function (Blueprint $table): void {
             $table->dropColumn(['payment_reminder_text', 'payment_reminder_email_text']);
         });
     }

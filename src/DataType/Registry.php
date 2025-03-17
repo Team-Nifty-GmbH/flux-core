@@ -38,22 +38,6 @@ class Registry
     }
 
     /**
-     * Check if a handler has been set for a given type identifier.
-     */
-    public function hasHandlerForType(string $type): bool
-    {
-        return array_key_exists($type, $this->handlers);
-    }
-
-    /**
-     * Removes the handler with a given type identifier.
-     */
-    public function removeHandlerForType(string $type): void
-    {
-        unset($this->handlers[$type]);
-    }
-
-    /**
      * Find a data type Handler that is able to operate on the value, return the type identifier associated with it.
      *
      *
@@ -68,5 +52,21 @@ class Registry
         }
 
         throw DataTypeException::handlerNotFoundForValue($value);
+    }
+
+    /**
+     * Check if a handler has been set for a given type identifier.
+     */
+    public function hasHandlerForType(string $type): bool
+    {
+        return array_key_exists($type, $this->handlers);
+    }
+
+    /**
+     * Removes the handler with a given type identifier.
+     */
+    public function removeHandlerForType(string $type): void
+    {
+        unset($this->handlers[$type]);
     }
 }

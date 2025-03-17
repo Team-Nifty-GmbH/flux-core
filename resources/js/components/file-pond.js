@@ -1,14 +1,22 @@
 import FilePondPluginImagePreview from 'filepond-plugin-image-preview';
-import {create, registerPlugin, setOptions} from 'filepond';
+import { create, registerPlugin, setOptions } from 'filepond';
 
 const BASE_LANGUAGE_PATH = '/node_modules/filepond/locale/';
 
 // load all available languages from filepond
-const availableLanguages = import.meta.glob('/node_modules/filepond/locale/*.js');
+const availableLanguages = import.meta.glob(
+    '/node_modules/filepond/locale/*.js',
+);
 
 //  TODO: error on tree refresh - renderLevel undefined - and is called several times
 
-export default function ($wire, $ref, lang, modalTranslations, inputTranslation) {
+export default function (
+    $wire,
+    $ref,
+    lang,
+    modalTranslations,
+    inputTranslation,
+) {
     return {
         tempFilesId: [],
         isLoadingFiles: [],
@@ -21,7 +29,8 @@ export default function ($wire, $ref, lang, modalTranslations, inputTranslation)
         async setCollection(collectionName) {
             if (collectionName !== null) {
                 //  on selected - check if collection is single file upload
-                this.multipleFileUpload = !await $wire.hasSingleFile(collectionName);
+                this.multipleFileUpload =
+                    !(await $wire.hasSingleFile(collectionName));
                 this.readOnly = await $wire.readOnly(collectionName);
                 //  check if collection is read-only - disable file upload if true
             } else {
@@ -32,16 +41,28 @@ export default function ($wire, $ref, lang, modalTranslations, inputTranslation)
 
             this.pond.setOptions({
                 allowMultiple: this.multipleFileUpload,
-                labelIdle: this.readOnly ? inputTranslation.uploadDisabled : this.uploadLabel,
-                disabled: this.readOnly
+                labelIdle: this.readOnly
+                    ? inputTranslation.uploadDisabled
+                    : this.uploadLabel,
+                disabled: this.readOnly,
             });
             this.selectedCollection = collectionName;
         },
         async loadFilePond(fileCountGetter) {
             // getting specific language path - based on selected language
-            const languageKey = lang === null ? undefined : Object.keys(availableLanguages).find((key) => key.split('/').pop().includes(lang));
+            const languageKey =
+                lang === null
+                    ? undefined
+                    : Object.keys(availableLanguages).find((key) =>
+                          key.split('/').pop().includes(lang),
+                      );
             // fallback is english
-            const moduleLanguage = languageKey !== undefined ? await availableLanguages[languageKey]() : await availableLanguages[`${BASE_LANGUAGE_PATH}en-en.js`]();
+            const moduleLanguage =
+                languageKey !== undefined
+                    ? await availableLanguages[languageKey]()
+                    : await availableLanguages[
+                          `${BASE_LANGUAGE_PATH}en-en.js`
+                      ]();
             // return file-count for selected folder
             this.fileCount = fileCountGetter.bind(this);
             registerPlugin(FilePondPluginImagePreview);
@@ -60,7 +81,7 @@ export default function ($wire, $ref, lang, modalTranslations, inputTranslation)
                 onremovefile: (error, file) => {
                     if (error) return;
 
-                    const ids = this.pond.getFiles().map(f => f.serverId);
+                    const ids = this.pond.getFiles().map((f) => f.serverId);
 
                     if (ids.length === 0) {
                         this.tempFilesId = [];
@@ -82,41 +103,62 @@ export default function ($wire, $ref, lang, modalTranslations, inputTranslation)
                     // if single file upload and error is null, show confirm dialog - to replace file
                     if (!this.multipleFileUpload && error === null) {
                         //  check if single file folder is not empty
-                        if (this.fileCount !== null && this.fileCount() !== undefined && this.fileCount() > 0) {
-                            window.$wireui.confirmDialog({
-                                title: modalTranslations.title,
-                                description: modalTranslations.description,
-                                icon: 'error',
-                                accept: {
-                                    label: modalTranslations.labelAccept,
-                                },
-                                reject: {
-                                    execute: () => {
-                                        this.pond.removeFile(file.id);
-                                    },
-                                    label: modalTranslations.labelReject,
-                                }
-                            }, $wire.__instance.id);
+                        if (
+                            this.fileCount !== null &&
+                            this.fileCount() !== undefined &&
+                            this.fileCount() > 0
+                        ) {
+                            $interaction('dialog')
+                                .wireable($wire.id)
+                                .question(
+                                    modalTranslations.title,
+                                    modalTranslations.description,
+                                )
+                                .confirm(modalTranslations.labelAccept)
+                                .cancel(modalTranslations.labelReject, () => {
+                                    this.pond.removeFile(file.id);
+                                })
+                                .send();
                         }
                     }
                 },
                 server: {
-                    process: async (fieldName, file, metadata, load, error, progress, abort, transfer, options) => {
+                    process: async (
+                        fieldName,
+                        file,
+                        metadata,
+                        load,
+                        error,
+                        progress,
+                        abort,
+                        transfer,
+                        options,
+                    ) => {
                         const onSuccess = async (tempFileId) => {
-                            if (await $wire.validateOnDemand(tempFileId, this.selectedCollection)) {
+                            if (
+                                await $wire.validateOnDemand(
+                                    tempFileId,
+                                    this.selectedCollection,
+                                )
+                            ) {
                                 this.tempFilesId.push(tempFileId);
                                 load(tempFileId);
                             } else {
                                 error(tempFileId);
                             }
-                        }
+                        };
 
                         const onError = () => {
                             error();
-                        }
+                        };
 
-                        await $wire.upload('files', file, onSuccess, onError, progress);
-
+                        await $wire.upload(
+                            'files',
+                            file,
+                            onSuccess,
+                            onError,
+                            progress,
+                        );
                     },
                     revert: null,
                     remove: null,
@@ -136,17 +178,27 @@ export default function ($wire, $ref, lang, modalTranslations, inputTranslation)
                 this.clearPond();
             }
         },
-        async submitFiles(collectionName, successCallback, modelType = null, modelId = null) {
-            const response = await $wire.submitFiles(collectionName, this.tempFilesId, modelType, modelId);
+        async submitFiles(
+            collectionName,
+            successCallback,
+            modelType = null,
+            modelId = null,
+        ) {
+            const response = await $wire.submitFiles(
+                collectionName,
+                this.tempFilesId,
+                modelType,
+                modelId,
+            );
 
             if (response && this.pond !== null) {
                 this.clearPond();
-                await (successCallback.bind(this))(this.multipleFileUpload);
+                await successCallback.bind(this)(this.multipleFileUpload);
             }
         },
         clearPond() {
             this.tempFilesId = [];
             this.pond.removeFiles();
-        }
+        },
     };
 }

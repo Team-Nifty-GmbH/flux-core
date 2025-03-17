@@ -12,6 +12,14 @@ class UpdateContactBankConnectionRuleset extends FluxRuleset
 {
     protected static ?string $model = ContactBankConnection::class;
 
+    public static function getRules(): array
+    {
+        return array_merge(
+            resolve_static(BankConnectionRuleset::class, 'getRules'),
+            parent::getRules()
+        );
+    }
+
     public function rules(): array
     {
         return [
@@ -27,13 +35,5 @@ class UpdateContactBankConnectionRuleset extends FluxRuleset
             ],
             'iban' => ['string', app(Iban::class)],
         ];
-    }
-
-    public static function getRules(): array
-    {
-        return array_merge(
-            resolve_static(BankConnectionRuleset::class, 'getRules'),
-            parent::getRules()
-        );
     }
 }

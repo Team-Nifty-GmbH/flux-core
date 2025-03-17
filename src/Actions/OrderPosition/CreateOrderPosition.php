@@ -19,35 +19,14 @@ use Illuminate\Validation\ValidationException;
 
 class CreateOrderPosition extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateOrderPositionRuleset::class;
-    }
-
-    public function setRulesFromRulesets(): static
-    {
-        return parent::setRulesFromRulesets()
-            ->mergeRules([
-                'vat_rate_percentage' => [
-                    Rule::excludeIf(
-                        data_get($this->data, 'is_free_text', false)
-                        || data_get($this->data, 'is_bundle_position', false)
-                        || data_get($this->data, 'vat_rate_id', false)
-                    ),
-                    Rule::requiredIf(
-                        ! data_get($this->data, 'is_free_text', false)
-                        && ! data_get($this->data, 'is_bundle_position', false)
-                        && ! data_get($this->data, 'vat_rate_id', false)
-                        && ! data_get($this->data, 'product_id', false)
-                    ),
-                    app(Numeric::class),
-                ],
-            ]);
-    }
-
     public static function models(): array
     {
         return [OrderPosition::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateOrderPositionRuleset::class;
     }
 
     public function performAction(): OrderPosition
@@ -142,7 +121,7 @@ class CreateOrderPosition extends FluxAction
                         'is_bundle_position' => true,
                     ];
                 })
-                ->each(function (array $bundleProduct) {
+                ->each(function (array $bundleProduct): void {
                     CreateOrderPosition::make($bundleProduct)
                         ->validate()
                         ->execute();
@@ -152,6 +131,27 @@ class CreateOrderPosition extends FluxAction
         $orderPosition->attachTags($tags);
 
         return $orderPosition->withoutRelations()->fresh();
+    }
+
+    public function setRulesFromRulesets(): static
+    {
+        return parent::setRulesFromRulesets()
+            ->mergeRules([
+                'vat_rate_percentage' => [
+                    Rule::excludeIf(
+                        data_get($this->data, 'is_free_text', false)
+                        || data_get($this->data, 'is_bundle_position', false)
+                        || data_get($this->data, 'vat_rate_id', false)
+                    ),
+                    Rule::requiredIf(
+                        ! data_get($this->data, 'is_free_text', false)
+                        && ! data_get($this->data, 'is_bundle_position', false)
+                        && ! data_get($this->data, 'vat_rate_id', false)
+                        && ! data_get($this->data, 'product_id', false)
+                    ),
+                    app(Numeric::class),
+                ],
+            ]);
     }
 
     protected function validateData(): void

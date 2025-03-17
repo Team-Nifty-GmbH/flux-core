@@ -25,7 +25,7 @@ class SepaMandate extends FluxModel implements HasMedia, OffersPrinting
 
     protected static function booted(): void
     {
-        static::saving(function (SepaMandate $mandate) {
+        static::saving(function (SepaMandate $mandate): void {
             // reset to original
             if ($mandate->wasChanged('mandate_reference_number')) {
                 $mandate->mandate_reference_number = $mandate->getOriginal('mandate_reference_number');
@@ -59,17 +59,17 @@ class SepaMandate extends FluxModel implements HasMedia, OffersPrinting
         return $this->belongsTo(ContactBankConnection::class);
     }
 
-    public function registerMediaCollections(): void
-    {
-        $this->addMediaCollection('signed_mandate')
-            ->acceptsMimeTypes(['application/pdf', 'image/jpeg', 'image/png', 'image/svg+xml'])
-            ->singleFile();
-    }
-
     public function getPrintViews(): array
     {
         return [
             'sepa-mandate' => SepaMandateView::class,
         ];
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('signed_mandate')
+            ->acceptsMimeTypes(['application/pdf', 'image/jpeg', 'image/png', 'image/svg+xml'])
+            ->singleFile();
     }
 }

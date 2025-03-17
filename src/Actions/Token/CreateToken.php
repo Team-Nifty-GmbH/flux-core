@@ -8,14 +8,14 @@ use FluxErp\Rulesets\Token\CreateTokenRuleset;
 
 class CreateToken extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateTokenRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Token::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateTokenRuleset::class;
     }
 
     public function performAction(): mixed

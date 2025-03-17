@@ -14,14 +14,14 @@ use Illuminate\Database\Eloquent\Collection;
 
 class ProductPricesUpdate extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return ProductPricesUpdateRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Product::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return ProductPricesUpdateRuleset::class;
     }
 
     public function performAction(): Collection

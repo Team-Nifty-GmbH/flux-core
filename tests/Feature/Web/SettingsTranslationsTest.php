@@ -3,13 +3,17 @@
 namespace FluxErp\Tests\Feature\Web;
 
 use FluxErp\Models\Permission;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class SettingsTranslationsTest extends BaseSetup
 {
-    use DatabaseTransactions;
+    public function test_settings_translations_no_user(): void
+    {
+        $this->get('/settings/translations')
+            ->assertStatus(302)
+            ->assertRedirect(route('login'));
+    }
 
-    public function test_settings_translations_page()
+    public function test_settings_translations_page(): void
     {
         $this->user->givePermissionTo(Permission::findOrCreate('settings.translations.get', 'web'));
 
@@ -17,14 +21,7 @@ class SettingsTranslationsTest extends BaseSetup
             ->assertStatus(200);
     }
 
-    public function test_settings_translations_no_user()
-    {
-        $this->get('/settings/translations')
-            ->assertStatus(302)
-            ->assertRedirect(route('login'));
-    }
-
-    public function test_settings_translations_without_permission()
+    public function test_settings_translations_without_permission(): void
     {
         Permission::findOrCreate('settings.translations.get', 'web');
 

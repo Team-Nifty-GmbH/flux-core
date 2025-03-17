@@ -9,7 +9,7 @@ class ChangeNameToJsonOnProjectCategoryTemplatesTable extends Migration
 {
     public function up(): void
     {
-        Schema::table('project_category_templates', function (Blueprint $table) {
+        Schema::table('project_category_templates', function (Blueprint $table): void {
             $table->json('name')->change();
         });
 
@@ -20,16 +20,16 @@ class ChangeNameToJsonOnProjectCategoryTemplatesTable extends Migration
     {
         $this->rollbackName();
 
-        Schema::table('project_category_templates', function (Blueprint $table) {
+        Schema::table('project_category_templates', function (Blueprint $table): void {
             $table->string('name')->change();
         });
     }
 
-    private function migrateName()
+    private function migrateName(): void
     {
         $templates = DB::table('project_category_templates')->get()->toArray();
 
-        array_walk($templates, function (&$item) {
+        array_walk($templates, function (&$item): void {
             $item->name = json_encode([config('app.locale') => $item->name]);
             $item = (array) $item;
         });
@@ -37,11 +37,11 @@ class ChangeNameToJsonOnProjectCategoryTemplatesTable extends Migration
         DB::table('project_category_templates')->upsert($templates, ['id']);
     }
 
-    private function rollbackName()
+    private function rollbackName(): void
     {
         $templates = DB::table('project_category_templates')->get()->toArray();
 
-        array_walk($templates, function (&$item) {
+        array_walk($templates, function (&$item): void {
             $item->name = substr(json_decode($item->name)->{config('app.locale')}, 0, 255);
             $item = (array) $item;
         });

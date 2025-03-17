@@ -11,7 +11,7 @@ return new class() extends Migration
      */
     public function up(): void
     {
-        Schema::create('model_related', function (Blueprint $table) {
+        Schema::create('model_related', function (Blueprint $table): void {
             $table->morphs('model');
             $table->morphs('related');
 

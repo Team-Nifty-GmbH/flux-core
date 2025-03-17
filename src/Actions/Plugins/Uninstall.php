@@ -25,7 +25,7 @@ class Uninstall extends BasePluginAction
         $run = $composer->removePackages(
             $this->data['packages'],
             false,
-            function ($type, $buffer) use (&$output) {
+            function ($type, $buffer) use (&$output): void {
                 $output .= $buffer;
             }
         );

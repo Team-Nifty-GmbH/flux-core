@@ -2,29 +2,25 @@
 
 namespace FluxErp\Tests\Feature\Web\Portal;
 
-use Illuminate\Foundation\Testing\DatabaseTransactions;
-
 class LoginTest extends PortalSetup
 {
-    use DatabaseTransactions;
-
-    public function test_login_page()
+    public function test_login_as_authenticated_user(): void
     {
-        $this->get($this->portalDomain . '/login')
-            ->assertStatus(200);
+        $this->actingAs($this->user, 'address')->get($this->portalDomain . '/login')
+            ->assertStatus(302)
+            ->assertRedirect(route('portal.dashboard'));
     }
 
-    public function test_login_no_path()
+    public function test_login_no_path(): void
     {
         $this->get($this->portalDomain . '/')
             ->assertStatus(302)
             ->assertRedirect($this->portalDomain . '/login');
     }
 
-    public function test_login_as_authenticated_user()
+    public function test_login_page(): void
     {
-        $this->actingAs($this->user, 'address')->get($this->portalDomain . '/login')
-            ->assertStatus(302)
-            ->assertRedirect(route('portal.dashboard'));
+        $this->get($this->portalDomain . '/login')
+            ->assertStatus(200);
     }
 }

@@ -46,30 +46,6 @@ class Client extends FluxModel implements HasMedia
         ];
     }
 
-    public function searchableUsing(): Engine
-    {
-        return app(EngineManager::class)->engine('collection');
-    }
-
-    public function getAvatarUrlAttribute(): string
-    {
-        return $this->logo_small_url;
-    }
-
-    public function logoUrl(): Attribute
-    {
-        return Attribute::get(
-            fn () => $this->getFirstMediaUrl('logo')
-        );
-    }
-
-    public function logoSmallUrl(): Attribute
-    {
-        return Attribute::get(
-            fn () => $this->getFirstMediaUrl('logo_small')
-        );
-    }
-
     public function bankConnections(): BelongsToMany
     {
         return $this->belongsToMany(BankConnection::class, 'bank_connection_client');
@@ -80,20 +56,9 @@ class Client extends FluxModel implements HasMedia
         return $this->belongsTo(Country::class);
     }
 
-    public function paymentTypes(): BelongsToMany
+    public function getAvatarUrlAttribute(): string
     {
-        return $this->belongsToMany(PaymentType::class, 'client_payment_type')
-            ->using(ClientPaymentType::class);
-    }
-
-    public function projects(): HasMany
-    {
-        return $this->hasMany(Project::class);
-    }
-
-    public function settings(): MorphMany
-    {
-        return $this->morphMany(Setting::class, 'model');
+        return $this->logo_small_url;
     }
 
     public function getPostalAddressOneLineAttribute(): string
@@ -106,6 +71,31 @@ class Client extends FluxModel implements HasMedia
                 $this->postcode . ' ' . $this->city,
             ])
         );
+    }
+
+    public function logoSmallUrl(): Attribute
+    {
+        return Attribute::get(
+            fn () => $this->getFirstMediaUrl('logo_small')
+        );
+    }
+
+    public function logoUrl(): Attribute
+    {
+        return Attribute::get(
+            fn () => $this->getFirstMediaUrl('logo')
+        );
+    }
+
+    public function paymentTypes(): BelongsToMany
+    {
+        return $this->belongsToMany(PaymentType::class, 'client_payment_type')
+            ->using(ClientPaymentType::class);
+    }
+
+    public function projects(): HasMany
+    {
+        return $this->hasMany(Project::class);
     }
 
     public function registerMediaCollections(): void
@@ -124,5 +114,15 @@ class Client extends FluxModel implements HasMedia
         $this->addMediaConversion('png')
             ->performOnCollections('logo', 'logo_small')
             ->format('png');
+    }
+
+    public function searchableUsing(): Engine
+    {
+        return app(EngineManager::class)->engine('collection');
+    }
+
+    public function settings(): MorphMany
+    {
+        return $this->morphMany(Setting::class, 'model');
     }
 }

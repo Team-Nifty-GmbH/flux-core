@@ -9,14 +9,14 @@ use Illuminate\Validation\ValidationException;
 
 class CreateDiscount extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateDiscountRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Discount::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateDiscountRuleset::class;
     }
 
     public function performAction(): Discount

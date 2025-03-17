@@ -9,14 +9,14 @@ use Illuminate\Validation\ValidationException;
 
 class DeleteValueList extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeleteValueListRuleset::class;
-    }
-
     public static function models(): array
     {
         return [AdditionalColumn::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeleteValueListRuleset::class;
     }
 
     public function performAction(): ?bool

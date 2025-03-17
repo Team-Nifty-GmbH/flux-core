@@ -7,16 +7,27 @@ use Illuminate\View\ComponentAttributeBag;
 
 class ProductOptionGroupList extends BaseProductOptionGroupList
 {
-    public bool $showFilterInputs = false;
-
-    public ?bool $isSearchable = true;
-
-    public bool $hasSidebar = false;
-
     public array $enabledCols = [
         'name',
         'selected',
     ];
+
+    public bool $hasSidebar = false;
+
+    public ?bool $isSearchable = true;
+
+    public bool $showFilterInputs = false;
+
+    public function save(): bool
+    {
+        if (! parent::save()) {
+            return false;
+        }
+
+        $this->dispatch('data-table-row-clicked', record: $this->productOptionGroupForm);
+
+        return true;
+    }
 
     public function startSearch(): void
     {
@@ -29,13 +40,9 @@ class ProductOptionGroupList extends BaseProductOptionGroupList
         parent::startSearch();
     }
 
-    protected function getRowAttributes(): ComponentAttributeBag
+    protected function allowSoftDeletes(): bool
     {
-        return new ComponentAttributeBag([
-            'x-bind:class' => <<<'JS'
-                record.id === productOptionGroup?.id && 'bg-primary-100 dark:bg-primary-800'
-            JS,
-        ]);
+        return false;
     }
 
     protected function getCellAttributes(): ComponentAttributeBag
@@ -52,19 +59,12 @@ class ProductOptionGroupList extends BaseProductOptionGroupList
         ]);
     }
 
-    public function save(): bool
+    protected function getRowAttributes(): ComponentAttributeBag
     {
-        if (! parent::save()) {
-            return false;
-        }
-
-        $this->dispatch('data-table-row-clicked', record: $this->productOptionGroupForm);
-
-        return true;
-    }
-
-    protected function allowSoftDeletes(): bool
-    {
-        return false;
+        return new ComponentAttributeBag([
+            'x-bind:class' => <<<'JS'
+                record.id === productOptionGroup?.id && 'bg-indigo-100 dark:bg-indigo-800'
+            JS,
+        ]);
     }
 }

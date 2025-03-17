@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class IndustriesTest extends TestCase
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(Industries::class)
             ->assertStatus(200);

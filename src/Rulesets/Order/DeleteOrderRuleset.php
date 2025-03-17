@@ -8,9 +8,9 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class DeleteOrderRuleset extends FluxRuleset
 {
-    protected static ?string $model = Order::class;
-
     protected static bool $addAdditionalColumnRules = false;
+
+    protected static ?string $model = Order::class;
 
     public function rules(): array
     {

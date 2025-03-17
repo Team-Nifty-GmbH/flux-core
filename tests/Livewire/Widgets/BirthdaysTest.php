@@ -26,7 +26,7 @@ class BirthdaysTest extends BaseSetup
         ]);
     }
 
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(Birthdays::class)
             ->assertStatus(200)

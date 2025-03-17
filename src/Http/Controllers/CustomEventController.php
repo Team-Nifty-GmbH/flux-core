@@ -29,13 +29,6 @@ class CustomEventController extends BaseController
         return ResponseHelper::createResponseFromBase(statusCode: 201, data: $customEvent);
     }
 
-    public function update(Request $request, CustomEventService $customEventService): JsonResponse
-    {
-        $response = $customEventService->update($request->all());
-
-        return ResponseHelper::createResponseFromArrayResponse($response);
-    }
-
     public function delete(string $id, CustomEventService $customEventService): JsonResponse
     {
         $response = $customEventService->delete($id);
@@ -60,5 +53,12 @@ class CustomEventController extends BaseController
             data: $response,
             statusMessage: 'Event \'' . $customEvent->name . '\' dispatched.'
         );
+    }
+
+    public function update(Request $request, CustomEventService $customEventService): JsonResponse
+    {
+        $response = $customEventService->update($request->all());
+
+        return ResponseHelper::createResponseFromArrayResponse($response);
     }
 }

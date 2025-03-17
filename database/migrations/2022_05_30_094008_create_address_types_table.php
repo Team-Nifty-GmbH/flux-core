@@ -8,7 +8,7 @@ class CreateAddressTypesTable extends Migration
 {
     public function up(): void
     {
-        Schema::create('address_types', function (Blueprint $table) {
+        Schema::create('address_types', function (Blueprint $table): void {
             $table->id()
                 ->comment('Id of the record.');
             $table->char('uuid', 36)

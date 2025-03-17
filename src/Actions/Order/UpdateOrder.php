@@ -15,14 +15,14 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateOrder extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateOrderRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Order::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateOrderRuleset::class;
     }
 
     public function performAction(): Model

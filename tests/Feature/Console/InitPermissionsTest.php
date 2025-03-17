@@ -10,7 +10,6 @@ use FluxErp\Models\Permission;
 use FluxErp\Tests\Feature\BaseSetup;
 use FluxErp\Traits\Livewire\WithTabs;
 use FluxErp\Traits\Widgetable;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Event;
 use Livewire\Component;
 use Livewire\Livewire;
@@ -20,9 +19,7 @@ use function Livewire\invade;
 
 class InitPermissionsTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
-    public function test_init_permissions()
+    public function test_init_permissions(): void
     {
         $actionsWithPermission = 0;
         foreach (Action::all() as $action) {
@@ -66,9 +63,9 @@ class InitPermissionsTest extends BaseSetup
         Widget::register('custom-widget-that-never-exists', 'custom-widget-that-never-exists');
 
         // Add Custom Tab
-        Event::listen('tabs.rendering: ' . Product::class, function (Component $component) {
+        Event::listen('tabs.rendering: ' . Product::class, function (Component $component): void {
             $component->mergeTabsToRender([
-                TabButton::make('custom-tab-that-never-exists', label: 'Custom Tab'),
+                TabButton::make('custom-tab-that-never-exists')->text('Custom Tab'),
             ]);
         });
 

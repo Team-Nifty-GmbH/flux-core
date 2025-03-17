@@ -10,9 +10,18 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class ReplicateOrderRuleset extends FluxRuleset
 {
+    protected static bool $addAdditionalColumnRules = false;
+
     protected static ?string $model = Order::class;
 
-    protected static bool $addAdditionalColumnRules = false;
+    public static function getRules(): array
+    {
+        return array_merge(
+            resolve_static(UpdateOrderRuleset::class, 'getRules'),
+            parent::getRules(),
+            resolve_static(OrderPositionRuleset::class, 'getRules')
+        );
+    }
 
     public function rules(): array
     {
@@ -30,14 +39,5 @@ class ReplicateOrderRuleset extends FluxRuleset
                 app(ExistsWithForeign::class, ['foreignAttribute' => 'client_id', 'table' => 'contacts']),
             ],
         ];
-    }
-
-    public static function getRules(): array
-    {
-        return array_merge(
-            resolve_static(UpdateOrderRuleset::class, 'getRules'),
-            parent::getRules(),
-            resolve_static(OrderPositionRuleset::class, 'getRules')
-        );
     }
 }

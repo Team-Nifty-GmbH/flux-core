@@ -15,39 +15,38 @@ use Illuminate\Validation\ValidationException;
 
 class MediaService
 {
-    /**
-     * @throws \League\Flysystem\FilesystemException
-     */
-    public function downloadPublic(string $filename, array $data): array
+    public function delete(string $id): array
     {
-        $mediaItem = resolve_static(Media::class, 'query')
-            ->where('model_type', $data['model_type'])
-            ->where('model_id', $data['model_id'])
-            ->where('file_name', $filename)
-            ->first();
-
-        if (! $mediaItem) {
+        try {
+            DeleteMedia::make(['id' => $id])->validate()->execute();
+        } catch (ValidationException $e) {
             return ResponseHelper::createArrayResponse(
                 statusCode: 404,
-                data: ['media' => __('File not found (MediaItem empty)')]
+                data: $e->errors()
             );
         }
 
-        if (($data['conversion'] ?? false) && ! $mediaItem->hasGeneratedConversion($data['conversion'])) {
+        return ResponseHelper::createArrayResponse(
+            statusCode: 204,
+            statusMessage: 'media deleted'
+        );
+    }
+
+    public function deleteCollection(array $data): array
+    {
+        try {
+            DeleteMediaCollection::make($data)->validate()->execute();
+        } catch (ValidationException $e) {
             return ResponseHelper::createArrayResponse(
-                statusCode: 404,
-                data: ['conversion' => __('File not found (conversion not generated)')]
+                statusCode: 422,
+                data: $e->errors()
             );
         }
 
-        if ((config('filesystems.disks.' . $mediaItem->disk)['visibility'] ?? null) !== 'public') {
-            return ResponseHelper::createArrayResponse(
-                statusCode: 404,
-                data: ['public' => __('File not found (not public)')]
-            );
-        }
-
-        return $this->download($mediaItem->id, $data);
+        return ResponseHelper::createArrayResponse(
+            statusCode: 204,
+            statusMessage: 'media collection deleted'
+        );
     }
 
     /**
@@ -91,22 +90,39 @@ class MediaService
         );
     }
 
-    public function upload(array $data): array
+    /**
+     * @throws \League\Flysystem\FilesystemException
+     */
+    public function downloadPublic(string $filename, array $data): array
     {
-        try {
-            $media = UploadMedia::make($data)->validate()->execute();
-        } catch (ValidationException $e) {
+        $mediaItem = resolve_static(Media::class, 'query')
+            ->where('model_type', $data['model_type'])
+            ->where('model_id', $data['model_id'])
+            ->where('file_name', $filename)
+            ->first();
+
+        if (! $mediaItem) {
             return ResponseHelper::createArrayResponse(
-                statusCode: 422,
-                data: $e->errors()
+                statusCode: 404,
+                data: ['media' => __('File not found (MediaItem empty)')]
             );
         }
 
-        return ResponseHelper::createArrayResponse(
-            statusCode: 201,
-            data: $media,
-            additions: ['url' => $media->getUrl()]
-        );
+        if (($data['conversion'] ?? false) && ! $mediaItem->hasGeneratedConversion($data['conversion'])) {
+            return ResponseHelper::createArrayResponse(
+                statusCode: 404,
+                data: ['conversion' => __('File not found (conversion not generated)')]
+            );
+        }
+
+        if ((config('filesystems.disks.' . $mediaItem->disk)['visibility'] ?? null) !== 'public') {
+            return ResponseHelper::createArrayResponse(
+                statusCode: 404,
+                data: ['public' => __('File not found (not public)')]
+            );
+        }
+
+        return $this->download($mediaItem->id, $data);
     }
 
     public function replace(string $id, array $data): array
@@ -132,27 +148,10 @@ class MediaService
         return UpdateMedia::make($data)->validate()->execute();
     }
 
-    public function delete(string $id): array
+    public function upload(array $data): array
     {
         try {
-            DeleteMedia::make(['id' => $id])->validate()->execute();
-        } catch (ValidationException $e) {
-            return ResponseHelper::createArrayResponse(
-                statusCode: 404,
-                data: $e->errors()
-            );
-        }
-
-        return ResponseHelper::createArrayResponse(
-            statusCode: 204,
-            statusMessage: 'media deleted'
-        );
-    }
-
-    public function deleteCollection(array $data): array
-    {
-        try {
-            DeleteMediaCollection::make($data)->validate()->execute();
+            $media = UploadMedia::make($data)->validate()->execute();
         } catch (ValidationException $e) {
             return ResponseHelper::createArrayResponse(
                 statusCode: 422,
@@ -161,8 +160,9 @@ class MediaService
         }
 
         return ResponseHelper::createArrayResponse(
-            statusCode: 204,
-            statusMessage: 'media collection deleted'
+            statusCode: 201,
+            data: $media,
+            additions: ['url' => $media->getUrl()]
         );
     }
 }

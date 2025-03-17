@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('tasks', function (Blueprint $table) {
+        Schema::table('tasks', function (Blueprint $table): void {
             $table->string('model_type')->nullable()->after('order_position_id');
             $table->unsignedBigInteger('model_id')->nullable()->after('model_type');
 
@@ -18,7 +18,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('tasks', function (Blueprint $table) {
+        Schema::table('tasks', function (Blueprint $table): void {
             $table->dropIndex('tasks_model_type_model_id_index');
             $table->dropColumn([
                 'model_type',

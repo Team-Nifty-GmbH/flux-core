@@ -15,11 +15,11 @@ class FormBuilderForm extends FluxModel
 
     protected static function booted(): void
     {
-        static::deleting(function (FormBuilderForm $form) {
-            $form->sections->each(function ($item) {
+        static::deleting(function (FormBuilderForm $form): void {
+            $form->sections->each(function ($item): void {
                 $item->delete();
             });
-            $form->responses->each(function ($item) {
+            $form->responses->each(function ($item): void {
                 $item->delete();
             });
         });
@@ -35,7 +35,7 @@ class FormBuilderForm extends FluxModel
         ];
     }
 
-    public function responses(): hasMany
+    public function responses(): HasMany
     {
         return $this->hasMany(FormBuilderResponse::class, 'form_id');
     }

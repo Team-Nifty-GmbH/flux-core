@@ -18,6 +18,21 @@ class ProductTypeManager
         $this->productTypes = collect();
     }
 
+    public function all(): Collection
+    {
+        return $this->productTypes;
+    }
+
+    public function get(?string $name): ?array
+    {
+        return $this->productTypes->get($name);
+    }
+
+    public function getDefault(): ?array
+    {
+        return $this->productTypes->first(fn ($type) => $type['is_default']);
+    }
+
     /**
      * @throws \Exception
      */
@@ -57,20 +72,5 @@ class ProductTypeManager
     public function unregister(string $name): void
     {
         $this->productTypes->forget($name);
-    }
-
-    public function all(): Collection
-    {
-        return $this->productTypes;
-    }
-
-    public function get(?string $name): ?array
-    {
-        return $this->productTypes->get($name);
-    }
-
-    public function getDefault(): ?array
-    {
-        return $this->productTypes->first(fn ($type) => $type['is_default']);
     }
 }

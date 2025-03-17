@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class MyResponsibleTasksTest extends BaseSetup
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::actingAs($this->user)
             ->test(MyResponsibleTasks::class)

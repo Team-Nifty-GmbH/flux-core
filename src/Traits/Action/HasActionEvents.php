@@ -8,19 +8,14 @@ use Illuminate\Events\QueuedClosure;
 
 trait HasActionEvents
 {
-    public static function booting(QueuedClosure|callable|array|string $callback): void
-    {
-        static::registerActionEvent('booting', $callback);
-    }
-
     public static function booted(QueuedClosure|callable|array|string $callback): void
     {
         static::registerActionEvent('booted', $callback);
     }
 
-    public static function executing(QueuedClosure|callable|array|string $callback): void
+    public static function booting(QueuedClosure|callable|array|string $callback): void
     {
-        static::registerActionEvent('executing', $callback);
+        static::registerActionEvent('booting', $callback);
     }
 
     public static function executed(QueuedClosure|callable|array|string $callback): void
@@ -28,14 +23,19 @@ trait HasActionEvents
         static::registerActionEvent('executed', $callback);
     }
 
+    public static function executing(QueuedClosure|callable|array|string $callback): void
+    {
+        static::registerActionEvent('executing', $callback);
+    }
+
     public static function preparingForValidation(QueuedClosure|callable|array|string $callback): void
     {
         static::registerActionEvent('preparingForValidation', $callback);
     }
 
-    public static function validating(QueuedClosure|callable|array|string $callback): void
+    public static function setEventDispatcher(?Dispatcher $dispatcher = null): void
     {
-        static::registerActionEvent('validating', $callback);
+        static::$dispatcher = $dispatcher;
     }
 
     public static function validated(QueuedClosure|callable|array|string $callback): void
@@ -43,9 +43,18 @@ trait HasActionEvents
         static::registerActionEvent('validated', $callback);
     }
 
-    public static function setEventDispatcher(?Dispatcher $dispatcher = null): void
+    public static function validating(QueuedClosure|callable|array|string $callback): void
     {
-        static::$dispatcher = $dispatcher;
+        static::registerActionEvent('validating', $callback);
+    }
+
+    protected static function registerActionEvent($event, $callback): void
+    {
+        if (isset(static::$dispatcher)) {
+            $name = static::class;
+
+            static::$dispatcher->listen('action.' . $event . ': ' . $name, $callback);
+        }
     }
 
     final public function withEvents(): static
@@ -60,15 +69,6 @@ trait HasActionEvents
         static::setEventDispatcher(app(NullDispatcher::class));
 
         return $this;
-    }
-
-    protected static function registerActionEvent($event, $callback): void
-    {
-        if (isset(static::$dispatcher)) {
-            $name = static::class;
-
-            static::$dispatcher->listen('action.' . $event . ': ' . $name, $callback);
-        }
     }
 
     protected function fireActionEvent(string $event, bool $halt = true): mixed

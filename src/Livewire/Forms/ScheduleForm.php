@@ -3,22 +3,13 @@
 namespace FluxErp\Livewire\Forms;
 
 use FluxErp\Actions\Schedule\CreateSchedule;
+use FluxErp\Actions\Schedule\DeleteSchedule;
 use FluxErp\Actions\Schedule\UpdateSchedule;
 use FluxErp\Facades\Repeatable;
 use Livewire\Attributes\Locked;
-use Livewire\Form;
 
-class ScheduleForm extends Form
+class ScheduleForm extends FluxForm
 {
-    #[Locked]
-    public ?int $id = null;
-
-    public ?string $name = null;
-
-    public ?string $description = null;
-
-    public array $parameters = [];
-
     public array $cron = [
         'methods' => [
             'basic' => null,
@@ -32,19 +23,56 @@ class ScheduleForm extends Form
         ],
     ];
 
-    public ?string $due_at = null;
-
-    public ?string $ends_at = null;
-
-    public ?int $recurrences = null;
-
     public ?int $current_recurrence = null;
 
-    public bool $is_active = true;
+    public ?string $description = null;
+
+    public ?string $due_at = null;
 
     public ?string $end_radio = null;
 
+    public ?string $ends_at = null;
+
+    #[Locked]
+    public ?int $id = null;
+
+    public bool $is_active = true;
+
+    public ?string $name = null;
+
     public ?array $orders = null;
+
+    public array $parameters = [];
+
+    public ?int $recurrences = null;
+
+    public function fill($values): void
+    {
+        parent::fill($values);
+
+        $this->cron['parameters']['basic'] = array_replace(
+            [null, null, null],
+            $this->cron['parameters']['basic']
+        );
+
+        $this->cron['parameters']['timeConstraint'] = array_replace(
+            [null, null],
+            $this->cron['parameters']['timeConstraint']
+        );
+
+        if (! is_null($this->name)) {
+            $this->parameters = array_merge(
+                Repeatable::get($this->name)['parameters'] ?? [],
+                $this->parameters
+            );
+        }
+
+        $this->end_radio = match (true) {
+            ! is_null($this->ends_at) => 'ends_at',
+            ! is_null($this->recurrences) => 'recurrences',
+            default => 'never'
+        };
+    }
 
     public function save(): void
     {
@@ -101,31 +129,10 @@ class ScheduleForm extends Form
         $this->fill($response);
     }
 
-    public function fill($values): void
+    protected function getActions(): array
     {
-        parent::fill($values);
-
-        $this->cron['parameters']['basic'] = array_replace(
-            [null, null, null],
-            $this->cron['parameters']['basic']
-        );
-
-        $this->cron['parameters']['timeConstraint'] = array_replace(
-            [null, null],
-            $this->cron['parameters']['timeConstraint']
-        );
-
-        if (! is_null($this->name)) {
-            $this->parameters = array_merge(
-                Repeatable::get($this->name)['parameters'] ?? [],
-                $this->parameters
-            );
-        }
-
-        $this->end_radio = match (true) {
-            ! is_null($this->ends_at) => 'ends_at',
-            ! is_null($this->recurrences) => 'recurrences',
-            default => 'never'
-        };
+        return [
+            'delete' => DeleteSchedule::class,
+        ];
     }
 }

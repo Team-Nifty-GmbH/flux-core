@@ -8,7 +8,7 @@ class CreateWarehousesTable extends Migration
 {
     public function up(): void
     {
-        Schema::create('warehouses', function (Blueprint $table) {
+        Schema::create('warehouses', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
             $table->unsignedBigInteger('address_id');

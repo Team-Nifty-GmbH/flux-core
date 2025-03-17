@@ -9,7 +9,7 @@ class CreateDiscountsTable extends Migration
     public function up(): void
     {
         if (! Schema::hasTable('discounts')) {
-            Schema::create('discounts', function (Blueprint $table) {
+            Schema::create('discounts', function (Blueprint $table): void {
                 $table->id()
                     ->comment('An incrementing number to uniquely identify a record in this table. This also is the primary key of this table.');
                 $table->char('uuid', 36)
