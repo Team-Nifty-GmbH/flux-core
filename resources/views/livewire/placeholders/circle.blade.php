@@ -1,5 +1,10 @@
-<div class="w-full h-full flex items-center justify-center">
-    <div class="w-32 h-32 rounded-full relative mb-4 animate-pulse text-base text-neutral-700 dark:text-white">
-        <div class="h-full w-full rounded-full absolute bg-transparent border-gray-300 dark:border-slate-700" style="border-width: 20px"></div>
+<div class="flex h-full w-full items-center justify-center">
+    <div
+        class="relative mb-4 h-32 w-32 animate-pulse rounded-full text-base text-neutral-700 dark:text-white"
+    >
+        <div
+            class="absolute h-full w-full rounded-full border-gray-300 bg-transparent dark:border-slate-700"
+            style="border-width: 20px"
+        ></div>
     </div>
 </div>

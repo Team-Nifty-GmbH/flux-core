@@ -1,9 +1,12 @@
-export default function() {
+export default function () {
     let spinnerTimeout;
     let spinnerVisible = false;
 
     function showSpinner(event) {
-        if (event.type === 'beforeunload' && event.target.location.href === window.location.href) {
+        if (
+            event.type === 'beforeunload' &&
+            event.target.location.href === window.location.href
+        ) {
             return;
         }
 

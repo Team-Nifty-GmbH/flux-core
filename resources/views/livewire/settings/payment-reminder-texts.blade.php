@@ -3,27 +3,33 @@
         class="flex flex-col gap-1.5"
         x-data="{
             addReceiver($event, type) {
-                let value = $event.target.value;
+                let value = $event.target.value
                 if ($event instanceof KeyboardEvent && $event.which !== 13) {
-                    value = value.slice(0, -1);
+                    value = value.slice(0, -1)
                 }
 
-                value = value.trim();
+                value = value.trim()
 
-                if (value && ($event instanceof FocusEvent || ($event.code === 'Comma' || $event.code === 'Enter' || $event.code === 'Space'))) {
+                if (
+                    value &&
+                    ($event instanceof FocusEvent ||
+                        $event.code === 'Comma' ||
+                        $event.code === 'Enter' ||
+                        $event.code === 'Space')
+                ) {
                     if (! Array.isArray($wire.paymentReminderTextForm[type])) {
-                        $wire.paymentReminderTextForm[type] = [];
+                        $wire.paymentReminderTextForm[type] = []
                     }
 
-                    const email = value.match(/<([^>]*)>/);
+                    const email = value.match(/<([^>]*)>/)
                     if (email && email[1]) {
-                        value = email[1];
+                        value = email[1]
                     }
 
-                    $wire.paymentReminderTextForm[type].push(value);
-                    $event.target.value = null;
+                    $wire.paymentReminderTextForm[type].push(value)
+                    $event.target.value = null
                 }
-            }
+            },
         }"
     >
         <x-number
@@ -39,23 +45,27 @@
             wire:model="paymentReminderTextForm.reminder_body"
         />
         <div class="flex gap-1">
-            <template x-for="to in $wire.paymentReminderTextForm.mail_to || []">
+            <template
+                x-for="to in $wire.paymentReminderTextForm.mail_to || []"
+            >
                 <x-badge flat color="indigo" cl>
                     <x-slot:text>
                         <span x-text="to"></span>
-                    </x-slot:text>
+                    </x-slot>
                     <x-slot
                         name="right"
-                        class="relative flex items-center w-2 h-2"
+                        class="relative flex h-2 w-2 items-center"
                     >
                         <button
                             type="button"
-                            x-on:click="$wire.paymentReminderTextForm.mail_to.splice($wire.paymentReminderTextForm.mail_to.indexOf(to), 1)"
+                            x-on:click="
+                                $wire.paymentReminderTextForm.mail_to.splice(
+                                    $wire.paymentReminderTextForm.mail_to.indexOf(to),
+                                    1,
+                                )
+                            "
                         >
-                            <x-icon
-                                name="x-mark"
-                                class="w-4 h-4"
-                            />
+                            <x-icon name="x-mark" class="h-4 w-4" />
                         </button>
                     </x-slot>
                 </x-badge>
@@ -69,23 +79,27 @@
             :placeholder="__('Leave empty to send to the customer.')"
         />
         <div class="flex gap-1">
-            <template x-for="to in $wire.paymentReminderTextForm.mail_cc || []">
+            <template
+                x-for="to in $wire.paymentReminderTextForm.mail_cc || []"
+            >
                 <x-badge flat color="indigo" cl>
                     <x-slot:text>
                         <span x-text="to"></span>
-                    </x-slot:text>
+                    </x-slot>
                     <x-slot
                         name="right"
-                        class="relative flex items-center w-2 h-2"
+                        class="relative flex h-2 w-2 items-center"
                     >
                         <button
                             type="button"
-                            x-on:click="$wire.paymentReminderTextForm.mail_cc.splice($wire.paymentReminderTextForm.mail_cc.indexOf(to), 1)"
+                            x-on:click="
+                                $wire.paymentReminderTextForm.mail_cc.splice(
+                                    $wire.paymentReminderTextForm.mail_cc.indexOf(to),
+                                    1,
+                                )
+                            "
                         >
-                            <x-icon
-                                name="x-mark"
-                                class="w-4 h-4"
-                            />
+                            <x-icon name="x-mark" class="h-4 w-4" />
                         </button>
                     </x-slot>
                 </x-badge>
@@ -97,19 +111,27 @@
             x-on:blur="addReceiver($event, 'mail_cc')"
             x-on:keyup="addReceiver($event, 'mail_cc')"
         />
-        <x-input :label="__('Payment Reminder Email Subject')"
-             wire:model="paymentReminderTextForm.mail_subject"
+        <x-input
+            :label="__('Payment Reminder Email Subject')"
+            wire:model="paymentReminderTextForm.mail_subject"
         />
-        <x-flux::editor :label="__('Payment Reminder Email Text')"
-              wire:model="paymentReminderTextForm.mail_body"
+        <x-flux::editor
+            :label="__('Payment Reminder Email Text')"
+            wire:model="paymentReminderTextForm.mail_body"
         />
         <x-slot:footer>
-            <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('edit-payment-reminder-text-modal')"/>
+            <x-button
+                color="secondary"
+                light
+                flat
+                :text="__('Cancel')"
+                x-on:click="$modalClose('edit-payment-reminder-text-modal')"
+            />
             <x-button
                 color="indigo"
                 :text="__('Save')"
                 wire:click="save().then((success) => { if (success) $modalClose('edit-payment-reminder-text-modal'); })"
             />
-        </x-slot:footer>
+        </x-slot>
     </div>
 </x-modal>

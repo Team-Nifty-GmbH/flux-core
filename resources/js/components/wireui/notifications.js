@@ -1,6 +1,6 @@
 // import the original module
-import { timer } from '@/notifications/timer'
-import uuid from '@/utils/uuid'
+import { timer } from '@/notifications/timer';
+import uuid from '@/utils/uuid';
 import originalNotifications from '@/components/notifications';
 
 const customNotifications = () => {
@@ -20,17 +20,21 @@ const customNotifications = () => {
                         this.removeNotification(notification.id);
                     },
                     (percentage) => {
-                        const progressBar = document.getElementById(`timeout.bar.${notification.id}`);
+                        const progressBar = document.getElementById(
+                            `timeout.bar.${notification.id}`,
+                        );
 
                         if (!progressBar) return;
 
                         progressBar.style.width = `${percentage}%`;
-                    }
+                    },
                 );
             }
 
             // If the notifications array has a notification with the same id, update it
-            const index = this.notifications.findIndex((item) => item.id === notification.id);
+            const index = this.notifications.findIndex(
+                (item) => item.id === notification.id,
+            );
             if (index !== -1) {
                 this.notifications.splice(index, 1, notification);
             } else {

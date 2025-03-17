@@ -1,21 +1,21 @@
 .fc .fc-toolbar.fc-header-toolbar {
-    @apply p-4 mb-0;
+    @apply mb-0 p-4;
 }
 
 .fc .fc-daygrid-day.fc-day-today .fc-daygrid-day-top a {
-    @apply bg-indigo-600 text-white font-semibold rounded-full;
+    @apply rounded-full bg-indigo-600 font-semibold text-white;
 }
 
 .fc-day {
-    @apply bg-white text-gray-800 dark:bg-secondary-800;
+    @apply dark:bg-secondary-800 bg-white text-gray-800;
 }
 
 .fc-day.fc-day-other {
-    @apply bg-gray-50 text-gray-500 dark:bg-secondary-700;
+    @apply dark:bg-secondary-700 bg-gray-50 text-gray-500;
 }
 
 .fc-daygrid-day-top {
-    @apply text-gray-700 text-sm;
+    @apply text-sm text-gray-700;
 }
 
 .fc-h-event {
@@ -26,8 +26,8 @@
     @apply !capitalize;
 }
 
-.fc-scrollgrid  {
-    @apply !border-l-0 !border-b-0 !border-r-0 !border-gray-200;
+.fc-scrollgrid {
+    @apply !border-b-0 !border-l-0 !border-r-0 !border-gray-200;
 }
 
 .fc-col-header-cell .fc-scrollgrid-sync-inner {
@@ -35,22 +35,24 @@
 }
 
 .fc-col-header-cell-cushion {
-    @apply dark:text-white
+    @apply dark:text-white;
 }
 
 .fc-event-time {
-    @apply dark:text-white
+    @apply dark:text-white;
 }
 
 .fc-event-title {
-    @apply dark:text-white
+    @apply dark:text-white;
 }
 
 .fc-daygrid-day-number {
-    @apply dark:text-white
+    @apply dark:text-white;
 }
 
-.fc-theme-standard td, .fc-theme-standard th, .fc-theme-standard .fc-scrollgrid {
+.fc-theme-standard td,
+.fc-theme-standard th,
+.fc-theme-standard .fc-scrollgrid {
     @apply border dark:border-slate-600;
 }
 
