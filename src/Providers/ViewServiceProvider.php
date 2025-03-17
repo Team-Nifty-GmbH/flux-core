@@ -133,6 +133,10 @@ class ViewServiceProvider extends ServiceProvider
             ->block('text', 'block text-sm font-medium text-gray-700 dark:text-gray-400');
 
         TallStackUi::personalize()
+            ->card('min-h-full')
+            ->block('wrapper.first', 'flex justify-center gap-4 w-full min-h-full');
+
+        TallStackUi::personalize()
             ->card()
             ->block('header.text.size', 'text-sm font-medium w-full');
 

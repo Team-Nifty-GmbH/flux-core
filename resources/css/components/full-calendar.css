@@ -55,3 +55,11 @@
 .fc-theme-standard .fc-scrollgrid {
     @apply border dark:border-slate-600;
 }
+
+.fc table {
+    @apply border-collapse text-sm;
+}
+
+.fc-toolbar-title {
+    @apply !text-lg !font-semibold;
+}
