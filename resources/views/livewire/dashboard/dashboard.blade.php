@@ -23,6 +23,6 @@
             <x-flux::dashboard.edit-dashboard />
         @show
     </div>
-        <x-flux::editor transparent />
+        <x-flux::editor transparent :availableFontSizes="[12,16,20,24,30,32]" />
     <x-flux::dashboard.grid />
 </div>

@@ -1,6 +1,7 @@
 @props([
     'editable' => true,
-    'font' => true,
+    'fontSize' => null,
+    'availableFontSizes' => []
 ])
 
 <div>
@@ -59,16 +60,17 @@
         @if($code)
             <x-button flat color="secondary" x-on:click="editor().chain().focus().toggleCode().run()" icon="code-bracket" :text="null"/>
         @endif
-        @if($h1)
-            <x-button flat color="secondary" x-on:click="editor().chain().focus().toggleHeading({ level: 1 }).run()" text="H1"></x-button>
+        @if(empty($availableFontSizes) && empty($fontSize))
+            @if($h1)
+                <x-button flat color="secondary" x-on:click="editor().chain().focus().toggleHeading({ level: 1 }).run()" text="H1"></x-button>
+            @endif
+            @if($h2)
+                <x-button flat color="secondary" x-on:click="editor().chain().focus().toggleHeading({ level: 2 }).run()" text="H2"></x-button>
+            @endif
+            @if($h3)
+                <x-button flat color="secondary" x-on:click="editor().chain().focus().toggleHeading({ level: 3 }).run()" text="H3"></x-button>
+            @endif
         @endif
-        @if($h2)
-            <x-button flat color="secondary" x-on:click="editor().chain().focus().toggleHeading({ level: 2 }).run()" text="H2"></x-button>
-        @endif
-        @if($h3)
-            <x-button flat color="secondary" x-on:click="editor().chain().focus().toggleHeading({ level: 3 }).run()" text="H3"></x-button>
-        @endif
-
         @if($horizontalRule)
             <x-button flat color="secondary" x-on:click="editor().chain().focus().setHorizontalRule().run()" text="-"></x-button>
         @endif
@@ -89,9 +91,11 @@
             <x-button flat color="secondary" icon="code-bracket-square" x-on:click="editor().chain().focus().toggleCodeBlock().run()">
             </x-button>
         @endif
-        @if($font)
-                <x-button flat color="secondary" text="PX" x-on:click="console.log(editor().chain().focus().setFontSize({ size: 12 }))">
-                </x-button>
+        @if(! empty($availableFontSizes))
+            @foreach($availableFontSizes as $size)
+                    <x-button flat color="secondary" text="{{ json_encode($size) }}px" x-on:click="editor().chain().focus().setFontSize({{ json_encode($size) }}).run()">
+                    </x-button>
+            @endforeach
         @endif
     </template>
 </div>

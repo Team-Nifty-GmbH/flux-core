@@ -4,6 +4,44 @@ import Mention from '@tiptap/extension-mention';
 import TextStyle from '@tiptap/extension-text-style';
 import axios from 'axios';
 
+// Font size handler - extention
+const FontSize = TextStyle.extend({
+    addOptions() {
+        return {
+            types: ['textStyle'],
+        }
+    },
+    addGlobalAttributes() {
+        return [
+            {
+                types: this.options.types,
+                attributes: {
+                    fontSize: {
+                        default: null,
+                        parseHTML: (element) => element.style.fontSize,
+                        renderHTML: (attributes) => {
+                            if (!attributes.fontSize) {
+                                return {}
+                            }
+
+                            return {
+                                style: `font-size: ${attributes.fontSize}px`,
+                            }
+                        },
+                    },
+                },
+            },
+        ]
+    },
+    addCommands() {
+        return {
+            setFontSize: fontSize => ({ chain }) => {
+                return chain().setMark('textStyle', { fontSize });
+            }
+        }
+    }
+});
+
 export default function (content, debounceDelay = 0, searchModel = ['user', 'role']) {
     return (() => {
         let _editor;
@@ -22,31 +60,6 @@ export default function (content, debounceDelay = 0, searchModel = ['user', 'rol
                 const controlPanel = this.$refs?.controlPanel;
                 const commands = this.$refs?.commands;
                 let actions = null;
-
-                const FontSize = TextStyle.extend({
-                    addAttributes() {
-                        return {
-                            fontSize: {
-                                default: '16px',
-                                parseHTML: element => element.style.fontSize,
-                                renderHTML: attributes => {
-                                    if (!attributes.fontSize) {
-                                        return {};
-                                    }
-                                    return { style: `font-size: ${attributes.fontSize}` };
-                                },
-                            },
-                        };
-                    },
-                    addCommands() {
-                        console.log('addCommands');
-                        return {
-                            setFontSize: fontSize => ({ chain }) => {
-                                return chain().setMark('fontSize', { fontSize }).run();
-                            }
-                        }
-                    }
-                })
 
                 if(showTooltipDropdown && popUp !== null) {
                     // append controllers to tiptap
