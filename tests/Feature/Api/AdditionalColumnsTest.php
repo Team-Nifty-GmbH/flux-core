@@ -148,7 +148,7 @@ class AdditionalColumnsTest extends BaseSetup
                             Carbon::parse($additionalColumn->created_at)->timezone('GMT')->toDateTimeString() &&
                             Carbon::parse($jsonAdditionalColumn->updated_at)->toDateTimeString() ===
                             Carbon::parse($additionalColumn->created_at)->timezone('GMT')->toDateTimeString();
-                })
+                    })
             );
         }
     }
