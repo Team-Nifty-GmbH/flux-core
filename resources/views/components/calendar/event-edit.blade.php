@@ -29,14 +29,15 @@
                     x-bind:value="dayjs($wire.calendarEvent.start).format('YYYY-MM-DD')"
                     x-on:change="setDateTime('start', $event)"
                 />
-                <x-input
-                    id="calendar-event-start-time"
-                    x-show="! $wire.calendarEvent.allDay"
-                    type="time"
-                    x-bind:disabled="! $wire.calendarEvent.is_editable ?? false"
-                    x-on:change="setDateTime('start', $event)"
-                    x-bind:value="dayjs($wire.calendarEvent.start).format('HH:mm')"
-                />
+                <div x-cloak x-show="! $wire.calendarEvent.allDay">
+                    <x-input
+                        id="calendar-event-start-time"
+                        type="time"
+                        x-bind:disabled="! $wire.calendarEvent.is_editable ?? false"
+                        x-on:change="setDateTime('start', $event)"
+                        x-bind:value="dayjs($wire.calendarEvent.start).format('HH:mm')"
+                    />
+                </div>
             </div>
             <div class="grid grid-cols-3 items-center gap-1.5">
                 <x-label :label="__('End')" />
@@ -47,14 +48,15 @@
                     x-bind:value="dayjs($wire.calendarEvent.end).format('YYYY-MM-DD')"
                     x-on:change="setDateTime('end', $event)"
                 />
-                <x-input
-                    id="calendar-event-end-time"
-                    x-show="! $wire.calendarEvent.allDay"
-                    type="time"
-                    x-bind:disabled="! $wire.calendarEvent.is_editable ?? false"
-                    x-on:change="setDateTime('end', $event)"
-                    x-bind:value="dayjs($wire.calendarEvent.end).format('HH:mm')"
-                />
+                <div x-cloak x-show="! $wire.calendarEvent.allDay">
+                    <x-input
+                        id="calendar-event-end-time"
+                        type="time"
+                        x-bind:disabled="! $wire.calendarEvent.is_editable ?? false"
+                        x-on:change="setDateTime('end', $event)"
+                        x-bind:value="dayjs($wire.calendarEvent.end).format('HH:mm')"
+                    />
+                </div>
             </div>
         @show
         @section('event-edit.custom-properties')
