@@ -91,11 +91,32 @@
             <x-button flat color="secondary" icon="code-bracket-square" x-on:click="editor().chain().focus().toggleCodeBlock().run()">
             </x-button>
         @endif
-        @if(! empty($availableFontSizes))
+{{--   tooltiop on select disabled - show dropdown on font-size edit --}}
+        @if(! empty($availableFontSizes) && !$tooltipDropdown)
+            <x-button
+                x-on:click="onClick"
+                x-ref="tipyParent"
+                x-data="fontSizeHandlerDropDown($refs.tipyParent, $refs.fontSizeDropdown)"
+                x-init="onInit"
+                flat color="secondary" text="PX">
+            </x-button>
+        @endif
+{{--   otherwise list all posible font-sizes in dropdown on hover --}}
+        @if(! empty($availableFontSizes) && $tooltipDropdown)
             @foreach($availableFontSizes as $size)
-                    <x-button flat color="secondary" text="{{ json_encode($size) }}px" x-on:click="editor().chain().focus().setFontSize({{ json_encode($size) }}).run()">
-                    </x-button>
+                <x-button flat color="secondary" text="{{ json_encode($size) }}px"
+                          x-on:click="editor().chain().focus().setFontSize({{ json_encode($size) }}).run()">
+                </x-button>
             @endforeach
         @endif
+    </template>
+    <template x-ref="fontSizeDropdown">
+       <div class="flex flex-col">
+        @foreach($availableFontSizes as $size)
+            <x-button flat color="secondary" text="{{ json_encode($size) }}px"
+                      x-on:click="editor().chain().focus().setFontSize({{ json_encode($size) }}).run()">
+            </x-button>
+        @endforeach
+       </div>
     </template>
 </div>

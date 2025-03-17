@@ -4,7 +4,7 @@ import Mention from '@tiptap/extension-mention';
 import TextStyle from '@tiptap/extension-text-style';
 import axios from 'axios';
 
-// Font size handler - extention
+// Font size handler - extension
 const FontSize = TextStyle.extend({
     addOptions() {
         return {
@@ -212,6 +212,30 @@ export default function (content, debounceDelay = 0, searchModel = ['user', 'rol
                     if (content === this.editor().getHTML()) return;
                     this.editor().commands.setContent(content, false);
                 });
+            },
+            fontSizeHandlerDropDown(parentElement, dropdownElement) {
+                return {
+                    popUpFontSize:null,
+                    onInit() {
+                        if(dropdownElement !== undefined && parentElement !== undefined) {
+                            const actions =  dropdownElement.content.cloneNode(true);
+                            this.popUpFontSize = window.tippy(parentElement, {
+                                content:  actions ?? 'not defined',
+                                showOnCreate: true,
+                                interactive: true,
+                                trigger: 'manual',
+                                placement: 'bottom',
+                            });
+                        }
+                    },
+                    onClick() {
+                        if(this.popUpFontSize.state.isVisible) {
+                            this.popUpFontSize.hide();
+                        } else {
+                            this.popUpFontSize.show();
+                        }
+                    }
+                }
             },
             updateSuggestionItems(element, props) {
                 while (element.firstChild) {
