@@ -166,25 +166,22 @@ class MediaTest extends BaseSetup
 
     public function test_download_media_public_route_with_format_parameters(): void
     {
-        $modelType = $this->task->getMorphClass();
         $fileName = Str::uuid()->toString() . '.png';
 
-        $media = $this->createMedia([
+        $this->createMedia([
             'disk' => 'public',
             'file_name' => $fileName,
             'name' => $fileName,
         ]);
-        $queryParams = $fileName . '?model_type=' . $modelType . '&model_id=' . $this->task->getKey() . '&as=url';
+        $queryParams = $fileName . '?model_type=' . $this->task->getMorphClass() . '&model_id=' . $this->task->getKey();
 
-        $download = $this->get('/api/media/' . $queryParams);
+        $download = $this->get('/api/media/' . $queryParams . '&as=url');
         $download->assertStatus(200);
         $responseData = json_decode($download->getContent(), true);
         $this->assertArrayHasKey('data', $responseData);
         $this->assertStringContainsString('/storage/', $responseData['data']);
 
-        $queryParams = $fileName . '?model_type=' . $modelType . '&model_id=' . $this->task->getKey() . '&as=path';
-
-        $download = $this->get('/api/media/' . $queryParams);
+        $download = $this->get('/api/media/' . $queryParams . '&as=path');
 
         $download->assertStatus(200);
         $responseData = json_decode($download->getContent(), true);
@@ -246,7 +243,10 @@ class MediaTest extends BaseSetup
             'file_name' => $fileName,
             'name' => $fileName,
         ]);
-        $queryParams = $fileName . '?model_type=task&model_id=' . $this->task->getKey() . '&as=someInvalidValue';
+        $queryParams = $fileName
+            . '?model_type=' . $this->task->getMorphClass()
+            . '&model_id=' . $this->task->getKey()
+            . '&as=someInvalidValue';
 
         $response = $this->actingAs($this->user)->get('/api/media/' . $queryParams);
 
@@ -331,8 +331,7 @@ class MediaTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['download-multiple']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)
-            ->get('/api/media/download-multiple');
+        $response = $this->actingAs($this->user)->get('/api/media/download-multiple');
 
         $response->assertStatus(422);
     }

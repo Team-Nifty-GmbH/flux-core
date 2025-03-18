@@ -320,7 +320,7 @@ Route::prefix('api')
                 Route::post('/addresses', CreateAddress::class);
                 Route::put('/addresses', UpdateAddress::class);
                 Route::delete('/addresses/{id}', DeleteAddress::class);
-                Route::post('/address/{id}/login-token', GenerateAddressLoginToken::class);
+                Route::post('/addresses/{id}/login-token', GenerateAddressLoginToken::class);
 
                 // AddressTypes
                 Route::get('/address-types/{id}', [BaseController::class, 'show'])
