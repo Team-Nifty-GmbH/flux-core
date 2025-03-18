@@ -118,7 +118,6 @@ class Notifications extends Component
     #[Renderless]
     public function showNotifications(): void
     {
-
         auth()->user()
             ->unreadNotifications()
             ->offset($this->loaded)

@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use Exception;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
@@ -33,7 +34,7 @@ class SerialNumber extends FluxModel implements HasMedia, InteractsWithDataTable
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function getAvatarUrl(): ?string
     {

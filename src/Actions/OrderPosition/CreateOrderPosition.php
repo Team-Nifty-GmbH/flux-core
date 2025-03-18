@@ -177,7 +177,6 @@ class CreateOrderPosition extends FluxAction
                 && in_array($order->orderType->order_type_enum, [OrderTypeEnum::Retoure, OrderTypeEnum::SplitOrder])
             ) {
                 if (! $originPositionId = data_get($this->data, 'origin_position_id')) {
-
                     $errors += [
                         'origin_position_id' => [__('validation.required', ['attribute' => 'origin_position_id'])],
                     ];

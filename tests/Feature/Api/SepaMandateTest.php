@@ -337,7 +337,7 @@ class SepaMandateTest extends BaseSetup
         $response = $this->actingAs($this->user)->put('/api/sepa-mandates', $sepaMandates);
         $response->assertStatus(422);
 
-        $responses = json_decode($response->getContent())->responses;
+        $responses = json_decode($response->getContent())->data->items;
         $this->assertEquals($sepaMandates[0]['id'], $responses[0]->id);
         $this->assertEquals(422, $responses[0]->status);
         $this->assertTrue(property_exists($responses[0]->errors, 'contact_bank_connection_id'));
@@ -346,7 +346,7 @@ class SepaMandateTest extends BaseSetup
         $this->assertTrue(property_exists($responses[1]->errors, 'contact_bank_connection_id'));
     }
 
-    public function test_update_sepa_mandate_multi_status_validation_fails(): void
+    public function test_update_sepa_mandate_validation_fails(): void
     {
         $sepaMandate = [
             'id' => $this->sepaMandates[0]->id,
@@ -360,7 +360,6 @@ class SepaMandateTest extends BaseSetup
         $response->assertStatus(422);
 
         $responseSepaMandate = json_decode($response->getContent());
-        $this->assertEquals($sepaMandate['id'], $responseSepaMandate->id);
         $this->assertEquals(422, $responseSepaMandate->status);
     }
 }

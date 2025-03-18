@@ -345,7 +345,7 @@ class PurchaseInvoiceTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->post('/api/purchase-invoices/finish', $purchaseInvoice);
-        $response->assertStatus(200);
+        $response->assertStatus(201);
 
         $responseOrder = json_decode($response->getContent())->data;
 

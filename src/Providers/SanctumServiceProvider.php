@@ -10,7 +10,6 @@ class SanctumServiceProvider extends \Laravel\Sanctum\SanctumServiceProvider
     public function register(): void
     {
         parent::register();
-
     }
 
     /**

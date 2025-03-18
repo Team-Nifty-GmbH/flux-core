@@ -2,6 +2,7 @@
 
 namespace FluxErp\Http\Controllers;
 
+use Exception;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -21,7 +22,7 @@ class LoginLinkController extends Controller
 
         try {
             Auth::guard($login['guard'])->login($login['user']);
-        } catch (\Exception) {
+        } catch (Exception) {
         }
 
         return Auth::guard($login['guard'])->check()

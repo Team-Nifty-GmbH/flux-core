@@ -31,7 +31,6 @@ use Spatie\TranslationLoader\TranslationServiceProvider;
 use Symfony\Component\Process\Process;
 use TallStackUi\TallStackUiServiceProvider;
 use TeamNiftyGmbH\DataTable\DataTableServiceProvider;
-
 use function Orchestra\Testbench\package_path;
 
 abstract class DuskTestCase extends TestCase
@@ -60,7 +59,6 @@ abstract class DuskTestCase extends TestCase
             if (! static::deleteDirectory($dir . DIRECTORY_SEPARATOR . $item)) {
                 return false;
             }
-
         }
 
         return rmdir($dir);

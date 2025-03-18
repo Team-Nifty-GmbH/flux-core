@@ -2,6 +2,7 @@
 
 namespace FluxErp\Actions\PurchaseInvoice;
 
+use Exception;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Media\UploadMedia;
 use FluxErp\Actions\PurchaseInvoicePosition\CreatePurchaseInvoicePosition;
@@ -14,6 +15,7 @@ use FluxErp\Rulesets\PurchaseInvoice\CreatePurchaseInvoiceRuleset;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use SplFileInfo;
 
 class CreatePurchaseInvoice extends FluxAction
 {
@@ -85,7 +87,7 @@ class CreatePurchaseInvoice extends FluxAction
         $media = data_get($this->data, 'media');
         $filePath = match (true) {
             is_string($media) && is_file($media) => $media,
-            is_a($media, \SplFileInfo::class) => $media->getRealPath(),
+            is_a($media, SplFileInfo::class) => $media->getRealPath(),
             (bool) data_get($media, 'id') => resolve_static(Media::class, 'query')
                 ->whereKey(data_get($media, 'id'))
                 ->first()
@@ -98,7 +100,7 @@ class CreatePurchaseInvoice extends FluxAction
 
             Validator::make($this->data, ['hash' => 'required|string|unique:purchase_invoices,hash'])
                 ->validate();
-        } catch (\Exception|ValidationException $e) {
+        } catch (Exception|ValidationException $e) {
             if ($e instanceof ValidationException) {
                 $errors += $e->errors();
             } else {

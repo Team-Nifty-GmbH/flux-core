@@ -414,7 +414,7 @@ class ProductTest extends BaseSetup
         $response = $this->actingAs($this->user)->put('/api/products', $products);
         $response->assertStatus(200);
 
-        $responses = json_decode($response->getContent())->responses;
+        $responses = json_decode($response->getContent())->data->items;
 
         $this->assertEquals($products[0]['id'], $responses[0]->data->id);
         $this->assertEquals($products[0]['name'], $responses[0]->data->name);

@@ -3,6 +3,7 @@
 namespace FluxErp\Actions\Plugins;
 
 use FluxErp\Rulesets\Plugin\TogglePluginRuleset;
+use RuntimeException;
 
 class ToggleActive extends BasePluginAction
 {
@@ -33,7 +34,7 @@ class ToggleActive extends BasePluginAction
         $run = $composer->dumpAutoloads();
 
         if ($run) {
-            throw new \RuntimeException('Could not dump autoloads.');
+            throw new RuntimeException('Could not dump autoloads.');
         }
 
         return true;

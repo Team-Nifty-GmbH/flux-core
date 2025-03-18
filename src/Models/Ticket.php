@@ -2,13 +2,13 @@
 
 namespace FluxErp\Models;
 
+use Exception;
 use FluxErp\Casts\Money;
 use FluxErp\States\Ticket\TicketState;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Communicatable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
-use FluxErp\Traits\HasCustomEvents;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasRelatedModel;
@@ -30,9 +30,9 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables
 {
-    use Commentable, Communicatable, Filterable, HasAdditionalColumns, HasCustomEvents, HasFrontendAttributes,
-        HasPackageFactory, HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification, HasUuid,
-        InteractsWithMedia, LogsActivity, Searchable, SoftDeletes, Trackable;
+    use Commentable, Communicatable, Filterable, HasAdditionalColumns, HasFrontendAttributes, HasPackageFactory,
+        HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification, HasUuid, InteractsWithMedia,
+        LogsActivity, Searchable, SoftDeletes, Trackable;
 
     public static string $iconName = 'chat-bubble-left-right';
 
@@ -68,7 +68,7 @@ class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function getAvatarUrl(): ?string
     {
