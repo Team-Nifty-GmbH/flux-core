@@ -1,33 +1,36 @@
 <div
     x-data="{
         init() {
-            $wire.getPriceLists()
-                .then(() => $wire.priceLists.forEach(
-                    priceList => {
-                        priceList.price_net = parseNumber(priceList.price_net);
-                        priceList.price_gross = parseNumber(priceList.price_gross);
-                    }
-                ))
+            $wire.getPriceLists().then(() =>
+                $wire.priceLists.forEach((priceList) => {
+                    priceList.price_net = parseNumber(priceList.price_net)
+                    priceList.price_gross = parseNumber(priceList.price_gross)
+                }),
+            )
         },
         recalculate(priceList, isNet) {
-            const vatRate = Number($wire.product.vat_rate?.rate_percentage);
+            const vatRate = Number($wire.product.vat_rate?.rate_percentage)
 
             if (! vatRate) {
                 if (isNet) {
-                    priceList.price_gross = parseNumber(priceList.price_net);
+                    priceList.price_gross = parseNumber(priceList.price_net)
                 } else {
-                    priceList.price_net = parseNumber(priceList.price_gross);
+                    priceList.price_net = parseNumber(priceList.price_gross)
                 }
 
-                return;
+                return
             }
 
             if (isNet) {
-                priceList.price_gross = parseNumber(priceList.price_net * (1 + vatRate));
+                priceList.price_gross = parseNumber(
+                    priceList.price_net * (1 + vatRate),
+                )
             } else {
-                priceList.price_net = parseNumber(priceList.price_gross / (1 + vatRate));
+                priceList.price_net = parseNumber(
+                    priceList.price_gross / (1 + vatRate),
+                )
             }
-        }
+        },
     }"
     class="space-y-5"
 >
@@ -45,9 +48,21 @@
             <x-slot:title>
                 <div class="flex gap-1.5">
                     <span x-text="priceList.name"></span>
-                    <x-badge x-show="priceList.is_default" color="indigo" label="{{ __('Default') }}" />
-                    <x-badge x-show="priceList.is_purchase" color="red" label="{{ __('Purchase Price') }}" />
-                    <x-badge x-show="priceList.parent && ! priceList.price_id" color="amber" x-text="'{{ __('Inherited from :parent_name') }}'.replace(':parent_name', priceList.parent?.name)" />
+                    <x-badge
+                        x-show="priceList.is_default"
+                        color="indigo"
+                        label="{{ __('Default') }}"
+                    />
+                    <x-badge
+                        x-show="priceList.is_purchase"
+                        color="red"
+                        label="{{ __('Purchase Price') }}"
+                    />
+                    <x-badge
+                        x-show="priceList.parent && ! priceList.price_id"
+                        color="amber"
+                        x-text="'{{ __('Inherited from :parent_name') }}'.replace(':parent_name', priceList.parent?.name)"
+                    />
                     <div x-show="priceList.parent">
                         <x-toggle
                             x-model.boolean="priceList.is_editable"
@@ -56,7 +71,7 @@
                         />
                     </div>
                 </div>
-            </x-slot:title>
+            </x-slot>
             <x-input
                 :prefix="$defaultCurrency->symbol"
                 class="net-price"
@@ -78,4 +93,3 @@
         </x-card>
     </template>
 </div>
-

@@ -1,9 +1,14 @@
 <div>
-    <div class="grid grid-cols-1 gap-1.5 sm:grid-cols-6" x-data="{isNew: @entangle('isNew')}">
+    <div
+        class="grid grid-cols-1 gap-1.5 sm:grid-cols-6"
+        x-data="{ isNew: @entangle('isNew') }"
+    >
         <div class="sm:col-span-6">
-            <x-input label="{{ __('Name') }}"
-                     placeholder="{{ __('Name') }}"
-                     wire:model="ticketType.name"/>
+            <x-input
+                label="{{ __('Name') }}"
+                placeholder="{{ __('Name') }}"
+                wire:model="ticketType.name"
+            />
         </div>
         <div class="sm:col-span-6" x-show="isNew" x-transition x-cloak>
             <x-select.styled

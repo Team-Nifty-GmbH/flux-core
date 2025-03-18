@@ -26,17 +26,8 @@ class TaskTest extends BaseSetup
 
     public function test_switch_tabs(): void
     {
-        $component = Livewire::actingAs($this->user)
-            ->test(TaskView::class, ['id' => $this->task->id]);
-
-        foreach (Livewire::new(TaskView::class)->getTabs() as $tab) {
-            $component
-                ->set('taskTab', $tab->component)
-                ->assertStatus(200);
-
-            if ($tab->isLivewireComponent) {
-                $component->assertSeeLivewire($tab->component);
-            }
-        }
+        Livewire::actingAs($this->user)
+            ->test(TaskView::class, ['id' => $this->task->id])
+            ->cycleTabs('taskTab');
     }
 }

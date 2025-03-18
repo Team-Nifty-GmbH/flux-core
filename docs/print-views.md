@@ -13,14 +13,14 @@ use FluxErp\Traits\Printable;
 class Order extends Model implements OffersPrinting
 {
     use Printable;
-    
+
     ...
-    
+
     public function getPrintViews(): array
     {
         return [
             'my-printable-view' => \App\View\Printing\MyPrintableView::class,
-            'my-other-printable-view' => fn (Order $order => $order->is_locked 
+            'my-other-printable-view' => fn (Order $order => $order->is_locked
                 ? \App\View\Printing\MyOtherPrintableView::class
                 : null
         ];
@@ -43,7 +43,7 @@ use Illuminate\Database\Eloquent\Collection;
 class OrderCollection extends Collection implements OffersPrinting
 {
     use Printable;
-    
+
     public function getPrintViews(): array
     {
         return [
@@ -62,14 +62,14 @@ use App\Collections\OrderCollection;
 class Order extends Model implements OffersPrinting
 {
     use Printable;
-    
+
     ...
-    
+
     public function newCollection(array $models = []): OrderCollection
     {
         return new OrderCollection($models);
     }
-    
+
     ...
 }
 ```
@@ -148,7 +148,7 @@ For example if you want to lock the order before creating the invoice:
 class Invoice extends PrintableView
 {
     ...
-    
+
     public function beforePrinting(): void
     {
         if ($this->preview || $this->model->invoice_number) {
@@ -212,7 +212,6 @@ public function register(): void
     });
 }
 ```
-
 
 # Editing the blade file
 

@@ -91,13 +91,13 @@ class WorkTimeList extends BaseDataTable
                 ->text(__('Create Orders'))
                 ->color('indigo')
                 ->xOnClick(<<<'JS'
-                    $modalOpen('create-orders');
+                    $modalOpen('create-orders-modal');
                 JS)
                 ->when(fn () => resolve_static(CreateOrder::class, 'canPerformAction', [false])),
             DataTableButton::make()
                 ->text(__('Change is billable'))
                 ->xOnClick(<<<'JS'
-                    $modalOpen('toggle-is-billable');
+                    $modalOpen('toggle-is-billable-modal');
                 JS)
                 ->when(fn () => resolve_static(UpdateLockedWorkTime::class, 'canPerformAction', [false])),
         ];

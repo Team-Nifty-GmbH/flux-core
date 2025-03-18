@@ -228,7 +228,7 @@ class FluxCalendar extends Component
                     [
                         'locale' => app()->getLocale(),
                         'firstDay' => Carbon::getWeekStartsAt(),
-                        'height' => 'auto',
+                        'height' => '500px',
                         'views' => $this->getViews(),
                         'headerToolbar' => [
                             'end' => 'prev,next today',
