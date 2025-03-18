@@ -17,6 +17,8 @@ abstract class FluxForm extends BaseForm
 
     protected ?string $modelClass = null;
 
+    abstract protected function getActions(): array;
+
     public function canAction(string $action): bool
     {
         return resolve_static(data_get($this->getActions(), $action), 'canPerformAction', [false]);
@@ -130,8 +132,6 @@ abstract class FluxForm extends BaseForm
             $attributes
         );
     }
-
-    abstract protected function getActions(): array;
 
     protected function getKey(): string
     {

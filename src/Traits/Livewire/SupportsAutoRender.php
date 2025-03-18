@@ -8,6 +8,7 @@ use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Locked;
 use ReflectionClass;
+use ReflectionNamedType;
 use ReflectionProperty;
 use ReflectionUnionType;
 
@@ -127,7 +128,7 @@ trait SupportsAutoRender
             return implode('|', $typeNames);
         }
 
-        if ($type instanceof \ReflectionNamedType && $type->allowsNull()) {
+        if ($type instanceof ReflectionNamedType && $type->allowsNull()) {
             return $type->getName() . '|null';
         }
 

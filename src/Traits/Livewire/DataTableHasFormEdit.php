@@ -13,6 +13,8 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 trait DataTableHasFormEdit
 {
+    abstract public function loadData(): void;
+
     public function bootSupportsFluxForms(): void
     {
         if (! $this instanceof DataTable) {
@@ -23,7 +25,9 @@ trait DataTableHasFormEdit
     #[Renderless]
     public function delete(string|int $id): bool
     {
-        $model = resolve_static($this->model, 'query')->whereKey($id)->firstOrFail();
+        $model = resolve_static($this->model, 'query')
+            ->whereKey($id)
+            ->firstOrFail();
 
         $this->{$this->formAttributeName()}->reset();
         $this->{$this->formAttributeName()}->fill($model);
@@ -72,7 +76,9 @@ trait DataTableHasFormEdit
         $this->{$this->formAttributeName()}->reset();
 
         if ($id) {
-            $model = resolve_static($this->model, 'query')->whereKey($id)->firstOrFail();
+            $model = resolve_static($this->model, 'query')
+                ->whereKey($id)
+                ->firstOrFail();
             $this->{$this->formAttributeName()}->fill($model);
         }
 
@@ -81,8 +87,6 @@ trait DataTableHasFormEdit
             \$modalOpen('$modalName');
         JS);
     }
-
-    abstract public function loadData(): void;
 
     #[Renderless]
     public function save(): bool
