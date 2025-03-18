@@ -30,7 +30,6 @@
             {{ $slot }}
         @elseif($tabs[$this->{$attributes->wire('model')->value()}]?->isLivewireComponent)
             <livewire:dynamic-component
-                lazy
                 wire:model="{{ $tabs[$this->{$attributes->wire('model')->value()}]?->wireModel }}"
                 :is="$this->{$attributes->wire('model')->value()}"
                 wire:key="{{ uniqid() }}"

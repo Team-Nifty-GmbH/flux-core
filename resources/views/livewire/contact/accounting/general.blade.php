@@ -137,7 +137,7 @@
                 x-bind:disabled="! $wire.$parent.$parent.edit"
                 step="1"
                 min="1"
-                wire:model="contact.payment_discount_days"
+                wire:model="contact.discount_days"
                 :label="__('Payment Discount Days')"
             />
             <x-number

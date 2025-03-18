@@ -126,7 +126,7 @@ class AddressForm extends FluxForm
         return app(Address::class)->fill($this->toArray())->postal_address;
     }
 
-    public function toArray(): array
+    public function toActionData(): array
     {
         $data = parent::toArray();
 
