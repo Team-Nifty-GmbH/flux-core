@@ -29,17 +29,13 @@
         {{ $attributes->whereDoesntStartWith('wire:model') }}
         wire:ignore
     >
-        <template x-ref="popWindow" class="divide-x flex flex-wrap items-stretch placeholder-secondary-400
-            dark:bg-secondary-800 dark:text-secondary-400 dark:placeholder-secondary-500
-            focus:ring-primary-500 focus:border-primary-500 dark:border-secondary-600
-            w-full sm:text-sm rounded-t-md transition ease-in-out duration-100 focus:outline-none">
-        </template>
         <div x-cloak
              x-transition
              x-show="proxy.isEditable"
              x-ref="controlPanel"
              id="controlPanel"
-             class="divide-x flex flex-wrap items-stretch placeholder-secondary-400
+             class="
+                flex flex-wrap items-stretch placeholder-secondary-400
              dark:bg-secondary-800 dark:text-secondary-400 dark:placeholder-secondary-500
               {{ $tooltipDropdown ? '' : 'border border-b-0' }} border-secondary-300 focus:ring-primary-500
              focus:border-primary-500 dark:border-secondary-600  w-full sm:text-sm
@@ -47,6 +43,12 @@
         </div>
         <div class="list-disc" x-ref="editor"></div>
     </div>
+{{--    templates to be add on demand --}}
+    <template x-ref="popWindow" class="divide-x flex flex-wrap items-stretch placeholder-secondary-400
+            dark:bg-secondary-800 dark:text-secondary-400 dark:placeholder-secondary-500
+            focus:ring-primary-500 focus:border-primary-500 dark:border-secondary-600
+            w-full sm:text-sm rounded-t-md transition ease-in-out duration-100 focus:outline-none">
+    </template>
     <template x-ref="commands">
         @if($bold)
             <x-button flat color="secondary" x-on:click="editor().chain().focus().toggleBold().run()" class="font-bold" text="B"></x-button>
@@ -96,8 +98,7 @@
             <x-button
                 x-on:click="onClick"
                 x-ref="tipyParent"
-                x-data="fontSizeHandlerDropDown($refs.tipyParent, $refs.fontSizeDropdown)"
-                x-init="onInit"
+                x-data="editorFontSizeHandler($refs.tipyParent, $refs.fontSizeDropdown)"
                 flat color="secondary" text="PX">
             </x-button>
         @endif

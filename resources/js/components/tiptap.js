@@ -1,46 +1,10 @@
 import { Editor } from '@tiptap/core';
+import { FontSizeConfig } from "./tiptap-font-size-handler.js";
 import StarterKit from '@tiptap/starter-kit';
 import Mention from '@tiptap/extension-mention';
-import TextStyle from '@tiptap/extension-text-style';
 import axios from 'axios';
 
 // Font size handler - extension
-const FontSize = TextStyle.extend({
-    addOptions() {
-        return {
-            types: ['textStyle'],
-        }
-    },
-    addGlobalAttributes() {
-        return [
-            {
-                types: this.options.types,
-                attributes: {
-                    fontSize: {
-                        default: null,
-                        parseHTML: (element) => element.style.fontSize,
-                        renderHTML: (attributes) => {
-                            if (!attributes.fontSize) {
-                                return {}
-                            }
-
-                            return {
-                                style: `font-size: ${attributes.fontSize}px`,
-                            }
-                        },
-                    },
-                },
-            },
-        ]
-    },
-    addCommands() {
-        return {
-            setFontSize: fontSize => ({ chain }) => {
-                return chain().setMark('textStyle', { fontSize });
-            }
-        }
-    }
-});
 
 export default function (content, debounceDelay = 0, searchModel = ['user', 'role']) {
     return (() => {
@@ -79,7 +43,7 @@ export default function (content, debounceDelay = 0, searchModel = ['user', 'rol
                     element: element,
                     extensions: [
                         StarterKit,
-                        FontSize,
+                        FontSizeConfig,
                         Mention.configure({
                             HTMLAttributes: { 'class': 'mention' },
                             suggestion: {
@@ -212,30 +176,6 @@ export default function (content, debounceDelay = 0, searchModel = ['user', 'rol
                     if (content === this.editor().getHTML()) return;
                     this.editor().commands.setContent(content, false);
                 });
-            },
-            fontSizeHandlerDropDown(parentElement, dropdownElement) {
-                return {
-                    popUpFontSize:null,
-                    onInit() {
-                        if(dropdownElement !== undefined && parentElement !== undefined) {
-                            const actions =  dropdownElement.content.cloneNode(true);
-                            this.popUpFontSize = window.tippy(parentElement, {
-                                content:  actions ?? 'not defined',
-                                showOnCreate: true,
-                                interactive: true,
-                                trigger: 'manual',
-                                placement: 'bottom',
-                            });
-                        }
-                    },
-                    onClick() {
-                        if(this.popUpFontSize.state.isVisible) {
-                            this.popUpFontSize.hide();
-                        } else {
-                            this.popUpFontSize.show();
-                        }
-                    }
-                }
             },
             updateSuggestionItems(element, props) {
                 while (element.firstChild) {
