@@ -420,7 +420,8 @@ Route::prefix('api')
                 // CountryRegions
                 Route::get('/country-regions/{id}', [BaseController::class, 'show'])
                     ->defaults('model', CountryRegion::class);
-                Route::get('/country-regions', [BaseController::class, 'index'])->defaults('model', CountryRegion::class);
+                Route::get('/country-regions', [BaseController::class, 'index'])
+                    ->defaults('model', CountryRegion::class);
                 Route::post('/country-regions', CreateCountryRegion::class);
                 Route::put('/country-regions', UpdateCountryRegion::class);
                 Route::delete('/country-regions/{id}', DeleteCountryRegion::class);
