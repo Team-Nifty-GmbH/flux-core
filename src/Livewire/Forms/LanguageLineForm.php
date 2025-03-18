@@ -22,6 +22,14 @@ class LanguageLineForm extends FluxForm
 
     public ?string $translation = null;
 
+    public function fill($values): void
+    {
+        $this->locale = data_get(array_keys(data_get($values, 'text', [])), 0);
+        $this->translation = data_get($values, 'text.' . $this->locale);
+
+        parent::fill($values);
+    }
+
     public function toActionData(): array
     {
         $this->text = [

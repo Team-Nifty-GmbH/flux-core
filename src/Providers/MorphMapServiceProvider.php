@@ -145,7 +145,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'interface_user' => InterfaceUser::class,
             'job_batch' => JobBatch::class,
             'language' => Language::class,
-            'translation' => LanguageLine::class,
+            'language_line' => LanguageLine::class,
             'ledger_account' => LedgerAccount::class,
             'lock' => Lock::class,
             'log' => Log::class,
