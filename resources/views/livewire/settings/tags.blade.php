@@ -14,8 +14,18 @@
             </div>
         </div>
         <x-slot:footer>
-            <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('edit-tag-modal')"/>
-            <x-button color="indigo" :text="__('Save')" wire:click="save().then((success) => { if(success) $modalClose('edit-tag-modal')})"/>
-        </x-slot:footer>
+            <x-button
+                color="secondary"
+                light
+                flat
+                :text="__('Cancel')"
+                x-on:click="$modalClose('edit-tag-modal')"
+            />
+            <x-button
+                color="indigo"
+                :text="__('Save')"
+                wire:click="save().then((success) => { if(success) $modalClose('edit-tag-modal')})"
+            />
+        </x-slot>
     </x-modal>
 </div>

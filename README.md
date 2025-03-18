@@ -1,9 +1,11 @@
 <p align="center"><a href="https://team-nifty.com" target="_blank"><img src="https://user-images.githubusercontent.com/40495041/160839207-0e1593e0-ff3d-4407-b9d2-d3513c366ab9.svg" width="400"></a></p>
 
 ### 1. Installation
+
 Remove the welcome route from `routes/web.php`.
 
 Add the following to your `config/filesystem.php` config file
+
 ```php
     'links' => [
         ...
@@ -12,9 +14,11 @@ Add the following to your `config/filesystem.php` config file
 ```
 
 link the flux-erp assets
+
 ```bash
 php artisan storage:link
 ```
+
 This will create a symlink in `public/flux` to `vendor/team-nifty-gmbh/flux/public` which is where the flux-erp assets are stored.
 
 If you want to use seeders add the following to your DatabaseSeeder.php file:
@@ -28,14 +32,19 @@ Because vite includes the pusher data into the build process its neccessary to r
 ```bash
 vite build
 ```
+
 Please keep in mind to do so after setting the pusher credentials in the .env file.
 
 ### 2. Development
+
 If you want to develop for flux-erp you should publish the docker files (this runs nginx instead of artisan serve)
+
 ```bash
 php artisan vendor:publish --tag="flux-docker"
 ```
+
 Alternative you can change your docker-compose.yml file to use the flux-erp docker files from the vendor folder.
+
 ```yaml
     laravel.test:
         build:
@@ -44,11 +53,13 @@ Alternative you can change your docker-compose.yml file to use the flux-erp dock
 ```
 
 If you already have built the docker images you should rebuild them
+
 ```bash
 sail build --no-cache
 ```
 
 ### 3. Running tests
+
 ```bash
 cd vendor/flux-erp
 composer i
@@ -65,7 +76,7 @@ You should build the Pusher config with port 443 as it should be the production 
 
 ```js
 // resources/js/bootstrap.js
-import Echo from 'laravel-echo'
+import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
 
 window.Pusher = Pusher;
@@ -73,7 +84,7 @@ window.Pusher = Pusher;
 window.Echo = new Echo({
     broadcaster: 'pusher',
     key: import.meta.env.VITE_PUSHER_APP_KEY,
-    cluster:import.meta.env.VITE_PUSHER_APP_CLUSTER,
+    cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
     wsHost: window.location.hostname, // <-- important if you dont build the js file on the prod server
     wsPort: 80, // <-- this ensures that nginx will receive the request
     wssPort: 443, // <-- this ensures that nginx will receive the request
@@ -83,6 +94,7 @@ window.Echo = new Echo({
 ```
 
 Your nginx config should look like this
+
 ```nginx
 # Virtual Host configuration for tnconnect
 #
@@ -192,6 +204,7 @@ server {
 ```
 
 Your .env file should look something like this:
+
 ```dotenv
 # .env
 REVERB_APP_ID=local
@@ -205,6 +218,7 @@ REVERB_PORT=443
 This ensures that nginx handles your request, if you have mutliple instances of websockets running on the same server nginx will handle the request to the correct instance.
 
 If you have only one instance of websockets running you can use the default port 6001 and remove the `PUSHER_PORT` from your .env file.
+
 ```dotenv
 # .env
 REVERB_APP_ID=local

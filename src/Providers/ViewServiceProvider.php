@@ -108,12 +108,8 @@ class ViewServiceProvider extends ServiceProvider
 
     protected function bootBladeDirectives(): void
     {
-        Blade::directive('canAction', function ($expression) {
-            return "<?php if (resolve_static($expression, 'canPerformAction', [false])): ?>";
-        });
-
-        Blade::directive('endCanAction', function () {
-            return '<?php endif; ?>';
+        Blade::if('canAction', function (string $action) {
+            return resolve_static($action, 'canPerformAction', [false]);
         });
     }
 
@@ -135,6 +131,10 @@ class ViewServiceProvider extends ServiceProvider
         TallStackUi::personalize()
             ->form('label')
             ->block('text', 'block text-sm font-medium text-gray-700 dark:text-gray-400');
+
+        TallStackUi::personalize()
+            ->card('min-h-full')
+            ->block('wrapper.first', 'flex justify-center gap-4 w-full min-h-full');
 
         TallStackUi::personalize()
             ->card()

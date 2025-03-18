@@ -23,7 +23,13 @@
                         />
                     </div>
                     <div class="flex justify-end gap-x-2">
-                        <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('task-form-modal')"/>
+                        <x-button
+                            color="secondary"
+                            light
+                            flat
+                            :text="__('Cancel')"
+                            x-on:click="$modalClose('task-form-modal')"
+                        />
                         <x-button
                             color="indigo"
                             :text="__('Save')"
@@ -33,10 +39,13 @@
                         />
                     </div>
                 </div>
-            </x-slot:footer>
+            </x-slot>
         </x-modal>
     </div>
-    <div wire:ignore x-on:data-table-row-clicked="$wire.edit($event.detail.id)">
+    <div
+        wire:ignore
+        x-on:data-table-row-clicked="$wire.edit($event.detail.id)"
+    >
         @include('tall-datatables::livewire.data-table')
     </div>
 </div>

@@ -12,16 +12,19 @@ class TallstackUISelect {
             for (const key in source) {
                 if (source.hasOwnProperty(key)) {
                     if (
-                      source[key] &&
-                      typeof source[key] === 'object' &&
-                      !Array.isArray(source[key]) &&
-                      target[key] &&
-                      typeof target[key] === 'object' &&
-                      !Array.isArray(target[key])
+                        source[key] &&
+                        typeof source[key] === 'object' &&
+                        !Array.isArray(source[key]) &&
+                        target[key] &&
+                        typeof target[key] === 'object' &&
+                        !Array.isArray(target[key])
                     ) {
-                      target[key] = mergeDeep({ ...target[key] }, source[key]);
+                        target[key] = mergeDeep(
+                            { ...target[key] },
+                            source[key],
+                        );
                     } else {
-                      target[key] = source[key];
+                        target[key] = source[key];
                     }
                 }
             }
@@ -47,16 +50,19 @@ class TallstackUISelect {
     }
 
     getRequestParams() {
-        return Alpine.evaluate(this.alpineComponent, this.alpineComponent.$refs.params.innerHTML);
+        return Alpine.evaluate(
+            this.alpineComponent,
+            this.alpineComponent.$refs.params.innerHTML,
+        );
     }
 
     getSelect() {
         return document
-          .getElementById(this.id)
-          .querySelector('[x-data^="tallstackui_select"]');
+            .getElementById(this.id)
+            .querySelector('[x-data^="tallstackui_select"]');
     }
 }
 
 export default function (id) {
-  return new TallstackUISelect(id);
+    return new TallstackUISelect(id);
 }
