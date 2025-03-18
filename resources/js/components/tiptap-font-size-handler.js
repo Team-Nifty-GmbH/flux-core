@@ -1,11 +1,10 @@
-import TextStyle from "@tiptap/extension-text-style";
-
+import TextStyle from '@tiptap/extension-text-style';
 
 export const FontSizeConfig = TextStyle.extend({
     addOptions() {
         return {
             types: ['textStyle'],
-        }
+        };
     },
     addGlobalAttributes() {
         return [
@@ -17,51 +16,76 @@ export const FontSizeConfig = TextStyle.extend({
                         parseHTML: (element) => element.style.fontSize,
                         renderHTML: (attributes) => {
                             if (!attributes.fontSize) {
-                                return {}
+                                return {};
                             }
 
                             return {
                                 style: `font-size: ${attributes.fontSize}px`,
-                            }
+                            };
                         },
                     },
                 },
             },
-        ]
+        ];
     },
     addCommands() {
         return {
-            setFontSize: fontSize => ({ chain }) => {
-                return chain().setMark('textStyle', { fontSize });
-            }
-        }
-    }
+            setFontSize:
+                (fontSize) =>
+                ({ chain }) => {
+                    return chain().setMark('textStyle', { fontSize });
+                },
+        };
+    },
 });
 
-
 export default function (parentElement, dropdownElement) {
+    let sideEffect = null;
     return {
-        popUpFontSize:null,
+        popUpFontSize: null,
+        sideEffect() {
+            if (
+                this.popUpFontSize !== null &&
+                this.popUpFontSize.state.isVisible
+            ) {
+                this.popUpFontSize.hide();
+            }
+        },
         onClick() {
-            if(this.popUpFontSize === null) {
-                if(dropdownElement !== undefined && parentElement !== undefined) {
-                    const actions =  dropdownElement.content.cloneNode(true);
+            if (this.popUpFontSize === null) {
+                if (
+                    dropdownElement !== undefined &&
+                    parentElement !== undefined
+                ) {
+                    const actions = dropdownElement.content.cloneNode(true);
                     this.popUpFontSize = window.tippy(parentElement, {
-                        content:  actions ?? 'not defined',
+                        content: actions ?? 'not defined',
                         showOnCreate: true,
                         interactive: true,
                         trigger: 'manual',
                         placement: 'bottom',
+                        onShow: (instance) => {
+                            sideEffect = this.sideEffect.bind(this);
+                            instance.popper.addEventListener(
+                                'click',
+                                sideEffect,
+                            );
+                        },
+                        onHide: (instance) =>
+                            sideEffect &&
+                            instance.popper.removeEventListener(
+                                'click',
+                                sideEffect,
+                            ),
                     });
+
+                    return;
                 }
-                return;
             }
 
-            if(this.popUpFontSize.state.isVisible) {
-                this.popUpFontSize.hide();
-            } else {
+            if (!this.popUpFontSize.state.isVisible) {
                 this.popUpFontSize.show();
             }
-        }
-    }
+        },
+    };
 }

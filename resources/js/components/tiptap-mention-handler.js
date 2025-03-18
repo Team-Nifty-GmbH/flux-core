@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from 'axios';
 import Mention from '@tiptap/extension-mention';
 
 let suggestionPopup = null;
@@ -8,7 +8,7 @@ function updateSuggestionItems(element, props) {
         element.removeChild(element.firstChild);
     }
 
-    props.items.forEach(item => {
+    props.items.forEach((item) => {
         const div = document.createElement('div');
         div.className = 'suggestion-item flex gap-1 justify-start';
         const img = document.createElement('img');
@@ -29,18 +29,24 @@ function updateSuggestionItems(element, props) {
 }
 
 export const MentionConfig = Mention.configure({
-    HTMLAttributes: { 'class': 'mention' },
+    HTMLAttributes: { class: 'mention' },
     suggestion: {
         items: async ({ query }) => {
-            return (await Promise.all(searchModel.map(async model => {
-                return (await axios.get(`/search/${model}?search=${query}`)).data.map(item => {
-                    return {
-                        id: model + ':' + item.id,
-                        label: item.label,
-                        src: item.src,
-                    };
-                });
-            }))).flat();
+            return (
+                await Promise.all(
+                    searchModel.map(async (model) => {
+                        return (
+                            await axios.get(`/search/${model}?search=${query}`)
+                        ).data.map((item) => {
+                            return {
+                                id: model + ':' + item.id,
+                                label: item.label,
+                                src: item.src,
+                            };
+                        });
+                    }),
+                )
+            ).flat();
         },
 
         render: () => {
@@ -48,7 +54,7 @@ export const MentionConfig = Mention.configure({
             suggestionElement.className = 'suggestion-popup';
 
             return {
-                onStart: props => {
+                onStart: (props) => {
                     suggestionPopup = window.tippy(element, {
                         content: suggestionElement,
                         showOnCreate: true,
@@ -60,7 +66,7 @@ export const MentionConfig = Mention.configure({
                     updateSuggestionItems(suggestionElement, props);
                 },
 
-                onUpdate: props => {
+                onUpdate: (props) => {
                     if (!props.clientRect) {
                         return;
                     }
@@ -72,7 +78,7 @@ export const MentionConfig = Mention.configure({
                     });
                 },
 
-                onKeyDown: props => {
+                onKeyDown: (props) => {
                     if (props.event.key === 'Escape') {
                         suggestionPopup.hide();
                         return true;
