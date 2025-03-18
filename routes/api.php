@@ -87,6 +87,7 @@ use FluxErp\Actions\MailAccount\UpdateMailAccount;
 use FluxErp\Actions\Media\DeleteMedia;
 use FluxErp\Actions\Media\DeleteMediaCollection;
 use FluxErp\Actions\Media\DownloadMedia;
+use FluxErp\Actions\Media\DownloadMultipleMedia;
 use FluxErp\Actions\Media\ReplaceMedia;
 use FluxErp\Actions\Media\UpdateMedia;
 use FluxErp\Actions\Media\UploadMedia;
@@ -295,7 +296,6 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('api')
     ->middleware(['throttle:api', SetAcceptHeaders::class])
     ->group(function (): void {
-        Route::get('/media/{file_name}', DownloadMedia::class)->name('media.public');
         Route::post('/auth/token', [AuthController::class, 'authenticate']);
 
         Route::middleware(['auth:sanctum', 'abilities:user', 'localization', 'permission', 'api'])
@@ -386,7 +386,9 @@ Route::prefix('api')
                 Route::delete('/contact-bank-connections/{id}', DeleteContactBankConnection::class);
 
                 // ContactOptions
-                Route::get('/contact-options/{id}', [BaseController::class, 'index'])
+                Route::get('/contact-options/{id}', [BaseController::class, 'show'])
+                    ->defaults('model', ContactOption::class);
+                Route::get('/contact-options', [BaseController::class, 'index'])
                     ->defaults('model', ContactOption::class);
                 Route::post('/contact-options', CreateContactOption::class);
                 Route::put('/contact-options', UpdateContactOption::class);
@@ -516,6 +518,7 @@ Route::prefix('api')
                 // Media
                 Route::get('/media/private/{id}', DownloadMedia::class)
                     ->withoutMiddleware(SetAcceptHeaders::class);
+                Route::get('/media/download-multiple', DownloadMultipleMedia::class);
                 Route::post('/media/{id}', ReplaceMedia::class);
                 Route::post('/media', UploadMedia::class);
                 Route::put('/media', UpdateMedia::class);
@@ -844,5 +847,6 @@ Route::prefix('api')
                 Route::delete('/warehouses/{id}', DeleteWarehouse::class);
             });
 
+        Route::get('/media/{file_name}', DownloadMedia::class)->name('media.public');
         Broadcast::routes(['middleware' => ['auth:sanctum']]);
     });

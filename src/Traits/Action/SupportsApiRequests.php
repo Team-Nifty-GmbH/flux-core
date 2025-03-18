@@ -4,19 +4,22 @@ namespace FluxErp\Traits\Action;
 
 use Exception;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 trait SupportsApiRequests
 {
+    public static bool $returnResult = false;
+
     public static ?int $successCode = null;
 
-    public function __invoke(Request $request): Htmlable|Response|JsonResponse
+    public function __invoke(Request $request): Htmlable|Responsable|Response|BinaryFileResponse
     {
         $routeParams = $request->route()->parameters();
         $data = array_merge(
@@ -42,6 +45,7 @@ trait SupportsApiRequests
         $results = [];
         $successful = 0;
         $failed = 0;
+        $data = $data === [] ? [[]] : $data;
         $worstStatusCode = Response::HTTP_OK;
 
         foreach ($data as $item) {
@@ -54,7 +58,7 @@ trait SupportsApiRequests
                     ->validate()
                     ->execute();
 
-                if ($result instanceof Htmlable && $request->acceptsHtml() && ! $isBulk) {
+                if (static::$returnResult) {
                     return $result;
                 }
 

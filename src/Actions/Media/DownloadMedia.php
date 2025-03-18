@@ -23,6 +23,7 @@ class DownloadMedia extends FluxAction
 
     public function performAction(): mixed
     {
+        /** @var Media $media */
         $media = resolve_static(Media::class, 'query')
             ->whereKey($this->getData('id'))
             ->first();
@@ -37,7 +38,7 @@ class DownloadMedia extends FluxAction
 
         return match (strtolower($this->getData('as'))) {
             'base64' => base64_encode(file_get_contents($mediaPath)),
-            'url' => $media->getUrl($conversion),
+            'url' => $media->getUrl($conversion ?? ''),
             'path' => $mediaPath,
             default => response()->download($mediaPath, $fileName)
         };

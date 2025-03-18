@@ -11,6 +11,8 @@ use Illuminate\View\View;
 
 class Printing extends FluxAction
 {
+    public static bool $returnResult = true;
+
     public Model $model;
 
     public Printable $printable;
