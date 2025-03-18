@@ -28,70 +28,73 @@ function updateSuggestionItems(element, props) {
     });
 }
 
-export const MentionConfig = Mention.configure({
-    HTMLAttributes: { class: 'mention' },
-    suggestion: {
-        items: async ({ query }) => {
-            return (
-                await Promise.all(
-                    searchModel.map(async (model) => {
-                        return (
-                            await axios.get(`/search/${model}?search=${query}`)
-                        ).data.map((item) => {
-                            return {
-                                id: model + ':' + item.id,
-                                label: item.label,
-                                src: item.src,
-                            };
+export const MentionConfig = (searchModel, element) =>
+    Mention.configure({
+        HTMLAttributes: { class: 'mention' },
+        suggestion: {
+            items: async ({ query }) => {
+                return (
+                    await Promise.all(
+                        searchModel.map(async (model) => {
+                            return (
+                                await axios.get(
+                                    `/search/${model}?search=${query}`,
+                                )
+                            ).data.map((item) => {
+                                return {
+                                    id: model + ':' + item.id,
+                                    label: item.label,
+                                    src: item.src,
+                                };
+                            });
+                        }),
+                    )
+                ).flat();
+            },
+
+            render: () => {
+                let suggestionElement = document.createElement('div');
+                suggestionElement.className = 'suggestion-popup';
+
+                return {
+                    onStart: (props) => {
+                        suggestionPopup = window.tippy(element, {
+                            content: suggestionElement,
+                            showOnCreate: true,
+                            interactive: true,
+                            trigger: 'manual',
+                            placement: 'bottom-start',
                         });
-                    }),
-                )
-            ).flat();
+
+                        updateSuggestionItems(suggestionElement, props);
+                    },
+
+                    onUpdate: (props) => {
+                        if (!props.clientRect) {
+                            return;
+                        }
+
+                        updateSuggestionItems(suggestionElement, props);
+
+                        suggestionPopup.setProps({
+                            getReferenceClientRect: props.clientRect,
+                        });
+                    },
+
+                    onKeyDown: (props) => {
+                        if (props.event.key === 'Escape') {
+                            suggestionPopup.hide();
+                            return true;
+                        }
+
+                        // Add custom key handling if needed
+                        return false;
+                    },
+
+                    onExit: () => {
+                        suggestionPopup.destroy();
+                    },
+                };
+            },
         },
-
-        render: () => {
-            let suggestionElement = document.createElement('div');
-            suggestionElement.className = 'suggestion-popup';
-
-            return {
-                onStart: (props) => {
-                    suggestionPopup = window.tippy(element, {
-                        content: suggestionElement,
-                        showOnCreate: true,
-                        interactive: true,
-                        trigger: 'manual',
-                        placement: 'bottom-start',
-                    });
-
-                    updateSuggestionItems(suggestionElement, props);
-                },
-
-                onUpdate: (props) => {
-                    if (!props.clientRect) {
-                        return;
-                    }
-
-                    updateSuggestionItems(suggestionElement, props);
-
-                    suggestionPopup.setProps({
-                        getReferenceClientRect: props.clientRect,
-                    });
-                },
-
-                onKeyDown: (props) => {
-                    if (props.event.key === 'Escape') {
-                        suggestionPopup.hide();
-                        return true;
-                    }
-
-                    // Add custom key handling if needed
-                    return false;
-                },
-
-                onExit: () => {
-                    suggestionPopup.destroy();
-                },
-            };
-        },
-    },
-});
+    });

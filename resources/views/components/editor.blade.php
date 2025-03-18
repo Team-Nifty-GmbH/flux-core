@@ -1,7 +1,5 @@
 @props([
     "editable" => true,
-    "fontSize" => null,
-    "availableFontSizes" => [],
 ])
 
 <div>
@@ -14,8 +12,7 @@
         @else
             x-modelable="editable"
         @endif
-        x-data="{
-            ...setupEditor(
+        x-data="setupEditor(
                 @if ($attributes->wire("model")->value())
                     $wire.$entangle('{{ $attributes->wire("model")->value() }}',
                     @js($attributes->wire("model")->hasModifier("live"))
@@ -34,9 +31,8 @@
                             : 0
                     }}
                 @endif
-            ),
-        }"
-        x-init="initTextArea($refs.editor, @json($transparent), @json($tooltipDropdown))"
+            )"
+        x-init="initTextArea($refs.editor, @json($transparent), @json($tooltipDropdown), @json($fontSize))"
         {{ $attributes->whereDoesntStartWith("wire:model") }}
         wire:ignore
     >

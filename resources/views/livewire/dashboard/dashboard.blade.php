@@ -29,6 +29,6 @@
         <x-flux::dashboard.edit-dashboard/>
         @show
     </div>
-        <x-flux::editor :availableFontSizes="[12,16,20,24,32]"/>
+        <x-flux::editor transparent tooltip-dropdown :font-size="24" :availableFontSizes="[12,16,20,24,32]"/>
     <x-flux::dashboard.grid />
 </div>

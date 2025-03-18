@@ -23,7 +23,9 @@ class Editor extends Component
         public bool $codeBlock = true,
 
         public bool $tooltipDropdown = false,
-        public bool $transparent = false
+        public bool $transparent = false,
+        public ?int $fontSize = null,
+        public array $availableFontSizes = []
     ) {}
 
     public function render(): View|Closure|string
