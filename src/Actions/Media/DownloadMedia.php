@@ -56,14 +56,12 @@ class DownloadMedia extends FluxAction
             )
             ->first();
 
-        $this->data['id'] ??= $media?->getKey();
-
         if (
-            (
+            ! $media
+            || (
                 $this->getData('conversion')
                 && ! $media?->hasGeneratedConversion($this->getData('conversion'))
             )
-            || ! $media
         ) {
             throw ValidationException::withMessages([
                 'media' => 'File not found',
@@ -76,5 +74,7 @@ class DownloadMedia extends FluxAction
         }
 
         parent::validateData();
+
+        $this->data['id'] ??= $media?->getKey();
     }
 }

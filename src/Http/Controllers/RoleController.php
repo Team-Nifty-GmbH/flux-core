@@ -6,7 +6,7 @@ use FluxErp\Helpers\ResponseHelper;
 use FluxErp\Models\User;
 use Illuminate\Http\JsonResponse;
 
-class RoleController extends BaseController
+class RoleController extends Controller
 {
     public function showUserRoles(string $id): JsonResponse
     {

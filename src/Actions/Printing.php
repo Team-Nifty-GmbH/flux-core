@@ -11,7 +11,7 @@ use Illuminate\View\View;
 
 class Printing extends FluxAction
 {
-    public static bool $returnResult = true;
+    protected static bool $returnResult = true;
 
     public Model $model;
 

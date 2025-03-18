@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
-class ValueListsTest extends BaseSetup
+class ValueListTest extends BaseSetup
 {
     private array $permissions;
 

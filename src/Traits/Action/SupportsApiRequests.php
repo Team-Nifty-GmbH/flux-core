@@ -15,9 +15,9 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 
 trait SupportsApiRequests
 {
-    public static bool $returnResult = false;
+    protected static bool $returnResult = false;
 
-    public static ?int $successCode = null;
+    protected static ?int $successCode = null;
 
     public function __invoke(Request $request): Htmlable|Responsable|Response|BinaryFileResponse
     {

@@ -98,11 +98,11 @@ class MediaTest extends BaseSetup
         $media = $this->createMedia([
             'disk' => 'public',
         ]);
-
         $modelType = $this->task->getMorphClass();
         $queryParams = '?model_type=' . $modelType . '&model_id=' . $this->task->getKey();
 
         $download = $this->get('/api/media/' . $media->file_name . $queryParams);
+
         $download->assertStatus(200);
     }
 
@@ -112,6 +112,7 @@ class MediaTest extends BaseSetup
         $queryParams = '?model_type=' . $modelType . '&model_id=' . $this->task->getKey();
 
         $download = $this->get('/api/media/' . Str::random() . $this->media->file_name . $queryParams);
+
         $download->assertStatus(404);
     }
 
@@ -119,9 +120,10 @@ class MediaTest extends BaseSetup
     {
         $this->user->givePermissionTo($this->permissions['download']);
         Sanctum::actingAs($this->user, ['user']);
-
         $queryParams = '?model_type=notExistingModelType' . Str::random() . '&model_id=' . $this->task->getKey();
+
         $response = $this->actingAs($this->user)->get('/api/media/filename' . $queryParams);
+
         $response->assertStatus(404);
     }
 
@@ -135,6 +137,7 @@ class MediaTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $download = $this->actingAs($this->user)->get('/api/media/private/' . $media->getKey());
+
         $download->assertStatus(200);
     }
 
@@ -146,20 +149,18 @@ class MediaTest extends BaseSetup
             'file_name' => $fileName,
             'disk' => 'public',
         ]);
+        $queryParams = $fileName . '?model_type=' . $this->task->getMorphClass() . '&model_id=' . $this->task->getKey();
 
-        $download = $this->get('/api/media/'
-            . $fileName
-            . '?model_type=' . $this->task->getMorphClass()
-            . '&model_id=' . $this->task->getKey()
-        );
+        $download = $this->get('/api/media/' . $queryParams);
+
         $download->assertStatus(200);
     }
 
     public function test_download_media_public_route_file_not_found(): void
     {
-        $modelType = $this->task->getMorphClass();
+        $queryParams = '?model_type=' . $this->task->getMorphClass() . '&model_id=' . $this->task->getKey();
 
-        $download = $this->get('/api/media/' . Str::random() . '.png?model_type=' . $modelType . '&model_id=' . $this->task->getKey());
+        $download = $this->get('/api/media/' . Str::random() . '.png' . $queryParams);
         $download->assertStatus(404);
     }
 
@@ -173,14 +174,18 @@ class MediaTest extends BaseSetup
             'file_name' => $fileName,
             'name' => $fileName,
         ]);
+        $queryParams = $fileName . '?model_type=' . $modelType . '&model_id=' . $this->task->getKey() . '&as=url';
 
-        $download = $this->get('/api/media/' . $fileName . '?model_type=' . $modelType . '&model_id=' . $this->task->getKey() . '&as=url');
+        $download = $this->get('/api/media/' . $queryParams);
         $download->assertStatus(200);
         $responseData = json_decode($download->getContent(), true);
         $this->assertArrayHasKey('data', $responseData);
         $this->assertStringContainsString('/storage/', $responseData['data']);
 
-        $download = $this->get('/api/media/' . $fileName . '?model_type=' . $modelType . '&model_id=' . $this->task->getKey() . '&as=path');
+        $queryParams = $fileName . '?model_type=' . $modelType . '&model_id=' . $this->task->getKey() . '&as=path';
+
+        $download = $this->get('/api/media/' . $queryParams);
+
         $download->assertStatus(200);
         $responseData = json_decode($download->getContent(), true);
         $this->assertArrayHasKey('data', $responseData);
@@ -189,7 +194,6 @@ class MediaTest extends BaseSetup
 
     public function test_download_media_public_route_with_model_parameters(): void
     {
-        $modelType = $this->task->getMorphClass();
         $fileName = Str::uuid()->toString() . '.png';
 
         $this->createMedia([
@@ -197,35 +201,36 @@ class MediaTest extends BaseSetup
             'file_name' => $fileName,
             'name' => $fileName,
         ]);
+        $queryParams = $fileName . '?model_type=' . $this->task->getMorphClass() . '&model_id=' . $this->task->getKey();
 
-        $download = $this->get('/api/media/' . $fileName . '?model_type=' . $modelType . '&model_id=' . $this->task->getKey());
+        $download = $this->get('/api/media/' . $queryParams);
         $download->assertStatus(200);
     }
 
     public function test_download_media_thumbnail_not_generated(): void
     {
-        $modelType = $this->task->getMorphClass();
-
         $media = $this->createMedia([
             'disk' => 'public',
             'generated_conversions' => [],
         ]);
+        $queryParams = '?model_type=' . $this->task->getMorphClass()
+            . '&model_id=' . $this->task->getKey()
+            . '&conversion=thumb';
 
-        $queryParams = '?model_type=' . $modelType . '&model_id=' . $this->task->getKey() . '&conversion=thumb';
         $download = $this->get('/api/media/' . $media->file_name . $queryParams);
+
         $download->assertStatus(404);
     }
 
     public function test_download_media_unauthenticated_private_media(): void
     {
-        $modelType = $this->task->getMorphClass();
-
         $media = $this->createMedia([
             'disk' => 'local',
         ]);
+        $queryParams = '?model_type=' . $this->task->getMorphClass() . '&model_id=' . $this->task->getKey();
 
-        $queryParams = '?model_type=' . $modelType . '&model_id=' . $this->task->getKey();
         $download = $this->get('/api/media/' . $media->file_name . $queryParams);
+
         $download->assertStatus(403);
     }
 
@@ -236,31 +241,28 @@ class MediaTest extends BaseSetup
 
         $fileName = Str::uuid()->toString();
 
-        $media = $this->createMedia([
+        $this->createMedia([
             'disk' => 'local',
             'file_name' => $fileName,
             'name' => $fileName,
         ]);
+        $queryParams = $fileName . '?model_type=task&model_id=' . $this->task->getKey() . '&as=someInvalidValue';
 
-        $response = $this->actingAs($this->user)
-            ->get('/api/media/' . $fileName
-                . '?model_type=task&model_id=' . $this->task->getKey()
-                . '&as=someInvalidValue'
-            );
+        $response = $this->actingAs($this->user)->get('/api/media/' . $queryParams);
+
         $response->assertStatus(422);
     }
 
     public function test_download_media_with_categories(): void
     {
-        $modelType = $this->task->getMorphClass();
-
         $media = $this->createMedia([
             'disk' => 'public',
             'custom_properties' => ['categories' => []],
         ]);
+        $queryParams = '?model_type=' . $this->task->getMorphClass() . '&model_id=' . $this->task->getKey();
 
-        $queryParams = '?model_type=' . $modelType . '&model_id=' . $this->task->getKey();
         $download = $this->get('/api/media/' . $media->file_name . $queryParams);
+
         $download->assertStatus(200);
     }
 
@@ -275,9 +277,9 @@ class MediaTest extends BaseSetup
 
         $this->user->givePermissionTo($this->permissions['download-multiple']);
         Sanctum::actingAs($this->user, ['user']);
+        $queryParams = '?ids[]=' . implode('&ids[]=', $mediaIds);
 
-        $response = $this->actingAs($this->user)
-            ->get('/api/media/download-multiple?ids[]=' . implode('&ids[]=', $mediaIds));
+        $response = $this->actingAs($this->user)->get('/api/media/download-multiple' . $queryParams);
 
         $response->assertStatus(200);
         $response->assertHeader('Content-Type', 'application/octet-stream');
@@ -296,9 +298,9 @@ class MediaTest extends BaseSetup
 
         $this->user->givePermissionTo($this->permissions['download-multiple']);
         Sanctum::actingAs($this->user, ['user']);
+        $queryParams = '?ids[]=' . $publicMedia->getKey() . '&ids[]=' . $privateMedia->getKey();
 
-        $response = $this->actingAs($this->user)
-            ->get('/api/media/download-multiple?ids[]=' . $publicMedia->getKey() . '&ids[]=' . $privateMedia->getKey());
+        $response = $this->actingAs($this->user)->get('/api/media/download-multiple' . $queryParams);
 
         $response->assertStatus(200);
         $response->assertHeader('Content-Type', 'application/octet-stream');
@@ -318,8 +320,7 @@ class MediaTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['download-multiple']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)
-            ->get('/api/media/download-multiple?ids[]=' . $media->getKey());
+        $response = $this->actingAs($this->user)->get('/api/media/download-multiple?ids[]=' . $media->getKey());
 
         $response->assertStatus(200);
         $response->assertHeader('Content-Type', 'application/octet-stream');
@@ -343,8 +344,7 @@ class MediaTest extends BaseSetup
 
         $nonExistentId = Media::query()->max('id') + 999;
 
-        $response = $this->actingAs($this->user)
-            ->get('/api/media/download-multiple?ids[]=' . $nonExistentId);
+        $response = $this->actingAs($this->user)->get('/api/media/download-multiple?ids[]=' . $nonExistentId);
 
         $response->assertStatus(422);
     }
@@ -362,9 +362,8 @@ class MediaTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $customFileName = 'custom-archive';
-
-        $response = $this->actingAs($this->user)
-            ->get('/api/media/download-multiple?file_name=' . $customFileName . '&ids[]=' . implode('&ids[]=', $mediaIds));
+        $queryParams = '?file_name=' . $customFileName . '&ids[]=' . implode('&ids[]=', $mediaIds);
+        $response = $this->actingAs($this->user)->get('/api/media/download-multiple' . $queryParams);
 
         $response->assertStatus(200);
         $response->assertHeader('Content-Type', 'application/octet-stream');
@@ -426,9 +425,7 @@ class MediaTest extends BaseSetup
 
         $nonExistentId = $this->media->getKey() + 1;
 
-        $replace = $this->actingAs($this->user)->post('/api/media/' . $nonExistentId, [
-            'media' => $this->file,
-        ]);
+        $replace = $this->actingAs($this->user)->post('/api/media/' . $nonExistentId, ['media' => $this->file]);
         $replace->assertStatus(422);
     }
 

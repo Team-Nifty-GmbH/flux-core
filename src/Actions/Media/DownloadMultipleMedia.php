@@ -10,7 +10,7 @@ use Spatie\MediaLibrary\Support\MediaStream;
 
 class DownloadMultipleMedia extends FluxAction
 {
-    public static bool $returnResult = true;
+    protected static bool $returnResult = true;
 
     public static function models(): array
     {

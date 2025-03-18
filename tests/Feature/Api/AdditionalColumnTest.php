@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
-class AdditionalColumnsTest extends BaseSetup
+class AdditionalColumnTest extends BaseSetup
 {
     private array $additionalColumns;
 

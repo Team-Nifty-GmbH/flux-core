@@ -19,7 +19,7 @@ use Illuminate\Support\Str;
 
 class PrintingTest extends BaseSetup
 {
-    public Order $order;
+    private Order $order;
 
     protected function setUp(): void
     {
