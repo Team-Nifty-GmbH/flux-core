@@ -23,7 +23,7 @@ abstract class FluxForm extends BaseForm
     {
         $actionClass = data_get($this->getActions(), $action);
 
-        if (! $actionClass) {
+        if (! is_string($actionClass)) {
             return false;
         }
 
