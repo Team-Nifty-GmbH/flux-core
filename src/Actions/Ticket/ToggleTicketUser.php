@@ -5,9 +5,12 @@ namespace FluxErp\Actions\Ticket;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Ticket;
 use FluxErp\Rulesets\Ticket\ToggleTicketUserRuleset;
+use Illuminate\Http\Response;
 
 class ToggleTicketUser extends FluxAction
 {
+    public static ?int $successCode = Response::HTTP_OK;
+
     public static function models(): array
     {
         return [Ticket::class];

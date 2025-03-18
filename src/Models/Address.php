@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use Carbon\Carbon;
+use Exception;
 use FluxErp\Contracts\Calendarable;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\SalutationEnum;
@@ -53,6 +54,7 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\ModelStates\HasStates;
 use Spatie\Permission\Traits\HasRoles;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
+use Throwable;
 
 class Address extends FluxAuthenticatable implements Calendarable, HasLocalePreference, HasMedia, InteractsWithDataTables, OffersPrinting
 {
@@ -333,7 +335,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function getAvatarUrl(): ?string
     {
@@ -422,7 +424,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
     {
         try {
             $enum = SalutationEnum::from($this->salutation ?? '');
-        } catch (\Throwable) {
+        } catch (Throwable) {
             $enum = SalutationEnum::NO_SALUTATION;
         }
 

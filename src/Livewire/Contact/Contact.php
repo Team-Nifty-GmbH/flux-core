@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Contact;
 
+use Exception;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Forms\ContactForm;
@@ -172,7 +173,7 @@ class Contact extends Component
                 $this->contact->id,
                 morph_alias(ContactModel::class)
             );
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             exception_to_notifications($e, $this);
 
             return;

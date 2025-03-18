@@ -35,7 +35,6 @@ class SnapshotEventSubscriber
     public function subscribe($events): array
     {
         return [
-
         ];
     }
 }

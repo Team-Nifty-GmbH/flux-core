@@ -38,7 +38,6 @@ class AdditionalColumnEdit extends Component
 
     public function mount(): void
     {
-
         $this->models = model_info_all()
             ->unique('morphClass')
             ->filter(fn ($modelInfo) => in_array(

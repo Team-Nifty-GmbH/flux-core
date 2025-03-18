@@ -2,6 +2,7 @@
 
 namespace FluxErp\Database\Factories;
 
+use DateTime;
 use FluxErp\Models\Task;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
@@ -12,7 +13,7 @@ class TaskFactory extends Factory
 
     public function definition(): array
     {
-        /** @var \DateTime $startDate */
+        /** @var DateTime $startDate */
         $startDate = $this->faker->dateTimeBetween(
             now()->subMonths(2)->startOfMonth(),
             now()->addMonths()->endOfMonth()

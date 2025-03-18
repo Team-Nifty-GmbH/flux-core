@@ -4,7 +4,6 @@ namespace FluxErp\Models;
 
 use FluxErp\Traits\CacheModelQueries;
 use FluxErp\Traits\HasAdditionalColumns;
-use FluxErp\Traits\HasCustomEvents;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
@@ -15,8 +14,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class TicketType extends FluxModel
 {
-    use CacheModelQueries, HasAdditionalColumns, HasCustomEvents, HasPackageFactory, HasUserModification, HasUuid,
-        LogsActivity, SoftDeletes;
+    use CacheModelQueries, HasAdditionalColumns, HasPackageFactory, HasUserModification, HasUuid, LogsActivity,
+        SoftDeletes;
 
     public function roles(): BelongsToMany
     {

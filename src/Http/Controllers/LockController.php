@@ -14,21 +14,6 @@ use Illuminate\Support\Facades\Validator;
 
 class LockController extends BaseController
 {
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    public function index(Request $request): JsonResponse
-    {
-        $perPage = $request->per_page > 500 || $request->per_page < 1 ? 25 : $request->per_page;
-
-        $locks = resolve_static(Lock::class, 'query')
-            ->paginate($perPage);
-
-        return ResponseHelper::createResponseFromBase(statusCode: 200, data: $locks);
-    }
-
     /**
      * @throws \Illuminate\Validation\ValidationException
      */

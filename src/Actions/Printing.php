@@ -11,6 +11,8 @@ use Illuminate\View\View;
 
 class Printing extends FluxAction
 {
+    protected static bool $returnResult = true;
+
     public Model $model;
 
     public Printable $printable;
@@ -25,24 +27,18 @@ class Printing extends FluxAction
         return PrintingRuleset::class;
     }
 
-    public function boot($data): void
+    public function performAction(): View|Factory|PrintableView
     {
-        parent::boot($data);
-
-        $this->validate();
         $this->model = morphed_model($this->data['model_type'])::query()
             ->whereKey($this->data['model_id'])
             ->first();
-    }
 
-    public function performAction(): View|Factory|PrintableView
-    {
         $this->printable = $this->model
             ->print()
-            ->preview(data_get($this->data, 'preview', false) && ! data_get($this->data, 'html', false));
-        $printClass = $this->printable->getViewClass($this->data['view']);
+            ->preview($this->getData('preview') && ! $this->getData('html'));
+        $printClass = $this->printable->getViewClass($this->getData('view'));
 
-        return ($this->data['html'] ?? false)
+        return $this->getData('html')
             ? $this->printable->renderView($printClass)
             : $this->printable->printView($printClass);
     }

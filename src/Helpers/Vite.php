@@ -2,6 +2,7 @@
 
 namespace FluxErp\Helpers;
 
+use Exception;
 use Illuminate\Foundation\Vite as BaseVite;
 
 class Vite extends BaseVite
@@ -15,7 +16,7 @@ class Vite extends BaseVite
         $path = $buildDirectory . '/' . $chunk['file'];
 
         if (! is_file($path) || ! file_exists($path)) {
-            throw new \Exception("Unable to locate asset file: {$path}");
+            throw new Exception("Unable to locate asset file: {$path}");
         }
 
         return file_get_contents($path);

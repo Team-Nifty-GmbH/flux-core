@@ -3,6 +3,7 @@
 namespace FluxErp\Console\Commands\Init;
 
 use Closure;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Facades\Action;
 use FluxErp\Facades\Widget;
 use FluxErp\Models\Permission;
@@ -14,10 +15,10 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Route;
 use Livewire\Mechanisms\ComponentRegistry;
 use ReflectionClass;
+use ReflectionException;
 use ReflectionFunction;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
-
 use function Livewire\invade;
 
 class InitPermissions extends Command
@@ -31,15 +32,22 @@ class InitPermissions extends Command
     public function handle(): void
     {
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
-        $this->currentPermissions = array_flip(app(Permission::class)->all('id')->pluck('id')->toArray());
+        $this->currentPermissions = array_flip(
+            resolve_static(Permission::class, 'query')
+                ->pluck('id')
+                ->toArray()
+        );
 
         $this->registerActionPermission();
+        $this->registerActionPermission('sanctum');
         $this->registerModelGetPermission();
         $this->registerRoutePermissions();
         $this->registerWidgetPermissions();
         $this->registerTabPermissions();
 
-        resolve_static(Permission::class, 'query')->whereIntegerInRaw('id', array_keys($this->currentPermissions))->delete();
+        resolve_static(Permission::class, 'query')
+            ->whereIntegerInRaw('id', array_keys($this->currentPermissions))
+            ->delete();
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
     }
 
@@ -80,7 +88,7 @@ class InitPermissions extends Command
     }
 
     /**
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     protected function isVendorRoute(\Illuminate\Routing\Route $route): bool
     {
@@ -109,9 +117,9 @@ class InitPermissions extends Command
             && ! str_starts_with($path, base_path('vendor/team-nifty-gmbh/flux-erp'));
     }
 
-    private function registerActionPermission(): void
+    private function registerActionPermission(string $guardName = 'web'): void
     {
-        $this->info('Registering action permissions…');
+        $this->info('Registering action permissions for guard ' . $guardName . '…');
         foreach (Action::all() as $action) {
             if ($action['class']::hasPermission()) {
                 $permission = resolve_static(
@@ -119,7 +127,7 @@ class InitPermissions extends Command
                     'findOrCreate',
                     [
                         'name' => 'action.' . $action['name'],
-                        'guardName' => 'web',
+                        'guardName' => $guardName,
                     ]
                 );
                 unset($this->currentPermissions[$permission->id]);
@@ -184,7 +192,9 @@ class InitPermissions extends Command
 
             $guards = array_values(array_filter($route->middleware(), fn ($guard) => str_starts_with($guard, 'auth:')));
             $guard = array_shift($guards);
-            if (! $guard) {
+
+            // omit api routes
+            if (! $guard || is_a($route->getAction('controller'), FluxAction::class, true)) {
                 continue;
             }
 

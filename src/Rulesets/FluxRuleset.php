@@ -10,6 +10,8 @@ abstract class FluxRuleset
 
     protected static ?string $model = null;
 
+    abstract public function rules(): array;
+
     public static function getRules(): array
     {
         $rules = (new static())->rules();
@@ -24,6 +26,4 @@ abstract class FluxRuleset
 
         return $rules;
     }
-
-    abstract public function rules(): array;
 }

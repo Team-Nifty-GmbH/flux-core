@@ -49,6 +49,5 @@ class Categories extends Component
                 </x-card>
             </div>
         Blade;
-
     }
 }
