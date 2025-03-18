@@ -54,7 +54,7 @@ class AppServiceProvider extends ServiceProvider
     {
         // Register all widgets in the path
         Widget::autoDiscoverWidgets(app_path('Http/Widgets'), 'App\Http\Widgets');
-       
+
         // Register a single widget
         Widget::registerWidget(MyWidget::class);
     }
@@ -62,14 +62,14 @@ class AppServiceProvider extends ServiceProvider
 ```
 
 > [!warning]
-> A widget can not accept any mount parameters. 
+> A widget can not accept any mount parameters.
 > If you need to pass data to your widget you can use the `session` or `cache` facade.
-> When using auto discovery, only valid widgets will be registered. 
+> When using auto discovery, only valid widgets will be registered.
 > Auto discovery will skip any widget that does not implement the `UserWidget` interface or expects a mount parameter.
 
 ## Permissions
 
-Every registered widget will automaticially get a permission assigned to it when you run the 
+Every registered widget will automaticially get a permission assigned to it when you run the
 `php artisan init:permissions` command.
 
 The permission will be named `widgets.widget.{widget-name}`. For example: `widgets.widget.my-widget`.

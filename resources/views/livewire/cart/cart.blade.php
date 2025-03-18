@@ -2,7 +2,12 @@
 @section('cart-sidebar.footer.buttons')
     @parent
     @section('cart-sidebar.footer.buttons.buy')
-        <x-button wire:click="addToCurrentOrder()" color="indigo" class="w-full" :text="__('Add to current order')"/>
+        <x-button
+            wire:click="addToCurrentOrder()"
+            color="indigo"
+            class="w-full"
+            :text="__('Add to current order')"
+        />
         <x-button
             light
             :text="__('Clear cart')"
@@ -12,6 +17,7 @@
             class="w-full"
         />
     @endsection
+
     <x-select.styled
         class="w-full"
         :label="__('Load a watchlist')"
