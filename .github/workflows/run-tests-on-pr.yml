@@ -117,7 +117,7 @@ jobs:
           ./vendor/bin/testbench migrate --force
           ./vendor/bin/testbench schema:dump
 
-      - name: Run Livewire Tests
+      - name: Run Unit Tests
         run: composer test-unit
         env:
           DB_PORT: ${{ job.services.mysql.ports['3306'] }}
