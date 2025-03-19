@@ -26,7 +26,7 @@
         </div>
         @show
         @section('dashboard-edit')
-        <x-flux::dashboard.edit-dashboard/>
+        <x-flux::dashboard.edit-dashboard />
         @show
     </div>
     <x-flux::dashboard.grid />
