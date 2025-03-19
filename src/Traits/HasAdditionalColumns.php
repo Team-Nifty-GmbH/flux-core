@@ -25,10 +25,6 @@ use Spatie\Translatable\Translatable;
 
 trait HasAdditionalColumns
 {
-    use HasTranslations {
-        HasTranslations::setAttribute as hasTranslationsSetAttribute;
-    }
-
     protected static ?Collection $additionalColumns = null;
 
     /**
@@ -1044,7 +1040,7 @@ trait HasAdditionalColumns
     public function setAttribute($key, $value)
     {
         if (! $this->isValidMetaKey($key)) {
-            return $this->hasTranslationsSetAttribute($key, $value);
+            return parent::setAttribute($key, $value);
         }
 
         return $this->setMetaFromString($key, $value);

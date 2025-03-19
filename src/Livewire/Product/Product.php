@@ -9,6 +9,7 @@ use FluxErp\Helpers\PriceHelper;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Forms\ProductForm;
 use FluxErp\Models\Contact;
+use FluxErp\Models\Language;
 use FluxErp\Models\Pivots\ProductBundleProduct;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product as ProductModel;
@@ -23,6 +24,7 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Response;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Renderless;
@@ -51,6 +53,10 @@ class Product extends Component
     public array $productProperties = [];
 
     public array $selectedProductProperties = [];
+
+    public array $languages = [];
+
+    public ?int $languageId;
 
     #[Url]
     public string $tab = 'product.general';
@@ -104,11 +110,17 @@ class Product extends Component
             ])
             ->withCount('children')
             ->firstOrFail();
-        $product->append('avatar_url');
+        $product->localize()->append('avatar_url');
 
         $this->product->fill($product);
+        $this->languageId = Session::get('selectedLanguageId')
+            ?? resolve_static(Language::class, 'default')?->id;
         $this->product->product_properties = Arr::keyBy($this->product->product_properties, 'id');
 
+        $this->languages = resolve_static(Language::class, 'query')
+            ->orderBy('name')
+            ->get(['id', 'name'])
+            ->toArray();
         $this->additionalColumns = $product->getAdditionalColumns()->toArray();
         $this->recalculateDisplayedProductProperties();
     }
@@ -334,6 +346,19 @@ class Product extends Component
             ->toArray();
     }
 
+    public function localize(): void
+    {
+        Session::put('selectedLanguageId', $this->languageId);
+
+        $this->product->fill(
+            resolve_static(ProductModel::class, 'query')
+                ->whereKey($this->product->id)
+                ->first()
+                ?->localize($this->languageId)
+        );
+        $this->product->language_id = $this->languageId;
+    }
+
     public function resetProduct(): void
     {
         $product = resolve_static(ProductModel::class, 'query')
@@ -349,7 +374,7 @@ class Product extends Component
             ])
             ->withCount('children')
             ->firstOrFail();
-        $product->append('avatar_url');
+        $product->localize()->append('avatar_url');
 
         $this->product->reset();
         $this->product->fill($product);

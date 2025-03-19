@@ -2,10 +2,12 @@
 
 namespace FluxErp\Http\Controllers;
 
+use FluxErp\Traits\HasAttributeTranslations;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Session;
 use Laravel\Scout\Searchable;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
@@ -139,6 +141,15 @@ class SearchController extends Controller
         }
 
         $result = $query->latest()->get();
+
+        if (
+            in_array(
+                HasAttributeTranslations::class,
+                class_uses_recursive(resolve_static($model, 'class'))
+            )
+        ) {
+            $result = $result->localize();
+        }
 
         if ($request->has('appends')) {
             $result->each(function ($item) use ($request): void {
