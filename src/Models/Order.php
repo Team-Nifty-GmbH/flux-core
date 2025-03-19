@@ -422,7 +422,7 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
             )
             ->get()
             ->map(function (OrderPosition $item) {
-                if ($this->total_discount_percentage) {
+                if ($this->total_discount_percentage && $item->total_base_net_price) {
                     $item->total_net_price = discount(
                         $item->total_base_net_price,
                         $this->total_discount_percentage
