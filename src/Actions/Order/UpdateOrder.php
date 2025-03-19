@@ -31,7 +31,7 @@ class UpdateOrder extends FluxAction
         $users = Arr::pull($this->data, 'users');
 
         $order = resolve_static(Order::class, 'query')
-            ->whereKey($this->data['id'])
+            ->whereKey($this->getData('id'))
             ->first();
         if ($order->shipping_costs_net_price) {
             $order->shipping_costs_vat_rate_percentage = 0.190000000;   // TODO: Make this percentage NOT hardcoded!
@@ -45,11 +45,7 @@ class UpdateOrder extends FluxAction
             );
         }
 
-        if (! ($this->data['address_delivery']['id'] ?? false)) {
-            $this->data['address_delivery_id'] = null;
-        } else {
-            $this->data['address_delivery_id'] = $this->data['address_delivery']['id'];
-        }
+        $this->data['address_delivery_id'] ??= $this->getData('address_delivery.id');
 
         $order->fill($this->data);
         $order->save();
@@ -89,14 +85,12 @@ class UpdateOrder extends FluxAction
         }
 
         $updatedOrderType = false;
-        if ($this->data['order_type_id'] ?? false) {
+        if ($this->getData('order_type_id')) {
             $updatedOrderType = $order->order_type_id !== $this->data['order_type_id'] ?
                 $this->data['order_type_id'] : false;
         }
 
-        if (($this->data['invoice_number'] ?? false)
-            || $updatedOrderType
-        ) {
+        if ($this->getData('invoice_number') || $updatedOrderType) {
             $isPurchase = resolve_static(OrderType::class, 'query')
                 ->whereKey($updatedOrderType ?: $order->order_type_id)
                 ->whereIn('order_type_enum', [OrderTypeEnum::Purchase->value, OrderTypeEnum::PurchaseRefund->value])
@@ -105,7 +99,7 @@ class UpdateOrder extends FluxAction
             if (resolve_static(Order::class, 'query')
                 ->where('id', '!=', $this->data['id'])
                 ->where('client_id', $order->client_id)
-                ->where('invoice_number', $this->data['invoice_number'] ?? $order->invoice_number)
+                ->where('invoice_number', $this->getData('invoice_number', $order->invoice_number))
                 ->when($isPurchase, fn (Builder $query) => $query->where('contact_id', $order->contact_id))
                 ->exists()
             ) {
