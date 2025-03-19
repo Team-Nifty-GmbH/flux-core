@@ -124,7 +124,13 @@ use FluxErp\Actions\Price\UpdatePrice;
 use FluxErp\Actions\PriceList\CreatePriceList;
 use FluxErp\Actions\PriceList\DeletePriceList;
 use FluxErp\Actions\PriceList\UpdatePriceList;
+use FluxErp\Actions\Printer\CreatePrinter;
+use FluxErp\Actions\Printer\DeletePrinter;
+use FluxErp\Actions\Printer\UpdatePrinter;
 use FluxErp\Actions\Printing;
+use FluxErp\Actions\PrintJob\CreatePrintJob;
+use FluxErp\Actions\PrintJob\DeletePrintJob;
+use FluxErp\Actions\PrintJob\UpdatePrintJob;
 use FluxErp\Actions\Product\CreateProduct;
 use FluxErp\Actions\Product\DeleteProduct;
 use FluxErp\Actions\Product\ProductBundleProduct\CreateProductBundleProduct;
@@ -254,6 +260,8 @@ use FluxErp\Models\Permission;
 use FluxErp\Models\Pivots\ProductBundleProduct;
 use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
+use FluxErp\Models\Printer;
+use FluxErp\Models\PrintJob;
 use FluxErp\Models\Product;
 use FluxErp\Models\ProductCrossSelling;
 use FluxErp\Models\ProductOption;
@@ -611,6 +619,20 @@ Route::prefix('api')
                 Route::post('/price-lists', CreatePriceList::class);
                 Route::put('/price-lists', UpdatePriceList::class);
                 Route::delete('/price-lists/{id}', DeletePriceList::class);
+
+                // Printers
+                Route::get('/printers/{id}', [BaseController::class, 'show'])->defaults('model', Printer::class);
+                Route::get('/printers', [BaseController::class, 'index'])->defaults('model', Printer::class);
+                Route::post('/printers', CreatePrinter::class);
+                Route::put('/printers', UpdatePrinter::class);
+                Route::delete('/printers/{id}', DeletePrinter::class);
+
+                // PrintJobs
+                Route::get('/print-jobs/{id}', [BaseController::class, 'show'])->defaults('model', PrintJob::class);
+                Route::get('/print-jobs', [BaseController::class, 'index'])->defaults('model', PrintJob::class);
+                Route::post('/print-jobs', CreatePrintJob::class);
+                Route::put('/print-jobs', UpdatePrintJob::class);
+                Route::delete('/print-jobs/{id}', DeletePrintJob::class);
 
                 // PrintPdf
                 Route::post('/print/views', [PrintController::class, 'getPrintViews']);
