@@ -17,6 +17,8 @@ trait HasAttributeTranslations
 {
     public ?array $translations = null;
 
+    abstract protected function translatableAttributes(): array;
+
     public static function getTranslatableAttributes(): array
     {
         return app(static::class)->translatableAttributes();
@@ -143,6 +145,4 @@ trait HasAttributeTranslations
     {
         return app(TranslatableCollection::class, ['items' => $models]);
     }
-
-    abstract protected function translatableAttributes(): array;
 }

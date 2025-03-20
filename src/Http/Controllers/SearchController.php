@@ -2,8 +2,8 @@
 
 namespace FluxErp\Http\Controllers;
 
-use FluxErp\Traits\HasAttributeTranslations;
 use FluxErp\Models\Scopes\UserClientScope;
+use FluxErp\Traits\HasAttributeTranslations;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Http\Request;
