@@ -32,7 +32,7 @@
                     }}
                 @endif
             )"
-        x-init="initTextArea($refs.editor, @json($transparent), @json($tooltipDropdown), @json($fontSize))"
+        x-init="initTextArea($refs.editor, @json($transparent), @json($tooltipDropdown), @json($defaultFontSize))"
         {{ $attributes->whereDoesntStartWith("wire:model") }}
         wire:ignore
     >
@@ -92,33 +92,56 @@
             />
         @endif
 
-        @if (empty($availableFontSizes) && empty($fontSize))
-            @if ($h1)
-                <x-button
-                    flat
-                    color="secondary"
-                    x-on:click="editor().chain().focus().toggleHeading({ level: 1 }).run()"
-                    text="H1"
-                ></x-button>
-            @endif
+        @if ($h1)
+            <x-button
+                flat
+                color="secondary"
+                x-on:click="editor().chain().focus().toggleHeading({ level: 1 }).run()"
+                text="H1"
+            ></x-button>
+        @endif
 
-            @if ($h2)
-                <x-button
-                    flat
-                    color="secondary"
-                    x-on:click="editor().chain().focus().toggleHeading({ level: 2 }).run()"
-                    text="H2"
-                ></x-button>
-            @endif
+        @if ($h2)
+            <x-button
+                flat
+                color="secondary"
+                x-on:click="editor().chain().focus().toggleHeading({ level: 2 }).run()"
+                text="H2"
+            ></x-button>
+        @endif
 
-            @if ($h3)
+        @if ($h3)
+            <x-button
+                flat
+                color="secondary"
+                x-on:click="editor().chain().focus().toggleHeading({ level: 3 }).run()"
+                text="H3"
+            ></x-button>
+        @endif
+
+        @if ($availableFontSizes && ! $tooltipDropdown)
+            <x-button
+                x-on:click.prevent="onClick"
+                x-ref="tippyParent"
+                x-data="editorFontSizeHandler($refs.tippyParent, $refs.fontSizeDropdown)"
+                flat
+                color="secondary"
+            >
+                <x-slot:text>
+                    <i class="ph ph-text-aa text-lg"></i>
+                </x-slot>
+            </x-button>
+        @endif
+
+        @if ($availableFontSizes && $tooltipDropdown)
+            @foreach ($availableFontSizes as $size)
                 <x-button
                     flat
                     color="secondary"
-                    x-on:click="editor().chain().focus().toggleHeading({ level: 3 }).run()"
-                    text="H3"
+                    :text="$size . 'px'"
+                    x-on:click="editor().chain().focus().setFontSize({{ json_encode($size) }}).run()"
                 ></x-button>
-            @endif
+            @endforeach
         @endif
 
         @if ($horizontalRule)
@@ -165,30 +188,6 @@
                 x-on:click="editor().chain().focus().toggleCodeBlock().run()"
             ></x-button>
         @endif
-
-        {{-- tooltiop on select disabled - show dropdown on font-size edit --}}
-        @if (! empty($availableFontSizes) && ! $tooltipDropdown)
-            <x-button
-                x-on:click.prevent="onClick"
-                x-ref="tippyParent"
-                x-data="editorFontSizeHandler($refs.tippyParent, $refs.fontSizeDropdown)"
-                flat
-                color="secondary"
-                text="PX"
-            ></x-button>
-        @endif
-
-        {{-- otherwise list all posible font-sizes in dropdown on hover --}}
-        @if (! empty($availableFontSizes) && $tooltipDropdown)
-            @foreach ($availableFontSizes as $size)
-                <x-button
-                    flat
-                    color="secondary"
-                    text="{{ json_encode($size) }}px"
-                    x-on:click="editor().chain().focus().setFontSize({{ json_encode($size) }}).run()"
-                ></x-button>
-            @endforeach
-        @endif
     </template>
     <template x-ref="fontSizeDropdown">
         <div class="flex flex-col">
@@ -196,7 +195,7 @@
                 <x-button
                     flat
                     color="secondary"
-                    text="{{ json_encode($size) }}px"
+                    :text="$size . 'px'"
                     x-on:click="editor().chain().focus().setFontSize({{ json_encode($size) }}).run()"
                 ></x-button>
             @endforeach
