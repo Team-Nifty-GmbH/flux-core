@@ -8,14 +8,14 @@ use FluxErp\Rulesets\AttributeTranslation\DeleteAttributeTranslationRuleset;
 
 class DeleteAttributeTranslation extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeleteAttributeTranslationRuleset::class;
-    }
-
     public static function models(): array
     {
         return [AttributeTranslation::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeleteAttributeTranslationRuleset::class;
     }
 
     public function performAction(): bool

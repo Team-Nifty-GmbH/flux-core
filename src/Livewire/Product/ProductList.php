@@ -11,12 +11,9 @@ use FluxErp\Livewire\DataTables\ProductList as BaseProductList;
 use FluxErp\Livewire\Forms\ProductForm;
 use FluxErp\Livewire\Forms\ProductPricesUpdateForm;
 use FluxErp\Models\Client;
-use FluxErp\Models\Language;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\VatRate;
-use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\HtmlString;
+use FluxErp\Traits\Livewire\DataTable\SupportsLocalization;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
@@ -25,6 +22,8 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class ProductList extends BaseProductList
 {
+    use SupportsLocalization;
+
     public ?string $cacheKey = 'product.product-list';
 
     public bool $isSelectable = true;
@@ -38,10 +37,6 @@ class ProductList extends BaseProductList
     public array $productTypes = [];
 
     public array $vatRates = [];
-
-    public ?int $languageId;
-
-    public array $languages = [];
 
     protected ?string $includeBefore = 'flux::livewire.product.product-list';
 
@@ -62,30 +57,11 @@ class ProductList extends BaseProductList
                 'label' => __(Str::headline($key)),
             ])
             ->toArray();
-
-        $this->languageId = Session::get('selectedLanguageId')
-            ?? resolve_static(Language::class, 'default')?->id;
-        $this->languages = resolve_static(Language::class, 'query')
-            ->orderBy('name')
-            ->get(['id', 'name'])
-            ->toArray();
     }
 
     protected function getTableActions(): array
     {
         return [
-            new HtmlString(
-                Blade::render(
-                    '<x-select.styled
-                        required
-                        x-model="$wire.languageId"
-                        x-on:select="$wire.localize()"
-                        select="label:name|value:id"
-                        :options="$languages"
-                    />',
-                    ['languages' => $this->languages]
-                )
-            ),
             DataTableButton::make()
                 ->color('indigo')
                 ->text(__('New'))
@@ -113,13 +89,6 @@ class ProductList extends BaseProductList
                     $modalOpen('update-prices-modal');
                 JS),
         ];
-    }
-
-    public function localize(): void
-    {
-        Session::put('selectedLanguageId', $this->languageId);
-
-        $this->loadData();
     }
 
     #[Renderless]

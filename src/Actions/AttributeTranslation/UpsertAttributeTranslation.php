@@ -9,14 +9,14 @@ use Illuminate\Database\Eloquent\Builder;
 
 class UpsertAttributeTranslation extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpsertAttributeTranslationRuleset::class;
-    }
-
     public static function models(): array
     {
         return [AttributeTranslation::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpsertAttributeTranslationRuleset::class;
     }
 
     public function performAction(): AttributeTranslation

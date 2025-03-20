@@ -44,6 +44,10 @@ class Product extends Component
 
     public array $displayedProductProperties = [];
 
+    public ?int $languageId;
+
+    public array $languages = [];
+
     public ?array $priceLists = null;
 
     public ProductForm $product;
@@ -53,10 +57,6 @@ class Product extends Component
     public array $productProperties = [];
 
     public array $selectedProductProperties = [];
-
-    public array $languages = [];
-
-    public ?int $languageId;
 
     #[Url]
     public string $tab = 'product.general';

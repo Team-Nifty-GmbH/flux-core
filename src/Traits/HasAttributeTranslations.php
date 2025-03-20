@@ -17,11 +17,14 @@ trait HasAttributeTranslations
 {
     public ?array $translations = null;
 
-    abstract protected function translatableAttributes(): array;
+    public static function getTranslatableAttributes(): array
+    {
+        return app(static::class)->translatableAttributes();
+    }
 
     protected static function bootHasAttributeTranslations(): void
     {
-        static::saving(function (Model $model) {
+        static::saving(function (Model $model): void {
             $languageId = Session::get('selectedLanguageId');
 
             if (is_null($languageId)
@@ -48,7 +51,7 @@ trait HasAttributeTranslations
             }
         });
 
-        static::saved(function (Model $model) {
+        static::saved(function (Model $model): void {
             if (! $model->translations) {
                 return;
             }
@@ -82,14 +85,24 @@ trait HasAttributeTranslations
         });
     }
 
-    public static function getTranslatableAttributes(): array
+    public function attributeTranslationRules(): array
     {
-        return app(static::class)->translatableAttributes();
+        return [
+            'translations' => 'array|nullable',
+            'translations.*' => 'required|array',
+            'translations.*.language_id' => 'required|integer',
+            'translations.*.attribute' => [
+                'required',
+                'string',
+                Rule::in($this->translatableAttributes()),
+            ],
+            'translations.*.value' => 'string|nullable',
+        ];
     }
 
-    public function isTranslatable(string $attribute): bool
+    public function attributeTranslations(): MorphMany
     {
-        return in_array($attribute, $this->getTranslatableAttributes());
+        return $this->morphMany(AttributeTranslation::class, 'model');
     }
 
     public function getAttributeTranslation(string $attribute, int $languageId): string
@@ -100,9 +113,9 @@ trait HasAttributeTranslations
             ->value('value');
     }
 
-    public function attributeTranslations(): MorphMany
+    public function isTranslatable(string $attribute): bool
     {
-        return $this->morphMany(AttributeTranslation::class, 'model');
+        return in_array($attribute, $this->getTranslatableAttributes());
     }
 
     public function localize(?int $languageId = null): static
@@ -126,23 +139,10 @@ trait HasAttributeTranslations
         return $this;
     }
 
-    public function attributeTranslationRules(): array
-    {
-        return [
-            'translations' => 'array|nullable',
-            'translations.*' => 'required|array',
-            'translations.*.language_id' => 'required|integer',
-            'translations.*.attribute' => [
-                'required',
-                'string',
-                Rule::in($this->translatableAttributes()),
-            ],
-            'translations.*.value' => 'string|nullable',
-        ];
-    }
-
     public function newCollection(array $models = []): Collection
     {
         return app(TranslatableCollection::class, ['items' => $models]);
     }
+
+    abstract protected function translatableAttributes(): array;
 }

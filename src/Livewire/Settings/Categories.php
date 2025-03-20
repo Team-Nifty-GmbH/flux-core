@@ -8,14 +8,12 @@ use FluxErp\Actions\Category\UpdateCategory;
 use FluxErp\Livewire\DataTables\CategoryList;
 use FluxErp\Livewire\Forms\CategoryForm;
 use FluxErp\Models\Category;
-use FluxErp\Models\Language;
 use FluxErp\Traits\Categorizable;
 use FluxErp\Traits\Livewire\Actions;
+use FluxErp\Traits\Livewire\DataTable\SupportsLocalization;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
@@ -24,7 +22,7 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class Categories extends CategoryList
 {
-    use Actions;
+    use Actions, SupportsLocalization;
 
     public CategoryForm $category;
 
@@ -34,33 +32,9 @@ class Categories extends CategoryList
 
     protected ?string $includeBefore = 'flux::livewire.settings.categories';
 
-    public function mount(): void
-    {
-        parent::mount();
-
-        $this->languageId = Session::get('selectedLanguageId')
-            ?? resolve_static(Language::class, 'default')?->id;
-        $this->languages = resolve_static(Language::class, 'query')
-            ->orderBy('name')
-            ->get(['id', 'name'])
-            ->toArray();
-    }
-
     protected function getTableActions(): array
     {
         return [
-            new HtmlString(
-                Blade::render(
-                    '<x-select.styled
-                        required
-                        x-model="$wire.languageId"
-                        x-on:select="$wire.localize()"
-                        select="label:name|value:id"
-                        :options="$languages"
-                    />',
-                    ['languages' => $this->languages]
-                )
-            ),
             DataTableButton::make()
                 ->text(__('Create'))
                 ->color('indigo')
@@ -137,33 +111,6 @@ class Categories extends CategoryList
         return true;
     }
 
-    protected function getViewData(): array
-    {
-        return array_merge(parent::getViewData(), [
-            'models' => model_info_all()
-                ->filter(fn ($modelInfo) => in_array(
-                    Categorizable::class,
-                    class_uses_recursive($modelInfo->class)
-                ))
-                ->unique('morphClass')
-                ->map(fn ($modelInfo) => [
-                    'label' => __(Str::headline($modelInfo->morphClass)),
-                    'value' => $modelInfo->morphClass,
-                ])
-                ->toArray(),
-            'languages' => resolve_static(Language::class, 'query')
-                ->get(['id', 'name'])
-                ->toArray(),
-        ]);
-    }
-
-    public function localize(): void
-    {
-        Session::put('selectedLanguageId', $this->languageId);
-
-        $this->loadData();
-    }
-
     protected function getResultFromQuery(Builder $query): array
     {
         $tree = to_flat_tree(
@@ -188,5 +135,22 @@ class Categories extends CategoryList
         }
 
         return $tree;
+    }
+
+    protected function getViewData(): array
+    {
+        return array_merge(parent::getViewData(), [
+            'models' => model_info_all()
+                ->filter(fn ($modelInfo) => in_array(
+                    Categorizable::class,
+                    class_uses_recursive($modelInfo->class)
+                ))
+                ->unique('morphClass')
+                ->map(fn ($modelInfo) => [
+                    'label' => __(Str::headline($modelInfo->morphClass)),
+                    'value' => $modelInfo->morphClass,
+                ])
+                ->toArray(),
+        ]);
     }
 }

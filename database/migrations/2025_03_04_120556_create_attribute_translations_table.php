@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::create('attribute_translations', function (Blueprint $table) {
+        Schema::create('attribute_translations', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('language_id')
                 ->constrained('languages')
