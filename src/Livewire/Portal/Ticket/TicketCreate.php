@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Portal\Ticket;
 
+use Exception;
 use FluxErp\Actions\Ticket\CreateTicket;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Ticket;
@@ -46,7 +47,7 @@ class TicketCreate extends Component
     {
         try {
             $modelType = $modelType ? app($modelType)->getMorphClass() : null;
-        } catch (\Exception) {
+        } catch (Exception) {
             $modelType = null;
         }
 
@@ -101,7 +102,7 @@ class TicketCreate extends Component
             $ticket = CreateTicket::make($this->ticket)
                 ->validate()
                 ->execute();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             exception_to_notifications($e, $this);
 
             return false;
@@ -109,7 +110,7 @@ class TicketCreate extends Component
 
         try {
             $this->saveFileUploadsToMediaLibrary('attachments', $ticket->id, app(Ticket::class)->getMorphClass());
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             exception_to_notifications($e, $this);
         }
 

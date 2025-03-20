@@ -31,16 +31,6 @@ class AccountingTest extends TestCase
         $form = new ContactForm(Livewire::new(Accounting::class), 'contact');
         $form->fill($this->contact);
 
-        $component = Livewire::test(Accounting::class, ['contact' => $form]);
-
-        foreach (Livewire::new(Accounting::class)->getTabs() as $tab) {
-            $component
-                ->set('tab', $tab->component)
-                ->assertStatus(200);
-
-            if ($tab->isLivewireComponent) {
-                $component->assertSeeLivewire($tab->component);
-            }
-        }
+        Livewire::test(Accounting::class, ['contact' => $form])->cycleTabs();
     }
 }

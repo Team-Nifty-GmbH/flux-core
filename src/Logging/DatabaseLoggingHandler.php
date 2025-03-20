@@ -7,6 +7,7 @@ use FluxErp\Models\Log;
 use Illuminate\Support\Facades\DB;
 use Monolog\Handler\AbstractProcessingHandler;
 use Monolog\LogRecord;
+use Throwable;
 
 class DatabaseLoggingHandler extends AbstractProcessingHandler
 {
@@ -39,7 +40,7 @@ class DatabaseLoggingHandler extends AbstractProcessingHandler
                     ->first()
                     ->newBroadcastableModelEvent('created');
             }
-        } catch (\Throwable) {
+        } catch (Throwable) {
             // fallback to single logging of laravel
         }
     }

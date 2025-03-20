@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use FluxErp\Support\MediaLibrary\MediaCollection;
+use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\ResolvesRelationsThroughContainer;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,7 +13,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media as BaseMedia;
 
 class Media extends BaseMedia
 {
-    use LogsActivity, ResolvesRelationsThroughContainer;
+    use HasPackageFactory, LogsActivity, ResolvesRelationsThroughContainer;
 
     public bool $isTemporary = false;
 

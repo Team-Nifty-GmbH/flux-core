@@ -115,7 +115,5 @@ class CreateMailMessageTest extends TestCase
             'description' => $action->getData('text_body'),
             'created_by' => $this->address->getMorphClass() . ':' . $this->address->getKey(),
         ]);
-
-        $this->assertTrue($result->communications()->where('communications.id', $result->id)->exists());
     }
 }

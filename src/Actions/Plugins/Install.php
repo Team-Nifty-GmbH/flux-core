@@ -3,6 +3,7 @@
 namespace FluxErp\Actions\Plugins;
 
 use FluxErp\Rulesets\Plugin\InstallPluginRuleset;
+use RuntimeException;
 
 class Install extends BasePluginAction
 {
@@ -27,7 +28,7 @@ class Install extends BasePluginAction
         });
 
         if (! $run) {
-            throw new \RuntimeException($output);
+            throw new RuntimeException($output);
         }
 
         if ($this->data['migrate'] ?? true) {

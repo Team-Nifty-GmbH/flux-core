@@ -2,6 +2,7 @@
 
 namespace FluxErp\Rules;
 
+use Closure;
 use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\InvokableRule;
 use Illuminate\Http\UploadedFile;
@@ -16,7 +17,7 @@ class MediaUploadType implements DataAwareRule, InvokableRule
      *
      * @param  string  $attribute
      * @param  mixed  $value
-     * @param  \Closure(string): \Illuminate\Translation\PotentiallyTranslatedString  $fail
+     * @param  Closure(string): \Illuminate\Translation\PotentiallyTranslatedString  $fail
      */
     public function __invoke($attribute, $value, $fail): void
     {

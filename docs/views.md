@@ -73,7 +73,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         Event::listen(
-            'tabs.rendering: ' . Contact::class, 
+            'tabs.rendering: ' . Contact::class,
             function (Contact $component) {
                 $component->mergeTabsToRender([
                     // The component name follows the same pattern as the livewire component name

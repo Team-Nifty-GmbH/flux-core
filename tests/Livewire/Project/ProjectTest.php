@@ -28,16 +28,6 @@ class ProjectTest extends BaseSetup
 
     public function test_switch_tabs(): void
     {
-        $component = Livewire::test(ProjectView::class, ['id' => $this->project->id]);
-
-        foreach (Livewire::new(ProjectView::class)->getTabs() as $tab) {
-            $component
-                ->set('tab', $tab->component)
-                ->assertStatus(200);
-
-            if ($tab->isLivewireComponent) {
-                $component->assertSeeLivewire($tab->component);
-            }
-        }
+        Livewire::test(ProjectView::class, ['id' => $this->project->id])->cycleTabs();
     }
 }

@@ -71,10 +71,12 @@ use Livewire\Livewire;
 use PHPUnit\Framework\Assert;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use ReflectionClass;
 use RegexIterator;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 use Spatie\Translatable\Facades\Translatable;
+use Throwable;
 
 class FluxServiceProvider extends ServiceProvider
 {
@@ -152,7 +154,7 @@ class FluxServiceProvider extends ServiceProvider
         $this->loadJsonTranslationsFrom(__DIR__ . '/../lang');
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'flux');
         $this->registerConfig();
-        $this->registerMarcos();
+        $this->registerMacros();
         $this->registerExtensions();
 
         Translatable::fallback(
@@ -506,17 +508,17 @@ class FluxServiceProvider extends ServiceProvider
         foreach ($this->getViewClassAliasFromNamespace($livewireNamespace) as $alias => $class) {
             try {
                 if (is_a($class, Component::class, true)
-                    && ! (new \ReflectionClass($class))->isAbstract()
+                    && ! (new ReflectionClass($class))->isAbstract()
                 ) {
                     Livewire::component($alias, $class);
                 }
-            } catch (\Throwable) {
+            } catch (Throwable) {
                 Cache::forget('flux.view-classes.' . Str::slug($livewireNamespace));
             }
         }
     }
 
-    protected function registerMarcos(): void
+    protected function registerMacros(): void
     {
         if (! Arr::hasMacro('sortByPattern')) {
             Arr::macro('sortByPattern', function (array $array, array $pattern) {
@@ -620,6 +622,27 @@ class FluxServiceProvider extends ServiceProvider
         }
 
         if ($this->app->runningUnitTests()) {
+            if (! Testable::hasMacro('cycleTabs')) {
+                Testable::macro(
+                    'cycleTabs',
+                    function (string $tabPropertyName = 'tab'): void {
+                        $tabs = $this->instance()->getTabs();
+
+                        foreach ($tabs as $tab) {
+                            $this
+                                ->set($tabPropertyName, $tab->component)
+                                ->assertStatus(200);
+
+                            if ($tab->isLivewireComponent) {
+                                $this->assertSeeLivewire($tab->component);
+                            }
+                        }
+
+                        $this->set($tabPropertyName, $tabs[0]->component);
+                    }
+                );
+            }
+
             if (! Testable::hasMacro('assertToastNotification')) {
                 Testable::macro(
                     'assertToastNotification',

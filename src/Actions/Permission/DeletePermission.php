@@ -38,7 +38,9 @@ class DeletePermission extends FluxAction
         ) {
             throw ValidationException::withMessages([
                 'is_locked' => [__('Permission is locked')],
-            ])->errorBag('deletePermission');
+            ])
+                ->errorBag('deletePermission')
+                ->status(423);
         }
     }
 }

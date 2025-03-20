@@ -3,11 +3,14 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Traits\HasAttributeTranslations;
+use FluxErp\Models\Scopes\UserClientScope;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Event;
 use Laravel\Scout\Searchable;
+use Laravel\Scout\SearchableScope;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class SearchController extends Controller
@@ -31,7 +34,7 @@ class SearchController extends Controller
 
         Event::dispatch('tall-datatables-searching', $request);
 
-        if ($request->has('selected') && ! $request->has('search')) {
+        if (! blank($request->get('selected')) && blank($request->get('search'))) {
             $selected = $request->get('selected');
             $optionValue = $request->get('option-value') ?: (app($model))->getKeyName();
 
@@ -40,10 +43,20 @@ class SearchController extends Controller
                 ? $query->whereIn($optionValue, Arr::wrap($selected))
                 : $query->where($optionValue, $selected);
         } elseif ($request->has('search') && $isSearchable) {
+            /** @var Builder $perPageSearch */
+            $perPageSearch = count(Arr::except(
+                app($model)->getGlobalScopes(),
+                [
+                    SoftDeletingScope::class,
+                    SearchableScope::class,
+                    UserClientScope::class,
+                ]
+            )) === 0 ? 20 : 1000;
+
             $query = ! is_string($request->get('search'))
                 ? resolve_static($model, 'query')->limit(20)
                 : resolve_static($model, 'search', ['query' => $request->get('search')])
-                    ->toEloquentBuilder();
+                    ->toEloquentBuilder(perPage: $perPageSearch);
         } elseif ($request->has('search')) {
             $query = resolve_static($model, 'query');
             $query->where(function (Builder $query) use ($request): void {

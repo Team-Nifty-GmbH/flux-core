@@ -2,6 +2,7 @@
 
 namespace FluxErp\Traits\Livewire;
 
+use BadMethodCallException;
 use FluxErp\Actions\Printing;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Models\Media;
@@ -11,6 +12,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use InvalidArgumentException;
 use Laravel\SerializableClosure\SerializableClosure;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
@@ -45,11 +47,19 @@ trait CreatesDocuments
 
     abstract public function createDocuments(): null|MediaStream|Media;
 
+    abstract protected function getHtmlBody(OffersPrinting $item): string;
+
+    abstract protected function getPrintLayouts(): array;
+
+    abstract protected function getSubject(OffersPrinting $item): string;
+
+    abstract protected function getTo(OffersPrinting $item, array $documents): array;
+
     #[Renderless]
     public function downloadPreview(): ?StreamedResponse
     {
         if (! $this->supportsDocumentPreview()) {
-            throw new \BadMethodCallException('Document preview is not supported');
+            throw new BadMethodCallException('Document preview is not supported');
         }
 
         try {
@@ -109,11 +119,11 @@ trait CreatesDocuments
     public function openPreview(string $printView, string $modelType, int|string $modelId): void
     {
         if (! in_array($printView, array_keys($this->getPrintLayouts()))) {
-            throw new \InvalidArgumentException('Invalid print view');
+            throw new InvalidArgumentException('Invalid print view');
         }
 
         if (! $this->supportsDocumentPreview()) {
-            throw new \BadMethodCallException('Document preview is not supported');
+            throw new BadMethodCallException('Document preview is not supported');
         }
 
         $this->previewData = [
@@ -338,14 +348,6 @@ trait CreatesDocuments
             'name' => __($view),
         ];
     }
-
-    abstract protected function getHtmlBody(OffersPrinting $item): string;
-
-    abstract protected function getPrintLayouts(): array;
-
-    abstract protected function getSubject(OffersPrinting $item): string;
-
-    abstract protected function getTo(OffersPrinting $item, array $documents): array;
 
     protected function supportsDocumentPreview(): bool
     {
