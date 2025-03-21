@@ -26,11 +26,23 @@ trait HasAttributeTranslations
 
     protected static function bootHasAttributeTranslations(): void
     {
+        static::retrieved(function (Model $model) {
+            $languageId = Session::get('selectedLanguageId');
+
+            if (is_null($languageId)
+                || $languageId === resolve_static(Language::class, 'default')?->id
+            ) {
+                return;
+            }
+
+            $model->localize($languageId);
+        });
+
         static::saving(function (Model $model): void {
             $languageId = Session::get('selectedLanguageId');
 
             if (is_null($languageId)
-                || resolve_static(Language::class, 'default')?->id === $languageId
+                || $languageId === resolve_static(Language::class, 'default')?->id
                 || $model->translations !== null
             ) {
                 return;
@@ -38,10 +50,6 @@ trait HasAttributeTranslations
 
             foreach ($model->translatableAttributes() as $translatableAttribute) {
                 $value = $model->getAttribute($translatableAttribute);
-
-                if (blank($value)) {
-                    continue;
-                }
 
                 $model->translations[] = [
                     'language_id' => $languageId,
@@ -60,7 +68,14 @@ trait HasAttributeTranslations
 
             foreach ($model->translations as $translation) {
                 if (blank(data_get($translation, 'value'))
-                    || data_get($translation, 'value') === '<p></p>'
+                    || in_array(
+                        data_get($translation, 'value'),
+                        [
+                            '<p></p>',
+                            $model->getRawOriginal(data_get($translation, 'attribute')),
+                        ],
+                        true
+                    )
                 ) {
                     if ($attributeTranslationId = $model->attributeTranslations()
                         ->where('language_id', data_get($translation, 'language_id'))
