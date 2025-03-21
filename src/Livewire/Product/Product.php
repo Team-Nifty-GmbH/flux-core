@@ -111,6 +111,7 @@ class Product extends Component
             ])
             ->withCount('children')
             ->firstOrFail();
+        $product->append('avatar_url');
 
         $this->product->fill($product);
         $this->product->product_properties = Arr::keyBy($this->product->product_properties, 'id');
@@ -373,6 +374,7 @@ class Product extends Component
             ])
             ->withCount('children')
             ->firstOrFail();
+        $product->append('avatar_url');
 
         $this->product->reset();
         $this->product->fill($product);

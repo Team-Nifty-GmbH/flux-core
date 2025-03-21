@@ -21,7 +21,7 @@ class ProductOption extends FluxModel
 
     public function newCollection(array $models = []): Collection
     {
-        return app(ProductOptionCollection::class, ['items' => $models])->localize();
+        return app(ProductOptionCollection::class, ['items' => $models]);
     }
 
     public function productOptionGroup(): BelongsTo
