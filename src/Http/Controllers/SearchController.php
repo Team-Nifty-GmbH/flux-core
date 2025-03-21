@@ -3,7 +3,6 @@
 namespace FluxErp\Http\Controllers;
 
 use FluxErp\Models\Scopes\UserClientScope;
-use FluxErp\Traits\HasAttributeTranslations;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Http\Request;
@@ -153,15 +152,6 @@ class SearchController extends Controller
         }
 
         $result = $query->latest()->get();
-
-        if (
-            in_array(
-                HasAttributeTranslations::class,
-                class_uses_recursive(resolve_static($model, 'class'))
-            )
-        ) {
-            $result = $result->localize();
-        }
 
         if ($request->has('appends')) {
             $result->each(function ($item) use ($request): void {

@@ -198,9 +198,4 @@ class ProductList extends BaseProductList
             ]
         );
     }
-
-    protected function itemToArray($item): array
-    {
-        return parent::itemToArray($item->localize());
-    }
 }

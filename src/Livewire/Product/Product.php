@@ -111,17 +111,17 @@ class Product extends Component
             ])
             ->withCount('children')
             ->firstOrFail();
-        $product->localize()->append('avatar_url');
 
         $this->product->fill($product);
-        $this->languageId = Session::get('selectedLanguageId')
-            ?? resolve_static(Language::class, 'default')?->id;
         $this->product->product_properties = Arr::keyBy($this->product->product_properties, 'id');
 
+        $this->languageId = Session::get('selectedLanguageId')
+            ?? resolve_static(Language::class, 'default')?->getKey();
         $this->languages = resolve_static(Language::class, 'query')
             ->orderBy('name')
             ->get(['id', 'name'])
             ->toArray();
+
         $this->additionalColumns = $product->getAdditionalColumns()->toArray();
         $this->recalculateDisplayedProductProperties();
     }
@@ -355,9 +355,7 @@ class Product extends Component
             resolve_static(ProductModel::class, 'query')
                 ->whereKey($this->product->id)
                 ->first()
-                ?->localize($this->languageId)
         );
-        $this->product->language_id = $this->languageId;
     }
 
     public function resetProduct(): void
@@ -375,7 +373,6 @@ class Product extends Component
             ])
             ->withCount('children')
             ->firstOrFail();
-        $product->localize()->append('avatar_url');
 
         $this->product->reset();
         $this->product->fill($product);

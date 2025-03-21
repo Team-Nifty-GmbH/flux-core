@@ -57,7 +57,9 @@ trait HasAttributeTranslations
                     'value' => $value,
                 ];
 
-                $model->setAttribute($translatableAttribute, $model->getRawOriginal($translatableAttribute));
+                if ($model->exists) {
+                    $model->setAttribute($translatableAttribute, $model->getRawOriginal($translatableAttribute));
+                }
             }
         });
 

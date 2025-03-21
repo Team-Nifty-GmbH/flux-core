@@ -316,6 +316,6 @@ abstract class FluxAction
 
     protected function validateData(): void
     {
-        $this->data = Validator::validate($this->data, $this->getRules());
+        $this->data = Validator::validate($this->getData(), $this->getRules());
     }
 }

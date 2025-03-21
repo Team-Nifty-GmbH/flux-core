@@ -9,13 +9,14 @@ use FluxErp\Livewire\DataTables\ProductOptionGroupList;
 use FluxErp\Livewire\Forms\ProductOptionGroupForm;
 use FluxErp\Models\ProductOptionGroup;
 use FluxErp\Traits\Livewire\Actions;
+use FluxErp\Traits\Livewire\DataTable\SupportsLocalization;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class ProductOptionGroups extends ProductOptionGroupList
 {
-    use Actions;
+    use Actions, SupportsLocalization;
 
     public ProductOptionGroupForm $productOptionGroupForm;
 

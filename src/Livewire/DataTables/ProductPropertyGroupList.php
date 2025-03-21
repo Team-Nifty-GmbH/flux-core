@@ -12,4 +12,11 @@ class ProductPropertyGroupList extends BaseDataTable
     ];
 
     protected string $model = ProductPropertyGroup::class;
+
+    protected function itemToArray($item): array
+    {
+        $item->productProperties->each(fn ($productProperty) => $productProperty->localize());
+
+        return parent::itemToArray($item);
+    }
 }

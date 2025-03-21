@@ -11,9 +11,6 @@ use FluxErp\Models\Category;
 use FluxErp\Traits\Categorizable;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\DataTable\SupportsLocalization;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
@@ -25,10 +22,6 @@ class Categories extends CategoryList
     use Actions, SupportsLocalization;
 
     public CategoryForm $category;
-
-    public ?int $languageId;
-
-    public array $languages = [];
 
     protected ?string $includeBefore = 'flux::livewire.settings.categories';
 
@@ -88,7 +81,7 @@ class Categories extends CategoryList
     public function edit(Category $category): void
     {
         $this->category->reset();
-        $this->category->fill($category->localize(Session::get('selectedLanguageId')));
+        $this->category->fill($category);
 
         $this->js(<<<'JS'
             $modalOpen('edit-category-modal');
@@ -109,32 +102,6 @@ class Categories extends CategoryList
         $this->loadData();
 
         return true;
-    }
-
-    protected function getResultFromQuery(Builder $query): array
-    {
-        $tree = to_flat_tree(
-            $query->get()
-                ->localize()
-                ->toArray()
-        );
-
-        $returnKeys = array_merge($this->getReturnKeys(), ['depth']);
-
-        foreach ($tree as &$item) {
-            $item = Arr::only(Arr::dot($item), $returnKeys);
-            $item['indentation'] = '';
-
-            if ($item['depth'] > 0) {
-                $indent = $item['depth'] * 20;
-                $item['indentation'] = <<<HTML
-                    <div class="text-right indent-icon" style="width:{$indent}px;">
-                    </div>
-                    HTML;
-            }
-        }
-
-        return $tree;
     }
 
     protected function getViewData(): array

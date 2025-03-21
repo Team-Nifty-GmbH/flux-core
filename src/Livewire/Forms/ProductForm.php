@@ -5,7 +5,6 @@ namespace FluxErp\Livewire\Forms;
 use FluxErp\Actions\Product\CreateProduct;
 use FluxErp\Actions\Product\DeleteProduct;
 use FluxErp\Actions\Product\UpdateProduct;
-use FluxErp\Traits\HasAttributeTranslations;
 use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Locked;
 
@@ -132,10 +131,6 @@ class ProductForm extends FluxForm
                 'tags:id',
                 'vatRate:id,rate_percentage',
             ]);
-
-            if (in_array(HasAttributeTranslations::class, class_uses_recursive($values))) {
-                $values->localize();
-            }
 
             $values->append('avatar_url');
         }
