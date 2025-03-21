@@ -26,7 +26,7 @@ trait HasAttributeTranslations
 
     protected static function bootHasAttributeTranslations(): void
     {
-        static::retrieved(function (Model $model) {
+        static::retrieved(function (Model $model): void {
             $languageId = Session::get('selectedLanguageId');
 
             if (is_null($languageId)
