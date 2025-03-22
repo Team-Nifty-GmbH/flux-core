@@ -10,13 +10,14 @@ use FluxErp\Livewire\Forms\PaymentTypeForm;
 use FluxErp\Models\Client;
 use FluxErp\Models\PaymentType;
 use FluxErp\Traits\Livewire\Actions;
+use FluxErp\Traits\Livewire\DataTable\SupportsLocalization;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class PaymentTypes extends PaymentTypeList
 {
-    use Actions;
+    use Actions, SupportsLocalization;
 
     public ?string $includeBefore = 'flux::livewire.settings.payment-types';
 

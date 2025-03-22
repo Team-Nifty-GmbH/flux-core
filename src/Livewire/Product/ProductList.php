@@ -13,6 +13,7 @@ use FluxErp\Livewire\Forms\ProductPricesUpdateForm;
 use FluxErp\Models\Client;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\VatRate;
+use FluxErp\Traits\Livewire\DataTable\SupportsLocalization;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
@@ -21,6 +22,8 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class ProductList extends BaseProductList
 {
+    use SupportsLocalization;
+
     public ?string $cacheKey = 'product.product-list';
 
     public bool $isSelectable = true;

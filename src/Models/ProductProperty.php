@@ -4,6 +4,7 @@ namespace FluxErp\Models;
 
 use FluxErp\Enums\PropertyTypeEnum;
 use FluxErp\Traits\Filterable;
+use FluxErp\Traits\HasAttributeTranslations;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
@@ -14,7 +15,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class ProductProperty extends FluxModel
 {
-    use Filterable, HasPackageFactory, HasUserModification, HasUuid, LogsActivity, SoftDeletes;
+    use Filterable, HasAttributeTranslations, HasPackageFactory, HasUserModification, HasUuid, LogsActivity,
+        SoftDeletes;
 
     protected $hidden = [
         'pivot',
@@ -40,5 +42,12 @@ class ProductProperty extends FluxModel
             'product_prop_id',
             'product_id'
         );
+    }
+
+    protected function translatableAttributes(): array
+    {
+        return [
+            'name',
+        ];
     }
 }

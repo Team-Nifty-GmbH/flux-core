@@ -5,7 +5,6 @@ namespace FluxErp\Actions\ProductOption;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\ProductOption;
 use FluxErp\Rulesets\ProductOption\CreateProductOptionRuleset;
-use Illuminate\Support\Facades\Validator;
 
 class CreateProductOption extends FluxAction
 {
@@ -25,13 +24,5 @@ class CreateProductOption extends FluxAction
         $productOption->save();
 
         return $productOption->fresh();
-    }
-
-    protected function validateData(): void
-    {
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(ProductOption::class));
-
-        $this->data = $validator->validate();
     }
 }

@@ -35,7 +35,6 @@ use FluxErp\Models\SerialNumber;
 use FluxErp\Models\Task;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\User;
-use FluxErp\Support\Validator\ValidatorFactory;
 use FluxErp\Traits\HasClientAssignment;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Bus\Dispatcher;
@@ -811,13 +810,6 @@ class FluxServiceProvider extends ServiceProvider
             'composer',
             function () {
                 return $this->app->get(Composer::class);
-            }
-        );
-
-        $this->app->extend(
-            'validator',
-            function () {
-                return $this->app->get(ValidatorFactory::class);
             }
         );
     }

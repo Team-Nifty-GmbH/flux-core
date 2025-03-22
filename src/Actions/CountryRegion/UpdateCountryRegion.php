@@ -6,7 +6,6 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Models\CountryRegion;
 use FluxErp\Rulesets\CountryRegion\UpdateCountryRegionRuleset;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Validator;
 
 class UpdateCountryRegion extends FluxAction
 {
@@ -30,13 +29,5 @@ class UpdateCountryRegion extends FluxAction
         $countryRegion->save();
 
         return $countryRegion->withoutRelations()->fresh();
-    }
-
-    protected function validateData(): void
-    {
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(CountryRegion::class));
-
-        $this->data = $validator->validate();
     }
 }

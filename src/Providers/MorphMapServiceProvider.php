@@ -51,6 +51,7 @@ use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentReminder;
+use FluxErp\Models\PaymentReminderText;
 use FluxErp\Models\PaymentRun;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
@@ -160,6 +161,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'order_position' => OrderPosition::class,
             'order_type' => OrderType::class,
             'payment_reminder' => PaymentReminder::class,
+            'payment_reminder_text' => PaymentReminderText::class,
             'payment_run' => PaymentRun::class,
             'payment_type' => PaymentType::class,
             'permission' => Permission::class,
