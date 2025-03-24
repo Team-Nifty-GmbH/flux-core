@@ -14,7 +14,6 @@ use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\Product\UpdateProductRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -131,10 +130,7 @@ class UpdateProduct extends FluxAction
 
     protected function validateData(): void
     {
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(Product::class));
-
-        $this->data = $validator->validate();
+        parent::validateData();
 
         if ($this->data['parent_id'] ?? false) {
             $product = resolve_static(Product::class, 'query')

@@ -140,7 +140,7 @@ class UserTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->delete('/api/users/' . $this->user->id);
-        $response->assertStatus(422);
+        $response->assertStatus(403);
 
         $dbUser = User::query()->whereKey($this->users[0]->id)->first();
         $this->assertNotNull($dbUser);
@@ -152,7 +152,7 @@ class UserTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->delete('/api/users/' . $this->users[1]->id + 1);
-        $response->assertStatus(422);
+        $response->assertStatus(404);
     }
 
     public function test_get_user(): void

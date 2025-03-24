@@ -4,6 +4,8 @@ namespace FluxErp\Support\Widgets\Charts;
 
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
+use ReflectionClass;
+use ReflectionProperty;
 
 abstract class Chart extends Component
 {
@@ -59,6 +61,8 @@ abstract class Chart extends Component
 
     public ?array $yaxis = null;
 
+    abstract public function calculateChart(): void;
+
     public static function getDefaultHeight(): int
     {
         return 2;
@@ -101,8 +105,6 @@ abstract class Chart extends Component
         $this->options ??= $this->getOptions();
     }
 
-    abstract public function calculateChart(): void;
-
     #[Renderless]
     public function updateData(): void
     {
@@ -117,9 +119,9 @@ abstract class Chart extends Component
     protected function getOptions(): array
     {
         $public = [];
-        $reflection = new \ReflectionClass(static::class);
+        $reflection = new ReflectionClass(static::class);
         $properties = array_filter(
-            $reflection->getProperties(\ReflectionProperty::IS_PUBLIC),
+            $reflection->getProperties(ReflectionProperty::IS_PUBLIC),
             fn ($property) => ! in_array($property->getName(), ['timeFrame', 'options'])
         );
 

@@ -56,7 +56,9 @@ class DeleteLanguage extends FluxAction
         }
 
         if ($errors) {
-            throw ValidationException::withMessages($errors)->errorBag('deleteLanguage');
+            throw ValidationException::withMessages($errors)
+                ->errorBag('deleteLanguage')
+                ->status(423);
         }
     }
 }

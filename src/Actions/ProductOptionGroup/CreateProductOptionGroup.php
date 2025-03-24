@@ -7,7 +7,6 @@ use FluxErp\Actions\ProductOption\CreateProductOption;
 use FluxErp\Models\ProductOptionGroup;
 use FluxErp\Rulesets\ProductOptionGroup\CreateProductOptionGroupRuleset;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Validator;
 
 class CreateProductOptionGroup extends FluxAction
 {
@@ -36,13 +35,5 @@ class CreateProductOptionGroup extends FluxAction
         }
 
         return $productOptionGroup->fresh();
-    }
-
-    protected function validateData(): void
-    {
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(ProductOptionGroup::class));
-
-        $this->data = $validator->validate();
     }
 }

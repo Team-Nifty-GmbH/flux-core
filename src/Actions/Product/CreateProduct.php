@@ -14,7 +14,6 @@ use FluxErp\Models\Tag;
 use FluxErp\Models\VatRate;
 use FluxErp\Rulesets\Product\CreateProductRuleset;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Validator;
 
 class CreateProduct extends FluxAction
 {
@@ -125,13 +124,5 @@ class CreateProduct extends FluxAction
                 $this->data['vat_rate_id'] = resolve_static(VatRate::class, 'default')?->id;
             }
         }
-    }
-
-    protected function validateData(): void
-    {
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(Product::class));
-
-        $this->data = $validator->validate();
     }
 }

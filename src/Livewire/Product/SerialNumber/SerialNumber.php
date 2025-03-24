@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Product\SerialNumber;
 
+use Exception;
 use FluxErp\Actions\SerialNumber\UpdateSerialNumber;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Forms\SerialNumberForm;
@@ -74,7 +75,7 @@ class SerialNumber extends Component
                 ->checkPermission()
                 ->validate()
                 ->execute();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             exception_to_notifications($e, $this);
 
             return;

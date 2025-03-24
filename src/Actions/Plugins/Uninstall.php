@@ -4,6 +4,7 @@ namespace FluxErp\Actions\Plugins;
 
 use FluxErp\Rulesets\Plugin\UninstallPluginRuleset;
 use Illuminate\Validation\ValidationException;
+use RuntimeException;
 
 class Uninstall extends BasePluginAction
 {
@@ -31,7 +32,7 @@ class Uninstall extends BasePluginAction
         );
 
         if (! $run) {
-            throw new \RuntimeException($output);
+            throw new RuntimeException($output);
         }
 
         return $run;

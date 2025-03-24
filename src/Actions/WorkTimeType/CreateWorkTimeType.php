@@ -5,7 +5,6 @@ namespace FluxErp\Actions\WorkTimeType;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\WorkTimeType;
 use FluxErp\Rulesets\WorkTimeType\CreateWorkTimeTypeRuleset;
-use Illuminate\Support\Facades\Validator;
 
 class CreateWorkTimeType extends FluxAction
 {
@@ -25,13 +24,5 @@ class CreateWorkTimeType extends FluxAction
         $workTimeType->save();
 
         return $workTimeType->fresh();
-    }
-
-    protected function validateData(): void
-    {
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(WorkTimeType::class));
-
-        $this->data = $validator->validate();
     }
 }

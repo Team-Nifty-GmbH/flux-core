@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire;
 
+use Exception;
 use FluxErp\Actions\Media\DeleteMedia;
 use FluxErp\Actions\Media\DeleteMediaCollection;
 use FluxErp\Actions\Media\UpdateMedia;
@@ -41,7 +42,7 @@ class FolderTree extends Component
                 ->checkPermission()
                 ->validate()
                 ->execute();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             exception_to_notifications($e, $this);
 
             return false;
@@ -67,7 +68,7 @@ class FolderTree extends Component
                 ->checkPermission()
                 ->validate()
                 ->execute();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             exception_to_notifications($e, $this);
         }
     }
@@ -158,7 +159,6 @@ class FolderTree extends Component
                 ->first()
                 ?->move($model, $targetCollectionName);
         }
-
     }
 
     #[Renderless]
@@ -242,7 +242,7 @@ class FolderTree extends Component
                 ->checkPermission()
                 ->validate()
                 ->execute();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             exception_to_notifications($e, $this);
 
             return false;

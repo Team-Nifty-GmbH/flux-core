@@ -14,6 +14,7 @@ use FluxErp\Models\Media;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Spatie\Activitylog\Facades\CauserResolver;
+use Throwable;
 
 class CreateMailExecutedSubscriber
 {
@@ -59,7 +60,7 @@ class CreateMailExecutedSubscriber
                     ->execute();
 
                 $comment->model->communications()->attach($message->getKey());
-            } catch (\Throwable) {
+            } catch (Throwable) {
             }
         } elseif ($message->mailFolder->can_create_ticket) {
             $this->createTicket($message);
@@ -95,7 +96,7 @@ class CreateMailExecutedSubscriber
                     )
                     ->validate()
                     ->execute();
-            } catch (\Throwable) {
+            } catch (Throwable) {
                 continue;
             }
 
@@ -131,7 +132,7 @@ class CreateMailExecutedSubscriber
             try {
                 /** @var Media $attachment */
                 $attachment->copy($ticket);
-            } catch (\Throwable) {
+            } catch (Throwable) {
             }
         }
     }

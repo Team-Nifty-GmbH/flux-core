@@ -7,7 +7,6 @@ use FluxErp\Models\Client;
 use FluxErp\Models\PaymentType;
 use FluxErp\Rulesets\PaymentType\CreatePaymentTypeRuleset;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Validator;
 
 class CreatePaymentType extends FluxAction
 {
@@ -40,13 +39,5 @@ class CreatePaymentType extends FluxAction
         $this->data['clients'] ??= [
             data_get($this->data, 'client_id') ?? resolve_static(Client::class, 'default')?->id,
         ];
-    }
-
-    protected function validateData(): void
-    {
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(PaymentType::class));
-
-        $this->data = $validator->validate();
     }
 }

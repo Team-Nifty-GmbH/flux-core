@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Features;
 
+use Exception;
 use FluxErp\Actions\CommissionRate\CreateCommissionRate;
 use FluxErp\Actions\CommissionRate\DeleteCommissionRate;
 use FluxErp\Actions\CommissionRate\UpdateCommissionRate;
@@ -108,7 +109,7 @@ class CommissionRates extends BaseDataTable
                 ->checkPermission()
                 ->validate()
                 ->execute();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             exception_to_notifications($e, $this);
 
             return;
@@ -156,7 +157,7 @@ class CommissionRates extends BaseDataTable
                 ->checkPermission()
                 ->validate()
                 ->execute();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             exception_to_notifications($e, $this);
 
             if ($this->commissionRate['commission_rate']) {

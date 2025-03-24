@@ -35,7 +35,6 @@ use FluxErp\Models\SerialNumber;
 use FluxErp\Models\Task;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\User;
-use FluxErp\Support\Validator\ValidatorFactory;
 use FluxErp\Traits\HasClientAssignment;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Bus\Dispatcher;
@@ -71,10 +70,12 @@ use Livewire\Livewire;
 use PHPUnit\Framework\Assert;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use ReflectionClass;
 use RegexIterator;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 use Spatie\Translatable\Facades\Translatable;
+use Throwable;
 
 class FluxServiceProvider extends ServiceProvider
 {
@@ -506,11 +507,11 @@ class FluxServiceProvider extends ServiceProvider
         foreach ($this->getViewClassAliasFromNamespace($livewireNamespace) as $alias => $class) {
             try {
                 if (is_a($class, Component::class, true)
-                    && ! (new \ReflectionClass($class))->isAbstract()
+                    && ! (new ReflectionClass($class))->isAbstract()
                 ) {
                     Livewire::component($alias, $class);
                 }
-            } catch (\Throwable) {
+            } catch (Throwable) {
                 Cache::forget('flux.view-classes.' . Str::slug($livewireNamespace));
             }
         }
@@ -809,13 +810,6 @@ class FluxServiceProvider extends ServiceProvider
             'composer',
             function () {
                 return $this->app->get(Composer::class);
-            }
-        );
-
-        $this->app->extend(
-            'validator',
-            function () {
-                return $this->app->get(ValidatorFactory::class);
             }
         );
     }

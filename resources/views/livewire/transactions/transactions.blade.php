@@ -6,13 +6,37 @@
             select="label:name|value:id|description:iban"
             :options="$bankConnections"
         />
-        <x-date without-time wire:model="transactionForm.booking_date" :label="__('Booking Date')"/>
-        <x-date without-time wire:model="transactionForm.value_date" :label="__('Value Date')"/>
-        <x-input wire:model="transactionForm.counterpart_name" :label="__('Counterpart Name')"/>
-        <x-input wire:model="transactionForm.counterpart_iban" :label="__('Counterpart IBAN')"/>
-        <x-input wire:model="transactionForm.counterpart_bank_name" :label="__('Counterpart Bank Name')"/>
-        <x-textarea wire:model="transactionForm.purpose" :label="__('Purpose')"/>
-        <x-number step="0.01" wire:model="transactionForm.amount" :label="__('Amount')"/>
+        <x-date
+            without-time
+            wire:model="transactionForm.booking_date"
+            :label="__('Booking Date')"
+        />
+        <x-date
+            without-time
+            wire:model="transactionForm.value_date"
+            :label="__('Value Date')"
+        />
+        <x-input
+            wire:model="transactionForm.counterpart_name"
+            :label="__('Counterpart Name')"
+        />
+        <x-input
+            wire:model="transactionForm.counterpart_iban"
+            :label="__('Counterpart IBAN')"
+        />
+        <x-input
+            wire:model="transactionForm.counterpart_bank_name"
+            :label="__('Counterpart Bank Name')"
+        />
+        <x-textarea
+            wire:model="transactionForm.purpose"
+            :label="__('Purpose')"
+        />
+        <x-number
+            step="0.01"
+            wire:model="transactionForm.amount"
+            :label="__('Amount')"
+        />
     </div>
     <x-slot:footer>
         <div class="flex justify-between">
@@ -23,10 +47,19 @@
                 wire:click="deleteTransaction().then((success) => {if(success) $modalClose('transaction-detail-modal');})"
                 wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Transaction')]) }}"
             />
-            <div class="w-full flex justify-end gap-x-2">
-                <x-button color="secondary" light :text="__('Cancel')" x-on:click="$modalClose('transaction-details-modal')"/>
-                <x-button color="indigo" :text="__('Save')" wire:click="saveTransaction().then((success) => {if(success) $modalClose('transaction-details-modal');})"/>
+            <div class="flex w-full justify-end gap-x-2">
+                <x-button
+                    color="secondary"
+                    light
+                    :text="__('Cancel')"
+                    x-on:click="$modalClose('transaction-details-modal')"
+                />
+                <x-button
+                    color="indigo"
+                    :text="__('Save')"
+                    wire:click="saveTransaction().then((success) => {if(success) $modalClose('transaction-details-modal');})"
+                />
             </div>
         </div>
-    </x-slot:footer>
+    </x-slot>
 </x-modal>

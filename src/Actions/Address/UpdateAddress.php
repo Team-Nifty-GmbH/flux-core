@@ -14,7 +14,6 @@ use FluxErp\Rulesets\Address\UpdateAddressRuleset;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -141,10 +140,7 @@ class UpdateAddress extends FluxAction
 
     protected function validateData(): void
     {
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(Address::class));
-
-        $this->data = $validator->validate();
+        parent::validateData();
 
         $errors = [];
         $address = resolve_static(Address::class, 'query')

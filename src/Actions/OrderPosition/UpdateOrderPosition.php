@@ -11,7 +11,6 @@ use FluxErp\Models\Product;
 use FluxErp\Rulesets\OrderPosition\UpdateOrderPositionRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 class UpdateOrderPosition extends FluxAction
@@ -124,10 +123,7 @@ class UpdateOrderPosition extends FluxAction
 
     protected function validateData(): void
     {
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(OrderPosition::class));
-
-        $this->data = $validator->validate();
+        parent::validateData();
 
         if ($this->data['id'] ?? false) {
             $errors = [];

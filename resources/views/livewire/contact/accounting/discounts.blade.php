@@ -15,7 +15,13 @@
                 ],
             ]"
         />
-        <div x-cloak x-show="$wire.discountForm.model_type === '{{ morph_alias(\FluxErp\Models\Category::class) }}'">
+        <div
+            x-cloak
+            x-show="
+                $wire.discountForm.model_type ===
+                    '{{ morph_alias(\FluxErp\Models\Category::class) }}'
+            "
+        >
             <x-select.styled
                 :label="__('Category')"
                 wire:model="discountForm.model_id"
@@ -36,7 +42,13 @@
                 ]"
             />
         </div>
-        <div x-cloak x-show="$wire.discountForm.model_type === '{{ morph_alias(\FluxErp\Models\Product::class) }}'">
+        <div
+            x-cloak
+            x-show="
+                $wire.discountForm.model_type ===
+                    '{{ morph_alias(\FluxErp\Models\Product::class) }}'
+            "
+        >
             <x-select.styled
                 :label="__('Product')"
                 wire:model="discountForm.model_id"
@@ -61,11 +73,11 @@
         />
         <div x-cloak x-show="$wire.discountForm.is_percentage">
             <x-number
-                 :label="__('Discount Percent')"
-                 wire:model="discountForm.discount"
-                 step="0.01"
-                 min="-100"
-                 max="100"
+                :label="__('Discount Percent')"
+                wire:model="discountForm.discount"
+                step="0.01"
+                min="-100"
+                max="100"
             />
         </div>
         <div x-cloak x-show="! $wire.discountForm.is_percentage">
@@ -82,5 +94,5 @@
             :text="__('Save')"
             wire:click="save().then((success) => {if(success) close();})"
         />
-    </x-slot:footer>
+    </x-slot>
 </x-modal>

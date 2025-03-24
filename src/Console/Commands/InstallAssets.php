@@ -2,8 +2,10 @@
 
 namespace FluxErp\Console\Commands;
 
+use Closure;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
+use InvalidArgumentException;
 use RuntimeException;
 use Symfony\Component\Process\Process;
 
@@ -24,13 +26,14 @@ class InstallAssets extends Command
     protected $signature = 'flux:install-assets
         {directory? : The directory to install the assets}
         {--force : Overwrite existing files}
-        {--merge-json : If a file is json parsable merge it recursively}';
+        {--merge-json : If a file is json parsable merge it recursively}
+        {--no-build : Skip building the assets}';
 
     public static function copyStubs(
         ?array $files = null,
         bool $force = false,
         bool $merge = true,
-        ?\Closure $basePath = null
+        ?Closure $basePath = null
     ): void {
         $files = is_array($files)
             ? $files
@@ -123,7 +126,7 @@ class InstallAssets extends Command
     {
         $target = $this->argument('directory');
         if ($target && ! file_exists($target)) {
-            throw new \InvalidArgumentException('The target directory does not exist.');
+            throw new InvalidArgumentException('The target directory does not exist.');
         }
 
         $this->callSilent('storage:link');
@@ -131,7 +134,11 @@ class InstallAssets extends Command
         // require npm packages
         $this->info('Installing npm packages...');
 
-        static::copyStubs(force: $this->option('force'), merge: $this->option('merge-json'));
+        static::copyStubs(
+            force: $this->option('force'),
+            merge: $this->option('merge-json'),
+            basePath: $target ? fn ($path = '') => $target . '/' . $path : null,
+        );
 
         $this->updateNodePackages(function ($packages) {
             return data_get(
@@ -147,7 +154,12 @@ class InstallAssets extends Command
             unlink(resource_path('views/welcome.blade.php'));
         }
 
-        $this->runCommands(['npm install', 'npm run build']);
+        $commands = ['npm install'];
+        if (! $this->option('no-build')) {
+            $commands[] = 'npm run build';
+        }
+
+        $this->runCommands($commands);
     }
 
     protected function runCommands($commands): void

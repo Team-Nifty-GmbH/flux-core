@@ -1,17 +1,44 @@
-<x-modal id="edit-language-modal" wire="editModal" :title="$selectedLanguage->id ?? false ? __('Edit Language') : __('Create Language')">
+<x-modal
+    id="edit-language-modal"
+    wire="editModal"
+    :title="$selectedLanguage->id ?? false ? __('Edit Language') : __('Create Language')"
+>
     <div class="flex flex-col gap-1.5">
-        <x-input wire:model="selectedLanguage.name" :label="__('Language Name')"/>
-        <x-input wire:model="selectedLanguage.iso_name" :label="__('ISO Name')"/>
-        <x-input wire:model="selectedLanguage.language_code" :label="__('Language Code')"
-                 list="language-code-data" autocomplete="off"/>
+        <x-input
+            wire:model="selectedLanguage.name"
+            :label="__('Language Name')"
+        />
+        <x-input
+            wire:model="selectedLanguage.iso_name"
+            :label="__('ISO Name')"
+        />
+        <x-input
+            wire:model="selectedLanguage.language_code"
+            :label="__('Language Code')"
+            list="language-code-data"
+            autocomplete="off"
+        />
         <div class="mt-2">
-            <x-toggle wire:model.boolean="selectedLanguage.is_default" :label="__('Is Default')" />
+            <x-toggle
+                wire:model.boolean="selectedLanguage.is_default"
+                :label="__('Is Default')"
+            />
         </div>
     </div>
     <x-slot:footer>
-        <x-button color="secondary" light flat :text="__('Cancel')" x-on:click="$modalClose('edit-language-modal')"/>
-        <x-button color="indigo" :text="__('Save')" wire:click="save().then((success) => {if(success) $modalClose('edit-language-modal');});"/>
-    </x-slot:footer>
+        <x-button
+            color="secondary"
+            light
+            flat
+            :text="__('Cancel')"
+            x-on:click="$modalClose('edit-language-modal')"
+        />
+        <x-button
+            color="indigo"
+            :text="__('Save')"
+            wire:click="save().then((success) => {if(success) $modalClose('edit-language-modal');});"
+        />
+    </x-slot>
 </x-modal>
 <datalist id="language-code-data">
     <option>af_ZA</option>

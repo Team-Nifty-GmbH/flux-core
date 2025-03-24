@@ -1,4 +1,7 @@
-<div class="flex flex-col gap-4" x-bind:class="! $wire.$parent.$parent.edit && 'pointer-events-none'">
+<div
+    class="flex flex-col gap-4"
+    x-bind:class="! $wire.$parent.$parent.edit && 'pointer-events-none'"
+>
     <x-card>
         <div class="flex flex-col gap-1.5">
             <x-select.styled
@@ -134,7 +137,7 @@
                 x-bind:disabled="! $wire.$parent.$parent.edit"
                 step="1"
                 min="1"
-                wire:model="contact.payment_discount_days"
+                wire:model="contact.discount_days"
                 :label="__('Payment Discount Days')"
             />
             <x-number
@@ -148,13 +151,7 @@
         </div>
     </x-card>
     <x-card class="flex flex-col gap-4">
-        <x-flux::editor
-            wire:model="contact.header"
-            :label="__('Header')"
-        />
-        <x-flux::editor
-            wire:model="contact.footer"
-            :label="__('Footer')"
-        />
+        <x-flux::editor wire:model="contact.header" :label="__('Header')" />
+        <x-flux::editor wire:model="contact.footer" :label="__('Footer')" />
     </x-card>
 </div>

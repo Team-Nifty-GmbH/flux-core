@@ -8,7 +8,6 @@ use FluxErp\Models\Task;
 use FluxErp\Rulesets\Task\UpdateTaskRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Validator;
 
 class UpdateTask extends FluxAction
 {
@@ -53,13 +52,5 @@ class UpdateTask extends FluxAction
         }
 
         return $task->withoutRelations()->fresh();
-    }
-
-    protected function validateData(): void
-    {
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(Task::class));
-
-        $this->data = $validator->validated();
     }
 }
