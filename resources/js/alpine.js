@@ -1,5 +1,6 @@
 import folders from './components/folders';
 import setupEditor from './components/tiptap';
+import editorFontSizeHandler from './components/tiptap-font-size-handler.js';
 import workTime from './components/work-time.js';
 import calendar from './components/calendar.js';
 import dashboard from './components/dashboard';
@@ -25,6 +26,7 @@ import dayjs from 'dayjs';
 window.dayjs = dayjs;
 window.calendar = calendar;
 window.setupEditor = setupEditor;
+window.editorFontSizeHandler = editorFontSizeHandler;
 window.workTime = workTime;
 window.dashboard = dashboard;
 window.addressMap = addressMap;

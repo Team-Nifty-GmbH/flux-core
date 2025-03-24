@@ -49,7 +49,9 @@ class DeleteOrder extends FluxAction
         }
 
         if ($errors) {
-            throw ValidationException::withMessages($errors)->errorBag('deleteOrder');
+            throw ValidationException::withMessages($errors)
+                ->errorBag('deleteOrder')
+                ->status(423);
         }
     }
 }

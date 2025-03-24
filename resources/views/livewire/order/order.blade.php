@@ -6,10 +6,10 @@
         showOrderInformations: false,
         showAdditionalAddresses: false,
         orderPositions: [],
-        formatter: @js(resolve_static(\FluxErp\Models\Order::class, "typeScriptAttributes")),
+        formatter: @js(resolve_static(\FluxErp\Models\Order::class, 'typeScriptAttributes')),
     }"
 >
-    @section("modals")
+    @section('modals')
     {{ $this->renderCreateDocumentsModal() }}
     @canAction(\FluxErp\Actions\Task\CreateTask::class)
         <x-modal id="create-tasks">
@@ -336,11 +336,9 @@
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">
                     <div class="flex items-center gap-1.5">
                         <div
-                            @canAction(\FluxErp\Actions\Order\ToggleLock::class)
-                                wire:click="toggleLock()"
-                                class="size-5 cursor-pointer"
-                                wire:flux-confirm.icon.warning="{{ __("Change order lock state") }}|{{ __("Manually locking or unlocking orders can have unexpected side effects.<br><br>Are you Sure?") }}|{{ __("Cancel") }}|{{ __("Continue") }}"
-                            @endcanAction
+                            class="size-5 cursor-pointer"
+                            wire:click="toggleLock()"
+                            wire:flux-confirm.icon.warning="{{ __('Change order lock state') }}|{{ __('Manually locking or unlocking orders can have unexpected side effects.<br><br>Are you Sure?') }}|{{ __('Cancel') }}|{{ __('Continue') }}"
                         >
                             <x-icon
                                 x-cloak
@@ -421,7 +419,7 @@
         <div
             class="mt-6 flex flex-col-reverse justify-stretch space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-x-3 sm:space-y-0 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3"
         >
-            @if (resolve_static(\FluxErp\Actions\Order\ReplicateOrder::class, "canPerformAction", [false]))
+            @if (resolve_static(\FluxErp\Actions\Order\ReplicateOrder::class, 'canPerformAction', [false]))
                 <x-button
                     color="secondary"
                     light
@@ -432,7 +430,7 @@
                 />
             @endif
 
-            @if (resolve_static(\FluxErp\Actions\Order\DeleteOrder::class, "canPerformAction", [false]) && ! $order->is_locked)
+            @if (resolve_static(\FluxErp\Actions\Order\DeleteOrder::class, 'canPerformAction', [false]) && ! $order->is_locked)
                 <x-button
                     color="secondary"
                     light
@@ -443,7 +441,7 @@
                 />
             @endif
 
-            @if ((resolve_static(\FluxErp\Actions\Order\UpdateOrder::class, "canPerformAction", [false]) && ! $order->is_locked) || resolve_static(\FluxErp\Actions\Order\UpdateLockedOrder::class, "canPerformAction", [false]))
+            @if ((resolve_static(\FluxErp\Actions\Order\UpdateOrder::class, 'canPerformAction', [false]) && ! $order->is_locked) || resolve_static(\FluxErp\Actions\Order\UpdateLockedOrder::class, 'canPerformAction', [false]))
                 <x-button
                     color="indigo"
                     loading="save"
@@ -463,13 +461,13 @@
         <x-slot:prepend>
             <section class="relative basis-2/12" wire:ignore>
                 <div class="sticky top-6 flex flex-col gap-4">
-                    @section("contact-address-card")
+                    @section('contact-address-card')
                     <x-card>
                         <x-slot:header>
                             <div
                                 class="flex w-full items-center justify-between gap-4"
                             >
-                                <div>{{ __("Contact") }}</div>
+                                <div>{{ __('Contact') }}</div>
                                 <x-button
                                     color="secondary"
                                     light
@@ -527,13 +525,13 @@
                         </div>
                     </x-card>
                     @show
-                    @section("invoice-address-card")
+                    @section('invoice-address-card')
                     <x-card>
                         <x-slot:header>
                             <div
                                 class="flex w-full items-center justify-between gap-4"
                             >
-                                <div>{{ __("Invoice Address") }}</div>
+                                <div>{{ __('Invoice Address') }}</div>
                                 <x-button
                                     color="secondary"
                                     light
@@ -598,13 +596,13 @@
                         </div>
                     </x-card>
                     @show
-                    @section("delivery-address-card")
+                    @section('delivery-address-card')
                     <x-card>
                         <x-slot:header>
                             <div
                                 class="flex w-full items-center justify-between gap-4"
                             >
-                                <div>{{ __("Delivery Address") }}</div>
+                                <div>{{ __('Delivery Address') }}</div>
                                 <x-button
                                     color="secondary"
                                     light
@@ -671,7 +669,7 @@
                         </div>
                     </x-card>
                     @show
-                    @section("general-card")
+                    @section('general-card')
                     <x-card
                         :header="__('Additional Addresses')"
                         minimize="mount"
@@ -793,7 +791,7 @@
                         </div>
                     </x-card>
                     @show
-                    @section("state-card")
+                    @section('state-card')
                     <x-card>
                         <div class="flex flex-col gap-3">
                             <x-flux::state
@@ -827,10 +825,10 @@
         <x-slot:append>
             <section class="relative basis-2/12" wire:ignore>
                 <div class="sticky top-6 space-y-6">
-                    @section("content.right")
+                    @section('content.right')
                     <x-card>
                         <div class="space-y-4">
-                            @section("actions")
+                            @section('actions')
                             @if ($printLayouts)
                                 <x-button
                                     color="indigo"
@@ -880,7 +878,7 @@
                     </x-card>
                     <x-card>
                         <div class="text-sm">
-                            @section("content.right.summary")
+                            @section('content.right.summary')
                             <div
                                 x-cloak
                                 x-show="
@@ -890,7 +888,7 @@
                             >
                                 <div class="flex justify-between p-2.5">
                                     <div>
-                                        {{ __("Sum net without discount") }}
+                                        {{ __('Sum net without discount') }}
                                     </div>
                                     <div>
                                         <span
@@ -905,7 +903,7 @@
                                 >
                                     <div>
                                         <span>
-                                            {{ __("Position discounts") }}
+                                            {{ __('Position discounts') }}
                                         </span>
                                         <span
                                             x-html="formatters.percentage($wire.order.total_position_discount_percentage ?? 0)"
@@ -924,7 +922,7 @@
                                 >
                                     <div>
                                         <span>
-                                            {{ __("Sum net discounted") }}
+                                            {{ __('Sum net discounted') }}
                                         </span>
                                     </div>
                                     <div>
@@ -947,7 +945,7 @@
                                             <div
                                                 class="flex items-center gap-1.5"
                                             >
-                                                @if (! $order->is_locked || ! resolve_static(\FluxErp\Actions\Discount\DeleteDiscount::class, "canPerformAction", [false]))
+                                                @if (! $order->is_locked || ! resolve_static(\FluxErp\Actions\Discount\DeleteDiscount::class, 'canPerformAction', [false]))
                                                     <div>
                                                         <x-button.circle
                                                             color="red"
@@ -977,7 +975,7 @@
                                     </template>
                                 </div>
                             </div>
-                            @if (! $order->is_locked || ! resolve_static(\FluxErp\Actions\Discount\CreateDiscount::class, "canPerformAction", [false]))
+                            @if (! $order->is_locked || ! resolve_static(\FluxErp\Actions\Discount\CreateDiscount::class, 'canPerformAction', [false]))
                                 <div class="w-full">
                                     <x-button
                                         color="secondary"
@@ -995,7 +993,7 @@
                                 x-show="($wire.order.total_discount_percentage ?? 0) != 0"
                             >
                                 <div>
-                                    <span>{{ __("Total discount") }}</span>
+                                    <span>{{ __('Total discount') }}</span>
                                     <span
                                         x-html="formatters.percentage($wire.order.total_discount_percentage ?? 0)"
                                     ></span>
@@ -1008,7 +1006,7 @@
                             </div>
                             <div class="flex justify-between p-2.5">
                                 <div>
-                                    {{ __("Sum net") }}
+                                    {{ __('Sum net') }}
                                 </div>
                                 <div>
                                     <span
@@ -1020,7 +1018,7 @@
                             <template x-for="vat in $wire.order.total_vats">
                                 <div class="flex justify-between p-2.5">
                                     <div>
-                                        <span>{{ __("Plus ") }}</span>
+                                        <span>{{ __('Plus ') }}</span>
                                         <span
                                             x-html="formatters.percentage(vat.vat_rate_percentage ?? 0)"
                                         ></span>
@@ -1036,7 +1034,7 @@
                                 class="dark:bg-secondary-700 flex justify-between bg-gray-50 p-2.5"
                             >
                                 <div>
-                                    {{ __("Total Gross") }}
+                                    {{ __('Total Gross') }}
                                 </div>
                                 <div>
                                     <span
@@ -1048,7 +1046,7 @@
                                 class="dark:bg-secondary-700 flex justify-between bg-gray-50 p-2.5 opacity-50"
                             >
                                 <div>
-                                    {{ __("Balance") }}
+                                    {{ __('Balance') }}
                                 </div>
                                 <div>
                                     <span
@@ -1056,11 +1054,11 @@
                                     ></span>
                                 </div>
                             </div>
-                            @section("content.right.summary.profit")
+                            @section('content.right.summary.profit')
                             <hr />
                             <div class="flex justify-between p-2.5">
                                 <div>
-                                    {{ __("Margin") }}
+                                    {{ __('Margin') }}
                                 </div>
                                 <div>
                                     <span
@@ -1070,7 +1068,7 @@
                             </div>
                             <div class="flex justify-between p-2.5">
                                 <div>
-                                    {{ __("Gross Profit") }}
+                                    {{ __('Gross Profit') }}
                                 </div>
                                 <div>
                                     <span
@@ -1084,7 +1082,7 @@
                     </x-card>
                     <x-card>
                         <div class="space-y-3">
-                            @section("content.right.order_dates")
+                            @section('content.right.order_dates')
                             <x-date
                                 wire:model="order.invoice_date"
                                 :without-time="true"
@@ -1127,21 +1125,21 @@
                             class="overflow-hidden text-ellipsis whitespace-nowrap text-sm"
                         >
                             <div class="flex gap-0.5">
-                                <div class="">{{ __("Created At") }}:</div>
+                                <div class="">{{ __('Created At') }}:</div>
                                 <div
                                     x-text="window.formatters.datetime($wire.order.created_at)"
                                 ></div>
                                 <div
-                                    x-text="$wire.order.created_by || '{{ __("Unknown") }}'"
+                                    x-text="$wire.order.created_by || '{{ __('Unknown') }}'"
                                 ></div>
                             </div>
                             <div class="flex gap-0.5">
-                                <div class="">{{ __("Updated At") }}:</div>
+                                <div class="">{{ __('Updated At') }}:</div>
                                 <div
                                     x-text="window.formatters.datetime($wire.order.updated_at)"
                                 ></div>
                                 <div
-                                    x-text="$wire.order.updated_by || '{{ __("Unknown") }}'"
+                                    x-text="$wire.order.updated_by || '{{ __('Unknown') }}'"
                                 ></div>
                             </div>
                         </div>

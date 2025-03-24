@@ -7,7 +7,6 @@ use FluxErp\Helpers\Helper;
 use FluxErp\Models\Category;
 use FluxErp\Rulesets\Category\UpdateCategoryRuleset;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 class UpdateCategory extends FluxAction
@@ -36,10 +35,7 @@ class UpdateCategory extends FluxAction
 
     protected function validateData(): void
     {
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(Category::class));
-
-        $this->data = $validator->validate();
+        parent::validateData();
 
         if ($this->data['parent_id'] ?? false) {
             $category = resolve_static(Category::class, 'query')

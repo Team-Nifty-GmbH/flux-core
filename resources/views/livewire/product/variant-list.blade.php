@@ -83,10 +83,8 @@
                 x-on:click="$modalClose('generate-variants-modal')"
             />
             <x-button
-                color="secondary"
-                light
+                color="indigo"
                 x-show="! Object.values($wire.variants).length > 0"
-                primary
                 spinner="next()"
                 :text="__('Next')"
                 wire:click="next()"
@@ -101,11 +99,9 @@
                 x-on:click="$wire.variants = {}"
             />
             <x-button
-                color="secondary"
-                light
+                color="indigo"
                 x-show="Object.values($wire.variants).length > 0"
                 x-cloak
-                primary
                 spinner="save()"
                 :text="__('Save')"
                 wire:flux-confirm.type.error="{{ __('Save Variants') }}|{{ __('Non existing product option combinations will be deleted!') }}|{{ __('Cancel') }}|{{ __('OK') }}"

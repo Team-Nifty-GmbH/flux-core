@@ -1,7 +1,7 @@
 <?php
 
+use FluxErp\Actions\Media\DownloadMultipleMedia;
 use FluxErp\Http\Controllers\AuthController;
-use FluxErp\Http\Controllers\MediaController;
 use FluxErp\Http\Middleware\PortalMiddleware;
 use FluxErp\Livewire\Portal\Auth\Login;
 use FluxErp\Livewire\Portal\Auth\Logout;
@@ -39,7 +39,6 @@ Route::middleware(['web', PortalMiddleware::class])
     ->domain(config('flux.portal_domain'))
     ->name('portal.')
     ->group(function (): void {
-
         Route::get('/icons/{name}/{variant?}', IconController::class)
             ->where('variant', '(outline|solid)')
             ->name('icons');
@@ -90,7 +89,7 @@ Route::middleware(['web', PortalMiddleware::class])
                 return $media;
             })->name('media');
 
-            Route::any('/media/download-multiple', [MediaController::class, 'downloadMultiple'])
+            Route::any('/media/download-multiple', DownloadMultipleMedia::class)
                 ->name('media.download-multiple');
         });
     });

@@ -1,4 +1,4 @@
-import {defineConfig} from 'vite';
+import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 
 export default defineConfig({
@@ -15,7 +15,7 @@ export default defineConfig({
                 '.{{ relative_path }}/resources/js/web-push.js',
                 './vendor/team-nifty-gmbh/tall-datatables/resources/js/tall-datatables.js',
             ],
-            refresh: false
-        })
+            refresh: false,
+        }),
     ],
 });

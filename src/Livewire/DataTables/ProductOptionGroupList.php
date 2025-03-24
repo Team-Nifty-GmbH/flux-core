@@ -12,4 +12,11 @@ class ProductOptionGroupList extends BaseDataTable
     ];
 
     protected string $model = ProductOptionGroup::class;
+
+    protected function itemToArray($item): array
+    {
+        $item->productOptions->each(fn ($productOption) => $productOption->localize());
+
+        return parent::itemToArray($item);
+    }
 }

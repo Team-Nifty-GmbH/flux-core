@@ -13,7 +13,6 @@ use FluxErp\Models\Warehouse;
 use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\OrderPosition\CreateOrderPositionRuleset;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -156,11 +155,9 @@ class CreateOrderPosition extends FluxAction
 
     protected function validateData(): void
     {
-        $errors = [];
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(OrderPosition::class));
+        parent::validateData();
 
-        $this->data = $validator->validate();
+        $errors = [];
         $order = resolve_static(Order::class, 'query')
             ->whereKey($this->data['order_id'])
             ->first();
@@ -177,7 +174,6 @@ class CreateOrderPosition extends FluxAction
                 && in_array($order->orderType->order_type_enum, [OrderTypeEnum::Retoure, OrderTypeEnum::SplitOrder])
             ) {
                 if (! $originPositionId = data_get($this->data, 'origin_position_id')) {
-
                     $errors += [
                         'origin_position_id' => [__('validation.required', ['attribute' => 'origin_position_id'])],
                     ];

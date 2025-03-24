@@ -4,6 +4,7 @@ namespace FluxErp\Models;
 
 use FluxErp\Support\Collection\ProductOptionCollection;
 use FluxErp\Traits\Filterable;
+use FluxErp\Traits\HasAttributeTranslations;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
@@ -15,7 +16,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class ProductOption extends FluxModel
 {
-    use Filterable, HasPackageFactory, HasUserModification, HasUuid, LogsActivity, SoftDeletes;
+    use Filterable, HasAttributeTranslations, HasPackageFactory, HasUserModification, HasUuid, LogsActivity,
+        SoftDeletes;
 
     public function newCollection(array $models = []): Collection
     {
@@ -30,5 +32,12 @@ class ProductOption extends FluxModel
     public function products(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, 'product_product_option');
+    }
+
+    protected function translatableAttributes(): array
+    {
+        return [
+            'name',
+        ];
     }
 }

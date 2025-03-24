@@ -10,6 +10,7 @@
 
 <!DOCTYPE html>
 <html
+    x-data="tallstackui_darkTheme()"
     class="font-portal h-full"
     lang="{{ str_replace('_', '-', app()->getLocale()) }}"
 >

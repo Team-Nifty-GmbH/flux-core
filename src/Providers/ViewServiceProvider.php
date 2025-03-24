@@ -180,7 +180,6 @@ class ViewServiceProvider extends ServiceProvider
 
     protected function registerViews(): void
     {
-
         Blade::component(App::class, 'flux::layouts.app');
         Blade::component(Printing::class, 'flux::layouts.print');
         config([

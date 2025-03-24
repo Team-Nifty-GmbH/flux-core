@@ -43,6 +43,8 @@ abstract class Metric
 
     protected bool $withGrowthRate = false;
 
+    abstract protected function resolve(): mixed;
+
     public function __construct(Builder $query)
     {
         $this->query = $query->clone();
@@ -166,8 +168,6 @@ abstract class Metric
     {
         return $this->dateColumn ?? $this->query->getModel()->getQualifiedCreatedAtColumn();
     }
-
-    abstract protected function resolve(): mixed;
 
     protected function resolveBetween(array $range): array
     {

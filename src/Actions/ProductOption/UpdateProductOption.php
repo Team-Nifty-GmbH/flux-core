@@ -6,7 +6,6 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Models\ProductOption;
 use FluxErp\Rulesets\ProductOption\UpdateProductOptionRuleset;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Validator;
 
 class UpdateProductOption extends FluxAction
 {
@@ -30,13 +29,5 @@ class UpdateProductOption extends FluxAction
         $productOption->save();
 
         return $productOption->withoutRelations()->fresh();
-    }
-
-    protected function validateData(): void
-    {
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(ProductOption::class));
-
-        $this->data = $validator->validate();
     }
 }

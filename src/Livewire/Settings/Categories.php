@@ -10,6 +10,7 @@ use FluxErp\Livewire\Forms\CategoryForm;
 use FluxErp\Models\Category;
 use FluxErp\Traits\Categorizable;
 use FluxErp\Traits\Livewire\Actions;
+use FluxErp\Traits\Livewire\DataTable\SupportsLocalization;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
@@ -18,7 +19,7 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class Categories extends CategoryList
 {
-    use Actions;
+    use Actions, SupportsLocalization;
 
     public CategoryForm $category;
 

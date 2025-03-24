@@ -12,8 +12,7 @@
         @else
             x-modelable="editable"
         @endif
-        x-data="{
-            ...setupEditor(
+        x-data="setupEditor(
                 @if ($attributes->wire("model")->value())
                     $wire.$entangle('{{ $attributes->wire("model")->value() }}',
                     @js($attributes->wire("model")->hasModifier("live"))
@@ -32,26 +31,26 @@
                             : 0
                     }}
                 @endif
-            ),
-        }"
-        x-init="initTextArea($refs.editor, @json($transparent), @json($tooltipDropdown))"
+            )"
+        x-init="initTextArea($refs.editor, @json($transparent), @json($tooltipDropdown), @json($defaultFontSize))"
         {{ $attributes->whereDoesntStartWith("wire:model") }}
         wire:ignore
     >
-        <template
-            x-ref="popWindow"
-            class="placeholder-secondary-400 focus:border-primary-500 focus:ring-primary-500 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-400 dark:placeholder-secondary-500 flex w-full flex-wrap items-stretch divide-x rounded-t-md transition duration-100 ease-in-out focus:outline-none sm:text-sm"
-        ></template>
         <div
             x-cloak
             x-transition
             x-show="proxy.isEditable"
             x-ref="controlPanel"
             id="controlPanel"
-            class="{{ $tooltipDropdown ? "" : "border border-b-0" }} border-secondary-300 placeholder-secondary-400 focus:border-primary-500 focus:ring-primary-500 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-400 dark:placeholder-secondary-500 flex w-full flex-wrap items-stretch divide-x rounded-t-md transition duration-100 ease-in-out focus:outline-none sm:text-sm"
+            class="placeholder-secondary-400 dark:bg-secondary-800 dark:text-secondary-400 dark:placeholder-secondary-500 {{ $tooltipDropdown ? "" : "border border-b-0" }} border-secondary-300 focus:ring-primary-500 focus:border-primary-500 dark:border-secondary-600 flex w-full flex-wrap items-stretch rounded-t-md transition duration-100 ease-in-out focus:outline-none sm:text-sm"
         ></div>
         <div class="list-disc" x-ref="editor"></div>
     </div>
+    {{-- templates to be add on demand --}}
+    <template
+        x-ref="popWindow"
+        class="placeholder-secondary-400 dark:bg-secondary-800 dark:text-secondary-400 dark:placeholder-secondary-500 focus:ring-primary-500 focus:border-primary-500 dark:border-secondary-600 flex w-full flex-wrap items-stretch divide-x rounded-t-md transition duration-100 ease-in-out focus:outline-none sm:text-sm"
+    ></template>
     <template x-ref="commands">
         @if ($bold)
             <x-button
@@ -120,6 +119,31 @@
             ></x-button>
         @endif
 
+        @if ($availableFontSizes && ! $tooltipDropdown)
+            <x-button
+                x-on:click.prevent="onClick"
+                x-ref="tippyParent"
+                x-data="editorFontSizeHandler($refs.tippyParent, $refs.fontSizeDropdown)"
+                flat
+                color="secondary"
+            >
+                <x-slot:text>
+                    <i class="ph ph-text-aa text-lg"></i>
+                </x-slot>
+            </x-button>
+        @endif
+
+        @if ($availableFontSizes && $tooltipDropdown)
+            @foreach ($availableFontSizes as $size)
+                <x-button
+                    flat
+                    color="secondary"
+                    :text="$size . 'px'"
+                    x-on:click="editor().chain().focus().setFontSize({{ json_encode($size) }}).run()"
+                ></x-button>
+            @endforeach
+        @endif
+
         @if ($horizontalRule)
             <x-button
                 flat
@@ -164,5 +188,17 @@
                 x-on:click="editor().chain().focus().toggleCodeBlock().run()"
             ></x-button>
         @endif
+    </template>
+    <template x-ref="fontSizeDropdown">
+        <div class="flex flex-col">
+            @foreach ($availableFontSizes as $size)
+                <x-button
+                    flat
+                    color="secondary"
+                    :text="$size . 'px'"
+                    x-on:click="editor().chain().focus().setFontSize({{ json_encode($size) }}).run()"
+                ></x-button>
+            @endforeach
+        </div>
     </template>
 </div>

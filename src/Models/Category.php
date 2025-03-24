@@ -5,6 +5,7 @@ namespace FluxErp\Models;
 use FluxErp\Traits\Categorizable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
+use FluxErp\Traits\HasAttributeTranslations;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasParentChildRelations;
 use FluxErp\Traits\HasUserModification;
@@ -23,8 +24,8 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Category extends FluxModel implements InteractsWithDataTables, Sortable
 {
-    use Filterable, HasAdditionalColumns, HasPackageFactory, HasParentChildRelations, HasUserModification,
-        HasUuid, LogsActivity, Searchable, SortableTrait;
+    use Filterable, HasAdditionalColumns, HasAttributeTranslations, HasPackageFactory, HasParentChildRelations,
+        HasUserModification, HasUuid, LogsActivity, Searchable, SortableTrait;
 
     public array $sortable = [
         'order_column_name' => 'sort_number',
@@ -124,5 +125,12 @@ class Category extends FluxModel implements InteractsWithDataTables, Sortable
                 '',
                 ''
             );
+    }
+
+    protected function translatableAttributes(): array
+    {
+        return [
+            'name',
+        ];
     }
 }
