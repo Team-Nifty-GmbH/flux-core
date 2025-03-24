@@ -9,7 +9,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::create('client_product', function (Blueprint $table) {
+        Schema::create('client_product', function (Blueprint $table): void {
             $table->id('pivot_id');
             $table->foreignId('client_id')->constrained()->cascadeOnDelete();
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
@@ -17,20 +17,20 @@ return new class() extends Migration
 
         DB::insert('INSERT INTO client_product (client_id, product_id) SELECT client_id, id FROM products');
 
-        Schema::table('products', function (Blueprint $table) {
+        Schema::table('products', function (Blueprint $table): void {
             $table->dropConstrainedForeignId('client_id');
         });
     }
 
     public function down(): void
     {
-        Schema::table('products', function (Blueprint $table) {
+        Schema::table('products', function (Blueprint $table): void {
             $table->unsignedBigInteger('client_id')->nullable();
         });
 
         DB::statement('UPDATE products p JOIN client_product cp ON p.id = cp.product_id SET p.client_id = cp.client_id');
 
-        Schema::table('products', function (Blueprint $table) {
+        Schema::table('products', function (Blueprint $table): void {
             $table->foreign('client_id')->on('clients')->references('id')->cascadeOnDelete();
         });
 

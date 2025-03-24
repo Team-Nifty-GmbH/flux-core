@@ -14,8 +14,8 @@ class FormBuilderSection extends FluxModel
 
     protected static function booted(): void
     {
-        static::deleting(function (FormBuilderSection $section) {
-            $section->fields->each(function ($item) {
+        static::deleting(function (FormBuilderSection $section): void {
+            $section->fields->each(function ($item): void {
                 $item->delete();
             });
         });

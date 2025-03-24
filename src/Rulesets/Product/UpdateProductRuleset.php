@@ -18,6 +18,38 @@ class UpdateProductRuleset extends FluxRuleset
 {
     protected static ?string $model = Product::class;
 
+    public static function getRules(): array
+    {
+        return array_merge(
+            parent::getRules(),
+            resolve_static(ClientRuleset::class, 'getRules'),
+            resolve_static(ProductOptionRuleset::class, 'getRules'),
+            resolve_static(ProductPropertyRuleset::class, 'getRules'),
+            resolve_static(PriceRuleset::class, 'getRules'),
+            resolve_static(BundleProductRuleset::class, 'getRules'),
+            resolve_static(SupplierRuleset::class, 'getRules'),
+            resolve_static(CategoryRuleset::class, 'getRules'),
+            resolve_static(TagRuleset::class, 'getRules'),
+            Arr::prependKeysWith(
+                array_merge(
+                    Arr::except(
+                        resolve_static(CreateProductCrossSellingRuleset::class, 'getRules'),
+                        ['product_id']
+                    ),
+                    [
+                        'id' => [
+                            'sometimes',
+                            'required',
+                            'integer',
+                            app(ModelExists::class, ['model' => ProductCrossSelling::class]),
+                        ],
+                    ]
+                ),
+                'product_cross_sellings.*.'
+            )
+        );
+    }
+
     public function rules(): array
     {
         return [
@@ -94,37 +126,5 @@ class UpdateProductRuleset extends FluxRuleset
             'is_nos' => 'boolean',
             'is_active_export_to_web_shop' => 'boolean',
         ];
-    }
-
-    public static function getRules(): array
-    {
-        return array_merge(
-            parent::getRules(),
-            resolve_static(ClientRuleset::class, 'getRules'),
-            resolve_static(ProductOptionRuleset::class, 'getRules'),
-            resolve_static(ProductPropertyRuleset::class, 'getRules'),
-            resolve_static(PriceRuleset::class, 'getRules'),
-            resolve_static(BundleProductRuleset::class, 'getRules'),
-            resolve_static(SupplierRuleset::class, 'getRules'),
-            resolve_static(CategoryRuleset::class, 'getRules'),
-            resolve_static(TagRuleset::class, 'getRules'),
-            Arr::prependKeysWith(
-                array_merge(
-                    Arr::except(
-                        resolve_static(CreateProductCrossSellingRuleset::class, 'getRules'),
-                        ['product_id']
-                    ),
-                    [
-                        'id' => [
-                            'sometimes',
-                            'required',
-                            'integer',
-                            app(ModelExists::class, ['model' => ProductCrossSelling::class]),
-                        ],
-                    ]
-                ),
-                'product_cross_sellings.*.'
-            )
-        );
     }
 }

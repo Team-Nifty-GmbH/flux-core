@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class TaskListTest extends TestCase
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(TaskList::class)
             ->assertStatus(200);

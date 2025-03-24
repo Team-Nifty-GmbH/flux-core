@@ -9,7 +9,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('contacts', function (Blueprint $table) {
+        Schema::table('contacts', function (Blueprint $table): void {
             $table->foreignId('main_address_id')
                 ->nullable()
                 ->after('expense_ledger_account_id')
@@ -35,7 +35,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('contacts', function (Blueprint $table) {
+        Schema::table('contacts', function (Blueprint $table): void {
             $table->dropConstrainedForeignId('main_address_id');
             $table->dropConstrainedForeignId('invoice_address_id');
             $table->dropConstrainedForeignId('delivery_address_id');

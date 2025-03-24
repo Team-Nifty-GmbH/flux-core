@@ -22,14 +22,14 @@ class CalendarEventInviteCreated extends Notification implements HasToastNotific
         $this->model = $model;
     }
 
-    public function toMail(object $notifiable): MailMessage
-    {
-        return $this->toToastNotification($notifiable)->toMail();
-    }
-
     public function toArray(object $notifiable): array
     {
         return $this->toToastNotification($notifiable)->toArray();
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        return $this->toToastNotification($notifiable)->toMail();
     }
 
     public function toToastNotification(object $notifiable): ToastNotification
@@ -42,7 +42,7 @@ class CalendarEventInviteCreated extends Notification implements HasToastNotific
             )
             ->icon('calendar')
             ->when($this->model->userCreated?->avatar_url, function (ToastNotification $toast) {
-                return $toast->img($this->model->userCreated->avatar_url);
+                return $toast->image($this->model->userCreated->avatar_url);
             })
             ->description(
                 '<div class="font-semibold">' . $this->model->calendarEvent->title . '</div>' .

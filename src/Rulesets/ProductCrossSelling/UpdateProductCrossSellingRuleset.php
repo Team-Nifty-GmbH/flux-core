@@ -11,6 +11,14 @@ class UpdateProductCrossSellingRuleset extends FluxRuleset
 {
     protected static ?string $model = ProductCrossSelling::class;
 
+    public static function getRules(): array
+    {
+        return array_merge(
+            parent::getRules(),
+            resolve_static(ProductRuleset::class, 'getRules')
+        );
+    }
+
     public function rules(): array
     {
         return [
@@ -28,13 +36,5 @@ class UpdateProductCrossSellingRuleset extends FluxRuleset
             'order_column' => 'integer',
             'is_active' => 'boolean',
         ];
-    }
-
-    public static function getRules(): array
-    {
-        return array_merge(
-            parent::getRules(),
-            resolve_static(ProductRuleset::class, 'getRules')
-        );
     }
 }

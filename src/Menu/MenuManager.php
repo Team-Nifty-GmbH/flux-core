@@ -2,6 +2,7 @@
 
 namespace FluxErp\Menu;
 
+use Closure;
 use FluxErp\Models\Permission;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Arr;
@@ -14,14 +15,92 @@ class MenuManager
 {
     use Macroable;
 
-    protected array $resolved = [];
-
     protected array $registered = [];
 
     protected array $registeredGroups = [];
 
+    protected array $resolved = [];
+
+    public function all(): array
+    {
+        $this->resolve();
+
+        return $this->sortMultiDimensional($this->resolved);
+    }
+
+    public function clear(): void
+    {
+        $this->resolved = [];
+        $this->registered = [];
+        $this->registeredGroups = [];
+    }
+
+    public function forGuard(string $guard, ?string $group = null, bool $ignorePermissions = false): array
+    {
+        $this->resolve();
+        $menuItems = $this->sortMultiDimensional(
+            $this->resolved,
+            function (array $value) use ($guard, $ignorePermissions) {
+                if (($value['guard'] ?? $guard) !== $guard) {
+                    return false;
+                }
+
+                $permission = data_get($value, 'permission');
+                // first check if a permission exists
+                if ($permission && ! $ignorePermissions) {
+                    try {
+                        resolve_static(
+                            Permission::class,
+                            'findByName',
+                            [
+                                'name' => $permission,
+                                'guardName' => $guard,
+                            ]
+                        );
+                    } catch (PermissionDoesNotExist) {
+                        return true;
+                    }
+
+                    // if the user has the permission, return true
+                    return auth()->user()?->can($permission);
+                }
+
+                return true;
+            }
+        );
+
+        // filter out the group if it doesnt have children
+        $menuItems = $group ? data_get($menuItems, $group, []) : $menuItems;
+
+        return array_filter(
+            $menuItems,
+            fn ($value) => count(data_get($value, 'children', [])) > 0 || data_get($value, 'uri'),
+        );
+    }
+
+    public function get(string $name): ?string
+    {
+        return $this->resolved[$name] ?? null;
+    }
+
+    public function group(
+        string $path,
+        ?string $icon = null,
+        ?string $label = null,
+        ?int $order = null,
+        ?Closure $closure = null): void
+    {
+        data_set($this->registeredGroups, $path, [
+            'label' => $label ?? data_get($this->registeredGroups, $path . '.label'),
+            'icon' => $icon ?? data_get($this->registeredGroups, $path . '.icon'),
+            'order' => $order ?? data_get($this->registeredGroups, $path . '.order'),
+            'children' => data_get($this->registeredGroups, $path . '.children', []),
+            'closure' => array_merge(data_get($this->registeredGroups, $path . '.closure', []), [$closure]),
+        ]);
+    }
+
     /**
-     * @throws \Symfony\Component\Routing\Exception\RouteNotFoundException
+     * @throws RouteNotFoundException
      */
     public function register(
         string|Route $route,
@@ -41,20 +120,9 @@ class MenuManager
         ];
     }
 
-    public function group(
-        string $path,
-        ?string $icon = null,
-        ?string $label = null,
-        ?int $order = null,
-        ?\Closure $closure = null): void
+    public function unregister(string $name): void
     {
-        data_set($this->registeredGroups, $path, [
-            'label' => $label ?? data_get($this->registeredGroups, $path . '.label'),
-            'icon' => $icon ?? data_get($this->registeredGroups, $path . '.icon'),
-            'order' => $order ?? data_get($this->registeredGroups, $path . '.order'),
-            'children' => data_get($this->registeredGroups, $path . '.children', []),
-            'closure' => array_merge(data_get($this->registeredGroups, $path . '.closure', []), [$closure]),
-        ]);
+        unset($this->resolved[$name]);
     }
 
     protected function resolve(): void
@@ -130,74 +198,7 @@ class MenuManager
         }
     }
 
-    public function unregister(string $name): void
-    {
-        unset($this->resolved[$name]);
-    }
-
-    public function clear(): void
-    {
-        $this->resolved = [];
-        $this->registered = [];
-        $this->registeredGroups = [];
-    }
-
-    public function all(): array
-    {
-        $this->resolve();
-
-        return $this->sortMultiDimensional($this->resolved);
-    }
-
-    public function forGuard(string $guard, ?string $group = null, bool $ignorePermissions = false): array
-    {
-        $this->resolve();
-        $menuItems = $this->sortMultiDimensional(
-            $this->resolved,
-            function (array $value) use ($guard, $ignorePermissions) {
-                if (($value['guard'] ?? $guard) !== $guard) {
-                    return false;
-                }
-
-                $permission = data_get($value, 'permission');
-                // first check if a permission exists
-                if ($permission && ! $ignorePermissions) {
-                    try {
-                        resolve_static(
-                            Permission::class,
-                            'findByName',
-                            [
-                                'name' => $permission,
-                                'guardName' => $guard,
-                            ]
-                        );
-                    } catch (PermissionDoesNotExist) {
-                        return true;
-                    }
-
-                    // if the user has the permission, return true
-                    return auth()->user()?->can($permission);
-                }
-
-                return true;
-            }
-        );
-
-        // filter out the group if it doesnt have children
-        $menuItems = $group ? data_get($menuItems, $group, []) : $menuItems;
-
-        return array_filter(
-            $menuItems,
-            fn ($value) => count(data_get($value, 'children', [])) > 0 || data_get($value, 'uri'),
-        );
-    }
-
-    public function get(string $name): ?string
-    {
-        return $this->resolved[$name] ?? null;
-    }
-
-    private function sortMultiDimensional(array $array, ?\Closure $filter = null): array
+    private function sortMultiDimensional(array $array, ?Closure $filter = null): array
     {
         $array = array_filter($array, $filter);
 

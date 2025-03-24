@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Contact;
 
+use Exception;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Forms\ContactForm;
@@ -25,9 +26,9 @@ class Contact extends Component
 {
     use Actions, CreatesDocuments, WithFileUploads, WithTabs;
 
-    public ContactForm $contact;
-
     public $avatar;
+
+    public ContactForm $contact;
 
     public bool $edit = false;
 
@@ -45,23 +46,9 @@ class Contact extends Component
         $this->contact->fill($contact);
     }
 
-    #[Renderless]
-    public function getListeners(): array
+    public function render(): View|Factory|Application
     {
-        $model = app(ContactModel::class);
-        $model->id = $this->contact->id;
-        $channel = $model->broadcastChannel(false);
-
-        return [
-            'echo-private:' . $channel . ',.ContactUpdated' => 'contactUpdated',
-            'echo-private:' . $channel . ',.ContactDeleted' => 'contactDeleted',
-        ];
-    }
-
-    #[Renderless]
-    public function contactUpdated(): void
-    {
-        $this->contact->fill(resolve_static(ContactModel::class, 'query')->whereKey($this->contact->id)->first());
+        return view('flux::livewire.contact.contact');
     }
 
     #[Renderless]
@@ -70,49 +57,17 @@ class Contact extends Component
         $this->redirectRoute('contacts.contacts', navigate: true);
     }
 
-    public function render(): View|Factory|Application
+    #[Renderless]
+    public function contactUpdated(): void
     {
-        return view('flux::livewire.contact.contact');
+        $this->contact->fill(resolve_static(ContactModel::class, 'query')->whereKey($this->contact->id)->first());
     }
 
-    public function getTabs(): array
+    public function createDocuments(): null|MediaStream|Media
     {
-        return [
-            TabButton::make('contact.addresses')
-                ->label(__('Addresses'))
-                ->isLivewireComponent()
-                ->wireModel('contact'),
-            TabButton::make('contact.orders')
-                ->label(__('Orders'))
-                ->isLivewireComponent()
-                ->wireModel('contact'),
-            TabButton::make('contact.communication')
-                ->label(__('Communication'))
-                ->isLivewireComponent()
-                ->wireModel('contact.id'),
-            TabButton::make('contact.projects')
-                ->label(__('Projects'))
-                ->isLivewireComponent()
-                ->wireModel('contact.id'),
-            TabButton::make('contact.attachments')
-                ->label(__('Attachments'))
-                ->isLivewireComponent()
-                ->wireModel('contact.id'),
-            TabButton::make('contact.tickets')
-                ->label(__('Tickets'))
-                ->isLivewireComponent()
-                ->wireModel('contact.id'),
-            TabButton::make('contact.work-times')
-                ->label(__('Work Times'))
-                ->isLivewireComponent()
-                ->wireModel('contact.id'),
-            TabButton::make('contact.accounting')
-                ->label(__('Accounting'))
-                ->isLivewireComponent()
-                ->wireModel('contact'),
-            TabButton::make('contact.statistics')
-                ->label(__('Statistics')),
-        ];
+        return $this->createDocumentFromItems(
+            resolve_static(ContactModel::class, 'query')->whereKey($this->contact->id)->firstOrFail(),
+        );
     }
 
     #[Renderless]
@@ -127,6 +82,70 @@ class Contact extends Component
         }
 
         $this->redirectRoute('contacts.contacts', navigate: true);
+    }
+
+    #[Renderless]
+    public function getListeners(): array
+    {
+        $model = app(ContactModel::class);
+        $model->id = $this->contact->id;
+        $channel = $model->broadcastChannel(false);
+
+        return [
+            'echo-private:' . $channel . ',.ContactUpdated' => 'contactUpdated',
+            'echo-private:' . $channel . ',.ContactDeleted' => 'contactDeleted',
+        ];
+    }
+
+    public function getTabs(): array
+    {
+        return [
+            TabButton::make('contact.addresses')
+                ->text(__('Addresses'))
+                ->isLivewireComponent()
+                ->wireModel('contact'),
+            TabButton::make('contact.orders')
+                ->text(__('Orders'))
+                ->isLivewireComponent()
+                ->wireModel('contact'),
+            TabButton::make('contact.communication')
+                ->text(__('Communication'))
+                ->isLivewireComponent()
+                ->wireModel('contact.id'),
+            TabButton::make('contact.projects')
+                ->text(__('Projects'))
+                ->isLivewireComponent()
+                ->wireModel('contact.id'),
+            TabButton::make('contact.attachments')
+                ->text(__('Attachments'))
+                ->isLivewireComponent()
+                ->wireModel('contact.id'),
+            TabButton::make('contact.tickets')
+                ->text(__('Tickets'))
+                ->isLivewireComponent()
+                ->wireModel('contact.id'),
+            TabButton::make('contact.work-times')
+                ->text(__('Work Times'))
+                ->isLivewireComponent()
+                ->wireModel('contact.id'),
+            TabButton::make('contact.accounting')
+                ->text(__('Accounting'))
+                ->isLivewireComponent()
+                ->wireModel('contact'),
+            TabButton::make('contact.statistics')
+                ->text(__('Statistics')),
+        ];
+    }
+
+    #[Renderless]
+    public function reloadContact(): void
+    {
+        $contact = resolve_static(ContactModel::class, 'query')
+            ->with(['mainAddress', 'categories:id'])
+            ->whereKey($this->contact->id)
+            ->firstOrFail();
+
+        $this->contact->fill($contact);
     }
 
     #[Renderless]
@@ -145,17 +164,6 @@ class Contact extends Component
         return true;
     }
 
-    #[Renderless]
-    public function reloadContact(): void
-    {
-        $contact = resolve_static(ContactModel::class, 'query')
-            ->with(['mainAddress', 'categories:id'])
-            ->whereKey($this->contact->id)
-            ->firstOrFail();
-
-        $this->contact->fill($contact);
-    }
-
     public function updatedAvatar(): void
     {
         $this->collection = 'avatar';
@@ -165,7 +173,7 @@ class Contact extends Component
                 $this->contact->id,
                 morph_alias(ContactModel::class)
             );
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             exception_to_notifications($e, $this);
 
             return;
@@ -175,16 +183,6 @@ class Contact extends Component
             ->whereKey($this->contact->id)
             ->first()
             ->getAvatarUrl();
-    }
-
-    protected function getTo(OffersPrinting $item, array $documents): array
-    {
-        return [$item->invoiceAddress->email_primary ?? $item->mainAddress->email_primary];
-    }
-
-    protected function getSubject(OffersPrinting $item): string
-    {
-        return __('Balance Statement :date', ['date' => now()->format('d.m.Y')]);
     }
 
     protected function getHtmlBody(OffersPrinting $item): string
@@ -197,10 +195,13 @@ class Contact extends Component
         return app(ContactModel::class)->resolvePrintViews();
     }
 
-    public function createDocuments(): null|MediaStream|Media
+    protected function getSubject(OffersPrinting $item): string
     {
-        return $this->createDocumentFromItems(
-            resolve_static(ContactModel::class, 'query')->whereKey($this->contact->id)->firstOrFail(),
-        );
+        return __('Balance Statement :date', ['date' => now()->format('d.m.Y')]);
+    }
+
+    protected function getTo(OffersPrinting $item, array $documents): array
+    {
+        return [$item->invoiceAddress->email_primary ?? $item->mainAddress->email_primary];
     }
 }

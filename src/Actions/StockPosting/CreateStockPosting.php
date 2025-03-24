@@ -11,14 +11,14 @@ use Illuminate\Support\Arr;
 
 class CreateStockPosting extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateStockPostingRuleset::class;
-    }
-
     public static function models(): array
     {
         return [StockPosting::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateStockPostingRuleset::class;
     }
 
     public function performAction(): StockPosting

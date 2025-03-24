@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Task;
 
+use FluxErp\Actions\Task\CreateTask;
 use FluxErp\Livewire\DataTables\TaskList as BaseTaskList;
 use FluxErp\Livewire\Forms\TaskForm;
 use FluxErp\Models\Task;
@@ -13,11 +14,11 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class TaskList extends BaseTaskList
 {
-    protected ?string $includeBefore = 'flux::livewire.task.task-list';
+    public array $availableStates = [];
 
     public TaskForm $task;
 
-    public array $availableStates = [];
+    protected ?string $includeBefore = 'flux::livewire.task.task-list';
 
     public function mount(): void
     {
@@ -43,11 +44,11 @@ class TaskList extends BaseTaskList
     {
         return [
             DataTableButton::make()
-                ->label(__('New'))
-                ->color('primary')
-                ->attributes([
-                    'x-on:click' => "\$dispatch('new-task')",
-                ]),
+                ->text(__('Create'))
+                ->color('indigo')
+                ->icon('plus')
+                ->when(resolve_static(CreateTask::class, 'canPerformAction', [false]))
+                ->wireClick('show'),
         ];
     }
 
@@ -68,7 +69,7 @@ class TaskList extends BaseTaskList
     }
 
     #[Renderless]
-    public function resetForm(): void
+    public function show(): void
     {
         $this->task->reset();
         $this->task->additionalColumns = array_fill_keys(
@@ -77,5 +78,9 @@ class TaskList extends BaseTaskList
         );
         $this->task->responsible_user_id ??= auth()?->id();
         $this->task->users = array_filter([auth()?->id()]);
+
+        $this->js(<<<'JS'
+            $modalOpen('new-task-modal');
+        JS);
     }
 }

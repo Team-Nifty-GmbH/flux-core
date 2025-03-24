@@ -7,18 +7,17 @@ use FluxErp\Models\Tag;
 use FluxErp\Models\Task;
 use FluxErp\Rulesets\Task\CreateTaskRuleset;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Validator;
 
 class CreateTask extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateTaskRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Task::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateTaskRuleset::class;
     }
 
     public function performAction(): Task
@@ -53,13 +52,5 @@ class CreateTask extends FluxAction
     protected function prepareForValidation(): void
     {
         $this->data['priority'] ??= 0;
-    }
-
-    protected function validateData(): void
-    {
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(Task::class));
-
-        $this->data = $validator->validated();
     }
 }

@@ -6,6 +6,7 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Media;
 use FluxErp\Rulesets\Media\ReplaceMediaRuleset;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
@@ -13,16 +14,18 @@ use Illuminate\Validation\ValidationException;
 
 class ReplaceMedia extends FluxAction
 {
-    protected bool $force = false;
+    public static ?int $successCode = Response::HTTP_OK;
 
-    protected function getRulesets(): string|array
-    {
-        return ReplaceMediaRuleset::class;
-    }
+    protected bool $force = false;
 
     public static function models(): array
     {
         return [Media::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return ReplaceMediaRuleset::class;
     }
 
     public function force($force = true): static

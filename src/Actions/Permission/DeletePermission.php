@@ -9,14 +9,14 @@ use Illuminate\Validation\ValidationException;
 
 class DeletePermission extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeletePermissionRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Permission::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeletePermissionRuleset::class;
     }
 
     public function performAction(): ?bool
@@ -38,7 +38,9 @@ class DeletePermission extends FluxAction
         ) {
             throw ValidationException::withMessages([
                 'is_locked' => [__('Permission is locked')],
-            ])->errorBag('deletePermission');
+            ])
+                ->errorBag('deletePermission')
+                ->status(423);
         }
     }
 }

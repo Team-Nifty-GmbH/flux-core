@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('addresses', function (Blueprint $table) {
+        Schema::table('addresses', function (Blueprint $table): void {
             $table->boolean('is_invoice_address')->after('is_main_address')->default(false);
             $table->boolean('is_delivery_address')->after('is_invoice_address')->default(false);
         });
@@ -16,7 +16,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('addresses', function (Blueprint $table) {
+        Schema::table('addresses', function (Blueprint $table): void {
             $table->dropColumn(['is_invoice_address', 'is_delivery_address']);
         });
     }

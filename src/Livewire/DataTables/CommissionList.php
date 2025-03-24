@@ -10,7 +10,9 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class CommissionList extends BaseDataTable
 {
-    protected string $model = Commission::class;
+    public array $columnLabels = [
+        'user.name' => 'Commission Agent',
+    ];
 
     public array $enabledCols = [
         'user.name',
@@ -26,9 +28,7 @@ class CommissionList extends BaseDataTable
 
     public bool $isSelectable = true;
 
-    public array $columnLabels = [
-        'user.name' => 'Commission Agent',
-    ];
+    protected string $model = Commission::class;
 
     public function mount(): void
     {
@@ -42,6 +42,33 @@ class CommissionList extends BaseDataTable
                 'total_net_price' => 'coloredMoney',
             ]
         );
+    }
+
+    protected function getRowActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->text(__('View Order'))
+                ->color('indigo')
+                ->icon('eye')
+                ->href('#')
+                ->attributes([
+                    'x-bind:href' => '\'/orders/\' + record.order_id',
+                ]),
+        ];
+    }
+
+    protected function getSelectedActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->color('indigo')
+                ->text(__('Create credit notes'))
+                ->attributes([
+                    'wire:click' => 'createCreditNotes',
+                    'wire:flux-confirm' => __('wire:confirm.commission-credit-notes'),
+                ]),
+        ];
     }
 
     public function createCreditNotes(): bool
@@ -68,13 +95,6 @@ class CommissionList extends BaseDataTable
         return true;
     }
 
-    protected function itemToArray($item): array
-    {
-        $item->commission_rate = $item->commission_rate['commission_rate'];
-
-        return parent::itemToArray($item);
-    }
-
     protected function getReturnKeys(): array
     {
         return array_merge(
@@ -85,29 +105,10 @@ class CommissionList extends BaseDataTable
         );
     }
 
-    protected function getSelectedActions(): array
+    protected function itemToArray($item): array
     {
-        return [
-            DataTableButton::make()
-                ->color('primary')
-                ->label(__('Create credit notes'))
-                ->attributes([
-                    'wire:click' => 'createCreditNotes',
-                    'wire:flux-confirm' => __('wire:confirm.commission-credit-notes'),
-                ]),
-        ];
-    }
+        $item->commission_rate = $item->commission_rate['commission_rate'];
 
-    protected function getRowActions(): array
-    {
-        return [
-            DataTableButton::make(label: __('View Order'))
-                ->color('primary')
-                ->icon('eye')
-                ->href('#')
-                ->attributes([
-                    'x-bind:href' => '\'/orders/\' + record.order_id',
-                ]),
-        ];
+        return parent::itemToArray($item);
     }
 }

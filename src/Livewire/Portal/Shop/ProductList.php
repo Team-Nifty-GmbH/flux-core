@@ -16,12 +16,12 @@ class ProductList extends Component
 {
     use WithPagination;
 
-    public ?string $search = null;
+    #[Url]
+    public ?int $category = null;
 
     public ?string $orderBy = 'is_highlight';
 
-    #[Url]
-    public ?int $category = null;
+    public ?string $search = null;
 
     public function render(): View
     {
@@ -48,12 +48,12 @@ class ProductList extends Component
         $result = $builder
             ->webshop()
             ->when(! $this->search, fn (Builder $query) => $query->whereNull('parent_id'))
-            ->when($this->orderBy, function (Builder $query, string $orderBy) {
+            ->when($this->orderBy, function (Builder $query, string $orderBy): void {
                 $query->orderByDesc($orderBy);
             })
             ->orderByDesc('id')
-            ->when($this->category, function (Builder $query, int $category) {
-                $query->whereHas('categories', function (Builder $query) use ($category) {
+            ->when($this->category, function (Builder $query, int $category): void {
+                $query->whereHas('categories', function (Builder $query) use ($category): void {
                     $query->where('category_id', $category);
                 });
             })

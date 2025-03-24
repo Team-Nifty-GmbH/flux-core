@@ -5,13 +5,10 @@ namespace FluxErp\Tests\Livewire\Project;
 use FluxErp\Livewire\Project\Project as ProjectView;
 use FluxErp\Models\Project;
 use FluxErp\Tests\Livewire\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;
 
 class ProjectTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Project $project;
 
     protected function setUp(): void
@@ -23,24 +20,14 @@ class ProjectTest extends BaseSetup
         ]);
     }
 
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(ProjectView::class, ['id' => $this->project->id])
             ->assertStatus(200);
     }
 
-    public function test_switch_tabs()
+    public function test_switch_tabs(): void
     {
-        $component = Livewire::test(ProjectView::class, ['id' => $this->project->id]);
-
-        foreach (Livewire::new(ProjectView::class)->getTabs() as $tab) {
-            $component
-                ->set('tab', $tab->component)
-                ->assertStatus(200);
-
-            if ($tab->isLivewireComponent) {
-                $component->assertSeeLivewire($tab->component);
-            }
-        }
+        Livewire::test(ProjectView::class, ['id' => $this->project->id])->cycleTabs();
     }
 }

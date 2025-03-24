@@ -6,18 +6,17 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Language;
 use FluxErp\Rulesets\Language\UpdateLanguageRuleset;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Validator;
 
 class UpdateLanguage extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateLanguageRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Language::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateLanguageRuleset::class;
     }
 
     public function performAction(): Model
@@ -45,13 +44,5 @@ class UpdateLanguage extends FluxAction
         ) {
             $this->rules['is_default'] .= '|accepted';
         }
-    }
-
-    protected function validateData(): void
-    {
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(Language::class));
-
-        $this->data = $validator->validate();
     }
 }

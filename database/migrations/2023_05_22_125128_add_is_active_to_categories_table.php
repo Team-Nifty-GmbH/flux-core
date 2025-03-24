@@ -11,7 +11,7 @@ return new class() extends Migration
      */
     public function up(): void
     {
-        Schema::table('categories', function (Blueprint $table) {
+        Schema::table('categories', function (Blueprint $table): void {
             $table->boolean('is_active')->default(true)->after('sort_number');
         });
     }
@@ -21,7 +21,7 @@ return new class() extends Migration
      */
     public function down(): void
     {
-        Schema::table('categories', function (Blueprint $table) {
+        Schema::table('categories', function (Blueprint $table): void {
             $table->dropColumn('is_active');
         });
     }

@@ -8,14 +8,14 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('sepa_mandates', function (Blueprint $table) {
+        Schema::table('sepa_mandates', function (Blueprint $table): void {
             $table->renameColumn('bank_connection_id', 'contact_bank_connection_id');
         });
     }
 
     public function down(): void
     {
-        Schema::table('sepa_mandates', function (Blueprint $table) {
+        Schema::table('sepa_mandates', function (Blueprint $table): void {
             $table->renameColumn('contact_bank_connection_id', 'bank_connection_id');
         });
     }

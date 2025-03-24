@@ -14,14 +14,14 @@ class UpdateMedia extends FluxAction
 {
     protected bool $force = false;
 
-    protected function getRulesets(): string|array
-    {
-        return UpdateMediaRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Media::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateMediaRuleset::class;
     }
 
     public function force($force = true): static

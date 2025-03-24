@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire;
 
+use Exception;
 use FluxErp\Actions\Media\DeleteMedia;
 use FluxErp\Actions\Media\DeleteMediaCollection;
 use FluxErp\Actions\Media\UpdateMedia;
@@ -22,35 +23,61 @@ class FolderTree extends Component
 {
     use Actions, WithFilePond;
 
-    /** @var class-string<Model> */
-    public ?string $modelType = null;
+    public $files = [];
 
     public ?int $modelId = null;
 
-    public $files = [];
-
-    public function getListeners(): array
-    {
-        return [
-            'folder-tree:loadModel' => 'loadModel',
-        ];
-    }
+    /** @var class-string<Model> */
+    public ?string $modelType = null;
 
     public function render(): View|Factory|Application
     {
         return view('flux::livewire.folder-tree');
     }
 
-    public function loadModel(array $arguments): void
+    public function delete(MediaModel $media): bool
     {
-        $this->fill($arguments);
+        try {
+            DeleteMedia::make($media->toArray())
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (Exception $e) {
+            exception_to_notifications($e, $this);
 
-        $this->js(
-            <<<'JS'
-                selected = false;
-                loadLevels();
-            JS
-        );
+            return false;
+        }
+
+        return true;
+    }
+
+    public function deleteCollection(string|array|null $collection = null): void
+    {
+        if (! $collection) {
+            return;
+        }
+
+        $collection = is_array($collection) ? implode('.', $collection) : $collection;
+
+        try {
+            DeleteMediaCollection::make([
+                'model_type' => morph_alias($this->modelType),
+                'model_id' => $this->modelId,
+                'collection_name' => $collection,
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (Exception $e) {
+            exception_to_notifications($e, $this);
+        }
+    }
+
+    public function getListeners(): array
+    {
+        return [
+            'folder-tree:loadModel' => 'loadModel',
+        ];
     }
 
     public function getRules(): array
@@ -60,16 +87,16 @@ class FolderTree extends Component
         ];
     }
 
-    #[Renderless]
-    public function updatedFiles(): void
+    public function getTree(): array
     {
-        try {
-            resolve_static(UpdateMedia::class, 'canPerformAction', [false]);
-        } catch (UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return;
+        if (! $this->modelType || ! $this->modelId) {
+            return [];
         }
+
+        return resolve_static($this->modelType, 'query')
+            ->whereKey($this->modelId)
+            ->first()
+            ?->getMediaAsTree() ?? [];
     }
 
     #[Renderless]
@@ -89,6 +116,51 @@ class FolderTree extends Component
         );
     }
 
+    public function loadModel(array $arguments): void
+    {
+        $this->fill($arguments);
+
+        $this->js(
+            <<<'JS'
+                selected = false;
+                loadLevels();
+            JS
+        );
+    }
+
+    #[Renderless]
+    public function moveItem(string $mediaId, array|string $targetCollectionName): void
+    {
+        $targetCollectionName = is_array($targetCollectionName)
+            ? implode('.', $targetCollectionName)
+            : $targetCollectionName;
+        $model = resolve_static($this->modelType, 'query')
+            ->whereKey($this->modelId)
+            ->first();
+
+        if (! is_numeric($mediaId)) {
+            resolve_static(MediaModel::class, 'query')
+                ->where('model_type', morph_alias($this->modelType))
+                ->where('model_id', $this->modelId)
+                ->where('collection_name', 'LIKE', $mediaId . '%')
+                ->get()
+                ->each(function (MediaModel $media) use ($mediaId, $targetCollectionName, $model): void {
+                    $collectionName = $media->collection_name;
+                    $collectionName = Str::replaceFirst(Str::beforeLast($mediaId, '.'), $targetCollectionName, $collectionName);
+
+                    $media->move($model, $collectionName);
+                });
+        } else {
+            resolve_static(MediaModel::class, 'query')
+                ->where('model_type', morph_alias($this->modelType))
+                ->where('model_id', $this->modelId)
+                ->with('model')
+                ->whereKey($mediaId)
+                ->first()
+                ?->move($model, $targetCollectionName);
+        }
+    }
+
     #[Renderless]
     public function readOnly(string $collectionName): bool
     {
@@ -106,18 +178,6 @@ class FolderTree extends Component
             'readOnly',
             false
         );
-    }
-
-    public function getTree(): array
-    {
-        if (! $this->modelType || ! $this->modelId) {
-            return [];
-        }
-
-        return resolve_static($this->modelType, 'query')
-            ->whereKey($this->modelId)
-            ->first()
-            ?->getMediaAsTree() ?? [];
     }
 
     public function save(array $item): bool
@@ -153,7 +213,7 @@ class FolderTree extends Component
             ->where('model_id', $this->modelId)
             ->where('collection_name', 'LIKE', $collection['collection_name'] . '%')
             ->get()
-            ->each(function (MediaModel $media) use ($newCollectionName, $model, $collection) {
+            ->each(function (MediaModel $media) use ($newCollectionName, $model, $collection): void {
                 $collectionName = $media->collection_name;
                 $collectionName = Str::replaceFirst($collection['collection_name'], $newCollectionName, $collectionName);
 
@@ -164,74 +224,14 @@ class FolderTree extends Component
     }
 
     #[Renderless]
-    public function moveItem(string $mediaId, array|string $targetCollectionName): void
-    {
-        $targetCollectionName = is_array($targetCollectionName)
-            ? implode('.', $targetCollectionName)
-            : $targetCollectionName;
-        $model = resolve_static($this->modelType, 'query')
-            ->whereKey($this->modelId)
-            ->first();
-
-        if (! is_numeric($mediaId)) {
-            resolve_static(MediaModel::class, 'query')
-                ->where('model_type', morph_alias($this->modelType))
-                ->where('model_id', $this->modelId)
-                ->where('collection_name', 'LIKE', $mediaId . '%')
-                ->get()
-                ->each(function (MediaModel $media) use ($mediaId, $targetCollectionName, $model) {
-                    $collectionName = $media->collection_name;
-                    $collectionName = Str::replaceFirst(Str::beforeLast($mediaId, '.'), $targetCollectionName, $collectionName);
-
-                    $media->move($model, $collectionName);
-                });
-        } else {
-            resolve_static(MediaModel::class, 'query')
-                ->where('model_type', morph_alias($this->modelType))
-                ->where('model_id', $this->modelId)
-                ->with('model')
-                ->whereKey($mediaId)
-                ->first()
-                ?->move($model, $targetCollectionName);
-        }
-
-    }
-
-    public function delete(MediaModel $media): bool
+    public function updatedFiles(): void
     {
         try {
-            DeleteMedia::make($media->toArray())
-                ->checkPermission()
-                ->validate()
-                ->execute();
-        } catch (\Exception $e) {
+            resolve_static(UpdateMedia::class, 'canPerformAction', [false]);
+        } catch (UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
-            return false;
-        }
-
-        return true;
-    }
-
-    public function deleteCollection(string|array|null $collection = null): void
-    {
-        if (! $collection) {
             return;
-        }
-
-        $collection = is_array($collection) ? implode('.', $collection) : $collection;
-
-        try {
-            DeleteMediaCollection::make([
-                'model_type' => morph_alias($this->modelType),
-                'model_id' => $this->modelId,
-                'collection_name' => $collection,
-            ])
-                ->checkPermission()
-                ->validate()
-                ->execute();
-        } catch (\Exception $e) {
-            exception_to_notifications($e, $this);
         }
     }
 
@@ -242,13 +242,13 @@ class FolderTree extends Component
                 ->checkPermission()
                 ->validate()
                 ->execute();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             exception_to_notifications($e, $this);
 
             return false;
         }
 
-        $this->notification()->success(__('File saved!'));
+        $this->notification()->success(__('File saved!'))->send();
 
         return $response instanceof Media;
     }

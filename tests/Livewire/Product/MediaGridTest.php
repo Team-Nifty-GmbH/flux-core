@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class MediaGridTest extends TestCase
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(MediaGrid::class)
             ->assertStatus(200);

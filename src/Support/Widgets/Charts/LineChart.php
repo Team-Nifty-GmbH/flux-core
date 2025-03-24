@@ -8,18 +8,18 @@ abstract class LineChart extends BarChart
         'type' => 'line',
     ];
 
-    public ?array $stroke = [
-        'show' => true,
-        'width' => 4,
-        'curve' => 'smooth',
-        'colors' => ['transparent'],
-    ];
-
     public ?array $plotOptions = [
         'bar' => [
             'horizontal' => false,
             'endingShape' => 'rounded',
             'columnWidth' => '75%',
         ],
+    ];
+
+    public ?array $stroke = [
+        'show' => true,
+        'width' => 4,
+        'curve' => 'smooth',
+        'colors' => ['transparent'],
     ];
 }

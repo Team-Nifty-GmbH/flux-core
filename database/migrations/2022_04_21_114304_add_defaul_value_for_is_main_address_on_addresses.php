@@ -8,14 +8,14 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('addresses', function (Blueprint $table) {
+        Schema::table('addresses', function (Blueprint $table): void {
             $table->boolean('is_main_address')->default(false)->change();
         });
     }
 
     public function down(): void
     {
-        Schema::table('addresses', function (Blueprint $table) {
+        Schema::table('addresses', function (Blueprint $table): void {
             $table->boolean('is_main_address')->default(null)->change();
         });
     }

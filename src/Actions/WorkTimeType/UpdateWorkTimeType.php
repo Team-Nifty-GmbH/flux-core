@@ -6,18 +6,17 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Models\WorkTimeType;
 use FluxErp\Rulesets\WorkTimeType\UpdateWorkTimeTypeRuleset;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Validator;
 
 class UpdateWorkTimeType extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateWorkTimeTypeRuleset::class;
-    }
-
     public static function models(): array
     {
         return [WorkTimeType::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateWorkTimeTypeRuleset::class;
     }
 
     public function performAction(): Model
@@ -30,13 +29,5 @@ class UpdateWorkTimeType extends FluxAction
         $workTimeType->save();
 
         return $workTimeType->withoutRelations()->fresh();
-    }
-
-    protected function validateData(): void
-    {
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(WorkTimeType::class));
-
-        $this->data = $validator->validate();
     }
 }

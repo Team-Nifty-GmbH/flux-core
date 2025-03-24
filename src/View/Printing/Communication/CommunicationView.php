@@ -16,11 +16,6 @@ class CommunicationView extends PrintableView
         $this->model = $communication;
     }
 
-    public function getModel(): Communication
-    {
-        return $this->model;
-    }
-
     public function render(): View|Factory
     {
         return view('print::communication.communication', [
@@ -31,6 +26,11 @@ class CommunicationView extends PrintableView
     public function getFileName(): string
     {
         return $this->getSubject();
+    }
+
+    public function getModel(): Communication
+    {
+        return $this->model;
     }
 
     public function getSubject(): string

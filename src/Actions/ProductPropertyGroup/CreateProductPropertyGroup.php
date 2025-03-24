@@ -10,14 +10,14 @@ use Illuminate\Support\Arr;
 
 class CreateProductPropertyGroup extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateProductPropertyGroupRuleset::class;
-    }
-
     public static function models(): array
     {
         return [ProductPropertyGroup::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateProductPropertyGroupRuleset::class;
     }
 
     public function performAction(): ProductPropertyGroup

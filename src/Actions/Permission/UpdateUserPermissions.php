@@ -8,10 +8,9 @@ use FluxErp\Rulesets\Permission\UpdateUserPermissionRuleset;
 
 class UpdateUserPermissions extends FluxAction
 {
-    protected function boot(array $data): void
+    public static function models(): array
     {
-        parent::boot($data);
-        $this->data = $this->data ? array_merge(['give' => true, 'sync' => false], $this->data) : [];
+        return [User::class];
     }
 
     public static function name(): string
@@ -19,14 +18,15 @@ class UpdateUserPermissions extends FluxAction
         return 'user.update-permissions';
     }
 
-    public static function models(): array
-    {
-        return [User::class];
-    }
-
     protected function getRulesets(): string|array
     {
         return UpdateUserPermissionRuleset::class;
+    }
+
+    protected function boot(array $data): void
+    {
+        parent::boot($data);
+        $this->data = $this->data ? array_merge(['give' => true, 'sync' => false], $this->data) : [];
     }
 
     public function performAction(): array

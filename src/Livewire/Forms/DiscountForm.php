@@ -10,37 +10,28 @@ use Livewire\Attributes\Locked;
 
 class DiscountForm extends FluxForm
 {
-    #[Locked]
-    public ?int $id = null;
-
-    #[Locked]
-    public ?string $model_type = null;
-
-    #[Locked]
-    public ?int $model_id = null;
-
-    public ?string $name = null;
-
     public ?string $discount = null;
-
-    #[ExcludeFromActionData, Locked]
-    public ?string $discount_percentage = null;
 
     #[ExcludeFromActionData, Locked]
     public ?string $discount_flat = null;
 
-    public ?int $order_column = null;
+    #[ExcludeFromActionData, Locked]
+    public ?string $discount_percentage = null;
+
+    #[Locked]
+    public ?int $id = null;
 
     public bool $is_percentage = true;
 
-    public function getActions(): array
-    {
-        return [
-            'create' => CreateDiscount::class,
-            'update' => UpdateDiscount::class,
-            'delete' => DeleteDiscount::class,
-        ];
-    }
+    #[Locked]
+    public ?int $model_id = null;
+
+    #[Locked]
+    public ?string $model_type = null;
+
+    public ?string $name = null;
+
+    public ?int $order_column = null;
 
     public function fill($values): void
     {
@@ -49,6 +40,15 @@ class DiscountForm extends FluxForm
         $this->discount = $this->is_percentage
             ? bcmul($this->discount, 100)
             : $this->discount;
+    }
+
+    public function getActions(): array
+    {
+        return [
+            'create' => CreateDiscount::class,
+            'update' => UpdateDiscount::class,
+            'delete' => DeleteDiscount::class,
+        ];
     }
 
     public function toActionData(): array

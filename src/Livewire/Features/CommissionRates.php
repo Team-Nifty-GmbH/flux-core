@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Features;
 
+use Exception;
 use FluxErp\Actions\CommissionRate\CreateCommissionRate;
 use FluxErp\Actions\CommissionRate\DeleteCommissionRate;
 use FluxErp\Actions\CommissionRate\UpdateCommissionRate;
@@ -18,29 +19,11 @@ class CommissionRates extends BaseDataTable
 {
     use Actions;
 
-    protected string $view = 'flux::livewire.features.commission-rates';
-
-    protected string $model = CommissionRate::class;
-
-    public array $enabledCols = [
-        'category.name',
-        'product.name',
-        'commission_rate',
-    ];
+    public array $categories;
 
     public array $columnLabels = [
         'user.name' => 'Commission Agent',
     ];
-
-    public string $orderBy = 'user_id';
-
-    public bool $orderAsc = true;
-
-    #[Locked]
-    public ?int $userId = null;
-
-    #[Locked]
-    public ?int $contactId = null;
 
     public array $commissionRate = [
         'user_id' => null,
@@ -50,16 +33,34 @@ class CommissionRates extends BaseDataTable
         'commission_rate' => null,
     ];
 
-    public array $categories;
+    #[Locked]
+    public ?int $contactId = null;
+
+    public bool $create = true;
+
+    public array $enabledCols = [
+        'category.name',
+        'product.name',
+        'commission_rate',
+    ];
+
+    public bool $orderAsc = true;
+
+    public string $orderBy = 'user_id';
 
     public bool $showModal = false;
 
-    public bool $create = true;
+    #[Locked]
+    public ?int $userId = null;
+
+    protected ?string $includeBefore = 'flux::livewire.features.commission-rates';
 
     protected $listeners = [
         'loadData',
         'setUserId',
     ];
+
+    protected string $model = CommissionRate::class;
 
     public function mount(): void
     {
@@ -88,76 +89,17 @@ class CommissionRates extends BaseDataTable
         );
     }
 
-    protected function getBottomAppends(): array
-    {
-        return [
-            'user.name' => 'user.email',
-        ];
-    }
-
     protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
-                ->label(__('Create'))
-                ->color('primary')
+                ->text(__('Create'))
+                ->color('indigo')
                 ->icon('plus')
                 ->attributes([
                     'x-on:click' => '$wire.show()',
                 ]),
         ];
-    }
-
-    public function show(?int $id = null): void
-    {
-        if ($id) {
-            $this->commissionRate = resolve_static(CommissionRate::class, 'query')
-                ->whereKey($id)
-                ->first()
-                ->toArray();
-
-            $this->commissionRate['commission_rate'] *= 100;
-        } else {
-            $this->commissionRate =
-                array_fill_keys(
-                    array_keys(resolve_static(CreateCommissionRateRuleset::class, 'getRules')),
-                    null
-                );
-
-            $this->commissionRate['user_id'] = ($this->userId ?? null);
-            $this->commissionRate['contact_id'] = ($this->contactId ?? null);
-        }
-
-        $this->create = is_null($id);
-        $this->showModal = true;
-    }
-
-    public function save(): void
-    {
-        if ($this->commissionRate['commission_rate']) {
-            $this->commissionRate['commission_rate'] /= 100;
-        }
-
-        $action = ($this->commissionRate['id'] ?? false) ? UpdateCommissionRate::class : CreateCommissionRate::class;
-
-        try {
-            $action::make($this->commissionRate)
-                ->checkPermission()
-                ->validate()
-                ->execute();
-        } catch (\Exception $e) {
-            exception_to_notifications($e, $this);
-
-            if ($this->commissionRate['commission_rate']) {
-                $this->commissionRate['commission_rate'] *= 100;
-            }
-
-            return;
-        }
-
-        $this->loadData();
-
-        $this->showModal = false;
     }
 
     public function delete(): void
@@ -167,7 +109,7 @@ class CommissionRates extends BaseDataTable
                 ->checkPermission()
                 ->validate()
                 ->execute();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             exception_to_notifications($e, $this);
 
             return;
@@ -176,20 +118,6 @@ class CommissionRates extends BaseDataTable
         $this->loadData();
 
         $this->showModal = false;
-    }
-
-    public function updatedCommissionRateCategoryId(): void
-    {
-        $this->commissionRate['product_id'] = null;
-
-        $this->skipRender();
-    }
-
-    public function updatedCommissionRateProductId(): void
-    {
-        $this->commissionRate['category_id'] = null;
-
-        $this->skipRender();
     }
 
     public function getFilters(): array
@@ -216,6 +144,34 @@ class CommissionRates extends BaseDataTable
         return $filters;
     }
 
+    public function save(): void
+    {
+        if ($this->commissionRate['commission_rate']) {
+            $this->commissionRate['commission_rate'] /= 100;
+        }
+
+        $action = ($this->commissionRate['id'] ?? false) ? UpdateCommissionRate::class : CreateCommissionRate::class;
+
+        try {
+            $action::make($this->commissionRate)
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (Exception $e) {
+            exception_to_notifications($e, $this);
+
+            if ($this->commissionRate['commission_rate']) {
+                $this->commissionRate['commission_rate'] *= 100;
+            }
+
+            return;
+        }
+
+        $this->loadData();
+
+        $this->showModal = false;
+    }
+
     public function setUserId(int $id): void
     {
         if ($this->showModal) {
@@ -227,5 +183,50 @@ class CommissionRates extends BaseDataTable
         $this->filters = $this->getFilters();
 
         $this->loadData();
+    }
+
+    public function show(?int $id = null): void
+    {
+        if ($id) {
+            $this->commissionRate = resolve_static(CommissionRate::class, 'query')
+                ->whereKey($id)
+                ->first()
+                ->toArray();
+
+            $this->commissionRate['commission_rate'] *= 100;
+        } else {
+            $this->commissionRate =
+                array_fill_keys(
+                    array_keys(resolve_static(CreateCommissionRateRuleset::class, 'getRules')),
+                    null
+                );
+
+            $this->commissionRate['user_id'] = ($this->userId ?? null);
+            $this->commissionRate['contact_id'] = ($this->contactId ?? null);
+        }
+
+        $this->create = is_null($id);
+        $this->showModal = true;
+    }
+
+    public function updatedCommissionRateCategoryId(): void
+    {
+        $this->commissionRate['product_id'] = null;
+
+        $this->skipRender();
+    }
+
+    public function updatedCommissionRateProductId(): void
+    {
+        $this->commissionRate['category_id'] = null;
+
+        $this->skipRender();
+    }
+
+    protected function getBottomAppends(): array
+    {
+        return [
+            'user.name' => 'user.email',
+        ];
     }
 }

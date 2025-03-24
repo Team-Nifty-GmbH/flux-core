@@ -24,9 +24,27 @@ class OrderView extends PrintableView
         $this->prepareModel();
     }
 
+    public function render(): View|Factory
+    {
+        return view('print::order.order', [
+            'model' => $this->model,
+            'summary' => $this->summary,
+        ]);
+    }
+
+    public function getFileName(): string
+    {
+        return $this->getSubject();
+    }
+
     public function getModel(): Order
     {
         return $this->model;
+    }
+
+    public function getSubject(): string
+    {
+        return __('Order') . ' ' . $this->model->order_number;
     }
 
     public function prepareModel(): void
@@ -55,23 +73,5 @@ class OrderView extends PrintableView
         }
 
         $this->model->setRelation('orderPositions', $flattened);
-    }
-
-    public function render(): View|Factory
-    {
-        return view('print::order.order', [
-            'model' => $this->model,
-            'summary' => $this->summary,
-        ]);
-    }
-
-    public function getFileName(): string
-    {
-        return $this->getSubject();
-    }
-
-    public function getSubject(): string
-    {
-        return __('Order') . ' ' . $this->model->order_number;
     }
 }

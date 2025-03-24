@@ -1,4 +1,6 @@
 import defaultTheme from 'tailwindcss/defaultTheme';
+import forms from '@tailwindcss/forms';
+import typography from '@tailwindcss/typography';
 
 export default {
     darkMode: 'selector',
@@ -7,32 +9,34 @@ export default {
         __dirname + '/resources/**/*.js',
         __dirname + '/resources/**/*.vue',
         __dirname + '/src/Htmlables/**/*.php',
+        __dirname + '/src/Providers/*.php',
+        __dirname + '/src/View/Components/**/*.php',
         __dirname + '/src/Livewire/**/*.php',
     ],
     theme: {
         extend: {
             colors: {
                 'flux-primary': {
-                    '800': '#0690FA',
-                    '700': '#2FA1F7',
-                    '600': '#5EB3F4',
-                    '500': '#74BBF3',
-                    '400': '#8AC4F1',
-                    '300': '#9ECDF0',
-                    '200': '#B6D6ED',
-                    '100': '#CCDEEB',
-                    '50': '#D7E3EC',
+                    800: '#0690FA',
+                    700: '#2FA1F7',
+                    600: '#5EB3F4',
+                    500: '#74BBF3',
+                    400: '#8AC4F1',
+                    300: '#9ECDF0',
+                    200: '#B6D6ED',
+                    100: '#CCDEEB',
+                    50: '#D7E3EC',
                 },
                 'flux-secondary': {
-                    '50': '#D7DBE2',
-                    '100': '#B5B9C5',
-                    '200': '#9EA2B4',
-                    '300': '#5B5D7A',
-                    '400': '#444667',
-                    '500': '#2D2F55',
-                    '600': '#171842',
-                    '700': '#00012F',
-                    '800': '#00011B',
+                    50: '#D7DBE2',
+                    100: '#B5B9C5',
+                    200: '#9EA2B4',
+                    300: '#5B5D7A',
+                    400: '#444667',
+                    500: '#2D2F55',
+                    600: '#171842',
+                    700: '#00012F',
+                    800: '#00011B',
                 },
             },
             transitionProperty: {
@@ -43,7 +47,7 @@ export default {
             },
         },
     },
-    plugins: [require('@tailwindcss/typography'), require('@tailwindcss/forms')],
+    plugins: [typography, forms],
     safelist: [
         'mention',
         'tippy-box',
@@ -62,10 +66,10 @@ export default {
         'md:col-span-11',
         'md:col-span-12',
         {
-            pattern: /row-span-\d+/
+            pattern: /row-span-\d+/,
         },
         {
-            pattern: /grid-cols-\d+/
-        }
-    ]
-}
+            pattern: /grid-cols-\d+/,
+        },
+    ],
+};

@@ -8,7 +8,7 @@ class CreateProjectCategoryTemplatesTable extends Migration
 {
     public function up(): void
     {
-        Schema::create('project_category_templates', function (Blueprint $table) {
+        Schema::create('project_category_templates', function (Blueprint $table): void {
             $table->id();
             $table->string('name');
             $table->timestamps();

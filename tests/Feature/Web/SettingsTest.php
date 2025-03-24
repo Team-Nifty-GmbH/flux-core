@@ -3,20 +3,17 @@
 namespace FluxErp\Tests\Feature\Web;
 
 use FluxErp\Models\Permission;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class SettingsTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
-    public function test_settings_no_user()
+    public function test_settings_no_user(): void
     {
         $this->get('/settings/clients')
             ->assertStatus(302)
             ->assertRedirect(route('login'));
     }
 
-    public function test_settings_without_permission()
+    public function test_settings_without_permission(): void
     {
         Permission::findOrCreate('settings.clients.get', 'web');
 

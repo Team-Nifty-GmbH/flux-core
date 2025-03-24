@@ -11,25 +11,16 @@ use Livewire\Attributes\Locked;
 
 class RoleForm extends FluxForm
 {
+    public ?string $guard_name = null;
+
     #[Locked]
     public ?int $id = null;
 
     public ?string $name = null;
 
-    public ?string $guard_name = null;
-
     public array $permissions = [];
 
     public ?array $users = null;
-
-    protected function getActions(): array
-    {
-        return [
-            'create' => CreateRole::class,
-            'update' => UpdateRole::class,
-            'delete' => DeleteRole::class,
-        ];
-    }
 
     public function fill($values): void
     {
@@ -55,5 +46,14 @@ class RoleForm extends FluxForm
             ->toArray();
 
         return $actionData;
+    }
+
+    protected function getActions(): array
+    {
+        return [
+            'create' => CreateRole::class,
+            'update' => UpdateRole::class,
+            'delete' => DeleteRole::class,
+        ];
     }
 }

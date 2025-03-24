@@ -2,6 +2,7 @@
 
 namespace FluxErp\Widgets;
 
+use Exception;
 use FluxErp\Traits\Widgetable;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Traits\Macroable;
@@ -10,6 +11,7 @@ use Livewire\Mechanisms\ComponentRegistry;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use ReflectionClass;
+use Throwable;
 
 class WidgetManager
 {
@@ -17,65 +19,9 @@ class WidgetManager
 
     protected $widgets = [];
 
-    /**
-     * @throws \Exception
-     */
-    public function register(string $name, string $widget): void
-    {
-        $componentRegistry = app(ComponentRegistry::class);
-        $componentClass = $componentRegistry->getClass($widget);
-
-        if (! class_exists($componentClass)) {
-            throw new \Exception("The provided widget class '{$componentClass}' does not exist.");
-        }
-
-        if (! is_subclass_of($componentClass, Component::class)) {
-            throw new \Exception(
-                "The provided widget class '{$componentClass}' does not extend Livewire\\Component."
-            );
-        }
-
-        $reflection = new ReflectionClass($componentClass);
-        if (method_exists($componentClass, 'mount')
-            && $reflection->getMethod('mount')->getNumberOfParameters() !== 0
-        ) {
-            throw new \Exception(
-                "The provided widget class '{$componentClass}' must not have any parameters in the mount method."
-            );
-        }
-
-        if (! in_array(Widgetable::class, class_uses_recursive($componentClass))) {
-            throw new \Exception(
-                "The provided widget class '{$componentClass}' does not use the Widgetable trait."
-            );
-        }
-
-        $this->widgets[$name] = [
-            'component_name' => $widget,
-            'label' => $componentClass::getLabel(),
-            'class' => $componentClass,
-            'defaultWidth' => method_exists($componentClass, 'getDefaultWidth')
-                ? $componentClass::getDefaultWidth()
-                : 1,
-            'defaultHeight' => method_exists($componentClass, 'getDefaultHeight')
-                ? $componentClass::getDefaultHeight()
-                : 1,
-        ];
-    }
-
-    public function unregister(string $name): void
-    {
-        unset($this->widgets[$name]);
-    }
-
     public function all(): array
     {
         return $this->widgets;
-    }
-
-    public function get(string $name): ?string
-    {
-        return $this->widgets[$name] ?? null;
     }
 
     public function autoDiscoverWidgets(?string $directory = null, ?string $namespace = null): void
@@ -92,7 +38,7 @@ class WidgetManager
 
         try {
             $widgets = Cache::get('flux.widgets.' . $cacheKey);
-        } catch (\Throwable) {
+        } catch (Throwable) {
             $widgets = null;
         }
 
@@ -136,15 +82,71 @@ class WidgetManager
         foreach ($widgets as $name => $class) {
             try {
                 $this->register($name, $name);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 // Don't throw exceptions on auto discovery
             }
         }
 
         try {
             Cache::put('flux.widgets.' . $cacheKey, $widgets);
-        } catch (\Throwable) {
+        } catch (Throwable) {
             // Ignore exceptions during cache put
         }
+    }
+
+    public function get(string $name): ?string
+    {
+        return $this->widgets[$name] ?? null;
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function register(string $name, string $widget): void
+    {
+        $componentRegistry = app(ComponentRegistry::class);
+        $componentClass = $componentRegistry->getClass($widget);
+
+        if (! class_exists($componentClass)) {
+            throw new Exception("The provided widget class '{$componentClass}' does not exist.");
+        }
+
+        if (! is_subclass_of($componentClass, Component::class)) {
+            throw new Exception(
+                "The provided widget class '{$componentClass}' does not extend Livewire\\Component."
+            );
+        }
+
+        $reflection = new ReflectionClass($componentClass);
+        if (method_exists($componentClass, 'mount')
+            && $reflection->getMethod('mount')->getNumberOfParameters() !== 0
+        ) {
+            throw new Exception(
+                "The provided widget class '{$componentClass}' must not have any parameters in the mount method."
+            );
+        }
+
+        if (! in_array(Widgetable::class, class_uses_recursive($componentClass))) {
+            throw new Exception(
+                "The provided widget class '{$componentClass}' does not use the Widgetable trait."
+            );
+        }
+
+        $this->widgets[$name] = [
+            'component_name' => $widget,
+            'label' => $componentClass::getLabel(),
+            'class' => $componentClass,
+            'defaultWidth' => method_exists($componentClass, 'getDefaultWidth')
+                ? $componentClass::getDefaultWidth()
+                : 1,
+            'defaultHeight' => method_exists($componentClass, 'getDefaultHeight')
+                ? $componentClass::getDefaultHeight()
+                : 1,
+        ];
+    }
+
+    public function unregister(string $name): void
+    {
+        unset($this->widgets[$name]);
     }
 }

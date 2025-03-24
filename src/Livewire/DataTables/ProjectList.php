@@ -6,8 +6,6 @@ use FluxErp\Models\Project;
 
 class ProjectList extends BaseDataTable
 {
-    protected string $model = Project::class;
-
     public array $enabledCols = [
         'project_number',
         'name',
@@ -20,4 +18,6 @@ class ProjectList extends BaseDataTable
     public array $formatters = [
         'progress' => 'progressPercentage',
     ];
+
+    protected string $model = Project::class;
 }

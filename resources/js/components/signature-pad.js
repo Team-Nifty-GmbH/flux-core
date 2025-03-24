@@ -2,7 +2,7 @@ import SignaturePad from 'signature_pad';
 
 // resizing canvas - data get lost - hence need for tempData during drawing
 // and existingData for already saved signature
-export default function($wire, $refs) {
+export default function ($wire, $refs) {
     return {
         signaturePad: null,
         isEmpty: true,
@@ -13,7 +13,9 @@ export default function($wire, $refs) {
         resizeFuncRef: null,
         async init() {
             // init signature pad
-            this.signaturePad = new SignaturePad($refs.canvas, { backgroundColor: 'rgba(255, 255, 255, 1)' });
+            this.signaturePad = new SignaturePad($refs.canvas, {
+                backgroundColor: 'rgba(255, 255, 255, 1)',
+            });
 
             // if signature is already saved - order->print will inject it
             if ($wire.signature.stagedFiles.length > 0) {
@@ -27,7 +29,10 @@ export default function($wire, $refs) {
             window.addEventListener('resize', this.resizeFuncRef);
             this.resizeCanvas();
             // if signature is not saved - allow to draw and clear after first stroke
-            this.signaturePad.addEventListener('afterUpdateStroke', this.strokeHandler.bind(this));
+            this.signaturePad.addEventListener(
+                'afterUpdateStroke',
+                this.strokeHandler.bind(this),
+            );
         },
         destroy() {
             if (this.resizeFuncRef !== null) {
@@ -62,14 +67,17 @@ export default function($wire, $refs) {
             if (this.signaturePad.isEmpty()) {
                 return;
             }
-            const data = await (await fetch(this.signaturePad.toDataURL())).blob();
+            const data = await (
+                await fetch(this.signaturePad.toDataURL())
+            ).blob();
             await $wire.upload('signature.file', data, this.upload.bind(this));
         },
         resizeCanvas() {
             if (window.innerWidth < 700) {
                 // going to small screen - resize canvas to fit the screen
                 const width = $refs.canvas.width;
-                $refs.canvas.width = (width) - (this.prevWidth - window.innerWidth);
+                $refs.canvas.width =
+                    width - (this.prevWidth - window.innerWidth);
                 this.prevWidth = window.innerWidth;
                 const ctx = $refs.canvas.getContext('2d');
                 ctx.scale(1, 1);
@@ -98,6 +106,6 @@ export default function($wire, $refs) {
             if (!this.signaturePad.isEmpty()) {
                 this.clear();
             }
-        }
+        },
     };
 }

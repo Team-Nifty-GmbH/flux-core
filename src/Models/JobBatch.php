@@ -9,6 +9,7 @@ use Illuminate\Bus\Batch;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Facades\Bus;
+use Throwable;
 
 class JobBatch extends FluxModel
 {
@@ -32,19 +33,9 @@ class JobBatch extends FluxModel
         return Bus::findBatch($this->id);
     }
 
-    public function jobBatchables(): HasMany
+    public function getProcessedJobs(): int
     {
-        return $this->hasMany(JobBatchable::class);
-    }
-
-    public function queueMonitors(): HasMany
-    {
-        return $this->hasMany(QueueMonitor::class);
-    }
-
-    public function users(): MorphToMany
-    {
-        return $this->morphedByMany(User::class, 'job_batchable', 'job_batchables');
+        return $this->total_jobs - $this->pending_jobs - $this->failed_jobs;
     }
 
     public function getProgress(): float
@@ -58,11 +49,6 @@ class JobBatch extends FluxModel
         }
 
         return 0;
-    }
-
-    public function getProcessedJobs(): int
-    {
-        return $this->total_jobs - $this->pending_jobs - $this->failed_jobs;
     }
 
     public function getRemainingInterval(?Carbon $now = null): CarbonInterval
@@ -85,7 +71,7 @@ class JobBatch extends FluxModel
             return CarbonInterval::seconds(
                 (1 - $this->getProgress()) / ($this->getProgress() / $timeDiff)
             )->cascade();
-        } catch (\Throwable) {
+        } catch (Throwable) {
             return CarbonInterval::seconds(0);
         }
     }
@@ -93,5 +79,20 @@ class JobBatch extends FluxModel
     public function isFinished(): bool
     {
         return ! is_null($this->finished_at);
+    }
+
+    public function jobBatchables(): HasMany
+    {
+        return $this->hasMany(JobBatchable::class);
+    }
+
+    public function queueMonitors(): HasMany
+    {
+        return $this->hasMany(QueueMonitor::class);
+    }
+
+    public function users(): MorphToMany
+    {
+        return $this->morphedByMany(User::class, 'job_batchable', 'job_batchables');
     }
 }

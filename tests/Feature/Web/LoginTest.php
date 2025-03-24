@@ -2,29 +2,25 @@
 
 namespace FluxErp\Tests\Feature\Web;
 
-use Illuminate\Foundation\Testing\DatabaseTransactions;
-
 class LoginTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
-    public function test_login_page()
+    public function test_login_as_authenticated_user(): void
     {
-        $this->get('/login')
-            ->assertStatus(200);
+        $this->actingAs($this->user, 'web')->get('/login')
+            ->assertStatus(302)
+            ->assertRedirect();
     }
 
-    public function test_login_no_path()
+    public function test_login_no_path(): void
     {
         $this->get('/')
             ->assertStatus(302)
             ->assertRedirect(route('login'));
     }
 
-    public function test_login_as_authenticated_user()
+    public function test_login_page(): void
     {
-        $this->actingAs($this->user, 'web')->get('/login')
-            ->assertStatus(302)
-            ->assertRedirect();
+        $this->get('/login')
+            ->assertStatus(200);
     }
 }

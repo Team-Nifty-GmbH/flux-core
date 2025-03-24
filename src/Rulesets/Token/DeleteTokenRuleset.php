@@ -7,9 +7,9 @@ use FluxErp\Rules\ModelExists;
 
 class DeleteTokenRuleset
 {
-    protected static ?string $model = Token::class;
-
     protected static bool $addAdditionalColumnRules = false;
+
+    protected static ?string $model = Token::class;
 
     public function rules(): array
     {

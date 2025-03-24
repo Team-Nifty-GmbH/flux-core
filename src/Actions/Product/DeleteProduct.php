@@ -9,14 +9,14 @@ use Illuminate\Validation\ValidationException;
 
 class DeleteProduct extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeleteProductRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Product::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeleteProductRuleset::class;
     }
 
     public function performAction(): ?bool
@@ -39,7 +39,9 @@ class DeleteProduct extends FluxAction
         ) {
             throw ValidationException::withMessages([
                 'children' => [__('The given product has children')],
-            ])->errorBag('deleteProduct');
+            ])
+                ->errorBag('deleteProduct')
+                ->status(423);
         }
     }
 }

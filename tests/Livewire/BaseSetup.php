@@ -12,15 +12,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class BaseSetup extends TestCase
 {
-    protected User $user;
-
-    protected Model $dbClient;
-
     protected Address $address;
 
     protected Contact $contact;
 
+    protected Model $dbClient;
+
     protected Language $defaultLanguage;
+
+    protected User $user;
 
     protected function setUp(): void
     {

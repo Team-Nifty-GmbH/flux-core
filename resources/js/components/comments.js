@@ -7,7 +7,7 @@ export default function comments() {
         async init() {
             Promise.all([
                 this.$wire.loadComments(),
-                this.$wire.loadStickyComments()
+                this.$wire.loadStickyComments(),
             ]).then(([commentsResponse, stickyCommentsResponse]) => {
                 this.comments = commentsResponse.data;
                 this.stickyComments = stickyCommentsResponse;
@@ -16,24 +16,26 @@ export default function comments() {
         },
 
         loadMore() {
-            if (! this.initialized) {
+            if (!this.initialized) {
                 return;
             }
 
-            this.$wire.loadMoreComments().then(response => {
+            this.$wire.loadMoreComments().then((response) => {
                 this.comments.push(...response.data); // Append new comments
             });
         },
 
         toggleSticky(node) {
             this.$wire.toggleSticky(node.id);
-            node.is_sticky = ! node.is_sticky;
+            node.is_sticky = !node.is_sticky;
 
             // add it to stickyComments if its sticky now
             if (node.is_sticky) {
                 this.stickyComments.push(node);
             } else {
-                const stickyNodeIndex = this.stickyComments.findIndex((item) => item.id === node.id);
+                const stickyNodeIndex = this.stickyComments.findIndex(
+                    (item) => item.id === node.id,
+                );
                 if (stickyNodeIndex !== -1) {
                     this.stickyComments.splice(stickyNodeIndex, 1);
                 }
@@ -41,15 +43,18 @@ export default function comments() {
         },
 
         async saveComment(content, files, sticky, internal, parentNode = null) {
-            const editor = Alpine.$data(content.querySelector('[x-data]')).editor();
+            const editor = Alpine.$data(
+                content.querySelector('[x-data]'),
+            ).editor();
 
-            let child = await this.$wire.saveComment({
+            let child = await this.$wire.saveComment(
+                {
                     comment: editor.getHTML(),
                     is_sticky: sticky.checked,
                     is_internal: internal,
                     parent_id: parentNode !== null ? parentNode.id : null,
                 },
-                files
+                files,
             );
 
             if (child === null) {
@@ -57,20 +62,20 @@ export default function comments() {
             }
 
             if (parentNode !== null) {
-                if (! parentNode.hasOwnProperty('children')) {
+                if (!parentNode.hasOwnProperty('children')) {
                     parentNode.children = [];
                 }
 
                 parentNode.children.unshift(child);
             } else {
-
                 this.comments.unshift(child);
             }
 
             editor.commands.setContent('', false);
 
             sticky.checked = false;
-            this.$refs.comments.querySelectorAll('.comment-input')
+            this.$refs.comments
+                .querySelectorAll('.comment-input')
                 .forEach(function (el) {
                     el.remove();
                 });
@@ -103,10 +108,12 @@ export default function comments() {
 
             traverseAndRemove(this.comments);
 
-            const stickyNodeIndex = this.stickyComments.findIndex((item) => item.id === nodeId);
+            const stickyNodeIndex = this.stickyComments.findIndex(
+                (item) => item.id === nodeId,
+            );
             if (stickyNodeIndex !== -1) {
                 this.stickyComments.splice(stickyNodeIndex, 1);
             }
         },
-    }
+    };
 }

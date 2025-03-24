@@ -10,6 +10,7 @@ use FluxErp\Livewire\Forms\CategoryForm;
 use FluxErp\Models\Category;
 use FluxErp\Traits\Categorizable;
 use FluxErp\Traits\Livewire\Actions;
+use FluxErp\Traits\Livewire\DataTable\SupportsLocalization;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
@@ -18,35 +19,18 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class Categories extends CategoryList
 {
-    use Actions;
-
-    protected ?string $includeBefore = 'flux::livewire.settings.categories';
+    use Actions, SupportsLocalization;
 
     public CategoryForm $category;
 
-    protected function getViewData(): array
-    {
-        return array_merge(parent::getViewData(), [
-            'models' => model_info_all()
-                ->filter(fn ($modelInfo) => in_array(
-                    Categorizable::class,
-                    class_uses_recursive($modelInfo->class)
-                ))
-                ->unique('morphClass')
-                ->map(fn ($modelInfo) => [
-                    'label' => __(Str::headline($modelInfo->morphClass)),
-                    'value' => $modelInfo->morphClass,
-                ])
-                ->toArray(),
-        ]);
-    }
+    protected ?string $includeBefore = 'flux::livewire.settings.categories';
 
     protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
-                ->label(__('Create'))
-                ->color('primary')
+                ->text(__('Create'))
+                ->color('indigo')
                 ->icon('plus')
                 ->when(resolve_static(CreateCategory::class, 'canPerformAction', [false]))
                 ->wireClick('edit()'),
@@ -57,48 +41,21 @@ class Categories extends CategoryList
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
-                ->color('primary')
+                ->text(__('Edit'))
+                ->color('indigo')
                 ->icon('pencil')
                 ->when(resolve_static(UpdateCategory::class, 'canPerformAction', [false]))
                 ->wireClick('edit(record.id)'),
             DataTableButton::make()
-                ->label(__('Delete'))
-                ->color('negative')
+                ->text(__('Delete'))
+                ->color('red')
                 ->icon('trash')
                 ->when(resolve_static(DeleteCategory::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'delete(record.id)',
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Category')]),
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Category')]),
                 ]),
         ];
-    }
-
-    #[Renderless]
-    public function edit(Category $category): void
-    {
-        $this->category->reset();
-        $this->category->fill($category);
-
-        $this->js(<<<'JS'
-            $openModal('edit-category');
-        JS);
-    }
-
-    #[Renderless]
-    public function save(): bool
-    {
-        try {
-            $this->category->save();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
     }
 
     #[Renderless]
@@ -118,5 +75,49 @@ class Categories extends CategoryList
         $this->loadData();
 
         return true;
+    }
+
+    #[Renderless]
+    public function edit(Category $category): void
+    {
+        $this->category->reset();
+        $this->category->fill($category);
+
+        $this->js(<<<'JS'
+            $modalOpen('edit-category-modal');
+        JS);
+    }
+
+    #[Renderless]
+    public function save(): bool
+    {
+        try {
+            $this->category->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
+    }
+
+    protected function getViewData(): array
+    {
+        return array_merge(parent::getViewData(), [
+            'models' => model_info_all()
+                ->filter(fn ($modelInfo) => in_array(
+                    Categorizable::class,
+                    class_uses_recursive($modelInfo->class)
+                ))
+                ->unique('morphClass')
+                ->map(fn ($modelInfo) => [
+                    'label' => __(Str::headline($modelInfo->morphClass)),
+                    'value' => $modelInfo->morphClass,
+                ])
+                ->toArray(),
+        ]);
     }
 }

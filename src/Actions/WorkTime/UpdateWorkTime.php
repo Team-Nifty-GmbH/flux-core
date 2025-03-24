@@ -11,14 +11,14 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateWorkTime extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateWorkTimeRuleset::class;
-    }
-
     public static function models(): array
     {
         return [WorkTime::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateWorkTimeRuleset::class;
     }
 
     public function performAction(): Model
@@ -77,7 +77,7 @@ class UpdateWorkTime extends FluxAction
                 ->where('is_locked', false)
                 ->where('id', '!=', $workTime->id)
                 ->get()
-                ->each(function (WorkTime $workTime) {
+                ->each(function (WorkTime $workTime): void {
                     $workTime->ended_at = now()->toDateTimeString();
                     $workTime->is_locked = true;
                     UpdateWorkTime::make($workTime->toArray())->execute();

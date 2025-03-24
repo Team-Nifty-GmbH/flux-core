@@ -9,14 +9,14 @@ use Illuminate\Validation\ValidationException;
 
 class DeleteProject extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeleteProjectRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Project::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeleteProjectRuleset::class;
     }
 
     public function performAction(): ?bool
@@ -39,7 +39,9 @@ class DeleteProject extends FluxAction
         ) {
             throw ValidationException::withMessages([
                 'children' => [__('The given project has children')],
-            ])->errorBag('deleteProject');
+            ])
+                ->errorBag('deleteProject')
+                ->status(423);
         }
     }
 }

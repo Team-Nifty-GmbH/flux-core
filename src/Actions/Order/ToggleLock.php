@@ -8,14 +8,14 @@ use FluxErp\Rulesets\Order\ToggleLockRuleset;
 
 class ToggleLock extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return ToggleLockRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Order::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return ToggleLockRuleset::class;
     }
 
     public function performAction(): Order

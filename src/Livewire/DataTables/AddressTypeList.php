@@ -6,8 +6,6 @@ use FluxErp\Models\AddressType;
 
 class AddressTypeList extends BaseDataTable
 {
-    protected string $model = AddressType::class;
-
     public array $enabledCols = [
         'name',
         'client.name',
@@ -15,4 +13,6 @@ class AddressTypeList extends BaseDataTable
         'is_locked',
         'is_unique',
     ];
+
+    protected string $model = AddressType::class;
 }

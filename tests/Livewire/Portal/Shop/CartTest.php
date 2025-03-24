@@ -26,13 +26,7 @@ class CartTest extends BaseSetup
         ]);
     }
 
-    public function test_renders_successfully()
-    {
-        Livewire::test(Cart::class)
-            ->assertStatus(200);
-    }
-
-    public function test_can_add_cart_item()
+    public function test_can_add_cart_item(): void
     {
         /** @var Collection $products */
         $products = Product::factory()
@@ -50,21 +44,27 @@ class CartTest extends BaseSetup
             ->fireEvent('cart:add', $products->first()->id)
             ->assertStatus(200)
             ->assertHasNoErrors()
-            ->assertWireuiNotification(icon: 'success')
+            ->assertToastNotification(type: 'success')
             ->assertCount('cart.cartItems', 1)
             ->fireEvent('cart:add', [$products->get(1)->id])
             ->assertStatus(200)
             ->assertHasNoErrors()
-            ->assertWireuiNotification(icon: 'success')
+            ->assertToastNotification(type: 'success')
             ->assertCount('cart.cartItems', 2)
             ->fireEvent('cart:add', ['id' => $products->get(1)->id, 'amount' => 2])
             ->assertStatus(200)
             ->assertHasNoErrors()
-            ->assertWireuiNotification(icon: 'success')
+            ->assertToastNotification(type: 'success')
             ->assertCount('cart.cartItems', 2)
             ->assertSet('cart.cartItems.1.amount', 3)
             ->assertStatus(200)
             ->assertHasNoErrors()
-            ->assertWireuiNotification(icon: 'success');
+            ->assertToastNotification(type: 'success');
+    }
+
+    public function test_renders_successfully(): void
+    {
+        Livewire::test(Cart::class)
+            ->assertStatus(200);
     }
 }

@@ -6,8 +6,6 @@ use FluxErp\Models\AdditionalColumn;
 
 class AdditionalColumnList extends BaseDataTable
 {
-    protected string $model = AdditionalColumn::class;
-
     public array $enabledCols = [
         'name',
         'model_type',
@@ -16,4 +14,6 @@ class AdditionalColumnList extends BaseDataTable
         'validations',
         'values',
     ];
+
+    protected string $model = AdditionalColumn::class;
 }

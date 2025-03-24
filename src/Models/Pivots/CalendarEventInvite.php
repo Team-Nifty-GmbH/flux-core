@@ -20,11 +20,6 @@ class CalendarEventInvite extends MorphPivot
         return $this->morphTo('model');
     }
 
-    public function calendarEvent(): BelongsTo
-    {
-        return $this->belongsTo(CalendarEvent::class);
-    }
-
     /**
      * Get the channels that model events should broadcast on.
      *
@@ -35,6 +30,11 @@ class CalendarEventInvite extends MorphPivot
         return new PrivateChannel(
             str_replace('\\', '.', $this->model_type) . '.' . $this->model_id
         );
+    }
+
+    public function calendarEvent(): BelongsTo
+    {
+        return $this->belongsTo(CalendarEvent::class);
     }
 
     public function notifiable(): MorphTo

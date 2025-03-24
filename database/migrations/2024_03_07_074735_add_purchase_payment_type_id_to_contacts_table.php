@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('contacts', function (Blueprint $table) {
+        Schema::table('contacts', function (Blueprint $table): void {
             $table->foreignId('purchase_payment_type_id')
                 ->nullable()
                 ->after('payment_type_id')
@@ -19,7 +19,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('contacts', function (Blueprint $table) {
+        Schema::table('contacts', function (Blueprint $table): void {
             $table->dropConstrainedForeignId('purchase_payment_type_id');
         });
     }

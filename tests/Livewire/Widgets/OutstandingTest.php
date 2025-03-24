@@ -50,7 +50,7 @@ class OutstandingTest extends BaseSetup
         $this->inTimeDate = Carbon::now()->addDay()->toDateString();
     }
 
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         $this->createData(collect());
 

@@ -8,14 +8,14 @@ use FluxErp\Rulesets\MailAccount\CreateMailAccountRuleset;
 
 class CreateMailAccount extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateMailAccountRuleset::class;
-    }
-
     public static function models(): array
     {
         return [MailAccount::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateMailAccountRuleset::class;
     }
 
     public function performAction(): MailAccount

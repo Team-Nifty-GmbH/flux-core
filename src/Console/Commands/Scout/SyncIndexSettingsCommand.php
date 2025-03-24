@@ -2,6 +2,7 @@
 
 namespace FluxErp\Console\Commands\Scout;
 
+use Exception;
 use FluxErp\Traits\HasClientAssignment;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -16,10 +17,8 @@ class SyncIndexSettingsCommand extends BaseSyncIndexSettingsCommand
 
     /**
      * Execute the console command.
-     *
-     * @return void
      */
-    public function handle(EngineManager $manager)
+    public function handle(EngineManager $manager): void
     {
         $engine = $manager->engine();
 
@@ -85,7 +84,7 @@ class SyncIndexSettingsCommand extends BaseSyncIndexSettingsCommand
             } else {
                 $this->info('No index settings found for the "' . $driver . '" engine.');
             }
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             $this->error($exception->getMessage());
         }
     }

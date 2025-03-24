@@ -25,13 +25,8 @@ use FluxErp\Models\ContactOrigin;
 use FluxErp\Models\Country;
 use FluxErp\Models\CountryRegion;
 use FluxErp\Models\Currency;
-use FluxErp\Models\CustomEvent;
 use FluxErp\Models\Discount;
 use FluxErp\Models\DiscountGroup;
-use FluxErp\Models\DocumentGenerationSetting;
-use FluxErp\Models\DocumentType;
-use FluxErp\Models\Email;
-use FluxErp\Models\EmailTemplate;
 use FluxErp\Models\EventSubscription;
 use FluxErp\Models\Favorite;
 use FluxErp\Models\FormBuilderField;
@@ -55,8 +50,8 @@ use FluxErp\Models\NotificationSetting;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\OrderType;
-use FluxErp\Models\PaymentNotice;
 use FluxErp\Models\PaymentReminder;
+use FluxErp\Models\PaymentReminderText;
 use FluxErp\Models\PaymentRun;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
@@ -68,12 +63,15 @@ use FluxErp\Models\Pivots\Communicatable;
 use FluxErp\Models\Pivots\ContactDiscount;
 use FluxErp\Models\Pivots\ContactDiscountGroup;
 use FluxErp\Models\Pivots\JobBatchable;
+use FluxErp\Models\Pivots\PrinterUser;
 use FluxErp\Models\Pivots\ProductBundleProduct;
 use FluxErp\Models\Pivots\ProductCrossSellingProduct;
 use FluxErp\Models\Pivots\ProductProductOption;
 use FluxErp\Models\Pivots\QueueMonitorable;
 use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
+use FluxErp\Models\Printer;
+use FluxErp\Models\PrintJob;
 use FluxErp\Models\Product;
 use FluxErp\Models\ProductCrossSelling;
 use FluxErp\Models\ProductOption;
@@ -136,13 +134,8 @@ class MorphMapServiceProvider extends ServiceProvider
             'country' => Country::class,
             'country_region' => CountryRegion::class,
             'currency' => Currency::class,
-            'custom_event' => CustomEvent::class,
             'discount' => Discount::class,
             'discount_group' => DiscountGroup::class,
-            'document_generation_setting' => DocumentGenerationSetting::class,
-            'document_type' => DocumentType::class,
-            'email' => Email::class,
-            'email_template' => EmailTemplate::class,
             'event_subscription' => EventSubscription::class,
             'favorite' => Favorite::class,
             'form_builder_field' => FormBuilderField::class,
@@ -153,7 +146,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'interface_user' => InterfaceUser::class,
             'job_batch' => JobBatch::class,
             'language' => Language::class,
-            'translation' => LanguageLine::class,
+            'language_line' => LanguageLine::class,
             'ledger_account' => LedgerAccount::class,
             'lock' => Lock::class,
             'log' => Log::class,
@@ -162,17 +155,20 @@ class MorphMapServiceProvider extends ServiceProvider
             'media' => Media::class,
             'meta' => Meta::class,
             'notification' => Notification::class,
+            'database_notification' => Notification::class,
             'notification_setting' => NotificationSetting::class,
             'order' => Order::class,
             'order_position' => OrderPosition::class,
             'order_type' => OrderType::class,
-            'payment_notice' => PaymentNotice::class,
             'payment_reminder' => PaymentReminder::class,
+            'payment_reminder_text' => PaymentReminderText::class,
             'payment_run' => PaymentRun::class,
             'payment_type' => PaymentType::class,
             'permission' => Permission::class,
             'price' => Price::class,
             'price_list' => PriceList::class,
+            'print_job' => PrintJob::class,
+            'printer' => Printer::class,
             'product' => Product::class,
             'product_cross_selling' => ProductCrossSelling::class,
             'product_option' => ProductOption::class,
@@ -213,6 +209,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'contact_discount' => ContactDiscount::class,
             'contact_discount_group' => ContactDiscountGroup::class,
             'job_batchable' => JobBatchable::class,
+            'printer_user' => PrinterUser::class,
             'product_bundle_product' => ProductBundleProduct::class,
             'product_cross_selling_product' => ProductCrossSellingProduct::class,
             'product_product_option' => ProductProductOption::class,

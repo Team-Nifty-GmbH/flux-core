@@ -5,18 +5,17 @@ namespace FluxErp\Actions\Language;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Language;
 use FluxErp\Rulesets\Language\CreateLanguageRuleset;
-use Illuminate\Support\Facades\Validator;
 
 class CreateLanguage extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateLanguageRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Language::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateLanguageRuleset::class;
     }
 
     public function performAction(): Language
@@ -25,13 +24,5 @@ class CreateLanguage extends FluxAction
         $language->save();
 
         return $language->fresh();
-    }
-
-    protected function validateData(): void
-    {
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(Language::class));
-
-        $this->data = $validator->validate();
     }
 }

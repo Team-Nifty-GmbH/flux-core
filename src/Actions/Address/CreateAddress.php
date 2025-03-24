@@ -12,19 +12,18 @@ use FluxErp\Models\Tag;
 use FluxErp\Rulesets\Address\CreateAddressRuleset;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
 class CreateAddress extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateAddressRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Address::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateAddressRuleset::class;
     }
 
     public function performAction(): Address
@@ -117,13 +116,5 @@ class CreateAddress extends FluxAction
         $this->data['client_id'] ??= resolve_static(Contact::class, 'query')
             ->whereKey($this->getData('contact_id'))
             ->value('client_id');
-    }
-
-    protected function validateData(): void
-    {
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(Address::class));
-
-        $this->data = $validator->validate();
     }
 }

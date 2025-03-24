@@ -8,14 +8,14 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table): void {
             $table->decimal('cost_per_hour', 10)->nullable()->after('bic');
         });
     }
 
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table): void {
             $table->dropColumn('cost_per_hour');
         });
     }

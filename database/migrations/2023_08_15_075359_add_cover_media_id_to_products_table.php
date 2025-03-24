@@ -11,7 +11,7 @@ return new class() extends Migration
      */
     public function up(): void
     {
-        Schema::table('products', function (Blueprint $table) {
+        Schema::table('products', function (Blueprint $table): void {
             $table->foreignId('cover_media_id')
                 ->nullable()
                 ->after('client_id')
@@ -25,7 +25,7 @@ return new class() extends Migration
      */
     public function down(): void
     {
-        Schema::table('products', function (Blueprint $table) {
+        Schema::table('products', function (Blueprint $table): void {
             $table->dropForeign(['cover_media_id']);
             $table->dropColumn('cover_media_id');
         });

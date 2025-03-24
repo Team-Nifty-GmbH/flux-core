@@ -9,7 +9,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::create('meta', function (Blueprint $table) {
+        Schema::create('meta', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('additional_column_id')
                 ->nullable()
@@ -35,7 +35,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::create('model_has_values', function (Blueprint $table) {
+        Schema::create('model_has_values', function (Blueprint $table): void {
             $table->unsignedBigInteger('model_id');
             $table->unsignedBigInteger('additional_column_id');
             $table->string('value')->nullable();

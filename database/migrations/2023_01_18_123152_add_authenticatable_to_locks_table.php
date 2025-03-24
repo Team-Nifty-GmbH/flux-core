@@ -14,7 +14,7 @@ return new class() extends Migration
     {
         DB::table('locks')->truncate();
 
-        Schema::table('locks', function (Blueprint $table) {
+        Schema::table('locks', function (Blueprint $table): void {
             $table->string('authenticatable_type')->after('model_id');
             $table->unsignedBigInteger('authenticatable_id')->after('authenticatable_type');
             $table->index(['authenticatable_type', 'authenticatable_id']);
@@ -26,7 +26,7 @@ return new class() extends Migration
      */
     public function down(): void
     {
-        Schema::table('locks', function (Blueprint $table) {
+        Schema::table('locks', function (Blueprint $table): void {
             $table->dropMorphs('authenticatable');
         });
     }

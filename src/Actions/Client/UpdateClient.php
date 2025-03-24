@@ -7,18 +7,17 @@ use FluxErp\Models\Client;
 use FluxErp\Rulesets\Client\UpdateClientRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Validator;
 
 class UpdateClient extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateClientRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Client::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateClientRuleset::class;
     }
 
     public function performAction(): Model
@@ -50,13 +49,5 @@ class UpdateClient extends FluxAction
         ) {
             $this->rules['is_default'] .= '|accepted';
         }
-    }
-
-    protected function validateData(): void
-    {
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(Client::class));
-
-        $this->data = $validator->validate();
     }
 }

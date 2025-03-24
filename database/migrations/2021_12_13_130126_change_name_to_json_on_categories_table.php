@@ -9,7 +9,7 @@ class ChangeNameToJsonOnCategoriesTable extends Migration
 {
     public function up(): void
     {
-        Schema::table('categories', function (Blueprint $table) {
+        Schema::table('categories', function (Blueprint $table): void {
             $table->json('name')->change();
         });
 
@@ -20,7 +20,7 @@ class ChangeNameToJsonOnCategoriesTable extends Migration
     {
         $this->rollbackName();
 
-        Schema::table('categories', function (Blueprint $table) {
+        Schema::table('categories', function (Blueprint $table): void {
             $table->string('name')->change();
         });
     }
@@ -29,7 +29,7 @@ class ChangeNameToJsonOnCategoriesTable extends Migration
     {
         $categories = DB::table('categories')->get()->toArray();
 
-        array_walk($categories, function (&$item) {
+        array_walk($categories, function (&$item): void {
             $item->name = json_encode([config('app.locale') => $item->name]);
             $item = (array) $item;
         });
@@ -41,7 +41,7 @@ class ChangeNameToJsonOnCategoriesTable extends Migration
     {
         $categories = DB::table('categories')->get()->toArray();
 
-        array_walk($categories, function (&$item) {
+        array_walk($categories, function (&$item): void {
             $item->name = substr(json_decode($item->name)->{config('app.locale')}, 0, 255);
             $item = (array) $item;
         });

@@ -15,58 +15,24 @@ use Illuminate\Support\Traits\Macroable;
 use InvalidArgumentException;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use Throwable;
 
 class RepeatableManager
 {
     use Macroable;
 
-    protected Collection $repeatable;
-
     protected static array $discoveries = [];
+
+    protected Collection $repeatable;
 
     public function __construct()
     {
         $this->repeatable = Collection::make();
     }
 
-    /**
-     * @throws InvalidArgumentException
-     */
-    public function register(string $name, string $class): void
-    {
-        if (! is_a($class, Repeatable::class, true)) {
-            throw new InvalidArgumentException('The provided class is not repeatable');
-        }
-
-        // Valid repeatable classes are artisan commands, jobs and invokable classes.
-        $type = match (true) {
-            method_exists($class, 'repeatableType')
-                && $class::repeatableType() instanceof RepeatableTypeEnum => $class::repeatableType(),
-            is_a($class, Command::class, true) => RepeatableTypeEnum::Command,
-            $this->isJob($class) => RepeatableTypeEnum::Job,
-            method_exists($class, '__invoke') => RepeatableTypeEnum::Invokable,
-            default => throw new InvalidArgumentException(
-                'The provided class is not a artisan command nor a job nor an invokable class'
-            ),
-        };
-
-        $this->repeatable[$name] = [
-            'name' => $class::name(),
-            'description' => $class::description(),
-            'class' => $class,
-            'type' => $type,
-            'parameters' => $class::parameters(),
-        ];
-    }
-
     public function all(): Collection
     {
         return $this->repeatable;
-    }
-
-    public function get(string $name): ?array
-    {
-        return $this->repeatable->get($name);
     }
 
     public function autoDiscover(?string $directory = null, ?string $namespace = null): void
@@ -111,7 +77,7 @@ class RepeatableManager
             // if the cache is not available, we will iterate over the directory
             try {
                 $repeatables = Cache::get('flux.repeatable.' . $cacheKey);
-            } catch (\Throwable) {
+            } catch (Throwable) {
                 $repeatables = null;
             }
 
@@ -154,15 +120,50 @@ class RepeatableManager
 
             try {
                 Cache::put('flux.repeatable.' . $cacheKey, $repeatables);
-            } catch (\Throwable) {
+            } catch (Throwable) {
                 // Ignore exceptions during cache put
             }
         }
     }
 
+    public function get(string $name): ?array
+    {
+        return $this->repeatable->get($name);
+    }
+
     public function getDiscoveries(): array
     {
         return static::$discoveries;
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     */
+    public function register(string $name, string $class): void
+    {
+        if (! is_a($class, Repeatable::class, true)) {
+            throw new InvalidArgumentException('The provided class is not repeatable');
+        }
+
+        // Valid repeatable classes are artisan commands, jobs and invokable classes.
+        $type = match (true) {
+            method_exists($class, 'repeatableType')
+                && $class::repeatableType() instanceof RepeatableTypeEnum => $class::repeatableType(),
+            is_a($class, Command::class, true) => RepeatableTypeEnum::Command,
+            $this->isJob($class) => RepeatableTypeEnum::Job,
+            method_exists($class, '__invoke') => RepeatableTypeEnum::Invokable,
+            default => throw new InvalidArgumentException(
+                'The provided class is not a artisan command nor a job nor an invokable class'
+            ),
+        };
+
+        $this->repeatable[$name] = [
+            'name' => $class::name(),
+            'description' => $class::description(),
+            'class' => $class,
+            'type' => $type,
+            'parameters' => $class::parameters(),
+        ];
     }
 
     private function isJob(string $class): bool

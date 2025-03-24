@@ -8,7 +8,7 @@ class RenameCategoryIdToParentIdOnCategoriesTable extends Migration
 {
     public function up(): void
     {
-        Schema::table('categories', function (Blueprint $table) {
+        Schema::table('categories', function (Blueprint $table): void {
             $table->dropForeign('project_categories_category_id_foreign');
             $table->dropForeign('project_categories_created_by_foreign');
             $table->dropForeign('project_categories_updated_by_foreign');
@@ -26,7 +26,7 @@ class RenameCategoryIdToParentIdOnCategoriesTable extends Migration
 
     public function down(): void
     {
-        Schema::table('categories', function (Blueprint $table) {
+        Schema::table('categories', function (Blueprint $table): void {
             $table->dropForeign('categories_parent_id_foreign');
             $table->dropIndex('categories_parent_id_foreign');
 

@@ -18,14 +18,6 @@ class TopProductsByRevenue extends ValueList
 {
     use IsTimeFrameAwareWidget;
 
-    protected function getListeners(): array
-    {
-        return [
-            'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
-                . ',.OrderLocked' => 'calculateList',
-        ];
-    }
-
     #[Renderless]
     public function calculateList(): void
     {
@@ -75,6 +67,12 @@ class TopProductsByRevenue extends ValueList
     }
 
     #[Renderless]
+    public function hasMore(): bool
+    {
+        return $this->limit < $this->query()->count();
+    }
+
+    #[Renderless]
     public function showMore(): void
     {
         $this->limit += 10;
@@ -82,10 +80,12 @@ class TopProductsByRevenue extends ValueList
         $this->calculateList();
     }
 
-    #[Renderless]
-    public function hasMore(): bool
+    protected function getListeners(): array
     {
-        return $this->limit < $this->query()->count();
+        return [
+            'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
+                . ',.OrderLocked' => 'calculateList',
+        ];
     }
 
     protected function hasLoadMore(): bool

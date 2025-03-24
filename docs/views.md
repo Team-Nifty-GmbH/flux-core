@@ -73,14 +73,14 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         Event::listen(
-            'tabs.rendering: ' . Contact::class, 
+            'tabs.rendering: ' . Contact::class,
             function (Contact $component) {
                 $component->mergeTabsToRender([
                     // The component name follows the same pattern as the livewire component name
                     // If your Livewire component is used like this: <livewire:contact.custom-tab />
                     // The component name would be contact.custom-tab
                     \FluxErp\Htmlables\TabButton::make('contact.custom-tab')
-                        ->label(__('Custom Tab'))
+                        ->text(__('Custom Tab'))
                         ->icon('icon')
                         ->isLivewireComponent()
                         ->wireModel('contact.id')

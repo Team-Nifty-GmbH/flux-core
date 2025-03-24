@@ -9,14 +9,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 trait HasParentChildRelations
 {
-    protected function getParentKeyAttribute(): string
+    public static function familyTree(): Builder
     {
-        return 'parent_id';
-    }
+        static::addGlobalScope(resolve_static(FamilyTreeScope::class, 'class'));
 
-    public function parent(): BelongsTo
-    {
-        return $this->belongsTo(static::class, $this->getParentKeyAttribute());
+        return static::query();
     }
 
     public function children(): HasMany
@@ -24,10 +21,13 @@ trait HasParentChildRelations
         return $this->hasMany(static::class, $this->getParentKeyAttribute());
     }
 
-    public static function familyTree(): Builder
+    public function parent(): BelongsTo
     {
-        static::addGlobalScope(resolve_static(FamilyTreeScope::class, 'class'));
+        return $this->belongsTo(static::class, $this->getParentKeyAttribute());
+    }
 
-        return static::query();
+    protected function getParentKeyAttribute(): string
+    {
+        return 'parent_id';
     }
 }

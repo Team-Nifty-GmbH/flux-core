@@ -2,6 +2,7 @@
 
 namespace FluxErp\Console\Commands;
 
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Console\ConfirmableTrait;
 use Illuminate\Foundation\Console\KeyGenerateCommand;
@@ -16,19 +17,19 @@ class Init extends Command
     use ConfirmableTrait;
 
     /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Initiate the database with actual production data.';
+
+    /**
      * The name and signature of the console command.
      *
      * @var string
      */
     protected $signature = 'db:init
                             {--filter= : filter which sync should be executed}';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Initiate the database with actual production data.';
 
     /**
      * Create a new command instance.
@@ -133,7 +134,7 @@ class Init extends Command
         if (! empty($filter)) {
             try {
                 $this->call($filter . ':init', []);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $this->error($filter . ' not found');
             }
         } else {
@@ -150,6 +151,22 @@ class Init extends Command
             $this->setEnvVariable($content, 'APP_ENV', 'production');
             $this->writeFile($envFilePath, $content);
         }
+    }
+
+    /**
+     * Read the "key=value" string of a given key from an environment file.
+     * This function returns original "key=value" string and doesn't modify it.
+     *
+     * @return string|null Key=value string or null if the key is not exists.
+     */
+    private function readKeyValuePair(string $envFileContent, string $key): ?string
+    {
+        // Match the given key at the beginning of a line
+        if (preg_match("#^ *{$key} *= *[^\r\n]*$#uimU", $envFileContent, $matches)) {
+            return $matches[0];
+        }
+
+        return null;
     }
 
     /**
@@ -180,22 +197,6 @@ class Init extends Command
 
         // For a new key.
         return [$envFileContent . "\n" . $newPair . "\n", true];
-    }
-
-    /**
-     * Read the "key=value" string of a given key from an environment file.
-     * This function returns original "key=value" string and doesn't modify it.
-     *
-     * @return string|null Key=value string or null if the key is not exists.
-     */
-    private function readKeyValuePair(string $envFileContent, string $key): ?string
-    {
-        // Match the given key at the beginning of a line
-        if (preg_match("#^ *{$key} *= *[^\r\n]*$#uimU", $envFileContent, $matches)) {
-            return $matches[0];
-        }
-
-        return null;
     }
 
     /**

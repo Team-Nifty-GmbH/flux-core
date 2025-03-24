@@ -20,7 +20,7 @@ return new class() extends Migration
      */
     public function down(): void
     {
-        Schema::create('project_category_templates', function (Blueprint $table) {
+        Schema::create('project_category_templates', function (Blueprint $table): void {
             $table->id();
             $table->json('name');
             $table->timestamps();

@@ -18,17 +18,17 @@ class Tickets extends Component
         return view('flux::livewire.portal.ticket.tickets');
     }
 
+    public function closeModal(): void
+    {
+        $this->showTicketModal = false;
+        $this->skipRender();
+    }
+
     public function show(): void
     {
         $this->dispatch('show')->to('portal.ticket.ticket-create');
 
         $this->showTicketModal = true;
-        $this->skipRender();
-    }
-
-    public function closeModal(): void
-    {
-        $this->showTicketModal = false;
         $this->skipRender();
     }
 }

@@ -15,6 +15,33 @@ class MakeForm extends FormCommand
         {--updateAction= }
         {--deleteAction= }';
 
+    public function getStub(): string
+    {
+        if (File::exists(base_path('stubs/livewire.form.stub'))) {
+            return base_path('stubs/livewire.form.stub');
+        }
+
+        return __DIR__ . DIRECTORY_SEPARATOR . 'stubs' . DIRECTORY_SEPARATOR . 'livewire.form.stub';
+    }
+
+    public function replacePlaceholders(&$stub, string $actions, string $imports): static
+    {
+        $searches = [
+            ['{{ actions }}', '{{ imports }}'],
+            ['{{actions}}', '{{imports}}'],
+        ];
+
+        foreach ($searches as $search) {
+            $stub = str_replace(
+                $search,
+                [$actions, $imports],
+                $stub
+            );
+        }
+
+        return $this;
+    }
+
     protected function buildClass($name): string
     {
         $stub = $this->files->get($this->getStub());
@@ -47,32 +74,5 @@ class MakeForm extends FormCommand
                 $imports
             )
             ->replaceClass($stub, $name);
-    }
-
-    public function replacePlaceholders(&$stub, string $actions, string $imports): static
-    {
-        $searches = [
-            ['{{ actions }}', '{{ imports }}'],
-            ['{{actions}}', '{{imports}}'],
-        ];
-
-        foreach ($searches as $search) {
-            $stub = str_replace(
-                $search,
-                [$actions, $imports],
-                $stub
-            );
-        }
-
-        return $this;
-    }
-
-    public function getStub(): string
-    {
-        if (File::exists(base_path('stubs/livewire.form.stub'))) {
-            return base_path('stubs/livewire.form.stub');
-        }
-
-        return __DIR__ . DIRECTORY_SEPARATOR . 'stubs' . DIRECTORY_SEPARATOR . 'livewire.form.stub';
     }
 }

@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class PluginsTest extends TestCase
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(Plugins::class)
             ->assertStatus(200);

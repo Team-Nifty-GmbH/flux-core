@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('orders', function (Blueprint $table) {
+        Schema::table('orders', function (Blueprint $table): void {
             $table->string('iban')->nullable()->after('commission');
             $table->string('account_holder')->nullable()->after('iban');
             $table->string('bank_name')->nullable()->after('account_holder');
@@ -20,7 +20,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('orders', function (Blueprint $table) {
+        Schema::table('orders', function (Blueprint $table): void {
             $table->dropColumn(['iban', 'account_holder', 'bank_name', 'bic']);
 
             $table->unique(['invoice_number', 'client_id']);

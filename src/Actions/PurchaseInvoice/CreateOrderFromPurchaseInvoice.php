@@ -11,21 +11,24 @@ use FluxErp\Models\Order;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PurchaseInvoice;
 use FluxErp\Rulesets\PurchaseInvoice\CreateOrderFromPurchaseInvoiceRuleset;
+use Illuminate\Http\Response;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 
 class CreateOrderFromPurchaseInvoice extends FluxAction
 {
-    public ?PurchaseInvoice $purchaseInvoice;
+    public static ?int $successCode = Response::HTTP_CREATED;
 
-    protected function getRulesets(): string|array
-    {
-        return CreateOrderFromPurchaseInvoiceRuleset::class;
-    }
+    public ?PurchaseInvoice $purchaseInvoice;
 
     public static function models(): array
     {
         return [PurchaseInvoice::class, Order::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateOrderFromPurchaseInvoiceRuleset::class;
     }
 
     public function performAction(): Order

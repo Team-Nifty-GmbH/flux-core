@@ -2,6 +2,7 @@
 
 namespace FluxErp\Assets;
 
+use Exception;
 use FluxErp\Helpers\Vite;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Arr;
@@ -9,7 +10,6 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Macroable;
-
 use function Livewire\invade;
 
 class AssetManager implements Htmlable
@@ -23,6 +23,34 @@ class AssetManager implements Htmlable
     public function __construct()
     {
         static::$assets = collect();
+    }
+
+    public static function clear(): void
+    {
+        static::$assets = collect();
+    }
+
+    public static function path(string $filename): ?string
+    {
+        $asset = static::$assets->first(
+            fn ($asset) => data_get($asset, 'name') === $filename || data_get($asset, 'alias') === $filename
+        );
+
+        return data_get($asset ?? [], 'path');
+    }
+
+    public function all(): Collection
+    {
+        return static::$assets;
+    }
+
+    public function register(string $name, string $path, array $attributes): void
+    {
+        if (! is_file($path) || ! file_exists($path)) {
+            throw new Exception("Unable to locate asset file: {$path}");
+        }
+
+        static::$assets[$name] = array_merge($attributes, ['path' => $path, 'name' => $name]);
     }
 
     public function toHtml(string|array|null $items = null): HtmlString
@@ -50,15 +78,6 @@ class AssetManager implements Htmlable
         return new HtmlString($html);
     }
 
-    public function register(string $name, string $path, array $attributes): void
-    {
-        if (! is_file($path) || ! file_exists($path)) {
-            throw new \Exception("Unable to locate asset file: {$path}");
-        }
-
-        static::$assets[$name] = array_merge($attributes, ['path' => $path, 'name' => $name]);
-    }
-
     public function unregister(string $name): void
     {
         static::$assets->forget($name);
@@ -67,25 +86,6 @@ class AssetManager implements Htmlable
     public function url(string $path, ?bool $secure = null): string
     {
         return app('url')->asset(Str::start($path, 'flux-assets/'), $secure);
-    }
-
-    public function all(): Collection
-    {
-        return static::$assets;
-    }
-
-    public static function path(string $filename): ?string
-    {
-        $asset = static::$assets->first(
-            fn ($asset) => data_get($asset, 'name') === $filename || data_get($asset, 'alias') === $filename
-        );
-
-        return data_get($asset ?? [], 'path');
-    }
-
-    public static function clear(): void
-    {
-        static::$assets = collect();
     }
 
     public function vite(string $path, string|array $files, string $manifestFilename = 'manifest.json'): void

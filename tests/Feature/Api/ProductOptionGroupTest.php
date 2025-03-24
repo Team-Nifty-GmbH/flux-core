@@ -7,20 +7,17 @@ use FluxErp\Models\Product;
 use FluxErp\Models\ProductOption;
 use FluxErp\Models\ProductOptionGroup;
 use FluxErp\Tests\Feature\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
 class ProductOptionGroupTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
-    private Collection $productOptions;
+    private array $permissions;
 
     private Collection $productOptionGroups;
 
-    private array $permissions;
+    private Collection $productOptions;
 
     protected function setUp(): void
     {
@@ -41,46 +38,7 @@ class ProductOptionGroupTest extends BaseSetup
         ];
     }
 
-    public function test_get_product_option_group()
-    {
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/product-option-groups/'
-            . $this->productOptionGroups[0]->id);
-        $response->assertStatus(200);
-
-        $productOptionGroup = json_decode($response->getContent())->data;
-
-        $this->assertEquals($this->productOptionGroups[0]->id, $productOptionGroup->id);
-        $this->assertEquals($this->productOptionGroups[0]->name, $productOptionGroup->name);
-    }
-
-    public function test_get_product_option_group_product_option_group_not_found()
-    {
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/product-option-groups/'
-            . $this->productOptionGroups[2]->id + 100);
-        $response->assertStatus(404);
-    }
-
-    public function test_get_product_option_groups()
-    {
-        $this->user->givePermissionTo($this->permissions['index']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/product-option-groups');
-        $response->assertStatus(200);
-
-        $productOptionGroups = json_decode($response->getContent())->data;
-
-        $this->assertEquals($this->productOptionGroups[0]->id, $productOptionGroups->data[0]->id);
-        $this->assertEquals($this->productOptionGroups[0]->name, $productOptionGroups->data[0]->name);
-    }
-
-    public function test_create_product_option_group()
+    public function test_create_product_option_group(): void
     {
         $productOptionGroup = [
             'name' => Str::random(),
@@ -101,7 +59,7 @@ class ProductOptionGroupTest extends BaseSetup
         $this->assertEquals($productOptionGroup['name'], $dbProductOptionGroup->name);
     }
 
-    public function test_create_product_option_group_validation_fails()
+    public function test_create_product_option_group_validation_fails(): void
     {
         $productOptionGroup = [
             'name' => 123,
@@ -114,7 +72,84 @@ class ProductOptionGroupTest extends BaseSetup
         $response->assertStatus(422);
     }
 
-    public function test_update_product_option_group()
+    public function test_delete_product_option_group(): void
+    {
+        $this->user->givePermissionTo($this->permissions['delete']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)
+            ->delete('/api/product-option-groups/' . $this->productOptionGroups[0]->id);
+        $response->assertStatus(204);
+
+        $this->assertFalse(ProductOptionGroup::query()->whereKey($this->productOptionGroups[0]->id)->exists());
+    }
+
+    public function test_delete_product_option_group_group_option_has_product(): void
+    {
+        $product = Product::factory()
+            ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+            ->create();
+
+        $product->productOptions()->attach($this->productOptions[1]->id);
+
+        $this->user->givePermissionTo($this->permissions['delete']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)
+            ->delete('/api/product-option-groups/' . $this->productOptionGroups[1]->id);
+        $response->assertStatus(423);
+    }
+
+    public function test_delete_product_option_group_product_option_group_not_found(): void
+    {
+        $this->user->givePermissionTo($this->permissions['delete']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)
+            ->delete('/api/product-option-groups/' . ++$this->productOptionGroups[2]->id);
+        $response->assertStatus(404);
+    }
+
+    public function test_get_product_option_group(): void
+    {
+        $this->user->givePermissionTo($this->permissions['show']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->get('/api/product-option-groups/'
+            . $this->productOptionGroups[0]->id);
+        $response->assertStatus(200);
+
+        $productOptionGroup = json_decode($response->getContent())->data;
+
+        $this->assertEquals($this->productOptionGroups[0]->id, $productOptionGroup->id);
+        $this->assertEquals($this->productOptionGroups[0]->name, $productOptionGroup->name);
+    }
+
+    public function test_get_product_option_group_product_option_group_not_found(): void
+    {
+        $this->user->givePermissionTo($this->permissions['show']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->get('/api/product-option-groups/'
+            . $this->productOptionGroups[2]->id + 100);
+        $response->assertStatus(404);
+    }
+
+    public function test_get_product_option_groups(): void
+    {
+        $this->user->givePermissionTo($this->permissions['index']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->get('/api/product-option-groups');
+        $response->assertStatus(200);
+
+        $productOptionGroups = json_decode($response->getContent())->data;
+
+        $this->assertEquals($this->productOptionGroups[0]->id, $productOptionGroups->data[0]->id);
+        $this->assertEquals($this->productOptionGroups[0]->name, $productOptionGroups->data[0]->name);
+    }
+
+    public function test_update_product_option_group(): void
     {
         $productOptionGroup = [
             'id' => $this->productOptionGroups[0]->id,
@@ -137,7 +172,7 @@ class ProductOptionGroupTest extends BaseSetup
         $this->assertEquals($productOptionGroup['name'], $dbProductOptionGroup->name);
     }
 
-    public function test_update_product_option_group_validation_fails()
+    public function test_update_product_option_group_validation_fails(): void
     {
         $productOptionGroup = [
             'id' => $this->productOptionGroups[0]->id,
@@ -148,43 +183,5 @@ class ProductOptionGroupTest extends BaseSetup
 
         $response = $this->actingAs($this->user)->put('/api/product-option-groups', $productOptionGroup);
         $response->assertStatus(422);
-    }
-
-    public function test_delete_product_option_group()
-    {
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)
-            ->delete('/api/product-option-groups/' . $this->productOptionGroups[0]->id);
-        $response->assertStatus(204);
-
-        $this->assertFalse(ProductOptionGroup::query()->whereKey($this->productOptionGroups[0]->id)->exists());
-    }
-
-    public function test_delete_product_option_group_product_option_group_not_found()
-    {
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)
-            ->delete('/api/product-option-groups/' . ++$this->productOptionGroups[2]->id);
-        $response->assertStatus(404);
-    }
-
-    public function test_delete_product_option_group_group_option_has_product()
-    {
-        $product = Product::factory()
-            ->hasAttached(factory: $this->dbClient, relationship: 'clients')
-            ->create();
-
-        $product->productOptions()->attach($this->productOptions[1]->id);
-
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)
-            ->delete('/api/product-option-groups/' . $this->productOptionGroups[1]->id);
-        $response->assertStatus(207);
     }
 }

@@ -19,40 +19,6 @@ class Composer extends BaseComposer
         }
     }
 
-    /**
-     * @throws \Symfony\Component\Process\Exception\ProcessFailedException
-     */
-    public function search(string $search, ?string $composerBinary = null): array
-    {
-        if (! $search) {
-            return [];
-        }
-
-        $command = [
-            ...$this->findComposer($composerBinary),
-            'search',
-            '--format=json',
-            $search,
-        ];
-
-        return json_decode($this->getProcess($command)->mustRun()->getOutput(), true);
-    }
-
-    /**
-     * @throws \Symfony\Component\Process\Exception\ProcessFailedException
-     */
-    public function show(string $package, ?string $composerBinary = null): array
-    {
-        $command = [
-            ...$this->findComposer($composerBinary),
-            'show',
-            '--format=json',
-            $package,
-        ];
-
-        return json_decode($this->getProcess($command)->mustRun()->getOutput(), true);
-    }
-
     public function addRepository(ComposerRepositoryTypeEnum $type, string $url, string $name): void
     {
         $this->modify(function ($composer) use ($type, $url, $name) {
@@ -63,52 +29,6 @@ class Composer extends BaseComposer
 
             return $composer;
         });
-    }
-
-    public function removeRepository(string $name): void
-    {
-        $this->modify(function ($composer) use ($name) {
-            unset($composer['repositories'][$name]);
-
-            return $composer;
-        });
-    }
-
-    /**
-     * @throws \Symfony\Component\Process\Exception\ProcessFailedException
-     */
-    public function showAvailable(bool $withPackagist = false, ?bool $composerBinary = null): array
-    {
-        $command = [
-            ...$this->findComposer($composerBinary),
-            'show',
-            '--available',
-            '--format=json',
-        ];
-
-        if (! $withPackagist) {
-            // disable packagist
-            $disableCommand = [
-                ...$this->findComposer($composerBinary),
-                'config',
-                'repo.packagist',
-                'false',
-            ];
-            $this->getProcess($disableCommand)->mustRun();
-        }
-
-        $available = json_decode($this->getProcess($command)->mustRun()->getOutput(), true);
-
-        // enable packagist
-        $enableCommand = [
-            ...$this->findComposer($composerBinary),
-            'config',
-            '--unset',
-            'repo.packagist',
-        ];
-        $this->getProcess($enableCommand)->mustRun();
-
-        return $available;
     }
 
     /**
@@ -124,10 +44,10 @@ class Composer extends BaseComposer
             'show',
             '--format=json',
         ])
-            ->when(! $dev, function ($command) {
+            ->when(! $dev, function ($command): void {
                 $command->push('--no-dev');
             })
-            ->when($direct, function ($command) {
+            ->when($direct, function ($command): void {
                 $command->push('--direct');
             })
             ->all();
@@ -174,15 +94,95 @@ class Composer extends BaseComposer
             '--direct',
             '--format=json',
         ])
-            ->when(! $dev, function ($command) {
+            ->when(! $dev, function ($command): void {
                 $command->push('--no-dev');
             })
-            ->when($direct, function ($command) {
+            ->when($direct, function ($command): void {
                 $command->push('--direct');
             })
             ->all();
 
         return json_decode($this->getProcess($command)->mustRun()->getOutput(), true);
+    }
+
+    public function removeRepository(string $name): void
+    {
+        $this->modify(function ($composer) use ($name) {
+            unset($composer['repositories'][$name]);
+
+            return $composer;
+        });
+    }
+
+    /**
+     * @throws \Symfony\Component\Process\Exception\ProcessFailedException
+     */
+    public function search(string $search, ?string $composerBinary = null): array
+    {
+        if (! $search) {
+            return [];
+        }
+
+        $command = [
+            ...$this->findComposer($composerBinary),
+            'search',
+            '--format=json',
+            $search,
+        ];
+
+        return json_decode($this->getProcess($command)->mustRun()->getOutput(), true);
+    }
+
+    /**
+     * @throws \Symfony\Component\Process\Exception\ProcessFailedException
+     */
+    public function show(string $package, ?string $composerBinary = null): array
+    {
+        $command = [
+            ...$this->findComposer($composerBinary),
+            'show',
+            '--format=json',
+            $package,
+        ];
+
+        return json_decode($this->getProcess($command)->mustRun()->getOutput(), true);
+    }
+
+    /**
+     * @throws \Symfony\Component\Process\Exception\ProcessFailedException
+     */
+    public function showAvailable(bool $withPackagist = false, ?bool $composerBinary = null): array
+    {
+        $command = [
+            ...$this->findComposer($composerBinary),
+            'show',
+            '--available',
+            '--format=json',
+        ];
+
+        if (! $withPackagist) {
+            // disable packagist
+            $disableCommand = [
+                ...$this->findComposer($composerBinary),
+                'config',
+                'repo.packagist',
+                'false',
+            ];
+            $this->getProcess($disableCommand)->mustRun();
+        }
+
+        $available = json_decode($this->getProcess($command)->mustRun()->getOutput(), true);
+
+        // enable packagist
+        $enableCommand = [
+            ...$this->findComposer($composerBinary),
+            'config',
+            '--unset',
+            'repo.packagist',
+        ];
+        $this->getProcess($enableCommand)->mustRun();
+
+        return $available;
     }
 
     /**
@@ -194,7 +194,7 @@ class Composer extends BaseComposer
             ...$this->findComposer($composerBinary),
             'update',
         ])
-            ->when($packages, function ($command) use ($packages) {
+            ->when($packages, function ($command) use ($packages): void {
                 $packages = is_array($packages) ? implode(' ', $packages) : $packages;
 
                 $command->push($packages);

@@ -8,7 +8,7 @@ class CreatePrintDataTable extends Migration
 {
     public function up(): void
     {
-        Schema::create('print_data', function (Blueprint $table) {
+        Schema::create('print_data', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
             $table->nullableMorphs('model');

@@ -8,14 +8,14 @@ use FluxErp\Rulesets\ProductCrossSelling\DeleteProductCrossSellingRuleset;
 
 class DeleteProductCrossSelling extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeleteProductCrossSellingRuleset::class;
-    }
-
     public static function models(): array
     {
         return [ProductCrossSelling::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeleteProductCrossSellingRuleset::class;
     }
 
     public function performAction(): bool

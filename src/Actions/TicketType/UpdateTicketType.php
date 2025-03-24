@@ -7,18 +7,17 @@ use FluxErp\Models\TicketType;
 use FluxErp\Rulesets\TicketType\UpdateTicketTypeRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Validator;
 
 class UpdateTicketType extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateTicketTypeRuleset::class;
-    }
-
     public static function models(): array
     {
         return [TicketType::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateTicketTypeRuleset::class;
     }
 
     public function performAction(): Model
@@ -37,13 +36,5 @@ class UpdateTicketType extends FluxAction
         }
 
         return $ticketType->withoutRelations()->fresh();
-    }
-
-    protected function validateData(): void
-    {
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(TicketType::class));
-
-        $this->data = $validator->validate();
     }
 }

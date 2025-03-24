@@ -18,13 +18,13 @@ class CreateTaskModal extends Component
 {
     use Actions;
 
-    public ?string $modelType = null;
+    public array $availableStates = [];
 
     public ?int $modelId = null;
 
-    public TaskForm $task;
+    public ?string $modelType = null;
 
-    public array $availableStates = [];
+    public TaskForm $task;
 
     public function mount(): void
     {
@@ -42,6 +42,22 @@ class CreateTaskModal extends Component
                 ];
             })
             ->toArray();
+    }
+
+    public function render(): View|Factory|Application
+    {
+        return view('flux::livewire.features.create-task-modal');
+    }
+
+    #[Renderless]
+    public function resetTask(): void
+    {
+        $this->task->reset();
+
+        $this->task->additionalColumns = array_fill_keys(
+            resolve_static(Task::class, 'additionalColumnsQuery')->pluck('name')?->toArray() ?? [],
+            null
+        );
     }
 
     public function save(): bool
@@ -65,21 +81,5 @@ class CreateTaskModal extends Component
         $this->task->reset();
 
         return true;
-    }
-
-    public function render(): View|Factory|Application
-    {
-        return view('flux::livewire.features.create-task-modal');
-    }
-
-    #[Renderless]
-    public function resetTask(): void
-    {
-        $this->task->reset();
-
-        $this->task->additionalColumns = array_fill_keys(
-            resolve_static(Task::class, 'additionalColumnsQuery')->pluck('name')?->toArray() ?? [],
-            null
-        );
     }
 }

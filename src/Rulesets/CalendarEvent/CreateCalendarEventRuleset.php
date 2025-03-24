@@ -14,6 +14,16 @@ class CreateCalendarEventRuleset extends FluxRuleset
 {
     protected static ?string $model = CalendarEvent::class;
 
+    public static function getRules(): array
+    {
+        return array_merge(
+            parent::getRules(),
+            resolve_static(RepeatRuleset::class, 'getRules'),
+            resolve_static(InvitedAddressRuleset::class, 'getRules'),
+            resolve_static(InvitedRuleset::class, 'getRules')
+        );
+    }
+
     public function rules(): array
     {
         return [
@@ -44,15 +54,5 @@ class CreateCalendarEventRuleset extends FluxRuleset
             'excluded' => 'array|nullable',
             'excluded.*' => 'date',
         ];
-    }
-
-    public static function getRules(): array
-    {
-        return array_merge(
-            parent::getRules(),
-            resolve_static(RepeatRuleset::class, 'getRules'),
-            resolve_static(InvitedAddressRuleset::class, 'getRules'),
-            resolve_static(InvitedRuleset::class, 'getRules')
-        );
     }
 }

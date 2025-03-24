@@ -13,36 +13,40 @@
                 labelReject: '{{ __('Undo') }}',
             },
             {
-                uploadDisabled:'{{ __('Upload not allowed - Read Only') }}',
-            }
+                uploadDisabled: '{{ __('Upload not allowed - Read Only') }}',
+            },
         ),
         selectionProxy: {},
         selection: {},
         countChildren() {
-            return this.selectionProxy?.children?.length;
+            return this.selectionProxy?.children?.length
         },
         files: [],
         sticky: false,
         removeUpload(index) {
-            this.files.splice(index, 1);
-            this.updateInputValue(this.$refs.fileUpload);
+            this.files.splice(index, 1)
+            this.updateInputValue(this.$refs.fileUpload)
         },
         updateInputValue(ref) {
-            ref.value = '';
-            const dataTransfer = new DataTransfer();
+            ref.value = ''
+            const dataTransfer = new DataTransfer()
             this.files.forEach((file) => {
-            const fileInput = new File([file], file.name);
-                dataTransfer.items.add(fileInput);
-            });
-            ref.files = dataTransfer.files;
-        }
+                const fileInput = new File([file], file.name)
+                dataTransfer.items.add(fileInput)
+            })
+            ref.files = dataTransfer.files
+        },
     }"
 >
     <div class="flex space-x-3">
-        <div>
-            <div class="shrink-0 inline-flex items-center justify-center overflow-hidden rounded-full border border-gray-200 dark:border-secondary-500">
-                <img class="shrink-0 object-cover object-center rounded-full w-10 h-10 text-base" x-bind:src="avatarUrl" />
-            </div>
+        <div
+            x-init="
+                $nextTick(() => {
+                    $el.querySelector('img').src = avatarUrl
+                })
+            "
+        >
+            <x-avatar image="{{ route('icons', ['name' => 'user']) }}" xl />
         </div>
         <div class="min-w-0 flex-1">
             <div x-ref="upload">
@@ -52,31 +56,39 @@
                 <div class="grow pt-4">
                     @canAction(\FluxErp\Actions\Media\UploadMedia::class)
                         <div class="flex flex-col items-end">
-                            <div class="w-full mb-4">
-                                <input x-init="loadFilePond(countChildren)" id="filepond-drop" type="file"/>
+                            <div class="mb-4 w-full">
+                                <input
+                                    x-init="loadFilePond(countChildren)"
+                                    id="filepond-drop"
+                                    type="file"
+                                />
                             </div>
                         </div>
-                    @endCanAction
+                    @endcanAction
                 </div>
                 <div class="flex flex-wrap justify-end">
-                    <div class="flex items-center justify-end space-x-4">
-                        <x-toggle x-ref="sticky" md :left-label="__('Sticky')" />
+                    <div class="flex items-center justify-end gap-x-2">
+                        <x-toggle
+                            x-ref="sticky"
+                            :label="__('Sticky')"
+                            position="left"
+                        />
                         <x-button
+                            color="indigo"
                             x-on:click="saveComment($refs.textarea, tempFilesId, $refs.sticky, false, typeof comment !== 'undefined' ? comment : null).then((success) => {if(success) clearPond();})"
-                            primary
                             spinner="saveComment"
                             wire:loading.attr="disabled"
                             x-bind:disabled="isLoadingFiles.length > 0"
-                            :label="auth()->user()?->getMorphClass() === morph_alias(\FluxErp\Models\User::class) && $this->isPublic === true ? __('Save internal') : __('Save')"
+                            :text="auth()->user()?->getMorphClass() === morph_alias(\FluxErp\Models\User::class) && $this->isPublic === true ? __('Save internal') : __('Save')"
                         />
-                        @if(auth()->user()?->getMorphClass() === morph_alias(\FluxErp\Models\User::class) && $this->isPublic === true)
+                        @if (auth()->user()?->getMorphClass() === morph_alias(\FluxErp\Models\User::class) && $this->isPublic === true)
                             <x-button
+                                color="indigo"
                                 x-on:click="saveComment($refs.textarea, tempFilesId, $refs.sticky, false, typeof comment !== 'undefined' ? comment : null).then((success) => {if(success) clearPond();})"
-                                primary
                                 spinner="saveComment"
                                 x-bind:disabled="isLoadingFiles.length > 0"
                                 wire:loading.attr="disabled"
-                                :label="__('Answer to customer')"
+                                :text="__('Answer to customer')"
                             />
                         @endif
                     </div>

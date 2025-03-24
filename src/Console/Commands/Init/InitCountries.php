@@ -9,9 +9,9 @@ use Illuminate\Console\Command;
 
 class InitCountries extends Command
 {
-    protected $signature = 'init:countries';
-
     protected $description = 'Initiates Countries and fills table with data.';
+
+    protected $signature = 'init:countries';
 
     public function handle(): void
     {

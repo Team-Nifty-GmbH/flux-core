@@ -17,7 +17,7 @@ class ContactBankConnection extends FluxModel
 
     protected static function booted(): void
     {
-        static::saving(function (ContactBankConnection $model) {
+        static::saving(function (ContactBankConnection $model): void {
             if ($model->isDirty('iban')) {
                 $model->iban = str_replace(' ', '', strtoupper($model->iban));
             }

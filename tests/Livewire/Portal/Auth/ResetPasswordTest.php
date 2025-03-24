@@ -15,13 +15,7 @@ use Livewire\Livewire;
 
 class ResetPasswordTest extends BaseSetup
 {
-    public function test_renders_successfully()
-    {
-        Livewire::test(ResetPassword::class)
-            ->assertStatus(200);
-    }
-
-    public function test_can_reset_password()
+    public function test_can_reset_password(): void
     {
         /** @var Address $baseAddress */
         $baseAddress = Contact::factory()
@@ -59,5 +53,11 @@ class ResetPasswordTest extends BaseSetup
         $this->assertEquals($baseAddress->email, $updatedAddress->email);
         $this->assertEquals($baseAddress->email_primary, $updatedAddress->email_primary);
         $this->assertNotEquals($baseAddress->password, $updatedAddress->password);
+    }
+
+    public function test_renders_successfully(): void
+    {
+        Livewire::test(ResetPassword::class)
+            ->assertStatus(200);
     }
 }

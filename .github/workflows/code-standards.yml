@@ -2,7 +2,7 @@ name: fix code styling
 
 on:
   push:
-    branches: [ dev ]
+    branches: [dev]
 
 jobs:
   lint:

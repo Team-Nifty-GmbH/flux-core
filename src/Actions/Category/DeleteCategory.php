@@ -9,14 +9,14 @@ use Illuminate\Validation\ValidationException;
 
 class DeleteCategory extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeleteCategoryRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Category::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeleteCategoryRuleset::class;
     }
 
     public function performAction(): ?bool
@@ -49,7 +49,9 @@ class DeleteCategory extends FluxAction
         }
 
         if ($errors) {
-            throw ValidationException::withMessages($errors)->errorBag('deleteCategory');
+            throw ValidationException::withMessages($errors)
+                ->errorBag('deleteCategory')
+                ->status(423);
         }
     }
 }

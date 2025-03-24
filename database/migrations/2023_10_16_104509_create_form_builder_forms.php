@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::create('form_builder_forms', function (Blueprint $table) {
+        Schema::create('form_builder_forms', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
             $table->bigInteger('user_id')->nullable()->unsigned();

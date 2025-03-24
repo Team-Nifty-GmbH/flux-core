@@ -10,14 +10,14 @@ use Illuminate\Validation\ValidationException;
 
 class DeleteComment extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeleteCommentRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Comment::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeleteCommentRuleset::class;
     }
 
     public function performAction(): ?bool
@@ -40,7 +40,8 @@ class DeleteComment extends FluxAction
         if (! Auth::user()->hasRole('Super Admin') && ! $comment->getCreatedBy()?->is(Auth::user())) {
             throw ValidationException::withMessages([
                 'comment' => [__('Cant delete other users comments.')],
-            ]);
+            ])
+                ->status(403);
         }
     }
 }

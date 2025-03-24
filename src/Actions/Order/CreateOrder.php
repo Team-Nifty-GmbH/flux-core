@@ -16,19 +16,18 @@ use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\Order\CreateOrderRuleset;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 class CreateOrder extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateOrderRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Order::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateOrderRuleset::class;
     }
 
     public function performAction(): Order
@@ -175,10 +174,7 @@ class CreateOrder extends FluxAction
 
     protected function validateData(): void
     {
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(Order::class));
-
-        $this->data = $validator->validate();
+        parent::validateData();
 
         if ($this->data['invoice_number'] ?? false) {
             $isPurchase = resolve_static(OrderType::class, 'query')

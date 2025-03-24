@@ -8,7 +8,7 @@ class CreateDocumentTypesTable extends Migration
 {
     public function up(): void
     {
-        Schema::create('document_types', function (Blueprint $table) {
+        Schema::create('document_types', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
             $table->unsignedBigInteger('client_id');

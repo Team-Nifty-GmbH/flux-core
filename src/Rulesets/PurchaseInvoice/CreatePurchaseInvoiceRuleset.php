@@ -19,6 +19,16 @@ class CreatePurchaseInvoiceRuleset extends FluxRuleset
 {
     protected static ?string $model = PurchaseInvoice::class;
 
+    public static function getRules(): array
+    {
+        return array_merge(
+            parent::getRules(),
+            resolve_static(BankConnectionRuleset::class, 'getRules'),
+            resolve_static(PurchaseInvoicePositionRuleset::class, 'getRules'),
+            resolve_static(TagRuleset::class, 'getRules'),
+        );
+    }
+
     public function rules(): array
     {
         return [
@@ -74,15 +84,5 @@ class CreatePurchaseInvoiceRuleset extends FluxRuleset
             ],
             'media_type' => ['sometimes', app(MediaUploadType::class)],
         ];
-    }
-
-    public static function getRules(): array
-    {
-        return array_merge(
-            parent::getRules(),
-            resolve_static(BankConnectionRuleset::class, 'getRules'),
-            resolve_static(PurchaseInvoicePositionRuleset::class, 'getRules'),
-            resolve_static(TagRuleset::class, 'getRules'),
-        );
     }
 }

@@ -6,8 +6,6 @@ use FluxErp\Models\Activity;
 
 class ActivityLogList extends BaseDataTable
 {
-    protected string $model = Activity::class;
-
     public array $enabledCols = [
         'causer_type',
         'causer_id',
@@ -17,4 +15,6 @@ class ActivityLogList extends BaseDataTable
         'description',
         'created_at',
     ];
+
+    protected string $model = Activity::class;
 }

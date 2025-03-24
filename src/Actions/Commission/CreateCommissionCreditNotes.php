@@ -25,14 +25,14 @@ class CreateCommissionCreditNotes extends DispatchableFluxAction
 
     protected ?int $vatRateId = null;
 
-    protected function getRulesets(): string|array
-    {
-        return CreateCommissionCreditNotesRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Commission::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateCommissionCreditNotesRuleset::class;
     }
 
     public function performAction(): OrderCollection

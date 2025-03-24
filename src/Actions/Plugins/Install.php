@@ -3,6 +3,7 @@
 namespace FluxErp\Actions\Plugins;
 
 use FluxErp\Rulesets\Plugin\InstallPluginRuleset;
+use RuntimeException;
 
 class Install extends BasePluginAction
 {
@@ -22,12 +23,12 @@ class Install extends BasePluginAction
             ['--no-progress', '--no-interaction', '--no-ansi'],
             $this->data['options'] ?? []
         );
-        $run = $composer->requirePackages($command, false, function ($type, $buffer) use (&$output) {
+        $run = $composer->requirePackages($command, false, function ($type, $buffer) use (&$output): void {
             $output .= $buffer;
         });
 
         if (! $run) {
-            throw new \RuntimeException($output);
+            throw new RuntimeException($output);
         }
 
         if ($this->data['migrate'] ?? true) {

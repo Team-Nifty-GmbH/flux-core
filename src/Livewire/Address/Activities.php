@@ -8,8 +8,8 @@ use Livewire\Attributes\Modelable;
 
 class Activities extends BaseActivities
 {
-    public string $modelType = Address::class;
-
     #[Modelable]
     public int $modelId;
+
+    public string $modelType = Address::class;
 }

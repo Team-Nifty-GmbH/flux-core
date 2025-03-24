@@ -9,14 +9,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class UpdateUnit extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateUnitRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Unit::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateUnitRuleset::class;
     }
 
     public function performAction(): Model

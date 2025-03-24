@@ -8,9 +8,9 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class PostalAddressRuleset extends FluxRuleset
 {
-    protected static ?string $model = Address::class;
-
     protected static bool $addAdditionalColumnRules = false;
+
+    protected static ?string $model = Address::class;
 
     public function rules(): array
     {

@@ -19,17 +19,17 @@ class ProjectTaskList extends BaseTaskList
 {
     use Actions, WithTabs;
 
-    protected string $view = 'flux::livewire.project.project-task-list';
-
-    public string $taskTab = 'task.general';
-
-    public TaskForm $task;
-
     public array $availableStates = [];
+
+    public bool $hasNoRedirect = true;
 
     public ?int $projectId;
 
-    public bool $hasNoRedirect = true;
+    public TaskForm $task;
+
+    public string $taskTab = 'task.general';
+
+    protected string $view = 'flux::livewire.project.project-task-list';
 
     public function mount(): void
     {
@@ -56,28 +56,30 @@ class ProjectTaskList extends BaseTaskList
     {
         return [
             DataTableButton::make()
-                ->label(__('New'))
-                ->color('primary')
+                ->text(__('New'))
+                ->color('indigo')
                 ->attributes([
                     'x-on:click' => '$wire.edit()',
                 ]),
         ];
     }
 
-    #[Renderless]
-    public function getTabs(): array
+    public function delete(): bool
     {
-        return [
-            TabButton::make('task.general')->label(__('General')),
-            TabButton::make('task.comments')->label(__('Comments'))
-                ->attributes([
-                    'x-bind:disabled' => '! $wire.task.id',
-                ]),
-            TabButton::make('task.media')->label(__('Media'))
-                ->attributes([
-                    'x-bind:disabled' => '! $wire.task.id',
-                ]),
-        ];
+        try {
+            DeleteTask::make($this->task->toArray())
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
     }
 
     public function edit(Task $task): void
@@ -96,8 +98,24 @@ class ProjectTaskList extends BaseTaskList
         );
 
         $this->js(<<<'JS'
-            $openModal('task-form-modal');
+            $modalOpen('task-form-modal');
         JS);
+    }
+
+    #[Renderless]
+    public function getTabs(): array
+    {
+        return [
+            TabButton::make('task.general')->text(__('General')),
+            TabButton::make('task.comments')->text(__('Comments'))
+                ->attributes([
+                    'x-bind:disabled' => '! $wire.task.id',
+                ]),
+            TabButton::make('task.media')->text(__('Media'))
+                ->attributes([
+                    'x-bind:disabled' => '! $wire.task.id',
+                ]),
+        ];
     }
 
     #[Renderless]
@@ -105,24 +123,6 @@ class ProjectTaskList extends BaseTaskList
     {
         try {
             $this->task->save();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
-    }
-
-    public function delete(): bool
-    {
-        try {
-            DeleteTask::make($this->task->toArray())
-                ->checkPermission()
-                ->validate()
-                ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 

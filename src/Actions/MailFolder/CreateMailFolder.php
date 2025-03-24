@@ -10,14 +10,14 @@ class CreateMailFolder extends FluxAction
 {
     protected static bool $hasPermission = false;
 
-    protected function getRulesets(): string|array
-    {
-        return CreateMailFolderRuleset::class;
-    }
-
     public static function models(): array
     {
         return [MailFolder::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateMailFolderRuleset::class;
     }
 
     public function performAction(): MailFolder

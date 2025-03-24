@@ -14,12 +14,9 @@ use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Transaction;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class TransactionTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -79,7 +76,14 @@ class TransactionTest extends BaseSetup
         }
     }
 
-    public function test_transactions_page()
+    public function test_transactions_no_user(): void
+    {
+        $this->get('/accounting/transactions')
+            ->assertStatus(302)
+            ->assertRedirect(route('login'));
+    }
+
+    public function test_transactions_page(): void
     {
         $this->user->givePermissionTo(Permission::findOrCreate('accounting.transactions.get', 'web'));
 
@@ -87,14 +91,7 @@ class TransactionTest extends BaseSetup
             ->assertStatus(200);
     }
 
-    public function test_transactions_no_user()
-    {
-        $this->get('/accounting/transactions')
-            ->assertStatus(302)
-            ->assertRedirect(route('login'));
-    }
-
-    public function test_transactions_without_permission()
+    public function test_transactions_without_permission(): void
     {
         Permission::findOrCreate('accounting.transactions.get', 'web');
 

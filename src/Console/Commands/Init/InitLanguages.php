@@ -7,9 +7,9 @@ use Illuminate\Console\Command;
 
 class InitLanguages extends Command
 {
-    protected $signature = 'init:languages';
-
     protected $description = 'Initiates Languages and fills table with data.';
+
+    protected $signature = 'init:languages';
 
     public function handle(): void
     {

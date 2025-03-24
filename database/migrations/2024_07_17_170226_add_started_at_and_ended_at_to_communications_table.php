@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('communications', function (Blueprint $table) {
+        Schema::table('communications', function (Blueprint $table): void {
             $table->dateTime('started_at')->nullable()->after('date');
             $table->dateTime('ended_at')->nullable()->after('started_at');
             $table->unsignedBigInteger('total_time_ms')->default(0)->after('ended_at');
@@ -17,7 +17,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('communications', function (Blueprint $table) {
+        Schema::table('communications', function (Blueprint $table): void {
             $table->dropColumn(['started_at', 'ended_at', 'total_time_ms']);
         });
     }

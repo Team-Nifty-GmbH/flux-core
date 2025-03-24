@@ -27,6 +27,21 @@ class TicketCreatedNotification extends Notification implements ShouldQueue
         $this->model = $model;
     }
 
+    public function toArray(object $notifiable): array
+    {
+        $user = $this->model->authenticatable;
+
+        return ToastNotification::make()
+            ->title(__(':username created ticket :id', ['username' => $user->name, 'id' => $this->model->id]))
+            ->description($this->model->title . '<br>' . $this->model->description)
+            ->accept(
+                NotificationAction::make()
+                    ->label(__('View'))
+                    ->url(config('app.url') . $this->model->detailRoute(false))
+            )
+            ->toArray();
+    }
+
     /**
      * Get the mail representation of the notification.
      *
@@ -40,23 +55,6 @@ class TicketCreatedNotification extends Notification implements ShouldQueue
             ->subject($notification['title'])
             ->line($notification['description'])
             ->action($notification['accept']['label'] ?? '', $notification['accept']['url'] ?? '');
-    }
-
-    public function toArray(object $notifiable): array
-    {
-        $user = $this->model->authenticatable;
-
-        return ToastNotification::make()
-            ->title(__(':username created ticket :id', ['username' => $user->name, 'id' => $this->model->id]))
-            ->description($this->model->title . '<br>' . $this->model->description)
-            ->icon('info')
-            ->img(method_exists($user, 'getAvatarUrl') ? $user->getAvatarUrl() : null)
-            ->accept(
-                NotificationAction::make()
-                    ->label(__('View'))
-                    ->url(config('app.url') . $this->model->detailRoute(false))
-            )
-            ->toArray();
     }
 
     public function toWebPush(object $notifiable): ?WebPushMessage

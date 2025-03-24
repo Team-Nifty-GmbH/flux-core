@@ -11,7 +11,7 @@ return new class() extends Migration
      */
     public function up(): void
     {
-        Schema::table('vat_rates', function (Blueprint $table) {
+        Schema::table('vat_rates', function (Blueprint $table): void {
             $table->string('footer_text')->after('rate_percentage')->nullable();
         });
     }
@@ -21,7 +21,7 @@ return new class() extends Migration
      */
     public function down(): void
     {
-        Schema::table('vat_rates', function (Blueprint $table) {
+        Schema::table('vat_rates', function (Blueprint $table): void {
             $table->dropColumn('footer_text');
         });
     }

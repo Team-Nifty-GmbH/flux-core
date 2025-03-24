@@ -1,8 +1,8 @@
-<div class="gap-6 flex flex-col">
+<div class="flex flex-col gap-6">
     <x-card>
         <x-slot:title>
             {{ __('Images') }}
-        </x-slot:title>
+        </x-slot>
         <livewire:product.media-grid
             :is-searchable="false"
             wire:model="product"
@@ -22,9 +22,10 @@
                     '=',
                     'images',
                 ],
-            ]" />
+            ]"
+        />
     </x-card>
-    <x-card :title="__('Other media')">
+    <x-card :header="__('Other media')">
         <livewire:product.attachments :model-id="$this->product->id" />
     </x-card>
 </div>

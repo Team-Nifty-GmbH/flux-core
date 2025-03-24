@@ -9,14 +9,15 @@ use Illuminate\Support\Str;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads as WithFileUploadsBase;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use ZipArchive;
 
 trait WithFileUploads
 {
     use EnsureUsedInLivewire, WithFileUploadsBase;
 
-    public array $filesArray = [];
-
     public string $collection = '';
+
+    public array $filesArray = [];
 
     public bool $filesArrayDirty = false;
 
@@ -24,7 +25,7 @@ trait WithFileUploads
     {
         if (! file_exists($mediaItem->getPath())) {
             if (method_exists($this, 'notification')) {
-                $this->notification()->error(__('File not found!'));
+                $this->notification()->error(__('File not found!'))->send();
             }
 
             return false;
@@ -48,12 +49,12 @@ trait WithFileUploads
             ->get();
 
         // add files to a zip file
-        $zip = new \ZipArchive();
+        $zip = new ZipArchive();
         $zipFileName = explode('.', $collection);
         $zipFileName = array_pop($zipFileName);
         $zipFileName = $zipFileName . '.zip';
 
-        $zip->open($zipFileName, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+        $zip->open($zipFileName, ZipArchive::CREATE | ZipArchive::OVERWRITE);
         foreach ($media as $file) {
             /** @var Media $file */
             if (! file_exists($file->getPath())) {
@@ -83,13 +84,6 @@ trait WithFileUploads
         }
     }
 
-    public function removeFileUpload(string $name, int $index): void
-    {
-        unset($this->filesArray[$index]);
-
-        $this->skipRender();
-    }
-
     public function prepareForMediaLibrary(string $name, ?int $modelId = null, ?string $modelType = null): void
     {
         $this->filesArrayDirty = true;
@@ -113,6 +107,13 @@ trait WithFileUploads
                 'media' => $file->getRealPath(),
             ];
         }
+    }
+
+    public function removeFileUpload(string $name, int $index): void
+    {
+        unset($this->filesArray[$index]);
+
+        $this->skipRender();
     }
 
     public function saveFileUploadsToMediaLibrary(string $name, ?int $modelId = null, ?string $modelType = null): array

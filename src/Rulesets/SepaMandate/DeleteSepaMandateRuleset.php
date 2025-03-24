@@ -8,9 +8,9 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class DeleteSepaMandateRuleset extends FluxRuleset
 {
-    protected static ?string $model = SepaMandate::class;
-
     protected static bool $addAdditionalColumnRules = false;
+
+    protected static ?string $model = SepaMandate::class;
 
     public function rules(): array
     {

@@ -9,14 +9,16 @@ use Livewire\Attributes\Locked;
 
 class CountryForm extends FluxForm
 {
+    public ?int $currency_id = null;
+
     #[Locked]
     public ?int $id = null;
 
-    public ?int $language_id = null;
+    public bool $is_active = true;
 
-    public ?int $currency_id = null;
+    public bool $is_default = false;
 
-    public ?string $name = null;
+    public bool $is_eu_country = false;
 
     public ?string $iso_alpha2 = null;
 
@@ -24,11 +26,9 @@ class CountryForm extends FluxForm
 
     public ?string $iso_numeric = null;
 
-    public bool $is_active = true;
+    public ?int $language_id = null;
 
-    public bool $is_default = false;
-
-    public bool $is_eu_country = false;
+    public ?string $name = null;
 
     protected function getActions(): array
     {

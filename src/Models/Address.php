@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use Carbon\Carbon;
+use Exception;
 use FluxErp\Contracts\Calendarable;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\SalutationEnum;
@@ -14,6 +15,7 @@ use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Communicatable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
+use FluxErp\Traits\HasCalendars;
 use FluxErp\Traits\HasCart;
 use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasFrontendAttributes;
@@ -51,8 +53,8 @@ use Illuminate\Validation\UnauthorizedException;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\ModelStates\HasStates;
 use Spatie\Permission\Traits\HasRoles;
-use TeamNiftyGmbH\Calendar\Traits\HasCalendars;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
+use Throwable;
 
 class Address extends FluxAuthenticatable implements Calendarable, HasLocalePreference, HasMedia, InteractsWithDataTables, OffersPrinting
 {
@@ -60,17 +62,17 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         HasFrontendAttributes, HasPackageFactory, HasRoles, HasStates, HasTags, HasUserModification, HasUuid,
         InteractsWithMedia, Lockable, LogsActivity, MonitorsQueue, Notifiable, Printable, Searchable, SoftDeletes;
 
-    protected $hidden = [
-        'password',
-    ];
+    public static string $iconName = 'user';
+
+    protected ?string $detailRouteName = 'contacts.id?';
 
     protected $guarded = [
         'id',
     ];
 
-    protected ?string $detailRouteName = 'contacts.id?';
-
-    public static string $iconName = 'user';
+    protected $hidden = [
+        'password',
+    ];
 
     public static function findAddressByEmail(string $email): ?Address
     {
@@ -101,9 +103,39 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         return $address;
     }
 
+    public static function fromCalendarEvent(array $event): Model
+    {
+        $currentAddress = static::query()->whereKey(data_get($event, 'id'))->first();
+
+        $address = new static();
+        $address->forceFill([
+            'id' => data_get($event, 'id'),
+            'date_of_birth' => Carbon::parse(data_get($event, 'start'))->setYear($currentAddress->date_of_birth->year),
+        ]);
+
+        return $address;
+    }
+
+    public static function toCalendar(): array
+    {
+        return [
+            'id' => Str::of(static::class)->replace('\\', '.'),
+            'modelType' => morph_alias(static::class),
+            'name' => __('Birthdays'),
+            'color' => '#dd2c2c',
+            'resourceEditable' => false,
+            'hasRepeatableEvents' => false,
+            'isPublic' => false,
+            'isShared' => false,
+            'permission' => 'owner',
+            'group' => 'other',
+            'isVirtual' => true,
+        ];
+    }
+
     protected static function booted(): void
     {
-        static::saving(function (Address $address) {
+        static::saving(function (Address $address): void {
             if ($address->isDirty('lastname')
                 || $address->isDirty('firstname')
                 || $address->isDirty('company')
@@ -117,7 +149,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
             }
         });
 
-        static::saved(function (Address $address) {
+        static::saved(function (Address $address): void {
             Cache::forget('morph_to:' . $address->getMorphClass() . ':' . $address->id);
 
             $contactUpdates = [];
@@ -165,7 +197,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
             }
         });
 
-        static::deleted(function (Address $address) {
+        static::deleted(function (Address $address): void {
             $contactUpdates = [];
             $addressesUpdates = [];
             $mainAddress = resolve_static(Address::class, 'query')
@@ -218,43 +250,6 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         ];
     }
 
-    public function routeNotificationForMail(): ?string
-    {
-        return $this->email ?? $this->email_primary;
-    }
-
-    protected function password(): Attribute
-    {
-        return Attribute::set(
-            fn ($value) => Hash::info($value)['algoName'] !== 'bcrypt' ? Hash::make($value) : $value,
-        );
-    }
-
-    protected function postalAddress(): Attribute
-    {
-        return Attribute::get(
-            fn () => array_filter([
-                $this->company,
-                trim($this->firstname . ' ' . $this->lastname),
-                $this->addition,
-                $this->street,
-                trim($this->country?->iso_alpha2 . ' ' . $this->zip . ' ' . $this->city),
-                $this->country?->name,
-            ])
-        );
-    }
-
-    public function salutation(): ?string
-    {
-        try {
-            $enum = SalutationEnum::from($this->salutation ?? '');
-        } catch (\Throwable) {
-            $enum = SalutationEnum::NO_SALUTATION;
-        }
-
-        return $enum->salutation($this);
-    }
-
     public function addressTypeOrders(): BelongsToMany
     {
         return $this->belongsToMany(Order::class, 'address_address_type_order')
@@ -265,6 +260,19 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
     public function addressTypes(): BelongsToMany
     {
         return $this->belongsToMany(AddressType::class);
+    }
+
+    /**
+     * Get the channels that model events should broadcast on.
+     *
+     * @param  string  $event
+     */
+    public function broadcastOn($event): array
+    {
+        return [
+            new PrivateChannel($this->broadcastChannel()),
+            new PrivateChannel((app(Contact::class))->broadcastChannel() . $this->contact_id),
+        ];
     }
 
     public function client(): BelongsTo
@@ -285,111 +293,6 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
     public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class);
-    }
-
-    public function language(): BelongsTo
-    {
-        return $this->belongsTo(Language::class);
-    }
-
-    public function orders(): BelongsToMany
-    {
-        return $this->belongsToMany(Order::class, 'address_address_type_order')
-            ->withPivot('address_type_id');
-    }
-
-    public function ordersDeliveryAddress(): HasMany
-    {
-        return $this->hasMany(Order::class, 'address_delivery_id');
-    }
-
-    public function ordersInvoiceAddress(): HasMany
-    {
-        return $this->hasMany(Order::class, 'address_invoice_id');
-    }
-
-    public function priceList(): HasOneThrough
-    {
-        return $this->hasOneThrough(
-            PriceList::class,
-            Contact::class,
-            'id',
-            'id',
-            'contact_id',
-            'price_list_id'
-        );
-    }
-
-    public function projectTasks(): HasMany
-    {
-        return $this->hasMany(Task::class);
-    }
-
-    public function serialNumbers(): BelongsToMany
-    {
-        return $this->belongsToMany(SerialNumber::class, 'address_serial_number');
-    }
-
-    public function settings(): MorphMany
-    {
-        return $this->morphMany(Setting::class, 'model');
-    }
-
-    public function newCollection(array $models = []): Collection
-    {
-        return app(AddressCollection::class, ['items' => $models]);
-    }
-
-    /**
-     * Get the channels that model events should broadcast on.
-     *
-     * @param  string  $event
-     */
-    public function broadcastOn($event): array
-    {
-        return [
-            new PrivateChannel($this->broadcastChannel()),
-            new PrivateChannel((app(Contact::class))->broadcastChannel() . $this->contact_id),
-        ];
-    }
-
-    public function detailRouteParams(): array
-    {
-        return [
-            'id' => $this->contact_id,
-            'address' => $this->id,
-        ];
-    }
-
-    /**
-     * Get the preferred locale of the entity.
-     */
-    public function preferredLocale(): ?string
-    {
-        return $this->language?->language_code;
-    }
-
-    public function getLabel(): ?string
-    {
-        return $this->name;
-    }
-
-    public function getDescription(): ?string
-    {
-        return implode(', ', $this->postal_address);
-    }
-
-    public function getUrl(): ?string
-    {
-        return $this->detailRoute();
-    }
-
-    /**
-     * @throws \Exception
-     */
-    public function getAvatarUrl(): ?string
-    {
-        return $this->contact?->getAvatarUrl();
     }
 
     public function createLoginToken(): array
@@ -423,6 +326,145 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         ];
     }
 
+    public function detailRouteParams(): array
+    {
+        return [
+            'id' => $this->contact_id,
+            'address' => $this->id,
+        ];
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function getAvatarUrl(): ?string
+    {
+        return $this->contact?->getAvatarUrl();
+    }
+
+    public function getDescription(): ?string
+    {
+        return implode(', ', $this->postal_address);
+    }
+
+    public function getLabel(): ?string
+    {
+        return $this->name;
+    }
+
+    public function getPrintViews(): array
+    {
+        return [
+            'address-label' => AddressLabel::class,
+        ];
+    }
+
+    public function getUrl(): ?string
+    {
+        return $this->detailRoute();
+    }
+
+    public function language(): BelongsTo
+    {
+        return $this->belongsTo(Language::class);
+    }
+
+    public function newCollection(array $models = []): Collection
+    {
+        return app(AddressCollection::class, ['items' => $models]);
+    }
+
+    public function orders(): BelongsToMany
+    {
+        return $this->belongsToMany(Order::class, 'address_address_type_order')
+            ->withPivot('address_type_id');
+    }
+
+    public function ordersDeliveryAddress(): HasMany
+    {
+        return $this->hasMany(Order::class, 'address_delivery_id');
+    }
+
+    public function ordersInvoiceAddress(): HasMany
+    {
+        return $this->hasMany(Order::class, 'address_invoice_id');
+    }
+
+    /**
+     * Get the preferred locale of the entity.
+     */
+    public function preferredLocale(): ?string
+    {
+        return $this->language?->language_code;
+    }
+
+    public function priceList(): HasOneThrough
+    {
+        return $this->hasOneThrough(
+            PriceList::class,
+            Contact::class,
+            'id',
+            'id',
+            'contact_id',
+            'price_list_id'
+        );
+    }
+
+    public function projectTasks(): HasMany
+    {
+        return $this->hasMany(Task::class);
+    }
+
+    public function routeNotificationForMail(): ?string
+    {
+        return $this->email ?? $this->email_primary;
+    }
+
+    public function salutation(): ?string
+    {
+        try {
+            $enum = SalutationEnum::from($this->salutation ?? '');
+        } catch (Throwable) {
+            $enum = SalutationEnum::NO_SALUTATION;
+        }
+
+        return $enum->salutation($this);
+    }
+
+    public function scopeInTimeframe(
+        Builder $builder,
+        Carbon|string|null $start,
+        Carbon|string|null $end,
+        ?array $info = null
+    ): void {
+        $start = $start ? Carbon::parse($start) : null;
+        $end = $end ? Carbon::parse($end) : null;
+
+        if ($start && $end && $start->greaterThan($end)) {
+            $var = $start;
+            $start = $end;
+            $end = $var;
+        }
+
+        $builder
+            ->when($start && $end, function (Builder $builder) use ($start, $end): void {
+                $builder->whereRaw("REPLACE(SUBSTR(date_of_birth, 6), '-', '') BETWEEN ? AND ?", [
+                    $start->format('md'),
+                    $end->format('md'),
+                ]);
+            })
+            ->when($start && ! $end, function (Builder $builder) use ($start): void {
+                $builder->whereRaw("REPLACE(SUBSTR(date_of_birth, 6), '-', '') >= ?", [
+                    $start->format('md'),
+                ]);
+            })
+            ->when(! $start && $end, function (Builder $builder) use ($end): void {
+                $builder->whereRaw("REPLACE(SUBSTR(date_of_birth, 6), '-', '') <= ?", [
+                    $end->format('md'),
+                ]);
+            });
+    }
+
     public function sendLoginLink(): void
     {
         try {
@@ -435,28 +477,14 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         Mail::to($this->email)->send(MagicLoginLink::make($login['token'], $login['expires']));
     }
 
-    public function getPrintViews(): array
+    public function serialNumbers(): BelongsToMany
     {
-        return [
-            'address-label' => AddressLabel::class,
-        ];
+        return $this->belongsToMany(SerialNumber::class, 'address_serial_number');
     }
 
-    public static function toCalendar(): array
+    public function settings(): MorphMany
     {
-        return [
-            'id' => Str::of(static::class)->replace('\\', '.'),
-            'modelType' => morph_alias(static::class),
-            'name' => __('Birthdays'),
-            'color' => '#dd2c2c',
-            'resourceEditable' => false,
-            'hasRepeatableEvents' => false,
-            'isPublic' => false,
-            'isShared' => false,
-            'permission' => 'owner',
-            'group' => 'other',
-            'isVirtual' => true,
-        ];
+        return $this->morphMany(Setting::class, 'model');
     }
 
     public function toCalendarEvent(?array $info = null): array
@@ -504,50 +532,24 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         ];
     }
 
-    public function scopeInTimeframe(
-        Builder $builder,
-        Carbon|string|null $start,
-        Carbon|string|null $end,
-        ?array $info = null
-    ): void {
-        $start = $start ? Carbon::parse($start) : null;
-        $end = $end ? Carbon::parse($end) : null;
-
-        if ($start && $end && $start->greaterThan($end)) {
-            $var = $start;
-            $start = $end;
-            $end = $var;
-        }
-
-        $builder
-            ->when($start && $end, function (Builder $builder) use ($start, $end) {
-                $builder->whereRaw("REPLACE(SUBSTR(date_of_birth, 6), '-', '') BETWEEN ? AND ?", [
-                    $start->format('md'),
-                    $end->format('md'),
-                ]);
-            })
-            ->when($start && ! $end, function (Builder $builder) use ($start) {
-                $builder->whereRaw("REPLACE(SUBSTR(date_of_birth, 6), '-', '') >= ?", [
-                    $start->format('md'),
-                ]);
-            })
-            ->when(! $start && $end, function (Builder $builder) use ($end) {
-                $builder->whereRaw("REPLACE(SUBSTR(date_of_birth, 6), '-', '') <= ?", [
-                    $end->format('md'),
-                ]);
-            });
+    protected function password(): Attribute
+    {
+        return Attribute::set(
+            fn ($value) => Hash::info($value)['algoName'] !== 'bcrypt' ? Hash::make($value) : $value,
+        );
     }
 
-    public static function fromCalendarEvent(array $event): Model
+    protected function postalAddress(): Attribute
     {
-        $currentAddress = static::query()->whereKey(data_get($event, 'id'))->first();
-
-        $address = new static();
-        $address->forceFill([
-            'id' => data_get($event, 'id'),
-            'date_of_birth' => Carbon::parse(data_get($event, 'start'))->setYear($currentAddress->date_of_birth->year),
-        ]);
-
-        return $address;
+        return Attribute::get(
+            fn () => array_filter([
+                $this->company,
+                trim($this->firstname . ' ' . $this->lastname),
+                $this->addition,
+                $this->street,
+                trim($this->country?->iso_alpha2 . ' ' . $this->zip . ' ' . $this->city),
+                $this->country?->name,
+            ])
+        );
     }
 }

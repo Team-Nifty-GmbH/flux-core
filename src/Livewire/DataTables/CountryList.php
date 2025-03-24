@@ -7,8 +7,6 @@ use Illuminate\Database\Eloquent\Builder;
 
 class CountryList extends BaseDataTable
 {
-    protected string $model = Country::class;
-
     public array $enabledCols = [
         'name',
         'language.name',
@@ -20,6 +18,8 @@ class CountryList extends BaseDataTable
         'is_default',
         'is_eu_country',
     ];
+
+    protected string $model = Country::class;
 
     protected function getBuilder(Builder $builder): Builder
     {

@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('order_types', function (Blueprint $table) {
+        Schema::table('order_types', function (Blueprint $table): void {
             $table->string('mail_subject')->nullable()->after('description');
             $table->text('mail_body')->nullable()->after('mail_subject');
         });
@@ -16,7 +16,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('order_types', function (Blueprint $table) {
+        Schema::table('order_types', function (Blueprint $table): void {
             $table->dropColumn('mail_subject');
             $table->dropColumn('mail_body');
         });

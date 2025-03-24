@@ -22,12 +22,6 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class WorkTimeList extends BaseDataTable
 {
-    protected string $model = WorkTime::class;
-
-    protected ?string $includeBefore = 'flux::livewire.work-time.work-time-list';
-
-    public LockedWorkTimeForm $workTime;
-
     public CreateOrdersFromWorkTimesForm $createOrdersFromWorkTimes;
 
     public array $enabledCols = [
@@ -51,27 +45,62 @@ class WorkTimeList extends BaseDataTable
 
     public bool $isSelectable = true;
 
-    #[Renderless]
-    public function toggleIsBillable(bool $isBillable): void
+    public LockedWorkTimeForm $workTime;
+
+    protected ?string $includeBefore = 'flux::livewire.work-time.work-time-list';
+
+    protected string $model = WorkTime::class;
+
+    protected function getTableActions(): array
     {
-        foreach ($this->getSelectedModelsQuery()->pluck('id') as $id) {
-            try {
-                UpdateLockedWorkTime::make([
-                    'id' => $id,
-                    'is_billable' => $isBillable,
-                ])
-                    ->checkPermission()
-                    ->validate()
-                    ->execute();
-            } catch (ValidationException|UnauthorizedException $e) {
-                exception_to_notifications($e, $this);
+        return [
+            DataTableButton::make()
+                ->text(__('New'))
+                ->color('indigo')
+                ->icon('plus')
+                ->wireClick('edit')
+                ->when(resolve_static(CreateLockedWorkTime::class, 'canPerformAction', [false])),
+        ];
+    }
 
-                return;
-            }
-        }
+    protected function getRowActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->text(__('Edit'))
+                ->icon('pencil')
+                ->color('indigo')
+                ->wireClick('edit(record.id)')
+                ->when(resolve_static(UpdateLockedWorkTime::class, 'canPerformAction', [false])),
+            DataTableButton::make()
+                ->text(__('Delete'))
+                ->icon('trash')
+                ->color('red')
+                ->when(resolve_static(DeleteWorkTime::class, 'canPerformAction', [false]))
+                ->attributes([
+                    'wire:click' => 'delete(record.id)',
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Work Time')]),
+                ]),
+        ];
+    }
 
-        $this->reset('selected');
-        $this->loadData();
+    protected function getSelectedActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->text(__('Create Orders'))
+                ->color('indigo')
+                ->xOnClick(<<<'JS'
+                    $modalOpen('create-orders-modal');
+                JS)
+                ->when(fn () => resolve_static(CreateOrder::class, 'canPerformAction', [false])),
+            DataTableButton::make()
+                ->text(__('Change is billable'))
+                ->xOnClick(<<<'JS'
+                    $modalOpen('toggle-is-billable-modal');
+                JS)
+                ->when(fn () => resolve_static(UpdateLockedWorkTime::class, 'canPerformAction', [false])),
+        ];
     }
 
     #[Renderless]
@@ -97,12 +126,71 @@ class WorkTimeList extends BaseDataTable
         $this->loadData();
     }
 
-    protected function itemToArray($item): array
+    #[Renderless]
+    public function delete(WorkTime $workTime): void
     {
-        $item = parent::itemToArray($item);
-        $item['name'] = __($item['name']);
+        $this->workTime->reset();
+        $this->workTime->fill($workTime);
 
-        return $item;
+        try {
+            $this->workTime->delete();
+        } catch (UnauthorizedException|ValidationException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->loadData();
+    }
+
+    #[Renderless]
+    public function edit(WorkTime $workTime): void
+    {
+        $this->workTime->reset();
+        $this->workTime->fill($workTime);
+
+        $this->js(<<<'JS'
+            $modalOpen('edit-work-time-modal');
+        JS);
+    }
+
+    #[Renderless]
+    public function save(): bool
+    {
+        try {
+            $this->workTime->save();
+        } catch (UnauthorizedException|ValidationException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
+    }
+
+    #[Renderless]
+    public function toggleIsBillable(bool $isBillable): void
+    {
+        foreach ($this->getSelectedModelsQuery()->pluck('id') as $id) {
+            try {
+                UpdateLockedWorkTime::make([
+                    'id' => $id,
+                    'is_billable' => $isBillable,
+                ])
+                    ->checkPermission()
+                    ->validate()
+                    ->execute();
+            } catch (ValidationException|UnauthorizedException $e) {
+                exception_to_notifications($e, $this);
+
+                return;
+            }
+        }
+
+        $this->reset('selected');
+        $this->loadData();
     }
 
     protected function getReturnKeys(): array
@@ -111,58 +199,6 @@ class WorkTimeList extends BaseDataTable
             parent::getReturnKeys(),
             ['name']
         );
-    }
-
-    protected function getSelectedActions(): array
-    {
-        return [
-            DataTableButton::make()
-                ->label(__('Create Orders'))
-                ->color('primary')
-                ->xOnClick(<<<'JS'
-                    $openModal('create-orders');
-                JS)
-                ->when(fn () => resolve_static(CreateOrder::class, 'canPerformAction', [false])),
-            DataTableButton::make()
-                ->label(__('Change is billable'))
-                ->xOnClick(<<<'JS'
-                    $openModal('toggle-is-billable');
-                JS)
-                ->when(fn () => resolve_static(UpdateLockedWorkTime::class, 'canPerformAction', [false])),
-        ];
-    }
-
-    protected function getTableActions(): array
-    {
-        return [
-            DataTableButton::make()
-                ->label(__('New'))
-                ->color('primary')
-                ->icon('plus')
-                ->wireClick('edit')
-                ->when(resolve_static(CreateLockedWorkTime::class, 'canPerformAction', [false])),
-        ];
-    }
-
-    protected function getRowActions(): array
-    {
-        return [
-            DataTableButton::make()
-                ->label(__('Edit'))
-                ->icon('pencil')
-                ->color('primary')
-                ->wireClick('edit(record.id)')
-                ->when(resolve_static(UpdateLockedWorkTime::class, 'canPerformAction', [false])),
-            DataTableButton::make()
-                ->label(__('Delete'))
-                ->icon('trash')
-                ->color('negative')
-                ->when(resolve_static(DeleteWorkTime::class, 'canPerformAction', [false]))
-                ->attributes([
-                    'wire:click' => 'delete(record.id)',
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Work Time')]),
-                ]),
-        ];
     }
 
     protected function getViewData(): array
@@ -189,53 +225,16 @@ class WorkTimeList extends BaseDataTable
                     ->where('is_active', true)
                     ->get(['id', 'name', 'order_type_enum'])
                     ->filter(fn (OrderType $orderType) => ! $orderType->order_type_enum->isPurchase())
-                    ->pluck('name', 'id')
                     ->toArray(),
             ]
         );
     }
 
-    #[Renderless]
-    public function edit(WorkTime $workTime): void
+    protected function itemToArray($item): array
     {
-        $this->workTime->reset();
-        $this->workTime->fill($workTime);
+        $item = parent::itemToArray($item);
+        $item['name'] = __($item['name']);
 
-        $this->js(<<<'JS'
-            $openModal('edit-work-time');
-        JS);
-    }
-
-    #[Renderless]
-    public function delete(WorkTime $workTime): void
-    {
-        $this->workTime->reset();
-        $this->workTime->fill($workTime);
-
-        try {
-            $this->workTime->delete();
-        } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
-
-            return;
-        }
-
-        $this->loadData();
-    }
-
-    #[Renderless]
-    public function save(): bool
-    {
-        try {
-            $this->workTime->save();
-        } catch (UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
+        return $item;
     }
 }

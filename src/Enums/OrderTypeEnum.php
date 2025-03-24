@@ -8,25 +8,14 @@ enum OrderTypeEnum: string
 {
     use EnumTrait;
 
-    case Order = 'order';
-
-    case SplitOrder = 'split-order';
-
-    case Retoure = 'retoure';
-
-    case Refund = 'refund';
-
-    case Purchase = 'purchase';
-
-    case PurchaseRefund = 'purchase-refund';
-
-    case PurchaseSubscription = 'purchase-subscription';
-
-    case Subscription = 'subscription';
-
-    public function multiplier(): string
+    public static function getIsPurchase(self $value): bool
     {
-        return self::getMultiplier($this);
+        return in_array($value, [self::Purchase, self::PurchaseRefund, self::PurchaseSubscription]);
+    }
+
+    public static function getIsSubscription(self $value): bool
+    {
+        return in_array($value, [self::Subscription, self::PurchaseSubscription]);
     }
 
     public static function getMultiplier(self $value): int
@@ -47,13 +36,24 @@ enum OrderTypeEnum: string
         return self::getIsSubscription($this);
     }
 
-    public static function getIsPurchase(self $value): bool
+    public function multiplier(): string
     {
-        return in_array($value, [self::Purchase, self::PurchaseRefund, self::PurchaseSubscription]);
+        return self::getMultiplier($this);
     }
 
-    public static function getIsSubscription(self $value): bool
-    {
-        return in_array($value, [self::Subscription, self::PurchaseSubscription]);
-    }
+    case Order = 'order';
+
+    case Purchase = 'purchase';
+
+    case PurchaseRefund = 'purchase-refund';
+
+    case PurchaseSubscription = 'purchase-subscription';
+
+    case Refund = 'refund';
+
+    case Retoure = 'retoure';
+
+    case SplitOrder = 'split-order';
+
+    case Subscription = 'subscription';
 }

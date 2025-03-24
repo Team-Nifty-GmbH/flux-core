@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('commissions', function (Blueprint $table) {
+        Schema::table('commissions', function (Blueprint $table): void {
             $table->timestamp('deleted_at')->nullable()->after('updated_by');
             $table->string('deleted_by')->nullable()->after('deleted_at');
         });
@@ -16,7 +16,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('commissions', function (Blueprint $table) {
+        Schema::table('commissions', function (Blueprint $table): void {
             $table->dropColumn(['deleted_at', 'deleted_by']);
         });
     }

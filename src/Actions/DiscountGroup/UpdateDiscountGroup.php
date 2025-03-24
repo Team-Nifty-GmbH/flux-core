@@ -10,14 +10,14 @@ use Illuminate\Support\Arr;
 
 class UpdateDiscountGroup extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateDiscountGroupRuleset::class;
-    }
-
     public static function models(): array
     {
         return [DiscountGroup::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateDiscountGroupRuleset::class;
     }
 
     public function performAction(): Model

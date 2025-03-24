@@ -20,11 +20,19 @@ class Kernel extends ConsoleKernel
     ];
 
     /**
-     * Define the application's command schedule.
-     *
-     * @return void
+     * Register the commands for the application.
      */
-    protected function schedule(Schedule $schedule)
+    protected function commands(): void
+    {
+        $this->load(__DIR__ . '/Commands');
+
+        require base_path('routes/console.php');
+    }
+
+    /**
+     * Define the application's command schedule.
+     */
+    protected function schedule(Schedule $schedule): void
     {
         $schedule->job(new ArtisanJob(PruneCommand::class))
             ->name('model:prune')
@@ -33,17 +41,5 @@ class Kernel extends ConsoleKernel
         $schedule->job(new ArtisanJob(PruneExpired::class))
             ->name('sanctum:prune-expired')
             ->daily();
-    }
-
-    /**
-     * Register the commands for the application.
-     *
-     * @return void
-     */
-    protected function commands()
-    {
-        $this->load(__DIR__ . '/Commands');
-
-        require base_path('routes/console.php');
     }
 }

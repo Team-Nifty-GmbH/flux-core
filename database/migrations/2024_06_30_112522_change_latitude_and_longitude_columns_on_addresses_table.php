@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('addresses', function (Blueprint $table) {
+        Schema::table('addresses', function (Blueprint $table): void {
             $table->decimal('latitude', 15, 12)->nullable()->change();
             $table->decimal('longitude', 15, 12)->nullable()->change();
         });
@@ -16,7 +16,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('addresses', function (Blueprint $table) {
+        Schema::table('addresses', function (Blueprint $table): void {
             $table->decimal('latitude', 8, 6)->nullable()->change();
             $table->decimal('longitude', 9, 6)->nullable()->change();
         });

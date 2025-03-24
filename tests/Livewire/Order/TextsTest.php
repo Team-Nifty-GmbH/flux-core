@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class TextsTest extends TestCase
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(Texts::class)
             ->assertStatus(200);

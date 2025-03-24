@@ -11,6 +11,11 @@ use Illuminate\Validation\ValidationException;
 
 class UnlockModel extends FluxAction
 {
+    public static function models(): array
+    {
+        return [];
+    }
+
     protected function boot(array $data): void
     {
         parent::boot($data);
@@ -22,11 +27,6 @@ class UnlockModel extends FluxAction
                 new ClassExists(instanceOf: Model::class),
             ],
         ];
-    }
-
-    public static function models(): array
-    {
-        return [];
     }
 
     public function performAction(): ?bool

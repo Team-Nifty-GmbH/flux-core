@@ -12,15 +12,15 @@ class CategoryForm extends FluxForm
     #[Locked]
     public ?int $id = null;
 
-    public ?string $model_type = null;
+    public bool $is_active = true;
 
-    public ?int $parent_id;
+    public ?string $model_type = null;
 
     public ?string $name;
 
-    public ?int $sort_number;
+    public ?int $parent_id;
 
-    public bool $is_active = true;
+    public ?int $sort_number;
 
     protected function getActions(): array
     {

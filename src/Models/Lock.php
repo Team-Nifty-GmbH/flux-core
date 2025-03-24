@@ -16,9 +16,9 @@ class Lock extends FluxModel
         'user',
     ];
 
-    protected static function booted()
+    protected static function booted(): void
     {
-        static::saving(function ($model) {
+        static::saving(function ($model): void {
             $model->authenticatable_type = Auth::user()->getMorphClass();
             $model->authenticatable_id = Auth::user()->getAuthIdentifier();
         });

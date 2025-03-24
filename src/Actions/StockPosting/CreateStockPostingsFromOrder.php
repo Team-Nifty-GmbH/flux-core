@@ -13,14 +13,14 @@ use Illuminate\Validation\ValidationException;
 
 class CreateStockPostingsFromOrder extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateStockPostingsFromOrderRuleset::class;
-    }
-
     public static function models(): array
     {
         return [StockPosting::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateStockPostingsFromOrderRuleset::class;
     }
 
     public function performAction(): bool

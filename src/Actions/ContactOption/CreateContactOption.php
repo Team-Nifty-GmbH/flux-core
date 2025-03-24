@@ -8,14 +8,14 @@ use FluxErp\Rulesets\ContactOption\CreateContactOptionRuleset;
 
 class CreateContactOption extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateContactOptionRuleset::class;
-    }
-
     public static function models(): array
     {
         return [ContactOption::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateContactOptionRuleset::class;
     }
 
     public function performAction(): ContactOption

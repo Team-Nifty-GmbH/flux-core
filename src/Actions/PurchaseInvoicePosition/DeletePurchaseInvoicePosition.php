@@ -8,14 +8,14 @@ use FluxErp\Rulesets\PurchaseInvoicePosition\DeletePurchaseInvoicePositionRulese
 
 class DeletePurchaseInvoicePosition extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeletePurchaseInvoicePositionRuleset::class;
-    }
-
     public static function models(): array
     {
         return [PurchaseInvoicePosition::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeletePurchaseInvoicePositionRuleset::class;
     }
 
     public function performAction(): ?bool

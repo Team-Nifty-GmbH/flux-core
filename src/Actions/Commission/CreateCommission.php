@@ -10,14 +10,14 @@ use FluxErp\Rulesets\Commission\CreateCommissionRuleset;
 
 class CreateCommission extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateCommissionRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Commission::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateCommissionRuleset::class;
     }
 
     public function performAction(): Commission

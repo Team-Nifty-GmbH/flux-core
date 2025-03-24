@@ -15,13 +15,13 @@ class Ticket extends Component
 {
     use WithTabs;
 
-    public array $ticket;
-
     public array $additionalColumns = [];
 
     public array $attachments = [];
 
     public string $tab = 'portal.ticket.comments';
+
+    public array $ticket;
 
     public function mount(int $id): void
     {
@@ -30,10 +30,10 @@ class Ticket extends Component
             ->firstOrFail();
 
         $this->additionalColumns = resolve_static(AdditionalColumn::class, 'query')
-            ->where(function (Builder $query) use ($ticket) {
+            ->where(function (Builder $query) use ($ticket): void {
                 $query->where('model_type', app(TicketModel::class)->getMorphClass())
-                    ->when($ticket->ticket_type_id, function (Builder $query) use ($ticket) {
-                        $query->orWhere(function (Builder $query) use ($ticket) {
+                    ->when($ticket->ticket_type_id, function (Builder $query) use ($ticket): void {
+                        $query->orWhere(function (Builder $query) use ($ticket): void {
                             $query->where('model_type', app(TicketType::class)->getMorphClass())
                                 ->where('model_id', $ticket->ticket_type_id);
                         });
@@ -55,8 +55,8 @@ class Ticket extends Component
     public function getTabs(): array
     {
         return [
-            TabButton::make('portal.ticket.comments')->label(__('Comments'))->isLivewireComponent(),
-            TabButton::make('portal.ticket.activities')->label(__('Activities'))->isLivewireComponent(),
+            TabButton::make('portal.ticket.comments')->text(__('Comments'))->isLivewireComponent(),
+            TabButton::make('portal.ticket.activities')->text(__('Activities'))->isLivewireComponent(),
         ];
     }
 }

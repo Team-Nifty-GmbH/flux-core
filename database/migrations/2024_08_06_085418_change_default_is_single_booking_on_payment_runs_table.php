@@ -8,14 +8,14 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('payment_runs', function (Blueprint $table) {
+        Schema::table('payment_runs', function (Blueprint $table): void {
             $table->boolean('is_single_booking')->default(true)->change();
         });
     }
 
     public function down(): void
     {
-        Schema::table('payment_runs', function (Blueprint $table) {
+        Schema::table('payment_runs', function (Blueprint $table): void {
             $table->boolean('is_single_booking')->default(false)->change();
         });
     }

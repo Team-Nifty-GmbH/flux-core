@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Project;
 
+use Exception;
 use FluxErp\Actions\Project\DeleteProject;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Forms\ProjectForm;
@@ -21,19 +22,19 @@ class Project extends Component
 {
     use Actions, WithFileUploads, WithTabs;
 
-    public ProjectForm $project;
-
-    public string $tab = 'project.general';
-
     public array $availableStates = [];
 
+    public $avatar;
+
     public array $openCategories = [];
+
+    public ProjectForm $project;
 
     public array $queryString = [
         'tab' => ['except' => 'general'],
     ];
 
-    public $avatar;
+    public string $tab = 'project.general';
 
     public function mount(string $id): void
     {
@@ -70,29 +71,39 @@ class Project extends Component
         return view('flux::livewire.project.project');
     }
 
+    #[Computed]
+    public function avatarUrl(): ?string
+    {
+        return $this->project->id
+            ? resolve_static(ProjectModel::class, 'query')
+                ->whereKey($this->project->id)
+                ->first()
+                ->getAvatarUrl()
+            : null;
+    }
+
+    public function delete(): void
+    {
+        $this->skipRender();
+        try {
+            DeleteProject::make($this->project->toArray())
+                ->checkPermission()
+                ->validate()
+                ->execute();
+
+            $this->redirect(route('projects'));
+        } catch (Exception $e) {
+            exception_to_notifications($e, $this);
+        }
+    }
+
     public function getTabs(): array
     {
         return [
-            TabButton::make('project.general')->label(__('General')),
-            TabButton::make('project.comments')->label(__('Comments')),
-            TabButton::make('project.statistics')->label(__('Statistics')),
+            TabButton::make('project.general')->text(__('General')),
+            TabButton::make('project.comments')->text(__('Comments')),
+            TabButton::make('project.statistics')->text(__('Statistics')),
         ];
-    }
-
-    public function save(): array|bool
-    {
-        try {
-            $this->project->save();
-        } catch (\Exception $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->notification()->success(__(':model saved', ['model' => __('Project')]));
-        $this->skipRender();
-
-        return true;
     }
 
     public function resetForm(): void
@@ -112,30 +123,20 @@ class Project extends Component
         );
     }
 
-    public function delete(): void
+    public function save(): array|bool
     {
-        $this->skipRender();
         try {
-            DeleteProject::make($this->project->toArray())
-                ->checkPermission()
-                ->validate()
-                ->execute();
-
-            $this->redirect(route('projects'));
-        } catch (\Exception $e) {
+            $this->project->save();
+        } catch (Exception $e) {
             exception_to_notifications($e, $this);
-        }
-    }
 
-    #[Computed]
-    public function avatarUrl(): ?string
-    {
-        return $this->project->id
-            ? resolve_static(ProjectModel::class, 'query')
-                ->whereKey($this->project->id)
-                ->first()
-                ->getAvatarUrl()
-            : null;
+            return false;
+        }
+
+        $this->notification()->success(__(':model saved', ['model' => __('Project')]))->send();
+        $this->skipRender();
+
+        return true;
     }
 
     public function updatedAvatar(): void
@@ -147,7 +148,7 @@ class Project extends Component
                 $this->project->id,
                 morph_alias(ProjectModel::class)
             );
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             exception_to_notifications($e, $this);
 
             return;

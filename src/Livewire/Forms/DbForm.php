@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Forms;
 
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Rule;
 use Livewire\Form;
@@ -9,19 +10,19 @@ use Livewire\Form;
 class DbForm extends Form
 {
     #[Rule('required|string')]
+    public ?string $database = null;
+
+    #[Rule('required|string')]
     public ?string $host = null;
+
+    #[Rule('nullable|string')]
+    public ?string $password = null;
 
     #[Rule('required|integer')]
     public int $port = 3306;
 
     #[Rule('required|string')]
-    public ?string $database = null;
-
-    #[Rule('required|string')]
     public ?string $username = null;
-
-    #[Rule('nullable|string')]
-    public ?string $password = null;
 
     public function validate($rules = null, $messages = [], $attributes = []): void
     {
@@ -38,7 +39,7 @@ class DbForm extends Form
 
         try {
             DB::connection('mysql')->getPdo();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->addError(null, $e->getMessage());
         }
 

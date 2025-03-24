@@ -9,19 +9,18 @@ use FluxErp\Models\PaymentType;
 use FluxErp\Rulesets\Contact\UpdateContactRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 class UpdateContact extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateContactRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Contact::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateContactRuleset::class;
     }
 
     public function performAction(): Model
@@ -89,10 +88,7 @@ class UpdateContact extends FluxAction
 
     protected function validateData(): void
     {
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(Contact::class));
-
-        $this->data = $validator->validate();
+        parent::validateData();
 
         $errors = [];
 

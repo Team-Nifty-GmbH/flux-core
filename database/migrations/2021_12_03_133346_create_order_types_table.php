@@ -8,7 +8,7 @@ class CreateOrderTypesTable extends Migration
 {
     public function up(): void
     {
-        Schema::create('order_types', function (Blueprint $table) {
+        Schema::create('order_types', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
             $table->unsignedBigInteger('client_id');

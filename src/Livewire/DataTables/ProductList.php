@@ -6,8 +6,6 @@ use FluxErp\Models\Product;
 
 class ProductList extends BaseDataTable
 {
-    protected string $model = Product::class;
-
     public array $enabledCols = [
         'name',
         'product_number',
@@ -20,13 +18,7 @@ class ProductList extends BaseDataTable
         'product_image' => 'image',
     ];
 
-    protected function itemToArray($item): array
-    {
-        $returnArray = parent::itemToArray($item);
-        $returnArray['product_image'] = $item->getAvatarUrl();
-
-        return $returnArray;
-    }
+    protected string $model = Product::class;
 
     protected function getLeftAppends(): array
     {
@@ -35,5 +27,13 @@ class ProductList extends BaseDataTable
                 'product_image',
             ],
         ];
+    }
+
+    protected function itemToArray($item): array
+    {
+        $returnArray = parent::itemToArray($item);
+        $returnArray['product_image'] = $item->getAvatarUrl();
+
+        return $returnArray;
     }
 }

@@ -1,41 +1,48 @@
 @props([
-    'card' => false,
     'tabs' => [],
 ])
-<div class="mt-2"
-     x-data="{
+<div
+    class="mt-2"
+    x-data="{
         tab: $wire.entangle('{{ $attributes->wire('model')->value() }}', true),
         tabButtonClicked(tabButton) {
-            this.tabSelected = this.tab = tabButton.dataset.tabName;
+            this.tabSelected = this.tab = tabButton.dataset.tabName
         },
     }"
-     wire:ignore
+    wire:ignore
 >
     <div class="pb-2.5">
         <div class="dark:border-secondary-700 border-b border-gray-200">
             <nav class="soft-scrollbar flex overflow-x-auto" x-ref="tabButtons">
-                @foreach($tabs as $tabButtons)
-                    {{ $tabButtons }}
+                @foreach ($tabs as $tabButton)
+                    {{ $tabButton }}
                 @endforeach
             </nav>
         </div>
     </div>
 </div>
-<x-dynamic-component :component="$card ? 'card' : 'div'">
-    <div {{ $attributes->whereDoesntStartWith(['wire', 'tabs'])->merge(['class' => 'relative pt-6']) }}>
-        {{ $prepend ?? '' }}
-        @if($attributes->has('wire:loading'))
-            <x-spinner {{ $attributes->thatStartWith('wire:loading') }} />
+<div
+    {{ $attributes->whereDoesntStartWith(['wire', 'tabs'])->merge(['class' => 'relative pt-6']) }}
+>
+    {{ $prepend ?? '' }}
+    @if ($attributes->has('wire:loading'))
+        <x-flux::spinner {{ $attributes->thatStartWith('wire:loading') }} />
+    @endif
+
+    <div class="w-full">
+        @if ($slot->isNotEmpty())
+            {{ $slot }}
+        @elseif ($tabs[$this->{$attributes->wire('model')->value()}]?->isLivewireComponent)
+            <livewire:dynamic-component
+                wire:model="{{ $tabs[$this->{$attributes->wire('model')->value()}]?->wireModel }}"
+                :is="$this->{$attributes->wire('model')->value()}"
+                wire:key="{{ uniqid() }}"
+            />
+        @else
+            <x-dynamic-component
+                :component="$this->{$attributes->wire('model')->value()}"
+            />
         @endif
-        <div class="w-full">
-            @if($slot->isNotEmpty())
-                {{ $slot }}
-            @elseif($tabs[$this->{$attributes->wire('model')->value()}]?->isLivewireComponent)
-                <livewire:dynamic-component wire:model="{{ $tabs[$this->{$attributes->wire('model')->value()}]?->wireModel }}" :is="$this->{$attributes->wire('model')->value()}" wire:key="{{ uniqid() }}"/>
-            @else
-                <x-dynamic-component :component="$this->{$attributes->wire('model')->value()}" />
-            @endif
-        </div>
-        {{ $append ?? '' }}
     </div>
-</x-dynamic-component>
+    {{ $append ?? '' }}
+</div>

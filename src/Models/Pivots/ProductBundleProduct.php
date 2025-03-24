@@ -8,15 +8,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ProductBundleProduct extends FluxPivot
 {
-    protected $table = 'product_bundle_product';
+    public $incrementing = true;
 
     public $timestamps = false;
 
-    public $incrementing = true;
+    protected $table = 'product_bundle_product';
 
     protected static function booted(): void
     {
-        static::created(function (ProductBundleProduct $model) {
+        static::created(function (ProductBundleProduct $model): void {
             if (! $model->siblings()->whereKeyNot($model->id)->exists()) {
                 $model->product->update([
                     'is_bundle' => true,
@@ -24,7 +24,7 @@ class ProductBundleProduct extends FluxPivot
             }
         });
 
-        static::deleted(function (ProductBundleProduct $model) {
+        static::deleted(function (ProductBundleProduct $model): void {
             if ($model->siblings()->count() === 0) {
                 $model->product->update([
                     'is_bundle' => false,

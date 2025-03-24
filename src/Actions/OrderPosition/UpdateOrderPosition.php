@@ -11,19 +11,18 @@ use FluxErp\Models\Product;
 use FluxErp\Rulesets\OrderPosition\UpdateOrderPositionRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 class UpdateOrderPosition extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateOrderPositionRuleset::class;
-    }
-
     public static function models(): array
     {
         return [OrderPosition::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateOrderPositionRuleset::class;
     }
 
     public function performAction(): Model
@@ -110,7 +109,7 @@ class UpdateOrderPosition extends FluxAction
                         'is_bundle_position' => true,
                     ];
                 })
-                ->each(function (array $bundleProduct) {
+                ->each(function (array $bundleProduct): void {
                     CreateOrderPosition::make($bundleProduct)
                         ->validate()
                         ->execute();
@@ -124,10 +123,7 @@ class UpdateOrderPosition extends FluxAction
 
     protected function validateData(): void
     {
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(OrderPosition::class));
-
-        $this->data = $validator->validate();
+        parent::validateData();
 
         if ($this->data['id'] ?? false) {
             $errors = [];

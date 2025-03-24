@@ -11,27 +11,27 @@ class RefactorProjectCategoriesTable extends Migration
     {
         $this->renameProjectCategoriesTableToCategories();
 
-        Schema::table('categories', function (Blueprint $table) {
+        Schema::table('categories', function (Blueprint $table): void {
             $table->boolean('is_project_category')->after('sort_number');
         });
     }
 
     public function down(): void
     {
-        Schema::table('categories', function (Blueprint $table) {
+        Schema::table('categories', function (Blueprint $table): void {
             $table->dropColumn('is_project_category');
         });
 
         $this->renameCategoriesTableToProjectCategories();
     }
 
-    private function renameProjectCategoriesTableToCategories()
-    {
-        DB::statement('RENAME TABLE project_categories TO categories');
-    }
-
-    private function renameCategoriesTableToProjectCategories()
+    private function renameCategoriesTableToProjectCategories(): void
     {
         DB::statement('RENAME TABLE categories TO project_categories');
+    }
+
+    private function renameProjectCategoriesTableToCategories(): void
+    {
+        DB::statement('RENAME TABLE project_categories TO categories');
     }
 }

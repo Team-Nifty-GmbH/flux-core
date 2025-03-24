@@ -51,7 +51,7 @@ class Login extends Component
             $login = $this->tryLogin();
         } else {
             $this->sendMagicLink();
-            $this->notification()->success(__('Login link sent, check your inbox'));
+            $this->notification()->success(__('Login link sent, check your inbox'))->send();
 
             return true;
         }
@@ -62,11 +62,20 @@ class Login extends Component
             return true;
         } else {
             $this->reset('password');
-            $this->notification()->error(__('Login failed'));
+            $this->notification()->error(__('Login failed'))->send();
             $this->js('$focus.focus(document.getElementById(\'password\'));');
         }
 
         return false;
+    }
+
+    public function resetPassword(): void
+    {
+        $this->validateOnly('email');
+
+        $this->getPasswordBroker()->sendResetLink(['email' => $this->email]);
+
+        $this->notification()->success(__('Password reset link sent'))->send();
     }
 
     public function sendMagicLink(): void
@@ -80,24 +89,6 @@ class Login extends Component
         }
     }
 
-    public function resetPassword(): void
-    {
-        $this->validateOnly('email');
-
-        $this->getPasswordBroker()->sendResetLink(['email' => $this->email]);
-
-        $this->notification()->success(__('Password reset link sent'));
-    }
-
-    protected function tryLogin(): bool
-    {
-        return Auth::guard($this->guard)->attempt([
-            'email' => $this->email,
-            'password' => $this->password,
-            'is_active' => true,
-        ]);
-    }
-
     protected function getPasswordBroker(): PasswordBroker
     {
         $provider = config('auth.guards.' . Auth::guard($this->guard)->name . '.provider');
@@ -109,5 +100,14 @@ class Login extends Component
             ->first();
 
         return Password::broker($broker);
+    }
+
+    protected function tryLogin(): bool
+    {
+        return Auth::guard($this->guard)->attempt([
+            'email' => $this->email,
+            'password' => $this->password,
+            'is_active' => true,
+        ]);
     }
 }

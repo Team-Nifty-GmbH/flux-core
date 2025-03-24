@@ -1,7 +1,7 @@
 <?php
 
+use FluxErp\Actions\Media\DownloadMultipleMedia;
 use FluxErp\Http\Controllers\AuthController;
-use FluxErp\Http\Controllers\MediaController;
 use FluxErp\Http\Middleware\PortalMiddleware;
 use FluxErp\Livewire\Portal\Auth\Login;
 use FluxErp\Livewire\Portal\Auth\Logout;
@@ -38,13 +38,12 @@ use TeamNiftyGmbH\DataTable\Controllers\IconController;
 Route::middleware(['web', PortalMiddleware::class])
     ->domain(config('flux.portal_domain'))
     ->name('portal.')
-    ->group(function () {
-
+    ->group(function (): void {
         Route::get('/icons/{name}/{variant?}', IconController::class)
             ->where('variant', '(outline|solid)')
             ->name('icons');
 
-        Route::middleware(['guest:address'])->group(function () {
+        Route::middleware(['guest:address'])->group(function (): void {
             Route::get('/login', Login::class)
                 ->name('login');
             Route::post('/login', [AuthController::class, 'authenticatePortal']);
@@ -54,7 +53,7 @@ Route::middleware(['web', PortalMiddleware::class])
         Route::any('/logout', Logout::class)
             ->name('logout');
 
-        Route::middleware(['auth:address', 'permission'])->group(function () {
+        Route::middleware(['auth:address', 'permission'])->group(function (): void {
             Route::get('/', Dashboard::class)
                 ->name('dashboard');
             Route::get('/calendar', Calendar::class)
@@ -90,7 +89,7 @@ Route::middleware(['web', PortalMiddleware::class])
                 return $media;
             })->name('media');
 
-            Route::any('/media/download-multiple', [MediaController::class, 'downloadMultiple'])
+            Route::any('/media/download-multiple', DownloadMultipleMedia::class)
                 ->name('media.download-multiple');
         });
     });

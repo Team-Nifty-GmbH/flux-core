@@ -14,20 +14,19 @@ use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\Product\UpdateProductRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class UpdateProduct extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateProductRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Product::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateProductRuleset::class;
     }
 
     public function performAction(): Model
@@ -80,7 +79,7 @@ class UpdateProduct extends FluxAction
         if ($prices) {
             $priceCollection = collect($prices)->keyBy('price_list_id');
             $product->prices
-                ?->each(function ($price) use ($priceCollection) {
+                ?->each(function ($price) use ($priceCollection): void {
                     if ($priceCollection->has($price->price_list_id)) {
                         $price->update($priceCollection->get($price->price_list_id));
                         $priceCollection->forget($price->price_list_id);
@@ -131,10 +130,7 @@ class UpdateProduct extends FluxAction
 
     protected function validateData(): void
     {
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(Product::class));
-
-        $this->data = $validator->validate();
+        parent::validateData();
 
         if ($this->data['parent_id'] ?? false) {
             $product = resolve_static(Product::class, 'query')

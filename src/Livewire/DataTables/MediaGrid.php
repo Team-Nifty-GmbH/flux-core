@@ -19,6 +19,24 @@ class MediaGrid extends MediaList
         'url' => 'image',
     ];
 
+    public function deleteMedia(Media $media): bool
+    {
+        try {
+            DeleteMedia::make($media->toArray())
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
+    }
+
     protected function getLayout(): string
     {
         return 'tall-datatables::layouts.grid';
@@ -37,23 +55,5 @@ class MediaGrid extends MediaList
             );
 
         return $itemArray;
-    }
-
-    public function deleteMedia(Media $media): bool
-    {
-        try {
-            DeleteMedia::make($media->toArray())
-                ->checkPermission()
-                ->validate()
-                ->execute();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
     }
 }

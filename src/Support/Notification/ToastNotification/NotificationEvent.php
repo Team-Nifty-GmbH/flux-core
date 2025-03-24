@@ -7,11 +7,11 @@ use Illuminate\Support\Arr;
 
 class NotificationEvent implements Arrayable
 {
-    protected ?string $url = null;
-
     protected ?string $method = null;
 
     protected mixed $params = null;
+
+    protected ?string $url = null;
 
     public static function make(...$arguments): static
     {
@@ -28,13 +28,6 @@ class NotificationEvent implements Arrayable
         }
 
         return $instance;
-    }
-
-    public function url(string $url): static
-    {
-        $this->url = $url;
-
-        return $this;
     }
 
     public function method(string $method): static
@@ -58,5 +51,12 @@ class NotificationEvent implements Arrayable
             'method' => $this->method,
             'params' => $this->params,
         ];
+    }
+
+    public function url(string $url): static
+    {
+        $this->url = $url;
+
+        return $this;
     }
 }

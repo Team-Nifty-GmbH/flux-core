@@ -9,14 +9,14 @@ use Illuminate\Validation\ValidationException;
 
 class CreateValueList extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateValueListRuleset::class;
-    }
-
     public static function models(): array
     {
         return [AdditionalColumn::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateValueListRuleset::class;
     }
 
     public function performAction(): AdditionalColumn

@@ -12,9 +12,9 @@ class PaymentReminderForm extends FluxForm
     #[Locked]
     public ?int $id = null;
 
-    public ?int $order_id = null;
-
     public ?int $media_id = null;
+
+    public ?int $order_id = null;
 
     public ?int $reminder_level = null;
 

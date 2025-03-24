@@ -12,6 +12,7 @@ use FluxErp\Models\Product;
 use FluxErp\Models\ProductOptionGroup;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Modelable;
 use Livewire\Attributes\Renderless;
@@ -20,14 +21,14 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class VariantList extends ProductList
 {
-    protected string $view = 'flux::livewire.product.variant-list';
-
     public array $enabledCols = [
         'name',
         'product_number',
         'product_options.name',
         'is_active',
     ];
+
+    public bool $isSelectable = true;
 
     #[Modelable]
     public ProductForm $product;
@@ -38,7 +39,7 @@ class VariantList extends ProductList
 
     public array $variants = [];
 
-    public bool $isSelectable = true;
+    protected string $view = 'flux::livewire.product.variant-list';
 
     public function mount(): void
     {
@@ -61,8 +62,8 @@ class VariantList extends ProductList
             ->with('children:id,parent_id')
             ->first()
             ->children
-            ?->each(function ($item) {
-                $item->productOptions->each(function ($item) {
+            ?->each(function ($item): void {
+                $item->productOptions->each(function ($item): void {
                     $this->selectedOptions[$item->product_option_group_id][] = $item->id;
                 });
             });
@@ -76,12 +77,12 @@ class VariantList extends ProductList
     {
         return [
             DataTableButton::make()
-                ->color('primary')
-                ->label(__('Edit Variants'))
+                ->color('indigo')
+                ->text(__('Edit Variants'))
                 ->icon('pencil')
                 ->attributes([
                     'x-on:click' => <<<'JS'
-                        $openModal('generate-variants-modal')
+                        $modalOpen('generate-variants-modal')
                     JS,
                 ])
                 ->when(
@@ -95,8 +96,8 @@ class VariantList extends ProductList
     {
         return [
             DataTableButton::make()
-                ->label(__('Recalculate names'))
-                ->icon('refresh')
+                ->text(__('Recalculate names'))
+                ->icon('arrow-path')
                 ->when(fn () => resolve_static(UpdateProduct::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:flux-confirm.icon.info' => __('wire:confirm.recalculate-product-names'),
@@ -152,42 +153,12 @@ class VariantList extends ProductList
             ->toArray();
     }
 
-    public function save(): void
-    {
-        foreach (data_get($this->variants, 'delete', []) as $variantDelete) {
-            DeleteProduct::make($variantDelete)
-                ->checkPermission()
-                ->validate()
-                ->execute();
-        }
-
-        try {
-            CreateVariants::make(
-                array_merge(
-                    $this->product->toArray(),
-                    [
-                        'parent_id' => $this->product->id,
-                        'product_options' => data_get($this->variants, 'new', []),
-                    ]
-                )
-            )
-                ->checkPermission()
-                ->validate()
-                ->execute();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-        }
-
-        $this->variants = [];
-        $this->loadData();
-    }
-
     #[Renderless]
     public function recalculateNames(): void
     {
         $parent = resolve_static(Product::class, 'query')
             ->whereKey($this->product->id)
-            ->first(['name']);
+            ->first(['id', 'name']);
 
         foreach ($this->getSelectedModelsQuery()->with('productOptions:id,name')->get(['id']) as $product) {
             UpdateProduct::make([
@@ -207,5 +178,52 @@ class VariantList extends ProductList
         }
 
         $this->loadData();
+    }
+
+    public function save(): void
+    {
+        foreach (data_get($this->variants, 'delete', []) as $variantDelete) {
+            DeleteProduct::make($variantDelete)
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        }
+
+        $selectedLanguage = Session::pull('selectedLanguageId');
+
+        $product = resolve_static(Product::class, 'query')
+            ->whereKey($this->product->id)
+            ->first(resolve_static(Product::class, 'getTranslatableAttributes'))
+            ?->toArray();
+
+        Session::put('selectedLanguageId', $selectedLanguage);
+
+        try {
+            CreateVariants::make(
+                array_merge(
+                    $this->product->toArray(),
+                    $product ?? [],
+                    [
+                        'parent_id' => $this->product->id,
+                        'product_options' => data_get($this->variants, 'new', []),
+                    ]
+                )
+            )
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+        }
+
+        $this->variants = [];
+        $this->loadData();
+    }
+
+    protected function itemToArray($item): array
+    {
+        $item->load('productOptions:id,name');
+
+        return parent::itemToArray($item);
     }
 }

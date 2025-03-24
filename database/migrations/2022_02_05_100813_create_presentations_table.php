@@ -8,7 +8,7 @@ class CreatePresentationsTable extends Migration
 {
     public function up(): void
     {
-        Schema::create('presentations', function (Blueprint $table) {
+        Schema::create('presentations', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
             $table->nullableMorphs('model');

@@ -12,7 +12,7 @@ return new class() extends Migration
      */
     public function up(): void
     {
-        Schema::table('products', function (Blueprint $table) {
+        Schema::table('products', function (Blueprint $table): void {
             $table->dropColumn(['locked_by_user_id', 'is_force_active', 'is_force_inactive']);
             $table->renameColumn('option_bundle_type', 'is_pre_packed');
             $table->renameColumn('is_active_always_export_in_web_shop', 'is_nos');
@@ -26,7 +26,7 @@ return new class() extends Migration
 
         $this->migrateClientId();
 
-        Schema::table('products', function (Blueprint $table) {
+        Schema::table('products', function (Blueprint $table): void {
             $table->foreign('client_id')->references('id')->on('clients');
         });
     }
@@ -36,7 +36,7 @@ return new class() extends Migration
      */
     public function down(): void
     {
-        Schema::table('products', function (Blueprint $table) {
+        Schema::table('products', function (Blueprint $table): void {
             $table->text('locked_by_user_id')->nullable()->after('is_pre_packed');
             $table->boolean('is_force_active')->default(false)
                 ->after('is_active_export_to_web_shop');

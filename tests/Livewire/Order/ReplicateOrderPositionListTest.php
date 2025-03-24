@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class ReplicateOrderPositionListTest extends TestCase
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(ReplicateOrderPositionList::class)
             ->assertStatus(200);

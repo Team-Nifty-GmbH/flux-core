@@ -18,9 +18,9 @@ class UniqueInFieldDependence implements DataAwareRule, Rule
 
     private bool $ignoreSelf;
 
-    private string $model;
-
     private string $key;
+
+    private string $model;
 
     /**
      * Create a new rule instance.
@@ -33,6 +33,14 @@ class UniqueInFieldDependence implements DataAwareRule, Rule
         $this->ignoreSelf = $ignoreSelf;
         $this->model = $model;
         $this->key = $key ?: (app($model))->getKeyName();
+    }
+
+    /**
+     * Get the validation error message.
+     */
+    public function message(): string
+    {
+        return 'The :attribute has already been taken.';
     }
 
     /**
@@ -88,23 +96,15 @@ class UniqueInFieldDependence implements DataAwareRule, Rule
 
         return ! $model->query()
             ->where(array_pop($explodedAttribute), $value)
-            ->where(function (Builder $query) use ($explodedDependingFields, $dependingFieldValues) {
+            ->where(function (Builder $query) use ($explodedDependingFields, $dependingFieldValues): void {
                 foreach ($explodedDependingFields as $key => $explodedDependingField) {
                     $query->where(array_pop($explodedDependingField), $dependingFieldValues[$key]);
                 }
             })
-            ->when($this->ignoreSelf, function (Builder $query) use ($keyData) {
+            ->when($this->ignoreSelf, function (Builder $query) use ($keyData): void {
                 $query->whereKeyNot($keyData);
             })
             ->exists();
-    }
-
-    /**
-     * Get the validation error message.
-     */
-    public function message(): string
-    {
-        return 'The :attribute has already been taken.';
     }
 
     /**

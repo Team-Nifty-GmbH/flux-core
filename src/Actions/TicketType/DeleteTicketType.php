@@ -9,14 +9,14 @@ use Illuminate\Validation\ValidationException;
 
 class DeleteTicketType extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeleteTicketTypeRuleset::class;
-    }
-
     public static function models(): array
     {
         return [TicketType::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeleteTicketTypeRuleset::class;
     }
 
     public function performAction(): ?bool

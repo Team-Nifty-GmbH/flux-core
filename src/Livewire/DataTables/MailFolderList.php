@@ -6,10 +6,10 @@ use FluxErp\Models\MailFolder;
 
 class MailFolderList extends BaseDataTable
 {
-    protected string $model = MailFolder::class;
-
     public array $enabledCols = [
         'name',
         'slug',
     ];
+
+    protected string $model = MailFolder::class;
 }

@@ -7,9 +7,9 @@ use Illuminate\Console\Command;
 
 class InitCurrencies extends Command
 {
-    protected $signature = 'init:currencies';
-
     protected $description = 'Initiates Currencies and fills table with data.';
+
+    protected $signature = 'init:currencies';
 
     public function handle(): void
     {

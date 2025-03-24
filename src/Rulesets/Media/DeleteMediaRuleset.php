@@ -8,9 +8,9 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class DeleteMediaRuleset extends FluxRuleset
 {
-    protected static ?string $model = Media::class;
-
     protected static bool $addAdditionalColumnRules = false;
+
+    protected static ?string $model = Media::class;
 
     public function rules(): array
     {

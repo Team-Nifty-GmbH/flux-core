@@ -23,17 +23,49 @@ trait Categorizable
 
     public static function bootCategorizable(): void
     {
-        static::saving(function (Model $model) {
+        static::saving(function (Model $model): void {
             // before saving remove virtual attributes
             $model->sanitize();
         });
 
-        static::saved(function (Model $model) {
+        static::saved(function (Model $model): void {
             // after saving attach the attributes
             if (! is_null(static::$categoryIds)) {
                 $model->categories()->sync(static::$categoryIds);
             }
         });
+    }
+
+    public function categories(): MorphToMany
+    {
+        return $this->morphToMany(Category::class, 'categorizable')
+            ->using(\FluxErp\Models\Pivots\Categorizable::class);
+    }
+
+    public function category(): MorphToMany|BelongsTo
+    {
+        return $this->hasCategoryIdAttribute() ? $this->belongsTo(Category::class) : $this->categories();
+    }
+
+    /**
+     * returns the first category id if only one category is assigned
+     * if set is used the category id is set into a static variable
+     */
+    public function categoryId(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $this->hasCategoryIdAttribute()
+                ? $value
+                : ($this->categories()->count() === 1 ? $this->categories()->first()?->id : null),
+            set: fn ($value) => $this->hasCategoryIdAttribute()
+                ? $value
+                : self::$categoryIds = $value
+        );
+    }
+
+    public function getFirstCategory(): HasOne
+    {
+        return $this->hasOne(Category::class, 'id', 'category_id');
     }
 
     /**
@@ -56,22 +88,6 @@ trait Categorizable
         }
 
         $this->mergeFillable(array_merge($unguarded, ['category_id', 'categories']));
-    }
-
-    public function categories(): MorphToMany
-    {
-        return $this->morphToMany(Category::class, 'categorizable')
-            ->using(\FluxErp\Models\Pivots\Categorizable::class);
-    }
-
-    public function category(): MorphToMany|BelongsTo
-    {
-        return $this->hasCategoryIdAttribute() ? $this->belongsTo(Category::class) : $this->categories();
-    }
-
-    public function getFirstCategory(): HasOne
-    {
-        return $this->hasOne(Category::class, 'id', 'category_id');
     }
 
     /**
@@ -104,22 +120,6 @@ trait Categorizable
         }
 
         self::$categoryIds = $validator->validated();
-    }
-
-    /**
-     * returns the first category id if only one category is assigned
-     * if set is used the category id is set into a static variable
-     */
-    public function categoryId(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => $this->hasCategoryIdAttribute()
-                ? $value
-                : ($this->categories()->count() === 1 ? $this->categories()->first()?->id : null),
-            set: fn ($value) => $this->hasCategoryIdAttribute()
-                ? $value
-                : self::$categoryIds = $value
-        );
     }
 
     /**

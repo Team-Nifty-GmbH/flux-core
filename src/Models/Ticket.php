@@ -2,13 +2,13 @@
 
 namespace FluxErp\Models;
 
+use Exception;
 use FluxErp\Casts\Money;
 use FluxErp\States\Ticket\TicketState;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Communicatable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
-use FluxErp\Traits\HasCustomEvents;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasRelatedModel;
@@ -30,9 +30,11 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables
 {
-    use Commentable, Communicatable, Filterable, HasAdditionalColumns, HasCustomEvents, HasFrontendAttributes,
-        HasPackageFactory, HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification, HasUuid,
-        InteractsWithMedia, LogsActivity, Searchable, SoftDeletes, Trackable;
+    use Commentable, Communicatable, Filterable, HasAdditionalColumns, HasFrontendAttributes, HasPackageFactory,
+        HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification, HasUuid, InteractsWithMedia,
+        LogsActivity, Searchable, SoftDeletes, Trackable;
+
+    public static string $iconName = 'chat-bubble-left-right';
 
     protected ?string $detailRouteName = 'tickets.id';
 
@@ -40,14 +42,37 @@ class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables
         'ticketType',
     ];
 
-    public static string $iconName = 'chat-bubble-left-right';
-
     protected function casts(): array
     {
         return [
             'state' => TicketState::class,
             'total_cost' => Money::class,
         ];
+    }
+
+    public function authenticatable(): MorphTo
+    {
+        return $this->morphTo('authenticatable');
+    }
+
+    public function costColumn(): string
+    {
+        return 'total_cost';
+    }
+
+    public function detailRouteParams(): array
+    {
+        return [
+            'id' => $this->id,
+        ];
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function getAvatarUrl(): ?string
+    {
+        return $this->getFirstMediaUrl('images') ?: static::icon()->getUrl();
     }
 
     public function getContactId(): ?int
@@ -59,9 +84,24 @@ class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables
             : null;
     }
 
-    public function authenticatable(): MorphTo
+    public function getDescription(): ?string
     {
-        return $this->morphTo('authenticatable');
+        return Str::limit($this->description, 200);
+    }
+
+    public function getLabel(): ?string
+    {
+        return $this->title . ' ' . $this->ticket_number;
+    }
+
+    public function getPortalDetailRoute(): string
+    {
+        return route('portal.tickets.id', ['id' => $this->id]);
+    }
+
+    public function getUrl(): ?string
+    {
+        return $this->detailRoute();
     }
 
     public function model(): MorphTo
@@ -77,45 +117,5 @@ class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'ticket_user');
-    }
-
-    public function detailRouteParams(): array
-    {
-        return [
-            'id' => $this->id,
-        ];
-    }
-
-    public function getLabel(): ?string
-    {
-        return $this->title . ' ' . $this->ticket_number;
-    }
-
-    public function getDescription(): ?string
-    {
-        return Str::limit($this->description, 200);
-    }
-
-    public function getUrl(): ?string
-    {
-        return $this->detailRoute();
-    }
-
-    /**
-     * @throws \Exception
-     */
-    public function getAvatarUrl(): ?string
-    {
-        return $this->getFirstMediaUrl('images') ?: static::icon()->getUrl();
-    }
-
-    public function getPortalDetailRoute(): string
-    {
-        return route('portal.tickets.id', ['id' => $this->id]);
-    }
-
-    public function costColumn(): string
-    {
-        return 'total_cost';
     }
 }

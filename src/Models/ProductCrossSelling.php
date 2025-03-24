@@ -22,6 +22,11 @@ class ProductCrossSelling extends FluxModel implements Sortable
         ];
     }
 
+    public function buildSortQuery(): Builder
+    {
+        return static::query()->where('product_id', $this->product_id);
+    }
+
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
@@ -31,10 +36,5 @@ class ProductCrossSelling extends FluxModel implements Sortable
     {
         return $this->belongsToMany(Product::class, 'product_cross_selling_product')
             ->using(ProductCrossSellingProduct::class);
-    }
-
-    public function buildSortQuery(): Builder
-    {
-        return static::query()->where('product_id', $this->product_id);
     }
 }

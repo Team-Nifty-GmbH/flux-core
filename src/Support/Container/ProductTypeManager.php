@@ -2,10 +2,12 @@
 
 namespace FluxErp\Support\Container;
 
+use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Traits\Macroable;
 use InvalidArgumentException;
 use Livewire\Component;
+use ReflectionClass;
 
 class ProductTypeManager
 {
@@ -18,8 +20,23 @@ class ProductTypeManager
         $this->productTypes = collect();
     }
 
+    public function all(): Collection
+    {
+        return $this->productTypes;
+    }
+
+    public function get(?string $name): ?array
+    {
+        return $this->productTypes->get($name);
+    }
+
+    public function getDefault(): ?array
+    {
+        return $this->productTypes->first(fn ($type) => $type['is_default']);
+    }
+
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function register(string $name, ?string $class = null, ?string $view = null, bool $default = false): void
     {
@@ -30,7 +47,7 @@ class ProductTypeManager
         if ($class
             && (
                 ! is_a($class, Component::class, true)
-                || (new \ReflectionClass($class))->isAbstract()
+                || (new ReflectionClass($class))->isAbstract()
             )
         ) {
             throw new InvalidArgumentException('The provided class must be a non-abstract livewire component.');
@@ -57,20 +74,5 @@ class ProductTypeManager
     public function unregister(string $name): void
     {
         $this->productTypes->forget($name);
-    }
-
-    public function all(): Collection
-    {
-        return $this->productTypes;
-    }
-
-    public function get(?string $name): ?array
-    {
-        return $this->productTypes->get($name);
-    }
-
-    public function getDefault(): ?array
-    {
-        return $this->productTypes->first(fn ($type) => $type['is_default']);
     }
 }

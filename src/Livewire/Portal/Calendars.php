@@ -2,19 +2,27 @@
 
 namespace FluxErp\Livewire\Portal;
 
-use Illuminate\Contracts\View\Factory;
+use FluxErp\Livewire\Features\Calendar\FluxCalendar;
+use FluxErp\Models\Calendar;
+use FluxErp\Models\CalendarEvent;
 use Illuminate\Contracts\View\View;
-use Illuminate\Foundation\Application;
 use Illuminate\Support\Carbon;
-use TeamNiftyGmbH\Calendar\Livewire\CalendarComponent;
-use TeamNiftyGmbH\Calendar\Models\Calendar;
-use TeamNiftyGmbH\Calendar\Models\CalendarEvent;
 
-class Calendars extends CalendarComponent
+class Calendars extends FluxCalendar
 {
-    public function render(): Factory|View|Application
+    public function render(): View
     {
         return view('flux::livewire.portal.calendar-view');
+    }
+
+    public function attendEvent(CalendarEvent $event): void
+    {
+        $event->invites()
+            ->create([
+                'inviteable_type' => auth()->user()->getMorphClass(),
+                'inviteable_id' => auth()->user()->getKey(),
+                'status' => 'accepted',
+            ]);
     }
 
     public function getCalendars(): array
@@ -39,7 +47,7 @@ class Calendars extends CalendarComponent
             ->first();
 
         return $calendar->calendarEvents()
-            ->where(function ($query) use ($info) {
+            ->where(function ($query) use ($info): void {
                 $query->whereBetween('start', [
                     Carbon::parse($info['start']),
                     Carbon::parse($info['end']),
@@ -59,16 +67,6 @@ class Calendars extends CalendarComponent
                 return $event->toCalendarEventObject(['is_editable' => false, 'is_attending' => $invited]);
             })
             ?->toArray();
-    }
-
-    public function attendEvent(CalendarEvent $event): void
-    {
-        $event->invites()
-            ->create([
-                'inviteable_type' => auth()->user()->getMorphClass(),
-                'inviteable_id' => auth()->user()->getKey(),
-                'status' => 'accepted',
-            ]);
     }
 
     public function notAttendEvent(CalendarEvent $event): void

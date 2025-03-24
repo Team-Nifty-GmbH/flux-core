@@ -9,7 +9,7 @@ class ChangeProjectNameAndDisplayNameToTextOnProjectsTable extends Migration
 {
     public function up(): void
     {
-        Schema::table('projects', function (Blueprint $table) {
+        Schema::table('projects', function (Blueprint $table): void {
             $table->json('project_name')->change();
             $table->json('display_name')->nullable()->change();
         });
@@ -21,7 +21,7 @@ class ChangeProjectNameAndDisplayNameToTextOnProjectsTable extends Migration
         DB::reconnect();
 
         try {
-            Schema::table('projects', function (Blueprint $table) {
+            Schema::table('projects', function (Blueprint $table): void {
                 $table->string('project_name')->change();
                 $table->string('display_name')->nullable()->change();
             });

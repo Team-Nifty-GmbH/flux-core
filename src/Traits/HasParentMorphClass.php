@@ -7,15 +7,6 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 
 trait HasParentMorphClass
 {
-    public function getMorphClass(): string
-    {
-        try {
-            return parent::getMorphClass();
-        } catch (ClassMorphViolationException) {
-            return static::getParentMorphClass();
-        }
-    }
-
     public static function getParentMorphClass(): string
     {
         $morphMap = Relation::morphMap();
@@ -30,5 +21,14 @@ trait HasParentMorphClass
         }
 
         return $parentClass;
+    }
+
+    public function getMorphClass(): string
+    {
+        try {
+            return parent::getMorphClass();
+        } catch (ClassMorphViolationException) {
+            return static::getParentMorphClass();
+        }
     }
 }
