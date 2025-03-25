@@ -11,7 +11,6 @@ use FluxErp\Traits\HasModelPermission;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Route;
 use Livewire\Mechanisms\ComponentRegistry;
 use ReflectionClass;
