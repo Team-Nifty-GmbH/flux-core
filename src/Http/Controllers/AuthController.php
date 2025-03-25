@@ -4,7 +4,6 @@ namespace FluxErp\Http\Controllers;
 
 use FluxErp\Helpers\ResponseHelper;
 use FluxErp\Models\Address;
-use FluxErp\Models\InterfaceUser;
 use FluxErp\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -56,17 +55,6 @@ class AuthController extends Controller
 
             if ($user && Hash::check($request->password, $user->password)) {
                 $abilities = ['address'];
-            }
-        }
-
-        if (count($abilities) < 1) {
-            $user = resolve_static(InterfaceUser::class, 'query')
-                ->where('name', $request->email)
-                ->where('is_active', true)
-                ->first();
-
-            if ($user && Hash::check($request->password, $user->password)) {
-                $abilities = ['interface'];
             }
         }
 

@@ -2,21 +2,15 @@
 
 namespace FluxErp\Tests\Feature\Api;
 
-use FluxErp\Models\InterfaceUser;
 use FluxErp\Models\Language;
 use FluxErp\Models\Permission;
 use FluxErp\Models\User;
 use FluxErp\Tests\TestCase;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
 class AuthTest extends TestCase
 {
-    private Model $interfaceUser;
-
-    private string $interfaceUserPassword;
-
     private string $password;
 
     private User $user;
@@ -36,14 +30,6 @@ class AuthTest extends TestCase
         $this->user->password = $this->password;
         $this->user->is_active = true;
         $this->user->save();
-
-        $this->interfaceUserPassword = Str::random();
-
-        $this->interfaceUser = new InterfaceUser();
-        $this->interfaceUser->name = Str::random();
-        $this->interfaceUser->password = $this->interfaceUserPassword;
-        $this->interfaceUser->is_active = true;
-        $this->interfaceUser->save();
     }
 
     public function test_authenticate(): void
@@ -56,41 +42,6 @@ class AuthTest extends TestCase
 
         $token = json_decode($response->getContent())->access_token;
         $this->assertNotEmpty($token);
-    }
-
-    public function test_authenticate_interface_user(): void
-    {
-        $response = $this->post('/api/auth/token', [
-            'email' => $this->interfaceUser->name,
-            'password' => $this->interfaceUserPassword,
-        ]);
-
-        $response->assertStatus(200);
-        $token = json_decode($response->getContent())->access_token;
-        $this->assertNotEmpty($token);
-    }
-
-    public function test_authenticate_interface_user_invalid_credentials(): void
-    {
-        $response = $this->post('/api/auth/token', [
-            'email' => $this->interfaceUser->name,
-            'password' => Str::random() . $this->interfaceUserPassword,
-        ]);
-
-        $response->assertStatus(401);
-    }
-
-    public function test_authenticate_interface_user_user_inactive(): void
-    {
-        $this->interfaceUser->is_active = false;
-        $this->interfaceUser->save();
-
-        $response = $this->post('/api/auth/token', [
-            'email' => $this->interfaceUser->name,
-            'password' => $this->interfaceUserPassword,
-        ]);
-
-        $response->assertStatus(401);
     }
 
     public function test_authenticate_invalid_credentials(): void
