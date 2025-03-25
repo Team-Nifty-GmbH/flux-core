@@ -28,15 +28,15 @@
                     light
                     icon="clock"
                     x-on:click="
-                            $dispatch(
-                                'start-time-tracking',
-                                {
-                                    trackable_type: 'FluxErp\\\Models\\\Task',
-                                    trackable_id: {{ $task->id }},
-                                    name: '{{ $task->name }}',
-                                    description: {{ strip_tags(json_encode($task->description)) }}
-                                }
-                            )"
+                        $dispatch(
+                            'start-time-tracking',
+                            {
+                                trackable_type: '{{ morph_alias(\FluxErp\Models\Task::class) }}',
+                                trackable_id: {{ $task->id }},
+                                name: '{{ $task->name }}',
+                                description: {{ strip_tags(json_encode($task->description)) }}
+                            }
+                        )"
                 >
                     <div class="hidden sm:block">
                         {{ __('Track Time') }}
@@ -68,8 +68,8 @@
                     x-show="edit"
                     class="w-full"
                     x-on:click="$wire.save().then((success) => {
-                    edit = false;
-                });"
+                        edit = false;
+                    });"
                     :text="__('Save')"
                 />
                 <x-button

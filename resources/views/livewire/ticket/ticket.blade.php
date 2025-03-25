@@ -39,15 +39,15 @@
                 light
                 icon="clock"
                 x-on:click="
-                            $dispatch(
-                                'start-time-tracking',
-                                {
-                                    trackable_type: 'FluxErp\\\Models\\\Ticket',
-                                    trackable_id: {{ $ticket->id }},
-                                    name: '{{ $ticket->title }}',
-                                    description: {{ strip_tags(json_encode($ticket->description)) }}
-                                }
-                            )"
+                    $dispatch(
+                        'start-time-tracking',
+                        {
+                            trackable_type: '{{ morph_alias(\FluxErp\Models\Ticket::class) }}',
+                            trackable_id: {{ $ticket->id }},
+                            name: '{{ $ticket->title }}',
+                            description: {{ strip_tags(json_encode($ticket->description)) }}
+                        }
+                    )"
             >
                 <div class="hidden sm:block">
                     {{ __('Track Time') }}

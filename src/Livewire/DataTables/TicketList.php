@@ -173,16 +173,16 @@ class TicketList extends BaseDataTable
         $ticket->description = json_encode($ticket->description);
 
         $this->js(<<<JS
-                    \$dispatch(
-                        'start-time-tracking',
-                        {
-                            trackable_type: '{$ticket->getMorphClass()}',
-                            trackable_id: {$ticket->getKey()},
-                            name: {$ticket->title},
-                            description: {$ticket->description}
-                        }
-                    );
-                JS);
+            \$dispatch(
+                'start-time-tracking',
+                {
+                    trackable_type: '{$ticket->getMorphClass()}',
+                    trackable_id: {$ticket->getKey()},
+                    name: {$ticket->title},
+                    description: {$ticket->description}
+                }
+            );
+        JS);
     }
 
     public function updatedAttachments(): void
