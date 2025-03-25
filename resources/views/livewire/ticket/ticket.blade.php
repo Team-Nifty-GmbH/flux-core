@@ -31,14 +31,40 @@
         class="mt-6 flex flex-col-reverse justify-end space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-x-3 sm:space-y-0 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3"
     >
         @section('buttons')
-        @if (resolve_static(\FluxErp\Actions\Ticket\DeleteTicket::class, 'canPerformAction', [false]) && $ticket->id)
+        @canAction(\FluxErp\Actions\WorkTime\CreateWorkTime::class)
             <x-button
+                x-cloak
+                x-show="$wire.ticket.id"
+                color="secondary"
+                light
+                icon="clock"
+                x-on:click="
+                            $dispatch(
+                                'start-time-tracking',
+                                {
+                                    trackable_type: 'FluxErp\\\Models\\\Ticket',
+                                    trackable_id: {{ $ticket->id }},
+                                    name: '{{ $ticket->title }}',
+                                    description: {{ strip_tags(json_encode($ticket->description)) }}
+                                }
+                            )"
+            >
+                <div class="hidden sm:block">
+                    {{ __('Track Time') }}
+                </div>
+            </x-button>
+        @endcanAction
+
+        @canAction(\FluxErp\Actions\Ticket\DeleteTicket::class)
+            <x-button
+                x-cloak
+                x-show="$wire.ticket.id"
                 color="red"
                 :text="__('Delete') "
                 wire:click="delete()"
                 wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Ticket')]) }}"
             />
-        @endif
+        @endcanAction
 
         <x-button color="indigo" :text="__('Save')" wire:click="save" />
         @show

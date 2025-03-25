@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\DataTables;
 
 use Exception;
 use FluxErp\Actions\Ticket\CreateTicket;
+use FluxErp\Actions\WorkTime\CreateWorkTime;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\TicketType;
@@ -12,6 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\Renderless;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class TicketList extends BaseDataTable
@@ -101,6 +103,18 @@ class TicketList extends BaseDataTable
         ];
     }
 
+    protected function getRowActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->icon('clock')
+                ->text(__('Track Time'))
+                ->when(fn() => resolve_static(CreateWorkTime::class, 'canPerformAction', [false]))
+                ->wireClick('startTimeTracking(record.id)'),
+        ];
+    }
+
+    #[Renderless]
     public function save(): void
     {
         $this->ticket = array_merge($this->ticket, [
@@ -134,7 +148,6 @@ class TicketList extends BaseDataTable
         $this->notification()->success(__('Ticket created…'))->send();
 
         $this->showTicketModal = false;
-        $this->skipRender();
         $this->loadData();
     }
 
@@ -151,6 +164,25 @@ class TicketList extends BaseDataTable
         $this->attachments = [];
 
         $this->showTicketModal = true;
+    }
+
+    #[Renderless]
+    public function startTimeTracking(Ticket $ticket): void
+    {
+        $ticket->title = json_encode($ticket->title);
+        $ticket->description = json_encode($ticket->description);
+
+        $this->js(<<<JS
+                    \$dispatch(
+                        'start-time-tracking',
+                        {
+                            trackable_type: '{$ticket->getMorphClass()}',
+                            trackable_id: {$ticket->getKey()},
+                            name: {$ticket->title},
+                            description: {$ticket->description}
+                        }
+                    );
+                JS);
     }
 
     public function updatedAttachments(): void

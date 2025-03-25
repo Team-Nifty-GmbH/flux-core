@@ -22,43 +22,66 @@
         <div
             class="mt-6 flex flex-col-reverse justify-stretch space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-x-3 sm:space-y-0 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3"
         >
-            @if (resolve_static(\FluxErp\Actions\Task\DeleteTask::class, 'canPerformAction', [false]))
+            @canAction(\FluxErp\Actions\WorkTime\CreateWorkTime::class)
                 <x-button
+                    color="secondary"
                     light
+                    icon="clock"
+                    x-on:click="
+                            $dispatch(
+                                'start-time-tracking',
+                                {
+                                    trackable_type: 'FluxErp\\\Models\\\Task',
+                                    trackable_id: {{ $task->id }},
+                                    name: '{{ $task->name }}',
+                                    description: {{ strip_tags(json_encode($task->description)) }}
+                                }
+                            )"
+                >
+                    <div class="hidden sm:block">
+                        {{ __('Track Time') }}
+                    </div>
+                </x-button>
+            @endcanAction
+
+            @canAction(\FluxErp\Actions\Task\DeleteTask::class)
+                <x-button
                     wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Task')]) }}"
                     color="red"
                     :text="__('Delete')"
                     wire:click="delete()"
                 />
-            @endif
+            @endcanAction
 
-            <x-button
-                color="indigo"
-                x-show="!edit"
-                class="w-full"
-                x-on:click="edit = true"
-                :text="__('Edit')"
-            />
-            <x-button
-                x-cloak
-                color="indigo"
-                loading
-                x-show="edit"
-                class="w-full"
-                x-on:click="$wire.save().then((success) => {
+            @canAction(\FluxErp\Actions\Task\UpdateTask::class)
+                <x-button
+                    color="indigo"
+                    x-show="!edit"
+                    class="w-full"
+                    x-on:click="edit = true"
+                    :text="__('Edit')"
+                />
+                <x-button
+                    x-cloak
+                    color="indigo"
+                    loading
+                    x-show="edit"
+                    class="w-full"
+                    x-on:click="$wire.save().then((success) => {
                     edit = false;
                 });"
-                :text="__('Save')"
-            />
-            <x-button
-                x-cloak
-                color="indigo"
-                loading
-                x-show="edit"
-                class="w-full"
-                x-on:click="edit = false; $wire.resetForm();"
-                :text="__('Cancel')"
-            />
+                    :text="__('Save')"
+                />
+                <x-button
+                    x-cloak
+                    color="indigo"
+                    loading
+                    x-show="edit"
+                    class="w-full"
+                    x-on:click="edit = false; $wire.resetForm();"
+                    :text="__('Cancel')"
+                />
+            @endcanAction
         </div>
     </div>
     <x-flux::tabs
