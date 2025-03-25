@@ -61,7 +61,7 @@ use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
-use Laravel\Sanctum\Http\Middleware\CheckAbilities;
+use Laravel\Sanctum\Http\Middleware\CheckForAnyAbility;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use Laravel\Scout\Builder;
 use Livewire\Component;
@@ -732,7 +732,7 @@ class FluxServiceProvider extends ServiceProvider
         $kernel->appendMiddlewareToGroup('web', AuthContextMiddleware::class);
         $kernel->appendMiddlewareToGroup('web', PortalMiddleware::class);
 
-        $this->app['router']->aliasMiddleware('abilities', CheckAbilities::class);
+        $this->app['router']->aliasMiddleware('ability', CheckForAnyAbility::class);
         $this->app['router']->aliasMiddleware('role', RoleMiddleware::class);
         $this->app['router']->aliasMiddleware('role_or_permission', RoleOrPermissionMiddleware::class);
         $this->app['router']->aliasMiddleware('permission', Permissions::class);

@@ -11,7 +11,6 @@ use FluxErp\Traits\HasModelPermission;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Route;
 use Livewire\Mechanisms\ComponentRegistry;
 use ReflectionClass;
@@ -174,10 +173,6 @@ class InitPermissions extends Command
 
     private function registerRoutePermissions(): void
     {
-        $guards = array_keys(Arr::prependKeysWith(config('auth.guards'), 'auth:'));
-        $guards[] = 'auth';
-        $defaultGuard = config('auth.defaults.guard');
-
         $routes = Route::getRoutes()->getRoutes();
 
         $this->info('Registering route permissions…');
@@ -198,35 +193,19 @@ class InitPermissions extends Command
                 continue;
             }
 
-            $guard = str_replace('auth:', '', $guard);
+            $authGuards = explode(',', str_replace('auth:', '', $guard));
 
-            $permission = resolve_static(
-                Permission::class,
-                'findOrCreate',
-                [
-                    'name' => $permissionName,
-                    'guardName' => $guard,
-                ]
-            );
+            foreach ($authGuards as $guard) {
+                $permission = resolve_static(
+                    Permission::class,
+                    'findOrCreate',
+                    [
+                        'name' => $permissionName,
+                        'guardName' => $guard,
+                    ]
+                );
 
-            unset($this->currentPermissions[$permission->id]);
-
-            if ($guard[1] === $defaultGuard) {
-                foreach (array_keys(config('auth.guards')) as $additionalGuard) {
-                    if ($additionalGuard === $defaultGuard ||
-                        config('auth.guards.' . $additionalGuard)['provider'] !== 'users') {
-                        continue;
-                    }
-
-                    resolve_static(
-                        Permission::class,
-                        'findOrCreate',
-                        [
-                            'name' => $permissionName,
-                            'guardName' => $additionalGuard,
-                        ]
-                    );
-                }
+                unset($this->currentPermissions[$permission->id]);
             }
 
             $bar->advance();
