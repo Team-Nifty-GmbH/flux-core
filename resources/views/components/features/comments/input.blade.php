@@ -75,7 +75,7 @@
                         />
                         <x-button
                             color="indigo"
-                            x-on:click="saveComment($refs.textarea, tempFilesId, $refs.sticky, false, typeof comment !== 'undefined' ? comment : null).then((success) => {if(success) clearPond();})"
+                            x-on:click="saveComment($refs.textarea, tempFilesId, $refs.sticky, true, typeof comment !== 'undefined' ? comment : null).then((success) => {if(success) clearPond();})"
                             spinner="saveComment"
                             wire:loading.attr="disabled"
                             x-bind:disabled="isLoadingFiles.length > 0"
