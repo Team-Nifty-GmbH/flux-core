@@ -176,6 +176,10 @@ class ViewServiceProvider extends ServiceProvider
             ->modal('fullscreen')
             ->block('wrapper.fourth', 'dark:bg-dark-700 relative flex w-full transform flex-col rounded-xl bg-white text-left shadow-xl transition-all min-h-screen')
             ->block('body', 'dark:text-dark-300 grow rounded-b-xl py-5 text-gray-700 px-4 min-h-screen');
+
+        TallStackUi::personalize()
+            ->modal('headless')
+            ->block('body', 'dark:text-dark-300 grow text-gray-700');
     }
 
     protected function registerViews(): void

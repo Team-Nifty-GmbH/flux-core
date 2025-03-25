@@ -3,12 +3,12 @@
 namespace FluxErp\Contracts;
 
 use Carbon\Carbon;
+use FluxErp\Actions\FluxAction;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 
 interface Calendarable
 {
-    public static function fromCalendarEvent(array $event): Model;
+    public static function fromCalendarEvent(array $event): FluxAction;
 
     public static function toCalendar(): array;
 

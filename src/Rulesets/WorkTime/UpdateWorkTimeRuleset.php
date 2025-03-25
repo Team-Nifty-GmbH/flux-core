@@ -22,7 +22,8 @@ class UpdateWorkTimeRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                (app(ModelExists::class, ['model' => WorkTime::class]))->where('is_locked', false),
+                app(ModelExists::class, ['model' => WorkTime::class])
+                    ->where('is_locked', false),
             ],
             'contact_id' => [
                 'nullable',

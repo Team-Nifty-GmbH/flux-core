@@ -21,8 +21,9 @@ class CalendarForm extends FluxForm
     public bool $has_repeatable_events = true;
 
     #[Locked]
-    public ?int $id = null;
+    public int|string|null $id = null;
 
+    #[Locked]
     public bool $is_editable = true;
 
     public bool $is_public = false;
@@ -31,7 +32,7 @@ class CalendarForm extends FluxForm
 
     public ?string $name = null;
 
-    public ?int $parent_id = null;
+    public string|int|null $parent_id = null;
 
     public ?int $user_id = null;
 
@@ -44,6 +45,26 @@ class CalendarForm extends FluxForm
         }
 
         parent::fill($values);
+
+        $this->user_id ??= auth()->id();
+        $this->color ??= faker()->hexColor();
+    }
+
+    public function fromCalendarObject(?array $calendar): void
+    {
+        if (! $calendar) {
+            $this->reset();
+
+            return;
+        }
+
+        $mappedArray = [];
+
+        foreach ($calendar as $key => $value) {
+            $mappedArray[Str::snake($key)] = $value;
+        }
+
+        $this->fill($mappedArray);
     }
 
     protected function getActions(): array

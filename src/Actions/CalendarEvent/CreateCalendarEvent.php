@@ -26,7 +26,7 @@ class CreateCalendarEvent extends FluxAction
     {
         $repeat = Arr::pull($this->data, 'repeat');
 
-        if ($repeat) {
+        if ($repeat && $this->getData('has_repeats')) {
             $this->data['repeat'] = Helper::buildRepeatStringFromArray(
                 array_merge($repeat, ['start' => $this->data['start']])
             );

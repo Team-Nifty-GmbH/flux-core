@@ -13,7 +13,6 @@ use FluxErp\Livewire\Accounting\TransactionList;
 use FluxErp\Livewire\Auth\Login;
 use FluxErp\Livewire\Auth\Logout;
 use FluxErp\Livewire\Auth\ResetPassword;
-use FluxErp\Livewire\Calendars\Calendar;
 use FluxErp\Livewire\Cart\Watchlists;
 use FluxErp\Livewire\Contact\CommunicationList;
 use FluxErp\Livewire\Contact\Contact;
@@ -121,7 +120,7 @@ Route::middleware('web')
 
             Route::middleware(TrackVisits::class)->group(function (): void {
                 Route::get('/mail', Mail::class)->name('mail');
-                Route::get('/calendars', Calendar::class)->name('calendars');
+                Route::get('/calendars', FluxErp\Livewire\Features\Calendar\Calendar::class)->name('calendars');
 
                 Route::name('contacts.')->prefix('contacts')
                     ->group(function (): void {

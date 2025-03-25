@@ -30,6 +30,7 @@ class UpdateCalendarEventRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => CalendarEvent::class]),
             ],
             'calendar_id' => [
+                'sometimes',
                 'required',
                 'integer',
                 app(ModelExists::class, ['model' => Calendar::class]),
@@ -41,8 +42,8 @@ class UpdateCalendarEventRuleset extends FluxRuleset
             'is_all_day' => 'boolean',
             'has_taken_place' => 'boolean',
             'extended_props' => 'array|nullable',
-            'confirm_option' => 'required|string|in:this,future,all',
-            'original_start' => 'required_if:confirm_option,this|required_if:confirm_option,future|date',
+            'confirm_option' => 'sometimes|required|string|in:this,future,all',
+            'original_start' => 'nullable|required_if:confirm_option,this|required_if:confirm_option,future|date',
         ];
     }
 }

@@ -35,8 +35,6 @@ class FluxCalendar extends Component
     #[Locked]
     public array $allCalendars = [];
 
-    public array $calendarEvent = [];
-
     #[Locked]
     public bool $calendarEventWasRepeatable = false;
 
@@ -70,8 +68,6 @@ class FluxCalendar extends Component
 
     public string $tab = 'users';
 
-    public array $validationErrors = [];
-
     protected $listeners = [
         'calendar-view-did-mount' => 'storeViewSettings',
         'calendar-toggle-event-source' => 'toggleEventSource',
@@ -83,16 +79,6 @@ class FluxCalendar extends Component
 
     protected string $view = 'flux::livewire.features.calendar.flux-calendar';
 
-    public function mount(): void
-    {
-        $this->calendarEvent = [
-            'calendar_id' => null,
-            'model_id' => null,
-            'start' => now(),
-            'end' => now(),
-        ];
-    }
-
     public function render(): View
     {
         return view($this->view);
@@ -101,9 +87,9 @@ class FluxCalendar extends Component
     #[Renderless]
     public function addInvitedRecord(int $id): void
     {
-        $model = app($this->tab === 'users' ? User::class : Address::class);
+        $query = resolve_static($this->tab === 'users' ? User::class : Address::class, 'query');
 
-        $this->addInvitee($model->query()->whereKey($id)->first());
+        $this->addInvitee($query->whereKey($id)->first());
     }
 
     #[Renderless]
@@ -714,8 +700,10 @@ class FluxCalendar extends Component
     #[Renderless]
     public function updatedSearch(): void
     {
-        $model = app($this->tab === 'users' ? User::class : Address::class);
-        $this->searchResults = $this->search ? $model::search($this->search)->get()->toArray() : [];
+        $search = resolve_static($this->tab === 'users' ? User::class : Address::class, 'search', [$this->search]);
+        $this->searchResults = $this->search
+            ? $search->get()->toArray()
+            : [];
     }
 
     #[Renderless]

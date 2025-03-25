@@ -15,14 +15,14 @@
                 <div class="flex w-full justify-between gap-2">
                     <div>
                         <x-button
-                            x-show="calendarEvent.id"
+                            x-show="event.id"
                             spinner
                             flat
                             color="red"
                             :text="__('Delete')"
-                            x-show="$wire.calendarEvent.is_editable && $wire.calendarEvent.id"
+                            x-show="$wire.event.is_editable && $wire.event.id"
                             wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Calendar Event')]) }}"
-                            wire:click="deleteEvent($wire.calendarEvent).then((calendarEvent) => {deleteEvent(calendarEvent);})"
+                            wire:click="deleteEvent($wire.event).then((calendarEvent) => {deleteEvent(calendarEvent);})"
                         />
                     </div>
                     <div class="flex gap-2">
@@ -34,9 +34,9 @@
                         <x-button
                             primary
                             :text="__('Save')"
-                            x-show="$wire.calendarEvent.is_editable"
+                            x-show="$wire.event.is_editable"
                             x-on:click="
-                                    $wire.confirmSave = $wire.calendarEventWasRepeatable && !$wire.calendarEvent.has_repeats ? 'this' : 'future';
+                                    $wire.confirmSave = $wire.calendarEventWasRepeatable && !$wire.event.has_repeats ? 'this' : 'future';
                                     $wire.calendarEventWasRepeatable ?
                                         $wireui.confirmDialog({
                                             id: 'edit-repeatable-event-dialog',
@@ -61,7 +61,7 @@
             id="edit-repeatable-event-dialog"
             :title="__('Edit Repeatable Event')"
         >
-            <div x-show="! $wire.calendarEvent.has_repeats">
+            <div x-show="! $wire.event.has_repeats">
                 <x-radio
                     :label="__('This event')"
                     value="this"
