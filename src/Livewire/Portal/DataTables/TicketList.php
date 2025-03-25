@@ -24,6 +24,7 @@ class TicketList extends BaseDataTable
     ];
 
     public array $enabledCols = [
+        'ticket_number',
         'title',
         'state',
         'ticket_type.name',
