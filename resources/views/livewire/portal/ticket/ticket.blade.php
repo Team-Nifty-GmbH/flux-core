@@ -1,8 +1,38 @@
 <div>
     <div class="pl-8 pr-6 pt-5">
-        <h1 class="pt-5 text-3xl font-bold dark:text-gray-50">
-            {{ __('Ticket') . ': ' . $ticket['ticket_number'] }}
-        </h1>
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <h1 class="pt-5 text-3xl font-bold dark:text-gray-50">
+                    {{ __('Ticket') . ': ' . $ticket['ticket_number'] }}
+                </h1>
+                @if ($ticket['state'] === \FluxErp\States\Ticket\Escalated::$name)
+                    <x-badge :text="__('Escalated')" color="red" />
+                @endif
+            </div>
+            <div class="flex gap-2">
+                @if ($ticket['state'] !== \FluxErp\States\Ticket\Closed::$name)
+                    <x-button
+                        :text="__('Close')"
+                        color="emerald"
+                        wire:click="closeTicket"
+                    />
+                @endif
+
+                @if ($ticket['state'] !== \FluxErp\States\Ticket\Escalated::$name)
+                    <x-button
+                        wire:flux-confirm.type.error="{{ __('Escalate ticket|Do you really want to escalate this ticket?|Cancel|Escalate') }}"
+                        :text="__('Escalate')"
+                        color="red"
+                        wire:click="escalateTicket"
+                    />
+                @endif
+            </div>
+        </div>
+        <div>
+            @foreach (data_get($ticket, 'users', []) as $user)
+                <x-badge :text="data_get($user, 'name')" />
+            @endforeach
+        </div>
         <h2 class="pb-8 pt-10 text-base font-bold uppercase dark:text-gray-50">
             {{ __('Information') }}
         </h2>
