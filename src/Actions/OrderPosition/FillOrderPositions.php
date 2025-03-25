@@ -154,7 +154,7 @@ class FillOrderPositions extends FluxAction
         // If simulate = false, save order position, keep track of saved ids
         if (! $simulate) {
             $discounts = $orderPosition->discounts;
-            unset($orderPosition->discounts);
+            unset($orderPosition->discounts, $orderPosition->unit_price);
             $orderPosition->save();
 
             $existingDiscounts = $discounts->filter(fn ($discount) => $discount['id'] ?? false)->toArray();
@@ -172,7 +172,7 @@ class FillOrderPositions extends FluxAction
         // Create Children
         $children = Collection::make();
         foreach ($originalChildren as $child) {
-            if ($child['is_bundle_position']) {
+            if (data_get($child, 'is_bundle_position')) {
                 $child['amount'] = bcmul($child['amount_bundle'], $orderPosition->amount);
             }
 

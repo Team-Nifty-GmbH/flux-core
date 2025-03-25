@@ -127,7 +127,9 @@ class CreateOrderPosition extends FluxAction
                 });
         }
 
-        $orderPosition->attachTags($tags);
+        if ($tags) {
+            $orderPosition->tags()->attach($tags);
+        }
 
         return $orderPosition->withoutRelations()->fresh();
     }
