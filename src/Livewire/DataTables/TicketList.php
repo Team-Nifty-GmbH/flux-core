@@ -109,7 +109,7 @@ class TicketList extends BaseDataTable
             DataTableButton::make()
                 ->icon('clock')
                 ->text(__('Track Time'))
-                ->when(fn() => resolve_static(CreateWorkTime::class, 'canPerformAction', [false]))
+                ->when(fn () => resolve_static(CreateWorkTime::class, 'canPerformAction', [false]))
                 ->wireClick('startTimeTracking(record.id)'),
         ];
     }
