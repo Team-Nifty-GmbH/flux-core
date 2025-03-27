@@ -22,7 +22,6 @@ use FluxErp\Livewire\Features\Calendar\CalendarOverview;
 use FluxErp\Models\Activity;
 use FluxErp\Models\Address;
 use FluxErp\Models\Category;
-use FluxErp\Models\Client;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\Notification;
 use FluxErp\Models\Order;
@@ -35,14 +34,12 @@ use FluxErp\Models\SerialNumber;
 use FluxErp\Models\Task;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\User;
-use FluxErp\Traits\HasClientAssignment;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Bus\Dispatcher;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Contracts\Queue\Factory as QueueFactoryContract;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -63,7 +60,6 @@ use Illuminate\Support\Str;
 use InvalidArgumentException;
 use Laravel\Sanctum\Http\Middleware\CheckForAnyAbility;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
-use Laravel\Scout\Builder;
 use Livewire\Component;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
@@ -786,23 +782,6 @@ class FluxServiceProvider extends ServiceProvider
                         return $this->app[QueueFactoryContract::class]->connection($connection);
                     }
                 );
-            }
-        );
-
-        $this->app->extend(
-            Builder::class,
-            function (Builder $scoutBuilder) {
-                if (($user = auth()->user()) instanceof User
-                    && in_array(HasClientAssignment::class, class_uses_recursive($scoutBuilder->model))
-                    && $scoutBuilder->model->isRelation('client')
-                    && ($relation = $scoutBuilder->model->client()) instanceof BelongsTo
-                ) {
-                    $clients = $user->clients()->pluck('id')->toArray() ?: Client::query()->pluck('id')->toArray();
-
-                    $scoutBuilder->whereIn($relation->getForeignKeyName(), $clients);
-                }
-
-                return $scoutBuilder;
             }
         );
 
