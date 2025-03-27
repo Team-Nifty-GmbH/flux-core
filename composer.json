@@ -29,9 +29,10 @@
         "spatie/laravel-translatable": "^6.0",
         "spatie/laravel-translation-loader": "^2.7",
         "spatie/pdf-to-image": "^3.0",
+        "staudenmeir/laravel-cte": "^1.0",
+        "tallstackui/tallstackui": "^2.2",
         "team-nifty-gmbh/tall-datatables": "^1.0",
-        "webklex/laravel-imap": "^6.1",
-        "tallstackui/tallstackui": "^2.2"
+        "webklex/laravel-imap": "^6.1"
     },
     "require-dev": {
         "brianium/paratest": "^7.0",

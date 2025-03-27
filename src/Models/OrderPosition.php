@@ -5,6 +5,7 @@ namespace FluxErp\Models;
 use FluxErp\Casts\BcFloat;
 use FluxErp\Casts\Money;
 use FluxErp\Casts\Percentage;
+use FluxErp\Traits\CascadeSoftDeletes;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasClientAssignment;
@@ -28,14 +29,16 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Spatie\EloquentSortable\Sortable;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortable
 {
-    use Commentable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes, HasPackageFactory,
-        HasParentChildRelations, HasSerialNumberRange, HasTags, HasUserModification, HasUuid, LogsActivity, SoftDeletes,
+    use CascadeSoftDeletes, Commentable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes,
+        HasPackageFactory, HasParentChildRelations, HasSerialNumberRange, HasTags, HasUserModification, HasUuid,
+        LogsActivity, SoftDeletes,
         SortableTrait {
             SortableTrait::setHighestOrderNumber as protected parentSetHighestOrderNumber;
         }
@@ -49,12 +52,35 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
         'unit_price',
     ];
 
+    protected array $cascadeDeletes = [
+        'children',
+        'commission',
+    ];
+
     protected static function booted(): void
     {
         static::deleted(function (OrderPosition $orderPosition): void {
             $orderPosition->workTime()->update(['order_position_id' => null]);
             $orderPosition->creditNoteCommission()->update(['credit_note_order_position_id' => null]);
-            $orderPosition->commission()->delete();
+            $orderPosition->order->recalculateOrderPositionSlugPositions();
+        });
+
+        static::saved(function (OrderPosition $orderPosition): void {
+            if ($orderPosition->isDirty('sort_number') || $orderPosition->isDirty('parent_id')) {
+                if ($orderPosition->isDirty('parent_id')) {
+                    DB::statement('SET @row_number = 0');
+
+                    resolve_static(OrderPosition::class, 'query')
+                        ->where('order_id', $orderPosition->order_id)
+                        ->where('parent_id', $orderPosition->getOriginal('parent_id'))
+                        ->orderBy('sort_number')
+                        ->update([
+                            'sort_number' => DB::raw('(@row_number:=@row_number+1)'),
+                        ]);
+                }
+
+                $orderPosition->order->recalculateOrderPositionSlugPositions();
+            }
         });
     }
 
@@ -273,10 +299,57 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
         );
     }
 
+    protected function subTotalGross(): string|float|null
+    {
+        $result = DB::select('
+            WITH RECURSIVE child_items AS (
+                SELECT id, total_gross_price, is_alternative
+                FROM order_positions
+                WHERE id = ?
+
+                UNION ALL
+
+                SELECT i.id, i.total_gross_price, i.is_alternative
+                FROM order_positions i
+                INNER JOIN child_items ci ON i.parent_id = ci.id
+                WHERE i.is_alternative = false
+            )
+            SELECT SUM(total_gross_price) as total
+            FROM child_items
+            WHERE id != ? AND is_alternative = false
+        ', [$this->getKey(), $this->getKey()]);
+
+        return (string) ($result[0]->total ?? 0);
+    }
+
+    protected function subTotalNet(): string|float|null
+    {
+        // Get all nested non-alternative children using a CTE query
+        $result = DB::select('
+            WITH RECURSIVE child_items AS (
+                SELECT id, total_net_price, is_alternative
+                FROM order_positions
+                WHERE id = ?
+
+                UNION ALL
+
+                SELECT i.id, i.total_net_price, i.is_alternative
+                FROM order_positions i
+                INNER JOIN child_items ci ON i.parent_id = ci.id
+                WHERE i.is_alternative = false
+            )
+            SELECT SUM(total_net_price) as total
+            FROM child_items
+            WHERE id != ? AND is_alternative = false
+        ', [$this->getKey(), $this->getKey()]);
+
+        return (string) ($result[0]->total ?? 0);
+    }
+
     protected function totalGrossPrice(): Attribute
     {
-        return Attribute::get(
-            fn ($value) => $this->is_free_text && ! $value
+        return Attribute::make(
+            get: fn ($value) => $this->is_free_text && ! $value
                 ? $this->subTotalGross() ?: null
                 : $value
         );
@@ -284,8 +357,8 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
 
     protected function totalNetPrice(): Attribute
     {
-        return Attribute::get(
-            fn ($value) => $this->is_free_text && ! $value
+        return Attribute::make(
+            get: fn ($value) => $this->is_free_text && ! $value
                 ? $this->subTotalNet() ?: null
                 : $value
         );
@@ -293,24 +366,10 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
 
     protected function unitPrice(): Attribute
     {
-        return Attribute::get(
-            fn ($value) => $this->is_net
+        return Attribute::make(
+            get: fn ($value) => $this->is_net
                 ? $this->unit_net_price
                 : $this->unit_gross_price
         );
-    }
-
-    private function subTotalGross(): string
-    {
-        return (string) (($this->relations['children'] ?? $this->children())
-            ->where('is_alternative', false)
-            ->sum('total_gross_price'));
-    }
-
-    private function subTotalNet(): string
-    {
-        return (string) (($this->relations['children'] ?? $this->children())
-            ->where('is_alternative', false)
-            ->sum('total_net_price'));
     }
 }

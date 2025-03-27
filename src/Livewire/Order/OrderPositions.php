@@ -50,11 +50,15 @@ class OrderPositions extends OrderPositionList
 
     public OrderPositionForm $orderPosition;
 
+    public string $orderPositionsView = 'table';
+
     public int $perPage = 100;
 
     public array $sortable = [];
 
-    protected string $view = 'flux::livewire.order.order-positions';
+    protected ?string $includeAfter = 'flux::livewire.order.order-list-footer';
+
+    protected ?string $includeBefore = 'flux::livewire.order.order-list-header';
 
     public function mount(): void
     {
@@ -62,6 +66,18 @@ class OrderPositions extends OrderPositionList
 
         $this->reset('filters', 'selected');
         $this->page = 1;
+    }
+
+    protected function getTableActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->icon('bars-3')
+                ->wireClick('switchView(\'list\')'),
+            DataTableButton::make()
+                ->icon('table-cells')
+                ->wireClick('switchView(\'table\')'),
+        ];
     }
 
     protected function getRowActions(): array
@@ -83,9 +99,9 @@ class OrderPositions extends OrderPositionList
             DataTableButton::make()
                 ->icon('eye')
                 ->attributes([
-                    'x-cloak' => 'true',
-                    'x-show' => 'record.product_id',
                     'wire:click' => 'showProduct(record.product_id)',
+                    'x-cloak' => true,
+                    'x-show' => 'record.product_id',
                 ]),
         ];
     }
@@ -139,6 +155,10 @@ class OrderPositions extends OrderPositionList
     #[Renderless]
     public function addOrderPosition(bool $reload = true): bool
     {
+        if ($this->orderPositionsView !== 'table') {
+            $this->forceRender();
+        }
+
         $this->orderPosition->order_id = $this->order->id;
         $this->orderPosition->vat_rate_id = $this->order->vat_rate_id ?? $this->orderPosition->vat_rate_id;
 
@@ -235,6 +255,10 @@ class OrderPositions extends OrderPositionList
     #[Renderless]
     public function deleteOrderPosition(): bool
     {
+        if ($this->orderPositionsView !== 'table') {
+            $this->forceRender();
+        }
+
         try {
             $this->orderPosition->delete();
         } catch (ValidationException|UnauthorizedException $e) {
@@ -339,6 +363,19 @@ class OrderPositions extends OrderPositionList
         ]);
     }
 
+    public function getSortableOrderPositions(): array
+    {
+        OrderPosition::addGlobalScope('sorted', function ($query): void {
+            $query->ordered();
+        });
+
+        return OrderPosition::familyTree()
+            ->where('order_id', $this->order->id)
+            ->whereNull('parent_id')
+            ->get()
+            ->toArray();
+    }
+
     public function getViewData(): array
     {
         return array_merge(
@@ -349,6 +386,28 @@ class OrderPositions extends OrderPositionList
                     ->toArray(),
             ]
         );
+    }
+
+    public function movePosition(OrderPosition $position, int $newPosition, ?int $parentId = null): void
+    {
+        $newPosition = $newPosition + 1;
+        if ($position->parent_id === $parentId && $position->sort_number === $newPosition) {
+            return;
+        }
+
+        try {
+            UpdateOrderPosition::make([
+                'id' => $position->id,
+                'parent_id' => $parentId,
+                'sort_number' => $newPosition,
+            ])
+                ->validate()
+                ->execute();
+
+            $this->forceRender();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+        }
     }
 
     #[Renderless]
@@ -429,6 +488,41 @@ class OrderPositions extends OrderPositionList
         $this->js(<<<JS
             \$openDetailModal('{$product->getUrl()}');
         JS);
+    }
+
+    public function switchView(string $view): void
+    {
+        if ($view === $this->orderPositionsView) {
+            return;
+        }
+
+        if ($view !== 'table') {
+            $this->data = [];
+        } else {
+            $this->loadData();
+        }
+
+        $this->forceRender();
+
+        $this->orderPositionsView = $view;
+
+        $this->cacheState();
+    }
+
+    protected function compileStoredLayout(): array
+    {
+        $savedFilter = parent::compileStoredLayout();
+
+        data_set($savedFilter, 'settings.orderPositionsView', $this->orderPositionsView);
+
+        return $savedFilter;
+    }
+
+    protected function getLayout(): string
+    {
+        return $this->orderPositionsView === 'table'
+            ? 'tall-datatables::layouts.table'
+            : 'flux::order.sort-order-positions';
     }
 
     protected function getLeftAppends(): array

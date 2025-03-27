@@ -18,6 +18,7 @@ use FluxErp\States\Order\PaymentState\PartialPaid;
 use FluxErp\States\Order\PaymentState\PaymentState;
 use FluxErp\Support\Calculation\Rounding;
 use FluxErp\Support\Collection\OrderCollection;
+use FluxErp\Traits\CascadeSoftDeletes;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Communicatable;
 use FluxErp\Traits\Filterable;
@@ -51,6 +52,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\ModelStates\HasStates;
@@ -58,15 +60,19 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Order extends FluxModel implements HasMedia, InteractsWithDataTables, OffersPrinting
 {
-    use Commentable, Communicatable, Filterable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes,
-        HasPackageFactory, HasParentChildRelations, HasRelatedModel, HasSerialNumberRange, HasStates,
-        HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable, Searchable, SoftDeletes,
+    use CascadeSoftDeletes, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasClientAssignment,
+        HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasRelatedModel, HasSerialNumberRange,
+        HasStates, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable, Searchable, SoftDeletes,
         Trackable {
             Printable::resolvePrintViews as protected printableResolvePrintViews;
             HasSerialNumberRange::getSerialNumber as protected hasSerialNumberRangeGetSerialNumber;
         }
 
     public static string $iconName = 'shopping-bag';
+
+    protected array $cascadeDeletes = [
+        'orderPositions',
+    ];
 
     protected ?string $detailRouteName = 'orders.id';
 
@@ -168,10 +174,6 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
         });
 
         static::deleted(function (Order $order): void {
-            foreach ($order->orderPositions()->get('id') as $orderPosition) {
-                $orderPosition->delete();
-            }
-
             $order->purchaseInvoice()->update(['order_id' => null]);
         });
     }
@@ -633,6 +635,61 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
     public function purchaseInvoice(): HasOne
     {
         return $this->hasOne(PurchaseInvoice::class);
+    }
+
+    public function recalculateOrderPositionSlugPositions(): static
+    {
+        DB::table('order_positions')
+            ->where('order_id', $this->getKey())
+            ->whereNull('parent_id')
+            ->update([
+                'slug_position' => DB::raw('CAST(sort_number AS CHAR)'),
+            ]);
+
+        $query = "
+        WITH RECURSIVE position_hierarchy AS (
+            SELECT
+                id,
+                parent_id,
+                order_id,
+                slug_position,
+                sort_number,
+                0 AS level
+            FROM
+                order_positions
+            WHERE
+                order_id = ? AND parent_id IS NULL
+
+            UNION ALL
+
+            SELECT
+                c.id,
+                c.parent_id,
+                c.order_id,
+                CONCAT(p.slug_position, '.', c.sort_number) AS slug_position,
+                c.sort_number,
+                p.level + 1 AS level
+            FROM
+                position_hierarchy p
+            JOIN
+                order_positions c ON p.id = c.parent_id AND c.order_id = ?
+        )
+
+        UPDATE order_positions op,
+               position_hierarchy ph
+        SET op.slug_position = ph.slug_position
+        WHERE op.id = ph.id
+          AND op.order_id = ?
+          AND op.parent_id IS NOT NULL;
+        ";
+
+        DB::statement($query, [
+            $this->getKey(),
+            $this->getKey(),
+            $this->getKey(),
+        ]);
+
+        return $this;
     }
 
     public function registerMediaCollections(): void
