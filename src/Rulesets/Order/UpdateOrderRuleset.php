@@ -178,7 +178,7 @@ class UpdateOrderRuleset extends FluxRuleset
             'header' => 'string|nullable',
             'footer' => 'string|nullable',
             'logistic_note' => 'string|nullable',
-            'tracking_email' => 'email|nullable',
+            'tracking_email' => 'email|max:255|nullable',
             'payment_texts' => 'array|nullable',
 
             'order_date' => 'date',

@@ -22,7 +22,7 @@ class CreateTicketTypeRuleset extends FluxRuleset
     {
         return [
             'uuid' => 'nullable|string|uuid|unique:ticket_types,uuid',
-            'name' => 'required|string',
+            'name' => 'required|string|max:255',
             'model_type' => [
                 'string',
                 'max:255',

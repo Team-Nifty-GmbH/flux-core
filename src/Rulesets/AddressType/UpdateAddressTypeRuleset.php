@@ -21,6 +21,7 @@ class UpdateAddressTypeRuleset extends FluxRuleset
             ],
             'address_type_code' => [
                 'string',
+                'max:255',
                 'nullable',
                 app(UniqueInFieldDependence::class, ['model' => AddressType::class, 'dependingField' => 'client_id']),
             ],

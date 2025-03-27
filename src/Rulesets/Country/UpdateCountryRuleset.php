@@ -31,7 +31,7 @@ class UpdateCountryRuleset extends FluxRuleset
             ],
             'name' => 'string|max:255',
             'iso_alpha2' => 'sometimes|required|string|max:255|unique:countries,iso_alpha2',
-            'iso_alpha3' => 'nullable|string',
+            'iso_alpha3' => 'nullable|string|max:255',
             'iso_numeric' => [
                 'nullable',
                 app(Numeric::class, ['min' => 0, 'max' => 999]),

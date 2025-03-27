@@ -62,9 +62,10 @@ class UpdateAddressRuleset extends FluxRuleset
             'email' => [
                 'required_if_accepted:can_login',
                 'email',
+                'max:255',
                 'nullable',
             ],
-            'password' => 'string|nullable',
+            'password' => 'string|max:255|nullable',
             'is_main_address' => 'boolean',
             'is_invoice_address' => 'boolean',
             'is_delivery_address' => 'boolean',

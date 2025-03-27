@@ -23,7 +23,7 @@ class UpdateOrderTypeRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => Client::class]),
             ],
-            'name' => 'string|max:255',
+            'name' => 'sometimes|required|string|max:255',
             'description' => 'string|nullable',
             'mail_subject' => 'string|max:255|nullable',
             'mail_body' => 'string|nullable',

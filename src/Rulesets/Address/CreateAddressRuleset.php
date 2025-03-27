@@ -65,10 +65,11 @@ class CreateAddressRuleset extends FluxRuleset
             'email' => [
                 'nullable',
                 'email',
+                'max:255',
                 Rule::unique('addresses', 'email')
                     ->whereNull('deleted_at'),
             ],
-            'password' => 'string|nullable',
+            'password' => 'string|max:255|nullable',
             'is_main_address' => 'boolean',
             'is_invoice_address' => 'boolean',
             'is_delivery_address' => 'boolean',

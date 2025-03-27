@@ -18,9 +18,9 @@ class UpdateLanguageRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => Language::class]),
             ],
-            'name' => 'string|max:255',
-            'iso_name' => 'string|max:255|unique:languages,iso_name',
-            'language_code' => 'string|max:255|unique:languages,language_code',
+            'name' => 'sometimes|required|string|max:255',
+            'iso_name' => 'sometimes|required|string|max:255|unique:languages,iso_name',
+            'language_code' => 'sometimes|required|string|max:255|unique:languages,language_code',
             'is_default' => 'boolean',
         ];
     }
