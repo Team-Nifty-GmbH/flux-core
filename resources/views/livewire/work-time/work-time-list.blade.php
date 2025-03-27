@@ -1,15 +1,13 @@
 <div
-    x-data="{
-        trackable_type: $wire.entangle('workTime.trackable_type'),
-        init() {
-            $watch('trackable_type', () => {
-                $wire.workTime.trackable_id = null
-                let searchRoute = {{ '\'' . route('search', '__model__') . '\'' }}
-                searchRoute = searchRoute.replace('__model__', this.trackable_type)
-                $tallstackuiSelect('invoice-address-id').setRequestUrl(searchRoute)
-            })
-        },
-    }"
+    wire:init="$watch(
+        'workTime.trackable_type',
+        () => {
+            $wire.workTime.trackable_id = null
+            let searchRoute = {{ '\'' . route('search', '__model__') . '\'' }}
+            searchRoute = searchRoute.replace('__model__', $wire.workTime.trackable_type)
+            $tallstackuiSelect('trackable-id-edit').setRequestUrl(searchRoute)
+        }
+    )"
 >
     <x-modal id="edit-work-time-modal">
         <div class="flex flex-col gap-1.5">
@@ -48,24 +46,20 @@
                     ]"
                 />
             </div>
-            <x-date
-                time-format="24"
+            <x-input
+                type="datetime-local"
                 :label="__('Started At')"
-                display-format="DD.MM.YYYY HH:mm"
-                parse-format="YYYY-MM-DD HH:mm:ss"
                 wire:model="workTime.started_at"
             />
-            <x-date
-                time-format="24"
+            <x-input
+                type="datetime-local"
                 :label="__('Ended At')"
-                display-format="DD.MM.YYYY HH:mm"
-                parse-format="YYYY-MM-DD HH:mm:ss"
                 wire:model="workTime.ended_at"
             />
             <x-input
                 :label="__('Paused Time')"
                 wire:model.blur="workTime.paused_time"
-                :corner-hint="__('Hours:Minutes')"
+                :hint="__('Hours:Minutes')"
             />
             <div
                 class="flex flex-col gap-1.5"
@@ -99,7 +93,6 @@
                 <x-select.styled
                     :label="__('Model')"
                     wire:model="workTime.trackable_type"
-                    select="label:value|value:label"
                     :options="$trackableTypes"
                 />
                 <div
