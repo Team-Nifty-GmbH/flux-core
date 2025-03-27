@@ -31,6 +31,46 @@
             <x-input id="prompt-value" />
         </x-dialog>
         <x-flux::flash />
+        <div
+            x-data="{
+                openUrl() {
+                    let urlObj = new URL($el.querySelector('iframe').src)
+                    urlObj.searchParams.delete('no-navigation')
+
+                    window.open(urlObj)
+                    $modalClose('detail-modal')
+                },
+            }"
+        >
+            <x-modal
+                id="detail-modal"
+                size="7xl"
+                x-on:close="$el.querySelector('iframe').src = 'data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E'"
+            >
+                <div class="grid h-screen w-full">
+                    <iframe
+                        class="object-contain"
+                        height="100%"
+                        width="100%"
+                        id="detail-modal-iframe"
+                        src="data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E"
+                    ></iframe>
+                </div>
+                <x-slot:footer>
+                    <x-button
+                        color="secondary"
+                        light
+                        :text="__('Cancel')"
+                        x-on:click="$modalClose('detail-modal')"
+                    />
+                    <x-button
+                        color="indigo"
+                        :text="__('Open')"
+                        x-on:click="openUrl()"
+                    />
+                </x-slot>
+            </x-modal>
+        </div>
         <div class="absolute right-4 top-6 flex gap-1.5">
             <a
                 href="{{ $client?->website }}"

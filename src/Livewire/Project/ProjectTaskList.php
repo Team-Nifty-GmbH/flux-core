@@ -64,6 +64,7 @@ class ProjectTaskList extends BaseTaskList
         ];
     }
 
+    #[Renderless]
     public function delete(): bool
     {
         try {
@@ -82,6 +83,7 @@ class ProjectTaskList extends BaseTaskList
         return true;
     }
 
+    #[Renderless]
     public function edit(Task $task): void
     {
         $this->reset('taskTab');
