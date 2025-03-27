@@ -86,7 +86,7 @@ abstract class FluxAction
             return true;
         }
 
-        if (! auth()->user()->can('action.' . static::name())) {
+        if (! auth()->user()?->can('action.' . static::name())) {
             if ($throwException) {
                 throw UnauthorizedException::forPermissions(['action.' . static::name()]);
             } else {

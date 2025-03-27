@@ -20,7 +20,6 @@
                 label="{{ __('Model') }}"
                 placeholder="{{ __('Model') }}"
                 wire:model="additionalColumn.model_type"
-                select="label:value|value:label"
                 :options="$models"
             />
         </div>
