@@ -90,8 +90,8 @@ class UpdateProductRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => Unit::class]),
             ],
 
-            'product_number' => 'string|nullable',
-            'name' => 'string',
+            'product_number' => 'string|max:255|nullable',
+            'name' => 'string|max:255',
             'description' => 'string|nullable',
             'weight_gram' => 'numeric|nullable',
             'dimension_length_mm' => 'numeric|nullable',
@@ -114,7 +114,7 @@ class UpdateProductRuleset extends FluxRuleset
             'max_purchase' => 'numeric|nullable',
             'seo_keywords' => 'string|nullable',
             'manufacturer_product_number' => 'string|nullable',
-            'posting_account' => 'string|nullable',
+            'posting_account' => 'string|max:255|nullable',
             'warning_stock_amount' => 'numeric|nullable',
 
             'is_active' => 'boolean',

@@ -182,8 +182,8 @@ class CreateOrderRuleset extends FluxRuleset
             'payment_reminder_current_level' => 'integer|nullable|min:0',
             'payment_reminder_next_date' => 'date|nullable',
 
-            'order_number' => 'sometimes|required|string|unique:orders',
-            'commission' => 'string|nullable',
+            'order_number' => 'sometimes|required|string|max:255|unique:orders',
+            'commission' => 'string|max:255|nullable',
             'header' => 'string|nullable',
             'footer' => 'string|nullable',
             'logistic_note' => 'string|nullable',
@@ -192,7 +192,7 @@ class CreateOrderRuleset extends FluxRuleset
 
             'order_date' => 'date',
             'invoice_date' => 'date|nullable',
-            'invoice_number' => 'string',
+            'invoice_number' => 'string|max:255',
             'system_delivery_date' => 'date|nullable|required_with:system_delivery_date_end',
             'system_delivery_date_end' => 'date|nullable|after_or_equal:system_delivery_date',
             'customer_delivery_date' => 'date|nullable',

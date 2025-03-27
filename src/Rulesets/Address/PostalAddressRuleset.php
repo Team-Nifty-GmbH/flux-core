@@ -15,15 +15,15 @@ class PostalAddressRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'company' => 'string|nullable',
-            'title' => 'string|nullable',
-            'salutation' => 'string|nullable',
-            'firstname' => 'string|nullable',
-            'lastname' => 'string|nullable',
-            'addition' => 'string|nullable',
-            'mailbox' => 'string|nullable',
-            'mailbox_city' => 'string|nullable',
-            'mailbox_zip' => 'string|nullable',
+            'company' => 'string|max:255|nullable',
+            'title' => 'string|max:255|nullable',
+            'salutation' => 'string|max:255|nullable',
+            'firstname' => 'string|max:255|nullable',
+            'lastname' => 'string|max:255|nullable',
+            'addition' => 'string|max:255|nullable',
+            'mailbox' => 'string|max:255|nullable',
+            'mailbox_city' => 'string|max:255|nullable',
+            'mailbox_zip' => 'string|max:255|nullable',
             'latitude' => [
                 'nullable',
                 'regex:/^[-]?(([0-8]?[0-9](\.\d+)?)|(90(\.0+)?))$/',
@@ -36,13 +36,13 @@ class PostalAddressRuleset extends FluxRuleset
                 'nullable',
                 app(StringOrInteger::class),
             ],
-            'city' => 'string|nullable',
-            'street' => 'string|nullable',
+            'city' => 'string|max:255|nullable',
+            'street' => 'string|max:255|nullable',
 
-            'url' => 'string|nullable',
-            'email_primary' => 'email|nullable',
-            'phone' => 'string|nullable',
-            'phone_mobile' => 'string|nullable',
+            'url' => 'string|max:255|nullable',
+            'email_primary' => 'email|max:255|nullable',
+            'phone' => 'string|max:255|nullable',
+            'phone_mobile' => 'string|max:255|nullable',
             'has_formal_salutation' => 'boolean|nullable',
         ];
     }

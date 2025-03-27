@@ -24,7 +24,7 @@ class CreateOrderTypeRuleset extends FluxRuleset
             ],
             'name' => 'required|string',
             'description' => 'string|nullable',
-            'mail_subject' => 'string|nullable',
+            'mail_subject' => 'string|max:255|nullable',
             'mail_body' => 'string|nullable',
             'print_layouts' => 'array|nullable',
             'print_layouts.*' => 'required|string',

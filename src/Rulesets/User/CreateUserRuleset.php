@@ -45,14 +45,14 @@ class CreateUserRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => User::class]),
             ],
             'email' => 'required|email|unique:users,email',
-            'firstname' => 'required|string',
-            'lastname' => 'required|string',
-            'phone' => 'nullable|string',
+            'firstname' => 'required|string|max:255',
+            'lastname' => 'required|string|max:255',
+            'phone' => 'nullable|string|max:255',
             'password' => [
                 'required',
                 Password::min(8)->mixedCase()->numbers(),
             ],
-            'user_code' => 'required|string|unique:users,user_code',
+            'user_code' => 'required|string|max:255|unique:users,user_code',
             'timezone' => [
                 'nullable',
                 'timezone',

@@ -48,14 +48,14 @@ class UpdateUserRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => User::class]),
             ],
             'email' => 'sometimes|required|email|unique:users,email',
-            'firstname' => 'sometimes|required|string',
-            'lastname' => 'sometimes|required|string',
-            'phone' => 'nullable|string',
+            'firstname' => 'sometimes|required|string|max:255',
+            'lastname' => 'sometimes|required|string|max:255',
+            'phone' => 'nullable|string|max:255',
             'password' => [
                 'nullable',
                 Password::min(8)->mixedCase()->numbers(),
             ],
-            'user_code' => 'sometimes|required|string|unique:users,user_code',
+            'user_code' => 'sometimes|required|string|max:255|unique:users,user_code',
             'timezone' => [
                 'nullable',
                 'timezone',

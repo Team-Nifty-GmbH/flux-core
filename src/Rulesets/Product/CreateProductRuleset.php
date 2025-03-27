@@ -43,7 +43,7 @@ class CreateProductRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'name' => 'required|string',
+            'name' => 'required|string|max:255',
 
             'uuid' => 'nullable|string|uuid|unique:products,uuid',
             'parent_id' => [
@@ -72,7 +72,7 @@ class CreateProductRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => Unit::class]),
             ],
 
-            'product_number' => 'string|nullable|unique:products,product_number',
+            'product_number' => 'string|max:255|nullable|unique:products,product_number',
             'product_type' => [
                 Rule::in(ProductType::all()->keys()),
                 'nullable',
@@ -98,8 +98,8 @@ class CreateProductRuleset extends FluxRuleset
             'min_purchase' => 'numeric|nullable',
             'max_purchase' => 'numeric|nullable',
             'seo_keywords' => 'string|nullable',
-            'manufacturer_product_number' => 'string|nullable',
-            'posting_account' => 'string|nullable',
+            'manufacturer_product_number' => 'string|max:255|nullable',
+            'posting_account' => 'string|max:255|nullable',
             'warning_stock_amount' => 'numeric|nullable',
 
             'is_active' => 'boolean',

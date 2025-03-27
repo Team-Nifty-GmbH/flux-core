@@ -19,6 +19,7 @@ class CreateSettingRuleset extends FluxRuleset
             'model_type' => [
                 'required_with:model_id',
                 'string',
+                'max:255',
                 app(MorphClassExists::class),
             ],
             'model_id' => [

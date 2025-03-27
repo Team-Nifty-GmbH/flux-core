@@ -43,6 +43,7 @@ class UpdateWorkTimeRuleset extends FluxRuleset
             'trackable_type' => [
                 'required_with:trackable_id',
                 'string',
+                'max:255',
                 app(MorphClassExists::class, ['uses' => Trackable::class]),
             ],
             'trackable_id' => [
@@ -51,7 +52,7 @@ class UpdateWorkTimeRuleset extends FluxRuleset
                 app(MorphExists::class, ['modelAttribute' => 'trackable_type']),
             ],
             'ended_at' => 'nullable|date',
-            'name' => 'exclude_if:is_daily_work_time,true|string|nullable',
+            'name' => 'exclude_if:is_daily_work_time,true|string|max:255|nullable',
             'description' => 'string|nullable',
             'is_billable' => 'nullable|boolean',
             'is_locked' => 'boolean',

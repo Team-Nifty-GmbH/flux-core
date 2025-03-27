@@ -58,7 +58,7 @@ class UpdateAddressRuleset extends FluxRuleset
                 ValidStateRule::make(AdvertisingState::class),
             ],
             'date_of_birth' => 'date|nullable',
-            'department' => 'string|nullable',
+            'department' => 'string|max:255|nullable',
             'email' => [
                 'required_if_accepted:can_login',
                 'email',
