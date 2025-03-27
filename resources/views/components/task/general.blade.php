@@ -170,7 +170,7 @@
         </div>
         <x-number
             x-bind:readonly="!edit"
-            :text="__('Budget')"
+            :label="__('Budget')"
             wire:model="task.budget"
             step="0.01"
         />

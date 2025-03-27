@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\DataTables;
 
+use FluxErp\Actions\WorkTime\CreateWorkTime;
 use FluxErp\Models\Task;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
@@ -31,6 +32,7 @@ class TaskList extends BaseDataTable
             DataTableButton::make()
                 ->icon('clock')
                 ->text(__('Track Time'))
+                ->when(fn () => resolve_static(CreateWorkTime::class, 'canPerformAction', [false]))
                 ->xOnClick(<<<'JS'
                     $event.stopPropagation();
                     $dispatch(

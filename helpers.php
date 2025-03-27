@@ -33,19 +33,27 @@ if (! function_exists('route_to_permission')) {
         $route = is_string($route) ? Illuminate\Support\Facades\Route::getRoutes()->getByName($route) : $route;
         $route = $route ?: Illuminate\Support\Facades\Route::current();
 
-        if ($route === null) {
+        if (is_null($route)) {
             return null;
         }
 
-        $guards = array_keys(Illuminate\Support\Arr::prependKeysWith(config('auth.guards'), 'auth:'));
+        $guards = array_keys(config('auth.guards'));
         // Add auth as it's the default guard but still guarded
-        $guards[] = 'auth';
+        $authGuard = Illuminate\Support\Arr::first(Illuminate\Support\Arr::where(
+            $route->middleware(),
+            fn ($value) => str_starts_with($value, 'auth:')
+        ));
+
+        $guard = explode(',', explode(':', $authGuard)[1] ?? '');
         $defaultGuard = config('auth.defaults.guard');
-        $guard = explode(':', Illuminate\Support\Arr::first(array_intersect($route->middleware(), $guards)));
 
         // Allow if route is not guarded in any way.
-        if (! array_intersect($route->middleware(), $guards) || ! $route->getPermissionName()) {
+        if (! array_intersect($guard, $guards) || ! $route->getPermissionName()) {
             return null;
+        }
+
+        if (! $checkPermission) {
+            return $route->getPermissionName();
         }
 
         try {
@@ -54,14 +62,14 @@ if (! function_exists('route_to_permission')) {
                 'findByName',
                 [
                     'name' => $route->getPermissionName(),
-                    'guardName' => $guard[1] ?? $defaultGuard,
+                    'guardName' => $guard[0] ?? $defaultGuard,
                 ]
             );
         } catch (Spatie\Permission\Exceptions\PermissionDoesNotExist $e) {
             $permission = null;
         }
 
-        return $checkPermission ? $permission?->name : $route->getPermissionName();
+        return $permission?->name;
     }
 }
 

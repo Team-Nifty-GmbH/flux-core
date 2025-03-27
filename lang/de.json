@@ -680,6 +680,8 @@
     "Enter a search phrase…": "Kein Suchergebnis gefunden…",
     "Enter file path": "Gib einen Pfad an…",
     "Enter new or choose an existing…": "Neue eingeben oder vorhandene wählen…",
+    "Escalate": "Eskalieren",
+    "Escalate ticket|Do you really want to escalate this ticket?|Cancel|Escalate": "Ticket eskalieren|Möchten Sie dieses Ticket wirklich eskalieren?|Abbrechen|Eskalieren",
     "escalated": "Eskaliert",
     "Escalated": "Eskaliert",
     "EU Country": "EU-Land",
