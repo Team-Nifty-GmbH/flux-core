@@ -5,16 +5,14 @@ namespace FluxErp\Traits;
 use Closure;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\Str;
-use InvalidArgumentException;
 
 trait CascadeSoftDeletes
 {
+    use SoftDeletes;
+
     protected static function bootCascadeSoftDeletes(): void
     {
         static::deleting(function (Model $model): void {
-            $model->validateCascadingSoftDelete();
-
             $model->runCascadingDeletes();
         });
     }
@@ -23,11 +21,11 @@ trait CascadeSoftDeletes
     {
         $delete = $this->forceDeleting ? 'forceDelete' : 'delete';
 
-        $cb = function ($model) use ($delete): void {
+        $closure = function (Model $model) use ($delete): void {
             isset($model->pivot) ? $model->pivot->{$delete}() : $model->{$delete}();
         };
 
-        $this->handleRecords($relationship, $cb);
+        $this->handleRecords($relationship, $closure);
     }
 
     protected function getActiveCascadingDeletes(): array
@@ -71,24 +69,6 @@ trait CascadeSoftDeletes
     {
         foreach ($this->getActiveCascadingDeletes() as $relationship) {
             $this->cascadeSoftDeletes($relationship);
-        }
-    }
-
-    protected function validateCascadingSoftDelete(): void
-    {
-        if (! in_array(\Illuminate\Database\Eloquent\SoftDeletes::class, class_uses_recursive(static::class))) {
-            throw new InvalidArgumentException(sprintf(
-                '%s does not implement Illuminate\Database\Eloquent\SoftDeletes',
-                static::class)
-            );
-        }
-
-        if ($invalidCascadingRelationships = $this->hasInvalidCascadingRelationships()) {
-            throw new InvalidArgumentException(sprintf(
-                '%s [%s] must exist and return an object of type Illuminate\Database\Eloquent\Relations\Relation',
-                Str::plural('Relationship', count($invalidCascadingRelationships)),
-                implode(', ', $invalidCascadingRelationships)
-            ));
         }
     }
 }

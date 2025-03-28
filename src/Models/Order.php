@@ -35,7 +35,6 @@ use FluxErp\Traits\InteractsWithMedia;
 use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\Printable;
 use FluxErp\Traits\Scout\Searchable;
-use FluxErp\Traits\SoftDeletes;
 use FluxErp\Traits\Trackable;
 use FluxErp\View\Printing\Order\Invoice;
 use FluxErp\View\Printing\Order\Offer;
@@ -62,7 +61,7 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
 {
     use CascadeSoftDeletes, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasClientAssignment,
         HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasRelatedModel, HasSerialNumberRange,
-        HasStates, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable, Searchable, SoftDeletes,
+        HasStates, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable, Searchable,
         Trackable {
             Printable::resolvePrintViews as protected printableResolvePrintViews;
             HasSerialNumberRange::getSerialNumber as protected hasSerialNumberRangeGetSerialNumber;
@@ -643,44 +642,44 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
             ->where('order_id', $this->getKey())
             ->whereNull('parent_id')
             ->update([
-                'slug_position' => DB::raw('CAST(sort_number AS CHAR)'),
+                'slug_position' => DB::raw('LPAD(sort_number, 8, "0")'),
             ]);
 
         $query = "
-        WITH RECURSIVE position_hierarchy AS (
-            SELECT
-                id,
-                parent_id,
-                order_id,
-                slug_position,
-                sort_number,
-                0 AS level
-            FROM
-                order_positions
-            WHERE
-                order_id = ? AND parent_id IS NULL
+            WITH RECURSIVE position_hierarchy AS (
+                SELECT
+                    id,
+                    parent_id,
+                    order_id,
+                    slug_position,
+                    sort_number,
+                    0 AS level
+                FROM
+                    order_positions
+                WHERE
+                    order_id = ? AND parent_id IS NULL
 
-            UNION ALL
+                UNION ALL
 
-            SELECT
-                c.id,
-                c.parent_id,
-                c.order_id,
-                CONCAT(p.slug_position, '.', c.sort_number) AS slug_position,
-                c.sort_number,
-                p.level + 1 AS level
-            FROM
-                position_hierarchy p
-            JOIN
-                order_positions c ON p.id = c.parent_id AND c.order_id = ?
-        )
+                SELECT
+                    c.id,
+                    c.parent_id,
+                    c.order_id,
+                    CONCAT(p.slug_position, '.', LPAD(c.sort_number, 8, '0')) AS slug_position,
+                    c.sort_number,
+                    p.level + 1 AS level
+                FROM
+                    position_hierarchy p
+                JOIN
+                    order_positions c ON p.id = c.parent_id AND c.order_id = ?
+            )
 
-        UPDATE order_positions op,
-               position_hierarchy ph
-        SET op.slug_position = ph.slug_position
-        WHERE op.id = ph.id
-          AND op.order_id = ?
-          AND op.parent_id IS NOT NULL;
+            UPDATE order_positions op,
+                   position_hierarchy ph
+            SET op.slug_position = ph.slug_position
+            WHERE op.id = ph.id
+              AND op.order_id = ?
+              AND op.parent_id IS NOT NULL;
         ";
 
         DB::statement($query, [

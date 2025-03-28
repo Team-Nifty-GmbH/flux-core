@@ -17,7 +17,6 @@ use FluxErp\Traits\HasTags;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
-use FluxErp\Traits\SoftDeletes;
 use FluxErp\Traits\SortableTrait;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -38,10 +37,7 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
 {
     use CascadeSoftDeletes, Commentable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes,
         HasPackageFactory, HasParentChildRelations, HasSerialNumberRange, HasTags, HasUserModification, HasUuid,
-        LogsActivity, SoftDeletes,
-        SortableTrait {
-            SortableTrait::setHighestOrderNumber as protected parentSetHighestOrderNumber;
-        }
+        LogsActivity, SortableTrait;
 
     public array $sortable = [
         'order_column_name' => 'sort_number',
@@ -243,14 +239,6 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
         );
     }
 
-    public function setHighestOrderNumber(): void
-    {
-        $this->parentSetHighestOrderNumber();
-
-        $this->slug_position = ($this->parent ? $this->parent->slug_position . '.' : null)
-            . $this->sort_number;
-    }
-
     public function siblings(): HasMany
     {
         return $this->hasMany(
@@ -309,22 +297,21 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
 
                 UNION ALL
 
-                SELECT i.id, i.total_gross_price, i.is_alternative
-                FROM order_positions i
-                INNER JOIN child_items ci ON i.parent_id = ci.id
-                WHERE i.is_alternative = false
+                SELECT op.id, op.total_gross_price, op.is_alternative
+                FROM order_positions op
+                INNER JOIN child_items ci ON op.parent_id = ci.id
+                WHERE op.is_alternative = false
             )
             SELECT SUM(total_gross_price) as total
             FROM child_items
             WHERE id != ? AND is_alternative = false
         ', [$this->getKey(), $this->getKey()]);
 
-        return (string) ($result[0]->total ?? 0);
+        return (string) data_get($result, '0.total', 0);
     }
 
     protected function subTotalNet(): string|float|null
     {
-        // Get all nested non-alternative children using a CTE query
         $result = DB::select('
             WITH RECURSIVE child_items AS (
                 SELECT id, total_net_price, is_alternative
@@ -333,17 +320,17 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
 
                 UNION ALL
 
-                SELECT i.id, i.total_net_price, i.is_alternative
-                FROM order_positions i
-                INNER JOIN child_items ci ON i.parent_id = ci.id
-                WHERE i.is_alternative = false
+                SELECT op.id, op.total_net_price, op.is_alternative
+                FROM order_positions op
+                INNER JOIN child_items ci ON op.parent_id = ci.id
+                WHERE op.is_alternative = false
             )
             SELECT SUM(total_net_price) as total
             FROM child_items
             WHERE id != ? AND is_alternative = false
         ', [$this->getKey(), $this->getKey()]);
 
-        return (string) ($result[0]->total ?? 0);
+        return (string) data_get($result, '0.total', 0);
     }
 
     protected function totalGrossPrice(): Attribute

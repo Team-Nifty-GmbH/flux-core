@@ -23,7 +23,6 @@ use FluxErp\Traits\InteractsWithMedia;
 use FluxErp\Traits\Lockable;
 use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\Printable;
-use FluxErp\Traits\SoftDeletes;
 use FluxErp\View\Printing\Contact\BalanceStatement;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -39,7 +38,7 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
 {
     use CascadeSoftDeletes, Categorizable, Commentable, Communicatable, Filterable,
         HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasSerialNumberRange,
-        HasUserModification, HasUuid, InteractsWithMedia, Lockable, LogsActivity, Printable, SoftDeletes;
+        HasUserModification, HasUuid, InteractsWithMedia, Lockable, LogsActivity, Printable;
 
     public static string $iconName = 'users';
 

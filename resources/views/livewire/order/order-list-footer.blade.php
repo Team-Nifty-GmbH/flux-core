@@ -20,10 +20,10 @@
                     class="pb-4"
                     :label="__('Product')"
                     x-on:select="$wire.changedProductId($event.detail.select.id).then(() => {
-                                const input = $refs.quickAddAmount.querySelector('input');
-                                input.focus();
-                                input.select();
-                            })"
+                        const input = $refs.quickAddAmount.querySelector('input');
+                        input.focus();
+                        input.select();
+                    })"
                     wire:model="orderPosition.product_id"
                     required
                     select="label:label|value:id|description:product_number"
