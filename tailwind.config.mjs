@@ -39,6 +39,10 @@ export default {
                     800: '#00011B',
                 },
             },
+            fontSize: {
+                '3xs': '0.5rem',
+                '2xs': '0.65rem',
+            },
             transitionProperty: {
                 width: 'width',
             },

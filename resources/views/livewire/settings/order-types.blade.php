@@ -30,7 +30,6 @@
                         :placeholder="__('Select Print Layouts')"
                         wire:model="orderType.print_layouts"
                         multiple
-                        select="label:value|value:label"
                         :options="$printViews"
                     />
                     <x-select.styled
@@ -38,7 +37,6 @@
                         :hint="__('Stock will be posted on creation of given documents')"
                         wire:model="orderType.post_stock_print_layouts"
                         multiple
-                        select="label:value|value:label"
                         :options="$printViews"
                     />
                     <x-select.styled
@@ -46,7 +44,6 @@
                         :hint="__('Stock will be reserved on creation of given documents.') . ' ' . __('Stock posting has priority over stock reservation.')"
                         wire:model="orderType.reserve_stock_print_layouts"
                         multiple
-                        select="label:value|value:label"
                         :options="$printViews"
                     />
                     <x-checkbox
