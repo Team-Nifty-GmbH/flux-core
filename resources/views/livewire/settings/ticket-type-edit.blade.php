@@ -15,7 +15,6 @@
                 label="{{ __('Model') }}"
                 placeholder="{{ __('Model') }}"
                 wire:model="ticketType.model_type"
-                select="label:value|value:label"
                 :options="$models"
             />
         </div>

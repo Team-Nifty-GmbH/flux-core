@@ -36,6 +36,7 @@ use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\Printable;
 use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\Trackable;
+use FluxErp\View\Printing\Order\DeliveryNote;
 use FluxErp\View\Printing\Order\Invoice;
 use FluxErp\View\Printing\Order\Offer;
 use FluxErp\View\Printing\Order\OrderConfirmation;
@@ -548,6 +549,7 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
                 'order-confirmation' => OrderConfirmation::class,
                 'retoure' => Retoure::class,
                 'refund' => Refund::class,
+                'delivery-note' => DeliveryNote::class,
             ];
     }
 
