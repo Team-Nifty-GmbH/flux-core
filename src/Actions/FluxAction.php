@@ -70,7 +70,7 @@ abstract class FluxAction
 
     public static function canPerformAction(bool $throwException = true): bool
     {
-        if (! static::hasPermission()) {
+        if (! static::hasPermission() || (app()->runningInConsole() && ! app()->runningUnitTests())) {
             return true;
         }
 
