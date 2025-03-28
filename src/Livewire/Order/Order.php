@@ -345,11 +345,19 @@ class Order extends Component
 
         $order = resolve_static(OrderModel::class, 'query')
             ->whereKey($this->order->id)
-            ->first('id');
+            ->first([
+                'id',
+                'parent_id',
+                'created_from_id',
+                'contact_id',
+                'currency_id',
+                'order_type_id',
+                'price_list_id',
+            ]);
 
         $order->calculatePrices()->save();
 
-        $this->order->fill($order->toArray());
+        $this->order->fill($order);
     }
 
     #[Renderless]

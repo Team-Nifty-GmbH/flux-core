@@ -8,7 +8,7 @@ class Money extends BaseMoney
 {
     public function get($model, string $key, $value, array $attributes): mixed
     {
-        if ($value === null) {
+        if (is_null($value) && ! ($model->hasAttributeMutator($key) || $model->hasGetMutator($key))) {
             return null;
         }
 
