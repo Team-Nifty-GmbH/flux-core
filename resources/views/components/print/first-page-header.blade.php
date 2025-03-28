@@ -13,7 +13,7 @@
     </div>
     @show
     @section('client-address')
-    <div class="text-2xs -mt-2 w-full pb-1">
+    <div class="-mt-2 w-full pb-1 text-2xs">
         {{ $client->postal_address_one_line }}
     </div>
     <div class="black-bar"></div>

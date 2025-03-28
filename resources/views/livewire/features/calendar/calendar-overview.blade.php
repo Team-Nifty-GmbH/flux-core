@@ -31,7 +31,6 @@
                                 wire:model="selectedCalendar.modelType"
                                 :label="__('Model Type')"
                                 x-bind:disabled="$wire.selectedCalendar.id"
-                                select="label:value|value:label"
                                 :options="$this->availableModels"
                             />
                         </div>
