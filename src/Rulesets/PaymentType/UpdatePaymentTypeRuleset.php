@@ -27,7 +27,7 @@ class UpdatePaymentTypeRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => PaymentType::class]),
             ],
-            'name' => 'string',
+            'name' => 'sometimes|required|string|max:255',
             'description' => 'string|nullable',
             'payment_reminder_days_1' => 'integer|nullable',
             'payment_reminder_days_2' => 'integer|nullable',

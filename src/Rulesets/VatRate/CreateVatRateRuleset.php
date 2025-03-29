@@ -13,7 +13,7 @@ class CreateVatRateRuleset extends FluxRuleset
     {
         return [
             'uuid' => 'nullable|string|uuid|unique:vat_rates,uuid',
-            'name' => 'required|string',
+            'name' => 'required|string|max:255',
             'rate_percentage' => 'required|numeric|lt:1|min:0',
             'footer_text' => 'string|nullable',
             'is_default' => 'boolean',

@@ -32,7 +32,7 @@ class UnitTest extends BaseSetup
     {
         $unit = [
             'name' => Str::random(),
-            'abbreviation' => Str::random(),
+            'abbreviation' => Str::random(10),
         ];
 
         $this->user->givePermissionTo($this->permissions['create']);

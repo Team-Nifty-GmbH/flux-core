@@ -17,7 +17,7 @@ class ProductPropertyRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => ProductProperty::class]),
             ],
-            'product_properties.*.value' => 'string|nullable',
+            'product_properties.*.value' => 'string|max:255|nullable',
         ];
     }
 }

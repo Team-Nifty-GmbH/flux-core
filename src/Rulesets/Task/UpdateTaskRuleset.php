@@ -49,7 +49,7 @@ class UpdateTaskRuleset extends FluxRuleset
                 'nullable',
                 app(ModelExists::class, ['model' => OrderPosition::class]),
             ],
-            'name' => 'sometimes|required|string',
+            'name' => 'sometimes|required|string|max:255',
             'description' => 'string|nullable',
             'start_date' => 'present|date|nullable',
             'due_date' => 'present|date|nullable|after_or_equal:start_date',

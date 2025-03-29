@@ -23,7 +23,7 @@ class UpdateCountryRegionRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => Country::class]),
             ],
-            'name' => 'string',
+            'name' => 'string|max:255',
         ];
     }
 }

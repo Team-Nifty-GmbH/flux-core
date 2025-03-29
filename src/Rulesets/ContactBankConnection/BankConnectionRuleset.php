@@ -18,9 +18,9 @@ class BankConnectionRuleset extends FluxRuleset
                 'string',
                 app(Iban::class),
             ],
-            'account_holder' => 'string|nullable',
-            'bank_name' => 'string|nullable',
-            'bic' => 'string|nullable',
+            'account_holder' => 'string|nullable|max:255',
+            'bank_name' => 'string|nullable|max:255',
+            'bic' => 'string|nullable|max:255',
         ];
     }
 }

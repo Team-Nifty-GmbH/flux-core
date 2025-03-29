@@ -12,8 +12,8 @@ class CreatePermissionRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'name' => 'required|string|unique:permissions,name',
-            'guard_name' => 'required|string',
+            'name' => 'required|string|max:255|unique:permissions,name',
+            'guard_name' => 'required|string|max:255',
         ];
     }
 }

@@ -15,10 +15,11 @@ class CreateSettingRuleset extends FluxRuleset
     {
         return [
             'uuid' => 'nullable|string|uuid|unique:settings,uuid',
-            'key' => 'required|string|unique:settings,key',
+            'key' => 'required|string|max:255|unique:settings,key',
             'model_type' => [
                 'required_with:model_id',
                 'string',
+                'max:255',
                 app(MorphClassExists::class),
             ],
             'model_id' => [

@@ -17,7 +17,7 @@ class SupplierRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => Contact::class]),
             ],
-            'suppliers.*.manufacturer_product_number' => 'string|nullable',
+            'suppliers.*.manufacturer_product_number' => 'string|max:255|nullable',
             'suppliers.*.purchase_price' => 'numeric|nullable|min:0',
         ];
     }

@@ -46,16 +46,17 @@ class CreateTransactionRuleset extends FluxRuleset
                 app(Numeric::class),
             ],
             'purpose' => 'string|nullable',
-            'type' => 'string|nullable',
-            'counterpart_name' => 'string|nullable',
-            'counterpart_account_number' => 'string|nullable',
+            'type' => 'string|max:255|nullable',
+            'counterpart_name' => 'string|max:255|nullable',
+            'counterpart_account_number' => 'string|max:255|nullable',
             'counterpart_iban' => [
                 'string',
                 'nullable',
+                'max:255',
                 app(Iban::class),
             ],
-            'counterpart_bic' => 'string|nullable',
-            'counterpart_bank_name' => 'string|nullable',
+            'counterpart_bic' => 'string|max:255|nullable',
+            'counterpart_bank_name' => 'string|max:255|nullable',
         ];
     }
 }

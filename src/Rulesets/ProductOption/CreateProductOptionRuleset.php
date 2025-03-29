@@ -20,7 +20,7 @@ class CreateProductOptionRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => ProductOptionGroup::class]),
             ],
-            'name' => 'required|string',
+            'name' => 'required|string|max:255',
         ];
     }
 }

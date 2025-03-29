@@ -22,6 +22,7 @@ class SerialNumberRuleset extends FluxRuleset
             'serial_number.supplier_serial_number' => [
                 'required_if_accepted:serial_number.use_supplier_serial_number',
                 'string',
+                'max:255',
                 'nullable',
             ],
             'serial_number.use_supplier_serial_number' => 'boolean',

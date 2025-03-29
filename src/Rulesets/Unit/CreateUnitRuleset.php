@@ -13,8 +13,8 @@ class CreateUnitRuleset extends FluxRuleset
     {
         return [
             'uuid' => 'nullable|string|uuid|unique:units,uuid',
-            'name' => 'required|string',
-            'abbreviation' => 'required|string',
+            'name' => 'required|string|max:255',
+            'abbreviation' => 'required|string|max:10',
         ];
     }
 }

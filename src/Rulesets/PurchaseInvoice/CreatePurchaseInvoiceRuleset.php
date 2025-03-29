@@ -74,7 +74,7 @@ class CreatePurchaseInvoiceRuleset extends FluxRuleset
             'invoice_date' => 'nullable|date',
             'system_delivery_date' => 'date|nullable|required_with:system_delivery_date_end',
             'system_delivery_date_end' => 'date|nullable|after_or_equal:system_delivery_date',
-            'invoice_number' => 'nullable|string',
+            'invoice_number' => 'nullable|string|max:255',
             'is_net' => 'boolean',
 
             'media' => 'required',

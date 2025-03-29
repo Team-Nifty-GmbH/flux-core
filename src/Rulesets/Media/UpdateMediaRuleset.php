@@ -23,9 +23,9 @@ class UpdateMediaRuleset extends FluxRuleset
                 'nullable',
                 app(ModelExists::class, ['model' => Media::class]),
             ],
-            'name' => 'sometimes|required|string',
-            'file_name' => 'sometimes|required|string',
-            'collection_name' => 'sometimes|required|string',
+            'name' => 'sometimes|required|string|max:255',
+            'file_name' => 'sometimes|required|string|max:255',
+            'collection_name' => 'sometimes|required|string|max:255',
             'categories' => 'sometimes|array',
             'custom_properties' => 'sometimes|array',
         ];

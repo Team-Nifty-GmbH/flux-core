@@ -22,8 +22,8 @@ class ContactOptionRuleset extends FluxRuleset
                 'string',
                 Rule::in(['phone', 'email', 'website']),
             ],
-            'contact_options.*.label' => 'required|string',
-            'contact_options.*.value' => 'required|string',
+            'contact_options.*.label' => 'required|string|max:255',
+            'contact_options.*.value' => 'required|string|max:255',
             'contact_options.*.is_primary' => 'boolean',
         ];
     }

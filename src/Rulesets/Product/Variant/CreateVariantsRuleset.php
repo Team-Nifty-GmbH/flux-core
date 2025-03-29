@@ -48,7 +48,7 @@ class CreateVariantsRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => Product::class]),
             ],
-            'name' => 'string',
+            'name' => 'string|max:255',
             'clients' => 'array',
             'clients.*' => [
                 'required',

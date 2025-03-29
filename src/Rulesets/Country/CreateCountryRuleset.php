@@ -27,9 +27,9 @@ class CreateCountryRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => Currency::class]),
             ],
-            'name' => 'required|string',
-            'iso_alpha2' => 'required|string|unique:countries,iso_alpha2',
-            'iso_alpha3' => 'nullable|string',
+            'name' => 'required|string|max:255',
+            'iso_alpha2' => 'required|string|max:255|unique:countries,iso_alpha2',
+            'iso_alpha3' => 'nullable|string|max:255',
             'iso_numeric' => [
                 'nullable',
                 app(Numeric::class, ['min' => 0, 'max' => 999]),

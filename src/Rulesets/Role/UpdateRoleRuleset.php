@@ -20,7 +20,7 @@ class UpdateRoleRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => Role::class]),
             ],
-            'name' => 'sometimes|required|string',
+            'name' => 'sometimes|required|string|max:255',
             'permissions' => 'array',
             'permissions.*' => [
                 'required',

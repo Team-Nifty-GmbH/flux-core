@@ -23,7 +23,7 @@ class UpdateProductOptionRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => ProductOptionGroup::class]),
             ],
-            'name' => 'sometimes|required|string',
+            'name' => 'sometimes|required|string|max:255',
         ];
     }
 }

@@ -21,7 +21,7 @@ class CreateProductPropertyGroupRuleset extends FluxRuleset
     {
         return [
             'uuid' => 'nullable|string|uuid|unique:product_property_groups,uuid',
-            'name' => 'required|string',
+            'name' => 'required|string|max:255',
         ];
     }
 }

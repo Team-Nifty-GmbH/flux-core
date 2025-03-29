@@ -20,7 +20,7 @@ class UpdateProductPropertyRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => ProductProperty::class]),
             ],
-            'name' => 'sometimes|required|string',
+            'name' => 'sometimes|required|string|max:255',
             'property_type_enum' => [
                 'sometimes',
                 'required',
