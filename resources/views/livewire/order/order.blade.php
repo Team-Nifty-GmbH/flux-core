@@ -532,14 +532,16 @@
                                 class="flex w-full items-center justify-between gap-4"
                             >
                                 <div>{{ __('Invoice Address') }}</div>
-                                <x-button
-                                    color="secondary"
-                                    light
-                                    wire:navigate
-                                    light
-                                    icon="eye"
-                                    :href="route('address.id', data_get($order, 'address_invoice_id', ''))"
-                                />
+                                @if ($invoiceAddressId = data_get($order, 'address_invoice_id', ''))
+                                    <x-button
+                                        color="secondary"
+                                        light
+                                        wire:navigate
+                                        light
+                                        icon="eye"
+                                        :href="route('address.id', $invoiceAddressId)"
+                                    />
+                                @endif
                             </div>
                         </x-slot>
                         <div id="order-invoice-address-id">
@@ -603,13 +605,16 @@
                                 class="flex w-full items-center justify-between gap-4"
                             >
                                 <div>{{ __('Delivery Address') }}</div>
-                                <x-button
-                                    color="secondary"
-                                    light
-                                    light
-                                    icon="eye"
-                                    :href="route('address.id', data_get($order, 'address_delivery_id', ''))"
-                                />
+                                @if ($deliveryAddressId = data_get($order, 'address_delivery_id', ''))
+                                    <x-button
+                                        color="secondary"
+                                        light
+                                        wire:navigate
+                                        light
+                                        icon="eye"
+                                        :href="route('address.id', $deliveryAddressId)"
+                                    />
+                                @endif
                             </div>
                         </x-slot>
                         <div id="order-delivery-address-id">
