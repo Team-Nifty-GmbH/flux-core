@@ -239,15 +239,13 @@ abstract class PrintableView extends Component
 
         $client = $model?->client ?? Client::query()->first();
 
-        $logoSmall = $client->getFirstMedia('logo_small');
-
-        if ($logo = $client->getFirstMedia('logo')) {
+        if (($logo = $client->getFirstMedia('logo')) && file_exists($logo->getPath())) {
             $client->logo = File::mimeType($logo->getPath()) === 'image/svg+xml'
                 ? $logo->getUrl('png')
                 : $logo->getUrl();
         }
 
-        if ($logoSmall = $client->getFirstMedia('logo_small')) {
+        if (($logoSmall = $client->getFirstMedia('logo_small')) && file_exists($logoSmall->getPath())) {
             $client->logo_small = File::mimeType($logoSmall->getPath()) === 'image/svg+xml'
                 ? $logoSmall->getUrl('png')
                 : $logoSmall->getUrl();
