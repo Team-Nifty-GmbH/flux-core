@@ -46,6 +46,7 @@ class CreateWorkTimeRuleset extends FluxRuleset
             'trackable_type' => [
                 'required_with:trackable_id',
                 'string',
+                'max:255',
                 app(MorphClassExists::class, ['uses' => Trackable::class]),
             ],
             'trackable_id' => [
@@ -55,7 +56,7 @@ class CreateWorkTimeRuleset extends FluxRuleset
             ],
             'started_at' => 'required_with:ended_at|nullable|date_format:Y-m-d H:i:s|before_or_equal:now',
             'ended_at' => 'nullable|date_format:Y-m-d H:i:s|after:started_at',
-            'name' => 'required_unless:is_daily_work_time,true|string|nullable',
+            'name' => 'required_unless:is_daily_work_time,true|string|max:255|nullable',
             'description' => 'string|nullable',
             'is_billable' => 'nullable|boolean',
             'is_daily_work_time' => 'boolean',

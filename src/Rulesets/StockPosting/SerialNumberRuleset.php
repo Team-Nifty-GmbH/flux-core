@@ -18,10 +18,16 @@ class SerialNumberRuleset extends FluxRuleset
                 'nullable',
                 app(ModelExists::class, ['model' => SerialNumberRange::class]),
             ],
-            'serial_number.serial_number' => 'required_with:serial_number|string|unique:serial_numbers,serial_number',
+            'serial_number.serial_number' => [
+                'required_with:serial_number',
+                'string',
+                'max:255',
+                'unique:serial_numbers,serial_number',
+            ],
             'serial_number.supplier_serial_number' => [
                 'required_if_accepted:serial_number.use_supplier_serial_number',
                 'string',
+                'max:255',
                 'nullable',
             ],
             'serial_number.use_supplier_serial_number' => 'boolean',

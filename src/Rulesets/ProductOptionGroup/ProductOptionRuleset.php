@@ -10,7 +10,7 @@ class ProductOptionRuleset extends FluxRuleset
     {
         return [
             'product_options' => 'array',
-            'product_options.*.name' => 'required|string',
+            'product_options.*.name' => 'required|string|max:255',
         ];
     }
 }

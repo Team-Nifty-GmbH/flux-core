@@ -19,6 +19,7 @@ class DeleteMediaCollectionRuleset extends FluxRuleset
             'model_type' => [
                 'required',
                 'string',
+                'max:255',
                 app(MorphClassExists::class),
             ],
             'model_id' => [
@@ -26,7 +27,7 @@ class DeleteMediaCollectionRuleset extends FluxRuleset
                 'integer',
                 app(MorphExists::class),
             ],
-            'collection_name' => 'required|string',
+            'collection_name' => 'required|string|max:255',
         ];
     }
 }

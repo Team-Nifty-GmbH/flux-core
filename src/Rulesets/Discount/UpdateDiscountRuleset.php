@@ -18,7 +18,7 @@ class UpdateDiscountRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => Discount::class]),
             ],
-            'name' => 'nullable|string',
+            'name' => 'nullable|string|max:255',
             'discount' => 'required_with:is_percentage|numeric',
             'from' => 'nullable|date_format:Y-m-d H:i:s',
             'till' => 'nullable|date_format:Y-m-d H:i:s',

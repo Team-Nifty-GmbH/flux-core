@@ -50,6 +50,7 @@ class CreateTaskRuleset extends FluxRuleset
             'model_type' => [
                 'required_with:model_id',
                 'string',
+                'max:255',
                 'nullable',
                 app(MorphClassExists::class),
             ],
@@ -59,7 +60,7 @@ class CreateTaskRuleset extends FluxRuleset
                 'nullable',
                 app(MorphExists::class),
             ],
-            'name' => 'required|string',
+            'name' => 'required|string|max:255',
             'description' => 'string|nullable',
             'start_date' => 'date|nullable',
             'due_date' => 'date|nullable|after_or_equal:start_date',
