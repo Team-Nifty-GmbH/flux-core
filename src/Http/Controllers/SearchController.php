@@ -13,7 +13,7 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class SearchController extends Controller
 {
-    public function __invoke(Request $request, $model)
+    public function __invoke(Request $request, ?string $model = null)
     {
         // check if $model is a morph alias
         $model = morphed_model($model) ?? $model;
