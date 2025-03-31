@@ -36,9 +36,9 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, OffersPrinting
 {
-    use CascadeSoftDeletes, Categorizable, Commentable, Communicatable, Filterable,
-        HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasSerialNumberRange,
-        HasUserModification, HasUuid, InteractsWithMedia, Lockable, LogsActivity, Printable;
+    use CascadeSoftDeletes, Categorizable, Commentable, Communicatable, Filterable, HasAdditionalColumns,
+        HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasSerialNumberRange, HasUserModification,
+        HasUuid, InteractsWithMedia, Lockable, LogsActivity, Printable;
 
     public static string $iconName = 'users';
 
