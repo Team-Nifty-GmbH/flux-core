@@ -101,7 +101,7 @@ class SignaturePublicLink extends Component
             ]);
 
             try {
-                $this->signature->force()->save();
+                $this->signature->setCheckPermission(false)->force()->save();
             } catch (ValidationException|UnauthorizedException $e) {
                 exception_to_notifications($e, $this);
                 $this->skipRender();

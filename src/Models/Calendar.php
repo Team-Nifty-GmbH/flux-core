@@ -17,7 +17,8 @@ use Illuminate\Support\Str;
 
 class Calendar extends FluxModel
 {
-    use HasPackageFactory, HasParentChildRelations, HasUserModification, LogsActivity, ResolvesRelationsThroughContainer;
+    use HasPackageFactory, HasParentChildRelations, HasUserModification, LogsActivity,
+        ResolvesRelationsThroughContainer;
 
     protected $guarded = [
         'id',
