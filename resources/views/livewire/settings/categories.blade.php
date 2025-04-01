@@ -45,6 +45,7 @@
                     wire:model="category.parent_id"
                     :label="__('Parent')"
                     select="label:label|value:id"
+                    unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\Category::class),
                         'method' => 'POST',

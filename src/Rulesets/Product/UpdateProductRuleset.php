@@ -113,6 +113,11 @@ class UpdateProductRuleset extends FluxRuleset
             'min_purchase' => 'numeric|nullable',
             'max_purchase' => 'numeric|nullable',
             'seo_keywords' => 'string|nullable',
+            'search_aliases' => [
+                'array',
+                'nullable',
+            ],
+            'search_aliases.*' => 'string|max:255|distinct',
             'posting_account' => 'string|max:255|nullable',
             'warning_stock_amount' => 'numeric|nullable',
 

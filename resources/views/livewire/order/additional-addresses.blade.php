@@ -7,6 +7,7 @@
                         :label="__('Address')"
                         wire:model="address_id"
                         select="label:label|value:id"
+                        unfiltered
                         :request="[
                             'url' => route('search', \FluxErp\Models\Address::class),
                             'method' => 'POST',

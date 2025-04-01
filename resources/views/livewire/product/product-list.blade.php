@@ -23,6 +23,7 @@
                     :label="__('Clients')"
                     :src="'logo_small_url'"
                     select="label:name|value:id"
+                    unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\Client::class),
                         'method' => 'POST',

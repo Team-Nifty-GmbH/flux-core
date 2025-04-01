@@ -63,6 +63,7 @@
                                 wire:model="orderPosition.product_id"
                                 required
                                 select="label:label|value:id|description:product_number"
+                                unfiltered
                                 :request="[
                                     'url' => route('search', \FluxErp\Models\Product::class),
                                     'method' => 'POST',
@@ -85,6 +86,7 @@
                                     :label="__('Warehouse')"
                                     wire:model="orderPosition.warehouse_id"
                                     select="label:name|value:id"
+                                    unfiltered
                                     :request="[
                                         'url' => route('search', \FluxErp\Models\Warehouse::class),
                                         'method' => 'POST',
@@ -145,6 +147,7 @@
                             select="label:name|value:id"
                             wire:model.number="orderPosition.ledger_account_id"
                             select="label:name|value:id|description:number"
+                            unfiltered
                             :request="[
                                 'url' => route('search', \FluxErp\Models\LedgerAccount::class),
                                 'method' => 'POST',

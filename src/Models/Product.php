@@ -75,6 +75,7 @@ class Product extends FluxModel implements HasMedia, InteractsWithDataTables
     {
         return [
             'time_unit_enum' => TimeUnitEnum::class,
+            'search_aliases' => 'array',
             'is_active' => 'boolean',
             'is_highlight' => 'boolean',
             'is_bundle' => 'boolean',

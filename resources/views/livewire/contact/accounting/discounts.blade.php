@@ -26,6 +26,7 @@
                 :label="__('Category')"
                 wire:model="discountForm.model_id"
                 select="label:name|value:id"
+                unfiltered
                 :request="[
                     'url' => route('search', \FluxErp\Models\Category::class),
                     'method' => 'POST',
@@ -53,6 +54,7 @@
                 :label="__('Product')"
                 wire:model="discountForm.model_id"
                 select="label:label|value:id|description:product_number"
+                unfiltered
                 :request="[
                     'url' => route('search', \FluxErp\Models\Product::class),
                     'method' => 'POST',

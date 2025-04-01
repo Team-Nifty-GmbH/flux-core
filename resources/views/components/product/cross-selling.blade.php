@@ -16,6 +16,7 @@
                 x-on:select="pushProduct($event.detail.select, $el.closest('[data-index]').getAttribute('data-index')); clear()"
                 class="pb-4"
                 select="label:name|value:id|description:product_number"
+                unfiltered
                 :request="[
                     'url' => route('search', \FluxErp\Models\Product::class),
                     'params' => [

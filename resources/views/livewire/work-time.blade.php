@@ -25,6 +25,7 @@
                 :label="__('Contact')"
                 wire:model="workTime.contact_id"
                 select="label:label|value:contact_id"
+                unfiltered
                 :request="[
                     'url' => route('search', \FluxErp\Models\Address::class),
                     'method' => 'POST',
@@ -61,6 +62,7 @@
                     x-on:select="recordSelected($event.detail.select)"
                     wire:model="workTime.trackable_id"
                     select="label:label|value:id"
+                    unfiltered
                     :request="[
                         'url' => route('search', '__model__'),
                         'method' => 'POST',

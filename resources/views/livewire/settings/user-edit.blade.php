@@ -249,6 +249,7 @@
                 class="pb-4"
                 wire:model="userForm.contact_id"
                 select="label:label|value:contact_id"
+                unfiltered
                 :request="[
                     'url' => route('search', \FluxErp\Models\Address::class),
                     'method' => 'POST',
