@@ -12,6 +12,7 @@
                     :label="__('Project')"
                     wire:model="task.project_id"
                     select="label:label|value:id"
+                    unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\Project::class),
                         'method' => 'POST',
@@ -22,6 +23,7 @@
                     autocomplete="off"
                     wire:model="task.responsible_user_id"
                     select="label:label|value:id"
+                    unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\User::class),
                         'method' => 'POST',
@@ -64,6 +66,7 @@
                     wire:model="task.categories"
                     multiple
                     select="label:label|value:id"
+                    unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\Category::class),
                         'method' => 'POST',
@@ -84,6 +87,7 @@
                     multiple
                     wire:model="task.users"
                     select="label:label|value:id"
+                    unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\User::class),
                         'method' => 'POST',

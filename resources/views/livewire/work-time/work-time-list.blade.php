@@ -34,6 +34,7 @@
                     autocomplete="off"
                     wire:model="workTime.user_id"
                     select="label:label|value:id"
+                    unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\User::class),
                         'method' => 'POST',
@@ -70,6 +71,7 @@
                     :label="__('Contact')"
                     wire:model="workTime.contact_id"
                     select="label:label|value:contact_id"
+                    unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\Address::class),
                         'method' => 'POST',
@@ -104,6 +106,7 @@
                         wire:model="workTime.trackable_id"
                         x-on:select="$event.detail.select.contact_id ? $wire.workTime.contact_id = $event.detail.select.contact_id : null"
                         select="label:label|value:id"
+                        unfiltered
                         :request="[
                             'url' => route('search', '__model__'),
                             'method' => 'POST',
@@ -150,6 +153,7 @@
                 :label="__('Product')"
                 wire:model="createOrdersFromWorkTimes.product_id"
                 select="label:label|value:id"
+                unfiltered
                 :request="[
                     'url' => route('search', \FluxErp\Models\Product::class),
                     'method' => 'POST',

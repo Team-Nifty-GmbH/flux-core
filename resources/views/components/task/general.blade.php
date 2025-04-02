@@ -22,6 +22,7 @@
                 wire:model="task.project_id"
                 x-bind:readonly="!edit"
                 select="label:label|value:id"
+                unfiltered
                 :request="[
                     'url' => route('search', \FluxErp\Models\Project::class),
                     'method' => 'POST',
@@ -37,6 +38,7 @@
                 wire:model="task.responsible_user_id"
                 x-bind:readonly="!edit"
                 select="label:label|value:id"
+                unfiltered
                 :request="[
                     'url' => route('search', \FluxErp\Models\User::class),
                     'method' => 'POST',
@@ -96,6 +98,7 @@
                 x-bind:readonly="!edit"
                 multiple
                 select="label:label|value:id"
+                unfiltered
                 :request="[
                     'url' => route('search', \FluxErp\Models\Category::class),
                     'method' => 'POST',
@@ -119,6 +122,7 @@
                 wire:model="task.users"
                 x-bind:readonly="!edit"
                 select="label:label|value:id"
+                unfiltered
                 :request="[
                     'url' => route('search', \FluxErp\Models\User::class),
                     'method' => 'POST',
@@ -133,11 +137,11 @@
             x-bind:class="!edit && 'pointer-events-none'"
         >
             <x-select.styled
-                :label="__('Tags')"
                 multiple
                 x-bind:disabled="! edit"
                 wire:model.number="task.tags"
                 select="label:label|value:id"
+                unfiltered
                 :request="[
                     'url' => route('search', \FluxErp\Models\Tag::class),
                     'method' => 'POST',
@@ -153,18 +157,19 @@
                     ],
                 ]"
             >
-                <x-slot:after>
-                    @canAction(\FluxErp\Actions\Tag\CreateTag::class)
-                        <div class="px-1">
-                            <x-button
+                <x-slot:label>
+                    <div class="flex items-center gap-2">
+                        <x-label :label="__('Tags')" />
+                        @canAction(\FluxErp\Actions\Tag\CreateTag::class)
+                            <x-button.circle
+                                sm
+                                icon="plus"
                                 color="emerald"
-                                full
-                                :text="__('Add')"
                                 wire:click="addTag($promptValue())"
                                 wire:flux-confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}"
                             />
-                        </div>
-                    @endcanAction
+                        @endcanAction
+                    </div>
                 </x-slot>
             </x-select.styled>
         </div>

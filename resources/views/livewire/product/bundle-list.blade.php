@@ -7,6 +7,7 @@
                 wire:model="productBundleProductForm.bundle_product_id"
                 required
                 select="label:label|value:id|description:product_number"
+                unfiltered
                 :request="[
                     'url' => route('search', \FluxErp\Models\Product::class),
                     'method' => 'POST',

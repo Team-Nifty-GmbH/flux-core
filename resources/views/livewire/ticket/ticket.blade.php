@@ -218,6 +218,7 @@
                             :label="__('Assigned')"
                             wire:model.live="ticket.users"
                             select="label:label|value:id"
+                            unfiltered
                             :request="[
                                 'url' => route('search', \FluxErp\Models\User::class),
                                 'method' => 'POST',
@@ -258,6 +259,7 @@
                                     wire:model="ticket.authenticatable_id"
                                     required
                                     select="label:label|value:id"
+                                    unfiltered
                                     :request="[
                                         'url' => route('search', $ticket->authenticatable_type ?? morph_alias(\FluxErp\Models\User::class)),
                                         'method' => 'POST',

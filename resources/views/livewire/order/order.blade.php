@@ -37,6 +37,7 @@
                     wire:model="replicateOrder.order_type_id"
                     required
                     select="label:name|value:id"
+                    unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\OrderType::class),
                         'method' => 'POST',
@@ -71,6 +72,7 @@
                         required
                         x-on:select="updateContactId($event.detail.select.contact_id)"
                         select="label:label|value:contact_id"
+                        unfiltered
                         :request="[
                             'url' => route('search', \FluxErp\Models\Address::class),
                             'method' => 'POST',
@@ -101,6 +103,7 @@
                             wire:model="replicateOrder.address_invoice_id"
                             required
                             select="label:label|value:id"
+                            unfiltered
                             :request="[
                                 'url' => route('search', \FluxErp\Models\Address::class),
                                 'method' => 'POST',
@@ -124,6 +127,7 @@
                             wire:model="replicateOrder.address_delivery_id"
                             required
                             select="label:label|value:id"
+                            unfiltered
                             :request="[
                                 'url' => route('search', \FluxErp\Models\Address::class),
                                 'method' => 'POST',
@@ -202,6 +206,7 @@
                     wire:model="replicateOrder.order_type_id"
                     required
                     select="label:name|value:id"
+                    unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\OrderType::class),
                         'method' => 'POST',
@@ -499,6 +504,7 @@
                                 required
                                 x-on:select="updateContactId($event.detail.select.value)"
                                 select="label:label|value:contact_id"
+                                unfiltered
                                 :request="[
                                     'url' => route('search', \FluxErp\Models\Address::class),
                                     'method' => 'POST',
@@ -551,6 +557,7 @@
                                 wire:model.live="order.address_invoice_id"
                                 required
                                 select="label:label|value:id"
+                                unfiltered
                                 :request="[
                                     'url' => route('search', \FluxErp\Models\Address::class),
                                     'method' => 'POST',
@@ -624,6 +631,7 @@
                                 wire:model.live="order.address_delivery_id"
                                 required
                                 select="label:label|value:id"
+                                unfiltered
                                 :request="[
                                     'url' => route('search', \FluxErp\Models\Address::class),
                                     'method' => 'POST',
@@ -710,6 +718,7 @@
                                 autocomplete="off"
                                 wire:model="order.agent_id"
                                 select="label:label|value:id"
+                                unfiltered
                                 :request="[
                                     'url' => route('search', \FluxErp\Models\User::class),
                                     'method' => 'POST',
@@ -723,6 +732,7 @@
                                 autocomplete="off"
                                 wire:model="order.responsible_user_id"
                                 select="label:label|value:id"
+                                unfiltered
                                 :request="[
                                     'url' => route('search', \FluxErp\Models\User::class),
                                     'method' => 'POST',
@@ -737,6 +747,7 @@
                                 multiple
                                 wire:model="order.users"
                                 select="label:label|value:id"
+                                unfiltered
                                 :request="[
                                     'url' => route('search', \FluxErp\Models\User::class),
                                     'method' => 'POST',
