@@ -38,7 +38,7 @@ class CreateOrderPosition extends FluxAction
             ->first();
         $orderPosition = app(OrderPosition::class);
 
-        $this->data['is_net'] ??= $this->getData( 'priceList.is_net', false);
+        $this->data['is_net'] ??= $this->getData('priceList.is_net', false);
         $this->data['client_id'] ??= $this->getData('client_id') ?? Client::default()?->getKey();
         $this->data['price_list_id'] ??= $this->getData('price_list_id') ?? PriceList::default()?->getKey();
 
@@ -134,9 +134,9 @@ class CreateOrderPosition extends FluxAction
             ->mergeRules([
                 'vat_rate_percentage' => [
                     Rule::excludeIf(
-                        $this->getData( 'is_free_text', false)
-                        || $this->getData( 'is_bundle_position', false)
-                        || $this->getData( 'vat_rate_id', false)
+                        $this->getData('is_free_text', false)
+                        || $this->getData('is_bundle_position', false)
+                        || $this->getData('vat_rate_id', false)
                     ),
                     Rule::requiredIf(
                         ! $this->getData('is_free_text', false)
