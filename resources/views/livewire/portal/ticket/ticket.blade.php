@@ -65,10 +65,12 @@
                     @section('additional-columns')
                     <template x-for="additionalColumn in additionalColumns">
                         <div>
-                            <x-label
-                                x-html="additionalColumn.label ? additionalColumn.label : additionalColumn.name"
-                                x-bind:for="additionalColumn.name"
-                            />
+                            <x-label>
+                                <span
+                                    x-html="additionalColumn.label ? additionalColumn.label : additionalColumn.name"
+                                    x-bind:for="additionalColumn.name"
+                                />
+                            </x-label>
                             <x-input
                                 x-bind:type="additionalColumn.field_type"
                                 x-model="ticket[additionalColumn.name]"

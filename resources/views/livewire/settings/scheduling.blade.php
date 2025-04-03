@@ -19,10 +19,12 @@
         />
         <template x-for="(value, parameter) in $wire.schedule.parameters">
             <div>
-                <x-label
-                    x-html="parameter"
-                    x-bind:for="$wire.schedule.parameters[parameter]"
-                />
+                <x-label>
+                    <span
+                        x-html="parameter"
+                        x-bind:for="$wire.schedule.parameters[parameter]"
+                    />
+                </x-label>
                 <x-input x-model="$wire.schedule.parameters[parameter]" />
             </div>
         </template>
