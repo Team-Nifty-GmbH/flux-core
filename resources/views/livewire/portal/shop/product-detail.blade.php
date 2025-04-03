@@ -194,7 +194,7 @@
                                     <x-button
                                         :text="__('Download folder')"
                                         color="indigo"
-                                        icon="save"
+                                        icon="arrow-down-tray"
                                         wire:click="downloadMedia({{ \Illuminate\Support\Js::from(array_keys($media)) }}, '{{ $collection }}')"
                                     />
                                     <x-button
