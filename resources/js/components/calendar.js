@@ -64,7 +64,15 @@ const calendar = () => {
                 return false;
             }
 
-            this.getFolderTree().updateNode(this.$wire.calendarObject);
+            if (this.$wire.calendarObject.isNew) {
+                // Add new calendar
+                if (! this.$wire.calendarObject.is_group) {
+                    // Add calendar as event source
+                    this.calendar.addEventSource(calendarObject);
+                }
+            } else {
+                this.getFolderTree().updateNode(this.$wire.calendarObject);
+            }
 
             return true;
         },
@@ -270,63 +278,38 @@ const calendar = () => {
                     this.dispatchCalendarEvents('unselect', { jsEvent, view });
                 },
                 dateClick: (dateClickInfo) => {
-                    dateClickInfo.view.dateEnv.timeZone =
-                        Intl.DateTimeFormat().resolvedOptions().timeZone;
+                    dateClickInfo.view.dateEnv.timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
                     this.dispatchCalendarEvents('dateClick', dateClickInfo);
                 },
                 viewDidMount: (viewDidMountInfo) => {
-                    this.dispatchCalendarEvents(
-                        'viewDidMount',
-                        viewDidMountInfo,
-                    );
+                    this.dispatchCalendarEvents('viewDidMount', viewDidMountInfo);
                 },
                 eventDidMount: (eventDidMountInfo) => {
-                    this.dispatchCalendarEvents(
-                        'eventDidMount',
-                        eventDidMountInfo,
-                    );
+                    this.dispatchCalendarEvents('eventDidMount', eventDidMountInfo);
                 },
                 eventClick: (eventClickInfo) => {
                     this.dispatchCalendarEvents('eventClick', eventClickInfo);
                 },
                 eventMouseEnter: (eventMouseEnterInfo) => {
-                    this.dispatchCalendarEvents(
-                        'eventMouseEnter',
-                        eventMouseEnterInfo,
-                    );
+                    this.dispatchCalendarEvents('eventMouseEnter', eventMouseEnterInfo);
                 },
                 eventMouseLeave: (eventMouseLeaveInfo) => {
-                    this.dispatchCalendarEvents(
-                        'eventMouseLeave',
-                        eventMouseLeaveInfo,
-                    );
+                    this.dispatchCalendarEvents('eventMouseLeave', eventMouseLeaveInfo);
                 },
                 eventDragStart: (eventDragStartInfo) => {
-                    this.dispatchCalendarEvents(
-                        'eventDragStart',
-                        eventDragStartInfo,
-                    );
+                    this.dispatchCalendarEvents('eventDragStart', eventDragStartInfo);
                 },
                 eventDragStop: (eventDragStopInfo) => {
-                    this.dispatchCalendarEvents(
-                        'eventDragStop',
-                        eventDragStopInfo,
-                    );
+                    this.dispatchCalendarEvents('eventDragStop', eventDragStopInfo);
                 },
                 eventDrop: (eventDropInfo) => {
                     this.dispatchCalendarEvents('eventDrop', eventDropInfo);
                 },
                 eventResizeStart: (eventResizeStartInfo) => {
-                    this.dispatchCalendarEvents(
-                        'eventResizeStart',
-                        eventResizeStartInfo,
-                    );
+                    this.dispatchCalendarEvents('eventResizeStart', eventResizeStartInfo);
                 },
                 eventResizeStop: (eventResizeStopInfo) => {
-                    this.dispatchCalendarEvents(
-                        'eventResizeStop',
-                        eventResizeStopInfo,
-                    );
+                    this.dispatchCalendarEvents('eventResizeStop', eventResizeStopInfo);
                 },
                 eventResize: (eventResizeInfo) => {
                     this.dispatchCalendarEvents('eventResize', eventResizeInfo);
@@ -335,10 +318,7 @@ const calendar = () => {
                     this.dispatchCalendarEvents('drop', dropInfo);
                 },
                 eventReceive: (eventReceiveInfo) => {
-                    this.dispatchCalendarEvents(
-                        'eventReceive',
-                        eventReceiveInfo,
-                    );
+                    this.dispatchCalendarEvents('eventReceive', eventReceiveInfo);
                 },
                 eventLeave: (eventLeaveInfo) => {
                     this.dispatchCalendarEvents('eventLeave', eventLeaveInfo);

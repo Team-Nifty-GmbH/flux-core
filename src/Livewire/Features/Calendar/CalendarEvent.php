@@ -3,10 +3,13 @@
 namespace FluxErp\Livewire\Features\Calendar;
 
 use FluxErp\Livewire\Forms\CalendarEventForm;
+use FluxErp\Models\Calendar;
 use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Livewire\Attributes\Modelable;
+use Livewire\Attributes\On;
+use Livewire\Attributes\Reactive;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -15,8 +18,13 @@ class CalendarEvent extends Component
 {
     use Actions;
 
+    #[Reactive]
+    public array $calendars = [];
+
     #[Modelable]
     public CalendarEventForm $event;
+
+    public array $selectableCalendars = [];
 
     public function render(): View
     {
@@ -24,6 +32,7 @@ class CalendarEvent extends Component
     }
 
     #[Renderless]
+    #[On('delete-calendar-event')]
     public function delete(): bool
     {
         $eventId = $this->event->id;
@@ -37,6 +46,7 @@ class CalendarEvent extends Component
         }
 
         $this->js(<<<JS
+            \$modalClose('confirm-dialog');
             \$modalClose('edit-event-modal');
             calendar.getEventById('$eventId')?.remove();
         JS);
@@ -45,8 +55,21 @@ class CalendarEvent extends Component
     }
 
     #[Renderless]
+    public function isCalendarEventRepeatable(int|string|null $calendarId): bool
+    {
+        return (bool) resolve_static(Calendar::class, 'query')
+            ->whereKey($calendarId)
+            ->value('has_repeatable_events');
+    }
+
+    #[Renderless]
+    #[On('save-calendar-event')]
     public function save(): bool
     {
+        if (! $this->event->was_repeatable && $this->event->has_repeats) {
+            $this->event->confirm_option = 'all';
+        }
+
         try {
             $this->event->save();
         } catch (UnauthorizedException|ValidationException $e) {
@@ -56,10 +79,24 @@ class CalendarEvent extends Component
         }
 
         $this->js(<<<JS
+            \$modalClose('confirm-dialog');
             \$modalClose('edit-event-modal');
             calendar.getEventSourceById('{$this->event->calendar_id}').refetch();
         JS);
 
         return true;
+    }
+
+    #[On('calendar-date-click')]
+    #[On('calendar-event-click')]
+    public function setCalendars(): void
+    {
+        $this->selectableCalendars = array_values(
+            collect(to_flat_tree($this->calendars))
+                ->where('isGroup', false)
+                ->where('hasNoEvents', false)
+                ->where('isVirtual', false)
+                ->all()
+        );
     }
 }

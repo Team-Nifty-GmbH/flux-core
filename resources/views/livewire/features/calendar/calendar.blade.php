@@ -6,24 +6,18 @@
         x-bind:style="{ height: height + 'px' }"
         class="flex"
     >
-        <livewire:features.calendar.calendar-event-edit wire:model="event" />
+        <livewire:features.calendar.calendar-event-edit wire:model="event" :calendars="$calendars" />
         @section('calendar-modal')
         <x-modal id="calendar-modal" :title="__('Edit Calendar')">
             @section('calendar-edit')
             <div class="flex flex-col gap-4">
-                <div
-                    x-cloak
-                    x-show="
-                        $wire.selectedCalendar.children === undefined ||
-                            $wire.selectedCalendar.children?.length() === 0
-                    "
-                >
-                    <x-select.styled
-                        wire:model="calendar.parent_id"
-                        :label="__('Parent Calendar')"
-                        select="label:name|value:id"
-                    />
-                </div>
+                <x-select.styled
+                    wire:model="calendar.parent_id"
+                    :label="__('Parent Calendar')"
+                    required
+                    select="label:label|value:id"
+                    :options="$calendarLeafs"
+                />
                 <x-input
                     wire:model="calendar.name"
                     :label="__('Calendar Name')"
@@ -34,48 +28,58 @@
                     :label="__('Color')"
                     wire:model="calendar.color"
                 />
-                <x-checkbox
-                    wire:model="calendar.has_repeatable_events"
-                    :label="__('Has repeatable events')"
-                />
+                <div x-show="!$wire.calendar.id" x-cloak>
+                    <x-checkbox
+                        wire:model="calendar.is_group"
+                        :label="__('Is Group')"
+                    />
+                </div>
+                <div x-show="!$wire.calendar.is_group" x-cloak>
+                    <x-checkbox
+                        wire:model="calendar.has_repeatable_events"
+                        :label="__('Has repeatable events')"
+                    />
+                </div>
                 <x-checkbox
                     wire:model="calendar.is_public"
                     :label="__('Public')"
                 />
-                <x-card :header="__('Custom Properties')">
-                    <div class="flex flex-col gap-4">
-                        <x-button.circle
-                            class="mr-2"
-                            color="indigo"
-                            icon="plus"
-                            wire:click="addCustomProperty"
-                        />
-                        @foreach ($calendar->custom_properties ?? [] as $index => $customProperty)
-                            <div class="flex gap-x-4">
-                                <div class="pt-6">
-                                    <x-button.circle
-                                        color="red"
-                                        icon="trash"
-                                        wire:click="removeCustomProperty({{ $index }})"
-                                    />
+                <div x-show="!$wire.calendar.is_group" x-cloak>
+                    <x-card :header="__('Custom Properties')">
+                        <div class="flex flex-col gap-4">
+                            <x-button.circle
+                                class="mr-2"
+                                color="indigo"
+                                icon="plus"
+                                wire:click="addCustomProperty"
+                            />
+                            @foreach ($calendar->custom_properties ?? [] as $index => $customProperty)
+                                <div class="flex gap-x-4">
+                                    <div class="pt-6">
+                                        <x-button.circle
+                                            color="red"
+                                            icon="trash"
+                                            wire:click="removeCustomProperty({{ $index }})"
+                                        />
+                                    </div>
+                                    <div class="max-w-sm">
+                                        <x-select.styled
+                                            wire:model="calendar.customProperties.{{ $index }}.field_type"
+                                            :label="__('Field Type')"
+                                            :options="$this->fieldTypes"
+                                        />
+                                    </div>
+                                    <div class="w-full">
+                                        <x-input
+                                            wire:model="calendar.customProperties.{{ $index }}.name"
+                                            :label="__('Name')"
+                                        />
+                                    </div>
                                 </div>
-                                <div class="max-w-sm">
-                                    <x-select.styled
-                                        wire:model="selectedCalendar.customProperties.{{ $index }}.field_type"
-                                        :label="__('Field Type')"
-                                        :options="$this->fieldTypes"
-                                    />
-                                </div>
-                                <div class="w-full">
-                                    <x-input
-                                        wire:model="selectedCalendar.customProperties.{{ $index }}.name"
-                                        :label="__('Name')"
-                                    />
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                </x-card>
+                            @endforeach
+                        </div>
+                    </x-card>
+                </div>
             </div>
             @show
             <x-slot:footer>

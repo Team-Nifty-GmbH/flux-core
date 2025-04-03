@@ -30,6 +30,8 @@ class Calendar extends Component
 
     public CalendarForm $calendar;
 
+    public array $calendarLeafs = [];
+
     public ?array $calendarObject = null;
 
     #[Locked]
@@ -38,7 +40,14 @@ class Calendar extends Component
         'end' => null,
     ];
 
+    public array $calendars = [];
+
     public CalendarEventForm $event;
+
+    public function mount(): void
+    {
+        $this->calendars = $this->getCalendars();
+    }
 
     public function render(): View
     {
@@ -100,16 +109,13 @@ class Calendar extends Component
             data_get($event, 'extendedProps', []),
             $event
         ));
+        $this->event->original_start = data_get($event, 'start');
 
         if (data_get($this->event, 'id')) {
             $explodedId = explode('|', $this->event->id);
             $this->event->id = $explodedId[0];
             $this->event->repetition = $explodedId[1] ?? null;
         }
-
-        $this->calendarEventWasRepeatable = $this->event->has_repeats ?? false;
-        $this->confirmSave = 'future';
-        $this->confirmDelete = 'this';
 
         if ($trigger === 'event-change') {
             try {
@@ -139,11 +145,11 @@ class Calendar extends Component
     #[Renderless]
     public function getCalendars(): array
     {
-        return collect(
+        $this->calendars = collect(
             [
                 [
-                    'name' => __('My calendars'),
                     'id' => 'my-calendars',
+                    'name' => __('My calendars'),
                     'hasNoEvents' => true,
                     'children' => auth()->user()
                         ->calendars()
@@ -156,8 +162,8 @@ class Calendar extends Component
                         ->toArray(),
                 ],
                 [
-                    'name' => __('Shared with me'),
                     'id' => 'shared-with-me',
+                    'name' => __('Shared with me'),
                     'hasNoEvents' => true,
                     'children' => auth()->user()
                         ->calendars()
@@ -177,8 +183,8 @@ class Calendar extends Component
                         ->toArray(),
                 ],
                 [
-                    'name' => __('Public'),
                     'id' => 'public',
+                    'name' => __('Public'),
                     'hasNoEvents' => true,
                     'children' => resolve_static(\FluxErp\Models\Calendar::class, 'familyTree')
                         ->where('is_public', true)
@@ -193,8 +199,8 @@ class Calendar extends Component
                         ->toArray(),
                 ],
                 [
-                    'name' => __('Other'),
                     'id' => 'other',
+                    'name' => __('Other'),
                     'hasNoEvents' => true,
                     'children' => collect(Relation::morphMap())
                         ->filter(fn (string $modelClass) => in_array(Calendarable::class, class_implements($modelClass)))
@@ -208,6 +214,22 @@ class Calendar extends Component
             ->filter(fn (array $item) => data_get($item, 'children'))
             ->values()
             ->toArray();
+
+        $this->calendarLeafs = array_values(
+            array_merge(
+                [
+                    [
+                        'id' => null,
+                        'label' => __('My Calendars'),
+                    ],
+                ],
+                collect(to_flat_tree($this->calendars))
+                    ->where('isGroup', true)
+                    ->all()
+            )
+        );
+
+        return $this->calendars;
     }
 
     #[Renderless]
@@ -235,7 +257,12 @@ class Calendar extends Component
                         ],
                     ]
                 ),
-                Arr::dot(auth()->user()?->getCalendarSettings(static::class)->value('settings') ?? [])
+                Arr::dot(
+                    auth()
+                        ->user()
+                        ?->getCalendarSettings(static::class)
+                        ->value('settings') ?? []
+                )
             )
         );
     }
@@ -332,6 +359,7 @@ class Calendar extends Component
     #[Renderless]
     public function saveCalendar(): bool
     {
+        $isNew = ! $this->calendar->id;
         try {
             $this->calendar->save();
         } catch (ValidationException|UnauthorizedException $e) {
@@ -340,8 +368,13 @@ class Calendar extends Component
             return false;
         }
 
-        $this->calendarObject = $this->calendar->getActionResult()->toCalendarObject();
-        $this->toast()->success(__(':model saved', ['model' => __('Calendar')]))->send();
+        $this->calendarObject = $this->calendar
+            ->getActionResult()
+            ->toCalendarObject(['isNew' => $isNew]);
+
+        $this->toast()
+            ->success(__(':model saved', ['model' => __('Calendar')]))
+            ->send();
 
         return true;
     }
@@ -378,11 +411,6 @@ class Calendar extends Component
             'has_repeats' => false,
             'invited' => [],
         ]);
-    }
-
-    public function updatedCalendarObject(): void
-    {
-        $this->calendar->fromCalendarObject($this->calendarObject);
     }
 
     protected function calculateRepeatableEvents($calendar, Collection $calendarEvents): Collection

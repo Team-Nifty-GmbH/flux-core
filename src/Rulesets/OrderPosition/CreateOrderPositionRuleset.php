@@ -102,7 +102,9 @@ class CreateOrderPositionRuleset extends FluxRuleset
                 Rule::when(
                     fn (Fluent $data) => (! $data->is_free_text
                         && ! $data->is_bundle_position)
-                        && ! resolve_static(Product::class, 'query')->whereKey($data->product_id)->exists(),
+                        && ! resolve_static(Product::class, 'query')
+                            ->whereKey($data->product_id)
+                            ->exists(),
                     'required'
                 ),
                 'integer',

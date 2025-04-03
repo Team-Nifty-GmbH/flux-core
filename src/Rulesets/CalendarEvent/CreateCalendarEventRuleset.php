@@ -50,7 +50,6 @@ class CreateCalendarEventRuleset extends FluxRuleset
             'end' => 'required|date|after_or_equal:start',
             'is_all_day' => 'boolean',
             'has_taken_place' => 'boolean',
-            'has_repeats' => 'boolean',
             'extended_props' => 'array|nullable',
             'excluded' => 'array|nullable',
             'excluded.*' => 'date',

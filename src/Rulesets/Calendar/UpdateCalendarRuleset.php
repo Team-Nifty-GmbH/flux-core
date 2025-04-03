@@ -20,9 +20,10 @@ class UpdateCalendarRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => Calendar::class]),
             ],
             'parent_id' => [
-                'integer',
                 'nullable',
-                (app(ModelExists::class, ['model' => Calendar::class]))->whereNull('parent_id'),
+                'integer',
+                (app(ModelExists::class, ['model' => Calendar::class]))
+                    ->where('is_group', true),
             ],
             'name' => 'sometimes|required|string',
             'description' => 'string|nullable',
@@ -44,7 +45,7 @@ class UpdateCalendarRuleset extends FluxRuleset
                 ]),
             ],
             'has_repeatable_events' => 'boolean',
-            'is_public' => 'sometimes|boolean',
+            'is_public' => 'boolean',
         ];
     }
 }

@@ -6,6 +6,7 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Helpers\Helper;
 use FluxErp\Models\CalendarEvent;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 
 class CalendarEventForm extends FluxForm
 {
@@ -13,11 +14,11 @@ class CalendarEventForm extends FluxForm
 
     public ?string $calendar_type = null;
 
-    public string $confirm_option = 'all';
+    public string $confirm_option = 'this';
 
     public ?string $description = null;
 
-    public string $edit_component = 'test';
+    public ?string $edit_component = null;
 
     public ?string $end = null;
 
@@ -59,24 +60,41 @@ class CalendarEventForm extends FluxForm
 
     public ?string $title = null;
 
+    public bool $was_repeatable = false;
+
     public function fill($values): void
     {
         if ($values instanceof Model) {
             $values = $values->toArray();
         }
 
+        $wasRepeatable = false;
         if (is_string(data_get($values, 'repeat'))) {
             $values['repeat'] = Helper::parseRepeatStringToArray(data_get($values, 'repeat'));
+            $wasRepeatable = true;
+        } elseif (str_contains(data_get($values, 'id', ''), '|')) {
+            $wasRepeatable = true;
         }
 
         parent::fill($values);
 
         $this->end ??= $this->start;
+        $this->was_repeatable = $wasRepeatable;
     }
 
     public function fillFromJs(array $values): void
     {
         $values['is_all_day'] = data_get($values, 'allDay');
+
+        $values['repeat'] = [
+            'interval' => Arr::pull($values, 'interval'),
+            'unit' => Arr::pull($values, 'unit'),
+            'weekdays' => Arr::pull($values, 'weekdays'),
+            'monthly' => Arr::pull($values, 'monthly'),
+            'repeat_radio' => Arr::pull($values, 'repeat_radio'),
+            'repeat_end' => Arr::pull($values, 'repeat_end'),
+            'recurrences' => Arr::pull($values, 'recurrences'),
+        ];
 
         $this->fill($values);
     }
@@ -91,6 +109,11 @@ class CalendarEventForm extends FluxForm
         $model = morphed_model(data_get($this->extended_props, 'calendar_type') ?? '')
             ?? CalendarEvent::class;
 
-        return $model::fromCalendarEvent($this->toArray());
+        $data = $this->toArray();
+        if (! data_get($data, 'is_repeatable') || ! data_get($data, 'has_repeats')) {
+            unset($data['repeat']);
+        }
+
+        return $model::fromCalendarEvent($data);
     }
 }

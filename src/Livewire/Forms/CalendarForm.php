@@ -26,6 +26,8 @@ class CalendarForm extends FluxForm
     #[Locked]
     public bool $is_editable = true;
 
+    public bool $is_group = false;
+
     public bool $is_public = false;
 
     public ?string $model_type = null;

@@ -3,13 +3,14 @@
         <div class="grid grid-cols-1 space-y-2.5">
             @section('event-edit.content')
             @section('event-edit.calendar-select')
-            <div x-show="!$wire.event.calendar_type">
+            <div x-show="!$wire.event.calendar_type" id="calendar-select">
                 <x-select.styled
                     wire:model="event.calendar_id"
                     :label="__('Calendar')"
                     required
-                    x-on:select="$wire.event.is_repeatable = $wire.isCalendarEventRepeatable($event.detail.select.value);"
-                    select="label:name|value:id"
+                    x-on:select="$wire.event.is_repeatable = await $wire.isCalendarEventRepeatable($event.detail.select.id);"
+                    select="label:label|value:id"
+                    :options="$selectableCalendars"
                 />
             </div>
             @show
@@ -320,11 +321,13 @@
                             ],
                         }"
                     >
-                        <x-dropdown position="bottom-start">
+                        <x-dropdown position="bottom" scope="calendar">
                             <x-slot:action>
                                 <x-button
-                                    class="w-full"
+                                    class="w-full mt-2"
                                     x-on:click="show = ! show"
+                                    color="secondary"
+                                    flat
                                 >
                                     <span
                                         x-text="selectedOption?.label ?? '{{ __('Please select') }}'"
@@ -351,51 +354,7 @@
                             </template>
                         </x-dropdown>
                     </div>
-                    <x-select.styled
-                        class="mt-4"
-                        x-on:select="$wire.event.repeat.monthly = $event.detail.select.value"
-                        x-init="$wire.$watch('event.repeat.monthly', (value) => {
-                                  const option = options.find(option => option.value === value);
-                                  if (option) {
-                                      select(option);
-                                  }
-                              })"
-                        required
-                        x-bind:disabled="! $wire.event.is_editable ?? false"
-                    >
-                        <calendar-option value="day">
-                            <span
-                                x-text="'{{ __('Monthly on') }} ' + dayjs($wire.event.start).format('DD') + '.'"
-                            ></span>
-                        </calendar-option>
-                        <calendar-option value="first">
-                            <span
-                                x-text="'{{ __('Monthly on first') }} ' + dayjs($wire.event.start).format('dddd')"
-                            ></span>
-                        </calendar-option>
-                        <calendar-option value="second">
-                            <span
-                                x-text="'{{ __('Monthly on second') }} ' + dayjs($wire.event.start).format('dddd')"
-                            ></span>
-                        </calendar-option>
-                        <calendar-option value="third">
-                            <span
-                                x-text="'{{ __('Monthly on third') }} ' + dayjs($wire.event.start).format('dddd')"
-                            ></span>
-                        </calendar-option>
-                        <calendar-option value="fourth">
-                            <span
-                                x-text="'{{ __('Monthly on fourth') }} ' + dayjs($wire.event.start).format('dddd')"
-                            ></span>
-                        </calendar-option>
-                        <calendar-option value="last">
-                            <span
-                                x-text="'{{ __('Monthly on last') }} ' + dayjs($wire.event.start).format('dddd')"
-                            ></span>
-                        </calendar-option>
-                    </x-select.styled>
                 </template>
-
                 <div class="mb-2 mt-4">
                     <x-label :label="__('Repeat end')" />
                 </div>
@@ -538,8 +497,8 @@
                             id="invite"
                             :placeholder="__('Add invite')"
                             x-on:select="$wire.event.invited.push($event.detail.select); clear(); $tallstackuiSelect('invitee-search').mergeRequestParams({
-                    where: [['id', '!=', $event.detail.select.value]],
-                })"
+                                where: [['id', '!=', $event.detail.select.value]],
+                            })"
                             select="label:label|value:id"
                             :request="[
                                 'url' => route('search', \FluxErp\Models\User::class),
@@ -565,13 +524,12 @@
         <x-slot:footer>
             <div class="flex w-full justify-between gap-2">
                 <x-button
-                    wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Calendar Event')]) }}"
                     color="red"
                     flat
                     :text="__('Delete')"
                     x-show="$wire.event.id"
                     x-cloak
-                    wire:click="delete().then((calendarEvent) => {deleteEvent(calendarEvent);})"
+                    x-on:click="dialogType = 'delete'; $modalOpen('confirm-dialog')"
                 />
                 <div class="flex w-full justify-end gap-2">
                     <x-button
@@ -581,7 +539,7 @@
                         :text="__('Cancel')"
                         x-on:click="$modalClose('edit-event-modal')"
                     />
-                    <x-button primary :text="__('Save')" wire:click="save()" />
+                    <x-button primary :text="__('Save')" x-on:click="dialogType = 'save'; $wire.event.confirm_option = 'future'; $wire.event.was_repeatable ? $modalOpen('confirm-dialog') : $wire.save()" />
                 </div>
             </div>
         </x-slot>
