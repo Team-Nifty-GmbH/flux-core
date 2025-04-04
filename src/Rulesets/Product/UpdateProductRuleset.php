@@ -2,6 +2,7 @@
 
 namespace FluxErp\Rulesets\Product;
 
+use FluxErp\Enums\BundleTypeEnum;
 use FluxErp\Enums\TimeUnitEnum;
 use FluxErp\Models\Media;
 use FluxErp\Models\Product;
@@ -90,6 +91,11 @@ class UpdateProductRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => Unit::class]),
             ],
 
+            'bundle_type_enum' => [
+                'nullable',
+                Rule::enum(BundleTypeEnum::class),
+            ],
+
             'product_number' => 'string|nullable',
             'name' => 'string|max:255',
             'description' => 'string|nullable',
@@ -123,7 +129,10 @@ class UpdateProductRuleset extends FluxRuleset
 
             'is_active' => 'boolean',
             'is_highlight' => 'boolean',
-            'is_bundle' => 'boolean',
+            'is_bundle' => [
+                'required_with:bundle_type_enum',
+                'boolean',
+            ],
             'is_service' => 'boolean',
             'is_shipping_free' => 'boolean',
             'has_serial_numbers' => 'boolean',

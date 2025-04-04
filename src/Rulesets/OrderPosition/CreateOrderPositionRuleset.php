@@ -111,6 +111,7 @@ class CreateOrderPositionRuleset extends FluxRuleset
             ],
             'warehouse_id' => [
                 'exclude_if:is_free_text,true',
+                'exclude_without:product_id',
                 'integer',
                 'nullable',
                 app(ModelExists::class, ['model' => Warehouse::class]),

@@ -3,6 +3,7 @@
 namespace FluxErp\Actions\Product\ProductBundleProduct;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Enums\BundleTypeEnum;
 use FluxErp\Models\Pivots\ProductBundleProduct;
 use FluxErp\Models\Product;
 use FluxErp\Rulesets\Product\ProductBundleProduct\CreateProductBundleProductRuleset;
@@ -30,6 +31,7 @@ class CreateProductBundleProduct extends FluxAction
             ->first()
             ->update([
                 'is_bundle' => true,
+                'bundle_type_enum' => BundleTypeEnum::Standard,
             ]);
 
         return $productBundleProduct->refresh();

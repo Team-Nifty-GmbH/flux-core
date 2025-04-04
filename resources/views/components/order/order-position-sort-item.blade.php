@@ -44,7 +44,7 @@
             </div>
 
             <div class="flex items-center space-x-4">
-                @if (data_get($position, "amount"))
+                @if (data_get($position, "amount") && data_get($position, "unit_price"))
                     <div class="text-sm text-gray-600">
                         {{ is_null(data_get($position, "total_net_price")) ? null : data_get($position, "amount") . " × " . Number::currency(data_get($position, "unit_price"), data_get($this->order->currency, "iso"), app()->getLocale()) }}
                     </div>

@@ -16,6 +16,8 @@ class ProductForm extends FluxForm
 
     public array $bundle_products = [];
 
+    public ?string $bundle_type_enum = null;
+
     public array $categories = [];
 
     public ?int $children_count = null;
