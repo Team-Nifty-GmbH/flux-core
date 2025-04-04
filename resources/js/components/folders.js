@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
+import { destroy } from 'filepond';
 
 export default function folders(
     getTreePromise,
@@ -7,6 +8,7 @@ export default function folders(
     multiSelect = false,
     nameAttribute = 'label',
     childrenAttribute = 'children',
+    parentIdAttribute = 'parent_id',
     selectedCallback = null,
     checkedCallback = null,
     searchAttributes = null,
@@ -23,6 +25,7 @@ export default function folders(
         multiSelect: multiSelect,
         nameAttribute: nameAttribute,
         childrenAttribute: childrenAttribute,
+        parentIdAttribute: parentIdAttribute,
         selectedCallback: selectedCallback,
         checkedCallback: checkedCallback,
 
@@ -92,6 +95,27 @@ export default function folders(
         },
         isLeaf(node) {
             return !Array.isArray(node.children) || node.children.length === 0;
+        },
+        getNodeById(nodeId) {
+            if (!nodeId) return null;
+
+            const traverse = (nodes) => {
+                for (let i = 0; i < nodes.length; i++) {
+                    if (nodes[i].id === nodeId) {
+                        return nodes[i];
+                    }
+
+                    if (nodes[i][this.childrenAttribute]) {
+                        const found = traverse(
+                            nodes[i][this.childrenAttribute],
+                        );
+                        if (found) return found;
+                    }
+                }
+                return null;
+            };
+
+            return traverse(this.tree);
         },
         toggleCheck(node, isChecked) {
             const traverse = (currentNode, check) => {
@@ -252,7 +276,7 @@ export default function folders(
                 .filter((node) => node !== null); // Remove null (non-matching) nodes
         },
         addFolder(node = null, attributes = {}) {
-            let id = uuidv4();
+            let id = attributes.id || uuidv4();
             let target = node ? node.children : this.tree;
 
             if (node) {
@@ -268,7 +292,7 @@ export default function folders(
             }
 
             attributes.id = id;
-            attributes.parent_id = node?.id ?? null;
+            attributes[this.parentIdAttribute] = node?.id ?? null;
             target.push(attributes);
 
             const newNode = target[target.length - 1];
@@ -281,7 +305,24 @@ export default function folders(
             const traverseAndUpdate = (nodes) => {
                 for (let i = 0; i < nodes.length; i++) {
                     if (nodes[i].id === attributes.id) {
+                        const nodeCopy = { ...nodes[i] };
                         Object.assign(nodes[i], attributes);
+
+                        if (
+                            nodeCopy[this.parentIdAttribute] !==
+                            attributes[this.parentIdAttribute]
+                        ) {
+                            let parentNode = this.getNodeById(
+                                attributes[this.parentIdAttribute],
+                            );
+                            this.removeNode(nodes[i]);
+
+                            if (!parentNode[this.childrenAttribute]) {
+                                parentNode[this.childrenAttribute] = [];
+                            }
+
+                            parentNode[this.childrenAttribute].push(nodeCopy);
+                        }
 
                         this.$dispatch(
                             'folder-tree-folder-updated',

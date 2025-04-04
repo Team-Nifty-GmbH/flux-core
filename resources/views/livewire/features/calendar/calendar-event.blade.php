@@ -3,14 +3,18 @@
         <div class="grid grid-cols-1 space-y-2.5">
             @section('event-edit.content')
             @section('event-edit.calendar-select')
-            <div x-show="!$wire.event.calendar_type" id="calendar-select">
+            <div
+                x-show="!$wire.event.calendar_type"
+                id="calendar-select"
+                wire:ignore
+            >
                 <x-select.styled
                     wire:model="event.calendar_id"
                     :label="__('Calendar')"
                     required
                     x-on:select="$wire.event.is_repeatable = await $wire.isCalendarEventRepeatable($event.detail.select.id);"
                     select="label:label|value:id"
-                    :options="$selectableCalendars"
+                    :options="[]"
                 />
             </div>
             @show
@@ -324,7 +328,7 @@
                         <x-dropdown position="bottom" scope="calendar">
                             <x-slot:action>
                                 <x-button
-                                    class="w-full mt-2"
+                                    class="mt-2 w-full"
                                     x-on:click="show = ! show"
                                     color="secondary"
                                     flat
@@ -539,7 +543,11 @@
                         :text="__('Cancel')"
                         x-on:click="$modalClose('edit-event-modal')"
                     />
-                    <x-button primary :text="__('Save')" x-on:click="dialogType = 'save'; $wire.event.confirm_option = 'future'; $wire.event.was_repeatable ? $modalOpen('confirm-dialog') : $wire.save()" />
+                    <x-button
+                        primary
+                        :text="__('Save')"
+                        x-on:click="dialogType = 'save'; $wire.event.confirm_option = 'future'; $wire.event.was_repeatable ? $modalOpen('confirm-dialog') : $wire.save()"
+                    />
                 </div>
             </div>
         </x-slot>

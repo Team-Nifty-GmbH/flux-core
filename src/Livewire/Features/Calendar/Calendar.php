@@ -10,6 +10,7 @@ use FluxErp\Livewire\Forms\CalendarForm;
 use FluxErp\Models\CalendarEvent;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\Calendar\StoresCalendarSettings;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Arr;
@@ -174,8 +175,8 @@ class Calendar extends Component
                         ->map(function (\FluxErp\Models\Calendar $calendar) {
                             return $calendar->toCalendarObject(
                                 [
-                                    'permission' => $calendar['pivot']['permission'],
-                                    'resourceEditable' => $calendar['pivot']['permission'] !== 'reader',
+                                    'permission' => data_get($calendar, 'pivot.permission'),
+                                    'resourceEditable' => data_get($calendar, 'pivot.permission') !== 'reader',
                                     'group' => 'shared',
                                 ]
                             );
@@ -188,8 +189,13 @@ class Calendar extends Component
                     'hasNoEvents' => true,
                     'children' => resolve_static(\FluxErp\Models\Calendar::class, 'familyTree')
                         ->where('is_public', true)
+                        ->whereDoesntHave('calendarables', function (Builder $query): void {
+                            $query->where('calendarable_type', auth()->user()->getMorphClass())
+                                ->where('calendarable_id', auth()->id())
+                                ->where('permission', 'owner');
+                        })
                         ->get()
-                        ->map(function (Calendar $calendar) {
+                        ->map(function (\FluxErp\Models\Calendar $calendar) {
                             return $calendar->toCalendarObject([
                                 'permission' => 'reader',
                                 'group' => 'public',
@@ -219,7 +225,7 @@ class Calendar extends Component
             array_merge(
                 [
                     [
-                        'id' => null,
+                        'id' => 'my-calendars',
                         'label' => __('My Calendars'),
                     ],
                 ],
@@ -411,6 +417,12 @@ class Calendar extends Component
             'has_repeats' => false,
             'invited' => [],
         ]);
+    }
+
+    public function updatedCalendarObject(): void
+    {
+        $this->calendar->reset();
+        $this->calendar->fill($this->calendarObject ?? []);
     }
 
     protected function calculateRepeatableEvents($calendar, Collection $calendarEvents): Collection

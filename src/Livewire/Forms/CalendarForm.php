@@ -69,6 +69,15 @@ class CalendarForm extends FluxForm
         $this->fill($mappedArray);
     }
 
+    public function toActionData(): array
+    {
+        if (! is_int($this->parent_id)) {
+            $this->parent_id = null;
+        }
+
+        return parent::toActionData();
+    }
+
     protected function getActions(): array
     {
         return [

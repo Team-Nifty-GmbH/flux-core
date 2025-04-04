@@ -6,7 +6,10 @@
         x-bind:style="{ height: height + 'px' }"
         class="flex"
     >
-        <livewire:features.calendar.calendar-event-edit wire:model="event" :calendars="$calendars" />
+        <livewire:features.calendar.calendar-event-edit
+            wire:model="event"
+            :calendars="$calendars"
+        />
         @section('calendar-modal')
         <x-modal id="calendar-modal" :title="__('Edit Calendar')">
             @section('calendar-edit')
@@ -149,15 +152,16 @@
                 <x-flux::checkbox-tree
                     tree="calendars"
                     name-attribute="name"
+                    parent-id-attribute="parentId"
                     selectable="true"
                     hide-icon="true"
                     checked-callback="checkedCallback"
                     x-on:calendar-initialized.window="(event) => checked = event.detail.getEventSources().map(source => source.internalEventSource.publicId)"
-                    x-on:refresh-calendars.window="refresh()"
                 >
                     @canAction(\FluxErp\Actions\Calendar\CreateCalendar::class)
                         <x-slot:beforeTree>
                             <x-button
+                                class="mb-2"
                                 :text="__('Create Calendar')"
                                 wire:click="editCalendar()"
                             />
@@ -199,7 +203,7 @@
                         </div>
                         @canAction(\FluxErp\Actions\Calendar\UpdateCalendar::class)
                             <div
-                                class="flex cursor-pointer items-center"
+                                class="flex cursor-pointer items-center gap-1"
                                 x-cloak
                                 x-show="node.resourceEditable === true"
                             >
@@ -208,14 +212,19 @@
                                         calendarItem = node
                                         $wire.editCalendar(node.id)
                                     "
-                                    class="ph ph-note-pencil size-"
+                                    class="ph ph-note-pencil"
                                     x-cloak
                                     x-show="node.resourceEditable === true"
                                 ></i>
                                 <i
-                                    class="ph ph-rss size-6"
+                                    class="ph ph-share-fat"
                                     x-cloak
                                     x-show="node.isShared"
+                                ></i>
+                                <i
+                                    class="ph ph-rss"
+                                    x-cloak
+                                    x-show="node.isPublic"
                                 ></i>
                             </div>
                         @endcanAction

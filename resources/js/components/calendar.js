@@ -64,12 +64,23 @@ const calendar = () => {
                 return false;
             }
 
+            this.$wire.calendarObject.parentId ??= 'my-calendars';
+
             if (this.$wire.calendarObject.isNew) {
                 // Add new calendar
-                if (! this.$wire.calendarObject.is_group) {
+                if (!this.$wire.calendarObject.is_group) {
                     // Add calendar as event source
-                    this.calendar.addEventSource(calendarObject);
+                    this.calendar.addEventSource(this.$wire.calendarObject);
+                } else {
+                    this.$wire.calendarObject.children = [];
                 }
+
+                this.getFolderTree().addFolder(
+                    this.getFolderTree().getNodeById(
+                        this.$wire.calendarObject.parentId,
+                    ),
+                    this.$wire.calendarObject,
+                );
             } else {
                 this.getFolderTree().updateNode(this.$wire.calendarObject);
             }
@@ -77,7 +88,7 @@ const calendar = () => {
             return true;
         },
         deleteCalendar() {
-            this.calendar.getEventSourceById(this.calendarItem.id).remove();
+            this.calendar.getEventSourceById(this.calendarItem.id)?.remove();
 
             this.getFolderTree().removeNode(this.calendarItem.id);
 
@@ -252,6 +263,56 @@ const calendar = () => {
             this.$wire.getInvites().then((invites) => {
                 this.invites = invites;
             });
+            this.$watch('calendars', () => {
+                // Flatten the nested calendar structure with hierarchical naming
+                const flattenedCalendars = this.flattenCalendars(
+                    this.calendars,
+                );
+
+                // Filter the flattened calendars
+                const selectableCalendars = flattenedCalendars.filter(
+                    (calendar) =>
+                        calendar.isGroup !== true &&
+                        calendar.hasNoEvents !== true &&
+                        calendar.isVirtual !== true,
+                );
+
+                $tallstackuiSelect('calendar-select').setOptions(
+                    selectableCalendars,
+                );
+            });
+        },
+        flattenCalendars(calendars, parentPath = '') {
+            let result = [];
+
+            for (const calendar of calendars) {
+                // Create a copy of the calendar object to avoid modifying the original
+                const calendarCopy = { ...calendar };
+
+                // Create the path for this calendar
+                const currentPath = parentPath
+                    ? `${parentPath} -> ${calendar.name}`
+                    : calendar.name;
+
+                // Add the path to the calendar copy
+                calendarCopy.displayName = currentPath;
+
+                // Add the modified calendar to the result
+                result.push(calendarCopy);
+
+                // If this calendar has children, recursively flatten them with the updated path
+                if (
+                    calendar.children &&
+                    Array.isArray(calendar.children) &&
+                    calendar.children.length > 0
+                ) {
+                    result = result.concat(
+                        this.flattenCalendars(calendar.children, currentPath),
+                    );
+                }
+            }
+
+            return result;
         },
         initCalendar() {
             let calendarEl = document.getElementById(this.id);
@@ -278,38 +339,63 @@ const calendar = () => {
                     this.dispatchCalendarEvents('unselect', { jsEvent, view });
                 },
                 dateClick: (dateClickInfo) => {
-                    dateClickInfo.view.dateEnv.timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                    dateClickInfo.view.dateEnv.timeZone =
+                        Intl.DateTimeFormat().resolvedOptions().timeZone;
                     this.dispatchCalendarEvents('dateClick', dateClickInfo);
                 },
                 viewDidMount: (viewDidMountInfo) => {
-                    this.dispatchCalendarEvents('viewDidMount', viewDidMountInfo);
+                    this.dispatchCalendarEvents(
+                        'viewDidMount',
+                        viewDidMountInfo,
+                    );
                 },
                 eventDidMount: (eventDidMountInfo) => {
-                    this.dispatchCalendarEvents('eventDidMount', eventDidMountInfo);
+                    this.dispatchCalendarEvents(
+                        'eventDidMount',
+                        eventDidMountInfo,
+                    );
                 },
                 eventClick: (eventClickInfo) => {
                     this.dispatchCalendarEvents('eventClick', eventClickInfo);
                 },
                 eventMouseEnter: (eventMouseEnterInfo) => {
-                    this.dispatchCalendarEvents('eventMouseEnter', eventMouseEnterInfo);
+                    this.dispatchCalendarEvents(
+                        'eventMouseEnter',
+                        eventMouseEnterInfo,
+                    );
                 },
                 eventMouseLeave: (eventMouseLeaveInfo) => {
-                    this.dispatchCalendarEvents('eventMouseLeave', eventMouseLeaveInfo);
+                    this.dispatchCalendarEvents(
+                        'eventMouseLeave',
+                        eventMouseLeaveInfo,
+                    );
                 },
                 eventDragStart: (eventDragStartInfo) => {
-                    this.dispatchCalendarEvents('eventDragStart', eventDragStartInfo);
+                    this.dispatchCalendarEvents(
+                        'eventDragStart',
+                        eventDragStartInfo,
+                    );
                 },
                 eventDragStop: (eventDragStopInfo) => {
-                    this.dispatchCalendarEvents('eventDragStop', eventDragStopInfo);
+                    this.dispatchCalendarEvents(
+                        'eventDragStop',
+                        eventDragStopInfo,
+                    );
                 },
                 eventDrop: (eventDropInfo) => {
                     this.dispatchCalendarEvents('eventDrop', eventDropInfo);
                 },
                 eventResizeStart: (eventResizeStartInfo) => {
-                    this.dispatchCalendarEvents('eventResizeStart', eventResizeStartInfo);
+                    this.dispatchCalendarEvents(
+                        'eventResizeStart',
+                        eventResizeStartInfo,
+                    );
                 },
                 eventResizeStop: (eventResizeStopInfo) => {
-                    this.dispatchCalendarEvents('eventResizeStop', eventResizeStopInfo);
+                    this.dispatchCalendarEvents(
+                        'eventResizeStop',
+                        eventResizeStopInfo,
+                    );
                 },
                 eventResize: (eventResizeInfo) => {
                     this.dispatchCalendarEvents('eventResize', eventResizeInfo);
@@ -318,7 +404,10 @@ const calendar = () => {
                     this.dispatchCalendarEvents('drop', dropInfo);
                 },
                 eventReceive: (eventReceiveInfo) => {
-                    this.dispatchCalendarEvents('eventReceive', eventReceiveInfo);
+                    this.dispatchCalendarEvents(
+                        'eventReceive',
+                        eventReceiveInfo,
+                    );
                 },
                 eventLeave: (eventLeaveInfo) => {
                     this.dispatchCalendarEvents('eventLeave', eventLeaveInfo);

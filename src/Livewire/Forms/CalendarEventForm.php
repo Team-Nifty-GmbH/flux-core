@@ -80,6 +80,10 @@ class CalendarEventForm extends FluxForm
 
         $this->end ??= $this->start;
         $this->was_repeatable = $wasRepeatable;
+
+        if (! is_array($this->repeat)) {
+            $this->reset('repeat');
+        }
     }
 
     public function fillFromJs(array $values): void
