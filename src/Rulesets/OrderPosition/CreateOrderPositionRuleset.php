@@ -154,7 +154,7 @@ class CreateOrderPositionRuleset extends FluxRuleset
                 'nullable',
             ],
             'customer_delivery_date' => 'date|nullable',
-            'ean_code' => 'string|nullable',
+            'ean_code' => 'string|max:255|nullable',
             'possible_delivery_date' => 'date|nullable',
             'unit_gram_weight' => [
                 app(Numeric::class),
@@ -168,6 +168,7 @@ class CreateOrderPositionRuleset extends FluxRuleset
                 'exclude_with:product_id',
                 'nullable',
                 'string',
+                'max:255',
             ],
             'sort_number' => 'nullable|integer|min:0',
 

@@ -14,10 +14,11 @@ class CreateLanguageLineRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'group' => 'required|string',
+            'group' => 'required|string|max:255',
             'key' => [
                 'required',
                 'string',
+                'max:255',
                 app(
                     UniqueInFieldDependence::class,
                     [

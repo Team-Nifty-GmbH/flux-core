@@ -121,7 +121,7 @@ class UpdateOrderPositionRuleset extends FluxRuleset
 
             'amount_packed_products' => 'numeric|nullable',
             'customer_delivery_date' => 'date|nullable',
-            'ean_code' => 'string|nullable',
+            'ean_code' => 'string|max:255|nullable',
             'possible_delivery_date' => 'date|nullable',
             'unit_gram_weight' => 'numeric|nullable',
 
@@ -132,6 +132,7 @@ class UpdateOrderPositionRuleset extends FluxRuleset
                 'exclude_with:product_id',
                 'sometimes',
                 'string',
+                'max:255',
                 'nullable',
             ],
             'sort_number' => 'integer|min:0',

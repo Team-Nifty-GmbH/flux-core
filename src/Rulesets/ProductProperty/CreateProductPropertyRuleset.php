@@ -22,7 +22,7 @@ class CreateProductPropertyRuleset extends FluxRuleset
                 'nullable',
                 app(ModelExists::class, ['model' => ProductPropertyGroup::class]),
             ],
-            'name' => 'required|string',
+            'name' => 'required|string|max:255',
             'property_type_enum' => [
                 'required',
                 'string',

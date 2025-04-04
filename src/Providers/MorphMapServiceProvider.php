@@ -34,7 +34,6 @@ use FluxErp\Models\FormBuilderFieldResponse;
 use FluxErp\Models\FormBuilderForm;
 use FluxErp\Models\FormBuilderResponse;
 use FluxErp\Models\FormBuilderSection;
-use FluxErp\Models\InterfaceUser;
 use FluxErp\Models\JobBatch;
 use FluxErp\Models\Language;
 use FluxErp\Models\LanguageLine;
@@ -51,6 +50,7 @@ use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentReminder;
+use FluxErp\Models\PaymentReminderText;
 use FluxErp\Models\PaymentRun;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
@@ -142,7 +142,6 @@ class MorphMapServiceProvider extends ServiceProvider
             'form_builder_form' => FormBuilderForm::class,
             'form_builder_response' => FormBuilderResponse::class,
             'form_builder_section' => FormBuilderSection::class,
-            'interface_user' => InterfaceUser::class,
             'job_batch' => JobBatch::class,
             'language' => Language::class,
             'language_line' => LanguageLine::class,
@@ -160,6 +159,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'order_position' => OrderPosition::class,
             'order_type' => OrderType::class,
             'payment_reminder' => PaymentReminder::class,
+            'payment_reminder_text' => PaymentReminderText::class,
             'payment_run' => PaymentRun::class,
             'payment_type' => PaymentType::class,
             'permission' => Permission::class,

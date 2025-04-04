@@ -10,6 +10,7 @@ use FluxErp\Helpers\PriceHelper;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\Forms\ProductForm;
 use FluxErp\Models\Contact;
+use FluxErp\Models\Language;
 use FluxErp\Models\Pivots\ProductBundleProduct;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product as ProductModel;
@@ -24,6 +25,7 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Response;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Renderless;
@@ -42,6 +44,10 @@ class Product extends Component
     public ?array $currency = null;
 
     public array $displayedProductProperties = [];
+
+    public ?int $languageId;
+
+    public array $languages = [];
 
     public ?array $priceLists = null;
 
@@ -109,6 +115,13 @@ class Product extends Component
 
         $this->product->fill($product);
         $this->product->product_properties = Arr::keyBy($this->product->product_properties, 'id');
+
+        $this->languageId = Session::get('selectedLanguageId')
+            ?? resolve_static(Language::class, 'default')?->getKey();
+        $this->languages = resolve_static(Language::class, 'query')
+            ->orderBy('name')
+            ->get(['id', 'name'])
+            ->toArray();
 
         $this->additionalColumns = $product->getAdditionalColumns()->toArray();
         $this->recalculateDisplayedProductProperties();
@@ -333,6 +346,17 @@ class Product extends Component
             ))
             ->keyBy('id')
             ->toArray();
+    }
+
+    public function localize(): void
+    {
+        Session::put('selectedLanguageId', $this->languageId);
+
+        $this->product->fill(
+            resolve_static(ProductModel::class, 'query')
+                ->whereKey($this->product->id)
+                ->first()
+        );
     }
 
     public function resetProduct(): void

@@ -1,10 +1,10 @@
 <tbody class="bg-uneven">
     <tr>
-        <td class="pos py-4 pr-8 align-top">
+        <td class="pos py-2 pr-8 align-top">
             {{ $position->total_net_price ? $position->slug_position : '' }}
         </td>
         <td
-            class="py-4 pr-8 align-top"
+            class="py-2 pr-8 align-top"
             style="padding-left: {{ $position->depth * 15 }}px"
         >
             @if ($position->is_alternative)
@@ -26,11 +26,11 @@
                 {!! $position->description !!}
             </div>
         </td>
-        <td class="py-4 pr-8 text-center align-top">
+        <td class="py-2 pr-8 text-center align-top">
             {{ format_number($position->amount) }}
             {{ data_get($position, 'product.unit.abbreviation') }}
         </td>
-        <td class="py-4 text-right align-top">
+        <td class="py-2 text-right align-top">
             @if ($position->total_base_net_price > $position->total_net_price)
                 <div class="whitespace-nowrap text-xs">
                     <div class="line-through">

@@ -126,6 +126,7 @@ class WorkTime extends Component
     #[Renderless]
     public function recordSelected(array $data): void
     {
+        unset($data['id']);
         $this->workTime->fill($data);
 
         $this->workTime->name = data_get($data, 'label') ?? data_get($data, 'name');

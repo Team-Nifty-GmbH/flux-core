@@ -11,7 +11,6 @@ use FluxErp\Models\Product;
 use FluxErp\Rulesets\OrderPosition\UpdateOrderPositionRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 class UpdateOrderPosition extends FluxAction
@@ -39,28 +38,15 @@ class UpdateOrderPosition extends FluxAction
             ->select(['id', 'client_id', 'price_list_id'])
             ->first();
 
-        $this->data['client_id'] = data_get($this->data, 'client_id', $order->client_id);
-        $this->data['price_list_id'] = data_get($this->data, 'price_list_id', $order->price_list_id);
-
-        if (is_int($this->data['sort_number'] ?? false)
-            && $orderPosition->sort_number !== $this->data['sort_number']
-        ) {
-            $currentHighestSortNumber = resolve_static(OrderPosition::class, 'query')
-                ->where('order_id', $this->data['order_id'])
-                ->max('sort_number');
-            $this->data['sort_number'] = min($this->data['sort_number'], $currentHighestSortNumber + 1);
-
-            resolve_static(OrderPosition::class, 'query')->where('order_id', $this->data['order_id'])
-                ->where('sort_number', '>=', $this->data['sort_number'])
-                ->increment('sort_number');
-        }
+        $this->data['client_id'] ??= $order->client_id;
+        $this->data['price_list_id'] ??= $order->price_list_id;
 
         $orderPosition->fill($this->data);
 
         $product = null;
         if ($orderPosition->isDirty('product_id') && $orderPosition->product_id) {
             $product = resolve_static(Product::class, 'query')
-                ->whereKey($this->data['product_id'])
+                ->whereKey($this->getData('product_id'))
                 ->with([
                     'bundleProducts:id,name',
                 ])
@@ -124,10 +110,7 @@ class UpdateOrderPosition extends FluxAction
 
     protected function validateData(): void
     {
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(OrderPosition::class));
-
-        $this->data = $validator->validate();
+        parent::validateData();
 
         if ($this->data['id'] ?? false) {
             $errors = [];

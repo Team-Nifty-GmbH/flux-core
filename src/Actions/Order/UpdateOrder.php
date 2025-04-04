@@ -10,7 +10,6 @@ use FluxErp\Rulesets\Order\UpdateOrderRuleset;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 class UpdateOrder extends FluxAction
@@ -72,12 +71,9 @@ class UpdateOrder extends FluxAction
 
     protected function validateData(): void
     {
+        parent::validateData();
+
         $errors = [];
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(Order::class));
-
-        $this->data = $validator->validate();
-
         $order = resolve_static(Order::class, 'query')
             ->whereKey($this->data['id'])
             ->first();

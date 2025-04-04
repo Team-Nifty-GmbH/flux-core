@@ -5,6 +5,7 @@
             :label="__('Client')"
             wire:model="ledgerAccount.client_id"
             select="label:name|value:id"
+            unfiltered
             :request="[
                 'url' => route('search', \FluxErp\Models\Client::class),
                 'method' => 'POST',

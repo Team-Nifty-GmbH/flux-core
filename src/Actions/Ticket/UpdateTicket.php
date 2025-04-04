@@ -11,7 +11,6 @@ use FluxErp\Models\User;
 use FluxErp\Rulesets\Ticket\UpdateTicketRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 class UpdateTicket extends FluxAction
@@ -74,13 +73,5 @@ class UpdateTicket extends FluxAction
                     ?->hasAdditionalColumnsValidationRules() ?? []
             );
         }
-    }
-
-    protected function validateData(): void
-    {
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(Ticket::class));
-
-        $this->data = $validator->validate();
     }
 }

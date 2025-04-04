@@ -12,6 +12,7 @@ use FluxErp\Models\Product;
 use FluxErp\Models\ProductOptionGroup;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Modelable;
 use Livewire\Attributes\Renderless;
@@ -157,7 +158,7 @@ class VariantList extends ProductList
     {
         $parent = resolve_static(Product::class, 'query')
             ->whereKey($this->product->id)
-            ->first(['name']);
+            ->first(['id', 'name']);
 
         foreach ($this->getSelectedModelsQuery()->with('productOptions:id,name')->get(['id']) as $product) {
             UpdateProduct::make([
@@ -188,10 +189,20 @@ class VariantList extends ProductList
                 ->execute();
         }
 
+        $selectedLanguage = Session::pull('selectedLanguageId');
+
+        $product = resolve_static(Product::class, 'query')
+            ->whereKey($this->product->id)
+            ->first(resolve_static(Product::class, 'getTranslatableAttributes'))
+            ?->toArray();
+
+        Session::put('selectedLanguageId', $selectedLanguage);
+
         try {
             CreateVariants::make(
                 array_merge(
                     $this->product->toArray(),
+                    $product ?? [],
                     [
                         'parent_id' => $this->product->id,
                         'product_options' => data_get($this->variants, 'new', []),
@@ -207,5 +218,12 @@ class VariantList extends ProductList
 
         $this->variants = [];
         $this->loadData();
+    }
+
+    protected function itemToArray($item): array
+    {
+        $item->load('productOptions:id,name');
+
+        return parent::itemToArray($item);
     }
 }

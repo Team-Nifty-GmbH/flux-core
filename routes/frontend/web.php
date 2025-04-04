@@ -238,7 +238,7 @@ Route::middleware('web')
         });
 
         Route::group(['middleware' => ['auth:web']], function (): void {
-            Route::any('/search/{model}', SearchController::class)
+            Route::any('/search/{model?}', SearchController::class)
                 ->where('model', '(.*)')
                 ->name('search');
             Route::match(['get', 'post'], '/print/render', Printing::class)

@@ -90,6 +90,8 @@ class ProductForm extends FluxForm
 
     public ?int $restock_time = null;
 
+    public ?array $search_aliases = null;
+
     public ?float $selling_unit = null;
 
     public ?string $seo_keywords = null;

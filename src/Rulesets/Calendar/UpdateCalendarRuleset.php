@@ -25,7 +25,7 @@ class UpdateCalendarRuleset extends FluxRuleset
                 (app(ModelExists::class, ['model' => Calendar::class]))
                     ->where('is_group', true),
             ],
-            'name' => 'sometimes|required|string',
+            'name' => 'sometimes|required|string|max:255',
             'description' => 'string|nullable',
             'color' => [
                 'string',

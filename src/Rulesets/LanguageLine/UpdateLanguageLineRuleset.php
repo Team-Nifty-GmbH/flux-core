@@ -20,11 +20,12 @@ class UpdateLanguageLineRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => LanguageLine::class]),
             ],
-            'group' => 'sometimes|required|string',
+            'group' => 'sometimes|required|string|max:255',
             'key' => [
                 'sometimes',
                 'required',
                 'string',
+                'max:255',
                 app(
                     UniqueInFieldDependence::class,
                     [

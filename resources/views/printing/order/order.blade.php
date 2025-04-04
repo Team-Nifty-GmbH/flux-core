@@ -88,7 +88,7 @@
     @if ($summary)
         @section('summary')
         <div class="pb-6">
-            <table class="w-full">
+            <table class="w-full text-xs">
                 <tbody class="break-inside-avoid">
                     <tr>
                         <td

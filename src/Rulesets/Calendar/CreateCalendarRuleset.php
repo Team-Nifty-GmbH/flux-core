@@ -32,7 +32,7 @@ class CreateCalendarRuleset extends FluxRuleset
                 'nullable',
                 app(MorphClassExists::class),
             ],
-            'name' => 'required|string',
+            'name' => 'required|string|max:255',
             'description' => 'string|nullable',
             'color' => [
                 'string',

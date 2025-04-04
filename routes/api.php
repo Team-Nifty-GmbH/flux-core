@@ -306,7 +306,7 @@ Route::prefix('api')
     ->group(function (): void {
         Route::post('/auth/token', [AuthController::class, 'authenticate']);
 
-        Route::middleware(['auth:sanctum', 'abilities:user', 'localization', 'permission', 'api'])
+        Route::middleware(['auth:sanctum,token', 'ability:user,interface', 'localization', 'permission', 'api'])
             ->name('api.')
             ->group(callback: function (): void {
                 // Validate Token

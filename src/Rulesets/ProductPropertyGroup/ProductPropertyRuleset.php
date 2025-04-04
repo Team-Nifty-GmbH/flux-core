@@ -12,7 +12,7 @@ class ProductPropertyRuleset extends FluxRuleset
     {
         return [
             'product_properties' => 'array',
-            'product_properties.*.name' => 'required|string',
+            'product_properties.*.name' => 'required|string|max:255',
             'product_properties.*.property_type_enum' => [
                 'sometimes',
                 'required',

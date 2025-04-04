@@ -16,6 +16,7 @@ class PrintingRuleset extends FluxRuleset
             'model_type' => [
                 'required',
                 'string',
+                'max:255',
                 app(MorphClassExists::class, ['uses' => Printable::class, 'implements' => OffersPrinting::class]),
             ],
             'model_id' => [

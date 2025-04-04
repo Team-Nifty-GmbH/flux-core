@@ -15,6 +15,7 @@
         <x-label :label="__('Company')" for="{{ md5('address.company') }}" />
         <div class="col-span-2 w-full">
             <x-input
+                id="address-company"
                 x-bind:readonly="!$wire.edit"
                 wire:model="address.company"
             />
@@ -304,6 +305,7 @@
                     x-bind:disabled="! $wire.edit"
                     wire:model.number="address.tags"
                     select="label:label|value:id"
+                    unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\Tag::class),
                         'method' => 'POST',
@@ -319,18 +321,19 @@
                         ],
                     ]"
                 >
-                    <x-slot:after>
-                        @canAction(\FluxErp\Actions\Tag\CreateTag::class)
-                            <div class="px-1">
-                                <x-button
-                                    class="w-full"
+                    <x-slot:label>
+                        <div class="flex items-center gap-2">
+                            <x-label :label="__('Tags')" />
+                            @canAction(\FluxErp\Actions\Tag\CreateTag::class)
+                                <x-button.circle
+                                    sm
+                                    icon="plus"
                                     color="emerald"
-                                    :text="__('Add')"
                                     wire:click="addTag($promptValue())"
                                     wire:flux-confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}"
                                 />
-                            </div>
-                        @endcanAction
+                            @endcanAction
+                        </div>
                     </x-slot>
                 </x-select.styled>
             </div>

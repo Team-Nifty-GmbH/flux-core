@@ -70,7 +70,7 @@ abstract class FluxAction
 
     public static function canPerformAction(bool $throwException = true): bool
     {
-        if (! static::hasPermission()) {
+        if (! static::hasPermission() || (app()->runningInConsole() && ! app()->runningUnitTests())) {
             return true;
         }
 
@@ -86,7 +86,7 @@ abstract class FluxAction
             return true;
         }
 
-        if (! auth()->user()->can('action.' . static::name())) {
+        if (! auth()->user()?->can('action.' . static::name())) {
             if ($throwException) {
                 throw UnauthorizedException::forPermissions(['action.' . static::name()]);
             } else {
@@ -316,6 +316,6 @@ abstract class FluxAction
 
     protected function validateData(): void
     {
-        $this->data = Validator::validate($this->data, $this->getRules());
+        $this->data = Validator::validate($this->getData(), $this->getRules());
     }
 }

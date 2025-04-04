@@ -13,9 +13,9 @@ class CreateLanguageRuleset extends FluxRuleset
     {
         return [
             'uuid' => 'nullable|string|uuid|unique:languages,uuid',
-            'name' => 'required|string',
-            'iso_name' => 'required|string',
-            'language_code' => 'required|string|unique:languages,language_code',
+            'name' => 'required|string|max:255',
+            'iso_name' => 'required|string|max:255',
+            'language_code' => 'required|string|max:255|unique:languages,language_code',
             'is_default' => 'boolean',
         ];
     }

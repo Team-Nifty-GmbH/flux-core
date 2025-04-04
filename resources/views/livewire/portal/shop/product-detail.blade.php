@@ -104,7 +104,7 @@
                         @endif
                     </div>
                     @show
-                    <div class="text-2xs text-secondary-400">
+                    <div class="text-secondary-400 text-2xs">
                         @if (auth()->user()?->priceList?->is_net)
                             * {{ __('All prices net plus VAT') }}
                         @else
@@ -194,7 +194,7 @@
                                     <x-button
                                         :text="__('Download folder')"
                                         color="indigo"
-                                        icon="save"
+                                        icon="arrow-down-tray"
                                         wire:click="downloadMedia({{ \Illuminate\Support\Js::from(array_keys($media)) }}, '{{ $collection }}')"
                                     />
                                     <x-button

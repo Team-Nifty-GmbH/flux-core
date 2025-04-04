@@ -2,7 +2,6 @@
 
 namespace FluxErp\Models;
 
-use DragonCode\Contracts\Support\Arrayable;
 use Exception;
 use FluxErp\Enums\TimeUnitEnum;
 use FluxErp\Helpers\PriceHelper;
@@ -13,6 +12,7 @@ use FluxErp\Traits\Categorizable;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
+use FluxErp\Traits\HasAttributeTranslations;
 use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasPackageFactory;
@@ -26,6 +26,7 @@ use FluxErp\Traits\Lockable;
 use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SoftDeletes;
+use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
@@ -37,9 +38,9 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Product extends FluxModel implements HasMedia, InteractsWithDataTables
 {
-    use Categorizable, Commentable, Filterable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes,
-        HasPackageFactory, HasParentChildRelations, HasSerialNumberRange, HasTags, HasUserModification, HasUuid,
-        InteractsWithMedia, Lockable, LogsActivity, Searchable, SoftDeletes;
+    use Categorizable, Commentable, Filterable, HasAdditionalColumns, HasAttributeTranslations, HasClientAssignment,
+        HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasSerialNumberRange, HasTags,
+        HasUserModification, HasUuid, InteractsWithMedia, Lockable, LogsActivity, Searchable, SoftDeletes;
 
     public static string $iconName = 'square-3-stack-3d';
 
@@ -74,6 +75,7 @@ class Product extends FluxModel implements HasMedia, InteractsWithDataTables
     {
         return [
             'time_unit_enum' => TimeUnitEnum::class,
+            'search_aliases' => 'array',
             'is_active' => 'boolean',
             'is_highlight' => 'boolean',
             'is_bundle' => 'boolean',
@@ -267,5 +269,13 @@ class Product extends FluxModel implements HasMedia, InteractsWithDataTables
     public function vatRate(): BelongsTo
     {
         return $this->belongsTo(VatRate::class);
+    }
+
+    protected function translatableAttributes(): array
+    {
+        return [
+            'name',
+            'description',
+        ];
     }
 }

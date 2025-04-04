@@ -91,7 +91,7 @@ class UpdateProductRuleset extends FluxRuleset
             ],
 
             'product_number' => 'string|nullable',
-            'name' => 'string',
+            'name' => 'string|max:255',
             'description' => 'string|nullable',
             'weight_gram' => 'numeric|nullable',
             'dimension_length_mm' => 'numeric|nullable',
@@ -113,8 +113,12 @@ class UpdateProductRuleset extends FluxRuleset
             'min_purchase' => 'numeric|nullable',
             'max_purchase' => 'numeric|nullable',
             'seo_keywords' => 'string|nullable',
-            'manufacturer_product_number' => 'string|nullable',
-            'posting_account' => 'string|nullable',
+            'search_aliases' => [
+                'array',
+                'nullable',
+            ],
+            'search_aliases.*' => 'string|max:255|distinct',
+            'posting_account' => 'string|max:255|nullable',
             'warning_stock_amount' => 'numeric|nullable',
 
             'is_active' => 'boolean',
