@@ -1,4 +1,5 @@
 <x-modal
+    x-on:open="$focusOn('ticket-title')"
     id="new-ticket-modal"
     z-index="z-30"
     wire="showTicketModal"
@@ -23,6 +24,7 @@
                 <div class="mt-6 grid grid-cols-1 gap-1.5 sm:grid-cols-6">
                     <div class="sm:col-span-6">
                         <x-input
+                            id="ticket-title"
                             :label="__('Title')"
                             :placeholder="__('What is it about?')"
                             wire:model="ticket.title"

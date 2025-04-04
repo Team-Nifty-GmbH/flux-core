@@ -291,7 +291,7 @@
                                 x-model="position.name"
                                 :label="__('Name')"
                             />
-                            <div class="flex flex-col gap-1.5 md:flex-row">
+                            <div class="flex flex-col gap-1.5 xl:flex-row">
                                 <x-number
                                     step="0.01"
                                     x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
@@ -301,7 +301,6 @@
                                 />
                                 <div
                                     x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'"
-                                    class="w-full"
                                 >
                                     <x-select.styled
                                         x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
@@ -332,7 +331,6 @@
                                 class="w-full"
                             >
                                 <x-select.styled
-                                    x-on:select="position.ledger_account_id = $event.detail.select?.value"
                                     x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
                                     :label="__('Ledger Account')"
                                     x-init="$el.value = position.ledger_account_id; init();"

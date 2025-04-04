@@ -10,7 +10,7 @@
                         >
                             <div>{{ __('Addresses') }}</div>
                             <x-button
-                                wire:click="new()"
+                                wire:click="new().then(() => $focusOn('address-company'))"
                                 color="indigo"
                                 :text="__('New')"
                             />
@@ -175,7 +175,7 @@
                                 <x-button
                                     color="secondary"
                                     light
-                                    wire:click="replicate()"
+                                    wire:click="replicate().then(() => $focusOn('address-company'))"
                                     :text="__('Duplicate')"
                                 />
                             </div>

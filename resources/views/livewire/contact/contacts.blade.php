@@ -3,7 +3,7 @@
     {{ $this->renderCreateDocumentsModal() }}
     @can('action.contact.create')
         @section('modals')
-        <x-modal id="new-contact-modal">
+        <x-modal id="new-contact-modal" x-on:open="$focusOn('contact-company')">
             @if (resolve_static(\FluxErp\Models\Client::class, 'query')->count() > 1)
                 <x-select.styled
                     wire:model="contact.client_id"
@@ -26,6 +26,7 @@
                     </label>
                     <div class="col-span-2">
                         <x-input
+                            id="contact-company"
                             x-ref="company"
                             wire:model="contact.main_address.company"
                         />

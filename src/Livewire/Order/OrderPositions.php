@@ -322,6 +322,8 @@ class OrderPositions extends OrderPositionList
         $this->orderPosition->is_net = $this->order->getPriceList()->is_net;
         if ($orderPosition->exists) {
             $this->orderPosition->fill($orderPosition);
+        } else {
+            $this->orderPosition->vat_rate_id ??= VatRate::default()->getKey();
         }
 
         $this->js(<<<'JS'

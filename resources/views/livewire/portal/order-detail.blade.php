@@ -89,7 +89,11 @@
         @show
     </x-modal>
     <div id="new-ticket-modal-wrapper">
-        <x-modal id="new-ticket-modal" :title="__('New Ticket')">
+        <x-modal
+            id="new-ticket-modal"
+            :title="__('New Ticket')"
+            x-on:open="$focusOn('ticket-title')"
+        >
             <livewire:portal.ticket.ticket-create
                 :model-type="\FluxErp\Models\Order::class"
                 :model-id="$order['id']"

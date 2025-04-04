@@ -287,12 +287,16 @@
     </x-modal>
     <x-modal
         id="edit-discount"
-        x-on:open="$focus.first()"
+        x-on:open="$focusOn('discount-name')"
         x-trap="show"
         x-on:keyup.enter="$wire.saveDiscount().then((success) => {if(success) $modalClose('edit-discount');})"
     >
         <div class="flex flex-col gap-1.5">
-            <x-input wire:model="discount.name" :text="__('Name')" />
+            <x-input
+                wire:model="discount.name"
+                :text="__('Name')"
+                id="discount-name"
+            />
             <div x-cloak x-show="$wire.discount.is_percentage">
                 <x-input
                     prefix="%"
