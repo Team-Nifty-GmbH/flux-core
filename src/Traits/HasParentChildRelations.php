@@ -24,22 +24,24 @@ trait HasParentChildRelations
         $keyValue = $this->getKey();
         $parentKeyName = $this->getParentKeyAttribute();
 
-        return DB::table(DB::raw("
-        (WITH RECURSIVE parent_items AS (
-            SELECT {$keyName}, {$parentKeyName}
-            FROM {$table}
-            WHERE {$keyName} = {$keyValue}
+        return DB::table(
+            DB::raw("
+                (WITH RECURSIVE parent_items AS (
+                    SELECT {$keyName}, {$parentKeyName}
+                    FROM {$table}
+                    WHERE {$keyName} = {$keyValue}
 
-            UNION ALL
+                    UNION ALL
 
-            SELECT parent.{$keyName}, parent.{$parentKeyName}
-            FROM {$table} parent
-            INNER JOIN parent_items child ON parent.{$keyName} = child.{$parentKeyName}
+                    SELECT parent.{$keyName}, parent.{$parentKeyName}
+                    FROM {$table} parent
+                    INNER JOIN parent_items child ON parent.{$keyName} = child.{$parentKeyName}
+                )
+                SELECT {$keyName} as id
+                FROM parent_items
+                WHERE {$keyName} != {$keyValue}) as ancestors
+            ")
         )
-        SELECT {$keyName} as id
-        FROM parent_items
-        WHERE {$keyName} != {$keyValue}) as ancestors
-    "))
             ->pluck('id')
             ->toArray();
     }
@@ -56,22 +58,24 @@ trait HasParentChildRelations
         $keyValue = $this->getKey();
         $parentKeyName = $this->getParentKeyAttribute();
 
-        return DB::table(DB::raw("
-            (WITH RECURSIVE child_items AS (
-                SELECT {$keyName}
-                FROM {$table}
-                WHERE {$keyName} = {$keyValue}
+        return DB::table(
+            DB::raw("
+                (WITH RECURSIVE child_items AS (
+                    SELECT {$keyName}
+                    FROM {$table}
+                    WHERE {$keyName} = {$keyValue}
 
-                UNION ALL
+                    UNION ALL
 
-                SELECT child.{$keyName}
-                FROM {$table} child
-                INNER JOIN child_items parent ON child.{$parentKeyName} = parent.{$keyName}
-            )
-            SELECT {$keyName} as id
-            FROM child_items
-            WHERE {$keyName} != {$keyValue}) as descendants
-        "))
+                    SELECT child.{$keyName}
+                    FROM {$table} child
+                    INNER JOIN child_items parent ON child.{$parentKeyName} = parent.{$keyName}
+                )
+                SELECT {$keyName} as id
+                FROM child_items
+                WHERE {$keyName} != {$keyValue}) as descendants
+            ")
+        )
             ->pluck('id')
             ->toArray();
     }

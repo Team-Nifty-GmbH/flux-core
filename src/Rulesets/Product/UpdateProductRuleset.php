@@ -92,6 +92,7 @@ class UpdateProductRuleset extends FluxRuleset
             ],
 
             'bundle_type_enum' => [
+                'nullable',
                 Rule::enum(BundleTypeEnum::class),
             ],
 
@@ -123,7 +124,10 @@ class UpdateProductRuleset extends FluxRuleset
 
             'is_active' => 'boolean',
             'is_highlight' => 'boolean',
-            'is_bundle' => 'boolean',
+            'is_bundle' => [
+                'required_with:bundle_type_enum',
+                'boolean',
+            ],
             'is_service' => 'boolean',
             'is_shipping_free' => 'boolean',
             'has_serial_numbers' => 'boolean',

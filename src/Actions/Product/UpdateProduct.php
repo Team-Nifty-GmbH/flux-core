@@ -134,6 +134,8 @@ class UpdateProduct extends FluxAction
     {
         if ($this->getData('is_bundle')) {
             $this->data['bundle_type_enum'] ??= BundleTypeEnum::Standard;
+        } else {
+            $this->data['bundle_type_enum'] = null;
         }
 
         $this->rules['cover_media_id'][] = (new ModelExists(Media::class))

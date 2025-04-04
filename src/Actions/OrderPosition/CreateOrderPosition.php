@@ -38,9 +38,11 @@ class CreateOrderPosition extends FluxAction
             ->first();
         $orderPosition = app(OrderPosition::class);
 
-        $this->data['is_net'] ??= $this->getData('priceList.is_net', false);
-        $this->data['client_id'] ??= $this->getData('client_id') ?? Client::default()?->getKey();
-        $this->data['price_list_id'] ??= $this->getData('price_list_id') ?? PriceList::default()?->getKey();
+        $this->data['is_net'] ??= $this->getData('priceList.is_net')
+            ?? $order->priceList->is_net
+            ?? PriceList::default()?->is_net;
+        $this->data['client_id'] ??= $order->client_id ?? Client::default()?->getKey();
+        $this->data['price_list_id'] ??= $order->price_list_id ?? PriceList::default()?->getKey();
 
         if (is_int($this->getData('sort_number'))) {
             $currentHighestSortNumber = resolve_static(OrderPosition::class, 'query')
@@ -74,7 +76,6 @@ class CreateOrderPosition extends FluxAction
             data_set($this->data, 'product_number', $product->product_number, false);
             data_set($this->data, 'ean_code', $product->ean, false);
             data_set($this->data, 'unit_gram_weight', $product->weight_gram, false);
-            $this->data['warehouse_id'] ??= Warehouse::default()?->getKey();
 
             if ($product->bundle_type_enum === BundleTypeEnum::Group) {
                 $this->data['is_free_text'] = true;
@@ -149,6 +150,11 @@ class CreateOrderPosition extends FluxAction
             ]);
     }
 
+    protected function prepareForValidation(): void
+    {
+        $this->data['warehouse_id'] ??= Warehouse::default()?->getKey();
+    }
+
     protected function validateData(): void
     {
         parent::validateData();
@@ -194,7 +200,7 @@ class CreateOrderPosition extends FluxAction
                     $originPosition->descendantsAmount ?? 0,
                 );
 
-                if (bccomp($this->getData('amount', 1), $maxAmount) > 0) {
+                if (bccomp($this->getData('amount') ?? 1, $maxAmount) > 0) {
                     $errors += [
                         'amount' => [__('validation.max.numeric', ['attribute' => __('amount'), 'max' => $maxAmount])],
                     ];
