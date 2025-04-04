@@ -1,6 +1,10 @@
 <div x-data="{ edit: true }">
     @canAction(\FluxErp\Actions\Product\CreateProduct::class)
-        <x-modal id="create-product-modal" :title="__('New Product')">
+        <x-modal
+            id="create-product-modal"
+            :title="__('New Product')"
+            x-on:open="$focusOn('product-name')"
+        >
             <section class="flex flex-col gap-1.5">
                 <x-input
                     wire:model="product.product_number"
@@ -15,7 +19,11 @@
                         :options="$productTypes"
                     />
                 </div>
-                <x-input wire:model="product.name" :label="__('Name')" />
+                <x-input
+                    wire:model="product.name"
+                    :label="__('Name')"
+                    id="product-name"
+                />
                 <x-select.styled
                     multiple
                     x-bind:disabled="!edit"

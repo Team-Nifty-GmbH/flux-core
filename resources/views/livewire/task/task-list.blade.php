@@ -1,5 +1,5 @@
 <div>
-    <x-modal id="new-task-modal">
+    <x-modal id="new-task-modal" x-on:open="$focusOn('task-name')">
         <div
             class="space-y-8 divide-y divide-gray-200"
             x-data="{
@@ -7,7 +7,11 @@
             }"
         >
             <div class="flex flex-col gap-1.5">
-                <x-input wire:model="task.name" label="{{ __('Name') }}" />
+                <x-input
+                    wire:model="task.name"
+                    label="{{ __('Name') }}"
+                    id="task-name"
+                />
                 <x-select.styled
                     :label="__('Project')"
                     wire:model="task.project_id"

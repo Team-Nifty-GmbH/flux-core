@@ -20,6 +20,7 @@
                 >
                     <div class="sm:col-span-6">
                         <x-input
+                            id="ticket-title"
                             :label="__('Title')"
                             :placeholder="__('What is it about?')"
                             wire:model="ticket.title"

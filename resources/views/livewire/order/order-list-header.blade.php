@@ -35,6 +35,7 @@
         size="6xl"
         id="edit-order-position"
         x-on:close="$wire.resetOrderPosition()"
+        x-on:open="$focusOn('order-position-name')"
         persistent
     >
         @section('order-position-detail-modal.content')
@@ -49,6 +50,7 @@
                             :label="__('Comment / Block')"
                         />
                         <x-input
+                            id="order-position-name"
                             :label="__('Name')"
                             wire:model="orderPosition.name"
                         />

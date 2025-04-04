@@ -277,11 +277,11 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
     {
         return Attribute::make(
             get: fn ($value) => array_reduce(
-                explode('.', $value),
+                explode('.', $value ?? ''),
                 fn ($carry, $item) => (is_null($carry) ? '' : $carry . '.') . ltrim($item, '0')
             ),
             set: fn ($value) => array_reduce(
-                explode('.', $value),
+                explode('.', $value ?? ''),
                 fn ($carry, $item) => (is_null($carry) ? '' : $carry . '.') . Str::padLeft($item, 8, '0')
             ),
         );

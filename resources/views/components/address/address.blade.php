@@ -15,6 +15,7 @@
         <x-label :label="__('Company')" for="{{ md5('address.company') }}" />
         <div class="col-span-2 w-full">
             <x-input
+                id="address-company"
                 x-bind:readonly="!$wire.edit"
                 wire:model="address.company"
             />

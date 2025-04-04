@@ -5,7 +5,7 @@
         </td>
         <td
             class="py-2 pr-8 align-top"
-            style="padding-left: {{ ($position->depth - 1) * 15 }}px"
+            style="padding-left: {{ $position->depth * 15 }}px"
         >
             @if ($position->is_alternative)
                 <x-badge
@@ -16,22 +16,14 @@
                 />
             @endif
 
-            <div>
-                @if ($position->depth > 0)
-                    <div class="float-left w-4">↳</div>
-                @endif
-
-                <div class="float-left">
-                    <p class="font-italic text-xs">
-                        {{ $position->product_number }}
-                    </p>
-                    <p class="font-semibold">
-                        {{ $position->name }}
-                    </p>
-                    <div class="prose-xs prose">
-                        {!! $position->description !!}
-                    </div>
-                </div>
+            <p class="font-italic text-xs">
+                {{ $position->product_number }}
+            </p>
+            <p class="font-semibold">
+                {{ $position->name }}
+            </p>
+            <div class="prose-xs prose">
+                {!! $position->description !!}
             </div>
         </td>
         <td class="py-2 pr-8 text-center align-top">

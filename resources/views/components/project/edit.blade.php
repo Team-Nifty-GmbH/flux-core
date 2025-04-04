@@ -9,6 +9,7 @@
             label="{{ __('Project Number') }}"
         />
         <x-input
+            id="project-name"
             x-bind:readonly="!edit"
             wire:model="project.name"
             label="{{ __('Name') }}"
