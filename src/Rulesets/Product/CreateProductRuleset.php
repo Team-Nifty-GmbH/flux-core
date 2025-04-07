@@ -2,6 +2,7 @@
 
 namespace FluxErp\Rulesets\Product;
 
+use FluxErp\Enums\BundleTypeEnum;
 use FluxErp\Enums\TimeUnitEnum;
 use FluxErp\Facades\ProductType;
 use FluxErp\Models\Product;
@@ -76,6 +77,11 @@ class CreateProductRuleset extends FluxRuleset
             'product_type' => [
                 Rule::in(ProductType::all()->keys()),
                 'nullable',
+            ],
+            'bundle_type_enum' => [
+                'required_if_accepted:is_bundle',
+                'nullable',
+                Rule::enum(BundleTypeEnum::class),
             ],
             'description' => 'string|nullable',
             'weight_gram' => 'numeric|nullable',

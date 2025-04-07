@@ -17,6 +17,7 @@ use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Models\VatRate;
+use FluxErp\Models\Warehouse;
 use FluxErp\Tests\Livewire\BaseSetup;
 use Livewire\Livewire;
 
@@ -29,6 +30,8 @@ class OrderPositionsTest extends BaseSetup
     protected function setUp(): void
     {
         parent::setUp();
+
+        Warehouse::factory()->create(['is_default' => true]);
 
         $contact = Contact::factory()->create([
             'client_id' => $this->dbClient->getKey(),
