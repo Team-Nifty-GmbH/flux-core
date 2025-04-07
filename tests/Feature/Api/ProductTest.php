@@ -133,7 +133,7 @@ class ProductTest extends BaseSetup
             'purchase_unit_id' => $this->units[1]->id,
             'reference_unit_id' => $this->units[2]->id,
             'product_number' => Str::random(),
-            'bundle_type_enum' => BundleTypeEnum::Standard,
+            'bundle_type_enum' => BundleTypeEnum::Standard->value,
             'description' => Str::random(),
             'weight_gram' => rand(1, 1000),
             'dimension_length_mm' => rand(1, 1000),
