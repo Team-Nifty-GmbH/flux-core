@@ -1,120 +1,117 @@
-<x-card>
-    <div
-        wire:ignore
-        x-data="{ ...calendar(), ...{ height: 0 } }"
-        x-resize.document="height = $height - 126"
-        x-bind:style="{ height: height + 'px' }"
-        class="flex"
-    >
-        <livewire:features.calendar.calendar-event-edit
-            wire:model="event"
-            :calendars="$calendars"
-        />
-        @section('calendar-modal')
-        <x-modal id="calendar-modal" :title="__('Edit Calendar')">
-            @section('calendar-edit')
-            <div class="flex flex-col gap-4">
-                <x-select.styled
-                    wire:model="calendar.parent_id"
-                    :label="__('Parent Calendar')"
-                    required
-                    select="label:label|value:id"
-                    :options="$calendarLeafs"
-                />
-                <x-input
-                    wire:model="calendar.name"
-                    :label="__('Calendar Name')"
-                />
-                <x-input
-                    class="p-0"
-                    type="color"
-                    :label="__('Color')"
-                    wire:model="calendar.color"
-                />
-                <div x-show="!$wire.calendar.id" x-cloak>
-                    <x-checkbox
-                        wire:model="calendar.is_group"
-                        :label="__('Is Group')"
-                    />
-                </div>
-                <div x-show="!$wire.calendar.is_group" x-cloak>
-                    <x-checkbox
-                        wire:model="calendar.has_repeatable_events"
-                        :label="__('Has repeatable events')"
-                    />
-                </div>
+<div
+    wire:ignore
+    x-data="calendar()"
+    x-resize.document="changedHeight()"
+    x-bind:style="{ height: height + 'px' }"
+    class="flex h-full"
+>
+    <livewire:features.calendar.calendar-event-edit
+        wire:model="event"
+        :calendars="$calendars"
+    />
+    @section('calendar-modal')
+    <x-modal id="calendar-modal" :title="__('Edit Calendar')">
+        @section('calendar-edit')
+        <div class="flex flex-col gap-4">
+            <x-select.styled
+                wire:model="calendar.parent_id"
+                :label="__('Parent Calendar')"
+                required
+                select="label:label|value:id"
+                :options="$calendarLeafs"
+            />
+            <x-input wire:model="calendar.name" :label="__('Calendar Name')" />
+            <x-input
+                class="p-0"
+                type="color"
+                :label="__('Color')"
+                wire:model="calendar.color"
+            />
+            <div x-show="!$wire.calendar.id" x-cloak>
                 <x-checkbox
-                    wire:model="calendar.is_public"
-                    :label="__('Public')"
+                    wire:model="calendar.is_group"
+                    :label="__('Is Group')"
                 />
-                <div x-show="!$wire.calendar.is_group" x-cloak>
-                    <x-card :header="__('Custom Properties')">
-                        <div class="flex flex-col gap-4">
-                            <x-button.circle
-                                class="mr-2"
-                                color="indigo"
-                                icon="plus"
-                                wire:click="addCustomProperty"
-                            />
-                            @foreach ($calendar->custom_properties ?? [] as $index => $customProperty)
-                                <div class="flex gap-x-4">
-                                    <div class="pt-6">
-                                        <x-button.circle
-                                            color="red"
-                                            icon="trash"
-                                            wire:click="removeCustomProperty({{ $index }})"
-                                        />
-                                    </div>
-                                    <div class="max-w-sm">
-                                        <x-select.styled
-                                            wire:model="calendar.customProperties.{{ $index }}.field_type"
-                                            :label="__('Field Type')"
-                                            :options="$this->fieldTypes"
-                                        />
-                                    </div>
-                                    <div class="w-full">
-                                        <x-input
-                                            wire:model="calendar.customProperties.{{ $index }}.name"
-                                            :label="__('Name')"
-                                        />
-                                    </div>
+            </div>
+            <div x-show="!$wire.calendar.is_group" x-cloak>
+                <x-checkbox
+                    wire:model="calendar.has_repeatable_events"
+                    :label="__('Has repeatable events')"
+                />
+            </div>
+            <x-checkbox
+                wire:model="calendar.is_public"
+                :label="__('Public')"
+            />
+            <div x-show="!$wire.calendar.is_group" x-cloak>
+                <x-card :header="__('Custom Properties')">
+                    <div class="flex flex-col gap-4">
+                        <x-button.circle
+                            class="mr-2"
+                            color="indigo"
+                            icon="plus"
+                            wire:click="addCustomProperty"
+                        />
+                        @foreach ($calendar->custom_properties ?? [] as $index => $customProperty)
+                            <div class="flex gap-x-4">
+                                <div class="pt-6">
+                                    <x-button.circle
+                                        color="red"
+                                        icon="trash"
+                                        wire:click="removeCustomProperty({{ $index }})"
+                                    />
                                 </div>
-                            @endforeach
-                        </div>
-                    </x-card>
+                                <div class="max-w-sm">
+                                    <x-select.styled
+                                        wire:model="calendar.customProperties.{{ $index }}.field_type"
+                                        :label="__('Field Type')"
+                                        :options="$this->fieldTypes"
+                                    />
+                                </div>
+                                <div class="w-full">
+                                    <x-input
+                                        wire:model="calendar.customProperties.{{ $index }}.name"
+                                        :label="__('Name')"
+                                    />
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </x-card>
+            </div>
+        </div>
+        @show
+        <x-slot:footer>
+            <div class="flex w-full justify-between gap-2">
+                <div>
+                    <x-button
+                        x-show="$wire.calendar.is_editable && '{{ resolve_static(\FluxErp\Actions\Calendar\DeleteCalendar::class, 'canPerformAction', [false]) }}'"
+                        flat
+                        color="red"
+                        :text="__('Delete')"
+                        wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Calendar')]) }}"
+                        wire:click="deleteCalendar().then((deletedId) => {if(deletedId !== false) deleteCalendar(deletedId);})"
+                    />
+                </div>
+                <div class="flex gap-2">
+                    <x-button
+                        color="secondary"
+                        light
+                        flat
+                        :text="__('Cancel')"
+                        x-on:click="$modalClose('calendar-modal');"
+                    />
+                    <x-button
+                        color="indigo"
+                        :text="__('Save')"
+                        x-on:click="saveCalendar().then((success) => {if(success) $modalClose('calendar-modal');})"
+                    />
                 </div>
             </div>
-            @show
-            <x-slot:footer>
-                <div class="flex w-full justify-between gap-2">
-                    <div>
-                        <x-button
-                            x-show="$wire.calendar.is_editable && '{{ resolve_static(\FluxErp\Actions\Calendar\DeleteCalendar::class, 'canPerformAction', [false]) }}'"
-                            flat
-                            color="red"
-                            :text="__('Delete')"
-                            wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Calendar')]) }}"
-                            wire:click="deleteCalendar().then((deletedId) => {if(deletedId !== false) deleteCalendar(deletedId);})"
-                        />
-                    </div>
-                    <div class="flex gap-2">
-                        <x-button
-                            color="secondary"
-                            light
-                            flat
-                            :text="__('Cancel')"
-                            x-on:click="$modalClose('calendar-modal');"
-                        />
-                        <x-button
-                            color="indigo"
-                            :text="__('Save')"
-                            x-on:click="saveCalendar().then((success) => {if(success) $modalClose('calendar-modal');})"
-                        />
-                    </div>
-                </div>
-            </x-slot>
-        </x-modal>
-        @show
+        </x-slot>
+    </x-modal>
+    @show
+    @if ($showCalendars)
         <div class="whitespace-nowrap" wire:ignore>
             <div
                 x-data="{
@@ -232,12 +229,12 @@
                 </x-flux::checkbox-tree>
             </div>
         </div>
+    @endif
 
-        <div class="h-full w-full">
-            <div
-                class="dark:border-secondary-600 !h-full border-l dark:text-gray-50"
-                x-bind:id="id"
-            ></div>
-        </div>
+    <div class="h-full w-full">
+        <div
+            calendar
+            class="dark:border-secondary-600 !h-full border-l dark:text-gray-50"
+        ></div>
     </div>
-</x-card>
+</div>

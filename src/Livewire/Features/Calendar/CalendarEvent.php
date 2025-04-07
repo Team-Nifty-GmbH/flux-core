@@ -9,7 +9,6 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Livewire\Attributes\Modelable;
 use Livewire\Attributes\On;
-use Livewire\Attributes\Reactive;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -17,9 +16,6 @@ use Spatie\Permission\Exceptions\UnauthorizedException;
 class CalendarEvent extends Component
 {
     use Actions;
-
-    #[Reactive]
-    public array $calendars = [];
 
     #[Modelable]
     public CalendarEventForm $event;
@@ -87,16 +83,8 @@ class CalendarEvent extends Component
         return true;
     }
 
-    #[On('calendar-date-click')]
-    #[On('calendar-event-click')]
-    public function setCalendars(): void
+    public function updatedEvent(): void
     {
-        $this->selectableCalendars = array_values(
-            collect(to_flat_tree($this->calendars))
-                ->where('isGroup', false)
-                ->where('hasNoEvents', false)
-                ->where('isVirtual', false)
-                ->all()
-        );
+        $this->skipRender();
     }
 }

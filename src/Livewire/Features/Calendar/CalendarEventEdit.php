@@ -16,8 +16,24 @@ class CalendarEventEdit extends Component
     #[Modelable]
     public CalendarEventForm $event;
 
+    protected ?string $currentEditComponent = null;
+
     public function render(): View
     {
         return view('flux::livewire.features.calendar.calendar-event-edit');
+    }
+
+    public function boot(): void
+    {
+        $this->currentEditComponent = data_get($this->event, 'edit_component');
+    }
+
+    public function updatedEvent(): void
+    {
+        if ($this->currentEditComponent === data_get($this->event, 'edit_component')) {
+            return;
+        }
+
+        $this->skipRender();
     }
 }

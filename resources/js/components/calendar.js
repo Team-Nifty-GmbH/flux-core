@@ -1,6 +1,7 @@
 const calendar = () => {
     return {
         calendarItem: {},
+        height: 0,
         parseDateTime(event, locale, property) {
             const dateTime = new Date(event.start);
             let config = null;
@@ -193,7 +194,6 @@ const calendar = () => {
         },
         calendar: null,
         config: {},
-        id: null,
         calendarId: null,
         calendars: [],
         invites: [],
@@ -245,6 +245,10 @@ const calendar = () => {
                     .map((source) => source.internalEventSource),
             );
         },
+        changedHeight() {
+            this.height =
+                this.$el.parentNode.offsetHeight - this.$el.offsetTop - 2;
+        },
         showEventSource(calendar) {
             this.calendar.addEventSource(calendar);
         },
@@ -252,7 +256,6 @@ const calendar = () => {
             this.calendar.getEventSourceById(calendar.id)?.remove();
         },
         init() {
-            this.id = this.$id('calendar');
             this.$wire.getCalendars().then((calendars) => {
                 this.calendars = calendars;
             });
@@ -315,7 +318,7 @@ const calendar = () => {
             return result;
         },
         initCalendar() {
-            let calendarEl = document.getElementById(this.id);
+            let calendarEl = this.$el.querySelector('[calendar]');
 
             let defaultConfig = {
                 plugins: [
@@ -482,6 +485,7 @@ const calendar = () => {
             };
 
             const { activeCalendars, ...filteredConfig } = this.config;
+
             this.calendar = new Calendar(calendarEl, {
                 ...defaultConfig,
                 ...filteredConfig,
@@ -503,6 +507,7 @@ const calendar = () => {
                 },
             );
 
+            this.changedHeight();
             this.calendar.render();
             this.$dispatch('calendar-initialized', this.calendar);
         },

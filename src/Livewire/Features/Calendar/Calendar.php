@@ -45,6 +45,8 @@ class Calendar extends Component
 
     public CalendarEventForm $event;
 
+    public bool $showCalendars = true;
+
     public function mount(): void
     {
         $this->calendars = $this->getCalendars();
@@ -385,8 +387,8 @@ class Calendar extends Component
         return true;
     }
 
-    #[On('calendar-date-click')]
     #[Renderless]
+    #[On('calendar-date-click')]
     public function timeslotClick(bool $allDay, string $dateStr, array $view): void
     {
         if (! $this->calendar->is_editable) {
