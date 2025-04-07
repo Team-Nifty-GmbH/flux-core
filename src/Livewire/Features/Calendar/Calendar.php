@@ -148,9 +148,10 @@ class Calendar extends Component
                 [
                     'id' => 'my-calendars',
                     'name' => __('My calendars'),
+                    'label' => __('My calendars'),
                     'hasNoEvents' => true,
                     'children' => auth()->user()
-                        ->calendars()
+                        ?->calendars()
                         ->withPivot('permission')
                         ->wherePivot('permission', 'owner')
                         ->whereNull('parent_id')
@@ -162,9 +163,10 @@ class Calendar extends Component
                 [
                     'id' => 'shared-with-me',
                     'name' => __('Shared with me'),
+                    'label' => __('Shared with me'),
                     'hasNoEvents' => true,
                     'children' => auth()->user()
-                        ->calendars()
+                        ?->calendars()
                         ->withPivot('permission')
                         ->wherePivot('permission', '!=', 'owner')
                         ->get()
@@ -183,11 +185,12 @@ class Calendar extends Component
                 [
                     'id' => 'public',
                     'name' => __('Public'),
+                    'label' => __('Public'),
                     'hasNoEvents' => true,
                     'children' => resolve_static(CalendarModel::class, 'familyTree')
                         ->where('is_public', true)
                         ->whereDoesntHave('calendarables', function (Builder $query): void {
-                            $query->where('calendarable_type', auth()->user()->getMorphClass())
+                            $query->where('calendarable_type', auth()->user()?->getMorphClass())
                                 ->where('calendarable_id', auth()->id())
                                 ->where('permission', 'owner');
                         })
@@ -204,6 +207,7 @@ class Calendar extends Component
                 [
                     'id' => 'other',
                     'name' => __('Other'),
+                    'label' => __('Other'),
                     'hasNoEvents' => true,
                     'children' => collect(Relation::morphMap())
                         ->filter(

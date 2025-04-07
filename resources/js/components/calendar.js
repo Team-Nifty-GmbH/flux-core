@@ -267,9 +267,12 @@ const calendar = () => {
                 this.invites = invites;
             });
             this.$watch('calendars', () => {
-                // Flatten the nested calendar structure with hierarchical naming
-                const flattenedCalendars = this.flattenCalendars(
-                    this.calendars,
+                this.hydrateCalendarSelects();
+            });
+        },
+        hydrateCalendarSelects() {
+            const flattenedCalendars = this.flattenCalendars(
+                    JSON.parse(JSON.stringify(this.calendars)),
                 );
 
                 // Filter the flattened calendars
@@ -283,13 +286,6 @@ const calendar = () => {
                 $tallstackuiSelect('calendar-select').setOptions(
                     selectableCalendars,
                 );
-
-                // $tallstackuiSelect('parent-calendar-select').setOptions(
-                //     flattenedCalendars.filter(
-                //         (calendar) => calendar.isGroup === true || calendar.id === 'my-calendars',
-                //     )
-                // );
-            });
         },
         flattenCalendars(calendars, parentPath = '') {
             let result = [];

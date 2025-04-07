@@ -1,5 +1,6 @@
 <div
     wire:ignore
+    calendar-root
     x-data="calendar()"
     x-resize.document="changedHeight()"
     x-bind:style="{ height: height + 'px' }"
