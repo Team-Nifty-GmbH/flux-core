@@ -32,6 +32,7 @@ class CalendarEvent extends Component
     public function delete(): bool
     {
         $eventId = $this->event->id;
+        $eventId .= ! is_null($this->event->repetition) ? '|' . $this->event->repetition : '';
 
         try {
             $this->event->delete();
@@ -64,6 +65,13 @@ class CalendarEvent extends Component
     {
         if (! $this->event->was_repeatable && $this->event->has_repeats) {
             $this->event->confirm_option = 'all';
+        }
+
+        if ($this->event->was_repeatable
+            && $this->event->has_repeats
+            && $this->event->confirm_option === 'this'
+        ) {
+            $this->event->confirm_option = 'future';
         }
 
         try {

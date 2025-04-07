@@ -24,6 +24,7 @@ use FluxErp\Livewire\DataTables\PaymentRunList;
 use FluxErp\Livewire\DataTables\PurchaseInvoiceList;
 use FluxErp\Livewire\DataTables\TicketList;
 use FluxErp\Livewire\DataTables\WorkTimeList;
+use FluxErp\Livewire\Features\Calendar\Calendar;
 use FluxErp\Livewire\InstallWizard;
 use FluxErp\Livewire\Mail\Mail;
 use FluxErp\Livewire\Media\Media as MediaGrid;
@@ -120,7 +121,7 @@ Route::middleware('web')
 
             Route::middleware(TrackVisits::class)->group(function (): void {
                 Route::get('/mail', Mail::class)->name('mail');
-                Route::get('/calendars', FluxErp\Livewire\Features\Calendar\Calendar::class)->name('calendars');
+                Route::get('/calendars', Calendar::class)->name('calendars');
 
                 Route::name('contacts.')->prefix('contacts')
                     ->group(function (): void {

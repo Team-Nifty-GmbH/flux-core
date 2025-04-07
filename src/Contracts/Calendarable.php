@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 interface Calendarable
 {
-    public static function fromCalendarEvent(array $event): FluxAction;
+    public static function fromCalendarEvent(array $event, string $action): FluxAction;
 
     public static function toCalendar(): array;
 

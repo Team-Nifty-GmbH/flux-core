@@ -56,6 +56,8 @@ class CalendarEventForm extends FluxForm
         'repeat_radio' => null,
     ];
 
+    public ?int $repetition = null;
+
     public ?string $start = null;
 
     public ?string $title = null;
@@ -111,13 +113,13 @@ class CalendarEventForm extends FluxForm
     protected function makeAction(string $name, ?array $data = null): FluxAction
     {
         $model = morphed_model(data_get($this->extended_props, 'calendar_type') ?? '')
-            ?? CalendarEvent::class;
+            ?? resolve_static(CalendarEvent::class, 'class');
 
         $data = $this->toArray();
         if (! data_get($data, 'is_repeatable') || ! data_get($data, 'has_repeats')) {
             unset($data['repeat']);
         }
 
-        return $model::fromCalendarEvent($data);
+        return $model::fromCalendarEvent($data, $name);
     }
 }

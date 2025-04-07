@@ -4,7 +4,9 @@ namespace FluxErp\Models;
 
 use Carbon\Carbon;
 use FluxErp\Actions\CalendarEvent\CreateCalendarEvent;
+use FluxErp\Actions\CalendarEvent\DeleteCalendarEvent;
 use FluxErp\Actions\CalendarEvent\UpdateCalendarEvent;
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Pivots\CalendarEventInvite;
 use FluxErp\Models\Pivots\Inviteable;
 use FluxErp\Traits\HasPackageFactory;
@@ -25,11 +27,14 @@ class CalendarEvent extends FluxModel implements HasMedia
 {
     use HasPackageFactory, HasUlids, HasUserModification, InteractsWithMedia, LogsActivity;
 
-    public static function fromCalendarEvent(array $event): UpdateCalendarEvent|CreateCalendarEvent
+    public static function fromCalendarEvent(array $event, string $action): ?FluxAction
     {
-        return data_get($event, 'id')
-            ? UpdateCalendarEvent::make($event)
-            : CreateCalendarEvent::make($event);
+        return match ($action) {
+            'create' => CreateCalendarEvent::make($event),
+            'update' => UpdateCalendarEvent::make($event),
+            'delete' => DeleteCalendarEvent::make($event),
+            default => null,
+        };
     }
 
     protected function casts(): array

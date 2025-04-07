@@ -7,6 +7,7 @@ use DatePeriod;
 use FluxErp\Contracts\Calendarable;
 use FluxErp\Livewire\Forms\CalendarEventForm;
 use FluxErp\Livewire\Forms\CalendarForm;
+use FluxErp\Models\Calendar as CalendarModel;
 use FluxErp\Models\CalendarEvent;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\Calendar\StoresCalendarSettings;
@@ -31,8 +32,6 @@ class Calendar extends Component
 
     public CalendarForm $calendar;
 
-    public array $calendarLeafs = [];
-
     public ?array $calendarObject = null;
 
     #[Locked]
@@ -41,16 +40,11 @@ class Calendar extends Component
         'end' => null,
     ];
 
-    public array $calendars = [];
+    public array $calendarTwigs = [];
 
     public CalendarEventForm $event;
 
     public bool $showCalendars = true;
-
-    public function mount(): void
-    {
-        $this->calendars = $this->getCalendars();
-    }
 
     public function render(): View
     {
@@ -72,7 +66,7 @@ class Calendar extends Component
     }
 
     #[Renderless]
-    public function editCalendar(\FluxErp\Models\Calendar $calendar): void
+    public function editCalendar(CalendarModel $calendar): void
     {
         $this->calendar->reset();
         $this->calendar->fill($calendar->toCalendarObject());
@@ -122,8 +116,9 @@ class Calendar extends Component
 
         if ($trigger === 'event-change') {
             try {
-                $model = morphed_model(data_get($event, 'extendedProps.calendar_type') ?? '') ?? CalendarEvent::class;
-                $model::fromCalendarEvent($event)
+                $model = morphed_model(data_get($event, 'extendedProps.calendar_type') ?? '')
+                    ?? resolve_static(CalendarEvent::class, 'class');
+                $model::fromCalendarEvent($event, 'update')
                     ->checkPermission()
                     ->validate()
                     ->execute();
@@ -148,7 +143,7 @@ class Calendar extends Component
     #[Renderless]
     public function getCalendars(): array
     {
-        $this->calendars = collect(
+        return collect(
             [
                 [
                     'id' => 'my-calendars',
@@ -174,7 +169,7 @@ class Calendar extends Component
                         ->wherePivot('permission', '!=', 'owner')
                         ->get()
                         ->toFlatTree()
-                        ->map(function (\FluxErp\Models\Calendar $calendar) {
+                        ->map(function (CalendarModel $calendar) {
                             return $calendar->toCalendarObject(
                                 [
                                     'permission' => data_get($calendar, 'pivot.permission'),
@@ -189,7 +184,7 @@ class Calendar extends Component
                     'id' => 'public',
                     'name' => __('Public'),
                     'hasNoEvents' => true,
-                    'children' => resolve_static(\FluxErp\Models\Calendar::class, 'familyTree')
+                    'children' => resolve_static(CalendarModel::class, 'familyTree')
                         ->where('is_public', true)
                         ->whereDoesntHave('calendarables', function (Builder $query): void {
                             $query->where('calendarable_type', auth()->user()->getMorphClass())
@@ -197,7 +192,7 @@ class Calendar extends Component
                                 ->where('permission', 'owner');
                         })
                         ->get()
-                        ->map(function (\FluxErp\Models\Calendar $calendar) {
+                        ->map(function (CalendarModel $calendar) {
                             return $calendar->toCalendarObject([
                                 'permission' => 'reader',
                                 'group' => 'public',
@@ -211,7 +206,9 @@ class Calendar extends Component
                     'name' => __('Other'),
                     'hasNoEvents' => true,
                     'children' => collect(Relation::morphMap())
-                        ->filter(fn (string $modelClass) => in_array(Calendarable::class, class_implements($modelClass)))
+                        ->filter(
+                            fn (string $modelClass) => in_array(Calendarable::class, class_implements($modelClass))
+                        )
                         ->map(fn (string $modelClass) => resolve_static($modelClass, 'toCalendar'))
                         ->flatMap(fn ($item) => Arr::isAssoc($item) ? [$item] : $item)
                         ->values()
@@ -222,22 +219,6 @@ class Calendar extends Component
             ->filter(fn (array $item) => data_get($item, 'children'))
             ->values()
             ->toArray();
-
-        $this->calendarLeafs = array_values(
-            array_merge(
-                [
-                    [
-                        'id' => 'my-calendars',
-                        'label' => __('My Calendars'),
-                    ],
-                ],
-                collect(to_flat_tree($this->calendars))
-                    ->where('isGroup', true)
-                    ->all()
-            )
-        );
-
-        return $this->calendars;
     }
 
     #[Renderless]
@@ -297,7 +278,7 @@ class Calendar extends Component
             'end' => Carbon::parse($info['endStr'])->toDateTimeString(),
         ];
 
-        $calendar = resolve_static(\FluxErp\Models\Calendar::class, 'query')
+        $calendar = resolve_static(CalendarModel::class, 'query')
             ->whereKey($calendarAttributes['id'])
             ->first();
 
@@ -498,7 +479,10 @@ class Calendar extends Component
             );
 
             $events = array_merge($events, Arr::mapWithKeys($dates, function ($date, $key) use ($event) {
-                $interval = date_diff(Carbon::parse(data_get($event, 'start')), Carbon::parse(data_get($event, 'end')));
+                $interval = date_diff(
+                    Carbon::parse(data_get($event, 'start')),
+                    Carbon::parse(data_get($event, 'end'))
+                );
 
                 return [
                     $key => app(CalendarEvent::class)->forceFill(

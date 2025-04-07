@@ -40,6 +40,7 @@ class Calendar extends FluxModel
             'has_notifications' => 'boolean',
             'has_repeatable_events' => 'boolean',
             'is_editable' => 'boolean',
+            'is_group' => 'boolean',
             'is_public' => 'boolean',
         ];
     }

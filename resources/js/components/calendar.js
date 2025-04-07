@@ -275,14 +275,20 @@ const calendar = () => {
                 // Filter the flattened calendars
                 const selectableCalendars = flattenedCalendars.filter(
                     (calendar) =>
-                        calendar.isGroup !== true &&
-                        calendar.hasNoEvents !== true &&
-                        calendar.isVirtual !== true,
+                        calendar.isGroup != true
+                        && calendar.hasNoEvents != true
+                        && calendar.isVirtual != true,
                 );
 
                 $tallstackuiSelect('calendar-select').setOptions(
                     selectableCalendars,
                 );
+
+                // $tallstackuiSelect('parent-calendar-select').setOptions(
+                //     flattenedCalendars.filter(
+                //         (calendar) => calendar.isGroup === true || calendar.id === 'my-calendars',
+                //     )
+                // );
             });
         },
         flattenCalendars(calendars, parentPath = '') {

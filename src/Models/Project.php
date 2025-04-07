@@ -40,7 +40,7 @@ class Project extends FluxModel implements Calendarable, HasMedia, InteractsWith
 
     protected ?string $detailRouteName = 'projects.id';
 
-    public static function fromCalendarEvent(array $event): UpdateProject
+    public static function fromCalendarEvent(array $event, string $action = 'update'): UpdateProject
     {
         return UpdateProject::make([
             'id' => data_get($event, 'id'),

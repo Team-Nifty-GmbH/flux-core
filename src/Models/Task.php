@@ -40,7 +40,7 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
 
     protected ?string $detailRouteName = 'tasks.id';
 
-    public static function fromCalendarEvent(array $event): UpdateTask
+    public static function fromCalendarEvent(array $event, string $action = 'update'): UpdateTask
     {
         return UpdateTask::make([
             'id' => data_get($event, 'id'),

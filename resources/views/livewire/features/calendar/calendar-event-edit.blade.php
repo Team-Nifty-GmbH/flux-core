@@ -6,7 +6,6 @@
             <div>
                 <livewire:dynamic-component
                     wire:model="event"
-                    :calendars="$calendars"
                     :is="$event->edit_component ?? 'features.calendar.calendar-event'"
                 />
             </div>

@@ -104,13 +104,16 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         return $address;
     }
 
-    public static function fromCalendarEvent(array $event): UpdateAddress
+    public static function fromCalendarEvent(array $event, string $action = 'update'): UpdateAddress
     {
-        $currentAddress = static::query()->whereKey(data_get($event, 'id'))->first();
+        $currentAddress = static::query()
+            ->whereKey(data_get($event, 'id'))
+            ->first();
 
         return UpdateAddress::make([
             'id' => data_get($event, 'id'),
-            'date_of_birth' => Carbon::parse(data_get($event, 'start'))->setYear($currentAddress->date_of_birth->year),
+            'date_of_birth' => Carbon::parse(data_get($event, 'start'))
+                ->setYear($currentAddress->date_of_birth->year),
         ]);
     }
 

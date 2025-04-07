@@ -20,7 +20,7 @@ class WorkTime extends FluxModel implements Calendarable
 {
     use Filterable, HasPackageFactory, HasParentChildRelations, HasUuid, SoftDeletes;
 
-    public static function fromCalendarEvent(array $event): UpdateWorkTime
+    public static function fromCalendarEvent(array $event, string $action = 'update'): UpdateWorkTime
     {
         return UpdateWorkTime::make([
             'id' => data_get($event, 'id'),
