@@ -92,6 +92,7 @@ class UpdateProductRuleset extends FluxRuleset
             ],
 
             'bundle_type_enum' => [
+                'required_if_accepted:is_bundle',
                 'nullable',
                 Rule::enum(BundleTypeEnum::class),
             ],

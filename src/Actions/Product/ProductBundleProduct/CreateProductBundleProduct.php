@@ -30,8 +30,8 @@ class CreateProductBundleProduct extends FluxAction
             ->whereKey($this->data['product_id'])
             ->first()
             ->update([
-                'is_bundle' => true,
                 'bundle_type_enum' => BundleTypeEnum::Standard,
+                'is_bundle' => true,
             ]);
 
         return $productBundleProduct->refresh();

@@ -79,6 +79,7 @@ class CreateProductRuleset extends FluxRuleset
                 'nullable',
             ],
             'bundle_type_enum' => [
+                'required_if_accepted:is_bundle',
                 'nullable',
                 Rule::enum(BundleTypeEnum::class),
             ],

@@ -39,10 +39,10 @@ class CreateOrderPosition extends FluxAction
         $orderPosition = app(OrderPosition::class);
 
         $this->data['is_net'] ??= $this->getData('priceList.is_net')
-            ?? $order->priceList->is_net
-            ?? PriceList::default()?->is_net;
-        $this->data['client_id'] ??= $order->client_id ?? Client::default()?->getKey();
-        $this->data['price_list_id'] ??= $order->price_list_id ?? PriceList::default()?->getKey();
+            ?? data_get($order, 'priceList.is_net')
+            ?? data_get(PriceList::default(), 'is_net');
+        $this->data['client_id'] ??= data_get($order, 'client_id') ?? Client::default()?->getKey();
+        $this->data['price_list_id'] ??= data_get($order, 'price_list_id') ?? PriceList::default()?->getKey();
 
         if (is_int($this->getData('sort_number'))) {
             $currentHighestSortNumber = resolve_static(OrderPosition::class, 'query')
