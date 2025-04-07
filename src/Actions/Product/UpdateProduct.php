@@ -132,14 +132,7 @@ class UpdateProduct extends FluxAction
 
     protected function prepareForValidation(): void
     {
-        if (
-            $this->getData('is_bundle')
-            || resolve_static(Product::class, 'query')
-                ->whereKey($this->getData('id'))
-                ->value('is_bundle')
-        ) {
-            $this->data['bundle_type_enum'] ??= BundleTypeEnum::Standard;
-        } else {
+        if ($this->getData('is_bundle') === false) {
             $this->data['bundle_type_enum'] = null;
         }
 

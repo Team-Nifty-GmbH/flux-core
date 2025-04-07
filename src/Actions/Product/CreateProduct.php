@@ -5,7 +5,6 @@ namespace FluxErp\Actions\Product;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Price\CreatePrice;
 use FluxErp\Actions\ProductCrossSelling\CreateProductCrossSelling;
-use FluxErp\Enums\BundleTypeEnum;
 use FluxErp\Facades\ProductType;
 use FluxErp\Models\Client;
 use FluxErp\Models\Pivots\ClientProduct;
@@ -96,8 +95,8 @@ class CreateProduct extends FluxAction
     {
         $this->data['product_type'] ??= data_get(ProductType::getDefault(), 'type');
 
-        if ($this->getData('is_bundle')) {
-            $this->data['bundle_type_enum'] ??= BundleTypeEnum::Standard;
+        if (! $this->getData('is_bundle')) {
+            $this->data['bundle_type_enum'] = null;
         }
 
         if (! data_get($this->data, 'prices') && data_get($this->data, 'parent_id')) {

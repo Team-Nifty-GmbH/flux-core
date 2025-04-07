@@ -127,6 +127,7 @@ class UpdateProductRuleset extends FluxRuleset
             'is_highlight' => 'boolean',
             'is_bundle' => [
                 'required_with:bundle_type_enum',
+                'required_if:bundle_type_enum,null',
                 'boolean',
             ],
             'is_service' => 'boolean',
