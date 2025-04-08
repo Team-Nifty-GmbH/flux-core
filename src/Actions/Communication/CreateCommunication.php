@@ -35,7 +35,7 @@ class CreateCommunication extends FluxAction
         $endedAt = data_get($this->data, 'ended_at');
 
         if (is_null(data_get($this->data, 'total_time_ms')) && $startedAt && $endedAt) {
-            $this->data['total_time_ms'] = Carbon::parse($startedAt)->diffInMilliseconds(Carbon::parse($endedAt));
+            $this->data['total_time_ms'] = Carbon::parse($startedAt)->diffInMilliseconds(Carbon::parse($endedAt), true);
         }
 
         $communication = app(Communication::class, ['attributes' => $this->data]);
