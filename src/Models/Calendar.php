@@ -40,6 +40,7 @@ class Calendar extends FluxModel
             'has_notifications' => 'boolean',
             'has_repeatable_events' => 'boolean',
             'is_editable' => 'boolean',
+            'is_group' => 'boolean',
             'is_public' => 'boolean',
         ];
     }
@@ -67,6 +68,13 @@ class Calendar extends FluxModel
         return $this;
     }
 
+    public function getLabel(): string
+    {
+        $parent = $this->parent?->getLabel();
+
+        return ($parent ? $parent . ' -> ' : '') . $this->name;
+    }
+
     public function invitesCalendarEvents()
     {
         return $this->hasManyThrough(
@@ -91,10 +99,12 @@ class Calendar extends FluxModel
                 'parentId' => $this->parent_id,
                 'modelType' => $this->model_type,
                 'name' => $this->name,
+                'label' => $this->getLabel(),
                 'color' => $this->color,
                 'customProperties' => $this->custom_properties ?? [],
                 'resourceEditable' => $this->is_editable ?? true,
                 'hasRepeatableEvents' => $this->has_repeatable_events ?? true,
+                'isGroup' => $this->is_group ?? false,
                 'isPublic' => $this->is_public ?? false,
                 'isShared' => $this->calendarables_count > 1,
             ],

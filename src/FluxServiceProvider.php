@@ -18,7 +18,6 @@ use FluxErp\Http\Middleware\Localization;
 use FluxErp\Http\Middleware\Permissions;
 use FluxErp\Http\Middleware\PortalMiddleware;
 use FluxErp\Http\Middleware\SetJobAuthenticatedUserMiddleware;
-use FluxErp\Livewire\Features\Calendar\CalendarOverview;
 use FluxErp\Models\Activity;
 use FluxErp\Models\Address;
 use FluxErp\Models\Category;
@@ -130,8 +129,6 @@ class FluxServiceProvider extends ServiceProvider
         if (! $this->app->runningInConsole() || $this->app->runningUnitTests()) {
             ProductType::register(name: 'product', class: \FluxErp\Livewire\Product\Product::class, default: true);
         }
-
-        Livewire::component('calendar-overview', CalendarOverview::class);
     }
 
     public function register(): void

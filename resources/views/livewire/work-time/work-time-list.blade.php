@@ -136,7 +136,11 @@
             <x-button
                 color="indigo"
                 loading
-                x-on:click="$wire.save().then((success) => { if (success) $modalClose('edit-work-time-modal'); })"
+                x-on:click="
+                    $wire.workTime.local_started_at = dayjs($wire.workTime.started_at).format();
+                    $wire.workTime.local_ended_at = dayjs($wire.workTime.ended_at).format();
+                    $wire.save().then((success) => { if (success) $modalClose('edit-work-time-modal'); })
+                "
                 :text="__('Save')"
             />
         </x-slot>

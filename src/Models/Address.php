@@ -4,6 +4,7 @@ namespace FluxErp\Models;
 
 use Carbon\Carbon;
 use Exception;
+use FluxErp\Actions\Address\UpdateAddress;
 use FluxErp\Contracts\Calendarable;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\SalutationEnum;
@@ -103,23 +104,23 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         return $address;
     }
 
-    public static function fromCalendarEvent(array $event): Model
+    public static function fromCalendarEvent(array $event, string $action = 'update'): UpdateAddress
     {
-        $currentAddress = static::query()->whereKey(data_get($event, 'id'))->first();
+        $currentAddress = static::query()
+            ->whereKey(data_get($event, 'id'))
+            ->first();
 
-        $address = new static();
-        $address->forceFill([
+        return UpdateAddress::make([
             'id' => data_get($event, 'id'),
-            'date_of_birth' => Carbon::parse(data_get($event, 'start'))->setYear($currentAddress->date_of_birth->year),
+            'date_of_birth' => Carbon::parse(data_get($event, 'start'))
+                ->setYear($currentAddress->date_of_birth->year),
         ]);
-
-        return $address;
     }
 
     public static function toCalendar(): array
     {
         return [
-            'id' => Str::of(static::class)->replace('\\', '.'),
+            'id' => Str::of(static::class)->replace('\\', '.')->toString(),
             'modelType' => morph_alias(static::class),
             'name' => __('Birthdays'),
             'color' => '#dd2c2c',
@@ -524,6 +525,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
             'title' => $name,
             'start' => $currentBirthday->toDateString(),
             'end' => $currentBirthday->toDateString(),
+            'editable' => false,
             'invited' => [],
             'allDay' => true,
             'is_editable' => false,

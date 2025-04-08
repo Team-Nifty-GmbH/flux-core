@@ -2,13 +2,13 @@
 
 namespace FluxErp\Tests\Livewire\Features\Calendar;
 
-use FluxErp\Livewire\Features\Calendar\CalendarOverview;
+use FluxErp\Livewire\Features\Calendar\CalendarEventEdit;
 use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
-class CalendarOverviewTest extends TestCase
+class CalendarEventEditTest extends TestCase
 {
-    protected string $livewireComponent = CalendarOverview::class;
+    protected string $livewireComponent = CalendarEventEdit::class;
 
     public function test_renders_successfully(): void
     {
