@@ -272,20 +272,20 @@ const calendar = () => {
         },
         hydrateCalendarSelects() {
             const flattenedCalendars = this.flattenCalendars(
-                    JSON.parse(JSON.stringify(this.calendars)),
-                );
+                JSON.parse(JSON.stringify(this.calendars)),
+            );
 
-                // Filter the flattened calendars
-                const selectableCalendars = flattenedCalendars.filter(
-                    (calendar) =>
-                        calendar.isGroup != true
-                        && calendar.hasNoEvents != true
-                        && calendar.isVirtual != true,
-                );
+            // Filter the flattened calendars
+            const selectableCalendars = flattenedCalendars.filter(
+                (calendar) =>
+                    calendar.isGroup != true &&
+                    calendar.hasNoEvents != true &&
+                    calendar.isVirtual != true,
+            );
 
-                $tallstackuiSelect('calendar-select').setOptions(
-                    selectableCalendars,
-                );
+            $tallstackuiSelect('calendar-select').setOptions(
+                selectableCalendars,
+            );
         },
         flattenCalendars(calendars, parentPath = '') {
             let result = [];
