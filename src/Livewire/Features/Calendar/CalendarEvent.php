@@ -34,6 +34,10 @@ class CalendarEvent extends Component
         $eventId = $this->event->id;
         $eventId .= ! is_null($this->event->repetition) ? '|' . $this->event->repetition : '';
 
+        if (! $this->event->was_repeatable) {
+            $this->event->confirm_option = 'all';
+        }
+
         try {
             $this->event->delete();
         } catch (ValidationException $e) {
@@ -63,15 +67,15 @@ class CalendarEvent extends Component
     #[On('save-calendar-event')]
     public function save(): bool
     {
-        if (! $this->event->was_repeatable && $this->event->has_repeats) {
-            $this->event->confirm_option = 'all';
-        }
-
         if ($this->event->was_repeatable
             && $this->event->has_repeats
             && $this->event->confirm_option === 'this'
         ) {
             $this->event->confirm_option = 'future';
+        }
+
+        if (! $this->event->was_repeatable) {
+            $this->event->confirm_option = 'all';
         }
 
         try {

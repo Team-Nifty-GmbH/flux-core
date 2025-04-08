@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Forms;
 
+use Carbon\Carbon;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Helpers\Helper;
 use FluxErp\Models\CalendarEvent;
@@ -118,6 +119,19 @@ class CalendarEventForm extends FluxForm
         $data = $this->toArray();
         if (! data_get($data, 'is_repeatable') || ! data_get($data, 'has_repeats')) {
             unset($data['repeat']);
+        }
+
+        $dateProperties = [
+            'start',
+            'end',
+            'repeat_end',
+            'original_start',
+        ];
+
+        foreach ($dateProperties as $property) {
+            if ($value = data_get($data, $property)) {
+                $data[$property] = Carbon::parse($value)->timezone('UTC')->toDateTimeString();
+            }
         }
 
         return $model::fromCalendarEvent($data, $name);

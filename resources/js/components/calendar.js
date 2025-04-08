@@ -104,6 +104,7 @@ const calendar = () => {
                 if (event instanceof Array) {
                     event
                         .map((item) => String(item.id).split('|')[0])
+                        .map(this.mapDatesToUtc)
                         .filter(
                             (value, index, self) =>
                                 self.indexOf(value) === index,
@@ -127,7 +128,7 @@ const calendar = () => {
                 } else {
                     this.calendar.getEventById(event.id)?.remove();
                     this.calendar.addEvent(
-                        event,
+                        this.mapDatesToUtc(event),
                         this.calendar.getEventSourceById(event.calendar_id),
                     );
                 }
@@ -156,6 +157,17 @@ const calendar = () => {
             } else {
                 this.$wire.event.end = dateTime.format(); // Use the default ISO 8601 format
             }
+        },
+        mapDatesToUtc(event) {
+            event.start = dayjs(event.start).utc(true).format();
+            event.end = dayjs(event.end).utc(true).format();
+            event.repeat_end = event.repeat_end
+                ? dayjs(event.repeat_end)
+                    .utc(true)
+                    .format()
+                : null;
+
+            return event;
         },
         deleteEvent(event) {
             if (event === false) {
@@ -219,7 +231,7 @@ const calendar = () => {
                 calendar.events = async (info) => {
                     calendar.isLoading = true;
                     try {
-                        return await this.$wire.getEvents(info, calendar);
+                        return (await this.$wire.getEvents(info, calendar)).map(this.mapDatesToUtc);
                     } finally {
                         calendar.isLoading = false;
                     }
@@ -266,26 +278,6 @@ const calendar = () => {
             this.$wire.getInvites().then((invites) => {
                 this.invites = invites;
             });
-            this.$watch('calendars', () => {
-                this.hydrateCalendarSelects();
-            });
-        },
-        hydrateCalendarSelects() {
-            const flattenedCalendars = this.flattenCalendars(
-                JSON.parse(JSON.stringify(this.calendars)),
-            );
-
-            // Filter the flattened calendars
-            const selectableCalendars = flattenedCalendars.filter(
-                (calendar) =>
-                    calendar.isGroup != true &&
-                    calendar.hasNoEvents != true &&
-                    calendar.isVirtual != true,
-            );
-
-            $tallstackuiSelect('calendar-select').setOptions(
-                selectableCalendars,
-            );
         },
         flattenCalendars(calendars, parentPath = '') {
             let result = [];

@@ -14,7 +14,13 @@
                     required
                     x-on:select="$wire.event.is_repeatable = await $wire.isCalendarEventRepeatable($event.detail.select.id);"
                     select="label:label|value:id"
-                    :options="[]"
+                    :request="[
+                        'url' => route('calendar-search'),
+                        'method' => 'POST',
+                        'params' => [
+                            'where' => [['is_group', '=', false]],
+                        ],
+                    ]"
                 />
             </div>
             @show

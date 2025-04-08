@@ -40,8 +40,6 @@ class Calendar extends Component
         'end' => null,
     ];
 
-    public array $calendarTwigs = [];
-
     public CalendarEventForm $event;
 
     public bool $showCalendars = true;
@@ -155,7 +153,6 @@ class Calendar extends Component
                         ->withPivot('permission')
                         ->wherePivot('permission', 'owner')
                         ->whereNull('parent_id')
-                        ->withCount('calendarables')
                         ->get()
                         ->toCalendarObjects()
                         ->toArray(),

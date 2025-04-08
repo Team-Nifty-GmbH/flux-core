@@ -18,7 +18,13 @@
                         :label="__('Parent Calendar')"
                         required
                         select="label:label|value:id"
-                        :options="[]"
+                        :request="[
+                            'url' => route('calendar-search'),
+                            'method' => 'POST',
+                            'params' => [
+                                'onlyGroups' => true,
+                            ]
+                        ]"
                     />
                 </div>
                 <x-input
