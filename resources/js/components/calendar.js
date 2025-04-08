@@ -162,9 +162,7 @@ const calendar = () => {
             event.start = dayjs(event.start).utc(true).format();
             event.end = dayjs(event.end).utc(true).format();
             event.repeat_end = event.repeat_end
-                ? dayjs(event.repeat_end)
-                    .utc(true)
-                    .format()
+                ? dayjs(event.repeat_end).utc(true).format()
                 : null;
 
             return event;
@@ -231,7 +229,9 @@ const calendar = () => {
                 calendar.events = async (info) => {
                     calendar.isLoading = true;
                     try {
-                        return (await this.$wire.getEvents(info, calendar)).map(this.mapDatesToUtc);
+                        return (await this.$wire.getEvents(info, calendar)).map(
+                            this.mapDatesToUtc,
+                        );
                     } finally {
                         calendar.isLoading = false;
                     }
