@@ -57,7 +57,7 @@ class TotalUnassignedBillableHoursTest extends BaseSetup
                 'is_default' => false,
             ]);
 
-        $order_position = $order = Order::factory()->create([
+        $order = Order::factory()->create([
             'client_id' => $this->dbClient->getKey(),
             'language_id' => $language->id,
             'order_type_id' => $orderType->id,
@@ -69,7 +69,7 @@ class TotalUnassignedBillableHoursTest extends BaseSetup
             'is_locked' => false,
         ]);
 
-        OrderPosition::factory()->create([
+        $orderPosition = OrderPosition::factory()->create([
             'client_id' => $this->dbClient->getKey(),
             'order_id' => $order->id,
         ]);
@@ -110,7 +110,7 @@ class TotalUnassignedBillableHoursTest extends BaseSetup
         WorkTime::factory()
             ->for($this->user)
             ->create([
-                'order_position_id' => $order_position->id,
+                'order_position_id' => $orderPosition->id,
                 'is_daily_work_time' => false,
                 'is_billable' => false,
                 'started_at' => Carbon::now()->subHours(2)->toDateTimeString(),
