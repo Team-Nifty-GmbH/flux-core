@@ -6,16 +6,18 @@
         precision: {{ $precision }},
         maskedValue: null,
         mask(value) {
-            return (value).replace('.', this.decimal);
+            return value.replace('.', this.decimal)
         },
         emitInput(value) {
-            this.input = value.replaceAll(this.thousands, '').replace(this.decimal, '.');
-        }
+            this.input = value
+                .replaceAll(this.thousands, '')
+                .replace(this.decimal, '.')
+        },
     }"
     x-init="
         $watch('input', (value) => {
-            this.maskedValue = mask(value);
-        });
+            this.maskedValue = mask(value)
+        })
     "
 >
     <x-input
