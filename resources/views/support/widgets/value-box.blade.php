@@ -1,6 +1,8 @@
 <div class="flex h-full w-full flex-col">
     <div class="px-6 pt-6">
-        <h2 class="flex items-center justify-between truncate text-lg font-semibold text-gray-400">
+        <h2
+            class="flex items-center justify-between truncate text-lg font-semibold text-gray-400"
+        >
             <span>{{ __($this->title()) }}</span>
             @if (class_implements($this, \FluxErp\Contracts\HasWidgetOptions::class))
                 <x-dropdown icon="ellipsis-vertical" static>
@@ -15,13 +17,18 @@
         </h2>
         <hr />
     </div>
-    <div class="flex h-full w-full gap-6 px-6 pb-6 items-center">
+    <div class="flex h-full w-full items-center gap-6 px-6 pb-6">
         <x-flux::spinner />
         <div class="flex w-full grow flex-col justify-between">
             <div>
-                <div class="flex max-w-full grow flex-wrap items-center justify-center gap-4">
+                <div
+                    class="flex max-w-full grow flex-wrap items-center justify-center gap-4"
+                >
                     <div class="flex items-center justify-center">
-                        <x-icon :name="$this->icon()" class="text-primary-500 h-12 w-12" />
+                        <x-icon
+                            :name="$this->icon()"
+                            class="text-primary-500 h-12 w-12"
+                        />
                         <div
                             class="ml-4 flex-none truncate whitespace-nowrap text-2xl font-bold"
                             x-text="$wire.sum"
@@ -39,7 +46,9 @@
                                     <x-slot:left>
                                         <i class="ph ph-caret-up"></i>
                                     </x-slot>
-                                    <span x-text="$wire.growthRate + '%'"></span>
+                                    <span
+                                        x-text="$wire.growthRate + '%'"
+                                    ></span>
                                 </x-badge>
                                 <x-badge
                                     x-cloak
@@ -50,7 +59,9 @@
                                     <x-slot:left>
                                         <i class="ph ph-caret-down"></i>
                                     </x-slot>
-                                    <span x-text="$wire.growthRate + '%'"></span>
+                                    <span
+                                        x-text="$wire.growthRate + '%'"
+                                    ></span>
                                 </x-badge>
                             </div>
                         </template>
@@ -66,7 +77,9 @@
                                     <x-slot:left>
                                         <i class="ph ph-caret-up"></i>
                                     </x-slot>
-                                    <span x-text="$wire.growthRate + '%'"></span>
+                                    <span
+                                        x-text="$wire.growthRate + '%'"
+                                    ></span>
                                 </x-badge>
                                 <x-badge
                                     x-cloak
@@ -77,14 +90,16 @@
                                     <x-slot:left>
                                         <i class="ph ph-caret-down"></i>
                                     </x-slot>
-                                    <span x-text="$wire.growthRate + '%'"></span>
+                                    <span
+                                        x-text="$wire.growthRate + '%'"
+                                    ></span>
                                 </x-badge>
                             </div>
                         </template>
                     @endif
                 </div>
                 <div
-                    class="flex-none truncate whitespace-nowrap text-lg font-semibold text-center"
+                    class="flex-none truncate whitespace-nowrap text-center text-lg font-semibold"
                     x-html="$wire.subValue"
                 ></div>
             </div>
