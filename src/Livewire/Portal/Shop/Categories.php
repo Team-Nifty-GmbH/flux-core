@@ -39,15 +39,4 @@ class Categories extends Component
             ->where('model_type', morph_alias(Product::class))
             ->get();
     }
-
-    public function placeholder(): string
-    {
-        return <<<'Blade'
-            <div class="min-w-96">
-                <x-card>
-                    @include('flux::livewire.placeholders.horizontal-bar')
-                </x-card>
-            </div>
-        Blade;
-    }
 }
