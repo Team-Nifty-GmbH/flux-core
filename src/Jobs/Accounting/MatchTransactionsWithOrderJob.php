@@ -4,6 +4,7 @@ namespace FluxErp\Jobs\Accounting;
 
 use Exception;
 use FluxErp\Actions\OrderTransaction\CreateOrderTransaction;
+use FluxErp\Models\Address;
 use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\Order;
 use FluxErp\Models\Pivots\OrderTransaction;
@@ -13,6 +14,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\MultipleRecordsFoundException;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Collection;
@@ -43,18 +45,32 @@ class MatchTransactionsWithOrderJob implements ShouldQueue
             ->where('iban', $transaction->counterpart_iban)
             ->value('contact_id');
 
+        try {
+            $contactId ??= resolve_static(Address::class, 'query')
+                ->whereRaw(
+                    'JSON_CONTAINS(LOWER(search_aliases), LOWER(?))',
+                    [json_encode($transaction->counterpart_name)]
+                )
+                ->where('search_aliases', $transaction->counterpart_name)
+                ->sole('contact_id');
+        } catch (ModelNotFoundException|MultipleRecordsFoundException) {
+        }
+
         $bookingDate = $transaction->booking_date->format('Y-m-d');
 
         $matches = collect();
-        if ($transaction->purpose) {
-            $order = $this->findOrderByPurpose($transaction, $contactId, $bookingDate);
+        if ($contactId) {
+            $order = $this->findOrderByContactAndBalance($transaction, $contactId, $bookingDate);
             if ($order) {
+                // exact match for contact and balance
                 $matches->push($order);
+
+                return $matches;
             }
         }
 
-        if ($contactId) {
-            $order = $this->findOrderByContactAndBalance($transaction, $contactId, $bookingDate);
+        if ($transaction->purpose) {
+            $order = $this->findOrderByPurpose($transaction, $contactId, $bookingDate);
             if ($order) {
                 $matches->push($order);
             }
@@ -75,7 +91,7 @@ class MatchTransactionsWithOrderJob implements ShouldQueue
         return resolve_static(Order::class, 'query')
             ->whereNotNull('invoice_number')
             ->where('contact_id', $contactId)
-            ->whereRaw('ROUND(balance, 2) = ?', $transaction->amount)
+            ->whereRaw('ROUND(balance, 2) = ROUND(?, 2)', $transaction->amount)
             ->orderByRaw('ABS(DATEDIFF(invoice_date, ?))', [$bookingDate])
             ->first();
     }
@@ -149,23 +165,15 @@ class MatchTransactionsWithOrderJob implements ShouldQueue
 
         $matches = resolve_static(Order::class, 'query')
             ->whereRaw('LOWER(invoice_number) = ?', strtolower($word))
-            ->when($contactId, fn ($query) => $query->where('contact_id', $contactId))
+            ->whereNot('balance', 0)
+            ->when($contactId, fn (Builder $query) => $query->where('contact_id', $contactId))
             ->get();
 
         $potentialMatches = $potentialMatches->merge($matches);
 
-        if ($contactId) {
-            $matches = resolve_static(Order::class, 'query')
-                ->whereRaw('LOWER(invoice_number) = ?', strtolower($word))
-                ->whereNot('contact_id', $contactId)
-                ->get();
-
-            $potentialMatches = $potentialMatches->merge($matches);
-        }
-
         $matches = resolve_static(Order::class, 'query')
             ->where('invoice_number', 'like', '%' . $word . '%')
-            ->whereRaw('ROUND(balance, 2) = ?', $transaction->amount)
+            ->whereRaw('ROUND(balance, 2) = ROUND(?, 2)', $transaction->amount)
             ->get();
 
         $potentialMatches = $potentialMatches->merge($matches);

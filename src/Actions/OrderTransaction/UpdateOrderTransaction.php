@@ -2,11 +2,11 @@
 
 namespace FluxErp\Actions\OrderTransaction;
 
-use FluxErp\Actions\FluxAction;
+use FluxErp\Actions\DispatchableFluxAction;
 use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Rulesets\OrderTransaction\UpdateOrderTransactionRuleset;
 
-class UpdateOrderTransaction extends FluxAction
+class UpdateOrderTransaction extends DispatchableFluxAction
 {
     public static function models(): array
     {

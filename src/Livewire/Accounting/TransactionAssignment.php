@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\Accounting;
 
 use FluxErp\Actions\OrderTransaction\CreateOrderTransaction;
+use FluxErp\Actions\OrderTransaction\UpdateOrderTransaction;
 use FluxErp\Livewire\Forms\OrderTransactionForm;
 use FluxErp\Livewire\Forms\TransactionForm;
 use FluxErp\Models\BankConnection;
@@ -21,7 +22,7 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class TransactionAssignments extends Component
+class TransactionAssignment extends Component
 {
     use Actions, WithPagination;
 
@@ -58,6 +59,36 @@ class TransactionAssignments extends Component
                 ->get(['id', 'name', 'iban'])
                 ->toArray(),
         ]);
+    }
+
+    #[Renderless]
+    public function acceptAll(?Transaction $transaction = null): void
+    {
+        if (! $transaction->exists) {
+            $suggestions = resolve_static(OrderTransaction::class, 'query')
+                ->whereHas('transaction')
+                ->where('is_accepted', false)
+                ->get();
+        } else {
+            $suggestions = $transaction->orderTransactions()
+                ->where('is_accepted', false)
+                ->get();
+        }
+
+        $suggestions
+            ->map(fn (OrderTransaction $orderTransaction) => $orderTransaction->setAttribute('is_accepted', true))
+            ->each(function (OrderTransaction $suggestion): void {
+                try {
+                    UpdateOrderTransaction::make($suggestion->toArray())
+                        ->validate()
+                        ->execute();
+                } catch (ValidationException|UnauthorizedException $e) {
+                    exception_to_notifications($e, $this);
+                }
+            });
+
+        $this->toast()->success(__('Accepted :count assignments', ['count' => $suggestions->count()]))->send();
+        $this->refreshTransactions();
     }
 
     #[Renderless]
@@ -174,7 +205,11 @@ class TransactionAssignments extends Component
                 ],
                 'amount'
             )
-            ->withCount(['orderTransactions', 'comments'])
+            ->withCount([
+                'orderTransactions',
+                'comments',
+                'orderTransactions as suggestions' => fn ($query) => $query->where('is_accepted', false),
+            ])
             ->when($this->range, function (Builder $query): void {
                 $query->whereBetween('booking_date', $this->range);
             })
@@ -290,6 +325,7 @@ class TransactionAssignments extends Component
             ->count();
 
         $this->unassignedCount = resolve_static(Transaction::class, 'query')
+            ->where('is_ignored', false)
             ->whereDoesntHave('orders')
             ->count();
     }

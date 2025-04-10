@@ -4,7 +4,6 @@ namespace FluxErp\Rulesets\Transaction;
 
 use FluxErp\Models\BankConnection;
 use FluxErp\Models\Currency;
-use FluxErp\Models\Order;
 use FluxErp\Models\Transaction;
 use FluxErp\Rules\Iban;
 use FluxErp\Rules\ModelExists;
@@ -33,11 +32,6 @@ class CreateTransactionRuleset extends FluxRuleset
                 'integer',
                 'nullable',
                 app(ModelExists::class, ['model' => Transaction::class]),
-            ],
-            'order_id' => [
-                'integer',
-                'nullable',
-                app(ModelExists::class, ['model' => Order::class]),
             ],
             'value_date' => 'required|date',
             'booking_date' => 'required|date',

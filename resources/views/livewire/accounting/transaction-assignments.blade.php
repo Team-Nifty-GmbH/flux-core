@@ -12,6 +12,113 @@
         },
     }"
 >
+    <x-flux::spinner />
+    @teleport('body')
+        <x-modal id="transaction-assign-orders-modal" size="7xl">
+            <x-slot:title>
+                <div class="flex w-full flex-col">
+                    <div class="flex flex-row gap-2">
+                        <span
+                            x-text="$wire.transactionForm.counterpart_name"
+                        ></span>
+                        <span
+                            class="text-red-600"
+                            x-html="formatters.coloredMoney($wire.transactionForm.amount)"
+                        ></span>
+                    </div>
+                    <div
+                        class="text-xs"
+                        x-text="formatters.date($wire.transactionForm.booking_date)"
+                    ></div>
+                    <div
+                        class="mt-2 flex w-full flex-row justify-between border-t border-slate-200 pt-2"
+                    >
+                        <div x-text="$wire.transactionForm.purpose"></div>
+                    </div>
+                </div>
+            </x-slot>
+            <livewire:accounting.order-list lazy />
+            <x-slot:footer>
+                <x-button
+                    color="secondary"
+                    :text="__('Cancel')"
+                    x-on:click="$modalClose('transaction-assign-orders-modal')"
+                />
+                <x-button
+                    :text="__('Assign')"
+                    x-on:click="assignOrders($root.querySelector('[tall-datatable]').parentNode.getAttribute('wire:id'))"
+                />
+            </x-slot>
+        </x-modal>
+    @endteleport
+
+    @teleport('body')
+        <x-modal id="transaction-comments-modal">
+            <x-slot:title>
+                <div class="flex w-full flex-col">
+                    <div class="flex flex-row gap-2">
+                        <span
+                            x-text="$wire.transactionForm.counterpart_name"
+                        ></span>
+                        <span
+                            class="text-red-600"
+                            x-html="formatters.coloredMoney($wire.transactionForm.amount)"
+                        ></span>
+                    </div>
+                    <div
+                        class="text-xs"
+                        x-text="formatters.date($wire.transactionForm.booking_date)"
+                    ></div>
+                    <div
+                        class="mt-2 flex w-full flex-row justify-between border-t border-slate-200 pt-2"
+                    >
+                        <div x-text="$wire.transactionForm.purpose"></div>
+                    </div>
+                </div>
+            </x-slot>
+            <livewire:features.comments.comments
+                :model-type="\FluxErp\Models\Transaction::class"
+                wire:model="transactionForm.id"
+                lazy
+                :is-public="false"
+            />
+            <x-slot:footer>
+                <x-button
+                    color="secondary"
+                    :text="__('Cancel')"
+                    x-on:click="$modalClose('transaction-comments-modal')"
+                />
+            </x-slot>
+        </x-modal>
+    @endteleport
+
+    @teleport('body')
+        <x-modal
+            id="order-transaction-modal"
+            x-on:open="$focusOn('order-transaction-amount')"
+        >
+            <x-number
+                id="order-transaction-amount"
+                :label="__('Amount')"
+                wire:model="orderTransactionForm.amount"
+                step="0.01"
+                :corner-hint="__('Amount')"
+                placeholder="0.00"
+            />
+            <x-slot:footer>
+                <x-button
+                    color="secondary"
+                    :text="__('Cancel')"
+                    x-on:click="$modalClose('order-transaction-modal')"
+                />
+                <x-button
+                    :text="__('Save')"
+                    x-on:click="$wire.saveOrderTransaction()"
+                />
+            </x-slot>
+        </x-modal>
+    @endteleport
+
     <div class="flex flex-col gap-4 text-sm">
         <div class="flex flex-col">
             <x-tab wire:model.live="tab">
@@ -137,20 +244,17 @@
                                             <span
                                                 x-text="formatters.date(transaction.booking_date)"
                                             ></span>
-                                            <x-tooltip
-                                                position="top"
-                                                icon="banknotes"
-                                                color="gray"
-                                                light
-                                            >
-                                                <b
-                                                    x-text="transaction.bank_connection.bank_name"
-                                                ></b>
-                                                <br />
-                                                <span
-                                                    x-text="transaction.bank_connection.iban"
-                                                ></span>
-                                            </x-tooltip>
+                                            <x-dropdown icon="banknotes">
+                                                <div class="p-2">
+                                                    <b
+                                                        x-text="transaction.bank_connection.bank_name"
+                                                    ></b>
+                                                    <br />
+                                                    <span
+                                                        x-text="transaction.bank_connection.iban"
+                                                    ></span>
+                                                </div>
+                                            </x-dropdown>
                                         </div>
                                     </div>
                                 </div>
@@ -173,7 +277,17 @@
                                             class="group/button relative w-fit rounded-full"
                                         >
                                             <x-button.circle
+                                                x-cloak
+                                                x-show="order.pivot.is_accepted"
                                                 color="emerald"
+                                                rounded
+                                                icon="link"
+                                                class="block transition-opacity duration-200 group-hover/button:opacity-0"
+                                            />
+                                            <x-button.circle
+                                                x-cloak
+                                                x-show="! order.pivot.is_accepted"
+                                                color="amber"
                                                 rounded
                                                 icon="link"
                                                 class="block transition-opacity duration-200 group-hover/button:opacity-0"
@@ -192,12 +306,12 @@
                                         >
                                             <div class="flex gap-2">
                                                 <div
-                                                    class="flex flex-col gap-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+                                                    class="hidden overflow-hidden transition-all duration-200 group-hover:block"
                                                 >
                                                     <x-button
-                                                        class="grow"
-                                                        sm
+                                                        class="h-full"
                                                         color="secondary"
+                                                        sm
                                                         icon="eye"
                                                         x-on:click="$openDetailModal('{{ route('orders.id', ['id' => '__key__']) }}'.replace('__key__', order.id))"
                                                     />
@@ -212,9 +326,7 @@
                                                 </div>
                                             </div>
                                             <div class="flex gap-2">
-                                                <div
-                                                    class="flex flex-col gap-2"
-                                                >
+                                                <div>
                                                     <div
                                                         class="flex w-full justify-end font-semibold"
                                                         x-html="formatters.coloredMoney(order.pivot.amount)"
@@ -227,14 +339,17 @@
                                                         ></span>
                                                     </div>
                                                 </div>
-                                                <!-- Edit button with opacity-0 by default and opacity-100 on group-hover -->
-                                                <x-button
-                                                    color="secondary"
-                                                    sm
-                                                    icon="pencil"
-                                                    wire:click="editOrderTransaction(order.pivot.pivot_id)"
-                                                    class="opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-                                                />
+                                                <div
+                                                    class="hidden overflow-hidden transition-all duration-200 group-hover:block"
+                                                >
+                                                    <x-button
+                                                        class="h-full"
+                                                        color="secondary"
+                                                        sm
+                                                        icon="pencil"
+                                                        wire:click="editOrderTransaction(order.pivot.pivot_id)"
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -245,6 +360,14 @@
                                             class="flex flex-row items-center justify-between border-t border-slate-200 pt-2"
                                         >
                                             <div class="flex flex-row gap-2">
+                                                <x-button
+                                                    sm
+                                                    x-cloak
+                                                    x-show="transaction.suggestions > 0"
+                                                    color="emerald"
+                                                    wire:click="acceptAll(transaction.id)"
+                                                    :text="__('Accept')"
+                                                />
                                                 <x-button
                                                     sm
                                                     light
@@ -282,6 +405,14 @@
                                                     x-show="transaction.order_transactions_count === 0 && ! transaction.is_ignored"
                                                     :text="__('Ignore transaction')"
                                                 />
+                                                <x-button
+                                                    sm
+                                                    color="emerald"
+                                                    wire:click="ignoreTransaction(transaction.id)"
+                                                    x-cloak
+                                                    x-show="transaction.is_ignored"
+                                                    :text="__('Dont ignore transaction')"
+                                                />
                                             </div>
                                             <div
                                                 class="flex flex-row gap-2 pr-2"
@@ -299,114 +430,20 @@
                             </div>
                         </div>
                     </template>
+                    <div>
+                        <x-button
+                            class="w-full"
+                            color="emerald"
+                            wire:flux-confirm.type.warning="{{ __('Accept all assignments|All suggested transaction assignments will be accepted') }}"
+                            wire:click="acceptAll()"
+                            :text="__('Accept all')"
+                            x-cloak
+                            x-show="$wire.tab === '{{ __('Assignment suggestions') }}' && data.data.length > 0"
+                        />
+                    </div>
                     <x-tall-datatables::pagination />
                 </div>
             </x-tab>
         </div>
     </div>
-    @teleport('body')
-        <x-modal id="transaction-assign-orders-modal" size="7xl">
-            <x-slot:title>
-                <div class="flex w-full flex-col">
-                    <div class="flex flex-row gap-2">
-                        <span
-                            x-text="$wire.transactionForm.counterpart_name"
-                        ></span>
-                        <span
-                            class="text-red-600"
-                            x-html="formatters.coloredMoney($wire.transactionForm.amount)"
-                        ></span>
-                    </div>
-                    <div
-                        class="text-xs"
-                        x-text="formatters.date($wire.transactionForm.booking_date)"
-                    ></div>
-                    <div
-                        class="mt-2 flex w-full flex-row justify-between border-t border-slate-200 pt-2"
-                    >
-                        <div x-text="$wire.transactionForm.purpose"></div>
-                    </div>
-                </div>
-            </x-slot>
-            <livewire:accounting.order-list lazy />
-            <x-slot:footer>
-                <x-button
-                    color="secondary"
-                    :text="__('Cancel')"
-                    x-on:click="$modalClose('transaction-assign-orders-modal')"
-                />
-                <x-button
-                    :text="__('Assign')"
-                    x-on:click="assignOrders($root.querySelector('[tall-datatable]').parentNode.getAttribute('wire:id'))"
-                />
-            </x-slot>
-        </x-modal>
-    @endteleport
-
-    @teleport('body')
-        <x-modal id="transaction-comments-modal">
-            <x-slot:title>
-                <div class="flex w-full flex-col">
-                    <div class="flex flex-row gap-2">
-                        <span
-                            x-text="$wire.transactionForm.counterpart_name"
-                        ></span>
-                        <span
-                            class="text-red-600"
-                            x-html="formatters.coloredMoney($wire.transactionForm.amount)"
-                        ></span>
-                    </div>
-                    <div
-                        class="text-xs"
-                        x-text="formatters.date($wire.transactionForm.booking_date)"
-                    ></div>
-                    <div
-                        class="mt-2 flex w-full flex-row justify-between border-t border-slate-200 pt-2"
-                    >
-                        <div x-text="$wire.transactionForm.purpose"></div>
-                    </div>
-                </div>
-            </x-slot>
-            <livewire:features.comments.comments
-                :model-type="\FluxErp\Models\Transaction::class"
-                wire:model="transactionForm.id"
-                lazy
-                :is-public="false"
-            />
-            <x-slot:footer>
-                <x-button
-                    color="secondary"
-                    :text="__('Cancel')"
-                    x-on:click="$modalClose('transaction-comments-modal')"
-                />
-            </x-slot>
-        </x-modal>
-    @endteleport
-
-    @teleport('body')
-        <x-modal
-            id="order-transaction-modal"
-            x-on:open="$focusOn('order-transaction-amount')"
-        >
-            <x-number
-                id="order-transaction-amount"
-                :label="__('Amount')"
-                wire:model="orderTransactionForm.amount"
-                step="0.01"
-                :corner-hint="__('Amount')"
-                placeholder="0.00"
-            />
-            <x-slot:footer>
-                <x-button
-                    color="secondary"
-                    :text="__('Cancel')"
-                    x-on:click="$modalClose('order-transaction-modal')"
-                />
-                <x-button
-                    :text="__('Save')"
-                    x-on:click="$wire.saveOrderTransaction()"
-                />
-            </x-slot>
-        </x-modal>
-    @endteleport
 </div>

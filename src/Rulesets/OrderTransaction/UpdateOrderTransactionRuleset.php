@@ -33,6 +33,7 @@ class UpdateOrderTransactionRuleset extends FluxRuleset
                 'required',
                 app(Numeric::class),
             ],
+            'is_accepted' => 'boolean',
         ];
     }
 }
