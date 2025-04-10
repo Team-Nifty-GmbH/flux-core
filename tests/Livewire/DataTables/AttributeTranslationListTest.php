@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\Feature\Livewire\DataTables;
+namespace FluxErp\Tests\Livewire\DataTables\DataTables;
 
 use FluxErp\Livewire\DataTables\AttributeTranslationList;
 use FluxErp\Tests\TestCase;

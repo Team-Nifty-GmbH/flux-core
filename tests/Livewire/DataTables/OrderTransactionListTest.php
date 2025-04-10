@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\Feature\Livewire\DataTables;
+namespace FluxErp\Tests\Livewire\DataTables;
 
 use FluxErp\Livewire\DataTables\OrderTransactionList;
 use FluxErp\Tests\TestCase;
