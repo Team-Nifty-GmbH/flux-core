@@ -21,7 +21,7 @@ class ToggleTicketUser extends FluxAction
 
     protected static function getSuccessCode(): ?int
     {
-        return Response::HTTP_OK;
+        return parent::getSuccessCode() ?? Response::HTTP_OK;
     }
 
     protected function getRulesets(): string|array

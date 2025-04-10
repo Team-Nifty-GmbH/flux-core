@@ -26,7 +26,7 @@ class CreateOrderFromPurchaseInvoice extends FluxAction
 
     protected static function getSuccessCode(): ?int
     {
-        return Response::HTTP_CREATED;
+        return parent::getSuccessCode() ?? Response::HTTP_CREATED;
     }
 
     protected function getRulesets(): string|array

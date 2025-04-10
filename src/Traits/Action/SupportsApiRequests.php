@@ -135,9 +135,9 @@ trait SupportsApiRequests
         return response()->json($responseContent, $responseCode);
     }
 
-    protected static function getReturnResult(): bool
+    protected static function getReturnResult(): ?bool
     {
-        return data_get(static::$classOptions, static::class . '.returnResult', false);
+        return data_get(static::$classOptions, static::class . '.returnResult');
     }
 
     protected static function getSuccessCode(): ?int
@@ -145,13 +145,13 @@ trait SupportsApiRequests
         return data_get(static::$classOptions, static::class . '.successCode');
     }
 
-    protected static function setReturnResult(bool $value): void
+    protected static function setReturnResult(bool $returnResult): void
     {
-        data_set(static::$classOptions, static::class . '.returnResult', $value);
+        data_set(static::$classOptions, static::class . '.returnResult', $returnResult);
     }
 
-    protected static function setSuccessCode(?int $value): void
+    protected static function setSuccessCode(?int $statusCode): void
     {
-        data_set(static::$classOptions, static::class . '.successCode', $value);
+        data_set(static::$classOptions, static::class . '.successCode', $statusCode);
     }
 }

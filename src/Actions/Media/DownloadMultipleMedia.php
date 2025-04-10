@@ -17,7 +17,7 @@ class DownloadMultipleMedia extends FluxAction
 
     protected static function getReturnResult(): bool
     {
-        return true;
+        return parent::getReturnResult() ?? true;
     }
 
     protected function getRulesets(): string|array
