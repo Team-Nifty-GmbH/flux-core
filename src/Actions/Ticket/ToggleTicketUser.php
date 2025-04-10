@@ -9,8 +9,6 @@ use Illuminate\Http\Response;
 
 class ToggleTicketUser extends FluxAction
 {
-    public static ?int $successCode = Response::HTTP_OK;
-
     public static function models(): array
     {
         return [Ticket::class];
@@ -19,6 +17,11 @@ class ToggleTicketUser extends FluxAction
     public static function name(): string
     {
         return 'ticket.toggle-user';
+    }
+
+    protected static function getSuccessCode(): ?int
+    {
+        return Response::HTTP_OK;
     }
 
     protected function getRulesets(): string|array

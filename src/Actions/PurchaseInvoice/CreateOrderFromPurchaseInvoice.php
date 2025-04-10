@@ -17,13 +17,16 @@ use Illuminate\Validation\ValidationException;
 
 class CreateOrderFromPurchaseInvoice extends FluxAction
 {
-    public static ?int $successCode = Response::HTTP_CREATED;
-
     public ?PurchaseInvoice $purchaseInvoice;
 
     public static function models(): array
     {
         return [PurchaseInvoice::class, Order::class];
+    }
+
+    protected static function getSuccessCode(): ?int
+    {
+        return Response::HTTP_CREATED;
     }
 
     protected function getRulesets(): string|array

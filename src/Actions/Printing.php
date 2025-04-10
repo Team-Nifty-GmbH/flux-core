@@ -11,8 +11,6 @@ use Illuminate\View\View;
 
 class Printing extends FluxAction
 {
-    protected static bool $returnResult = true;
-
     public Model $model;
 
     public Printable $printable;
@@ -20,6 +18,11 @@ class Printing extends FluxAction
     public static function models(): array
     {
         return [];
+    }
+
+    protected static function getReturnResult(): bool
+    {
+        return true;
     }
 
     protected function getRulesets(): string|array

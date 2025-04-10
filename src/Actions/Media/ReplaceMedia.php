@@ -14,13 +14,16 @@ use Illuminate\Validation\ValidationException;
 
 class ReplaceMedia extends FluxAction
 {
-    public static ?int $successCode = Response::HTTP_OK;
-
     protected bool $force = false;
 
     public static function models(): array
     {
         return [Media::class];
+    }
+
+    protected static function getSuccessCode(): ?int
+    {
+        return Response::HTTP_OK;
     }
 
     protected function getRulesets(): string|array
