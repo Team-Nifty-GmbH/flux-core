@@ -36,12 +36,20 @@ class DownloadMedia extends FluxAction
             $fileName = $conversion . '_' . $fileName;
         }
 
-        return match (strtolower($this->getData('as'))) {
+        $response = match (strtolower($this->getData('as'))) {
             'base64' => base64_encode(file_get_contents($mediaPath)),
             'url' => $media->getUrl($conversion ?? ''),
             'path' => $mediaPath,
             default => response()->download($mediaPath, $fileName)
         };
+
+        if (! is_string($response)) {
+            static::setReturnResult(true);
+        } else {
+            static::setReturnResult(false);
+        }
+
+        return $response;
     }
 
     protected function validateData(): void

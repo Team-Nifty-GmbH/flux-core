@@ -139,6 +139,8 @@ class MediaTest extends BaseSetup
         $download = $this->actingAs($this->user)->get('/api/media/private/' . $media->getKey());
 
         $download->assertStatus(200);
+        $download->assertHeader('Content-Type', 'image/png');
+        $download->assertDownload($media->file_name);
     }
 
     public function test_download_media_public_route(): void
@@ -154,6 +156,8 @@ class MediaTest extends BaseSetup
         $download = $this->get('/api/media/' . $queryParams);
 
         $download->assertStatus(200);
+        $download->assertHeader('Content-Type', 'image/png');
+        $download->assertDownload($fileName);
     }
 
     public function test_download_media_public_route_file_not_found(): void
@@ -202,6 +206,8 @@ class MediaTest extends BaseSetup
 
         $download = $this->get('/api/media/' . $queryParams);
         $download->assertStatus(200);
+        $download->assertHeader('Content-Type', 'image/png');
+        $download->assertDownload($fileName);
     }
 
     public function test_download_media_thumbnail_not_generated(): void
@@ -264,6 +270,8 @@ class MediaTest extends BaseSetup
         $download = $this->get('/api/media/' . $media->file_name . $queryParams);
 
         $download->assertStatus(200);
+        $download->assertHeader('Content-Type', 'image/png');
+        $download->assertDownload($media->file_name);
     }
 
     public function test_download_multiple_media(): void

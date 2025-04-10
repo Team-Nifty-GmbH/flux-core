@@ -15,9 +15,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 
 trait SupportsApiRequests
 {
-    protected static bool $returnResult = false;
-
-    protected static ?int $successCode = null;
+    protected static array $classOptions = [];
 
     public function __invoke(Request $request): Htmlable|Responsable|Response|BinaryFileResponse
     {
@@ -58,7 +56,7 @@ trait SupportsApiRequests
                     ->validate()
                     ->execute();
 
-                if (static::$returnResult) {
+                if (static::getReturnResult()) {
                     return $result;
                 }
 
@@ -70,7 +68,7 @@ trait SupportsApiRequests
                     $itemResult['data'] = null;
                     $statusCode = Response::HTTP_NO_CONTENT;
                 } else {
-                    $statusCode = static::$successCode ??
+                    $statusCode = static::getSuccessCode() ??
                         (
                             $request->isMethod('POST')
                                 ? Response::HTTP_CREATED
@@ -135,5 +133,25 @@ trait SupportsApiRequests
         }
 
         return response()->json($responseContent, $responseCode);
+    }
+
+    protected static function getReturnResult(): ?bool
+    {
+        return data_get(static::$classOptions, static::class . '.returnResult');
+    }
+
+    protected static function getSuccessCode(): ?int
+    {
+        return data_get(static::$classOptions, static::class . '.successCode');
+    }
+
+    protected static function setReturnResult(?bool $returnResult): void
+    {
+        data_set(static::$classOptions, static::class . '.returnResult', $returnResult);
+    }
+
+    protected static function setSuccessCode(?int $statusCode): void
+    {
+        data_set(static::$classOptions, static::class . '.successCode', $statusCode);
     }
 }
