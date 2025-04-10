@@ -1,12 +1,12 @@
 <div
     x-data="{
-        input: @entangle($attributes->wire('model')),
+        input: {{ $attributes->wire('model')->value ? '$wire.entangle(\'' . $attributes->wire('model')->value . '\')' : ($attributes->whereStartsWith('x-model')->first() ?: 'null') }},
         thousands: '{{ $thousands }}',
         decimal: '{{ $decimal }}',
         precision: {{ $precision }},
         maskedValue: null,
         mask(value) {
-            return value.replace('.', this.decimal)
+            return value?.toString().replace('.', this.decimal)
         },
         emitInput(value) {
             this.input = value
@@ -31,7 +31,7 @@
         :suffix="$suffix"
         x-model="maskedValue"
         x-mask:dynamic="$money($input, decimal, thousands, precision)"
-        x-init="maskedValue = mask(input)"
-        x-on:blur="emitInput($event.target.value)"
+        x-init="maskedValue = mask(input); emitInput(maskedValue);"
+        x-on:input="emitInput($event.target.value)"
     />
 </div>
