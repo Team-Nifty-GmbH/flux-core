@@ -3,6 +3,9 @@
 namespace FluxErp\Models;
 
 use FluxErp\Casts\Money;
+use FluxErp\Models\Pivots\OrderTransaction;
+use FluxErp\Traits\Categorizable;
+use FluxErp\Traits\Commentable;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasParentChildRelations;
 use FluxErp\Traits\HasUserModification;
@@ -11,14 +14,16 @@ use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Auth;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 
 class Transaction extends FluxModel implements InteractsWithDataTables
 {
-    use HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasUserModification, HasUuid, LogsActivity,
-        Searchable, SoftDeletes;
+    use Categorizable, Commentable, HasFrontendAttributes, HasPackageFactory, HasParentChildRelations,
+        HasUserModification, HasUuid, LogsActivity, Searchable, SoftDeletes;
 
     protected static function booted(): void
     {
@@ -26,27 +31,7 @@ class Transaction extends FluxModel implements InteractsWithDataTables
             $transaction->currency_id = $transaction->currency_id
                 ?? Auth::user()?->currency_id
                 ?? Currency::default()?->getKey();
-        });
-
-        static::saved(function (Transaction $transaction): void {
-            $originalOrderId = $transaction->getRawOriginal('order_id');
-            if ($originalOrderId) {
-                resolve_static(Order::class, 'query')
-                    ->whereKey($originalOrderId)
-                    ->first()
-                    ->calculatePaymentState()
-                    ->save();
-            }
-
-            if ($transaction->order_id) {
-                $transaction->order->calculatePaymentState()->save();
-            }
-        });
-
-        static::deleted(function (Transaction $transaction): void {
-            if ($transaction->order_id) {
-                $transaction->order->calculatePaymentState()->save();
-            }
+            $transaction->balance ??= $transaction->amount;
         });
     }
 
@@ -56,12 +41,28 @@ class Transaction extends FluxModel implements InteractsWithDataTables
             'value_date' => 'date:Y-m-d',
             'booking_date' => 'date:Y-m-d',
             'amount' => Money::class,
+            'balance' => Money::class,
+            'is_ignored' => 'boolean',
         ];
     }
 
     public function bankConnection(): BelongsTo
     {
         return $this->belongsTo(BankConnection::class);
+    }
+
+    public function calculateBalance(): static
+    {
+        $this->balance = bcround(
+            bcsub(
+                $this->amount,
+                $this->orders()->withPivot('amount')->sum('order_transaction.amount'),
+                9
+            ),
+            2
+        );
+
+        return $this;
     }
 
     public function getAvatarUrl(): ?string
@@ -84,8 +85,13 @@ class Transaction extends FluxModel implements InteractsWithDataTables
         return null;
     }
 
-    public function order(): BelongsTo
+    public function orders(): BelongsToMany
     {
-        return $this->belongsTo(Order::class);
+        return $this->belongsToMany(Order::class)->using(OrderTransaction::class);
+    }
+
+    public function orderTransactions(): HasMany
+    {
+        return $this->hasMany(OrderTransaction::class);
     }
 }

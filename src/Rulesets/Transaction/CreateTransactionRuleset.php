@@ -57,6 +57,7 @@ class CreateTransactionRuleset extends FluxRuleset
             ],
             'counterpart_bic' => 'string|max:255|nullable',
             'counterpart_bank_name' => 'string|max:255|nullable',
+            'is_ignored' => 'boolean',
         ];
     }
 }
