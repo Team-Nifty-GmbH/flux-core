@@ -55,5 +55,5 @@
         :disabled="$attributes->get('disabled')"
         :readonly="$attributes->get('readonly')"
         {{ $attributes }}
-    ></x-input>
+    />
 </div>
