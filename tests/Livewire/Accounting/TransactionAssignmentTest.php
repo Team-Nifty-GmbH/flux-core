@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Livewire\Accounting;
+namespace FluxErp\Feature\Livewire\Accounting;
 
 use FluxErp\Livewire\Accounting\TransactionAssignment;
 use FluxErp\Tests\TestCase;
