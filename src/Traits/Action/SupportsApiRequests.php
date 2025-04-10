@@ -145,7 +145,7 @@ trait SupportsApiRequests
         return data_get(static::$classOptions, static::class . '.successCode');
     }
 
-    protected static function setReturnResult(bool $returnResult): void
+    protected static function setReturnResult(?bool $returnResult): void
     {
         data_set(static::$classOptions, static::class . '.returnResult', $returnResult);
     }
