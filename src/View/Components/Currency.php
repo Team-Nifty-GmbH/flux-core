@@ -7,7 +7,7 @@ use Illuminate\View\Component;
 use Illuminate\View\ComponentSlot;
 use TallStackUi\Foundation\Attributes\SkipDebug;
 
-class CurrencyInput extends Component
+class Currency extends Component
 {
     public function __construct(
         public string $thousands = ',',
@@ -28,6 +28,6 @@ class CurrencyInput extends Component
 
     public function render(): View
     {
-        return view('flux::components.input.currency');
+        return view('flux::components.currency');
     }
 }
