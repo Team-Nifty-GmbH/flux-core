@@ -27,6 +27,9 @@ class UpdatePrintJobRuleset extends FluxRuleset
                 'string',
                 'max:255',
             ],
+            'is_completed' => [
+                'boolean',
+            ],
         ];
     }
 }
