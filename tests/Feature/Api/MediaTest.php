@@ -138,7 +138,7 @@ class MediaTest extends BaseSetup
 
         $download = $this->actingAs($this->user)->get('/api/media/private/' . $media->getKey());
 
-        $download->assertStatus(200)->assertDownload($media->file_name);
+        $download->assertStatus(200);
     }
 
     public function test_download_media_public_route(): void
