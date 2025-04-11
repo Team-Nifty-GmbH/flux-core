@@ -5,6 +5,7 @@ namespace FluxErp\Traits\Livewire;
 use BadMethodCallException;
 use FluxErp\Actions\Printing;
 use FluxErp\Contracts\OffersPrinting;
+use FluxErp\Livewire\Forms\PrintJobForm;
 use FluxErp\Models\Media;
 use FluxErp\View\Printing\PrintableView;
 use Illuminate\Support\Arr;
@@ -35,6 +36,8 @@ trait CreatesDocuments
 
     #[Locked]
     public array $previewData = [];
+
+    public PrintJobForm $printJobForm;
 
     public array $printLayouts = [];
 
@@ -77,6 +80,19 @@ trait CreatesDocuments
             fn () => print ($pdf->pdf->output()),
             Str::finish($pdf->getFileName(), '.pdf')
         );
+    }
+
+    public function mountCreatesDocuments(): void
+    {
+        if (
+            $defaultPrinter = auth()->user()
+                ?->printerUsers()
+                ->where('is_default', true)
+                ->with('printer:id,media_sizes')->first()
+        ) {
+            $this->printJobForm->printer_id = $defaultPrinter->printer_id;
+            $this->printJobForm->size = $defaultPrinter->default_size;
+        }
     }
 
     #[Renderless]
@@ -145,7 +161,19 @@ trait CreatesDocuments
     {
         return view(
             'flux::livewire.create-documents-modal',
-            ['supportsDocumentPreview' => $this->supportsDocumentPreview()]
+            [
+                'supportsDocumentPreview' => $this->supportsDocumentPreview(),
+                'printers' => auth()->user()
+                    ?->printers()
+                    ->where('is_active', true)
+                    ->get([
+                        'id',
+                        'name',
+                        'location',
+                        'media_sizes',
+                    ])
+                    ->toArray() ?? [],
+            ]
         );
     }
 
@@ -237,7 +265,6 @@ trait CreatesDocuments
                 }
 
                 if ($isPrint) {
-                    // TODO: add to print queue for spooler
                     $printIds[] = $media->getKey();
                 }
 
@@ -304,6 +331,20 @@ trait CreatesDocuments
                 . '_' . now()->toDateString() . '.zip'
             )
                 ->addMedia($files);
+        }
+
+        if ($printIds && $this->printJobForm->printer_id) {
+            foreach ($printIds as $printId) {
+                $this->printJobForm->media_id = $printId;
+
+                try {
+                    $this->printJobForm->save();
+                } catch (ValidationException|UnauthorizedException $e) {
+                    exception_to_notifications($e, $this);
+                }
+            }
+
+            $this->printJobForm->reset();
         }
 
         return null;

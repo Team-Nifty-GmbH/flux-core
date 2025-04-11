@@ -37,7 +37,7 @@ class CreateToken extends FluxAction
         )->plainTextToken;
 
         $token = $token->fresh();
-        $token->token = $plainTextToken;
+        $token->plain_text_token = $plainTextToken;
 
         return $token;
     }

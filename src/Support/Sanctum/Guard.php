@@ -2,6 +2,7 @@
 
 namespace FluxErp\Support\Sanctum;
 
+use FluxErp\Models\Token;
 use Laravel\Sanctum\Sanctum;
 
 class Guard extends \Laravel\Sanctum\Guard
@@ -22,13 +23,13 @@ class Guard extends \Laravel\Sanctum\Guard
         $isValid =
             (! $this->expiration || $accessToken->last_used_at->gt(now()->subMinutes($this->expiration)))
             && $this->hasValidProvider($accessToken->tokenable)
-            && (! $accessToken->tokenable instanceof \FluxErp\Models\Token || $accessToken->tokenable->isValid());
+            && (! $accessToken->tokenable instanceof Token || $accessToken->tokenable->isValid());
 
         if (is_callable(Sanctum::$accessTokenAuthenticationCallback)) {
             $isValid = (bool) (Sanctum::$accessTokenAuthenticationCallback)($accessToken, $isValid);
         }
 
-        if ($accessToken->tokenable instanceof \FluxErp\Models\Token) {
+        if ($accessToken->tokenable instanceof Token) {
             $accessToken->tokenable->use();
 
             if (! $accessToken->tokenable->isValid()) {

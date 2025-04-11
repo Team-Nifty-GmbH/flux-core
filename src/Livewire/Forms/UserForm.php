@@ -60,6 +60,8 @@ class UserForm extends FluxForm
 
     public ?string $phone = null;
 
+    public ?array $printers = [];
+
     public array $roles = [];
 
     public ?string $termination_date = null;

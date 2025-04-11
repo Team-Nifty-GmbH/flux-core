@@ -15,7 +15,7 @@ trait DataTableHasFormEdit
 {
     abstract public function loadData(): void;
 
-    public function bootSupportsFluxForms(): void
+    public function bootDataTableHasFormEdit(): void
     {
         if (! $this instanceof DataTable) {
             throw new InvalidArgumentException('This trait can only be used in a DataTable');
@@ -114,7 +114,7 @@ trait DataTableHasFormEdit
         return $this->getAttributes()->first(fn ($attribute) => $attribute instanceof DataTableForm);
     }
 
-    protected function getRowActionsSupportsFluxForms(): array
+    protected function getRowActionsDataTableHasFormEdit(): array
     {
         return [
             DataTableButton::make()
@@ -140,7 +140,7 @@ trait DataTableHasFormEdit
         ];
     }
 
-    protected function getSelectedActionsSupportsFluxForms(): array
+    protected function getSelectedActionsDataTableHasFormEdit(): array
     {
         if (! $this->supportBatchDelete()) {
             return [];
@@ -161,7 +161,7 @@ trait DataTableHasFormEdit
         ];
     }
 
-    protected function getTableActionsSupportsFluxForms(): array
+    protected function getTableActionsDataTableHasFormEdit(): array
     {
         return [
             DataTableButton::make()
