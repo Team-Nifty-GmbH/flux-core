@@ -22,9 +22,9 @@ use Livewire\Livewire;
 
 class AmountByLedgerAccountTest extends BaseSetup
 {
-    private LedgerAccount $ledgerAccountRevenue;
-
     private LedgerAccount $ledgerAccountExpenses;
+
+    private LedgerAccount $ledgerAccountRevenue;
 
     private Collection $orders;
 
@@ -70,7 +70,7 @@ class AmountByLedgerAccountTest extends BaseSetup
             ->hasAttached(factory: $this->dbClient, relationship: 'clients')
             ->create([
                 'is_default' => false,
-        ]);
+            ]);
 
         $this->orders = Order::factory()->count(4)->create([
             'client_id' => $this->dbClient->getKey(),
@@ -88,20 +88,20 @@ class AmountByLedgerAccountTest extends BaseSetup
             'client_id' => $this->dbClient->getKey(),
             'ledger_account_id' => $this->ledgerAccountRevenue->id,
             'order_id' => $this->orders[0]->id,
-            'total_gross_price' => 2000
+            'total_gross_price' => 2000,
         ]);
 
         OrderPosition::factory()->count(10)->create([
             'client_id' => $this->dbClient->getKey(),
             'ledger_account_id' => $this->ledgerAccountExpenses->id,
             'order_id' => $this->orders[1]->id,
-            'total_gross_price' => 2000
+            'total_gross_price' => 2000,
         ]);
 
         OrderPosition::factory()->count(10)->create([
             'client_id' => $this->dbClient->getKey(),
             'order_id' => $this->orders[2]->id,
-            'total_gross_price' => 2000
+            'total_gross_price' => 2000,
         ]);
 
         OrderPosition::factory()->count(2)->create([
@@ -112,13 +112,7 @@ class AmountByLedgerAccountTest extends BaseSetup
         ]);
     }
 
-    public function test_renders_successfully()
-    {
-        Livewire::test(AmountByLedgerAccount::class)
-            ->assertStatus(200);
-    }
-
-    public function test_calculate_chart_returns_right_numbers_timeframe_today()
+    public function test_calculate_chart_returns_right_numbers_timeframe_today(): void
     {
         $timeFrame = TimeFrameEnum::Today;
 
@@ -154,7 +148,7 @@ class AmountByLedgerAccountTest extends BaseSetup
             ->assertStatus(200);
     }
 
-    public function test_calculate_chart_returns_right_numbers_timeframe_yesterday()
+    public function test_calculate_chart_returns_right_numbers_timeframe_yesterday(): void
     {
         $timeFrame = TimeFrameEnum::Yesterday;
 
@@ -173,6 +167,12 @@ class AmountByLedgerAccountTest extends BaseSetup
                 ),
             ])
             ->assertHasNoErrors()
+            ->assertStatus(200);
+    }
+
+    public function test_renders_successfully(): void
+    {
+        Livewire::test(AmountByLedgerAccount::class)
             ->assertStatus(200);
     }
 }
