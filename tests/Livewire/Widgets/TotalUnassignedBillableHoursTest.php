@@ -121,12 +121,11 @@ class TotalUnassignedBillableHoursTest extends BaseSetup
 
     public function calculateDisplayedTime(int $ms): string
     {
-        return CarbonInterval::milliseconds($ms)->cascade()->forHumans([
-            'parts' => 2,
-            'join' => true,
-            'short' => true,
-            'locale' => 'en',
-        ]);
+        $interval = CarbonInterval::milliseconds($ms)->cascade();
+        $totalHours = floor($interval->totalHours);
+        $minutes = $interval->minutes;
+
+        return $totalHours . ' h ' . $minutes . ' min';
     }
 
     public function test_calculates_correct_sum_of_unassigned_billable_hours(): void
