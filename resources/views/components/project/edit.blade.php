@@ -9,6 +9,7 @@
             label="{{ __('Project Number') }}"
         />
         <x-input
+            id="project-name"
             x-bind:readonly="!edit"
             wire:model="project.name"
             label="{{ __('Name') }}"
@@ -28,6 +29,7 @@
                     :label="__('Client')"
                     wire:model="project.client_id"
                     select="label:name|value:id"
+                    unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\Client::class),
                         'method' => 'POST',
@@ -76,6 +78,7 @@
                     autocomplete="off"
                     wire:model="project.responsible_user_id"
                     select="label:name|value:id"
+                    unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\User::class),
                         'method' => 'POST',
@@ -91,6 +94,7 @@
                     x-bind:readonly="!edit"
                     wire:model="project.contact_id"
                     select="label:label|value:contact_id"
+                    unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\Address::class),
                         'method' => 'POST',
@@ -118,6 +122,7 @@
                     :label="__('Order')"
                     wire:model="project.order_id"
                     select="label:label|value:id"
+                    unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\Order::class),
                         'method' => 'POST',

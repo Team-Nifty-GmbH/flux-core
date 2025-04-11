@@ -21,7 +21,7 @@ class CreateDiscountGroupRuleset extends FluxRuleset
     {
         return [
             'uuid' => 'nullable|string|uuid|unique:discount_groups,uuid',
-            'name' => 'required|string',
+            'name' => 'required|string|max:255',
             'is_active' => 'boolean',
         ];
     }

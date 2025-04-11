@@ -26,7 +26,7 @@ class UpdateDiscountGroupRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => DiscountGroup::class]),
             ],
-            'name' => 'sometimes|required|string',
+            'name' => 'sometimes|required|string|max:255',
             'is_active' => 'boolean',
         ];
     }

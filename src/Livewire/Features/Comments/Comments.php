@@ -186,12 +186,16 @@ class Comments extends Component
             [
                 'model_type' => morph_alias($this->modelType),
                 'model_id' => $this->modelId,
-                'is_internal' => auth()->user()->getMorphClass() !== morph_alias(User::class)
+                'is_internal' => auth()->user()?->getMorphClass() !== morph_alias(User::class)
                     ? false
                     : data_get($comment, 'is_internal', true),
             ]
         )
         );
+
+        if (! $this->commentForm->is_internal && ! auth()->user()) {
+            $this->commentForm->setCheckPermission(false);
+        }
 
         try {
             $this->commentForm->save();

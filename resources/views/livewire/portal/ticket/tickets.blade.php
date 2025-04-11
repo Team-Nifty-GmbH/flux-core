@@ -1,5 +1,6 @@
 <div>
     <x-modal
+        x-on:open="$focusOn('ticket-title')"
         id="new-ticket-modal"
         z-index="z-30"
         wire="showTicketModal"

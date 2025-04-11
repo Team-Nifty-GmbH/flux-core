@@ -18,11 +18,9 @@ use FluxErp\Http\Middleware\Localization;
 use FluxErp\Http\Middleware\Permissions;
 use FluxErp\Http\Middleware\PortalMiddleware;
 use FluxErp\Http\Middleware\SetJobAuthenticatedUserMiddleware;
-use FluxErp\Livewire\Features\Calendar\CalendarOverview;
 use FluxErp\Models\Activity;
 use FluxErp\Models\Address;
 use FluxErp\Models\Category;
-use FluxErp\Models\Client;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\Notification;
 use FluxErp\Models\Order;
@@ -35,14 +33,12 @@ use FluxErp\Models\SerialNumber;
 use FluxErp\Models\Task;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\User;
-use FluxErp\Traits\HasClientAssignment;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Bus\Dispatcher;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Contracts\Queue\Factory as QueueFactoryContract;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -61,9 +57,8 @@ use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
-use Laravel\Sanctum\Http\Middleware\CheckAbilities;
+use Laravel\Sanctum\Http\Middleware\CheckForAnyAbility;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
-use Laravel\Scout\Builder;
 use Livewire\Component;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
@@ -134,8 +129,6 @@ class FluxServiceProvider extends ServiceProvider
         if (! $this->app->runningInConsole() || $this->app->runningUnitTests()) {
             ProductType::register(name: 'product', class: \FluxErp\Livewire\Product\Product::class, default: true);
         }
-
-        Livewire::component('calendar-overview', CalendarOverview::class);
     }
 
     public function register(): void
@@ -732,7 +725,7 @@ class FluxServiceProvider extends ServiceProvider
         $kernel->appendMiddlewareToGroup('web', AuthContextMiddleware::class);
         $kernel->appendMiddlewareToGroup('web', PortalMiddleware::class);
 
-        $this->app['router']->aliasMiddleware('abilities', CheckAbilities::class);
+        $this->app['router']->aliasMiddleware('ability', CheckForAnyAbility::class);
         $this->app['router']->aliasMiddleware('role', RoleMiddleware::class);
         $this->app['router']->aliasMiddleware('role_or_permission', RoleOrPermissionMiddleware::class);
         $this->app['router']->aliasMiddleware('permission', Permissions::class);
@@ -786,23 +779,6 @@ class FluxServiceProvider extends ServiceProvider
                         return $this->app[QueueFactoryContract::class]->connection($connection);
                     }
                 );
-            }
-        );
-
-        $this->app->extend(
-            Builder::class,
-            function (Builder $scoutBuilder) {
-                if (($user = auth()->user()) instanceof User
-                    && in_array(HasClientAssignment::class, class_uses_recursive($scoutBuilder->model))
-                    && $scoutBuilder->model->isRelation('client')
-                    && ($relation = $scoutBuilder->model->client()) instanceof BelongsTo
-                ) {
-                    $clients = $user->clients()->pluck('id')->toArray() ?: Client::query()->pluck('id')->toArray();
-
-                    $scoutBuilder->whereIn($relation->getForeignKeyName(), $clients);
-                }
-
-                return $scoutBuilder;
             }
         );
 

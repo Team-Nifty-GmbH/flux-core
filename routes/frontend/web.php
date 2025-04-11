@@ -3,6 +3,7 @@
 use FluxErp\Actions\Printing;
 use FluxErp\Actions\PushSubscription\UpsertPushSubscription;
 use FluxErp\Http\Controllers\AuthController;
+use FluxErp\Http\Controllers\CalendarSearchController;
 use FluxErp\Http\Controllers\SearchController;
 use FluxErp\Http\Middleware\NoAuth;
 use FluxErp\Http\Middleware\TrackVisits;
@@ -13,7 +14,6 @@ use FluxErp\Livewire\Accounting\TransactionList;
 use FluxErp\Livewire\Auth\Login;
 use FluxErp\Livewire\Auth\Logout;
 use FluxErp\Livewire\Auth\ResetPassword;
-use FluxErp\Livewire\Calendars\Calendar;
 use FluxErp\Livewire\Cart\Watchlists;
 use FluxErp\Livewire\Contact\CommunicationList;
 use FluxErp\Livewire\Contact\Contact;
@@ -25,6 +25,7 @@ use FluxErp\Livewire\DataTables\PaymentRunList;
 use FluxErp\Livewire\DataTables\PurchaseInvoiceList;
 use FluxErp\Livewire\DataTables\TicketList;
 use FluxErp\Livewire\DataTables\WorkTimeList;
+use FluxErp\Livewire\Features\Calendar\Calendar;
 use FluxErp\Livewire\InstallWizard;
 use FluxErp\Livewire\Mail\Mail;
 use FluxErp\Livewire\Media\Media as MediaGrid;
@@ -239,9 +240,11 @@ Route::middleware('web')
         });
 
         Route::group(['middleware' => ['auth:web']], function (): void {
-            Route::any('/search/{model}', SearchController::class)
+            Route::any('/search/{model?}', SearchController::class)
                 ->where('model', '(.*)')
                 ->name('search');
+            Route::any('/calendar-search', CalendarSearchController::class)
+                ->name('calendar-search');
             Route::match(['get', 'post'], '/print/render', Printing::class)
                 ->defaults('html', true)
                 ->defaults('preview', false)

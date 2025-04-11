@@ -34,7 +34,6 @@ use FluxErp\Models\FormBuilderFieldResponse;
 use FluxErp\Models\FormBuilderForm;
 use FluxErp\Models\FormBuilderResponse;
 use FluxErp\Models\FormBuilderSection;
-use FluxErp\Models\InterfaceUser;
 use FluxErp\Models\JobBatch;
 use FluxErp\Models\Language;
 use FluxErp\Models\LanguageLine;
@@ -143,7 +142,6 @@ class MorphMapServiceProvider extends ServiceProvider
             'form_builder_form' => FormBuilderForm::class,
             'form_builder_response' => FormBuilderResponse::class,
             'form_builder_section' => FormBuilderSection::class,
-            'interface_user' => InterfaceUser::class,
             'job_batch' => JobBatch::class,
             'language' => Language::class,
             'language_line' => LanguageLine::class,

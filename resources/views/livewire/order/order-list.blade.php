@@ -33,6 +33,7 @@
                         required
                         x-on:select="updateContactId($event.detail.select.contact_id)"
                         select="label:label|value:contact_id"
+                        unfiltered
                         :request="[
                             'url' => route('search', \FluxErp\Models\Address::class),
                             'method' => 'POST',
@@ -63,6 +64,7 @@
                             wire:model="order.address_invoice_id"
                             required
                             select="label:label|value:id"
+                            unfiltered
                             :request="[
                                 'url' => route('search', \FluxErp\Models\Address::class),
                                 'method' => 'POST',
@@ -86,6 +88,7 @@
                             wire:model="order.address_delivery_id"
                             required
                             select="label:label|value:id"
+                            unfiltered
                             :request="[
                                 'url' => route('search', \FluxErp\Models\Address::class),
                                 'method' => 'POST',

@@ -1,15 +1,13 @@
 <div
-    x-data="{
-        trackable_type: $wire.entangle('workTime.trackable_type'),
-        init() {
-            $watch('trackable_type', () => {
-                $wire.workTime.trackable_id = null
-                let searchRoute = {{ '\'' . route('search', '__model__') . '\'' }}
-                searchRoute = searchRoute.replace('__model__', this.trackable_type)
-                $tallstackuiSelect('invoice-address-id').setRequestUrl(searchRoute)
-            })
-        },
-    }"
+    wire:init="$watch(
+        'workTime.trackable_type',
+        () => {
+            $wire.workTime.trackable_id = null
+            let searchRoute = {{ '\'' . route('search', '__model__') . '\'' }}
+            searchRoute = searchRoute.replace('__model__', $wire.workTime.trackable_type)
+            $tallstackuiSelect('trackable-id-edit').setRequestUrl(searchRoute)
+        }
+    )"
 >
     <x-modal id="edit-work-time-modal">
         <div class="flex flex-col gap-1.5">
@@ -36,6 +34,7 @@
                     autocomplete="off"
                     wire:model="workTime.user_id"
                     select="label:label|value:id"
+                    unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\User::class),
                         'method' => 'POST',
@@ -48,24 +47,20 @@
                     ]"
                 />
             </div>
-            <x-date
-                time-format="24"
+            <x-input
+                type="datetime-local"
                 :label="__('Started At')"
-                display-format="DD.MM.YYYY HH:mm"
-                parse-format="YYYY-MM-DD HH:mm:ss"
                 wire:model="workTime.started_at"
             />
-            <x-date
-                time-format="24"
+            <x-input
+                type="datetime-local"
                 :label="__('Ended At')"
-                display-format="DD.MM.YYYY HH:mm"
-                parse-format="YYYY-MM-DD HH:mm:ss"
                 wire:model="workTime.ended_at"
             />
             <x-input
                 :label="__('Paused Time')"
                 wire:model.blur="workTime.paused_time"
-                :corner-hint="__('Hours:Minutes')"
+                :hint="__('Hours:Minutes')"
             />
             <div
                 class="flex flex-col gap-1.5"
@@ -76,6 +71,7 @@
                     :label="__('Contact')"
                     wire:model="workTime.contact_id"
                     select="label:label|value:contact_id"
+                    unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\Address::class),
                         'method' => 'POST',
@@ -99,7 +95,6 @@
                 <x-select.styled
                     :label="__('Model')"
                     wire:model="workTime.trackable_type"
-                    select="label:value|value:label"
                     :options="$trackableTypes"
                 />
                 <div
@@ -111,6 +106,7 @@
                         wire:model="workTime.trackable_id"
                         x-on:select="$event.detail.select.contact_id ? $wire.workTime.contact_id = $event.detail.select.contact_id : null"
                         select="label:label|value:id"
+                        unfiltered
                         :request="[
                             'url' => route('search', '__model__'),
                             'method' => 'POST',
@@ -140,7 +136,11 @@
             <x-button
                 color="indigo"
                 loading
-                x-on:click="$wire.save().then((success) => { if (success) $modalClose('edit-work-time-modal'); })"
+                x-on:click="
+                    $wire.workTime.local_started_at = dayjs($wire.workTime.started_at).format();
+                    $wire.workTime.local_ended_at = dayjs($wire.workTime.ended_at).format();
+                    $wire.save().then((success) => { if (success) $modalClose('edit-work-time-modal'); })
+                "
                 :text="__('Save')"
             />
         </x-slot>
@@ -157,6 +157,7 @@
                 :label="__('Product')"
                 wire:model="createOrdersFromWorkTimes.product_id"
                 select="label:label|value:id"
+                unfiltered
                 :request="[
                     'url' => route('search', \FluxErp\Models\Product::class),
                     'method' => 'POST',

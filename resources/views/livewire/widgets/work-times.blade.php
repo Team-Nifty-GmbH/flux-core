@@ -5,6 +5,7 @@
             autocomplete="off"
             wire:model.live="userId"
             select="label:label|value:id"
+            unfiltered
             :request="[
                 'url' => route('search', \FluxErp\Models\User::class),
                 'method' => 'POST',

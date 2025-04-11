@@ -8,6 +8,7 @@
                 wire:model="schedule.parameters.orderTypeId"
                 required
                 select="label:name|value:id"
+                unfiltered
                 :request="[
                     'url' => route('search', \FluxErp\Models\OrderType::class),
                     'method' => 'POST',

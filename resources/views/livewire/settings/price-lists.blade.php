@@ -161,6 +161,7 @@
                                     wire:model="newCategoryDiscount.category_id"
                                     required
                                     select="label:label|value:id"
+                                    unfiltered
                                     :request="[
                                         'url' => route('search', \FluxErp\Models\Category::class),
                                         'method' => 'POST',

@@ -37,6 +37,7 @@
                     wire:model="replicateOrder.order_type_id"
                     required
                     select="label:name|value:id"
+                    unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\OrderType::class),
                         'method' => 'POST',
@@ -71,6 +72,7 @@
                         required
                         x-on:select="updateContactId($event.detail.select.contact_id)"
                         select="label:label|value:contact_id"
+                        unfiltered
                         :request="[
                             'url' => route('search', \FluxErp\Models\Address::class),
                             'method' => 'POST',
@@ -101,6 +103,7 @@
                             wire:model="replicateOrder.address_invoice_id"
                             required
                             select="label:label|value:id"
+                            unfiltered
                             :request="[
                                 'url' => route('search', \FluxErp\Models\Address::class),
                                 'method' => 'POST',
@@ -124,6 +127,7 @@
                             wire:model="replicateOrder.address_delivery_id"
                             required
                             select="label:label|value:id"
+                            unfiltered
                             :request="[
                                 'url' => route('search', \FluxErp\Models\Address::class),
                                 'method' => 'POST',
@@ -202,6 +206,7 @@
                     wire:model="replicateOrder.order_type_id"
                     required
                     select="label:name|value:id"
+                    unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\OrderType::class),
                         'method' => 'POST',
@@ -282,12 +287,16 @@
     </x-modal>
     <x-modal
         id="edit-discount"
-        x-on:open="$focus.first()"
+        x-on:open="$focusOn('discount-name')"
         x-trap="show"
         x-on:keyup.enter="$wire.saveDiscount().then((success) => {if(success) $modalClose('edit-discount');})"
     >
         <div class="flex flex-col gap-1.5">
-            <x-input wire:model="discount.name" :text="__('Name')" />
+            <x-input
+                wire:model="discount.name"
+                :text="__('Name')"
+                id="discount-name"
+            />
             <div x-cloak x-show="$wire.discount.is_percentage">
                 <x-input
                     prefix="%"
@@ -499,6 +508,7 @@
                                 required
                                 x-on:select="updateContactId($event.detail.select.value)"
                                 select="label:label|value:contact_id"
+                                unfiltered
                                 :request="[
                                     'url' => route('search', \FluxErp\Models\Address::class),
                                     'method' => 'POST',
@@ -532,14 +542,16 @@
                                 class="flex w-full items-center justify-between gap-4"
                             >
                                 <div>{{ __('Invoice Address') }}</div>
-                                <x-button
-                                    color="secondary"
-                                    light
-                                    wire:navigate
-                                    light
-                                    icon="eye"
-                                    :href="route('address.id', data_get($order, 'address_invoice_id', ''))"
-                                />
+                                @if ($invoiceAddressId = data_get($order, 'address_invoice_id', ''))
+                                    <x-button
+                                        color="secondary"
+                                        light
+                                        wire:navigate
+                                        light
+                                        icon="eye"
+                                        :href="route('address.id', $invoiceAddressId)"
+                                    />
+                                @endif
                             </div>
                         </x-slot>
                         <div id="order-invoice-address-id">
@@ -549,6 +561,7 @@
                                 wire:model.live="order.address_invoice_id"
                                 required
                                 select="label:label|value:id"
+                                unfiltered
                                 :request="[
                                     'url' => route('search', \FluxErp\Models\Address::class),
                                     'method' => 'POST',
@@ -603,13 +616,16 @@
                                 class="flex w-full items-center justify-between gap-4"
                             >
                                 <div>{{ __('Delivery Address') }}</div>
-                                <x-button
-                                    color="secondary"
-                                    light
-                                    light
-                                    icon="eye"
-                                    :href="route('address.id', data_get($order, 'address_delivery_id', ''))"
-                                />
+                                @if ($deliveryAddressId = data_get($order, 'address_delivery_id', ''))
+                                    <x-button
+                                        color="secondary"
+                                        light
+                                        wire:navigate
+                                        light
+                                        icon="eye"
+                                        :href="route('address.id', $deliveryAddressId)"
+                                    />
+                                @endif
                             </div>
                         </x-slot>
                         <div id="order-delivery-address-id">
@@ -619,6 +635,7 @@
                                 wire:model.live="order.address_delivery_id"
                                 required
                                 select="label:label|value:id"
+                                unfiltered
                                 :request="[
                                     'url' => route('search', \FluxErp\Models\Address::class),
                                     'method' => 'POST',
@@ -705,6 +722,7 @@
                                 autocomplete="off"
                                 wire:model="order.agent_id"
                                 select="label:label|value:id"
+                                unfiltered
                                 :request="[
                                     'url' => route('search', \FluxErp\Models\User::class),
                                     'method' => 'POST',
@@ -718,6 +736,7 @@
                                 autocomplete="off"
                                 wire:model="order.responsible_user_id"
                                 select="label:label|value:id"
+                                unfiltered
                                 :request="[
                                     'url' => route('search', \FluxErp\Models\User::class),
                                     'method' => 'POST',
@@ -732,6 +751,7 @@
                                 multiple
                                 wire:model="order.users"
                                 select="label:label|value:id"
+                                unfiltered
                                 :request="[
                                     'url' => route('search', \FluxErp\Models\User::class),
                                     'method' => 'POST',

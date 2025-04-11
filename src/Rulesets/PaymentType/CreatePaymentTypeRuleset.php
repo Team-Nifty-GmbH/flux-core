@@ -23,7 +23,7 @@ class CreatePaymentTypeRuleset extends FluxRuleset
     {
         return [
             'uuid' => 'nullable|string|uuid|unique:payment_types,uuid',
-            'name' => 'required|string',
+            'name' => 'required|string|max:255',
             'description' => 'string|nullable',
             'payment_reminder_days_1' => 'integer|nullable',
             'payment_reminder_days_2' => 'integer|nullable',

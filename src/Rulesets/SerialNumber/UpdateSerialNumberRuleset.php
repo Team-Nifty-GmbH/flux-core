@@ -18,8 +18,8 @@ class UpdateSerialNumberRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => SerialNumber::class]),
             ],
-            'serial_number' => 'sometimes|required|string',
-            'supplier_serial_number' => 'string|nullable',
+            'serial_number' => 'sometimes|required|string|max:255',
+            'supplier_serial_number' => 'string|nullable|max:255',
         ];
     }
 }

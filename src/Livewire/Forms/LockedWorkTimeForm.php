@@ -31,6 +31,10 @@ class LockedWorkTimeForm extends FluxForm
     #[Locked]
     public bool $is_pause = false;
 
+    public ?string $local_ended_at = null;
+
+    public ?string $local_started_at = null;
+
     public ?string $name = null;
 
     public ?int $order_position_id = null;
@@ -107,6 +111,22 @@ class LockedWorkTimeForm extends FluxForm
                     );
                 }
             }
+        }
+
+        if (data_get($workTime, 'started_at')) {
+            $workTime['started_at'] = Carbon::parse(
+                data_get($workTime, 'local_started_at') ?? data_get($workTime, 'started_at')
+            )
+                ->setTimezone('UTC')
+                ->toDateTimeString();
+        }
+
+        if (data_get($workTime, 'ended_at')) {
+            $workTime['ended_at'] = Carbon::parse(
+                data_get($workTime, 'local_ended_at') ?? data_get($workTime, 'ended_at')
+            )
+                ->setTimezone('UTC')
+                ->toDateTimeString();
         }
 
         $workTime['is_locked'] = (bool) $workTime['ended_at'];

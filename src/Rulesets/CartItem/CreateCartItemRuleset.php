@@ -34,12 +34,14 @@ class CreateCartItemRuleset extends FluxRuleset
                 'required_without:product_id',
                 'nullable',
                 'string',
+                'max:255',
             ],
             'amount' => [
                 'nullable',
                 app(Numeric::class, ['min' => 1]),
             ],
             'price' => [
+                'required',
                 app(Numeric::class),
             ],
             'order_column' => [

@@ -26,6 +26,7 @@ class Token extends FluxAuthenticatable
     protected function casts(): array
     {
         return [
+            'abilities' => 'array',
             'expires_at' => 'datetime',
         ];
     }
