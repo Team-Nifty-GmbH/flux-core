@@ -158,7 +158,9 @@ class MenuManager
             }
 
             if (! $resolvedRoute) {
-                throw new RouteNotFoundException('No route found for ' . $route);
+                unset($this->registered[array_search($item, $this->registered)]);
+
+                continue;
             }
 
             $routeName = $resolvedRoute->getName()
