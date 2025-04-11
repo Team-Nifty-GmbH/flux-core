@@ -442,6 +442,7 @@
     "Contact Origins": "Kontakt-Herkünfte",
     "Contact.customer Number": "Kundennummer",
     "Contacts": "Kontakte",
+    "Contacts By Contact Origin": "Kontakte nach Kontaktherkunft",
     "contacts.get": "Kontakte anzeigen",
     "contacts.{id?}.get": "Kontaktdetails anzeigen",
     "Content": "Inhalt",
