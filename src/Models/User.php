@@ -185,6 +185,11 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
             ->using(PrinterUser::class);
     }
 
+    public function printerUsers(): HasMany
+    {
+        return $this->hasMany(PrinterUser::class);
+    }
+
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('avatar')

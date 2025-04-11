@@ -96,6 +96,34 @@
             :options="$mailAccounts"
         />
         @show
+        @section('user-edit.printers')
+        <x-select.styled
+            :label="__('Printers')"
+            wire:model="userForm.printers"
+            multiple
+            select="label:name|value:id|description:location"
+            :options="$printers"
+        />
+        @show
+        @section('user-edit.default-printer')
+        @if ($userPrinters)
+            <x-select.styled
+                :label="__('Default Printer')"
+                wire:model="printerUserForm.pivot_id"
+                x-on:select="$tallstackuiSelect('default-printer-size').setOptions($event.detail.select.media_sizes)"
+                select="label:name|value:id|description:location"
+                :options="$userPrinters"
+            />
+            <div id="default-printer-size">
+                <x-select.styled
+                    :label="__('Default Size')"
+                    wire:model="printerUserForm.default_size"
+                    :options="data_get(collect($printers)->firstWhere('id', $printerUserForm->printer_id), 'media_sizes', [''])"
+                />
+            </div>
+        @endif
+
+        @show
     </form>
     @show
     <div
