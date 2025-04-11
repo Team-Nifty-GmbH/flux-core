@@ -98,4 +98,9 @@ class Outstanding extends ValueBox implements HasWidgetOptions
                 . ',.OrderLocked' => 'calculateSum',
         ];
     }
+
+    protected function icon(): string
+    {
+        return 'banknotes';
+    }
 }

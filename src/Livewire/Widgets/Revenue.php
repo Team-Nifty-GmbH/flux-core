@@ -43,4 +43,9 @@ class Revenue extends ValueBox
                 . ',.OrderLocked' => 'calculateSum',
         ];
     }
+
+    protected function icon(): string
+    {
+        return 'credit-card';
+    }
 }

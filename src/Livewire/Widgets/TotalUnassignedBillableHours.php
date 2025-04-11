@@ -20,11 +20,15 @@ class TotalUnassignedBillableHours extends ValueBox
             ->where('is_daily_work_time', false)
             ->sum('total_time_ms');
 
-        $this->sum = CarbonInterval::milliseconds($ms)->cascade()->forHumans([
-            'parts' => 2,
-            'join' => true,
-            'short' => true,
-            'locale' => 'en',
-        ]);
+        $interval = CarbonInterval::milliseconds($ms)->cascade();
+        $totalHours = floor($interval->totalHours);
+        $minutes = $interval->minutes;
+
+        $this->sum = $totalHours . ' h ' . $minutes . ' min';
+    }
+
+    protected function icon(): string
+    {
+        return 'clock';
     }
 }
