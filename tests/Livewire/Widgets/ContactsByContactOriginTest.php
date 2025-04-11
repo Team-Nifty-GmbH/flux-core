@@ -13,9 +13,9 @@ use Livewire\Livewire;
 
 class ContactsByContactOriginTest extends BaseSetup
 {
-    private Collection $contacts;
-
     private Collection $contactOrigins;
+
+    private Collection $contacts;
 
     protected function setUp(): void
     {
@@ -46,76 +46,55 @@ class ContactsByContactOriginTest extends BaseSetup
                     'client_id' => $this->dbClient->getKey(),
                     'contact_origin_id' => $contactOrigin->id,
                 ])->merge(
-                Contact::factory()->count($quantity)->create([
-                    'client_id' => $this->dbClient->getKey(),
-                    'contact_origin_id' => $contactOrigin->id,
-                    'created_at' => Carbon::now()->startOfWeek(),
-                ]))->merge(
-                Contact::factory()->count($quantity)->create([
-                    'client_id' => $this->dbClient->getKey(),
-                    'contact_origin_id' => $contactOrigin->id,
-                    'created_at' => Carbon::now()->startOfMonth(),
-                ]))->merge(
-                Contact::factory()->count($quantity)->create([
-                    'client_id' => $this->dbClient->getKey(),
-                    'contact_origin_id' => $contactOrigin->id,
-                    'created_at' => Carbon::now()->startOfQuarter(),
-                ]))->merge(
-                Contact::factory()->count($quantity)->create([
-                    'client_id' => $this->dbClient->getKey(),
-                    'contact_origin_id' => $contactOrigin->id,
-                    'created_at' => Carbon::now()->startOfYear(),
-                ])),
+                    Contact::factory()->count($quantity)->create([
+                        'client_id' => $this->dbClient->getKey(),
+                        'contact_origin_id' => $contactOrigin->id,
+                        'created_at' => Carbon::now()->startOfWeek(),
+                    ]))->merge(
+                        Contact::factory()->count($quantity)->create([
+                            'client_id' => $this->dbClient->getKey(),
+                            'contact_origin_id' => $contactOrigin->id,
+                            'created_at' => Carbon::now()->startOfMonth(),
+                        ]))->merge(
+                            Contact::factory()->count($quantity)->create([
+                                'client_id' => $this->dbClient->getKey(),
+                                'contact_origin_id' => $contactOrigin->id,
+                                'created_at' => Carbon::now()->startOfQuarter(),
+                            ]))->merge(
+                                Contact::factory()->count($quantity)->create([
+                                    'client_id' => $this->dbClient->getKey(),
+                                    'contact_origin_id' => $contactOrigin->id,
+                                    'created_at' => Carbon::now()->startOfYear(),
+                                ])),
             );
         }
         $this->contacts = $this->contacts[0]->merge($this->contacts[1])->merge($this->contacts[2]);
     }
 
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(ContactsByContactOrigin::class)
             ->assertStatus(200);
     }
 
-    public function test_timeframe_today()
+    public function test_timeframe_in_the_future(): void
     {
-        $timeFrame = TimeFrameEnum::Today;
+        $start = Carbon::now()->addDay();
+        $end = Carbon::now()->addDays(2);
+        $timeFrame = TimeFrameEnum::Custom;
 
         Livewire::test(ContactsByContactOrigin::class)
             ->set('timeFrame', $timeFrame)
+            ->set('start', $start)
+            ->set('end', $end)
             ->call('calculateChart')
-            ->assertSet('labels', [
-                $this->contactOrigins[1]->name,
-                $this->contactOrigins[0]->name,
-            ])
-            ->assertSet('series', [
-                $this->getContactsCountInTimeFrame($timeFrame, $this->contactOrigins[1]),
-                $this->getContactsCountInTimeFrame($timeFrame, $this->contactOrigins[0]),
-            ])
+            ->assertSet('labels', [])
+            ->assertSet('series', [])
             ->assertStatus(200)
             ->assertHasNoErrors();
     }
 
-    public function test_timeframe_this_week()
-    {
-        $timeFrame = TimeFrameEnum::ThisWeek;
-
-        Livewire::test(ContactsByContactOrigin::class)
-            ->set('timeFrame', $timeFrame)
-            ->call('calculateChart')
-            ->assertSet('labels', [
-                $this->contactOrigins[1]->name,
-                $this->contactOrigins[0]->name,
-            ])
-            ->assertSet('series', [
-                $this->getContactsCountInTimeFrame($timeFrame, $this->contactOrigins[1]),
-                $this->getContactsCountInTimeFrame($timeFrame, $this->contactOrigins[0]),
-            ])
-            ->assertStatus(200)
-            ->assertHasNoErrors();
-    }
-
-    public function test_timeframe_this_month()
+    public function test_timeframe_this_month(): void
     {
         $timeFrame = TimeFrameEnum::ThisMonth;
 
@@ -134,7 +113,7 @@ class ContactsByContactOriginTest extends BaseSetup
             ->assertHasNoErrors();
     }
 
-    public function test_timeframe_this_quarter()
+    public function test_timeframe_this_quarter(): void
     {
         $timeFrame = TimeFrameEnum::ThisQuarter;
 
@@ -153,7 +132,26 @@ class ContactsByContactOriginTest extends BaseSetup
             ->assertHasNoErrors();
     }
 
-    public function test_timeframe_this_year()
+    public function test_timeframe_this_week(): void
+    {
+        $timeFrame = TimeFrameEnum::ThisWeek;
+
+        Livewire::test(ContactsByContactOrigin::class)
+            ->set('timeFrame', $timeFrame)
+            ->call('calculateChart')
+            ->assertSet('labels', [
+                $this->contactOrigins[1]->name,
+                $this->contactOrigins[0]->name,
+            ])
+            ->assertSet('series', [
+                $this->getContactsCountInTimeFrame($timeFrame, $this->contactOrigins[1]),
+                $this->getContactsCountInTimeFrame($timeFrame, $this->contactOrigins[0]),
+            ])
+            ->assertStatus(200)
+            ->assertHasNoErrors();
+    }
+
+    public function test_timeframe_this_year(): void
     {
         $timeFrame = TimeFrameEnum::ThisYear;
 
@@ -172,19 +170,21 @@ class ContactsByContactOriginTest extends BaseSetup
             ->assertHasNoErrors();
     }
 
-    public function test_timeframe_in_the_future()
+    public function test_timeframe_today(): void
     {
-        $start = Carbon::now()->addDay();
-        $end = Carbon::now()->addDays(2);
-        $timeFrame = TimeFrameEnum::Custom;
+        $timeFrame = TimeFrameEnum::Today;
 
         Livewire::test(ContactsByContactOrigin::class)
             ->set('timeFrame', $timeFrame)
-            ->set('start', $start)
-            ->set('end', $end)
             ->call('calculateChart')
-            ->assertSet('labels', [])
-            ->assertSet('series', [])
+            ->assertSet('labels', [
+                $this->contactOrigins[1]->name,
+                $this->contactOrigins[0]->name,
+            ])
+            ->assertSet('series', [
+                $this->getContactsCountInTimeFrame($timeFrame, $this->contactOrigins[1]),
+                $this->getContactsCountInTimeFrame($timeFrame, $this->contactOrigins[0]),
+            ])
             ->assertStatus(200)
             ->assertHasNoErrors();
     }
