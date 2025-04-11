@@ -136,7 +136,7 @@
                     </div>
                 </div>
             </template>
-            @if($printers ?? false)
+            @if ($printers ?? false)
                 <div
                     class="flex flex-col gap-2 p-4"
                     x-collapse
