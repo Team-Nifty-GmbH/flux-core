@@ -29,6 +29,5 @@
         <x-flux::dashboard.edit-dashboard />
         @show
     </div>
-        <x-flux::editor :bold="false" :italic="false"/>
     <x-flux::dashboard.grid />
 </div>
