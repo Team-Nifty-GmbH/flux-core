@@ -18,7 +18,9 @@
                 .replace(this.decimal, '.')
         },
         round(value) {
-            return {{ $round }} ? Math.round(value * {{ $modifier }}) / {{ $modifier }} : value
+            return {{ $round }}
+                ? Math.round(value * {{ $modifier }}) / {{ $modifier }}
+                : value
         },
     }"
     x-init.once="
@@ -52,8 +54,7 @@
             'x-mask:dynamic' => '$money($input, decimal, thousands, ' . $precision . ')',
             'x-on:input' => 'emitInput($event)',
             'x-on:blur' => $attributes->wire('model')->hasModifier('blur') ? '$wire.$refresh()' : $attributes->get('x-on:blur'),
-            'x-on:change' =>
-                $attributes->wire('model')->hasModifier('change') || $attributes->wire('model')->hasModifier('lazy') ? '$wire.$refresh()' : $attributes->get('x-on:change'),
+            'x-on:change' => $attributes->wire('model')->hasModifier('change') || $attributes->wire('model')->hasModifier('lazy') ? '$wire.$refresh()' : $attributes->get('x-on:change'),
         ])
         ->filter(fn (?string $value, string $key) => ! str_starts_with($key, 'wire:model'))
 }}
