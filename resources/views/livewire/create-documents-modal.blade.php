@@ -171,7 +171,7 @@
                     <x-select.styled
                         :label="__('Size')"
                         wire:model="printJobForm.size"
-                        :options="data_get(collect($printers)->firstWhere('id', $this->printJobForm->printer_id), 'media_sizes', [''])"
+                        :options="$mediaSizes"
                     />
                 </div>
             </div>

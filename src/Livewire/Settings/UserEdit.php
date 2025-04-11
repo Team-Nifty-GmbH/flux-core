@@ -182,11 +182,13 @@ class UserEdit extends Component
             exception_to_notifications($e, $this);
         }
 
-        try {
-            $this->printerUserForm->is_default = true;
-            $this->printerUserForm->save();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+        if ($this->printerUserForm->pivot_id) {
+            try {
+                $this->printerUserForm->is_default = true;
+                $this->printerUserForm->save();
+            } catch (ValidationException|UnauthorizedException $e) {
+                exception_to_notifications($e, $this);
+            }
         }
 
         $this->fetchUser($user);

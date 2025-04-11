@@ -173,6 +173,14 @@ trait CreatesDocuments
                         'media_sizes',
                     ])
                     ->toArray() ?? [],
+                'mediaSizes' => (
+                    $this->printJobForm->printer_id
+                        ? auth()->user()
+                            ?->printers()
+                            ->whereKey($this->printJobForm->printer_id)
+                            ->value('media_sizes')
+                        : null
+                ) ?? [''],
             ]
         );
     }
