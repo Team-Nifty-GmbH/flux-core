@@ -1,6 +1,4 @@
-<div
-    class="relative flex h-80 w-full flex-col justify-between gap-1 p-6"
->
+<div class="relative flex h-80 w-full flex-col justify-between gap-1 p-6">
     <x-flux::spinner
         class="absolute inset-0 z-10 bg-white/70"
         wire:loading.delay
@@ -15,12 +13,14 @@
                 <div
                     class="text-3xl font-semibold text-gray-900"
                     x-text="$wire.sum"
-                >
-                </div>
+                ></div>
             </div>
 
             <div class="flex items-center gap-2">
-                <x-icon :name="$this->icon()" class="text-primary-500 h-12 w-12" />
+                <x-icon
+                    :name="$this->icon()"
+                    class="text-primary-500 h-12 w-12"
+                />
 
                 @if (class_implements($this, \FluxErp\Contracts\HasWidgetOptions::class))
                     <x-dropdown icon="ellipsis-vertical" static>
