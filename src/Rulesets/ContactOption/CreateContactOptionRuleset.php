@@ -25,8 +25,8 @@ class CreateContactOptionRuleset extends FluxRuleset
                 'string',
                 Rule::in(['phone', 'email', 'website']),
             ],
-            'label' => 'required|string',
-            'value' => 'required|string',
+            'label' => 'required|string|max:255',
+            'value' => 'required|string|max:255',
         ];
     }
 }

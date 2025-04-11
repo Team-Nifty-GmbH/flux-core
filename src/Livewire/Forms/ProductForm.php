@@ -16,6 +16,8 @@ class ProductForm extends FluxForm
 
     public array $bundle_products = [];
 
+    public ?string $bundle_type_enum = null;
+
     public array $categories = [];
 
     public ?int $children_count = null;
@@ -89,6 +91,8 @@ class ProductForm extends FluxForm
     public ?int $reference_unit_id = null;
 
     public ?int $restock_time = null;
+
+    public ?array $search_aliases = null;
 
     public ?float $selling_unit = null;
 

@@ -102,7 +102,9 @@ class CreateOrderPositionRuleset extends FluxRuleset
                 Rule::when(
                     fn (Fluent $data) => (! $data->is_free_text
                         && ! $data->is_bundle_position)
-                        && ! resolve_static(Product::class, 'query')->whereKey($data->product_id)->exists(),
+                        && ! resolve_static(Product::class, 'query')
+                            ->whereKey($data->product_id)
+                            ->exists(),
                     'required'
                 ),
                 'integer',
@@ -111,6 +113,8 @@ class CreateOrderPositionRuleset extends FluxRuleset
             ],
             'warehouse_id' => [
                 'exclude_if:is_free_text,true',
+                'exclude_without:product_id',
+                'required_with:product_id',
                 'integer',
                 'nullable',
                 app(ModelExists::class, ['model' => Warehouse::class]),
@@ -152,7 +156,7 @@ class CreateOrderPositionRuleset extends FluxRuleset
                 'nullable',
             ],
             'customer_delivery_date' => 'date|nullable',
-            'ean_code' => 'string|nullable',
+            'ean_code' => 'string|max:255|nullable',
             'possible_delivery_date' => 'date|nullable',
             'unit_gram_weight' => [
                 app(Numeric::class),
@@ -166,6 +170,7 @@ class CreateOrderPositionRuleset extends FluxRuleset
                 'exclude_with:product_id',
                 'nullable',
                 'string',
+                'max:255',
             ],
             'sort_number' => 'nullable|integer|min:0',
 

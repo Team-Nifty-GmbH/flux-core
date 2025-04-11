@@ -5,6 +5,7 @@
             wire:model="stockPosting.product_id"
             required
             select="label:name|value:id|description:product_number"
+            unfiltered
             :request="[
                 'url' => route('search', \FluxErp\Models\Product::class),
                 'method' => 'POST',
@@ -40,6 +41,7 @@
             wire:model="stockPosting.address.id"
             required
             select="label:label|value:id"
+            unfiltered
             :request="[
                 'url' => route('search', \FluxErp\Models\Address::class),
                 'method' => 'POST',

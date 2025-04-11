@@ -35,6 +35,13 @@ class TallstackUISelect {
         this.setRequestParams(mergeDeep({ ...currentParams }, newParams));
     }
 
+    setOptions(params) {
+        const encoded = btoa(JSON.stringify(params));
+
+        this.alpineComponent.$refs.options.innerText = `JSON.parse(atob('${encoded}'))`;
+        this.alpineComponent.sync();
+    }
+
     setRequestParams(params) {
         const encoded = btoa(JSON.stringify(params));
 

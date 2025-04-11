@@ -13,9 +13,9 @@ class CreateCurrencyRuleset extends FluxRuleset
     {
         return [
             'uuid' => 'nullable|string|uuid|unique:currencies,uuid',
-            'name' => 'required|string',
-            'iso' => 'required|string|unique:currencies,iso',
-            'symbol' => 'required|string',
+            'name' => 'required|string|max:255',
+            'iso' => 'required|string|max:255|unique:currencies,iso',
+            'symbol' => 'required|string|max:255',
             'is_default' => 'boolean',
         ];
     }

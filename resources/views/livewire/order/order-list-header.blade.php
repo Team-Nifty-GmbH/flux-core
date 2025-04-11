@@ -5,6 +5,7 @@
         x-on:close="$wire.discount = null"
         x-on:keyup.enter="$wire.discountSelectedPositions().then(() => {close();})"
         x-trap="show"
+        persistent
     >
         <div class="flex flex-col gap-4">
             <x-input
@@ -34,6 +35,8 @@
         size="6xl"
         id="edit-order-position"
         x-on:close="$wire.resetOrderPosition()"
+        x-on:open="$focusOn('order-position-name')"
+        persistent
     >
         @section('order-position-detail-modal.content')
         <div class="relative">
@@ -47,6 +50,7 @@
                             :label="__('Comment / Block')"
                         />
                         <x-input
+                            id="order-position-name"
                             :label="__('Name')"
                             wire:model="orderPosition.name"
                         />
@@ -61,6 +65,7 @@
                                 wire:model="orderPosition.product_id"
                                 required
                                 select="label:label|value:id|description:product_number"
+                                unfiltered
                                 :request="[
                                     'url' => route('search', \FluxErp\Models\Product::class),
                                     'method' => 'POST',
@@ -83,6 +88,7 @@
                                     :label="__('Warehouse')"
                                     wire:model="orderPosition.warehouse_id"
                                     select="label:name|value:id"
+                                    unfiltered
                                     :request="[
                                         'url' => route('search', \FluxErp\Models\Warehouse::class),
                                         'method' => 'POST',
@@ -112,14 +118,14 @@
                             x-ref="amount"
                         />
                         <x-input
-                            :prefix="$order->currency['symbol']"
+                            :prefix="data_get($order->currency, 'symbol')"
                             type="number"
                             :label="__('Unit price :type', ['type' => ($orderPosition->is_net ?? true) ? __('net') : __('gross')])"
                             wire:model="orderPosition.unit_price"
                             x-on:change="$el.value = parseNumber($el.value)"
                         />
                         <x-input
-                            :prefix="$order->currency['symbol']"
+                            :prefix="data_get($order->currency, 'symbol')"
                             type="number"
                             :label="__('Purchase Price')"
                             wire:model="orderPosition.purchase_price"
@@ -143,6 +149,7 @@
                             select="label:name|value:id"
                             wire:model.number="orderPosition.ledger_account_id"
                             select="label:name|value:id|description:number"
+                            unfiltered
                             :request="[
                                 'url' => route('search', \FluxErp\Models\LedgerAccount::class),
                                 'method' => 'POST',
@@ -202,101 +209,4 @@
             </div>
         </x-slot>
     </x-modal>
-    <div class="w-full xl:space-x-6">
-        <div class="ml:p-10 relative min-h-full space-y-6">
-            <div>
-                @include('tall-datatables::livewire.data-table')
-                @section('order-positions-footer-card')
-                <div
-                    x-show="! $wire.order.is_locked"
-                    x-cloak
-                    class="sticky bottom-6 pt-6"
-                >
-                    <x-card>
-                        <form
-                            class="flex flex-col gap-4"
-                            x-on:submit.prevent="
-                                $wire
-                                    .quickAdd()
-                                    .then(() => (Alpine.$data($el.querySelector('[x-data]')).show = true))
-                            "
-                        >
-                            <div class="flex flex-col gap-4">
-                                @section('order-positions-footer-card.inputs')
-                                <x-select.styled
-                                    class="pb-4"
-                                    :label="__('Product')"
-                                    x-on:select="$wire.changedProductId($event.detail.select.id).then(() => {
-                                                const input = $refs.quickAddAmount.querySelector('input');
-                                                input.focus();
-                                                input.select();
-                                            })"
-                                    wire:model="orderPosition.product_id"
-                                    required
-                                    select="label:label|value:id|description:product_number"
-                                    :request="[
-                                        'url' => route('search', \FluxErp\Models\Product::class),
-                                        'method' => 'POST',
-                                        'params' => [
-                                            'whereDoesntHave' => 'children',
-                                            'fields' => [
-                                                'id',
-                                                'name',
-                                                'product_number',
-                                            ],
-                                            'with' => 'media',
-                                        ],
-                                    ]"
-                                />
-                                <div
-                                    x-transition
-                                    x-cloak
-                                    x-ref="quickAddAmount"
-                                    x-show="$wire.orderPosition.product_id"
-                                    class="min-w-28"
-                                >
-                                    <x-number
-                                        :step="0.01"
-                                        :label="__('Amount')"
-                                        wire:model="orderPosition.amount"
-                                    />
-                                </div>
-                                @show
-                            </div>
-                            <div
-                                class="flex w-full items-center justify-end gap-2 pt-2"
-                            >
-                                @section('order-positions-footer-card.buttons')
-                                <div
-                                    x-transition
-                                    x-cloak
-                                    x-show="$wire.orderPosition.product_id"
-                                >
-                                    <x-button
-                                        class="whitespace-nowrap"
-                                        color="emerald"
-                                        icon="plus"
-                                        :text="__('Quick add')"
-                                        type="submit"
-                                    />
-                                </div>
-                                <div>
-                                    <x-button
-                                        class="whitespace-nowrap"
-                                        :text="__('Add Detailed')"
-                                        color="indigo"
-                                        icon="pencil"
-                                        x-ref="addPosition"
-                                        wire:click="editOrderPosition().then(() => $modalOpen('edit-order-position'))"
-                                    />
-                                </div>
-                                @show
-                            </div>
-                        </form>
-                    </x-card>
-                </div>
-                @show
-            </div>
-        </div>
-    </div>
 </div>

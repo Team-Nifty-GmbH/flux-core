@@ -96,7 +96,7 @@
             @endpersist
         @endauth
 
-        <x-layout>
+        <x-flux::layout>
             @if (! $navigation && auth()->check() && ! request()->routeIs('logout'))
                 <x-slot:header>
                     <x-layout.header without-mobile-button>
@@ -145,6 +145,6 @@
             @endif
 
             {{ $slot }}
-        </x-layout>
+        </x-flux::layout>
     </body>
 </html>

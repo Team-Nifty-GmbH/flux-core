@@ -2,10 +2,13 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Traits\Filterable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PrintJob extends FluxModel
 {
+    use Filterable;
+
     protected function casts(): array
     {
         return [

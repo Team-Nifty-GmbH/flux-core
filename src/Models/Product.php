@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use Exception;
+use FluxErp\Enums\BundleTypeEnum;
 use FluxErp\Enums\TimeUnitEnum;
 use FluxErp\Helpers\PriceHelper;
 use FluxErp\Models\Pivots\ClientProduct;
@@ -74,7 +75,9 @@ class Product extends FluxModel implements HasMedia, InteractsWithDataTables
     protected function casts(): array
     {
         return [
+            'bundle_type_enum' => BundleTypeEnum::class,
             'time_unit_enum' => TimeUnitEnum::class,
+            'search_aliases' => 'array',
             'is_active' => 'boolean',
             'is_highlight' => 'boolean',
             'is_bundle' => 'boolean',

@@ -56,7 +56,7 @@ class CreateLockedWorkTime extends CreateWorkTime
         parent::validateData();
 
         if ($endedAt = data_get($this->data, 'ended_at')) {
-            $totalTimeMs = Carbon::parse($endedAt)->diffInMilliseconds(Carbon::parse($this->data['started_at']))
+            $totalTimeMs = Carbon::parse($this->data['started_at'])->diffInMilliseconds(Carbon::parse($endedAt), true)
                 - data_get($this->data, 'paused_time_ms', 0);
 
             if ($totalTimeMs < 0) {

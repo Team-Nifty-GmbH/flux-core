@@ -2,6 +2,7 @@
 
 namespace FluxErp\Rulesets\Product;
 
+use FluxErp\Enums\BundleTypeEnum;
 use FluxErp\Enums\TimeUnitEnum;
 use FluxErp\Facades\ProductType;
 use FluxErp\Models\Product;
@@ -43,7 +44,7 @@ class CreateProductRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'name' => 'required|string',
+            'name' => 'required|string|max:255',
 
             'uuid' => 'nullable|string|uuid|unique:products,uuid',
             'parent_id' => [
@@ -77,6 +78,11 @@ class CreateProductRuleset extends FluxRuleset
                 Rule::in(ProductType::all()->keys()),
                 'nullable',
             ],
+            'bundle_type_enum' => [
+                'required_if_accepted:is_bundle',
+                'nullable',
+                Rule::enum(BundleTypeEnum::class),
+            ],
             'description' => 'string|nullable',
             'weight_gram' => 'numeric|nullable',
             'dimension_length_mm' => 'numeric|nullable',
@@ -98,8 +104,12 @@ class CreateProductRuleset extends FluxRuleset
             'min_purchase' => 'numeric|nullable',
             'max_purchase' => 'numeric|nullable',
             'seo_keywords' => 'string|nullable',
-            'manufacturer_product_number' => 'string|nullable',
-            'posting_account' => 'string|nullable',
+            'search_aliases' => [
+                'array',
+                'nullable',
+            ],
+            'search_aliases.*' => 'string|max:255|distinct',
+            'posting_account' => 'string|max:255|nullable',
             'warning_stock_amount' => 'numeric|nullable',
 
             'is_active' => 'boolean',

@@ -18,6 +18,7 @@ class CreateDiscountRuleset extends FluxRuleset
             'model_type' => [
                 'required_with:model_id',
                 'string',
+                'max:255',
                 app(MorphClassExists::class),
             ],
             'model_id' => [
@@ -25,7 +26,7 @@ class CreateDiscountRuleset extends FluxRuleset
                 'integer',
                 app(MorphExists::class),
             ],
-            'name' => 'nullable|string',
+            'name' => 'nullable|string|max:255',
             'discount' => 'required|numeric',
             'from' => 'nullable|date_format:Y-m-d H:i:s',
             'till' => 'nullable|date_format:Y-m-d H:i:s',

@@ -3,9 +3,11 @@
 namespace FluxErp\Actions\Product;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Actions\Price\DeletePrice;
 use FluxErp\Actions\ProductCrossSelling\CreateProductCrossSelling;
 use FluxErp\Actions\ProductCrossSelling\DeleteProductCrossSelling;
 use FluxErp\Actions\ProductCrossSelling\UpdateProductCrossSelling;
+use FluxErp\Enums\BundleTypeEnum;
 use FluxErp\Helpers\Helper;
 use FluxErp\Models\Media;
 use FluxErp\Models\Product;
@@ -101,6 +103,18 @@ class UpdateProduct extends FluxAction
                 );
         }
 
+        if ($product->is_bundle && $product->bundle_type_enum === BundleTypeEnum::Group) {
+            // when the bundle type is group we need to remove all prices form the product as the price
+            // is calculated by the prices of the group items
+            foreach ($product->prices()->get('id') as $price) {
+                DeletePrice::make([
+                    'id' => $price->getKey(),
+                ])
+                    ->validate()
+                    ->execute();
+            }
+        }
+
         if (! is_null($productCrossSellings)) {
             Helper::updateRelatedRecords(
                 model: $product,
@@ -118,6 +132,10 @@ class UpdateProduct extends FluxAction
 
     protected function prepareForValidation(): void
     {
+        if ($this->getData('is_bundle') === false) {
+            $this->data['bundle_type_enum'] = null;
+        }
+
         $this->rules['cover_media_id'][] = (new ModelExists(Media::class))
             ->where('model_type', app(Product::class)->getMorphClass())
             ->where('model_id', $this->data['id'] ?? null);

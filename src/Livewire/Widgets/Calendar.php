@@ -2,7 +2,7 @@
 
 namespace FluxErp\Livewire\Widgets;
 
-use FluxErp\Livewire\Features\Calendar\FluxCalendar;
+use FluxErp\Livewire\Features\Calendar\Calendar as BaseCalendar;
 use FluxErp\Traits\Widgetable;
 use Illuminate\Support\Arr;
 use Livewire\Attributes\Isolate;
@@ -10,7 +10,7 @@ use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 
 #[Isolate]
-class Calendar extends FluxCalendar
+class Calendar extends BaseCalendar
 {
     use Widgetable;
 

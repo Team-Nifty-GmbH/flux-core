@@ -18,9 +18,9 @@ class UpdateCurrencyRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => Currency::class]),
             ],
-            'name' => 'string',
-            'iso' => 'string|unique:currencies,iso',
-            'symbol' => 'string',
+            'name' => 'string|max:255',
+            'iso' => 'string|max:255|unique:currencies,iso',
+            'symbol' => 'string|max:255',
             'is_default' => 'boolean',
         ];
     }

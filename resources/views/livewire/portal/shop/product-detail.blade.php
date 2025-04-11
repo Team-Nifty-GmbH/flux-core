@@ -7,7 +7,7 @@
         showMedia: null,
     }"
 >
-    <x-spinner />
+    <x-flux::spinner />
     <div class="relative grid h-full gap-8 sm:flex">
         <div class="flex w-full justify-items-center gap-4 sm:w-1/2">
             <div class="w-full">
@@ -129,21 +129,21 @@
             <div class="flex flex-col gap-4">
                 @foreach ($productForm->meta as $name => $value)
                     <x-card class="!px-0 !py-0">
-                        <x-slot:title>
-                            <div
-                                class="font-semiboldl w-full"
-                                x-on:click="showMeta = showMeta === '{{ $name }}' ? null : '{{ $name }}'"
-                            >
-                                {{ $name }}
-                            </div>
-                        </x-slot>
                         <x-slot:header>
-                            <x-button
-                                color="secondary"
-                                light
-                                icon="chevron-down"
-                                x-on:click="showMeta = showMeta === '{{ $name }}' ? null : '{{ $name }}'"
-                            />
+                            <div class="flex justify-between">
+                                <div
+                                    class="w-full font-semibold"
+                                    x-on:click="showMeta = showMeta === '{{ $name }}' ? null : '{{ $name }}'"
+                                >
+                                    {{ $name }}
+                                </div>
+                                <x-button
+                                    color="secondary"
+                                    light
+                                    icon="chevron-down"
+                                    x-on:click="showMeta = showMeta === '{{ $name }}' ? null : '{{ $name }}'"
+                                />
+                            </div>
                         </x-slot>
                         <div
                             class="px-2 py-5 md:px-4"
@@ -181,28 +181,28 @@
                     </h2>
                     @foreach ($productForm->additionalMedia ?? [] as $collection => $media)
                         <x-card class="!px-0 !py-0">
-                            <x-slot:title>
-                                <div
-                                    class="font-semiboldl w-full"
-                                    x-on:click="showMedia = showMedia === '{{ $collection }}' ? null : '{{ $collection }}'"
-                                >
-                                    {{ __($collection) }}
-                                </div>
-                            </x-slot>
                             <x-slot:header>
-                                <div class="flex justify-end gap-1.5">
-                                    <x-button
-                                        :text="__('Download folder')"
-                                        color="indigo"
-                                        icon="save"
-                                        wire:click="downloadMedia({{ \Illuminate\Support\Js::from(array_keys($media)) }}, '{{ $collection }}')"
-                                    />
-                                    <x-button
-                                        color="secondary"
-                                        light
-                                        icon="chevron-down"
+                                <div class="flex justify-between gap-4">
+                                    <div
+                                        class="w-full font-semibold"
                                         x-on:click="showMedia = showMedia === '{{ $collection }}' ? null : '{{ $collection }}'"
-                                    />
+                                    >
+                                        {{ __($collection) }}
+                                    </div>
+                                    <div class="flex justify-end gap-1.5">
+                                        <x-button
+                                            :text="__('Download folder')"
+                                            color="indigo"
+                                            icon="arrow-down-tray"
+                                            wire:click="downloadMedia({{ \Illuminate\Support\Js::from(array_keys($media)) }}, '{{ $collection }}')"
+                                        />
+                                        <x-button
+                                            color="secondary"
+                                            light
+                                            icon="chevron-down"
+                                            x-on:click="showMedia = showMedia === '{{ $collection }}' ? null : '{{ $collection }}'"
+                                        />
+                                    </div>
                                 </div>
                             </x-slot>
                             <div

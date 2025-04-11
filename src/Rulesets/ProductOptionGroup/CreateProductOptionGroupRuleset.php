@@ -21,7 +21,7 @@ class CreateProductOptionGroupRuleset extends FluxRuleset
     {
         return [
             'uuid' => 'nullable|string|uuid|unique:product_option_groups,uuid',
-            'name' => 'required|string',
+            'name' => 'required|string|max:255',
         ];
     }
 }

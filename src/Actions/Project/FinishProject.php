@@ -11,11 +11,14 @@ use Illuminate\Http\Response;
 
 class FinishProject extends FluxAction
 {
-    public static ?int $successCode = Response::HTTP_OK;
-
     public static function models(): array
     {
         return [Project::class];
+    }
+
+    protected static function getSuccessCode(): ?int
+    {
+        return parent::getSuccessCode() ?? Response::HTTP_OK;
     }
 
     protected function getRulesets(): string|array

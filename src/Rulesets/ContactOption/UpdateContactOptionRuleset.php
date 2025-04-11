@@ -25,8 +25,8 @@ class UpdateContactOptionRuleset extends FluxRuleset
                 'string',
                 Rule::in(['phone', 'email', 'website']),
             ],
-            'label' => 'sometimes|required|string',
-            'value' => 'sometimes|required|string',
+            'label' => 'sometimes|required|string|max:255',
+            'value' => 'sometimes|required|string|max:255',
         ];
     }
 }

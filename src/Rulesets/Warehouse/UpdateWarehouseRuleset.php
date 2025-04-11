@@ -24,7 +24,7 @@ class UpdateWarehouseRuleset extends FluxRuleset
                 'nullable',
                 app(ModelExists::class, ['model' => Address::class]),
             ],
-            'name' => 'sometimes|required|string',
+            'name' => 'sometimes|required|string|max:255',
             'is_default' => 'boolean',
         ];
     }

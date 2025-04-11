@@ -1,5 +1,6 @@
 import { Editor } from '@tiptap/core';
 import { FontSizeConfig } from './tiptap-font-size-handler.js';
+import { LiteralTab } from './tiptap-literal-tab-handler.js';
 import StarterKit from '@tiptap/starter-kit';
 import { MentionConfig } from './tiptap-mention-handler.js';
 
@@ -48,6 +49,7 @@ export default function (
                     extensions: [
                         StarterKit,
                         FontSizeConfig,
+                        LiteralTab,
                         MentionConfig(searchModel, element),
                     ],
                     timeout: null,
@@ -55,8 +57,8 @@ export default function (
                     editable: this.editable,
                     editorProps: {
                         attributes: {
-                            class: `${isTransparent ? 'bg-transparent text-black' : 'dark:bg-secondary-800 dark:text-gray-50'} ${showTooltipDropdown ? 'rounded-md' : 'rounded-b-md'} \
-                                prose prose-sm dark:prose-invert max-w-full content-editable-placeholder placeholder-secondary-400 dark:placeholder-secondary-500 \
+                            class: `${isTransparent ? 'bg-transparent' : 'dark:bg-secondary-800'} ${showTooltipDropdown ? 'rounded-md' : 'rounded-b-md'} \
+                                prose prose-sm dark:prose-invert max-w-full content-editable-placeholder dark:text-gray-50 placeholder-secondary-400 dark:placeholder-secondary-500 \
                                 border-secondary-300 focus:ring-primary-500 focus:border-primary-500 dark:border-secondary-600 form-input block \
                                 min-h-[85px] w-full border p-3 shadow-sm transition duration-100 ease-in-out focus:outline-none sm:text-sm`,
                             style: `${initFontSize !== null ? `font-size:${initFontSize}px` : ''}`,
