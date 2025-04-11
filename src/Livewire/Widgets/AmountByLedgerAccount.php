@@ -19,28 +19,6 @@ class AmountByLedgerAccount extends CircleChart
 
     public bool $showTotals = false;
 
-    public function showTitle(): bool
-    {
-        return true;
-    }
-
-    public function getPlotOptions(): array
-    {
-        return [
-            'pie' => [
-                'donut' => [
-                    'labels' => [
-                        'show' => true,
-                        'total' => [
-                            'show' => true,
-                            'label' => __('Total'),
-                        ],
-                    ],
-                ],
-            ],
-        ];
-    }
-
     #[Renderless]
     public function calculateByTimeFrame(): void
     {
@@ -67,10 +45,32 @@ class AmountByLedgerAccount extends CircleChart
         $indexOfEmptyLabel = array_search('', $tempLabels);
 
         if ($indexOfEmptyLabel !== false) {
-            $tempLabels[$indexOfEmptyLabel] =  __('Not Assigned');
+            $tempLabels[$indexOfEmptyLabel] = __('Not Assigned');
         }
 
         $this->labels = $tempLabels;
         $this->series = $metrics->getData();
+    }
+
+    public function getPlotOptions(): array
+    {
+        return [
+            'pie' => [
+                'donut' => [
+                    'labels' => [
+                        'show' => true,
+                        'total' => [
+                            'show' => true,
+                            'label' => __('Total'),
+                        ],
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    public function showTitle(): bool
+    {
+        return true;
     }
 }
