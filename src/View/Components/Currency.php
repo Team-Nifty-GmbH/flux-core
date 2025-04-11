@@ -9,10 +9,13 @@ use TallStackUi\Foundation\Attributes\SkipDebug;
 
 class Currency extends Component
 {
+    public int $modifier = 1;
+
     public function __construct(
         public string $thousands = ',',
         public string $decimal = '.',
         public int $precision = 2,
+        public bool $round = true,
         public ?string $label = null,
         public ?string $hint = null,
         public ?string $icon = null,
@@ -24,7 +27,11 @@ class Currency extends Component
         public ComponentSlot|string|null $prefix = null,
         #[SkipDebug]
         public ComponentSlot|string|null $suffix = null,
-    ) {}
+    ) {
+        if ($this->round) {
+            $this->modifier = (int) str_pad('1', $this->precision + 1, '0');
+        }
+    }
 
     public function render(): View
     {

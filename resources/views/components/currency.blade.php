@@ -1,16 +1,3 @@
-@php
-    $attributes
-        ->merge([
-            'x-ref' => 'input',
-            'x-model' => 'maskedValue',
-            'x-mask:dynamic' => '$money($input, decimal, thousands, ' . $precision . ')',
-            'x-on:input' => 'emitInput($event)',
-            'x-on:blur' => $attributes->wire('model')->hasModifier('blur') ? '$wire.$refresh()' : $attributes->get('x-on:blur'),
-            'x-on:change' => $attributes->wire('model')->hasModifier('change') || $attributes->wire('model')->hasModifier('lazy') ? '$wire.$refresh()' : $attributes->get('x-on:change'),
-        ])
-        ->filter(fn (?string $value, string $key) => ! str_starts_with($key, 'wire:model'));
-@endphp
-
 <div
     x-data="{
         input: {{ $attributes->wire('model')->value ? '$wire.$entangle(\'' . $attributes->wire('model')->value . '\')' : ($attributes->whereStartsWith('x-model')->first() ?: 'null') }},
@@ -30,14 +17,19 @@
                 ?.replaceAll(this.thousands, '')
                 .replace(this.decimal, '.')
         },
+        round(value) {
+            return {{ $round }}
+                ? Math.round(value * {{ $modifier }}) / {{ $modifier }}
+                : value
+        },
     }"
     x-init.once="
-        maskedValue = mask(input)
+        maskedValue = mask(round(input))
         $nextTick(() => $refs.input.dispatchEvent(new Event('input')))
 
         $watch('input', (value) => {
             if (parseFloat(value) !== normalizeValue(maskedValue)) {
-                maskedValue = mask(value)
+                maskedValue = mask(round(value))
                 $nextTick(() => $refs.input.dispatchEvent(new Event('input')))
             }
         })
@@ -54,6 +46,17 @@
         :suffix="$suffix"
         :disabled="$attributes->get('disabled')"
         :readonly="$attributes->get('readonly')"
-        {{ $attributes }}
+        {{
+    $attributes
+        ->merge([
+            'x-ref' => 'input',
+            'x-model' => 'maskedValue',
+            'x-mask:dynamic' => '$money($input, decimal, thousands, ' . $precision . ')',
+            'x-on:input' => 'emitInput($event)',
+            'x-on:blur' => $attributes->wire('model')->hasModifier('blur') ? '$wire.$refresh()' : $attributes->get('x-on:blur'),
+            'x-on:change' => $attributes->wire('model')->hasModifier('change') || $attributes->wire('model')->hasModifier('lazy') ? '$wire.$refresh()' : $attributes->get('x-on:change'),
+        ])
+        ->filter(fn (?string $value, string $key) => ! str_starts_with($key, 'wire:model'))
+}}
     />
 </div>
