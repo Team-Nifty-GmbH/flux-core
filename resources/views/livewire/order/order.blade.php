@@ -347,7 +347,7 @@
                         <div
                             class="size-5 cursor-pointer"
                             wire:click="toggleLock()"
-                            wire:flux-confirm.icon.warning="{{ __('Change order lock state') }}|{{ __('Manually locking or unlocking orders can have unexpected side effects.<br><br>Are you Sure?') }}|{{ __('Cancel') }}|{{ __('Continue') }}"
+                            wire:flux-confirm.type.warning="{{ __('Change order lock state') }}|{{ __('Manually locking or unlocking orders can have unexpected side effects.<br><br>Are you Sure?') }}|{{ __('Cancel') }}|{{ __('Continue') }}"
                         >
                             <x-icon
                                 x-cloak

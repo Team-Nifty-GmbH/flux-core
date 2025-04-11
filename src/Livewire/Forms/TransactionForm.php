@@ -35,6 +35,8 @@ class TransactionForm extends FluxForm
     #[Locked]
     public ?int $id = null;
 
+    public bool $is_ignored = false;
+
     #[Locked]
     public ?int $order_id = null;
 

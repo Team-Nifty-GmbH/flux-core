@@ -298,6 +298,18 @@
             class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2"
             x-bind:class="!$wire.edit && 'pointer-events-none'"
         >
+            <x-label
+                :label="__('Search Aliases')"
+                for="{{ md5('address.search_aliases') }}"
+            />
+            <div class="col-span-2">
+                <x-tag wire:model="address.search_aliases" />
+            </div>
+        </div>
+        <div
+            class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-2"
+            x-bind:class="!$wire.edit && 'pointer-events-none'"
+        >
             <x-label :label="__('Tags')" for="{{ md5('address.tags') }}" />
             <div class="col-span-2">
                 <x-select.styled

@@ -22,7 +22,7 @@ class Accounting extends TransactionList
     #[Modelable]
     public OrderForm $order;
 
-    protected string $view = 'flux::livewire.order.accounting';
+    protected ?string $includeBefore = 'flux::livewire.order.accounting';
 
     public function deleteTransaction(): bool
     {
@@ -53,6 +53,6 @@ class Accounting extends TransactionList
 
     protected function getBuilder(Builder $builder): Builder
     {
-        return $builder->where('order_id', $this->order->id);
+        return $builder->whereHas('orders', fn (Builder $builder) => $builder->whereKey($this->order->id));
     }
 }
