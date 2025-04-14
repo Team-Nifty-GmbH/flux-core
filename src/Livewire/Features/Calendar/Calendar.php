@@ -42,11 +42,43 @@ class Calendar extends Component
 
     public CalendarEventForm $event;
 
+    public array $fieldTypes = [];
+
     public bool $showCalendars = true;
+
+    public function mount(): void
+    {
+        $this->fieldTypes = [
+            [
+                'label' => __('Text'),
+                'value' => 'text',
+            ],
+            [
+                'label' => __('Textarea'),
+                'value' => 'textarea',
+            ],
+            [
+                'label' => __('Checkbox'),
+                'value' => 'checkbox',
+            ],
+            [
+                'label' => __('Date'),
+                'value' => 'date',
+            ],
+        ];
+    }
 
     public function render(): View
     {
         return view('flux::livewire.features.calendar.calendar');
+    }
+
+    public function addCustomProperty(): void
+    {
+        $this->calendar->custom_properties[] = [
+            'field_type' => null,
+            'name' => null,
+        ];
     }
 
     #[Renderless]
@@ -84,7 +116,7 @@ class Calendar extends Component
                 data_get($event, 'id')
                 && ! data_get($event, 'extendedProps.is_editable')
             )
-             || ! data_get($this->calendar, 'is_editable')
+            || ! data_get($this->calendar, 'is_editable')
         ) {
             return;
         }
@@ -344,6 +376,11 @@ class Calendar extends Component
             ->with('calendarEvent:id,start,end,title,is_all_day,calendar_id')
             ->get()
             ->toArray();
+    }
+
+    public function removeCustomProperty(int $index): void
+    {
+        unset($this->calendar->custom_properties[$index]);
     }
 
     #[Renderless]

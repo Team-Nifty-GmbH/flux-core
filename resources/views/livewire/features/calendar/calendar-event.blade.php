@@ -89,7 +89,7 @@
             @show
             @section('event-edit.custom-properties')
             <template
-                x-for="(customProperty, propertyName) in $wire.event.customProperties"
+                x-for="customProperty in $wire.event.extended_props ?? []"
             >
                 <div>
                     <div
@@ -97,16 +97,18 @@
                         x-show="customProperty.field_type === 'text'"
                     >
                         <div class="mb-1">
-                            <x-label x-bind:for="propertyName">
+                            <x-label x-bind:for="customProperty.name">
                                 <x-slot:word>
-                                    <span x-text="propertyName"></span>
+                                    <span
+                                        x-text="customProperty.name"
+                                    ></span>
                                 </x-slot>
                             </x-label>
                         </div>
                         <x-input
                             x-model="customProperty.value"
                             x-bind:disabled="! $wire.event.is_editable ?? false"
-                            x-bind:id="propertyName"
+                            x-bind:id="customProperty.name"
                         />
                     </div>
                     <div
@@ -114,15 +116,18 @@
                         x-show="customProperty.field_type === 'textarea'"
                     >
                         <div class="mb-1">
-                            <x-label
-                                x-bind:for="propertyName"
-                                x-text="propertyName"
-                            />
+                            <x-label x-bind:for="customProperty.name">
+                                <x-slot:word>
+                                    <span
+                                        x-text="customProperty.name"
+                                    ></span>
+                                </x-slot>
+                            </x-label>
                         </div>
                         <x-textarea
                             x-model="customProperty.value"
                             x-bind:disabled="! $wire.event.is_editable ?? false"
-                            x-bind:id="propertyName"
+                            x-bind:id="customProperty.name"
                         />
                     </div>
                     <div
@@ -133,27 +138,31 @@
                         <x-checkbox
                             x-model="customProperty.value"
                             x-bind:disabled="! $wire.event.is_editable ?? false"
-                            x-bind:id="propertyName"
+                            x-bind:id="customProperty.name"
                         />
-                        <x-label
-                            x-bind:for="propertyName"
-                            x-text="propertyName"
-                        />
+                        <x-label x-bind:for="customProperty.name">
+                            <x-slot:word>
+                                <span x-text="customProperty.name"></span>
+                            </x-slot>
+                        </x-label>
                     </div>
                     <div
                         x-cloak
                         x-show="customProperty.field_type === 'date'"
                     >
                         <div class="mb-1">
-                            <x-label
-                                x-bind:for="propertyName"
-                                x-text="propertyName"
-                            />
+                            <x-label x-bind:for="customProperty.name">
+                                <x-slot:word>
+                                    <span
+                                        x-text="customProperty.name"
+                                    ></span>
+                                </x-slot>
+                            </x-label>
                         </div>
                         <x-input
                             x-model="customProperty.value"
                             x-bind:disabled="! $wire.event.is_editable ?? false"
-                            x-bind:id="propertyName"
+                            x-bind:id="customProperty.name"
                             type="date"
                         />
                     </div>
