@@ -61,7 +61,7 @@ class MediaList extends BaseDataTable
                 ->when(fn () => resolve_static(DeleteMedia::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Media')]),
-                    'wire:click' => 'show = false; deleteMedia(record.id)',
+                    'wire:click' => 'deleteMedia(record.id).then(() => show = false)',
                 ]),
         ];
     }
