@@ -103,6 +103,8 @@ class CalendarEventForm extends FluxForm
             'recurrences' => Arr::pull($values, 'recurrences'),
         ];
 
+        $values['extended_props'] = Arr::pull($values, 'extendedProps.customProperties');
+
         $this->fill($values);
     }
 
