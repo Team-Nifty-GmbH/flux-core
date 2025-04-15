@@ -49,7 +49,7 @@ class CalendarForm extends FluxForm
         parent::fill($values);
 
         $this->user_id ??= auth()->id();
-        $this->color ??= faker()->hexColor();
+        $this->color ??= '#' . dechex(rand(0x000000, 0xFFFFFF));
     }
 
     public function fromCalendarObject(?array $calendar): void
