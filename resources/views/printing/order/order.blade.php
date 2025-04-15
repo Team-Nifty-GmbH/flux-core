@@ -9,36 +9,44 @@
     <x-slot:right-block>
         <div class="inline-block">
             @section('first-page-right-block')
-            <div class="inline-block">
-                @section('first-page-right-block.labels')
-                <div class="font-semibold">{{ __('Order no.') }}:</div>
-                <div class="font-semibold">{{ __('Customer no.') }}:</div>
-                <div class="font-semibold">{{ __('Order Date') }}:</div>
-                @if ($model->commission)
-                    <div class="font-semibold">{{ __('Commission') }}:</div>
-                @endif
-
-                @show
-            </div>
-            <div class="inline-block pl-6 text-right">
-                @section('first-page-right-block.values')
-                <div>
-                    {{ $model->order_number }}
-                </div>
-                <div>
-                    {{ $model->addressInvoice->contact->customer_number }}
-                </div>
-                <div>
-                    {{ $model->order_date->locale(app()->getLocale())->isoFormat('L') }}
-                </div>
-                @if ($model->commission)
-                    <div>
-                        {{ $model->commission }}
-                    </div>
-                @endif
-
-                @show
-            </div>
+            <table class="border-separate border-spacing-x-2">
+                <tbody class="align-text-top text-xs">
+                    <tr>
+                        <td class="text-right font-semibold">
+                            {{ __('Order no.') }}
+                        </td>
+                        <td>
+                            {{ $model->order_number }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-right font-semibold">
+                            {{ __('Customer no.') }}
+                        </td>
+                        <td>
+                            {{ $model->addressInvoice->contact->customer_number }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-right font-semibold">
+                            {{ __('Order Date') }}
+                        </td>
+                        <td>
+                            {{ $model->order_date->locale(app()->getLocale())->isoFormat('L') }}
+                        </td>
+                    </tr>
+                    @if ($model->commission)
+                        <tr>
+                            <td class="text-right font-semibold">
+                                {{ __('Commission') }}
+                            </td>
+                            <td>
+                                {{ $model->commission }}
+                            </td>
+                        </tr>
+                    @endif
+                </tbody>
+            </table>
             @show
         </div>
     </x-slot>

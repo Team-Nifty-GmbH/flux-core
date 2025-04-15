@@ -3,9 +3,11 @@
 namespace FluxErp\View\Printing\Order;
 
 use FluxErp\Models\Order;
+use FluxErp\Models\OrderPosition;
 use FluxErp\View\Printing\PrintableView;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Fluent;
 
 class OrderView extends PrintableView
@@ -49,16 +51,20 @@ class OrderView extends PrintableView
 
     public function prepareModel(): void
     {
-        $positions = to_flat_tree(
-            $this->model
-                ->orderPositions()
-                ->whereNull('parent_id')
-                ->when(! $this->showAlternatives, fn ($query) => $query->whereNot('is_alternative', true))
-                ->with(['tags', 'product.unit:id,name,abbreviation'])
-                ->get()
-                ->append('children')
-                ->toArray()
-        );
+        resolve_static(OrderPosition::class, 'addGlobalScope', [
+            'scope' => 'sorted',
+            'implementation' => function (Builder $query): void {
+                $query->ordered()
+                    ->with(['tags', 'product.unit:id,name,abbreviation'])
+                    ->when(! $this->showAlternatives, fn (Builder $query) => $query->whereNot('is_alternative', true));
+            },
+        ]);
+
+        $positions = to_flat_tree(resolve_static(OrderPosition::class, 'familyTree')
+            ->where('order_id', $this->model->getKey())
+            ->whereNull('parent_id')
+            ->get()
+            ->toArray());
 
         $flattened = collect($positions)->map(
             function ($item) {
