@@ -13,6 +13,7 @@ use FluxErp\Models\Client;
 use FluxErp\Models\Country;
 use FluxErp\Models\Scopes\UserClientScope;
 use FluxErp\Traits\Livewire\Actions;
+use FluxErp\Traits\Livewire\WithFileUploads;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
@@ -22,7 +23,7 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class Clients extends ClientList
 {
-    use Actions, \FluxErp\Traits\Livewire\WithFileUploads, WithTabs;
+    use Actions, WithFileUploads, WithTabs;
 
     public ClientForm $client;
 
