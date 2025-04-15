@@ -114,7 +114,7 @@ class CreateOrderPosition extends FluxAction
                         'vat_rate_percentage' => 0,
                         'is_net' => $orderPosition->is_net ?? false,
                         'is_free_text' => false,
-                        'is_bundle_position' => ! $this->data['is_free_text'],
+                        'is_bundle_position' => ! data_get($this->data, 'is_free_text'),
                     ];
                 })
                 ->each(function (array $bundleProduct): void {

@@ -27,8 +27,10 @@
             </div>
         </td>
         <td class="py-2 pr-8 text-center align-top">
-            {{ format_number($position->amount) }}
-            {{ data_get($position, 'product.unit.abbreviation') }}
+            @if (! $position->is_free_text)
+                {{ format_number($position->amount) }}
+                {{ data_get($position, 'product.unit.abbreviation') }}
+            @endif
         </td>
         <td class="py-2 text-right align-top">
             @if ($position->total_base_net_price > $position->total_net_price)
