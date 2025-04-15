@@ -169,7 +169,7 @@
                                 light
                                 loading
                                 :text="__('Download folder')"
-                                x-on:click="$wire.downloadCollection(getNodePath())"
+                                x-on:click="$wire.downloadCollection(getNodePath(selection, 'collection_name'))"
                             />
                             @show
                         </div>

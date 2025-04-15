@@ -17,13 +17,12 @@ use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
-use Livewire\WithFileUploads;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class Clients extends ClientList
 {
-    use Actions, WithFileUploads, WithTabs;
+    use Actions, \FluxErp\Traits\Livewire\WithFileUploads, WithTabs;
 
     public ClientForm $client;
 
