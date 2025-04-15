@@ -11,6 +11,7 @@ class Editor extends Component
     public function __construct(
         public bool $bold = true,
         public bool $italic = true,
+        public bool $underline = true,
         public bool $strike = true,
         public bool $code = true,
         public bool $h1 = true,

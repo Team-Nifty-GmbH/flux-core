@@ -71,6 +71,16 @@
                 text="I"
             ></x-button>
         @endif
+{{--TODO: add extention to toggleUnderline--}}
+        @if ($underline)
+            <x-button
+                flat
+                color="secondary"
+                x-on:click="editor().chain().focus().toggleUnderline().run()"
+                class="underline"
+                text="U"
+            ></x-button>
+        @endif
 
         @if ($strike)
             <x-button
