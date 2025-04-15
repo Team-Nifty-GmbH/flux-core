@@ -27,7 +27,7 @@
             </div>
         </td>
         <td class="py-2 pr-8 text-center align-top">
-            @if (! $position->is_free_text)
+            @if (! $position->is_free_text && ! $position->is_bundle_position)
                 {{ format_number($position->amount) }}
                 {{ data_get($position, 'product.unit.abbreviation') }}
             @endif
