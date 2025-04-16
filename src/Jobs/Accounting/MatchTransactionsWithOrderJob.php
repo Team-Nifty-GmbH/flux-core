@@ -2,8 +2,10 @@
 
 namespace FluxErp\Jobs\Accounting;
 
-use Exception;
+use Cron\CronExpression;
 use FluxErp\Actions\OrderTransaction\CreateOrderTransaction;
+use FluxErp\Console\Scheduling\Repeatable;
+use FluxErp\Enums\RepeatableTypeEnum;
 use FluxErp\Models\Address;
 use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\Order;
@@ -18,8 +20,9 @@ use Illuminate\Database\MultipleRecordsFoundException;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
-class MatchTransactionsWithOrderJob implements ShouldQueue
+class MatchTransactionsWithOrderJob implements Repeatable, ShouldQueue
 {
     use Batchable, Dispatchable, InteractsWithQueue, Queueable;
 
@@ -27,12 +30,49 @@ class MatchTransactionsWithOrderJob implements ShouldQueue
         public ?array $transactionIds = null
     ) {}
 
+    public function __invoke(): void
+    {
+        $this->handle();
+    }
+
+    public static function defaultCron(): ?CronExpression
+    {
+        return new CronExpression('0 23 * * *');
+    }
+
+    public static function description(): ?string
+    {
+        return 'Try to match all open transactions with orders';
+    }
+
+    public static function isRepeatable(): bool
+    {
+        return true;
+    }
+
+    public static function name(): string
+    {
+        return Str::headline(class_basename(static::class));
+    }
+
+    public static function parameters(): array
+    {
+        return [];
+    }
+
+    public static function repeatableType(): RepeatableTypeEnum
+    {
+        return RepeatableTypeEnum::Invokable;
+    }
+
     public function handle(): void
     {
         resolve_static(Transaction::class, 'query')
             ->when($this->transactionIds, fn (Builder $query) => $query->whereKey($this->transactionIds))
             ->whereNot('balance', 0)
-            ->whereDoesntHave('orders', fn (Builder $query) => $query->whereNot('is_accepted', true))
+            ->where('is_ignored', false)
+            ->whereDoesntHave('orders', fn (Builder $query) => $query->where('is_accepted', false))
+            ->latest()
             ->cursor()
             ->each(function (Transaction $transaction): void {
                 $this->processTransaction($transaction);
@@ -42,8 +82,13 @@ class MatchTransactionsWithOrderJob implements ShouldQueue
     protected function findMatchingOrders(Transaction $transaction): Collection
     {
         $contactId = resolve_static(ContactBankConnection::class, 'query')
+            ->latest()
             ->where('iban', $transaction->counterpart_iban)
-            ->value('contact_id');
+            ->value('contact_id')
+            ?? resolve_static(Order::class, 'query')
+                ->latest()
+                ->where('iban', $transaction->counterpart_iban)
+                ->value('contact_id');
 
         try {
             $contactId ??= resolve_static(Address::class, 'query')
@@ -51,7 +96,6 @@ class MatchTransactionsWithOrderJob implements ShouldQueue
                     'JSON_CONTAINS(LOWER(search_aliases), LOWER(?))',
                     [json_encode($transaction->counterpart_name)]
                 )
-                ->where('search_aliases', $transaction->counterpart_name)
                 ->sole('contact_id');
         } catch (ModelNotFoundException|MultipleRecordsFoundException) {
         }
@@ -61,6 +105,7 @@ class MatchTransactionsWithOrderJob implements ShouldQueue
         $matches = collect();
         if ($contactId) {
             $order = $this->findOrderByContactAndBalance($transaction, $contactId, $bookingDate);
+
             if ($order) {
                 // exact match for contact and balance
                 $matches->push($order);
@@ -70,24 +115,29 @@ class MatchTransactionsWithOrderJob implements ShouldQueue
         }
 
         if ($transaction->purpose) {
-            $order = $this->findOrderByPurpose($transaction, $contactId, $bookingDate);
-            if ($order) {
-                $matches->push($order);
+            $orders = $this->findOrderByPurpose($transaction, $contactId, $bookingDate);
+
+            if ($orders?->isNotEmpty()) {
+                $matches = $matches->merge($orders);
             }
         }
 
         if ($transaction->counterpart_name) {
             $order = $this->findOrderByCounterpartName($transaction, $bookingDate);
+
             if ($order) {
                 $matches->push($order);
             }
         }
 
-        return $matches;
+        return $matches->unique('id');
     }
 
-    protected function findOrderByContactAndBalance(Transaction $transaction, int $contactId, string $bookingDate): ?Order
-    {
+    protected function findOrderByContactAndBalance(
+        Transaction $transaction,
+        int $contactId,
+        string $bookingDate
+    ): ?Order {
         return resolve_static(Order::class, 'query')
             ->whereNotNull('invoice_number')
             ->where('contact_id', $contactId)
@@ -114,21 +164,25 @@ class MatchTransactionsWithOrderJob implements ShouldQueue
             ->first();
     }
 
-    protected function findOrderByPurpose(Transaction $transaction, ?int $contactId, string $bookingDate): ?Order
-    {
+    protected function findOrderByPurpose(
+        Transaction $transaction,
+        ?int $contactId,
+        string $bookingDate
+    ): ?Collection {
         $search = collect(array_merge(
             explode(' ', $transaction->purpose),
             explode('.', $transaction->purpose),
             explode('-', $transaction->purpose),
+            explode(',', $transaction->purpose),
         ))
             ->filter()
+            ->map(fn (string $word) => trim($word))
             ->unique()
             ->values();
 
         $potentialMatches = collect();
 
         foreach ($search as $word) {
-            $word = trim($word);
             if (
                 strlen($word) < 5
                 || $word === $transaction->counterpart_iban
@@ -150,73 +204,63 @@ class MatchTransactionsWithOrderJob implements ShouldQueue
 
         return $potentialMatches
             ->sortBy([
-                fn (Order $order) => abs(bcsub(round($order->balance ?? 0, 2), $transaction->amount)) > 0.01 ? 1 : 0,
+                fn (Order $order) => abs(
+                    bcsub(
+                        round($order->balance ?? 0, 2),
+                        $transaction->amount
+                    )
+                ) > 0.01 ? 1 : 0,
                 fn (Order $order) => $order->invoice_date
                     ? abs(strtotime($order->invoice_date) - strtotime($bookingDate))
                     : PHP_INT_MAX,
                 fn (Order $order) => $contactId && $order->contact_id == $contactId ? 0 : 1,
             ])
-            ->first();
+            ->values();
     }
 
     protected function findPotentialOrderMatches(string $word, Transaction $transaction, ?int $contactId): Collection
     {
-        $potentialMatches = collect();
-
-        $matches = resolve_static(Order::class, 'query')
-            ->whereRaw('LOWER(invoice_number) = ?', strtolower($word))
-            ->whereNot('balance', 0)
-            ->when($contactId, fn (Builder $query) => $query->where('contact_id', $contactId))
-            ->get();
-
-        $potentialMatches = $potentialMatches->merge($matches);
-
-        $matches = resolve_static(Order::class, 'query')
-            ->where('invoice_number', 'like', '%' . $word . '%')
-            ->whereRaw('ROUND(balance, 2) = ROUND(?, 2)', $transaction->amount)
-            ->get();
-
-        $potentialMatches = $potentialMatches->merge($matches);
-
-        if ($contactId) {
-            $matches = resolve_static(Order::class, 'query')
-                ->whereNotNull('invoice_number')
-                ->where('contact_id', $contactId)
-                ->whereRaw('ROUND(balance, 2) = ?', $transaction->amount)
-                ->get();
-
-            $potentialMatches = $potentialMatches->merge($matches);
-        }
-
-        $matches = resolve_static(Order::class, 'query')
-            ->whereNotNull('invoice_number')
-            ->whereRelation('contact', 'customer_number', $word)
-            ->whereRaw('ROUND(balance, 2) = ?', $transaction->amount)
-            ->get();
-
-        $potentialMatches = $potentialMatches->merge($matches);
-
-        try {
-            $matches = resolve_static(Order::class, 'query')
-                ->whereNotNull('invoice_number')
-                ->where('invoice_number', 'like', '%' . $word . '%')
-                ->whereRaw('ROUND(total_gross_price, 2) = ?', $transaction->amount)
-                ->get();
-
-            $potentialMatches = $potentialMatches->merge($matches);
-        } catch (Exception) {
-        }
-
-        return $potentialMatches->unique('id');
+        return resolve_static(Order::class, 'query')
+            ->where(function (Builder $query) use ($word, $transaction, $contactId): void {
+                // exact invoice number match with non-zero balance
+                $query->where(function (Builder $query) use ($word, $contactId): void {
+                    $query->whereRaw('LOWER(invoice_number) = ?', strtolower($word))
+                        ->whereNot('balance', 0)
+                        ->when($contactId, fn (Builder $subQuery) => $subQuery->where('contact_id', $contactId));
+                })
+                    // partial invoice number match with exact amount
+                    ->orWhere(function (Builder $query) use ($word, $transaction): void {
+                        $query->where('invoice_number', 'like', '%' . $word . '%')
+                            ->whereRaw('ROUND(balance, 2) = ROUND(?, 2)', $transaction->amount);
+                    })
+                    // contact id with exact amount (only if contactId exists)
+                    ->when($contactId, function (Builder $query) use ($contactId, $transaction): void {
+                        $query->orWhere(function (Builder $query) use ($contactId, $transaction): void {
+                            $query->whereNotNull('invoice_number')
+                                ->where('contact_id', $contactId)
+                                ->whereRaw('ROUND(balance, 2) = ?', $transaction->amount);
+                        });
+                    })
+                    // customer number relation with exact amount
+                    ->orWhere(function (Builder $query) use ($word, $transaction): void {
+                        $query->whereNotNull('invoice_number')
+                            ->whereRelation('contact', 'customer_number', $word)
+                            ->whereRaw('ROUND(balance, 2) = ?', $transaction->amount);
+                    })
+                    // partial invoice match with total gross price
+                    ->orWhere(function (Builder $query) use ($word, $transaction): void {
+                        $query->whereNotNull('invoice_number')
+                            ->where('invoice_number', 'like', '%' . $word . '%')
+                            ->whereRaw('ROUND(total_gross_price, 2) = ?', $transaction->amount);
+                    });
+            })
+            ->get()
+            ->unique('id');
     }
 
     protected function processTransaction(Transaction $transaction): void
     {
         $orders = $this->findMatchingOrders($transaction);
-
-        if ($orders->isEmpty()) {
-            return;
-        }
 
         $orders->each(function (Order $order) use ($transaction): void {
             if (! resolve_static(OrderTransaction::class, 'query')
@@ -224,10 +268,15 @@ class MatchTransactionsWithOrderJob implements ShouldQueue
                 ->where('transaction_id', $transaction->getKey())
                 ->exists()
             ) {
+                $transaction->refresh();
+                $amount = $transaction->amount > 0
+                    ? min($order->balance, $transaction->balance)
+                    : max($order->balance, $transaction->balance);
+
                 CreateOrderTransaction::make([
                     'transaction_id' => $transaction->getKey(),
                     'order_id' => $order->getKey(),
-                    'amount' => $order->balance ?? 0,
+                    'amount' => $amount,
                 ])
                     ->validate()
                     ->execute();

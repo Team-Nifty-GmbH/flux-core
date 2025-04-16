@@ -43,11 +43,6 @@ class PostalAddressRuleset extends FluxRuleset
             'email_primary' => 'email|max:255|nullable',
             'phone' => 'string|max:255|nullable',
             'phone_mobile' => 'string|max:255|nullable',
-            'search_aliases' => [
-                'array',
-                'nullable',
-            ],
-            'search_aliases.*' => 'string|max:255|distinct',
             'has_formal_salutation' => 'boolean|nullable',
         ];
     }

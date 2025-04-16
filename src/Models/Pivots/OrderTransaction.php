@@ -4,13 +4,10 @@ namespace FluxErp\Models\Pivots;
 
 use FluxErp\Models\Order;
 use FluxErp\Models\Transaction;
-use FluxErp\Traits\HasPackageFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OrderTransaction extends FluxPivot
 {
-    use HasPackageFactory;
-
     public $incrementing = true;
 
     protected $guarded = [
@@ -23,7 +20,11 @@ class OrderTransaction extends FluxPivot
     {
         static::saved(function (OrderTransaction $orderTransaction): void {
             $originalOrderId = $orderTransaction->getRawOriginal('order_id');
-            if ($originalOrderId && $orderTransaction->is_accepted) {
+            if (
+                $originalOrderId
+                && $originalOrderId !== $orderTransaction->order_id
+                && $orderTransaction->is_accepted
+            ) {
                 resolve_static(Order::class, 'query')
                     ->whereKey($originalOrderId)
                     ->first()
@@ -42,11 +43,11 @@ class OrderTransaction extends FluxPivot
         });
 
         static::deleted(function (OrderTransaction $orderTransaction): void {
-            if ($orderTransaction->order_id && $orderTransaction->is_accepted) {
+            if ($orderTransaction->is_accepted) {
                 $orderTransaction->order->calculatePaymentState()->save();
             }
 
-            if ($orderTransaction->transaction_id && $orderTransaction->is_accepted) {
+            if ($orderTransaction->is_accepted) {
                 $orderTransaction->transaction->calculateBalance()->save();
             }
         });

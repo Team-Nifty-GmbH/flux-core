@@ -11,6 +11,8 @@ class OrderTransactionForm extends FluxForm
 {
     public ?float $amount = null;
 
+    public bool $is_accepted = false;
+
     #[Locked]
     public ?int $order_id = null;
 

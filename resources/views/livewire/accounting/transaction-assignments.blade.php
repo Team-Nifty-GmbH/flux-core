@@ -164,11 +164,11 @@
                         </div>
                         <div class="w-1/2">
                             <x-select.styled
-                                multiple
-                                select="label:name|value:id|description:iban"
-                                :placeholder="__('Choose bank account')"
-                                :options="$bankConnections"
                                 wire:model.live="bankAccounts"
+                                multiple
+                                :placeholder="__('Choose bank account')"
+                                select="label:name|value:id|description:iban"
+                                :options="$bankConnections"
                             />
                         </div>
                     </div>
@@ -192,11 +192,11 @@
                             <x-dropdown.items>
                                 <div class="w-full">
                                     <x-select.styled
-                                        multiple
-                                        select="label:name|value:id|description:iban"
-                                        :placeholder="__('Choose bank account')"
-                                        :options="$bankConnections"
                                         wire:model.live="bankAccounts"
+                                        multiple
+                                        :placeholder="__('Choose bank account')"
+                                        select="label:name|value:id|description:iban"
+                                        :options="$bankConnections"
                                     />
                                 </div>
                             </x-dropdown.items>
@@ -209,7 +209,7 @@
                             class="flex flex-col rounded border-2 border-slate-200 lg:flex-row"
                         >
                             <div
-                                class="flex w-full flex-col border-b-2 border-slate-200 p-4 lg:w-1/2 lg:border-b-0 lg:border-r-2"
+                                class="flex w-full flex-col p-4 lg:w-1/2 lg:border-b-0 lg:border-r-2"
                             >
                                 <div class="flex justify-between gap-4">
                                     <div class="flex gap-4">
@@ -400,7 +400,7 @@
                                                 <x-button
                                                     sm
                                                     color="red"
-                                                    wire:click="ignoreTransaction(transaction.id)"
+                                                    wire:click="toggleIgnoreTransaction(transaction.id)"
                                                     x-cloak
                                                     x-show="transaction.order_transactions_count === 0 && ! transaction.is_ignored"
                                                     :text="__('Ignore transaction')"
@@ -408,7 +408,7 @@
                                                 <x-button
                                                     sm
                                                     color="emerald"
-                                                    wire:click="ignoreTransaction(transaction.id)"
+                                                    wire:click="toggleIgnoreTransaction(transaction.id)"
                                                     x-cloak
                                                     x-show="transaction.is_ignored"
                                                     :text="__('Dont ignore transaction')"

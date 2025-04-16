@@ -3,7 +3,7 @@
 namespace FluxErp\Livewire\Order;
 
 use FluxErp\Livewire\Forms\OrderForm;
-use Illuminate\View\View;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Modelable;
 use Livewire\Component;
 

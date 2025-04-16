@@ -43,23 +43,11 @@ return new class() extends Migration
 
     private function migrateTransactions(): void
     {
-        DB::transaction(function (): void {
-            $transactions = DB::table('transactions')
-                ->select('id', 'order_id', 'amount')
-                ->whereNotNull('order_id')
-                ->get();
-
-            foreach ($transactions as $transaction) {
-                DB::table('order_transaction')
-                    ->insert([
-                        'transaction_id' => $transaction->id,
-                        'order_id' => $transaction->order_id,
-                        'amount' => $transaction->amount,
-                        'is_accepted' => true,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
-            }
-        });
+        DB::statement('
+            INSERT INTO order_transaction (transaction_id, order_id, amount, is_accepted, created_at, updated_at)
+            SELECT id, order_id, amount, true, updated_at, updated_at
+            FROM transactions
+            WHERE order_id IS NOT NULL'
+        );
     }
 };

@@ -12,17 +12,17 @@ use FluxErp\Models\Order;
 use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Models\Transaction;
 use FluxErp\Traits\Livewire\Actions;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Validation\UnauthorizedException;
 use Illuminate\Validation\ValidationException;
-use Illuminate\View\View;
 use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class TransactionAssignment extends Component
+class TransactionAssignments extends Component
 {
     use Actions, WithPagination;
 
@@ -64,7 +64,7 @@ class TransactionAssignment extends Component
     #[Renderless]
     public function acceptAll(?Transaction $transaction = null): void
     {
-        if (! $transaction->exists) {
+        if (! $transaction?->exists) {
             $suggestions = resolve_static(OrderTransaction::class, 'query')
                 ->whereHas('transaction')
                 ->where('is_accepted', false)
@@ -87,7 +87,9 @@ class TransactionAssignment extends Component
                 }
             });
 
-        $this->toast()->success(__('Accepted :count assignments', ['count' => $suggestions->count()]))->send();
+        $this->toast()
+            ->success(__('Accepted :count assignments', ['count' => $suggestions->count()]))
+            ->send();
         $this->refreshTransactions();
     }
 
@@ -158,24 +160,6 @@ class TransactionAssignment extends Component
     }
 
     #[Renderless]
-    public function ignoreTransaction(Transaction $transaction): void
-    {
-        $this->transactionForm->reset();
-        $this->transactionForm->fill($transaction);
-        $this->transactionForm->is_ignored = ! $transaction->is_ignored;
-
-        try {
-            $this->transactionForm->save();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return;
-        }
-
-        $this->refreshTransactions();
-    }
-
-    #[Renderless]
     public function loadTransactions(): array
     {
         $query = resolve_static(
@@ -197,7 +181,8 @@ class TransactionAssignment extends Component
             )
             ->when(
                 $this->tab === __('Open transactions'),
-                fn (Builder $query) => $query->whereNot('balance', 0)->where('is_ignored', false)
+                fn (Builder $query) => $query->whereNot('balance', 0)
+                    ->where('is_ignored', false)
             )
             ->withSum(
                 [
@@ -275,6 +260,24 @@ class TransactionAssignment extends Component
         $this->js(<<<'JS'
             $modalOpen('transaction-comments-modal');
         JS);
+    }
+
+    #[Renderless]
+    public function toggleIgnoreTransaction(Transaction $transaction): void
+    {
+        $this->transactionForm->reset();
+        $this->transactionForm->fill($transaction);
+        $this->transactionForm->is_ignored = ! $transaction->is_ignored;
+
+        try {
+            $this->transactionForm->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->refreshTransactions();
     }
 
     public function updatedBankAccounts(): void

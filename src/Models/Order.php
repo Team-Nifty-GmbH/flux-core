@@ -260,7 +260,9 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
         $this->balance = bcround(
             bcsub(
                 $this->total_gross_price,
-                $this->transactions()->withPivot('amount')->sum('order_transaction.amount'),
+                $this->transactions()
+                    ->withPivot('amount')
+                    ->sum('order_transaction.amount'),
                 9
             ),
             2
@@ -330,7 +332,12 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
         } else {
             if (
                 bccomp(
-                    bcround($this->transactions()->withPivot('amount')->sum('order_transaction.amount'), 2),
+                    bcround(
+                        $this->transactions()
+                            ->withPivot('amount')
+                            ->sum('order_transaction.amount'),
+                        2
+                    ),
                     bcround($this->total_gross_price, 2),
                     2
                 ) === 0

@@ -2,13 +2,13 @@
 
 namespace FluxErp\Tests\Livewire\DataTables\Accounting;
 
-use FluxErp\Livewire\Accounting\TransactionAssignment;
+use FluxErp\Livewire\Accounting\TransactionAssignments;
 use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
-class TransactionAssignmentTest extends TestCase
+class TransactionAssignmentsTest extends TestCase
 {
-    protected string $livewireComponent = TransactionAssignment::class;
+    protected string $livewireComponent = TransactionAssignments::class;
 
     public function test_renders_successfully(): void
     {

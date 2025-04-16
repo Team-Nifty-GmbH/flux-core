@@ -10,8 +10,8 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::table('transactions', function (Blueprint $table): void {
-            $table->boolean('is_ignored')->default(false)->after('counterpart_bank_name');
             $table->decimal('balance', 40, 10)->nullable()->after('amount');
+            $table->boolean('is_ignored')->default(false)->after('counterpart_bank_name');
         });
 
         $this->migrateBalance();
@@ -21,8 +21,8 @@ return new class() extends Migration
     {
         Schema::table('transactions', function (Blueprint $table): void {
             $table->dropColumn([
-                'is_ignored',
                 'balance',
+                'is_ignored',
             ]);
         });
     }
@@ -34,11 +34,15 @@ return new class() extends Migration
                 ->update([
                     'balance' => DB::raw(
                         'transactions.amount - COALESCE(
-                            (SELECT SUM(amount)
-                            FROM order_transaction
-                            WHERE order_transaction.is_accepted = 1
-                            AND order_transaction.transaction_id = transactions.id),
-                        0)'),
+                            (
+                                SELECT SUM(amount)
+                                FROM order_transaction
+                                WHERE order_transaction.is_accepted = 1
+                                AND order_transaction.transaction_id = transactions.id
+                            ),
+                            0
+                        )'
+                    ),
                 ]);
         });
     }

@@ -20,9 +20,10 @@ class CreateOrderTransaction extends FluxAction
 
     public function performAction(): OrderTransaction
     {
-        $transactionAssignmentSuggestion = app(OrderTransaction::class, ['attributes' => $this->getData()]);
-        $transactionAssignmentSuggestion->save();
+        /** @var OrderTransaction $orderTransaction */
+        $orderTransaction = app(OrderTransaction::class, ['attributes' => $this->getData()]);
+        $orderTransaction->save();
 
-        return $transactionAssignmentSuggestion->fresh();
+        return $orderTransaction->refresh();
     }
 }
