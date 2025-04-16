@@ -9,6 +9,7 @@ use Illuminate\View\Component;
 class Editor extends Component
 {
     public function __construct(
+        public ?string $id = null,
         public bool $bold = true,
         public bool $italic = true,
         public bool $underline = true,
@@ -37,7 +38,9 @@ class Editor extends Component
             32,
             36,
         ]
-    ) {}
+    ) {
+        $this->id = $this->id ?? uniqid();
+    }
 
     public function render(): View|Closure|string
     {

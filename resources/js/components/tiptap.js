@@ -22,14 +22,15 @@ export default function (
             content: content,
             popUp: null,
             initTextArea(
+                id,
                 element,
                 isTransparent,
                 showTooltipDropdown,
                 initFontSize,
             ) {
-                const popUp = this.$refs?.popWindow;
-                const controlPanel = this.$refs?.controlPanel;
-                const commands = this.$refs?.commands;
+                const popUp = this.$refs[`popWindow-${id}`];
+                const controlPanel = this.$refs[`controlPanel-${id}`];
+                const commands = this.$refs[`commands-${id}`];
                 let actions = null;
 
                 if (showTooltipDropdown && popUp !== null) {
