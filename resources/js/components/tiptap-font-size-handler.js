@@ -19,9 +19,22 @@ export const FontSizeConfig = TextStyle.extend({
                                 return {};
                             }
 
-                            return {
-                                style: `font-size: ${attributes.fontSize}px`,
-                            };
+                            if (typeof attributes.fontSize === 'number') {
+                                return {
+                                    style: `font-size: ${attributes.fontSize}px`,
+                                };
+                            }
+
+                            if (
+                                typeof attributes.fontSize === 'string' &&
+                                attributes.fontSize.contain('px')
+                            ) {
+                                return {
+                                    style: `font-size: ${attributes.fontSize}`,
+                                };
+                            }
+
+                            return {};
                         },
                     },
                 },

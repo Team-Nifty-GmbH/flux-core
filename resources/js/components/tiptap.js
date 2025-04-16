@@ -1,6 +1,7 @@
 import { Editor } from '@tiptap/core';
 import { FontSizeConfig } from './tiptap-font-size-handler.js';
 import { LiteralTab } from './tiptap-literal-tab-handler.js';
+import { Underline } from '@tiptap/extension-underline';
 import StarterKit from '@tiptap/starter-kit';
 import { MentionConfig } from './tiptap-mention-handler.js';
 
@@ -21,14 +22,15 @@ export default function (
             content: content,
             popUp: null,
             initTextArea(
+                id,
                 element,
                 isTransparent,
                 showTooltipDropdown,
                 initFontSize,
             ) {
-                const popUp = this.$refs?.popWindow;
-                const controlPanel = this.$refs?.controlPanel;
-                const commands = this.$refs?.commands;
+                const popUp = this.$refs[`popWindow-${id}`];
+                const controlPanel = this.$refs[`controlPanel-${id}`];
+                const commands = this.$refs[`commands-${id}`];
                 let actions = null;
 
                 if (showTooltipDropdown && popUp !== null) {
@@ -50,6 +52,7 @@ export default function (
                         StarterKit,
                         FontSizeConfig,
                         LiteralTab,
+                        Underline,
                         MentionConfig(searchModel, element),
                     ],
                     timeout: null,
