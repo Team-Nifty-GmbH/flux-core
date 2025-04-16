@@ -39,6 +39,7 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Contracts\Queue\Factory as QueueFactoryContract;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -82,6 +83,8 @@ class FluxServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        Model::automaticallyEagerLoadRelationships();
+
         bcscale(9);
         $this->bootMiddleware();
         $this->bootCommands();
