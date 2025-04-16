@@ -4,6 +4,7 @@ namespace FluxErp\View\Components;
 
 use Closure;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Str;
 use Illuminate\View\Component;
 
 class Editor extends Component
@@ -39,7 +40,7 @@ class Editor extends Component
             36,
         ]
     ) {
-        $this->id = $this->id ?? uniqid();
+        $this->id ??= Str::uuid()->toString();
     }
 
     public function render(): View|Closure|string
