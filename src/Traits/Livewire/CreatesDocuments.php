@@ -86,12 +86,11 @@ trait CreatesDocuments
     {
         if (
             $defaultPrinter = auth()->user()
-                ?->printerUsers()
-                ->where('is_default', true)
-                ->with('printer:id,media_sizes')
-                ->first()
+                ?->printers()
+                ->where('printer_user.is_default', true)
+                ->first(['id', 'default_size'])
         ) {
-            $this->printJobForm->printer_id = $defaultPrinter->printer_id;
+            $this->printJobForm->printer_id = $defaultPrinter->id;
             $this->printJobForm->size = $defaultPrinter->default_size;
         }
     }

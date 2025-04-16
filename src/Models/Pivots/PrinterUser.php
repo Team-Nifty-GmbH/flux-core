@@ -22,7 +22,7 @@ class PrinterUser extends FluxPivot
             if ($printerUser->isDirty('is_default') && $printerUser->is_default) {
                 resolve_static(PrinterUser::class, 'query')
                     ->whereKeyNot($printerUser->getKey())
-                    ->where('user_id' . $printerUser->user_id)
+                    ->where('user_id', $printerUser->user_id)
                     ->where('is_default', true)
                     ->update(['is_default' => false]);
             }
