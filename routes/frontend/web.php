@@ -74,6 +74,7 @@ use FluxErp\Livewire\Settings\SerialNumberRanges;
 use FluxErp\Livewire\Settings\Settings;
 use FluxErp\Livewire\Settings\Tags;
 use FluxErp\Livewire\Settings\TicketTypes;
+use FluxErp\Livewire\Settings\Tokens;
 use FluxErp\Livewire\Settings\Units;
 use FluxErp\Livewire\Settings\UserEdit;
 use FluxErp\Livewire\Settings\Users;
@@ -216,6 +217,7 @@ Route::middleware('web')
                         Route::get('/serial-number-ranges', SerialNumberRanges::class)->name('serial-number-ranges');
                         Route::get('/tags', Tags::class)->name('tags');
                         Route::get('/ticket-types', TicketTypes::class)->name('ticket-types');
+                        Route::get('/tokens', Tokens::class)->name('tokens');
                         Route::get('/translations', LanguageLines::class)->name('translations');
                         Route::get('/units', Units::class)->name('units');
                         Route::get('/users', Users::class)->name('users');
