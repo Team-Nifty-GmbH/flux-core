@@ -88,7 +88,8 @@ trait CreatesDocuments
             $defaultPrinter = auth()->user()
                 ?->printerUsers()
                 ->where('is_default', true)
-                ->with('printer:id,media_sizes')->first()
+                ->with('printer:id,media_sizes')
+                ->first()
         ) {
             $this->printJobForm->printer_id = $defaultPrinter->printer_id;
             $this->printJobForm->size = $defaultPrinter->default_size;
@@ -343,6 +344,7 @@ trait CreatesDocuments
 
         if ($printIds && $this->printJobForm->printer_id) {
             foreach ($printIds as $printId) {
+                $this->printJobForm->reset('id');
                 $this->printJobForm->media_id = $printId;
 
                 try {

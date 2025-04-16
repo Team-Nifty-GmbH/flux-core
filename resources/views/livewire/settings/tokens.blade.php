@@ -1,6 +1,29 @@
 <x-modal :id="$tokenForm->modalName()">
     <div class="flex flex-col gap-4">
         <x-input wire:model="tokenForm.name" :label="__('Name')" />
+        <x-select.styled
+            wire:model="tokenForm.abilities"
+            multiple
+            :label="__('Abilities')"
+            :options="[
+                [
+                    'value' => '*',
+                    'label' => __('All'),
+                ],
+                [
+                    'value' => 'interface',
+                    'label' => __('Interface'),
+                ],
+                [
+                    'value' => 'user',
+                    'label' => __('User'),
+                ],
+                [
+                    'value' => 'address',
+                    'label' => __('Address'),
+                ],
+            ]"
+        />
         <x-textarea
             wire:model="tokenForm.description"
             :label="__('Description')"

@@ -146,9 +146,9 @@
                     <x-select.styled
                         :label="__('Printer')"
                         wire:model="printJobForm.printer_id"
-                        :options="$printers"
                         x-on:select="$tallstackuiSelect('print-job-size').setOptions($event.detail.select.media_sizes)"
                         select="label:name|value:id|description:location"
+                        :options="$printers"
                     />
                     <div
                         x-cloak
