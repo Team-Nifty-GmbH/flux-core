@@ -20,6 +20,8 @@
         "@tailwindcss/typography": "^0.5.10",
         "@tiptap/core": "^2.3.1",
         "@tiptap/extension-mention": "^2.5.7",
+        "@tiptap/extension-text-style": "2.11.5",
+        "@tiptap/extension-underline":"^2.11.7",
         "@tiptap/pm": "^2.3.1",
         "@tiptap/starter-kit": "^2.3.1",
         "@types/lodash.debounce": "^4.0.8",

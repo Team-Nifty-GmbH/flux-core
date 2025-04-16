@@ -1,6 +1,7 @@
 import { Editor } from '@tiptap/core';
 import { FontSizeConfig } from './tiptap-font-size-handler.js';
 import { LiteralTab } from './tiptap-literal-tab-handler.js';
+import { Underline } from '@tiptap/extension-underline';
 import StarterKit from '@tiptap/starter-kit';
 import { MentionConfig } from './tiptap-mention-handler.js';
 
@@ -50,6 +51,7 @@ export default function (
                         StarterKit,
                         FontSizeConfig,
                         LiteralTab,
+                        Underline,
                         MentionConfig(searchModel, element),
                     ],
                     timeout: null,

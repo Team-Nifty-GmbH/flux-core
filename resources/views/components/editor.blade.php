@@ -71,7 +71,7 @@
                 text="I"
             ></x-button>
         @endif
-{{--TODO: add extention to toggleUnderline--}}
+{{--TODO: add extention to toggleUnderline @tiptap/extension-underline--}}
         @if ($underline)
             <x-button
                 flat
