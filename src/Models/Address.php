@@ -241,6 +241,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         return [
             'date_of_birth' => 'date',
             'advertising_state' => AdvertisingState::class,
+            'search_aliases' => 'array',
             'has_formal_salutation' => 'boolean',
             'is_main_address' => 'boolean',
             'is_invoice_address' => 'boolean',

@@ -82,6 +82,8 @@ class AddressForm extends FluxForm
 
     public ?string $salutation = null;
 
+    public ?array $search_aliases = null;
+
     public ?string $street = null;
 
     public array $tags = [];

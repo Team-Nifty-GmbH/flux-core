@@ -100,7 +100,7 @@ class VariantList extends ProductList
                 ->icon('arrow-path')
                 ->when(fn () => resolve_static(UpdateProduct::class, 'canPerformAction', [false]))
                 ->attributes([
-                    'wire:flux-confirm.icon.info' => __('wire:confirm.recalculate-product-names'),
+                    'wire:flux-confirm.type.info' => __('wire:confirm.recalculate-product-names'),
                     'wire:click' => 'recalculateNames',
                 ]),
         ];

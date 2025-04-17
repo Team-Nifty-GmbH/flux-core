@@ -1,2 +1,8 @@
 resources/views/components/tabs.blade.php
-resources/views/emails/orders/order-confirmation.blade.php
+**mail**
+/node_modules
+/public
+/vendor
+/storage
+.DS_Store
+Thumbs.db

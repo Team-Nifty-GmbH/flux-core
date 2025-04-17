@@ -43,7 +43,7 @@ class Comments extends Component
     public bool $isPublic = true;
 
     #[Modelable]
-    public int $modelId = 0;
+    public ?int $modelId = null;
 
     /** @var Model $this->modelType */
     public string $modelType = '';
@@ -98,6 +98,10 @@ class Comments extends Component
     #[Renderless]
     public function loadComments(): array
     {
+        if (! $this->modelId) {
+            return [];
+        }
+
         /** @var Model $record */
         $record = resolve_static($this->modelType, 'query')
             ->whereKey($this->modelId)
@@ -146,6 +150,10 @@ class Comments extends Component
     #[Renderless]
     public function loadStickyComments(): array
     {
+        if (! $this->modelId) {
+            return [];
+        }
+
         resolve_static(Comment::class, 'addGlobalScopes', [
             'scopes' => [
                 'media' => function (Builder $query): void {

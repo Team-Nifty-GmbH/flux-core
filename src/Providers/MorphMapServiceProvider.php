@@ -62,6 +62,7 @@ use FluxErp\Models\Pivots\Communicatable;
 use FluxErp\Models\Pivots\ContactDiscount;
 use FluxErp\Models\Pivots\ContactDiscountGroup;
 use FluxErp\Models\Pivots\JobBatchable;
+use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Models\Pivots\PrinterUser;
 use FluxErp\Models\Pivots\ProductBundleProduct;
 use FluxErp\Models\Pivots\ProductCrossSellingProduct;
@@ -207,6 +208,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'contact_discount' => ContactDiscount::class,
             'contact_discount_group' => ContactDiscountGroup::class,
             'job_batchable' => JobBatchable::class,
+            'order_transaction' => OrderTransaction::class,
             'printer_user' => PrinterUser::class,
             'product_bundle_product' => ProductBundleProduct::class,
             'product_cross_selling_product' => ProductCrossSellingProduct::class,
