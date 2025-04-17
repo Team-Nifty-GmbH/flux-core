@@ -11,6 +11,7 @@
             @section('first-page-right-block')
             <table class="border-separate border-spacing-x-2">
                 <tbody class="align-text-top text-xs">
+                    @section('first-page-right-block.rows')
                     <tr>
                         <td class="text-right font-semibold">
                             {{ __('Order no.') }}
@@ -45,6 +46,8 @@
                             </td>
                         </tr>
                     @endif
+
+                    @show
                 </tbody>
             </table>
             @show
