@@ -11,7 +11,7 @@
     <tr>
         <td class="text-right font-semibold">{{ __('Performance Date') }}:</td>
         <td>
-            @if ($model->system_delivery_date_end)
+            @if ($model->system_delivery_date_end && $model->system_delivery_date_end->format('Y-m-d') !== $model->system_delivery_date->format('Y-m-d'))
                 {{ ($model->system_delivery_date ?: now())->locale(app()->getLocale())->isoFormat('L') }}
                 -
                 {{ ($model->system_delivery_date_end ?: now())->locale(app()->getLocale())->isoFormat('L') }}

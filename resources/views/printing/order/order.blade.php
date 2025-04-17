@@ -7,51 +7,49 @@
 @section('first-page-header')
 <x-flux::print.first-page-header :address="$model->addressInvoice" :$model>
     <x-slot:right-block>
-        <div class="inline-block">
-            @section('first-page-right-block')
-            <table class="border-separate border-spacing-x-2">
-                <tbody class="align-text-top text-xs">
-                    @section('first-page-right-block.rows')
-                    <tr>
-                        <td class="text-right font-semibold">
-                            {{ __('Order no.') }}
+        @section('first-page-right-block')
+        <table class="border-separate border-spacing-x-2">
+            <tbody class="align-text-top text-xs leading-none">
+                @section('first-page-right-block.rows')
+                <tr class="leading-none">
+                    <td class="py-0 text-right font-semibold">
+                        {{ __('Order no.') }}
+                    </td>
+                    <td class="py-0">
+                        {{ $model->order_number }}
+                    </td>
+                </tr>
+                <tr class="leading-none">
+                    <td class="py-0 text-right font-semibold">
+                        {{ __('Customer no.') }}
+                    </td>
+                    <td class="py-0">
+                        {{ $model->addressInvoice->contact->customer_number }}
+                    </td>
+                </tr>
+                <tr class="leading-none">
+                    <td class="py-0 text-right font-semibold">
+                        {{ __('Order Date') }}
+                    </td>
+                    <td class="py-0">
+                        {{ $model->order_date->locale(app()->getLocale())->isoFormat('L') }}
+                    </td>
+                </tr>
+                @if ($model->commission)
+                    <tr class="leading-none">
+                        <td class="py-0 text-right font-semibold">
+                            {{ __('Commission') }}
                         </td>
-                        <td>
-                            {{ $model->order_number }}
+                        <td class="py-0">
+                            {{ $model->commission }}
                         </td>
                     </tr>
-                    <tr>
-                        <td class="text-right font-semibold">
-                            {{ __('Customer no.') }}
-                        </td>
-                        <td>
-                            {{ $model->addressInvoice->contact->customer_number }}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="text-right font-semibold">
-                            {{ __('Order Date') }}
-                        </td>
-                        <td>
-                            {{ $model->order_date->locale(app()->getLocale())->isoFormat('L') }}
-                        </td>
-                    </tr>
-                    @if ($model->commission)
-                        <tr>
-                            <td class="text-right font-semibold">
-                                {{ __('Commission') }}
-                            </td>
-                            <td>
-                                {{ $model->commission }}
-                            </td>
-                        </tr>
-                    @endif
+                @endif
 
-                    @show
-                </tbody>
-            </table>
-            @show
-        </div>
+                @show
+            </tbody>
+        </table>
+        @show
     </x-slot>
 </x-flux::print.first-page-header>
 @show
@@ -66,17 +64,17 @@
         <table class="w-full table-auto text-xs">
             <thead class="border-b-2 border-black">
                 @section('positions.header')
-                <tr>
-                    <th class="pr-8 text-left font-normal">
+                <tr class="py-2">
+                    <th class="py-2 pr-8 text-left font-normal">
                         {{ __('Pos.') }}
                     </th>
-                    <th class="pr-8 text-left font-normal">
+                    <th class="py-2 pr-8 text-left font-normal">
                         {{ __('Name') }}
                     </th>
-                    <th class="pr-8 text-center font-normal">
+                    <th class="py-2 pr-8 text-center font-normal">
                         {{ __('Amount') }}
                     </th>
-                    <th class="text-right font-normal uppercase">
+                    <th class="py-2 text-right font-normal uppercase">
                         {{ __('Sum') }}
                     </th>
                 </tr>

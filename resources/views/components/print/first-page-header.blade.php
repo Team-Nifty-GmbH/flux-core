@@ -52,12 +52,8 @@
             </td>
             <td class="w-1/2 align-top">
                 @section('recipient-address.right-block')
-                <div
-                    class="float-right inline-block max-w-full items-end text-xs"
-                >
-                    <div>
-                        {{ $rightBlock ?? '' }}
-                    </div>
+                <div class="float-right inline-block max-w-full text-xs">
+                    {{ $rightBlock ?? '' }}
                 </div>
                 @show
             </td>
