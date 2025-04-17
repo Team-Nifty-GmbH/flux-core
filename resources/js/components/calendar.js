@@ -1,3 +1,5 @@
+import momentTimezonePlugin from '@fullcalendar/moment-timezone';
+
 const calendar = () => {
     return {
         calendarItem: {},
@@ -320,6 +322,7 @@ const calendar = () => {
                     timeGridPlugin,
                     listPlugin,
                     interactionPlugin,
+                    momentTimezonePlugin,
                 ],
                 initialView: 'dayGridMonth',
                 slotDuration: '00:15:00',

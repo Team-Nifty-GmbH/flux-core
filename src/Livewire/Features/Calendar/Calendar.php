@@ -262,6 +262,7 @@ class Calendar extends Component
                 Arr::dot(
                     [
                         'locale' => app()->getLocale(),
+                        'timeZone' => auth()->user()?->timezone ?? 'local',
                         'firstDay' => Carbon::getWeekStartsAt(),
                         'height' => '500px',
                         'views' => $this->getViews(),
