@@ -553,13 +553,13 @@ if (! function_exists('morphed_model')) {
 }
 
 if (! function_exists('morph_to')) {
-    function morph_to(string $type, ?int $id = null, bool $returnBuilder = false): Illuminate\Database\Eloquent\Model|Illuminate\Database\Eloquent\Builder|null
+    function morph_to(?string $type = null, ?int $id = null, bool $returnBuilder = false): Illuminate\Database\Eloquent\Model|Illuminate\Database\Eloquent\Builder|null
     {
         if (is_null($id) && str_contains($type, ':')) {
             [$type, $id] = explode(':', $type);
         }
 
-        if (is_null($id)) {
+        if (is_null($id) || is_null($type)) {
             return null;
         }
 
