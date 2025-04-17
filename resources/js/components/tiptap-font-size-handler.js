@@ -27,7 +27,7 @@ export const FontSizeConfig = TextStyle.extend({
 
                             if (
                                 typeof attributes.fontSize === 'string' &&
-                                attributes.fontSize.contain('px')
+                                attributes.fontSize.includes('px')
                             ) {
                                 return {
                                     style: `font-size: ${attributes.fontSize}`,
