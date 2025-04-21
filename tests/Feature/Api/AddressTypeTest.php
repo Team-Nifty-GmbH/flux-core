@@ -18,6 +18,8 @@ class AddressTypeTest extends BaseSetup
         parent::setUp();
 
         $this->permissions = [
+            'show' => Permission::findOrCreate('api.bank-connections.{id}.get'),
+            'index' => Permission::findOrCreate('api.bank-connections.get'),
             'create' => Permission::findOrCreate('api.address_types.post'),
             'update' => Permission::findOrCreate('api.address_types.put'),
             'delete' => Permission::findOrCreate('api.address_types.{id}.delete'),
@@ -139,8 +141,7 @@ class AddressTypeTest extends BaseSetup
             'client_id' => $this->dbClient->id,
         ]);
 
-        $permission = Permission::findOrCreate('api.address_types.get');
-        $this->user->givePermissionTo($permission);
+        $this->user->givePermissionTo($this->permissions['index']);
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->get('/api/address-types');
@@ -159,8 +160,7 @@ class AddressTypeTest extends BaseSetup
 
     public function test_get_non_existent_address_types(): void
     {
-        $permission = Permission::findOrCreate('api.address_types.{id}.get');
-        $this->user->givePermissionTo($permission);
+        $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->get('/api/address-types/' . '1');
@@ -173,8 +173,7 @@ class AddressTypeTest extends BaseSetup
             'client_id' => $this->dbClient->id,
         ]);
 
-        $permission = Permission::findOrCreate('api.address_types.{id}.get');
-        $this->user->givePermissionTo($permission);
+        $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)->get('/api/address-types/' . $addressTypes[0]->id);
