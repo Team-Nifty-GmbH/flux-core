@@ -28,6 +28,7 @@ class FluxSeeder extends Seeder
         $this->call(MailAccountTableSeeder::class);
         $this->call(MailAccountUserTableSeeder::class);
         $this->call(MailFolderTableSeeder::class);
+        $this->call(CommunicationTableSeeder::class);
 
         $this->call(ClientTableSeeder::class);
         $this->call(BankConnectionTableSeeder::class);
