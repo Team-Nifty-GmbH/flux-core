@@ -108,6 +108,22 @@ class CalendarEventForm extends FluxForm
         $this->fill($values);
     }
 
+    public function save(): void
+    {
+        if ($this->was_repeatable
+            && $this->has_repeats
+            && $this->confirm_option === 'this'
+        ) {
+            $this->confirm_option = 'future';
+        }
+
+        if (! $this->was_repeatable) {
+            $this->confirm_option = 'all';
+        }
+
+        parent::save();
+    }
+
     protected function getActions(): array
     {
         return [];
