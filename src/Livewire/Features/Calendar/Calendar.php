@@ -427,8 +427,8 @@ class Calendar extends Component
         }
 
         $this->editEvent([
-            'start' => $start->toDateTimeString(),
-            'end' => $start->addMinutes(15)->toDateTimeString(),
+            'start' => $start->toIso8601String(),
+            'end' => $start->addMinutes(15)->toIso8601String(),
             'allDay' => $allDay,
             'calendar_id' => $this->calendar->id,
             'model_type' => $this->calendar->model_type,

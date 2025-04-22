@@ -40,10 +40,10 @@ class CalendarEvent extends FluxModel implements HasMedia
     protected function casts(): array
     {
         return [
-            'start' => 'datetime',
-            'end' => 'datetime',
-            'repeat_start' => 'datetime',
-            'repeat_end' => 'datetime',
+            'start' => 'datetime:UTC',
+            'end' => 'datetime:UTC',
+            'repeat_start' => 'datetime:UTC',
+            'repeat_end' => 'datetime:UTC',
             'excluded' => 'array',
             'is_all_day' => 'boolean',
             'has_taken_place' => 'boolean',
