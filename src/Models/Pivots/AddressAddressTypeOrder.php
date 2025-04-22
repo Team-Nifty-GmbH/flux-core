@@ -13,12 +13,13 @@ class AddressAddressTypeOrder extends FluxPivot
 {
     use HasPackageFactory;
 
-    protected $table = 'address_address_type_order';
+    public $incrementing = false;
 
     public $timestamps = false;
+
     protected $primaryKey = ['address_id', 'address_type_id', 'order_id'];
 
-    public $incrementing = false;
+    protected $table = 'address_address_type_order';
 
     protected static function booted(): void
     {
@@ -32,7 +33,7 @@ class AddressAddressTypeOrder extends FluxPivot
     protected function casts(): array
     {
         return [
-            'address' => 'array',
+            'address' => 'json',
         ];
     }
 
@@ -48,11 +49,11 @@ class AddressAddressTypeOrder extends FluxPivot
 
     public function getAddressAttribute(): ?Model
     {
-        $address = $this->fromJson($this->attributes['address'] ?? null);
+        $address = $this->fromJson(data_get($this->attributes, 'address'));
 
         return $address
             ? resolve_static(Address::class, 'query')
-                ->whereKey($address['id'])
+                ->whereKey(data_get($address, 'id'))
                 ->firstOrNew()
                 ->fill($address)
             : $this->address()->first();
