@@ -2,9 +2,7 @@
 
 namespace FluxErp\Models\Pivots;
 
-use FluxErp\Models\Client;
 use FluxErp\Models\MailAccount;
-use FluxErp\Models\Product;
 use FluxErp\Models\User;
 use FluxErp\Traits\HasPackageFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -22,11 +20,6 @@ class MailAccountUser extends FluxPivot
 
     protected $table = 'mail_account_user';
 
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'user_id');
-    }
-
     public function mailAccount(): BelongsTo
     {
         return $this->belongsTo(MailAccount::class, 'mail_account_id');
@@ -35,5 +28,10 @@ class MailAccountUser extends FluxPivot
     public function siblings(): HasMany
     {
         return $this->hasMany(MailAccountUser::class, 'mail_account_id', 'mail_account_id');
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 }

@@ -2,7 +2,6 @@
 
 namespace FluxErp\Database\Factories;
 
-
 use FluxErp\Models\Pivots\MailAccountUser;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
