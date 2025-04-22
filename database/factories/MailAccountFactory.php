@@ -19,6 +19,8 @@ class MailAccountFactory extends Factory
             'smtp_email' => $this->faker->safeEmail(),
             'smtp_password' => $this->faker->password(),
             'smtp_host' => $this->faker->domainName(),
+            'is_auto_assign' => $this->faker->boolean(),
+            'is_o_auth' => $this->faker->boolean(),
         ];
     }
 }
