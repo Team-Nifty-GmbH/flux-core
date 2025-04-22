@@ -35,6 +35,7 @@ class FluxSeeder extends Seeder
         $this->call(ContactTableSeeder::class);
         $this->call(AddressTypeTableSeeder::class);
         $this->call(AddressTableSeeder::class);
+
         $this->call(ContactOptionTableSeeder::class);
         $this->call(CategoryTableSeeder::class);
         $this->call(ProjectTableSeeder::class);
@@ -57,6 +58,7 @@ class FluxSeeder extends Seeder
         $this->call(PriceTableSeeder::class);
         $this->call(OrderTableSeeder::class);
         $this->call(OrderPositionTableSeeder::class);
+        $this->call(AddressAddressTypeOrderTableSeeder::class);
         $this->call(TransactionTableSeeder::class);
         $this->call(DiscountTableSeeder::class);
         $this->call(SerialNumberTableSeeder::class);
