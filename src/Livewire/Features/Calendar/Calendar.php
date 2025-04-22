@@ -148,10 +148,7 @@ class Calendar extends Component
             try {
                 $model = morphed_model(data_get($event, 'extendedProps.calendar_type') ?? '')
                     ?? resolve_static(CalendarEvent::class, 'class');
-                $model::fromCalendarEvent($event, 'update')
-                    ->checkPermission()
-                    ->validate()
-                    ->execute();
+                $this->event->save();
 
                 $this->toast()
                     ->success(__(':model saved', ['model' => __(Str::headline(morph_alias($model)))]))
@@ -427,8 +424,8 @@ class Calendar extends Component
         }
 
         $this->editEvent([
-            'start' => $start->toDateTimeString(),
-            'end' => $start->addMinutes(15)->toDateTimeString(),
+            'start' => $start->toIso8601String(),
+            'end' => $start->addMinutes(15)->toIso8601String(),
             'allDay' => $allDay,
             'calendar_id' => $this->calendar->id,
             'model_type' => $this->calendar->model_type,
