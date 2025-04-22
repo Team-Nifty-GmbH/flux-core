@@ -2,10 +2,8 @@
 
 namespace FluxErp\Database\Seeders;
 
-use FluxErp\Models\Cart;
 use FluxErp\Models\Client;
 use FluxErp\Models\PaymentType;
-use FluxErp\Models\PriceList;
 use Illuminate\Database\Seeder;
 
 class ClientPaymentTypeTableSeeder extends Seeder

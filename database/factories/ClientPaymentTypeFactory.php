@@ -2,7 +2,6 @@
 
 namespace FluxErp\Database\Factories;
 
-use FluxErp\Models\Cart;
 use FluxErp\Models\Pivots\ClientPaymentType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 

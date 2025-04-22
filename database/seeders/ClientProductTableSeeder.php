@@ -2,10 +2,7 @@
 
 namespace FluxErp\Database\Seeders;
 
-use FluxErp\Models\Cart;
 use FluxErp\Models\Client;
-use FluxErp\Models\PaymentType;
-use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use Illuminate\Database\Seeder;
 
