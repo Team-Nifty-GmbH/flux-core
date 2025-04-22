@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use FluxErp\Models\Pivots\ClientPaymentType;
+use FluxErp\Models\Pivots\ClientProduct;
 use FluxErp\Traits\CacheModelQueries;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasClientAssignment;
@@ -91,6 +92,12 @@ class Client extends FluxModel implements HasMedia
     {
         return $this->belongsToMany(PaymentType::class, 'client_payment_type')
             ->using(ClientPaymentType::class);
+    }
+
+    public function products(): BelongsToMany
+    {
+        return $this->belongsToMany(Product::class, 'client_product')
+            ->using(ClientProduct::class);
     }
 
     public function projects(): HasMany
