@@ -9,6 +9,6 @@ class MailAccountTableSeeder extends Seeder
 {
     public function run(): void
     {
-        MailAccount::factory()->count(5)->create();
+        MailAccount::factory()->count(10)->create();
     }
 }
