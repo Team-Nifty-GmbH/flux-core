@@ -115,8 +115,7 @@ class CalendarEventForm extends FluxForm
 
     protected function makeAction(string $name, ?array $data = null): FluxAction
     {
-        $model = morphed_model(data_get($this->extended_props, 'calendar_type') ?? '')
-            ?? resolve_static(CalendarEvent::class, 'class');
+        $model = morphed_model($this->calendar_type ?? '') ?? resolve_static(CalendarEvent::class, 'class');
 
         $data = $this->toArray();
         if (! data_get($data, 'is_repeatable') || ! data_get($data, 'has_repeats')) {

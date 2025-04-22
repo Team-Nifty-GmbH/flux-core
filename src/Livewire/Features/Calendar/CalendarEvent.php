@@ -89,7 +89,7 @@ class CalendarEvent extends Component
         $this->js(<<<JS
             \$modalClose('confirm-dialog');
             \$modalClose('edit-event-modal');
-            calendar.getEventSourceById('{$this->event->calendar_id}').refetch();
+            calendar.getEventSourceById('{$this->event->calendar_id}')?.refetch();
         JS);
 
         return true;
