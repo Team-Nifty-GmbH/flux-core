@@ -2,29 +2,28 @@
 
 namespace FluxErp\Database\Seeders;
 
-use FluxErp\Models\Contact;
 use FluxErp\Models\Discount;
-use FluxErp\Models\Pivots\ContactDiscount;
+use FluxErp\Models\DiscountGroup;
+use FluxErp\Models\Pivots\DiscountDiscountGroup;
 use Illuminate\Database\Seeder;
 
-class ContactDiscountTableSeeder extends Seeder
+class DiscountDiscountGroupTableSeeder extends Seeder
 {
     public function run(): void
     {
-        $contactIds = Contact::query()->get('id');
-        $cutContactIds = $contactIds->random(bcfloor($contactIds->count() * 0.7));
         $discountIds = Discount::query()->get('id');
         $cutDiscountIds = $discountIds->random(bcfloor($discountIds->count() * 0.7));
+        $discountGroupIds = DiscountGroup::query()->get('id');
+        $cutDiscountGroupIds = $discountGroupIds->random(bcfloor($discountGroupIds->count() * 0.8));
 
-        foreach ($cutContactIds as $cutContactId) {
+        foreach ($cutDiscountGroupIds as $cutDiscountGroupId) {
             $numGroups = rand(1, floor($cutDiscountIds->count() * 0.8));
 
             $ids = $cutDiscountIds->random($numGroups)->pluck('id')->toArray();
-
-            foreach ($ids as $id){
-                ContactDiscount::factory()->create([
-                    'contact_id' => $cutContactId,
+            foreach ($ids as $id) {
+                DiscountDiscountGroup::factory()->create([
                     'discount_id' => $id,
+                    'discount_group_id' => $cutDiscountGroupId,
                 ]);
             }
         }

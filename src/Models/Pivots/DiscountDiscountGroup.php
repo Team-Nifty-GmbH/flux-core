@@ -2,13 +2,13 @@
 
 namespace FluxErp\Models\Pivots;
 
-use FluxErp\Models\Contact;
+use FluxErp\Models\Discount;
 use FluxErp\Models\DiscountGroup;
 use FluxErp\Traits\HasPackageFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class ContactDiscountGroup extends FluxPivot
+class DiscountDiscountGroup extends FluxPivot
 {
     use HasPackageFactory;
 
@@ -18,11 +18,11 @@ class ContactDiscountGroup extends FluxPivot
 
     protected $primaryKey = 'id';
 
-    protected $table = 'contact_discount_group';
+    protected $table = 'discount_discount_group';
 
-    public function contact(): BelongsTo
+    public function discount(): BelongsTo
     {
-        return $this->belongsTo(Contact::class, 'contact_id');
+        return $this->belongsTo(Discount::class, 'discount_id');
     }
 
     public function discountGroup(): BelongsTo
@@ -32,6 +32,6 @@ class ContactDiscountGroup extends FluxPivot
 
     public function siblings(): HasMany
     {
-        return $this->hasMany(ContactDiscountGroup::class, 'discount_group_id', 'discount_group_id');
+        return $this->hasMany(DiscountDiscountGroup::class, 'discount_group_id', 'discount_group_id');
     }
 }

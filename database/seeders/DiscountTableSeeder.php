@@ -13,7 +13,7 @@ class DiscountTableSeeder extends Seeder
         $discounts = Discount::all(['id']);
         $orderPositions = OrderPosition::all(['id']);
 
-        for ($i = 0; $i < 20; $i++) {
+        for ($i = 0; $i < 30; $i++) {
             $isNewDiscount = $discounts->isEmpty() ? 1 : rand(0, 1);
             Discount::factory()->create([
                 'model_id' => $isNewDiscount ? $orderPositions->random()->id : null,
