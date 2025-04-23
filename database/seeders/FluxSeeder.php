@@ -15,12 +15,12 @@ class FluxSeeder extends Seeder
         $this->call(LanguageTableSeeder::class);
         Artisan::call(InitPermissions::class);
         Role::findOrCreate('Super Admin');
+        $this->call(CurrencyTableSeeder::class);
         $this->call(UserTableSeeder::class);
         CauserResolver::resolveUsing(function () {
             return \FluxErp\Models\User::query()->inRandomOrder()->first();
         });
 
-        $this->call(CurrencyTableSeeder::class);
         $this->call(CountryTableSeeder::class);
         $this->call(CountryRegionTableSeeder::class);
         $this->call(PriceListTableSeeder::class);

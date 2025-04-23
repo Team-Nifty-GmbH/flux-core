@@ -3,6 +3,7 @@
 namespace FluxErp\Database\Seeders;
 
 use FluxErp\Facades\Widget;
+use FluxErp\Models\Currency;
 use FluxErp\Models\Language;
 use FluxErp\Models\User;
 use Illuminate\Database\Seeder;
@@ -14,12 +15,14 @@ class UserTableSeeder extends Seeder
     public function run(): void
     {
         $languages = Language::all('id');
+        $currency = Currency::all('id');
         $password = Hash::make('password');
 
         User::factory(10)
             ->create([
                 'password' => $password,
-                'language_id' => fn () => $languages->random()->id,
+                'language_id' => fn () => $languages->random()->getKey(),
+                'currency_id' => fn () => $currency->random()->getKey(),
             ])
             ->each(function (User $user): void {
                 $user->assignRole('Super Admin');
