@@ -18,7 +18,7 @@ class PaymentReminderTextFactory extends Factory
             'mail_body' => $this->faker->paragraph(),
             'reminder_subject' => $this->faker->sentence(),
             'reminder_body' => $this->faker->paragraph(),
-            'reminder_level' => $this->faker->unique()->numberBetween(1, 10),
+            'reminder_level' => $this->faker->numberBetween(1, 10),
         ];
     }
 }
