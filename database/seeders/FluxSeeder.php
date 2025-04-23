@@ -100,6 +100,7 @@ class FluxSeeder extends Seeder
         $this->call(CalendarEventTableSeeder::class);
         $this->call(TicketTypeTableSeeder::class);
         $this->call(TicketTableSeeder::class);
+        $this->call(TicketUserTableSeeder::class);
         $this->call(RoleTicketTypeTableSeeder::class);
         $this->call(CommentTableSeeder::class);
     }
