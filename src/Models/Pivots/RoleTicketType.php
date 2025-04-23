@@ -1,0 +1,33 @@
+<?php
+
+namespace FluxErp\Models\Pivots;
+
+use FluxErp\Models\OrderPosition;
+use FluxErp\Models\Role;
+use FluxErp\Models\StockPosting;
+use FluxErp\Models\TicketType;
+use FluxErp\Traits\HasPackageFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class RoleTicketType extends FluxPivot
+{
+    use HasPackageFactory;
+
+    public $incrementing = true;
+
+    public $timestamps = false;
+
+    protected $primaryKey = 'id';
+
+    protected $table = 'role_ticket_type';
+
+    public function role(): BelongsTo
+    {
+        return $this->belongsTo(Role::class, 'role_id');
+    }
+
+    public function ticketType(): BelongsTo
+    {
+        return $this->belongsTo(TicketType::class, 'ticket_type_id');
+    }
+}
