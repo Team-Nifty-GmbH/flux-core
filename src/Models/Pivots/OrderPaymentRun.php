@@ -2,12 +2,9 @@
 
 namespace FluxErp\Models\Pivots;
 
-use FluxErp\Models\Address;
-use FluxErp\Models\AddressType;
 use FluxErp\Models\Order;
 use FluxErp\Models\PaymentRun;
 use FluxErp\Traits\HasPackageFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OrderPaymentRun extends FluxPivot
@@ -32,11 +29,11 @@ class OrderPaymentRun extends FluxPivot
 
     public function order(): BelongsTo
     {
-        return $this->belongsTo(Order::class, 'order_id');;
+        return $this->belongsTo(Order::class, 'order_id');
     }
 
     public function paymentRun(): BelongsTo
     {
-        return $this->belongsTo(PaymentRun::class, 'payment_run_id');;
+        return $this->belongsTo(PaymentRun::class, 'payment_run_id');
     }
 }

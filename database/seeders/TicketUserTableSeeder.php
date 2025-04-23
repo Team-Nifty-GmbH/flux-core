@@ -2,8 +2,6 @@
 
 namespace FluxErp\Database\Seeders;
 
-use FluxErp\Models\Address;
-use FluxErp\Models\AddressType;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\User;
 use Illuminate\Database\Seeder;

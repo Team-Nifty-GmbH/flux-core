@@ -2,14 +2,9 @@
 
 namespace FluxErp\Database\Seeders;
 
-use FluxErp\Models\Address;
-use FluxErp\Models\AddressType;
 use FluxErp\Models\Order;
 use FluxErp\Models\PaymentRun;
-use FluxErp\Models\Pivots\AddressAddressTypeOrder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Arr;
 
 class OrderPaymentRunTableSeeder extends Seeder
 {
