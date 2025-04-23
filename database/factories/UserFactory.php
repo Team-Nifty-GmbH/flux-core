@@ -13,7 +13,7 @@ class UserFactory extends Factory
     public function definition(): array
     {
         $from = Carbon::parse('1990-01-01 00:00:00');
-        $to   = Carbon::now();
+        $to = Carbon::now();
 
         $employmentDate = Carbon::createFromTimestamp(rand($from->timestamp, $to->timestamp));
         $terminationDate = $this->faker->boolean(70)
