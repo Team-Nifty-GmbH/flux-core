@@ -6,7 +6,6 @@ use FluxErp\Enums\CommunicationTypeEnum;
 use FluxErp\Models\Communication;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
-use FluxErp\Models\Product;
 use Illuminate\Database\Seeder;
 
 class CommunicationTableSeeder extends Seeder

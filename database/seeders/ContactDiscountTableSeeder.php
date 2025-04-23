@@ -21,7 +21,7 @@ class ContactDiscountTableSeeder extends Seeder
 
             $ids = $cutDiscountIds->random($numGroups)->pluck('id')->toArray();
 
-            foreach ($ids as $id){
+            foreach ($ids as $id) {
                 ContactDiscount::factory()->create([
                     'contact_id' => $cutContactId,
                     'discount_id' => $id,

@@ -19,7 +19,7 @@ class ContactDiscountGroupTableSeeder extends Seeder
         foreach ($cutContactIds as $cutContactId) {
             $numGroups = rand(1, floor($cutDiscountGroupIds->count() * 0.8));
 
-            $ids = $cutDiscountGroupIds->random($numGroups)->pluck('id')->toArray();;
+            $ids = $cutDiscountGroupIds->random($numGroups)->pluck('id')->toArray();
 
             foreach ($ids as $id) {
                 ContactDiscountGroup::factory()->create([
