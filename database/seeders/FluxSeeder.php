@@ -40,6 +40,7 @@ class FluxSeeder extends Seeder
         $this->call(IndustryTableSeeder::class);
 
         $this->call(ContactTableSeeder::class);
+        $this->call(ContactIndustryTableSeeder::class);
         $this->call(AddressTypeTableSeeder::class);
         $this->call(AddressTableSeeder::class);
 
