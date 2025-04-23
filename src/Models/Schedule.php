@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use FluxErp\Enums\RepeatableTypeEnum;
+use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Schedule extends FluxModel
 {
-    use HasUserModification, HasUuid, SoftDeletes;
+    use HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
 
     protected function casts(): array
     {
