@@ -25,6 +25,10 @@ class FluxSeeder extends Seeder
         $this->call(CountryRegionTableSeeder::class);
         $this->call(PriceListTableSeeder::class);
 
+        $this->call(PrinterTableSeeder::class);
+        $this->call(PrintJobTableSeeder::class);
+        $this->call(PrinterUserTableSeeder::class);
+
         $this->call(MailAccountTableSeeder::class);
         $this->call(MailAccountUserTableSeeder::class);
         $this->call(MailFolderTableSeeder::class);

@@ -3,11 +3,12 @@
 namespace FluxErp\Models;
 
 use FluxErp\Traits\Filterable;
+use FluxErp\Traits\HasPackageFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PrintJob extends FluxModel
 {
-    use Filterable;
+    use Filterable, HasPackageFactory;
 
     protected function casts(): array
     {

@@ -4,10 +4,13 @@ namespace FluxErp\Models\Pivots;
 
 use FluxErp\Models\Printer;
 use FluxErp\Models\User;
+use FluxErp\Traits\HasPackageFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PrinterUser extends FluxPivot
 {
+    use HasPackageFactory;
+
     public $incrementing = true;
 
     public $timestamps = false;
