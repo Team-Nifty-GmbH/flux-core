@@ -2,9 +2,7 @@
 
 namespace FluxErp\Models\Pivots;
 
-use FluxErp\Models\OrderPosition;
 use FluxErp\Models\Role;
-use FluxErp\Models\StockPosting;
 use FluxErp\Models\TicketType;
 use FluxErp\Traits\HasPackageFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

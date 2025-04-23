@@ -2,11 +2,8 @@
 
 namespace FluxErp\Database\Seeders;
 
-use FluxErp\Models\OrderPosition;
-use FluxErp\Models\Pivots\OrderPositionStockPosting;
 use FluxErp\Models\Pivots\RoleTicketType;
 use FluxErp\Models\Role;
-use FluxErp\Models\StockPosting;
 use FluxErp\Models\TicketType;
 use Illuminate\Database\Seeder;
 
