@@ -171,6 +171,11 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
         return $this->belongsToMany(MailAccount::class, 'mail_account_user');
     }
 
+    public function orders(): BelongsToMany
+    {
+        return $this->belongsToMany(Order::class);
+    }
+
     /**
      * Get the preferred locale of the entity.
      */
