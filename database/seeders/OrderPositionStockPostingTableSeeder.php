@@ -2,10 +2,8 @@
 
 namespace FluxErp\Database\Seeders;
 
-use FluxErp\Models\Client;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\Pivots\OrderPositionStockPosting;
-use FluxErp\Models\Product;
 use FluxErp\Models\StockPosting;
 use Illuminate\Database\Seeder;
 

@@ -2,7 +2,6 @@
 
 namespace FluxErp\Database\Factories;
 
-use FluxErp\Models\Pivots\ClientProduct;
 use FluxErp\Models\Pivots\OrderPositionStockPosting;
 use Illuminate\Database\Eloquent\Factories\Factory;
 

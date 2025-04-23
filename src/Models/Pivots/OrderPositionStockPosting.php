@@ -2,13 +2,10 @@
 
 namespace FluxErp\Models\Pivots;
 
-use FluxErp\Models\Client;
 use FluxErp\Models\OrderPosition;
-use FluxErp\Models\Product;
 use FluxErp\Models\StockPosting;
 use FluxErp\Traits\HasPackageFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class OrderPositionStockPosting extends FluxPivot
 {
