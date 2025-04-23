@@ -3,6 +3,7 @@
 namespace FluxErp\Database\Seeders;
 
 use FluxErp\Console\Commands\Init\InitPermissions;
+use FluxErp\Models\ProductPropertyGroup;
 use FluxErp\Models\Role;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Artisan;
@@ -44,6 +45,7 @@ class FluxSeeder extends Seeder
         $this->call(OrderTypeTableSeeder::class);
         $this->call(ContactOriginTableSeeder::class);
         $this->call(IndustryTableSeeder::class);
+        $this->call(ProductPropertyGroup::class);
 
         $this->call(ContactTableSeeder::class);
         $this->call(ContactIndustryTableSeeder::class);
