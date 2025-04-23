@@ -2,7 +2,7 @@
 
 namespace FluxErp\Database\Seeders;
 
-use FluxErp\Models\Discount;
+use FluxErp\Models\Contact;
 use FluxErp\Models\DiscountGroup;
 use FluxErp\Models\Pivots\ContactDiscountGroup;
 use Illuminate\Database\Seeder;
@@ -11,7 +11,7 @@ class ContactDiscountGroupTableSeeder extends Seeder
 {
     public function run(): void
     {
-        $contactIds = Discount::query()->get('id');
+        $contactIds = Contact::query()->get('id');
         $cutContactIds = $contactIds->random(bcfloor($contactIds->count() * 0.7));
         $discountGroupIds = DiscountGroup::query()->get('id');
         $cutDiscountGroupIds = $discountGroupIds->random(bcfloor($discountGroupIds->count() * 0.8));
