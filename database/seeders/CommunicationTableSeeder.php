@@ -5,6 +5,7 @@ namespace FluxErp\Database\Seeders;
 use FluxErp\Enums\CommunicationTypeEnum;
 use FluxErp\Models\Communication;
 use FluxErp\Models\MailAccount;
+use FluxErp\Models\MailFolder;
 use FluxErp\Models\Product;
 use Illuminate\Database\Seeder;
 
@@ -13,7 +14,7 @@ class CommunicationTableSeeder extends Seeder
     public function run(): void
     {
         $mailAccountIds = MailAccount::query()->get('id');
-        $mailFolderIds = Product::query()->get('id');
+        $mailFolderIds = MailFolder::query()->get('id');
 
         for ($i = 0; $i < 10; $i++) {
             Communication::factory()->create([
