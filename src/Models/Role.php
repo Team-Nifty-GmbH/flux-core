@@ -55,6 +55,11 @@ class Role extends SpatieRole implements InteractsWithDataTables
         }
     }
 
+    public function permissions(): BelongsToMany
+    {
+        return $this->belongsToMany(Permission::class, 'role_has_permissions');
+    }
+
     public function users(): BelongsToMany
     {
         return $this->morphedByMany(

@@ -18,6 +18,11 @@ class Permission extends SpatiePermission
 
     protected $hidden = ['pivot'];
 
+    public function role(): BelongsToMany
+    {
+        return $this->belongsToMany(Permission::class, 'role_has_permissions');
+    }
+
     public function users(): BelongsToMany
     {
         return $this->morphedByMany(

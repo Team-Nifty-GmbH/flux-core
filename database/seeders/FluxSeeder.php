@@ -95,6 +95,7 @@ class FluxSeeder extends Seeder
         $this->call(StockPostingTableSeeder::class);
         $this->call(OrderPositionStockPostingTableSeeder::class);
         $this->call(RoleTableSeeder::class);
+        $this->call(RoleHasPermissionTableSeeder::class);
         $this->call(CalendarTableSeeder::class);
         $this->call(CalendarEventTableSeeder::class);
         $this->call(TicketTypeTableSeeder::class);
