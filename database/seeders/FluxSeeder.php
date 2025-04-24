@@ -24,7 +24,6 @@ class FluxSeeder extends Seeder
         });
 
         $this->call(CountryTableSeeder::class);
-        $this->call(AttributeTranslationTableSeeder::class);
         $this->call(CountryRegionTableSeeder::class);
         $this->call(PriceListTableSeeder::class);
         $this->call(LanguageLineTableSeeder::class);
@@ -110,10 +109,14 @@ class FluxSeeder extends Seeder
         $this->call(CalendarEventTableSeeder::class);
         $this->call(TicketTypeTableSeeder::class);
         $this->call(TicketTableSeeder::class);
-        $this->call(CommunicatableTableSeeder::class);
-        $this->call(AdditionalColumnTableSeeder::class);
         $this->call(TicketUserTableSeeder::class);
         $this->call(RoleTicketTypeTableSeeder::class);
         $this->call(CommentTableSeeder::class);
+
+        $this->call(CategorizableTableSeeder::class);
+        $this->call(AdditionalColumnTableSeeder::class);
+        $this->call(CommunicatableTableSeeder::class);
+        $this->call(AttributeTranslationTableSeeder::class);
+
     }
 }

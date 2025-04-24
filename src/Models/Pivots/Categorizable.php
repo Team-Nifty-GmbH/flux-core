@@ -14,6 +14,10 @@ class Categorizable extends MorphPivot
 
     protected $table = 'categorizables';
 
+    public $incrementing = false;
+
+    public $timestamps = false;
+
     public function categorizable(): MorphTo
     {
         return $this->morphTo();
