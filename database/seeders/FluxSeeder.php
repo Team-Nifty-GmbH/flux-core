@@ -27,10 +27,6 @@ class FluxSeeder extends Seeder
         $this->call(PriceListTableSeeder::class);
         $this->call(LanguageLineTableSeeder::class);
 
-        $this->call(PrinterTableSeeder::class);
-        $this->call(PrintJobTableSeeder::class);
-        $this->call(PrinterUserTableSeeder::class);
-
         $this->call(MailAccountTableSeeder::class);
         $this->call(MailAccountUserTableSeeder::class);
         $this->call(MailFolderTableSeeder::class);
@@ -48,7 +44,7 @@ class FluxSeeder extends Seeder
         $this->call(OrderTypeTableSeeder::class);
         $this->call(ContactOriginTableSeeder::class);
         $this->call(IndustryTableSeeder::class);
-        $this->call(ProductPropertyGroup::class);
+        $this->call(ProductPropertyGroupTableSeeder::class);
 
         $this->call(ContactTableSeeder::class);
         $this->call(ContactIndustryTableSeeder::class);
@@ -119,5 +115,9 @@ class FluxSeeder extends Seeder
         $this->call(CommunicatableTableSeeder::class);
         $this->call(AttributeTranslationTableSeeder::class);
         $this->call(FavoriteTableSeeder::class);
+
+        $this->call(PrinterTableSeeder::class);
+        $this->call(PrintJobTableSeeder::class);
+        $this->call(PrinterUserTableSeeder::class);
     }
 }
