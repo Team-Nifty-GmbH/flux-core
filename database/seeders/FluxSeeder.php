@@ -105,6 +105,7 @@ class FluxSeeder extends Seeder
         $this->call(TicketTypeTableSeeder::class);
         $this->call(TicketTableSeeder::class);
         $this->call(CommunicatableTableSeeder::class);
+        $this->call(AdditionalColumnTableSeeder::class);
         $this->call(TicketUserTableSeeder::class);
         $this->call(RoleTicketTypeTableSeeder::class);
         $this->call(CommentTableSeeder::class);
