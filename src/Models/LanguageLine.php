@@ -9,5 +9,5 @@ use Spatie\TranslationLoader\LanguageLine as SpatieLanguageLine;
 
 class LanguageLine extends SpatieLanguageLine
 {
-    use ResolvesRelationsThroughContainer, Searchable, HasPackageFactory;
+    use HasPackageFactory, ResolvesRelationsThroughContainer, Searchable;
 }

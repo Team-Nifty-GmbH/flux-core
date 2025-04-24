@@ -2,12 +2,7 @@
 
 namespace FluxErp\Database\Seeders;
 
-use FluxErp\Models\Address;
-use FluxErp\Models\AddressType;
-use FluxErp\Models\Category;
 use FluxErp\Models\Client;
-use FluxErp\Models\Discount;
-use FluxErp\Models\PriceList;
 use FluxErp\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -23,7 +18,7 @@ class ClientUserTableSeeder extends Seeder
 
         foreach ($cutClientIds as $categoryId) {
             $categoryId->users()->attach($cutUserIds->random(
-                rand(1, max(1,bcfloor($cutUserIds->count() * 0.4)))
+                rand(1, max(1, bcfloor($cutUserIds->count() * 0.4)))
             ));
         }
     }

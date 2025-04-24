@@ -2,7 +2,6 @@
 
 namespace FluxErp\Database\Factories;
 
-use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\LanguageLine;
 use Illuminate\Database\Eloquent\Factories\Factory;
 

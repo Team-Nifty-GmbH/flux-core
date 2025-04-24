@@ -4,7 +4,6 @@ namespace FluxErp\Database\Seeders;
 
 use FluxErp\Models\Client;
 use FluxErp\Models\PaymentType;
-use FluxErp\Models\Pivots\ClientPaymentType;
 use Illuminate\Database\Seeder;
 
 class ClientPaymentTypeTableSeeder extends Seeder

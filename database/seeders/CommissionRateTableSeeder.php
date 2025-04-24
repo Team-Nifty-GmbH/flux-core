@@ -13,37 +13,25 @@ class CommissionRateTableSeeder extends Seeder
 {
     public function run(): void
     {
-        $userIds = User::query()->get('id')->random(rand(5, 9));
+        $userIds = User::query()->get('id');
+        $cutUserIds = $userIds->random(bcfloor($userIds->count() * 0.7));
+
         $contactIds = Contact::query()->get('id');
+        $cutContactIds = $contactIds->random(bcfloor($contactIds->count() * 0.7));
+
         $categoryIds = Category::query()->get('id');
+        $cutCategoryIds = $categoryIds->random(bcfloor($categoryIds->count() * 0.7));
+
         $productIds = Product::query()->get('id');
+        $cutProduktIds = $productIds->random(bcfloor($productIds->count() * 0.7));
 
-        $userIds->each(function ($userId) use ($contactIds, $categoryIds, $productIds): void {
-            $user = data_get(User::query()->find($userId), 0);
-
-            $commissionRates = [];
-            $count = rand(1, 3);
-
-            for ($i = 0; $i < $count; $i++) {
-                $parameters = [];
-
-                if (rand(0, 1) === 1) {
-                    $parameters[] = ['contact_id' => $contactIds->random()->getKey()];
-                }
-                if (rand(0, 1) === 1) {
-                    $parameters[] = ['category_id' => $categoryIds->random()->getKey()];
-                }
-                if (rand(0, 1) === 1) {
-                    $parameters[] = ['product_id' => $productIds->random()->getKey()];
-                }
-
-                $parameters[] = ['user_id' => $user->getKey()];
-
-                $parameters = array_merge(...$parameters);
-
-                $commissionRates[] = CommissionRate::factory()->make($parameters)->toArray();
-            }
-            $user->commissionRates()->createMany($commissionRates);
-        });
+        foreach ($cutUserIds as $userId) {
+            CommissionRate::factory()->count(rand(1, 3))->create([
+                'user_id' => $userId,
+                'contact_id' => fn () => faker()->boolean() ? $cutContactIds->random()->getKey() : null,
+                'category_id' => fn () => faker()->boolean() ? $cutCategoryIds->random()->getKey() : null,
+                'product_id' => fn () => faker()->boolean() ? $cutProduktIds->random()->getKey() : null,
+            ]);
+        }
     }
 }

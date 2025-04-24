@@ -8,7 +8,6 @@ use FluxErp\Models\Role;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Artisan;
 use Spatie\Activitylog\Facades\CauserResolver;
-use function Symfony\Component\Translation\t;
 
 class FluxSeeder extends Seeder
 {
@@ -120,6 +119,5 @@ class FluxSeeder extends Seeder
         $this->call(CommunicatableTableSeeder::class);
         $this->call(AttributeTranslationTableSeeder::class);
         $this->call(FavoriteTableSeeder::class);
-
     }
 }

@@ -12,6 +12,7 @@ class AddressAddressTableSeeder extends Seeder
     {
         $addressIds = Address::query()->get('id');
         $cutAddressIds = $addressIds->random(bcfloor($addressIds->count() * 0.6));
+
         $addressTypeIds = AddressType::query()->get('id');
         $cutAddressTypeIds = $addressTypeIds->random(bcfloor($addressTypeIds->count() * 0.6));
 

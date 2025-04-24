@@ -12,20 +12,19 @@ class CartItemTableSeeder extends Seeder
 {
     public function run(): void
     {
-        $cartIds = Cart::query()->get('id')->random(rand(2, 5));
-        $productIds = Product::query()->get('id')->random(rand(5, 15));
-        $vatRateIds = VatRate::query()->get('id')->random(rand(2, 3));
+        $cartIds = Cart::query()->get('id');
+        $cutCartIds = $cartIds->random(bcfloor($cartIds->count() * 0.7));
 
-        foreach ($cartIds as $cartId) {
-            foreach ($productIds as $productId) {
-                foreach ($vatRateIds as $vatRateId) {
-                    CartItem::factory()->create([
-                        'cart_id' => $cartId->getKey(),
-                        'product_id' => $productId->getKey(),
-                        'vat_rate_id' => $vatRateId->getKey(),
-                    ]);
-                }
-            }
-        }
+        $productIds = Product::query()->get('id');
+        $cutProductIds = $productIds->random(bcfloor($productIds->count() * 0.7));
+
+        $vatRateIds = VatRate::query()->get('id');
+        $cutVatRateIds = $vatRateIds->random(bcfloor($vatRateIds->count() * 0.7));
+
+        CartItem::factory()->count(30)->create([
+            'cart_id' => fn () => $cutCartIds->random()->getKey(),
+            'product_id' => fn () => faker()->boolean() ? $cutProductIds->random()->getKey() : null,
+            'vat_rate_id' => fn () => $cutVatRateIds->random()->getKey(),
+        ]);
     }
 }

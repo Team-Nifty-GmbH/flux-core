@@ -12,13 +12,14 @@ class MailAccountUserTableSeeder extends Seeder
     public function run(): void
     {
         $userIds = User::query()->get('id');
-        $mailAccountIds = MailAccount::query()->get('id');
+        $cutUserIds = $userIds->random(bcfloor($userIds->count() * 0.75));
 
-        for ($i = 0; $i < 10; $i++) {
-            MailAccountUser::factory()->create([
-                'user_id' => $userIds->random()->getKey(),
-                'mail_account_id' => $mailAccountIds->random()->getKey(),
-            ]);
-        }
+        $mailAccountIds = MailAccount::query()->get('id');
+        $cutMailAccountIds = $mailAccountIds->random(bcfloor($mailAccountIds->count() * 0.75));
+
+        MailAccountUser::factory()->count(10)->create([
+            'user_id' => fn () => $cutUserIds->random()->getKey(),
+            'mail_account_id' => fn () => $cutMailAccountIds->random()->getKey(),
+        ]);
     }
 }

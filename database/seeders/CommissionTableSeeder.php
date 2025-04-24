@@ -13,39 +13,26 @@ class CommissionTableSeeder extends Seeder
 {
     public function run(): void
     {
-        // pluck() gibt eine Collection reiner IDs zurück
-        $userIds = User::query()->pluck('id')->random(rand(5, 9));
-        $commissionRateIds = CommissionRate::query()->pluck('id');
-        $orderIds = Order::query()->pluck('id');
-        $orderPositionIds = OrderPosition::query()->pluck('id');
+        $userIds = User::query()->get('id');
+        $cutUserIds = $userIds->random(bcfloor($userIds->count() * 0.7));
 
-        $userIds->each(function (int $userId) use ($commissionRateIds, $orderIds, $orderPositionIds): void {
-            // direktes Find – kein data_get nötig
-            $user = User::findOrFail($userId);
+        $commissionRateIds = CommissionRate::query()->get('id');
+        $cutCommissionRateIds = $commissionRateIds->random(bcfloor($commissionRateIds->count() * 0.7));
 
-            $commissions = [];
-            $count = rand(1, 3);
+        $orderIds = Order::query()->get('id');
+        $cutOrderIds = $orderIds->random(bcfloor($orderIds->count() * 0.7));
 
-            for ($i = 0; $i < $count; $i++) {
-                $params = ['user_id' => $user->id];
+        $orderPositionIds = OrderPosition::query()->get('id');
+        $cutOrderPositionIds = $orderPositionIds->random(bcfloor($orderPositionIds->count() * 0.7));
 
-                if (rand(0, 1) === 1) {
-                    $params['commission_rate_id'] = $commissionRateIds->random();
-                }
-                if (rand(0, 1) === 1) {
-                    $params['order_id'] = $orderIds->random();
-                }
-                if (rand(0, 1) === 1) {
-                    $params['order_position_id'] = $orderPositionIds->random();
-                }
-                if (rand(0, 1) === 1) {
-                    $params['credit_note_order_position_id'] = $orderPositionIds->random();
-                }
-
-                $commissions[] = Commission::factory()->make($params)->toArray();
-            }
-
-            $user->commissions()->createMany($commissions);
-        });
+        foreach ($cutUserIds as $userId) {
+            Commission::factory()->count(rand(1, 3))->create([
+                'user_id' => $userId,
+                'commission_rate_id' => fn () => faker()->boolean() ? $cutCommissionRateIds->random()->getKey() : null,
+                'order_id' => fn () => faker()->boolean() ? $cutOrderIds->random()->getKey() : null,
+                'order_position_id' => fn () => faker()->boolean() ? $cutOrderPositionIds->random()->getKey() : null,
+                'credit_note_order_position_id' => fn () => faker()->boolean() ? $cutOrderPositionIds->random()->getKey() : null,
+            ]);
+        }
     }
 }

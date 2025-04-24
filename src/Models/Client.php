@@ -81,11 +81,6 @@ class Client extends FluxModel implements HasMedia
         );
     }
 
-    public function users() : BelongsToMany
-    {
-        return $this->belongsToMany(User::class, 'client_user');
-    }
-
     public function logoUrl(): Attribute
     {
         return Attribute::get(
@@ -136,5 +131,10 @@ class Client extends FluxModel implements HasMedia
     public function settings(): MorphMany
     {
         return $this->morphMany(Setting::class, 'model');
+    }
+
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'client_user');
     }
 }

@@ -2,24 +2,14 @@
 
 namespace FluxErp\Database\Seeders;
 
-use FluxErp\Models\AdditionalColumn;
-use FluxErp\Models\Address;
 use FluxErp\Models\AttributeTranslation;
 use FluxErp\Models\Category;
-use FluxErp\Models\Contact;
 use FluxErp\Models\Language;
-use FluxErp\Models\Order;
-use FluxErp\Models\OrderPosition;
 use FluxErp\Models\PaymentReminderText;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\Product;
 use FluxErp\Models\ProductOption;
 use FluxErp\Models\ProductProperty;
-use FluxErp\Models\Project;
-use FluxErp\Models\SerialNumber;
-use FluxErp\Models\Task;
-use FluxErp\Models\Ticket;
-use FluxErp\Models\TicketType;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Arr;
 

@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class AttributeTranslation extends FluxModel
 {
-    use HasUserModification, SoftDeletes, HasPackageFactory;
+    use HasPackageFactory, HasUserModification, SoftDeletes;
 
     public function language(): BelongsTo
     {

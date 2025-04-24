@@ -13,6 +13,7 @@ class ContactDiscountTableSeeder extends Seeder
     {
         $contactIds = Contact::query()->get('id');
         $cutContactIds = $contactIds->random(bcfloor($contactIds->count() * 0.7));
+
         $discountIds = Discount::query()->get('id');
         $cutDiscountIds = $discountIds->random(bcfloor($discountIds->count() * 0.7));
 

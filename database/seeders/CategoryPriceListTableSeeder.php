@@ -2,8 +2,6 @@
 
 namespace FluxErp\Database\Seeders;
 
-use FluxErp\Models\Address;
-use FluxErp\Models\AddressType;
 use FluxErp\Models\Category;
 use FluxErp\Models\Discount;
 use FluxErp\Models\PriceList;
@@ -24,7 +22,7 @@ class CategoryPriceListTableSeeder extends Seeder
 
         foreach ($cutCategoryIds as $categoryId) {
             $categoryId->priceLists()->attach($cutPriceListIds->random(
-                rand(1, max(1,bcfloor($cutPriceListIds->count() * 0.2)))
+                rand(1, max(1, bcfloor($cutPriceListIds->count() * 0.2)))
             ), [
                 'discount_id' => $cutDiscountIds->random()->getKey(),
             ]);

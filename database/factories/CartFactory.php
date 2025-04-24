@@ -13,10 +13,8 @@ class CartFactory extends Factory
     {
         return [
             'session_id' => $this->faker->uuid,
-            'authenticatable_type' => 'user',
-            'authenticatable_id' => $this->faker->numberBetween(1, 100),
-            'name' => $this->faker->name,
-            'total' => $this->faker->numberBetween(10, 1000),
+            'name' => $this->faker->boolean ? $this->faker->name : null,
+            'total' => $this->faker->boolean ? $this->faker->numberBetween(10, 1000) : null,
             'is_portal_public' => $this->faker->boolean,
             'is_public' => $this->faker->boolean,
             'is_watchlist' => $this->faker->boolean,

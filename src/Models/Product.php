@@ -89,6 +89,11 @@ class Product extends FluxModel implements HasMedia, InteractsWithDataTables
         ];
     }
 
+    public function addresses(): BelongsToMany
+    {
+        return $this->belongsToMany(Address::class, 'address_product');
+    }
+
     public function bundleProducts(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -160,11 +165,6 @@ class Product extends FluxModel implements HasMedia, InteractsWithDataTables
     public function getUrl(): ?string
     {
         return $this->detailRoute();
-    }
-
-    public function addresses(): BelongsToMany
-    {
-        return $this->belongsToMany(Address::class, 'address_product');
     }
 
     public function orderPositions(): HasMany

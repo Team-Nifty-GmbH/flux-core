@@ -3,7 +3,6 @@
 namespace FluxErp\Database\Seeders;
 
 use FluxErp\Models\Address;
-use FluxErp\Models\AddressType;
 use FluxErp\Models\Product;
 use Illuminate\Database\Seeder;
 
@@ -18,7 +17,7 @@ class AddressProductTableSeeder extends Seeder
 
         foreach ($cutAddressIds as $cutAddressId) {
             $cutAddressId->products()->attach($cutProductIds->random(
-                rand(1, max(1,bcfloor($cutProductIds->count() * 0.2)))
+                rand(1, max(1, bcfloor($cutProductIds->count() * 0.2)))
             ));
         }
     }

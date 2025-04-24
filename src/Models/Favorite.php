@@ -7,5 +7,5 @@ use FluxErp\Traits\HasUuid;
 
 class Favorite extends FluxModel
 {
-    use HasUuid, HasPackageFactory;
+    use HasPackageFactory, HasUuid;
 }
