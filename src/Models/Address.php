@@ -411,6 +411,11 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         );
     }
 
+    public function products(): BelongsToMany
+    {
+        return $this->belongsToMany(Product::class, 'address_product');
+    }
+
     public function projectTasks(): HasMany
     {
         return $this->hasMany(Task::class);

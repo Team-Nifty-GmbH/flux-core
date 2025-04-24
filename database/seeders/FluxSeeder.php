@@ -69,6 +69,7 @@ class FluxSeeder extends Seeder
         $this->call(UnitTableSeeder::class);
         $this->call(VatRateTableSeeder::class);
         $this->call(ProductTableSeeder::class);
+        $this->call(AddressProductTableSeeder::class);
         $this->call(ProductSupplierTableSeeder::class);
         $this->call(CommissionRateTableSeeder::class);
         $this->call(ProductCrossSellingTableSeeder::class);

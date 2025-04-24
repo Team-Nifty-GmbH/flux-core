@@ -162,6 +162,11 @@ class Product extends FluxModel implements HasMedia, InteractsWithDataTables
         return $this->detailRoute();
     }
 
+    public function addresses(): BelongsToMany
+    {
+        return $this->belongsToMany(Address::class, 'address_product');
+    }
+
     public function orderPositions(): HasMany
     {
         return $this->hasMany(OrderPosition::class);
