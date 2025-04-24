@@ -35,10 +35,9 @@ class CommunicatableTableSeeder extends Seeder
 
             Communicatable::firstOrCreate([
                 'communicatable_type' => $modelClass,
-                'communicatable_id'   => $instanceId,
-                'communication_id'    => $CutCommunicationIds->random()->getKey(),
+                'communicatable_id' => $instanceId,
+                'communication_id' => $CutCommunicationIds->random()->getKey(),
             ]);
         }
-
     }
 }

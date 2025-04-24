@@ -3,7 +3,6 @@
 namespace FluxErp\Database\Seeders;
 
 use FluxErp\Console\Commands\Init\InitPermissions;
-use FluxErp\Models\Pivots\Communicatable;
 use FluxErp\Models\ProductPropertyGroup;
 use FluxErp\Models\Role;
 use Illuminate\Database\Seeder;
