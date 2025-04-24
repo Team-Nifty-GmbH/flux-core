@@ -119,6 +119,7 @@ class FluxSeeder extends Seeder
         $this->call(AdditionalColumnTableSeeder::class);
         $this->call(CommunicatableTableSeeder::class);
         $this->call(AttributeTranslationTableSeeder::class);
+        $this->call(FavoriteTableSeeder::class);
 
     }
 }
