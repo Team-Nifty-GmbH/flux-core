@@ -24,6 +24,7 @@ class FluxSeeder extends Seeder
         });
 
         $this->call(CountryTableSeeder::class);
+        $this->call(AttributeTranslationTableSeeder::class);
         $this->call(CountryRegionTableSeeder::class);
         $this->call(PriceListTableSeeder::class);
 
