@@ -12,14 +12,7 @@ class AddressAddressTypeOrderFactory extends Factory
     public function definition(): array
     {
         return [
-            'address' => [
-                'street' => $this->faker->streetAddress(),
-                'city' => $this->faker->city(),
-                'zip' => $this->faker->postcode(),
-                'country' => $this->faker->country(),
-                'name' => $this->faker->name(),
-                'company' => $this->faker->company(),
-            ],
+
         ];
     }
 }

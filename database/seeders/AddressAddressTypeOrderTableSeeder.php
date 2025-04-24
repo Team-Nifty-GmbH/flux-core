@@ -14,37 +14,21 @@ class AddressAddressTypeOrderTableSeeder extends Seeder
 {
     public function run(): void
     {
-        Model::withoutEvents(function (): void {
-            $orderIds = Order::pluck('id')->toArray();
-            $addressIds = Address::pluck('id')->toArray();
-            $addressTypeIds = AddressType::pluck('id')->toArray();
+            $orderIds = Order::query()->get('id');
+            $cutOrderIds = $orderIds->random(bcfloor($orderIds->count() * 0.6));
 
-            foreach ($orderIds as $orderId) {
-                $pickCount = rand(1, 3);
-                $combos = [];
+            $addressIds = Address::query()->get('id');
+            $cutAddressIds = $addressIds->random(bcfloor($addressIds->count() * 0.6));
 
-                while (count($combos) < $pickCount) {
-                    $addrId = Arr::random($addressIds);
-                    $typeId = Arr::random($addressTypeIds);
-                    $key = "{$orderId}-{$addrId}-{$typeId}";
+            $addressTypeIds = AddressType::query()->get('id');
+            $cutAddressTypeIds = $addressTypeIds->random(bcfloor($addressTypeIds->count() * 0.6));
 
-                    if (! isset($combos[$key])) { // checks for duplicates
-                        $data = AddressAddressTypeOrder::factory()->make([
-                            'order_id' => $orderId,
-                            'address_id' => $addrId,
-                            'address_type_id' => $typeId,
-                        ])->toArray();
-
-                        if (isset($data['address']) && is_array($data['address'])) {
-                            $data['address'] = json_encode($data['address']);
-                        }
-
-                        $combos[$key] = $data;
-                    }
-                }
-
-                AddressAddressTypeOrder::insertOrIgnore(array_values($combos));
+            foreach ($cutAddressIds as $addressId) {
+                $addressId->addressTypeOrders()->attach($cutOrderIds->random(
+                    rand(1, bcfloor($cutOrderIds->count() * 0.2))), [
+                    'address_type_id' => $cutAddressTypeIds->random()->getKey(),
+                ]);
             }
-        });
+
     }
 }

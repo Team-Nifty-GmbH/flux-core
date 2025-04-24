@@ -13,12 +13,6 @@ class AddressAddressTypeOrder extends FluxPivot
 {
     use HasPackageFactory;
 
-    public $incrementing = false;
-
-    public $timestamps = false;
-
-    protected $primaryKey = ['address_id', 'address_type_id', 'order_id'];
-
     protected $table = 'address_address_type_order';
 
     protected static function booted(): void
@@ -33,7 +27,7 @@ class AddressAddressTypeOrder extends FluxPivot
     protected function casts(): array
     {
         return [
-            'address' => 'json',
+            'address' => 'array',
         ];
     }
 
