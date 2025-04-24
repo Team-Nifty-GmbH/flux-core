@@ -12,6 +12,7 @@ class AddressSerialNumberTableSeeder extends Seeder
     {
         $addressIds = Address::query()->get('id');
         $cutAddressIds = $addressIds->random(bcfloor($addressIds->count() * 0.5));
+
         $serialNumberIds = SerialNumber::query()->get('id');
         $cutSerialNumberIds = $serialNumberIds->random(bcfloor($serialNumberIds->count() * 0.75));
 

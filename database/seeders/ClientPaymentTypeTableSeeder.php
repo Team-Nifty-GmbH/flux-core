@@ -12,6 +12,7 @@ class ClientPaymentTypeTableSeeder extends Seeder
     {
         $clientIds = Client::query()->get('id');
         $cutClientIds = $clientIds->random(bcfloor($clientIds->count() * 0.75));
+
         $paymentTypesIds = PaymentType::query()->get('id');
         $cutPaymentTypesIds = $paymentTypesIds->random(bcfloor($paymentTypesIds->count() * 0.75));
 

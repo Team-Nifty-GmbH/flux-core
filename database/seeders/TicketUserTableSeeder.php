@@ -12,6 +12,7 @@ class TicketUserTableSeeder extends Seeder
     {
         $ticketIds = Ticket::query()->get('id');
         $cutTicketIds = $ticketIds->random(bcfloor($ticketIds->count() * 0.6));
+
         $userIds = User::query()->get('id');
         $cutUserIds = $userIds->random(bcfloor($userIds->count() * 0.6));
 

@@ -13,6 +13,7 @@ class OrderPositionTaskTableSeeder extends Seeder
     {
         $orderPositionIds = OrderPosition::query()->get('id');
         $cutOrderPositionIds = $orderPositionIds->random(bcfloor($orderPositionIds->count() * 0.3));
+
         $taskIds = Task::query()->get('id');
         $cutTaskIds = $taskIds->random(bcfloor($taskIds->count() * 0.6));
 

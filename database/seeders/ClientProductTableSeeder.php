@@ -12,6 +12,7 @@ class ClientProductTableSeeder extends Seeder
     {
         $clientIds = Client::query()->get('id');
         $cutClientIds = $clientIds->random(bcfloor($clientIds->count() * 0.7));
+
         $productIds = Product::query()->get('id');
         $cutProductIds = $productIds->random(bcfloor($productIds->count() * 0.7));
 

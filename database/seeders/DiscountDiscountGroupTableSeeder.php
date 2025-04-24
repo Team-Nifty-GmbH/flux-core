@@ -13,6 +13,7 @@ class DiscountDiscountGroupTableSeeder extends Seeder
     {
         $discountIds = Discount::query()->get('id');
         $cutDiscountIds = $discountIds->random(bcfloor($discountIds->count() * 0.7));
+
         $discountGroupIds = DiscountGroup::query()->get('id');
         $cutDiscountGroupIds = $discountGroupIds->random(bcfloor($discountGroupIds->count() * 0.8));
 

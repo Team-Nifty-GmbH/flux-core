@@ -13,6 +13,7 @@ class OrderUserTableSeeder extends Seeder
     {
         $orderIds = Order::query()->get('id');
         $cutOrderIds = $orderIds->random(bcfloor($orderIds->count() * 0.7));
+
         $userIds = User::query()->get('id');
         $cutUserIds = $userIds->random(bcfloor($userIds->count() * 0.7));
 

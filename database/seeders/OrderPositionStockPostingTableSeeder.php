@@ -13,6 +13,7 @@ class OrderPositionStockPostingTableSeeder extends Seeder
     {
         $orderPositionIds = OrderPosition::query()->get('id');
         $cutOrderPositionIds = $orderPositionIds->random(bcfloor($orderPositionIds->count() * 0.3));
+
         $stockPostingsIds = StockPosting::query()->get('id');
         $cutStockPostingsIds = $stockPostingsIds->random(bcfloor($stockPostingsIds->count() * 0.6));
 

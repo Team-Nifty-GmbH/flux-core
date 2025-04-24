@@ -13,6 +13,7 @@ class RoleTicketTypeTableSeeder extends Seeder
     {
         $roleIds = Role::query()->get('id');
         $cutRoleIds = $roleIds->random(bcfloor($roleIds->count() * 0.75));
+
         $ticketTypeIds = TicketType::query()->get('id');
         $cutTicketTypeIds = $ticketTypeIds->random(bcfloor($ticketTypeIds->count() * 0.6));
 

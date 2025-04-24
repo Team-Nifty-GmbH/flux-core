@@ -12,6 +12,7 @@ class ProductSupplierTableSeeder extends Seeder
     {
         $productIds = Product::query()->get('id');
         $cutProductIds = $productIds->random(bcfloor($productIds->count() * 0.6));
+
         $ContactIds = Contact::query()->get('id');
         $cutContactIds = $ContactIds->random(bcfloor($ContactIds->count() * 0.6));
 

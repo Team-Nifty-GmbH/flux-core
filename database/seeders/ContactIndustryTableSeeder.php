@@ -13,6 +13,7 @@ class ContactIndustryTableSeeder extends Seeder
     {
         $contactIds = Contact::query()->get('id');
         $cutContactIds = $contactIds->random(bcfloor($contactIds->count() * 0.6));
+
         $industryIds = Industry::query()->get('id');
         $cutIndustryIds = $industryIds->random(bcfloor($industryIds->count() * 0.7));
 

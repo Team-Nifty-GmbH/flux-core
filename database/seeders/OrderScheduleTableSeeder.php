@@ -13,6 +13,7 @@ class OrderScheduleTableSeeder extends Seeder
     {
         $orderIds = Order::query()->get('id');
         $cutOrderIds = $orderIds->random(bcfloor($orderIds->count() * 0.6));
+
         $scheduleIds = Schedule::query()->get('id');
         $cutScheduleIds = $scheduleIds->random(bcfloor($scheduleIds->count() * 0.7));
 

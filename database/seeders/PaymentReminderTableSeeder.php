@@ -13,6 +13,7 @@ class PaymentReminderTableSeeder extends Seeder
     {
         $orderIds = Order::query()->get('id');
         $cutOrderIds = $orderIds->random(bcfloor($orderIds->count() * 0.7));
+
         $mediaIds = Media::query()->get('id');
         $cutMediaIds = $mediaIds->random(bcfloor($mediaIds->count() * 0.7));
 

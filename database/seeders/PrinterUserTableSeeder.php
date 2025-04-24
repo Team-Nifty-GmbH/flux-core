@@ -13,6 +13,7 @@ class PrinterUserTableSeeder extends Seeder
     {
         $printerIds = Printer::query()->get('id');
         $cutPrinterIds = $printerIds->random(bcfloor($printerIds->count() * 0.8));
+
         $userIds = User::query()->get('id');
         $cutUserIds = $userIds->random(bcfloor($userIds->count() * 0.6));
 

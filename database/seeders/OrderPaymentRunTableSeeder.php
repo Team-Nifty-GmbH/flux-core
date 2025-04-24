@@ -12,6 +12,7 @@ class OrderPaymentRunTableSeeder extends Seeder
     {
         $orderIds = Order::query()->get('id');
         $cutOrderIds = $orderIds->random(bcfloor($orderIds->count() * 0.6));
+
         $paymentRunIds = PaymentRun::query()->get('id');
         $cutPaymentRunIds = $paymentRunIds->random(bcfloor($paymentRunIds->count() * 0.6));
 

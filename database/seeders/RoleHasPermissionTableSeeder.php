@@ -12,6 +12,7 @@ class RoleHasPermissionTableSeeder extends Seeder
     {
         $roleIds = Role::query()->get('id');
         $cutRoleIds = $roleIds->random(bcfloor($roleIds->count() * 0.6));
+
         $permissionIds = Permission::query()->get('id');
         $cutPermissionIds = $permissionIds->random(bcfloor($permissionIds->count() * 0.6));
 

@@ -12,6 +12,7 @@ class BankConnectionClientTableSeeder extends Seeder
     {
         $clientIds = Client::query()->get('id');
         $cutClientIds = $clientIds->random(bcfloor($clientIds->count() * 0.75));
+
         $bankConnectionIds = BankConnection::query()->get('id');
         $cutBankConnectionIds = $bankConnectionIds->random(bcfloor($bankConnectionIds->count() * 0.75));
 
