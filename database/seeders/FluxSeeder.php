@@ -8,6 +8,7 @@ use FluxErp\Models\Role;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Artisan;
 use Spatie\Activitylog\Facades\CauserResolver;
+use function Symfony\Component\Translation\t;
 
 class FluxSeeder extends Seeder
 {
@@ -98,6 +99,7 @@ class FluxSeeder extends Seeder
         $this->call(ContactDiscountGroupTableSeeder::class);
         $this->call(DiscountDiscountGroupTableSeeder::class);
         $this->call(SerialNumberTableSeeder::class);
+        $this->call(AddressSerialNumberTableSeeder::class);
         $this->call(StockPostingTableSeeder::class);
         $this->call(OrderPositionStockPostingTableSeeder::class);
         $this->call(RoleTableSeeder::class);
