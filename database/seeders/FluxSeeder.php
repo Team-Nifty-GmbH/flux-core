@@ -3,6 +3,7 @@
 namespace FluxErp\Database\Seeders;
 
 use FluxErp\Console\Commands\Init\InitPermissions;
+use FluxErp\Models\Pivots\Communicatable;
 use FluxErp\Models\ProductPropertyGroup;
 use FluxErp\Models\Role;
 use Illuminate\Database\Seeder;
@@ -104,6 +105,7 @@ class FluxSeeder extends Seeder
         $this->call(CalendarEventTableSeeder::class);
         $this->call(TicketTypeTableSeeder::class);
         $this->call(TicketTableSeeder::class);
+        $this->call(CommunicatableTableSeeder::class);
         $this->call(TicketUserTableSeeder::class);
         $this->call(RoleTicketTypeTableSeeder::class);
         $this->call(CommentTableSeeder::class);
