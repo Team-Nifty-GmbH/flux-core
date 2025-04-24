@@ -11,10 +11,14 @@ class ClientProductTableSeeder extends Seeder
     public function run(): void
     {
         $clientIds = Client::query()->get('id');
+        $cutClientIds = $clientIds->random(bcfloor($clientIds->count() * 0.7));
         $productIds = Product::query()->get('id');
+        $cutProductIds = $productIds->random(bcfloor($productIds->count() * 0.7));
 
-        foreach ($clientIds as $clientId) {
-            $clientId->products()->attach($productIds->random(rand(3, 9)));
+        foreach ($cutClientIds as $clientId) {
+            $clientId->products()->attach($cutProductIds->random(
+                rand(1, max(1, bcfloor($cutProductIds->count() * 0.6)))
+            ));
         }
     }
 }
