@@ -3,7 +3,6 @@
 namespace FluxErp\Database\Seeders;
 
 use FluxErp\Console\Commands\Init\InitPermissions;
-use FluxErp\Models\ProductPropertyGroup;
 use FluxErp\Models\Role;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Artisan;
@@ -54,8 +53,6 @@ class FluxSeeder extends Seeder
 
         $this->call(ContactOptionTableSeeder::class);
         $this->call(CategoryTableSeeder::class);
-        $this->call(ProjectTableSeeder::class);
-        $this->call(TaskTableSeeder::class);
 
         $this->call(WorkTimeTypeTableSeeder::class);
         $this->call(WorkTimeTableSeeder::class);
@@ -77,6 +74,8 @@ class FluxSeeder extends Seeder
         $this->call(WarehouseTableSeeder::class);
         $this->call(PriceTableSeeder::class);
         $this->call(OrderTableSeeder::class);
+        $this->call(ProjectTableSeeder::class);
+        $this->call(TaskTableSeeder::class);
         $this->call(OrderPositionTableSeeder::class);
         $this->call(OrderPaymentRunTableSeeder::class);
         $this->call(PurchaseInvoiceTableSeeder::class);
