@@ -73,6 +73,11 @@ class Category extends FluxModel implements InteractsWithDataTables, Sortable
         );
     }
 
+    public function priceLists(): BelongsToMany
+    {
+        return $this->belongsToMany(PriceList::class, 'category_price_list');
+    }
+
     public function discounts(): BelongsToMany
     {
         return $this->belongsToMany(Discount::class, 'category_price_list');
