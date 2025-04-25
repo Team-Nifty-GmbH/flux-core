@@ -31,7 +31,7 @@ class Discounts extends DiscountList
                 ->text(__('New'))
                 ->icon('plus')
                 ->xOnClick(<<<'JS'
-                    $modalOpen('edit-discount');
+                    $modalOpen('edit-discount-modal');
                 JS)
                 ->color('indigo'),
         ];
@@ -82,7 +82,7 @@ class Discounts extends DiscountList
         $this->discountForm->fill($discount);
 
         $this->js(<<<'JS'
-            $modalOpen('edit-discount');
+            $modalOpen('edit-discount-modal');
         JS);
     }
 
