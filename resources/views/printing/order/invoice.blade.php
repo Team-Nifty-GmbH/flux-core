@@ -3,14 +3,16 @@
 @section('first-page-right-block.rows')
     @parent
     <tr>
-        <td class="text-right font-semibold">{{ __('Invoice Date') }}:</td>
-        <td>
+        <td class="py-0 text-left font-semibold">{{ __('Invoice Date') }}:</td>
+        <td class="p-0 text-right">
             {{ ($model->invoice_date ?: now())->locale(app()->getLocale())->isoFormat('L') }}
         </td>
     </tr>
     <tr>
-        <td class="text-right font-semibold">{{ __('Performance Date') }}:</td>
-        <td>
+        <td class="py-0 text-left font-semibold">
+            {{ __('Performance Date') }}:
+        </td>
+        <td class="p-0 text-right">
             @if ($model->system_delivery_date_end && $model->system_delivery_date_end->format('Y-m-d') !== $model->system_delivery_date->format('Y-m-d'))
                 {{ ($model->system_delivery_date ?: now())->locale(app()->getLocale())->isoFormat('L') }}
                 -
