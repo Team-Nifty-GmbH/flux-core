@@ -248,6 +248,9 @@ class Product extends Component
 
         $priceLists = resolve_static(PriceList::class, 'query')
             ->with('parent')
+            ->orderByDesc('is_default')
+            ->orderByDesc('is_purchase')
+            ->orderBy('name')
             ->get([
                 'id',
                 'parent_id',

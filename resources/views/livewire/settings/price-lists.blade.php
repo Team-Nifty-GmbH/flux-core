@@ -28,6 +28,7 @@
                                 :label="__('Parent')"
                                 select="label:name|value:id"
                                 :options="$priceLists"
+                                searchable
                             />
                             <div
                                 x-show="$wire.priceList.parent_id > 0"
