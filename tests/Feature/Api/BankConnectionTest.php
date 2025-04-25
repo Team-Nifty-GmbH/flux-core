@@ -31,7 +31,6 @@ class BankConnectionTest extends BaseSetup
             'account_holder' => 'Test Holder',
             'bank_name' => 'Test Bank',
             'iban' => 'DE75512108001245126199',
-            'bic' => '72tjrv12j4a',
         ];
 
         $this->user->givePermissionTo($this->permissions['create']);
@@ -64,10 +63,23 @@ class BankConnectionTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/bank-connections/' . $bankConnection->id);
+        $response = $this->actingAs($this->user)->delete('/api/bank-connections/' . $bankConnection->getKey());
         $response->assertStatus(204);
 
-        $this->assertDatabaseMissing('bank_connections', ['id' => $bankConnection->id]);
+        $this->assertDatabaseMissing('bank_connections', ['id' => $bankConnection->getKey()]);
+    }
+
+    public function test_delete_non_existent_bank_connection(): void
+    {
+        $bankConnection = BankConnection::factory()->create();
+
+        $this->user->givePermissionTo($this->permissions['delete']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $bankConnection->delete();
+
+        $response = $this->actingAs($this->user)->delete('/api/bank-connections/' . $bankConnection->getKey());
+        $response->assertStatus(404);
     }
 
     public function test_get_bank_connections(): void
@@ -85,7 +97,7 @@ class BankConnectionTest extends BaseSetup
         $this->assertCount(3, $bankConnections);
 
         foreach ($bankConnections as $bankConnection) {
-            $this->assertTrue($jsonData->contains(fn ($item) => $item->id === $bankConnection->id &&
+            $this->assertTrue($jsonData->contains(fn ($item) => $item->id === $bankConnection->getKey() &&
                 $item->name === $bankConnection->name
             ));
         }
@@ -107,7 +119,7 @@ class BankConnectionTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/bank-connections/' . $bankConnections[0]->id);
+        $response = $this->actingAs($this->user)->get('/api/bank-connections/' . $bankConnections[0]->getKey());
         $response->assertStatus(200);
 
         $json = json_decode($response->getContent());
@@ -135,7 +147,7 @@ class BankConnectionTest extends BaseSetup
         $this->assertDatabaseHas('bank_connections', $payload);
     }
 
-    public function test_update_bank_connection_not_found(): void
+    public function test_update_non_existent_bank_connection(): void
     {
         $payload = [
             'id' => 999,

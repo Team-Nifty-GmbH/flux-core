@@ -10,7 +10,7 @@ use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Support\Collection;
 use Laravel\Sanctum\Sanctum;
 
-class ContactOptionsTest extends BaseSetup
+class ContactOptionTest extends BaseSetup
 {
     private Collection $contactOptions;
 
@@ -25,11 +25,12 @@ class ContactOptionsTest extends BaseSetup
         ]);
 
         $this->address = Address::factory()->create([
-            'contact_id' => $contact->id,
+            'contact_id' => $contact->getKey(),
             'client_id' => $this->dbClient->getKey(),
         ]);
+
         $this->contactOptions = ContactOption::factory()->count(2)->create([
-            'address_id' => $this->address->id,
+            'address_id' => $this->address->getKey(),
             'type' => 'email',
             'label' => 'Test Label',
             'value' => 'testmail@gmail.com',
@@ -47,7 +48,7 @@ class ContactOptionsTest extends BaseSetup
     public function test_create_contact_option(): void
     {
         $contactOption = [
-            'address_id' => $this->address->id,
+            'address_id' => $this->address->getKey(),
             'type' => 'email',
             'label' => 'Test Label',
             'value' => 'testmail@gmail.com',
@@ -88,10 +89,10 @@ class ContactOptionsTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/contact-options/' . $this->contactOptions[0]->id);
+        $response = $this->actingAs($this->user)->delete('/api/contact-options/' . $this->contactOptions[0]->getKey());
         $response->assertStatus(204);
 
-        $this->assertDatabaseMissing('contact_options', ['id' => $this->contactOptions[0]->id]);
+        $this->assertDatabaseMissing('contact_options', ['id' => $this->contactOptions[0]->getKey()]);
     }
 
     public function test_delete_contact_option_not_found(): void
@@ -101,7 +102,7 @@ class ContactOptionsTest extends BaseSetup
 
         $this->contactOptions[0]->delete();
 
-        $response = $this->actingAs($this->user)->delete('/api/contact-options/' . $this->contactOptions[0]->id);
+        $response = $this->actingAs($this->user)->delete('/api/contact-options/' . $this->contactOptions[0]->getKey());
         $response->assertStatus(404);
     }
 
@@ -123,12 +124,12 @@ class ContactOptionsTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/contact-options/' . $this->contactOptions[0]->id);
+        $response = $this->actingAs($this->user)->get('/api/contact-options/' . $this->contactOptions[0]->getKey());
         $response->assertStatus(200);
 
         $responseContactOptions = json_decode($response->getContent())->data;
 
-        $this->assertEquals($this->contactOptions[0]->id, $responseContactOptions->id);
+        $this->assertEquals($this->contactOptions[0]->getKey(), $responseContactOptions->id);
     }
 
     public function test_get_specific_contact_option_not_found(): void
@@ -138,7 +139,7 @@ class ContactOptionsTest extends BaseSetup
 
         $this->contactOptions[0]->delete();
 
-        $response = $this->actingAs($this->user)->get('/api/contact-options/' . $this->contactOptions[0]->id);
+        $response = $this->actingAs($this->user)->get('/api/contact-options/' . $this->contactOptions[0]->getKey());
         $response->assertStatus(404);
     }
 
@@ -162,7 +163,7 @@ class ContactOptionsTest extends BaseSetup
             ->whereKey($responseContactOption->id)
             ->first();
 
-        $this->assertEquals(data_get($payload, 'id'), $dbContactOption->id);
+        $this->assertEquals(data_get($payload, 'id'), $dbContactOption->getKey());
         $this->assertEquals(data_get($payload, 'type'), $dbContactOption->type);
         $this->assertEquals(data_get($payload, 'label'), $dbContactOption->label);
         $this->assertEquals(data_get($payload, 'value'), $dbContactOption->value);
@@ -171,7 +172,7 @@ class ContactOptionsTest extends BaseSetup
     public function test_update_contact_option_not_found(): void
     {
         $payload = [
-            'id' => $this->contactOptions[0]->id,
+            'id' => $this->contactOptions[0]->getKey(),
             'type' => 'website',
             'label' => 'Updated Test Label',
             'value' => 'test.com',
@@ -190,7 +191,7 @@ class ContactOptionsTest extends BaseSetup
     public function test_update_contact_option_validation_fails(): void
     {
         $payload = [
-            'id' => $this->contactOptions[0]->id,
+            'id' => $this->contactOptions[0]->getKey(),
             'type' => 42,
         ];
 

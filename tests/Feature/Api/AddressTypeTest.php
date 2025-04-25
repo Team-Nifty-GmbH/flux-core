@@ -30,7 +30,7 @@ class AddressTypeTest extends BaseSetup
     {
         $payload = [
             'name' => 'Office',
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
         ];
 
         $this->user->givePermissionTo($this->permissions['create']);
@@ -40,13 +40,13 @@ class AddressTypeTest extends BaseSetup
         $response->assertStatus(201);
 
         $data = json_decode($response->getContent(), true)['data'];
+
         $this->assertArrayHasKey('id', $data);
         $this->assertEquals($payload['name'], $data['name']);
-
         $this->assertDatabaseHas('address_types', [
             'id' => $data['id'],
             'name' => 'Office',
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
         ]);
     }
 
@@ -67,37 +67,37 @@ class AddressTypeTest extends BaseSetup
     {
         $type = AddressType::factory()->create([
             'name' => 'Home',
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'is_locked' => false,
         ]);
 
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/address-types/' . $type->id);
+        $response = $this->actingAs($this->user)->delete('/api/address-types/' . $type->getKey());
         $response->assertStatus(204);
 
-        $this->assertSoftDeleted('address_types', ['id' => $type->id]);
+        $this->assertSoftDeleted('address_types', ['id' => $type->getKey()]);
     }
 
     public function test_delete_address_type_locked(): void
     {
         $type = AddressType::factory()->create([
             'name' => 'Home',
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'is_locked' => true,
         ]);
 
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/address-types/' . $type->id);
+        $response = $this->actingAs($this->user)->delete('/api/address-types/' . $type->getKey());
         $response->assertStatus(422);
 
         $this->assertDatabaseHas('address_types', [
-            'id' => $type->id,
+            'id' => $type->getKey(),
             'name' => 'Home',
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
             'is_locked' => true,
         ]);
     }
@@ -110,7 +110,7 @@ class AddressTypeTest extends BaseSetup
 
         $type = AddressType::factory()->create([
             'name' => 'TestType',
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
         ]);
 
         Address::factory()
@@ -118,27 +118,27 @@ class AddressTypeTest extends BaseSetup
                 $type
             )
             ->create([
-                'contact_id' => $contact->id,
-                'client_id' => $this->dbClient->id,
+                'contact_id' => $contact->getKey(),
+                'client_id' => $this->dbClient->getKey(),
             ]);
 
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/address-types/' . $type->id);
+        $response = $this->actingAs($this->user)->delete('/api/address-types/' . $type->getKey());
         $response->assertStatus(422);
 
         $this->assertDatabaseHas('address_types', [
-            'id' => $type->id,
+            'id' => $type->getKey(),
             'name' => 'TestType',
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
         ]);
     }
 
     public function test_get_address_types(): void
     {
         $addressTypes = AddressType::factory()->count(3)->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
         ]);
 
         $this->user->givePermissionTo($this->permissions['index']);
@@ -152,7 +152,7 @@ class AddressTypeTest extends BaseSetup
         $this->assertGreaterThanOrEqual(2, count($jsonTypes));
 
         foreach ($addressTypes as $addressType) {
-            $this->assertTrue($jsonTypes->contains(fn ($item) => $item->id === $addressType->id &&
+            $this->assertTrue($jsonTypes->contains(fn ($item) => $item->id === $addressType->getKey() &&
                 $item->name === $addressType->name
             ));
         }
@@ -170,28 +170,28 @@ class AddressTypeTest extends BaseSetup
     public function test_get_specific_address_types(): void
     {
         $addressTypes = AddressType::factory()->count(2)->create([
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
         ]);
 
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/address-types/' . $addressTypes[0]->id);
+        $response = $this->actingAs($this->user)->get('/api/address-types/' . $addressTypes[0]->getKey());
         $response->assertStatus(200);
 
         $json = json_decode($response->getContent());
         $jsonType = $json->data;
 
         $this->assertNotEmpty($jsonType);
-        $this->assertEquals($addressTypes[0]->id, $jsonType->id);
+        $this->assertEquals($addressTypes[0]->getKey(), $jsonType->id);
         $this->assertEquals($addressTypes[0]->name, $jsonType->name);
     }
 
     public function test_update_address_type(): void
     {
-        $type = AddressType::factory()->create(['name' => 'Home', 'client_id' => $this->dbClient->id]);
+        $type = AddressType::factory()->create(['name' => 'Home', 'client_id' => $this->dbClient->getKey()]);
         $payload = [
-            'id' => $type->id,
+            'id' => $type->getKey(),
             'name' => 'Residential',
         ];
 
@@ -202,22 +202,22 @@ class AddressTypeTest extends BaseSetup
         $response->assertStatus(200);
 
         $data = json_decode($response->getContent(), true)['data'];
+
         $this->assertEquals($type->id, $data['id']);
         $this->assertEquals('Residential', $data['name']);
-
         $this->assertDatabaseHas('address_types', [
             'id' => $type->id,
             'name' => 'Residential',
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
         ]);
     }
 
-    public function test_update_address_type_not_found(): void
+    public function test_update_non_existent_address_type(): void
     {
         $payload = [
             'id' => 999,
             'name' => 'Test',
-            'client_id' => $this->dbClient->id,
+            'client_id' => $this->dbClient->getKey(),
         ];
 
         $this->user->givePermissionTo($this->permissions['update']);
