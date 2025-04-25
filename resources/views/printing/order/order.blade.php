@@ -12,35 +12,35 @@
             <tbody class="align-text-top text-xs leading-none">
                 @section('first-page-right-block.rows')
                 <tr class="leading-none">
-                    <td class="py-0 text-right font-semibold">
+                    <td class="py-0 text-left font-semibold">
                         {{ __('Order no.') }}
                     </td>
-                    <td class="py-0">
+                    <td class="py-0 text-right">
                         {{ $model->order_number }}
                     </td>
                 </tr>
                 <tr class="leading-none">
-                    <td class="py-0 text-right font-semibold">
+                    <td class="py-0 text-left font-semibold">
                         {{ __('Customer no.') }}
                     </td>
-                    <td class="py-0">
+                    <td class="py-0 text-right">
                         {{ $model->addressInvoice->contact->customer_number }}
                     </td>
                 </tr>
                 <tr class="leading-none">
-                    <td class="py-0 text-right font-semibold">
+                    <td class="py-0 text-left font-semibold">
                         {{ __('Order Date') }}
                     </td>
-                    <td class="py-0">
+                    <td class="py-0 text-right">
                         {{ $model->order_date->locale(app()->getLocale())->isoFormat('L') }}
                     </td>
                 </tr>
                 @if ($model->commission)
                     <tr class="leading-none">
-                        <td class="py-0 text-right font-semibold">
+                        <td class="py-0 text-left font-semibold">
                             {{ __('Commission') }}
                         </td>
-                        <td class="py-0">
+                        <td class="py-0 text-right">
                             {{ $model->commission }}
                         </td>
                     </tr>
