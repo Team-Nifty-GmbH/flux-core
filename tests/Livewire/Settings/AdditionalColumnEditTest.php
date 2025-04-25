@@ -39,7 +39,7 @@ class AdditionalColumnEditTest extends TestCase
             ->assertSet('hideModel', false)
             ->assertSet('additionalColumn.name', $additionalColumn->name)
             ->assertSet('additionalColumn.field_type', 'text')
-            ->assertSet('additionalColumn.label', null)
+            ->assertSet('additionalColumn.label', $additionalColumn->label)
             ->assertSet('additionalColumn.model_type', $additionalColumn->model_type)
             ->set('additionalColumn.name', 'Test 2');
 
