@@ -1,5 +1,7 @@
 <?php
 
+namespace FluxErp\Database\Factories;
+
 use FluxErp\Models\Pivots\TicketUser;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
