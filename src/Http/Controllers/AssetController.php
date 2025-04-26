@@ -56,9 +56,18 @@ class AssetController extends Controller
 
         $logo = Client::default()->getFirstMedia('logo_small');
 
+        if ($logo && file_exists($logo->getPath())) {
+            $path = $logo->getPath();
+            $mimeType = $logo->mime_type;
+        } else {
+            $path = tempnam(sys_get_temp_dir(), 'mailpixel_svg_');
+            $mimeType = 'image/svg+xml';
+            file_put_contents($path, '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"></svg>');
+        }
+
         return Utils::pretendResponseIsFile(
-            $logo->getPath(),
-            $logo->mime_type
+            $path,
+            $mimeType
         );
     }
 
