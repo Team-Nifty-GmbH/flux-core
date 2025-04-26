@@ -22,8 +22,8 @@ trait LogsActivity
 
         $changed = array_keys(
             array_intersect_key(
-                data_get($properties, 'attributes'),
-                data_get($properties, 'old')
+                data_get($properties, 'attributes') ?? [],
+                data_get($properties, 'old') ?? []
             )
         );
 
