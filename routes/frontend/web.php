@@ -123,7 +123,7 @@ Route::middleware('web')
             Route::get('/', Dashboard::class)->name('dashboard');
 
             Route::get('/storage/{path}', function (string $path) {
-                return response()->file(Storage::disk('local')->path($path));
+                return response()->file(Storage::path($path));
             })
                 ->where('path', '.*')
                 ->name('storage');

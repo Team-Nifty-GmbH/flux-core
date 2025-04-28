@@ -30,7 +30,7 @@ class ExportReady extends Notification
             ->accept(
                 NotificationAction::make()
                     ->label(__('Download'))
-                    ->url(Storage::disk('local')->url($this->filePath))
+                    ->url(Storage::url($this->filePath))
                     ->download()
             );
     }

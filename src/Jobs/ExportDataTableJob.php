@@ -8,6 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use TeamNiftyGmbH\DataTable\Exports\DataTableExport;
 
@@ -28,7 +29,7 @@ class ExportDataTableJob implements ShouldQueue
     public function handle(): void
     {
         /** @var Model $model */
-        $model = new $this->modelClass();
+        $model = app($this->modelClass);
 
         $query = $model->newModelQuery()
             ->fromRaw($this->sql, $this->bindings)
@@ -39,7 +40,7 @@ class ExportDataTableJob implements ShouldQueue
 
         Excel::store(
             new DataTableExport($query, $this->columns),
-            $filePath
+            Storage::path($filePath)
         );
 
         $user = morph_to($this->userMorph);
