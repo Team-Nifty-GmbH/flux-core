@@ -31,7 +31,11 @@ trait LogsActivity
             $attribute = data_get($properties, 'attributes.' . $key);
             $old = data_get($properties, 'old.' . $key);
 
-            if ($old instanceof State && $attribute instanceof State && $old::class === $attribute::class) {
+            if (
+                $old instanceof State
+                && $attribute instanceof State
+                && $old::class === $attribute::class
+            ) {
                 data_forget($properties, 'old.' . $key);
                 data_forget($properties, 'attributes.' . $key);
             }
