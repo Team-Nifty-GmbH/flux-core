@@ -45,9 +45,6 @@ class OrderTransaction extends FluxPivot
         static::deleted(function (OrderTransaction $orderTransaction): void {
             if ($orderTransaction->is_accepted) {
                 $orderTransaction->order->calculatePaymentState()->save();
-            }
-
-            if ($orderTransaction->is_accepted) {
                 $orderTransaction->transaction->calculateBalance()->save();
             }
         });
