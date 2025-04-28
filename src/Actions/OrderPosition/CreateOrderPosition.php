@@ -193,10 +193,11 @@ class CreateOrderPosition extends FluxAction
 
                 $originPosition = resolve_static(OrderPosition::class, 'query')
                     ->whereKey($originPositionId)
+                    ->where('order_id', $order->parent_id)
                     ->withSum('descendants as descendantsAmount', 'amount')
                     ->first();
                 $maxAmount = bcsub(
-                    $originPosition->amount,
+                    $originPosition?->amount ?? 0,
                     $originPosition->descendantsAmount ?? 0,
                 );
 
