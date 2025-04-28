@@ -40,7 +40,7 @@ class Activities extends Component
             ->firstOrFail()
             ->activities()
             ->with('causer:id,name')
-            ->latest()
+            ->latest('id')
             ->paginate(perPage: $this->perPage * $this->page);
 
         $this->perPage = $activities->perPage();
