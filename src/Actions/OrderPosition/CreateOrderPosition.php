@@ -198,7 +198,7 @@ class CreateOrderPosition extends FluxAction
                     ->first();
                 $maxAmount = bcsub(
                     $originPosition?->amount ?? 0,
-                    $originPosition->descendantsAmount ?? 0,
+                    $originPosition?->descendantsAmount ?? 0,
                 );
 
                 if (bccomp($this->getData('amount') ?? 1, $maxAmount) > 0) {
