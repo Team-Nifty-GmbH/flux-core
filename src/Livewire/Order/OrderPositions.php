@@ -119,7 +119,7 @@ class OrderPositions extends OrderPositionList
                     && ! $this->order->is_locked
                 )
                 ->attributes([
-                    'wire:flux-confirm.icon.warning' => __(
+                    'wire:flux-confirm.type.warning' => __(
                         'Recalculate prices|Are you sure you want to recalculate the prices?|Cancel|Confirm'
                     ),
                     'wire:click' => 'recalculateOrderPositions(); showSelectedActions = false;',

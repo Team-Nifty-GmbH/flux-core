@@ -237,6 +237,7 @@ class FluxServiceProvider extends ServiceProvider
                 Menu::register(route: 'accounting.payment-reminders');
                 Menu::register(route: 'accounting.purchase-invoices');
                 Menu::register(route: 'accounting.transactions');
+                Menu::register(route: 'accounting.transaction-assignments');
                 Menu::register(route: 'accounting.direct-debit');
                 Menu::register(route: 'accounting.money-transfer');
                 Menu::register(route: 'accounting.payment-runs');

@@ -10,6 +10,7 @@ use FluxErp\Http\Middleware\TrackVisits;
 use FluxErp\Livewire\Accounting\DirectDebit;
 use FluxErp\Livewire\Accounting\MoneyTransfer;
 use FluxErp\Livewire\Accounting\PaymentReminder;
+use FluxErp\Livewire\Accounting\TransactionAssignments;
 use FluxErp\Livewire\Accounting\TransactionList;
 use FluxErp\Livewire\Auth\Login;
 use FluxErp\Livewire\Auth\Logout;
@@ -174,6 +175,8 @@ Route::middleware('web')
                         Route::get('/payment-reminders', PaymentReminder::class)->name('payment-reminders');
                         Route::get('/purchase-invoices', PurchaseInvoiceList::class)->name('purchase-invoices');
                         Route::get('/transactions', TransactionList::class)->name('transactions');
+                        Route::get('/transaction-assignments', TransactionAssignments::class)
+                            ->name('transaction-assignments');
                         Route::get('/direct-debit', DirectDebit::class)->name('direct-debit');
                         Route::get('/money-transfer', MoneyTransfer::class)->name('money-transfer');
                         Route::get('/payment-runs', PaymentRunList::class)->name('payment-runs');

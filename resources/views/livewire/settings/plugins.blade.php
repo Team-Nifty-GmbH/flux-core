@@ -89,7 +89,7 @@
                                 loading="installUploaded"
                                 :text="__('Upload package')"
                                 wire:click="installUploaded"
-                                wire:flux-confirm.icon.warning="{{ __('wire:confirm.install-uploaded-plugin') }}"
+                                wire:flux-confirm.type.warning="{{ __('wire:confirm.install-uploaded-plugin') }}"
                             />
                         </div>
                     </x-slot>
