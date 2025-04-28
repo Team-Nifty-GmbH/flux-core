@@ -40,6 +40,10 @@ trait SortableTrait
             $orderColumn = $model->determineOrderColumnName();
             $orderValue = $model->$orderColumn;
 
+            if (! $orderColumn || ! $orderValue) {
+                return;
+            }
+
             $model->buildSortQuery()
                 ->where($orderColumn, '>', $orderValue)
                 ->decrement($orderColumn);
