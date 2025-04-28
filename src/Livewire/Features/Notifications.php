@@ -40,7 +40,7 @@ class Notifications extends Component
         JS);
 
         if (data_get($accept, 'url')) {
-            $this->redirect(data_get($accept, 'url'), navigate: true);
+            $this->redirect(data_get($accept, 'url'), navigate: data_get($accept, 'download') ? false : true);
 
             return;
         }

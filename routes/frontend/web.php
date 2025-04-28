@@ -87,6 +87,7 @@ use FluxErp\Livewire\Task\TaskList;
 use FluxErp\Livewire\Ticket\Ticket;
 use FluxErp\Models\Address;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use TeamNiftyGmbH\DataTable\Controllers\IconController;
 
@@ -121,6 +122,12 @@ Route::middleware('web')
 
         Route::middleware(['auth:web', 'permission'])->group(function (): void {
             Route::get('/', Dashboard::class)->name('dashboard');
+
+            Route::get('/storage/{path}', function (string $path) {
+                return response()->file(Storage::path($path));
+            })
+                ->where('path', '.*')
+                ->name('storage');
 
             Route::middleware(TrackVisits::class)->group(function (): void {
                 Route::get('/mail', Mail::class)->name('mail');
