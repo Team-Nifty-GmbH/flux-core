@@ -13,7 +13,11 @@ class SetJobAuthenticatedUserMiddleware
     {
         $user = morph_to(Context::get('user'));
 
-        if ((! auth()->check() || ! auth()->user()->isNot($user)) && $user && $user instanceof Authenticatable) {
+        if (
+            (! auth()->check() || auth()->user()->isNot($user))
+            && $user
+            && $user instanceof Authenticatable
+        ) {
             Auth::setUser($user);
         }
 
