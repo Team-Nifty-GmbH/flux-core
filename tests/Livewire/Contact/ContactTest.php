@@ -33,6 +33,14 @@ class ContactTest extends TestCase
         ]);
     }
 
+    public function test_can_delete_contact(): void
+    {
+        Livewire::test(Contact::class, ['id' => $this->contact->id])
+            ->call('delete')
+            ->assertHasNoErrors()
+            ->assertRedirectToRoute('contacts.contacts');
+    }
+
     public function test_renders_successfully(): void
     {
         Livewire::test(Contact::class, ['id' => $this->contact->id])

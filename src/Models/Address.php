@@ -206,6 +206,10 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                 ->where('is_main_address', true)
                 ->first();
 
+            if (! $mainAddress) {
+                return;
+            }
+
             if ($address->is_invoice_address) {
                 $contactUpdates += [
                     'invoice_address_id' => $mainAddress->id,
