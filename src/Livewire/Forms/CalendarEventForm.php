@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\Forms;
 
 use Carbon\Carbon;
+use Carbon\Exceptions\InvalidFormatException;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Helpers\Helper;
 use FluxErp\Models\CalendarEvent;
@@ -52,10 +53,10 @@ class CalendarEventForm extends FluxForm
         'unit' => 'days',
         'weekdays' => [],
         'monthly' => 'day',
-        'repeat_end' => null,
-        'recurrences' => null,
         'repeat_radio' => null,
     ];
+
+    public ?string $repeat_end = null;
 
     public ?int $repetition = null;
 
@@ -91,6 +92,18 @@ class CalendarEventForm extends FluxForm
 
     public function fillFromJs(array $values): void
     {
+        if (data_get($values, 'allDay')) {
+            if (is_null(data_get($values, 'end'))) {
+                $values['end'] = $values['start'];
+            } elseif (! Carbon::parse(data_get($values, 'end'))
+                ->isSameDay(Carbon::parse(data_get($values, 'start')))
+            ) {
+                $values['end'] = Carbon::parse(data_get($values, 'end'))
+                    ->subDay()
+                    ->toDateString();
+            }
+        }
+
         $values['is_all_day'] = data_get($values, 'allDay');
 
         $values['repeat'] = [
@@ -99,13 +112,27 @@ class CalendarEventForm extends FluxForm
             'weekdays' => Arr::pull($values, 'weekdays'),
             'monthly' => Arr::pull($values, 'monthly'),
             'repeat_radio' => Arr::pull($values, 'repeat_radio'),
-            'repeat_end' => Arr::pull($values, 'repeat_end'),
-            'recurrences' => Arr::pull($values, 'recurrences'),
         ];
 
         $values['extended_props'] = Arr::pull($values, 'extendedProps.customProperties');
 
         $this->fill($values);
+    }
+
+    public function save(): void
+    {
+        if ($this->was_repeatable
+            && $this->has_repeats
+            && $this->confirm_option === 'this'
+        ) {
+            $this->confirm_option = 'future';
+        }
+
+        if (! $this->was_repeatable) {
+            $this->confirm_option = 'all';
+        }
+
+        parent::save();
     }
 
     protected function getActions(): array
@@ -115,7 +142,8 @@ class CalendarEventForm extends FluxForm
 
     protected function makeAction(string $name, ?array $data = null): FluxAction
     {
-        $model = morphed_model($this->calendar_type ?? '') ?? resolve_static(CalendarEvent::class, 'class');
+        $model = morphed_model($this->calendar_type ?? '')
+            ?? resolve_static(CalendarEvent::class, 'class');
 
         $data = $this->toArray();
         if (! data_get($data, 'is_repeatable') || ! data_get($data, 'has_repeats')) {
@@ -131,7 +159,11 @@ class CalendarEventForm extends FluxForm
 
         foreach ($dateProperties as $property) {
             if ($value = data_get($data, $property)) {
-                $data[$property] = Carbon::parse($value)->timezone('UTC')->toDateTimeString();
+                try {
+                    $data[$property] = Carbon::parse($value)->timezone('UTC')->toDateTimeString();
+                } catch (InvalidFormatException) {
+                    //
+                }
             }
         }
 

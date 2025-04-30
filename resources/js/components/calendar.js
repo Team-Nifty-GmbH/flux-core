@@ -139,20 +139,24 @@ const calendar = () => {
             });
         },
         setDateTime(type, event) {
-            const date =
+            let id = 'calendar-event-';
+            let date =
                 event.target.parentNode.parentNode.parentNode.parentNode.parentNode.querySelector(
-                    'input[type="date"]',
-                ).value;
-            let time =
-                event.target.parentNode.parentNode.parentNode.parentNode.parentNode.querySelector(
-                    'input[type="time"]',
+                    `#${id + type}-date`
                 ).value;
 
-            if (this.$wire.event.allDay) {
-                time = '00:00:00';
+            let time = '00:00:00';
+            if (!this.$wire.event.is_all_day) {
+                time =
+                    event.target.parentNode.parentNode.parentNode.parentNode.parentNode.querySelector(
+                        `#${id + type}-time`
+                    ).value;
             }
 
             let dateTime = dayjs(date + ' ' + time);
+            if (this.$wire.event.is_all_day) {
+                dateTime = dateTime.utc(true);
+            }
 
             if (type === 'start') {
                 this.$wire.event.start = dateTime.format(); // Use the default ISO 8601 format
@@ -161,8 +165,17 @@ const calendar = () => {
             }
         },
         mapDatesToUtc(event) {
-            event.start = dayjs(event.start).utc(true).format();
-            event.end = dayjs(event.end).utc(true).format();
+            if (event.allDay) {
+                let start = dayjs(event.start).utc(true).startOf('day');
+                let end = dayjs(event.end).utc(true).startOf('day');
+
+                event.start = start.format();
+                event.end = start.isSame(end, 'day') ? end.format() : end.add(1, 'day').format();
+            } else {
+                event.start = dayjs(event.start).utc(true).format();
+                event.end = dayjs(event.end).utc(true).format();
+            }
+
             event.repeat_end = event.repeat_end
                 ? dayjs(event.repeat_end).utc(true).format()
                 : null;
