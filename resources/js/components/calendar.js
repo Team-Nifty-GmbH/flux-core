@@ -142,14 +142,14 @@ const calendar = () => {
             let id = 'calendar-event-';
             let date =
                 event.target.parentNode.parentNode.parentNode.parentNode.parentNode.querySelector(
-                    `#${id + type}-date`
+                    `#${id + type}-date`,
                 ).value;
 
             let time = '00:00:00';
             if (!this.$wire.event.is_all_day) {
                 time =
                     event.target.parentNode.parentNode.parentNode.parentNode.parentNode.querySelector(
-                        `#${id + type}-time`
+                        `#${id + type}-time`,
                     ).value;
             }
 
@@ -170,7 +170,9 @@ const calendar = () => {
                 let end = dayjs(event.end).utc(true).startOf('day');
 
                 event.start = start.format();
-                event.end = start.isSame(end, 'day') ? end.format() : end.add(1, 'day').format();
+                event.end = start.isSame(end, 'day')
+                    ? end.format()
+                    : end.add(1, 'day').format();
             } else {
                 event.start = dayjs(event.start).utc(true).format();
                 event.end = dayjs(event.end).utc(true).format();
