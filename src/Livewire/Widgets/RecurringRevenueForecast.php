@@ -41,14 +41,16 @@ class RecurringRevenueForecast extends BarChart
         $end = Carbon::now()->addMonths(12)->endOfMonth();
         $currentMonthIndex = Carbon::now()->month - 1;
 
-        $orderSchedules = OrderSchedule::with(['order', 'schedule'])->get();
+        $orderSchedules = resolve_static(OrderSchedule::class, 'query')
+            ->with(['order', 'schedule'])
+            ->get();
 
         $clientsData = [];
 
         foreach ($orderSchedules as $orderSchedule) {
             if ($orderSchedule->schedule->cron_expression) {
                 $order = $orderSchedule->order;
-                $client = $order->client->name ?? 'Unknown';
+                $client = $order->client->name ?? __('Unknown');
 
                 $orderValue = $order->total_net_price;
                 $cron = new CronExpression($orderSchedule->schedule->cron_expression);
@@ -56,15 +58,25 @@ class RecurringRevenueForecast extends BarChart
 
                 while ($nextRun <= $end) {
                     $month = Carbon::parse($nextRun)->monthName;
-                    $clientsData[$client][$month] = ($clientsData[$client][$month] ?? 0) + $orderValue;
+                    $clientsData[$client][$month] = bcadd($clientsData[$client][$month] ?? 0, $orderValue);
                     $nextRun = $cron->getNextRunDate($nextRun);
                 }
             }
         }
 
         $months = [
-            __('January'), __('February'), __('March'), __('April'), __('May'), __('June'),
-            __('July'), __('August'), __('September'), __('October'), __('November'), __('December'),
+            __('January'),
+            __('February'),
+            __('March'),
+            __('April'),
+            __('May'),
+            __('June'),
+            __('July'),
+            __('August'),
+            __('September'),
+            __('October'),
+            __('November'),
+            __('December'),
         ];
 
         $orderedMonths = array_merge(
