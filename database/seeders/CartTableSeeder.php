@@ -32,7 +32,7 @@ class CartTableSeeder extends Seeder
             Cart::factory()->create([
                 'payment_type_id' => faker()->boolean(70) ? $cutPaymentTypeIds->random()->getKey() : null,
                 'price_list_id' => $cutPriceListIds->random()->getKey(),
-                'authenticatable_type' => $modelClass,
+                'authenticatable_type' => morph_alias($modelClass),
                 'authenticatable_id' => $instanceId,
             ]);
         }

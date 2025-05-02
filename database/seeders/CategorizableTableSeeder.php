@@ -28,7 +28,7 @@ class CategorizableTableSeeder extends Seeder
             $instanceId = faker()->unique()->randomElement($idList);
 
             Categorizable::firstOrCreate([
-                'categorizable_type' => $modelClass,
+                'categorizable_type' => morph_alias($modelClass),
                 'categorizable_id' => $instanceId,
                 'category_id' => $cutCategoryIds->random()->getKey(),
             ]);

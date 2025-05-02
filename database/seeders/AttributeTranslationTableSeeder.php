@@ -35,7 +35,7 @@ class AttributeTranslationTableSeeder extends Seeder
 
             AttributeTranslation::firstOrCreate(AttributeTranslation::factory()->make([
                 'language_id' => $cutLanguageIds->random()->getKey(),
-                'model_type' => $modelClass,
+                'model_type' => morph_alias($modelClass),
                 'model_id' => $instanceId,
             ])->toArray());
         }

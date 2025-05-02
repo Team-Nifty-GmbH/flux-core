@@ -34,7 +34,7 @@ class CommunicatableTableSeeder extends Seeder
             $instanceId = faker()->unique()->randomElement($idList);
 
             Communicatable::firstOrCreate([
-                'communicatable_type' => $modelClass,
+                'communicatable_type' => morph_alias($modelClass),
                 'communicatable_id' => $instanceId,
                 'communication_id' => $CutCommunicationIds->random()->getKey(),
             ]);

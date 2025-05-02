@@ -40,7 +40,7 @@ class AdditionalColumnTableSeeder extends Seeder
             $instanceId = faker()->unique()->randomElement($idList);
 
             AdditionalColumn::firstOrCreate(AdditionalColumn::factory()->make([
-                'model_type' => $modelClass,
+                'model_type' => morph_alias($modelClass),
                 'model_id' => $instanceId,
             ])->toArray());
         }
