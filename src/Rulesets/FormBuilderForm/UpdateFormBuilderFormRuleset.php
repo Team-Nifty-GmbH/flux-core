@@ -22,8 +22,8 @@ class UpdateFormBuilderFormRuleset extends FluxRuleset
             'description' => 'nullable|string',
             'slug' => 'nullable|string|max:255',
             'options' => 'nullable|array',
-            'start_date' => 'present|nullable|datetime:Y-m-d H:i:s',
-            'end_date' => 'present|nullable|after:start_date|datetime:Y-m-d H:i:s',
+            'start_date' => 'present|nullable|date_format:Y-m-d H:i:s',
+            'end_date' => 'present|nullable|after:start_date|date_format:Y-m-d H:i:s',
             'is_active' => 'boolean',
         ];
     }
