@@ -99,7 +99,7 @@ class DiscountTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['create']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->post('/api/discounts', $payload);
+        $response = $this->actingAs($this->user)->post('/api/discounts', $payload);
         $response->assertStatus(201);
 
         $data = $response->json('data');
@@ -121,9 +121,9 @@ class DiscountTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['create']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $this->post('/api/discounts', $payload)
-            ->assertStatus(422)
-            ->assertJsonValidationErrors(['discount']);
+        $response = $this->actingAs($this->user)->post('/api/discounts', $payload);
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['discount']);
     }
 
     public function test_create_validation_fails(): void
@@ -135,9 +135,9 @@ class DiscountTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['create']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $this->post('/api/discounts', $payload)
-            ->assertStatus(422)
-            ->assertJsonValidationErrors(['discount', 'is_percentage']);
+        $response = $this->actingAs($this->user)->post('/api/discounts', $payload);
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['discount', 'is_percentage']);
     }
 
     public function test_delete_discount_success(): void
@@ -147,8 +147,8 @@ class DiscountTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['delete']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $this->delete('/api/discounts/' . $discount->getKey())
-            ->assertStatus(204);
+        $response = $this->actingAs($this->user)->delete('/api/discounts/' . $discount->getKey());
+        $response->assertStatus(204);
 
         $this->assertSoftDeleted('discounts', ['id' => $discount->id]);
     }
@@ -159,8 +159,8 @@ class DiscountTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $nonId = $this->discounts->max('id') + 1;
-        $this->delete('/api/discounts/' . $nonId)
-            ->assertStatus(404);
+        $response = $this->actingAs($this->user)->delete('/api/discounts/' . $nonId);
+        $response->assertStatus(404);
     }
 
     public function test_index_discounts(): void
@@ -168,7 +168,7 @@ class DiscountTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['index']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->get('/api/discounts');
+        $response = $this->actingAs($this->user)->get('/api/discounts');
         $response->assertStatus(200);
 
         $items = collect($response->json('data.data'));
@@ -190,7 +190,7 @@ class DiscountTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->get('/api/discounts/' . $discount->getKey());
+        $response = $this->actingAs($this->user)->get('/api/discounts/' . $discount->getKey());
         $response->assertStatus(200);
 
         $data = $response->json('data');
@@ -205,8 +205,8 @@ class DiscountTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $nonId = $this->discounts->max('id') + 1;
-        $this->get('/api/discounts/' . $nonId)
-            ->assertStatus(404);
+        $response = $this->actingAs($this->user)->get('/api/discounts/' . $nonId);
+        $response->assertStatus(404);
     }
 
     public function test_update_discount_success(): void
@@ -222,7 +222,7 @@ class DiscountTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['update']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->put('/api/discounts', $payload);
+        $response = $this->actingAs($this->user)->put('/api/discounts', $payload);
         $response->assertStatus(200);
 
         $data = $response->json('data');
@@ -246,14 +246,13 @@ class DiscountTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['update']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $this->put('/api/discounts', $payload)
-            ->assertStatus(422)
-            ->assertJsonValidationErrors(['discount']);
+        $response = $this->actingAs($this->user)->put('/api/discounts', $payload);
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['discount']);
     }
 
     public function test_update_validation_fails(): void
     {
-        $discount = $this->discounts->first();
         $payload = [
             'discount' => 0.2,
         ];
@@ -261,8 +260,8 @@ class DiscountTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['update']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $this->put('/api/discounts', $payload)
-            ->assertStatus(422)
-            ->assertJsonValidationErrors(['id']);
+        $response = $this->actingAs($this->user)->put('/api/discounts', $payload);
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['id']);
     }
 }
