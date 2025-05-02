@@ -6,7 +6,6 @@ use Carbon\Carbon;
 use FluxErp\Models\FormBuilderForm;
 use FluxErp\Models\Permission;
 use FluxErp\Tests\Feature\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithFaker;
 use Laravel\Sanctum\Sanctum;
 
