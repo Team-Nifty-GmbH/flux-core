@@ -2,7 +2,6 @@
 
 namespace FluxErp\Tests\Feature\Api;
 
-use Carbon\Carbon;
 use FluxErp\Models\FormBuilderForm;
 use FluxErp\Models\FormBuilderSection;
 use FluxErp\Models\Permission;
@@ -26,7 +25,7 @@ class FormBuilderSectionTest extends BaseSetup
         $this->formBuilderForm = FormBuilderForm::factory()->create();
 
         $this->formBuilderSections = FormBuilderSection::factory()->count(3)->create([
-            'form_id' => $this->formBuilderForm->getKey()
+            'form_id' => $this->formBuilderForm->getKey(),
         ]);
 
         $this->permissions = [
@@ -73,7 +72,7 @@ class FormBuilderSectionTest extends BaseSetup
 
         $response = $this->actingAs($this->user)->post('/api/form-builder/sections', $payload);
         $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['name', 'form_id', 'ordering', 'columns']);;
+        $response->assertJsonValidationErrors(['name', 'form_id', 'ordering', 'columns']);
     }
 
     public function test_delete_form_builder_section_success(): void
@@ -112,8 +111,7 @@ class FormBuilderSectionTest extends BaseSetup
 
         foreach ($this->formBuilderSections as $formBuilderSection) {
             $this->assertTrue(
-                $items->contains(fn ($i) =>
-                    $i['id'] === $formBuilderSection->getKey() &&
+                $items->contains(fn ($i) => $i['id'] === $formBuilderSection->getKey() &&
                     $i['name'] === $formBuilderSection->name &&
                     $i['description'] === $formBuilderSection->description &&
                     $i['ordering'] === $formBuilderSection->ordering &&
@@ -159,7 +157,7 @@ class FormBuilderSectionTest extends BaseSetup
         $payload = [
             'id' => $this->formBuilderSections[0]->getKey(),
             'name' => 'New Name',
-            'description' => "Test Description",
+            'description' => 'Test Description',
             'ordering' => 1,
             'columns' => 1,
         ];
