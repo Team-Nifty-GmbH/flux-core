@@ -66,7 +66,7 @@ class UpdateOrderPosition extends FluxAction
                 $orderPosition->unit_gram_weight : $product->unit_gram_weight;
         }
 
-        PriceCalculation::make($orderPosition, $this->data)->fill();
+        PriceCalculation::make($orderPosition, $this->data)->calculate();
         unset($orderPosition->discounts, $orderPosition->unit_price);
         $orderPosition->save();
 

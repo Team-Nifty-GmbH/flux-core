@@ -27,7 +27,7 @@ class PriceCalculation
         ]);
     }
 
-    public function fill(): void
+    public function calculate(): void
     {
         $this->price = data_get($this->data, 'unit_price') ?? $this->orderPosition->unit_price;
 
@@ -134,22 +134,32 @@ class PriceCalculation
             ->orderByDesc('id')
             ->first();
 
-        $productPurchasePrice = $this->orderPosition->product?->prices()
-            ->whereRelation('priceList', 'is_purchase')
-            ->first();
+        if ($stockPosting) {
+            $purchasePrice = $this->orderPosition->product?->prices()
+                ->whereRelation('priceList', 'is_purchase')
+                ->first()
+                ?->getNet($this->orderPosition->vat_rate_percentage);
+        } else {
+            $purchasePrice = bcdiv($stockPosting->purchase_price, $stockPosting->posting);
+        }
 
-        $purchasePrice = $stockPosting
-            ? bcdiv($stockPosting->purchase_price, $stockPosting->posting)
-            : $productPurchasePrice?->getNet($this->orderPosition->vat_rate_percentage);
-
-        $this->orderPosition->purchase_price = bcmul($purchasePrice ?? 0, $purchasePrice->amount ?? 0);
+        $this->orderPosition->purchase_price = bcmul(
+            $purchasePrice ?? 0,
+            $this->orderPosition->amount ?? 0
+        );
     }
 
     protected function calculateTotalPrices(): void
     {
         // calculate net and gross base prices
-        $this->orderPosition->total_base_gross_price = bcmul($this->orderPosition->unit_gross_price, $this->orderPosition->amount);
-        $this->orderPosition->total_base_net_price = bcmul($this->orderPosition->unit_net_price, $this->orderPosition->amount);
+        $this->orderPosition->total_base_gross_price = bcmul(
+            $this->orderPosition->unit_gross_price,
+            $this->orderPosition->amount
+        );
+        $this->orderPosition->total_base_net_price = bcmul(
+            $this->orderPosition->unit_net_price,
+            $this->orderPosition->amount
+        );
         $this->orderPosition->total_gross_price = $this->orderPosition->total_base_gross_price;
         $this->orderPosition->total_net_price = $this->orderPosition->total_base_net_price;
     }
@@ -185,8 +195,11 @@ class PriceCalculation
         $priceHelper = PriceHelper::make($this->orderPosition->product);
 
         if ($contactId = data_get($this->data, 'contact_id')) {
-            $priceHelper
-                ->setContact(resolve_static(Contact::class, 'query')->whereKey($contactId)->first());
+            $priceHelper->setContact(
+                resolve_static(Contact::class, 'query')
+                    ->whereKey($contactId)
+                    ->first()
+            );
         }
 
         if ($priceListId = data_get(
@@ -194,10 +207,11 @@ class PriceCalculation
             'price_list_id',
             $this->orderPosition->price_list_id ?? $this->orderPosition->order->price_list_id
         )) {
-            $priceHelper
-                ->setPriceList(
-                    resolve_static(PriceList::class, 'query')->whereKey($priceListId)->first()
-                );
+            $priceHelper->setPriceList(
+                resolve_static(PriceList::class, 'query')
+                    ->whereKey($priceListId)
+                    ->first()
+            );
         }
 
         return $priceHelper->price();

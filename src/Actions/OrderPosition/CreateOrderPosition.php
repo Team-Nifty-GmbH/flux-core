@@ -89,7 +89,7 @@ class CreateOrderPosition extends FluxAction
         $orderPosition->fill($this->data);
 
         if (! $this->getData('is_free_text')) {
-            PriceCalculation::make($orderPosition, $this->data)->fill();
+            PriceCalculation::make($orderPosition, $this->data)->calculate();
         }
         unset($orderPosition->discounts, $orderPosition->unit_price);
 
