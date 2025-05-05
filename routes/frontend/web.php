@@ -10,6 +10,7 @@ use FluxErp\Http\Middleware\TrackVisits;
 use FluxErp\Livewire\Accounting\DirectDebit;
 use FluxErp\Livewire\Accounting\MoneyTransfer;
 use FluxErp\Livewire\Accounting\PaymentReminder;
+use FluxErp\Livewire\Accounting\TransactionAssignments;
 use FluxErp\Livewire\Accounting\TransactionList;
 use FluxErp\Livewire\Auth\Login;
 use FluxErp\Livewire\Auth\Logout;
@@ -86,6 +87,7 @@ use FluxErp\Livewire\Task\TaskList;
 use FluxErp\Livewire\Ticket\Ticket;
 use FluxErp\Models\Address;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use TeamNiftyGmbH\DataTable\Controllers\IconController;
 
@@ -120,6 +122,12 @@ Route::middleware('web')
 
         Route::middleware(['auth:web', 'permission'])->group(function (): void {
             Route::get('/', Dashboard::class)->name('dashboard');
+
+            Route::get('/storage/{path}', function (string $path) {
+                return response()->file(Storage::path($path));
+            })
+                ->where('path', '.*')
+                ->name('storage');
 
             Route::middleware(TrackVisits::class)->group(function (): void {
                 Route::get('/mail', Mail::class)->name('mail');
@@ -174,6 +182,8 @@ Route::middleware('web')
                         Route::get('/payment-reminders', PaymentReminder::class)->name('payment-reminders');
                         Route::get('/purchase-invoices', PurchaseInvoiceList::class)->name('purchase-invoices');
                         Route::get('/transactions', TransactionList::class)->name('transactions');
+                        Route::get('/transaction-assignments', TransactionAssignments::class)
+                            ->name('transaction-assignments');
                         Route::get('/direct-debit', DirectDebit::class)->name('direct-debit');
                         Route::get('/money-transfer', MoneyTransfer::class)->name('money-transfer');
                         Route::get('/payment-runs', PaymentRunList::class)->name('payment-runs');

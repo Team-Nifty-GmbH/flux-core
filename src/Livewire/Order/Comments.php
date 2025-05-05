@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\Order;
 
 use FluxErp\Livewire\Forms\OrderForm;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Modelable;
 use Livewire\Component;
 
@@ -11,7 +12,7 @@ class Comments extends Component
     #[Modelable]
     public OrderForm $order;
 
-    public function render()
+    public function render(): View
     {
         return view('flux::livewire.order.comments');
     }

@@ -39,6 +39,7 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Contracts\Queue\Factory as QueueFactoryContract;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -82,6 +83,8 @@ class FluxServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        Model::automaticallyEagerLoadRelationships();
+
         bcscale(9);
         $this->bootMiddleware();
         $this->bootCommands();
@@ -234,6 +237,7 @@ class FluxServiceProvider extends ServiceProvider
                 Menu::register(route: 'accounting.payment-reminders');
                 Menu::register(route: 'accounting.purchase-invoices');
                 Menu::register(route: 'accounting.transactions');
+                Menu::register(route: 'accounting.transaction-assignments');
                 Menu::register(route: 'accounting.direct-debit');
                 Menu::register(route: 'accounting.money-transfer');
                 Menu::register(route: 'accounting.payment-runs');

@@ -9,6 +9,7 @@ use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
 use FluxErp\Models\Pivots\OrderSchedule;
+use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Rules\Numeric;
 use FluxErp\States\Order\DeliveryState\DeliveryState;
 use FluxErp\States\Order\OrderState;
@@ -257,7 +258,13 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
     public function calculateBalance(): static
     {
         $this->balance = bcround(
-            bcsub($this->total_gross_price, $this->transactions()->sum('amount'), 9),
+            bcsub(
+                $this->total_gross_price,
+                $this->transactions()
+                    ->withPivot('amount')
+                    ->sum('order_transaction.amount'),
+                9
+            ),
             2
         );
 
@@ -325,7 +332,12 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
         } else {
             if (
                 bccomp(
-                    bcround($this->transactions()->sum('amount'), 2),
+                    bcround(
+                        $this->transactions()
+                            ->withPivot('amount')
+                            ->sum('order_transaction.amount'),
+                        2
+                    ),
                     bcround($this->total_gross_price, 2),
                     2
                 ) === 0
@@ -603,6 +615,11 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
         return $this->hasMany(OrderPosition::class);
     }
 
+    public function orderTransactions(): HasMany
+    {
+        return $this->hasMany(OrderTransaction::class);
+    }
+
     public function orderType(): BelongsTo
     {
         return $this->belongsTo(OrderType::class);
@@ -769,9 +786,9 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
         return $this->hasManyThrough(Task::class, Project::class);
     }
 
-    public function transactions(): HasMany
+    public function transactions(): BelongsToMany
     {
-        return $this->hasMany(Transaction::class);
+        return $this->belongsToMany(Transaction::class)->using(OrderTransaction::class);
     }
 
     public function users(): BelongsToMany

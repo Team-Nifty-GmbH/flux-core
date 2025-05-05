@@ -204,13 +204,16 @@ class Product extends FluxModel implements HasMedia, InteractsWithDataTables
         );
     }
 
-    public function purchasePrice(float|int $amount = 1): ?Price
+    public function purchasePrice(float|int|null $amount = 1): ?Price
     {
-        return PriceHelper::make($this)
-            ->setPriceList(resolve_static(PriceList::class, 'query')
-                ->where('is_purchase', true)
-                ->first()
-            )->price();
+        return $amount
+            ? PriceHelper::make($this)
+                ->setPriceList(resolve_static(PriceList::class, 'query')
+                    ->where('is_purchase', true)
+                    ->first()
+                )
+                ->price()
+            : null;
     }
 
     public function registerMediaCollections(): void
