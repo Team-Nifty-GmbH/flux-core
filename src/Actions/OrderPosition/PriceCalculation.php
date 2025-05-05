@@ -135,12 +135,12 @@ class PriceCalculation
             ->first();
 
         if ($stockPosting) {
+            $purchasePrice = bcdiv($stockPosting->purchase_price, $stockPosting->posting);
+        } else {
             $purchasePrice = $this->orderPosition->product?->prices()
                 ->whereRelation('priceList', 'is_purchase')
                 ->first()
                 ?->getNet($this->orderPosition->vat_rate_percentage);
-        } else {
-            $purchasePrice = bcdiv($stockPosting->purchase_price, $stockPosting->posting);
         }
 
         $this->orderPosition->purchase_price = bcmul(
