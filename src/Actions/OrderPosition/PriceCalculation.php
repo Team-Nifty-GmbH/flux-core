@@ -15,9 +15,9 @@ class PriceCalculation
 {
     use Makeable;
 
-    public Price|float|string|null $price = null;
+    protected Price|float|string|null $price = null;
 
-    public function __construct(public OrderPosition $orderPosition, public array $data)
+    public function __construct(protected OrderPosition $orderPosition, protected array $data)
     {
         $this->orderPosition->loadMissing([
             'product:id,vat_rate_id',
