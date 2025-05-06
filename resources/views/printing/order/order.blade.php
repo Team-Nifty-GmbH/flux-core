@@ -1,6 +1,6 @@
 @php
-    $isNet = $model->priceList->is_net;
-    $currency = $model->currency->iso;
+    $isNet = ($model->priceList ?? \FluxErp\Models\PriceList::default())->is_net;
+    $currency = ($model->currency ?? \FluxErp\Models\Currency::default())->iso;
     $formatter = new NumberFormatter(app()->getLocale(), NumberFormatter::CURRENCY);
 @endphp
 
