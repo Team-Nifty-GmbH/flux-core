@@ -84,6 +84,11 @@ class FluxServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        try {
+            Number::useCurrency(resolve_static(Currency::class, 'default')->iso);
+        } catch (Throwable) {
+        }
+
         Model::automaticallyEagerLoadRelationships();
         Number::useLocale(app()->getLocale());
 
@@ -153,11 +158,6 @@ class FluxServiceProvider extends ServiceProvider
         $this->registerConfig();
         $this->registerMacros();
         $this->registerExtensions();
-
-        try {
-            Number::useCurrency(resolve_static(Currency::class, 'default')->iso);
-        } catch (Throwable) {
-        }
 
         Translatable::fallback(
             fallbackAny: true,
