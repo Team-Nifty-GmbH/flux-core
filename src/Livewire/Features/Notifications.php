@@ -34,6 +34,7 @@ class Notifications extends Component
     {
         $accept = data_get($notification->data, 'accept');
         $notification->markAsRead();
+        $this->unread = $this->unread - 1;
 
         $this->js(<<<'JS'
             $slideClose('notifications-slide');
@@ -71,8 +72,6 @@ class Notifications extends Component
     public function markAsRead(Notification $notification): void
     {
         $notification->markAsRead();
-        $index = array_search($notification->getKey(), array_column($this->notifications, 'id'));
-        unset($this->notifications[$index]);
 
         $this->unread = $this->unread - 1;
         if (! $this->unread) {
