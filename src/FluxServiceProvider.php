@@ -87,7 +87,7 @@ class FluxServiceProvider extends ServiceProvider
     {
         Model::automaticallyEagerLoadRelationships();
 
-        $this->app->booted(function () {
+        $this->app->booted(function (): void {
             try {
                 Number::useCurrency(resolve_static(Currency::class, 'default')->iso);
             } catch (QueryException) {
