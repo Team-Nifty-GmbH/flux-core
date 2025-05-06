@@ -41,6 +41,7 @@ use Illuminate\Console\Command;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Contracts\Queue\Factory as QueueFactoryContract;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -84,12 +85,14 @@ class FluxServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        try {
-            Number::useCurrency(resolve_static(Currency::class, 'default')->iso);
-        } catch (Throwable) {
-        }
-
         Model::automaticallyEagerLoadRelationships();
+
+        $this->app->booted(function () {
+            try {
+                Number::useCurrency(resolve_static(Currency::class, 'default')->iso);
+            } catch (QueryException) {
+            }
+        });
         Number::useLocale(app()->getLocale());
 
         bcscale(9);
