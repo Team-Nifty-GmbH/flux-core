@@ -133,7 +133,7 @@ class ProductDetail extends Component
                         $productForm->reset();
                         $productForm->fill($productArray);
 
-                        return app(Product::class)->withoutMeta()->fill($productForm->toArray());
+                        return app(Product::class)->withoutMeta()->forceFill($productForm->toArray());
                     })
                 )
                 ->values()
