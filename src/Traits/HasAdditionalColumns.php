@@ -68,6 +68,8 @@ trait HasAdditionalColumns
      */
     protected ?Collection $metaChanges = null;
 
+    protected bool $withoutMeta = false;
+
     private array $translatableMeta = [];
 
     /**
@@ -1039,7 +1041,7 @@ trait HasAdditionalColumns
      */
     public function setAttribute($key, $value)
     {
-        if (! $this->isValidMetaKey($key)) {
+        if (! $this->isValidMetaKey($key) || $this->withoutMeta) {
             return parent::setAttribute($key, $value);
         }
 
@@ -1118,6 +1120,13 @@ trait HasAdditionalColumns
         }
 
         return $meta;
+    }
+
+    public function withoutMeta(bool $withoutMeta = true): static
+    {
+        $this->withoutMeta = $withoutMeta;
+
+        return $this;
     }
 
     /**
