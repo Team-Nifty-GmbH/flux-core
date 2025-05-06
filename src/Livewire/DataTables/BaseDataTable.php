@@ -20,8 +20,7 @@ abstract class BaseDataTable extends DataTable
         $query = $this->buildSearch();
 
         ExportDataTableJob::dispatch(
-            $query->toSql(),
-            $query->getBindings(),
+            serialize($this),
             $this->getModel(),
             $columns,
             auth()->user()->getMorphClass() . ':' . auth()->id()

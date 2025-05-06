@@ -5,20 +5,18 @@ namespace FluxErp\Jobs;
 use FluxErp\Notifications\ExportReady;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use TeamNiftyGmbH\DataTable\Exports\DataTableExport;
+use function Livewire\invade;
 
 class ExportDataTableJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable;
 
     public function __construct(
-        protected string $sql,
-        protected array $bindings,
+        protected string $component,
         protected string $modelClass,
         protected array $columns,
         protected string $userMorph
@@ -28,19 +26,21 @@ class ExportDataTableJob implements ShouldQueue
 
     public function handle(): void
     {
-        /** @var Model $model */
-        $model = app($this->modelClass);
-
-        $query = $model->newModelQuery()
-            ->fromRaw($this->sql, $this->bindings)
-            ->from($model->getTable());
+        $query = invade(unserialize($this->component))->buildSearch();
 
         $fileName = morph_alias($this->modelClass) . '_' . now()->toDateTimeLocalString('minute') . '.xlsx';
-        $filePath = 'exports/' . str_replace(':', '_', $this->userMorph) . '/' . $fileName;
+        $folder = 'exports/' . str_replace(':', '_', $this->userMorph) . '/';
+        $filePath = $folder . str_replace(['<', '>', ':', '"', '/', '\\', '|', '?', '*'], '_', $fileName);
 
         Excel::store(
-            new DataTableExport($query, $this->columns),
-            Storage::path($filePath)
+            app(
+                DataTableExport::class,
+                [
+                    'builder' => $query,
+                    'exportColumns' => $this->columns,
+                ]
+            ),
+            $filePath
         );
 
         $user = morph_to($this->userMorph);
