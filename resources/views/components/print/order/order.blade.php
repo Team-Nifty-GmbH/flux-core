@@ -1,3 +1,4 @@
+@use(Illuminate\Support\Number)
 <tbody class="bg-uneven">
     <tr>
         <td class="pos py-4 align-top">
@@ -10,13 +11,13 @@
             {{ $order->invoice_number }}
         </td>
         <td class="py-4 text-right align-top">
-            {{ $formatter->formatCurrency($order->total_gross_price, $currency) }}
+            {{ Number::currency($order->total_gross_price) }}
         </td>
         <td class="py-4 text-right align-top">
-            {{ $formatter->formatCurrency($order->transactions()->withPivot('amount')->sum('order_transaction.amount'),$currency,) }}
+            {{ Number::currency($order->totalPaid()) }}
         </td>
         <td class="py-4 text-right align-top">
-            {{ $formatter->formatCurrency($order->balance, $currency) }}
+            {{ Number::currency($order->balance) }}
         </td>
     </tr>
 </tbody>

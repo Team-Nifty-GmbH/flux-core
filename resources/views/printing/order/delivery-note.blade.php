@@ -42,7 +42,7 @@
                     </p>
                 </td>
                 <td class="py-4 pr-8 text-center align-top">
-                    {{ format_number($position->amount) }}
+                    {{ Number::format($position->amount) }}
                     {{ data_get($position, 'product.unit.abbreviation') }}
                 </td>
             </tr>

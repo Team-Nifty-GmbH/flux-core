@@ -51,13 +51,14 @@ class ViewServiceProvider extends ServiceProvider
         $this->bootBladeDirectives();
 
         View::composer('*', function (): void {
-            Currency::default() && Number::useCurrency(Currency::default()->iso);
+            resolve_static(Currency::class, 'default')
+            && Number::useCurrency(resolve_static(Currency::class, 'default')->iso);
 
             try {
                 if (! $this->app->runningInConsole() || $this->app->runningUnitTests()) {
                     View::share(
                         'defaultCurrency',
-                        Currency::default() ?? app(Currency::class)
+                        resolve_static(Currency::class, 'default') ?? app(Currency::class)
                     );
                 } else {
                     View::share('defaultCurrency', app(Currency::class));

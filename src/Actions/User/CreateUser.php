@@ -42,6 +42,6 @@ class CreateUser extends FluxAction
     protected function prepareForValidation(): void
     {
         $this->data['is_active'] ??= true;
-        $this->data['language_id'] ??= Language::default()?->getKey();
+        $this->data['language_id'] ??= resolve_static(Language::class, 'default')?->getKey();
     }
 }
