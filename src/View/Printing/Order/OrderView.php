@@ -8,7 +8,6 @@ use FluxErp\View\Printing\PrintableView;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Fluent;
 
 class OrderView extends PrintableView
 {
@@ -60,17 +59,18 @@ class OrderView extends PrintableView
             },
         ]);
 
-        $positions = to_flat_tree(resolve_static(OrderPosition::class, 'familyTree')
-            ->where('order_id', $this->model->getKey())
-            ->whereNull('parent_id')
-            ->get()
-            ->toArray());
-
-        $flattened = collect($positions)->map(
-            function ($item) {
-                return new Fluent($item);
-            }
+        $positions = array_map(
+            fn (array $item) => app(OrderPosition::class)->setRawAttributes($item),
+            to_flat_tree(
+                resolve_static(OrderPosition::class, 'familyTree')
+                    ->where('order_id', $this->model->getKey())
+                    ->whereNull('parent_id')
+                    ->get()
+                    ->toArray()
+            )
         );
+
+        $flattened = app(OrderPosition::class)->newCollection($positions);
 
         foreach ($flattened as $item) {
             if ($item->depth === 0 && $item->is_free_text && $item->has_children) {
