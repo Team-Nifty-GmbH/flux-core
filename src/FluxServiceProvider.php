@@ -41,6 +41,7 @@ use Illuminate\Console\Command;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Contracts\Queue\Factory as QueueFactoryContract;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -85,6 +86,15 @@ class FluxServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Model::automaticallyEagerLoadRelationships();
+
+        $this->app->booted(function (): void {
+            try {
+                if ($iso = resolve_static(Currency::class, 'default')?->iso) {
+                    Number::useCurrency($iso);
+                }
+            } catch (QueryException) {
+            }
+        });
         Number::useLocale(app()->getLocale());
 
         bcscale(9);
@@ -153,11 +163,6 @@ class FluxServiceProvider extends ServiceProvider
         $this->registerConfig();
         $this->registerMacros();
         $this->registerExtensions();
-
-        try {
-            Number::useCurrency(resolve_static(Currency::class, 'default')->iso);
-        } catch (Throwable) {
-        }
 
         Translatable::fallback(
             fallbackAny: true,
