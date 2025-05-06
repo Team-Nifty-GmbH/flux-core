@@ -269,11 +269,6 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
         return $this;
     }
 
-    public function totalPaid(): string|float|int
-    {
-        return $this->transactions()->withPivot('amount')->sum('order_transaction.amount');
-    }
-
     public function calculateDiscounts(): static
     {
         $this->total_net_price = $this->discounts()
@@ -787,6 +782,11 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
     public function tasks(): HasManyThrough
     {
         return $this->hasManyThrough(Task::class, Project::class);
+    }
+
+    public function totalPaid(): string|float|int
+    {
+        return $this->transactions()->withPivot('amount')->sum('order_transaction.amount');
     }
 
     public function transactions(): BelongsToMany

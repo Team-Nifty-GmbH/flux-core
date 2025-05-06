@@ -21,7 +21,6 @@ use FluxErp\Http\Middleware\SetJobAuthenticatedUserMiddleware;
 use FluxErp\Models\Activity;
 use FluxErp\Models\Address;
 use FluxErp\Models\Category;
-use FluxErp\Models\Currency;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\Notification;
 use FluxErp\Models\Order;
@@ -85,9 +84,7 @@ class FluxServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Model::automaticallyEagerLoadRelationships();
-
         Number::useLocale(app()->getLocale());
-        Number::useCurrency(resolve_static(Currency::class, 'default')->iso);
 
         bcscale(9);
         $this->bootMiddleware();
