@@ -47,6 +47,8 @@
                             },
                             {
                                 uploadDisabled: '{{ __('Upload not allowed - Read Only') }}',
+                                readyForUpload: '{{ __('Ready for upload') }}',
+                                pending: '{{ __('pending') }}',
                             },
                         ),
                         selectionProxy: {},
