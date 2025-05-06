@@ -133,9 +133,8 @@ class ProductDetail extends Component
                         $productForm->reset();
                         $productForm->fill($productArray);
 
-                        return $productForm->toArray();
-                    }
-                    )
+                        return app(Product::class)->setRawAttributes($productForm->toArray());
+                    })
                 )
                 ->values()
         );

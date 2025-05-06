@@ -699,7 +699,7 @@ trait HasAdditionalColumns
     public function relationsToArray(): array
     {
         $array = parent::relationsToArray();
-        $meta = $this->meta->mapWithKeys(
+        $meta = $this->meta?->mapWithKeys(
             fn (Meta $meta) => [
                 $meta->key => $this->isTranslatableMeta($meta->key) ?
                     $this->getMetaTranslation($meta->key, app()->getLocale()) : $meta->value,
@@ -707,7 +707,7 @@ trait HasAdditionalColumns
         )->toArray();
         unset($array['meta']);
 
-        return array_merge($array, $meta);
+        return array_merge($array, $meta ?? []);
     }
 
     /**
