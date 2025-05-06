@@ -73,7 +73,7 @@
                 </div>
             </x-slot>
             <x-input
-                :prefix="$defaultCurrency->symbol"
+                :prefix="resolve_static(\FluxErp\Models\Currency::class, 'default')->symbol"
                 class="net-price"
                 type="number"
                 x-on:input="recalculate(priceList, true);"
@@ -82,7 +82,7 @@
                 x-model="priceList.price_net"
             />
             <x-input
-                :prefix="$defaultCurrency->symbol"
+                :prefix="resolve_static(\FluxErp\Models\Currency::class, 'default')->symbol"
                 class="gross-price"
                 type="number"
                 x-on:input="recalculate(priceList, false);"

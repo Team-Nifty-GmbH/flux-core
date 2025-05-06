@@ -16,7 +16,7 @@
 <meta name="ws-port" content="{{ config('flux.vite.reverb_port') }}" />
 <meta name="ws-protocol" content="{{ config('flux.vite.reverb_protocol') }}" />
 <meta name="webpush-key" content="{{ config('webpush.vapid.public_key') }}" />
-<meta name="currency-code" content="{{ $defaultCurrency?->iso }}" />
+<meta name="currency-code" content="{{ \Illuminate\Support\Number::defaultCurrency() }}" />
 <link rel="icon" href="{{ route('favicon') }}" />
 <meta
     http-equiv="refresh"

@@ -5,16 +5,12 @@ namespace FluxErp\Providers;
 use Composer\Autoload\ClassLoader;
 use Composer\InstalledVersions;
 use FluxErp\Facades\Asset;
-use FluxErp\Models\Currency;
 use FluxErp\View\Layouts\App;
 use FluxErp\View\Layouts\Printing;
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Vite;
-use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
 use TallStackUi\Facades\TallStackUi;
-use Throwable;
 
 class ViewServiceProvider extends ServiceProvider
 {
@@ -49,23 +45,6 @@ class ViewServiceProvider extends ServiceProvider
         $this->registerViews();
 
         $this->bootBladeDirectives();
-
-        View::composer('*', function (): void {
-            resolve_static(Currency::class, 'default')
-            && Number::useCurrency(resolve_static(Currency::class, 'default')->iso);
-
-            try {
-                if (! $this->app->runningInConsole() || $this->app->runningUnitTests()) {
-                    View::share(
-                        'defaultCurrency',
-                        resolve_static(Currency::class, 'default') ?? app(Currency::class)
-                    );
-                } else {
-                    View::share('defaultCurrency', app(Currency::class));
-                }
-            } catch (Throwable) {
-            }
-        });
     }
 
     protected function bootAssets(): void

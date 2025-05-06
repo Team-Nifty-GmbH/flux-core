@@ -786,7 +786,9 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
 
     public function totalPaid(): string|float|int
     {
-        return $this->transactions()->withPivot('amount')->sum('order_transaction.amount');
+        return $this->transactions()
+            ->withPivot('amount')
+            ->sum('order_transaction.amount');
     }
 
     public function transactions(): BelongsToMany

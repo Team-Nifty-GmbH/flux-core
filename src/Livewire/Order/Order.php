@@ -213,7 +213,7 @@ class Order extends Component
             ->first();
 
         $this->{$orderVariable}->client_id = $contact?->client_id
-            ?? resolve_static(Client::class, 'default')->id;
+            ?? resolve_static(Client::class, 'default')->getKey();
         $this->{$orderVariable}->agent_id = $contact?->agent_id ?? $this->{$orderVariable}->agent_id;
         $this->{$orderVariable}->address_invoice_id = $contact?->invoice_address_id ?? $contact?->mainAddress?->id;
         $this->{$orderVariable}->address_delivery_id = $contact?->delivery_address_id ?? $contact?->mainAddress?->id;

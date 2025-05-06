@@ -45,7 +45,8 @@ class ProductList extends BaseProductList
         parent::mount();
 
         $this->vatRates = resolve_static(VatRate::class, 'query')
-            ->get(['id', 'name', 'rate_percentage'])->toArray();
+            ->get(['id', 'name', 'rate_percentage'])
+            ->toArray();
         $priceList = resolve_static(PriceList::class, 'default')?->toArray() ?? [];
         $priceList['is_editable'] = true;
 

@@ -23,7 +23,7 @@ class OrderPositionTableSeeder extends Seeder
         $suppliers = Contact::all(['id']);
         $warehouses = Warehouse::all(['id']);
         $vatRates = VatRate::all(['id']);
-        $clientId = resolve_static(Client::class, 'default')?->id ?? Client::query()->value('id');
+        $clientId = Client::default()?->id ?? Client::query()->value('id');
 
         foreach ($orders as $order) {
             $multiplier = $order->orderType->order_type_enum->multiplier();

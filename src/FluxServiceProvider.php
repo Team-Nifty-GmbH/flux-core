@@ -21,6 +21,7 @@ use FluxErp\Http\Middleware\SetJobAuthenticatedUserMiddleware;
 use FluxErp\Models\Activity;
 use FluxErp\Models\Address;
 use FluxErp\Models\Category;
+use FluxErp\Models\Currency;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\Notification;
 use FluxErp\Models\Order;
@@ -152,6 +153,11 @@ class FluxServiceProvider extends ServiceProvider
         $this->registerConfig();
         $this->registerMacros();
         $this->registerExtensions();
+
+        try {
+            Number::useCurrency(resolve_static(Currency::class, 'default')->iso);
+        } catch (Throwable) {
+        }
 
         Translatable::fallback(
             fallbackAny: true,
