@@ -1,3 +1,4 @@
+@use(Illuminate\Support\Number)
 <tbody class="bg-uneven">
     <tr>
         <td class="pos py-2 pr-8 align-top">
@@ -28,7 +29,7 @@
         </td>
         <td class="py-2 pr-8 text-center align-top">
             @if (! $position->is_free_text && ! $position->is_bundle_position)
-                {{ format_number($position->amount) }}
+                {{ Number::format($position->amount) }}
                 {{ data_get($position, 'product.unit.abbreviation') }}
             @endif
         </td>
@@ -36,15 +37,15 @@
             @if ($position->total_base_net_price > $position->total_net_price)
                 <div class="whitespace-nowrap text-xs">
                     <div class="line-through">
-                        {{ $formatter->formatCurrency($isNet ? $position->total_base_net_price : $position->total_base_gross_price, $currency) }}
+                        {{ Number::currency($isNet ? $position->total_base_net_price : $position->total_base_gross_price) }}
                     </div>
                     <div>
-                        -{{ format_number(diff_percentage($position->total_base_net_price, $position->total_net_price), NumberFormatter::PERCENT) }}
+                        -{{ Number::percentage(bcmul(diff_percentage($position->total_base_net_price, $position->total_net_price), 100)) }}
                     </div>
                 </div>
             @endif
 
-            {{ $position->total_net_price ? $formatter->formatCurrency($isNet ? $position->total_net_price : $position->total_gross_price, $currency) : null }}
+            {{ $position->total_net_price ? Number::currency($isNet ? $position->total_net_price : $position->total_gross_price) : null }}
         </td>
     </tr>
 </tbody>

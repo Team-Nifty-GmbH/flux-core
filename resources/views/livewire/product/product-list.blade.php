@@ -106,7 +106,7 @@
                                                     $wire.productPricesUpdate.alteration +
                                                     ($wire.productPricesUpdate.is_percent
                                                         ? '%)'
-                                                        : '{{ \FluxErp\Models\Currency::default()?->symbol }})')
+                                                        : '{{ resolve_static(\FluxErp\Models\Currency::class, 'default')?->symbol }})')
                                             "
                                         />
                                     </x-slot>

@@ -8,6 +8,7 @@ use FluxErp\View\Printing\PrintableView;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Number;
 
 class OrderView extends PrintableView
 {
@@ -20,6 +21,10 @@ class OrderView extends PrintableView
     public function __construct(Order $order)
     {
         app()->setLocale($order->addressInvoice?->language?->language_code ?? config('app.locale'));
+        Number::useLocale(app()->getLocale());
+        if ($orderCurrency = $order->currency()->withTrashed()->value('iso')) {
+            Number::useCurrency($orderCurrency);
+        }
 
         $this->model = $order;
         $this->prepareModel();

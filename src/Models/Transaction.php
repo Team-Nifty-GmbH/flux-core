@@ -30,7 +30,7 @@ class Transaction extends FluxModel implements InteractsWithDataTables
         static::saving(function (Transaction $transaction): void {
             $transaction->currency_id = $transaction->currency_id
                 ?? Auth::user()?->currency_id
-                ?? Currency::default()?->getKey();
+                ?? resolve_static(Currency::class, 'default')?->getKey();
             $transaction->balance ??= $transaction->amount;
         });
     }

@@ -40,9 +40,11 @@ class CreateOrderPosition extends FluxAction
 
         $this->data['is_net'] ??= $this->getData('priceList.is_net')
             ?? data_get($order, 'priceList.is_net')
-            ?? data_get(PriceList::default(), 'is_net');
-        $this->data['client_id'] ??= data_get($order, 'client_id') ?? Client::default()?->getKey();
-        $this->data['price_list_id'] ??= data_get($order, 'price_list_id') ?? PriceList::default()?->getKey();
+            ?? data_get(resolve_static(PriceList::class, 'default'), 'is_net');
+        $this->data['client_id'] ??= data_get($order, 'client_id')
+            ?? resolve_static(Client::class, 'default')?->getKey();
+        $this->data['price_list_id'] ??= data_get($order, 'price_list_id')
+            ?? resolve_static(PriceList::class, 'default')?->getKey();
 
         if (is_int($this->getData('sort_number'))) {
             $currentHighestSortNumber = resolve_static(OrderPosition::class, 'query')
@@ -152,7 +154,7 @@ class CreateOrderPosition extends FluxAction
 
     protected function prepareForValidation(): void
     {
-        $this->data['warehouse_id'] ??= Warehouse::default()?->getKey();
+        $this->data['warehouse_id'] ??= resolve_static(Warehouse::class, 'default')?->getKey();
     }
 
     protected function validateData(): void

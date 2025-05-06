@@ -14,7 +14,7 @@
 <x-mail::panel>
 **{{ __('Total Net') }}:** {{ Number::currency($order->total_net_price, $order->currency->iso, app()->getLocale()) }}<br>
 @foreach($order->total_vats ?? [] as $vat)
-**{{ __('Plus ') }}:** {{ format_number($vat['vat_rate_percentage'], NumberFormatter::PERCENT) }} {{ Number::currency($vat['total_vat_price'], $order->currency->iso, app()->getLocale())}}<br>
+**{{ __('Plus ') }}:** {{ Number::percentage(bcmul($vat['vat_rate_percentage'], 100)) }} {{ Number::currency($vat['total_vat_price'], $order->currency->iso, app()->getLocale())}}<br>
 @endforeach
 **{{ __('Total Gross') }}:** {{ Number::currency($order->total_gross_price, $order->currency->iso, app()->getLocale()) }}<br>
 

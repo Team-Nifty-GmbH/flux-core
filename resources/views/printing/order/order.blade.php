@@ -1,11 +1,16 @@
+@use(\Illuminate\Support\Number)
+@use(\FluxErp\Models\PriceList)
+@use(\FluxErp\Models\Currency)
+@use(\Illuminate\Support\Fluent)
 @php
-    $isNet = $model->priceList->is_net;
-    $currency = $model->currency->iso;
-    $formatter = new NumberFormatter(app()->getLocale(), NumberFormatter::CURRENCY);
+    $isNet = ($model->priceList ?? resolve_static(PriceList::class, 'default'))->is_net;
 @endphp
 
 @section('first-page-header')
-<x-flux::print.first-page-header :address="$model->addressInvoice" :$model>
+<x-flux::print.first-page-header
+    :address="Fluent::make($model->address_invoice)"
+    :$model
+>
     <x-slot:right-block>
         @section('first-page-right-block')
         <table class="border-separate border-spacing-x-2">
@@ -24,7 +29,7 @@
                         {{ __('Customer no.') }}
                     </td>
                     <td class="py-0 text-right">
-                        {{ $model->addressInvoice->contact->customer_number }}
+                        {{ $model->contact()->withTrashed()->value('customer_number') }}
                     </td>
                 </tr>
                 <tr class="leading-none">
@@ -85,8 +90,6 @@
                 <x-flux::print.order.order-position
                     :position="$position"
                     :is-net="$isNet"
-                    :currency="$currency"
-                    :formatter="$formatter"
                 />
             @endforeach
 
@@ -116,7 +119,7 @@
                                 {{ $summaryItem->name }}
                             </td>
                             <td class="float-right text-right">
-                                {{ $formatter->formatCurrency($summaryItem->total_net_price, $currency) }}
+                                {{ Number::currency($summaryItem->total_net_price) }}
                             </td>
                         </tr>
                     @endforeach
@@ -141,7 +144,7 @@
                         {{ __('Sum net without discount') }}
                     </td>
                     <td class="w-0 whitespace-nowrap pl-12 text-right">
-                        {{ $formatter->formatCurrency($model->total_base_net_price, $currency) }}
+                        {{ Number::currency($model->total_base_net_price) }}
                     </td>
                 </tr>
                 @foreach ($model->discounts as $discount)
@@ -149,11 +152,11 @@
                         <td class="text-right">
                             <span>{{ data_get($discount, 'name') }}</span>
                             <span>
-                                {{ \Illuminate\Support\Number::percentage(bcmul(data_get($discount, 'discount_percentage', 0), 100)) }}
+                                {{ Number::percentage(bcmul(data_get($discount, 'discount_percentage', 0), 100)) }}
                             </span>
                         </td>
                         <td class="w-0 whitespace-nowrap pl-12 text-right">
-                            {{ $formatter->formatCurrency(bcmul(data_get($discount, 'discount_flat', 0), -1), $currency) }}
+                            {{ Number::currency(bcmul(data_get($discount, 'discount_flat', 0), -1)) }}
                         </td>
                     </tr>
                 @endforeach
@@ -168,7 +171,7 @@
                     {{ __('Sum net') }}
                 </td>
                 <td class="w-0 whitespace-nowrap pl-12 text-right">
-                    {{ $formatter->formatCurrency($model->total_net_price, $currency) }}
+                    {{ Number::currency($model->total_net_price) }}
                 </td>
             </tr>
             @show
@@ -178,13 +181,13 @@
                     <td class="text-right">
                         {{
                             __('Plus :percentage VAT from :total_net', [
-                                'percentage' => format_number($vat['vat_rate_percentage'], NumberFormatter::PERCENT),
-                                'total_net' => $formatter->formatCurrency($vat['total_net_price'], $currency),
+                                'percentage' => Number::percentage(bcmul($vat['vat_rate_percentage'], 100)),
+                                'total_net' => Number::currency($vat['total_net_price']),
                             ])
                         }}
                     </td>
                     <td class="w-0 whitespace-nowrap pl-12 text-right">
-                        {{ $formatter->formatCurrency($vat['total_vat_price'], $currency) }}
+                        {{ Number::currency($vat['total_vat_price']) }}
                     </td>
                 </tr>
             @endforeach
@@ -196,7 +199,7 @@
                     {{ __('Total Gross') }}
                 </td>
                 <td class="w-0 whitespace-nowrap pl-12 text-right">
-                    {{ $formatter->formatCurrency($model->total_gross_price, $currency) }}
+                    {{ Number::currency($model->total_gross_price) }}
                 </td>
             </tr>
             @show

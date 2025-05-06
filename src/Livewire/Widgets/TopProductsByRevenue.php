@@ -58,7 +58,7 @@ class TopProductsByRevenue extends ValueList
         $this->items = $query->map(fn ($item) => [
             'label' => $item->product?->name,
             'value' => Number::abbreviate(Rounding::round($item->total_net_price ?? 0, 0))
-                . ' ' . Currency::default()->symbol,
+                . ' ' . resolve_static(Currency::class, 'default')->symbol,
             'growthRate' => GrowthRateTypeEnum::Percentage->getValue(
                 $previous->get($item->product_id)?->total_net_price ?? 0,
                 $item->total_net_price ?? 0
