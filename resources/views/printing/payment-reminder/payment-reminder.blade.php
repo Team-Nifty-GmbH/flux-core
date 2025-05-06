@@ -1,5 +1,6 @@
+@use(\Illuminate\Support\Fluent)
 <x-flux::print.first-page-header
-    :address="$model->order->addressInvoice"
+    :address="Fluent::make($model->order->address_invoice)"
     :subject="$subject"
 />
 <main>

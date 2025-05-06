@@ -1,9 +1,9 @@
+@use(\FluxErp\Models\Currency)
 @php
-    $currency = $model->currency?->iso ?? resolve_static(\FluxErp\Models\Currency::class, 'default')->iso;
+    $currency = ($model->currency ?? Currency::default())->iso;
     $formatter = new NumberFormatter(app()->getLocale(), NumberFormatter::CURRENCY);
 @endphp
 
-@use('\FluxErp\States\Order\PaymentState\Paid')
 <x-flux::print.first-page-header
     :address="$model->invoiceAddress ?? $model->mainAddress"
 >

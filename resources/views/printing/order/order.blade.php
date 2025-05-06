@@ -1,11 +1,18 @@
+@use(\Illuminate\Support\Number)
+@use(\FluxErp\Models\PriceList)
+@use(\FluxErp\Models\Currency)
+@use(\Illuminate\Support\Fluent)
 @php
-    $isNet = ($model->priceList ?? \FluxErp\Models\PriceList::default())->is_net;
-    $currency = ($model->currency ?? \FluxErp\Models\Currency::default())->iso;
+    $isNet = ($model->priceList ?? PriceList::default())->is_net;
+    $currency = ($model->currency ?? Currency::default())->iso;
     $formatter = new NumberFormatter(app()->getLocale(), NumberFormatter::CURRENCY);
 @endphp
 
 @section('first-page-header')
-<x-flux::print.first-page-header :address="$model->addressInvoice" :$model>
+<x-flux::print.first-page-header
+    :address="Fluent::make($model->address_invoice)"
+    :$model
+>
     <x-slot:right-block>
         @section('first-page-right-block')
         <table class="border-separate border-spacing-x-2">
@@ -24,7 +31,7 @@
                         {{ __('Customer no.') }}
                     </td>
                     <td class="py-0 text-right">
-                        {{ $model->addressInvoice->contact->customer_number }}
+                        {{ $model->contact()->withTrashed()->value('customer_number') }}
                     </td>
                 </tr>
                 <tr class="leading-none">
@@ -149,7 +156,7 @@
                         <td class="text-right">
                             <span>{{ data_get($discount, 'name') }}</span>
                             <span>
-                                {{ \Illuminate\Support\Number::percentage(bcmul(data_get($discount, 'discount_percentage', 0), 100)) }}
+                                {{ Number::percentage(bcmul(data_get($discount, 'discount_percentage', 0), 100)) }}
                             </span>
                         </td>
                         <td class="w-0 whitespace-nowrap pl-12 text-right">

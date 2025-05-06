@@ -27,6 +27,6 @@
 @section('total')
     @parent
     <div>
-        {!! Blade::render(html_entity_decode($model->paymentType->description ?? ''), ['model' => $model]) !!}
+        {!! Blade::render( html_entity_decode($model->paymentType()->withTrashed()->value('description') ?? '',),['model' => $model],) !!}
     </div>
 @endsection
