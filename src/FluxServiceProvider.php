@@ -89,7 +89,7 @@ class FluxServiceProvider extends ServiceProvider
 
         $this->app->booted(function (): void {
             try {
-                Number::useCurrency(resolve_static(Currency::class, 'default')->iso);
+                Number::useCurrency(resolve_static(Currency::class, 'default')?->iso);
             } catch (QueryException) {
             }
         });
