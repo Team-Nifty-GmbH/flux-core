@@ -438,7 +438,7 @@
                             wire:click="acceptAll()"
                             :text="__('Accept all')"
                             x-cloak
-                            x-show="$wire.tab === '{{ __('Assignment suggestions') }}' && data.data.length > 0"
+                            x-show="$wire.tab === '{{ __('Assignment suggestions') }}' && data.data?.length > 0"
                         />
                     </div>
                     <x-tall-datatables::pagination />
