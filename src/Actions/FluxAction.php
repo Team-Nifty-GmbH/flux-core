@@ -196,7 +196,7 @@ abstract class FluxAction
             }
         }
 
-        DB::transaction(fn() => $this->result = $this->performAction(), 5);
+        DB::transaction(fn () => $this->result = $this->performAction(), 5);
 
         if ($current) {
             if (method_exists(auth(), 'login')) {
