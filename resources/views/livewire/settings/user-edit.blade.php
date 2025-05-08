@@ -306,7 +306,7 @@
             />
             <livewire:features.commission-rates
                 lazy
-                :userId="$user['id'] ?? null"
+                :user-id="$userForm->id"
                 :contactId="null"
                 cache-key="settings.users.commission-rates"
             />
