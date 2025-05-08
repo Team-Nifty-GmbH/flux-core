@@ -83,24 +83,18 @@
             </div>
         </div>
         <x-slot:footer>
-            <div class="w-full">
-                <div class="flex justify-between gap-x-4">
-                    <div class="flex gap-x-2">
-                        <x-button
-                            color="secondary"
-                            light
-                            flat
-                            :text="__('Cancel')"
-                            x-on:click="$modalClose('{{ $commissionRate->modalName() }}')"
-                        />
-                        <x-button
-                            color="indigo"
-                            :text="__('Save')"
-                            wire:click="save().then((success) => { if(success) $modalClose('{{ $commissionRate->modalName() }}')})"
-                        />
-                    </div>
-                </div>
-            </div>
+            <x-button
+                color="secondary"
+                light
+                flat
+                :text="__('Cancel')"
+                x-on:click="$modalClose('{{ $commissionRate->modalName() }}')"
+            />
+            <x-button
+                color="indigo"
+                :text="__('Save')"
+                wire:click="save().then((success) => { if(success) $modalClose('{{ $commissionRate->modalName() }}')})"
+            />
         </x-slot>
     </x-modal>
 </div>

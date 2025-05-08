@@ -13,7 +13,6 @@ class CommissionRates extends CommissionRateList
 {
     use Actions, DataTableHasFormEdit {
         DataTableHasFormEdit::save as parentSave;
-        DataTableHasFormEdit::edit as parentEdit;
     }
 
     public array $columnLabels = [
