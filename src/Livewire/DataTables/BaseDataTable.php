@@ -17,8 +17,6 @@ abstract class BaseDataTable extends DataTable
     #[Renderless]
     public function export(array $columns = []): Response|BinaryFileResponse
     {
-        $query = $this->buildSearch();
-
         ExportDataTableJob::dispatch(
             serialize($this),
             $this->getModel(),
