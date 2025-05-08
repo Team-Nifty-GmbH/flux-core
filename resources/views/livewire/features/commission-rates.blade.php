@@ -2,7 +2,7 @@
     <x-modal
         id="{{ $commissionRate->modalName() }}"
         z-index="z-30"
-        :title="$create ? __('Create Commission Rate') : __('Edit Commission Rate')"
+        :title="$commissionRate->id ? __('Edit Commission Rate') : __('Create Commission Rate')"
     >
         <div class="space-y-8 divide-y divide-gray-200">
             <div class="space-y-8 divide-y divide-gray-200">
@@ -14,7 +14,7 @@
                             <x-select.styled
                                 :label="__('Commission Agent')"
                                 wire:model="commissionRate.user_id"
-                                :disabled="! $create"
+                                :disabled="$commissionRate->id"
                                 required
                                 select="label:label|value:id"
                                 unfiltered
