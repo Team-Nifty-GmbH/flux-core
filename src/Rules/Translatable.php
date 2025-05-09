@@ -33,6 +33,8 @@ class Translatable implements DataAwareRule, ValidationRule
 
         if (! $model) {
             $fail('No model class given')->translate();
+
+            return;
         }
 
         if (! in_array(HasAttributeTranslations::class, class_uses_recursive($model))) {
