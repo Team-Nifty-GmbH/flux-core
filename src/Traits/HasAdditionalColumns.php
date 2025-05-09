@@ -25,6 +25,8 @@ use Spatie\Translatable\Translatable;
 
 trait HasAdditionalColumns
 {
+    public static bool $metaDisabled = false;
+
     protected static ?Collection $additionalColumns = null;
 
     /**
@@ -71,8 +73,6 @@ trait HasAdditionalColumns
     protected bool $withoutMeta = false;
 
     private array $translatableMeta = [];
-
-    public static bool $metaDisabled = false;
 
     /**
      * Boot the model trait.
