@@ -72,11 +72,17 @@ trait HasAdditionalColumns
 
     private array $translatableMeta = [];
 
+    public static bool $metaDisabled = false;
+
     /**
      * Boot the model trait.
      */
     public static function bootHasAdditionalColumns(): void
     {
+        if (static::$metaDisabled) {
+            return;
+        }
+
         foreach (
             resolve_static(AdditionalColumn::class, 'query')
                 ->whereNotNull('model_id')
@@ -275,7 +281,7 @@ trait HasAdditionalColumns
      */
     public function getAttribute($key)
     {
-        if (! $this->isValidMetaKey($key)) {
+        if (! $this->isValidMetaKey($key) || static::$metaDisabled) {
             return parent::getAttribute($key);
         }
 
@@ -488,6 +494,10 @@ trait HasAdditionalColumns
     {
         $rules = [];
 
+        if (static::$metaDisabled) {
+            return $rules;
+        }
+
         foreach ($this->getAdditionalColumns(false) as $column) {
             $rules[$column->name] ??= $column->validations ?: ['nullable'];
 
@@ -543,6 +553,10 @@ trait HasAdditionalColumns
      */
     public function initializeHasAdditionalColumns(): void
     {
+        if (static::$metaDisabled) {
+            return;
+        }
+
         $this->mergeCasts(
             $this->getAdditionalColumns()?->mapWithKeys(fn (AdditionalColumn $column) => [$column->name => MetaAttribute::class])
                 ->toArray() ?? []
@@ -570,7 +584,7 @@ trait HasAdditionalColumns
 
     public function isFillable($key): bool
     {
-        return parent::isFillable($key) || $this->isValidMetaKey($key);
+        return parent::isFillable($key) || (! static::$metaDisabled && $this->isValidMetaKey($key));
     }
 
     /**
@@ -701,6 +715,11 @@ trait HasAdditionalColumns
     public function relationsToArray(): array
     {
         $array = parent::relationsToArray();
+
+        if (static::$metaDisabled) {
+            return $array;
+        }
+
         $meta = $this->meta?->mapWithKeys(
             fn (Meta $meta) => [
                 $meta->key => $this->isTranslatableMeta($meta->key) ?
@@ -1041,7 +1060,7 @@ trait HasAdditionalColumns
      */
     public function setAttribute($key, $value)
     {
-        if (! $this->isValidMetaKey($key) || $this->withoutMeta) {
+        if (static::$metaDisabled || $this->withoutMeta || ! $this->isValidMetaKey($key)) {
             return parent::setAttribute($key, $value);
         }
 
