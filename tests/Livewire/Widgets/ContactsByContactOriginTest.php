@@ -41,34 +41,42 @@ class ContactsByContactOriginTest extends BaseSetup
         foreach ($this->contactOrigins as $contactOrigin) {
             $quantity = $contactOrigin->id === $this->contactOrigins[1]->id ? 2 : 1;
 
-            $this->contacts->push(
-                Contact::factory()->count($quantity)->create([
-                    'client_id' => $this->dbClient->getKey(),
-                    'contact_origin_id' => $contactOrigin->id,
-                ])->merge(
+            $this->contacts = $this->contacts
+                ->merge(
+                    Contact::factory()->count($quantity)->create([
+                        'client_id' => $this->dbClient->getKey(),
+                        'contact_origin_id' => $contactOrigin->id,
+                    ])
+                )
+                ->merge(
                     Contact::factory()->count($quantity)->create([
                         'client_id' => $this->dbClient->getKey(),
                         'contact_origin_id' => $contactOrigin->id,
                         'created_at' => Carbon::now()->startOfWeek(),
-                    ]))->merge(
-                        Contact::factory()->count($quantity)->create([
-                            'client_id' => $this->dbClient->getKey(),
-                            'contact_origin_id' => $contactOrigin->id,
-                            'created_at' => Carbon::now()->startOfMonth(),
-                        ]))->merge(
-                            Contact::factory()->count($quantity)->create([
-                                'client_id' => $this->dbClient->getKey(),
-                                'contact_origin_id' => $contactOrigin->id,
-                                'created_at' => Carbon::now()->startOfQuarter(),
-                            ]))->merge(
-                                Contact::factory()->count($quantity)->create([
-                                    'client_id' => $this->dbClient->getKey(),
-                                    'contact_origin_id' => $contactOrigin->id,
-                                    'created_at' => Carbon::now()->startOfYear(),
-                                ])),
-            );
+                    ])
+                )
+                ->merge(
+                    Contact::factory()->count($quantity)->create([
+                        'client_id' => $this->dbClient->getKey(),
+                        'contact_origin_id' => $contactOrigin->id,
+                        'created_at' => Carbon::now()->startOfMonth(),
+                    ])
+                )
+                ->merge(
+                    Contact::factory()->count($quantity)->create([
+                        'client_id' => $this->dbClient->getKey(),
+                        'contact_origin_id' => $contactOrigin->id,
+                        'created_at' => Carbon::now()->startOfQuarter(),
+                    ])
+                )
+                ->merge(
+                    Contact::factory()->count($quantity)->create([
+                        'client_id' => $this->dbClient->getKey(),
+                        'contact_origin_id' => $contactOrigin->id,
+                        'created_at' => Carbon::now()->startOfYear(),
+                    ])
+                );
         }
-        $this->contacts = $this->contacts[0]->merge($this->contacts[1])->merge($this->contacts[2]);
     }
 
     public function test_renders_successfully(): void
