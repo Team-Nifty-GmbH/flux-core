@@ -72,7 +72,7 @@ class AmountByLedgerAccountTest extends BaseSetup
                 'is_default' => false,
             ]);
 
-        $this->orders = Order::factory()->count(4)->create([
+        $this->orders = Order::factory()->count(5)->create([
             'client_id' => $this->dbClient->getKey(),
             'language_id' => $language->id,
             'order_type_id' => $orderType->id,
@@ -120,7 +120,7 @@ class AmountByLedgerAccountTest extends BaseSetup
             ->set('timeFrame', $timeFrame)
             ->call('calculateChart')
             ->assertSet('labels', [
-                'Not Assigned',
+                __('Not Assigned'),
                 $this->ledgerAccountRevenue->name,
                 $this->ledgerAccountExpenses->name,
             ])
@@ -156,11 +156,54 @@ class AmountByLedgerAccountTest extends BaseSetup
             ->set('timeFrame', $timeFrame)
             ->call('calculateChart')
             ->assertSet('labels', [
-                'Not Assigned',
+                __('Not Assigned'),
             ])
             ->assertSet('series', [
                 round(
                     $this->orders[3]
+                        ->orderPositions()
+                        ->sum('total_gross_price'),
+                    2
+                ),
+            ])
+            ->assertHasNoErrors()
+            ->assertStatus(200);
+    }
+
+    public function test_net_orders_get_successfully_ignored(): void
+    {
+        $timeFrame = TimeFrameEnum::Today;
+
+        OrderPosition::factory()->count(2)->create([
+            'client_id' => $this->dbClient->getKey(),
+            'ledger_account_id' => $this->ledgerAccountExpenses->id,
+            'order_id' => $this->orders[4]->id,
+            'total_net_price' => 2000,
+        ]);
+
+        Livewire::test(AmountByLedgerAccount::class)
+            ->set('timeFrame', $timeFrame)
+            ->call('calculateChart')
+            ->assertSet('labels', [
+                __('Not Assigned'),
+                $this->ledgerAccountRevenue->name,
+                $this->ledgerAccountExpenses->name,
+            ])
+            ->assertSet('series', [
+                round(
+                    $this->orders[0]
+                        ->orderPositions()
+                        ->sum('total_gross_price'),
+                    2
+                ),
+                round(
+                    $this->orders[1]
+                        ->orderPositions()
+                        ->sum('total_gross_price'),
+                    2
+                ),
+                round(
+                    $this->orders[2]
                         ->orderPositions()
                         ->sum('total_gross_price'),
                     2
