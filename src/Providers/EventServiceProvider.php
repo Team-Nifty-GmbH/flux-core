@@ -87,10 +87,7 @@ class EventServiceProvider extends ServiceProvider
         $manager->exceptionOccurred(static function (JobExceptionOccurred $event): void {
             QueueMonitorManager::handle($event);
         });
-    }
 
-    public function register(): void
-    {
         $this->app->resolving(Date::class, function (Date $component) {
             $component->start = Carbon::getWeekStartsAt();
 
