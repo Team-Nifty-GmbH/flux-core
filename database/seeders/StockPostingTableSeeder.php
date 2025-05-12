@@ -2,7 +2,9 @@
 
 namespace FluxErp\Database\Seeders;
 
+use FluxErp\Models\OrderPosition;
 use FluxErp\Models\Product;
+use FluxErp\Models\SerialNumber;
 use FluxErp\Models\StockPosting;
 use FluxErp\Models\Warehouse;
 use Illuminate\Database\Seeder;
@@ -11,14 +13,16 @@ class StockPostingTableSeeder extends Seeder
 {
     public function run(): void
     {
-        $warehouses = Warehouse::all(['id']);
-        $products = Product::all(['id']);
+        $warehouseIds = Warehouse::query()->get('id');
+        $productIds = Product::query()->get('id');
+        $orderPositionIds = OrderPosition::query()->get('id');
+        $serialNumberIds = SerialNumber::query()->get('id');
 
-        for ($i = 0; $i < 20; $i++) {
-            StockPosting::factory()->create([
-                'warehouse_id' => $warehouses->random()?->id,
-                'product_id' => $products->random()?->id,
-            ]);
-        }
+        StockPosting::factory()->count(20)->create([
+            'warehouse_id' => fn () => $warehouseIds->random()?->getKey(),
+            'product_id' => fn () => $productIds->random()?->getKey(),
+            'order_position_id' => fn () => $orderPositionIds->random()?->getKey(),
+            'serial_number_id' => fn () => $serialNumberIds->random()?->getKey(),
+        ]);
     }
 }

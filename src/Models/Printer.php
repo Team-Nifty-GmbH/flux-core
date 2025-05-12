@@ -4,12 +4,13 @@ namespace FluxErp\Models;
 
 use FluxErp\Models\Pivots\PrinterUser;
 use FluxErp\Traits\Filterable;
+use FluxErp\Traits\HasPackageFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Printer extends FluxModel
 {
-    use Filterable;
+    use Filterable, HasPackageFactory;
 
     protected function casts(): array
     {

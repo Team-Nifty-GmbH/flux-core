@@ -12,6 +12,10 @@ class Categorizable extends MorphPivot
 {
     use ResolvesRelationsThroughContainer;
 
+    public $incrementing = false;
+
+    public $timestamps = false;
+
     protected $table = 'categorizables';
 
     public function categorizable(): MorphTo
