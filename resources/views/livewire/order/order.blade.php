@@ -972,7 +972,7 @@
                                                             icon="x-mark"
                                                             2xs
                                                             wire:click="deleteDiscount(discount.id)"
-                                                            wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => 'Discount']) }}"
+                                                            wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Discount')]) }}"
                                                         />
                                                     </div>
                                                 @endif
