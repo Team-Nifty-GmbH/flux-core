@@ -408,8 +408,10 @@ class FluxServiceProvider extends ServiceProvider
         $this->booted(function (): void {
             config([
                 'tallstackui.settings.toast.z-index' => 'z-50',
+                'tallstackui.settings.toast.timeout' => 5,
                 'tallstackui.settings.dialog.z-index' => 'z-40',
                 'tallstackui.settings.modal.z-index' => 'z-30',
+                'tallstackui.settings.slide.z-index' => 'z-30',
             ]);
             config(['permission.models.role' => resolve_static(Role::class, 'class')]);
             config(['permission.models.permission' => resolve_static(Permission::class, 'class')]);
