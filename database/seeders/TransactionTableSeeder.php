@@ -3,7 +3,6 @@
 namespace FluxErp\Database\Seeders;
 
 use FluxErp\Models\BankConnection;
-use FluxErp\Models\Order;
 use FluxErp\Models\Transaction;
 use Illuminate\Database\Seeder;
 
