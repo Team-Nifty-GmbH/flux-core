@@ -33,7 +33,7 @@ class TopProductsByUnitSold extends ValueList
                 'order',
                 fn (Builder $query) => $query
                     ->when(
-                        $this->timeFrame === TimeFrameEnum::Custom,
+                        $this->timeFrame === TimeFrameEnum::Custom && $this->end,
                         function (Builder $query) {
                             $diff = $this->end->diffInDays($this->start);
 

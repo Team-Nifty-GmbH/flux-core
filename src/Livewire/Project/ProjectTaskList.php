@@ -9,6 +9,7 @@ use FluxErp\Livewire\Forms\TaskForm;
 use FluxErp\Models\Task;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithTabs;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
@@ -139,5 +140,10 @@ class ProjectTaskList extends BaseTaskList
     public function updatedTaskTab(): void
     {
         $this->forceRender();
+    }
+
+    protected function getBuilder(Builder $builder): Builder
+    {
+        return $builder->where('project_id', $this->projectId);
     }
 }

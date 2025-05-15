@@ -17,7 +17,7 @@
         @show
         <div
             @if($collapsed) x-collapse x-show="expanded" x-cloak @endif
-            class="space-y-2.5"
+            class="space-y-2.5 p-0.5"
         >
             <div
                 x-bind:class="! edit && 'pointer-events-none'"
@@ -58,7 +58,7 @@
                 <x-flux::state
                     x-bind:readonly="!edit"
                     class="w-full"
-                    align="left"
+                    align="bottom"
                     :label="__('Project state')"
                     wire:model="project.state"
                     formatters="formatter.state"
@@ -77,7 +77,7 @@
                     :label="__('Responsible User')"
                     autocomplete="off"
                     wire:model="project.responsible_user_id"
-                    select="label:name|value:id"
+                    select="label:label|value:id|description:description"
                     unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\User::class),
