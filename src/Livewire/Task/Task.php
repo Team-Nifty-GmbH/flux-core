@@ -18,6 +18,7 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Spatie\Permission\Exceptions\UnauthorizedException;
+use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Task extends Component
 {
@@ -32,6 +33,7 @@ class Task extends Component
     public function mount(string $id): void
     {
         $task = resolve_static(TaskModel::class, 'query')
+            ->with('model')
             ->whereKey($id)
             ->firstOrFail();
 
@@ -44,6 +46,11 @@ class Task extends Component
                 null
             )
         );
+
+        if ($task->model && in_array(InteractsWithDataTables::class, class_implements($task->model))) {
+            $this->task->modelUrl = $task->model->getUrl();
+            $this->task->modelLabel = $task->model->getLabel();
+        }
 
         $this->availableStates = app(TaskModel::class)
             ->getStatesFor('state')
