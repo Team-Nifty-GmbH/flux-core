@@ -36,13 +36,38 @@ class Ticket extends Component
 
     public function mount(int $id): void
     {
+        $this->fetchTicket($id);
+    }
+
+    public function render(): View
+    {
+        return view('flux::livewire.ticket.ticket');
+    }
+
+    #[Renderless]
+    public function delete(): void
+    {
+        try {
+            $this->ticket->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->redirect(route('tickets'), navigate: true);
+    }
+
+    #[Renderless]
+    public function fetchTicket(?int $id = null): void
+    {
+        $id ??= $this->ticket->id;
+
         $states = app(TicketModel::class)->getStatesFor('state');
-        $this->states = array_map(function ($item) {
-            return [
-                'label' => __($item),
-                'name' => $item,
-            ];
-        }, $states->toArray());
+        $this->states = $states->map(fn (string $state) => [
+            'label' => __($state),
+            'name' => $state,
+        ])->toArray();
 
         $this->ticketTypes = resolve_static(TicketType::class, 'query')
             ->select(['id', 'name'])
@@ -76,25 +101,6 @@ class Ticket extends Component
                 )
             )
             ->toArray();
-    }
-
-    public function render(): View
-    {
-        return view('flux::livewire.ticket.ticket');
-    }
-
-    #[Renderless]
-    public function delete(): void
-    {
-        try {
-            $this->ticket->delete();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return;
-        }
-
-        $this->redirect(route('tickets'), navigate: true);
     }
 
     public function getTabs(): array
