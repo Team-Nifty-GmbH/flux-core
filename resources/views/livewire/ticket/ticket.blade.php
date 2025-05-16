@@ -45,7 +45,7 @@
                             trackable_type: '{{ morph_alias(\FluxErp\Models\Ticket::class) }}',
                             trackable_id: {{ $ticket->id }},
                             name: '{{ $ticket->title }}',
-                            description: {{ strip_tags(json_encode($ticket->description)) }}
+                            description: {{ json_encode(strip_tags($ticket->description)) }}
                         }
                     )"
             >
@@ -224,6 +224,13 @@
                                 'method' => 'POST',
                                 'params' => [
                                     'with' => 'media',
+                                    'where' => [
+                                        [
+                                            'field' => 'is_active',
+                                            'operator' => '=',
+                                            'value' => true,
+                                        ],
+                                    ],
                                 ],
                             ]"
                         />
@@ -265,6 +272,13 @@
                                         'method' => 'POST',
                                         'params' => [
                                             'with' => $ticket->authenticatable_type === morph_alias(\FluxErp\Models\Address::class) ? 'contact.media' : 'media',
+                                            'where' => [
+                                                [
+                                                    'field' => 'is_active',
+                                                    'operator' => '=',
+                                                    'value' => true,
+                                                ],
+                                            ],
                                         ],
                                     ]"
                                 />
