@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use Exception;
+use FluxErp\Contracts\HasMediaForeignKey;
 use FluxErp\Enums\BundleTypeEnum;
 use FluxErp\Enums\TimeUnitEnum;
 use FluxErp\Helpers\PriceHelper;
@@ -37,7 +38,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\MediaLibrary\HasMedia;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
-class Product extends FluxModel implements HasMedia, InteractsWithDataTables
+class Product extends FluxModel implements HasMedia, HasMediaForeignKey, InteractsWithDataTables
 {
     use Categorizable, Commentable, Filterable, HasAdditionalColumns, HasAttributeTranslations, HasClientAssignment,
         HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasSerialNumberRange, HasTags,
@@ -61,6 +62,13 @@ class Product extends FluxModel implements HasMedia, InteractsWithDataTables
                         ->pluck('name')
                         ->toArray()
             );
+    }
+
+    public static function mediaReplaced(int|string|null $oldMediaId, int|string|null $newMediaId): void
+    {
+        static::query()
+            ->where('cover_media_id', $oldMediaId)
+            ->update(['cover_media_id' => $newMediaId]);
     }
 
     protected static function booted(): void
