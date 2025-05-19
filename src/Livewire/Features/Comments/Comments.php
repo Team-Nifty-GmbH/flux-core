@@ -127,8 +127,8 @@ class Comments extends Component
             ->paginate(page: $this->commentPage);
 
         $data = $comments->getCollection()->map(function ($comment) {
-            $comment->is_current_user = $comment->getRawOriginal('created_by') === auth()->getMorphClass() . ':'
-                . auth()->id();
+            $comment->is_current_user = $comment->getRawOriginal('created_by')
+                === auth()->user()?->getMorphClass() . ':' . auth()->id();
 
             return $comment;
         });
