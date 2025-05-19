@@ -53,19 +53,23 @@ class Mail extends CommunicationList
     #[Renderless]
     public function createPurchaseInvoice(Communication $communication): void
     {
-        CreatePurchaseInvoice::canPerformAction();
+        resolve_static(CreatePurchaseInvoice::class, 'canPerformAction');
 
         $purchaseInvoices = app(CreateMailExecutedSubscriber::class)
             ->findAddress($communication)
             ->createPurchaseInvoice($communication);
 
         if (is_null($purchaseInvoices) || $purchaseInvoices->isEmpty()) {
-            $this->toast()->error(__('Could not create purchase invoice'))->send();
+            $this->toast()
+                ->error(__('Could not create purchase invoice'))
+                ->send();
 
             return;
         }
 
-        $this->toast()->success(__(':model created', ['model' => __('Purchase Invoice')]))->send();
+        $this->toast()
+            ->success(__(':model created', ['model' => __('Purchase Invoice')]))
+            ->send();
         $this->js(<<<'JS'
             $modalClose('show-mail');
         JS);
@@ -74,19 +78,23 @@ class Mail extends CommunicationList
     #[Renderless]
     public function createTicket(Communication $communication): void
     {
-        CreateTicket::canPerformAction();
+        resolve_static(CreateTicket::class, 'canPerformAction');
 
         $ticket = app(CreateMailExecutedSubscriber::class)
             ->findAddress($communication)
             ->createTicket($communication);
 
         if (! $ticket) {
-            $this->toast()->error(__('Could not create ticket'))->send();
+            $this->toast()
+                ->error(__('Could not create ticket'))
+                ->send();
 
             return;
         }
 
-        $this->toast()->success(__(':model created', ['model' => __('Ticket')]))->send();
+        $this->toast()
+            ->success(__(':model created', ['model' => __('Ticket')]))
+            ->send();
         $this->js(<<<'JS'
             $modalClose('show-mail');
         JS);
