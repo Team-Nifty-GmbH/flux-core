@@ -60,14 +60,17 @@ class CommunicationForm extends FluxForm
         if ($values instanceof Communication) {
             $values->loadMissing(['tags:id', 'communicatables']);
             $values->communicatables->map(function (Communicatable $communicatable): void {
-                $communicatable->href = method_exists($communicatable->communicatable, 'getUrl')
-                    ? $communicatable->communicatable->getUrl()
-                    : null;
+                $modelLabel = null;
+                if ($communicatable->communicatable) {
+                    $communicatable->href = method_exists($communicatable->communicatable, 'getUrl')
+                        ? $communicatable->communicatable->getUrl()
+                        : null;
+                    $modelLabel = method_exists($communicatable->communicatable, 'getLabel')
+                        ? $communicatable->communicatable->getLabel()
+                        : null;
+                }
 
                 $typeLabel = __(Str::headline($communicatable->communicatable_type));
-                $modelLabel = method_exists($communicatable->communicatable, 'getLabel')
-                    ? $communicatable->communicatable->getLabel()
-                    : null;
 
                 $communicatable->label = $modelLabel ? $typeLabel . ': ' . $modelLabel : $typeLabel;
 

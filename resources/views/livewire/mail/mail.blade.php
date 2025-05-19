@@ -19,75 +19,108 @@
         },
     }"
 >
-    <x-modal size="7xl" id="show-mail" class="flex flex-col gap-4">
-        <div class="flex">
-            <div class="grow">
-                <div
-                    class="font-semibold"
-                    x-text="$wire.mailMessage.from"
-                ></div>
-                <div
-                    class="text-sm"
-                    x-text="$wire.mailMessage.subject"
-                ></div>
+    <x-modal size="7xl" id="show-mail">
+        <div class="flex flex-col gap-2">
+            <div class="flex">
+                <div class="grow">
+                    <div
+                        class="font-semibold"
+                        x-text="$wire.mailMessage.from"
+                    ></div>
+                    <div
+                        class="text-sm"
+                        x-text="$wire.mailMessage.subject"
+                    ></div>
+                </div>
+                <div class="text-right">
+                    <div
+                        class="font-semibold"
+                        x-text="window.formatters.datetime($wire.mailMessage.date)"
+                    ></div>
+                    <div class="text-sm" x-text="$wire.mailMessage.slug"></div>
+                    <div class="flex justify-end">
+                        <x-dropdown position="bottom-start">
+                            <x-slot:action>
+                                <x-button icon="chevron-down" x-on:click="show = !show" sm color="secondary" :text="__('Actions')" />
+                            </x-slot:action>
+                            @canAction(\FluxErp\Actions\Ticket\CreateTicket::class)
+                                <x-dropdown.items :text="__('Create ticket')" wire:click="createTicket($wire.mailMessage.id)" />
+                            @endcanAction
+                            @canAction(\FluxErp\Actions\PurchaseInvoice\CreatePurchaseInvoice::class)
+                                <x-dropdown.items :text="__('Create purchase invoice')" wire:click="createPurchaseInvoice($wire.mailMessage.id)" />
+                            @endcanAction
+                        </x-dropdown>
+                    </div>
+                </div>
             </div>
-            <div class="text-right">
-                <div
-                    class="font-semibold"
-                    x-text="window.formatters.datetime($wire.mailMessage.date)"
-                ></div>
-                <div class="text-sm" x-text="$wire.mailMessage.slug"></div>
+            <div class="flex items-center gap-1">
+                <div class="text-sm">{{ __('To') }}:</div>
+                <template x-for="to in $wire.mailMessage.to">
+                    <span
+                        x-html="window.formatters.badge(to.full, 'neutral')"
+                    ></span>
+                </template>
             </div>
+            <div
+                class="flex items-center gap-1"
+                x-cloak
+                x-show="$wire.mailMessage.bcc.length"
+            >
+                <div class="text-sm">{{ __('CC') }}:</div>
+                <template x-for="cc in $wire.mailMessage.cc">
+                    <span
+                        x-html="window.formatters.badge(cc.full, 'neutral')"
+                    ></span>
+                </template>
+            </div>
+            <div
+                class="flex items-center gap-1"
+                x-cloak
+                x-show="$wire.mailMessage.bcc.length"
+            >
+                <div class="text-sm">{{ __('BCC') }}:</div>
+                <template x-for="bcc in $wire.mailMessage.bcc">
+                    <span
+                        x-html="window.formatters.badge(bcc.full, 'neutral')"
+                    ></span>
+                </template>
+            </div>
+            <div class="flex gap-1">
+                <template x-for="communicatable in $wire.mailMessage.communicatables">
+                    <x-button
+                        color="secondary"
+                        sm
+                        light
+                        icon="link"
+                        rounded
+                        href="#"
+                        x-bind:href="communicatable.href"
+                        wire:navigate
+                    >
+                        <x-slot:text>
+                            <span x-text="communicatable.label"></span>
+                        </x-slot>
+                    </x-button>
+                </template>
+            </div>
+            <div class="flex gap-1">
+                <template x-for="file in $wire.mailMessage.attachments">
+                    <x-button
+                        color="secondary"
+                        sm
+                        light
+                        icon="paper-clip"
+                        x-on:click="$wire.download(file.id)"
+                        rounded
+                    >
+                        <x-slot:text>
+                            <span x-text="file.name"></span>
+                        </x-slot>
+                    </x-button>
+                </template>
+            </div>
+            <div class="overflow-auto rounded-md border p-4" id="mail-body"></div>
         </div>
-        <div class="flex items-center gap-1">
-            <div class="text-sm">{{ __('To') }}:</div>
-            <template x-for="to in $wire.mailMessage.to">
-                <span
-                    x-html="window.formatters.badge(to.full, 'neutral')"
-                ></span>
-            </template>
-        </div>
-        <div
-            class="flex items-center gap-1"
-            x-cloak
-            x-show="$wire.mailMessage.bcc.length"
-        >
-            <div class="text-sm">{{ __('CC') }}:</div>
-            <template x-for="cc in $wire.mailMessage.cc">
-                <span
-                    x-html="window.formatters.badge(cc.full, 'neutral')"
-                ></span>
-            </template>
-        </div>
-        <div
-            class="flex items-center gap-1"
-            x-cloak
-            x-show="$wire.mailMessage.bcc.length"
-        >
-            <div class="text-sm">{{ __('BCC') }}:</div>
-            <template x-for="bcc in $wire.mailMessage.bcc">
-                <span
-                    x-html="window.formatters.badge(bcc.full, 'neutral')"
-                ></span>
-            </template>
-        </div>
-        <div class="flex gap-1">
-            <template x-for="file in $wire.mailMessage.attachments">
-                <x-button
-                    color="secondary"
-                    light
-                    xs
-                    icon="paper-clip"
-                    x-on:click="$wire.download(file.id)"
-                    rounded
-                >
-                    <x-slot:label>
-                        <span x-text="file.name"></span>
-                    </x-slot>
-                </x-button>
-            </template>
-        </div>
-        <div class="overflow-auto rounded-md border p-4" id="mail-body"></div>
     </x-modal>
     <section class="flex max-w-[96rem] flex-col gap-4">
         <x-card
