@@ -7,6 +7,7 @@ use FluxErp\Listeners\Auth\LogoutListener;
 use FluxErp\Listeners\BroadcastEventSubscriber;
 use FluxErp\Listeners\CacheKeyWrittenListener;
 use FluxErp\Listeners\MailMessage\CreateMailExecutedSubscriber;
+use FluxErp\Listeners\Media\ReplaceMediaSubscriber;
 use FluxErp\Listeners\MessageSendingEventSubscriber;
 use FluxErp\Listeners\NotificationEloquentEventSubscriber;
 use FluxErp\Listeners\Order\OrderInvoiceAddedSubscriber;
@@ -61,6 +62,7 @@ class EventServiceProvider extends ServiceProvider
         OrderInvoiceAddedSubscriber::class,
         MessageSendingEventSubscriber::class,
         CreateMailExecutedSubscriber::class,
+        ReplaceMediaSubscriber::class,
     ];
 
     public function boot(): void

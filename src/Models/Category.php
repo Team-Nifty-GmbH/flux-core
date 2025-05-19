@@ -15,7 +15,6 @@ use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SortableTrait;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Str;
 use Spatie\EloquentSortable\Sortable;
@@ -104,11 +103,6 @@ class Category extends FluxModel implements InteractsWithDataTables, Sortable
     public function getUrl(): ?string
     {
         return null;
-    }
-
-    public function media(): HasMany
-    {
-        return $this->hasMany(Media::class);
     }
 
     public function model(): MorphToMany
