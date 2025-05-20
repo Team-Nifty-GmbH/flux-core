@@ -23,7 +23,7 @@
             <p class="font-semibold">
                 {{ $position->name }}
             </p>
-            <div class="prose-xs prose">
+            <div class="prose-xs">
                 {!! $position->description !!}
             </div>
         </td>
