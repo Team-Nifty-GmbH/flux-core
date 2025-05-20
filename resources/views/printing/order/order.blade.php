@@ -60,7 +60,7 @@
 @show
 <main>
     @section('header')
-    <div class="prose-xs prose pb-4 pt-10">
+    <div class="prose-xs pb-4 pt-10">
         {!! Blade::render(html_entity_decode($model->header ?? ''), ['model' => $model]) !!}
     </div>
     @show
@@ -207,7 +207,7 @@
     </table>
     @show
     @section('footer')
-    <div class="prose-xs prose break-inside-avoid">
+    <div class="prose-xs break-inside-avoid">
         {!! Blade::render(html_entity_decode($model->footer ?? ''), ['model' => $model]) !!}
         {!!
             $model

@@ -26,7 +26,7 @@
     </x-slot>
 </x-flux::print.first-page-header>
 <main>
-    <div class="prose-xs prose pb-4 pt-10">
+    <div class="prose-xs pb-4 pt-10">
         {!! $model->header !!}
     </div>
     <div class="pb-6">
