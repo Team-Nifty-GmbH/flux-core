@@ -5,11 +5,14 @@ namespace FluxErp\Models\Pivots;
 use FluxErp\Models\Address;
 use FluxErp\Models\AddressType;
 use FluxErp\Models\Order;
+use FluxErp\Traits\HasPackageFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AddressAddressTypeOrder extends FluxPivot
 {
+    use HasPackageFactory;
+
     protected $table = 'address_address_type_order';
 
     protected static function booted(): void
@@ -40,11 +43,11 @@ class AddressAddressTypeOrder extends FluxPivot
 
     public function getAddressAttribute(): ?Model
     {
-        $address = $this->fromJson($this->attributes['address'] ?? null);
+        $address = $this->fromJson(data_get($this->attributes, 'address'));
 
         return $address
             ? resolve_static(Address::class, 'query')
-                ->whereKey($address['id'])
+                ->whereKey(data_get($address, 'id'))
                 ->firstOrNew()
                 ->fill($address)
             : $this->address()->first();

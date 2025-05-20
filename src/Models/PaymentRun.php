@@ -5,6 +5,7 @@ namespace FluxErp\Models;
 use FluxErp\Enums\PaymentRunTypeEnum;
 use FluxErp\States\PaymentRun\PaymentRunState;
 use FluxErp\Traits\HasFrontendAttributes;
+use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class PaymentRun extends FluxModel
 {
-    use HasFrontendAttributes, HasUserModification, HasUuid, LogsActivity;
+    use HasFrontendAttributes, HasPackageFactory, HasUserModification, HasUuid, LogsActivity;
 
     protected function casts(): array
     {
