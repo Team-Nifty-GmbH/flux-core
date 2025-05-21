@@ -1679,6 +1679,7 @@
     "The credit line of the contact is exceeded": "Die Kreditlinie des Kontakts wurde überschritten",
     "The given columns must be unique.": "Jede Spalte darf nur einmal angegeben werden.",
     "The login link is invalid or has expired.": "Der Anmeldelink ist ungültig oder abgelaufen.",
+    "The main record must not be in the merge records.": "Der Hauptdatensatz darf nicht in den zusammenzuführenden Datensätzen sein.",
     "The media collection is read-only and cannot be modified.": "Die Mediensammlung ist schreibgeschützt und kann nicht geändert werden.",
     "The number has already been taken for this type.": "Die Nummer wurde bereits für diesen Typ vergeben.",
     "The token will not be shown again after closing the modal.": "Das Token wird nach dem Schließen des Dialogs nicht mehr angezeigt.",

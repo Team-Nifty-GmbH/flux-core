@@ -185,6 +185,18 @@ class MergeRecords extends FluxAction
             ]);
         }
 
+        // Validate that the main record is not in the merge records
+        if (in_array(
+            $this->getData('main_record.id'),
+            Arr::flatten($this->getData('merge_records.*.id'))
+        )) {
+            throw ValidationException::withMessages([
+                'main_record' => [
+                    'The main record must not be in the merge records.',
+                ],
+            ]);
+        }
+
         // Validate morphTo relations to ensure that the foreign key and morph type are from the same record
         $model = morphed_model($this->getData('model_type'));
 
