@@ -169,7 +169,7 @@ class Comments extends Component
             ->get()
             ->map(function (Comment $comment) {
                 $comment->is_current_user = $comment->getRawOriginal('created_by')
-                    === auth()->user()->getMorphClass() . ':' . auth()->id();
+                    === auth()->user()?->getMorphClass() . ':' . auth()->id();
 
                 return $comment;
             })
