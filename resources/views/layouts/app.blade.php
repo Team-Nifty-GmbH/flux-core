@@ -94,6 +94,10 @@
                     </x-modal>
                 </div>
             @endpersist
+
+            @persist('record-merging')
+                <livewire:record-merging lazy />
+            @endpersist
         @endauth
 
         <x-flux::layout>

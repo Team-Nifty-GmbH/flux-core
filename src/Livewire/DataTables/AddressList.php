@@ -8,6 +8,7 @@ use FluxErp\Livewire\Forms\ContactForm;
 use FluxErp\Models\Address;
 use FluxErp\Models\Media;
 use FluxErp\Traits\Livewire\CreatesDocuments;
+use FluxErp\Traits\Livewire\DataTable\AllowRecordMerging;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Redirector;
@@ -21,7 +22,7 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class AddressList extends BaseDataTable
 {
-    use CreatesDocuments;
+    use AllowRecordMerging, CreatesDocuments;
 
     public ContactForm $contact;
 
