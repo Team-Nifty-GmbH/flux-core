@@ -168,8 +168,8 @@ class Comments extends Component
             ->where('is_sticky', true)
             ->get()
             ->map(function (Comment $comment) {
-                $comment->is_current_user = $comment->getRawOriginal('created_by') === auth()->getMorphClass() . ':'
-                    . auth()->id();
+                $comment->is_current_user = $comment->getRawOriginal('created_by')
+                    === auth()->user()?->getMorphClass() . ':' . auth()->id();
 
                 return $comment;
             })
