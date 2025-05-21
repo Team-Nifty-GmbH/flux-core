@@ -72,7 +72,7 @@ class StockPostingList extends BaseStockPostingList
     {
         $this->stockPosting->reset();
         $this->stockPosting->warehouse_id =
-            $this->warehouseId ?? resolve_static(Warehouse::class, 'default')->id;
+            $this->warehouseId ?? resolve_static(Warehouse::class, 'default')->getKey();
 
         $this->js(<<<'JS'
             $modalOpen('create-stock-posting');

@@ -105,11 +105,6 @@ class Category extends FluxModel implements InteractsWithDataTables, Sortable
         return null;
     }
 
-    public function media(): MorphToMany
-    {
-        return $this->morphedByMany(Media::class, 'categorizable');
-    }
-
     public function model(): MorphToMany
     {
         return $this->model_type

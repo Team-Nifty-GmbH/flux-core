@@ -36,7 +36,7 @@ class Outstanding extends ValueBox implements HasWidgetOptions
             ->where('payment_reminder_next_date', '<=', now()->toDate())
             ->revenue();
 
-        $symbol = Currency::default()->symbol;
+        $symbol = resolve_static(Currency::class, 'default')->symbol;
         $this->subValue = '<span class="text-red-600">'
             . Number::abbreviate($overDueQuery->sum('balance'), 2)
             . ' ' . $symbol . ' ' . __('Overdue')

@@ -109,12 +109,8 @@ class Comments extends Component
 
         resolve_static(Comment::class, 'addGlobalScopes', [
             'scopes' => [
-                'media' => function (Builder $query): void {
-                    $query->with('media');
-                },
-                'ordered' => function (Builder $query): void {
-                    $query->orderBy('id', 'desc');
-                },
+                'media' => fn (Builder $query) => $query->with('media'),
+                'ordered' => fn (Builder $query) => $query->orderBy('id', 'desc'),
                 FamilyTreeScope::class,
             ],
         ]);
@@ -131,7 +127,8 @@ class Comments extends Component
             ->paginate(page: $this->commentPage);
 
         $data = $comments->getCollection()->map(function ($comment) {
-            $comment->is_current_user = $comment->getCreatedBy()?->is(Auth::user());
+            $comment->is_current_user = $comment->getRawOriginal('created_by')
+                === auth()->user()?->getMorphClass() . ':' . auth()->id();
 
             return $comment;
         });
@@ -156,29 +153,23 @@ class Comments extends Component
 
         resolve_static(Comment::class, 'addGlobalScopes', [
             'scopes' => [
-                'media' => function (Builder $query): void {
-                    $query->with('media:id,name,model_type,model_id,disk');
-                },
-                'ordered' => function (Builder $query): void {
-                    $query->orderBy('id', 'desc');
-                },
+                'media' => fn (Builder $query) => $query->with('media:id,name,model_type,model_id,disk'),
+                'ordered' => fn (Builder $query) => $query->orderBy('id', 'desc'),
             ],
         ]);
 
-        return resolve_static($this->modelType, 'query')
-            ->whereKey($this->modelId)
-            ->firstOrFail()
-            ->comments()
+        return resolve_static(Comment::class, 'query')
+            ->where('model_type', morph_alias($this->modelType))
+            ->where('model_id', $this->modelId)
             ->when(
                 ! Auth::user() instanceof User,
-                function ($query): void {
-                    $query->where('is_internal', false);
-                }
+                fn (Builder $query) => $query->where('is_internal', false)
             )
             ->where('is_sticky', true)
             ->get()
             ->map(function (Comment $comment) {
-                $comment->is_current_user = $comment->getCreatedBy()?->is(auth()->user());
+                $comment->is_current_user = $comment->getRawOriginal('created_by')
+                    === auth()->user()?->getMorphClass() . ':' . auth()->id();
 
                 return $comment;
             })

@@ -11,6 +11,9 @@ use FluxErp\Models\Client;
 use FluxErp\Models\Communication;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Media;
+use FluxErp\Models\PurchaseInvoice;
+use FluxErp\Models\Ticket;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Spatie\Activitylog\Facades\CauserResolver;
@@ -20,19 +23,99 @@ class CreateMailExecutedSubscriber
 {
     protected ?Address $address = null;
 
-    public function handle(CreateMailMessage $event): void
+    public function createPurchaseInvoice(Communication $message): ?Collection
     {
-        $message = $event->getResult();
+        $contact = $this->address?->contact;
 
+        $created = [];
+        foreach ($message->getMedia('attachments') as $attachment) {
+            try {
+                $purchaseInvoice = CreatePurchaseInvoice::make([
+                    'client_id' => $contact?->client_id ?? resolve_static(Client::class, 'default')->getKey(),
+                    'contact_id' => $contact?->id,
+                    'currency_id' => $contact?->currency_id ?? resolve_static(Currency::class, 'default')->getKey(),
+                    'payment_type_id' => $contact?->purchase_payment_type_id ?? $contact?->payment_type_id,
+                    'invoice_date' => $message->date->toDateString(),
+                    'media' => [
+                        'id' => $attachment->id,
+                    ],
+                ])
+                    ->when(
+                        $this->address,
+                        fn (CreatePurchaseInvoice $action) => $action->actingAs($this->address)
+                    )
+                    ->validate()
+                    ->execute();
+            } catch (Throwable) {
+                continue;
+            }
+
+            $created[] = $purchaseInvoice->getKey();
+            $purchaseInvoice->communications()->attach($message->getKey());
+        }
+
+        return $created
+            ? resolve_static(PurchaseInvoice::class, 'query')
+                ->whereKey($created)
+                ->get()
+            : null;
+    }
+
+    public function createTicket(Communication $communication): ?Ticket
+    {
+        if (! $this->address) {
+            return null;
+        }
+
+        try {
+            /** @var Ticket $ticket */
+            $ticket = CreateTicket::make([
+                'client_id' => $this->address->client_id
+                    ?? resolve_static(Client::class, 'default')->getKey(),
+                'authenticatable_type' => morph_alias(Address::class),
+                'authenticatable_id' => $this->address->id,
+                'title' => $communication->subject,
+                'description' => $communication->text_body ?? $communication->html_body,
+            ])
+                ->actingAs($this->address)
+                ->validate()
+                ->execute();
+        } catch (ValidationException) {
+            return null;
+        }
+
+        $ticket->communications()->attach($communication->getKey());
+
+        foreach ($communication->getMedia('attachments') as $attachment) {
+            try {
+                /** @var Media $attachment */
+                $attachment->copy($ticket);
+            } catch (Throwable) {
+            }
+        }
+
+        return $ticket;
+    }
+
+    public function findAddress(Communication $communication): static
+    {
         $this->address = resolve_static(
             Address::class,
             'findAddressByEmail',
-            ['email' => Str::between($message->from, '<', '>')]
+            ['email' => Str::between($communication->from, '<', '>')]
         );
 
         if ($this->address) {
             CauserResolver::setCauser($this->address);
         }
+
+        return $this;
+    }
+
+    public function handle(CreateMailMessage $event): void
+    {
+        $message = $event->getResult();
+        $this->findAddress($message);
 
         if ($message->mailFolder->can_create_purchase_invoice && $message->media()->count() !== 0) {
             $this->createPurchaseInvoice($message);
@@ -72,68 +155,5 @@ class CreateMailExecutedSubscriber
         return [
             'action.executed: ' . resolve_static(CreateMailMessage::class, 'class') => 'handle',
         ];
-    }
-
-    protected function createPurchaseInvoice(Communication $message): void
-    {
-        $contact = $this->address?->contact;
-
-        foreach ($message->getMedia('attachments') as $attachment) {
-            try {
-                $purchaseInvoice = CreatePurchaseInvoice::make([
-                    'client_id' => $contact?->client_id ?? Client::default()->getKey(),
-                    'contact_id' => $contact?->id,
-                    'currency_id' => $contact?->currency_id ?? Currency::default()->getKey(),
-                    'payment_type_id' => $contact?->purchase_payment_type_id ?? $contact?->payment_type_id,
-                    'invoice_date' => $message->date->toDateString(),
-                    'media' => [
-                        'id' => $attachment->id,
-                    ],
-                ])
-                    ->when(
-                        $this->address,
-                        fn (CreatePurchaseInvoice $action) => $action->actingAs($this->address)
-                    )
-                    ->validate()
-                    ->execute();
-            } catch (Throwable) {
-                continue;
-            }
-
-            $purchaseInvoice->communications()->attach($message->getKey());
-        }
-    }
-
-    protected function createTicket(Communication $communication): void
-    {
-        if (! $this->address) {
-            return;
-        }
-
-        try {
-            /** @var \FluxErp\Models\Ticket $ticket */
-            $ticket = CreateTicket::make([
-                'client_id' => $this->address->client_id ?? Client::default()->getKey(),
-                'authenticatable_type' => morph_alias(Address::class),
-                'authenticatable_id' => $this->address->id,
-                'title' => $communication->subject,
-                'description' => $communication->text_body ?? $communication->html_body,
-            ])
-                ->actingAs($this->address)
-                ->validate()
-                ->execute();
-        } catch (ValidationException) {
-            return;
-        }
-
-        $ticket->communications()->attach($communication->getKey());
-
-        foreach ($communication->getMedia('attachments') as $attachment) {
-            try {
-                /** @var Media $attachment */
-                $attachment->copy($ticket);
-            } catch (Throwable) {
-            }
-        }
     }
 }

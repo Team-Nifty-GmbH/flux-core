@@ -40,7 +40,7 @@
                 wire:model="userForm.termination_date"
             />
             <x-number
-                :prefix="\FluxErp\Models\Currency::default()?->symbol"
+                :prefix="resolve_static(\FluxErp\Models\Currency::class, 'default')?->symbol"
                 :label="__('Cost Per Hour')"
                 wire:model="userForm.cost_per_hour"
             />
@@ -306,7 +306,7 @@
             />
             <livewire:features.commission-rates
                 lazy
-                :userId="$user['id'] ?? null"
+                :user-id="$userForm->id"
                 :contactId="null"
                 cache-key="settings.users.commission-rates"
             />

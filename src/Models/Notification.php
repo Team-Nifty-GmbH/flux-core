@@ -22,7 +22,9 @@ class Notification extends DatabaseNotification
     {
         $title = data_get($this->data, 'title', '');
         if ($this->created_at->isToday()) {
-            $time = $this->created_at->format('h:i A');
+            $time = $this->created_at
+                ->timezone(auth()->user()?->timezone ?? config('app.timezone'))
+                ->toTimeString('minute');
         } else {
             $time = $this->created_at->diffForHumans();
         }

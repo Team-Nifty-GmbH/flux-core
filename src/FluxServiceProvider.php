@@ -21,6 +21,7 @@ use FluxErp\Http\Middleware\SetJobAuthenticatedUserMiddleware;
 use FluxErp\Models\Activity;
 use FluxErp\Models\Address;
 use FluxErp\Models\Category;
+use FluxErp\Models\Currency;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\Notification;
 use FluxErp\Models\Order;
@@ -40,6 +41,7 @@ use Illuminate\Console\Command;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Contracts\Queue\Factory as QueueFactoryContract;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -84,6 +86,16 @@ class FluxServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Model::automaticallyEagerLoadRelationships();
+
+        $this->app->booted(function (): void {
+            try {
+                if ($iso = resolve_static(Currency::class, 'default')?->iso) {
+                    Number::useCurrency($iso);
+                }
+            } catch (QueryException) {
+            }
+        });
+        Number::useLocale(app()->getLocale());
 
         bcscale(9);
         $this->bootMiddleware();
@@ -396,8 +408,10 @@ class FluxServiceProvider extends ServiceProvider
         $this->booted(function (): void {
             config([
                 'tallstackui.settings.toast.z-index' => 'z-50',
+                'tallstackui.settings.toast.timeout' => 5,
                 'tallstackui.settings.dialog.z-index' => 'z-40',
                 'tallstackui.settings.modal.z-index' => 'z-30',
+                'tallstackui.settings.slide.z-index' => 'z-30',
             ]);
             config(['permission.models.role' => resolve_static(Role::class, 'class')]);
             config(['permission.models.permission' => resolve_static(Permission::class, 'class')]);

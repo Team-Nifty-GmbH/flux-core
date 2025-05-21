@@ -11,5 +11,4 @@ reports
 vite.config.js
 postcss.config.js
 package-lock.json
-!/stubs/tailwind/package.json
 /public/build/

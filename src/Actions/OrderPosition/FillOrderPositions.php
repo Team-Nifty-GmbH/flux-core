@@ -11,7 +11,6 @@ use FluxErp\Rulesets\OrderPosition\CreateOrderPositionRuleset;
 use FluxErp\Rulesets\OrderPosition\FillOrderPositionsRuleset;
 use FluxErp\Rulesets\OrderPosition\UpdateOrderPositionRuleset;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -170,7 +169,7 @@ class FillOrderPositions extends FluxAction
         }
 
         // Create Children
-        $children = Collection::make();
+        $children = app(OrderPosition::class)->newCollection();
         foreach ($originalChildren as $child) {
             if ($child['is_bundle_position']) {
                 $child['amount'] = bcmul($child['amount_bundle'], $orderPosition->amount);

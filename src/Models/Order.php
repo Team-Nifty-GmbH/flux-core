@@ -260,9 +260,7 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
         $this->balance = bcround(
             bcsub(
                 $this->total_gross_price,
-                $this->transactions()
-                    ->withPivot('amount')
-                    ->sum('order_transaction.amount'),
+                $this->totalPaid(),
                 9
             ),
             2
@@ -784,6 +782,13 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
     public function tasks(): HasManyThrough
     {
         return $this->hasManyThrough(Task::class, Project::class);
+    }
+
+    public function totalPaid(): string|float|int
+    {
+        return $this->transactions()
+            ->withPivot('amount')
+            ->sum('order_transaction.amount');
     }
 
     public function transactions(): BelongsToMany

@@ -7,6 +7,7 @@ use FluxErp\Listeners\Auth\LogoutListener;
 use FluxErp\Listeners\BroadcastEventSubscriber;
 use FluxErp\Listeners\CacheKeyWrittenListener;
 use FluxErp\Listeners\MailMessage\CreateMailExecutedSubscriber;
+use FluxErp\Listeners\Media\ReplaceMediaSubscriber;
 use FluxErp\Listeners\MessageSendingEventSubscriber;
 use FluxErp\Listeners\NotificationEloquentEventSubscriber;
 use FluxErp\Listeners\Order\OrderInvoiceAddedSubscriber;
@@ -28,7 +29,9 @@ use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Queue\Events\JobQueued;
 use Illuminate\Queue\QueueManager;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Event;
+use TallStackUi\View\Components\Form\Date;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -59,6 +62,7 @@ class EventServiceProvider extends ServiceProvider
         OrderInvoiceAddedSubscriber::class,
         MessageSendingEventSubscriber::class,
         CreateMailExecutedSubscriber::class,
+        ReplaceMediaSubscriber::class,
     ];
 
     public function boot(): void
@@ -84,6 +88,16 @@ class EventServiceProvider extends ServiceProvider
 
         $manager->exceptionOccurred(static function (JobExceptionOccurred $event): void {
             QueueMonitorManager::handle($event);
+        });
+
+        $this->app->resolving(Date::class, function (Date $component) {
+            $component->start = Carbon::getWeekStartsAt();
+
+            if ($format = data_get(Carbon::getTranslator()->getMessages(), 'de.formats.L')) {
+                $component->format = $format;
+            }
+
+            return $component;
         });
     }
 }

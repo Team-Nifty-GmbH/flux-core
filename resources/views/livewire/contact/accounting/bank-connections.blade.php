@@ -26,7 +26,7 @@
                 :text="__('Cancel')"
             />
             <x-button
-                color="secondary"
+                color="primary"
                 light
                 wire:click="save().then((success) => { if(success) $modalClose('edit-contact-bank-connection'); })"
                 primary
