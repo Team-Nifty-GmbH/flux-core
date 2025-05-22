@@ -102,13 +102,13 @@
             <x-flux::currency
                 x-bind:readonly="!edit"
                 :label="__('Expected Revenue')"
-                :suffix="resolve_static(\FluxErp\Models\Currency::class, 'default')->symbol"
+                :suffix="resolve_static(\FluxErp\Models\Currency::class, 'default')?->symbol"
                 wire:model.blur="leadForm.expected_revenue"
             />
             <x-flux::currency
                 x-bind:readonly="!edit"
                 :label="__('Expected Gross Profit')"
-                :suffix="resolve_static(\FluxErp\Models\Currency::class, 'default')->symbol"
+                :suffix="resolve_static(\FluxErp\Models\Currency::class, 'default')?->symbol"
                 wire:model.blur="leadForm.expected_gross_profit"
             />
             <div x-bind:class="! edit && 'pointer-events-none'">

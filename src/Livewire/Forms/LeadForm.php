@@ -59,9 +59,9 @@ class LeadForm extends FluxForm
     {
         if ($values instanceof Lead) {
             $values->loadMissing(['tags:id', 'categories:id']);
-            $this->avatar = $values->address->getAvatarUrl();
-            $this->addressUrl = $values->address->getUrl();
-            $this->addressLabel = $values->address->getLabel();
+            $this->avatar = $values->address?->getAvatarUrl();
+            $this->addressUrl = $values->address?->getUrl();
+            $this->addressLabel = $values->address?->getLabel();
 
             $values = $values->toArray();
             $values['tags'] = array_column($values['tags'] ?? [], 'id');
