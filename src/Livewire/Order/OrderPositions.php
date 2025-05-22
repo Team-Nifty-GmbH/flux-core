@@ -245,7 +245,7 @@ class OrderPositions extends OrderPositionList
                     'description' => $orderPosition->description,
                     'users' => [
                         auth()->id(),
-                    ]
+                    ],
                 ])
                     ->checkPermission()
                     ->validate()
