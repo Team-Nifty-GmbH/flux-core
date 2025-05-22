@@ -237,11 +237,15 @@ class OrderPositions extends OrderPositionList
             try {
                 CreateTask::make([
                     'project_id' => $projectId,
+                    'responsible_user_id' => auth()->id(),
                     'order_position_id' => $modelId,
                     'model_type' => $modelType,
                     'model_id' => $modelId,
                     'name' => $orderPosition->name,
                     'description' => $orderPosition->description,
+                    'users' => [
+                        auth()->id(),
+                    ],
                 ])
                     ->checkPermission()
                     ->validate()
