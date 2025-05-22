@@ -28,6 +28,8 @@ use FluxErp\Livewire\DataTables\TicketList;
 use FluxErp\Livewire\DataTables\WorkTimeList;
 use FluxErp\Livewire\Features\Calendar\Calendar;
 use FluxErp\Livewire\InstallWizard;
+use FluxErp\Livewire\Lead\Lead;
+use FluxErp\Livewire\Lead\LeadList;
 use FluxErp\Livewire\Mail\Mail;
 use FluxErp\Livewire\Media\Media as MediaGrid;
 use FluxErp\Livewire\Order\Order;
@@ -54,6 +56,7 @@ use FluxErp\Livewire\Settings\FailedJobs;
 use FluxErp\Livewire\Settings\Industries;
 use FluxErp\Livewire\Settings\LanguageLines;
 use FluxErp\Livewire\Settings\Languages;
+use FluxErp\Livewire\Settings\LeadStates;
 use FluxErp\Livewire\Settings\LedgerAccounts;
 use FluxErp\Livewire\Settings\Logs;
 use FluxErp\Livewire\Settings\MailAccounts;
@@ -152,7 +155,15 @@ Route::middleware('web')
                 )
                     ->name('address.id');
 
-                Route::name('orders.')->prefix('orders')
+                Route::name('sales.')
+                    ->prefix('sales')
+                    ->group(function (): void {
+                        Route::get('/leads', LeadList::class)->name('leads');
+                        Route::get('/leads/{id}', Lead::class)->where('id', '[0-9]+')->name('lead.id');
+                    });
+
+                Route::name('orders.')
+                    ->prefix('orders')
                     ->group(function (): void {
                         Route::get('/list', OrderList::class)->name('orders');
                         Route::get('/list/{orderType}', OrderListByOrderType::class)->name('order-type');
@@ -226,6 +237,7 @@ Route::middleware('web')
                         Route::get('/scheduling', Scheduling::class)->name('scheduling');
                         Route::get('/serial-number-ranges', SerialNumberRanges::class)->name('serial-number-ranges');
                         Route::get('/tags', Tags::class)->name('tags');
+                        Route::get('/lead-states', LeadStates::class)->name('lead-states');
                         Route::get('/ticket-types', TicketTypes::class)->name('ticket-types');
                         Route::get('/tokens', Tokens::class)->name('tokens');
                         Route::get('/translations', LanguageLines::class)->name('translations');

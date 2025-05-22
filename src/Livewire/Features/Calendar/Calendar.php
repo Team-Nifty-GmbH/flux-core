@@ -297,8 +297,11 @@ class Calendar extends Component
         if (($calendarAttributes['modelType'] ?? false)
             && data_get($calendarAttributes, 'isVirtual', false)
         ) {
-            return resolve_static(morphed_model($calendarAttributes['modelType']), 'query')
-                ->inTimeframe($info['start'], $info['end'], $calendarAttributes)
+            return $this->getCalendarEventsFromModelTypeQuery(
+                $calendarAttributes['modelType'],
+                $info['start'],
+                $info['end'], $calendarAttributes
+            )
                 ->get()
                 ->map(fn (Model $model) => $model->toCalendarEvent($info))
                 ->toArray();
@@ -539,6 +542,16 @@ class Calendar extends Component
         }
 
         return $events;
+    }
+
+    protected function getCalendarEventsFromModelTypeQuery(
+        string $modelType,
+        string $start,
+        string $end,
+        array $calendarAttributes
+    ): Builder {
+        return resolve_static(morphed_model($modelType), 'query')
+            ->inTimeframe($start, $end, $calendarAttributes);
     }
 
     protected function getViews(): array

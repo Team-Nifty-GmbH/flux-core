@@ -22,7 +22,7 @@
     </div>
 </div>
 <div
-    {{ $attributes->whereDoesntStartWith(['wire', 'tabs'])->merge(['class' => 'relative pt-6']) }}
+    {{ $attributes->whereDoesntStartWith(['wire', 'tabs'])->merge(['class' => 'relative pt-6 grow flex']) }}
 >
     {{ $prepend ?? '' }}
     @if ($attributes->has('wire:loading'))
