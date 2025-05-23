@@ -19,6 +19,7 @@ class LeadList extends BaseDataTable
 
     public array $formatters = [
         'probability_percentage' => 'progressPercentage',
+        'expected_gross_profit_percentage' => 'progressPercentage',
     ];
 
     protected string $model = Lead::class;

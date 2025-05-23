@@ -84,7 +84,7 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         return [
             'start' => 'date:Y-m-d',
             'end' => 'date:Y-m-d',
-            'expected_gross_profit' => Money::class,
+            'expected_revenue' => Money::class,
             'expected_gross_profit' => Money::class,
         ];
     }
