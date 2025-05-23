@@ -1,8 +1,8 @@
 <div>
     <x-modal
-        persistent
         id="{{ $leadForm->modalName() }}"
         x-on:open="$focusOn('lead-name')"
+        persistent
     >
         <div class="flex flex-col gap-4">
             <x-input

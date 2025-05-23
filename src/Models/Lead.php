@@ -5,6 +5,7 @@ namespace FluxErp\Models;
 use Carbon\Carbon;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Lead\UpdateLead;
+use FluxErp\Casts\Money;
 use FluxErp\Contracts\Calendarable;
 use FluxErp\Traits\Categorizable;
 use FluxErp\Traits\Commentable;
@@ -83,6 +84,8 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         return [
             'start' => 'date:Y-m-d',
             'end' => 'date:Y-m-d',
+            'expected_gross_profit' => Money::class,
+            'expected_gross_profit' => Money::class,
         ];
     }
 
