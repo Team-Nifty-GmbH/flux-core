@@ -68,6 +68,7 @@ class DashboardTest extends BaseSetup
             'widgetable_type' => morph_alias(User::class),
             'widgetable_id' => $this->user->id,
             'component_name' => 'sample-component',
+            'dashboard_component' => data_get($this->components, '0')::dashboardComponent(),
             'name' => 'Widget 1',
             'width' => 2,
             'height' => 1,

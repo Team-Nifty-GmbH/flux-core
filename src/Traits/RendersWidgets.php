@@ -100,10 +100,10 @@ trait RendersWidgets
         $this->widgets = $this->filterWidgets(
             auth()
                 ->user()
-                ->widgets()
+                ?->widgets()
                 ->where('dashboard_component', static::class)
                 ->get()
-                ->toArray()
+                ->toArray() ?? []
         );
     }
 
