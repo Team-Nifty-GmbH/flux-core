@@ -21,7 +21,7 @@ class MorphExists implements DataAwareRule, ValidationRule
         $this->withPrefix = $withPrefix;
     }
 
-    public function setData($data): static
+    public function setData(array $data): static
     {
         $this->data = $data;
 

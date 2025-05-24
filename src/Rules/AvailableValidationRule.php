@@ -2,20 +2,13 @@
 
 namespace FluxErp\Rules;
 
-use Illuminate\Contracts\Validation\Rule;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
 
-class AvailableValidationRule implements Rule
+class AvailableValidationRule implements ValidationRule
 {
-    /**
-     * @var string[]
-     */
     public array $availableValidationRules;
 
-    /**
-     * Create a new rule instance.
-     *
-     * @return void
-     */
     public function __construct()
     {
         $this->availableValidationRules = [
@@ -87,38 +80,30 @@ class AvailableValidationRule implements Rule
         ];
     }
 
-    /**
-     * Get the validation error message.
-     */
-    public function message(): string
-    {
-        return __('invalid validation rule');
-    }
-
-    /**
-     * Determine if the validation rule passes.
-     *
-     * @param  string  $attribute
-     * @param  mixed  $value
-     */
-    public function passes($attribute, $value): bool
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if (! is_string($value) || str_ends_with($value, ':') || str_contains($value, '|')) {
-            return false;
+            $fail(sprintf('%s is not a valid validation rule.', $value))->translate();
+
+            return;
         }
 
         if (in_array($value, $this->availableValidationRules)) {
-            return true;
+            return;
         }
 
         $exploded = explode(':', $value);
 
         if (count($exploded) !== 2) {
-            return false;
+            $fail(sprintf('%s is not a valid validation rule.', $value))->translate();
+
+            return;
         }
 
         $validationRule = $exploded[0] . ':';
 
-        return in_array($validationRule, $this->availableValidationRules);
+        if (! in_array($validationRule, $this->availableValidationRules)) {
+            $fail(sprintf('%s is not a valid validation rule.', $validationRule))->translate();
+        }
     }
 }
