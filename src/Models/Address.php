@@ -375,6 +375,16 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         return $this->belongsTo(Language::class);
     }
 
+    public function leadRecommendations(): HasMany
+    {
+        return $this->hasMany(Lead::class, 'recommendation_address_id');
+    }
+
+    public function leads(): HasMany
+    {
+        return $this->hasMany(Lead::class);
+    }
+
     public function newCollection(array $models = []): Collection
     {
         return app(AddressCollection::class, ['items' => $models]);
