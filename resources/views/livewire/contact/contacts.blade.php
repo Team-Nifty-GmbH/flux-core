@@ -4,7 +4,7 @@
     @section('modals')
     @canAction(\FluxErp\Actions\Lead\CreateLead::class)
         <x-modal
-            id="{{ $leadForm->modalName() }}"
+            :id="$leadForm->modalName()"
             x-on:open="$focusOn('lead-name')"
             persistent
         >

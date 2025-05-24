@@ -14,13 +14,7 @@
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-50">
                     <div class="flex">
                         <div class="pl-2">
-                            <span
-                                x-text="$wire.leadForm.project_number"
-                            ></span>
-                            <span
-                                class="opacity-40 transition-opacity hover:opacity-100"
-                                x-text="$wire.leadForm.name"
-                            ></span>
+                            <span x-text="$wire.leadForm.name"></span>
                         </div>
                     </div>
                 </h1>
@@ -42,15 +36,15 @@
             class="mt-6 flex flex-col-reverse justify-stretch space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-x-3 sm:space-y-0 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3"
         >
             <x-button
+                :text="__('Edit')"
                 color="indigo"
                 x-cloak
                 x-show="!edit"
                 class="w-full"
                 x-on:click="edit = true"
-                :text="__('Edit')"
             />
             <x-button
-                x-cloak
+                :text="__('Save')"
                 color="indigo"
                 loading="save"
                 x-cloak
@@ -59,15 +53,14 @@
                 x-on:click="$wire.save().then((success) => {
                     edit = false;
                 });"
-                :text="__('Save')"
             />
             <x-button
+                :text="__('Cancel')"
                 color="secondary"
+                loading="save"
                 light
                 flat
-                :text="__('Cancel')"
                 x-cloak
-                loading="save"
                 x-show="edit"
                 class="w-full"
                 x-on:click="edit = false; $wire.resetForm();"

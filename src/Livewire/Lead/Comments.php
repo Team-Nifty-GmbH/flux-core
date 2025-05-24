@@ -3,8 +3,11 @@
 namespace FluxErp\Livewire\Lead;
 
 use FluxErp\Livewire\Features\Comments\Comments as BaseComments;
+use FluxErp\Models\Lead;
+use Livewire\Attributes\Locked;
 
 class Comments extends BaseComments
 {
-    public string $modelType = \FluxErp\Models\Lead::class;
+    #[Locked]
+    public string $modelType = Lead::class;
 }

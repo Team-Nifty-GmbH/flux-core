@@ -11,6 +11,7 @@ use FluxErp\Traits\Livewire\WithAddressAuth;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class Service extends Component
@@ -21,6 +22,7 @@ class Service extends Component
 
     public array $contactData = [];
 
+    #[Locked]
     public string $modelType = Ticket::class;
 
     public array $serialNumber;

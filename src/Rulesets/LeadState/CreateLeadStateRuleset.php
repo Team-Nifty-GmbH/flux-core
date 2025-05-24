@@ -23,20 +23,20 @@ class CreateLeadStateRuleset extends FluxRuleset
             'is_default' => [
                 'nullable',
                 'boolean',
-                'declined_if:is_win,true',
-                'declined_if:is_loss,true',
+                'declined_if:is_won,true',
+                'declined_if:is_lost,true',
             ],
-            'is_win' => [
+            'is_won' => [
                 'nullable',
                 'boolean',
                 'declined_if:is_default,true',
-                'declined_if:is_loss,true',
+                'declined_if:is_lost,true',
             ],
-            'is_loss' => [
+            'is_lost' => [
                 'nullable',
                 'boolean',
                 'declined_if:is_default,true',
-                'declined_if:is_win,true',
+                'declined_if:is_won,true',
             ],
         ];
     }

@@ -1,6 +1,6 @@
 <x-modal :id="$leadStateForm->modalName()">
     <div class="flex flex-col gap-4">
-        <x-input wire:model="leadStateForm.name" :label="__('Name')" />
+        <x-input :label="__('Name')" wire:model="leadStateForm.name" />
         <x-color :label="__('Color')" wire:model="leadStateForm.color" />
         <x-range
             wire:model.number="leadStateForm.probability_percentage"
@@ -17,20 +17,20 @@
         <x-toggle
             :label="__('Default')"
             lg
-            x-on:change="if($event.target.checked) $wire.leadStateForm.is_win = false; $wire.leadStateForm.is_loss = false"
+            x-on:change="if($event.target.checked) $wire.leadStateForm.is_won = false; $wire.leadStateForm.is_lost = false"
             wire:model.boolean="leadStateForm.is_default"
         />
         <x-toggle
-            :label="__('Is Win')"
+            :label="__('Is Won')"
             lg
-            x-on:change="if($event.target.checked) $wire.leadStateForm.is_default = false; $wire.leadStateForm.is_loss = false"
-            wire:model.boolean="leadStateForm.is_win"
+            x-on:change="if($event.target.checked) $wire.leadStateForm.is_default = false; $wire.leadStateForm.is_lost = false"
+            wire:model.boolean="leadStateForm.is_won"
         />
         <x-toggle
-            :label="__('Is Loss')"
+            :label="__('Is Lost')"
             lg
-            x-on:change="if($event.target.checked) $wire.leadStateForm.is_default = false; $wire.leadStateForm.is_win = false"
-            wire:model.boolean="leadStateForm.is_loss"
+            x-on:change="if($event.target.checked) $wire.leadStateForm.is_default = false; $wire.leadStateForm.is_won = false"
+            wire:model.boolean="leadStateForm.is_lost"
         />
     </div>
     <x-slot:footer>
@@ -39,12 +39,12 @@
             light
             flat
             :text="__('Cancel')"
-            x-on:click="$modalClose('{{ $this->modalName() }}')"
+            x-on:click="$modalClose('{{ $leadStateForm->modalName() }}')"
         />
         <x-button
             color="indigo"
             :text="__('Save')"
-            wire:click="save().then((success) => { if(success) $modalClose('{{ $this->modalName() }}')})"
+            wire:click="save().then((success) => { if(success) $modalClose('{{ $leadStateForm->modalName() }}')})"
         />
     </x-slot>
 </x-modal>

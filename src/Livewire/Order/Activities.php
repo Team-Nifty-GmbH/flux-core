@@ -3,9 +3,11 @@
 namespace FluxErp\Livewire\Order;
 
 use FluxErp\Livewire\Features\Activities as BaseActivities;
+use FluxErp\Models\Order;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Modelable;
 
 class Activities extends BaseActivities
@@ -15,7 +17,8 @@ class Activities extends BaseActivities
     #[Modelable]
     public int $modelId;
 
-    public string $modelType = \FluxErp\Models\Order::class;
+    #[Locked]
+    public string $modelType = Order::class;
 
     public function render(): View|Factory|Application
     {

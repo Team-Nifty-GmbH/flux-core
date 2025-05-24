@@ -209,7 +209,6 @@ class FluxServiceProvider extends ServiceProvider
             label: 'Sales',
             closure: function (): void {
                 Menu::register(route: 'sales.leads');
-                Menu::register(route: 'sales.opportunities');
             }
         );
 

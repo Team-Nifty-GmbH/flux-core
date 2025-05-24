@@ -29,10 +29,14 @@ class CreateLead extends FluxAction
         $lead->save();
 
         if ($tags) {
-            $lead->attachTags(resolve_static(Tag::class, 'query')->whereIntegerInRaw('id', $tags)->get());
+            $lead->attachTags(
+                resolve_static(Tag::class, 'query')
+                    ->whereIntegerInRaw('id', $tags)
+                    ->get()
+            );
         }
 
-        return $lead->fresh();
+        return $lead->refresh();
     }
 
     protected function prepareForValidation(): void
@@ -44,7 +48,7 @@ class CreateLead extends FluxAction
         if (
             resolve_static(LeadState::class, 'query')
                 ->whereKey($this->getData('lead_state_id'))
-                ->value('is_loss')
+                ->value('is_lost')
         ) {
             $this->rules['loss_reason'] = 'required|string|min:8';
         }

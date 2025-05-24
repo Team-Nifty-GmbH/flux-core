@@ -22,10 +22,8 @@ class Orders extends OrderList
             parent::getTableActions(),
             [
                 DataTableButton::make()
-                    ->icon('plus')
-                    ->color('indigo')
-                    ->text(__('New order'))
-                    ->wireClick('createOrder'),
+                    ->text(__('Balance Statement'))
+                    ->wireClick('$parent.openCreateDocumentsModal()'),
             ]
         );
     }

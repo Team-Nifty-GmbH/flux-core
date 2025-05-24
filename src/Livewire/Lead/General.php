@@ -27,7 +27,7 @@ class General extends Component
     {
         $this->isLoss = resolve_static(LeadState::class, 'query')
             ->whereKey($this->leadForm->lead_state_id)
-            ->value('is_loss') ?? false;
+            ->value('is_lost') ?? false;
     }
 
     public function render(): View

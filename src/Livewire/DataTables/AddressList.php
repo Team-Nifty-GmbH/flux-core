@@ -85,7 +85,7 @@ class AddressList extends BaseDataTable
                 ->color('indigo')
                 ->wireClick('createMailMessage'),
             DataTableButton::make()
-                ->text(__('Create leads'))
+                ->text(__('Create Leads'))
                 ->color('indigo')
                 ->wireClick('openLeadsModal')
                 ->when(fn () => resolve_static(CreateLead::class, 'canPerformAction', [false])),
@@ -116,13 +116,15 @@ class AddressList extends BaseDataTable
             } catch (ValidationException|UnauthorizedException $e) {
                 exception_to_notifications($e, $this);
 
-                return false;
+                continue;
             }
 
             $created++;
         }
 
-        $this->toast()->success(__(':count leads created', ['count' => $created]))->send();
+        $this->toast()
+            ->success(__(':count leads created', ['count' => $created]))
+            ->send();
 
         return true;
     }

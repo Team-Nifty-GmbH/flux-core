@@ -16,7 +16,7 @@ class DeleteLeadRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Lead::class),
+                app(ModelExists::class, ['model' => Lead::class]),
             ],
         ];
     }

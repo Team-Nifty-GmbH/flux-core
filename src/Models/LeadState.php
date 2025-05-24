@@ -25,8 +25,8 @@ class LeadState extends FluxModel
     {
         return [
             'is_default' => 'boolean',
-            'is_win' => 'boolean',
-            'is_loss' => 'boolean',
+            'is_won' => 'boolean',
+            'is_lost' => 'boolean',
         ];
     }
 

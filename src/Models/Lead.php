@@ -94,6 +94,11 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         return $this->belongsTo(Address::class);
     }
 
+    public function addressRecommendedBy(): BelongsTo
+    {
+        return $this->belongsTo(Address::class, 'recommended_by_address_id');
+    }
+
     public function contact(): HasOneThrough
     {
         return $this->hasOneThrough(Contact::class, Address::class);
@@ -148,9 +153,6 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
             'status' => $this->leadState()->value('name'),
             'invited' => [],
             'description' => $this->description,
-            //            'extendedProps' => [
-            //                'appendTitle' => $this->state->badge(),
-            //            ],
             'allDay' => true,
             'is_editable' => true,
             'is_invited' => false,

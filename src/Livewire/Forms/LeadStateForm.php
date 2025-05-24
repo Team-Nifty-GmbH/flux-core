@@ -19,9 +19,9 @@ class LeadStateForm extends FluxForm
 
     public bool $is_default = false;
 
-    public bool $is_loss = false;
+    public bool $is_lost = false;
 
-    public bool $is_win = false;
+    public bool $is_won = false;
 
     public ?string $name = null;
 

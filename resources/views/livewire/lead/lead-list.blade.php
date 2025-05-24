@@ -1,6 +1,6 @@
 <div>
     <x-modal
-        id="{{ $leadForm->modalName() }}"
+        :id="$leadForm->modalName()"
         x-on:open="$focusOn('lead-name')"
         persistent
     >
@@ -46,7 +46,6 @@
                 ]"
             />
             <x-select.styled
-                x-bind:readonly="!edit"
                 :label="__('Recommended by')"
                 wire:model="leadForm.recommended_by_address_id"
                 select="label:label|value:id"
@@ -86,14 +85,14 @@
         </div>
         <x-slot:footer>
             <x-button
+                :text="__('Cancel')"
                 color="secondary"
                 light
-                :text="__('Cancel')"
                 x-on:click="$modalClose('{{ $leadForm->modalName() }}')"
             />
             <x-button
-                color="indigo"
                 :text="__('Save')"
+                color="indigo"
                 wire:click="save().then((success) => {if(success) $modalClose('{{ $leadForm->modalName() }}');})"
             />
         </x-slot>

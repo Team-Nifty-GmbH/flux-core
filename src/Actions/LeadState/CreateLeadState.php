@@ -23,6 +23,6 @@ class CreateLeadState extends FluxAction
         $leadState = app(LeadState::class, ['attributes' => $this->getData()]);
         $leadState->save();
 
-        return $leadState->fresh();
+        return $leadState->refresh();
     }
 }

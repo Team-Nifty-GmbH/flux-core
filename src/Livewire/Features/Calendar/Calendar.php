@@ -300,7 +300,8 @@ class Calendar extends Component
             return $this->getCalendarEventsFromModelTypeQuery(
                 $calendarAttributes['modelType'],
                 $info['start'],
-                $info['end'], $calendarAttributes
+                $info['end'],
+                $calendarAttributes
             )
                 ->get()
                 ->map(fn (Model $model) => $model->toCalendarEvent($info))

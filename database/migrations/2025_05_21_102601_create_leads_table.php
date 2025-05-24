@@ -10,7 +10,7 @@ return new class() extends Migration
     {
         Schema::create('leads', function (Blueprint $table): void {
             $table->id();
-            $table->char('uuid', 36)->unique();
+            $table->char('uuid', 36);
             $table->foreignId('address_id')
                 ->nullable()
                 ->constrained('addresses')

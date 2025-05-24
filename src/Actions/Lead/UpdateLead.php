@@ -25,21 +25,21 @@ class UpdateLead extends FluxAction
     {
         $tags = Arr::pull($this->data, 'tags');
 
-        $updateLead = resolve_static(Lead::class, 'query')
+        $lead = resolve_static(Lead::class, 'query')
             ->whereKey($this->getData('id'))
             ->first();
-        $updateLead->fill($this->getData());
-        $updateLead->save();
+        $lead->fill($this->getData());
+        $lead->save();
 
         if (! is_null($tags)) {
-            $updateLead->syncTags(
+            $lead->syncTags(
                 resolve_static(Tag::class, 'query')
                     ->whereIntegerInRaw('id', $tags)
                     ->get()
             );
         }
 
-        return $updateLead->withoutRelations()->fresh();
+        return $lead->withoutRelations()->fresh();
     }
 
     protected function prepareForValidation(): void
@@ -52,7 +52,7 @@ class UpdateLead extends FluxAction
                             ->whereKey($this->getData('id'))
                             ->value('lead_state_id')
                 )
-                ->value('is_loss')
+                ->value('is_lost')
         ) {
             $this->rules['loss_reason'] = 'required|string|min:8';
         }

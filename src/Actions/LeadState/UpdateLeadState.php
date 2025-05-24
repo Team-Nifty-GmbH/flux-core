@@ -20,12 +20,12 @@ class UpdateLeadState extends FluxAction
 
     public function performAction(): LeadState
     {
-        $updateLeadState = resolve_static(LeadState::class, 'query')
+        $leadState = resolve_static(LeadState::class, 'query')
             ->whereKey($this->getData('id'))
             ->first();
-        $updateLeadState->fill($this->getData());
-        $updateLeadState->save();
+        $leadState->fill($this->getData());
+        $leadState->save();
 
-        return $updateLeadState->withoutRelations()->fresh();
+        return $leadState->withoutRelations()->fresh();
     }
 }

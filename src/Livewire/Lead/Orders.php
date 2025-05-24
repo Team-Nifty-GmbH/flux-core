@@ -38,7 +38,7 @@ class Orders extends OrderList
         parent::create();
     }
 
-    public function getBuilder(Builder $builder): Builder
+    protected function getBuilder(Builder $builder): Builder
     {
         return parent::getBuilder($builder)->where('lead_id', $this->leadForm->id);
     }
