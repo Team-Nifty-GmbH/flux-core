@@ -13,9 +13,12 @@ class MorphExists implements DataAwareRule, ValidationRule
 
     private string $modelAttribute;
 
-    public function __construct(string $modelAttribute = 'model_type')
+    private bool $withPrefix;
+
+    public function __construct(string $modelAttribute = 'model_type', bool $withPrefix = true)
     {
         $this->modelAttribute = $modelAttribute;
+        $this->withPrefix = $withPrefix;
     }
 
     public function setData($data): static
@@ -27,7 +30,10 @@ class MorphExists implements DataAwareRule, ValidationRule
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $prefix = strpos($attribute, '.') ? pathinfo($attribute, PATHINFO_FILENAME) . '.' : null;
+        $prefix = null;
+        if ($this->withPrefix) {
+            $prefix = strpos($attribute, '.') ? pathinfo($attribute, PATHINFO_FILENAME) . '.' : null;
+        }
 
         $model = data_get($this->data, $prefix . $this->modelAttribute);
 

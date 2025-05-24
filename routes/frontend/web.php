@@ -21,6 +21,7 @@ use FluxErp\Livewire\Contact\Contact;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\DataTables\AddressList;
 use FluxErp\Livewire\DataTables\CommissionList;
+use FluxErp\Livewire\DataTables\ContactList;
 use FluxErp\Livewire\DataTables\OrderPositionList;
 use FluxErp\Livewire\DataTables\PaymentRunList;
 use FluxErp\Livewire\DataTables\PurchaseInvoiceList;
@@ -135,8 +136,9 @@ Route::middleware('web')
 
                 Route::name('contacts.')->prefix('contacts')
                     ->group(function (): void {
-                        Route::get('/', AddressList::class)->name('contacts');
-                        Route::get('/{id?}', Contact::class)->where('id', '[0-9]+')->name('id?');
+                        Route::get('/contacts', ContactList::class)->name('contacts');
+                        Route::get('/contacts/{id?}', Contact::class)->where('id', '[0-9]+')->name('id?');
+                        Route::get('/addresses', AddressList::class)->name('addresses');
                         Route::get('/communications', CommunicationList::class)->name('communications');
                     });
                 Route::get(
