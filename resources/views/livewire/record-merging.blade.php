@@ -10,57 +10,54 @@
             <x-flux::table>
                 <x-slot:header>
                     <x-flux::table.row>
-                        <th></th>
-                        <th
-                            class="text-center"
-                            style="
-                                border-width: 1px;
-                                border-top: none;
-                                border-left: none;
-                            "
-                        >
-                            <span>{{ __('Id') }}</span>
+                        <th class="border border-l-0 border-t-0 text-center">
+                            <span>{{ __('Column') }}</span>
                         </th>
-                        <template x-for="column in $wire.columns">
+                        <th
+                            class="border border-r-0 border-t-0 text-center"
+                            x-show="$wire.mergeRecords.main_record.id"
+                            x-cloak
+                        >
+                            <span>
+                                {{ __('Main Record') }} (#
+                                <span
+                                    x-text="$wire.mergeRecords.main_record.id"
+                                ></span>
+                                )
+                            </span>
+                        </th>
+                        <template x-for="record in $wire.records">
                             <th
-                                class="text-center"
-                                style="
-                                    border-width: 1px;
-                                    border-top: none;
-                                    border-right: none;
-                                "
+                                class="border border-r-0 border-t-0 text-center"
+                                x-show="record.id !== $wire.mergeRecords.main_record.id"
+                                x-cloak
                             >
-                                <span x-text="column.label"></span>
+                                <div class="flex flex-col items-center gap-1">
+                                    <div class="flex items-center gap-2">
+                                        <x-checkbox
+                                            x-bind:value="record.id === $wire.mergeRecords.main_record.id"
+                                            wire:click="toggleRecord(record.id)"
+                                        />
+                                        <span>
+                                            {{ __('Record') }} #
+                                            <span x-text="record.id"></span>
+                                        </span>
+                                    </div>
+                                </div>
                             </th>
                         </template>
                     </x-flux::table.row>
                 </x-slot>
-                <x-flux::table.row
-                    class="h-16"
-                    x-show="$wire.mergeRecords.main_record.id"
-                    x-cloak
-                >
-                    <td style="border-width: 1px; border-left: none">
-                        <span class="font-bold">{{ __('Main Record') }}</span>
-                    </td>
-                    <td style="border-width: 1px">
-                        <div class="flex gap-x-2">
-                            <div class="flex items-center">
-                                <x-checkbox
-                                    x-bind:checked="$wire.mergeRecords.main_record.id"
-                                    x-bind:disabled="!$wire.mergeRecords.main_record.id"
-                                    wire:click="toggleRecord($wire.mergeRecords.main_record.id)"
-                                />
-                            </div>
-                            <span
-                                x-text="$wire.mergeRecords.main_record.id"
-                            ></span>
-                        </div>
-                    </td>
-                    <template x-for="column in $wire.columns">
+
+                <template x-for="column in $wire.columns">
+                    <x-flux::table.row class="h-16">
+                        <td class="border border-b-0 border-l-0 font-bold">
+                            <span x-text="column.label"></span>
+                        </td>
                         <td
-                            class="text-center"
-                            style="border-width: 1px; border-right: none"
+                            class="border border-b-0 border-r-0 text-center"
+                            x-show="$wire.mergeRecords.main_record.id"
+                            x-cloak
                         >
                             <template
                                 x-if="$wire.mainRecord[column.name] === true"
@@ -115,39 +112,11 @@
                                 ></span>
                             </div>
                         </td>
-                    </template>
-                </x-flux::table.row>
-                <template x-for="record in $wire.records">
-                    <x-flux::table.row
-                        class="h-16"
-                        x-show="record.id !== $wire.mergeRecords.main_record.id"
-                        x-cloak
-                    >
-                        <td></td>
-                        <td
-                            style="
-                                border-width: 1px;
-                                border-left: none;
-                                border-bottom: none;
-                            "
-                        >
-                            <div class="flex gap-2">
-                                <div class="flex items-center">
-                                    <x-checkbox
-                                        x-bind:value="record.id === $wire.mergeRecords.main_record.id"
-                                        wire:click="toggleRecord(record.id)"
-                                    />
-                                </div>
-                                <span x-text="record.id"></span>
-                            </div>
-                        </td>
-                        <template x-for="column in $wire.columns">
+                        <template x-for="record in $wire.records">
                             <td
-                                style="
-                                    border-width: 1px;
-                                    border-right: none;
-                                    border-bottom: none;
-                                "
+                                class="border border-b-0 border-r-0"
+                                x-show="record.id !== $wire.mergeRecords.main_record.id"
+                                x-cloak
                             >
                                 <div class="flex justify-center gap-x-2">
                                     <div class="flex items-center">
