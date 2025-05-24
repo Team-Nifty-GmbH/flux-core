@@ -11,11 +11,19 @@ trait Searchable
         BaseSearchable::toSearchableArray as toSearchableArrayBase;
     }
 
+    public static function scoutIndexSettings(): array
+    {
+        return config(
+            'scout.' . config('scout.driver') . '.index-settings.' . static::class,
+            []
+        );
+    }
+
     public function toSearchableArray(): array
     {
         return Arr::sortByPattern(
             $this->toSearchableArrayBase(),
-            config('scout.sorted_searchable_keys.' . morph_alias(static::class), []),
+            config('scout.sorted_searchable_keys.' . static::class, []),
         );
     }
 }

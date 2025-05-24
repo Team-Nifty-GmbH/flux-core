@@ -3,9 +3,9 @@
 namespace FluxErp\Console\Commands\Scout;
 
 use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Laravel\Scout\Console\ImportCommand as BaseImportCommand;
 use Laravel\Scout\Searchable;
-use Spatie\ModelInfo\ModelFinder;
 
 class ImportCommand extends BaseImportCommand
 {
@@ -14,7 +14,7 @@ class ImportCommand extends BaseImportCommand
      *
      * @var string
      */
-    protected $signature = 'scout:import
+    protected $signature = 'flux-scout:import
             {model? : Class name of model to bulk import}
             {--c|chunk= : The number of records to import at a time (Defaults to configuration value: `scout.chunk.searchable`)}';
 
@@ -23,20 +23,22 @@ class ImportCommand extends BaseImportCommand
      */
     public function handle(Dispatcher $events): int
     {
-        ModelFinder::all(flux_path('src/Models'), flux_path('src'), 'FluxErp')->merge(
-            ModelFinder::all()
-        );
         $models = (array) $this->argument('model') ?:
-            array_values(
-                ModelFinder::all(flux_path('src/Models'), flux_path('src'), 'FluxErp')
-                    ->merge(ModelFinder::all())
-                    ->filter(fn ($model) => in_array(Searchable::class, class_uses_recursive($model)))
-                    ->unique()
-                    ->toArray()
-            );
+            collect(Relation::morphMap())
+                ->map(fn (string $class) => resolve_static($class, 'class'))
+                ->filter(fn (string $class) => in_array(Searchable::class, class_uses_recursive($class)))
+                ->unique()
+                ->values()
+                ->toArray();
 
         foreach ($models as $model) {
-            $this->call(BaseImportCommand::class, ['model' => $model]);
+            $this->call(
+                BaseImportCommand::class,
+                [
+                    'model' => $model,
+                    '--chunk' => $this->option('chunk'),
+                ]
+            );
         }
 
         return 0;
