@@ -1032,6 +1032,7 @@
     "media.{media}.{filename}.get": "Medien anzeigen",
     "Merge": "Zusammenführen",
     "Merge Records": "Datensätze",
+    "Merge Records|Are you sure? This cannot be made undone!|Cancel|Confirm": "Datensätze zusammenführen|Sind Sie sicher? Dies kann nicht rückgängig gemacht werden!|Abbrechen|Bestätigen",
     "Message": "Nachricht",
     "Message Id": "Nachrichten-ID",
     "Message Uid": "Nachrichten-UID",

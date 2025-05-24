@@ -164,7 +164,8 @@ class MergeRecords extends FluxAction
         $model = morphed_model($this->getData('model_type'));
         resolve_static($model, 'query')
             ->whereKey($this->getData('merge_records.*.id'))
-            ->delete();
+            ->get()
+            ->each(fn (Model $model) => $model->delete());
 
         return $mainRecord->withoutRelations()->refresh();
     }

@@ -37,7 +37,7 @@ class ContactsTest extends BaseSetup
     {
         $this->contact->delete();
 
-        $this->user->givePermissionTo(Permission::findOrCreate('contacts.{id?}.get', 'web'));
+        $this->user->givePermissionTo(Permission::findOrCreate('contacts.contacts.{id?}.get', 'web'));
 
         $this->actingAs($this->user, 'web')->get('/contacts/' . $this->contact->id)
             ->assertStatus(404);
@@ -45,55 +45,55 @@ class ContactsTest extends BaseSetup
 
     public function test_contacts_id_no_user(): void
     {
-        $this->get('/contacts/' . $this->contact->id)
+        $this->get('/contacts/contacts/' . $this->contact->id)
             ->assertStatus(302)
             ->assertRedirect(route('login'));
     }
 
     public function test_contacts_id_page(): void
     {
-        $this->user->givePermissionTo(Permission::findOrCreate('contacts.{id?}.get', 'web'));
+        $this->user->givePermissionTo(Permission::findOrCreate('contacts.contacts.{id?}.get', 'web'));
 
-        $this->actingAs($this->user, 'web')->get('/contacts/' . $this->contact->id)
+        $this->actingAs($this->user, 'web')->get('/contacts/contacts/' . $this->contact->id)
             ->assertStatus(200);
     }
 
     public function test_contacts_id_page_without_id(): void
     {
-        $this->user->givePermissionTo(Permission::findOrCreate('contacts.{id?}.get', 'web'));
+        $this->user->givePermissionTo(Permission::findOrCreate('contacts.contacts.{id?}.get', 'web'));
 
-        $this->actingAs($this->user, 'web')->get('/contacts/0')
+        $this->actingAs($this->user, 'web')->get('/contacts/contacts/0')
             ->assertStatus(404);
     }
 
     public function test_contacts_id_without_permission(): void
     {
-        Permission::findOrCreate('contacts.{id?}.get', 'web');
+        Permission::findOrCreate('contacts.contacts.{id?}.get', 'web');
 
-        $this->actingAs($this->user, 'web')->get('/contacts/' . $this->contact->id)
+        $this->actingAs($this->user, 'web')->get('/contacts/contacts/' . $this->contact->id)
             ->assertStatus(403);
     }
 
     public function test_contacts_no_user(): void
     {
-        $this->get('/contacts')
+        $this->get('/contacts/contacts')
             ->assertStatus(302)
             ->assertRedirect(route('login'));
     }
 
     public function test_contacts_page(): void
     {
-        $this->user->givePermissionTo(Permission::findOrCreate('contacts.get', 'web'));
+        $this->user->givePermissionTo(Permission::findOrCreate('contacts.contacts.get', 'web'));
 
-        $this->actingAs($this->user, 'web')->get('/contacts')
+        $this->actingAs($this->user, 'web')->get('/contacts/contacts')
             ->assertStatus(200);
     }
 
     public function test_contacts_without_permission(): void
     {
-        Permission::findOrCreate('contacts.get', 'web');
+        Permission::findOrCreate('contacts.contacts.get', 'web');
 
-        $this->actingAs($this->user, 'web')->get('/contacts')
+        $this->actingAs($this->user, 'web')->get('/contacts/contacts')
             ->assertStatus(403);
     }
 }
