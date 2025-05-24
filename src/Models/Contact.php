@@ -265,6 +265,8 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
 
     public function toSearchableArray(): array
     {
+        $this->refresh();
+
         return array_merge(
             $this->mainAddress->toSearchableArray(),
             $this->toArray(),
