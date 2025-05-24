@@ -24,6 +24,11 @@ class DashboardTest extends BaseSetup
         {
             use Widgetable;
 
+            public static function dashboardComponent(): string
+            {
+                return self::class;
+            }
+
             public function render(): string
             {
                 return <<<'blade'
@@ -40,6 +45,11 @@ class DashboardTest extends BaseSetup
         $this->components[] = new class() extends Component
         {
             use Widgetable;
+
+            public static function dashboardComponent(): string
+            {
+                return self::class;
+            }
 
             public function render(): string
             {
