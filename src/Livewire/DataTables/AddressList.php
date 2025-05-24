@@ -3,8 +3,10 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Actions\Contact\CreateContact;
+use FluxErp\Actions\Lead\CreateLead;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Livewire\Forms\ContactForm;
+use FluxErp\Livewire\Forms\LeadForm;
 use FluxErp\Models\Address;
 use FluxErp\Models\Media;
 use FluxErp\Traits\Livewire\CreatesDocuments;
@@ -44,6 +46,8 @@ class AddressList extends BaseDataTable
 
     public bool $isSelectable = true;
 
+    public LeadForm $leadForm;
+
     public bool $showMap = false;
 
     protected ?string $includeBefore = 'flux::livewire.contact.contacts';
@@ -81,9 +85,15 @@ class AddressList extends BaseDataTable
                 ->text(__('Send Mail'))
                 ->color('indigo')
                 ->wireClick('createMailMessage'),
+            DataTableButton::make()
+                ->text(__('Create Leads'))
+                ->color('indigo')
+                ->wireClick('openLeadsModal')
+                ->when(fn () => resolve_static(CreateLead::class, 'canPerformAction', [false])),
         ];
     }
 
+    #[Renderless]
     public function createDocuments(): null|MediaStream|Media
     {
         $response = $this->createDocumentFromItems($this->getSelectedModels(), true);
@@ -93,6 +103,34 @@ class AddressList extends BaseDataTable
         return $response;
     }
 
+    #[Renderless]
+    public function createLeads(): bool
+    {
+        $created = 0;
+        foreach ($this->getSelectedModelsQuery()->with('contact:id,agent_id')->get(['id', 'contact_id']) as $address) {
+            $leadForm = clone $this->leadForm;
+            $leadForm->address_id = $address->getKey();
+            $leadForm->user_id = $address->contact?->agent_id ?? auth()->id();
+
+            try {
+                $leadForm->save();
+            } catch (ValidationException|UnauthorizedException $e) {
+                exception_to_notifications($e, $this);
+
+                continue;
+            }
+
+            $created++;
+        }
+
+        $this->toast()
+            ->success(__(':count leads created', ['count' => $created]))
+            ->send();
+
+        return true;
+    }
+
+    #[Renderless]
     public function createMailMessage(): void
     {
         $mailMessages = [];
@@ -113,6 +151,9 @@ class AddressList extends BaseDataTable
 
         $this->dispatch('createFromSession', key: $sessionKey)->to('edit-mail');
     }
+
+    #[Renderless]
+    public function evaluate(): void {}
 
     #[Renderless]
     public function loadData(): void
@@ -151,6 +192,13 @@ class AddressList extends BaseDataTable
             ->get()
             ->toMap()
             ->toArray();
+    }
+
+    #[Renderless]
+    public function openLeadsModal(): void
+    {
+        $this->leadForm->reset();
+        $this->leadForm->openModal();
     }
 
     #[Renderless]

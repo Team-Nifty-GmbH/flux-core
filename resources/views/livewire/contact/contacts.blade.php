@@ -1,9 +1,66 @@
 @use('\FluxErp\Enums\SalutationEnum')
 <div>
     {{ $this->renderCreateDocumentsModal() }}
-    @can('action.contact.create')
-        @section('modals')
-        <x-modal id="new-contact-modal" x-on:open="$focusOn('contact-company')">
+    @section('modals')
+    @canAction(\FluxErp\Actions\Lead\CreateLead::class)
+        <x-modal
+            :id="$leadForm->modalName()"
+            x-on:open="$focusOn('lead-name')"
+            persistent
+        >
+            <div class="flex flex-col gap-4">
+                <x-input
+                    id="lead-name"
+                    :label="__('Name')"
+                    wire:model="leadForm.name"
+                />
+                <x-textarea
+                    :label="__('Description')"
+                    wire:model="leadForm.description"
+                />
+                <x-rating
+                    wire:model.number="leadForm.score"
+                    :text="__('Score')"
+                    :quantity="5"
+                    position="right"
+                />
+                @if (is_null(resolve_static(\FluxErp\Models\LeadState::class, 'default')?->probability_percentage))
+                    <x-range
+                        wire:model.number="leadForm.probability_percentage"
+                        :hint="__('Probability to win this lead…')"
+                    >
+                        <x-slot:label>
+                            <span
+                                x-cloak
+                                x-show="$wire.leadForm.probability_percentage !== null"
+                                x-text="$wire.leadForm.probability_percentage + '%'"
+                            ></span>
+                        </x-slot>
+                    </x-range>
+                @endif
+            </div>
+            <x-slot:footer>
+                <x-button
+                    color="secondary"
+                    light
+                    :text="__('Cancel')"
+                    x-on:click="$modalClose('{{ $leadForm->modalName() }}')"
+                />
+                <x-button
+                    color="indigo"
+                    :text="__('Save')"
+                    wire:click="createLeads().then((success) => {if(success) $modalClose('{{ $leadForm->modalName() }}');})"
+                />
+            </x-slot>
+        </x-modal>
+    @endcanAction
+
+    @canAction(\FluxErp\Actions\Contact\CreateContact::class)
+        <x-modal
+            id="new-contact-modal"
+            x-on:open="$focusOn('contact-company')"
+            persistent
+        >
             @if (resolve_static(\FluxErp\Models\Client::class, 'query')->count() > 1)
                 <x-select.styled
                     wire:model="contact.client_id"
@@ -222,8 +279,9 @@
                 />
             </x-slot>
         </x-modal>
-        @show
-    @endcan
+    @endcanAction
+
+    @show
 
     @section('map')
     <div>

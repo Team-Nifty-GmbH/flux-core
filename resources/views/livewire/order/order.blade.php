@@ -796,6 +796,44 @@
                                 />
                             @endif
 
+                            <x-select.styled
+                                wire:model="order.lead_id"
+                                select="label:label|value:id"
+                                unfiltered
+                                :request="[
+                                    'url' => route('search', \FluxErp\Models\Lead::class),
+                                    'method' => 'POST',
+                                    'params' => [
+                                        'searchFields' => [
+                                            'name',
+                                        ],
+                                        'select' => [
+                                            'name',
+                                            'id',
+                                        ],
+                                        'whereIn' => [
+                                            [
+                                                'address_id',
+                                                resolve_static(\FluxErp\Models\Address::class, 'query')
+                                                    ->where('contact_id', $order->contact_id)
+                                                    ->pluck('id')
+                                                    ->toArray(),
+                                            ],
+                                        ],
+                                    ],
+                                ]"
+                            >
+                                <x-slot:label>
+                                    <x-link
+                                        icon="link"
+                                        :text="__('Lead')"
+                                        href="#"
+                                        wire:navigate
+                                        x-bind:href="$wire.order.lead_id ? '{{ route('sales.lead.id', ':id') }}'.replace(':id', $wire.order.lead_id) : '#'"
+                                    />
+                                </x-slot>
+                            </x-select.styled>
+
                             @if (count($languages) > 1)
                                 <x-select.styled
                                     :label="__('Language')"

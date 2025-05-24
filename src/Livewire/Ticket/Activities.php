@@ -3,8 +3,11 @@
 namespace FluxErp\Livewire\Ticket;
 
 use FluxErp\Livewire\Features\Activities as BaseActivities;
+use FluxErp\Models\Ticket;
+use Livewire\Attributes\Locked;
 
 class Activities extends BaseActivities
 {
-    public string $modelType = \FluxErp\Models\Ticket::class;
+    #[Locked]
+    public string $modelType = Ticket::class;
 }

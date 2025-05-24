@@ -1,4 +1,4 @@
-@use('\FluxErp\Enums\SalutationEnum')
+@use(\FluxErp\Enums\SalutationEnum)
 
 @props([
     'onlyPostal' => false,

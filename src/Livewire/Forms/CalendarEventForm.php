@@ -62,6 +62,8 @@ class CalendarEventForm extends FluxForm
 
     public ?string $start = null;
 
+    public ?string $status = null;
+
     public ?string $title = null;
 
     public bool $was_repeatable = false;

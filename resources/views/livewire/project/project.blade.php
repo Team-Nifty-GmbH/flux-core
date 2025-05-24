@@ -79,14 +79,15 @@
                 :text="__('Save')"
             />
             <x-button
+                color="secondary"
+                light
+                flat
+                :text="__('Cancel')"
                 x-cloak
-                color="indigo"
                 loading="save"
-                x-cloak
                 x-show="edit"
                 class="w-full"
                 x-on:click="edit = false; $wire.resetForm();"
-                :text="__('Cancel')"
             />
         </div>
     </div>

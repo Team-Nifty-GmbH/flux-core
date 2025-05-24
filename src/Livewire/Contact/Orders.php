@@ -18,27 +18,32 @@ class Orders extends OrderList
 
     protected function getTableActions(): array
     {
-        return [
-            DataTableButton::make()
-                ->text(__('Balance Statement'))
-                ->wireClick('$parent.openCreateDocumentsModal()'),
-            DataTableButton::make()
-                ->icon('plus')
-                ->color('indigo')
-                ->text(__('New order'))
-                ->wireClick('createOrder'),
-        ];
+        return array_merge(
+            parent::getTableActions(),
+            [
+                DataTableButton::make()
+                    ->text(__('Balance Statement'))
+                    ->wireClick('$parent.openCreateDocumentsModal()'),
+            ]
+        );
     }
 
     #[Renderless]
-    public function createOrder(): void
+    public function create(): void
     {
-        $this->order->reset();
         $this->order->contact_id = $this->contact->id;
-
-        $this->js(<<<'JS'
-            $modalOpen('create-order-modal');
+        $contactId = $this->contact->id;
+        $this->js(<<<JS
+            \$tallstackuiSelect('invoice-address-id').mergeRequestParams({
+                where: [['contact_id', '=', $contactId]],
+            })
+            \$tallstackuiSelect('delivery-address-id').mergeRequestParams({
+                where: [['contact_id', '=', $contactId]],
+            })
         JS);
+        $this->fetchContactData();
+
+        parent::create();
     }
 
     #[Renderless]

@@ -29,6 +29,8 @@ use FluxErp\Livewire\DataTables\TicketList;
 use FluxErp\Livewire\DataTables\WorkTimeList;
 use FluxErp\Livewire\Features\Calendar\Calendar;
 use FluxErp\Livewire\InstallWizard;
+use FluxErp\Livewire\Lead\Lead;
+use FluxErp\Livewire\Lead\LeadList;
 use FluxErp\Livewire\Mail\Mail;
 use FluxErp\Livewire\Media\Media as MediaGrid;
 use FluxErp\Livewire\Order\Order;
@@ -55,6 +57,7 @@ use FluxErp\Livewire\Settings\FailedJobs;
 use FluxErp\Livewire\Settings\Industries;
 use FluxErp\Livewire\Settings\LanguageLines;
 use FluxErp\Livewire\Settings\Languages;
+use FluxErp\Livewire\Settings\LeadStates;
 use FluxErp\Livewire\Settings\LedgerAccounts;
 use FluxErp\Livewire\Settings\Logs;
 use FluxErp\Livewire\Settings\MailAccounts;
@@ -154,7 +157,15 @@ Route::middleware('web')
                 )
                     ->name('address.id');
 
-                Route::name('orders.')->prefix('orders')
+                Route::name('sales.')
+                    ->prefix('sales')
+                    ->group(function (): void {
+                        Route::get('/leads', LeadList::class)->name('leads');
+                        Route::get('/leads/{id}', Lead::class)->name('lead.id');
+                    });
+
+                Route::name('orders.')
+                    ->prefix('orders')
                     ->group(function (): void {
                         Route::get('/list', OrderList::class)->name('orders');
                         Route::get('/list/{orderType}', OrderListByOrderType::class)->name('order-type');
@@ -210,6 +221,7 @@ Route::middleware('web')
                         Route::get('/failed-jobs', FailedJobs::class)->name('failed-jobs');
                         Route::get('/industries', Industries::class)->name('industries');
                         Route::get('/languages', Languages::class)->name('languages');
+                        Route::get('/lead-states', LeadStates::class)->name('lead-states');
                         Route::get('/ledger-accounts', LedgerAccounts::class)->name('ledger-accounts');
                         Route::get('/logs', Logs::class)->name('logs');
                         Route::get('/mail-accounts', MailAccounts::class)->name('mail-accounts');
