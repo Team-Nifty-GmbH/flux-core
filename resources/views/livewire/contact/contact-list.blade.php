@@ -1,6 +1,5 @@
 @use('\FluxErp\Enums\SalutationEnum')
 <div>
-
     @section('modals')
     @canAction(\FluxErp\Actions\Contact\CreateContact::class)
         <x-modal
