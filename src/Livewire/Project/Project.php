@@ -100,9 +100,14 @@ class Project extends Component
     public function getTabs(): array
     {
         return [
-            TabButton::make('project.general')->text(__('General')),
-            TabButton::make('project.comments')->text(__('Comments')),
-            TabButton::make('project.statistics')->text(__('Statistics')),
+            TabButton::make('project.general')
+                ->text(__('General')),
+            TabButton::make('project.comments')
+                ->text(__('Comments')),
+            TabButton::make('project.dashboard')
+                ->isLivewireComponent()
+                ->wireModel('project.id')
+                ->text(__('Dashboard')),
         ];
     }
 

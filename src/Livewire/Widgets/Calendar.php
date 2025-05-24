@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\Features\Calendar\Calendar as BaseCalendar;
 use FluxErp\Traits\Widgetable;
 use Illuminate\Support\Arr;
@@ -19,6 +20,11 @@ class Calendar extends BaseCalendar
 
     #[Locked]
     public bool $showInvites = false;
+
+    public static function dashboardComponent(): string
+    {
+        return Dashboard::class;
+    }
 
     public static function getDefaultHeight(): int
     {

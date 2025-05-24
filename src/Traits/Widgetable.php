@@ -7,6 +7,8 @@ use Illuminate\Support\Str;
 
 trait Widgetable
 {
+    abstract public static function dashboardComponent(): string;
+
     public static function getLabel(): string
     {
         if (app()->runningInConsole()) {

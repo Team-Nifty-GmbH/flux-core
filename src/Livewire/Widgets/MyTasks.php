@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\States\Task\TaskState;
 use FluxErp\Traits\Widgetable;
 use Illuminate\Contracts\View\Factory;
@@ -11,6 +12,11 @@ use Livewire\Component;
 class MyTasks extends Component
 {
     use Widgetable;
+
+    public static function dashboardComponent(): string
+    {
+        return Dashboard::class;
+    }
 
     public static function getDefaultHeight(): int
     {

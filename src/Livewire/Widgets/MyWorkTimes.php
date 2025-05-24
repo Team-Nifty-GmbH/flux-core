@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Widgets;
 
 use Carbon\Carbon;
 use FluxErp\Enums\TimeFrameEnum;
+use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Models\WorkTime;
 use FluxErp\Models\WorkTimeType;
 use FluxErp\Support\Metrics\Charts\Bar;
@@ -38,6 +39,11 @@ class MyWorkTimes extends BarChart
 
     #[Locked]
     public ?int $userId = null;
+
+    public static function dashboardComponent(): string
+    {
+        return Dashboard::class;
+    }
 
     public function mount(): void
     {

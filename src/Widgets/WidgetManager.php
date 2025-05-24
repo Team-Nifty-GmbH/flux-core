@@ -134,6 +134,7 @@ class WidgetManager
 
         $this->widgets[$name] = [
             'component_name' => $widget,
+            'dashboard_component' => $componentClass::dashboardComponent(),
             'label' => $componentClass::getLabel(),
             'class' => $componentClass,
             'defaultWidth' => method_exists($componentClass, 'getDefaultWidth')

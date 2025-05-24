@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Widgets;
 
 use FluxErp\Contracts\HasWidgetOptions;
 use FluxErp\Livewire\Accounting\PaymentReminder;
+use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\Order\OrderList;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Order;
@@ -18,6 +19,11 @@ use TeamNiftyGmbH\DataTable\Helpers\SessionFilter;
 class Outstanding extends ValueBox implements HasWidgetOptions
 {
     public bool $shouldBePositive = false;
+
+    public static function dashboardComponent(): string
+    {
+        return Dashboard::class;
+    }
 
     #[Renderless]
     public function calculateSum(): void

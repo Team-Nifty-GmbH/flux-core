@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Widgets;
 
 use FluxErp\Enums\GrowthRateTypeEnum;
 use FluxErp\Enums\TimeFrameEnum;
+use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
@@ -17,6 +18,11 @@ use Livewire\Attributes\Renderless;
 class TopProductsByRevenue extends ValueList
 {
     use IsTimeFrameAwareWidget;
+
+    public static function dashboardComponent(): string
+    {
+        return Dashboard::class;
+    }
 
     #[Renderless]
     public function calculateList(): void

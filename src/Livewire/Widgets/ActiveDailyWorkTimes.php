@@ -2,11 +2,17 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Models\WorkTime;
 use FluxErp\Support\Widgets\ValueList;
 
 class ActiveDailyWorkTimes extends ValueList
 {
+    public static function dashboardComponent(): string
+    {
+        return Dashboard::class;
+    }
+
     public function calculateList(): void
     {
         $query = resolve_static(WorkTime::class, 'query')

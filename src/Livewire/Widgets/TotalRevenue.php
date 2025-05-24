@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\Widgets;
 
 use FluxErp\Enums\TimeFrameEnum;
+use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Models\Order;
 use FluxErp\Support\Metrics\Charts\Line;
 use FluxErp\Support\Metrics\Value;
@@ -15,6 +16,11 @@ use Livewire\Attributes\Renderless;
 class TotalRevenue extends LineChart
 {
     use IsTimeFrameAwareWidget, MoneyChartFormattingTrait, Widgetable;
+
+    public static function dashboardComponent(): string
+    {
+        return Dashboard::class;
+    }
 
     #[Renderless]
     public function calculateByTimeFrame(): void
