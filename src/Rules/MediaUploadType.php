@@ -4,22 +4,22 @@ namespace FluxErp\Rules;
 
 use Closure;
 use Illuminate\Contracts\Validation\DataAwareRule;
-use Illuminate\Contracts\Validation\InvokableRule;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
 
-class MediaUploadType implements DataAwareRule, InvokableRule
+class MediaUploadType implements DataAwareRule, ValidationRule
 {
     protected array $data;
 
-    /**
-     * Run the validation rule.
-     *
-     * @param  string  $attribute
-     * @param  mixed  $value
-     * @param  Closure(string): \Illuminate\Translation\PotentiallyTranslatedString  $fail
-     */
-    public function __invoke($attribute, $value, $fail): void
+    public function setData(array $data): static
+    {
+        $this->data = $data;
+
+        return $this;
+    }
+
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         $method = 'addMediaFrom' . ucfirst(strtolower($value));
 
@@ -37,6 +37,8 @@ class MediaUploadType implements DataAwareRule, InvokableRule
             && ! method_exists(app($modelClass), $method)
         ) {
             $fail(':input is not a valid :attribute.')->translate();
+
+            return;
         }
 
         $valid = match (strtolower($value)) {
@@ -51,15 +53,5 @@ class MediaUploadType implements DataAwareRule, InvokableRule
         if (! $valid) {
             $fail(sprintf('Media is not a valid %s.', $value))->translate();
         }
-    }
-
-    /**
-     * @return MediaUploadType|$this
-     */
-    public function setData($data): MediaUploadType|static
-    {
-        $this->data = $data;
-
-        return $this;
     }
 }
