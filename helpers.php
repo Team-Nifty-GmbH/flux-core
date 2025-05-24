@@ -202,6 +202,20 @@ if (! function_exists('diff_percentage')) {
     }
 }
 
+if (! function_exists('percentage_of')) {
+    function percentage_of(string|float|int|null $total, string|float|int|null $part): string
+    {
+        $total ??= '0';
+        $part ??= '0';
+
+        if (bccomp($total, 0) === 0) {
+            return '0';
+        }
+
+        return bcround(bcmul(bcdiv($part, $total, 9), 100, 9), 4);
+    }
+}
+
 if (! function_exists('event_subscribers')) {
     function event_subscribers(
         string $event,
