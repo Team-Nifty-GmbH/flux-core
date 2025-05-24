@@ -278,6 +278,7 @@ class FluxServiceProvider extends ServiceProvider
             label: 'Settings',
             order: 9999,
             closure: function (): void {
+                Menu::register(route: 'settings.system');
                 Menu::register(route: 'settings.additional-columns');
                 Menu::register(route: 'settings.address-types');
                 Menu::register(route: 'settings.contact-origins');

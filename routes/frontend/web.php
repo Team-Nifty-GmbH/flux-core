@@ -73,6 +73,7 @@ use FluxErp\Livewire\Settings\QueueMonitor;
 use FluxErp\Livewire\Settings\Scheduling;
 use FluxErp\Livewire\Settings\SerialNumberRanges;
 use FluxErp\Livewire\Settings\Settings;
+use FluxErp\Livewire\Settings\System;
 use FluxErp\Livewire\Settings\Tags;
 use FluxErp\Livewire\Settings\TicketTypes;
 use FluxErp\Livewire\Settings\Tokens;
@@ -225,6 +226,7 @@ Route::middleware('web')
                         Route::get('/queue-monitor', QueueMonitor::class)->name('queue-monitor');
                         Route::get('/scheduling', Scheduling::class)->name('scheduling');
                         Route::get('/serial-number-ranges', SerialNumberRanges::class)->name('serial-number-ranges');
+                        Route::get('/system', System::class)->name('system');
                         Route::get('/tags', Tags::class)->name('tags');
                         Route::get('/ticket-types', TicketTypes::class)->name('ticket-types');
                         Route::get('/tokens', Tokens::class)->name('tokens');
