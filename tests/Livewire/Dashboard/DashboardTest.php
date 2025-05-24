@@ -24,6 +24,11 @@ class DashboardTest extends BaseSetup
         {
             use Widgetable;
 
+            public static function dashboardComponent(): string
+            {
+                return self::class;
+            }
+
             public function render(): string
             {
                 return <<<'blade'
@@ -40,6 +45,11 @@ class DashboardTest extends BaseSetup
         $this->components[] = new class() extends Component
         {
             use Widgetable;
+
+            public static function dashboardComponent(): string
+            {
+                return self::class;
+            }
 
             public function render(): string
             {
@@ -58,6 +68,7 @@ class DashboardTest extends BaseSetup
             'widgetable_type' => morph_alias(User::class),
             'widgetable_id' => $this->user->id,
             'component_name' => 'sample-component',
+            'dashboard_component' => data_get($this->components, '0')::dashboardComponent(),
             'name' => 'Widget 1',
             'width' => 2,
             'height' => 1,

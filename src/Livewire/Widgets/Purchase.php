@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Order;
 use FluxErp\Support\Metrics\Value;
@@ -15,6 +16,11 @@ class Purchase extends ValueBox
     use IsTimeFrameAwareWidget;
 
     public bool $shouldBePositive = false;
+
+    public static function dashboardComponent(): string
+    {
+        return Dashboard::class;
+    }
 
     #[Renderless]
     public function calculateSum(): void

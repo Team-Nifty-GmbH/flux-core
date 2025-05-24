@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\Widgets;
 
 use FluxErp\Contracts\HasWidgetOptions;
+use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\Order\OrderList;
 use FluxErp\Models\Order;
 use FluxErp\States\Order\DeliveryState\Open;
@@ -15,6 +16,11 @@ use TeamNiftyGmbH\DataTable\Helpers\SessionFilter;
 class OpenDeliveries extends ValueBox implements HasWidgetOptions
 {
     public bool $shouldBePositive = false;
+
+    public static function dashboardComponent(): string
+    {
+        return Dashboard::class;
+    }
 
     #[Renderless]
     public function calculateSum(): void

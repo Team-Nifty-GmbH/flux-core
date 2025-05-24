@@ -1,59 +1,64 @@
 @use('FluxErp\Enums\TimeFrameEnum')
 <div class="flex flex-col gap-2 md:flex-row">
-    <div
-        x-cloak
-        x-show="!editGrid"
-        class="flex flex-col items-center gap-2 text-sm md:flex-row"
-    >
-        <x-select.styled
-            class="p-2"
-            wire:model.live="params.timeFrame"
-            required
-            :options="TimeFrameEnum::valuesLocalized()"
-        />
+    @if ($hasTimeSelector)
         <div
-            class="flex min-w-96 flex-col items-center gap-2 md:flex-row"
-            x-cloak
-            x-show="$wire.params.timeFrame === 'Custom'"
-        >
-            <x-date wire:model.live="params.start" :without-time="true" />
-            <div>
-                <span class="px-2">{{ __('Till') }}</span>
-            </div>
-            <x-date wire:model.live="params.end" :without-time="true" />
-        </div>
-    </div>
-    <div class="flex flex-col items-center gap-2 md:flex-row">
-        <x-button
-            color="secondary"
-            light
             x-cloak
             x-show="!editGrid"
-            x-on:click="isLoading ? pendingMessage : editGridMode(true)"
-            icon="pencil"
-            class="flex-shrink-0"
-        />
-        <div x-cloak x-show="editGrid" class="flex gap-2">
+            class="flex flex-col items-center gap-2 text-sm md:flex-row"
+        >
+            <x-select.styled
+                class="p-2"
+                wire:model.live="params.timeFrame"
+                required
+                :options="TimeFrameEnum::valuesLocalized()"
+            />
+            <div
+                class="flex min-w-96 flex-col items-center gap-2 md:flex-row"
+                x-cloak
+                x-show="$wire.params.timeFrame === 'Custom'"
+            >
+                <x-date wire:model.live="params.start" :without-time="true" />
+                <div>
+                    <span class="px-2">{{ __('Till') }}</span>
+                </div>
+                <x-date wire:model.live="params.end" :without-time="true" />
+            </div>
+        </div>
+    @endif
+
+    @if ($canEdit)
+        <div class="flex flex-col items-center gap-2 md:flex-row">
             <x-button
                 color="secondary"
                 light
-                x-on:click="$modalOpen('widget-list')"
-                class="flex-shrink-0"
-                :text="__('Add')"
-            />
-            <x-button
-                color="indigo"
-                x-on:click="isLoading ? pendingMessage : save"
-                :text="__('Save')"
+                x-cloak
+                x-show="!editGrid"
+                x-on:click="isLoading ? pendingMessage : editGridMode(true)"
+                icon="pencil"
                 class="flex-shrink-0"
             />
-            <x-button
-                color="red"
-                wire:flux-confirm.type.error="{{ __('wire:confirm.cancel.dashboard-edit') }}"
-                wire:click="resetWidgets().then(() => {reInit().disable(); isLoading = false; editGridMode(false);})"
-                class="flex-shrink-0"
-                :text="__('Cancel')"
-            />
+            <div x-cloak x-show="editGrid" class="flex gap-2">
+                <x-button
+                    color="secondary"
+                    light
+                    x-on:click="$modalOpen('widget-list')"
+                    class="flex-shrink-0"
+                    :text="__('Add')"
+                />
+                <x-button
+                    color="indigo"
+                    x-on:click="isLoading ? pendingMessage : save"
+                    :text="__('Save')"
+                    class="flex-shrink-0"
+                />
+                <x-button
+                    color="red"
+                    wire:flux-confirm.type.error="{{ __('wire:confirm.cancel.dashboard-edit') }}"
+                    wire:click="resetWidgets().then(() => {reInit().disable(); isLoading = false; editGridMode(false);})"
+                    class="flex-shrink-0"
+                    :text="__('Cancel')"
+                />
+            </div>
         </div>
-    </div>
+    @endif
 </div>

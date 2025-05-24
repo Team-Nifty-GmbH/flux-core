@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\Widgets;
 
 use FluxErp\Enums\TimeFrameEnum;
+use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Models\Order;
 use FluxErp\Support\Metrics\Charts\Line;
 use FluxErp\Support\Metrics\Trend;
@@ -15,6 +16,11 @@ use Livewire\Attributes\Renderless;
 class AverageOrderValue extends LineChart
 {
     use IsTimeFrameAwareWidget, MoneyChartFormattingTrait;
+
+    public static function dashboardComponent(): string
+    {
+        return Dashboard::class;
+    }
 
     #[Renderless]
     public function calculateByTimeFrame(): void

@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Models\Order;
 use FluxErp\Support\Metrics\Charts\Line;
 use FluxErp\Support\Metrics\Results\Result;
@@ -13,6 +14,11 @@ use Livewire\Attributes\Renderless;
 class RevenuePurchasesProfitChart extends LineChart
 {
     use IsTimeFrameAwareWidget, MoneyChartFormattingTrait;
+
+    public static function dashboardComponent(): string
+    {
+        return Dashboard::class;
+    }
 
     #[Renderless]
     public function calculateByTimeFrame(): void
