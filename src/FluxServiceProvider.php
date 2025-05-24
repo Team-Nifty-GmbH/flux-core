@@ -231,6 +231,7 @@ class FluxServiceProvider extends ServiceProvider
             label: 'Contacts',
             closure: function (): void {
                 Menu::register(route: 'contacts.contacts');
+                Menu::register(route: 'contacts.addresses');
                 Menu::register(route: 'contacts.communications');
             }
         );
