@@ -21,19 +21,16 @@ class CreateLeadStateRuleset extends FluxRuleset
                 app(Numeric::class, ['min' => 0, 'max' => 1]),
             ],
             'is_default' => [
-                'nullable',
                 'boolean',
                 'declined_if:is_won,true',
                 'declined_if:is_lost,true',
             ],
             'is_won' => [
-                'nullable',
                 'boolean',
                 'declined_if:is_default,true',
                 'declined_if:is_lost,true',
             ],
             'is_lost' => [
-                'nullable',
                 'boolean',
                 'declined_if:is_default,true',
                 'declined_if:is_won,true',

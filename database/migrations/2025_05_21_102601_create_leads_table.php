@@ -15,13 +15,13 @@ return new class() extends Migration
                 ->nullable()
                 ->constrained('addresses')
                 ->nullOnDelete();
-            $table->foreignId('recommended_by_address_id')
-                ->nullable()
-                ->constrained('addresses')
-                ->nullOnDelete();
             $table->foreignId('lead_state_id')
                 ->nullable()
                 ->constrained('lead_states')
+                ->nullOnDelete();
+            $table->foreignId('recommended_by_address_id')
+                ->nullable()
+                ->constrained('addresses')
                 ->nullOnDelete();
             $table->foreignId('user_id')
                 ->constrained('users')

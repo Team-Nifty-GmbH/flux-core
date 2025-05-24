@@ -31,16 +31,22 @@ class UpdateLeadStateRuleset extends FluxRuleset
             ],
             'color' => 'nullable|hex_color',
             'is_default' => [
+                'required_if_accepted:is_won',
+                'required_if_accepted:is_lost',
                 'boolean',
                 'declined_if:is_won,true',
                 'declined_if:is_lost,true',
             ],
             'is_won' => [
+                'required_if_accepted:is_default',
+                'required_if_accepted:is_lost',
                 'boolean',
                 'declined_if:is_default,true',
                 'declined_if:is_lost,true',
             ],
             'is_lost' => [
+                'required_if_accepted:is_default',
+                'required_if_accepted:is_won',
                 'boolean',
                 'declined_if:is_default,true',
                 'declined_if:is_won,true',

@@ -55,7 +55,7 @@
             </div>
             <div x-bind:class="! edit && 'pointer-events-none'">
                 <x-select.styled
-                    x-on:select="$wire.isLoss = $event.detail.select.is_lost"
+                    x-on:select="$wire.isLost = $event.detail.select.is_lost"
                     wire:model="leadForm.lead_state_id"
                     select="label:name|value:id"
                     :label="__('Lead State')"
@@ -72,7 +72,7 @@
                     ]"
                 />
             </div>
-            <div x-cloak x-show="$wire.isLoss">
+            <div x-cloak x-show="$wire.isLost">
                 <x-textarea
                     x-bind:readonly="!edit"
                     wire:model="leadForm.loss_reason"

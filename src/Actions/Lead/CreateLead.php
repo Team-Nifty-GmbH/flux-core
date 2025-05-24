@@ -43,7 +43,7 @@ class CreateLead extends FluxAction
     {
         $this->data['start'] ??= now()->format('Y-m-d');
         $this->data['end'] ??= $this->data['start'];
-        $this->data['lead_state_id'] ??= LeadState::default()?->getKey();
+        $this->data['lead_state_id'] ??= resolve_static(LeadState::class, 'default')?->getKey();
 
         if (
             resolve_static(LeadState::class, 'query')

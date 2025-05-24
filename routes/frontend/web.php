@@ -159,7 +159,7 @@ Route::middleware('web')
                     ->prefix('sales')
                     ->group(function (): void {
                         Route::get('/leads', LeadList::class)->name('leads');
-                        Route::get('/leads/{id}', Lead::class)->where('id', '[0-9]+')->name('lead.id');
+                        Route::get('/leads/{id}', Lead::class)->name('lead.id');
                     });
 
                 Route::name('orders.')

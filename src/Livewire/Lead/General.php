@@ -18,14 +18,14 @@ class General extends Component
 {
     use Actions;
 
-    public bool $isLoss = false;
+    public bool $isLost = false;
 
     #[Modelable]
     public LeadForm $leadForm;
 
     public function mount(): void
     {
-        $this->isLoss = resolve_static(LeadState::class, 'query')
+        $this->isLost = resolve_static(LeadState::class, 'query')
             ->whereKey($this->leadForm->lead_state_id)
             ->value('is_lost') ?? false;
     }

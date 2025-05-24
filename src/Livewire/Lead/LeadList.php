@@ -33,10 +33,7 @@ class LeadList extends BaseLeadList
     }
 
     #[Renderless]
-    public function evaluate(int $quantity): void
-    {
-        //
-    }
+    public function evaluate(): void {}
 
     #[Renderless]
     public function save(): bool
