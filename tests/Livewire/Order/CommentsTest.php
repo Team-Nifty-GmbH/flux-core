@@ -76,7 +76,7 @@ class CommentsTest extends BaseSetup
             ->test(Comments::class, ['modelId' => $this->order->id])
             ->assertStatus(200)
             ->call('loadComments')
-            ->assertReturned(function (array $comments): bool {
+            ->assertReturned(function (array $comments): true {
                 $this->assertCount(3, data_get($comments, 'data'));
                 $this->assertEquals(1, data_get($comments, 'current_page'));
                 $this->assertEquals(3, data_get($comments, 'total'));
@@ -84,7 +84,7 @@ class CommentsTest extends BaseSetup
                 return true;
             })
             ->call('loadStickyComments')
-            ->assertReturned(function (array $stickyComments) {
+            ->assertReturned(function (array $stickyComments): true {
                 $this->assertCount(1, $stickyComments, 'data');
 
                 return true;
