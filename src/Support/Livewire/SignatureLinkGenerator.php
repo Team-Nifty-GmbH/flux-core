@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\Livewire\Features;
+namespace FluxErp\Support\Livewire;
 
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Contracts\SignablePrintView;
@@ -8,23 +8,21 @@ use FluxErp\Models\Media;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
-use Livewire\Attributes\Locked;
 use Livewire\Attributes\Modelable;
 use Livewire\Component;
 
-class SignatureLinkGenerator extends Component
+abstract class SignatureLinkGenerator extends Component
 {
     public array $generatedUrls = [];
 
     #[Modelable]
     public int $modelId;
 
-    #[Locked]
-    public string $modelType;
-
     public array $signedViews = [];
 
     public array $unsignedViews = [];
+
+    protected string $modelType;
 
     public function mount(): void
     {
@@ -47,7 +45,7 @@ class SignatureLinkGenerator extends Component
 
     public function render(): View
     {
-        return view('flux::livewire.features.signature-link-generator');
+        return view('flux::support.signature-link-generator');
     }
 
     public function setPublicLink(string $printView): void

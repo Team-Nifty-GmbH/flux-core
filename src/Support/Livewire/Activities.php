@@ -1,19 +1,18 @@
 <?php
 
-namespace FluxErp\Livewire\Features;
+namespace FluxErp\Support\Livewire;
 
 use FluxErp\Models\User;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Modelable;
 use Livewire\Component;
 use Livewire\WithPagination;
 use TeamNiftyGmbH\DataTable\Helpers\Icon;
 
-class Activities extends Component
+abstract class Activities extends Component
 {
     use WithPagination;
 
@@ -23,19 +22,17 @@ class Activities extends Component
     #[Modelable]
     public ?int $modelId = null;
 
-    /** @var Model $this->modelType */
-    #[Locked]
-    public ?string $modelType = null;
-
     public int $page = 1;
 
     public int $perPage = 15;
 
     public int $total = 0;
 
+    protected string $modelType;
+
     public function render(): View|Factory|Application
     {
-        return view('flux::livewire.features.activities');
+        return view('flux::support.activities');
     }
 
     public function loadData(): void

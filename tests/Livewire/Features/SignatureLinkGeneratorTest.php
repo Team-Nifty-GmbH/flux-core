@@ -3,7 +3,6 @@
 namespace FluxErp\Tests\Livewire\Features;
 
 use FluxErp\Enums\OrderTypeEnum;
-use FluxErp\Livewire\Features\SignatureLinkGenerator;
 use FluxErp\Models\Address;
 use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
@@ -12,6 +11,7 @@ use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
+use FluxErp\Support\Livewire\SignatureLinkGenerator;
 use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 

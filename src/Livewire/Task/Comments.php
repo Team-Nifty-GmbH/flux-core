@@ -2,12 +2,10 @@
 
 namespace FluxErp\Livewire\Task;
 
-use FluxErp\Livewire\Features\Comments\Comments as BaseComments;
 use FluxErp\Models\Task;
-use Livewire\Attributes\Locked;
+use FluxErp\Support\Livewire\Comments as BaseComments;
 
 class Comments extends BaseComments
 {
-    #[Locked]
-    public string $modelType = Task::class;
+    protected string $modelType = Task::class;
 }

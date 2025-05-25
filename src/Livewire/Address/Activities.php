@@ -2,12 +2,10 @@
 
 namespace FluxErp\Livewire\Address;
 
-use FluxErp\Livewire\Features\Activities as BaseActivities;
 use FluxErp\Models\Address;
-use Livewire\Attributes\Locked;
+use FluxErp\Support\Livewire\Activities as BaseActivities;
 
 class Activities extends BaseActivities
 {
-    #[Locked]
-    public ?string $modelType = Address::class;
+    protected string $modelType = Address::class;
 }

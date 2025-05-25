@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\Livewire\Features\Comments;
+namespace FluxErp\Support\Livewire;
 
 use FluxErp\Livewire\Forms\CommentForm;
 use FluxErp\Models\Comment;
@@ -22,7 +22,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 
-class Comments extends Component
+abstract class Comments extends Component
 {
     use Actions, WithFilePond, WithPagination;
 
@@ -44,8 +44,7 @@ class Comments extends Component
     #[Modelable]
     public ?int $modelId = null;
 
-    /** @var Model $this->modelType */
-    public string $modelType = '';
+    protected string $modelType;
 
     public function mount(): void
     {
@@ -60,7 +59,7 @@ class Comments extends Component
 
     public function render(): View|Factory|Application
     {
-        return view('flux::livewire.features.comments.comments');
+        return view('flux::support.comments');
     }
 
     #[Renderless]

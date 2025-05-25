@@ -2,12 +2,10 @@
 
 namespace FluxErp\Livewire\Product\SerialNumber;
 
-use FluxErp\Livewire\Features\Comments\Comments as BaseComments;
 use FluxErp\Models\SerialNumber;
-use Livewire\Attributes\Locked;
+use FluxErp\Support\Livewire\Comments as BaseComments;
 
 class Comments extends BaseComments
 {
-    #[Locked]
-    public string $modelType = SerialNumber::class;
+    protected string $modelType = SerialNumber::class;
 }

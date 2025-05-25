@@ -2,7 +2,7 @@
 
 namespace FluxErp\Tests\Livewire\Features;
 
-use FluxErp\Livewire\Features\Activities;
+use FluxErp\Support\Livewire\Activities;
 use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 

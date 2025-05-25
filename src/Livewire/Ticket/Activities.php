@@ -2,12 +2,10 @@
 
 namespace FluxErp\Livewire\Ticket;
 
-use FluxErp\Livewire\Features\Activities as BaseActivities;
 use FluxErp\Models\Ticket;
-use Livewire\Attributes\Locked;
+use FluxErp\Support\Livewire\Activities as BaseActivities;
 
 class Activities extends BaseActivities
 {
-    #[Locked]
-    public ?string $modelType = Ticket::class;
+    protected string $modelType = Ticket::class;
 }

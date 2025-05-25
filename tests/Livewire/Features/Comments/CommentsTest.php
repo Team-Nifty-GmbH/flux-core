@@ -2,8 +2,8 @@
 
 namespace FluxErp\Tests\Livewire\Features\Comments;
 
-use FluxErp\Livewire\Features\Comments\Comments;
 use FluxErp\Models\Product;
+use FluxErp\Support\Livewire\Comments;
 use FluxErp\Tests\Livewire\BaseSetup;
 use Livewire\Livewire;
 

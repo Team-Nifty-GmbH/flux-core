@@ -324,7 +324,7 @@ class Order extends Component
             TabButton::make('order.comments')
                 ->text(__('Comments'))
                 ->isLivewireComponent()
-                ->wireModel('order'),
+                ->wireModel('order.id'),
             TabButton::make('order.related')
                 ->text(__('Related processes'))
                 ->isLivewireComponent()

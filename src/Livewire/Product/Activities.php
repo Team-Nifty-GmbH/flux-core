@@ -2,12 +2,10 @@
 
 namespace FluxErp\Livewire\Product;
 
-use FluxErp\Livewire\Features\Activities as BaseActivities;
 use FluxErp\Models\Product;
-use Livewire\Attributes\Locked;
+use FluxErp\Support\Livewire\Activities as BaseActivities;
 
 class Activities extends BaseActivities
 {
-    #[Locked]
-    public ?string $modelType = Product::class;
+    protected string $modelType = Product::class;
 }
