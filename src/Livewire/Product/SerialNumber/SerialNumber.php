@@ -63,8 +63,12 @@ class SerialNumber extends Component
     public function getTabs(): array
     {
         return [
-            TabButton::make('product.serial-number.general')->text(__('General')),
-            TabButton::make('product.serial-number.comments')->text(__('Comments')),
+            TabButton::make('product.serial-number.general')
+                ->text(__('General')),
+            TabButton::make('product.serial-number.comments')
+                ->isLivewireComponent()
+                ->wireModel('serialNumber.id')
+                ->text(__('Comments')),
         ];
     }
 
