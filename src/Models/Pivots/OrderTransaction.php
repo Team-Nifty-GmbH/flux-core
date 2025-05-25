@@ -4,10 +4,13 @@ namespace FluxErp\Models\Pivots;
 
 use FluxErp\Models\Order;
 use FluxErp\Models\Transaction;
+use FluxErp\Traits\HasPackageFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OrderTransaction extends FluxPivot
 {
+    use HasPackageFactory;
+
     public $incrementing = true;
 
     protected $guarded = [
