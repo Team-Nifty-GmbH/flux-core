@@ -108,6 +108,7 @@ class Ticket extends Component
         return [
             TabButton::make('ticket.comments')
                 ->text(__('Comments'))
+                ->wireModel('ticket.id')
                 ->isLivewireComponent(),
             TabButton::make('ticket.communication')
                 ->text(__('Communication'))
@@ -115,6 +116,7 @@ class Ticket extends Component
                 ->isLivewireComponent(),
             TabButton::make('ticket.activities')
                 ->text(__('Activities'))
+                ->wireModel('ticket.id')
                 ->isLivewireComponent(),
         ];
     }

@@ -91,12 +91,6 @@
                 </div>
             </div>
         </div>
-        <x-flux::tabs wire:model.live="tab" :$tabs>
-            <livewire:is
-                wire:key="{{ uniqid() }}"
-                :component="$tab"
-                :model-id="$ticket['id']"
-            />
-        </x-flux::tabs>
+        <x-flux::tabs wire:model.live="tab" :$tabs wire:ignore />
     </div>
 </div>

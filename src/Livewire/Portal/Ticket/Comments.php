@@ -2,14 +2,12 @@
 
 namespace FluxErp\Livewire\Portal\Ticket;
 
-use FluxErp\Livewire\Features\Comments\Comments as BaseComments;
 use FluxErp\Models\Ticket;
-use Livewire\Attributes\Locked;
+use FluxErp\Support\Livewire\Comments as BaseComments;
 
 class Comments extends BaseComments
 {
     public bool $isPublic = false;
 
-    #[Locked]
-    public string $modelType = Ticket::class;
+    protected string $modelType = Ticket::class;
 }

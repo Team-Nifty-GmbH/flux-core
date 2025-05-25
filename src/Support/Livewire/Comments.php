@@ -1,10 +1,9 @@
 <?php
 
-namespace FluxErp\Livewire\Features\Comments;
+namespace FluxErp\Support\Livewire;
 
 use FluxErp\Livewire\Forms\CommentForm;
 use FluxErp\Models\Comment;
-use FluxErp\Models\Role;
 use FluxErp\Models\Scopes\FamilyTreeScope;
 use FluxErp\Models\User;
 use FluxErp\Traits\Livewire\Actions;
@@ -23,7 +22,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 
-class Comments extends Component
+abstract class Comments extends Component
 {
     use Actions, WithFilePond, WithPagination;
 
@@ -45,8 +44,7 @@ class Comments extends Component
     #[Modelable]
     public ?int $modelId = null;
 
-    /** @var Model $this->modelType */
-    public string $modelType = '';
+    protected string $modelType;
 
     public function mount(): void
     {
@@ -61,7 +59,7 @@ class Comments extends Component
 
     public function render(): View|Factory|Application
     {
-        return view('flux::livewire.features.comments.comments', $this->loadUsersAndRoles());
+        return view('flux::support.comments');
     }
 
     #[Renderless]
@@ -233,43 +231,5 @@ class Comments extends Component
         } catch (ValidationException $e) {
             exception_to_notifications($e, $this);
         }
-    }
-
-    protected function loadUsersAndRoles(): array
-    {
-        if (! auth()->user()?->getMorphClass() === app(User::class)->getMorphClass()) {
-            return [];
-        }
-
-        $result = [];
-        $result['users'] = resolve_static(User::class, 'query')
-            ->select('id', 'name')
-            ->where('is_active', true)
-            ->orderBy('firstname')
-            ->get()
-            ->map(function (User $user) {
-                return [
-                    'key' => $user->name,
-                    'value' => $user->id,
-                    'type' => app(User::class)->getMorphClass(),
-                ];
-            })
-            ->toArray();
-
-        $result['roles'] = resolve_static(Role::class, 'query')
-            ->select(['id', 'name'])
-            ->whereRelation('users', 'is_active', true)
-            ->orderBy('name')
-            ->get()
-            ->map(function (Role $role) {
-                return [
-                    'key' => $role->name,
-                    'value' => $role->id,
-                    'type' => app(Role::class)->getMorphClass(),
-                ];
-            })
-            ->toArray();
-
-        return $result;
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\Livewire\Order;
+namespace FluxErp\Livewire\SignaturePublicLink;
 
 use FluxErp\Models\Order;
 use FluxErp\Support\Livewire\Comments as BaseComments;

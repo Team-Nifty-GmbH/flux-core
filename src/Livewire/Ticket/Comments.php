@@ -2,15 +2,13 @@
 
 namespace FluxErp\Livewire\Ticket;
 
-use FluxErp\Livewire\Features\Comments\Comments as BaseComments;
 use FluxErp\Models\Ticket;
-use Livewire\Attributes\Locked;
+use FluxErp\Support\Livewire\Comments as BaseComments;
 use Livewire\Attributes\Renderless;
 
 class Comments extends BaseComments
 {
-    #[Locked]
-    public string $modelType = Ticket::class;
+    protected string $modelType = Ticket::class;
 
     #[Renderless]
     public function saveComment(array $comment, array $files = []): ?array

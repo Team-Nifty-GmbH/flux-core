@@ -1,17 +1,17 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Portal\Shop;
+namespace FluxErp\Tests\Livewire\Accounting\Transactions;
 
-use FluxErp\Livewire\Portal\Shop\Categories;
+use FluxErp\Livewire\Accounting\Transactions\Comments;
 use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
-class CategoriesTest extends TestCase
+class CommentsTest extends TestCase
 {
     public function test_renders_successfully(): void
     {
         Livewire::withoutLazyLoading()
-            ->test(Categories::class)
+            ->test(Comments::class)
             ->assertStatus(200);
     }
 }

@@ -1,6 +1,6 @@
 {
-    "':foreignKey' and ':morphType' must be from the same record.": "':foreignKey' und ':morphType' müssen aus dem gleichen Datensatz stammen.",
     "%d %s ago": "Vor %d %s",
+    "':foreignKey' and ':morphType' must be from the same record.": "':foreignKey' und ':morphType' müssen aus dem gleichen Datensatz stammen.",
     "(Or drag a file to the page)": "(Oder ziehe eine Datei auf diese Seite)",
     "(Or drag files to the page)": "(Oder ziehe Dateien auf diese Seite)",
     ":client_name is committed to protecting and respecting your privacy. We will only use your personal information to manage your account and to provide you with the products and services you have requested.": ":client_name verpflichtet sich, Ihre Privatsphäre zu schützen und zu respektieren. Wir verwenden Ihre persönlichen Daten nur zur Verwaltung Ihres Kontos und zur Bereitstellung der von Ihnen angeforderten Produkte und Dienstleistungen.",
@@ -358,6 +358,7 @@
     "Calculation": "Berechnung",
     "Calendar": "Kalender",
     "Calendar Event": "Kalendereintrag",
+    "Calendar Events": "Kalendereinträge",
     "Calendar Id": "Kalender-ID",
     "Calendar Name": "Kalendername",
     "Calendar Search": "Kalender Suche",

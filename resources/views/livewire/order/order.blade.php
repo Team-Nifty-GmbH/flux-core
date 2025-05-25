@@ -920,9 +920,8 @@
                                         </template>
                                     </x-dropdown>
                                 </div>
-                                <livewire:features.signature-link-generator
+                                <livewire:order.signature-link-generator
                                     lazy
-                                    :model-type="\FluxErp\Models\Order::class"
                                     wire:model="order.id"
                                 />
                             @endif
