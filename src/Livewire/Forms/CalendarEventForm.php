@@ -40,6 +40,8 @@ class CalendarEventForm extends FluxForm
 
     public bool $is_repeatable = false;
 
+    public ?array $model = null;
+
     public ?int $model_id = null;
 
     public ?string $model_type = null;
@@ -71,7 +73,21 @@ class CalendarEventForm extends FluxForm
     public function fill($values): void
     {
         if ($values instanceof Model) {
+            $model = $values->model;
             $values = $values->toArray();
+        } else {
+            $model = resolve_static(CalendarEvent::class, 'query')
+                ->whereKey(data_get($values, 'id'))
+                ->with(['model'])
+                ->first(['model_type', 'model_id'])
+                ?->model;
+        }
+
+        if ($model && method_exists($model, 'getUrl')) {
+            $this->model = [
+                'label' => $model->getLabel(),
+                'url' => $model->getUrl(),
+            ];
         }
 
         $wasRepeatable = false;

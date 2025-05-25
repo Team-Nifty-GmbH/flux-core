@@ -19,6 +19,7 @@
             x-cloak
             x-show="task.modelUrl"
             x-bind:href="task.modelUrl"
+            wire:navigate
         >
             <x-slot:text>
                 <span x-text="task.modelLabel"></span>

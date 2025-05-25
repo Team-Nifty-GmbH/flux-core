@@ -24,6 +24,21 @@
                 />
             </div>
             @show
+            @section('event-edit.model')
+            <x-link
+                sm
+                href="#"
+                icon="link"
+                x-cloak
+                x-show="$wire.event.model?.url"
+                x-bind:href="$wire.event.model?.url"
+                wire:navigate
+            >
+                <x-slot:text>
+                    <span x-text="$wire.event.model?.label"></span>
+                </x-slot>
+            </x-link>
+            @show
             @section('event-edit.input-fields')
             <x-input
                 x-ref="autofocus"

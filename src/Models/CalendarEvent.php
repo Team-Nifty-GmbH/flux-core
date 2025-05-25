@@ -16,6 +16,7 @@ use FluxErp\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Arr;
@@ -144,6 +145,11 @@ class CalendarEvent extends FluxModel implements HasMedia
     public function invites(): HasMany
     {
         return $this->hasMany(Inviteable::class);
+    }
+
+    public function model(): MorphTo
+    {
+        return $this->morphTo('model');
     }
 
     public function toCalendarEventObject(array $attributes = []): array
