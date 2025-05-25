@@ -117,8 +117,8 @@
             wire:model="task.priority"
             min="0"
         />
-        <x-textarea
-            x-bind:readonly="!edit"
+        <x-flux::editor
+            x-model="edit"
             wire:model="task.description"
             :label="__('Description')"
         />
