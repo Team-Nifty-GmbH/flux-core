@@ -44,8 +44,8 @@
                         {
                             trackable_type: '{{ morph_alias(\FluxErp\Models\Ticket::class) }}',
                             trackable_id: {{ $ticket->id }},
-                            name: '{{ $ticket->title }}',
-                            description: {{ json_encode(strip_tags($ticket->description)) }}
+                            name: {{ json_encode($ticket->title) }},
+                            description: {{ json_encode(strip_tags($ticket->description ?? '')) }}
                         }
                     )"
             >
