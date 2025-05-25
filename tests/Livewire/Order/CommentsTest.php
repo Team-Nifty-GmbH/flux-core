@@ -60,12 +60,14 @@ class CommentsTest extends BaseSetup
             'is_locked' => false,
         ]);
 
-        Comment::factory()
+        $comments = Comment::factory()
             ->count(3)
             ->create([
                 'model_type' => morph_alias(Order::class),
                 'model_id' => $this->order->id,
             ]);
+
+        $comments->first()->update(['is_sticky' => true]);
     }
 
     public function test_renders_successfully(): void
@@ -74,7 +76,18 @@ class CommentsTest extends BaseSetup
             ->test(Comments::class, ['modelId' => $this->order->id])
             ->assertStatus(200)
             ->call('loadComments')
+            ->assertReturned(function (array $comments): bool {
+                $this->assertCount(3, data_get($comments, 'data'));
+                $this->assertEquals(1, data_get($comments, 'current_page'));
+                $this->assertEquals(3, data_get($comments, 'total'));
+
+                return true;
+            })
             ->call('loadStickyComments')
-            ->assertCount('comments.data', 3);
+            ->assertReturned(function (array $stickyComments) {
+                $this->assertCount(1, $stickyComments, 'data');
+
+                return true;
+            });
     }
 }
