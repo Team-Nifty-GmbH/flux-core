@@ -10,7 +10,7 @@ class RecordMergingTest extends TestCase
 {
     protected string $livewireComponent = RecordMerging::class;
 
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test($this->livewireComponent)
             ->assertStatus(200);
