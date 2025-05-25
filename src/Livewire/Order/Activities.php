@@ -8,17 +8,13 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Locked;
-use Livewire\Attributes\Modelable;
 
 class Activities extends BaseActivities
 {
     public bool $initialized = false;
 
-    #[Modelable]
-    public int $modelId;
-
     #[Locked]
-    public string $modelType = Order::class;
+    public ?string $modelType = Order::class;
 
     public function render(): View|Factory|Application
     {

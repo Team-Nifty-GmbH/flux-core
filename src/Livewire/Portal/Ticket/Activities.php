@@ -9,5 +9,5 @@ use Livewire\Attributes\Locked;
 class Activities extends BaseActivities
 {
     #[Locked]
-    public string $modelType = Ticket::class;
+    public ?string $modelType = Ticket::class;
 }

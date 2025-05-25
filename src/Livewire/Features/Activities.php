@@ -7,6 +7,8 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
+use Livewire\Attributes\Locked;
+use Livewire\Attributes\Modelable;
 use Livewire\Component;
 use Livewire\WithPagination;
 use TeamNiftyGmbH\DataTable\Helpers\Icon;
@@ -15,12 +17,15 @@ class Activities extends Component
 {
     use WithPagination;
 
+    #[Locked]
     public array $activities = [];
 
-    public int $modelId = 0;
+    #[Modelable]
+    public ?int $modelId = null;
 
     /** @var Model $this->modelType */
-    public string $modelType = '';
+    #[Locked]
+    public ?string $modelType = null;
 
     public int $page = 1;
 
@@ -35,6 +40,10 @@ class Activities extends Component
 
     public function loadData(): void
     {
+        if (! $this->modelType || ! $this->modelId) {
+            return;
+        }
+
         $activities = resolve_static($this->modelType, 'query')
             ->whereKey($this->modelId)
             ->firstOrFail()
