@@ -1,8 +1,9 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Features;
+namespace FluxErp\Tests\Livewire\Order;
 
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Livewire\Order\SignatureLinkGenerator;
 use FluxErp\Models\Address;
 use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
@@ -11,7 +12,6 @@ use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
-use FluxErp\Support\Livewire\SignatureLinkGenerator;
 use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
@@ -67,7 +67,8 @@ class SignatureLinkGeneratorTest extends TestCase
 
     public function test_renders_successfully(): void
     {
-        Livewire::test(SignatureLinkGenerator::class, ['modelType' => Order::class, 'modelId' => $this->order->id])
+        Livewire::withoutLazyLoading()
+            ->test(SignatureLinkGenerator::class, ['modelType' => Order::class, 'modelId' => $this->order->id])
             ->assertStatus(200);
     }
 }

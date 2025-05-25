@@ -5,6 +5,7 @@ namespace FluxErp\Tests\Livewire\Order;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\Order\Comments;
 use FluxErp\Models\Address;
+use FluxErp\Models\Comment;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Language;
@@ -58,19 +59,22 @@ class CommentsTest extends BaseSetup
             'address_delivery_id' => $addresses->random()->id,
             'is_locked' => false,
         ]);
+
+        Comment::factory()
+            ->count(3)
+            ->create([
+                'model_type' => morph_alias(Order::class),
+                'model_id' => $this->order->id,
+            ]);
     }
 
     public function test_renders_successfully(): void
     {
-        $class = new class() extends Comments
-        {
-            public function mount(Order $orderModel): void
-            {
-                $this->order->fill($orderModel);
-            }
-        };
-
-        Livewire::test($class, ['orderModel' => $this->order])
-            ->assertStatus(200);
+        Livewire::withoutLazyLoading()
+            ->test(Comments::class, ['modelId' => $this->order->id])
+            ->assertStatus(200)
+            ->call('loadComments')
+            ->call('loadStickyComments')
+            ->assertCount('comments.data', 3);
     }
 }
