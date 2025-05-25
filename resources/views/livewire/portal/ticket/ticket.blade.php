@@ -91,10 +91,6 @@
                 </div>
             </div>
         </div>
-        <x-flux::tabs
-            wire:model.live="tab"
-            :$tabs
-            wire:ignore
-        />
+        <x-flux::tabs wire:model.live="tab" :$tabs wire:ignore />
     </div>
 </div>
