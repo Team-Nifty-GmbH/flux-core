@@ -58,6 +58,15 @@ class Category extends FluxModel implements InteractsWithDataTables, Sortable
             });
     }
 
+    public static function scoutIndexSettings(): array
+    {
+        return [
+            'filterableAttributes' => [
+                'model_type',
+            ],
+        ];
+    }
+
     protected function casts(): array
     {
         return [

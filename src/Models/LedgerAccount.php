@@ -13,6 +13,17 @@ class LedgerAccount extends FluxModel
 {
     use CacheModelQueries, HasPackageFactory, HasUuid, Searchable;
 
+    public static function scoutIndexSettings(): array
+    {
+        return [
+            'filterableAttributes' => [
+                'ledger_account_type_enum',
+                'is_automatic',
+            ],
+            'sortableAttributes' => ['*'],
+        ];
+    }
+
     protected function casts(): array
     {
         return [

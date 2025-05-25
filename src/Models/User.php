@@ -69,6 +69,15 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
         return false;
     }
 
+    public static function scoutIndexSettings(): array
+    {
+        return [
+            'filterableAttributes' => [
+                'is_active',
+            ],
+        ];
+    }
+
     protected static function booted(): void
     {
         static::saving(function (User $user): void {

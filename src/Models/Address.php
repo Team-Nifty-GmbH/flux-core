@@ -116,6 +116,17 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         ]);
     }
 
+    public static function scoutIndexSettings(): array
+    {
+        return [
+            'filterableAttributes' => [
+                'is_main_address',
+                'contact_id',
+            ],
+            'sortableAttributes' => ['*'],
+        ];
+    }
+
     public static function toCalendar(): array
     {
         return [

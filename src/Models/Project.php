@@ -51,6 +51,17 @@ class Project extends FluxModel implements Calendarable, HasMedia, InteractsWith
         ]);
     }
 
+    public static function scoutIndexSettings(): array
+    {
+        return [
+            'filterableAttributes' => [
+                'parent_id',
+                'state',
+            ],
+            'sortableAttributes' => ['*'],
+        ];
+    }
+
     public static function toCalendar(): array
     {
         return [

@@ -8,6 +8,7 @@ use FluxErp\Casts\Money;
 use FluxErp\Casts\TimeDuration;
 use FluxErp\Contracts\Calendarable;
 use FluxErp\States\Task\TaskState;
+use FluxErp\Support\Scout\ScoutCustomize;
 use FluxErp\Traits\Categorizable;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
@@ -49,6 +50,17 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
             'due_date' => data_get($event, 'end'),
             'description' => data_get($event, 'description'),
         ]);
+    }
+
+    public static function scoutIndexSettings(): array
+    {
+        return [
+            'filterableAttributes' => [
+                'project_id',
+                'state',
+            ],
+            'sortableAttributes' => ['*'],
+        ];
     }
 
     public static function toCalendar(): array
@@ -193,10 +205,9 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
 
     public function toSearchableArray(): array
     {
-        return $this->with('project:id,project_number,name')
-            ->whereKey($this->id)
-            ->first()
-            ?->toArray() ?? [];
+        return ScoutCustomize::make($this)
+            ->with('project:id,project_number,name')
+            ->toSearchableArray();
     }
 
     public function users(): BelongsToMany

@@ -28,6 +28,15 @@ class SerialNumber extends FluxModel implements HasMedia, InteractsWithDataTable
 
     protected ?string $detailRouteName = 'products.serial-numbers.id?';
 
+    public static function scoutIndexSettings(): array
+    {
+        return [
+            'filterableAttributes' => [
+                'address_id',
+            ],
+        ];
+    }
+
     public function addresses(): BelongsToMany
     {
         return $this->belongsToMany(Address::class, 'address_serial_number')->withPivot('quantity');

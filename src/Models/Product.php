@@ -71,6 +71,17 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
             ->update(['cover_media_id' => $newMediaId]);
     }
 
+    public static function scoutIndexSettings(): array
+    {
+        return [
+            'filterableAttributes' => [
+                'is_active',
+                'parent_id',
+            ],
+            'sortableAttributes' => ['*'],
+        ];
+    }
+
     protected static function booted(): void
     {
         static::creating(function (Product $product): void {

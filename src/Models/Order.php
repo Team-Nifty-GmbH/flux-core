@@ -91,6 +91,18 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
         );
     }
 
+    public static function scoutIndexSettings(): array
+    {
+        return [
+            'filterableAttributes' => [
+                'parent_id',
+                'contact_id',
+                'is_locked',
+            ],
+            'sortableAttributes' => ['*'],
+        ];
+    }
+
     protected static function booted(): void
     {
         static::saving(function (Order $order): void {

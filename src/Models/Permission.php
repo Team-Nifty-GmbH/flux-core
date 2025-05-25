@@ -18,6 +18,18 @@ class Permission extends SpatiePermission
 
     protected $hidden = ['pivot'];
 
+    public static function scoutIndexSettings(): array
+    {
+        return [
+            'filterableAttributes' => [
+                'guard_name',
+            ],
+            'sortableAttributes' => [
+                'name',
+            ],
+        ];
+    }
+
     public function users(): BelongsToMany
     {
         return $this->morphedByMany(

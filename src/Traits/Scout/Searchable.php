@@ -2,15 +2,10 @@
 
 namespace FluxErp\Traits\Scout;
 
-use Illuminate\Support\Arr;
-use Laravel\Scout\Searchable as BaseSearchable;
+use FluxErp\Support\Scout\ScoutCustomize;
 
 trait Searchable
 {
-    use BaseSearchable {
-        BaseSearchable::toSearchableArray as toSearchableArrayBase;
-    }
-
     public static function scoutIndexSettings(): array
     {
         return config(
@@ -21,9 +16,6 @@ trait Searchable
 
     public function toSearchableArray(): array
     {
-        return Arr::sortByPattern(
-            $this->toSearchableArrayBase(),
-            config('scout.sorted_searchable_keys.' . static::class, []),
-        );
+        return ScoutCustomize::make($this)->toSearchableArray();
     }
 }
