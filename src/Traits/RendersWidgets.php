@@ -71,7 +71,7 @@ trait RendersWidgets
                 ->user()
                 ->widgets()
                 ->updateOrCreate(
-                    ['id' => is_numeric($widget['id']) ? $widget['id'] : null],
+                    ['id' => is_numeric(data_get($widget, 'id')) ? data_get($widget, 'id') : null],
                     array_merge(
                         ['dashboard_component' => static::class],
                         Arr::except($widget, 'id')
