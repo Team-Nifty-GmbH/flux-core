@@ -60,7 +60,10 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
 {
     use Commentable, Communicatable, Filterable, HasAdditionalColumns, HasCalendars, HasCart, HasClientAssignment,
         HasFrontendAttributes, HasPackageFactory, HasRoles, HasStates, HasTags, HasUserModification, HasUuid,
-        InteractsWithMedia, Lockable, LogsActivity, MonitorsQueue, Notifiable, Printable, Searchable, SoftDeletes;
+        InteractsWithMedia, Lockable, LogsActivity, MonitorsQueue, Notifiable, Printable, SoftDeletes;
+    use Searchable {
+        Searchable::scoutIndexSettings as baseScoutIndexSettings;
+    }
 
     public static string $iconName = 'user';
 
@@ -114,6 +117,17 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
             'date_of_birth' => Carbon::parse(data_get($event, 'start'))
                 ->setYear($currentAddress->date_of_birth->year),
         ]);
+    }
+
+    public static function scoutIndexSettings(): ?array
+    {
+        return static::baseScoutIndexSettings() ?? [
+            'filterableAttributes' => [
+                'is_main_address',
+                'contact_id',
+            ],
+            'sortableAttributes' => ['*'],
+        ];
     }
 
     public static function toCalendar(): array

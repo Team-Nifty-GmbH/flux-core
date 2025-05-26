@@ -7,6 +7,7 @@ use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Models\Pivots\ContactDiscount;
 use FluxErp\Models\Pivots\ContactDiscountGroup;
 use FluxErp\Models\Pivots\ContactIndustry;
+use FluxErp\Support\Scout\ScoutCustomize;
 use FluxErp\Traits\CascadeSoftDeletes;
 use FluxErp\Traits\Categorizable;
 use FluxErp\Traits\Commentable;
@@ -265,12 +266,9 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
 
     public function toSearchableArray(): array
     {
-        $this->refresh()->loadMissing('mainAddress');
-
-        return array_merge(
-            $this->mainAddress?->toSearchableArray() ?? [],
-            $this->toArray(),
-        );
+        return ScoutCustomize::make($this)
+            ->with('mainAddress')
+            ->toSearchableArray();
     }
 
     public function vatRate(): BelongsTo

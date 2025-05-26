@@ -42,7 +42,10 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
 {
     use Categorizable, Commentable, Filterable, HasAdditionalColumns, HasAttributeTranslations, HasClientAssignment,
         HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasSerialNumberRange, HasTags,
-        HasUserModification, HasUuid, InteractsWithMedia, Lockable, LogsActivity, Searchable, SoftDeletes;
+        HasUserModification, HasUuid, InteractsWithMedia, Lockable, LogsActivity, SoftDeletes;
+    use Searchable {
+        Searchable::scoutIndexSettings as baseScoutIndexSettings;
+    }
 
     public static string $iconName = 'square-3-stack-3d';
 
@@ -69,6 +72,17 @@ class Product extends FluxModel implements HasMedia, HasMediaForeignKey, Interac
         static::query()
             ->where('cover_media_id', $oldMediaId)
             ->update(['cover_media_id' => $newMediaId]);
+    }
+
+    public static function scoutIndexSettings(): ?array
+    {
+        return static::baseScoutIndexSettings() ?? [
+            'filterableAttributes' => [
+                'is_active',
+                'parent_id',
+            ],
+            'sortableAttributes' => ['*'],
+        ];
     }
 
     protected static function booted(): void
