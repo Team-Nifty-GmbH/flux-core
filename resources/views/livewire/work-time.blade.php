@@ -124,10 +124,7 @@
         x-anchor.bottom-end.offset.5="$refs.button"
         class="z-10"
     >
-        <x-card
-            id="active-work-times"
-            class="flex max-w-md flex-col gap-4"
-        >
+        <x-card id="active-work-times" class="flex max-w-md flex-col gap-4">
             <x-slot:header>
                 <div class="flex w-full items-center justify-between gap-4">
                     <div>{{ __('Active Work Times') }}</div>
