@@ -10,7 +10,8 @@ class CategoriesTest extends TestCase
 {
     public function test_renders_successfully(): void
     {
-        Livewire::test(Categories::class)
+        Livewire::withoutLazyLoading()
+            ->test(Categories::class)
             ->assertStatus(200);
     }
 }

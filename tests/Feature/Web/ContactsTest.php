@@ -45,7 +45,7 @@ class ContactsTest extends BaseSetup
 
     public function test_contacts_id_no_user(): void
     {
-        $this->get('/contacts/' . $this->contact->id)
+        $this->get('/contacts/contacts/' . $this->contact->id)
             ->assertStatus(302)
             ->assertRedirect(route('login'));
     }
@@ -54,7 +54,7 @@ class ContactsTest extends BaseSetup
     {
         $this->user->givePermissionTo(Permission::findOrCreate('contacts.{id?}.get', 'web'));
 
-        $this->actingAs($this->user, 'web')->get('/contacts/' . $this->contact->id)
+        $this->actingAs($this->user, 'web')->get('/contacts/contacts/' . $this->contact->id)
             ->assertStatus(200);
     }
 
@@ -62,7 +62,7 @@ class ContactsTest extends BaseSetup
     {
         $this->user->givePermissionTo(Permission::findOrCreate('contacts.{id?}.get', 'web'));
 
-        $this->actingAs($this->user, 'web')->get('/contacts/0')
+        $this->actingAs($this->user, 'web')->get('/contacts/contacts/0')
             ->assertStatus(404);
     }
 
@@ -70,13 +70,13 @@ class ContactsTest extends BaseSetup
     {
         Permission::findOrCreate('contacts.{id?}.get', 'web');
 
-        $this->actingAs($this->user, 'web')->get('/contacts/' . $this->contact->id)
+        $this->actingAs($this->user, 'web')->get('/contacts/contacts/' . $this->contact->id)
             ->assertStatus(403);
     }
 
     public function test_contacts_no_user(): void
     {
-        $this->get('/contacts')
+        $this->get('/contacts/contacts')
             ->assertStatus(302)
             ->assertRedirect(route('login'));
     }
@@ -85,7 +85,7 @@ class ContactsTest extends BaseSetup
     {
         $this->user->givePermissionTo(Permission::findOrCreate('contacts.get', 'web'));
 
-        $this->actingAs($this->user, 'web')->get('/contacts')
+        $this->actingAs($this->user, 'web')->get('/contacts/contacts')
             ->assertStatus(200);
     }
 
@@ -93,7 +93,7 @@ class ContactsTest extends BaseSetup
     {
         Permission::findOrCreate('contacts.get', 'web');
 
-        $this->actingAs($this->user, 'web')->get('/contacts')
+        $this->actingAs($this->user, 'web')->get('/contacts/contacts')
             ->assertStatus(403);
     }
 }

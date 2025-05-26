@@ -19,21 +19,11 @@ use FluxErp\Http\Middleware\Permissions;
 use FluxErp\Http\Middleware\PortalMiddleware;
 use FluxErp\Http\Middleware\SetJobAuthenticatedUserMiddleware;
 use FluxErp\Models\Activity;
-use FluxErp\Models\Address;
-use FluxErp\Models\Category;
 use FluxErp\Models\Currency;
-use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\Notification;
-use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\Permission;
-use FluxErp\Models\Product;
-use FluxErp\Models\Project;
 use FluxErp\Models\Role;
-use FluxErp\Models\SerialNumber;
-use FluxErp\Models\Task;
-use FluxErp\Models\Ticket;
-use FluxErp\Models\User;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Bus\Dispatcher;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -204,6 +194,15 @@ class FluxServiceProvider extends ServiceProvider
         Menu::register(route: 'dashboard', icon: 'home', order: -9999);
 
         Menu::group(
+            path: 'sales',
+            icon: 'shopping-cart',
+            label: 'Sales',
+            closure: function (): void {
+                Menu::register(route: 'sales.leads');
+            }
+        );
+
+        Menu::group(
             path: 'orders',
             icon: 'briefcase',
             label: 'Orders',
@@ -231,6 +230,7 @@ class FluxServiceProvider extends ServiceProvider
             label: 'Contacts',
             closure: function (): void {
                 Menu::register(route: 'contacts.contacts');
+                Menu::register(route: 'contacts.addresses');
                 Menu::register(route: 'contacts.communications');
             }
         );
@@ -285,6 +285,7 @@ class FluxServiceProvider extends ServiceProvider
                 Menu::register(route: 'settings.industries');
                 Menu::register(route: 'settings.categories');
                 Menu::register(route: 'settings.tags');
+                Menu::register(route: 'settings.lead-states');
                 Menu::register(route: 'settings.tokens');
                 Menu::register(route: 'settings.product-option-groups');
                 Menu::register(route: 'settings.product-properties');
@@ -419,84 +420,6 @@ class FluxServiceProvider extends ServiceProvider
             config(['permission.display_permission_in_exception' => true]);
             config(['activitylog.activitymodel' => resolve_static(Activity::class, 'class')]);
             config(['media-library.media_downloader' => MediaLibraryDownloader::class]);
-            config([
-                'scout.meilisearch.index-settings' => [
-                    resolve_static(Address::class, 'class') => [
-                        'filterableAttributes' => [
-                            'is_main_address',
-                            'contact_id',
-                        ],
-                        'sortableAttributes' => ['*'],
-                    ],
-                    resolve_static(Category::class, 'class') => [
-                        'filterableAttributes' => [
-                            'model_type',
-                        ],
-                    ],
-                    resolve_static(LedgerAccount::class, 'class') => [
-                        'filterableAttributes' => [
-                            'ledger_account_type_enum',
-                            'is_automatic',
-                        ],
-                        'sortableAttributes' => ['*'],
-                    ],
-                    resolve_static(Order::class, 'class') => [
-                        'filterableAttributes' => [
-                            'parent_id',
-                            'contact_id',
-                            'is_locked',
-                        ],
-                        'sortableAttributes' => ['*'],
-                    ],
-                    resolve_static(Permission::class, 'class') => [
-                        'filterableAttributes' => [
-                            'guard_name',
-                        ],
-                        'sortableAttributes' => [
-                            'name',
-                        ],
-                    ],
-                    resolve_static(Product::class, 'class') => [
-                        'filterableAttributes' => [
-                            'is_active',
-                            'parent_id',
-                        ],
-                        'sortableAttributes' => ['*'],
-                    ],
-                    resolve_static(Project::class, 'class') => [
-                        'filterableAttributes' => [
-                            'parent_id',
-                            'state',
-                        ],
-                        'sortableAttributes' => ['*'],
-                    ],
-                    resolve_static(SerialNumber::class, 'class') => [
-                        'filterableAttributes' => [
-                            'address_id',
-                        ],
-                    ],
-                    resolve_static(Task::class, 'class') => [
-                        'filterableAttributes' => [
-                            'project_id',
-                            'state',
-                        ],
-                        'sortableAttributes' => ['*'],
-                    ],
-                    resolve_static(Ticket::class, 'class') => [
-                        'filterableAttributes' => [
-                            'authenticatable_type',
-                            'authenticatable_id',
-                            'state',
-                        ],
-                        'sortableAttributes' => ['*'],
-                    ],
-                    resolve_static(User::class, 'class') => [
-                        'filterableAttributes' => [
-                            'is_active',
-                        ],
-                    ],
-                ],
-            ]);
         });
         $this->mergeConfigFrom(__DIR__ . '/../config/flux.php', 'flux');
         $this->mergeConfigFrom(__DIR__ . '/../config/notifications.php', 'notifications');

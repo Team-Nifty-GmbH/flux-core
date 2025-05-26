@@ -4,7 +4,7 @@
 
 <div>
     <div class="mb-1">
-        <x-label :label="$label ?? ''" />
+        <x-label :text="$label ?? ''" />
     </div>
     <div
         @if ($attributes->has("x-modelable"))

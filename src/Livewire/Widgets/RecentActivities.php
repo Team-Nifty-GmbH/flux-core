@@ -2,14 +2,20 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use FluxErp\Livewire\Dashboard\Dashboard;
+use FluxErp\Livewire\Support\Widgets\ValueList;
 use FluxErp\Models\Activity;
-use FluxErp\Support\Widgets\ValueList;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Renderless;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class RecentActivities extends ValueList
 {
+    public static function dashboardComponent(): array|string
+    {
+        return Dashboard::class;
+    }
+
     #[Renderless]
     public function calculateList(): void
     {

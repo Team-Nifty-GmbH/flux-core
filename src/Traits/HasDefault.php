@@ -13,10 +13,11 @@ trait HasDefault
 
     public static function default(): ?static
     {
-        return Cache::rememberForever(
-            'default_' . morph_alias(static::class),
-            fn () => resolve_static(static::class, 'query')->where(static::$defaultColumn, true)->first()
-        );
+        return Cache::memo()
+            ->rememberForever(
+                'default_' . morph_alias(static::class),
+                fn () => resolve_static(static::class, 'query')->where(static::$defaultColumn, true)->first()
+            );
     }
 
     protected static function bootHasDefault(): void

@@ -2,18 +2,10 @@
 
 namespace FluxErp\Livewire\Order;
 
-use FluxErp\Livewire\Forms\OrderForm;
-use Illuminate\Contracts\View\View;
-use Livewire\Attributes\Modelable;
-use Livewire\Component;
+use FluxErp\Livewire\Support\Comments as BaseComments;
+use FluxErp\Models\Order;
 
-class Comments extends Component
+class Comments extends BaseComments
 {
-    #[Modelable]
-    public OrderForm $order;
-
-    public function render(): View
-    {
-        return view('flux::livewire.order.comments');
-    }
+    protected string $modelType = Order::class;
 }

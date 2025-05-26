@@ -82,9 +82,8 @@
             </div>
         </div>
     </div>
-    <livewire:features.comments.comments
+    <livewire:signature-public-link.comments
         lazy
-        :model-type="\FluxErp\Models\Order::class"
         :model-id="$modelInstance->id"
     />
 </div>

@@ -2,9 +2,10 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use FluxErp\Livewire\Dashboard\Dashboard;
+use FluxErp\Livewire\Support\Widgets\Charts\CircleChart;
 use FluxErp\Models\Order;
 use FluxErp\Support\Metrics\Charts\Donut;
-use FluxErp\Support\Widgets\Charts\CircleChart;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use FluxErp\Traits\MoneyChartFormattingTrait;
 use Livewire\Attributes\Renderless;
@@ -18,6 +19,11 @@ class RevenueBySalesRepresentative extends CircleChart
     ];
 
     public bool $showTotals = false;
+
+    public static function dashboardComponent(): array|string
+    {
+        return Dashboard::class;
+    }
 
     #[Renderless]
     public function calculateByTimeFrame(): void

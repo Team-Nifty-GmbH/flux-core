@@ -3,14 +3,15 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Actions\Contact\CreateContact;
+use FluxErp\Actions\Lead\CreateLead;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Livewire\Forms\ContactForm;
+use FluxErp\Livewire\Forms\LeadForm;
 use FluxErp\Models\Address;
 use FluxErp\Models\Media;
 use FluxErp\Traits\Livewire\CreatesDocuments;
+use FluxErp\Traits\Livewire\DataTable\AllowRecordMerging;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Routing\Redirector;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -21,7 +22,7 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class AddressList extends BaseDataTable
 {
-    use CreatesDocuments;
+    use AllowRecordMerging, CreatesDocuments;
 
     public ContactForm $contact;
 
@@ -43,9 +44,11 @@ class AddressList extends BaseDataTable
 
     public bool $isSelectable = true;
 
+    public LeadForm $leadForm;
+
     public bool $showMap = false;
 
-    protected ?string $includeBefore = 'flux::livewire.contact.contacts';
+    protected ?string $includeBefore = 'flux::livewire.contact.address-list';
 
     protected string $model = Address::class;
 
@@ -62,7 +65,7 @@ class AddressList extends BaseDataTable
                 ->color('indigo')
                 ->icon('plus')
                 ->attributes([
-                    'x-on:click' => '$wire.show()',
+                    'x-on:click' => '$modalOpen(\'create-contact-modal\')',
                 ])
                 ->when(fn () => resolve_static(CreateContact::class, 'canPerformAction', [false])),
         ];
@@ -80,9 +83,15 @@ class AddressList extends BaseDataTable
                 ->text(__('Send Mail'))
                 ->color('indigo')
                 ->wireClick('createMailMessage'),
+            DataTableButton::make()
+                ->text(__('Create Leads'))
+                ->color('indigo')
+                ->wireClick('openLeadsModal')
+                ->when(fn () => resolve_static(CreateLead::class, 'canPerformAction', [false])),
         ];
     }
 
+    #[Renderless]
     public function createDocuments(): null|MediaStream|Media
     {
         $response = $this->createDocumentFromItems($this->getSelectedModels(), true);
@@ -92,6 +101,34 @@ class AddressList extends BaseDataTable
         return $response;
     }
 
+    #[Renderless]
+    public function createLeads(): bool
+    {
+        $created = 0;
+        foreach ($this->getSelectedModelsQuery()->with('contact:id,agent_id')->get(['id', 'contact_id']) as $address) {
+            $leadForm = clone $this->leadForm;
+            $leadForm->address_id = $address->getKey();
+            $leadForm->user_id = $address->contact?->agent_id ?? auth()->id();
+
+            try {
+                $leadForm->save();
+            } catch (ValidationException|UnauthorizedException $e) {
+                exception_to_notifications($e, $this);
+
+                continue;
+            }
+
+            $created++;
+        }
+
+        $this->toast()
+            ->success(__(':count leads created', ['count' => $created]))
+            ->send();
+
+        return true;
+    }
+
+    #[Renderless]
     public function createMailMessage(): void
     {
         $mailMessages = [];
@@ -112,6 +149,9 @@ class AddressList extends BaseDataTable
 
         $this->dispatch('createFromSession', key: $sessionKey)->to('edit-mail');
     }
+
+    #[Renderless]
+    public function evaluate(): void {}
 
     #[Renderless]
     public function loadData(): void
@@ -153,7 +193,20 @@ class AddressList extends BaseDataTable
     }
 
     #[Renderless]
-    public function save(): false|RedirectResponse|Redirector
+    public function openLeadsModal(): void
+    {
+        $this->leadForm->reset();
+        $this->leadForm->openModal();
+    }
+
+    #[Renderless]
+    public function resetForm(): void
+    {
+        $this->contact->reset();
+    }
+
+    #[Renderless]
+    public function save(): bool
     {
         try {
             $this->contact->save();
@@ -163,21 +216,13 @@ class AddressList extends BaseDataTable
             return false;
         }
 
-        $this->notification()->success(__(':model saved', ['model' => __('Contact')]))->send();
+        $this->toast()
+            ->success(__(':model saved', ['model' => __('Contact')]))
+            ->send();
 
-        return redirect(route('contacts.id?', ['id' => $this->contact->id]));
-    }
+        $this->redirectRoute('contacts.id?', ['id' => $this->contact->id], navigate: true);
 
-    #[Renderless]
-    public function show(): void
-    {
-        $this->contact->reset();
-
-        $this->js(
-            <<<'JS'
-               $modalOpen('new-contact-modal');
-            JS
-        );
+        return true;
     }
 
     #[Renderless]

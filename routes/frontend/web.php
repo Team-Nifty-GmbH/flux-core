@@ -21,6 +21,7 @@ use FluxErp\Livewire\Contact\Contact;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\DataTables\AddressList;
 use FluxErp\Livewire\DataTables\CommissionList;
+use FluxErp\Livewire\DataTables\ContactList;
 use FluxErp\Livewire\DataTables\OrderPositionList;
 use FluxErp\Livewire\DataTables\PaymentRunList;
 use FluxErp\Livewire\DataTables\PurchaseInvoiceList;
@@ -28,6 +29,8 @@ use FluxErp\Livewire\DataTables\TicketList;
 use FluxErp\Livewire\DataTables\WorkTimeList;
 use FluxErp\Livewire\Features\Calendar\Calendar;
 use FluxErp\Livewire\InstallWizard;
+use FluxErp\Livewire\Lead\Lead;
+use FluxErp\Livewire\Lead\LeadList;
 use FluxErp\Livewire\Mail\Mail;
 use FluxErp\Livewire\Media\Media as MediaGrid;
 use FluxErp\Livewire\Order\Order;
@@ -54,6 +57,7 @@ use FluxErp\Livewire\Settings\FailedJobs;
 use FluxErp\Livewire\Settings\Industries;
 use FluxErp\Livewire\Settings\LanguageLines;
 use FluxErp\Livewire\Settings\Languages;
+use FluxErp\Livewire\Settings\LeadStates;
 use FluxErp\Livewire\Settings\LedgerAccounts;
 use FluxErp\Livewire\Settings\Logs;
 use FluxErp\Livewire\Settings\MailAccounts;
@@ -136,8 +140,9 @@ Route::middleware('web')
 
                 Route::name('contacts.')->prefix('contacts')
                     ->group(function (): void {
-                        Route::get('/', AddressList::class)->name('contacts');
-                        Route::get('/{id?}', Contact::class)->where('id', '[0-9]+')->name('id?');
+                        Route::get('/contacts', ContactList::class)->name('contacts');
+                        Route::get('/contacts/{id?}', Contact::class)->where('id', '[0-9]+')->name('id?');
+                        Route::get('/addresses', AddressList::class)->name('addresses');
                         Route::get('/communications', CommunicationList::class)->name('communications');
                     });
                 Route::get(
@@ -153,7 +158,15 @@ Route::middleware('web')
                 )
                     ->name('address.id');
 
-                Route::name('orders.')->prefix('orders')
+                Route::name('sales.')
+                    ->prefix('sales')
+                    ->group(function (): void {
+                        Route::get('/leads', LeadList::class)->name('leads');
+                        Route::get('/leads/{id}', Lead::class)->name('lead.id');
+                    });
+
+                Route::name('orders.')
+                    ->prefix('orders')
                     ->group(function (): void {
                         Route::get('/list', OrderList::class)->name('orders');
                         Route::get('/list/{orderType}', OrderListByOrderType::class)->name('order-type');
@@ -209,6 +222,7 @@ Route::middleware('web')
                         Route::get('/failed-jobs', FailedJobs::class)->name('failed-jobs');
                         Route::get('/industries', Industries::class)->name('industries');
                         Route::get('/languages', Languages::class)->name('languages');
+                        Route::get('/lead-states', LeadStates::class)->name('lead-states');
                         Route::get('/ledger-accounts', LedgerAccounts::class)->name('ledger-accounts');
                         Route::get('/logs', Logs::class)->name('logs');
                         Route::get('/mail-accounts', MailAccounts::class)->name('mail-accounts');

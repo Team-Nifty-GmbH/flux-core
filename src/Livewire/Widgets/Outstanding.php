@@ -4,11 +4,12 @@ namespace FluxErp\Livewire\Widgets;
 
 use FluxErp\Contracts\HasWidgetOptions;
 use FluxErp\Livewire\Accounting\PaymentReminder;
+use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\Order\OrderList;
+use FluxErp\Livewire\Support\Widgets\ValueBox;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Order;
 use FluxErp\States\Order\PaymentState\Paid;
-use FluxErp\Support\Widgets\ValueBox;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Number;
 use Livewire\Attributes\Renderless;
@@ -18,6 +19,11 @@ use TeamNiftyGmbH\DataTable\Helpers\SessionFilter;
 class Outstanding extends ValueBox implements HasWidgetOptions
 {
     public bool $shouldBePositive = false;
+
+    public static function dashboardComponent(): array|string
+    {
+        return Dashboard::class;
+    }
 
     #[Renderless]
     public function calculateSum(): void

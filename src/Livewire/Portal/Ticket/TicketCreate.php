@@ -25,6 +25,7 @@ class TicketCreate extends Component
 
     public $attachments = [];
 
+    #[Locked]
     public string $modelType = Ticket::class;
 
     #[Locked]

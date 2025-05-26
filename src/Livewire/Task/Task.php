@@ -109,12 +109,17 @@ class Task extends Component
     public function getTabs(): array
     {
         return [
-            TabButton::make('task.general')->text(__('General')),
-            TabButton::make('task.comments')->text(__('Comments'))
+            TabButton::make('task.general')
+                ->text(__('General')),
+            TabButton::make('task.comments')
+                ->isLivewireComponent()
+                ->wireModel('task.id')
+                ->text(__('Comments'))
                 ->attributes([
                     'x-bind:disabled' => '! $wire.task.id',
                 ]),
-            TabButton::make('task.media')->text(__('Media'))
+            TabButton::make('task.media')
+                ->text(__('Media'))
                 ->attributes([
                     'x-bind:disabled' => '! $wire.task.id',
                 ]),

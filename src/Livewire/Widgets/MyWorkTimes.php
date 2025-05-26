@@ -4,10 +4,11 @@ namespace FluxErp\Livewire\Widgets;
 
 use Carbon\Carbon;
 use FluxErp\Enums\TimeFrameEnum;
+use FluxErp\Livewire\Dashboard\Dashboard;
+use FluxErp\Livewire\Support\Widgets\Charts\BarChart;
 use FluxErp\Models\WorkTime;
 use FluxErp\Models\WorkTimeType;
 use FluxErp\Support\Metrics\Charts\Bar;
-use FluxErp\Support\Widgets\Charts\BarChart;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use Livewire\Attributes\Js;
 use Livewire\Attributes\Locked;
@@ -38,6 +39,11 @@ class MyWorkTimes extends BarChart
 
     #[Locked]
     public ?int $userId = null;
+
+    public static function dashboardComponent(): array|string
+    {
+        return Dashboard::class;
+    }
 
     public function mount(): void
     {
