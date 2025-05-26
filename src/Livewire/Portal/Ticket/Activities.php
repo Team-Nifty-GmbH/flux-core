@@ -2,9 +2,10 @@
 
 namespace FluxErp\Livewire\Portal\Ticket;
 
-use FluxErp\Livewire\Features\Activities as BaseActivities;
+use FluxErp\Models\Ticket;
+use FluxErp\Support\Livewire\Activities as BaseActivities;
 
 class Activities extends BaseActivities
 {
-    public string $modelType = \FluxErp\Models\Ticket::class;
+    protected string $modelType = Ticket::class;
 }

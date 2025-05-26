@@ -7,6 +7,7 @@ use FluxErp\Models\Client;
 use FluxErp\Models\Communication;
 use FluxErp\Providers\ViewServiceProvider;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Vite;
@@ -34,6 +35,22 @@ class AssetController extends Controller
         }
 
         return Utils::pretendResponseIsFile($path, $mimeType);
+    }
+
+    public function avatar(Request $request): Response
+    {
+        $color = $request->input('color', '6366f1');
+        $text = $request->input('text', '');
+
+        $svg = '<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="12" fill="#' . $color . '"/>
+            <text x="12" y="12" text-anchor="middle" dominant-baseline="central"
+                  fill="white" font-size="12" font-weight="600" font-family="system-ui, -apple-system, sans-serif">
+                ' . htmlspecialchars($text) . '
+            </text>
+        </svg>';
+
+        return response($svg, 200, ['Content-Type' => 'image/svg+xml']);
     }
 
     public function favicon(): BinaryFileResponse

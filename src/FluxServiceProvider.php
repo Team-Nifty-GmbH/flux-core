@@ -204,6 +204,15 @@ class FluxServiceProvider extends ServiceProvider
         Menu::register(route: 'dashboard', icon: 'home', order: -9999);
 
         Menu::group(
+            path: 'sales',
+            icon: 'shopping-cart',
+            label: 'Sales',
+            closure: function (): void {
+                Menu::register(route: 'sales.leads');
+            }
+        );
+
+        Menu::group(
             path: 'orders',
             icon: 'briefcase',
             label: 'Orders',
@@ -231,6 +240,7 @@ class FluxServiceProvider extends ServiceProvider
             label: 'Contacts',
             closure: function (): void {
                 Menu::register(route: 'contacts.contacts');
+                Menu::register(route: 'contacts.addresses');
                 Menu::register(route: 'contacts.communications');
             }
         );
@@ -284,6 +294,7 @@ class FluxServiceProvider extends ServiceProvider
                 Menu::register(route: 'settings.industries');
                 Menu::register(route: 'settings.categories');
                 Menu::register(route: 'settings.tags');
+                Menu::register(route: 'settings.lead-states');
                 Menu::register(route: 'settings.tokens');
                 Menu::register(route: 'settings.product-option-groups');
                 Menu::register(route: 'settings.product-properties');

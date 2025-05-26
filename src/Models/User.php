@@ -161,6 +161,11 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
         return $this->belongsTo(Language::class);
     }
 
+    public function leads(): HasMany
+    {
+        return $this->hasMany(Lead::class);
+    }
+
     public function locks(): MorphMany
     {
         return $this->morphMany(Lock::class, 'authenticatable');

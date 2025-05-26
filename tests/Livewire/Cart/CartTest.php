@@ -43,6 +43,7 @@ class CartTest extends BaseSetup
             ]);
 
         Livewire::actingAs($this->user)
+            ->withoutLazyLoading()
             ->test(Cart::class)
             ->assertCount('cart.cartItems', 3)
             ->call('remove', $cart->cartItems->first()->getKey())
@@ -61,6 +62,7 @@ class CartTest extends BaseSetup
             ]);
 
         Livewire::actingAs($this->user)
+            ->withoutLazyLoading()
             ->test(Cart::class)
             ->set('loadWatchlist', $watchList->id)
             ->assertSet('loadWatchlist', null)
@@ -80,6 +82,7 @@ class CartTest extends BaseSetup
             ]);
 
         Livewire::actingAs($this->user)
+            ->withoutLazyLoading()
             ->test(Cart::class)
             ->assertCount('cart.cartItems', 3)
             ->set('watchlistName', $watchListName = Str::uuid())
@@ -99,7 +102,8 @@ class CartTest extends BaseSetup
 
     public function test_renders_successfully(): void
     {
-        Livewire::test(Cart::class)
+        Livewire::withoutLazyLoading()
+            ->test(Cart::class)
             ->assertStatus(200);
     }
 

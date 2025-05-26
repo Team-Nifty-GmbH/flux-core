@@ -38,7 +38,6 @@ use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -375,6 +374,16 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         return $this->belongsTo(Language::class);
     }
 
+    public function leadRecommendations(): HasMany
+    {
+        return $this->hasMany(Lead::class, 'recommendation_address_id');
+    }
+
+    public function leads(): HasMany
+    {
+        return $this->hasMany(Lead::class);
+    }
+
     public function newCollection(array $models = []): Collection
     {
         return app(AddressCollection::class, ['items' => $models]);
@@ -414,11 +423,6 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
             'contact_id',
             'price_list_id'
         );
-    }
-
-    public function projectTasks(): HasMany
-    {
-        return $this->hasMany(Task::class);
     }
 
     public function routeNotificationForMail(): ?string

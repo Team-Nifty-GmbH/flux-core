@@ -2,10 +2,10 @@
 
 namespace FluxErp\Livewire\Address;
 
-use FluxErp\Livewire\Features\Comments\Comments as BaseComments;
 use FluxErp\Models\Address;
+use FluxErp\Support\Livewire\Comments as BaseComments;
 
 class Comments extends BaseComments
 {
-    public string $modelType = Address::class;
+    protected string $modelType = Address::class;
 }

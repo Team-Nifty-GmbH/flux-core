@@ -76,7 +76,7 @@
                     </div>
                 </div>
             </x-slot>
-            <livewire:features.comments.comments
+            <livewire:accounting.transactions.comments
                 :model-type="\FluxErp\Models\Transaction::class"
                 wire:model="transactionForm.id"
                 lazy

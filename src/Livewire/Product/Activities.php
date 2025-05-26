@@ -2,13 +2,10 @@
 
 namespace FluxErp\Livewire\Product;
 
-use FluxErp\Livewire\Features\Activities as BaseActivities;
-use Livewire\Attributes\Modelable;
+use FluxErp\Models\Product;
+use FluxErp\Support\Livewire\Activities as BaseActivities;
 
 class Activities extends BaseActivities
 {
-    #[Modelable]
-    public int $modelId;
-
-    public string $modelType = \FluxErp\Models\Product::class;
+    protected string $modelType = Product::class;
 }

@@ -44,8 +44,8 @@
                         {
                             trackable_type: '{{ morph_alias(\FluxErp\Models\Ticket::class) }}',
                             trackable_id: {{ $ticket->id }},
-                            name: '{{ $ticket->title }}',
-                            description: {{ json_encode(strip_tags($ticket->description)) }}
+                            name: {{ json_encode($ticket->title) }},
+                            description: {{ json_encode(strip_tags($ticket->description ?? '')) }}
                         }
                     )"
             >
@@ -181,13 +181,11 @@
                             @show
                         </x-card>
                         <x-card>
-                            <x-flux::tabs wire:model.live="tab" :$tabs>
-                                <livewire:is
-                                    wire:key="{{ uniqid() }}"
-                                    :component="$tab"
-                                    :model-id="$ticket->id"
-                                />
-                            </x-flux::tabs>
+                            <x-flux::tabs
+                                wire:model.live="tab"
+                                :$tabs
+                                wire:ignore
+                            />
                         </x-card>
                     </div>
                 </div>

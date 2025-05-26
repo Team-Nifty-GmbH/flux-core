@@ -13,7 +13,7 @@
 >
     <div class="pb-2.5">
         <div class="dark:border-secondary-700 border-b border-gray-200">
-            <nav class="soft-scrollbar flex overflow-x-auto" x-ref="tabButtons">
+            <nav class="soft-scrollbar flex overflow-x-auto" x-ref="tabButtons" wire:loading.class="pointer-events-none">
                 @foreach ($tabs as $tabButton)
                     {{ $tabButton }}
                 @endforeach
@@ -22,7 +22,7 @@
     </div>
 </div>
 <div
-    {{ $attributes->whereDoesntStartWith(['wire', 'tabs'])->merge(['class' => 'relative pt-6']) }}
+    {{ $attributes->whereDoesntStartWith(['wire', 'tabs'])->merge(['class' => 'relative pt-6 grow flex']) }}
 >
     {{ $prepend ?? '' }}
     @if ($attributes->has('wire:loading'))
