@@ -1,11 +1,9 @@
 <?php
 
-namespace FluxErp\Support\Widgets;
+namespace FluxErp\Livewire\Support\Widgets;
 
 use FluxErp\Traits\Widgetable;
-use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Foundation\Application;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
 
@@ -26,9 +24,9 @@ abstract class ValueList extends Component
         $this->calculateList();
     }
 
-    public function render(): Factory|Application|View|\Illuminate\Contracts\Foundation\Application
+    public function render(): View
     {
-        return view('flux::support.widgets.value-list');
+        return view('flux::livewire.support.widgets.value-list');
     }
 
     public function calculateByTimeFrame(): void

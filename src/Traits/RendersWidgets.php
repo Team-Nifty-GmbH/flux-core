@@ -58,7 +58,12 @@ trait RendersWidgets
         $this->widgets = $widgets;
 
         $existingItemIds = array_filter(Arr::pluck($this->widgets, 'id'), 'is_numeric');
-        auth()->user()->widgets()->whereNotIn('id', $existingItemIds)->delete();
+        auth()
+            ->user()
+            ->widgets()
+            ->where('dashboard_component', static::class)
+            ->whereNotIn('id', $existingItemIds)
+            ->delete();
 
         // create new widgets, update existing widgets
         foreach ($this->widgets as &$widget) {
@@ -66,8 +71,11 @@ trait RendersWidgets
                 ->user()
                 ->widgets()
                 ->updateOrCreate(
-                    ['id' => is_numeric($widget['id']) ? $widget['id'] : null],
-                    Arr::except($widget, 'id')
+                    ['id' => is_numeric(data_get($widget, 'id')) ? data_get($widget, 'id') : null],
+                    array_merge(
+                        ['dashboard_component' => static::class],
+                        Arr::except($widget, 'id')
+                    )
                 );
             $widget['id'] = $savedWidget->id;
         }
@@ -89,7 +97,19 @@ trait RendersWidgets
     #[Renderless]
     public function widgets(): void
     {
-        $this->widgets = $this->filterWidgets(auth()->user()->widgets()->get()->toArray());
+        $this->widgets = $this->filterWidgets(
+            auth()
+                ->user()
+                ?->widgets()
+                ->where('dashboard_component', static::class)
+                ->get()
+                ->toArray() ?? []
+        );
+    }
+
+    public function wireModel(): string
+    {
+        return 'params';
     }
 
     protected function filterWidgets(array $widgets): array
@@ -98,6 +118,14 @@ trait RendersWidgets
             $widgets,
             function (array $widget) {
                 $name = $widget['component_name'];
+
+                if (
+                    collect(Arr::wrap(data_get($widget, 'dashboard_component')))
+                        ->map(fn (string $dashboardClass) => resolve_static($dashboardClass, 'class'))
+                        ->doesntContain(static::class)
+                ) {
+                    return false;
+                }
 
                 try {
                     $permissionExists = ! is_null(

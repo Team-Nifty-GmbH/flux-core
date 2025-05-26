@@ -1,4 +1,4 @@
-@extends('flux::support.widgets.charts.chart')
+@extends('flux::livewire.support.widgets.charts.chart')
 @section('options')
     @parent
     <div class="px-6 py-2">

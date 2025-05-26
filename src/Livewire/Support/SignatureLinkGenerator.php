@@ -1,13 +1,13 @@
 <?php
 
-namespace FluxErp\Support\Livewire;
+namespace FluxErp\Livewire\Support;
 
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Contracts\SignablePrintView;
 use FluxErp\Models\Media;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
-use Illuminate\View\View;
 use Livewire\Attributes\Modelable;
 use Livewire\Component;
 
@@ -45,7 +45,7 @@ abstract class SignatureLinkGenerator extends Component
 
     public function render(): View
     {
-        return view('flux::support.signature-link-generator');
+        return view('flux::livewire.support.signature-link-generator');
     }
 
     public function setPublicLink(string $printView): void

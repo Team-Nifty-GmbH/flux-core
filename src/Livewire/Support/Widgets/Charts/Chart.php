@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\Support\Widgets\Charts;
+namespace FluxErp\Livewire\Support\Widgets\Charts;
 
 use Livewire\Attributes\Renderless;
 use Livewire\Component;

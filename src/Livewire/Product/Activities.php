@@ -2,8 +2,8 @@
 
 namespace FluxErp\Livewire\Product;
 
+use FluxErp\Livewire\Support\Activities as BaseActivities;
 use FluxErp\Models\Product;
-use FluxErp\Support\Livewire\Activities as BaseActivities;
 
 class Activities extends BaseActivities
 {

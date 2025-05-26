@@ -1,24 +1,23 @@
 <?php
 
-namespace FluxErp\Livewire\Widgets;
+namespace FluxErp\Livewire\Widgets\Project;
 
-use FluxErp\Livewire\Dashboard\Dashboard;
+use FluxErp\Livewire\Project\Dashboard;
 use FluxErp\Livewire\Support\Widgets\Charts\CircleChart;
-use FluxErp\Models\Order;
+use FluxErp\Models\Task;
 use FluxErp\Support\Metrics\Charts\Donut;
-use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
-use FluxErp\Traits\MoneyChartFormattingTrait;
+use FluxErp\Traits\Widgetable;
 use Livewire\Attributes\Renderless;
 
-class RevenueByTopCustomers extends CircleChart
+class TasksByState extends CircleChart
 {
-    use IsTimeFrameAwareWidget, MoneyChartFormattingTrait;
+    use Widgetable;
 
     public ?array $chart = [
         'type' => 'donut',
     ];
 
-    public int $limit = 10;
+    public ?int $projectId = null;
 
     public bool $showTotals = false;
 
@@ -37,20 +36,11 @@ class RevenueByTopCustomers extends CircleChart
     public function calculateChart(): void
     {
         $metrics = Donut::make(
-            resolve_static(Order::class, 'query')
-                ->revenue()
-                ->whereNotNull('invoice_date')
-                ->whereNotNull('invoice_number')
-                ->limit($this->limit)
-                ->with('addressInvoice:id,name')
-                ->orderBy('result', 'desc')
+            resolve_static(Task::class, 'query')
+                ->where('project_id', $this->projectId)
         )
-            ->setDateColumn('invoice_date')
-            ->setRange($this->timeFrame)
-            ->setEndingDate($this->end?->endOfDay())
-            ->setStartingDate($this->start?->startOfDay())
-            ->setLabelKey('addressInvoice.name')
-            ->sum('total_net_price', 'address_invoice_id');
+            ->withoutRange()
+            ->count('state');
 
         $this->series = $metrics->getData();
         $this->labels = $metrics->getLabels();
@@ -76,13 +66,5 @@ class RevenueByTopCustomers extends CircleChart
     public function showTitle(): bool
     {
         return true;
-    }
-
-    protected function getListeners(): array
-    {
-        return [
-            'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
-                . ',.OrderLocked' => 'calculateByTimeFrame',
-        ];
     }
 }

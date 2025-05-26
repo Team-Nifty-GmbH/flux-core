@@ -13,7 +13,11 @@
 >
     <div class="pb-2.5">
         <div class="dark:border-secondary-700 border-b border-gray-200">
-            <nav class="soft-scrollbar flex overflow-x-auto" x-ref="tabButtons" wire:loading.class="pointer-events-none">
+            <nav
+                class="soft-scrollbar flex overflow-x-auto"
+                x-ref="tabButtons"
+                wire:loading.class="pointer-events-none"
+            >
                 @foreach ($tabs as $tabButton)
                     {{ $tabButton }}
                 @endforeach

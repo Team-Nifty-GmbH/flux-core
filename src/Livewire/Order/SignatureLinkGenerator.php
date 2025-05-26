@@ -2,8 +2,8 @@
 
 namespace FluxErp\Livewire\Order;
 
+use FluxErp\Livewire\Support\SignatureLinkGenerator as BaseSignatureLinkGenerator;
 use FluxErp\Models\Order;
-use FluxErp\Support\Livewire\SignatureLinkGenerator as BaseSignatureLinkGenerator;
 
 class SignatureLinkGenerator extends BaseSignatureLinkGenerator
 {

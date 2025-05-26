@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\Support\Livewire;
+namespace FluxErp\Livewire\Support;
 
 use FluxErp\Livewire\Forms\CommentForm;
 use FluxErp\Models\Comment;
@@ -59,7 +59,7 @@ abstract class Comments extends Component
 
     public function render(): View|Factory|Application
     {
-        return view('flux::support.comments');
+        return view('flux::livewire.support.comments');
     }
 
     #[Renderless]

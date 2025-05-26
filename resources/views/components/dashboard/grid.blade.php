@@ -26,13 +26,14 @@
                     class="w-full"
                     x-bind:class="editGrid ? 'pointer-events-none' : ''"
                 >
-                    <livewire:is
-                        lazy
-                        :id="$widget['id']"
-                        :component="$widget['component_name'] ?? $widget['class']"
-                        wire:model="params"
-                        wire:key="{{ uniqid() }}"
-                    />
+                    @livewire(
+                        $widget['component_name'] ?? $widget['class'],
+                        array_merge($this->getWidgetAttributes(), [
+                            'widgetId' => $widget['id'],
+                            'wire:model' => $this->wireModel(),
+                        ]),
+                        key(uniqid())
+                    )
                 </div>
             </div>
         </div>

@@ -109,8 +109,10 @@ class Project extends Component
                 ->isLivewireComponent()
                 ->wireModel('project.id')
                 ->text(__('Comments')),
-            TabButton::make('project.statistics')
-                ->text(__('Statistics')),
+            TabButton::make('project.dashboard')
+                ->isLivewireComponent()
+                ->wireModel('project.id')
+                ->text(__('Dashboard')),
         ];
     }
 
