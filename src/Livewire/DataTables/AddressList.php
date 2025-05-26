@@ -12,8 +12,6 @@ use FluxErp\Models\Media;
 use FluxErp\Traits\Livewire\CreatesDocuments;
 use FluxErp\Traits\Livewire\DataTable\AllowRecordMerging;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Routing\Redirector;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -50,7 +48,7 @@ class AddressList extends BaseDataTable
 
     public bool $showMap = false;
 
-    protected ?string $includeBefore = 'flux::livewire.contact.contacts';
+    protected ?string $includeBefore = 'flux::livewire.contact.address-list';
 
     protected string $model = Address::class;
 
@@ -67,7 +65,7 @@ class AddressList extends BaseDataTable
                 ->color('indigo')
                 ->icon('plus')
                 ->attributes([
-                    'x-on:click' => '$wire.show()',
+                    'x-on:click' => '$modalOpen(\'create-contact-modal\')',
                 ])
                 ->when(fn () => resolve_static(CreateContact::class, 'canPerformAction', [false])),
         ];
@@ -202,7 +200,13 @@ class AddressList extends BaseDataTable
     }
 
     #[Renderless]
-    public function save(): false|RedirectResponse|Redirector
+    public function resetForm(): void
+    {
+        $this->contact->reset();
+    }
+
+    #[Renderless]
+    public function save(): bool
     {
         try {
             $this->contact->save();
@@ -212,21 +216,13 @@ class AddressList extends BaseDataTable
             return false;
         }
 
-        $this->notification()->success(__(':model saved', ['model' => __('Contact')]))->send();
+        $this->toast()
+            ->success(__(':model saved', ['model' => __('Contact')]))
+            ->send();
 
-        return redirect(route('contacts.id?', ['id' => $this->contact->id]));
-    }
+        $this->redirectRoute('contacts.id?', ['id' => $this->contact->id], navigate: true);
 
-    #[Renderless]
-    public function show(): void
-    {
-        $this->contact->reset();
-
-        $this->js(
-            <<<'JS'
-               $modalOpen('new-contact-modal');
-            JS
-        );
+        return true;
     }
 
     #[Renderless]
