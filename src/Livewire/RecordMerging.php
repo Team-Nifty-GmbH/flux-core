@@ -92,6 +92,14 @@ class RecordMerging extends Component
             ->whereKey($recordIds)
             ->get();
 
+        if (count($records) < 2) {
+            $this->notification()
+                ->error(__('At least two records are required for merging'))
+                ->send();
+
+            return;
+        }
+
         $casts = [];
         $belongsTos = [];
 
