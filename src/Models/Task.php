@@ -37,7 +37,10 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
 {
     use Categorizable, Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes,
         HasPackageFactory, HasStates, HasTags, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity,
-        Searchable, SoftDeletes, Trackable;
+        SoftDeletes, Trackable;
+    use Searchable {
+        Searchable::scoutIndexSettings as baseScoutIndexSettings;
+    }
 
     protected ?string $detailRouteName = 'tasks.id';
 
@@ -52,9 +55,9 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         ]);
     }
 
-    public static function scoutIndexSettings(): array
+    public static function scoutIndexSettings(): ?array
     {
-        return [
+        return static::baseScoutIndexSettings() ?? [
             'filterableAttributes' => [
                 'project_id',
                 'state',

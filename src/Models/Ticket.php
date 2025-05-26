@@ -33,7 +33,10 @@ class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables
 {
     use Commentable, Communicatable, Filterable, HasAdditionalColumns, HasFrontendAttributes, HasPackageFactory,
         HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification, HasUuid, InteractsWithMedia,
-        LogsActivity, Searchable, SoftDeletes, Trackable;
+        LogsActivity, SoftDeletes, Trackable;
+    use Searchable {
+        Searchable::scoutIndexSettings as baseScoutIndexSettings;
+    }
 
     public static string $iconName = 'chat-bubble-left-right';
 
@@ -43,9 +46,9 @@ class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables
         'ticketType',
     ];
 
-    public static function scoutIndexSettings(): array
+    public static function scoutIndexSettings(): ?array
     {
-        return [
+        return static::baseScoutIndexSettings() ?? [
             'filterableAttributes' => [
                 'authenticatable_type',
                 'authenticatable_id',

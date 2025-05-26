@@ -9,12 +9,9 @@ trait Searchable
 {
     use BaseSearchable;
 
-    public static function scoutIndexSettings(): array
+    public static function scoutIndexSettings(): ?array
     {
-        return config(
-            'scout.' . config('scout.driver') . '.index-settings.' . static::class,
-            []
-        );
+        return config('scout.' . config('scout.driver') . '.index-settings.' . static::class);
     }
 
     public function toSearchableArray(): array

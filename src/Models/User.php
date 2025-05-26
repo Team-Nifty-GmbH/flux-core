@@ -43,8 +43,10 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
 {
     use CacheModelQueries, Filterable, HasCalendars, HasCalendarUserSettings, HasCart, HasDatatableUserSettings,
         HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasPushSubscriptions, HasRoles,
-        HasUserModification, HasUuid, HasWidgets, InteractsWithMedia, MonitorsQueue, Notifiable, Searchable,
-        SoftDeletes;
+        HasUserModification, HasUuid, HasWidgets, InteractsWithMedia, MonitorsQueue, Notifiable, SoftDeletes;
+    use Searchable {
+        Searchable::scoutIndexSettings as baseScoutIndexSettings;
+    }
 
     public static string $iconName = 'user';
 
@@ -69,9 +71,9 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
         return false;
     }
 
-    public static function scoutIndexSettings(): array
+    public static function scoutIndexSettings(): ?array
     {
-        return [
+        return static::baseScoutIndexSettings() ?? [
             'filterableAttributes' => [
                 'is_active',
             ],

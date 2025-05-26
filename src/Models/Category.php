@@ -24,7 +24,10 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 class Category extends FluxModel implements InteractsWithDataTables, Sortable
 {
     use Filterable, HasAdditionalColumns, HasAttributeTranslations, HasPackageFactory, HasParentChildRelations,
-        HasUserModification, HasUuid, LogsActivity, Searchable, SortableTrait;
+        HasUserModification, HasUuid, LogsActivity, SortableTrait;
+    use Searchable {
+        Searchable::scoutIndexSettings as baseScoutIndexSettings;
+    }
 
     public array $sortable = [
         'order_column_name' => 'sort_number',
@@ -58,9 +61,9 @@ class Category extends FluxModel implements InteractsWithDataTables, Sortable
             });
     }
 
-    public static function scoutIndexSettings(): array
+    public static function scoutIndexSettings(): ?array
     {
-        return [
+        return static::baseScoutIndexSettings() ?? [
             'filterableAttributes' => [
                 'model_type',
             ],

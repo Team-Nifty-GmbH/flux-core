@@ -34,7 +34,10 @@ class Project extends FluxModel implements Calendarable, HasMedia, InteractsWith
 {
     use Commentable, Filterable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes, HasPackageFactory,
         HasParentChildRelations, HasSerialNumberRange, HasStates, HasTags, HasUserModification, HasUuid,
-        InteractsWithMedia, LogsActivity, Searchable, SoftDeletes;
+        InteractsWithMedia, LogsActivity, SoftDeletes;
+    use Searchable {
+        Searchable::scoutIndexSettings as baseScoutIndexSettings;
+    }
 
     protected static string $iconName = 'briefcase';
 
@@ -51,9 +54,9 @@ class Project extends FluxModel implements Calendarable, HasMedia, InteractsWith
         ]);
     }
 
-    public static function scoutIndexSettings(): array
+    public static function scoutIndexSettings(): ?array
     {
-        return [
+        return static::baseScoutIndexSettings() ?? [
             'filterableAttributes' => [
                 'parent_id',
                 'state',

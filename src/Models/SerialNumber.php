@@ -22,15 +22,18 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 class SerialNumber extends FluxModel implements HasMedia, InteractsWithDataTables
 {
     use Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes, HasPackageFactory, HasUserModification,
-        HasUuid, InteractsWithMedia, LogsActivity, Searchable;
+        HasUuid, InteractsWithMedia, LogsActivity;
+    use Searchable {
+        Searchable::scoutIndexSettings as baseScoutIndexSettings;
+    }
 
     public static string $iconName = 'tag';
 
     protected ?string $detailRouteName = 'products.serial-numbers.id?';
 
-    public static function scoutIndexSettings(): array
+    public static function scoutIndexSettings(): ?array
     {
-        return [
+        return static::baseScoutIndexSettings() ?? [
             'filterableAttributes' => [
                 'address_id',
             ],

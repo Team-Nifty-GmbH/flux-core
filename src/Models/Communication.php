@@ -170,7 +170,9 @@ class Communication extends FluxModel implements HasMedia, OffersPrinting
 
     public function toSearchableArray(): array
     {
-        return ScoutCustomize::make($this)->except('html_body')->toSearchableArray();
+        return ScoutCustomize::make($this)
+            ->except('html_body')
+            ->toSearchableArray();
     }
 
     protected function bccMail(): Attribute

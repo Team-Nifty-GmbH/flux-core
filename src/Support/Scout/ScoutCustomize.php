@@ -28,7 +28,7 @@ class ScoutCustomize
     public function toSearchableArray(): array
     {
         if ($this->fresh) {
-            $this->model->fresh($this->with);
+            $this->model->withoutRelations()->refresh();
         }
 
         if ($this->with) {
@@ -40,7 +40,7 @@ class ScoutCustomize
                 $this->model->toArray(),
                 $this->except
             ),
-            config('scout.sorted_searchable_keys.' . $this->model::class, []),
+            config('scout.sorted_searchable_keys.' . get_class($this->model), []),
         );
     }
 
@@ -51,9 +51,9 @@ class ScoutCustomize
         return $this;
     }
 
-    public function withoutFresh(bool $fresh = false): static
+    public function withoutFresh(bool $withoutFresh = true): static
     {
-        $this->fresh = $fresh;
+        $this->fresh = ! $withoutFresh;
 
         return $this;
     }

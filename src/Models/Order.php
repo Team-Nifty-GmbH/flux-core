@@ -63,11 +63,14 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
 {
     use CascadeSoftDeletes, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasClientAssignment,
         HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasRelatedModel, HasSerialNumberRange,
-        HasStates, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable, Searchable,
-        Trackable {
-            Printable::resolvePrintViews as protected printableResolvePrintViews;
-            HasSerialNumberRange::getSerialNumber as protected hasSerialNumberRangeGetSerialNumber;
-        }
+        HasStates, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable;
+    use Searchable {
+        Searchable::scoutIndexSettings as baseScoutIndexSettings;
+    }
+    use Trackable {
+        Printable::resolvePrintViews as protected printableResolvePrintViews;
+        HasSerialNumberRange::getSerialNumber as protected hasSerialNumberRangeGetSerialNumber;
+    }
 
     public static string $iconName = 'shopping-bag';
 
@@ -91,9 +94,9 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
         );
     }
 
-    public static function scoutIndexSettings(): array
+    public static function scoutIndexSettings(): ?array
     {
-        return [
+        return static::baseScoutIndexSettings() ?? [
             'filterableAttributes' => [
                 'parent_id',
                 'contact_id',

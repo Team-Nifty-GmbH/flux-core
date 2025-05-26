@@ -10,7 +10,10 @@ use Spatie\Permission\Models\Permission as SpatiePermission;
 
 class Permission extends SpatiePermission
 {
-    use Filterable, ResolvesRelationsThroughContainer, Searchable;
+    use Filterable, ResolvesRelationsThroughContainer;
+    use Searchable {
+        Searchable::scoutIndexSettings as baseScoutIndexSettings;
+    }
 
     protected $guarded = [
         'id',
@@ -18,9 +21,9 @@ class Permission extends SpatiePermission
 
     protected $hidden = ['pivot'];
 
-    public static function scoutIndexSettings(): array
+    public static function scoutIndexSettings(): ?array
     {
-        return [
+        return static::baseScoutIndexSettings() ?? [
             'filterableAttributes' => [
                 'guard_name',
             ],
