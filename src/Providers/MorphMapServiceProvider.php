@@ -27,6 +27,7 @@ use FluxErp\Models\CountryRegion;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Discount;
 use FluxErp\Models\DiscountGroup;
+use FluxErp\Models\EmailTemplate;
 use FluxErp\Models\EventSubscription;
 use FluxErp\Models\Favorite;
 use FluxErp\Models\FormBuilderField;
@@ -138,6 +139,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'currency' => Currency::class,
             'discount' => Discount::class,
             'discount_group' => DiscountGroup::class,
+            'email_template' => EmailTemplate::class,
             'event_subscription' => EventSubscription::class,
             'favorite' => Favorite::class,
             'form_builder_field' => FormBuilderField::class,
