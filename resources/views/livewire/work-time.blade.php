@@ -127,7 +127,6 @@
         <x-card
             id="active-work-times"
             class="flex max-w-md flex-col gap-4"
-            :header="__('Active Work Times')"
         >
             <x-slot:header>
                 <div class="flex w-full items-center justify-between gap-4">

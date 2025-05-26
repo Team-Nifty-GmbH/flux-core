@@ -13,7 +13,7 @@
         </x-flux::checkbox-tree>
     </x-card>
     <x-card>
-        <x-slot:title>
+        <x-slot:header>
             <div x-text="$wire.setting.path" />
         </x-slot>
         <x-flux::spinner />
