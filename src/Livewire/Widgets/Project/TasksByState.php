@@ -3,9 +3,9 @@
 namespace FluxErp\Livewire\Widgets\Project;
 
 use FluxErp\Livewire\Project\Dashboard;
+use FluxErp\Livewire\Support\Widgets\Charts\CircleChart;
 use FluxErp\Models\Task;
 use FluxErp\Support\Metrics\Charts\Donut;
-use FluxErp\Support\Widgets\Charts\CircleChart;
 use FluxErp\Traits\Widgetable;
 use Livewire\Attributes\Renderless;
 
@@ -21,7 +21,7 @@ class TasksByState extends CircleChart
 
     public bool $showTotals = false;
 
-    public static function dashboardComponent(): string
+    public static function dashboardComponent(): array|string
     {
         return Dashboard::class;
     }

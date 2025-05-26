@@ -120,9 +120,9 @@ trait RendersWidgets
                 $name = $widget['component_name'];
 
                 if (
-                    ! data_get($widget, 'dashboard_component')
-                    || resolve_static(static::class, 'class')
-                        !== resolve_static(data_get($widget, 'dashboard_component'), 'class')
+                    collect(Arr::wrap(data_get($widget, 'dashboard_component')))
+                        ->map(fn (string $dashboardClass) => resolve_static($dashboardClass, 'class'))
+                        ->doesntContain(static::class)
                 ) {
                     return false;
                 }

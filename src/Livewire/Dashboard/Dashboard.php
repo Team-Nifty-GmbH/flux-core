@@ -2,7 +2,7 @@
 
 namespace FluxErp\Livewire\Dashboard;
 
-use FluxErp\Support\Livewire\Dashboard as BaseDashboard;
+use FluxErp\Livewire\Support\Dashboard as BaseDashboard;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;

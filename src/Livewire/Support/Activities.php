@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\Support\Livewire;
+namespace FluxErp\Livewire\Support;
 
 use FluxErp\Models\User;
 use Illuminate\Contracts\Foundation\Application;
@@ -32,7 +32,7 @@ abstract class Activities extends Component
 
     public function render(): View|Factory|Application
     {
-        return view('flux::support.activities');
+        return view('flux::livewire.support.activities');
     }
 
     public function loadData(): void

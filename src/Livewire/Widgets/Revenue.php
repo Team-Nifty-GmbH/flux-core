@@ -3,10 +3,10 @@
 namespace FluxErp\Livewire\Widgets;
 
 use FluxErp\Livewire\Dashboard\Dashboard;
+use FluxErp\Livewire\Support\Widgets\ValueBox;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Order;
 use FluxErp\Support\Metrics\Value;
-use FluxErp\Support\Widgets\ValueBox;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use Illuminate\Support\Number;
 use Livewire\Attributes\Renderless;
@@ -15,7 +15,7 @@ class Revenue extends ValueBox
 {
     use IsTimeFrameAwareWidget;
 
-    public static function dashboardComponent(): string
+    public static function dashboardComponent(): array|string
     {
         return Dashboard::class;
     }

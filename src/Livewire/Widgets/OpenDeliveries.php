@@ -5,9 +5,9 @@ namespace FluxErp\Livewire\Widgets;
 use FluxErp\Contracts\HasWidgetOptions;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\Order\OrderList;
+use FluxErp\Livewire\Support\Widgets\ValueBox;
 use FluxErp\Models\Order;
 use FluxErp\States\Order\DeliveryState\Open;
-use FluxErp\Support\Widgets\ValueBox;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Renderless;
 use Livewire\Livewire;
@@ -17,7 +17,7 @@ class OpenDeliveries extends ValueBox implements HasWidgetOptions
 {
     public bool $shouldBePositive = false;
 
-    public static function dashboardComponent(): string
+    public static function dashboardComponent(): array|string
     {
         return Dashboard::class;
     }

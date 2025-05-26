@@ -2,8 +2,8 @@
 
 namespace FluxErp\Livewire\Lead;
 
+use FluxErp\Livewire\Support\Comments as BaseComments;
 use FluxErp\Models\Lead;
-use FluxErp\Support\Livewire\Comments as BaseComments;
 
 class Comments extends BaseComments
 {

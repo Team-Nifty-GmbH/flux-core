@@ -2,8 +2,8 @@
 
 namespace FluxErp\Livewire\Address;
 
+use FluxErp\Livewire\Support\Activities as BaseActivities;
 use FluxErp\Models\Address;
-use FluxErp\Support\Livewire\Activities as BaseActivities;
 
 class Activities extends BaseActivities
 {

@@ -1,4 +1,4 @@
-@extends('flux::support.dashboard')
+@extends('flux::livewire.support.dashboard')
 
 @section('dashboard-header')
     <div class="pb-6 md:flex md:items-center md:justify-between md:space-x-5">

@@ -12,7 +12,7 @@ class PurchaseInvoiceApproval extends Component
 {
     use Widgetable;
 
-    public static function dashboardComponent(): string
+    public static function dashboardComponent(): array|string
     {
         return Dashboard::class;
     }

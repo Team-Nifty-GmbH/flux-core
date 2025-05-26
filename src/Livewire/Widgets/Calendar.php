@@ -21,7 +21,7 @@ class Calendar extends BaseCalendar
     #[Locked]
     public bool $showInvites = false;
 
-    public static function dashboardComponent(): string
+    public static function dashboardComponent(): array|string
     {
         return Dashboard::class;
     }

@@ -2,8 +2,8 @@
 
 namespace FluxErp\Livewire\Ticket;
 
+use FluxErp\Livewire\Support\Comments as BaseComments;
 use FluxErp\Models\Ticket;
-use FluxErp\Support\Livewire\Comments as BaseComments;
 use Livewire\Attributes\Renderless;
 
 class Comments extends BaseComments

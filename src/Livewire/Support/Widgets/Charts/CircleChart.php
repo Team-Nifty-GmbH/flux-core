@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\Support\Widgets\Charts;
+namespace FluxErp\Livewire\Support\Widgets\Charts;
 
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -15,7 +15,7 @@ abstract class CircleChart extends Chart
 
     public function render(): View|Factory
     {
-        return view('flux::support.widgets.charts.circle-chart');
+        return view('flux::livewire.support.widgets.charts.circle-chart');
     }
 
     public function placeholder(): View|Factory

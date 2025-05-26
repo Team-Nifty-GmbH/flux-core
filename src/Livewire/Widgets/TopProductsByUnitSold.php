@@ -5,10 +5,10 @@ namespace FluxErp\Livewire\Widgets;
 use FluxErp\Enums\GrowthRateTypeEnum;
 use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Livewire\Dashboard\Dashboard;
+use FluxErp\Livewire\Support\Widgets\ValueList;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Support\Calculation\Rounding;
-use FluxErp\Support\Widgets\ValueList;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Renderless;
@@ -17,7 +17,7 @@ class TopProductsByUnitSold extends ValueList
 {
     use IsTimeFrameAwareWidget;
 
-    public static function dashboardComponent(): string
+    public static function dashboardComponent(): array|string
     {
         return Dashboard::class;
     }

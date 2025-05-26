@@ -2,7 +2,7 @@
 
 namespace FluxErp\Livewire\Project;
 
-use FluxErp\Support\Livewire\Dashboard as BaseDashboard;
+use FluxErp\Livewire\Support\Dashboard as BaseDashboard;
 use Livewire\Attributes\Modelable;
 
 class Dashboard extends BaseDashboard

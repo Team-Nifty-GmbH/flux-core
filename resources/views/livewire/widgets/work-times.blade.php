@@ -1,4 +1,4 @@
-@extends('flux::support.widgets.charts.bar-chart')
+@extends('flux::livewire.support.widgets.charts.bar-chart')
 @section('options')
     <div class="px-6">
         <x-select.styled

@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\Support\Widgets\Charts;
+namespace FluxErp\Livewire\Support\Widgets\Charts;
 
 abstract class LineChart extends BarChart
 {

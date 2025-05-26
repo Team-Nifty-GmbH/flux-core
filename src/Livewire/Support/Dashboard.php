@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\Support\Livewire;
+namespace FluxErp\Livewire\Support;
 
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\RendersWidgets;
@@ -19,7 +19,7 @@ abstract class Dashboard extends Component
 
     public function render(): View|Factory|Application
     {
-        return view('flux::support.dashboard');
+        return view('flux::livewire.support.dashboard');
     }
 
     public function getWidgetAttributes(): array

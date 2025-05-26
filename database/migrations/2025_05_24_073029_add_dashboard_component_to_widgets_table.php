@@ -1,9 +1,9 @@
 <?php
 
-use FluxErp\Livewire\Dashboard\Dashboard;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
 
 return new class() extends Migration
@@ -21,7 +21,12 @@ return new class() extends Migration
 
         DB::table('widgets')
             ->update([
-                'dashboard_component' => resolve_static(Dashboard::class, 'class'),
+                'dashboard_component' => resolve_static(
+                    Route::getRoutes()
+                        ->getByName('dashboard')
+                        ->getAction('controller'),
+                    'class'
+                ),
             ]);
 
         Schema::table('widgets', function (Blueprint $table): void {

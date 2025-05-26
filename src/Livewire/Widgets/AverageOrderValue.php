@@ -4,11 +4,11 @@ namespace FluxErp\Livewire\Widgets;
 
 use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Livewire\Dashboard\Dashboard;
+use FluxErp\Livewire\Support\Widgets\Charts\LineChart;
 use FluxErp\Models\Order;
 use FluxErp\Support\Metrics\Charts\Line;
 use FluxErp\Support\Metrics\Trend;
 use FluxErp\Support\Metrics\Value;
-use FluxErp\Support\Widgets\Charts\LineChart;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use FluxErp\Traits\MoneyChartFormattingTrait;
 use Livewire\Attributes\Renderless;
@@ -17,7 +17,7 @@ class AverageOrderValue extends LineChart
 {
     use IsTimeFrameAwareWidget, MoneyChartFormattingTrait;
 
-    public static function dashboardComponent(): string
+    public static function dashboardComponent(): array|string
     {
         return Dashboard::class;
     }

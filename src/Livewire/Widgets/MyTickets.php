@@ -19,7 +19,7 @@ class MyTickets extends Component
 
     protected ?Collection $tickets = null;
 
-    public static function dashboardComponent(): string
+    public static function dashboardComponent(): array|string
     {
         return Dashboard::class;
     }

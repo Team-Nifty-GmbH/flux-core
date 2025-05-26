@@ -3,12 +3,12 @@
 namespace FluxErp\Livewire\Widgets;
 
 use FluxErp\Livewire\Dashboard\Dashboard;
+use FluxErp\Livewire\Support\Widgets\ValueList;
 use FluxErp\Models\WorkTime;
-use FluxErp\Support\Widgets\ValueList;
 
 class ActiveDailyWorkTimes extends ValueList
 {
-    public static function dashboardComponent(): string
+    public static function dashboardComponent(): array|string
     {
         return Dashboard::class;
     }

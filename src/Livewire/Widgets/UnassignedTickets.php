@@ -12,7 +12,7 @@ class UnassignedTickets extends MyTickets
 {
     use Widgetable;
 
-    public static function dashboardComponent(): string
+    public static function dashboardComponent(): array|string
     {
         return Dashboard::class;
     }

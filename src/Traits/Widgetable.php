@@ -7,7 +7,7 @@ use Illuminate\Support\Str;
 
 trait Widgetable
 {
-    abstract public static function dashboardComponent(): string;
+    abstract public static function dashboardComponent(): array|string;
 
     public static function getLabel(): string
     {

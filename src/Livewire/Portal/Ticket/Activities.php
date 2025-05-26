@@ -2,8 +2,8 @@
 
 namespace FluxErp\Livewire\Portal\Ticket;
 
+use FluxErp\Livewire\Support\Activities as BaseActivities;
 use FluxErp\Models\Ticket;
-use FluxErp\Support\Livewire\Activities as BaseActivities;
 
 class Activities extends BaseActivities
 {
