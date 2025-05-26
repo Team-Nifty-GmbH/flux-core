@@ -19,14 +19,20 @@ return new class() extends Migration
                 ->after('dashboard_component');
         });
 
+        try {
+            $defaultDashboard = resolve_static(
+                Route::getRoutes()
+                    ->getByName('dashboard')
+                    ->getAction('controller'),
+                'class'
+            );
+        } catch (Throwable $e) {
+            $defaultDashboard = 'unknown';
+        }
+
         DB::table('widgets')
             ->update([
-                'dashboard_component' => resolve_static(
-                    Route::getRoutes()
-                        ->getByName('dashboard')
-                        ->getAction('controller'),
-                    'class'
-                ),
+                'dashboard_component' => $defaultDashboard,
             ]);
 
         Schema::table('widgets', function (Blueprint $table): void {
