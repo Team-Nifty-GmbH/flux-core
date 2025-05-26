@@ -59,13 +59,8 @@ trait Categorizable
                 : ($this->categories()->count() === 1 ? $this->categories()->first()?->id : null),
             set: fn ($value) => $this->hasCategoryIdAttribute()
                 ? $value
-                : self::$categoryIds = $value
+                : static::$categoryIds = $value
         );
-    }
-
-    public function getFirstCategory(): HasOne
-    {
-        return $this->hasOne(Category::class, 'id', 'category_id');
     }
 
     /**
