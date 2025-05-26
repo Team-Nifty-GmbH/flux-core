@@ -135,7 +135,7 @@ class MergeRecords extends FluxAction
                                 $mainRecord->getMorphClass()
                             )
                         )
-                        ->where($relation->getQualifiedForeignKeyName(), $this->getData('merge_records.*.id'))
+                        ->whereIn($relation->getQualifiedForeignKeyName(), $this->getData('merge_records.*.id'))
                         ->update([
                             $relation->getQualifiedForeignKeyName() => $mainRecord->getKey(),
                         ]);
