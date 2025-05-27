@@ -16,6 +16,8 @@ trait RendersWidgets
 {
     use EnsureUsedInLivewire;
 
+    protected static ?array $defaultWidgets = null;
+
     public array $availableWidgets = [];
 
     public array $params = [
@@ -53,7 +55,7 @@ trait RendersWidgets
     }
 
     #[Renderless]
-    public function saveWidgets(array $widgets): void
+    public function saveWidgets(?array $widgets = null): void
     {
         $this->widgets = $widgets;
 
@@ -97,13 +99,15 @@ trait RendersWidgets
     #[Renderless]
     public function widgets(): void
     {
-        $this->widgets = $this->filterWidgets(
-            auth()
-                ->user()
-                ?->widgets()
-                ->where('dashboard_component', static::class)
-                ->get()
-                ->toArray() ?? []
+        $this->widgets = array_values(
+            $this->filterWidgets(
+                auth()
+                    ->user()
+                    ?->widgets()
+                    ->where('dashboard_component', static::class)
+                    ->get()
+                    ->toArray() ?: static::getDefaultWidgets() ?? []
+            )
         );
     }
 

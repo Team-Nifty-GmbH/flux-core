@@ -77,6 +77,11 @@ class AverageOrderValue extends LineChart
         $this->xaxis['categories'] = $revenue->getLabels();
     }
 
+    public function showTitle(): bool
+    {
+        return ! $this->showTotals;
+    }
+
     protected function getListeners(): array
     {
         return [

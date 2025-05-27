@@ -30,10 +30,11 @@
         <div class="flex flex-col items-center gap-2 md:flex-row">
             <x-button
                 color="secondary"
+                loading
                 light
                 x-cloak
                 x-show="!editGrid"
-                x-on:click="isLoading ? pendingMessage : editGridMode(true)"
+                x-on:click="editGridMode(true)"
                 icon="pencil"
                 class="flex-shrink-0"
             />
@@ -47,12 +48,14 @@
                 />
                 <x-button
                     color="indigo"
-                    x-on:click="isLoading ? pendingMessage : save"
+                    loading
+                    x-on:click="save"
                     :text="__('Save')"
                     class="flex-shrink-0"
                 />
                 <x-button
                     color="red"
+                    loading
                     wire:flux-confirm.type.error="{{ __('wire:confirm.cancel.dashboard-edit') }}"
                     wire:click="resetWidgets().then(() => {reInit().disable(); isLoading = false; editGridMode(false);})"
                     class="flex-shrink-0"
