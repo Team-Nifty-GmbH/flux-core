@@ -17,6 +17,16 @@ abstract class Dashboard extends Component
 
     protected bool $hasTimeSelector = true;
 
+    public static function getDefaultWidgets(): ?array
+    {
+        return static::$defaultWidgets;
+    }
+
+    public static function setDefaultWidgets(?array $defaultWidgets): void
+    {
+        static::$defaultWidgets = $defaultWidgets;
+    }
+
     public function render(): View|Factory|Application
     {
         return view('flux::livewire.support.dashboard');

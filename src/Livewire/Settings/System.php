@@ -2,114 +2,60 @@
 
 namespace FluxErp\Livewire\Settings;
 
-use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Number;
-use Livewire\Component;
-use Symfony\Component\Console\Output\BufferedOutput;
+use FluxErp\Facades\Widget;
+use FluxErp\Livewire\Support\Dashboard;
+use FluxErp\Livewire\Widgets\Settings\System\Cache;
+use FluxErp\Livewire\Widgets\Settings\System\Database;
+use FluxErp\Livewire\Widgets\Settings\System\Extensions;
+use FluxErp\Livewire\Widgets\Settings\System\Laravel;
+use FluxErp\Livewire\Widgets\Settings\System\Php;
+use FluxErp\Livewire\Widgets\Settings\System\Queue;
+use FluxErp\Livewire\Widgets\Settings\System\Server;
+use FluxErp\Livewire\Widgets\Settings\System\Session;
+use FluxErp\Livewire\Widgets\Settings\System\Storage;
+use Illuminate\Support\Str;
 
-class System extends Component
+class System extends Dashboard
 {
-    public bool $showDetails = false;
+    protected static ?array $defaultWidgets = [
+        'default' => [
+        ],
+    ];
 
-    public function render(): View
+    protected bool $hasTimeSelector = false;
+
+    public static function getDefaultOrderColumn(): int
     {
-        return view('flux::livewire.settings.system', [
-            'systemData' => $this->getSystemData(),
-        ]);
+        return 1;
     }
 
-    public function getSystemData(): array
+    public static function getDefaultOrderRow(): int
     {
-        // call artisan db:show with --json
-        Artisan::call(
-            'db:show',
-            [
-                '--json' => true,
-                '--counts' => true,
-            ],
-            $output = new BufferedOutput()
-        );
-
-        return [
-            'php' => [
-                'version' => phpversion(),
-                'memory_limit' => ini_get('memory_limit'),
-                'max_execution_time' => ini_get('max_execution_time'),
-                'upload_max_filesize' => ini_get('upload_max_filesize'),
-                'post_max_size' => ini_get('post_max_size'),
-            ],
-            'server' => [
-                'software' => $_SERVER['SERVER_SOFTWARE'] ?? 'Unknown',
-                'os' => php_uname(),
-                'document_root' => $_SERVER['DOCUMENT_ROOT'] ?? 'Unknown',
-                'server_name' => $_SERVER['SERVER_NAME'] ?? 'Unknown',
-            ],
-            'laravel' => [
-                'version' => app()->version(),
-                'environment' => app()->environment(),
-                'debug_mode' => config('app.debug'),
-                'timezone' => config('app.timezone'),
-                'locale' => config('app.locale'),
-            ],
-            'database' => [
-                'connection' => config('database.default'),
-                'driver' => config('database.connections.' . config('database.default') . '.driver'),
-                'host' => config('database.connections.' . config('database.default') . '.host'),
-                'port' => config('database.connections.' . config('database.default') . '.port'),
-                'details' => json_decode($output->fetch(), true),
-            ],
-            'cache' => [
-                'driver' => config('cache.default'),
-                'prefix' => config('cache.prefix'),
-            ],
-            'session' => [
-                'driver' => config('session.driver'),
-                'lifetime' => config('session.lifetime'),
-                'secure' => config('session.secure'),
-                'same_site' => config('session.same_site'),
-            ],
-            'queue' => [
-                'connection' => config('queue.default'),
-                'driver' => config('queue.connections.' . config('queue.default') . '.driver'),
-                'queue' => config('queue.connections.' . config('queue.default') . '.queue'),
-            ],
-            'extensions' => $this->getPhpExtensions(),
-            'storage' => [
-                'disk_free_space' => Number::fileSize(disk_free_space('/'), 2),
-                'disk_total_space' => Number::fileSize(disk_total_space('/'), 2),
-                'view_cache_space' => Number::fileSize(
-                    array_reduce(
-                        glob(storage_path('framework/views/*')),
-                        fn ($carry, $item) => $carry + (is_dir($item) ? 0 : filesize($item)),
-                        0
-                    ),
-                    2
-                ),
-            ],
-        ];
+        return 0;
     }
 
-    public function refreshSystemInfo(): void
+    public static function getDefaultWidgets(): array
     {
-        $this->dispatch('system-refreshed');
-    }
+        return collect([
+            Widget::get(Cache::class),
+            Widget::get(Database::class),
+            Widget::get(Extensions::class),
+            Widget::get(Laravel::class),
+            Widget::get(Php::class),
+            Widget::get(Queue::class),
+            Widget::get(Server::class),
+            Widget::get(Session::class),
+            Widget::get(Storage::class),
+        ])
+            ->map(function ($widget) {
+                $widget['id'] ??= Str::uuid()->toString();
+                $widget['width'] ??= data_get($widget, 'defaultWidth');
+                $widget['height'] ??= data_get($widget, 'defaultHeight');
+                $widget['order_column'] ??= data_get($widget, 'defaultOrderColumn');
+                $widget['order_row'] ??= data_get($widget, 'defaultOrderRow');
 
-    public function toggleDetails(): void
-    {
-        $this->showDetails = ! $this->showDetails;
-    }
-
-    protected function getPhpExtensions(): array
-    {
-        $loadedExtensions = get_loaded_extensions();
-        sort($loadedExtensions);
-
-        $extensions = [];
-        foreach ($loadedExtensions as $extension) {
-            $extensions[strtolower($extension)] = true;
-        }
-
-        return $extensions;
+                return $widget;
+            })
+            ->toArray();
     }
 }
