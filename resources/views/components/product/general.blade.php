@@ -276,7 +276,7 @@
                     class="w-1/2"
                 >
                     <x-card>
-                        <x-slot:title>
+                        <x-slot:header>
                             <span x-text="productPropertyGroup?.name"></span>
                         </x-slot>
                         <template

@@ -92,6 +92,14 @@ class RecordMerging extends Component
             ->whereKey($recordIds)
             ->get();
 
+        if (count($records) < 2) {
+            $this->notification()
+                ->error(__('At least two records are required for merging'))
+                ->send();
+
+            return;
+        }
+
         $casts = [];
         $belongsTos = [];
 
@@ -99,7 +107,11 @@ class RecordMerging extends Component
             $this->columns = array_map(
                 fn ($column) => [
                     'name' => $column,
-                    'label' => __(Str::headline(Str::beforeLast($column, '_id'))),
+                    'label' => __(
+                        Str::headline(
+                            str_ends_with($column, '_id') ? Str::beforeLast($column, '_id') : $column
+                        )
+                    ),
                 ],
                 array_values(array_filter(
                     Schema::getColumnListing($records->first()->getTable()),

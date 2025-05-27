@@ -34,7 +34,7 @@
         x-for="(productCrossSelling, index) in $wire.productCrossSellings ?? []"
     >
         <x-card>
-            <x-slot:title>
+            <x-slot:header>
                 <div class="flex w-full justify-between">
                     <span x-text="productCrossSelling.name"></span>
                 </div>
