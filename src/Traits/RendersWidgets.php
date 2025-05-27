@@ -57,7 +57,7 @@ trait RendersWidgets
     #[Renderless]
     public function saveWidgets(?array $widgets = null): void
     {
-        //        $this->widgets = $widgets ?? $this->widgets;
+        $this->widgets = $widgets;
 
         $existingItemIds = array_filter(Arr::pluck($this->widgets, 'id'), 'is_numeric');
         auth()
