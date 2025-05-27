@@ -16,7 +16,7 @@
                 <span class="text-sm text-gray-600 dark:text-gray-400">
                     {{ __('Session Driver') }}
                 </span>
-                <x-badge color="purple">
+                <x-badge color="indigo">
                     <x-slot:text>
                         <span x-text="$wire.driver"></span>
                     </x-slot>
@@ -50,12 +50,4 @@
             </div>
         </div>
     </div>
-
-    <x-button
-        wire:click="clearCache"
-        color="indigo"
-        size="sm"
-        icon="trash"
-        :text="__('Clear Cache')"
-    />
 </div>

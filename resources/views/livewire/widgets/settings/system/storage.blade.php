@@ -46,8 +46,7 @@
     </div>
     <x-button
         wire:click="clearViewCache"
-        color="indigo"
-        size="sm"
+        loading="clearViewCache"
         icon="trash"
         :text="__('Clear View Cache')"
     />

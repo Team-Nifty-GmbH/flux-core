@@ -3,15 +3,19 @@
 namespace FluxErp\Livewire\Widgets\Settings\System;
 
 use FluxErp\Livewire\Settings\System;
+use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Widgetable;
 use Illuminate\Contracts\View\View;
+use Illuminate\Foundation\Console\ViewClearCommand;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Number;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
+use Symfony\Component\Console\Output\BufferedOutput;
 
 class Storage extends Component
 {
-    use Widgetable;
+    use Actions, Widgetable;
 
     public ?string $disk_free_space = null;
 
@@ -42,6 +46,19 @@ class Storage extends Component
     public function render(): View
     {
         return view('flux::livewire.widgets.settings.system.storage');
+    }
+
+    #[Renderless]
+    public function clearViewCache(): void
+    {
+        $result = Artisan::call(ViewClearCommand::class, [], $output = new BufferedOutput());
+
+        if ($result === 0) {
+            $this->toast()->success(trim($output->fetch()))->send();
+            $this->getData();
+        } else {
+            $this->toast()->error(trim($output->fetch()))->send();
+        }
     }
 
     #[Renderless]

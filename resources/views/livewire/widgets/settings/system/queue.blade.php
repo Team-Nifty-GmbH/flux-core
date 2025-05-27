@@ -1,4 +1,7 @@
-<div class="flex h-full flex-col justify-between p-4" wire:poll.30s="getData">
+<div
+    class="flex h-full flex-col justify-between gap-4 p-4"
+    wire:poll.30s="getData"
+>
     <div class="flex flex-col gap-4">
         <div class="flex items-center gap-2">
             <div
@@ -19,7 +22,7 @@
                 <span class="text-sm text-gray-600 dark:text-gray-400">
                     {{ __('Queue Connection') }}
                 </span>
-                <x-badge color="purple">
+                <x-badge color="indigo">
                     <x-slot:text>
                         <span x-text="$wire.connection"></span>
                     </x-slot>
@@ -29,7 +32,7 @@
                 <span class="text-sm text-gray-600 dark:text-gray-400">
                     {{ __('Queue Driver') }}
                 </span>
-                <x-badge color="purple">
+                <x-badge color="indigo">
                     <x-slot:text>
                         <span x-text="$wire.driver"></span>
                     </x-slot>
@@ -48,7 +51,7 @@
 
             <div class="flex items-center justify-between">
                 <span class="text-sm text-gray-600 dark:text-gray-400">
-                    {{ __('Queue size') }}
+                    {{ __('Queue Size') }}
                 </span>
                 <span
                     class="text-sm font-medium text-gray-900 dark:text-white"
@@ -57,20 +60,22 @@
             </div>
         </div>
     </div>
-    <div class="flex items-center justify-end gap-2">
+    <div class="flex flex-col gap-2">
         <x-button
             wire:click="clearQueue"
-            color="indigo"
-            size="sm"
+            wire:flux-confirm.type.warning="{{ __('wire:confirm.clear.queue') }}"
+            color="red"
+            loading="clearQueue"
             icon="trash"
             :text="__('Clear Queue')"
+            class="w-full"
         />
         <x-button
             wire:click="restartQueue"
-            color="indigo"
-            size="sm"
+            loading="restartQueue"
             icon="arrow-path"
             :text="__('Restart Queue')"
+            class="w-full"
         />
     </div>
 </div>

@@ -18,7 +18,7 @@
             <span class="text-sm text-gray-600 dark:text-gray-400">
                 {{ __('Version') }}
             </span>
-            <x-badge color="purple">
+            <x-badge color="indigo">
                 <x-slot:text>
                     <span x-text="$wire.version"></span>
                 </x-slot>

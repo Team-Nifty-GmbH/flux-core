@@ -3,15 +3,20 @@
 namespace FluxErp\Livewire\Widgets\Settings\System;
 
 use FluxErp\Livewire\Settings\System;
+use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Widgetable;
 use Illuminate\Contracts\View\View;
+use Illuminate\Queue\Console\ClearCommand;
+use Illuminate\Queue\Console\RestartCommand;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Queue as QueueFacade;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
+use Symfony\Component\Console\Output\BufferedOutput;
 
 class Queue extends Component
 {
-    use Widgetable;
+    use Actions, Widgetable;
 
     public ?string $connection = null;
 
@@ -47,6 +52,19 @@ class Queue extends Component
     }
 
     #[Renderless]
+    public function clearQueue(): void
+    {
+        $result = Artisan::call(ClearCommand::class, [], $output = new BufferedOutput());
+
+        if ($result === 0) {
+            $this->toast()->success(trim($output->fetch()))->send();
+            $this->getData();
+        } else {
+            $this->toast()->error(trim($output->fetch()))->send();
+        }
+    }
+
+    #[Renderless]
     public function getData(): void
     {
         $this->fill([
@@ -55,5 +73,18 @@ class Queue extends Component
             'queue' => config('queue.connections.' . config('queue.default') . '.queue'),
             'size' => QueueFacade::size(),
         ]);
+    }
+
+    #[Renderless]
+    public function restartQueue(): void
+    {
+        $result = Artisan::call(RestartCommand::class, [], $output = new BufferedOutput());
+
+        if ($result === 0) {
+            $this->toast()->success(trim($output->fetch()))->send();
+            $this->getData();
+        } else {
+            $this->toast()->error(trim($output->fetch()))->send();
+        }
     }
 }
