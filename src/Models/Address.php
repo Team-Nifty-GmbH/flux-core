@@ -390,7 +390,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
 
     public function leadRecommendations(): HasMany
     {
-        return $this->hasMany(Lead::class, 'recommendation_address_id');
+        return $this->hasMany(Lead::class, 'recommended_by_address_id');
     }
 
     public function leads(): HasMany

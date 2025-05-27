@@ -135,12 +135,24 @@ class MergeRecords extends FluxAction
                                 $mainRecord->getMorphClass()
                             )
                         )
-                        ->where($relation->getQualifiedForeignKeyName(), $this->getData('merge_records.*.id'))
+                        ->whereIn($relation->getQualifiedForeignKeyName(), $this->getData('merge_records.*.id'))
                         ->update([
                             $relation->getQualifiedForeignKeyName() => $mainRecord->getKey(),
                         ]);
                     break;
                 case $relation instanceof BelongsToMany:
+                    // Filter already existing records in the pivot table to avoid duplicate entries
+                    $existingRelatedIds = $relation->newPivotStatement()
+                        ->where($relation->getQualifiedForeignPivotKeyName(), $mainRecord->getKey())
+                        ->when(
+                            $relation instanceof MorphToMany && $relation->getInverse() === false,
+                            fn ($query) => $query->where(
+                                $relation->getQualifiedMorphTypeName(),
+                                $mainRecord->getMorphClass()
+                            )
+                        )
+                        ->pluck($relation->getQualifiedRelatedPivotKeyName());
+
                     $relation->newPivotStatement()
                         ->when(
                             $relation instanceof MorphToMany && $relation->getInverse() === false,
@@ -152,6 +164,10 @@ class MergeRecords extends FluxAction
                         ->whereIn(
                             $relation->getQualifiedForeignPivotKeyName(),
                             $this->getData('merge_records.*.id')
+                        )
+                        ->whereNotIn(
+                            $relation->getQualifiedRelatedPivotKeyName(),
+                            $existingRelatedIds
                         )
                         ->update([
                             $relation->getQualifiedForeignPivotKeyName() => $mainRecord->getKey(),
