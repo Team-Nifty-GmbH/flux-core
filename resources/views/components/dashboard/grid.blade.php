@@ -16,7 +16,8 @@
                     <x-button.circle
                         x-cloak
                         x-show="editGrid"
-                        x-on:click="isLoading ? pendingMessage : removeWidget('{{$widget['id']}}')"
+                        wire:loading.attr="disabled"
+                        x-on:click="removeWidget('{{$widget['id']}}')"
                         class="h-4 w-4 cursor-pointer text-gray-400 shadow-md"
                         icon="trash"
                         color="red"
