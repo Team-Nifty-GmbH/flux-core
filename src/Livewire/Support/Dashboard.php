@@ -31,7 +31,8 @@ abstract class Dashboard extends Component
     protected static function mapDefaultWidgets(?array $widgets = null): array
     {
         return collect($widgets ?? [])
-            ->map(function ($widget) {
+            ->filter()
+            ->map(function (array $widget) {
                 $widget['id'] ??= Str::uuid()->toString();
                 $widget['width'] ??= data_get($widget, 'defaultWidth');
                 $widget['height'] ??= data_get($widget, 'defaultHeight');

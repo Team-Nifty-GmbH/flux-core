@@ -52,6 +52,8 @@ class Extensions extends Component
     #[Renderless]
     public function getData(): void
     {
-        $this->loadedExtensions = collect(get_loaded_extensions())->sort()->toArray();
+        $this->loadedExtensions = collect(get_loaded_extensions())
+            ->sort()
+            ->toArray();
     }
 }

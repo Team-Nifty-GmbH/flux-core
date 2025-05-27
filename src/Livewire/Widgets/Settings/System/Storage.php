@@ -54,10 +54,14 @@ class Storage extends Component
         $result = Artisan::call(ViewClearCommand::class, [], $output = new BufferedOutput());
 
         if ($result === 0) {
-            $this->toast()->success(trim($output->fetch()))->send();
+            $this->toast()
+                ->success(trim($output->fetch()))
+                ->send();
             $this->getData();
         } else {
-            $this->toast()->error(trim($output->fetch()))->send();
+            $this->toast()
+                ->error(trim($output->fetch()))
+                ->send();
         }
     }
 

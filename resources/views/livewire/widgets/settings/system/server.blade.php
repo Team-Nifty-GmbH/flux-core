@@ -18,37 +18,37 @@
             <span class="text-sm text-gray-600 dark:text-gray-400">
                 {{ __('Software') }}
             </span>
-            <p
+            <span
                 x-text="$wire.software"
                 class="break-words text-sm font-medium text-gray-900 dark:text-white"
-            ></p>
+            ></span>
         </div>
         <div>
             <span class="text-sm text-gray-600 dark:text-gray-400">
                 {{ __('Operating System') }}
             </span>
-            <p
+            <span
                 x-text="$wire.os"
                 class="break-words text-sm font-medium text-gray-900 dark:text-white"
-            ></p>
+            ></span>
         </div>
         <div>
             <span class="text-sm text-gray-600 dark:text-gray-400">
                 {{ __('Server Name') }}
             </span>
-            <p
+            <span
                 x-text="$wire.server_name"
                 class="break-words text-sm font-medium text-gray-900 dark:text-white"
-            ></p>
+            ></span>
         </div>
         <div>
             <span class="text-sm text-gray-600 dark:text-gray-400">
                 {{ __('Document root') }}
             </span>
-            <p
+            <span
                 x-text="$wire.document_root"
                 class="break-words text-sm font-medium text-gray-900 dark:text-white"
-            ></p>
+            ></span>
         </div>
     </div>
 </div>
