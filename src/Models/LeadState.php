@@ -33,7 +33,11 @@ class LeadState extends FluxModel
     public function getImageAttribute(): string
     {
         return route('avatar', [
-            'text' => $this->name,
+            'text' => Str::of($this->name)
+                ->replaceMatches('/[^A-Z]/', '')
+                ->trim()
+                ->limit(2, '')
+                ->toString(),
             'color' => Str::after($this->color, '#'),
         ]);
     }
