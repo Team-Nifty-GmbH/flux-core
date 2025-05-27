@@ -14,7 +14,7 @@
     </x-card>
     <x-card>
         <x-slot:header>
-            <div x-text="$wire.setting.path" />
+            <div x-text="$wire.setting.path"></div>
         </x-slot>
         <x-flux::spinner />
         @if ($settingComponent = data_get($setting, 'component'))
