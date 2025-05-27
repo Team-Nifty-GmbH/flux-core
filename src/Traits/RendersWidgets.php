@@ -106,7 +106,7 @@ trait RendersWidgets
                     ?->widgets()
                     ->where('dashboard_component', static::class)
                     ->get()
-                    ->toArray() ?: static::getDefaultWidgets()
+                    ->toArray() ?: static::getDefaultWidgets() ?? []
             )
         );
     }

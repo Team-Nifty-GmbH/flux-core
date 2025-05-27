@@ -102,7 +102,7 @@ class WidgetManager
                 class_exists($name),
                 fn (Collection $widgets) => $widgets->firstWhere('class', $name),
                 fn (Collection $widgets) => $widgets->get($name)
-            ) ?: null;
+            );
     }
 
     /**
