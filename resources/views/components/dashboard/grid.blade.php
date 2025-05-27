@@ -31,6 +31,7 @@
                         array_merge($this->getWidgetAttributes(), [
                             'widgetId' => $widget['id'],
                             'wire:model' => $this->wireModel(),
+                            'lazy' => true,
                         ]),
                         key(uniqid())
                     )
