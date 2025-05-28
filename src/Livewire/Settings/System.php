@@ -18,16 +18,6 @@ class System extends Dashboard
 {
     protected bool $hasTimeSelector = false;
 
-    public static function getDefaultOrderColumn(): int
-    {
-        return 1;
-    }
-
-    public static function getDefaultOrderRow(): int
-    {
-        return 0;
-    }
-
     public static function getDefaultWidgets(): array
     {
         return parent::mapDefaultWidgets(

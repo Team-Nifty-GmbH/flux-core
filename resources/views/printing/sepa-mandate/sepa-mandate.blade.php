@@ -17,7 +17,7 @@
     </div>
     <div class="pt-4">
         <span class="font-semibold">{{ __('Account Holder') }}:</span>
-        <span>{{ $model->contactBankConnection->account_holder }}</span>
+        <span>{{ $model->contactBankConnection?->account_holder }}</span>
     </div>
     <div class="pt-4">
         <span class="font-semibold">{{ __('Street') }}:</span>
@@ -31,15 +31,15 @@
     </div>
     <div class="pt-4">
         <span class="font-semibold">{{ __('Bank Name') }}:</span>
-        <span>{{ $model->contactBankConnection->bank_name }}</span>
+        <span>{{ $model->contactBankConnection?->bank_name }}</span>
     </div>
     <div class="pt-4">
         <span class="font-semibold">{{ __('BIC') }}:</span>
-        <span>{{ $model->contactBankConnection->bic }}</span>
+        <span>{{ $model->contactBankConnection?->bic }}</span>
     </div>
     <div class="pt-4">
         <span class="font-semibold">{{ __('IBAN') }}:</span>
-        <span>{{ $model->contactBankConnection->iban }}</span>
+        <span>{{ $model->contactBankConnection?->iban }}</span>
     </div>
     <div class="pt-4 font-semibold">
         {{ __('Date, Location and Signature') }}

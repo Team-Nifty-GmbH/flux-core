@@ -205,6 +205,8 @@ class CalendarEvent extends FluxModel implements HasMedia
             } else {
                 $repeat['interval'] = $interval[1] ?? null;
             }
+
+            $attributes = array_merge($this->baseDates, $attributes);
         }
 
         $calendarEventObject = array_merge(
@@ -253,6 +255,33 @@ class CalendarEvent extends FluxModel implements HasMedia
     public function uniqueIds(): array
     {
         return ['ulid'];
+    }
+
+    protected function baseDates(): Attribute
+    {
+        return Attribute::get(function (mixed $value, array $attributes) {
+            if (
+                is_null(data_get($attributes, 'repeat'))
+                || is_null(data_get($attributes, 'id'))
+            ) {
+                return [
+                    'base_start' => data_get($attributes, 'start'),
+                    'base_end' => data_get($attributes, 'end'),
+                ];
+            }
+
+            $id = explode('|', data_get($attributes, 'id') ?? '')[0];
+
+            $event = $this->newQuery()
+                ->whereKey($id)
+                ->first(['start', 'end'])
+                ?->toArray();
+
+            return [
+                'base_start' => data_get($event, 'start'),
+                'base_end' => data_get($event, 'end'),
+            ];
+        });
     }
 
     protected function isCancelled(): Attribute
