@@ -174,8 +174,37 @@ const calendar = () => {
                     ? end.format()
                     : end.add(1, 'day').format();
             } else {
-                event.start = dayjs(event.start).utc(true).format();
-                event.end = dayjs(event.end).utc(true).format();
+                if (event.base_start) {
+                    event.start = dayjs(event.start).utc(true);
+
+                    let diff =
+                        dayjs(event.base_start).utc(true).local().utcOffset() -
+                        event.start.local().utcOffset();
+
+                    if (diff !== 0) {
+                        event.start = event.start.add(diff, 'minute');
+                    }
+
+                    event.start = event.start.format();
+                } else {
+                    event.start = dayjs(event.start).utc(true).format();
+                }
+
+                if (event.base_end) {
+                    event.end = dayjs(event.end).utc(true);
+
+                    let diff =
+                        dayjs(event.base_end).utc(true).local().utcOffset() -
+                        event.end.local().utcOffset();
+
+                    if (diff !== 0) {
+                        event.end = event.end.add(diff, 'minute');
+                    }
+
+                    event.end = event.end.format();
+                } else {
+                    event.end = dayjs(event.end).utc(true).format();
+                }
             }
 
             event.repeat_end = event.repeat_end
