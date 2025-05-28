@@ -232,7 +232,7 @@
                     @section('attributes.right')
                     <div class="text-right">{{ __('Clerk') }}:</div>
                     <div>
-                        {{ data_get($order, 'user_created.name') }}
+                        {{ data_get($order, 'created_by') }}
                     </div>
                     <div class="text-right">
                         {{ __('Responsible representative') }}:

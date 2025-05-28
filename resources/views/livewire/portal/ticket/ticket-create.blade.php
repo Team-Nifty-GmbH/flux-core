@@ -9,7 +9,7 @@
                     save() {
                         this.$wire.save().then((result) => {
                             if (result === true) {
-                                $modalClose('new-ticket-modal');
+                                $modalClose('new-ticket-modal')
                             }
                         })
                     },
