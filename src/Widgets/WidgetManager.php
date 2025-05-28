@@ -100,9 +100,9 @@ class WidgetManager
         return collect($this->widgets)
             ->when(
                 class_exists($name),
-                fn (Collection $widgets) => $widgets->firstWhere('class', $name),
-                fn (Collection $widgets) => $widgets->get($name)
-            );
+                fn (Collection $widgets) => $widgets->keyBy('class')
+            )
+            ->get($name);
     }
 
     /**
@@ -142,7 +142,7 @@ class WidgetManager
             'component_name' => $widget,
             'dashboard_component' => $componentClass::dashboardComponent(),
             'label' => $componentClass::getLabel(),
-            'class' => $componentClass,
+            'class' => ltrim($componentClass, '\\'),
             'defaultWidth' => method_exists($componentClass, 'getDefaultWidth')
                 ? $componentClass::getDefaultWidth()
                 : 1,
