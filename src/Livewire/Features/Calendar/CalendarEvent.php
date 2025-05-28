@@ -28,6 +28,30 @@ class CalendarEvent extends Component
     }
 
     #[Renderless]
+    #[On('cancel-calendar-event')]
+    public function cancel(): bool
+    {
+        $calendarId = $this->event->calendar_id;
+        $this->event->confirm_option = $this->event->was_repeatable ? 'this' : 'all';
+
+        try {
+            $this->event->cancel();
+        } catch (ValidationException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->js(<<<JS
+            \$modalClose('confirm-dialog');
+            \$modalClose('edit-event-modal');
+            calendar.getEventSourceById('$calendarId')?.refetch();
+        JS);
+
+        return true;
+    }
+
+    #[Renderless]
     #[On('delete-calendar-event')]
     public function delete(): bool
     {

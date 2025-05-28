@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use Carbon\Carbon;
+use FluxErp\Actions\CalendarEvent\CancelCalendarEvent;
 use FluxErp\Actions\CalendarEvent\CreateCalendarEvent;
 use FluxErp\Actions\CalendarEvent\DeleteCalendarEvent;
 use FluxErp\Actions\CalendarEvent\UpdateCalendarEvent;
@@ -13,6 +14,7 @@ use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\InteractsWithMedia;
 use FluxErp\Traits\LogsActivity;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -34,6 +36,7 @@ class CalendarEvent extends FluxModel implements HasMedia
             'create' => CreateCalendarEvent::make($event),
             'update' => UpdateCalendarEvent::make($event),
             'delete' => DeleteCalendarEvent::make($event),
+            'cancel' => CancelCalendarEvent::make($event),
             default => null,
         };
     }
@@ -46,6 +49,7 @@ class CalendarEvent extends FluxModel implements HasMedia
             'repeat_start' => 'datetime',
             'repeat_end' => 'datetime',
             'excluded' => 'array',
+            'cancelled' => 'array',
             'is_all_day' => 'boolean',
             'has_taken_place' => 'boolean',
             'extended_props' => 'array',
@@ -158,6 +162,7 @@ class CalendarEvent extends FluxModel implements HasMedia
             [
                 'calendar_type' => $this->calendar()->value('model_type'),
                 'extendedProps' => array_filter($this->extended_props ?? [], fn ($item) => ! is_array($item)),
+                'is_cancelled' => $this->isCancelled,
             ],
             $attributes
         );
@@ -248,5 +253,23 @@ class CalendarEvent extends FluxModel implements HasMedia
     public function uniqueIds(): array
     {
         return ['ulid'];
+    }
+
+    protected function isCancelled(): Attribute
+    {
+        return Attribute::get(function (mixed $value, array $attributes) {
+            if (data_get($attributes, 'cancelled_at')) {
+                return true;
+            }
+
+            if (data_get($attributes, 'repeat') && data_get($attributes, 'cancelled')) {
+                return in_array(
+                    data_get($attributes, 'start'),
+                    json_decode(data_get($attributes, 'cancelled'), true)
+                );
+            }
+
+            return false;
+        });
     }
 }

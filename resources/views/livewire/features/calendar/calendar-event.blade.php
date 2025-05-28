@@ -557,25 +557,34 @@
         </div>
         <x-slot:footer>
             <div class="flex w-full justify-between gap-2">
-                <x-button
-                    color="red"
-                    flat
-                    :text="__('Delete')"
-                    x-show="$wire.event.id"
-                    x-cloak
-                    x-on:click="dialogType = 'delete'; $modalOpen('confirm-dialog')"
-                />
+                <div class="flex justify-start gap-2">
+                    <x-button
+                        :text="__('Delete')"
+                        color="red"
+                        flat
+                        x-show="$wire.event.id"
+                        x-cloak
+                        x-on:click="dialogType = 'delete'; $modalOpen('confirm-dialog')"
+                    />
+                    <x-button
+                        :text="__('Cancel Event')"
+                        color="red"
+                        x-show="$wire.event.id && !$wire.event.is_cancelled"
+                        x-cloak
+                        x-on:click="dialogType = 'cancel'; $modalOpen('confirm-dialog')"
+                    />
+                </div>
                 <div class="flex w-full justify-end gap-2">
                     <x-button
+                        :text="__('Cancel')"
                         color="secondary"
                         light
                         flat
-                        :text="__('Cancel')"
                         x-on:click="$modalClose('edit-event-modal')"
                     />
                     <x-button
-                        primary
                         :text="__('Save')"
+                        primary
                         x-on:click="dialogType = 'save'; $wire.event.confirm_option = 'future'; $wire.event.was_repeatable ? $modalOpen('confirm-dialog') : $wire.save()"
                     />
                 </div>
