@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\MassPrunable;
 
 class Log extends FluxModel
@@ -15,8 +16,13 @@ class Log extends FluxModel
         ];
     }
 
-    public function prunable(): void
+    public function prunable(): Builder
     {
-        static::where('created_at', '<', now()->subDays(config('logging.channels.database.days')));
+        return static::query()
+            ->where(
+                static::getCreatedAtColumn(),
+                '<',
+                now()->subDays(config('logging.channels.database.days') ?? 1)
+            );
     }
 }
