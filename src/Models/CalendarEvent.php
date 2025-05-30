@@ -8,6 +8,7 @@ use FluxErp\Actions\CalendarEvent\CreateCalendarEvent;
 use FluxErp\Actions\CalendarEvent\DeleteCalendarEvent;
 use FluxErp\Actions\CalendarEvent\UpdateCalendarEvent;
 use FluxErp\Actions\FluxAction;
+use FluxErp\Casts\MorphTo as MorphToCast;
 use FluxErp\Models\Pivots\CalendarEventInvite;
 use FluxErp\Models\Pivots\Inviteable;
 use FluxErp\Traits\HasPackageFactory;
@@ -53,6 +54,8 @@ class CalendarEvent extends FluxModel implements HasMedia
             'is_all_day' => 'boolean',
             'has_taken_place' => 'boolean',
             'extended_props' => 'array',
+            'cancelled_at' => 'datetime',
+            'cancelled_by' => resolve_static(MorphToCast::class, 'class') . ':name'
         ];
     }
 

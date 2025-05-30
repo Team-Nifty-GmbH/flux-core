@@ -39,7 +39,7 @@ class CancelCalendarEvent extends FluxAction
                 [
                     'cancelled_at' => Carbon::now()->toDateTimeString(),
                     'cancelled_by' => auth()->user()
-                        ? auth()->user()->getMorphClass() . ':' . auth()->user()->getKey()
+                        ? auth()->user()->getMorphClass() . ':' . auth()->id()
                         : null,
                 ]
             )

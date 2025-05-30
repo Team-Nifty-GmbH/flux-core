@@ -39,15 +39,15 @@ trait HasUserModification
     public function initializeHasUserModification(): void
     {
         $this->mergeCasts([
-            $this->getCreatedByColumn() => MorphTo::class . ':name',
-            $this->getUpdatedByColumn() => MorphTo::class . ':name',
+            $this->getCreatedByColumn() => resolve_static(MorphTo::class, 'class') . ':name',
+            $this->getUpdatedByColumn() => resolve_static(MorphTo::class, 'class') . ':name',
         ]);
     }
 
     public function setCreatedAt($value): static
     {
         $this->{$this->getCreatedByColumn()} = auth()->user()
-            ? auth()->user()->getMorphClass() . ':' . auth()->user()->getKey()
+            ? auth()->user()->getMorphClass() . ':' . auth()->id()
             : null;
 
         return parent::setCreatedAt($value);
@@ -56,7 +56,7 @@ trait HasUserModification
     public function setUpdatedAt($value): static
     {
         $this->{$this->getUpdatedByColumn()} = auth()->user()
-            ? auth()->user()->getMorphClass() . ':' . auth()->user()->getKey()
+            ? auth()->user()->getMorphClass() . ':' . auth()->id()
             : null;
 
         return parent::setUpdatedAt($value);

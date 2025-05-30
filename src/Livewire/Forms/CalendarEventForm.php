@@ -86,6 +86,7 @@ class CalendarEventForm extends FluxForm
 
         if ($this->asyncAction) {
             $action->executeAsync();
+            $this->reset();
 
             return;
         }
