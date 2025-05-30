@@ -55,7 +55,7 @@ class CalendarEvent extends FluxModel implements HasMedia
             'has_taken_place' => 'boolean',
             'extended_props' => 'array',
             'cancelled_at' => 'datetime',
-            'cancelled_by' => resolve_static(MorphToCast::class, 'class') . ':name'
+            'cancelled_by' => resolve_static(MorphToCast::class, 'class') . ':name',
         ];
     }
 
