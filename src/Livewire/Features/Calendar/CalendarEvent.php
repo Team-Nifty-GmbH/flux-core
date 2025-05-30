@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Features\Calendar;
 
+use Carbon\Carbon;
 use FluxErp\Livewire\Forms\CalendarEventForm;
 use FluxErp\Models\Calendar;
 use FluxErp\Traits\Livewire\Actions;
@@ -76,6 +77,13 @@ class CalendarEvent extends Component
 
         if (! $this->event->was_repeatable) {
             $this->event->confirm_option = 'all';
+        }
+
+        if ($this->event->is_all_day) {
+            $this->event->start = ! is_null($this->event->start) ?
+                Carbon::parse($this->event->start)->toDateString() : null;
+            $this->event->end = ! is_null($this->event->end) ?
+                Carbon::parse($this->event->end)->toDateString() : null;
         }
 
         try {
