@@ -2,8 +2,13 @@
 
 namespace FluxErp\Models;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\MassPrunable;
+
 class FailedJob extends FluxModel
 {
+    use MassPrunable;
+
     protected $guarded = [
         'id',
         'uuid',
@@ -15,5 +20,15 @@ class FailedJob extends FluxModel
             'payload' => 'array',
             'failed_at' => 'datetime',
         ];
+    }
+
+    public function prunable(): Builder
+    {
+        return static::query()
+            ->where(
+                static::getCreatedAtColumn(),
+                '<',
+                now()->subDays(30)
+            );
     }
 }

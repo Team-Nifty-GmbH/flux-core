@@ -223,7 +223,12 @@ class QueueMonitor extends FluxModel
 
     public function prunable(): Builder
     {
-        return $this->where('finished_at', '<', now()->subDays(30));
+        return static::query()
+            ->where(
+                'finished_at',
+                '<',
+                now()->subDays(30)
+            );
     }
 
     public function queueMonitorables(): HasMany
