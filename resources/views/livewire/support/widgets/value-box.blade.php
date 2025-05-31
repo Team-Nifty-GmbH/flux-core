@@ -3,24 +3,28 @@
     <div class="flex flex-col justify-center">
         <x-icon :name="$this->icon()" class="text-primary-500 h-12 w-12" />
     </div>
-    <div class="flex w-full grow flex-col justify-between">
+    <div class="flex w-full grow flex-col justify-between overflow-hidden">
         <div class="flex w-full justify-between">
-            <h2 class="truncate text-lg font-semibold text-gray-400">
+            <div class="truncate text-lg font-semibold text-gray-400">
                 {{ __($this->title()) }}
-            </h2>
+            </div>
             @if (class_implements($this, \FluxErp\Contracts\HasWidgetOptions::class))
-                <x-dropdown icon="ellipsis-vertical" static>
-                    @foreach ($this->options() as $option)
-                        <x-dropdown.items
-                            :text="data_get($option, 'label')"
-                            wire:click="{{ data_get($option, 'method') }}"
-                        />
-                    @endforeach
-                </x-dropdown>
+                <div class="flex-none">
+                    <x-dropdown icon="ellipsis-vertical" static>
+                        @foreach ($this->options() as $option)
+                            <x-dropdown.items
+                                :text="data_get($option, 'label')"
+                                wire:click="{{ data_get($option, 'method') }}"
+                            />
+                        @endforeach
+                    </x-dropdown>
+                </div>
             @endif
         </div>
         <div>
-            <div class="flex max-w-full grow flex-wrap items-center gap-4">
+            <div
+                class="flex max-w-full grow flex-wrap items-center gap-4 overflow-hidden"
+            >
                 <div
                     class="flex-none truncate whitespace-nowrap text-2xl font-bold"
                     x-text="$wire.sum"
