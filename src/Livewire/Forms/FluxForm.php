@@ -76,6 +76,7 @@ abstract class FluxForm extends BaseForm
 
         if ($this->asyncAction) {
             $action->executeAsync();
+            $this->reset();
 
             return;
         }

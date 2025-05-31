@@ -491,6 +491,11 @@ const calendar = () => {
                     // Title container with better overflow handling
                     let titleContainer = document.createElement('span');
                     titleContainer.className = 'truncate min-w-0 flex-1';
+
+                    if (info.event.extendedProps.is_cancelled) {
+                        titleContainer.classList.add('line-through');
+                    }
+
                     titleContainer.innerHTML = info.event.title;
                     leftContent.appendChild(titleContainer);
 
@@ -515,6 +520,11 @@ const calendar = () => {
                         let timeNode = document.createElement('div');
                         timeNode.className =
                             'flex-shrink-0 whitespace-nowrap text-xs';
+
+                        if (info.event.extendedProps.is_cancelled) {
+                            timeNode.classList.add('line-through');
+                        }
+
                         timeNode.innerHTML = info.timeText;
                         rightContent.appendChild(timeNode);
                     }
