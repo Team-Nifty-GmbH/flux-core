@@ -4,9 +4,9 @@
         <div
             x-cloak
             x-show="!editGrid"
-            class="flex flex-col items-center gap-2 text-sm md:flex-row md:min-w-96"
+            class="flex flex-col items-center gap-2 text-sm md:min-w-96 md:flex-row"
         >
-            <div class="grow w-full">
+            <div class="w-full grow">
                 <x-select.styled
                     class="p-2"
                     wire:model.live="params.timeFrame"

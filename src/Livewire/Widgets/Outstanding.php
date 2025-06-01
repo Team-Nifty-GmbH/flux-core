@@ -13,17 +13,34 @@ use FluxErp\Models\OrderType;
 use FluxErp\States\Order\PaymentState\Paid;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Number;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Livewire\Livewire;
 use TeamNiftyGmbH\DataTable\Helpers\SessionFilter;
 
 class Outstanding extends ValueBox implements HasWidgetOptions
 {
+    #[Locked]
+    public array $orderTypeIds = [];
+
     public bool $shouldBePositive = false;
 
     public static function dashboardComponent(): array|string
     {
         return Dashboard::class;
+    }
+
+    public function mount(): void
+    {
+        $this->orderTypeIds = resolve_static(OrderType::class, 'query')
+            ->where('is_active', true)
+            ->get(['id', 'order_type_enum'])
+            ->filter(fn (OrderType $orderType) => ! $orderType->order_type_enum->isPurchase()
+                && $orderType->order_type_enum->multiplier() > 0
+            )
+            ->pluck('id');
+
+        parent::mount();
     }
 
     #[Renderless]
@@ -107,16 +124,11 @@ class Outstanding extends ValueBox implements HasWidgetOptions
             ->where('balance', '>', 0)
             ->whereNotState('payment_state', Paid::class)
             ->whereNotNull('invoice_number')
+            ->whereNotNull('invoice_date')
             ->whereDate('payment_reminder_next_date', '<=', now()->endOfDay()->toDate())
             ->whereIntegerInRaw(
                 'order_type_id',
-                resolve_static(OrderType::class, 'query')
-                    ->where('is_active', true)
-                    ->get(['id', 'order_type_enum'])
-                    ->filter(fn (OrderType $orderType) => ! $orderType->order_type_enum->isPurchase()
-                        && $orderType->order_type_enum->multiplier() > 0
-                    )
-                    ->pluck('id')
+                $this->orderTypeIds
             );
     }
 }

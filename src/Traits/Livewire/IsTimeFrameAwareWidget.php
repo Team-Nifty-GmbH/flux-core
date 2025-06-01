@@ -55,9 +55,14 @@ trait IsTimeFrameAwareWidget
     {
         if ($this->timeFrame === TimeFrameEnum::Custom) {
             return match (true) {
-                $this->getStart()->isStartOfMonth() && $this->getEnd()->isEndOfMonth() => $this->getStart()->subMonthNoOverflow()->endOfMonth()->endOfDay(),
-                $this->getStart()->isStartOfYear() && $this->getEnd()->isEndOfYear() => $this->getStart()->subYear()->endOfYear(),
-                default => $this->getEnd()->subDays(round($this->getStart()->diffInDays($this->getEnd())))
+                $this->getStart()->isStartOfMonth() && $this->getEnd()->isEndOfMonth() => $this->getStart()
+                    ->subMonthNoOverflow()
+                    ->endOfMonth()
+                    ->endOfDay(),
+                $this->getStart()->isStartOfYear() && $this->getEnd()->isEndOfYear() => $this->getStart()
+                    ->subYear()
+                    ->endOfYear(),
+                default => $this->getEnd()->subDays(round($this->getStart()->diffInDays($this->getEnd())) ?: 1)
             };
         }
 
@@ -75,9 +80,14 @@ trait IsTimeFrameAwareWidget
     {
         if ($this->timeFrame === TimeFrameEnum::Custom) {
             return match (true) {
-                $this->getStart()->isStartOfMonth() && $this->getEnd()->isEndOfMonth() => $this->getStart()->subMonthNoOverflow()->startOfMonth()->startOfDay(),
-                $this->getStart()->isStartOfYear() && $this->getEnd()->isEndOfYear() => $this->getStart()->subYear()->startOfYear(),
-                default => $this->getStart()->subDays(round($this->getStart()->diffInDays($this->getEnd())))
+                $this->getStart()->isStartOfMonth() && $this->getEnd()->isEndOfMonth() => $this->getStart()
+                    ->subMonthNoOverflow()
+                    ->startOfMonth()
+                    ->startOfDay(),
+                $this->getStart()->isStartOfYear() && $this->getEnd()->isEndOfYear() => $this->getStart()
+                    ->subYear()
+                    ->startOfYear(),
+                default => $this->getStart()->subDays(round($this->getStart()->diffInDays($this->getEnd())) ?: 1)
             };
         }
 
