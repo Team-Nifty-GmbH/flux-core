@@ -9,15 +9,15 @@ class PruneCommand extends BasePruneCommand
 {
     protected function models()
     {
-        $projectModels = parent::models();
+        $models = parent::models();
 
         if (! empty($this->option('model'))) {
-            return $projectModels;
+            return $models;
         }
 
         return collect(Relation::morphMap())
             ->values()
-            ->merge($projectModels)
+            ->merge($models)
             ->unique()
             ->values();
     }

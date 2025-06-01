@@ -2,11 +2,11 @@
 
 namespace FluxErp\Livewire\Widgets\Settings\System;
 
+use FluxErp\Console\Commands\PruneCommand;
 use FluxErp\Livewire\Settings\System;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Widgetable;
 use Illuminate\Contracts\View\View;
-use Illuminate\Database\Console\PruneCommand;
 use Illuminate\Database\Console\ShowCommand;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Artisan;
@@ -116,15 +116,35 @@ class Database extends Component
     {
         $result = Artisan::call(PruneCommand::class, [], $output = new BufferedOutput());
 
-        if ($result === 0) {
-            $this->toast()
-                ->success(trim($output->fetch()))
-                ->send();
-            $this->getData();
+        collect(explode("\n", $output->fetch()))
+            ->filter(fn (string $line) => ! blank(trim($line))
+                && ! str_contains($line, 'No prunable ')
+                && ! str_contains($line, 'INFO  Pruning')
+            )
+            ->map(
+                function (string $line): string {
+                    $modelClass = Str::of($line)->before(' .')->trim();
+
+                    return Str::of($line)
+                        ->replace($modelClass, __(Str::headline(morph_alias($modelClass))))
+                        ->replace('.', '')
+                        ->trim();
+                }
+            )
+            ->values()
+            ->each(fn (string $line) => $this->sendToast($line, (bool) $result));
+    }
+
+    protected function sendToast(string $text, bool $isError): void
+    {
+        $toast = $this->toast()->persistent();
+
+        if ($isError) {
+            $toast->error($text);
         } else {
-            $this->toast()
-                ->error(trim($output->fetch()))
-                ->send();
+            $toast->success($text);
         }
+
+        $toast->send();
     }
 }

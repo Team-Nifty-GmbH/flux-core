@@ -26,7 +26,7 @@ class FailedJob extends FluxModel
     {
         return static::query()
             ->where(
-                static::getCreatedAtColumn(),
+                'failed_at',
                 '<',
                 now()->subDays(30)
             );

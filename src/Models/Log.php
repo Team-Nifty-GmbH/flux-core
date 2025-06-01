@@ -22,7 +22,7 @@ class Log extends FluxModel
             ->where(
                 static::getCreatedAtColumn(),
                 '<',
-                now()->subDays(config('logging.channels.database.days') ?? 1)
+                now()->subDays(config('logging.channels.database.days', 30))
             );
     }
 }
