@@ -10,6 +10,7 @@ use FluxErp\Livewire\Widgets\Settings\System\Extensions;
 use FluxErp\Livewire\Widgets\Settings\System\Laravel;
 use FluxErp\Livewire\Widgets\Settings\System\Php;
 use FluxErp\Livewire\Widgets\Settings\System\Queue;
+use FluxErp\Livewire\Widgets\Settings\System\Scout;
 use FluxErp\Livewire\Widgets\Settings\System\Server;
 use FluxErp\Livewire\Widgets\Settings\System\Session;
 use FluxErp\Livewire\Widgets\Settings\System\Storage;
@@ -32,6 +33,7 @@ class System extends Dashboard
                 Widget::get(Server::class),
                 Widget::get(Session::class),
                 Widget::get(Storage::class),
+                Widget::get(Scout::class),
             ]
         );
     }
