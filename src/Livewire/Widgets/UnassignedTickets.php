@@ -32,6 +32,7 @@ class UnassignedTickets extends MyTickets
     protected function getTickets(): Collection
     {
         return $this->tickets ?? resolve_static(Ticket::class, 'query')
+            ->latest()
             ->whereDoesntHave('users')
             ->with('authenticatable:id,name')
             ->whereNotIn(

@@ -4,14 +4,16 @@
         <div
             x-cloak
             x-show="!editGrid"
-            class="flex flex-col items-center gap-2 text-sm md:flex-row"
+            class="flex flex-col items-center gap-2 text-sm md:flex-row md:min-w-96"
         >
-            <x-select.styled
-                class="p-2"
-                wire:model.live="params.timeFrame"
-                required
-                :options="TimeFrameEnum::valuesLocalized()"
-            />
+            <div class="grow w-full">
+                <x-select.styled
+                    class="p-2"
+                    wire:model.live="params.timeFrame"
+                    required
+                    :options="TimeFrameEnum::valuesLocalized()"
+                />
+            </div>
             <div
                 class="flex min-w-96 flex-col items-center gap-2 md:flex-row"
                 x-cloak
