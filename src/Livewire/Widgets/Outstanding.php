@@ -38,7 +38,8 @@ class Outstanding extends ValueBox implements HasWidgetOptions
             ->filter(fn (OrderType $orderType) => ! $orderType->order_type_enum->isPurchase()
                 && $orderType->order_type_enum->multiplier() > 0
             )
-            ->pluck('id');
+            ->pluck('id')
+            ->toArray();
 
         parent::mount();
     }
