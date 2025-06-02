@@ -66,10 +66,9 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
     protected static function booted(): void
     {
         static::saving(function (Lead $lead): void {
-            $lead->expected_gross_profit_percentage = percentage_of(
-                $lead->expected_revenue ?? 0,
-                $lead->expected_gross_profit ?? 0,
-            );
+            $lead->expected_gross_profit_percentage = $lead->expected_revenue && $lead->expected_gross_profit
+                ? bcround(bcdiv($lead->expected_gross_profit, $lead->expected_revenue), 4)
+                : 0;
 
             if ($lead->isDirty('lead_state_id')
                 && ! is_null(($probability = $lead->leadState()->value('probability_percentage')))
