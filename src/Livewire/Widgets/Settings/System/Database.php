@@ -117,7 +117,7 @@ class Database extends Component
         $result = Artisan::call(PruneCommand::class, [], $output = new BufferedOutput());
 
         collect(explode("\n", $output->fetch()))
-            ->filter(fn (string $line) => ! blank(trim($line))
+            ->filter(fn (string $line) => ! blank($line)
                 && ! str_contains($line, 'No prunable ')
                 && ! str_contains($line, 'INFO  Pruning')
             )
