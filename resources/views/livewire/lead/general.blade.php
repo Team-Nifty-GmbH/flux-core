@@ -99,19 +99,15 @@
                     ]"
                 />
             </div>
-            <x-currency
+            <x-number
                 x-bind:readonly="!edit"
                 :label="__('Expected Revenue')"
-                :locale="app()->getLocale()"
-                :symbol="resolve_static(\FluxErp\Models\Currency::class, 'default')?->symbol"
-                wire:model.blur="leadForm.expected_revenue"
+                wire:model="leadForm.expected_revenue"
             />
-            <x-currency
+            <x-number
                 x-bind:readonly="!edit"
                 :label="__('Expected Gross Profit')"
-                :locale="app()->getLocale()"
-                :symbol="resolve_static(\FluxErp\Models\Currency::class, 'default')?->symbol"
-                wire:model.blur="leadForm.expected_gross_profit"
+                wire:model="leadForm.expected_gross_profit"
             />
             <div x-bind:class="! edit && 'pointer-events-none'">
                 <x-rating
