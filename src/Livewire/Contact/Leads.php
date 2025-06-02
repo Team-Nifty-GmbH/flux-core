@@ -23,6 +23,6 @@ class Leads extends LeadList
 
     public function getBuilder(Builder $builder): Builder
     {
-        return $builder->whereRelation('address.contact', 'id', $this->contactId);
+        return $builder->whereRelation('address', 'contact_id', $this->contactId);
     }
 }
