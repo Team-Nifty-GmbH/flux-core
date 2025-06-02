@@ -3,8 +3,6 @@
 namespace FluxErp;
 
 use Closure;
-use FluxErp\Console\Commands\Init\InitEnv;
-use FluxErp\Console\Commands\Init\InitPermissions;
 use FluxErp\Facades\Action;
 use FluxErp\Facades\Menu;
 use FluxErp\Facades\ProductType;
@@ -165,25 +163,14 @@ class FluxServiceProvider extends ServiceProvider
     protected function bootCommands(): void
     {
         if (! $this->app->runningInConsole()) {
-            // commands required for installation
-            $this->commands(InitEnv::class);
-            $this->commands(InitPermissions::class);
-
-            return;
-        }
-
-        $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator(__DIR__ . '/Console/Commands')
-        );
-        $commandClasses = [];
-
-        foreach ($iterator as $file) {
-            if ($file->isFile() && $file->getExtension() === 'php') {
-                $classPath = str_replace([__DIR__ . '/', '/'], ['', '\\'], $file->getPathname());
-                $classNamespace = '\\FluxErp\\';
-                $class = $classNamespace . str_replace('.php', '', $classPath);
-                $commandClasses[] = $class;
-            }
+            $commandClasses = Cache::remember(
+                'flux.commands',
+                now()->addDay(),
+                fn () => $this->findCommands()
+            );
+        } else {
+            $commandClasses = $this->findCommands();
+            Cache::put('flux.commands', $commandClasses, now()->addDay());
         }
 
         $this->commands($commandClasses);
@@ -361,6 +348,25 @@ class FluxServiceProvider extends ServiceProvider
         }
 
         RouteFacade::pattern('id', '[0-9]+');
+    }
+
+    protected function findCommands(): array
+    {
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator(__DIR__ . '/Console/Commands')
+        );
+        $commandClasses = [];
+
+        foreach ($iterator as $file) {
+            if ($file->isFile() && $file->getExtension() === 'php') {
+                $classPath = str_replace([__DIR__ . '/', '/'], ['', '\\'], $file->getPathname());
+                $classNamespace = '\\FluxErp\\';
+                $class = $classNamespace . str_replace('.php', '', $classPath);
+                $commandClasses[] = $class;
+            }
+        }
+
+        return $commandClasses;
     }
 
     protected function offerPublishing(): void

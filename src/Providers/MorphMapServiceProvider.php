@@ -6,6 +6,7 @@ use FluxErp\Models\Activity;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Address;
 use FluxErp\Models\AddressType;
+use FluxErp\Models\AttributeTranslation;
 use FluxErp\Models\BankConnection;
 use FluxErp\Models\Calendar;
 use FluxErp\Models\CalendarEvent;
@@ -28,12 +29,14 @@ use FluxErp\Models\Currency;
 use FluxErp\Models\Discount;
 use FluxErp\Models\DiscountGroup;
 use FluxErp\Models\EventSubscription;
+use FluxErp\Models\FailedJob;
 use FluxErp\Models\Favorite;
 use FluxErp\Models\FormBuilderField;
 use FluxErp\Models\FormBuilderFieldResponse;
 use FluxErp\Models\FormBuilderForm;
 use FluxErp\Models\FormBuilderResponse;
 use FluxErp\Models\FormBuilderSection;
+use FluxErp\Models\Industry;
 use FluxErp\Models\JobBatch;
 use FluxErp\Models\Language;
 use FluxErp\Models\LanguageLine;
@@ -117,6 +120,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'additional_column' => AdditionalColumn::class,
             'address' => Address::class,
             'address_type' => AddressType::class,
+            'attribute_translation' => AttributeTranslation::class,
             'bank_connection' => BankConnection::class,
             'calendar' => Calendar::class,
             'calendar_event' => CalendarEvent::class,
@@ -139,12 +143,14 @@ class MorphMapServiceProvider extends ServiceProvider
             'discount' => Discount::class,
             'discount_group' => DiscountGroup::class,
             'event_subscription' => EventSubscription::class,
+            'failed_job' => FailedJob::class,
             'favorite' => Favorite::class,
             'form_builder_field' => FormBuilderField::class,
             'form_builder_field_response' => FormBuilderFieldResponse::class,
             'form_builder_form' => FormBuilderForm::class,
             'form_builder_response' => FormBuilderResponse::class,
             'form_builder_section' => FormBuilderSection::class,
+            'industry' => Industry::class,
             'job_batch' => JobBatch::class,
             'language' => Language::class,
             'language_line' => LanguageLine::class,
