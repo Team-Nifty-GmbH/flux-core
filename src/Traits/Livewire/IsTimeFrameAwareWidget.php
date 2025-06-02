@@ -12,9 +12,9 @@ trait IsTimeFrameAwareWidget
 {
     use Widgetable;
 
-    public ?Carbon $end = null;
+    public ?string $end = null;
 
-    public ?Carbon $start = null;
+    public ?string $start = null;
 
     public TimeFrameEnum $timeFrame = TimeFrameEnum::ThisMonth;
 
@@ -31,10 +31,10 @@ trait IsTimeFrameAwareWidget
             ? TimeFrameEnum::tryFrom($timeFrame)
             : $timeFrame;
         $this->start = $this->timeFrame === TimeFrameEnum::Custom
-            ? Carbon::parse(data_get($this->timeParams, 'start'))
+            ? Carbon::parse(data_get($this->timeParams, 'start'))->toDateString()
             : null;
         $this->end = $this->timeFrame === TimeFrameEnum::Custom
-            ? Carbon::parse(data_get($this->timeParams, 'end'))
+            ? Carbon::parse(data_get($this->timeParams, 'end'))->toDateString()
             : null;
 
         if ($this->timeFrame === TimeFrameEnum::Custom && ($this->start === null || $this->end === null)) {
