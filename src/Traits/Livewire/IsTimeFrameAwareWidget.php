@@ -55,11 +55,11 @@ trait IsTimeFrameAwareWidget
     {
         if ($this->timeFrame === TimeFrameEnum::Custom) {
             return match (true) {
-                $this->getEnd()->isEndOfMonth() && $this->getEnd()->isEndOfMonth() => $this->getStart()
+                $this->getStart()->isStartOfMonth() && $this->getEnd()->isEndOfMonth() => $this->getEnd()
                     ->subMonthNoOverflow()
                     ->endOfMonth()
                     ->endOfDay(),
-                $this->getEnd()->isEndOfMonth() && $this->getEnd()->isEndOfYear() => $this->getStart()
+                $this->getEnd()->isEndOfMonth() && $this->getEnd()->isEndOfYear() => $this->getEnd()
                     ->subYear()
                     ->endOfYear(),
                 default => $this->getEnd()->subDays(round($this->getStart()->diffInDays($this->getEnd())) ?: 1)
