@@ -48,18 +48,18 @@ trait IsTimeFrameAwareWidget
     {
         return $this->timeFrame === TimeFrameEnum::Custom && $this->end
             ? Carbon::parse($this->end)
-            : data_get($this->timeFrame->getRange(), 1)->endOfDay();
+            : data_get($this->timeFrame->getRange(), 1)?->endOfDay();
     }
 
     protected function getEndPrevious(): Carbon|CarbonImmutable|null
     {
         if ($this->timeFrame === TimeFrameEnum::Custom) {
             return match (true) {
-                $this->getStart()->isStartOfMonth() && $this->getEnd()->isEndOfMonth() => $this->getStart()
+                $this->getEnd()->isEndOfMonth() && $this->getEnd()->isEndOfMonth() => $this->getStart()
                     ->subMonthNoOverflow()
                     ->endOfMonth()
                     ->endOfDay(),
-                $this->getStart()->isStartOfYear() && $this->getEnd()->isEndOfYear() => $this->getStart()
+                $this->getEnd()->isEndOfMonth() && $this->getEnd()->isEndOfYear() => $this->getStart()
                     ->subYear()
                     ->endOfYear(),
                 default => $this->getEnd()->subDays(round($this->getStart()->diffInDays($this->getEnd())) ?: 1)
@@ -73,7 +73,7 @@ trait IsTimeFrameAwareWidget
     {
         return $this->timeFrame === TimeFrameEnum::Custom && $this->start
             ? Carbon::parse($this->start)
-            : data_get($this->timeFrame->getRange(), 0)->startOfDay();
+            : data_get($this->timeFrame->getRange(), 0)?->startOfDay();
     }
 
     protected function getStartPrevious(): Carbon|CarbonImmutable|null
