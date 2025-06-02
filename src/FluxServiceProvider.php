@@ -5,7 +5,6 @@ namespace FluxErp;
 use Closure;
 use FluxErp\Console\Commands\Init\InitEnv;
 use FluxErp\Console\Commands\Init\InitPermissions;
-use FluxErp\Console\Commands\Scout\SyncIndexSettingsCommand;
 use FluxErp\Facades\Action;
 use FluxErp\Facades\Menu;
 use FluxErp\Facades\ProductType;
@@ -169,7 +168,6 @@ class FluxServiceProvider extends ServiceProvider
             // commands required for installation
             $this->commands(InitEnv::class);
             $this->commands(InitPermissions::class);
-            $this->commands(SyncIndexSettingsCommand::class);
 
             return;
         }

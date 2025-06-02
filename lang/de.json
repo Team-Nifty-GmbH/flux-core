@@ -2024,7 +2024,7 @@
     "wire:confirm.clear.queue": "Warteschlange leeren|Soll die Warteschlange wirklich geleert werden?|Abbrechen|Leeren",
     "wire:confirm.commission-credit-notes": "Gutschriften erstellen|Sollen Gutschriften für die ausgewählten Provisionen erstellt werden?|Abbrechen|Erstellen",
     "wire:confirm.delete": ":model löschen|Soll diese(s) :model wirklich gelöscht werden?|Abbrechen|Löschen",
-    "wire:confirm.delete-all-indexes.scout": "Alle Scout-Indexe löschen|Soll der Scout-Index wirklich gelöscht werden?|Abbrechen|Löschen",
+    "wire:confirm.delete-all-indexes.scout": "Alle Scout-Indizes löschen|Soll der Scout-Index wirklich gelöscht werden?|Abbrechen|Löschen",
     "wire:confirm.flush.scout": "Scout-Index leeren|Soll der Scout-Index wirklich geleert werden?|Abbrechen|Leeren",
     "wire:confirm.install-uploaded-plugin": "Hochgeladene Plugins installieren|Der Code von hochgeladenen Plugins kann nicht verifiziert werden.\nStelle sicher dass die Quelle vertrauenwürdig ist.|Abbrechen|Installieren",
     "wire:confirm.product-prices-update": "Preise aktualisieren|Sollen die Preise für die ausgewählten Produkte aktualisiert werden?|Abbrechen|Ja",
