@@ -37,15 +37,15 @@ class RevenuePurchasesProfitChart extends LineChart
         $revenue = Line::make($baseQuery->clone()->revenue())
             ->setDateColumn('invoice_date')
             ->setRange($this->timeFrame)
-            ->setEndingDate($this->end?->endOfDay())
-            ->setStartingDate($this->start?->startOfDay())
+            ->setEndingDate($this->getEnd())
+            ->setStartingDate($this->getStart())
             ->sum('total_net_price');
 
         $purchases = Line::make($baseQuery->clone()->purchase())
             ->setDateColumn('invoice_date')
             ->setRange($this->timeFrame)
-            ->setEndingDate($this->end?->endOfDay())
-            ->setStartingDate($this->start?->startOfDay())
+            ->setEndingDate($this->getEnd())
+            ->setStartingDate($this->getStart())
             ->sum('total_net_price');
 
         $purchasesData = $purchases->getCombinedData();

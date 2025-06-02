@@ -32,8 +32,8 @@ class Purchase extends ValueBox
                 ->purchase()
         )
             ->setRange($this->timeFrame)
-            ->setEndingDate($this->end?->endOfDay())
-            ->setStartingDate($this->start?->startOfDay())
+            ->setEndingDate($this->getEnd())
+            ->setStartingDate($this->getStart())
             ->setDateColumn('invoice_date')
             ->withGrowthRate()
             ->sum('total_net_price');

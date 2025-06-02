@@ -31,7 +31,7 @@
                                             x-cloak
                                             x-show="item.growthRate > 0"
                                             class="w-full"
-                                            color:emerald
+                                            color="emerald"
                                         >
                                             <x-slot:left>
                                                 <i class="ph ph-caret-up"></i>

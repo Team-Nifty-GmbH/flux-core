@@ -2,8 +2,6 @@
 
 namespace FluxErp\Livewire\Widgets;
 
-use Carbon\Carbon;
-use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\Support\Widgets\Charts\BarChart;
 use FluxErp\Models\WorkTime;
@@ -66,12 +64,7 @@ class MyWorkTimes extends BarChart
         $baseQuery = resolve_static(WorkTime::class, 'query')
             ->where('user_id', $this->userId)
             ->where('is_locked', true)
-            ->when($this->timeFrame === TimeFrameEnum::Custom && $this->start, function ($query): void {
-                $query->where('started_at', '>=', Carbon::parse($this->start));
-            })
-            ->when($this->timeFrame === TimeFrameEnum::Custom && $this->end, function ($query): void {
-                $query->where('started_at', '<=', Carbon::parse($this->end)->endOfDay());
-            });
+            ->whereBetween('started_at', [$this->getStart(), $this->getEnd()]);
 
         $workDays = Bar::make(
             $baseQuery
@@ -81,8 +74,8 @@ class MyWorkTimes extends BarChart
         )
             ->setDateColumn('started_at')
             ->setRange($this->timeFrame)
-            ->setEndingDate($this->end?->endOfDay())
-            ->setStartingDate($this->start?->startOfDay())
+            ->setEndingDate($this->getEnd())
+            ->setStartingDate($this->getStart())
             ->sum('total_time_ms');
 
         $pause = Bar::make(
@@ -93,8 +86,8 @@ class MyWorkTimes extends BarChart
         )
             ->setDateColumn('started_at')
             ->setRange($this->timeFrame)
-            ->setEndingDate($this->end?->endOfDay())
-            ->setStartingDate($this->start?->startOfDay())
+            ->setEndingDate($this->getEnd())
+            ->setStartingDate($this->getStart())
             ->sum('total_time_ms');
 
         $data = [
@@ -148,8 +141,8 @@ class MyWorkTimes extends BarChart
             )
                 ->setDateColumn('started_at')
                 ->setRange($this->timeFrame)
-                ->setEndingDate($this->end?->endOfDay())
-                ->setStartingDate($this->start?->startOfDay())
+                ->setEndingDate($this->getEnd())
+                ->setStartingDate($this->getStart())
                 ->sum('total_time_ms');
 
             if (array_sum($typeData->getData()) > 0) {

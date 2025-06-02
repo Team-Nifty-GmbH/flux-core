@@ -44,8 +44,8 @@ class RevenueBySalesRepresentative extends CircleChart
         )
             ->setDateColumn('invoice_date')
             ->setRange($this->timeFrame)
-            ->setEndingDate($this->end?->endOfDay())
-            ->setStartingDate($this->start?->startOfDay())
+            ->setEndingDate($this->getEnd())
+            ->setStartingDate($this->getStart())
             ->setLabelKey('agent.name')
             ->sum('total_net_price', 'agent_id');
 

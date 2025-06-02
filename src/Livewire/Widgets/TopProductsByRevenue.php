@@ -3,7 +3,6 @@
 namespace FluxErp\Livewire\Widgets;
 
 use FluxErp\Enums\GrowthRateTypeEnum;
-use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\Support\Widgets\ValueList;
 use FluxErp\Models\Currency;
@@ -40,21 +39,7 @@ class TopProductsByRevenue extends ValueList
             ->whereHas(
                 'order',
                 fn (Builder $query) => $query
-                    ->when(
-                        $this->timeFrame === TimeFrameEnum::Custom && $this->end,
-                        function (Builder $query) {
-                            $diff = $this->end->diffInDays($this->start);
-
-                            return $query->whereBetween(
-                                'invoice_date',
-                                [$this->start->subDays($diff), $this->end->subDays($diff)]
-                            );
-                        },
-                        fn (Builder $query) => $query->whereBetween(
-                            'invoice_date',
-                            $this->timeFrame->getPreviousRange()
-                        )
-                    )
+                    ->whereBetween('invoice_date', [$this->getStartPrevious(), $this->getEndPrevious()])
                     ->revenue()
             )
             ->limit($this->limit)
@@ -107,11 +92,7 @@ class TopProductsByRevenue extends ValueList
             ->whereHas(
                 'order',
                 fn (Builder $query) => $query
-                    ->when(
-                        $this->timeFrame === TimeFrameEnum::Custom,
-                        fn (Builder $query) => $query->whereBetween('invoice_date', [$this->start, $this->end]),
-                        fn (Builder $query) => $query->whereBetween('invoice_date', $this->timeFrame->getRange())
-                    )
+                    ->whereBetween('invoice_date', [$this->getStart(), $this->getEnd()])
                     ->revenue()
             )
             ->whereHas('product');
