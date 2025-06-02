@@ -59,7 +59,7 @@ trait IsTimeFrameAwareWidget
                     ->subMonthNoOverflow()
                     ->endOfMonth()
                     ->endOfDay(),
-                $this->getEnd()->isEndOfMonth() && $this->getEnd()->isEndOfYear() => $this->getEnd()
+                $this->getStart()->isStartOfYear() && $this->getEnd()->isEndOfYear() => $this->getEnd()
                     ->subYear()
                     ->endOfYear(),
                 default => $this->getEnd()->subDays(round($this->getStart()->diffInDays($this->getEnd())) ?: 1)
