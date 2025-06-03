@@ -430,7 +430,10 @@ class FluxServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__ . '/../config/flux.php', 'flux');
         $this->mergeConfigFrom(__DIR__ . '/../config/notifications.php', 'notifications');
         config(['auth' => require __DIR__ . '/../config/auth.php']);
-        config(['logging' => array_merge_recursive(config('logging'), require __DIR__ . '/../config/logging.php')]);
+
+        if (! app()->configurationIsCached()) {
+            config(['logging' => array_merge_recursive(config('logging'), require __DIR__ . '/../config/logging.php')]);
+        }
 
         if ($this->app->runningInConsole()) {
             config([
