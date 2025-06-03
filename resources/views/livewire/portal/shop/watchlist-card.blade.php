@@ -2,10 +2,12 @@
     <x-slot:header>
         <div class="flex justify-between">
             <div
-                class="w-full font-semibold"
+                class="flex-1 font-semibold"
                 x-on:click="
                     showCart =
-                        showCart === {{ $cartForm->id ?? 'null' }} ? null : {{ $cartForm->id }}
+                        showCart === {{ $cartForm->id ?? 'null' }}
+                            ? null
+                            : {{ $cartForm->id ?? 'null' }}
                 "
             >
                 {{ $cartForm->name }}
