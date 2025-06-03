@@ -1,22 +1,22 @@
 <x-card class="!px-0 !py-0">
-    <x-slot:title>
-        <div
-            class="w-full font-semibold"
-            x-on:click="
+    <x-slot:header>
+        <div class="flex justify-between">
+            <div
+                class="w-full font-semibold"
+                x-on:click="
                 showCart =
                     showCart === {{ $cartForm->id ?? 'null' }} ? null : {{ $cartForm->id }}
             "
-        >
-            {{ $cartForm->name }}
+            >
+                {{ $cartForm->name }}
+            </div>
+            <x-button
+                color="secondary"
+                light
+                icon="chevron-down"
+                x-on:click="showCart = showCart === {{ $cartForm->id ?? 'null' }} ? null : {{ $cartForm->id ?? 'null' }}"
+            />
         </div>
-    </x-slot>
-    <x-slot:header>
-        <x-button
-            color="secondary"
-            light
-            icon="chevron-down"
-            x-on:click="showCart = showCart === {{ $cartForm->id ?? 'null' }} ? null : {{ $cartForm->id ?? 'null' }}"
-        />
     </x-slot>
     <div
         class="flex gap-4 px-2 py-5 md:px-4"
