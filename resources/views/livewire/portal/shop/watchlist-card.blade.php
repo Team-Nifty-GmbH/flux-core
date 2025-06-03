@@ -4,9 +4,9 @@
             <div
                 class="w-full font-semibold"
                 x-on:click="
-                showCart =
-                    showCart === {{ $cartForm->id ?? 'null' }} ? null : {{ $cartForm->id }}
-            "
+                    showCart =
+                        showCart === {{ $cartForm->id ?? 'null' }} ? null : {{ $cartForm->id }}
+                "
             >
                 {{ $cartForm->name }}
             </div>
