@@ -167,13 +167,16 @@
                                 />
                             @endcanAction
 
-                            <x-button
-                                color="secondary"
-                                light
-                                loading
-                                :text="__('Download folder')"
-                                x-on:click="$wire.downloadCollection(getNodePath(selection, 'collection_name'))"
-                            />
+                            @canAction(\FluxErp\Actions\Media\DownloadMultipleMedia::class)
+                                <x-button
+                                    color="secondary"
+                                    light
+                                    loading
+                                    :text="__('Download folder')"
+                                    x-on:click="$wire.downloadCollection(getNodePath(selection, 'collection_name'))"
+                                />
+                            @endcanAction
+
                             @show
                         </div>
                         @section('folder-tree.upload.attributes')
