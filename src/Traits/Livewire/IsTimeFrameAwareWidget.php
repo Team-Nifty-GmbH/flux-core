@@ -72,7 +72,7 @@ trait IsTimeFrameAwareWidget
     protected function getStart(): Carbon|CarbonImmutable|null
     {
         return $this->timeFrame === TimeFrameEnum::Custom && $this->start
-            ? Carbon::parse($this->start)->endOfDay()
+            ? Carbon::parse($this->start)->startOfDay()
             : data_get($this->timeFrame->getRange(), 0)?->startOfDay();
     }
 
