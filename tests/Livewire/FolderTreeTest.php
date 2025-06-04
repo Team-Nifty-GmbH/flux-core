@@ -2,7 +2,7 @@
 
 namespace FluxErp\Tests\Livewire;
 
-use FluxErp\Livewire\FolderTree;
+use FluxErp\Livewire\Support\FolderTree;
 use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 

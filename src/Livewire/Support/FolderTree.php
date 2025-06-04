@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\Livewire;
+namespace FluxErp\Livewire\Support;
 
 use Exception;
 use FluxErp\Actions\Media\DeleteMedia;
@@ -14,21 +14,23 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use Livewire\Attributes\Modelable;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 
-class FolderTree extends Component
+abstract class FolderTree extends Component
 {
     use Actions, WithFilePond;
 
     public $files = [];
 
+    #[Modelable]
     public ?int $modelId = null;
 
     /** @var class-string<Model> */
-    public ?string $modelType = null;
+    protected string $modelType;
 
     public function render(): View|Factory|Application
     {

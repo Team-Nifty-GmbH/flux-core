@@ -2,7 +2,7 @@
 
 namespace FluxErp\Livewire\Address;
 
-use FluxErp\Livewire\FolderTree;
+use FluxErp\Livewire\Support\FolderTree;
 use FluxErp\Models\Address;
 use Livewire\Attributes\Modelable;
 

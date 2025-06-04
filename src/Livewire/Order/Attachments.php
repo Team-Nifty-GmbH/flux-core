@@ -2,17 +2,9 @@
 
 namespace FluxErp\Livewire\Order;
 
-use FluxErp\Livewire\Forms\OrderForm;
-use Livewire\Attributes\Modelable;
-use Livewire\Component;
+use FluxErp\Livewire\Support\FolderTree;
 
-class Attachments extends Component
+class Attachments extends FolderTree
 {
-    #[Modelable]
-    public OrderForm $order;
-
-    public function render()
-    {
-        return view('flux::livewire.order.attachments');
-    }
+    protected string $modelType = Order::class;
 }
