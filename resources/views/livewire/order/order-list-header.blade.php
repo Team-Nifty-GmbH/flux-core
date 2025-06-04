@@ -192,14 +192,14 @@
                         >
                             <div class="flex justify-between">
                                 <x-radio
-                                    id="post-on-credit-account"
                                     :label="__('Credit')"
+                                    name="post-on-credit-account"
                                     wire:model="orderPosition.post_on_credit_account"
                                     :value="1"
                                 />
                                 <x-radio
-                                    id="post-on-credit-account"
                                     :label="__('Debit')"
+                                    name="post-on-credit-account"
                                     wire:model="orderPosition.post_on_credit_account"
                                     :value="-1"
                                 />
