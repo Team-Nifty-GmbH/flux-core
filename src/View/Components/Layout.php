@@ -18,7 +18,7 @@ class Layout extends TallStackUiLayout
         return Arr::dot([
             'wrapper' => [
                 'first' => 'h-full flex flex-col',
-                'second' => 'flex flex-col w-full grow md:pl-20',
+                'second' => 'flex flex-col w-full grow' . (auth()->check() && auth()->id() ? ' md:pl-20' : ''),
             ],
             'main' => 'h-full mx-auto w-full max-w-full p-4 md:p-10',
         ]);
