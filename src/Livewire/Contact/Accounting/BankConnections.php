@@ -24,7 +24,7 @@ class BankConnections extends BaseContactBankConnectionList
     #[Modelable]
     public int $contactId;
 
-    protected string $view = 'flux::livewire.contact.accounting.bank-connections';
+    protected ?string $includeBefore = 'flux::livewire.contact.accounting.bank-connections';
 
     protected function getTableActions(): array
     {
@@ -87,6 +87,7 @@ class BankConnections extends BaseContactBankConnectionList
     public function save(): bool
     {
         $this->contactBankConnection->contact_id = $this->contactId;
+        $this->contactBankConnection->is_credit_account = false;
 
         try {
             $this->contactBankConnection->save();
@@ -103,6 +104,7 @@ class BankConnections extends BaseContactBankConnectionList
 
     protected function getBuilder(Builder $builder): Builder
     {
-        return $builder->where('contact_id', $this->contactId);
+        return $builder->where('contact_id', $this->contactId)
+            ->where('is_credit_account', false);
     }
 }

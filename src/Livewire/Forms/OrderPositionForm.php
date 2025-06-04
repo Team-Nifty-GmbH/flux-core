@@ -23,6 +23,10 @@ class OrderPositionForm extends FluxForm
 
     public ?int $contact_id = null;
 
+    public ?int $credit_account_id = null;
+
+    public null|string|float $credit_amount = null;
+
     public ?string $customer_delivery_date = null;
 
     public ?string $description = null;
@@ -57,6 +61,8 @@ class OrderPositionForm extends FluxForm
     public ?int $parent_id = null;
 
     public ?string $possible_delivery_date = null;
+
+    public ?int $post_on_credit_account = null;
 
     public ?int $price_id = null;
 
