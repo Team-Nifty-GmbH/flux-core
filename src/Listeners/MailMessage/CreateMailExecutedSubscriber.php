@@ -3,6 +3,7 @@
 namespace FluxErp\Listeners\MailMessage;
 
 use FluxErp\Actions\Comment\CreateComment;
+use FluxErp\Actions\Lead\CreateLead;
 use FluxErp\Actions\MailMessage\CreateMailMessage;
 use FluxErp\Actions\PurchaseInvoice\CreatePurchaseInvoice;
 use FluxErp\Actions\Ticket\CreateTicket;
@@ -10,6 +11,7 @@ use FluxErp\Models\Address;
 use FluxErp\Models\Client;
 use FluxErp\Models\Communication;
 use FluxErp\Models\Currency;
+use FluxErp\Models\Lead;
 use FluxErp\Models\Media;
 use FluxErp\Models\PurchaseInvoice;
 use FluxErp\Models\Ticket;
@@ -22,6 +24,38 @@ use Throwable;
 class CreateMailExecutedSubscriber
 {
     protected ?Address $address = null;
+
+    public function createLead(Communication $communication): ?Lead
+    {
+        if (! $this->address) {
+            return null;
+        }
+
+        try {
+            /** @var Lead $lead */
+            $lead = CreateLead::make([
+                'address_id' => $this->address->getKey(),
+                'name' => $communication->subject,
+                'description' => $communication->text_body ?? $communication->html_body,
+            ])
+                ->validate()
+                ->execute();
+        } catch (ValidationException) {
+            return null;
+        }
+
+        $lead->communications()->attach($communication->getKey());
+
+        foreach ($communication->getMedia('attachments') as $attachment) {
+            try {
+                /** @var Media $attachment */
+                $attachment->copy($lead);
+            } catch (Throwable) {
+            }
+        }
+
+        return $lead;
+    }
 
     public function createPurchaseInvoice(Communication $message): ?Collection
     {
@@ -119,6 +153,10 @@ class CreateMailExecutedSubscriber
 
         if ($message->mailFolder->can_create_purchase_invoice && $message->media()->count() !== 0) {
             $this->createPurchaseInvoice($message);
+        }
+
+        if ($message->mailFolder->can_create_lead) {
+            $this->createLead($message);
         }
 
         $matches = [];

@@ -43,7 +43,7 @@ class CreateLeadRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => LeadState::class]),
             ],
             'user_id' => [
-                'required',
+                'nullable',
                 'integer',
                 app(ModelExists::class, ['model' => User::class]),
             ],

@@ -46,6 +46,9 @@
                             @canAction(\FluxErp\Actions\Ticket\CreateTicket::class)
                                 <x-dropdown.items :text="__('Create ticket')" wire:click="createTicket($wire.mailMessage.id)" />
                             @endcanAction
+                            @canAction(\FluxErp\Actions\Lead\CreateLead::class)
+                                <x-dropdown.items :text="__('Create lead')" wire:click="createLead($wire.mailMessage.id)" />
+                            @endcanAction
                             @canAction(\FluxErp\Actions\PurchaseInvoice\CreatePurchaseInvoice::class)
                                 <x-dropdown.items :text="__('Create purchase invoice')" wire:click="createPurchaseInvoice($wire.mailMessage.id)" />
                             @endcanAction
