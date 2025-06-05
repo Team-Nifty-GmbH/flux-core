@@ -83,6 +83,7 @@
             @section('product-modal.content.media')
             <livewire:portal.order.product-media
                 :model-type="\FluxErp\Models\Product::class"
+                wire:key="product-media-{{ data_get($positionDetails, 'product_id') }}"
                 wire:model="positionDetails.product_id"
             />
             @show
