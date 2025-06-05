@@ -191,18 +191,24 @@
                             x-show="$wire.orderPosition.credit_account_id"
                         >
                             <div class="flex justify-between">
-                                <x-radio
-                                    :label="__('Credit')"
-                                    name="post-on-credit-account"
-                                    wire:model="orderPosition.post_on_credit_account"
-                                    :value="1"
-                                />
-                                <x-radio
-                                    :label="__('Debit')"
-                                    name="post-on-credit-account"
-                                    wire:model="orderPosition.post_on_credit_account"
-                                    :value="-1"
-                                />
+                                <div>
+                                    <x-radio
+                                        id="credit-on-credit-account-radio"
+                                        name="post-on-credit-account-radio"
+                                        :label="__('Credit')"
+                                        wire:model="orderPosition.post_on_credit_account"
+                                        :value="\FluxErp\Enums\CreditAccountPostingEnum::Credit->value"
+                                    />
+                                </div>
+                                <div>
+                                    <x-radio
+                                        id="debit-on-credit-account-radio"
+                                        name="post-on-credit-account-radio"
+                                        :label="__('Debit')"
+                                        wire:model="orderPosition.post_on_credit_account"
+                                        :value="\FluxErp\Enums\CreditAccountPostingEnum::Debit->value"
+                                    />
+                                </div>
                             </div>
                             <x-input
                                 type="number"

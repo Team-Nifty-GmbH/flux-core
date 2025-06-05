@@ -5,6 +5,7 @@ namespace FluxErp\Models;
 use FluxErp\Casts\BcFloat;
 use FluxErp\Casts\Money;
 use FluxErp\Casts\Percentage;
+use FluxErp\Enums\CreditAccountPostingEnum;
 use FluxErp\Traits\CascadeSoftDeletes;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\HasAdditionalColumns;
@@ -83,23 +84,23 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
     protected function casts(): array
     {
         return [
-            'product_prices' => 'array',
-            'total_net_price' => Money::class,
-            'total_gross_price' => Money::class,
-            'unit_net_price' => Money::class,
-            'unit_gross_price' => Money::class,
-            'vat_price' => Money::class,
+            'amount' => BcFloat::class,
+            'discount_percentage' => Percentage::class,
             'margin' => Money::class,
             'provision' => Money::class,
             'purchase_price' => Money::class,
-            'total_base_price' => Money::class,
             'total_base_gross_price' => Money::class,
             'total_base_net_price' => Money::class,
+            'total_gross_price' => Money::class,
+            'total_net_price' => Money::class,
+            'vat_price' => Money::class,
+            'unit_net_price' => Money::class,
+            'unit_gross_price' => Money::class,
             'vat_rate_percentage' => Percentage::class,
             'customer_delivery_date' => 'date:Y-m-d',
             'possible_delivery_date' => 'date:Y-m-d',
-            'discount_percentage' => Percentage::class,
-            'amount' => BcFloat::class,
+            'product_prices' => 'array',
+            'post_on_credit_account' => CreditAccountPostingEnum::class,
             'is_alternative' => 'boolean',
             'is_net' => 'boolean',
             'is_free_text' => 'boolean',

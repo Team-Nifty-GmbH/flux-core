@@ -158,39 +158,41 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
                     ->where('post_on_credit_account', '!=', 0)
                     ->get(['id', 'credit_account_id', 'credit_amount', 'post_on_credit_account']);
 
-                foreach ($orderPositions as $orderPosition) {
-                    $multiplier = match (true) {
-                        $orderPosition->post_on_credit_account > 0 => 1,
-                        $orderPosition->post_on_credit_account < 0 => -1,
-                        default => 0,
-                    };
+                DB::transaction(function () use ($order, $orderPositions) {
+                    foreach ($orderPositions as $orderPosition) {
+                        $multiplier = match (true) {
+                            $orderPosition->post_on_credit_account > 0 => 1,
+                            $orderPosition->post_on_credit_account < 0 => -1,
+                            default => 0,
+                        };
 
-                    if ($multiplier === 0) {
-                        continue;
-                    }
+                        if ($multiplier === 0) {
+                            continue;
+                        }
 
-                    $transaction = CreateTransaction::make([
-                        'contact_bank_connection_id' => $orderPosition->credit_account_id,
-                        'currency_id' => $order->currency_id,
-                        'value_date' => $order->order_date,
-                        'booking_date' => $order->invoice_date,
-                        'amount' => bcmul($orderPosition->credit_amount, $multiplier),
-                        'purpose' => $orderPosition->getLabel(),
-                    ])
-                        ->validate()
-                        ->execute();
-
-                    if ($multiplier === -1) {
-                        CreateOrderTransaction::make([
-                            'transaction_id' => $transaction->id,
-                            'order_id' => $order->id,
-                            'amount' => $orderPosition->credit_amount,
-                            'is_accepted' => true,
+                        $transaction = CreateTransaction::make([
+                            'contact_bank_connection_id' => $orderPosition->credit_account_id,
+                            'currency_id' => $order->currency_id,
+                            'value_date' => $order->order_date,
+                            'booking_date' => $order->invoice_date,
+                            'amount' => bcmul($orderPosition->credit_amount, $multiplier),
+                            'purpose' => $orderPosition->getLabel(),
                         ])
                             ->validate()
                             ->execute();
+
+                        if ($multiplier === -1) {
+                            CreateOrderTransaction::make([
+                                'transaction_id' => $transaction->id,
+                                'order_id' => $order->id,
+                                'amount' => $orderPosition->credit_amount,
+                                'is_accepted' => true,
+                            ])
+                                ->validate()
+                                ->execute();
+                        }
                     }
-                }
+                });
 
                 $order->calculateBalance();
 

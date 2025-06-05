@@ -25,6 +25,8 @@
                         x-cloak
                     >
                         <x-radio
+                            id="this-event-radio"
+                            name="confirm-option-radio"
                             :label="__('This event')"
                             value="this"
                             wire:model="event.confirm_option"
@@ -32,6 +34,8 @@
                     </div>
                     <div>
                         <x-radio
+                            id="future-event-radio"
+                            name="confirm-option-radio"
                             :label="__('This event and following')"
                             value="future"
                             wire:model="event.confirm_option"
@@ -39,6 +43,8 @@
                     </div>
                     <div>
                         <x-radio
+                            id="all-event-radio"
+                            name="confirm-option-radio"
                             :label="__('All events')"
                             value="all"
                             wire:model="event.confirm_option"

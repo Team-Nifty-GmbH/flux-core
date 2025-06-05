@@ -2,6 +2,7 @@
 
 namespace FluxErp\Rulesets\OrderPosition;
 
+use FluxErp\Enums\CreditAccountPostingEnum;
 use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\ContactBankConnection;
@@ -196,7 +197,7 @@ class CreateOrderPositionRuleset extends FluxRuleset
                 'exclude_if:credit_account_id,null',
                 'required_with:credit_account_id',
                 'integer',
-                'in:-1,0,1',
+                Rule::enum(CreditAccountPostingEnum::class),
                 'nullable',
             ],
 
