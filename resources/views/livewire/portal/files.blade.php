@@ -31,7 +31,7 @@
                         {{ data_get($customerClient, 'phone') }}
                     </a>
                 </div>
-                @foreach (data_get($customerClient, 'opening_hours', []) as $openingHour)
+                @foreach (data_get($customerClient, 'opening_hours') ?? [] as $openingHour)
                     <div class="">
                         {{ data_get($openingHour, 'day') }}
                     </div>
