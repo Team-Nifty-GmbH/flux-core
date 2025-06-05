@@ -158,7 +158,7 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
                     ->where('post_on_credit_account', '!=', 0)
                     ->get(['id', 'credit_account_id', 'credit_amount', 'post_on_credit_account']);
 
-                DB::transaction(function () use ($order, $orderPositions) {
+                DB::transaction(function () use ($order, $orderPositions): void {
                     foreach ($orderPositions as $orderPosition) {
                         $multiplier = match (true) {
                             $orderPosition->post_on_credit_account > 0 => 1,
