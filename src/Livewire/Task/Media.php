@@ -3,8 +3,9 @@
 namespace FluxErp\Livewire\Task;
 
 use FluxErp\Livewire\Support\FolderTree;
+use FluxErp\Models\Task;
 
 class Media extends FolderTree
 {
-    protected string $modelType = \FluxErp\Models\Task::class;
+    protected string $modelType = Task::class;
 }

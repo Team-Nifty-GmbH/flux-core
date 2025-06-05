@@ -16,6 +16,7 @@ class LeadFactory extends Factory
         return [
             'name' => $this->faker->name(),
             'description' => $this->faker->realText(),
+            'loss_reason' => $this->faker->realText(),
             'start' => $start->format('Y-m-d'),
             'end' => $this->faker->dateTimeBetween($start, '+2 months')->format('Y-m-d'),
             'probability_percentage' => $this->faker->randomFloat(2, 0, 1),
