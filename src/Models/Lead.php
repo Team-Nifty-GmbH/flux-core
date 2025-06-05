@@ -11,6 +11,7 @@ use FluxErp\Traits\Categorizable;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Communicatable;
 use FluxErp\Traits\HasCalendarEvents;
+use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasTags;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
@@ -29,8 +30,8 @@ use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 
 class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDataTables
 {
-    use Categorizable, Commentable, Communicatable, HasCalendarEvents, HasFrontendAttributes, HasStates, HasTags,
-        HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Searchable, SoftDeletes;
+    use Categorizable, Commentable, Communicatable, HasCalendarEvents, HasFrontendAttributes, HasPackageFactory,
+        HasStates, HasTags, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Searchable, SoftDeletes;
 
     protected $guarded = [
         'id',

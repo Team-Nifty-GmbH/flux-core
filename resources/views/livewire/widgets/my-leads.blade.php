@@ -14,7 +14,7 @@
                 </x-slot>
                 <x-slot:sub-value>
                     <div>
-                        <div>{{ $lead->address->name }}</div>
+                        <div>{{ $lead->address?->name ?? __('Unknown') }}</div>
                         @if ($lead->end)
                             <x-badge
                                 :color="($diff = $lead->end->diffInDays(now(), false)) > 0

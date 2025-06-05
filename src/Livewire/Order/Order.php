@@ -312,7 +312,7 @@ class Order extends Component
             TabButton::make('order.attachments')
                 ->text(__('Attachments'))
                 ->isLivewireComponent()
-                ->wireModel('order'),
+                ->wireModel('order.id'),
             TabButton::make('order.texts')
                 ->text(__('Texts'))
                 ->isLivewireComponent()
