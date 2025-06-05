@@ -25,7 +25,8 @@ class InstallWizardTest extends TestCase
         Config::set('flux.install_done', false);
         Config::set('queue.default', 'sync');
 
-        $component = Livewire::test(InstallWizard::class)
+        $component = Livewire::withoutLazyLoading()
+            ->test(InstallWizard::class)
             ->assertStatus(200)
             ->call('testDatabaseConnection')
             ->assertHasNoErrors()
@@ -171,7 +172,8 @@ class InstallWizardTest extends TestCase
     {
         Config::set('flux.install_done', false);
 
-        Livewire::test(InstallWizard::class)
+        Livewire::withoutLazyLoading()
+            ->test(InstallWizard::class)
             ->assertStatus(200);
     }
 }
