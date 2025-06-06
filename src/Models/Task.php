@@ -178,8 +178,8 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         ?array $info = null
     ): void {
         $builder->where(function (Builder $query) use ($start, $end): void {
-            $query->whereBetween('start_date', [$start, $end])
-                ->orWhereBetween('due_date', [$start, $end])
+            $query->where('start_date', '<=', $end)
+                ->where('due_date', '>=', $start)
                 ->orWhereBetween('created_at', [$start, $end]);
         });
     }

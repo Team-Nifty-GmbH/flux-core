@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use FluxErp\Actions\CalendarEvent\CancelCalendarEvent;
 use FluxErp\Actions\CalendarEvent\CreateCalendarEvent;
 use FluxErp\Actions\CalendarEvent\DeleteCalendarEvent;
+use FluxErp\Actions\CalendarEvent\ReactivateCalendarEvent;
 use FluxErp\Actions\CalendarEvent\UpdateCalendarEvent;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Casts\MorphTo as MorphToCast;
@@ -38,6 +39,7 @@ class CalendarEvent extends FluxModel implements HasMedia
             'update' => UpdateCalendarEvent::make($event),
             'delete' => DeleteCalendarEvent::make($event),
             'cancel' => CancelCalendarEvent::make($event),
+            'reactivate' => ReactivateCalendarEvent::make($event),
             default => null,
         };
     }
@@ -226,8 +228,8 @@ class CalendarEvent extends FluxModel implements HasMedia
                 'recurrences' => $this->recurrences,
                 'allDay' => $this->is_all_day,
                 'has_taken_place' => $this->has_taken_place,
-                'editable' => ! $this->calendar->is_public && ! $this->is_invited,
-                'is_editable' => ! $this->calendar->is_public && ! $this->is_invited,
+                'editable' => ! $this->calendar->is_public && ! $this->is_invited && ! $this->isCancelled,
+                'is_editable' => ! $this->calendar->is_public && ! $this->is_invited && ! $this->isCancelled,
                 'is_invited' => $this->is_invited,
                 'is_public' => $this->calendar->is_public,
                 'status' => $this->status ?: 'busy',
