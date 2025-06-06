@@ -49,27 +49,27 @@ enum TimeFrameEnum: string
         return match ($this) {
             TimeFrameEnum::Today => [
                 $now->startOfDay(),
-                $now,
+                $now->endOfDay(),
             ],
             TimeFrameEnum::Yesterday => [
                 $now->subDay()->startOfDay(),
-                $now->subDay(),
+                $now->subDay()->endOfDay(),
             ],
             TimeFrameEnum::ThisWeek => [
-                $now->startOfWeek(),
-                $now,
+                $now->startOfWeek()->startOfDay(),
+                $now->endOfWeek()->endOfDay(),
             ],
             TimeFrameEnum::ThisMonth => [
-                $now->startOfMonth(),
-                $now,
+                $now->startOfMonth()->startOfDay(),
+                $now->endOfMonth()->endOfDay(),
             ],
             TimeFrameEnum::ThisQuarter => [
-                $now->startOfQuarter(),
-                $now,
+                $now->startOfQuarter()->startOfDay(),
+                $now->endOfQuarter()->endOfDay(),
             ],
             TimeFrameEnum::ThisYear => [
-                $now->startOfYear(),
-                $now,
+                $now->startOfYear()->startOfDay(),
+                $now->endOfYear()->endOfDay(),
             ],
             TimeFrameEnum::Custom => null,
         };
