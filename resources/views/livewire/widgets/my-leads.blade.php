@@ -8,19 +8,16 @@
             {{ __('My Leads') }}
         </h2>
         @section('options')
-        @if (class_implements($this, \FluxErp\Contracts\HasWidgetOptions::class))
-            <div class="flex-none">
-                <x-dropdown icon="ellipsis-vertical" static>
-                    @foreach ($this->options() as $option)
-                        <x-dropdown.items
-                            :text="data_get($option, 'label')"
-                            wire:click="{{ data_get($option, 'method') }}({{ json_encode(data_get($option, 'params')) }})"
-                        />
-                    @endforeach
-                </x-dropdown>
-            </div>
-        @endif
-
+        <div class="flex-none">
+            <x-dropdown icon="ellipsis-vertical" static>
+                @foreach ($this->options() as $option)
+                    <x-dropdown.items
+                        :text="data_get($option, 'label')"
+                        wire:click="{{ data_get($option, 'method') }}({{ json_encode(data_get($option, 'params', [])) }})"
+                    />
+                @endforeach
+            </x-dropdown>
+        </div>
         @show
     </div>
     <div class="flex-1 overflow-auto">

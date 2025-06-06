@@ -1233,6 +1233,7 @@
     "order-confirmation": "Auftragsbestätigung",
     "Ordering": "Sortierung",
     "Orders": "Aufträge",
+    "Orders by :agent-name": "Aufträge von :agent-name",
     "Orders created": "Aufträge erstellt",
     "Orders From Work Times": "Aufträge aus Arbeitszeiten",
     "orders.get": "Bestellungen anzeigen",

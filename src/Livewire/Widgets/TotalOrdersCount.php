@@ -36,7 +36,10 @@ class TotalOrdersCount extends LineChart implements HasWidgetOptions
 
     public function calculateChart(): void
     {
-        $query = $this->baseQuery(resolve_static(Order::class, 'query'));
+        $query = resolve_static(Order::class, 'query')
+            ->whereNotNull('invoice_date')
+            ->whereNotNull('invoice_number')
+            ->revenue();
 
         $metric = Line::make($query)
             ->setDateColumn('invoice_date')
@@ -106,19 +109,11 @@ class TotalOrdersCount extends LineChart implements HasWidgetOptions
                     $start,
                     $end,
                 ]),
-            __($this->getLabel()),
+            __(static::getLabel()),
         )
             ->store();
 
         $this->redirectRoute('orders.orders', navigate: true);
-    }
-
-    protected function baseQuery(Builder $builder): Builder
-    {
-        return $builder
-            ->whereNotNull('invoice_date')
-            ->whereNotNull('invoice_number')
-            ->revenue();
     }
 
     protected function getListeners(): array

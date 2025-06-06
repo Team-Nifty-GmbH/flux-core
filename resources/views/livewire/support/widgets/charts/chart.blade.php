@@ -21,13 +21,13 @@
         @show
         <div class="flex items-center gap-4">
             @section('options')
-            @if (class_implements($this, \FluxErp\Contracts\HasWidgetOptions::class))
+            @if ($this instanceof \FluxErp\Contracts\HasWidgetOptions)
                 <div class="flex-none">
                     <x-dropdown icon="ellipsis-vertical" static>
                         @foreach ($this->options() as $option)
                             <x-dropdown.items
                                 :text="data_get($option, 'label')"
-                                wire:click="{{ data_get($option, 'method') }}({{ json_encode(data_get($option, 'params')) }})"
+                                wire:click="{{ data_get($option, 'method') }}({{ json_encode(data_get($option, 'params', [])) }})"
                             />
                         @endforeach
                     </x-dropdown>
