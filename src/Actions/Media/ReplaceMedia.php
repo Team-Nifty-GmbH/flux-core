@@ -3,6 +3,7 @@
 namespace FluxErp\Actions\Media;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Contracts\HasMediaForeignKey;
 use FluxErp\Models\Media;
 use FluxErp\Rulesets\Media\ReplaceMediaRuleset;
 use Illuminate\Database\Eloquent\Model;
@@ -55,9 +56,6 @@ class ReplaceMedia extends FluxAction
         $file = $this->getData('media');
         $mediaItem->name = $this->getData('name');
 
-        DeleteMedia::make(['id' => $this->getData('id')])
-            ->execute();
-
         if ($this->getData('media_type') ?? false) {
             $fileAdder = $mediaItem->model->{'addMediaFrom' . $this->getData('media_type')}($file);
         } else {
@@ -98,7 +96,16 @@ class ReplaceMedia extends FluxAction
             fclose($this->getData('media'));
         }
 
+        $this->replaceOldMediaOnModels($media);
+        $this->deleteReplacedMedia();
+
         return $media->withoutRelations();
+    }
+
+    protected function deleteReplacedMedia(): void
+    {
+        DeleteMedia::make(['id' => $this->getData('id')])
+            ->execute();
     }
 
     protected function prepareForValidation(): void
@@ -108,6 +115,28 @@ class ReplaceMedia extends FluxAction
             ->whereKey($this->getData('id'))
             ->first()
             ?->model_type;
+    }
+
+    protected function replaceOldMediaOnModels(Model $media): void
+    {
+        model_info_all()
+            ->filter(
+                fn ($modelInfo) => is_a(
+                    resolve_static($modelInfo->class, 'class'),
+                    HasMediaForeignKey::class,
+                    true
+                )
+            )
+            ->each(
+                fn ($modelInfo) => resolve_static(
+                    $modelInfo->class,
+                    'mediaReplaced',
+                    [
+                        'oldMediaId' => $this->getData('id'),
+                        'newMediaId' => $media->getKey(),
+                    ]
+                )
+            );
     }
 
     protected function validateData(): void
