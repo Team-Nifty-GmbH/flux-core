@@ -6,21 +6,38 @@
         <x-flux::spinner />
     @endif
 
-    <div>
-        @section('title')
-        @if ($this->showTitle())
-            <div class="flex w-full justify-between px-6">
-                <h2 class="truncate text-lg font-semibold text-gray-400">
-                    {{ $this->getLabel() }}
-                </h2>
-            </div>
-            <hr class="mx-6" />
-        @endif
+    <div class="flex items-center justify-between gap-4">
+        <div>
+            @section('title')
+            @if ($this->showTitle())
+                <div class="flex w-full justify-between px-6">
+                    <h2 class="truncate text-lg font-semibold text-gray-400">
+                        {{ $this->getLabel() }}
+                    </h2>
+                </div>
+            @endif
+        </div>
 
         @show
-        @section('options')
-        @show
+        <div class="flex items-center gap-4">
+            @section('options')
+            @if ($this instanceof \FluxErp\Contracts\HasWidgetOptions)
+                <div class="flex-none">
+                    <x-dropdown icon="ellipsis-vertical" static>
+                        @foreach ($this->options() as $option)
+                            <x-dropdown.items
+                                :text="data_get($option, 'label')"
+                                wire:click="{{ data_get($option, 'method') }}({{ json_encode(data_get($option, 'params', [])) }})"
+                            />
+                        @endforeach
+                    </x-dropdown>
+                </div>
+            @endif
+
+            @show
+        </div>
     </div>
+    <hr class="mx-6" />
     <div
         class="flex h-full flex-1 flex-grow flex-col justify-between gap-4 dark:text-gray-400"
     >
