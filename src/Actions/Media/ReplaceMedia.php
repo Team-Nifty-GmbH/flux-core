@@ -96,13 +96,13 @@ class ReplaceMedia extends FluxAction
             fclose($this->getData('media'));
         }
 
-        $this->replaceOldMediaOnModels($media);
-        $this->deleteReplacedMedia();
+        $this->replaceOldMediaOnModels($this->getData('id'), $media);
+        $this->deleteOldMedia();
 
         return $media->withoutRelations();
     }
 
-    protected function deleteReplacedMedia(): void
+    protected function deleteOldMedia(): void
     {
         DeleteMedia::make(['id' => $this->getData('id')])
             ->execute();
@@ -117,7 +117,7 @@ class ReplaceMedia extends FluxAction
             ?->model_type;
     }
 
-    protected function replaceOldMediaOnModels(Model $media): void
+    protected function replaceOldMediaOnModels(int|string $oldMediaId, Model $newMedia): void
     {
         model_info_all()
             ->filter(
@@ -132,8 +132,8 @@ class ReplaceMedia extends FluxAction
                     $modelInfo->class,
                     'mediaReplaced',
                     [
-                        'oldMediaId' => $this->getData('id'),
-                        'newMediaId' => $media->getKey(),
+                        'oldMediaId' => $oldMediaId,
+                        'newMediaId' => $newMedia->getKey(),
                     ]
                 )
             );
