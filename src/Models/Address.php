@@ -212,6 +212,18 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         });
 
         static::deleted(function (Address $address): void {
+            if (! resolve_static(Address::class, 'query')
+                ->where('contact_id', $address->contact_id)
+                ->exists()
+            ) {
+                resolve_static(Contact::class, 'query')
+                    ->whereKey($address->contact_id)
+                    ->first()
+                    ?->delete();
+
+                return;
+            }
+
             $contactUpdates = [];
             $addressesUpdates = [];
             $mainAddress = resolve_static(Address::class, 'query')
