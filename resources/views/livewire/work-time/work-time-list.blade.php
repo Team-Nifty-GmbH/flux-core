@@ -174,16 +174,22 @@
             />
             <hr />
             <x-radio
+                id="rounding-round-radio"
+                name="rounding-radio"
                 value="round"
                 :label="__('Do not round')"
                 wire:model="createOrdersFromWorkTimes.round"
             />
             <x-radio
+                id="rounding-ceil-radio"
+                name="rounding-radio"
                 value="ceil"
                 :label="__('Round up')"
                 wire:model="createOrdersFromWorkTimes.round"
             />
             <x-radio
+                id="rounding-floor-radio"
+                name="rounding-radio"
                 value="floor"
                 :label="__('Round down')"
                 wire:model="createOrdersFromWorkTimes.round"

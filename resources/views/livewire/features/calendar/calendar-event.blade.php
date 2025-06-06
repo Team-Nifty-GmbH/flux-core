@@ -393,6 +393,8 @@
                     <x-label :label="__('Repeat end')" />
                 </div>
                 <x-radio
+                    id="calendar-event-repeat-end-never-radio"
+                    name="repeat-radio"
                     :label="__('Never')"
                     :value="null"
                     x-model="$wire.event.repeat.repeat_radio"
@@ -400,6 +402,8 @@
                 />
                 <div class="grid grid-cols-2 items-center gap-1.5">
                     <x-radio
+                        id="calendar-event-repeat-end-date-radio"
+                        name="repeat-radio"
                         :label="__('Date At')"
                         value="repeat_end"
                         x-model="$wire.event.repeat.repeat_radio"
@@ -413,6 +417,8 @@
                         x-on:change="$wire.event.repeat_end = dayjs($event.target.value).format('YYYY-MM-DD')"
                     />
                     <x-radio
+                        id="calendar-event-repeat-end-recurrences-radio"
+                        name="repeat-radio"
                         :label="__('After amount of events')"
                         value="recurrences"
                         x-model="$wire.event.repeat.repeat_radio"
