@@ -581,18 +581,32 @@
                     />
                 </div>
                 <div class="flex w-full justify-end gap-2">
-                    <x-button
-                        :text="__('Cancel')"
-                        color="secondary"
-                        light
-                        flat
-                        x-on:click="$modalClose('edit-event-modal')"
-                    />
-                    <x-button
-                        :text="__('Save')"
-                        primary
-                        x-on:click="dialogType = 'save'; $wire.event.confirm_option = 'future'; $wire.event.was_repeatable ? $modalOpen('confirm-dialog') : $wire.save()"
-                    />
+                    @canAction(\FluxErp\Actions\CalendarEvent\CancelCalendarEvent::class)
+                        <x-button
+                            :text="__('Cancel')"
+                            color="secondary"
+                            light
+                            flat
+                            x-on:click="$modalClose('edit-event-modal')"
+                        />
+                    @endcanAction
+
+                    <div x-show="!$wire.event.is_cancelled" x-cloak>
+                        <x-button
+                            :text="__('Save')"
+                            primary
+                            x-on:click="dialogType = 'save'; $wire.event.confirm_option = 'future'; $wire.event.was_repeatable ? $modalOpen('confirm-dialog') : $wire.save()"
+                        />
+                    </div>
+                    @canAction(\FluxErp\Actions\CalendarEvent\ReactivateCalendarEvent::class)
+                        <div x-show="$wire.event.is_cancelled" x-cloak>
+                            <x-button
+                                :text="__('Reactivate')"
+                                primary
+                                wire:click="reactivate()"
+                            />
+                        </div>
+                    @endcanAction
                 </div>
             </div>
         </x-slot>

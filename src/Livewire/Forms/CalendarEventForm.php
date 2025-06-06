@@ -165,6 +165,30 @@ class CalendarEventForm extends FluxForm
         $this->fill($values);
     }
 
+    public function reactivate(): void
+    {
+        $action = $this->makeAction('reactivate')
+            ->when($this->checkPermission, fn (FluxAction $action) => $action->checkPermission())
+            ->validate();
+
+        if ($this->asyncAction && ! $action instanceof DispatchableFluxAction) {
+            throw new InvalidArgumentException('Async actions must be DispatchableFluxAction');
+        }
+
+        if ($this->asyncAction) {
+            $action->executeAsync();
+            $this->reset();
+
+            return;
+        }
+
+        $response = $action->execute();
+
+        $this->actionResult = $response;
+
+        $this->reset();
+    }
+
     public function save(): void
     {
         if ($this->was_repeatable
