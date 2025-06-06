@@ -2,17 +2,22 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use FluxErp\Contracts\HasWidgetOptions;
 use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Livewire\Dashboard\Dashboard;
+use FluxErp\Livewire\Order\OrderList;
 use FluxErp\Livewire\Support\Widgets\Charts\LineChart;
 use FluxErp\Models\Order;
 use FluxErp\Support\Metrics\Charts\Line;
 use FluxErp\Support\Metrics\Value;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use FluxErp\Traits\Widgetable;
+use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Renderless;
+use Livewire\Livewire;
+use TeamNiftyGmbH\DataTable\Helpers\SessionFilter;
 
-class TotalOrdersCount extends LineChart
+class TotalOrdersCount extends LineChart implements HasWidgetOptions
 {
     use IsTimeFrameAwareWidget, Widgetable;
 
@@ -31,10 +36,7 @@ class TotalOrdersCount extends LineChart
 
     public function calculateChart(): void
     {
-        $query = resolve_static(Order::class, 'query')
-            ->whereNotNull('invoice_date')
-            ->whereNotNull('invoice_number')
-            ->revenue();
+        $query = $this->baseQuery(resolve_static(Order::class, 'query'));
 
         $metric = Line::make($query)
             ->setDateColumn('invoice_date')
@@ -77,9 +79,46 @@ class TotalOrdersCount extends LineChart
         $this->xaxis['categories'] = $revenue->getLabels();
     }
 
-    public function showTitle(): bool
+    #[Renderless]
+    public function options(): array
     {
-        return ! $this->showTotals;
+        return [
+            [
+                'label' => __('Show'),
+                'method' => 'show',
+            ],
+        ];
+    }
+
+    #[Renderless]
+    public function show(): void
+    {
+        // needs to be in an extra variable to avoid serialization issues
+        $start = $this->getStart()->toDateString();
+        $end = $this->getEnd()->toDateString();
+
+        SessionFilter::make(
+            Livewire::new(resolve_static(OrderList::class, 'class'))->getCacheKey(),
+            fn (Builder $query) => $query->whereNotNull('invoice_date')
+                ->whereNotNull('invoice_number')
+                ->revenue()
+                ->whereBetween('invoice_date', [
+                    $start,
+                    $end,
+                ]),
+            __($this->getLabel()),
+        )
+            ->store();
+
+        $this->redirectRoute('orders.orders', navigate: true);
+    }
+
+    protected function baseQuery(Builder $builder): Builder
+    {
+        return $builder
+            ->whereNotNull('invoice_date')
+            ->whereNotNull('invoice_number')
+            ->revenue();
     }
 
     protected function getListeners(): array
