@@ -6,7 +6,7 @@
         <x-flux::spinner />
     @endif
 
-    <div class="flex gap-4 justify-between items-center">
+    <div class="flex items-center justify-between gap-4">
         <div>
             @section('title')
             @if ($this->showTitle())
@@ -19,20 +19,21 @@
         </div>
 
         @show
-        <div class="flex gap-4 items-center">
+        <div class="flex items-center gap-4">
             @section('options')
-                @if (class_implements($this, \FluxErp\Contracts\HasWidgetOptions::class))
-                    <div class="flex-none">
-                        <x-dropdown icon="ellipsis-vertical" static>
-                            @foreach ($this->options() as $option)
-                                <x-dropdown.items
-                                    :text="data_get($option, 'label')"
-                                    wire:click="{{ data_get($option, 'method') }}({{ json_encode(data_get($option, 'params')) }})"
-                                />
-                            @endforeach
-                        </x-dropdown>
-                    </div>
-                @endif
+            @if (class_implements($this, \FluxErp\Contracts\HasWidgetOptions::class))
+                <div class="flex-none">
+                    <x-dropdown icon="ellipsis-vertical" static>
+                        @foreach ($this->options() as $option)
+                            <x-dropdown.items
+                                :text="data_get($option, 'label')"
+                                wire:click="{{ data_get($option, 'method') }}({{ json_encode(data_get($option, 'params')) }})"
+                            />
+                        @endforeach
+                    </x-dropdown>
+                </div>
+            @endif
+
             @show
         </div>
     </div>

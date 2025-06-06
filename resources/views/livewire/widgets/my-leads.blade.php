@@ -1,10 +1,27 @@
 <div class="flex max-h-full flex-col !px-0 !py-0">
-    <div class="border-b border-gray-200 pb-2 pl-2 pt-2">
+    <div
+        class="flex justify-between gap-4 border-b border-gray-200 pb-2 pl-2 pt-2"
+    >
         <h2
             class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400"
         >
             {{ __('My Leads') }}
         </h2>
+        @section('options')
+        @if (class_implements($this, \FluxErp\Contracts\HasWidgetOptions::class))
+            <div class="flex-none">
+                <x-dropdown icon="ellipsis-vertical" static>
+                    @foreach ($this->options() as $option)
+                        <x-dropdown.items
+                            :text="data_get($option, 'label')"
+                            wire:click="{{ data_get($option, 'method') }}({{ json_encode(data_get($option, 'params')) }})"
+                        />
+                    @endforeach
+                </x-dropdown>
+            </div>
+        @endif
+
+        @show
     </div>
     <div class="flex-1 overflow-auto">
         @forelse ($leads as $lead)
