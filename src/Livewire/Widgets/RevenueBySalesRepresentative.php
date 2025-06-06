@@ -98,7 +98,6 @@ class RevenueBySalesRepresentative extends CircleChart implements HasWidgetOptio
         SessionFilter::make(
             Livewire::new(resolve_static(OrderList::class, 'class'))->getCacheKey(),
             fn (Builder $query) => $query->whereNotNull('invoice_date')
-                ->whereNotNull('invoice_date')
                 ->whereNotNull('invoice_number')
                 ->whereNotNull('agent_id')
                 ->whereRelation('agent', 'name', $agentName)
