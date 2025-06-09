@@ -14,7 +14,6 @@ class PaymentRunFactory extends Factory
     public function definition(): array
     {
         return [
-            'uuid' => $this->faker->uuid,
             'state' => $this->faker->randomElement(PaymentRunState::all()->keys()),
             'payment_run_type_enum' => $this->faker->randomElement(PaymentRunTypeEnum::values()),
             'instructed_execution_date' => $this->faker->date('Y-m-d'),

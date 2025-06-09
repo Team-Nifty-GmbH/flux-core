@@ -9,6 +9,8 @@ class PaymentReminderTextTableSeeder extends Seeder
 {
     public function run(): void
     {
-        PaymentReminderText::factory()->count(7)->create();
+        PaymentReminderText::factory()
+            ->count(7)
+            ->create();
     }
 }

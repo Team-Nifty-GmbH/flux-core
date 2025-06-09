@@ -12,7 +12,6 @@ class DiscountGroupFactory extends Factory
     public function definition(): array
     {
         return [
-            'uuid' => $this->faker->uuid,
             'name' => $this->faker->name,
             'is_active' => $this->faker->boolean(80),
         ];

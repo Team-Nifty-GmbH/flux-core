@@ -18,11 +18,11 @@ class RoleTicketType extends FluxPivot
 
     public function role(): BelongsTo
     {
-        return $this->belongsTo(Role::class, 'role_id');
+        return $this->belongsTo(Role::class);
     }
 
     public function ticketType(): BelongsTo
     {
-        return $this->belongsTo(TicketType::class, 'ticket_type_id');
+        return $this->belongsTo(TicketType::class);
     }
 }

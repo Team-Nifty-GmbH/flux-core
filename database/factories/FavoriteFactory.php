@@ -2,12 +2,12 @@
 
 namespace FluxErp\Database\Factories;
 
-use FluxErp\Models\AdditionalColumn;
+use FluxErp\Models\Favorite;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class FavoriteFactory extends Factory
 {
-    protected $model = AdditionalColumn::class;
+    protected $model = Favorite::class;
 
     public function definition(): array
     {

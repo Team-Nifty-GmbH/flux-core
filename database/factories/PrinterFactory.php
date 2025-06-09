@@ -18,7 +18,10 @@ class PrinterFactory extends Factory
             'location' => $this->faker->boolean() ? $this->faker->city : null,
             'make_and_model' => $this->faker->boolean()
                 ? $this->faker->company . ' ' . $this->faker->bothify('Model-##?') : null,
-            'media_sizes' => $this->faker->randomElement(['A2', 'A3', 'A4', 'A5', 'A6']),
+            'media_sizes' => $this->faker->randomElements(
+                ['A2', 'A3', 'A4', 'A5', 'A6'],
+                $this->faker->numberBetween(2, 3)
+            ),
             'is_active' => $this->faker->boolean(80),
         ];
     }

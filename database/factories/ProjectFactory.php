@@ -2,7 +2,6 @@
 
 namespace FluxErp\Database\Factories;
 
-use Carbon\Carbon;
 use FluxErp\Models\Project;
 use FluxErp\States\Project\ProjectState;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -13,16 +12,11 @@ class ProjectFactory extends Factory
 
     public function definition(): array
     {
-        $from = Carbon::parse('2000-01-01 00:00:00');
-        $to = Carbon::now();
-
         $state = ProjectState::all()->random()::$name;
-
-        $startDate = Carbon::createFromTimestamp(rand($from->timestamp, $to->timestamp));
+        $startDate = $this->faker->date();
         $endDate = $state === 'done'
-            ? Carbon::createFromTimestamp(rand($startDate->timestamp, $to->timestamp))->format('Y-m-d')
+            ? $this->faker->dateTimeBetween($startDate)->format('Y-m-d')
             : null;
-        $startDate = $startDate->format('Y-m-d');
 
         return [
             'name' => $this->faker->jobTitle(),

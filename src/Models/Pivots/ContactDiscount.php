@@ -5,7 +5,6 @@ namespace FluxErp\Models\Pivots;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Discount;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ContactDiscount extends FluxPivot
 {
@@ -19,16 +18,11 @@ class ContactDiscount extends FluxPivot
 
     public function contact(): BelongsTo
     {
-        return $this->belongsTo(Contact::class, 'contact_id');
+        return $this->belongsTo(Contact::class);
     }
 
     public function discount(): BelongsTo
     {
-        return $this->belongsTo(Discount::class, 'discount_id');
-    }
-
-    public function siblings(): HasMany
-    {
-        return $this->hasMany(ContactDiscount::class, 'discount_id', 'discount_id');
+        return $this->belongsTo(Discount::class);
     }
 }

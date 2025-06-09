@@ -5,7 +5,6 @@ namespace FluxErp\Models\Pivots;
 use FluxErp\Models\Discount;
 use FluxErp\Models\DiscountGroup;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class DiscountDiscountGroup extends FluxPivot
 {
@@ -19,16 +18,11 @@ class DiscountDiscountGroup extends FluxPivot
 
     public function discount(): BelongsTo
     {
-        return $this->belongsTo(Discount::class, 'discount_id');
+        return $this->belongsTo(Discount::class);
     }
 
     public function discountGroup(): BelongsTo
     {
-        return $this->belongsTo(DiscountGroup::class, 'discount_group_id');
-    }
-
-    public function siblings(): HasMany
-    {
-        return $this->hasMany(DiscountDiscountGroup::class, 'discount_group_id', 'discount_group_id');
+        return $this->belongsTo(DiscountGroup::class);
     }
 }

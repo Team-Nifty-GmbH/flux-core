@@ -18,11 +18,11 @@ class OrderPositionStockPosting extends FluxPivot
 
     public function orderPosition(): BelongsTo
     {
-        return $this->belongsTo(OrderPosition::class, 'order_position_id');
+        return $this->belongsTo(OrderPosition::class);
     }
 
     public function stockPosting(): BelongsTo
     {
-        return $this->belongsTo(StockPosting::class, 'stock_posting_id');
+        return $this->belongsTo(StockPosting::class);
     }
 }

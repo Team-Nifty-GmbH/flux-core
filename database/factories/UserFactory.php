@@ -2,7 +2,6 @@
 
 namespace FluxErp\Database\Factories;
 
-use Carbon\Carbon;
 use FluxErp\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -12,14 +11,10 @@ class UserFactory extends Factory
 
     public function definition(): array
     {
-        $from = Carbon::parse('1990-01-01 00:00:00');
-        $to = Carbon::now();
-
-        $employmentDate = Carbon::createFromTimestamp(rand($from->timestamp, $to->timestamp));
+        $employmentDate = $this->faker->date();
         $terminationDate = $this->faker->boolean(70)
-            ? Carbon::createFromTimestamp(rand($employmentDate->timestamp, $to->timestamp))->format('Y-m-d')
+            ? $this->faker->dateTimeBetween($employmentDate)->format('Y-m-d')
             : null;
-        $employmentDate = $employmentDate->format('Y-m-d');
 
         return [
             'email' => $this->faker->safeEmail(),

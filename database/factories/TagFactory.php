@@ -14,8 +14,7 @@ class TagFactory extends Factory
         return [
             'name' => $this->faker->name,
             'slug' => $this->faker->slug,
-            'color' => $this->faker->colorName,
-            'order_column' => $this->faker->numberBetween(1, 50),
+            'color' => $this->faker->hexColor(),
         ];
     }
 }

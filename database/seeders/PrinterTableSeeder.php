@@ -9,6 +9,8 @@ class PrinterTableSeeder extends Seeder
 {
     public function run(): void
     {
-        Printer::factory()->count(5)->create();
+        Printer::factory()
+            ->count(5)
+            ->create();
     }
 }

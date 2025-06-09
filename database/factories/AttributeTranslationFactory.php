@@ -2,12 +2,12 @@
 
 namespace FluxErp\Database\Factories;
 
-use FluxErp\Models\AdditionalColumn;
+use FluxErp\Models\AttributeTranslation;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class AttributeTranslationFactory extends Factory
 {
-    protected $model = AdditionalColumn::class;
+    protected $model = AttributeTranslation::class;
 
     public function definition(): array
     {

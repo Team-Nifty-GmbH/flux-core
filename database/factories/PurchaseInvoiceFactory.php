@@ -2,7 +2,6 @@
 
 namespace FluxErp\Database\Factories;
 
-use Carbon\Carbon;
 use FluxErp\Models\PurchaseInvoice;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
@@ -13,14 +12,10 @@ class PurchaseInvoiceFactory extends Factory
 
     public function definition(): array
     {
-        $from = Carbon::parse('2000-01-01 00:00:00');
-        $to = Carbon::now();
-
-        $systemDeliveryDate = Carbon::createFromTimestamp(rand($from->timestamp, $to->timestamp));
+        $systemDeliveryDate = $this->faker->date();
         $systemDeliveryDateEnd = $this->faker->boolean(70)
-            ? Carbon::createFromTimestamp(rand($systemDeliveryDate->timestamp, $to->timestamp))->format('Y-m-d')
+            ? $this->faker->dateTimeBetween($systemDeliveryDate)->format('Y-m-d')
             : null;
-        $systemDeliveryDate = $systemDeliveryDate->format('Y-m-d');
 
         return [
             'invoice_date' => $this->faker->date(),

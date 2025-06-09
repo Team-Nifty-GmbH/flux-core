@@ -9,6 +9,8 @@ class ProductPropertyGroupTableSeeder extends Seeder
 {
     public function run(): void
     {
-        ProductPropertyGroup::factory()->count(5)->create();
+        ProductPropertyGroup::factory()
+            ->count(5)
+            ->create();
     }
 }

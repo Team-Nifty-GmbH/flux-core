@@ -18,11 +18,11 @@ class OrderPositionTask extends FluxPivot
 
     public function orderPosition(): BelongsTo
     {
-        return $this->belongsTo(OrderPosition::class, 'order_position_id');
+        return $this->belongsTo(OrderPosition::class);
     }
 
     public function task(): BelongsTo
     {
-        return $this->belongsTo(Task::class, 'task_id');
+        return $this->belongsTo(Task::class);
     }
 }

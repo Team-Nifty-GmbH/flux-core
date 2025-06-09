@@ -17,18 +17,17 @@ class OrderPaymentRun extends FluxPivot
     protected function casts(): array
     {
         return [
-            'amount' => 'float',
             'success' => 'boolean',
         ];
     }
 
     public function order(): BelongsTo
     {
-        return $this->belongsTo(Order::class, 'order_id');
+        return $this->belongsTo(Order::class);
     }
 
     public function paymentRun(): BelongsTo
     {
-        return $this->belongsTo(PaymentRun::class, 'payment_run_id');
+        return $this->belongsTo(PaymentRun::class);
     }
 }
