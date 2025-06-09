@@ -5,6 +5,7 @@ namespace FluxErp\Tests\Feature\Console;
 use FluxErp\Facades\Action;
 use FluxErp\Facades\Widget;
 use FluxErp\Htmlables\TabButton;
+use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\Product\Product;
 use FluxErp\Models\Permission;
 use FluxErp\Tests\Feature\BaseSetup;
@@ -45,6 +46,11 @@ class InitPermissionsTest extends BaseSetup
         Livewire::component('custom-widget-that-never-exists', new class() extends Component
         {
             use Widgetable;
+
+            public static function dashboardComponent(): string
+            {
+                return Dashboard::class;
+            }
 
             public function render()
             {

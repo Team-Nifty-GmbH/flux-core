@@ -4,7 +4,7 @@
 
 <div>
     <div class="mb-1">
-        <x-label :label="$label ?? ''" />
+        <x-label :text="$label ?? ''" />
     </div>
     <div
         @if ($attributes->has("x-modelable"))
@@ -32,7 +32,7 @@
                     }}
                 @endif
             )"
-        x-init="initTextArea($refs.editor, @json($transparent), @json($tooltipDropdown), @json($defaultFontSize))"
+        x-init="initTextArea('{{$id}}',$refs['editor-{{$id}}'], @json($transparent), @json($tooltipDropdown), @json($defaultFontSize))"
         {{ $attributes->whereDoesntStartWith("wire:model") }}
         wire:ignore
     >
@@ -40,18 +40,18 @@
             x-cloak
             x-transition
             x-show="proxy.isEditable"
-            x-ref="controlPanel"
+            x-ref="controlPanel-{{ $id }}"
             id="controlPanel"
             class="placeholder-secondary-400 dark:bg-secondary-800 dark:text-secondary-400 dark:placeholder-secondary-500 {{ $tooltipDropdown ? "" : "border border-b-0" }} border-secondary-300 focus:ring-primary-500 focus:border-primary-500 dark:border-secondary-600 flex w-full flex-wrap items-stretch rounded-t-md transition duration-100 ease-in-out focus:outline-none sm:text-sm"
         ></div>
-        <div class="list-disc" x-ref="editor"></div>
+        <div class="list-disc" x-ref="editor-{{ $id }}"></div>
     </div>
     {{-- templates to be add on demand --}}
     <template
-        x-ref="popWindow"
+        x-ref="popWindow-{{ $id }}"
         class="placeholder-secondary-400 dark:bg-secondary-800 dark:text-secondary-400 dark:placeholder-secondary-500 focus:ring-primary-500 focus:border-primary-500 dark:border-secondary-600 flex w-full flex-wrap items-stretch divide-x rounded-t-md transition duration-100 ease-in-out focus:outline-none sm:text-sm"
     ></template>
-    <template x-ref="commands">
+    <template x-ref="commands-{{ $id }}">
         @if ($bold)
             <x-button
                 flat
@@ -69,6 +69,16 @@
                 x-on:click="editor().chain().focus().toggleItalic().run()"
                 class="font-italic"
                 text="I"
+            ></x-button>
+        @endif
+
+        @if ($underline)
+            <x-button
+                flat
+                color="secondary"
+                x-on:click="editor().chain().focus().toggleUnderline().run()"
+                class="underline"
+                text="U"
             ></x-button>
         @endif
 
@@ -122,8 +132,8 @@
         @if ($availableFontSizes && ! $tooltipDropdown)
             <x-button
                 x-on:click.prevent="onClick"
-                x-ref="tippyParent"
-                x-data="editorFontSizeHandler($refs.tippyParent, $refs.fontSizeDropdown)"
+                x-ref="tippyParent-{{$id}}"
+                x-data="editorFontSizeHandler($refs['tippyParent-{{$id}}'], $refs['fontSizeDropdown-{{$id}}'])"
                 flat
                 color="secondary"
             >
@@ -189,7 +199,7 @@
             ></x-button>
         @endif
     </template>
-    <template x-ref="fontSizeDropdown">
+    <template x-ref="fontSizeDropdown-{{ $id }}">
         <div class="flex flex-col">
             @foreach ($availableFontSizes as $size)
                 <x-button

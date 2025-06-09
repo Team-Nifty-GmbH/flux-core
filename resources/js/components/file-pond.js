@@ -41,6 +41,8 @@ export default function (
 
             this.pond.setOptions({
                 allowMultiple: this.multipleFileUpload,
+                labelFileProcessingComplete: inputTranslation.readyForUpload,
+                labelFileProcessing: inputTranslation.pending,
                 labelIdle: this.readOnly
                     ? inputTranslation.uploadDisabled
                     : this.uploadLabel,
@@ -49,7 +51,7 @@ export default function (
             this.selectedCollection = collectionName;
         },
         async loadFilePond(fileCountGetter) {
-            // getting specific language path - based on selected language
+            // getting a specific language path - based on a selected language
             const languageKey =
                 lang === null
                     ? undefined
@@ -63,7 +65,7 @@ export default function (
                     : await availableLanguages[
                           `${BASE_LANGUAGE_PATH}en-en.js`
                       ]();
-            // return file-count for selected folder
+            // return file-count for the selected folder
             this.fileCount = fileCountGetter.bind(this);
             registerPlugin(FilePondPluginImagePreview);
 
@@ -100,9 +102,9 @@ export default function (
                         return item !== file.id;
                     });
 
-                    // if single file upload and error is null, show confirm dialog - to replace file
+                    // if single file upload and error is null, show the confirm dialog - to replace file
                     if (!this.multipleFileUpload && error === null) {
-                        //  check if single file folder is not empty
+                        //  check if a single file folder is not empty
                         if (
                             this.fileCount !== null &&
                             this.fileCount() !== undefined &&

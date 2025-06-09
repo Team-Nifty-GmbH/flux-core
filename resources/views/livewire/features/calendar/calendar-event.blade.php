@@ -24,6 +24,21 @@
                 />
             </div>
             @show
+            @section('event-edit.model')
+            <x-link
+                sm
+                href="#"
+                icon="link"
+                x-cloak
+                x-show="$wire.event.model?.url"
+                x-bind:href="$wire.event.model?.url"
+                wire:navigate
+            >
+                <x-slot:text>
+                    <span x-text="$wire.event.model?.label"></span>
+                </x-slot>
+            </x-link>
+            @show
             @section('event-edit.input-fields')
             <x-input
                 x-ref="autofocus"
@@ -89,7 +104,7 @@
             @show
             @section('event-edit.custom-properties')
             <template
-                x-for="(customProperty, propertyName) in $wire.event.customProperties"
+                x-for="customProperty in $wire.event.extended_props ?? []"
             >
                 <div>
                     <div
@@ -97,16 +112,18 @@
                         x-show="customProperty.field_type === 'text'"
                     >
                         <div class="mb-1">
-                            <x-label x-bind:for="propertyName">
+                            <x-label x-bind:for="customProperty.name">
                                 <x-slot:word>
-                                    <span x-text="propertyName"></span>
+                                    <span
+                                        x-text="customProperty.name"
+                                    ></span>
                                 </x-slot>
                             </x-label>
                         </div>
                         <x-input
                             x-model="customProperty.value"
                             x-bind:disabled="! $wire.event.is_editable ?? false"
-                            x-bind:id="propertyName"
+                            x-bind:id="customProperty.name"
                         />
                     </div>
                     <div
@@ -114,15 +131,18 @@
                         x-show="customProperty.field_type === 'textarea'"
                     >
                         <div class="mb-1">
-                            <x-label
-                                x-bind:for="propertyName"
-                                x-text="propertyName"
-                            />
+                            <x-label x-bind:for="customProperty.name">
+                                <x-slot:word>
+                                    <span
+                                        x-text="customProperty.name"
+                                    ></span>
+                                </x-slot>
+                            </x-label>
                         </div>
                         <x-textarea
                             x-model="customProperty.value"
                             x-bind:disabled="! $wire.event.is_editable ?? false"
-                            x-bind:id="propertyName"
+                            x-bind:id="customProperty.name"
                         />
                     </div>
                     <div
@@ -133,27 +153,31 @@
                         <x-checkbox
                             x-model="customProperty.value"
                             x-bind:disabled="! $wire.event.is_editable ?? false"
-                            x-bind:id="propertyName"
+                            x-bind:id="customProperty.name"
                         />
-                        <x-label
-                            x-bind:for="propertyName"
-                            x-text="propertyName"
-                        />
+                        <x-label x-bind:for="customProperty.name">
+                            <x-slot:word>
+                                <span x-text="customProperty.name"></span>
+                            </x-slot>
+                        </x-label>
                     </div>
                     <div
                         x-cloak
                         x-show="customProperty.field_type === 'date'"
                     >
                         <div class="mb-1">
-                            <x-label
-                                x-bind:for="propertyName"
-                                x-text="propertyName"
-                            />
+                            <x-label x-bind:for="customProperty.name">
+                                <x-slot:word>
+                                    <span
+                                        x-text="customProperty.name"
+                                    ></span>
+                                </x-slot>
+                            </x-label>
                         </div>
                         <x-input
                             x-model="customProperty.value"
                             x-bind:disabled="! $wire.event.is_editable ?? false"
-                            x-bind:id="propertyName"
+                            x-bind:id="customProperty.name"
                             type="date"
                         />
                     </div>
@@ -369,6 +393,8 @@
                     <x-label :label="__('Repeat end')" />
                 </div>
                 <x-radio
+                    id="calendar-event-repeat-end-never-radio"
+                    name="repeat-radio"
                     :label="__('Never')"
                     :value="null"
                     x-model="$wire.event.repeat.repeat_radio"
@@ -376,6 +402,8 @@
                 />
                 <div class="grid grid-cols-2 items-center gap-1.5">
                     <x-radio
+                        id="calendar-event-repeat-end-date-radio"
+                        name="repeat-radio"
                         :label="__('Date At')"
                         value="repeat_end"
                         x-model="$wire.event.repeat.repeat_radio"
@@ -389,6 +417,8 @@
                         x-on:change="$wire.event.repeat_end = dayjs($event.target.value).format('YYYY-MM-DD')"
                     />
                     <x-radio
+                        id="calendar-event-repeat-end-recurrences-radio"
+                        name="repeat-radio"
                         :label="__('After amount of events')"
                         value="recurrences"
                         x-model="$wire.event.repeat.repeat_radio"
@@ -533,27 +563,50 @@
         </div>
         <x-slot:footer>
             <div class="flex w-full justify-between gap-2">
-                <x-button
-                    color="red"
-                    flat
-                    :text="__('Delete')"
-                    x-show="$wire.event.id"
-                    x-cloak
-                    x-on:click="dialogType = 'delete'; $modalOpen('confirm-dialog')"
-                />
-                <div class="flex w-full justify-end gap-2">
+                <div class="flex justify-start gap-2">
                     <x-button
-                        color="secondary"
-                        light
+                        :text="__('Delete')"
+                        color="red"
                         flat
-                        :text="__('Cancel')"
-                        x-on:click="$modalClose('edit-event-modal')"
+                        x-show="$wire.event.id"
+                        x-cloak
+                        x-on:click="dialogType = 'delete'; $modalOpen('confirm-dialog')"
                     />
                     <x-button
-                        primary
-                        :text="__('Save')"
-                        x-on:click="dialogType = 'save'; $wire.event.confirm_option = 'future'; $wire.event.was_repeatable ? $modalOpen('confirm-dialog') : $wire.save()"
+                        :text="__('Cancel Event')"
+                        color="red"
+                        x-show="$wire.event.id && !$wire.event.is_cancelled"
+                        x-cloak
+                        x-on:click="dialogType = 'cancel'; $modalOpen('confirm-dialog')"
                     />
+                </div>
+                <div class="flex w-full justify-end gap-2">
+                    @canAction(\FluxErp\Actions\CalendarEvent\CancelCalendarEvent::class)
+                        <x-button
+                            :text="__('Cancel')"
+                            color="secondary"
+                            light
+                            flat
+                            x-on:click="$modalClose('edit-event-modal')"
+                        />
+                    @endcanAction
+
+                    <div x-show="!$wire.event.is_cancelled" x-cloak>
+                        <x-button
+                            :text="__('Save')"
+                            primary
+                            x-on:click="dialogType = 'save'; $wire.event.confirm_option = 'future'; $wire.event.was_repeatable ? $modalOpen('confirm-dialog') : $wire.save()"
+                        />
+                    </div>
+                    @canAction(\FluxErp\Actions\CalendarEvent\ReactivateCalendarEvent::class)
+                        <div x-show="$wire.event.is_cancelled" x-cloak>
+                            <x-button
+                                :text="__('Reactivate')"
+                                primary
+                                wire:click="reactivate()"
+                            />
+                        </div>
+                    @endcanAction
                 </div>
             </div>
         </x-slot>

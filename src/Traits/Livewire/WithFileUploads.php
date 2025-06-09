@@ -2,14 +2,17 @@
 
 namespace FluxErp\Traits\Livewire;
 
+use FluxErp\Actions\Media\DownloadMedia;
+use FluxErp\Actions\Media\DownloadMultipleMedia;
 use FluxErp\Actions\Media\UploadMedia;
 use FluxErp\Models\Media;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads as WithFileUploadsBase;
+use Spatie\MediaLibrary\Support\MediaStream;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use ZipArchive;
 
 trait WithFileUploads
 {
@@ -21,20 +24,23 @@ trait WithFileUploads
 
     public bool $filesArrayDirty = false;
 
-    public function download(Media $mediaItem): false|BinaryFileResponse
+    public function download(Media $media): ?BinaryFileResponse
     {
-        if (! file_exists($mediaItem->getPath())) {
-            if (method_exists($this, 'notification')) {
-                $this->notification()->error(__('File not found!'))->send();
-            }
-
-            return false;
+        try {
+            return DownloadMedia::make([
+                'id' => $media->getKey(),
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
         }
 
-        return response()->download($mediaItem->getPath(), $mediaItem->file_name);
+        return null;
     }
 
-    public function downloadCollection(array|string $collection): ?BinaryFileResponse
+    public function downloadCollection(array|string $collection): ?MediaStream
     {
         $collection = is_array($collection) ? implode('.', $collection) : $collection;
         $media = resolve_static(Media::class, 'query')
@@ -46,42 +52,20 @@ trait WithFileUploads
                         fn ($query) => $query->where('model_id', $this->modelId)
                     )
             )
-            ->get();
+            ->pluck('id');
 
-        // add files to a zip file
-        $zip = new ZipArchive();
-        $zipFileName = explode('.', $collection);
-        $zipFileName = array_pop($zipFileName);
-        $zipFileName = $zipFileName . '.zip';
-
-        $zip->open($zipFileName, ZipArchive::CREATE | ZipArchive::OVERWRITE);
-        foreach ($media as $file) {
-            /** @var Media $file */
-            if (! file_exists($file->getPath())) {
-                continue;
-            }
-
-            if ($collection === $file->collection_name) {
-                $relativePath = $file->name;
-            } else {
-                $collectionName = Str::remove($collection . '.', $file->collection_name);
-                $relativePath = explode('.', $collectionName);
-                $relativePath[] = $file->name;
-                $relativePath = implode(DIRECTORY_SEPARATOR, $relativePath);
-            }
-
-            $zip->addFile($file->getPath(), $relativePath);
+        try {
+            return DownloadMultipleMedia::make([
+                'ids' => $media->toArray(),
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
         }
 
-        $count = $zip->count();
-        $zip->close();
-
-        if ($count) {
-            // download zip file
-            return response()->download($zipFileName)->deleteFileAfterSend();
-        } else {
-            return null;
-        }
+        return null;
     }
 
     public function prepareForMediaLibrary(string $name, ?int $modelId = null, ?string $modelType = null): void

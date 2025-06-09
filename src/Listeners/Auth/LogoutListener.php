@@ -4,19 +4,6 @@ namespace FluxErp\Listeners\Auth;
 
 class LogoutListener
 {
-    /**
-     * Create the event listener.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        //
-    }
-
-    /**
-     * Handle the event.
-     */
     public function handle(object $event): void
     {
         activity()

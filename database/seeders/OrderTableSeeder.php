@@ -10,6 +10,7 @@ use FluxErp\Models\Language;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
+use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Transaction;
 use FluxErp\Models\User;
@@ -73,9 +74,13 @@ class OrderTableSeeder extends Seeder
                     ]);
 
                 if ($order->is_locked) {
-                    Transaction::factory()->create([
+                    $transaction = Transaction::factory()->create([
                         'bank_connection_id' => $bankConnections->random()->id,
                         'currency_id' => $currency->id,
+                    ]);
+
+                    OrderTransaction::factory()->create([
+                        'transaction_id' => $transaction->id,
                         'order_id' => $order->id,
                         'amount' => faker()->boolean(80)
                             ? $order->total_gross_price ?? 0

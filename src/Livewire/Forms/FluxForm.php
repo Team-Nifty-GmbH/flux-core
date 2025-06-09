@@ -2,9 +2,11 @@
 
 namespace FluxErp\Livewire\Forms;
 
+use FluxErp\Actions\DispatchableFluxAction;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Support\Livewire\Attributes\ExcludeFromActionData;
 use Illuminate\Database\Eloquent\Model;
+use InvalidArgumentException;
 use Livewire\Drawer\Utils;
 use Livewire\Form as BaseForm;
 use ReflectionProperty;
@@ -13,11 +15,20 @@ abstract class FluxForm extends BaseForm
 {
     protected mixed $actionResult = null;
 
+    protected bool $asyncAction = false;
+
     protected bool $checkPermission = true;
 
     protected ?string $modelClass = null;
 
     abstract protected function getActions(): array;
+
+    public function async(bool $async = true): static
+    {
+        $this->asyncAction = $async;
+
+        return $this;
+    }
 
     public function canAction(string $action): bool
     {
@@ -32,10 +43,21 @@ abstract class FluxForm extends BaseForm
 
     public function create(): void
     {
-        $response = $this->makeAction('create')
+        $action = $this->makeAction('create')
             ->when($this->checkPermission, fn (FluxAction $action) => $action->checkPermission())
-            ->validate()
-            ->execute();
+            ->validate();
+
+        if ($this->asyncAction && ! $action instanceof DispatchableFluxAction) {
+            throw new InvalidArgumentException('Async actions must be DispatchableFluxAction');
+        }
+
+        if ($this->asyncAction) {
+            $action->executeAsync();
+
+            return;
+        }
+
+        $response = $action->execute();
 
         $this->actionResult = $response;
 
@@ -44,10 +66,22 @@ abstract class FluxForm extends BaseForm
 
     public function delete(): void
     {
-        $response = $this->makeAction('delete')
+        $action = $this->makeAction('delete')
             ->when($this->checkPermission, fn (FluxAction $action) => $action->checkPermission())
-            ->validate()
-            ->execute();
+            ->validate();
+
+        if ($this->asyncAction && ! $action instanceof DispatchableFluxAction) {
+            throw new InvalidArgumentException('Async actions must be DispatchableFluxAction');
+        }
+
+        if ($this->asyncAction) {
+            $action->executeAsync();
+            $this->reset();
+
+            return;
+        }
+
+        $response = $action->execute();
 
         $this->actionResult = $response;
 
@@ -97,10 +131,21 @@ abstract class FluxForm extends BaseForm
 
     public function update(): void
     {
-        $response = $this->makeAction('update')
+        $action = $this->makeAction('update')
             ->when($this->checkPermission, fn (FluxAction $action) => $action->checkPermission())
-            ->validate()
-            ->execute();
+            ->validate();
+
+        if ($this->asyncAction && ! $action instanceof DispatchableFluxAction) {
+            throw new InvalidArgumentException('Async actions must be DispatchableFluxAction');
+        }
+
+        if ($this->asyncAction) {
+            $action->executeAsync();
+
+            return;
+        }
+
+        $response = $action->execute();
 
         $this->actionResult = $response;
 

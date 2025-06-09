@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\Renderless;
 use Livewire\Component;
 
 class TicketCreate extends Component
@@ -25,6 +26,7 @@ class TicketCreate extends Component
 
     public $attachments = [];
 
+    #[Locked]
     public string $modelType = Ticket::class;
 
     #[Locked]
@@ -90,6 +92,7 @@ class TicketCreate extends Component
         return Arr::prependKeysWith(resolve_static(CreateTicketRuleset::class, 'getRules'), 'ticket.');
     }
 
+    #[Renderless]
     public function save(): bool
     {
         $this->ticket = array_merge($this->ticket, [
@@ -116,9 +119,9 @@ class TicketCreate extends Component
 
         $this->notification()->success(__('Ticket created…'))->send();
 
-        $this->skipRender();
         $this->dispatch('closeModal', $ticket->toArray());
         $this->dispatch('loadData')->to('portal.data-tables.ticket-list');
+        $this->reset('ticket', 'ticketTypeId', 'attachments', 'filesArray');
 
         return true;
     }

@@ -347,7 +347,7 @@
                         <div
                             class="size-5 cursor-pointer"
                             wire:click="toggleLock()"
-                            wire:flux-confirm.icon.warning="{{ __('Change order lock state') }}|{{ __('Manually locking or unlocking orders can have unexpected side effects.<br><br>Are you Sure?') }}|{{ __('Cancel') }}|{{ __('Continue') }}"
+                            wire:flux-confirm.type.warning="{{ __('Change order lock state') }}|{{ __('Manually locking or unlocking orders can have unexpected side effects.<br><br>Are you Sure?') }}|{{ __('Cancel') }}|{{ __('Continue') }}"
                         >
                             <x-icon
                                 x-cloak
@@ -796,6 +796,44 @@
                                 />
                             @endif
 
+                            <x-select.styled
+                                wire:model="order.lead_id"
+                                select="label:label|value:id"
+                                unfiltered
+                                :request="[
+                                    'url' => route('search', \FluxErp\Models\Lead::class),
+                                    'method' => 'POST',
+                                    'params' => [
+                                        'searchFields' => [
+                                            'name',
+                                        ],
+                                        'select' => [
+                                            'name',
+                                            'id',
+                                        ],
+                                        'whereIn' => [
+                                            [
+                                                'address_id',
+                                                resolve_static(\FluxErp\Models\Address::class, 'query')
+                                                    ->where('contact_id', $order->contact_id)
+                                                    ->pluck('id')
+                                                    ->toArray(),
+                                            ],
+                                        ],
+                                    ],
+                                ]"
+                            >
+                                <x-slot:label>
+                                    <x-link
+                                        icon="link"
+                                        :text="__('Lead')"
+                                        href="#"
+                                        wire:navigate
+                                        x-bind:href="$wire.order.lead_id ? '{{ route('sales.lead.id', ':id') }}'.replace(':id', $wire.order.lead_id) : '#'"
+                                    />
+                                </x-slot>
+                            </x-select.styled>
+
                             @if (count($languages) > 1)
                                 <x-select.styled
                                     :label="__('Language')"
@@ -882,9 +920,8 @@
                                         </template>
                                     </x-dropdown>
                                 </div>
-                                <livewire:features.signature-link-generator
+                                <livewire:order.signature-link-generator
                                     lazy
-                                    :model-type="\FluxErp\Models\Order::class"
                                     wire:model="order.id"
                                 />
                             @endif
@@ -972,7 +1009,7 @@
                                                             icon="x-mark"
                                                             2xs
                                                             wire:click="deleteDiscount(discount.id)"
-                                                            wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => 'Discount']) }}"
+                                                            wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Discount')]) }}"
                                                         />
                                                     </div>
                                                 @endif

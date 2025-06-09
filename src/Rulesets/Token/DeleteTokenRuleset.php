@@ -4,8 +4,9 @@ namespace FluxErp\Rulesets\Token;
 
 use FluxErp\Models\Token;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rulesets\FluxRuleset;
 
-class DeleteTokenRuleset
+class DeleteTokenRuleset extends FluxRuleset
 {
     protected static bool $addAdditionalColumnRules = false;
 

@@ -11,7 +11,21 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class LedgerAccount extends FluxModel
 {
-    use CacheModelQueries, HasPackageFactory, HasUuid, Searchable;
+    use CacheModelQueries, HasPackageFactory, HasUuid;
+    use Searchable {
+        Searchable::scoutIndexSettings as baseScoutIndexSettings;
+    }
+
+    public static function scoutIndexSettings(): ?array
+    {
+        return static::baseScoutIndexSettings() ?? [
+            'filterableAttributes' => [
+                'ledger_account_type_enum',
+                'is_automatic',
+            ],
+            'sortableAttributes' => ['*'],
+        ];
+    }
 
     protected function casts(): array
     {

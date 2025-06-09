@@ -25,6 +25,8 @@ use Spatie\Translatable\Translatable;
 
 trait HasAdditionalColumns
 {
+    public static bool $metaDisabled = false;
+
     protected static ?Collection $additionalColumns = null;
 
     /**
@@ -68,6 +70,8 @@ trait HasAdditionalColumns
      */
     protected ?Collection $metaChanges = null;
 
+    protected bool $withoutMeta = false;
+
     private array $translatableMeta = [];
 
     /**
@@ -75,6 +79,10 @@ trait HasAdditionalColumns
      */
     public static function bootHasAdditionalColumns(): void
     {
+        if (static::$metaDisabled) {
+            return;
+        }
+
         foreach (
             resolve_static(AdditionalColumn::class, 'query')
                 ->whereNotNull('model_id')
@@ -273,7 +281,7 @@ trait HasAdditionalColumns
      */
     public function getAttribute($key)
     {
-        if (! $this->isValidMetaKey($key)) {
+        if (! $this->isValidMetaKey($key) || static::$metaDisabled) {
             return parent::getAttribute($key);
         }
 
@@ -486,6 +494,10 @@ trait HasAdditionalColumns
     {
         $rules = [];
 
+        if (static::$metaDisabled) {
+            return $rules;
+        }
+
         foreach ($this->getAdditionalColumns(false) as $column) {
             $rules[$column->name] ??= $column->validations ?: ['nullable'];
 
@@ -541,6 +553,10 @@ trait HasAdditionalColumns
      */
     public function initializeHasAdditionalColumns(): void
     {
+        if (static::$metaDisabled) {
+            return;
+        }
+
         $this->mergeCasts(
             $this->getAdditionalColumns()?->mapWithKeys(fn (AdditionalColumn $column) => [$column->name => MetaAttribute::class])
                 ->toArray() ?? []
@@ -568,7 +584,7 @@ trait HasAdditionalColumns
 
     public function isFillable($key): bool
     {
-        return parent::isFillable($key) || $this->isValidMetaKey($key);
+        return parent::isFillable($key) || (! static::$metaDisabled && $this->isValidMetaKey($key));
     }
 
     /**
@@ -699,7 +715,12 @@ trait HasAdditionalColumns
     public function relationsToArray(): array
     {
         $array = parent::relationsToArray();
-        $meta = $this->meta->mapWithKeys(
+
+        if (static::$metaDisabled) {
+            return $array;
+        }
+
+        $meta = $this->meta?->mapWithKeys(
             fn (Meta $meta) => [
                 $meta->key => $this->isTranslatableMeta($meta->key) ?
                     $this->getMetaTranslation($meta->key, app()->getLocale()) : $meta->value,
@@ -707,7 +728,7 @@ trait HasAdditionalColumns
         )->toArray();
         unset($array['meta']);
 
-        return array_merge($array, $meta);
+        return array_merge($array, $meta ?? []);
     }
 
     /**
@@ -1039,7 +1060,7 @@ trait HasAdditionalColumns
      */
     public function setAttribute($key, $value)
     {
-        if (! $this->isValidMetaKey($key)) {
+        if (static::$metaDisabled || $this->withoutMeta || ! $this->isValidMetaKey($key)) {
             return parent::setAttribute($key, $value);
         }
 
@@ -1118,6 +1139,13 @@ trait HasAdditionalColumns
         }
 
         return $meta;
+    }
+
+    public function withoutMeta(bool $withoutMeta = true): static
+    {
+        $this->withoutMeta = $withoutMeta;
+
+        return $this;
     }
 
     /**

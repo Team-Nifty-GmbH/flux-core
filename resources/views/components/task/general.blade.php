@@ -11,6 +11,21 @@
             wire:model="task.name"
             label="{{ __('Name') }}"
         />
+        @section('task.model')
+        <x-link
+            sm
+            href="#"
+            icon="link"
+            x-cloak
+            x-show="task.modelUrl"
+            x-bind:href="task.modelUrl"
+            wire:navigate
+        >
+            <x-slot:text>
+                <span x-text="task.modelLabel"></span>
+            </x-slot>
+        </x-link>
+        @show
         @section('task-content.selects')
         @section('task-content.selects.project')
         <div
@@ -18,7 +33,6 @@
             x-bind:class="!edit && 'pointer-events-none'"
         >
             <x-select.styled
-                :label="__('Project')"
                 wire:model="task.project_id"
                 x-bind:readonly="!edit"
                 select="label:label|value:id"
@@ -27,7 +41,25 @@
                     'url' => route('search', \FluxErp\Models\Project::class),
                     'method' => 'POST',
                 ]"
-            />
+            >
+                <x-slot:label>
+                    <div class="flex items-center justify-between pb-1">
+                        <x-label :label="__('Project')" />
+                        <x-button
+                            class="pointer-events-auto"
+                            x-cloak
+                            x-show="task.project_id"
+                            color="secondary"
+                            light
+                            sm
+                            wire:navigate
+                            icon="eye"
+                            x-bind:href="'{{ route('projects.id', ':id') }}'.replace(':id', task.project_id)"
+                            href=""
+                        />
+                    </div>
+                </x-slot>
+            </x-select.styled>
         </div>
         @show
         @section('task-content.selects.responsible-users')
@@ -86,8 +118,8 @@
             wire:model="task.priority"
             min="0"
         />
-        <x-textarea
-            x-bind:readonly="!edit"
+        <x-flux::editor
+            x-model="edit"
             wire:model="task.description"
             :label="__('Description')"
         />

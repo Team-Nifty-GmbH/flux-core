@@ -12,51 +12,59 @@
         </div>
     </div>
     @show
-    @section('client-address')
-    <div class="-mt-2 w-full pb-1 text-2xs">
-        {{ $client->postal_address_one_line }}
-    </div>
-    <div class="black-bar"></div>
-    @show
-    @section('recipient-address')
-    <div class="block pb-16 pt-4">
-        @section('recipient-address.left-block')
-        @if ($slot->isNotEmpty())
-            {!! $slot !!}
-        @else
-            <address class="float-left inline-block align-top not-italic">
-                <div class="font-semibold">
-                    {{ $address->company ?? '' }}
-                </div>
+    <table class="w-full">
+        <tr>
+            <td colspan="2" class="w-full pb-1 pt-6 text-2xs">
+                @section('client-address')
                 <div>
-                    {{ trim(($address->firstname ?? '') . ' ' . ($address->lastname ?? '')) }}
+                    {{ $client->postal_address_one_line }}
                 </div>
-                <div>
-                    {{ $address->addition ?? '' }}
+                <div class="black-bar"></div>
+                @show
+            </td>
+        </tr>
+        <tr class="h-4">
+            <td colspan="2"></td>
+        </tr>
+        @section('recipient-address')
+        <tr>
+            <td class="w-1/2 align-top">
+                @section('recipient-address.left-block')
+                @if ($slot->isNotEmpty())
+                    {!! $slot !!}
+                @else
+                    <address class="text-xs not-italic">
+                        <div class="font-semibold">
+                            {{ $address->company ?? '' }}
+                        </div>
+                        <div>
+                            {{ trim(($address->firstname ?? '') . ' ' . ($address->lastname ?? '')) }}
+                        </div>
+                        <div>
+                            {{ $address->addition ?? '' }}
+                        </div>
+                        <div>
+                            {{ $address->street ?? '' }}
+                        </div>
+                        <div>
+                            {{ trim(($address->zip ?? '') . ' ' . ($address->city ?? '')) }}
+                        </div>
+                    </address>
+                @endif
+                @show
+            </td>
+            <td class="w-1/2 align-top">
+                @section('recipient-address.right-block')
+                <div class="float-right inline-block max-w-full text-xs">
+                    {{ $rightBlock ?? '' }}
                 </div>
-                <div>
-                    {{ $address->street ?? '' }}
-                </div>
-                <div>
-                    {{ trim(($address->zip ?? '') . ' ' . ($address->city ?? '')) }}
-                </div>
-                <div>
-                    {{ $address->country->name ?? '' }}
-                </div>
-            </address>
-        @endif
+                @show
+            </td>
+        </tr>
         @show
-        <div class="float-right inline-block items-end align-top">
-            @section('recipient-address.right-block')
-            <div>
-                {{ $rightBlock ?? '' }}
-            </div>
-            @show
-        </div>
-    </div>
-    @show
+    </table>
     @section('first-page-subject')
-    <h1 class="pt-32 text-xl font-semibold">
+    <h1 class="pt-20 text-xl font-semibold">
         {{ $subject ?? '' }}
     </h1>
     @show

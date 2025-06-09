@@ -25,4 +25,11 @@ class CreateBankConnection extends FluxAction
 
         return $bankConnection->fresh();
     }
+
+    protected function prepareForValidation(): void
+    {
+        $this->data['iban'] = is_string($this->getData('iban'))
+            ? str_replace(' ', '', strtoupper($this->getData('iban')))
+            : $this->getData('iban');
+    }
 }

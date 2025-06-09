@@ -12,6 +12,8 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use ReflectionEnum;
 use ReflectionException;
+use Spatie\ModelStates\State;
+use UnitEnum;
 
 class Donut extends Metric
 {
@@ -47,8 +49,12 @@ class Donut extends Metric
 
         $cast = $this->query->getModel()->getCasts()[$this->groupBy] ?? null;
 
-        if ($cast && (new ReflectionEnum($cast))->isBacked()) {
+        if ($cast && is_subclass_of($cast, UnitEnum::class) && (new ReflectionEnum($cast))->isBacked()) {
             return Arr::pluck($cast::cases(), 'value');
+        }
+
+        if ($cast && is_subclass_of($cast, State::class)) {
+            return $cast::all()->keys()->toArray();
         }
 
         return [];
@@ -164,7 +170,7 @@ class Donut extends Metric
                 $key = $key instanceof BackedEnum ? $key->value : $key;
 
                 return [
-                    $key => $this->transformResult($model->result),
+                    (string) $key => $this->transformResult($model->result),
                 ];
             })
             ->toArray();
@@ -176,11 +182,21 @@ class Donut extends Metric
 
         if (
             $cast &&
+            is_subclass_of($cast, UnitEnum::class) &&
             (new ReflectionEnum($cast))->isBacked() &&
             method_exists($cast, 'getLabel')
         ) {
             $data = Arr::mapWithKeys($data, fn (string $value, mixed $key) => [
                 $cast::tryFrom($key)?->getLabel() => $value,
+            ]);
+        }
+
+        if (
+            $cast &&
+            is_subclass_of($cast, State::class)
+        ) {
+            $data = Arr::mapWithKeys($data, fn (string $value, mixed $key) => [
+                __($key) => $value,
             ]);
         }
 

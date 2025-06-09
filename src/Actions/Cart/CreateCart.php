@@ -41,9 +41,9 @@ class CreateCart extends FluxAction
         $this->data['authenticatable_type'] ??= auth()->user()?->getMorphClass();
         $this->data['authenticatable_id'] ??= auth()?->id();
         $this->data['payment_type_id'] ??= auth()->user()?->contact?->payment_type_id
-            ?? PaymentType::default()?->getKey();
+            ?? resolve_static(PaymentType::class, 'default')?->getKey();
         $this->data['price_list_id'] ??= auth()->user()?->contact?->price_list_id
-            ?? PriceList::default()?->getKey();
+            ?? resolve_static(PriceList::class, 'default')?->getKey();
         $this->data['session_id'] ??= session()->id();
     }
 }

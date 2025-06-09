@@ -34,7 +34,10 @@ class Project extends FluxModel implements Calendarable, HasMedia, InteractsWith
 {
     use Commentable, Filterable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes, HasPackageFactory,
         HasParentChildRelations, HasSerialNumberRange, HasStates, HasTags, HasUserModification, HasUuid,
-        InteractsWithMedia, LogsActivity, Searchable, SoftDeletes;
+        InteractsWithMedia, LogsActivity, SoftDeletes;
+    use Searchable {
+        Searchable::scoutIndexSettings as baseScoutIndexSettings;
+    }
 
     protected static string $iconName = 'briefcase';
 
@@ -49,6 +52,17 @@ class Project extends FluxModel implements Calendarable, HasMedia, InteractsWith
             'end_date' => data_get($event, 'end'),
             'description' => data_get($event, 'description'),
         ]);
+    }
+
+    public static function scoutIndexSettings(): ?array
+    {
+        return static::baseScoutIndexSettings() ?? [
+            'filterableAttributes' => [
+                'parent_id',
+                'state',
+            ],
+            'sortableAttributes' => ['*'],
+        ];
     }
 
     public static function toCalendar(): array
@@ -151,8 +165,8 @@ class Project extends FluxModel implements Calendarable, HasMedia, InteractsWith
         ?array $info = null
     ): void {
         $builder->where(function (Builder $query) use ($start, $end): void {
-            $query->whereBetween('start_date', [$start, $end])
-                ->orWhereBetween('end_date', [$start, $end])
+            $query->where('start_date', '<=', $end)
+                ->where('end_date', '>=', $start)
                 ->orWhereBetween('created_at', [$start, $end]);
         });
     }

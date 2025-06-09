@@ -65,7 +65,7 @@ class Token extends FluxAuthenticatable
             && parse_url(request()->url(), PHP_URL_PATH) === parse_url($this->url, PHP_URL_PATH);
     }
 
-    public function prunable()
+    public function prunable(): Builder
     {
         return static::query()->invalid();
     }

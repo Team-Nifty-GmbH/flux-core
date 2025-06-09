@@ -62,30 +62,33 @@
                                 icon="plus"
                                 wire:click="addCustomProperty"
                             />
-                            @foreach ($calendar->custom_properties ?? [] as $index => $customProperty)
+                            <template
+                                x-for="(customProperty, index) in $wire.calendar.custom_properties ?? []"
+                            >
                                 <div class="flex gap-x-4">
                                     <div class="pt-6">
                                         <x-button.circle
                                             color="red"
                                             icon="trash"
-                                            wire:click="removeCustomProperty({{ $index }})"
+                                            wire:click="removeCustomProperty(index)"
                                         />
                                     </div>
                                     <div class="max-w-sm">
                                         <x-select.styled
-                                            wire:model="calendar.customProperties.{{ $index }}.field_type"
+                                            x-model="customProperty.field_type"
                                             :label="__('Field Type')"
+                                            required
                                             :options="$this->fieldTypes"
                                         />
                                     </div>
                                     <div class="w-full">
                                         <x-input
-                                            wire:model="calendar.customProperties.{{ $index }}.name"
+                                            x-model="customProperty.name"
                                             :label="__('Name')"
                                         />
                                     </div>
                                 </div>
-                            @endforeach
+                            </template>
                         </div>
                     </x-card>
                 </div>

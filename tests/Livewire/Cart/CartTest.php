@@ -32,6 +32,25 @@ class CartTest extends BaseSetup
         $this->vatRate = VatRate::factory()->create();
     }
 
+    public function test_can_delete_cart_items(): void
+    {
+        $cart = $this->createFilledCartFactory()
+            ->create([
+                'authenticatable_type' => $this->user->getMorphClass(),
+                'authenticatable_id' => $this->user->id,
+                'price_list_id' => PriceList::default()->id,
+                'is_watchlist' => false,
+            ]);
+
+        Livewire::actingAs($this->user)
+            ->withoutLazyLoading()
+            ->test(Cart::class)
+            ->assertCount('cart.cartItems', 3)
+            ->call('remove', $cart->cartItems->first()->getKey())
+            ->assertHasNoErrors()
+            ->assertCount('cart.cartItems', 2);
+    }
+
     public function test_can_load_watchlist(): void
     {
         $watchList = $this->createFilledCartFactory()
@@ -43,6 +62,7 @@ class CartTest extends BaseSetup
             ]);
 
         Livewire::actingAs($this->user)
+            ->withoutLazyLoading()
             ->test(Cart::class)
             ->set('loadWatchlist', $watchList->id)
             ->assertSet('loadWatchlist', null)
@@ -62,6 +82,7 @@ class CartTest extends BaseSetup
             ]);
 
         Livewire::actingAs($this->user)
+            ->withoutLazyLoading()
             ->test(Cart::class)
             ->assertCount('cart.cartItems', 3)
             ->set('watchlistName', $watchListName = Str::uuid())
@@ -81,7 +102,8 @@ class CartTest extends BaseSetup
 
     public function test_renders_successfully(): void
     {
-        Livewire::test(Cart::class)
+        Livewire::withoutLazyLoading()
+            ->test(Cart::class)
             ->assertStatus(200);
     }
 

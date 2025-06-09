@@ -4,6 +4,7 @@ namespace FluxErp\Actions\OrderPosition;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Helpers\Helper;
+use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\Price;
@@ -66,7 +67,7 @@ class UpdateOrderPosition extends FluxAction
                 $orderPosition->unit_gram_weight : $product->unit_gram_weight;
         }
 
-        PriceCalculation::fill($orderPosition, $this->data);
+        PriceCalculation::make($orderPosition, $this->data)->calculate();
         unset($orderPosition->discounts, $orderPosition->unit_price);
         $orderPosition->save();
 
@@ -112,12 +113,12 @@ class UpdateOrderPosition extends FluxAction
     {
         parent::validateData();
 
-        if ($this->data['id'] ?? false) {
+        if ($this->getData('id')) {
             $errors = [];
             $orderPosition = resolve_static(OrderPosition::class, 'query')
                 ->whereKey($this->data['id'])
                 ->with([
-                    'order:id,order_type_id,is_locked',
+                    'order:id,contact_id,order_type_id,is_locked',
                     'order.orderType:id,order_type_enum',
                     'origin:id,order_id,amount',
                     'origin.order:id,order_type_id',
@@ -156,6 +157,17 @@ class UpdateOrderPosition extends FluxAction
                         'price_id' => [__('Price not found in price list')],
                     ];
                 }
+            }
+
+            if ($this->getData('credit_account_id')
+                && ! resolve_static(ContactBankConnection::class, 'query')
+                    ->whereKey($this->getData('credit_account_id'))
+                    ->where('contact_id', $orderPosition->order->contact_id)
+                    ->exists()
+            ) {
+                $errors += [
+                    'credit_account_id' => [__('validation.exists', ['attribute' => 'credit_account_id'])],
+                ];
             }
 
             // If order position has origin_position_id or is their parent, validate amount

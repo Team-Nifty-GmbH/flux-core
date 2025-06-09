@@ -55,6 +55,7 @@
                             wire:model="orderPosition.name"
                         />
                         <div
+                            class="space-y-2"
                             x-cloak
                             x-show="$wire.orderPosition.is_free_text !== true"
                         >
@@ -95,7 +96,7 @@
                                     ]"
                                 />
                             </div>
-                            <div class="mt-2">
+                            <div>
                                 <x-checkbox
                                     wire:model.boolean="orderPosition.is_alternative"
                                     :label="__('Alternative')"
@@ -139,14 +140,13 @@
                             x-on:change="$el.value = parseNumber($el.value)"
                         />
                         <x-select.styled
-                            :options="$vatRates"
-                            select="label:name|value:id"
                             :label="__('Vat rate')"
                             wire:model.live="orderPosition.vat_rate_id"
+                            select="label:name|value:id"
+                            :options="$vatRates"
                         />
                         <x-select.styled
                             :label="__('Ledger Account')"
-                            select="label:name|value:id"
                             wire:model.number="orderPosition.ledger_account_id"
                             select="label:name|value:id|description:number"
                             unfiltered
@@ -166,6 +166,56 @@
                                 ],
                             ]"
                         />
+                        <x-select.styled
+                            :label="__('Credit Account')"
+                            wire:model.number="orderPosition.credit_account_id"
+                            select="label:bank_name|value:id|description:balance"
+                            unfiltered
+                            :request="[
+                                'url' => route('search', \FluxErp\Models\ContactBankConnection::class),
+                                'method' => 'POST',
+                                'params' => [
+                                    'where' => [
+                                        [
+                                            'contact_id',
+                                            '=',
+                                            $order->contact_id,
+                                        ],
+                                    ],
+                                ],
+                            ]"
+                        />
+                        <div
+                            class="space-y-2"
+                            x-cloak
+                            x-show="$wire.orderPosition.credit_account_id"
+                        >
+                            <div class="flex justify-between">
+                                <div>
+                                    <x-radio
+                                        id="credit-on-credit-account-radio"
+                                        name="post-on-credit-account-radio"
+                                        :label="__('Credit')"
+                                        wire:model="orderPosition.post_on_credit_account"
+                                        :value="\FluxErp\Enums\CreditAccountPostingEnum::Credit->value"
+                                    />
+                                </div>
+                                <div>
+                                    <x-radio
+                                        id="debit-on-credit-account-radio"
+                                        name="post-on-credit-account-radio"
+                                        :label="__('Debit')"
+                                        wire:model="orderPosition.post_on_credit_account"
+                                        :value="\FluxErp\Enums\CreditAccountPostingEnum::Debit->value"
+                                    />
+                                </div>
+                            </div>
+                            <x-input
+                                type="number"
+                                :label="__('Credit Amount')"
+                                wire:model="orderPosition.credit_amount"
+                            />
+                        </div>
                         @show
                     </div>
                 </div>
