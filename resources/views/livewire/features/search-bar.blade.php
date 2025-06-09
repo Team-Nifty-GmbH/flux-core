@@ -35,12 +35,7 @@
         wire:model.live.debounce.500ms="search"
         placeholder="{{ __('Search everywhere...') }}"
     />
-    <div
-        class="absolute z-9 w-full pt-6"
-        x-show="show"
-        x-transition
-        x-cloak
-    >
+    <div class="absolute z-9 w-full pt-6" x-show="show" x-transition x-cloak>
         <x-card class="relative px-0! py-0! pb-2">
             <div
                 x-show="$wire.search.length && ! Object.keys($wire.return).length"
@@ -67,7 +62,7 @@
                                 <template x-for="item in items">
                                     <li
                                         x-on:mouseover.debounce.500ms="showDetails(model, item.id)"
-                                        class="flex cursor-pointer select-none items-center space-x-1.5 px-4 py-2 hover:bg-indigo-600 hover:text-white"
+                                        class="flex cursor-pointer items-center space-x-1.5 px-4 py-2 select-none hover:bg-indigo-600 hover:text-white"
                                         x-on:click="
                                             show = false
                                             $wire.showDetail(model, item.id)

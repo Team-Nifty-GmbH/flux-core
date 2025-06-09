@@ -4,7 +4,7 @@
     x-on:mouseover.away="closeMenu()"
     x-on:mouseover="showMenu()"
     x-bind:class="menuOpen && 'w-full! md:w-72!'"
-    class="soft-scrollbar fixed inset-y-0 top-0 z-20 w-0 overflow-y-auto bg-flux-secondary-500 transition-all duration-500 ease-in-out md:block md:flex md:w-20 md:flex-col"
+    class="soft-scrollbar bg-flux-secondary-500 fixed inset-y-0 top-0 z-20 w-0 overflow-y-auto transition-all duration-500 ease-in-out md:block md:flex md:w-20 md:flex-col"
 >
     <!-- Sidebar component, swap this element with another sidebar if you like -->
     <div class="soft-scrollbar flex grow flex-col overflow-x-hidden">
@@ -15,13 +15,13 @@
                 light
                 icon="x-mark"
                 x-on:click="closeMenu(true)"
-                class="absolute right-6 top-6 block md:hidden"
+                class="absolute top-6 right-6 block md:hidden"
             />
         </div>
         <!-- User Menu -->
         <div>
             <div class="flex flex-1 flex-col pt-0">
-                <div class="whitespace-nowrap pb-8 pt-4">
+                <div class="pt-4 pb-8 whitespace-nowrap">
                     <x-dropdown>
                         <x-slot:action>
                             <div

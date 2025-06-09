@@ -503,8 +503,7 @@ const calendar = () => {
 
                     // Right side container for time and status badges
                     let rightContent = document.createElement('div');
-                    rightContent.className =
-                        'flex items-center gap-1 shrink-0';
+                    rightContent.className = 'flex items-center gap-1 shrink-0';
 
                     // Add status badges if they exist
                     if (info.event.extendedProps.appendTitle) {

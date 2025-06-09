@@ -42,7 +42,7 @@
                         color="red"
                         icon="x-mark"
                         wire:click="removeProduct({{ $cartFormItem['id'] }})"
-                        class="absolute right-2 top-2 z-10 h-4 w-4"
+                        class="absolute top-2 right-2 z-10 h-4 w-4"
                     />
                 @endif
 

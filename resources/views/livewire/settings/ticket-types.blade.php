@@ -9,7 +9,7 @@
                     {{ __('Here you can manage all ticket types...') }}
                 </div>
             </div>
-            <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+            <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
                 <x-button
                     color="indigo"
                     :text="__('Create')"
@@ -30,7 +30,7 @@
                                 <tr class="divide-x divide-gray-200">
                                     <th
                                         scope="col"
-                                        class="py-3.5 pl-4 pr-4 text-left text-sm font-semibold text-gray-900 sm:pl-6"
+                                        class="py-3.5 pr-4 pl-4 text-left text-sm font-semibold text-gray-900 sm:pl-6"
                                     >
                                         {{ __('Name') }}
                                     </th>
@@ -60,7 +60,7 @@
                                     </th>
                                     <th
                                         scope="col"
-                                        class="py-2 pl-2 pr-2 text-left text-sm font-semibold text-gray-900"
+                                        class="py-2 pr-2 pl-2 text-left text-sm font-semibold text-gray-900"
                                     ></th>
                                 </tr>
                             </thead>
@@ -74,26 +74,26 @@
                                     <tr class="divide-x divide-gray-200">
                                         <td
                                             x-text="ticketType.field_type ? '&emsp;' + ticketType.name : ticketType.name"
-                                            class="whitespace-nowrap py-4 pl-4 pr-4 text-sm font-medium text-gray-900 sm:pl-6"
+                                            class="py-4 pr-4 pl-4 text-sm font-medium whitespace-nowrap text-gray-900 sm:pl-6"
                                         />
                                         <td
                                             x-text="ticketType.field_type ? ticketType.field_type : ticketType.model_type"
-                                            class="whitespace-nowrap py-4 pl-4 pr-4 text-sm font-medium text-gray-900 sm:pl-6"
+                                            class="py-4 pr-4 pl-4 text-sm font-medium whitespace-nowrap text-gray-900 sm:pl-6"
                                         />
                                         <td
                                             x-text="ticketType.label"
-                                            class="whitespace-nowrap py-4 pl-4 pr-4 text-sm font-medium text-gray-900 sm:pl-6"
+                                            class="py-4 pr-4 pl-4 text-sm font-medium whitespace-nowrap text-gray-900 sm:pl-6"
                                         />
                                         <td
                                             x-text="ticketType.validations"
-                                            class="whitespace-nowrap py-4 pl-4 pr-4 text-sm font-medium text-gray-900 sm:pl-6"
+                                            class="py-4 pr-4 pl-4 text-sm font-medium whitespace-nowrap text-gray-900 sm:pl-6"
                                         />
                                         <td
                                             x-text="ticketType.values"
-                                            class="whitespace-nowrap py-4 pl-4 pr-4 text-sm font-medium text-gray-900 sm:pl-6"
+                                            class="py-4 pr-4 pl-4 text-sm font-medium whitespace-nowrap text-gray-900 sm:pl-6"
                                         />
                                         <td
-                                            class="whitespace-nowrap py-2 pl-2 pr-2 text-center text-sm text-gray-500"
+                                            class="py-2 pr-2 pl-2 text-center text-sm whitespace-nowrap text-gray-500"
                                         >
                                             <div
                                                 class="flex justify-center gap-1"

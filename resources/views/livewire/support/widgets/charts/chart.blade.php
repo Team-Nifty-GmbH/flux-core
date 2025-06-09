@@ -1,6 +1,6 @@
 <div
     x-data="apexCharts($wire)"
-    class="flex h-full max-h-full w-full flex-col gap-4 pb-4 pt-4 text-sm"
+    class="flex h-full max-h-full w-full flex-col gap-4 pt-4 pb-4 text-sm"
 >
     @if ($withSpinner)
         <x-flux::spinner />
