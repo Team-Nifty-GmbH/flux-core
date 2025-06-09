@@ -53,14 +53,18 @@ class Transaction extends FluxModel implements InteractsWithDataTables
 
     public function calculateBalance(): static
     {
-        $this->balance = bcround(
-            bcsub(
-                $this->amount,
-                $this->orders()->withPivot('amount')->sum('order_transaction.amount'),
-                9
-            ),
-            2
-        );
+        if ($this->contact_bank_connection_id) {
+            $this->balance = 0;
+        } else {
+            $this->balance = bcround(
+                bcsub(
+                    $this->amount,
+                    $this->orders()->withPivot('amount')->sum('order_transaction.amount'),
+                    9
+                ),
+                2
+            );
+        }
 
         return $this;
     }

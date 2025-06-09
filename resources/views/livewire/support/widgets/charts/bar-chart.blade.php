@@ -34,6 +34,8 @@
                     <div class="flex flex-col gap-2">
                         <div
                             class="whitespace-nowrap text-lg font-semibold"
+                            x-cloak
+                            x-show="livewireOptions.series?.filter((series) => ! series.hideFromTotals).length > 1"
                             x-text="seriesData.name"
                         ></div>
                         <div class="flex gap-2">

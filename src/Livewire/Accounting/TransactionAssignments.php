@@ -171,6 +171,7 @@ class TransactionAssignments extends Component
         $query = $this->search ? $query->toEloquentBuilder(perPage: 1000) : $query;
 
         return $query
+            ->whereNull('contact_bank_connection_id')
             ->when(
                 $this->tab === __('Assignment suggestions'),
                 fn (Builder $query) => $query->whereHas(
@@ -328,6 +329,7 @@ class TransactionAssignments extends Component
             ->count();
 
         $this->unassignedCount = resolve_static(Transaction::class, 'query')
+            ->whereNull('contact_bank_connection_id')
             ->where('is_ignored', false)
             ->whereDoesntHave('orders')
             ->count();

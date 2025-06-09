@@ -89,6 +89,26 @@ class CalendarEvent extends Component
     }
 
     #[Renderless]
+    public function reactivate(): void
+    {
+        $calendarId = $this->event->calendar_id;
+        $this->event->confirm_option = $this->event->was_repeatable ? 'this' : 'all';
+
+        try {
+            $this->event->reactivate();
+        } catch (ValidationException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->js(<<<JS
+            \$modalClose('edit-event-modal');
+            calendar.getEventSourceById('$calendarId')?.refetch();
+        JS);
+    }
+
+    #[Renderless]
     #[On('save-calendar-event')]
     public function save(): bool
     {

@@ -8,7 +8,7 @@
             <div class="truncate text-lg font-semibold text-gray-400">
                 {{ __($this->title()) }}
             </div>
-            @if (class_implements($this, \FluxErp\Contracts\HasWidgetOptions::class))
+            @if ($this instanceof \FluxErp\Contracts\HasWidgetOptions)
                 <div class="flex-none">
                     <x-dropdown icon="ellipsis-vertical" static>
                         @foreach ($this->options() as $option)

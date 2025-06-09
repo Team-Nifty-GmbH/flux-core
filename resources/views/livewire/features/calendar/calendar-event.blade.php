@@ -393,6 +393,8 @@
                     <x-label :label="__('Repeat end')" />
                 </div>
                 <x-radio
+                    id="calendar-event-repeat-end-never-radio"
+                    name="repeat-radio"
                     :label="__('Never')"
                     :value="null"
                     x-model="$wire.event.repeat.repeat_radio"
@@ -400,6 +402,8 @@
                 />
                 <div class="grid grid-cols-2 items-center gap-1.5">
                     <x-radio
+                        id="calendar-event-repeat-end-date-radio"
+                        name="repeat-radio"
                         :label="__('Date At')"
                         value="repeat_end"
                         x-model="$wire.event.repeat.repeat_radio"
@@ -413,6 +417,8 @@
                         x-on:change="$wire.event.repeat_end = dayjs($event.target.value).format('YYYY-MM-DD')"
                     />
                     <x-radio
+                        id="calendar-event-repeat-end-recurrences-radio"
+                        name="repeat-radio"
                         :label="__('After amount of events')"
                         value="recurrences"
                         x-model="$wire.event.repeat.repeat_radio"
@@ -575,18 +581,32 @@
                     />
                 </div>
                 <div class="flex w-full justify-end gap-2">
-                    <x-button
-                        :text="__('Cancel')"
-                        color="secondary"
-                        light
-                        flat
-                        x-on:click="$modalClose('edit-event-modal')"
-                    />
-                    <x-button
-                        :text="__('Save')"
-                        primary
-                        x-on:click="dialogType = 'save'; $wire.event.confirm_option = 'future'; $wire.event.was_repeatable ? $modalOpen('confirm-dialog') : $wire.save()"
-                    />
+                    @canAction(\FluxErp\Actions\CalendarEvent\CancelCalendarEvent::class)
+                        <x-button
+                            :text="__('Cancel')"
+                            color="secondary"
+                            light
+                            flat
+                            x-on:click="$modalClose('edit-event-modal')"
+                        />
+                    @endcanAction
+
+                    <div x-show="!$wire.event.is_cancelled" x-cloak>
+                        <x-button
+                            :text="__('Save')"
+                            primary
+                            x-on:click="dialogType = 'save'; $wire.event.confirm_option = 'future'; $wire.event.was_repeatable ? $modalOpen('confirm-dialog') : $wire.save()"
+                        />
+                    </div>
+                    @canAction(\FluxErp\Actions\CalendarEvent\ReactivateCalendarEvent::class)
+                        <div x-show="$wire.event.is_cancelled" x-cloak>
+                            <x-button
+                                :text="__('Reactivate')"
+                                primary
+                                wire:click="reactivate()"
+                            />
+                        </div>
+                    @endcanAction
                 </div>
             </div>
         </x-slot>

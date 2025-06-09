@@ -81,8 +81,10 @@
         </div>
         <div id="folder-tree" class="pt-3">
             @section('product-modal.content.media')
-            <livewire:folder-tree
+            <livewire:portal.order.product-media
                 :model-type="\FluxErp\Models\Product::class"
+                wire:key="product-media-{{ data_get($positionDetails, 'product_id') }}"
+                wire:model="positionDetails.product_id"
             />
             @show
         </div>

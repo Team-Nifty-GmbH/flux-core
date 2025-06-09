@@ -49,8 +49,7 @@ class UpdateLeadRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => LeadState::class]),
             ],
             'user_id' => [
-                'sometimes',
-                'required',
+                'nullable',
                 'integer',
                 app(ModelExists::class, ['model' => User::class]),
             ],

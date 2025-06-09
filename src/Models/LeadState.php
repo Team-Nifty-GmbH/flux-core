@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use FluxErp\Traits\HasDefault;
+use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
@@ -11,7 +12,7 @@ use Illuminate\Support\Str;
 
 class LeadState extends FluxModel
 {
-    use HasDefault, HasUserModification, HasUuid, SoftDeletes;
+    use HasDefault, HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
 
     protected $appends = [
         'image',

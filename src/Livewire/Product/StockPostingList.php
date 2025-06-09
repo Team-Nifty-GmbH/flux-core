@@ -75,7 +75,7 @@ class StockPostingList extends BaseStockPostingList
             $this->warehouseId ?? resolve_static(Warehouse::class, 'default')->getKey();
 
         $this->js(<<<'JS'
-            $modalOpen('create-stock-posting');
+            $modalOpen('create-stock-posting-modal');
         JS);
     }
 

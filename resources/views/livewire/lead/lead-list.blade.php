@@ -17,7 +17,6 @@
             <x-select.styled
                 :label="__('Commission Agent')"
                 wire:model="leadForm.user_id"
-                required
                 select="label:label|value:id"
                 unfiltered
                 :request="[
