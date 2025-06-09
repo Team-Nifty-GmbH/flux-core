@@ -53,6 +53,6 @@
         "tippy.js": "^6.3.7",
         "uuid": "^11.1.0",
         "vite": "^6.0.3",
-        "@tiptap/extension-text-style": "2.12.0"
+        "@tiptap/extension-text-style": "2.14.0"
     }
 }
