@@ -2,7 +2,7 @@
 
 namespace FluxErp\Database\Seeders;
 
-use App\Models\Address;
+use FluxErp\Models\Address;
 use FluxErp\Models\Lead;
 use FluxErp\Models\User;
 use Illuminate\Database\Seeder;
