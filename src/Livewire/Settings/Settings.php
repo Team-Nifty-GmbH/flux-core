@@ -32,7 +32,9 @@ class Settings extends Component
     public function showSetting(array $setting): void
     {
         $route = Route::getRoutes()
-            ->match(Request::create(Str::after(parse_url($setting['uri'], PHP_URL_PATH), '/')));
+            ->match(Request::create(
+                Str::of(request()->schemeAndHttpHost())->append(parse_url($setting['uri'], PHP_URL_PATH))
+            ));
         $permission = route_to_permission($route);
 
         if (

@@ -44,8 +44,8 @@
                         {
                             trackable_type: '{{ morph_alias(\FluxErp\Models\Ticket::class) }}',
                             trackable_id: {{ $ticket->id }},
-                            name: '{{ $ticket->title }}',
-                            description: {{ strip_tags(json_encode($ticket->description)) }}
+                            name: {{ json_encode($ticket->title) }},
+                            description: {{ json_encode(strip_tags($ticket->description ?? '')) }}
                         }
                     )"
             >
@@ -174,20 +174,17 @@
                                 </div>
                             </x-slot>
                             @section('content.attachments')
-                            <livewire:folder-tree
-                                :model-type="\FluxErp\Models\Ticket::class"
-                                :model-id="$ticket->id"
+                            <livewire:ticket.media
+                                :model-id="data_get($ticket, 'id')"
                             />
                             @show
                         </x-card>
                         <x-card>
-                            <x-flux::tabs wire:model.live="tab" :$tabs>
-                                <livewire:is
-                                    wire:key="{{ uniqid() }}"
-                                    :component="$tab"
-                                    :model-id="$ticket->id"
-                                />
-                            </x-flux::tabs>
+                            <x-flux::tabs
+                                wire:model.live="tab"
+                                :$tabs
+                                wire:ignore
+                            />
                         </x-card>
                     </div>
                 </div>
@@ -218,11 +215,19 @@
                             :label="__('Assigned')"
                             wire:model.live="ticket.users"
                             select="label:label|value:id"
+                            unfiltered
                             :request="[
                                 'url' => route('search', \FluxErp\Models\User::class),
                                 'method' => 'POST',
                                 'params' => [
                                     'with' => 'media',
+                                    'where' => [
+                                        [
+                                            'field' => 'is_active',
+                                            'operator' => '=',
+                                            'value' => true,
+                                        ],
+                                    ],
                                 ],
                             ]"
                         />
@@ -258,11 +263,19 @@
                                     wire:model="ticket.authenticatable_id"
                                     required
                                     select="label:label|value:id"
+                                    unfiltered
                                     :request="[
                                         'url' => route('search', $ticket->authenticatable_type ?? morph_alias(\FluxErp\Models\User::class)),
                                         'method' => 'POST',
                                         'params' => [
                                             'with' => $ticket->authenticatable_type === morph_alias(\FluxErp\Models\Address::class) ? 'contact.media' : 'media',
+                                            'where' => [
+                                                [
+                                                    'field' => 'is_active',
+                                                    'operator' => '=',
+                                                    'value' => true,
+                                                ],
+                                            ],
                                         ],
                                     ]"
                                 />

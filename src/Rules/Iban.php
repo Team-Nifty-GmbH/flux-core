@@ -2,14 +2,15 @@
 
 namespace FluxErp\Rules;
 
-use Illuminate\Contracts\Validation\Rule;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
 
-class Iban implements Rule
+class Iban implements ValidationRule
 {
     /**
      * IBAN lengths for countries
      */
-    private array $lengths = [
+    protected array $lengths = [
         'AL' => 28,
         'AD' => 24,
         'AT' => 20,
@@ -117,30 +118,21 @@ class Iban implements Rule
         'TG' => 28,
     ];
 
-    /**
-     * Get the validation error message.
-     */
-    public function message(): string
-    {
-        return __('The sent IBAN is not valid');
-    }
-
-    /**
-     * Determine if the validation rule passes.
-     */
-    public function passes($attribute, $value): bool
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         // normalize value
         $value = str_replace(' ', '', strtoupper($value));
 
         // check iban length and checksum
-        return $this->hasValidLength($value) && $this->getChecksum($value) === 1;
+        if (! ($this->hasValidLength($value) && $this->getChecksum($value) === 1)) {
+            $fail('The sent IBAN is not valid')->translate();
+        }
     }
 
     /**
      * Calculate checksum of iban
      */
-    private function getChecksum(string $iban): int
+    protected function getChecksum(string $iban): int
     {
         $iban = substr($iban, 4) . substr($iban, 0, 4);
         $iban = str_replace(
@@ -163,19 +155,19 @@ class Iban implements Rule
     /**
      * Returns the designated length of IBAN for given IBAN
      */
-    private function getDesignatedIbanLength(string $iban): false|int
+    protected function getDesignatedIbanLength(string $iban): false|int
     {
         $countryCode = substr($iban, 0, 2);
 
         return $this->lengths[$countryCode] ?? false;
     }
 
-    private function getReplacementsChars(): array
+    protected function getReplacementsChars(): array
     {
         return range('A', 'Z');
     }
 
-    private function getReplacementsValues(): array
+    protected function getReplacementsValues(): array
     {
         $values = [];
         foreach (range(10, 35) as $value) {
@@ -188,7 +180,7 @@ class Iban implements Rule
     /**
      * Determine if given iban has the proper length
      */
-    private function hasValidLength(string $iban): bool
+    protected function hasValidLength(string $iban): bool
     {
         return $this->getDesignatedIbanLength($iban) == strlen($iban);
     }

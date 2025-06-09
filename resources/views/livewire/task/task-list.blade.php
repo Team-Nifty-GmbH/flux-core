@@ -1,5 +1,5 @@
 <div>
-    <x-modal id="new-task-modal">
+    <x-modal id="new-task-modal" x-on:open="$focusOn('task-name')">
         <div
             class="space-y-8 divide-y divide-gray-200"
             x-data="{
@@ -7,11 +7,16 @@
             }"
         >
             <div class="flex flex-col gap-1.5">
-                <x-input wire:model="task.name" label="{{ __('Name') }}" />
+                <x-input
+                    wire:model="task.name"
+                    label="{{ __('Name') }}"
+                    id="task-name"
+                />
                 <x-select.styled
                     :label="__('Project')"
                     wire:model="task.project_id"
                     select="label:label|value:id"
+                    unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\Project::class),
                         'method' => 'POST',
@@ -22,6 +27,7 @@
                     autocomplete="off"
                     wire:model="task.responsible_user_id"
                     select="label:label|value:id"
+                    unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\User::class),
                         'method' => 'POST',
@@ -64,6 +70,7 @@
                     wire:model="task.categories"
                     multiple
                     select="label:label|value:id"
+                    unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\Category::class),
                         'method' => 'POST',
@@ -84,6 +91,7 @@
                     multiple
                     wire:model="task.users"
                     select="label:label|value:id"
+                    unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\User::class),
                         'method' => 'POST',
@@ -131,7 +139,6 @@
                 x-on:click="$wire.save().then((task) => {
                     if (task) {
                         $modalClose('new-task-modal');
-                        window.location.href = baseRoute.replace(':id', $wire.task.id);
                     }
                 });"
             />

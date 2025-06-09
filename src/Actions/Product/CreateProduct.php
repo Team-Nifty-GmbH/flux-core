@@ -95,6 +95,10 @@ class CreateProduct extends FluxAction
     {
         $this->data['product_type'] ??= data_get(ProductType::getDefault(), 'type');
 
+        if (! $this->getData('is_bundle')) {
+            $this->data['bundle_type_enum'] = null;
+        }
+
         if (! data_get($this->data, 'prices') && data_get($this->data, 'parent_id')) {
             $this->data['prices'] = resolve_static(Price::class, 'query')
                 ->where('product_id', data_get($this->data, 'parent_id'))

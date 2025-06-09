@@ -81,15 +81,21 @@
         </div>
         <div id="folder-tree" class="pt-3">
             @section('product-modal.content.media')
-            <livewire:folder-tree
+            <livewire:portal.order.product-media
                 :model-type="\FluxErp\Models\Product::class"
+                wire:key="product-media-{{ data_get($positionDetails, 'product_id') }}"
+                wire:model="positionDetails.product_id"
             />
             @show
         </div>
         @show
     </x-modal>
     <div id="new-ticket-modal-wrapper">
-        <x-modal id="new-ticket-modal" :title="__('New Ticket')">
+        <x-modal
+            id="new-ticket-modal"
+            :title="__('New Ticket')"
+            x-on:open="$focusOn('ticket-title')"
+        >
             <livewire:portal.ticket.ticket-create
                 :model-type="\FluxErp\Models\Order::class"
                 :model-id="$order['id']"
@@ -228,7 +234,7 @@
                     @section('attributes.right')
                     <div class="text-right">{{ __('Clerk') }}:</div>
                     <div>
-                        {{ data_get($order, 'user_created.name') }}
+                        {{ data_get($order, 'created_by') }}
                     </div>
                     <div class="text-right">
                         {{ __('Responsible representative') }}:

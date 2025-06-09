@@ -37,6 +37,7 @@
                     wire:model="replicateOrder.order_type_id"
                     required
                     select="label:name|value:id"
+                    unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\OrderType::class),
                         'method' => 'POST',
@@ -71,6 +72,7 @@
                         required
                         x-on:select="updateContactId($event.detail.select.contact_id)"
                         select="label:label|value:contact_id"
+                        unfiltered
                         :request="[
                             'url' => route('search', \FluxErp\Models\Address::class),
                             'method' => 'POST',
@@ -101,6 +103,7 @@
                             wire:model="replicateOrder.address_invoice_id"
                             required
                             select="label:label|value:id"
+                            unfiltered
                             :request="[
                                 'url' => route('search', \FluxErp\Models\Address::class),
                                 'method' => 'POST',
@@ -124,6 +127,7 @@
                             wire:model="replicateOrder.address_delivery_id"
                             required
                             select="label:label|value:id"
+                            unfiltered
                             :request="[
                                 'url' => route('search', \FluxErp\Models\Address::class),
                                 'method' => 'POST',
@@ -202,6 +206,7 @@
                     wire:model="replicateOrder.order_type_id"
                     required
                     select="label:name|value:id"
+                    unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\OrderType::class),
                         'method' => 'POST',
@@ -282,12 +287,16 @@
     </x-modal>
     <x-modal
         id="edit-discount"
-        x-on:open="$focus.first()"
+        x-on:open="$focusOn('discount-name')"
         x-trap="show"
         x-on:keyup.enter="$wire.saveDiscount().then((success) => {if(success) $modalClose('edit-discount');})"
     >
         <div class="flex flex-col gap-1.5">
-            <x-input wire:model="discount.name" :text="__('Name')" />
+            <x-input
+                wire:model="discount.name"
+                :text="__('Name')"
+                id="discount-name"
+            />
             <div x-cloak x-show="$wire.discount.is_percentage">
                 <x-input
                     prefix="%"
@@ -338,7 +347,7 @@
                         <div
                             class="size-5 cursor-pointer"
                             wire:click="toggleLock()"
-                            wire:flux-confirm.icon.warning="{{ __('Change order lock state') }}|{{ __('Manually locking or unlocking orders can have unexpected side effects.<br><br>Are you Sure?') }}|{{ __('Cancel') }}|{{ __('Continue') }}"
+                            wire:flux-confirm.type.warning="{{ __('Change order lock state') }}|{{ __('Manually locking or unlocking orders can have unexpected side effects.<br><br>Are you Sure?') }}|{{ __('Cancel') }}|{{ __('Continue') }}"
                         >
                             <x-icon
                                 x-cloak
@@ -499,6 +508,7 @@
                                 required
                                 x-on:select="updateContactId($event.detail.select.value)"
                                 select="label:label|value:contact_id"
+                                unfiltered
                                 :request="[
                                     'url' => route('search', \FluxErp\Models\Address::class),
                                     'method' => 'POST',
@@ -532,14 +542,16 @@
                                 class="flex w-full items-center justify-between gap-4"
                             >
                                 <div>{{ __('Invoice Address') }}</div>
-                                <x-button
-                                    color="secondary"
-                                    light
-                                    wire:navigate
-                                    light
-                                    icon="eye"
-                                    :href="route('address.id', data_get($order, 'address_invoice_id', ''))"
-                                />
+                                @if ($invoiceAddressId = data_get($order, 'address_invoice_id', ''))
+                                    <x-button
+                                        color="secondary"
+                                        light
+                                        wire:navigate
+                                        light
+                                        icon="eye"
+                                        :href="route('address.id', $invoiceAddressId)"
+                                    />
+                                @endif
                             </div>
                         </x-slot>
                         <div id="order-invoice-address-id">
@@ -549,6 +561,7 @@
                                 wire:model.live="order.address_invoice_id"
                                 required
                                 select="label:label|value:id"
+                                unfiltered
                                 :request="[
                                     'url' => route('search', \FluxErp\Models\Address::class),
                                     'method' => 'POST',
@@ -603,13 +616,16 @@
                                 class="flex w-full items-center justify-between gap-4"
                             >
                                 <div>{{ __('Delivery Address') }}</div>
-                                <x-button
-                                    color="secondary"
-                                    light
-                                    light
-                                    icon="eye"
-                                    :href="route('address.id', data_get($order, 'address_delivery_id', ''))"
-                                />
+                                @if ($deliveryAddressId = data_get($order, 'address_delivery_id', ''))
+                                    <x-button
+                                        color="secondary"
+                                        light
+                                        wire:navigate
+                                        light
+                                        icon="eye"
+                                        :href="route('address.id', $deliveryAddressId)"
+                                    />
+                                @endif
                             </div>
                         </x-slot>
                         <div id="order-delivery-address-id">
@@ -619,6 +635,7 @@
                                 wire:model.live="order.address_delivery_id"
                                 required
                                 select="label:label|value:id"
+                                unfiltered
                                 :request="[
                                     'url' => route('search', \FluxErp\Models\Address::class),
                                     'method' => 'POST',
@@ -705,6 +722,7 @@
                                 autocomplete="off"
                                 wire:model="order.agent_id"
                                 select="label:label|value:id"
+                                unfiltered
                                 :request="[
                                     'url' => route('search', \FluxErp\Models\User::class),
                                     'method' => 'POST',
@@ -718,6 +736,7 @@
                                 autocomplete="off"
                                 wire:model="order.responsible_user_id"
                                 select="label:label|value:id"
+                                unfiltered
                                 :request="[
                                     'url' => route('search', \FluxErp\Models\User::class),
                                     'method' => 'POST',
@@ -732,6 +751,7 @@
                                 multiple
                                 wire:model="order.users"
                                 select="label:label|value:id"
+                                unfiltered
                                 :request="[
                                     'url' => route('search', \FluxErp\Models\User::class),
                                     'method' => 'POST',
@@ -775,6 +795,44 @@
                                     :options="$contactBankConnections"
                                 />
                             @endif
+
+                            <x-select.styled
+                                wire:model="order.lead_id"
+                                select="label:label|value:id"
+                                unfiltered
+                                :request="[
+                                    'url' => route('search', \FluxErp\Models\Lead::class),
+                                    'method' => 'POST',
+                                    'params' => [
+                                        'searchFields' => [
+                                            'name',
+                                        ],
+                                        'select' => [
+                                            'name',
+                                            'id',
+                                        ],
+                                        'whereIn' => [
+                                            [
+                                                'address_id',
+                                                resolve_static(\FluxErp\Models\Address::class, 'query')
+                                                    ->where('contact_id', $order->contact_id)
+                                                    ->pluck('id')
+                                                    ->toArray(),
+                                            ],
+                                        ],
+                                    ],
+                                ]"
+                            >
+                                <x-slot:label>
+                                    <x-link
+                                        icon="link"
+                                        :text="__('Lead')"
+                                        href="#"
+                                        wire:navigate
+                                        x-bind:href="$wire.order.lead_id ? '{{ route('sales.lead.id', ':id') }}'.replace(':id', $wire.order.lead_id) : '#'"
+                                    />
+                                </x-slot>
+                            </x-select.styled>
 
                             @if (count($languages) > 1)
                                 <x-select.styled
@@ -862,9 +920,8 @@
                                         </template>
                                     </x-dropdown>
                                 </div>
-                                <livewire:features.signature-link-generator
+                                <livewire:order.signature-link-generator
                                     lazy
-                                    :model-type="\FluxErp\Models\Order::class"
                                     wire:model="order.id"
                                 />
                             @endif
@@ -952,7 +1009,7 @@
                                                             icon="x-mark"
                                                             2xs
                                                             wire:click="deleteDiscount(discount.id)"
-                                                            wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => 'Discount']) }}"
+                                                            wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Discount')]) }}"
                                                         />
                                                     </div>
                                                 @endif

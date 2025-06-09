@@ -14,13 +14,6 @@
         <livewire:project.project-task-list
             cache-key="project.general.task-list"
             :headline="__('Tasks')"
-            :filters="[
-                    [
-                        'project_id',
-                        '=',
-                        $this->project->id,
-                    ],
-                ]"
             :projectId="$this->project->id"
         />
         @show

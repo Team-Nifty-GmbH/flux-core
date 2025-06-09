@@ -1,23 +1,35 @@
 @extends('flux::printing.order.order')
-@section('first-page-right-block.labels')
+@section('first-page-right-block.rows')
     @parent
-    <div class="font-semibold">{{ __('Refund Date') }}:</div>
-    <div class="font-semibold">{{ __('Related Invoice Number') }}:</div>
-@endsection
-
-@section('first-page-right-block.values')
-    @parent
-    <div>
-        {{ ($model->invoice_date ?: now())->locale(app()->getLocale())->isoFormat('L') }}
-    </div>
-    <div>
-        {{ $model->parent?->invoice_number }}
-    </div>
+    <tr>
+        <td class="py-0 text-left font-semibold">{{ __('Refund Date') }}:</td>
+        <td class="py-0 text-right">
+            {{ ($model->invoice_date ?: now())->locale(app()->getLocale())->isoFormat('L') }}
+        </td>
+    </tr>
+    <tr>
+        <td class="py-0 text-left font-semibold">
+            {{ __('Related Invoice Number') }}:
+        </td>
+        <td class="py-0 text-right">
+            {{ $model->parent?->invoice_number }}
+        </td>
+    </tr>
 @endsection
 
 @section('total')
     @parent
     <div>
-        {!! $model->paymentType->description !!}
+        {!!
+            Blade::render(
+                html_entity_decode(
+                    $model
+                        ->paymentType()
+                        ->withTrashed()
+                        ->value('description') ?? '',
+                ),
+                ['model' => $model],
+            )
+        !!}
     </div>
 @endsection

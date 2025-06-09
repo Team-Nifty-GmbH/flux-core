@@ -2,18 +2,29 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use FluxErp\Contracts\HasWidgetOptions;
 use FluxErp\Enums\TimeFrameEnum;
+use FluxErp\Livewire\Dashboard\Dashboard;
+use FluxErp\Livewire\Order\OrderList;
+use FluxErp\Livewire\Support\Widgets\Charts\LineChart;
 use FluxErp\Models\Order;
 use FluxErp\Support\Metrics\Charts\Line;
 use FluxErp\Support\Metrics\Value;
-use FluxErp\Support\Widgets\Charts\LineChart;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use FluxErp\Traits\Widgetable;
+use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Renderless;
+use Livewire\Livewire;
+use TeamNiftyGmbH\DataTable\Helpers\SessionFilter;
 
-class TotalOrdersCount extends LineChart
+class TotalOrdersCount extends LineChart implements HasWidgetOptions
 {
     use IsTimeFrameAwareWidget, Widgetable;
+
+    public static function dashboardComponent(): array|string
+    {
+        return Dashboard::class;
+    }
 
     #[Renderless]
     public function calculateByTimeFrame(): void
@@ -33,18 +44,19 @@ class TotalOrdersCount extends LineChart
         $metric = Line::make($query)
             ->setDateColumn('invoice_date')
             ->setRange($this->timeFrame)
-            ->setEndingDate($this->end?->endOfDay())
-            ->setStartingDate($this->start?->startOfDay());
+            ->setEndingDate($this->getEnd())
+            ->setStartingDate($this->getStart());
+
         $previousMetric = Line::make($query)
             ->setDateColumn('invoice_date')
-            ->setEndingDate($metric->previousRange()[1])
-            ->setStartingDate($metric->previousRange()[0])
+            ->setEndingDate($this->getEndPrevious())
+            ->setStartingDate($this->getStartPrevious())
             ->setRange(TimeFrameEnum::Custom);
 
         $growth = Value::make($query)
             ->setRange($this->timeFrame)
-            ->setEndingDate($this->end?->endOfDay())
-            ->setStartingDate($this->start?->startOfDay())
+            ->setEndingDate($this->getEnd())
+            ->setStartingDate($this->getStart())
             ->setDateColumn('invoice_date')
             ->withGrowthRate()
             ->count('total_net_price');
@@ -68,6 +80,40 @@ class TotalOrdersCount extends LineChart
         ];
 
         $this->xaxis['categories'] = $revenue->getLabels();
+    }
+
+    #[Renderless]
+    public function options(): array
+    {
+        return [
+            [
+                'label' => __('Show'),
+                'method' => 'show',
+            ],
+        ];
+    }
+
+    #[Renderless]
+    public function show(): void
+    {
+        // needs to be in an extra variable to avoid serialization issues
+        $start = $this->getStart()->toDateString();
+        $end = $this->getEnd()->toDateString();
+
+        SessionFilter::make(
+            Livewire::new(resolve_static(OrderList::class, 'class'))->getCacheKey(),
+            fn (Builder $query) => $query->whereNotNull('invoice_date')
+                ->whereNotNull('invoice_number')
+                ->revenue()
+                ->whereBetween('invoice_date', [
+                    $start,
+                    $end,
+                ]),
+            __(static::getLabel()),
+        )
+            ->store();
+
+        $this->redirectRoute('orders.orders', navigate: true);
     }
 
     protected function getListeners(): array

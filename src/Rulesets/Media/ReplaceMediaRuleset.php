@@ -26,15 +26,16 @@ class ReplaceMediaRuleset extends FluxRuleset
                 'nullable',
                 app(ModelExists::class, ['model' => Media::class]),
             ],
-            'name' => 'sometimes|required|string',
-            'file_name' => 'sometimes|required|string',
+            'name' => 'sometimes|required|string|max:255',
+            'file_name' => 'sometimes|required|string|max:255',
             'disk' => [
                 'sometimes',
                 'required',
                 'string',
+                'max:255',
                 Rule::in(array_keys(config('filesystems.disks'))),
             ],
-            'collection_name' => 'sometimes|required|string',
+            'collection_name' => 'sometimes|required|string|max:255',
             'custom_properties' => 'sometimes|array',
         ];
     }

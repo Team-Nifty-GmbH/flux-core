@@ -22,7 +22,7 @@ class BundleList extends ProductBundleProductList
 
     public ProductBundleProductForm $productBundleProductForm;
 
-    protected string $view = 'flux::livewire.product.bundle-list';
+    protected ?string $includeBefore = 'flux::livewire.product.bundle-list';
 
     public function mount(): void
     {

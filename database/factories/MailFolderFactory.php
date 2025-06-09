@@ -17,6 +17,7 @@ class MailFolderFactory extends Factory
             'slug' => $this->faker->slug,
             'can_create_ticket' => $this->faker->boolean,
             'can_create_purchase_invoice' => $this->faker->boolean,
+            'can_create_lead' => $this->faker->boolean,
         ];
     }
 }

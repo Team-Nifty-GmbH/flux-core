@@ -43,8 +43,10 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
 {
     use CacheModelQueries, Filterable, HasCalendars, HasCalendarUserSettings, HasCart, HasDatatableUserSettings,
         HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasPushSubscriptions, HasRoles,
-        HasUserModification, HasUuid, HasWidgets, InteractsWithMedia, MonitorsQueue, Notifiable, Searchable,
-        SoftDeletes;
+        HasUserModification, HasUuid, HasWidgets, InteractsWithMedia, MonitorsQueue, Notifiable, SoftDeletes;
+    use Searchable {
+        Searchable::scoutIndexSettings as baseScoutIndexSettings;
+    }
 
     public static string $iconName = 'user';
 
@@ -67,6 +69,15 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
     public static function hasPermission(): bool
     {
         return false;
+    }
+
+    public static function scoutIndexSettings(): ?array
+    {
+        return static::baseScoutIndexSettings() ?? [
+            'filterableAttributes' => [
+                'is_active',
+            ],
+        ];
     }
 
     protected static function booted(): void
@@ -161,6 +172,11 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
         return $this->belongsTo(Language::class);
     }
 
+    public function leads(): HasMany
+    {
+        return $this->hasMany(Lead::class);
+    }
+
     public function locks(): MorphMany
     {
         return $this->morphMany(Lock::class, 'authenticatable');
@@ -183,6 +199,11 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
     {
         return $this->belongsToMany(Printer::class, 'printer_user')
             ->using(PrinterUser::class);
+    }
+
+    public function printerUsers(): HasMany
+    {
+        return $this->hasMany(PrinterUser::class);
     }
 
     public function registerMediaCollections(): void

@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use Carbon\Carbon;
+use FluxErp\Actions\Project\UpdateProject;
 use FluxErp\Casts\TimeDuration;
 use FluxErp\Contracts\Calendarable;
 use FluxErp\States\Project\ProjectState;
@@ -21,7 +22,6 @@ use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
@@ -34,30 +34,41 @@ class Project extends FluxModel implements Calendarable, HasMedia, InteractsWith
 {
     use Commentable, Filterable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes, HasPackageFactory,
         HasParentChildRelations, HasSerialNumberRange, HasStates, HasTags, HasUserModification, HasUuid,
-        InteractsWithMedia, LogsActivity, Searchable, SoftDeletes;
+        InteractsWithMedia, LogsActivity, SoftDeletes;
+    use Searchable {
+        Searchable::scoutIndexSettings as baseScoutIndexSettings;
+    }
 
     protected static string $iconName = 'briefcase';
 
     protected ?string $detailRouteName = 'projects.id';
 
-    public static function fromCalendarEvent(array $event): Model
+    public static function fromCalendarEvent(array $event, string $action = 'update'): UpdateProject
     {
-        $project = new static();
-        $project->forceFill([
+        return UpdateProject::make([
             'id' => data_get($event, 'id'),
             'name' => data_get($event, 'title'),
             'start_date' => data_get($event, 'start'),
             'end_date' => data_get($event, 'end'),
             'description' => data_get($event, 'description'),
         ]);
+    }
 
-        return $project;
+    public static function scoutIndexSettings(): ?array
+    {
+        return static::baseScoutIndexSettings() ?? [
+            'filterableAttributes' => [
+                'parent_id',
+                'state',
+            ],
+            'sortableAttributes' => ['*'],
+        ];
     }
 
     public static function toCalendar(): array
     {
         return [
-            'id' => Str::of(static::class)->replace('\\', '.'),
+            'id' => Str::of(static::class)->replace('\\', '.')->toString(),
             'modelType' => morph_alias(static::class),
             'name' => __('Projects'),
             'color' => '#813d9c',
@@ -154,8 +165,8 @@ class Project extends FluxModel implements Calendarable, HasMedia, InteractsWith
         ?array $info = null
     ): void {
         $builder->where(function (Builder $query) use ($start, $end): void {
-            $query->whereBetween('start_date', [$start, $end])
-                ->orWhereBetween('end_date', [$start, $end])
+            $query->where('start_date', '<=', $end)
+                ->where('end_date', '>=', $start)
                 ->orWhereBetween('created_at', [$start, $end]);
         });
     }

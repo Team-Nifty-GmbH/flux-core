@@ -39,12 +39,15 @@
 
         @show
         @persist('notifications')
-            <div
-                id="{{ \Illuminate\Support\Str::uuid() }}"
-                x-on:tallstackui:toast-upsert.window="$tallstackuiToast($el.id).upsertToast($event)"
-            >
-                <x-toast z-index="z-50"></x-toast>
-            </div>
+            @if (auth()->check() && auth()->id())
+                <div
+                    id="{{ \Illuminate\Support\Str::uuid() }}"
+                    x-on:tallstackui:toast-upsert.window="$tallstackuiToast($el.id).upsertToast($event)"
+                >
+                    <x-toast z-index="z-50"></x-toast>
+                </div>
+            @endif
+
             <x-dialog z-index="z-40" blur="md" align="center" />
         @endpersist
 
@@ -94,10 +97,14 @@
                     </x-modal>
                 </div>
             @endpersist
+
+            @persist('record-merging')
+                <livewire:record-merging lazy />
+            @endpersist
         @endauth
 
-        <x-layout>
-            @if (! $navigation && auth()->check() && ! request()->routeIs('logout'))
+        <x-flux::layout>
+            @if (! $navigation && auth()->check() && auth()->id() && ! request()->routeIs('logout'))
                 <x-slot:header>
                     <x-layout.header without-mobile-button>
                         <x-slot:left>
@@ -108,12 +115,15 @@
                                 x-on:click="$dispatch('menu-force-open')"
                             />
                         </x-slot>
-                        <div
-                            x-persist="layout.header.search-bar"
-                            class="grow"
-                        >
-                            <livewire:features.search-bar />
-                        </div>
+                        @auth('web')
+                            <div
+                                x-persist="layout.header.search-bar"
+                                class="grow"
+                            >
+                                <livewire:features.search-bar />
+                            </div>
+                        @endauth
+
                         <div class="flex gap-2 overflow-hidden">
                             @persist('layout.header.cart')
                                 @canAction(\FluxErp\Actions\Cart\CreateCart::class)
@@ -121,9 +131,11 @@
                                 @endcanAction
                             @endpersist
 
-                            @canAction(\FluxErp\Actions\WorkTime\CreateWorkTime::class)
-                                <livewire:work-time lazy />
-                            @endcanAction
+                            @auth('web')
+                                @canAction(\FluxErp\Actions\WorkTime\CreateWorkTime::class)
+                                    <livewire:work-time lazy />
+                                @endcanAction
+                            @endauth
 
                             @persist('layout.header.notifications')
                                 <livewire:features.notifications lazy />
@@ -133,7 +145,7 @@
                 </x-slot>
             @endif
 
-            @if (auth()->check() && ! request()->routeIs('logout') && method_exists(auth()->guard(), 'getName') && ! $navigation)
+            @if (auth()->check() && auth()->id() && ! request()->routeIs('logout') && method_exists(auth()->guard(), 'getName') && ! $navigation)
                 <x-slot:menu>
                     @php($navigation = true)
                     @persist('navigation')
@@ -145,6 +157,6 @@
             @endif
 
             {{ $slot }}
-        </x-layout>
+        </x-flux::layout>
     </body>
 </html>

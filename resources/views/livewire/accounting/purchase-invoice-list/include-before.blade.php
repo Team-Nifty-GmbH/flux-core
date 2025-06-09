@@ -56,6 +56,7 @@
                     :label="__('Supplier')"
                     wire:model="purchaseInvoiceForm.contact_id"
                     select="label:label|value:contact_id"
+                    unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\Address::class),
                         'method' => 'POST',
@@ -119,6 +120,7 @@
                         :label="__('Approval User')"
                         wire:model="purchaseInvoiceForm.approval_user_id"
                         select="label:label|value:id"
+                        unfiltered
                         :request="[
                             'url' => route('search', \FluxErp\Models\User::class),
                             'method' => 'POST',
@@ -196,6 +198,7 @@
                         x-on:select="$wire.purchaseInvoiceForm.iban = $event.detail.select?.iban; $wire.purchaseInvoiceForm.bic = $event.detail.select?.bic; $wire.purchaseInvoiceForm.bank_name = $event.detail.select?.bank_name; $wire.purchaseInvoiceForm.account_holder = $event.detail.select?.account_holder"
                         wire:model="purchaseInvoiceForm.lay_out_user_id"
                         select="label:label|value:id"
+                        unfiltered
                         :request="[
                             'url' => route('search', \FluxErp\Models\User::class),
                             'method' => 'POST',
@@ -267,6 +270,7 @@
                                     x-model.number="position.product_id"
                                     x-on:select="position.name = $event.detail.select?.label"
                                     select="label:label|value:id|description:product_number"
+                                    unfiltered
                                     :request="[
                                         'url' => route('search', \FluxErp\Models\Product::class),
                                         'method' => 'POST',
@@ -287,7 +291,7 @@
                                 x-model="position.name"
                                 :label="__('Name')"
                             />
-                            <div class="flex flex-col gap-1.5 md:flex-row">
+                            <div class="flex flex-col gap-1.5 xl:flex-row">
                                 <x-number
                                     step="0.01"
                                     x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
@@ -297,7 +301,6 @@
                                 />
                                 <div
                                     x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'"
-                                    class="w-full"
                                 >
                                     <x-select.styled
                                         x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
@@ -328,12 +331,12 @@
                                 class="w-full"
                             >
                                 <x-select.styled
-                                    x-on:select="position.ledger_account_id = $event.detail.select?.value"
                                     x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
                                     :label="__('Ledger Account')"
                                     x-init="$el.value = position.ledger_account_id; init();"
                                     x-model.number="position.ledger_account_id"
                                     select="label:name|value:id|description:number"
+                                    unfiltered
                                     :request="[
                                         'url' => route('search', \FluxErp\Models\LedgerAccount::class),
                                         'method' => 'POST',

@@ -19,10 +19,12 @@
         />
         <template x-for="(value, parameter) in $wire.schedule.parameters">
             <div>
-                <x-label
-                    x-html="parameter"
-                    x-bind:for="$wire.schedule.parameters[parameter]"
-                />
+                <x-label>
+                    <span
+                        x-html="parameter"
+                        x-bind:for="$wire.schedule.parameters[parameter]"
+                    />
+                </x-label>
                 <x-input x-model="$wire.schedule.parameters[parameter]" />
             </div>
         </template>
@@ -268,12 +270,16 @@
         </div>
         <x-label :label="__('End')" />
         <x-radio
+            id="schedule-end-never-radio"
+            name="schedule-end-radio"
             :label="__('Never')"
             value="never"
             wire:model="schedule.end_radio"
         />
         <div class="grid grid-cols-2 items-center gap-1.5">
             <x-radio
+                id="schedule-end-date-radio"
+                name="schedule-end-radio"
                 :label="__('Ends At')"
                 value="ends_at"
                 wire:model="schedule.end_radio"
@@ -284,6 +290,8 @@
                 x-bind:disabled="$wire.schedule.end_radio !== 'ends_at'"
             />
             <x-radio
+                id="schedule-end-recurrences-radio"
+                name="schedule-end-radio"
                 :label="__('After number of recurrences')"
                 value="recurrences"
                 wire:model="schedule.end_radio"

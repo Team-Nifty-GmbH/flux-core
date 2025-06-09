@@ -1,5 +1,7 @@
 import { Editor } from '@tiptap/core';
 import { FontSizeConfig } from './tiptap-font-size-handler.js';
+import { LiteralTab } from './tiptap-literal-tab-handler.js';
+import { Underline } from '@tiptap/extension-underline';
 import StarterKit from '@tiptap/starter-kit';
 import { MentionConfig } from './tiptap-mention-handler.js';
 
@@ -20,14 +22,15 @@ export default function (
             content: content,
             popUp: null,
             initTextArea(
+                id,
                 element,
                 isTransparent,
                 showTooltipDropdown,
                 initFontSize,
             ) {
-                const popUp = this.$refs?.popWindow;
-                const controlPanel = this.$refs?.controlPanel;
-                const commands = this.$refs?.commands;
+                const popUp = this.$refs[`popWindow-${id}`];
+                const controlPanel = this.$refs[`controlPanel-${id}`];
+                const commands = this.$refs[`commands-${id}`];
                 let actions = null;
 
                 if (showTooltipDropdown && popUp !== null) {
@@ -48,6 +51,8 @@ export default function (
                     extensions: [
                         StarterKit,
                         FontSizeConfig,
+                        LiteralTab,
+                        Underline,
                         MentionConfig(searchModel, element),
                     ],
                     timeout: null,
@@ -55,8 +60,8 @@ export default function (
                     editable: this.editable,
                     editorProps: {
                         attributes: {
-                            class: `${isTransparent ? 'bg-transparent text-black' : 'dark:bg-secondary-800 dark:text-gray-50'} ${showTooltipDropdown ? 'rounded-md' : 'rounded-b-md'} \
-                                prose prose-sm dark:prose-invert max-w-full content-editable-placeholder placeholder-secondary-400 dark:placeholder-secondary-500 \
+                            class: `${isTransparent ? 'bg-transparent' : 'dark:bg-secondary-800'} ${showTooltipDropdown ? 'rounded-md' : 'rounded-b-md'} \
+                                prose prose-sm dark:prose-invert max-w-full content-editable-placeholder dark:text-gray-50 placeholder-secondary-400 dark:placeholder-secondary-500 \
                                 border-secondary-300 focus:ring-primary-500 focus:border-primary-500 dark:border-secondary-600 form-input block \
                                 min-h-[85px] w-full border p-3 shadow-sm transition duration-100 ease-in-out focus:outline-none sm:text-sm`,
                             style: `${initFontSize !== null ? `font-size:${initFontSize}px` : ''}`,

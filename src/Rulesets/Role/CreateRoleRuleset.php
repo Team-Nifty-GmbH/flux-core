@@ -15,8 +15,8 @@ class CreateRoleRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'name' => 'required|string|unique:roles,name',
-            'guard_name' => 'required|string',
+            'name' => 'required|string|max:255|unique:roles,name',
+            'guard_name' => 'required|string|max:255',
             'permissions' => 'array',
             'permissions.*' => [
                 'required',

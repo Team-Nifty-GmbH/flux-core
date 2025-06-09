@@ -25,7 +25,7 @@ abstract class Metric
 
     protected Builder $query;
 
-    protected ?TimeFrameEnum $range = null;
+    protected TimeFrameEnum|false|null $range = null;
 
     protected array $ranges = [
         TimeFrameEnum::Today,
@@ -66,10 +66,10 @@ abstract class Metric
             ];
         }
 
-        return $range->getRange();
+        return $range instanceof TimeFrameEnum ? $range->getRange() : null;
     }
 
-    public function getRange(): TimeFrameEnum
+    public function getRange(): TimeFrameEnum|false
     {
         return $this->range ?? data_get($this->getRanges(), '0', TimeFrameEnum::ThisWeek);
     }
@@ -160,6 +160,13 @@ abstract class Metric
     public function withGrowthRate(bool $withGrowthRate = true): static
     {
         $this->withGrowthRate = $withGrowthRate;
+
+        return $this;
+    }
+
+    public function withoutRange(): static
+    {
+        $this->range = false;
 
         return $this;
     }

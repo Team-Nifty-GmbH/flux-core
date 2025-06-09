@@ -21,7 +21,7 @@ class Localization
         app()->setlocale(
             $request->header('content-language') ??
             $userLanguage ??
-            Language::default()?->language_code ??
+            resolve_static(Language::class, 'default')?->language_code ??
             config('app.locale')
         );
 

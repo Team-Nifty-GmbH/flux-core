@@ -7,6 +7,7 @@ use FluxErp\Actions\Transaction\UpdateTransaction;
 use FluxErp\Livewire\Forms\TransactionForm;
 use FluxErp\Models\BankConnection;
 use FluxErp\Models\Transaction;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -103,6 +104,12 @@ class TransactionList extends BaseDataTable
         $this->loadData();
 
         return true;
+    }
+
+    protected function getBuilder(Builder $builder): Builder
+    {
+        return parent::getBuilder($builder)
+            ->whereNull('contact_bank_connection_id');
     }
 
     protected function getViewData(): array

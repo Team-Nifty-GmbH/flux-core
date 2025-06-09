@@ -5,6 +5,7 @@ namespace FluxErp\Models;
 use Exception;
 use FluxErp\Casts\Money;
 use FluxErp\States\Ticket\TicketState;
+use FluxErp\Support\Scout\ScoutCustomize;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Communicatable;
 use FluxErp\Traits\Filterable;
@@ -32,7 +33,10 @@ class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables
 {
     use Commentable, Communicatable, Filterable, HasAdditionalColumns, HasFrontendAttributes, HasPackageFactory,
         HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification, HasUuid, InteractsWithMedia,
-        LogsActivity, Searchable, SoftDeletes, Trackable;
+        LogsActivity, SoftDeletes, Trackable;
+    use Searchable {
+        Searchable::scoutIndexSettings as baseScoutIndexSettings;
+    }
 
     public static string $iconName = 'chat-bubble-left-right';
 
@@ -41,6 +45,18 @@ class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables
     protected array $relatedCustomEvents = [
         'ticketType',
     ];
+
+    public static function scoutIndexSettings(): ?array
+    {
+        return static::baseScoutIndexSettings() ?? [
+            'filterableAttributes' => [
+                'authenticatable_type',
+                'authenticatable_id',
+                'state',
+            ],
+            'sortableAttributes' => ['*'],
+        ];
+    }
 
     protected function casts(): array
     {
@@ -112,6 +128,13 @@ class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables
     public function ticketType(): BelongsTo
     {
         return $this->belongsTo(TicketType::class);
+    }
+
+    public function toSearchableArray(): array
+    {
+        return ScoutCustomize::make($this)
+            ->with(['authenticatable', 'ticketType:id,name'])
+            ->toSearchableArray();
     }
 
     public function users(): BelongsToMany

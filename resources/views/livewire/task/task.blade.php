@@ -33,8 +33,8 @@
                             {
                                 trackable_type: '{{ morph_alias(\FluxErp\Models\Task::class) }}',
                                 trackable_id: {{ $task->id }},
-                                name: '{{ $task->name }}',
-                                description: {{ strip_tags(json_encode($task->description)) }}
+                                name: {{ json_encode($task->name) }},
+                                description: {{ json_encode(strip_tags($task->description ?? '')) }}
                             }
                         )"
                 >

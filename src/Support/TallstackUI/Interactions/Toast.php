@@ -23,9 +23,9 @@ class Toast extends BaseToast
         return $this;
     }
 
-    public function progress(int $progress): static
+    public function progress(?int $progress): static
     {
-        $this->progress = $progress;
+        $this->progress = $progress ?? 0;
 
         return $this;
     }

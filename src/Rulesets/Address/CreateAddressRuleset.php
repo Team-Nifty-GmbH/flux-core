@@ -61,14 +61,20 @@ class CreateAddressRuleset extends FluxRuleset
                 ValidStateRule::make(AdvertisingState::class),
             ],
             'date_of_birth' => 'date|nullable',
-            'department' => 'string|nullable',
+            'department' => 'string|max:255|nullable',
             'email' => [
                 'nullable',
                 'email',
+                'max:255',
                 Rule::unique('addresses', 'email')
                     ->whereNull('deleted_at'),
             ],
-            'password' => 'string|nullable',
+            'password' => 'string|max:255|nullable',
+            'search_aliases' => [
+                'array',
+                'nullable',
+            ],
+            'search_aliases.*' => 'string|max:255|distinct:ignore_case',
             'is_main_address' => 'boolean',
             'is_invoice_address' => 'boolean',
             'is_delivery_address' => 'boolean',

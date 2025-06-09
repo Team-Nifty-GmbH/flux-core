@@ -3,8 +3,6 @@
 namespace FluxErp;
 
 use Closure;
-use FluxErp\Console\Commands\Init\InitEnv;
-use FluxErp\Console\Commands\Init\InitPermissions;
 use FluxErp\Facades\Action;
 use FluxErp\Facades\Menu;
 use FluxErp\Facades\ProductType;
@@ -18,28 +16,20 @@ use FluxErp\Http\Middleware\Localization;
 use FluxErp\Http\Middleware\Permissions;
 use FluxErp\Http\Middleware\PortalMiddleware;
 use FluxErp\Http\Middleware\SetJobAuthenticatedUserMiddleware;
-use FluxErp\Livewire\Features\Calendar\CalendarOverview;
 use FluxErp\Models\Activity;
-use FluxErp\Models\Address;
-use FluxErp\Models\Category;
-use FluxErp\Models\LedgerAccount;
+use FluxErp\Models\Currency;
 use FluxErp\Models\Notification;
-use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\Permission;
-use FluxErp\Models\Product;
-use FluxErp\Models\Project;
 use FluxErp\Models\Role;
-use FluxErp\Models\SerialNumber;
-use FluxErp\Models\Task;
-use FluxErp\Models\Ticket;
-use FluxErp\Models\User;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Bus\Dispatcher;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Contracts\Queue\Factory as QueueFactoryContract;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -83,6 +73,18 @@ class FluxServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        Model::automaticallyEagerLoadRelationships();
+
+        $this->app->booted(function (): void {
+            try {
+                if ($iso = resolve_static(Currency::class, 'default')?->iso) {
+                    Number::useCurrency($iso);
+                }
+            } catch (QueryException) {
+            }
+        });
+        Number::useLocale(app()->getLocale());
+
         bcscale(9);
         $this->bootMiddleware();
         $this->bootCommands();
@@ -130,8 +132,6 @@ class FluxServiceProvider extends ServiceProvider
         if (! $this->app->runningInConsole() || $this->app->runningUnitTests()) {
             ProductType::register(name: 'product', class: \FluxErp\Livewire\Product\Product::class, default: true);
         }
-
-        Livewire::component('calendar-overview', CalendarOverview::class);
     }
 
     public function register(): void
@@ -163,25 +163,14 @@ class FluxServiceProvider extends ServiceProvider
     protected function bootCommands(): void
     {
         if (! $this->app->runningInConsole()) {
-            // commands required for installation
-            $this->commands(InitEnv::class);
-            $this->commands(InitPermissions::class);
-
-            return;
-        }
-
-        $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator(__DIR__ . '/Console/Commands')
-        );
-        $commandClasses = [];
-
-        foreach ($iterator as $file) {
-            if ($file->isFile() && $file->getExtension() === 'php') {
-                $classPath = str_replace([__DIR__ . '/', '/'], ['', '\\'], $file->getPathname());
-                $classNamespace = '\\FluxErp\\';
-                $class = $classNamespace . str_replace('.php', '', $classPath);
-                $commandClasses[] = $class;
-            }
+            $commandClasses = Cache::remember(
+                'flux.commands',
+                now()->addDay(),
+                fn () => $this->findCommands()
+            );
+        } else {
+            $commandClasses = $this->findCommands();
+            Cache::put('flux.commands', $commandClasses, now()->addDay());
         }
 
         $this->commands($commandClasses);
@@ -190,6 +179,15 @@ class FluxServiceProvider extends ServiceProvider
     protected function bootFluxMenu(): void
     {
         Menu::register(route: 'dashboard', icon: 'home', order: -9999);
+
+        Menu::group(
+            path: 'sales',
+            icon: 'shopping-cart',
+            label: 'Sales',
+            closure: function (): void {
+                Menu::register(route: 'sales.leads');
+            }
+        );
 
         Menu::group(
             path: 'orders',
@@ -219,6 +217,7 @@ class FluxServiceProvider extends ServiceProvider
             label: 'Contacts',
             closure: function (): void {
                 Menu::register(route: 'contacts.contacts');
+                Menu::register(route: 'contacts.addresses');
                 Menu::register(route: 'contacts.communications');
             }
         );
@@ -237,6 +236,7 @@ class FluxServiceProvider extends ServiceProvider
                 Menu::register(route: 'accounting.payment-reminders');
                 Menu::register(route: 'accounting.purchase-invoices');
                 Menu::register(route: 'accounting.transactions');
+                Menu::register(route: 'accounting.transaction-assignments');
                 Menu::register(route: 'accounting.direct-debit');
                 Menu::register(route: 'accounting.money-transfer');
                 Menu::register(route: 'accounting.payment-runs');
@@ -265,12 +265,15 @@ class FluxServiceProvider extends ServiceProvider
             label: 'Settings',
             order: 9999,
             closure: function (): void {
+                Menu::register(route: 'settings.system');
                 Menu::register(route: 'settings.additional-columns');
                 Menu::register(route: 'settings.address-types');
                 Menu::register(route: 'settings.contact-origins');
                 Menu::register(route: 'settings.industries');
                 Menu::register(route: 'settings.categories');
                 Menu::register(route: 'settings.tags');
+                Menu::register(route: 'settings.lead-states');
+                Menu::register(route: 'settings.tokens');
                 Menu::register(route: 'settings.product-option-groups');
                 Menu::register(route: 'settings.product-properties');
                 Menu::register(route: 'settings.clients');
@@ -347,6 +350,25 @@ class FluxServiceProvider extends ServiceProvider
         RouteFacade::pattern('id', '[0-9]+');
     }
 
+    protected function findCommands(): array
+    {
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator(__DIR__ . '/Console/Commands')
+        );
+        $commandClasses = [];
+
+        foreach ($iterator as $file) {
+            if ($file->isFile() && $file->getExtension() === 'php') {
+                $classPath = str_replace([__DIR__ . '/', '/'], ['', '\\'], $file->getPathname());
+                $classNamespace = '\\FluxErp\\';
+                $class = $classNamespace . str_replace('.php', '', $classPath);
+                $commandClasses[] = $class;
+            }
+        }
+
+        return $commandClasses;
+    }
+
     protected function offerPublishing(): void
     {
         $this->publishes([
@@ -394,97 +416,24 @@ class FluxServiceProvider extends ServiceProvider
         $this->booted(function (): void {
             config([
                 'tallstackui.settings.toast.z-index' => 'z-50',
+                'tallstackui.settings.toast.timeout' => 5,
                 'tallstackui.settings.dialog.z-index' => 'z-40',
                 'tallstackui.settings.modal.z-index' => 'z-30',
+                'tallstackui.settings.slide.z-index' => 'z-30',
             ]);
             config(['permission.models.role' => resolve_static(Role::class, 'class')]);
             config(['permission.models.permission' => resolve_static(Permission::class, 'class')]);
             config(['permission.display_permission_in_exception' => true]);
             config(['activitylog.activitymodel' => resolve_static(Activity::class, 'class')]);
             config(['media-library.media_downloader' => MediaLibraryDownloader::class]);
-            config([
-                'scout.meilisearch.index-settings' => [
-                    resolve_static(Address::class, 'class') => [
-                        'filterableAttributes' => [
-                            'is_main_address',
-                            'contact_id',
-                        ],
-                        'sortableAttributes' => ['*'],
-                    ],
-                    resolve_static(Category::class, 'class') => [
-                        'filterableAttributes' => [
-                            'model_type',
-                        ],
-                    ],
-                    resolve_static(LedgerAccount::class, 'class') => [
-                        'filterableAttributes' => [
-                            'ledger_account_type_enum',
-                            'is_automatic',
-                        ],
-                        'sortableAttributes' => ['*'],
-                    ],
-                    resolve_static(Order::class, 'class') => [
-                        'filterableAttributes' => [
-                            'parent_id',
-                            'contact_id',
-                            'is_locked',
-                        ],
-                        'sortableAttributes' => ['*'],
-                    ],
-                    resolve_static(Permission::class, 'class') => [
-                        'filterableAttributes' => [
-                            'guard_name',
-                        ],
-                        'sortableAttributes' => [
-                            'name',
-                        ],
-                    ],
-                    resolve_static(Product::class, 'class') => [
-                        'filterableAttributes' => [
-                            'is_active',
-                            'parent_id',
-                        ],
-                        'sortableAttributes' => ['*'],
-                    ],
-                    resolve_static(Project::class, 'class') => [
-                        'filterableAttributes' => [
-                            'parent_id',
-                            'state',
-                        ],
-                        'sortableAttributes' => ['*'],
-                    ],
-                    resolve_static(SerialNumber::class, 'class') => [
-                        'filterableAttributes' => [
-                            'address_id',
-                        ],
-                    ],
-                    resolve_static(Task::class, 'class') => [
-                        'filterableAttributes' => [
-                            'project_id',
-                            'state',
-                        ],
-                        'sortableAttributes' => ['*'],
-                    ],
-                    resolve_static(Ticket::class, 'class') => [
-                        'filterableAttributes' => [
-                            'authenticatable_type',
-                            'authenticatable_id',
-                            'state',
-                        ],
-                        'sortableAttributes' => ['*'],
-                    ],
-                    resolve_static(User::class, 'class') => [
-                        'filterableAttributes' => [
-                            'is_active',
-                        ],
-                    ],
-                ],
-            ]);
         });
         $this->mergeConfigFrom(__DIR__ . '/../config/flux.php', 'flux');
         $this->mergeConfigFrom(__DIR__ . '/../config/notifications.php', 'notifications');
         config(['auth' => require __DIR__ . '/../config/auth.php']);
-        config(['logging' => array_merge_recursive(config('logging'), require __DIR__ . '/../config/logging.php')]);
+
+        if (! app()->configurationIsCached()) {
+            config(['logging' => array_merge_recursive(config('logging'), require __DIR__ . '/../config/logging.php')]);
+        }
 
         if ($this->app->runningInConsole()) {
             config([

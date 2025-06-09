@@ -24,6 +24,11 @@ class DashboardTest extends BaseSetup
         {
             use Widgetable;
 
+            public static function dashboardComponent(): string
+            {
+                return Dashboard::class;
+            }
+
             public function render(): string
             {
                 return <<<'blade'
@@ -40,6 +45,11 @@ class DashboardTest extends BaseSetup
         $this->components[] = new class() extends Component
         {
             use Widgetable;
+
+            public static function dashboardComponent(): string
+            {
+                return Dashboard::class;
+            }
 
             public function render(): string
             {
@@ -58,6 +68,7 @@ class DashboardTest extends BaseSetup
             'widgetable_type' => morph_alias(User::class),
             'widgetable_id' => $this->user->id,
             'component_name' => 'sample-component',
+            'dashboard_component' => data_get($this->components, '0')::dashboardComponent(),
             'name' => 'Widget 1',
             'width' => 2,
             'height' => 1,
@@ -92,6 +103,7 @@ class DashboardTest extends BaseSetup
             'widgetable_type' => morph_alias(User::class),
             'widgetable_id' => $this->user->id,
             'component_name' => $componentName,
+            'dashboard_component' => Dashboard::class,
         ]);
     }
 
@@ -107,6 +119,27 @@ class DashboardTest extends BaseSetup
             ->test(Dashboard::class)
             ->assertOk()
             ->assertDontSeeLivewire('sample-component');
+    }
+
+    public function test_dashboard_hides_widgets_from_different_dashboard_component(): void
+    {
+        Widget::query()->create([
+            'widgetable_type' => morph_alias(User::class),
+            'widgetable_id' => $this->user->id,
+            'component_name' => 'sample-component-other-dashboard',
+            'dashboard_component' => 'App\Livewire\SomeOtherDashboard',
+            'name' => 'Widget for Other Dashboard',
+            'width' => 2,
+            'height' => 1,
+        ]);
+
+        $component = Livewire::withoutLazyLoading()->test(Dashboard::class);
+
+        $component->assertOk()
+            ->assertSeeLivewire('sample-component')
+            ->assertDontSeeLivewire('sample-component-2');
+
+        $this->assertArrayNotHasKey('sample-component-from-other-dashboard', $component->get('widgets'));
     }
 
     public function test_dashboard_show_widget_with_permission(): void

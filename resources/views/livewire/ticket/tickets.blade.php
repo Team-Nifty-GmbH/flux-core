@@ -1,4 +1,5 @@
 <x-modal
+    x-on:open="$focusOn('ticket-title')"
     id="new-ticket-modal"
     z-index="z-30"
     wire="showTicketModal"
@@ -23,6 +24,7 @@
                 <div class="mt-6 grid grid-cols-1 gap-1.5 sm:grid-cols-6">
                     <div class="sm:col-span-6">
                         <x-input
+                            id="ticket-title"
                             :label="__('Title')"
                             :placeholder="__('What is it about?')"
                             wire:model="ticket.title"
@@ -48,10 +50,16 @@
                         x-for="ticketTypeAdditionalColumn in selectedAdditionalColumns"
                     >
                         <div class="sm:col-span-6">
-                            <x-label
-                                x-html="ticketTypeAdditionalColumn.label ? ticketTypeAdditionalColumn.label : ticketTypeAdditionalColumn.name"
-                                x-bind:for="ticketTypeAdditionalColumn.name"
-                            />
+                            <x-label>
+                                <span
+                                    x-html="
+                                        ticketTypeAdditionalColumn.label
+                                            ? ticketTypeAdditionalColumn.label
+                                            : ticketTypeAdditionalColumn.name
+                                    "
+                                    x-bind:for="ticketTypeAdditionalColumn.name"
+                                />
+                            </x-label>
                             <template
                                 x-if="ticketTypeAdditionalColumn.field_type === 'select'"
                             >
@@ -84,10 +92,12 @@
                     </template>
                     <template x-for="additionalColumn in additionalColumns">
                         <div class="sm:col-span-6">
-                            <x-label
-                                x-html="additionalColumn.label ? additionalColumn.label : additionalColumn.name"
-                                x-bind:for="additionalColumn.name"
-                            />
+                            <x-label>
+                                <span
+                                    x-html="additionalColumn.label ? additionalColumn.label : additionalColumn.name"
+                                    x-bind:for="additionalColumn.name"
+                                />
+                            </x-label>
                             <x-input
                                 x-bind:type="additionalColumn.field_type"
                                 x-model="ticket[additionalColumn.name]"

@@ -7,6 +7,7 @@ use FluxErp\Models\Client;
 use FluxErp\Models\Communication;
 use FluxErp\Providers\ViewServiceProvider;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Vite;
@@ -36,6 +37,22 @@ class AssetController extends Controller
         return Utils::pretendResponseIsFile($path, $mimeType);
     }
 
+    public function avatar(Request $request): Response
+    {
+        $color = $request->input('color', '6366f1');
+        $text = $request->input('text', '');
+
+        $svg = '<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="12" fill="#' . $color . '"/>
+            <text x="12" y="12" text-anchor="middle" dominant-baseline="central"
+                  fill="white" font-size="12" font-weight="600" font-family="system-ui, -apple-system, sans-serif">
+                ' . htmlspecialchars($text) . '
+            </text>
+        </svg>';
+
+        return response($svg, 200, ['Content-Type' => 'image/svg+xml']);
+    }
+
     public function favicon(): BinaryFileResponse
     {
         return response()->file(flux_path('public/pwa/images/icons-vector.svg'));
@@ -54,11 +71,20 @@ class AssetController extends Controller
                 ->log($communication->subject . ' opened');
         }
 
-        $logo = Client::default()->getFirstMedia('logo_small');
+        $logo = resolve_static(Client::class, 'default')->getFirstMedia('logo_small');
+
+        if ($logo && file_exists($logo->getPath())) {
+            $path = $logo->getPath();
+            $mimeType = $logo->mime_type;
+        } else {
+            $path = tempnam(sys_get_temp_dir(), 'mailpixel_svg_');
+            $mimeType = 'image/svg+xml';
+            file_put_contents($path, '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"></svg>');
+        }
 
         return Utils::pretendResponseIsFile(
-            $logo->getPath(),
-            $logo->mime_type
+            $path,
+            $mimeType
         );
     }
 

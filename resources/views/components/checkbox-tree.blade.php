@@ -5,6 +5,7 @@
     "tree" => null,
     "nameAttribute" => "label",
     "childrenAttribute" => "children",
+    "parentIdAttribute" => "parent_id",
     "withSearch" => false,
     "searchAttributes" => null,
     "checkbox" => null,
@@ -25,6 +26,7 @@
                 {{ $attributes->has("multiselect") ? "true" : "false" }},
                 '{{ $nameAttribute }}',
                 '{{ $childrenAttribute }}',
+                '{{ $parentIdAttribute }}',
                 {{ $attributes->get("selected", "null") }},
                 {{ $attributes->get("checked-callback", "null") }},
                 @js($searchAttributes),
@@ -32,7 +34,7 @@
 >
     <!-- Root Rendering of the Tree -->
     {{ $header ?? null }}
-    <div class="tree-container flex w-full gap-4">
+    <div class="tree-container w-full gap-4 lg:flex">
         <ul class="tree grow pl-2">
             {{ $beforeTree ?? null }}
             @if ($withSearch)

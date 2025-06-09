@@ -194,11 +194,25 @@ if (! function_exists('discount')) {
 if (! function_exists('diff_percentage')) {
     function diff_percentage(string $old, string $new): string
     {
-        if (bccomp($old, 0) === 0) {
+        if (bccomp($old, 0) === 0 || bccomp($new, 0) === 0) {
             return '0';
         }
 
         return bcround(bcdiv(bcsub($old, $new, 9), $old, 9), 4);
+    }
+}
+
+if (! function_exists('percentage_of')) {
+    function percentage_of(string|float|int|null $total, string|float|int|null $part): string
+    {
+        $total ??= '0';
+        $part ??= '0';
+
+        if (bccomp($total, 0) === 0 || bccomp($part, 0) === 0) {
+            return '0';
+        }
+
+        return bcround(bcmul(bcdiv($part, $total, 9), 100, 9), 4);
     }
 }
 
@@ -553,13 +567,13 @@ if (! function_exists('morphed_model')) {
 }
 
 if (! function_exists('morph_to')) {
-    function morph_to(string $type, ?int $id = null, bool $returnBuilder = false): Illuminate\Database\Eloquent\Model|Illuminate\Database\Eloquent\Builder|null
+    function morph_to(?string $type = null, ?int $id = null, bool $returnBuilder = false): Illuminate\Database\Eloquent\Model|Illuminate\Database\Eloquent\Builder|null
     {
-        if (is_null($id) && str_contains($type, ':')) {
+        if (is_null($id) && str_contains($type ?? '', ':')) {
             [$type, $id] = explode(':', $type);
         }
 
-        if (is_null($id)) {
+        if (is_null($id) || is_null($type)) {
             return null;
         }
 

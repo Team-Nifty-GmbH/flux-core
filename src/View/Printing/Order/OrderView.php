@@ -3,10 +3,12 @@
 namespace FluxErp\View\Printing\Order;
 
 use FluxErp\Models\Order;
+use FluxErp\Models\OrderPosition;
 use FluxErp\View\Printing\PrintableView;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Fluent;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Number;
 
 class OrderView extends PrintableView
 {
@@ -19,6 +21,10 @@ class OrderView extends PrintableView
     public function __construct(Order $order)
     {
         app()->setLocale($order->addressInvoice?->language?->language_code ?? config('app.locale'));
+        Number::useLocale(app()->getLocale());
+        if ($orderCurrency = $order->currency()->withTrashed()->value('iso')) {
+            Number::useCurrency($orderCurrency);
+        }
 
         $this->model = $order;
         $this->prepareModel();
@@ -49,22 +55,27 @@ class OrderView extends PrintableView
 
     public function prepareModel(): void
     {
-        $positions = to_flat_tree(
-            $this->model
-                ->orderPositions()
-                ->whereNull('parent_id')
-                ->when(! $this->showAlternatives, fn ($query) => $query->whereNot('is_alternative', true))
-                ->with(['tags', 'product.unit:id,name,abbreviation'])
-                ->get()
-                ->append('children')
-                ->toArray()
+        resolve_static(OrderPosition::class, 'addGlobalScope', [
+            'scope' => 'sorted',
+            'implementation' => function (Builder $query): void {
+                $query->ordered()
+                    ->with(['tags', 'product.unit:id,name,abbreviation'])
+                    ->when(! $this->showAlternatives, fn (Builder $query) => $query->whereNot('is_alternative', true));
+            },
+        ]);
+
+        $positions = array_map(
+            fn (array $item) => app(OrderPosition::class)->withoutMeta()->forceFill($item),
+            to_flat_tree(
+                resolve_static(OrderPosition::class, 'familyTree')
+                    ->where('order_id', $this->model->getKey())
+                    ->whereNull('parent_id')
+                    ->get()
+                    ->toArray()
+            )
         );
 
-        $flattened = collect($positions)->map(
-            function ($item) {
-                return new Fluent($item);
-            }
-        );
+        $flattened = app(OrderPosition::class)->newCollection($positions);
 
         foreach ($flattened as $item) {
             if ($item->depth === 0 && $item->is_free_text && $item->has_children) {

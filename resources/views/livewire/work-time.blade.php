@@ -25,6 +25,7 @@
                 :label="__('Contact')"
                 wire:model="workTime.contact_id"
                 select="label:label|value:contact_id"
+                unfiltered
                 :request="[
                     'url' => route('search', \FluxErp\Models\Address::class),
                     'method' => 'POST',
@@ -61,6 +62,7 @@
                     x-on:select="recordSelected($event.detail.select)"
                     wire:model="workTime.trackable_id"
                     select="label:label|value:id"
+                    unfiltered
                     :request="[
                         'url' => route('search', '__model__'),
                         'method' => 'POST',
@@ -122,11 +124,7 @@
         x-anchor.bottom-end.offset.5="$refs.button"
         class="z-10"
     >
-        <x-card
-            id="active-work-times"
-            class="flex max-w-md flex-col gap-4"
-            :header="__('Active Work Times')"
-        >
+        <x-card id="active-work-times" class="flex max-w-md flex-col gap-4">
             <x-slot:header>
                 <div class="flex w-full items-center justify-between gap-4">
                     <div>{{ __('Active Work Times') }}</div>
