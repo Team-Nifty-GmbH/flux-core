@@ -5,20 +5,27 @@ namespace FluxErp\Livewire\Widgets;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Cron\CronExpression;
+use FluxErp\Livewire\Dashboard\Dashboard;
+use FluxErp\Livewire\Support\Widgets\Charts\BarChart;
 use FluxErp\Models\Pivots\OrderSchedule;
-use FluxErp\Support\Widgets\Charts\BarChart;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use FluxErp\Traits\MoneyChartFormattingTrait;
+use FluxErp\Traits\Widgetable;
 use Livewire\Attributes\Renderless;
 
 class RecurringRevenueForecast extends BarChart
 {
-    use IsTimeFrameAwareWidget, MoneyChartFormattingTrait;
+    use IsTimeFrameAwareWidget, MoneyChartFormattingTrait, Widgetable;
 
     public ?array $chart = [
         'type' => 'bar',
         'stacked' => true,
     ];
+
+    public static function dashboardComponent(): array|string
+    {
+        return Dashboard::class;
+    }
 
     public ?array $plotOptions = [
         'bar' => [
@@ -38,22 +45,26 @@ class RecurringRevenueForecast extends BarChart
         $this->updateData();
     }
 
+    private function createFormattedPeriodDay(Carbon $date): string
+    {
+        return $date->day . ' ' . $date->monthName;
+    }
+
+    private function createFormattedPeriodMonth(Carbon $date): string
+    {
+        return $date->monthName . ' ' . $date->year;
+    }
+
+    private function createFormattedPeriodQuarter(Carbon $date): string
+    {
+        $quarter = ceil($date->month / 3);
+        return 'Q' . $quarter . ' ' . $date->year;
+    }
+
     public function calculateChart(): void
     {
-        $months = [
-            __('January'),
-            __('February'),
-            __('March'),
-            __('April'),
-            __('May'),
-            __('June'),
-            __('July'),
-            __('August'),
-            __('September'),
-            __('October'),
-            __('November'),
-            __('December'),
-        ];
+        $locale = auth()->user()?->language->language_code ?? 'de';
+        Carbon::setLocale($locale);
 
         $range = $this->timeFrame?->getRange();
 
@@ -68,62 +79,115 @@ class RecurringRevenueForecast extends BarChart
             $endDate = now()->addYear();
         }
 
-        $period = CarbonPeriod::create($startDate, '1 month', $endDate);
+        $diffInDays = $startDate->diffInDays($endDate);
+        if ($diffInDays <= 31) {
+            $interval = '1 day';
+        } elseif ($diffInDays <= 365) {
+            $interval = '1 month';
+        } else {
+            $interval = '3 months';
+        }
 
-        $startDate = $startDate->subSecond(1); // subtract 1 second to avoid issues with getNextRunDate
+        $period = CarbonPeriod::create($startDate, $interval, $endDate);
 
-        $formattedMonths = [];
+        $startDate = $startDate->subSecond(); // subtract 1 second to avoid issues with getNextRunDate
+
+        $formattedPeriods = [];
         foreach ($period as $date) {
-            $monthIndex = $date->month - 1;
-            $formattedMonths[] = $months[$monthIndex] . ' ' . $date->year;
+            switch ($interval) {
+                case '1 day':
+                    $formattedPeriods[] = $this->createFormattedPeriodDay($date);
+                    break;
+                case '1 month':
+                    $formattedPeriods[] = $this->createFormattedPeriodMonth($date);
+                    break;
+                case '3 months':
+                    $formattedPeriods[] = $this->createFormattedPeriodQuarter($date);
+                    break;
+            }
         }
 
         $orderSchedules = resolve_static(OrderSchedule::class, 'query')
-            ->with(['order', 'schedule'])
+            ->whereHas('schedule', function($query) {
+                $query->where('is_active', true)
+                    ->where(function ($q) {
+                        $q->whereNull('ends_at')
+                            ->orWhere('ends_at', '>', Carbon::now());
+                    });
+            })
+            ->with([
+                'order' => function ($query) {
+                    $query->select(['id', 'client_id', 'total_net_price'])
+                        ->with(['client' => function ($q) {
+                            $q->select(['id', 'name']);
+                        }]);
+                },
+                'schedule' => function ($query) {
+                    $query->where('is_active', true)
+                        ->select(['id', 'cron_expression', 'created_at', 'ends_at', 'is_active']);
+                }
+            ])
             ->get();
 
-        $clientsData = [];
+        $series = [];
+        $seriesIndexMap = [];
 
         foreach ($orderSchedules as $orderSchedule) {
-            $lStartDate = $startDate;
+            $effectiveStartDate = $startDate;
             if ($orderSchedule->schedule->cron_expression && $orderSchedule->schedule->is_active) {
-                if ($orderSchedule->schedule->created_at > $lStartDate) {
-                    $lStartDate = $orderSchedule->schedule->created_at;
+                if ($orderSchedule->schedule->created_at > $effectiveStartDate) {
+                    $effectiveStartDate = $orderSchedule->schedule->created_at;
                 }
-                $order = $orderSchedule->order;
-                $client = $order->client->name ?? __('Unknown');
+                $order       = $orderSchedule->order;
+                $clientName  = $order->client->name ?? __('Unknown');
+                $orderValue  = $order->total_net_price;
+                $cron        = new CronExpression($orderSchedule->schedule->cron_expression);
+                $nextRun     = $cron->getNextRunDate($effectiveStartDate);
 
-                $orderValue = $order->total_net_price;
-                $cron = new CronExpression($orderSchedule->schedule->cron_expression);
-                $nextRun = $cron->getNextRunDate($lStartDate);
+                if (! isset($seriesIndexMap[$clientName])) {
+                    $seriesIndexMap[$clientName] = count($series);
+                    $series[] = [
+                        'name' => $clientName,
+                        'data' => array_fill(0, count($formattedPeriods), 0),
+                    ];
+                }
 
-                while ($nextRun <= $endDate &&
-                    (! $orderSchedule->schedule->ends_at || $nextRun <= $orderSchedule->schedule->ends_at)) {
+                $clientIdx = $seriesIndexMap[$clientName];
+
+                while (
+                    $nextRun <= $endDate
+                    && (! $orderSchedule->schedule->ends_at || $nextRun <= $orderSchedule->schedule->ends_at)
+                ) {
                     $nextRunTime = Carbon::parse($nextRun);
-                    $month = $nextRunTime->monthName . ' ' . $nextRunTime->year;
-                    $clientsData[$client][$month] = bcadd($clientsData[$client][$month] ?? 0, $orderValue);
+
+                    switch ($interval) {
+                        case '1 day':
+                            $label = $this->createFormattedPeriodDay($nextRunTime);
+                            break;
+                        case '1 month':
+                            $label = $this->createFormattedPeriodMonth($nextRunTime);
+                            break;
+                        case '3 months':
+                            $label = $this->createFormattedPeriodQuarter($nextRunTime);
+                            break;
+                        default:
+                            $label = '';
+                    }
+
+                    if (false !== $idx = array_search($label, $formattedPeriods)) {
+                        $series[$clientIdx]['data'][$idx] = bcadd(
+                            $series[$clientIdx]['data'][$idx],
+                            $orderValue
+                        );
+                    }
+
                     $nextRun = $cron->getNextRunDate($nextRun);
                 }
             }
         }
 
-        $series = [];
-
-        foreach ($clientsData as $clientName => $monthlyData) {
-            $data = [];
-
-            foreach ($formattedMonths as $month) {
-                $data[] = $monthlyData[$month] ?? 0;
-            }
-
-            $series[] = [
-                'name' => $clientName,
-                'data' => $data,
-            ];
-        }
-
         $this->series = $series;
-        $this->xaxis['categories'] = $formattedMonths;
+        $this->xaxis['categories'] = $formattedPeriods;
     }
 
     public function showTitle(): bool
