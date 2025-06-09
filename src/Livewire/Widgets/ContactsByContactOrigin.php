@@ -2,21 +2,28 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use FluxErp\Livewire\Dashboard\Dashboard;
+use FluxErp\Livewire\Support\Widgets\Charts\CircleChart;
 use FluxErp\Models\Contact;
 use FluxErp\Support\Metrics\Charts\Donut;
-use FluxErp\Support\Widgets\Charts\CircleChart;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
+use FluxErp\Traits\Widgetable;
 use Livewire\Attributes\Renderless;
 
 class ContactsByContactOrigin extends CircleChart
 {
-    use IsTimeFrameAwareWidget;
+    use IsTimeFrameAwareWidget, Widgetable;
 
     public ?array $chart = [
         'type' => 'donut',
     ];
 
     public bool $showTotals = false;
+
+    public static function dashboardComponent(): array|string
+    {
+        return Dashboard::class;
+    }
 
     #[Renderless]
     public function calculateByTimeFrame(): void
