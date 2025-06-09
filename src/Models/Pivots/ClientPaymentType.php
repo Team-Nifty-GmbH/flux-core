@@ -4,14 +4,11 @@ namespace FluxErp\Models\Pivots;
 
 use FluxErp\Models\Client;
 use FluxErp\Models\PaymentType;
-use FluxErp\Traits\HasPackageFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ClientPaymentType extends FluxPivot
 {
-    use HasPackageFactory;
-
     public $incrementing = true;
 
     public $timestamps = false;

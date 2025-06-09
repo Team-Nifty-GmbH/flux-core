@@ -4,13 +4,10 @@ namespace FluxErp\Models\Pivots;
 
 use FluxErp\Models\Order;
 use FluxErp\Models\User;
-use FluxErp\Traits\HasPackageFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OrderUser extends FluxPivot
 {
-    use HasPackageFactory;
-
     public $incrementing = true;
 
     public $timestamps = false;

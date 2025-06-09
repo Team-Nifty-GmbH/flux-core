@@ -4,14 +4,11 @@ namespace FluxErp\Models\Pivots;
 
 use FluxErp\Models\Contact;
 use FluxErp\Models\DiscountGroup;
-use FluxErp\Traits\HasPackageFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ContactDiscountGroup extends FluxPivot
 {
-    use HasPackageFactory;
-
     public $incrementing = true;
 
     public $timestamps = false;

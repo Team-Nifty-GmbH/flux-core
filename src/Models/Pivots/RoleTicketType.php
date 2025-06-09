@@ -4,13 +4,10 @@ namespace FluxErp\Models\Pivots;
 
 use FluxErp\Models\Role;
 use FluxErp\Models\TicketType;
-use FluxErp\Traits\HasPackageFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class RoleTicketType extends FluxPivot
 {
-    use HasPackageFactory;
-
     public $incrementing = true;
 
     public $timestamps = false;

@@ -5,14 +5,11 @@ namespace FluxErp\Models\Pivots;
 use FluxErp\Models\Address;
 use FluxErp\Models\AddressType;
 use FluxErp\Models\Order;
-use FluxErp\Traits\HasPackageFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AddressAddressTypeOrder extends FluxPivot
 {
-    use HasPackageFactory;
-
     protected $table = 'address_address_type_order';
 
     protected static function booted(): void

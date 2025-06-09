@@ -4,13 +4,10 @@ namespace FluxErp\Models\Pivots;
 
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\StockPosting;
-use FluxErp\Traits\HasPackageFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OrderPositionStockPosting extends FluxPivot
 {
-    use HasPackageFactory;
-
     public $incrementing = true;
 
     public $timestamps = false;

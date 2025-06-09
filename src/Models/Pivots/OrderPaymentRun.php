@@ -4,18 +4,13 @@ namespace FluxErp\Models\Pivots;
 
 use FluxErp\Models\Order;
 use FluxErp\Models\PaymentRun;
-use FluxErp\Traits\HasPackageFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OrderPaymentRun extends FluxPivot
 {
-    use HasPackageFactory;
-
     public $incrementing = false;
 
     public $timestamps = false;
-
-    protected $primaryKey = ['order_id', 'payment_run_id'];
 
     protected $table = 'order_payment_run';
 

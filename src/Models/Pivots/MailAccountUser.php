@@ -4,14 +4,11 @@ namespace FluxErp\Models\Pivots;
 
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\User;
-use FluxErp\Traits\HasPackageFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class MailAccountUser extends FluxPivot
 {
-    use HasPackageFactory;
-
     public $incrementing = true;
 
     public $timestamps = false;
