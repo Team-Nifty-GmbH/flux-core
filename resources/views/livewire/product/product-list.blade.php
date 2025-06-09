@@ -1,6 +1,10 @@
 <div x-data="{ edit: true }">
     @canAction(\FluxErp\Actions\Product\CreateProduct::class)
-        <x-modal id="create-product-modal" :title="__('New Product')">
+        <x-modal
+            id="create-product-modal"
+            :title="__('New Product')"
+            x-on:open="$focusOn('product-name')"
+        >
             <section class="flex flex-col gap-1.5">
                 <x-input
                     wire:model="product.product_number"
@@ -15,7 +19,11 @@
                         :options="$productTypes"
                     />
                 </div>
-                <x-input wire:model="product.name" :label="__('Name')" />
+                <x-input
+                    wire:model="product.name"
+                    :label="__('Name')"
+                    id="product-name"
+                />
                 <x-select.styled
                     multiple
                     x-bind:disabled="!edit"
@@ -23,6 +31,7 @@
                     :label="__('Clients')"
                     :src="'logo_small_url'"
                     select="label:name|value:id"
+                    unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\Client::class),
                         'method' => 'POST',
@@ -97,7 +106,7 @@
                                                     $wire.productPricesUpdate.alteration +
                                                     ($wire.productPricesUpdate.is_percent
                                                         ? '%)'
-                                                        : '{{ \FluxErp\Models\Currency::default()?->symbol }})')
+                                                        : '{{ resolve_static(\FluxErp\Models\Currency::class, 'default')?->symbol }})')
                                             "
                                         />
                                     </x-slot>
@@ -151,7 +160,7 @@
                     loading="updatePrices"
                     color="indigo"
                     :text="__('Save')"
-                    wire:flux-confirm.icon.warning="{{ __('wire:confirm.product-prices-update') }}"
+                    wire:flux-confirm.type.warning="{{ __('wire:confirm.product-prices-update') }}"
                     wire:click="updatePrices().then((success) => {if(success) $modalClose('update-prices-modal');});"
                 />
             </x-slot>

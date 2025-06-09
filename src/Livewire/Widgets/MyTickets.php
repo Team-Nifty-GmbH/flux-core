@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Models\Ticket;
 use FluxErp\States\Ticket\TicketState;
 use FluxErp\Traits\Widgetable;
@@ -17,6 +18,11 @@ class MyTickets extends Component
     public ?array $rememberedEventListeners = null;
 
     protected ?Collection $tickets = null;
+
+    public static function dashboardComponent(): array|string
+    {
+        return Dashboard::class;
+    }
 
     public static function getDefaultHeight(): int
     {

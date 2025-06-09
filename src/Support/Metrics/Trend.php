@@ -188,8 +188,8 @@ class Trend extends Metric
             $diff = $this->startingDate?->diffInDays($this->endingDate ?? now()->addCenturies(2));
 
             $unit = match (true) {
-                $diff < 30 => 'day',
-                $diff < 365 => 'month',
+                $diff <= 31 => 'day',
+                $diff <= 365 => 'month',
                 default => 'year',
             };
         }

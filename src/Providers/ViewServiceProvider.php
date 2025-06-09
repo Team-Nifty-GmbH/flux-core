@@ -5,15 +5,12 @@ namespace FluxErp\Providers;
 use Composer\Autoload\ClassLoader;
 use Composer\InstalledVersions;
 use FluxErp\Facades\Asset;
-use FluxErp\Models\Currency;
 use FluxErp\View\Layouts\App;
 use FluxErp\View\Layouts\Printing;
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Facades\View;
-use Illuminate\Support\Number;
+use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use TallStackUi\Facades\TallStackUi;
-use Throwable;
 
 class ViewServiceProvider extends ServiceProvider
 {
@@ -33,6 +30,8 @@ class ViewServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        Vite::useAggressivePrefetching();
+
         if (
             (! $this->app->runningInConsole() || $this->app->runningUnitTests())
             && file_exists(public_path('build/manifest.json'))
@@ -46,22 +45,6 @@ class ViewServiceProvider extends ServiceProvider
         $this->registerViews();
 
         $this->bootBladeDirectives();
-
-        View::composer('*', function (): void {
-            Currency::default() && Number::useCurrency(Currency::default()->iso);
-
-            try {
-                if (! $this->app->runningInConsole() || $this->app->runningUnitTests()) {
-                    View::share(
-                        'defaultCurrency',
-                        Currency::default() ?? app(Currency::class)
-                    );
-                } else {
-                    View::share('defaultCurrency', app(Currency::class));
-                }
-            } catch (Throwable) {
-            }
-        });
     }
 
     protected function bootAssets(): void
@@ -121,6 +104,11 @@ class ViewServiceProvider extends ServiceProvider
         TallStackUi::personalize()
             ->dropdown()
             ->block('wrapper.second', 'relative inline-block text-left w-full');
+        TallStackUi::personalize()
+            ->scope('calendar')
+            ->dropdown()
+            ->block('wrapper.second', 'relative inline-block text-left w-full')
+            ->block('floating.class', 'w-full');
 
         TallStackUi::personalize()
             ->badge()
@@ -164,11 +152,6 @@ class ViewServiceProvider extends ServiceProvider
             ->block('buttons.close.wrapper', 'ml-2 flex shrink-0');
 
         TallStackUi::personalize()
-            ->layout()
-            ->block('wrapper.second', 'md:pl-20')
-            ->block('main', 'mx-auto max-w-full p-4 md:p-10');
-
-        TallStackUi::personalize()
             ->layout('header')
             ->block('wrapper', 'dark:bg-dark-700 dark:border-dark-600 sticky top-0 z-10 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8');
 
@@ -176,6 +159,10 @@ class ViewServiceProvider extends ServiceProvider
             ->modal('fullscreen')
             ->block('wrapper.fourth', 'dark:bg-dark-700 relative flex w-full transform flex-col rounded-xl bg-white text-left shadow-xl transition-all min-h-screen')
             ->block('body', 'dark:text-dark-300 grow rounded-b-xl py-5 text-gray-700 px-4 min-h-screen');
+
+        TallStackUi::personalize()
+            ->modal('headless')
+            ->block('body', 'dark:text-dark-300 grow text-gray-700');
     }
 
     protected function registerViews(): void

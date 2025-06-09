@@ -1,5 +1,5 @@
-<x-modal wire:close="resetDiscount()" id="edit-discount">
-    <x-card class="flex flex-col gap-1.5">
+<x-modal wire:close="resetDiscount()" id="edit-discount-modal">
+    <div class="flex flex-col gap-1.5">
         <x-select.styled
             :label="__('Type')"
             x-on:select="$wire.discountForm.model_id = null"
@@ -26,6 +26,7 @@
                 :label="__('Category')"
                 wire:model="discountForm.model_id"
                 select="label:name|value:id"
+                unfiltered
                 :request="[
                     'url' => route('search', \FluxErp\Models\Category::class),
                     'method' => 'POST',
@@ -53,6 +54,7 @@
                 :label="__('Product')"
                 wire:model="discountForm.model_id"
                 select="label:label|value:id|description:product_number"
+                unfiltered
                 :request="[
                     'url' => route('search', \FluxErp\Models\Product::class),
                     'method' => 'POST',
@@ -87,12 +89,12 @@
                 step="0.01"
             />
         </div>
-    </x-card>
+    </div>
     <x-slot:footer>
         <x-button
             color="indigo"
             :text="__('Save')"
-            wire:click="save().then((success) => {if(success) close();})"
+            wire:click="save().then((success) => {if(success) $modalClose('edit-discount-modal');})"
         />
     </x-slot>
 </x-modal>

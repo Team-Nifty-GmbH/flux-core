@@ -1,11 +1,12 @@
-<div>
-    <x-input
-        type="search"
-        class="w-full"
-        :placeholder="__('Type to search for products…')"
-        wire:model.live.debounce="search"
-        class="mb-4"
-    />
+<div class="pt-12">
+    <div class="mb-4">
+        <x-input
+            type="search"
+            class="w-full"
+            :placeholder="__('Type to search for products…')"
+            wire:model.live.debounce="search"
+        />
+    </div>
     <div class="flex flex-col gap-4 sm:flex-row">
         <div>
             <livewire:portal.shop.categories />

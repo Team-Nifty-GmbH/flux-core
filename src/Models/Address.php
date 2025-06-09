@@ -4,6 +4,7 @@ namespace FluxErp\Models;
 
 use Carbon\Carbon;
 use Exception;
+use FluxErp\Actions\Address\UpdateAddress;
 use FluxErp\Contracts\Calendarable;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\SalutationEnum;
@@ -37,7 +38,6 @@ use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -60,7 +60,10 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
 {
     use Commentable, Communicatable, Filterable, HasAdditionalColumns, HasCalendars, HasCart, HasClientAssignment,
         HasFrontendAttributes, HasPackageFactory, HasRoles, HasStates, HasTags, HasUserModification, HasUuid,
-        InteractsWithMedia, Lockable, LogsActivity, MonitorsQueue, Notifiable, Printable, Searchable, SoftDeletes;
+        InteractsWithMedia, Lockable, LogsActivity, MonitorsQueue, Notifiable, Printable, SoftDeletes;
+    use Searchable {
+        Searchable::scoutIndexSettings as baseScoutIndexSettings;
+    }
 
     public static string $iconName = 'user';
 
@@ -103,23 +106,34 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         return $address;
     }
 
-    public static function fromCalendarEvent(array $event): Model
+    public static function fromCalendarEvent(array $event, string $action = 'update'): UpdateAddress
     {
-        $currentAddress = static::query()->whereKey(data_get($event, 'id'))->first();
+        $currentAddress = static::query()
+            ->whereKey(data_get($event, 'id'))
+            ->first();
 
-        $address = new static();
-        $address->forceFill([
+        return UpdateAddress::make([
             'id' => data_get($event, 'id'),
-            'date_of_birth' => Carbon::parse(data_get($event, 'start'))->setYear($currentAddress->date_of_birth->year),
+            'date_of_birth' => Carbon::parse(data_get($event, 'start'))
+                ->setYear($currentAddress->date_of_birth->year),
         ]);
+    }
 
-        return $address;
+    public static function scoutIndexSettings(): ?array
+    {
+        return static::baseScoutIndexSettings() ?? [
+            'filterableAttributes' => [
+                'is_main_address',
+                'contact_id',
+            ],
+            'sortableAttributes' => ['*'],
+        ];
     }
 
     public static function toCalendar(): array
     {
         return [
-            'id' => Str::of(static::class)->replace('\\', '.'),
+            'id' => Str::of(static::class)->replace('\\', '.')->toString(),
             'modelType' => morph_alias(static::class),
             'name' => __('Birthdays'),
             'color' => '#dd2c2c',
@@ -198,12 +212,28 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         });
 
         static::deleted(function (Address $address): void {
+            if (! resolve_static(Address::class, 'query')
+                ->where('contact_id', $address->contact_id)
+                ->exists()
+            ) {
+                resolve_static(Contact::class, 'query')
+                    ->whereKey($address->contact_id)
+                    ->first()
+                    ?->delete();
+
+                return;
+            }
+
             $contactUpdates = [];
             $addressesUpdates = [];
             $mainAddress = resolve_static(Address::class, 'query')
                 ->where('contact_id', $address->contact_id)
                 ->where('is_main_address', true)
                 ->first();
+
+            if (! $mainAddress) {
+                return;
+            }
 
             if ($address->is_invoice_address) {
                 $contactUpdates += [
@@ -240,6 +270,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         return [
             'date_of_birth' => 'date',
             'advertising_state' => AdvertisingState::class,
+            'search_aliases' => 'array',
             'has_formal_salutation' => 'boolean',
             'is_main_address' => 'boolean',
             'is_invoice_address' => 'boolean',
@@ -369,6 +400,16 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         return $this->belongsTo(Language::class);
     }
 
+    public function leadRecommendations(): HasMany
+    {
+        return $this->hasMany(Lead::class, 'recommended_by_address_id');
+    }
+
+    public function leads(): HasMany
+    {
+        return $this->hasMany(Lead::class);
+    }
+
     public function newCollection(array $models = []): Collection
     {
         return app(AddressCollection::class, ['items' => $models]);
@@ -408,11 +449,6 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
             'contact_id',
             'price_list_id'
         );
-    }
-
-    public function projectTasks(): HasMany
-    {
-        return $this->hasMany(Task::class);
     }
 
     public function routeNotificationForMail(): ?string
@@ -524,6 +560,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
             'title' => $name,
             'start' => $currentBirthday->toDateString(),
             'end' => $currentBirthday->toDateString(),
+            'editable' => false,
             'invited' => [],
             'allDay' => true,
             'is_editable' => false,

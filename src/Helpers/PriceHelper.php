@@ -100,7 +100,7 @@ class PriceHelper
         }
 
         if (! $this->price && $this->useDefault) {
-            $this->priceList = PriceList::default();
+            $this->priceList = resolve_static(PriceList::class, 'default');
             $this->price = resolve_static(Price::class, 'query')
                 ->where('product_id', $this->product->getKey())
                 ->whereRelation('priceList', 'is_default', true)

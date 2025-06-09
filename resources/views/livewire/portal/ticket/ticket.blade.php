@@ -65,10 +65,12 @@
                     @section('additional-columns')
                     <template x-for="additionalColumn in additionalColumns">
                         <div>
-                            <x-label
-                                x-html="additionalColumn.label ? additionalColumn.label : additionalColumn.name"
-                                x-bind:for="additionalColumn.name"
-                            />
+                            <x-label>
+                                <span
+                                    x-html="additionalColumn.label ? additionalColumn.label : additionalColumn.name"
+                                    x-bind:for="additionalColumn.name"
+                                />
+                            </x-label>
                             <x-input
                                 x-bind:type="additionalColumn.field_type"
                                 x-model="ticket[additionalColumn.name]"
@@ -82,19 +84,12 @@
                     >
                         {{ __('Attachments') }}
                     </h2>
-                    <livewire:folder-tree
-                        :model-type="\FluxErp\Models\Ticket::class"
-                        :model-id="$ticket['id']"
+                    <livewire:portal.ticket.media
+                        :model-id="data_get($ticket, 'id')"
                     />
                 </div>
             </div>
         </div>
-        <x-flux::tabs wire:model.live="tab" :$tabs>
-            <livewire:is
-                wire:key="{{ uniqid() }}"
-                :component="$tab"
-                :model-id="$ticket['id']"
-            />
-        </x-flux::tabs>
+        <x-flux::tabs wire:model.live="tab" :$tabs wire:ignore />
     </div>
 </div>

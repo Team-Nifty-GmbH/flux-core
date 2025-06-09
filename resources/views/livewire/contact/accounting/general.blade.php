@@ -50,6 +50,7 @@
                 wire:model="contact.agent_id"
                 required
                 select="label:label|value:id"
+                unfiltered
                 :request="[
                     'url' => route('search', \FluxErp\Models\User::class),
                     'method' => 'POST',
@@ -64,6 +65,7 @@
                 wire:model="contact.approval_user_id"
                 required
                 select="label:label|value:id"
+                unfiltered
                 :request="[
                     'url' => route('search', \FluxErp\Models\User::class),
                     'method' => 'POST',

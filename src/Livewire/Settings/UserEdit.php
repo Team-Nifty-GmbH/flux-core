@@ -8,11 +8,14 @@ use FluxErp\Actions\Role\UpdateUserRoles;
 use FluxErp\Actions\User\CreateUser;
 use FluxErp\Actions\User\UpdateUser;
 use FluxErp\Actions\User\UpdateUserClients;
+use FluxErp\Livewire\Forms\PrinterUserForm;
 use FluxErp\Livewire\Forms\UserForm;
 use FluxErp\Models\Client;
 use FluxErp\Models\Language;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\Permission;
+use FluxErp\Models\Pivots\PrinterUser;
+use FluxErp\Models\Printer;
 use FluxErp\Models\Role;
 use FluxErp\Models\User;
 use FluxErp\Traits\Livewire\Actions;
@@ -35,25 +38,15 @@ class UserEdit extends Component
 
     public array $lockedPermissions = [];
 
+    public PrinterUserForm $printerUserForm;
+
     public string $searchPermission = '';
 
     public UserForm $userForm;
 
     public function mount(User $user): void
     {
-        $user->loadMissing(['roles', 'mailAccounts:id', 'clients:id']);
-        $this->userForm->fill($user);
-        $this->isSuperAdmin = $user->hasRole('Super Admin');
-
-        $this->userForm->permissions = $user
-            ->getDirectPermissions()
-            ->pluck(['id'])
-            ->toArray();
-        $this->userForm->roles = $user->roles->pluck('id')->toArray();
-        $this->userForm->mail_accounts = $user->mailAccounts->pluck('id')->toArray();
-        $this->userForm->clients = $user->clients->pluck('id')->toArray();
-
-        $this->updatedUserRoles();
+        $this->fetchUser($user);
     }
 
     public function render(): View|Factory|Application
@@ -72,6 +65,21 @@ class UserEdit extends Component
                     ->toArray(),
                 'mailAccounts' => resolve_static(MailAccount::class, 'query')
                     ->get(['id', 'email'])
+                    ->toArray(),
+                'printers' => resolve_static(Printer::class, 'query')
+                    ->where('is_active', true)
+                    ->get(['id', 'name', 'location', 'media_sizes'])
+                    ->toArray(),
+                'userPrinters' => resolve_static(PrinterUser::class, 'query')
+                    ->where('user_id', $this->userForm->id)
+                    ->with('printer:id,name,location,media_sizes')
+                    ->get()
+                    ->map(fn (PrinterUser $item) => [
+                        'id' => $item->getKey(),
+                        'name' => $item->printer->name,
+                        'location' => $item->printer->location,
+                        'media_sizes' => $item->printer->media_sizes,
+                    ])
                     ->toArray(),
                 'users' => resolve_static(User::class, 'query')
                     ->where('is_active', true)
@@ -104,7 +112,6 @@ class UserEdit extends Component
         $this->redirectRoute('settings.users', navigate: true);
     }
 
-    #[Renderless]
     public function save(): void
     {
         try {
@@ -175,8 +182,16 @@ class UserEdit extends Component
             exception_to_notifications($e, $this);
         }
 
-        $user->loadMissing(['roles', 'permissions', 'clients:id']);
-        $this->userForm->fill($user);
+        if ($this->printerUserForm->pivot_id) {
+            try {
+                $this->printerUserForm->is_default = true;
+                $this->printerUserForm->save();
+            } catch (ValidationException|UnauthorizedException $e) {
+                exception_to_notifications($e, $this);
+            }
+        }
+
+        $this->fetchUser($user);
     }
 
     #[Renderless]
@@ -207,5 +222,33 @@ class UserEdit extends Component
             ->toArray();
 
         $this->lockedPermissions = Arr::flatten($lockedPermissions);
+    }
+
+    protected function fetchUser(User $user): void
+    {
+        $user->loadMissing([
+            'roles',
+            'mailAccounts:id',
+            'clients:id',
+            'printers:id',
+        ]);
+
+        if ($defaultPrinter = $user->printerUsers()->where('is_default', true)->first()) {
+            $this->printerUserForm->fill($defaultPrinter);
+        }
+
+        $this->userForm->fill($user);
+        $this->isSuperAdmin = $user->hasRole('Super Admin');
+
+        $this->userForm->permissions = $user
+            ->getDirectPermissions()
+            ->pluck(['id'])
+            ->toArray();
+        $this->userForm->roles = $user->roles->pluck('id')->toArray();
+        $this->userForm->mail_accounts = $user->mailAccounts->pluck('id')->toArray();
+        $this->userForm->clients = $user->clients->pluck('id')->toArray();
+        $this->userForm->printers = $user->printers->pluck('id')->toArray();
+
+        $this->updatedUserRoles();
     }
 }

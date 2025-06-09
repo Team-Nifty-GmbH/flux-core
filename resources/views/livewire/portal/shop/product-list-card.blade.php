@@ -43,7 +43,7 @@
                 </p>
                 @show
                 @section('price')
-                @if ($productForm->children_count === 0)
+                @if ($productForm->children_count === 0 && $productForm->buy_price && $productForm->root_price_flat)
                     @can(route_to_permission('portal.checkout'))
                         <div
                             class="flex flex-col gap-1.5 text-center text-gray-900 dark:text-gray-50"
@@ -75,7 +75,7 @@
             </div>
         </a>
         @section('add-to-cart')
-        @if ($productForm->children_count === 0)
+        @if ($productForm->children_count === 0 && $productForm->buy_price)
             @can(route_to_permission('portal.checkout'))
                 <div class="mt-4 flex items-center gap-1.5">
                     @if ($cartItemId)

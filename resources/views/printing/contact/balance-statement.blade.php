@@ -1,9 +1,4 @@
-@php
-    $currency = $model->currency?->iso ?? resolve_static(\FluxErp\Models\Currency::class, 'default')->iso;
-    $formatter = new NumberFormatter(app()->getLocale(), NumberFormatter::CURRENCY);
-@endphp
-
-@use('\FluxErp\States\Order\PaymentState\Paid')
+@use(Illuminate\Support\Number)
 <x-flux::print.first-page-header
     :address="$model->invoiceAddress ?? $model->mainAddress"
 >
@@ -31,7 +26,7 @@
     </x-slot>
 </x-flux::print.first-page-header>
 <main>
-    <div class="prose-xs prose pb-4 pt-10">
+    <div class="prose-xs pb-4 pt-10">
         {!! $model->header !!}
     </div>
     <div class="pb-6">
@@ -63,11 +58,7 @@
             </thead>
             @section('positions.body')
             @foreach ($model->orders()->unpaid()->get(['id', 'order_number', 'invoice_date', 'invoice_number', 'total_gross_price', 'balance']) as $order)
-                <x-flux::print.order.order
-                    :order="$order"
-                    :currency="$currency"
-                    :formatter="$formatter"
-                />
+                <x-flux::print.order.order :order="$order" />
             @endforeach
 
             @show
@@ -85,7 +76,7 @@
                     <td
                         class="float-right border-b border-black text-right font-semibold"
                     >
-                        {{ $formatter->formatCurrency($model->orders()->unpaid()->sum('balance'),$currency,) }}
+                        {{ Number::currency($model->orders()->unpaid()->sum('balance'),) }}
                     </td>
                 </tr>
             </tbody>

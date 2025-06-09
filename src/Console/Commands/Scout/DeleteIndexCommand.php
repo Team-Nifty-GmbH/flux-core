@@ -2,11 +2,10 @@
 
 namespace FluxErp\Console\Commands\Scout;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Laravel\Scout\Console\DeleteIndexCommand as BaseDeleteIndexCommand;
 use Laravel\Scout\EngineManager;
 use Laravel\Scout\Searchable;
-use Spatie\ModelInfo\ModelFinder;
 
 class DeleteIndexCommand extends BaseDeleteIndexCommand
 {
@@ -15,7 +14,7 @@ class DeleteIndexCommand extends BaseDeleteIndexCommand
      *
      * @var string
      */
-    protected $signature = 'scout:delete-index
+    protected $signature = 'flux-scout:delete-index
             {name? : The name of the index}';
 
     /**
@@ -24,15 +23,15 @@ class DeleteIndexCommand extends BaseDeleteIndexCommand
     public function handle(EngineManager $manager): int
     {
         $indexes = (array) $this->argument('name') ?:
-            array_values(
-                ModelFinder::all(flux_path('src/Models'), flux_path('src'), 'FluxErp')
-                    ->merge(ModelFinder::all())
-                    ->filter(fn ($model) => in_array(Searchable::class, class_uses_recursive($model)))
-                    ->map(fn ($model) => app($model)->searchableAs())->unique()->toArray()
-            );
+            collect(Relation::morphMap())
+                ->map(fn (string $class) => resolve_static($class, 'class'))
+                ->filter(fn (string $class) => in_array(Searchable::class, class_uses_recursive($class)))
+                ->map(fn (string $model) => app($model)->searchableAs())
+                ->unique()
+                ->values()
+                ->toArray();
 
-        foreach ($indexes as $index) {
-            $indexName = $index instanceof Model ? $index->searchableAs() : $index;
+        foreach ($indexes as $indexName) {
             $this->call(BaseDeleteIndexCommand::class, ['name' => $indexName]);
         }
 

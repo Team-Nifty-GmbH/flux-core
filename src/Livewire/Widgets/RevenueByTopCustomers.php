@@ -2,9 +2,10 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use FluxErp\Livewire\Dashboard\Dashboard;
+use FluxErp\Livewire\Support\Widgets\Charts\CircleChart;
 use FluxErp\Models\Order;
 use FluxErp\Support\Metrics\Charts\Donut;
-use FluxErp\Support\Widgets\Charts\CircleChart;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use FluxErp\Traits\MoneyChartFormattingTrait;
 use Livewire\Attributes\Renderless;
@@ -20,6 +21,11 @@ class RevenueByTopCustomers extends CircleChart
     public int $limit = 10;
 
     public bool $showTotals = false;
+
+    public static function dashboardComponent(): array|string
+    {
+        return Dashboard::class;
+    }
 
     #[Renderless]
     public function calculateByTimeFrame(): void
@@ -41,8 +47,8 @@ class RevenueByTopCustomers extends CircleChart
         )
             ->setDateColumn('invoice_date')
             ->setRange($this->timeFrame)
-            ->setEndingDate($this->end?->endOfDay())
-            ->setStartingDate($this->start?->startOfDay())
+            ->setEndingDate($this->getEnd())
+            ->setStartingDate($this->getStart())
             ->setLabelKey('addressInvoice.name')
             ->sum('total_net_price', 'address_invoice_id');
 

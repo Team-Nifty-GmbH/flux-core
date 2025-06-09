@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use Carbon\Carbon;
+use FluxErp\Actions\WorkTime\UpdateWorkTime;
 use FluxErp\Contracts\Calendarable;
 use FluxErp\Support\Calculation\Rounding;
 use FluxErp\Traits\Filterable;
@@ -11,7 +12,6 @@ use FluxErp\Traits\HasParentChildRelations;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Str;
@@ -20,11 +20,15 @@ class WorkTime extends FluxModel implements Calendarable
 {
     use Filterable, HasPackageFactory, HasParentChildRelations, HasUuid, SoftDeletes;
 
-    public static function fromCalendarEvent(array $event): Model
+    public static function fromCalendarEvent(array $event, string $action = 'update'): UpdateWorkTime
     {
-        return resolve_static(static::class, 'query')
-            ->whereKey(data_get($event, 'id'))
-            ->first();
+        return UpdateWorkTime::make([
+            'id' => data_get($event, 'id'),
+            'name' => data_get($event, 'title'),
+            'started_at' => data_get($event, 'start'),
+            'ended_at' => data_get($event, 'end'),
+            'description' => data_get($event, 'description'),
+        ]);
     }
 
     public static function getGenericChannelEvents(): array
@@ -221,7 +225,8 @@ class WorkTime extends FluxModel implements Calendarable
             'invited' => [],
             'description' => $this->description,
             'allDay' => false,
-            'is_editable' => true,
+            'editable' => $this->is_locked ? false : true,
+            'is_editable' => $this->is_locked ? false : true,
             'is_invited' => false,
             'is_public' => false,
             'is_repeatable' => false,

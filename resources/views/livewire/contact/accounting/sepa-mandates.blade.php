@@ -1,5 +1,5 @@
 {{ $this->renderCreateDocumentsModal() }}
-<x-modal id="edit-sepa-mandate">
+<x-modal id="edit-sepa-mandate-modal">
     <div class="flex flex-col gap-1.5">
         <x-select.styled
             wire:model="sepaMandate.contact_bank_connection_id"
@@ -23,13 +23,11 @@
         <x-button
             color="secondary"
             light
-            x-on:click="$modalClose('execute-payment-run')"
+            x-on:click="$modalClose('edit-sepa-mandate-modal')"
             :text="__('Cancel')"
         />
         <x-button
-            color="secondary"
-            light
-            wire:click="save().then((success) => { if(success) $modalClose('execute-payment-run'); })"
+            wire:click="save().then((success) => { if(success) $modalClose('edit-sepa-mandate-modal'); })"
             primary
             :text="__('Save')"
         />

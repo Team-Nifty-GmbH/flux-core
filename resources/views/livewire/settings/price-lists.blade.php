@@ -28,6 +28,7 @@
                                 :label="__('Parent')"
                                 select="label:name|value:id"
                                 :options="$priceLists"
+                                searchable
                             />
                             <div
                                 x-show="$wire.priceList.parent_id > 0"
@@ -161,6 +162,7 @@
                                     wire:model="newCategoryDiscount.category_id"
                                     required
                                     select="label:label|value:id"
+                                    unfiltered
                                     :request="[
                                         'url' => route('search', \FluxErp\Models\Category::class),
                                         'method' => 'POST',

@@ -9,7 +9,7 @@
                     save() {
                         this.$wire.save().then((result) => {
                             if (result === true) {
-                                close()
+                                $modalClose('new-ticket-modal')
                             }
                         })
                     },
@@ -20,6 +20,7 @@
                 >
                     <div class="sm:col-span-6">
                         <x-input
+                            id="ticket-title"
                             :label="__('Title')"
                             :placeholder="__('What is it about?')"
                             wire:model="ticket.title"
@@ -45,10 +46,16 @@
                         x-for="ticketTypeAdditionalColumn in selectedAdditionalColumns"
                     >
                         <div class="sm:col-span-6">
-                            <x-label
-                                x-html="ticketTypeAdditionalColumn.label ? ticketTypeAdditionalColumn.label : ticketTypeAdditionalColumn.name"
-                                x-bind:for="ticketTypeAdditionalColumn.name"
-                            />
+                            <x-label>
+                                <span
+                                    x-html="
+                                        ticketTypeAdditionalColumn.label
+                                            ? ticketTypeAdditionalColumn.label
+                                            : ticketTypeAdditionalColumn.name
+                                    "
+                                    x-bind:for="ticketTypeAdditionalColumn.name"
+                                />
+                            </x-label>
                             <template
                                 x-if="ticketTypeAdditionalColumn.field_type === 'select'"
                             >
@@ -81,10 +88,12 @@
                     </template>
                     <template x-for="additionalColumn in additionalColumns">
                         <div class="sm:col-span-6">
-                            <x-label
-                                x-html="additionalColumn.label ? additionalColumn.label : additionalColumn.name"
-                                x-bind:for="additionalColumn.name"
-                            />
+                            <x-label>
+                                <span
+                                    x-html="additionalColumn.label ? additionalColumn.label : additionalColumn.name"
+                                    x-bind:for="additionalColumn.name"
+                                />
+                            </x-label>
                             <x-input
                                 x-bind:type="additionalColumn.field_type"
                                 x-model="ticket[additionalColumn.name]"

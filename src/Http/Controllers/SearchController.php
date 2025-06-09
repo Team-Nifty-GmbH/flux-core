@@ -2,7 +2,6 @@
 
 namespace FluxErp\Http\Controllers;
 
-use FluxErp\Models\Scopes\UserClientScope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Http\Request;
@@ -14,7 +13,7 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class SearchController extends Controller
 {
-    public function __invoke(Request $request, $model)
+    public function __invoke(Request $request, ?string $model = null)
     {
         // check if $model is a morph alias
         $model = morphed_model($model) ?? $model;
@@ -41,14 +40,13 @@ class SearchController extends Controller
             is_array($selected)
                 ? $query->whereIn($optionValue, Arr::wrap($selected))
                 : $query->where($optionValue, $selected);
-        } elseif ($request->has('search') && $isSearchable) {
+        } elseif ($request->has('search') && $isSearchable && ! $request->get('searchFields')) {
             /** @var Builder $perPageSearch */
             $perPageSearch = count(Arr::except(
                 app($model)->getGlobalScopes(),
                 [
                     SoftDeletingScope::class,
                     SearchableScope::class,
-                    UserClientScope::class,
                 ]
             )) === 0 ? 20 : 1000;
 
@@ -79,11 +77,7 @@ class SearchController extends Controller
         }
 
         if ($request->has('orderBy')) {
-            $query->orderBy($request->get('orderBy'));
-        }
-
-        if ($request->has('orderDirection')) {
-            $query->orderBy($request->get('orderDirection'));
+            $query->orderBy($request->get('orderBy'), $request->get('orderDirection', 'asc'));
         }
 
         if ($request->has('where')) {

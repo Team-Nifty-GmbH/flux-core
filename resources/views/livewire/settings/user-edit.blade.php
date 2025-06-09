@@ -40,7 +40,7 @@
                 wire:model="userForm.termination_date"
             />
             <x-number
-                :prefix="\FluxErp\Models\Currency::default()?->symbol"
+                :prefix="resolve_static(\FluxErp\Models\Currency::class, 'default')?->symbol"
                 :label="__('Cost Per Hour')"
                 wire:model="userForm.cost_per_hour"
             />
@@ -50,17 +50,20 @@
         @section('user-edit.selects')
         <x-select.styled
             wire:model="userForm.language_id"
+            searchable
             :label="__('Language')"
             select="label:name|value:id"
             :options="$languages"
         />
         <x-select.styled
             wire:model="userForm.timezone"
+            searchable
             :label="__('Timezone')"
             :options="timezone_identifiers_list()"
         />
         <x-select.styled
             wire:model="userForm.parent_id"
+            searchable
             :label="__('Parent')"
             select="label:name|value:id|description:email"
             :options="$users"
@@ -95,6 +98,34 @@
             select="label:email|value:id"
             :options="$mailAccounts"
         />
+        @show
+        @section('user-edit.printers')
+        <x-select.styled
+            :label="__('Printers')"
+            wire:model="userForm.printers"
+            multiple
+            select="label:name|value:id|description:location"
+            :options="$printers"
+        />
+        @show
+        @section('user-edit.default-printer')
+        @if ($userPrinters)
+            <x-select.styled
+                :label="__('Default Printer')"
+                wire:model="printerUserForm.pivot_id"
+                x-on:select="$tallstackuiSelect('default-printer-size').setOptions($event.detail.select.media_sizes)"
+                select="label:name|value:id|description:location"
+                :options="$userPrinters"
+            />
+            <div id="default-printer-size">
+                <x-select.styled
+                    :label="__('Default Size')"
+                    wire:model="printerUserForm.default_size"
+                    :options="data_get(collect($printers)->firstWhere('id', $printerUserForm->printer_id), 'media_sizes', [''])"
+                />
+            </div>
+        @endif
+
         @show
     </form>
     @show
@@ -249,6 +280,7 @@
                 class="pb-4"
                 wire:model="userForm.contact_id"
                 select="label:label|value:contact_id"
+                unfiltered
                 :request="[
                     'url' => route('search', \FluxErp\Models\Address::class),
                     'method' => 'POST',
@@ -277,7 +309,7 @@
             />
             <livewire:features.commission-rates
                 lazy
-                :userId="$user['id'] ?? null"
+                :user-id="$userForm->id"
                 :contactId="null"
                 cache-key="settings.users.commission-rates"
             />

@@ -37,8 +37,8 @@
                     *
                 </div>
             </div>
-            <div class="text-2xs text-secondary-400">
-                @if (auth()->user()?->priceList?->is_net || \FluxErp\Models\PriceList::default()->is_net)
+            <div class="text-secondary-400 text-2xs">
+                @if (auth()->user()?->priceList?->is_net || resolve_static(\FluxErp\Models\PriceList::class, 'default')->is_net)
                     * {{ __('All prices net plus VAT') }}
                 @else
                     * {{ __('All prices gross including VAT') }}

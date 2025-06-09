@@ -90,7 +90,8 @@ class OrderDetail extends Component
                 'total_net_price',
                 'unit_net_price',
                 'total_gross_price',
-                'unit_gross_price', ]
+                'unit_gross_price',
+            ]
         );
 
         // get the latest attachment per collection_name where disk is public
@@ -115,14 +116,15 @@ class OrderDetail extends Component
             [
                 'id',
                 'parent_id',
-                'order_number',
-                'commission',
+                'address_invoice',
                 'payment_target',
                 'payment_discount_tar',
                 'header',
                 'footer',
                 'logistic_note',
                 'payment_texts',
+                'order_number',
+                'commission',
                 'order_date',
                 'invoice_date',
                 'invoice_number',
@@ -134,9 +136,11 @@ class OrderDetail extends Component
                 'total_net_price',
                 'total_gross_price',
                 'total_vats',
-                'order_type',
-                'address_invoice',
+                'created_by',
+
+                'agent',
                 'currency',
+                'order_type',
             ]
         ));
 

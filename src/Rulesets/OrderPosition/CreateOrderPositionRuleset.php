@@ -2,8 +2,10 @@
 
 namespace FluxErp\Rulesets\OrderPosition;
 
+use FluxErp\Enums\CreditAccountPostingEnum;
 use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
+use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
@@ -102,7 +104,9 @@ class CreateOrderPositionRuleset extends FluxRuleset
                 Rule::when(
                     fn (Fluent $data) => (! $data->is_free_text
                         && ! $data->is_bundle_position)
-                        && ! resolve_static(Product::class, 'query')->whereKey($data->product_id)->exists(),
+                        && ! resolve_static(Product::class, 'query')
+                            ->whereKey($data->product_id)
+                            ->exists(),
                     'required'
                 ),
                 'integer',
@@ -111,6 +115,8 @@ class CreateOrderPositionRuleset extends FluxRuleset
             ],
             'warehouse_id' => [
                 'exclude_if:is_free_text,true',
+                'exclude_without:product_id',
+                'required_with:product_id',
                 'integer',
                 'nullable',
                 app(ModelExists::class, ['model' => Warehouse::class]),
@@ -152,7 +158,7 @@ class CreateOrderPositionRuleset extends FluxRuleset
                 'nullable',
             ],
             'customer_delivery_date' => 'date|nullable',
-            'ean_code' => 'string|nullable',
+            'ean_code' => 'string|max:255|nullable',
             'possible_delivery_date' => 'date|nullable',
             'unit_gram_weight' => [
                 app(Numeric::class),
@@ -166,7 +172,35 @@ class CreateOrderPositionRuleset extends FluxRuleset
                 'exclude_with:product_id',
                 'nullable',
                 'string',
+                'max:255',
             ],
+
+            'credit_account_id' => [
+                'exclude_if:is_free_text,true',
+                'exclude_if:is_bundle_position,true',
+                'integer',
+                'nullable',
+                app(ModelExists::class, ['model' => ContactBankConnection::class]),
+            ],
+            'credit_amount' => [
+                'exclude_if:is_free_text,true',
+                'exclude_if:is_bundle_position,true',
+                'exclude_without:credit_account_id',
+                'exclude_if:credit_account_id,null',
+                'required_with:credit_account_id',
+                app(Numeric::class),
+            ],
+            'post_on_credit_account' => [
+                'exclude_if:is_free_text,true',
+                'exclude_if:is_bundle_position,true',
+                'exclude_without:credit_account_id',
+                'exclude_if:credit_account_id,null',
+                'required_with:credit_account_id',
+                'integer',
+                Rule::enum(CreditAccountPostingEnum::class),
+                'nullable',
+            ],
+
             'sort_number' => 'nullable|integer|min:0',
 
             'is_alternative' => 'boolean',

@@ -333,7 +333,8 @@ Route::prefix('api')
                 // AddressTypes
                 Route::get('/address-types/{id}', [BaseController::class, 'show'])
                     ->defaults('model', AddressType::class);
-                Route::get('/address-types', [BaseController::class, 'index'])->defaults('model', AddressType::class);
+                Route::get('/address-types', [BaseController::class, 'index'])
+                    ->defaults('model', AddressType::class);
                 Route::post('/address-types', CreateAddressType::class);
                 Route::put('/address-types', UpdateAddressType::class);
                 Route::delete('/address-types/{id}', DeleteAddressType::class);

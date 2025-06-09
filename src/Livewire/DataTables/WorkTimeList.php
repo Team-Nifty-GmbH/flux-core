@@ -150,6 +150,12 @@ class WorkTimeList extends BaseDataTable
         $this->workTime->fill($workTime);
 
         $this->js(<<<'JS'
+            $wire.workTime.started_at = $wire.workTime.started_at ?
+                dayjs($wire.workTime.started_at).utc(true).local().format('YYYY-MM-DDTHH:mm')
+                : null;
+            $wire.workTime.ended_at = $wire.workTime.ended_at
+                ? dayjs($wire.workTime.ended_at).utc(true).local().format('YYYY-MM-DDTHH:mm')
+                : null;
             $modalOpen('edit-work-time-modal');
         JS);
     }

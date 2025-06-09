@@ -4,6 +4,7 @@ namespace FluxErp\Widgets;
 
 use Exception;
 use FluxErp\Traits\Widgetable;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Traits\Macroable;
 use Livewire\Component;
@@ -94,9 +95,14 @@ class WidgetManager
         }
     }
 
-    public function get(string $name): ?string
+    public function get(string $name): ?array
     {
-        return $this->widgets[$name] ?? null;
+        return collect($this->widgets)
+            ->when(
+                class_exists($name),
+                fn (Collection $widgets) => $widgets->keyBy('class')
+            )
+            ->get($name);
     }
 
     /**
@@ -134,14 +140,21 @@ class WidgetManager
 
         $this->widgets[$name] = [
             'component_name' => $widget,
+            'dashboard_component' => $componentClass::dashboardComponent(),
             'label' => $componentClass::getLabel(),
-            'class' => $componentClass,
+            'class' => ltrim($componentClass, '\\'),
             'defaultWidth' => method_exists($componentClass, 'getDefaultWidth')
                 ? $componentClass::getDefaultWidth()
                 : 1,
             'defaultHeight' => method_exists($componentClass, 'getDefaultHeight')
                 ? $componentClass::getDefaultHeight()
                 : 1,
+            'defaultOrderRow' => method_exists($componentClass, 'getDefaultOrderRow')
+                ? $componentClass::getDefaultOrderRow()
+                : 0,
+            'defaultOrderColumn' => method_exists($componentClass, 'getDefaultOrderColumn')
+                ? $componentClass::getDefaultOrderColumn()
+                : 0,
         ];
     }
 

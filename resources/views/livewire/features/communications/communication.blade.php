@@ -120,6 +120,7 @@
                     x-on:select="modelId = $event.detail?.select.value;"
                     x-model="modelId"
                     select="label:label|value:id"
+                    unfiltered
                     :request="[
                         'url' => route('search', ''),
                         'method' => 'POST',
@@ -137,6 +138,7 @@
                     :label="__('Address')"
                     x-on:select="$wire.setTo($event.detail.select)"
                     select="label:label|value:id"
+                    unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\Address::class),
                         'method' => 'POST',
@@ -282,11 +284,11 @@
                 :label="__('Content')"
             />
             <x-select.styled
-                :label="__('Tags')"
                 multiple
                 wire:model.number="communication.tags"
                 x-bind:disabled="$wire.communication.id && $wire.communication.communication_type_enum === 'mail'"
-                select="label:name|value:id"
+                select="label:label|value:id"
+                unfiltered
                 :request="[
                     'url' => route('search', \FluxErp\Models\Tag::class),
                     'method' => 'POST',
@@ -302,18 +304,19 @@
                     ],
                 ]"
             >
-                <x-slot:after>
-                    @canAction(\FluxErp\Actions\Tag\CreateTag::class)
-                        <div class="px-1">
-                            <x-button
+                <x-slot:label>
+                    <div class="flex items-center gap-2">
+                        <x-label :label="__('Tags')" />
+                        @canAction(\FluxErp\Actions\Tag\CreateTag::class)
+                            <x-button.circle
+                                sm
+                                icon="plus"
                                 color="emerald"
-                                full
-                                :text="__('Add')"
                                 wire:click="addTag($promptValue())"
                                 wire:flux-confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}"
                             />
-                        </div>
-                    @endcanAction
+                        @endcanAction
+                    </div>
                 </x-slot>
             </x-select.styled>
             <x-flux::features.media.upload-form-object

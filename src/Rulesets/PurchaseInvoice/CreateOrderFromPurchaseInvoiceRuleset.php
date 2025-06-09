@@ -77,7 +77,7 @@ class CreateOrderFromPurchaseInvoiceRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => PaymentType::class]),
             ],
-            'invoice_number' => 'required|string',
+            'invoice_number' => 'required|string|max:255',
             'invoice_date' => 'required|date',
             'is_net' => 'boolean',
         ];

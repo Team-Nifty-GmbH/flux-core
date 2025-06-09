@@ -70,7 +70,7 @@ abstract class FluxAction
 
     public static function canPerformAction(bool $throwException = true): bool
     {
-        if (! static::hasPermission()) {
+        if (! static::hasPermission() || (app()->runningInConsole() && ! app()->runningUnitTests())) {
             return true;
         }
 
@@ -86,7 +86,7 @@ abstract class FluxAction
             return true;
         }
 
-        if (! auth()->user()->can('action.' . static::name())) {
+        if (! auth()->user()?->can('action.' . static::name())) {
             if ($throwException) {
                 throw UnauthorizedException::forPermissions(['action.' . static::name()]);
             } else {
@@ -196,9 +196,7 @@ abstract class FluxAction
             }
         }
 
-        DB::transaction(function (): void {
-            $this->result = $this->performAction();
-        });
+        DB::transaction(fn () => $this->result = $this->performAction(), 5);
 
         if ($current) {
             if (method_exists(auth(), 'login')) {

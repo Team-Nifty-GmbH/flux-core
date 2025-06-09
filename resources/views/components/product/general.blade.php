@@ -173,13 +173,14 @@
         </div>
         @show
     </x-card>
-    <x-card class="flex flex-col gap-1.5" :header="__('Assignment')">
+    <x-card class="flex flex-col gap-4" :header="__('Assignment')">
         <x-select.styled
             multiple
             x-bind:disabled="!edit"
             wire:model.number="product.categories"
             :label="__('Categories')"
             select="label:label|value:id"
+            unfiltered
             :request="[
                 'url' => route('search', \FluxErp\Models\Category::class),
                 'method' => 'POST',
@@ -201,6 +202,7 @@
             :label="__('Clients')"
             select="label:name|value:id"
             :src="'logo_small_url'"
+            unfiltered
             :request="[
                 'url' => route('search', \FluxErp\Models\Client::class),
                 'method' => 'POST',
@@ -210,8 +212,8 @@
             multiple
             x-bind:disabled="!edit"
             wire:model.number="product.tags"
-            :label="__('Tags')"
-            select="label:name|value:id"
+            select="label:label|value:id"
+            unfiltered
             :request="[
                 'url' => route('search', \FluxErp\Models\Tag::class),
                 'method' => 'POST',
@@ -226,31 +228,36 @@
                 ],
             ]"
         >
-            <x-slot:after>
-                @canAction(\FluxErp\Actions\Tag\CreateTag::class)
-                    <div class="px-1">
-                        <x-button
+            <x-slot:label>
+                <div class="flex items-center gap-2">
+                    <x-label :label="__('Tags')" />
+                    @canAction(\FluxErp\Actions\Tag\CreateTag::class)
+                        <x-button.circle
+                            sm
+                            icon="plus"
                             color="emerald"
-                            full
-                            :text="__('Add')"
                             wire:click="addTag($promptValue())"
                             wire:flux-confirm.prompt="{{ __('New Tag') }}||{{ __('Cancel') }}|{{ __('Save') }}"
                         />
-                    </div>
-                @endcanAction
+                    @endcanAction
+                </div>
             </x-slot>
         </x-select.styled>
+        <x-tag
+            :label="__('Search Aliases')"
+            wire:model="product.search_aliases"
+        />
     </x-card>
     <x-card
         class="dark:bg-secondary-700 space-y-2.5 bg-gray-50"
         :header="__('Product Properties')"
+        x-data="{productPropertyGroup: null}"
     >
         @section('product-properties')
         <x-modal
             id="edit-product-properties-modal"
             size="6xl"
             :title="__('Edit Product Properties')"
-            x-data="{productPropertyGroup: null}"
         >
             <div
                 class="flex gap-4"
@@ -269,7 +276,7 @@
                     class="w-1/2"
                 >
                     <x-card>
-                        <x-slot:title>
+                        <x-slot:header>
                             <span x-text="productPropertyGroup?.name"></span>
                         </x-slot>
                         <template
@@ -303,7 +310,7 @@
                 <x-button
                     color="indigo"
                     :text="__('Save')"
-                    wire:click="addProductProperties().then(() => { close(); })"
+                    wire:click="addProductProperties().then(() => { $modalClose('edit-product-properties-modal'); })"
                 />
             </x-slot>
         </x-modal>
@@ -428,6 +435,7 @@
                 :label="__('Contact')"
                 select="label:label|value:contact_id"
                 x-on:select="$wire.addSupplier($event.detail.select.value); clear();"
+                unfiltered
                 :request="[
                     'url' => route('search', \FluxErp\Models\Address::class),
                     'method' => 'POST',

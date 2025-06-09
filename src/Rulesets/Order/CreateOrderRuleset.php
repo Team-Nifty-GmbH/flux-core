@@ -6,6 +6,7 @@ use FluxErp\Models\Address;
 use FluxErp\Models\Client;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Language;
+use FluxErp\Models\Lead;
 use FluxErp\Models\Order;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\User;
@@ -137,6 +138,11 @@ class CreateOrderRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => VatRate::class])
                     ->where('is_tax_exemption', true),
             ],
+            'lead_id' => [
+                'integer',
+                'nullable',
+                app(ModelExists::class, ['model' => Lead::class]),
+            ],
 
             'address_delivery' => [
                 'array',
@@ -182,17 +188,17 @@ class CreateOrderRuleset extends FluxRuleset
             'payment_reminder_current_level' => 'integer|nullable|min:0',
             'payment_reminder_next_date' => 'date|nullable',
 
-            'order_number' => 'sometimes|required|string|unique:orders',
-            'commission' => 'string|nullable',
+            'order_number' => 'sometimes|required|string|max:255|unique:orders',
+            'commission' => 'string|max:255|nullable',
             'header' => 'string|nullable',
             'footer' => 'string|nullable',
             'logistic_note' => 'string|nullable',
-            'tracking_email' => 'email|nullable',
+            'tracking_email' => 'email|max:255|nullable',
             'payment_texts' => 'array|nullable',
 
             'order_date' => 'date',
             'invoice_date' => 'date|nullable',
-            'invoice_number' => 'string',
+            'invoice_number' => 'string|max:255',
             'system_delivery_date' => 'date|nullable|required_with:system_delivery_date_end',
             'system_delivery_date_end' => 'date|nullable|after_or_equal:system_delivery_date',
             'customer_delivery_date' => 'date|nullable',

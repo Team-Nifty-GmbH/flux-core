@@ -10,7 +10,7 @@
                         >
                             <div>{{ __('Addresses') }}</div>
                             <x-button
-                                wire:click="new()"
+                                wire:click="new().then(() => $focusOn('address-company'))"
                                 color="indigo"
                                 :text="__('New')"
                             />
@@ -91,6 +91,7 @@
                     wire:model.number="contact.categories"
                     :label="__('Categories')"
                     select="label:label|value:id"
+                    unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\Category::class),
                         'method' => 'POST',
@@ -111,6 +112,7 @@
                     wire:model.number="contact.industries"
                     :label="__('Industries')"
                     select="label:name|value:id"
+                    unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\Industry::class),
                         'method' => 'POST',
@@ -173,7 +175,7 @@
                                 <x-button
                                     color="secondary"
                                     light
-                                    wire:click="replicate()"
+                                    wire:click="replicate().then(() => $focusOn('address-company'))"
                                     :text="__('Duplicate')"
                                 />
                             </div>

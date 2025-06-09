@@ -38,11 +38,16 @@
 >
     <div class="w-full overflow-hidden overflow-x-auto">
         <div class="grid w-full grid-cols-4 gap-4 text-left text-sm">
-            <div
-                class="overflow-hidden text-ellipsis whitespace-nowrap font-bold"
-            >
-                {{ __('Print') }}
-            </div>
+            @canAction(\FluxErp\Actions\PrintJob\CreatePrintJob::class)
+                @if (auth()->user()?->printers()->exists())
+                    <div
+                        class="overflow-hidden text-ellipsis whitespace-nowrap font-bold"
+                    >
+                        {{ __('Print') }}
+                    </div>
+                @endif
+            @endcanAction
+
             <div
                 class="overflow-hidden text-ellipsis whitespace-nowrap font-bold"
             >
@@ -62,21 +67,28 @@
         <div class="w-full divide-y divide-slate-300 dark:divide-slate-700">
             <template x-for="printLayout in $wire.printLayouts">
                 <div class="grid w-full grid-cols-4 gap-4 py-2">
-                    <div
-                        class="overflow-hidden text-ellipsis whitespace-nowrap"
-                    >
-                        <x-checkbox
-                            class="truncate"
-                            wire:model="selectedPrintLayouts.print"
-                            x-bind:value="printLayout.layout"
-                            x-bind:checked="$wire.forcedPrintLayouts.print.includes(printLayout.layout)"
-                            x-bind:disabled="$wire.forcedPrintLayouts.print.includes(printLayout.layout)"
-                        >
-                            <x-slot:label>
-                                <div x-text="printLayout.label"></div>
-                            </x-slot>
-                        </x-checkbox>
-                    </div>
+                    @canAction(\FluxErp\Actions\PrintJob\CreatePrintJob::class)
+                        @if ($printers ?? false)
+                            <div
+                                class="overflow-hidden text-ellipsis whitespace-nowrap"
+                            >
+                                <x-checkbox
+                                    class="truncate"
+                                    wire:model="selectedPrintLayouts.print"
+                                    x-bind:value="printLayout.layout"
+                                    x-bind:checked="$wire.forcedPrintLayouts.print.includes(printLayout.layout)"
+                                    x-bind:disabled="$wire.forcedPrintLayouts.print.includes(printLayout.layout)"
+                                >
+                                    <x-slot:label>
+                                        <div
+                                            x-text="printLayout.label"
+                                        ></div>
+                                    </x-slot>
+                                </x-checkbox>
+                            </div>
+                        @endif
+                    @endcanAction
+
                     <div
                         class="overflow-hidden text-ellipsis whitespace-nowrap"
                     >
@@ -124,6 +136,47 @@
                     </div>
                 </div>
             </template>
+            @if ($printers ?? false)
+                <div
+                    class="flex flex-col gap-2 p-4"
+                    x-collapse
+                    x-cloak
+                    x-show="$wire.selectedPrintLayouts.print.length > 0"
+                >
+                    <x-select.styled
+                        :label="__('Printer')"
+                        wire:model="printJobForm.printer_id"
+                        x-on:select="$tallstackuiSelect('print-job-size').setOptions($event.detail.select.media_sizes)"
+                        select="label:name|value:id|description:location"
+                        :options="$printers"
+                    />
+                    <div
+                        x-cloak
+                        x-show="$wire.printJobForm.printer_id"
+                        x-collapse
+                    >
+                        <x-number
+                            min="1"
+                            step="1"
+                            wire:model="printJobForm.quantity"
+                            :label="__('Copies')"
+                            class="w-full"
+                        />
+                    </div>
+                    <div
+                        id="print-job-size"
+                        x-cloak
+                        x-show="$wire.printJobForm.printer_id"
+                        x-collapse
+                    >
+                        <x-select.styled
+                            :label="__('Size')"
+                            wire:model="printJobForm.size"
+                            :options="$mediaSizes"
+                        />
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
     <x-slot:footer>

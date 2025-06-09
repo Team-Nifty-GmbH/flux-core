@@ -9,6 +9,7 @@
             label="{{ __('Project Number') }}"
         />
         <x-input
+            id="project-name"
             x-bind:readonly="!edit"
             wire:model="project.name"
             label="{{ __('Name') }}"
@@ -16,7 +17,7 @@
         @show
         <div
             @if($collapsed) x-collapse x-show="expanded" x-cloak @endif
-            class="space-y-2.5"
+            class="space-y-2.5 p-0.5"
         >
             <div
                 x-bind:class="! edit && 'pointer-events-none'"
@@ -28,6 +29,7 @@
                     :label="__('Client')"
                     wire:model="project.client_id"
                     select="label:name|value:id"
+                    unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\Client::class),
                         'method' => 'POST',
@@ -56,7 +58,7 @@
                 <x-flux::state
                     x-bind:readonly="!edit"
                     class="w-full"
-                    align="left"
+                    align="bottom"
                     :label="__('Project state')"
                     wire:model="project.state"
                     formatters="formatter.state"
@@ -75,7 +77,8 @@
                     :label="__('Responsible User')"
                     autocomplete="off"
                     wire:model="project.responsible_user_id"
-                    select="label:name|value:id"
+                    select="label:label|value:id|description:description"
+                    unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\User::class),
                         'method' => 'POST',
@@ -91,6 +94,7 @@
                     x-bind:readonly="!edit"
                     wire:model="project.contact_id"
                     select="label:label|value:contact_id"
+                    unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\Address::class),
                         'method' => 'POST',
@@ -118,6 +122,7 @@
                     :label="__('Order')"
                     wire:model="project.order_id"
                     select="label:label|value:id"
+                    unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\Order::class),
                         'method' => 'POST',

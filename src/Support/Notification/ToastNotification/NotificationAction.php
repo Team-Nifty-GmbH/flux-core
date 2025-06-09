@@ -7,6 +7,8 @@ use Illuminate\Support\Arr;
 
 class NotificationAction implements Arrayable
 {
+    protected bool $download = false;
+
     protected ?string $execute = null;
 
     protected string $label;
@@ -46,6 +48,13 @@ class NotificationAction implements Arrayable
         }
 
         return $instance;
+    }
+
+    public function download(bool $download = true): static
+    {
+        $this->download = $download;
+
+        return $this;
     }
 
     public function execute(string $execute): static
@@ -102,6 +111,7 @@ class NotificationAction implements Arrayable
             'style' => $this->style,
             'solid' => $this->solid,
             'url' => $this->url,
+            'download' => $this->download,
             'execute' => $this->execute,
             'method' => $this->method,
             'params' => $this->params,

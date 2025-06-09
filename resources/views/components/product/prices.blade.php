@@ -37,7 +37,7 @@
     <x-card :header="__('Calculation')">
         <x-select.styled
             x-on:select="$wire.product.vat_rate = $event.detail.select"
-            label="{{ __('VAT rate') }}"
+            :label="__('VAT rate')"
             wire:model="product.vat_rate_id"
             :options="$this->vatRates"
             select="label:name|value:id"
@@ -45,18 +45,18 @@
     </x-card>
     <template x-for="priceList in $wire.priceLists">
         <x-card class="space-y-2.5">
-            <x-slot:title>
+            <x-slot:header>
                 <div class="flex gap-1.5">
                     <span x-text="priceList.name"></span>
                     <x-badge
                         x-show="priceList.is_default"
                         color="indigo"
-                        label="{{ __('Default') }}"
+                        :text="__('Default')"
                     />
                     <x-badge
                         x-show="priceList.is_purchase"
                         color="red"
-                        label="{{ __('Purchase Price') }}"
+                        :text="__('Purchase Price')"
                     />
                     <x-badge
                         x-show="priceList.parent && ! priceList.price_id"
@@ -73,7 +73,7 @@
                 </div>
             </x-slot>
             <x-input
-                :prefix="$defaultCurrency->symbol"
+                :prefix="resolve_static(\FluxErp\Models\Currency::class, 'default')?->symbol"
                 class="net-price"
                 type="number"
                 x-on:input="recalculate(priceList, true);"
@@ -82,7 +82,7 @@
                 x-model="priceList.price_net"
             />
             <x-input
-                :prefix="$defaultCurrency->symbol"
+                :prefix="resolve_static(\FluxErp\Models\Currency::class, 'default')?->symbol"
                 class="gross-price"
                 type="number"
                 x-on:input="recalculate(priceList, false);"

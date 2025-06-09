@@ -5,6 +5,7 @@ namespace FluxErp\Models;
 use FluxErp\Enums\ToastType;
 use FluxErp\Support\TallstackUI\Interactions\Toast;
 use FluxErp\Traits\ResolvesRelationsThroughContainer;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Notifications\DatabaseNotification;
 use Livewire\Component;
@@ -13,16 +14,24 @@ class Notification extends DatabaseNotification
 {
     use MassPrunable, ResolvesRelationsThroughContainer;
 
-    public function prunable(): mixed
+    public function prunable(): Builder
     {
-        return static::where('created_at', '<', now()->subDays(30))->whereNotNull('read_at');
+        return static::query()
+            ->where(
+                static::getCreatedAtColumn(),
+                '<',
+                now()->subDays(30)
+            )
+            ->whereNotNull('read_at');
     }
 
     public function toast(?Component $component = null): Toast
     {
         $title = data_get($this->data, 'title', '');
         if ($this->created_at->isToday()) {
-            $time = $this->created_at->format('h:i A');
+            $time = $this->created_at
+                ->timezone(auth()->user()?->timezone ?? config('app.timezone'))
+                ->toTimeString('minute');
         } else {
             $time = $this->created_at->diffForHumans();
         }

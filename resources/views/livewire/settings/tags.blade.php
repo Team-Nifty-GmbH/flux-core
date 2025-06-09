@@ -8,7 +8,6 @@
                     x-bind:disabled="$wire.tagForm.id"
                     wire:model="tagForm.type"
                     :label="__('Type')"
-                    select="label:value|value:label"
                     :options="$taggables"
                 />
             </div>

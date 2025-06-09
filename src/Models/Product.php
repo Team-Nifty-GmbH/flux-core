@@ -3,6 +3,8 @@
 namespace FluxErp\Models;
 
 use Exception;
+use FluxErp\Contracts\HasMediaForeignKey;
+use FluxErp\Enums\BundleTypeEnum;
 use FluxErp\Enums\TimeUnitEnum;
 use FluxErp\Helpers\PriceHelper;
 use FluxErp\Models\Pivots\ClientProduct;
@@ -36,11 +38,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\MediaLibrary\HasMedia;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
-class Product extends FluxModel implements HasMedia, InteractsWithDataTables
+class Product extends FluxModel implements HasMedia, HasMediaForeignKey, InteractsWithDataTables
 {
     use Categorizable, Commentable, Filterable, HasAdditionalColumns, HasAttributeTranslations, HasClientAssignment,
         HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasSerialNumberRange, HasTags,
-        HasUserModification, HasUuid, InteractsWithMedia, Lockable, LogsActivity, Searchable, SoftDeletes;
+        HasUserModification, HasUuid, InteractsWithMedia, Lockable, LogsActivity, SoftDeletes;
+    use Searchable {
+        Searchable::scoutIndexSettings as baseScoutIndexSettings;
+    }
 
     public static string $iconName = 'square-3-stack-3d';
 
@@ -62,6 +67,24 @@ class Product extends FluxModel implements HasMedia, InteractsWithDataTables
             );
     }
 
+    public static function mediaReplaced(int|string|null $oldMediaId, int|string|null $newMediaId): void
+    {
+        static::query()
+            ->where('cover_media_id', $oldMediaId)
+            ->update(['cover_media_id' => $newMediaId]);
+    }
+
+    public static function scoutIndexSettings(): ?array
+    {
+        return static::baseScoutIndexSettings() ?? [
+            'filterableAttributes' => [
+                'is_active',
+                'parent_id',
+            ],
+            'sortableAttributes' => ['*'],
+        ];
+    }
+
     protected static function booted(): void
     {
         static::creating(function (Product $product): void {
@@ -74,7 +97,9 @@ class Product extends FluxModel implements HasMedia, InteractsWithDataTables
     protected function casts(): array
     {
         return [
+            'bundle_type_enum' => BundleTypeEnum::class,
             'time_unit_enum' => TimeUnitEnum::class,
+            'search_aliases' => 'array',
             'is_active' => 'boolean',
             'is_highlight' => 'boolean',
             'is_bundle' => 'boolean',
@@ -201,13 +226,16 @@ class Product extends FluxModel implements HasMedia, InteractsWithDataTables
         );
     }
 
-    public function purchasePrice(float|int $amount = 1): ?Price
+    public function purchasePrice(float|int|null $amount = 1): ?Price
     {
-        return PriceHelper::make($this)
-            ->setPriceList(resolve_static(PriceList::class, 'query')
-                ->where('is_purchase', true)
-                ->first()
-            )->price();
+        return $amount
+            ? PriceHelper::make($this)
+                ->setPriceList(resolve_static(PriceList::class, 'query')
+                    ->where('is_purchase', true)
+                    ->first()
+                )
+                ->price()
+            : null;
     }
 
     public function registerMediaCollections(): void
