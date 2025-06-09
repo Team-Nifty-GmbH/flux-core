@@ -1,5 +1,5 @@
 <div>
-    <div class="pl-8 pr-6 pt-5">
+    <div class="pt-5 pr-6 pl-8">
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-4">
                 <h1 class="pt-5 text-3xl font-bold dark:text-gray-50">
@@ -33,7 +33,7 @@
                 <x-badge :text="data_get($user, 'name')" />
             @endforeach
         </div>
-        <h2 class="pb-8 pt-10 text-base font-bold uppercase dark:text-gray-50">
+        <h2 class="pt-10 pb-8 text-base font-bold uppercase dark:text-gray-50">
             {{ __('Information') }}
         </h2>
         <div
@@ -80,7 +80,7 @@
                     </template>
                     @show
                     <h2
-                        class="pb-8 pt-10 text-base font-bold uppercase dark:text-gray-50"
+                        class="pt-10 pb-8 text-base font-bold uppercase dark:text-gray-50"
                     >
                         {{ __('Attachments') }}
                     </h2>

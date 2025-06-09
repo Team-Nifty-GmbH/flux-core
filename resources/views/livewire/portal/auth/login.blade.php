@@ -31,7 +31,7 @@
     <style>
         {{ $client?->settings()->first()['settings']['custom_css'] ?? '' }}
     </style>
-    <div class="md:text-portal-font-color absolute right-4 top-6 text-white">
+    <div class="md:text-portal-font-color absolute top-6 right-4 text-white">
         <a
             href="{{ $client?->website }}"
             target="_blank"
@@ -44,7 +44,7 @@
         </a>
     </div>
     <div
-        class="md:text-portal-font-color absolute left-4 top-6 max-h-80 max-w-80 text-white"
+        class="md:text-portal-font-color absolute top-6 left-4 max-h-80 max-w-80 text-white"
     >
         {{ $client?->getFirstMedia('logo') }}
     </div>

@@ -1,0 +1,7 @@
+@import '../../vendor/tallstackui/tallstackui/css/v4.css';
+@import '../../vendor/team-nifty-gmbh/flux-erp/resources/css/app.css';
+@plugin '@tailwindcss/forms';
+
+@source '../../vendor/tallstackui/tallstackui/**/*.php';
+@source '../../vendor/team-nifty-gmbh/tall-datatables/**/*.php';
+@source '../../vendor/team-nifty-gmbh/tall-datatables/**/*.js';

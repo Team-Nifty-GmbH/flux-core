@@ -6,15 +6,15 @@
         persistent
         x-on:close="$wire.clear()"
     >
-        <div class="pl-4 pr-4">
+        <div class="pr-4 pl-4">
             <x-flux::table>
                 <x-slot:header>
                     <x-flux::table.row>
-                        <th class="border border-l-0 border-t-0 text-center">
+                        <th class="border border-t-0 border-l-0 text-center">
                             <span>{{ __('Column') }}</span>
                         </th>
                         <th
-                            class="border border-r-0 border-t-0 text-center"
+                            class="border border-t-0 border-r-0 text-center"
                             x-show="$wire.mergeRecords.main_record.id"
                             x-cloak
                         >
@@ -28,7 +28,7 @@
                         </th>
                         <template x-for="record in $wire.records">
                             <th
-                                class="border border-r-0 border-t-0 text-center"
+                                class="border border-t-0 border-r-0 text-center"
                                 x-show="record.id !== $wire.mergeRecords.main_record.id"
                                 x-cloak
                             >
@@ -55,7 +55,7 @@
                             <span x-text="column.label"></span>
                         </td>
                         <td
-                            class="border border-b-0 border-r-0 text-center"
+                            class="border border-r-0 border-b-0 text-center"
                             x-show="$wire.mergeRecords.main_record.id"
                             x-cloak
                         >
@@ -114,7 +114,7 @@
                         </td>
                         <template x-for="record in $wire.records">
                             <td
-                                class="border border-b-0 border-r-0"
+                                class="border border-r-0 border-b-0"
                                 x-show="record.id !== $wire.mergeRecords.main_record.id"
                                 x-cloak
                             >
