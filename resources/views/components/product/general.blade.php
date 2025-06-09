@@ -266,7 +266,7 @@
                     productPropertyGroup = $event.detail.record ?? $event.detail
                 "
             >
-                <div class="flex-grow">
+                <div class="grow">
                     <livewire:product.product-property-group-list />
                 </div>
                 <div

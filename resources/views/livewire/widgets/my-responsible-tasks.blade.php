@@ -1,4 +1,4 @@
-<div class="flex max-h-full flex-col !px-0 !py-0">
+<div class="flex max-h-full flex-col px-0! py-0!">
     <div class="border-b border-gray-200 pb-2 pl-2 pt-2">
         <h2
             class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400"

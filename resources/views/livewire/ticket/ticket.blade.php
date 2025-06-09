@@ -120,7 +120,7 @@
                                                 x-cloak
                                                 x-show="additionalColumn.field_type !== 'checkbox' && additionalColumn.field_type !== 'select'"
                                                 x-model="$wire.ticket.additional_columns[name].value"
-                                                x-bind:class="(additionalColumn.field_type === 'color') && '!w-auto'"
+                                                x-bind:class="(additionalColumn.field_type === 'color') && 'w-auto!'"
                                                 x-bind:type="additionalColumn.field_type"
                                             ></x-input>
                                             <div

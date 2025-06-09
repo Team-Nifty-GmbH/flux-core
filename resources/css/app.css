@@ -1,31 +1,72 @@
-@import '/node_modules/@fontsource/inter/latin-300.css';
-@import '/node_modules/@fontsource/inter/latin-400.css';
-@import '/node_modules/@fontsource/inter/latin-600.css';
-@import '/node_modules/@fontsource/inter/latin-900.css';
-@import '/node_modules/leaflet/dist/leaflet.css';
-@import '/node_modules/leaflet.markercluster/dist/MarkerCluster.css';
-@import '/node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css';
+@import "tailwindcss";
 
-@import '/node_modules/gridstack/dist/gridstack.min.css';
-@import '/node_modules/gridstack/dist/gridstack-extra.min.css';
+@import '@fontsource/inter/latin-300.css';
+@import '@fontsource/inter/latin-400.css';
+@import '@fontsource/inter/latin-600.css';
+@import '@fontsource/inter/latin-900.css';
+@import 'leaflet/dist/leaflet.css';
+@import 'leaflet.markercluster/dist/MarkerCluster.css';
+@import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
+
+@import 'gridstack/dist/gridstack.min.css';
+@import 'gridstack/dist/gridstack-extra.min.css';
 @import './components/grid-stack.css';
 @import './components/apex-charts.css';
 @import './components/full-calendar.css';
 
-@import '/node_modules/@phosphor-icons/web/src/regular/style.css';
+@import 'filepond/dist/filepond.css';
+@import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css';
 
-@import '/node_modules/filepond/dist/filepond.css';
-@import '/node_modules/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css';
+@theme {
+  --color-flux-primary-50: #D7E3EC;
+  --color-flux-primary-100: #CCDEEB;
+  --color-flux-primary-200: #B6D6ED;
+  --color-flux-primary-300: #9ECDF0;
+  --color-flux-primary-400: #8AC4F1;
+  --color-flux-primary-500: #74BBF3;
+  --color-flux-primary-600: #5EB3F4;
+  --color-flux-primary-700: #2FA1F7;
+  --color-flux-primary-800: #0690FA;
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+  --color-flux-secondary-50: #D7DBE2;
+  --color-flux-secondary-100: #B5B9C5;
+  --color-flux-secondary-200: #9EA2B4;
+  --color-flux-secondary-300: #5B5D7A;
+  --color-flux-secondary-400: #444667;
+  --color-flux-secondary-500: #2D2F55;
+  --color-flux-secondary-600: #171842;
+  --color-flux-secondary-700: #00012F;
+  --color-flux-secondary-800: #00011B;
 
-[x-cloak] {
-    display: none !important;
+  --font-size-3xs: 0.5rem;
+  --font-size-2xs: 0.65rem;
+
+  --font-family-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+  --transition-property-width: width;
 }
 
+@source inline("mention");
+@source inline("tippy-box");
+@source inline("ring-offset-2");
+@source inline("indent-icon");
+@source inline("md:col-span-{1..12}");
+@source inline("row-span-{1..20}");
+@source inline("grid-cols-{1..12}");
+
+@source './resources/**/*.blade.php';
+@source './resources/**/*.js';
+@source './resources/**/*.vue';
+@source './src/Htmlables/**/*.php';
+@source './src/Providers/*.php';
+@source './src/View/Components/**/*.php';
+@source './src/Livewire/**/*.php';
+
 @layer components {
+    hr {
+        @apply dark:border-secondary-700 border-gray-200;
+    }
+
     .indent-icon {
         @apply after:content-['↳'];
     }

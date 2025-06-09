@@ -1,4 +1,4 @@
-<x-card class="!px-0 !py-0">
+<x-card class="px-0! py-0!">
     <x-slot:header>
         <div class="flex justify-between">
             <div

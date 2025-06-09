@@ -74,9 +74,9 @@
                             <a
                                 @if ((! data_get($navigation, "is_virtual_uri") && data_get($navigation, "children")) || data_get($navigation, "route_name") === "dashboard")
                                     )
-                                    wire:current.exact="bg-indigo-500 dark:bg-indigo-700 !text-white hover:bg-indigo-600 nav-item-active"
+                                    wire:current.exact="bg-indigo-500 dark:bg-indigo-700 text-white! hover:bg-indigo-600 nav-item-active"
                                 @else
-                                    wire:current="bg-indigo-500 dark:bg-indigo-700 !text-white hover:bg-indigo-600 nav-item-active"
+                                    wire:current="bg-indigo-500 dark:bg-indigo-700 text-white! hover:bg-indigo-600 nav-item-active"
                                 @endif
                                 href="{{ data_get($navigation, "uri", "#") }}"
                                 @if ($navigation["children"] ?? false)

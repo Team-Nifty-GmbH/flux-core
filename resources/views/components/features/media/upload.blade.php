@@ -115,7 +115,7 @@
                             x-text="file.name"
                         ></span>
                     </div>
-                    <div class="flex flex-shrink-0 space-x-4">
+                    <div class="flex shrink-0 space-x-4">
                         <x-button
                             color="red"
                             x-on:click="$wire.removeFileUpload('{{ $target }}', index)"

@@ -39,7 +39,7 @@
     </div>
     <hr class="mx-6" />
     <div
-        class="flex h-full flex-1 flex-grow flex-col justify-between gap-4 dark:text-gray-400"
+        class="flex h-full flex-1 grow flex-col justify-between gap-4 dark:text-gray-400"
     >
         @section('chart')
         <div class="chart h-full w-full"></div>

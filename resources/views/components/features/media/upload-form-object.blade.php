@@ -119,14 +119,14 @@
                 x-for="(file, index) in $wire.{{ $wireModel }}.stagedFiles"
             >
                 <x-card
-                    class="!px-0 !py-0"
+                    class="px-0! py-0!"
                     x-show="! file.shouldDelete"
                     x-cloak
                 >
                     <div class="flex items-center justify-between text-sm">
                         <div class="flex w-0 flex-1 items-center gap-1.5">
                             <div
-                                class="flex-shrink-0 rounded-md object-contain"
+                                class="shrink-0 rounded-md object-contain"
                             >
                                 <img
                                     x-bind:src="file.preview_url ? file.preview_url : '#'"
@@ -146,7 +146,7 @@
                                 wire:click="download(file.id)"
                             />
                         </div>
-                        <div class="flex flex-shrink-0 px-4">
+                        <div class="flex shrink-0 px-4">
                             <x-button
                                 color="red"
                                 x-on:click="file.shouldDelete = true"

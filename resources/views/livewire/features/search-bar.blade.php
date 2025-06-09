@@ -36,12 +36,12 @@
         placeholder="{{ __('Search everywhere...') }}"
     />
     <div
-        class="absolute z-[9] w-full pt-6"
+        class="absolute z-9 w-full pt-6"
         x-show="show"
         x-transition
         x-cloak
     >
-        <x-card class="relative !px-0 !py-0 pb-2">
+        <x-card class="relative px-0! py-0! pb-2">
             <div
                 x-show="$wire.search.length && ! Object.keys($wire.return).length"
                 x-cloak
