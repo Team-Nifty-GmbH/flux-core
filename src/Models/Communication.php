@@ -5,6 +5,7 @@ namespace FluxErp\Models;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\CommunicationTypeEnum;
 use FluxErp\Models\Pivots\Communicatable;
+use FluxErp\Support\Scout\ScoutCustomize;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasTags;
 use FluxErp\Traits\HasUserModification;
@@ -169,10 +170,9 @@ class Communication extends FluxModel implements HasMedia, OffersPrinting
 
     public function toSearchableArray(): array
     {
-        $array = $this->toArray();
-        unset($array['html_body']);
-
-        return $array;
+        return ScoutCustomize::make($this)
+            ->except('html_body')
+            ->toSearchableArray();
     }
 
     protected function bccMail(): Attribute

@@ -37,6 +37,10 @@
                         :label="__('Can Create Ticket')"
                     />
                     <x-toggle
+                        wire:model="mailFolder.can_create_lead"
+                        :label="__('Can Create Lead')"
+                    />
+                    <x-toggle
                         wire:model="mailFolder.is_active"
                         :label="__('Active')"
                     />

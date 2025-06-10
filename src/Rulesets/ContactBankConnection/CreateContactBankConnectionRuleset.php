@@ -29,7 +29,18 @@ class CreateContactBankConnectionRuleset extends FluxRuleset
                 'nullable',
                 app(ModelExists::class, ['model' => Contact::class]),
             ],
-            'iban' => ['required', 'string', app(Iban::class)],
+            'iban' => [
+                'required_if_declined:is_credit_account',
+                'exclude_if:is_credit_account,true',
+                'string',
+                app(Iban::class),
+            ],
+            'bank_name' => [
+                'required_if_accepted:is_credit_account',
+                'string',
+                'nullable',
+            ],
+            'is_credit_account' => 'boolean',
         ];
     }
 }

@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Models\Ticket;
 use FluxErp\States\Ticket\TicketState;
 use FluxErp\Traits\Widgetable;
@@ -10,6 +11,11 @@ use Illuminate\Database\Eloquent\Collection;
 class UnassignedTickets extends MyTickets
 {
     use Widgetable;
+
+    public static function dashboardComponent(): array|string
+    {
+        return Dashboard::class;
+    }
 
     protected function getListeners(): array
     {
@@ -26,6 +32,7 @@ class UnassignedTickets extends MyTickets
     protected function getTickets(): Collection
     {
         return $this->tickets ?? resolve_static(Ticket::class, 'query')
+            ->latest()
             ->whereDoesntHave('users')
             ->with('authenticatable:id,name')
             ->whereNotIn(

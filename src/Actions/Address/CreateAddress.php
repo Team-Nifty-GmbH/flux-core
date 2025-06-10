@@ -105,7 +105,7 @@ class CreateAddress extends FluxAction
 
     protected function prepareForValidation(): void
     {
-        $this->data['country_id'] ??= Country::default()?->getKey();
+        $this->data['country_id'] ??= resolve_static(Country::class, 'default')?->getKey();
         $this->data['email_primary'] = is_string($this->getData('email_primary'))
             ? Str::between($this->getData('email_primary'), '<', '>')
             : null;

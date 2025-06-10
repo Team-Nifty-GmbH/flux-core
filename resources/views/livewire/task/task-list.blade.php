@@ -139,7 +139,6 @@
                 x-on:click="$wire.save().then((task) => {
                     if (task) {
                         $modalClose('new-task-modal');
-                        window.location.href = baseRoute.replace(':id', $wire.task.id);
                     }
                 });"
             />

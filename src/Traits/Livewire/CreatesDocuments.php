@@ -308,8 +308,12 @@ trait CreatesDocuments
                     'html_body' => $this->getHtmlBody($item),
                     'blade_parameters_serialized' => is_string($bladeParameters),
                     'blade_parameters' => $bladeParameters,
-                    'communicatable_type' => $this->getCommunicatableType($item),
-                    'communicatable_id' => $this->getCommunicatableId($item),
+                    'communicatables' => [
+                        [
+                            'communicatable_type' => $this->getCommunicatableType($item),
+                            'communicatable_id' => $this->getCommunicatableId($item),
+                        ],
+                    ],
                 ];
             }
         }

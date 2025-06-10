@@ -30,6 +30,8 @@ class FluxSeeder extends Seeder
         $this->call(MailAccountUserTableSeeder::class);
         $this->call(MailFolderTableSeeder::class);
         $this->call(CommunicationTableSeeder::class);
+      
+        $this->call(LeadStateTableSeeder::class);
 
         $this->call(ClientTableSeeder::class);
         $this->call(ClientUserTableSeeder::class);
@@ -53,6 +55,9 @@ class FluxSeeder extends Seeder
 
         $this->call(ContactOptionTableSeeder::class);
         $this->call(CategoryTableSeeder::class);
+        $this->call(ProjectTableSeeder::class);
+        $this->call(TaskTableSeeder::class);
+        $this->call(LeadTableSeeder::class);
 
         $this->call(WorkTimeTypeTableSeeder::class);
         $this->call(WorkTimeTableSeeder::class);

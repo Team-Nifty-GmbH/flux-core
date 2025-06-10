@@ -20,6 +20,10 @@ class CreateContactBankConnection extends FluxAction
 
     public function performAction(): ContactBankConnection
     {
+        if ($this->getData('is_credit_account')) {
+            $this->data['balance'] = 0;
+        }
+
         $contactBankConnection = app(ContactBankConnection::class, ['attributes' => $this->data]);
         $contactBankConnection->save();
 

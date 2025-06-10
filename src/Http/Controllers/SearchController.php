@@ -40,7 +40,7 @@ class SearchController extends Controller
             is_array($selected)
                 ? $query->whereIn($optionValue, Arr::wrap($selected))
                 : $query->where($optionValue, $selected);
-        } elseif ($request->has('search') && $isSearchable) {
+        } elseif ($request->has('search') && $isSearchable && ! $request->get('searchFields')) {
             /** @var Builder $perPageSearch */
             $perPageSearch = count(Arr::except(
                 app($model)->getGlobalScopes(),
@@ -77,11 +77,7 @@ class SearchController extends Controller
         }
 
         if ($request->has('orderBy')) {
-            $query->orderBy($request->get('orderBy'));
-        }
-
-        if ($request->has('orderDirection')) {
-            $query->orderBy($request->get('orderDirection'));
+            $query->orderBy($request->get('orderBy'), $request->get('orderDirection', 'asc'));
         }
 
         if ($request->has('where')) {

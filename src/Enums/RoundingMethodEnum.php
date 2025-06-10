@@ -9,21 +9,6 @@ enum RoundingMethodEnum: string
 {
     use EnumTrait;
 
-    public static function valuesLocalized(): array
-    {
-        return array_combine(
-            self::values(),
-            [
-                __('Do not round'),
-                __('Round'),
-                __('Round up'),
-                __('Round down'),
-                __('Round to nearest multiple'),
-                __('Round to number'),
-            ]
-        );
-    }
-
     public function apply(
         string|float|int $value,
         ?int $precision = null,

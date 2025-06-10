@@ -287,7 +287,7 @@
                 multiple
                 wire:model.number="communication.tags"
                 x-bind:disabled="$wire.communication.id && $wire.communication.communication_type_enum === 'mail'"
-                select="label:name|value:id"
+                select="label:label|value:id"
                 unfiltered
                 :request="[
                     'url' => route('search', \FluxErp\Models\Tag::class),

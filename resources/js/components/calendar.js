@@ -139,20 +139,24 @@ const calendar = () => {
             });
         },
         setDateTime(type, event) {
-            const date =
+            let id = 'calendar-event-';
+            let date =
                 event.target.parentNode.parentNode.parentNode.parentNode.parentNode.querySelector(
-                    'input[type="date"]',
-                ).value;
-            let time =
-                event.target.parentNode.parentNode.parentNode.parentNode.parentNode.querySelector(
-                    'input[type="time"]',
+                    `#${id + type}-date`,
                 ).value;
 
-            if (this.$wire.event.allDay) {
-                time = '00:00:00';
+            let time = '00:00:00';
+            if (!this.$wire.event.is_all_day) {
+                time =
+                    event.target.parentNode.parentNode.parentNode.parentNode.parentNode.querySelector(
+                        `#${id + type}-time`,
+                    ).value;
             }
 
             let dateTime = dayjs(date + ' ' + time);
+            if (this.$wire.event.is_all_day) {
+                dateTime = dateTime.utc(true);
+            }
 
             if (type === 'start') {
                 this.$wire.event.start = dateTime.format(); // Use the default ISO 8601 format
@@ -161,8 +165,48 @@ const calendar = () => {
             }
         },
         mapDatesToUtc(event) {
-            event.start = dayjs(event.start).utc(true).format();
-            event.end = dayjs(event.end).utc(true).format();
+            if (event.allDay) {
+                let start = dayjs(event.start).utc(true).startOf('day');
+                let end = dayjs(event.end).utc(true).startOf('day');
+
+                event.start = start.format();
+                event.end = start.isSame(end, 'day')
+                    ? end.format()
+                    : end.add(1, 'day').format();
+            } else {
+                if (event.base_start) {
+                    event.start = dayjs(event.start).utc(true);
+
+                    let diff =
+                        dayjs(event.base_start).utc(true).local().utcOffset() -
+                        event.start.local().utcOffset();
+
+                    if (diff !== 0) {
+                        event.start = event.start.add(diff, 'minute');
+                    }
+
+                    event.start = event.start.format();
+                } else {
+                    event.start = dayjs(event.start).utc(true).format();
+                }
+
+                if (event.base_end) {
+                    event.end = dayjs(event.end).utc(true);
+
+                    let diff =
+                        dayjs(event.base_end).utc(true).local().utcOffset() -
+                        event.end.local().utcOffset();
+
+                    if (diff !== 0) {
+                        event.end = event.end.add(diff, 'minute');
+                    }
+
+                    event.end = event.end.format();
+                } else {
+                    event.end = dayjs(event.end).utc(true).format();
+                }
+            }
+
             event.repeat_end = event.repeat_end
                 ? dayjs(event.repeat_end).utc(true).format()
                 : null;
@@ -447,6 +491,11 @@ const calendar = () => {
                     // Title container with better overflow handling
                     let titleContainer = document.createElement('span');
                     titleContainer.className = 'truncate min-w-0 flex-1';
+
+                    if (info.event.extendedProps.is_cancelled) {
+                        titleContainer.classList.add('line-through');
+                    }
+
                     titleContainer.innerHTML = info.event.title;
                     leftContent.appendChild(titleContainer);
 
@@ -471,6 +520,11 @@ const calendar = () => {
                         let timeNode = document.createElement('div');
                         timeNode.className =
                             'flex-shrink-0 whitespace-nowrap text-xs';
+
+                        if (info.event.extendedProps.is_cancelled) {
+                            timeNode.classList.add('line-through');
+                        }
+
                         timeNode.innerHTML = info.timeText;
                         rightContent.appendChild(timeNode);
                     }

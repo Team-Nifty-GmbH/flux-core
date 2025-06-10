@@ -90,8 +90,8 @@ class PurchaseInvoiceForm extends FluxForm
     {
         parent::reset(...$properties);
 
-        $this->client_id = Client::default()?->getKey();
-        $this->currency_id = Currency::default()?->getKey();
+        $this->client_id = resolve_static(Client::class, 'default')?->getKey();
+        $this->currency_id = resolve_static(Currency::class, 'default')?->getKey();
     }
 
     protected function getActions(): array

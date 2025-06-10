@@ -2,10 +2,11 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use FluxErp\Livewire\Dashboard\Dashboard;
+use FluxErp\Livewire\Support\Widgets\Charts\LineChart;
 use FluxErp\Models\Order;
 use FluxErp\Support\Metrics\Charts\Line;
 use FluxErp\Support\Metrics\Results\Result;
-use FluxErp\Support\Widgets\Charts\LineChart;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use FluxErp\Traits\MoneyChartFormattingTrait;
 use Livewire\Attributes\Renderless;
@@ -13,6 +14,11 @@ use Livewire\Attributes\Renderless;
 class RevenuePurchasesProfitChart extends LineChart
 {
     use IsTimeFrameAwareWidget, MoneyChartFormattingTrait;
+
+    public static function dashboardComponent(): array|string
+    {
+        return Dashboard::class;
+    }
 
     #[Renderless]
     public function calculateByTimeFrame(): void
@@ -31,15 +37,15 @@ class RevenuePurchasesProfitChart extends LineChart
         $revenue = Line::make($baseQuery->clone()->revenue())
             ->setDateColumn('invoice_date')
             ->setRange($this->timeFrame)
-            ->setEndingDate($this->end?->endOfDay())
-            ->setStartingDate($this->start?->startOfDay())
+            ->setEndingDate($this->getEnd())
+            ->setStartingDate($this->getStart())
             ->sum('total_net_price');
 
         $purchases = Line::make($baseQuery->clone()->purchase())
             ->setDateColumn('invoice_date')
             ->setRange($this->timeFrame)
-            ->setEndingDate($this->end?->endOfDay())
-            ->setStartingDate($this->start?->startOfDay())
+            ->setEndingDate($this->getEnd())
+            ->setStartingDate($this->getStart())
             ->sum('total_net_price');
 
         $purchasesData = $purchases->getCombinedData();

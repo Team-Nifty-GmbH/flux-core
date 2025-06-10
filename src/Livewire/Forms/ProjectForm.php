@@ -46,7 +46,7 @@ class ProjectForm extends Form
     {
         parent::reset(...$properties);
 
-        $this->client_id = Client::default()?->getKey();
+        $this->client_id = resolve_static(Client::class, 'default')?->getKey();
     }
 
     public function save(): void

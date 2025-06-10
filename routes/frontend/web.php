@@ -10,6 +10,7 @@ use FluxErp\Http\Middleware\TrackVisits;
 use FluxErp\Livewire\Accounting\DirectDebit;
 use FluxErp\Livewire\Accounting\MoneyTransfer;
 use FluxErp\Livewire\Accounting\PaymentReminder;
+use FluxErp\Livewire\Accounting\TransactionAssignments;
 use FluxErp\Livewire\Accounting\TransactionList;
 use FluxErp\Livewire\Auth\Login;
 use FluxErp\Livewire\Auth\Logout;
@@ -20,6 +21,7 @@ use FluxErp\Livewire\Contact\Contact;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\DataTables\AddressList;
 use FluxErp\Livewire\DataTables\CommissionList;
+use FluxErp\Livewire\DataTables\ContactList;
 use FluxErp\Livewire\DataTables\OrderPositionList;
 use FluxErp\Livewire\DataTables\PaymentRunList;
 use FluxErp\Livewire\DataTables\PurchaseInvoiceList;
@@ -27,6 +29,8 @@ use FluxErp\Livewire\DataTables\TicketList;
 use FluxErp\Livewire\DataTables\WorkTimeList;
 use FluxErp\Livewire\Features\Calendar\Calendar;
 use FluxErp\Livewire\InstallWizard;
+use FluxErp\Livewire\Lead\Lead;
+use FluxErp\Livewire\Lead\LeadList;
 use FluxErp\Livewire\Mail\Mail;
 use FluxErp\Livewire\Media\Media as MediaGrid;
 use FluxErp\Livewire\Order\Order;
@@ -53,6 +57,7 @@ use FluxErp\Livewire\Settings\FailedJobs;
 use FluxErp\Livewire\Settings\Industries;
 use FluxErp\Livewire\Settings\LanguageLines;
 use FluxErp\Livewire\Settings\Languages;
+use FluxErp\Livewire\Settings\LeadStates;
 use FluxErp\Livewire\Settings\LedgerAccounts;
 use FluxErp\Livewire\Settings\Logs;
 use FluxErp\Livewire\Settings\MailAccounts;
@@ -72,6 +77,7 @@ use FluxErp\Livewire\Settings\QueueMonitor;
 use FluxErp\Livewire\Settings\Scheduling;
 use FluxErp\Livewire\Settings\SerialNumberRanges;
 use FluxErp\Livewire\Settings\Settings;
+use FluxErp\Livewire\Settings\System;
 use FluxErp\Livewire\Settings\Tags;
 use FluxErp\Livewire\Settings\TicketTypes;
 use FluxErp\Livewire\Settings\Tokens;
@@ -86,6 +92,7 @@ use FluxErp\Livewire\Task\TaskList;
 use FluxErp\Livewire\Ticket\Ticket;
 use FluxErp\Models\Address;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use TeamNiftyGmbH\DataTable\Controllers\IconController;
 
@@ -121,14 +128,21 @@ Route::middleware('web')
         Route::middleware(['auth:web', 'permission'])->group(function (): void {
             Route::get('/', Dashboard::class)->name('dashboard');
 
+            Route::get('/storage/{path}', function (string $path) {
+                return response()->file(Storage::path($path));
+            })
+                ->where('path', '.*')
+                ->name('storage');
+
             Route::middleware(TrackVisits::class)->group(function (): void {
                 Route::get('/mail', Mail::class)->name('mail');
                 Route::get('/calendars', Calendar::class)->name('calendars');
 
                 Route::name('contacts.')->prefix('contacts')
                     ->group(function (): void {
-                        Route::get('/', AddressList::class)->name('contacts');
-                        Route::get('/{id?}', Contact::class)->where('id', '[0-9]+')->name('id?');
+                        Route::get('/contacts', ContactList::class)->name('contacts');
+                        Route::get('/contacts/{id?}', Contact::class)->where('id', '[0-9]+')->name('id?');
+                        Route::get('/addresses', AddressList::class)->name('addresses');
                         Route::get('/communications', CommunicationList::class)->name('communications');
                     });
                 Route::get(
@@ -144,7 +158,15 @@ Route::middleware('web')
                 )
                     ->name('address.id');
 
-                Route::name('orders.')->prefix('orders')
+                Route::name('sales.')
+                    ->prefix('sales')
+                    ->group(function (): void {
+                        Route::get('/leads', LeadList::class)->name('leads');
+                        Route::get('/leads/{id}', Lead::class)->name('lead.id');
+                    });
+
+                Route::name('orders.')
+                    ->prefix('orders')
                     ->group(function (): void {
                         Route::get('/list', OrderList::class)->name('orders');
                         Route::get('/list/{orderType}', OrderListByOrderType::class)->name('order-type');
@@ -174,6 +196,8 @@ Route::middleware('web')
                         Route::get('/payment-reminders', PaymentReminder::class)->name('payment-reminders');
                         Route::get('/purchase-invoices', PurchaseInvoiceList::class)->name('purchase-invoices');
                         Route::get('/transactions', TransactionList::class)->name('transactions');
+                        Route::get('/transaction-assignments', TransactionAssignments::class)
+                            ->name('transaction-assignments');
                         Route::get('/direct-debit', DirectDebit::class)->name('direct-debit');
                         Route::get('/money-transfer', MoneyTransfer::class)->name('money-transfer');
                         Route::get('/payment-runs', PaymentRunList::class)->name('payment-runs');
@@ -198,6 +222,7 @@ Route::middleware('web')
                         Route::get('/failed-jobs', FailedJobs::class)->name('failed-jobs');
                         Route::get('/industries', Industries::class)->name('industries');
                         Route::get('/languages', Languages::class)->name('languages');
+                        Route::get('/lead-states', LeadStates::class)->name('lead-states');
                         Route::get('/ledger-accounts', LedgerAccounts::class)->name('ledger-accounts');
                         Route::get('/logs', Logs::class)->name('logs');
                         Route::get('/mail-accounts', MailAccounts::class)->name('mail-accounts');
@@ -215,6 +240,7 @@ Route::middleware('web')
                         Route::get('/queue-monitor', QueueMonitor::class)->name('queue-monitor');
                         Route::get('/scheduling', Scheduling::class)->name('scheduling');
                         Route::get('/serial-number-ranges', SerialNumberRanges::class)->name('serial-number-ranges');
+                        Route::get('/system', System::class)->name('system');
                         Route::get('/tags', Tags::class)->name('tags');
                         Route::get('/ticket-types', TicketTypes::class)->name('ticket-types');
                         Route::get('/tokens', Tokens::class)->name('tokens');

@@ -15,8 +15,11 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Renderless;
 use Livewire\Component;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class Project extends Component
 {
@@ -31,7 +34,7 @@ class Project extends Component
     public ProjectForm $project;
 
     public array $queryString = [
-        'tab' => ['except' => 'general'],
+        'tab' => ['except' => 'project.general'],
     ];
 
     public string $tab = 'project.general';
@@ -100,9 +103,16 @@ class Project extends Component
     public function getTabs(): array
     {
         return [
-            TabButton::make('project.general')->text(__('General')),
-            TabButton::make('project.comments')->text(__('Comments')),
-            TabButton::make('project.statistics')->text(__('Statistics')),
+            TabButton::make('project.general')
+                ->text(__('General')),
+            TabButton::make('project.comments')
+                ->isLivewireComponent()
+                ->wireModel('project.id')
+                ->text(__('Comments')),
+            TabButton::make('project.dashboard')
+                ->isLivewireComponent()
+                ->wireModel('project.id')
+                ->text(__('Dashboard')),
         ];
     }
 
@@ -123,18 +133,20 @@ class Project extends Component
         );
     }
 
+    #[Renderless]
     public function save(): array|bool
     {
         try {
             $this->project->save();
-        } catch (Exception $e) {
+        } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
             return false;
         }
 
-        $this->notification()->success(__(':model saved', ['model' => __('Project')]))->send();
-        $this->skipRender();
+        $this->toast()
+            ->success(__(':model saved', ['model' => __('Project')]))
+            ->send();
 
         return true;
     }

@@ -27,6 +27,7 @@ class UpdateMailFolderRuleset extends FluxRuleset
             'slug' => 'sometimes|required|string|max:255',
             'can_create_ticket' => 'boolean',
             'can_create_purchase_invoice' => 'boolean',
+            'can_create_lead' => 'boolean',
             'is_active' => 'boolean',
         ];
     }

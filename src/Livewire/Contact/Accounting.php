@@ -43,6 +43,10 @@ class Accounting extends Component
                 ->text(__('Sepa Mandates'))
                 ->isLivewireComponent()
                 ->wireModel('contact'),
+            TabButton::make('contact.accounting.credit-accounts')
+                ->text(__('Credit Accounts'))
+                ->isLivewireComponent()
+                ->wireModel('contact.id'),
         ];
     }
 }

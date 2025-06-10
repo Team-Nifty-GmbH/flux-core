@@ -23,8 +23,8 @@ class RepeatRuleset extends FluxRuleset
                 'required_if:repeat.unit,months',
                 'in:day,first,second,third,fourth,last',
             ],
-            'repeat_end' => 'date|nullable|after:start',
-            'recurrences' => 'integer|nullable|min:1',
+            'repeat_end' => 'exclude_if:repeat,null|date|nullable|after:start',
+            'recurrences' => 'exclude_if:repeat,null|integer|nullable|min:1',
         ];
     }
 }

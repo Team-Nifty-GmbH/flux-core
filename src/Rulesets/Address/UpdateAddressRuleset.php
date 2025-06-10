@@ -65,6 +65,11 @@ class UpdateAddressRuleset extends FluxRuleset
                 'max:255',
                 'nullable',
             ],
+            'search_aliases' => [
+                'array',
+                'nullable',
+            ],
+            'search_aliases.*' => 'string|max:255|distinct:ignore_case',
             'password' => 'string|max:255|nullable',
             'is_main_address' => 'boolean',
             'is_invoice_address' => 'boolean',

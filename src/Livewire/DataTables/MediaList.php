@@ -49,10 +49,10 @@ class MediaList extends BaseDataTable
             DataTableButton::make()
                 ->icon('eye')
                 ->text(__('View'))
-                ->href('record.url')
+                ->href('record.original_url')
                 ->attributes([
                     'target' => '_blank',
-                    'x-bind:href' => 'record.url',
+                    'x-bind:href' => 'record.original_url',
                 ]),
             DataTableButton::make()
                 ->icon('trash')
@@ -139,6 +139,7 @@ class MediaList extends BaseDataTable
                     ? $item->getUrl('thumb')
                     : route('icons', ['name' => 'document'])
             );
+        $itemArray['original_url'] = $item->original_url;
 
         return $itemArray;
     }

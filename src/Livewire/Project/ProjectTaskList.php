@@ -9,6 +9,7 @@ use FluxErp\Livewire\Forms\TaskForm;
 use FluxErp\Models\Task;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithTabs;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
@@ -108,12 +109,17 @@ class ProjectTaskList extends BaseTaskList
     public function getTabs(): array
     {
         return [
-            TabButton::make('task.general')->text(__('General')),
-            TabButton::make('task.comments')->text(__('Comments'))
+            TabButton::make('task.general')
+                ->text(__('General')),
+            TabButton::make('task.comments')
+                ->isLivewireComponent()
+                ->wireModel('task.id')
+                ->text(__('Comments'))
                 ->attributes([
                     'x-bind:disabled' => '! $wire.task.id',
                 ]),
-            TabButton::make('task.media')->text(__('Media'))
+            TabButton::make('task.media')
+                ->text(__('Media'))
                 ->attributes([
                     'x-bind:disabled' => '! $wire.task.id',
                 ]),
@@ -139,5 +145,10 @@ class ProjectTaskList extends BaseTaskList
     public function updatedTaskTab(): void
     {
         $this->forceRender();
+    }
+
+    protected function getBuilder(Builder $builder): Builder
+    {
+        return $builder->where('project_id', $this->projectId);
     }
 }

@@ -20,7 +20,7 @@
                 />
                 <x-color :label="__('Color')" wire:model="userForm.color" />
                 <x-number
-                    :prefix="\FluxErp\Models\Currency::default()?->symbol"
+                    :prefix="resolve_static(\FluxErp\Models\Currency::class, 'default')?->symbol"
                     :label="__('Cost Per Hour')"
                     wire:model="userForm.cost_per_hour"
                 />

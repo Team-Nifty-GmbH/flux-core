@@ -42,9 +42,7 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
                 ->text(__('New order'))
                 ->icon('plus')
                 ->when(resolve_static(CreateOrder::class, 'canPerformAction', [false]))
-                ->attributes([
-                    'x-on:click' => "\$modalOpen('create-order-modal')",
-                ]),
+                ->wireClick('create'),
         ];
     }
 
@@ -69,6 +67,20 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
     }
 
     #[Renderless]
+    public function create(): void
+    {
+        $this->order->payment_type_id ??= resolve_static(PaymentType::class, 'default')?->getKey();
+        $this->order->price_list_id ??= resolve_static(PriceList::class, 'default')?->getKey();
+        $this->order->payment_type_id ??= resolve_static(PaymentType::class, 'default')?->getKey();
+        $this->order->language_id ??= resolve_static(Language::class, 'default')?->getKey();
+        $this->order->client_id ??= resolve_static(Client::class, 'default')?->getKey();
+
+        $this->js(<<<'JS'
+             $modalOpen('create-order-modal');
+        JS);
+    }
+
+    #[Renderless]
     public function createDocuments(): null|MediaStream|Media
     {
         $response = $this->createDocumentFromItems($this->getSelectedModels(), true);
@@ -83,16 +95,18 @@ class OrderList extends \FluxErp\Livewire\DataTables\OrderList
     {
         $contact = resolve_static(Contact::class, 'query')
             ->whereKey($this->order->contact_id)
+            ->with('invoiceAddress:id,language_id')
             ->first();
 
-        $this->order->client_id = $contact->client_id ?: $this->order->client_id;
-        $this->order->agent_id = $contact->agent_id ?: $this->order->agent_id;
+        $this->order->client_id = $contact->client_id ?? $this->order->client_id;
+        $this->order->agent_id = $contact->agent_id ?? $this->order->agent_id;
+        $this->order->language_id = $contact->invoiceAddress?->language_id;
         $this->order->address_invoice_id = $contact->address_invoice_id;
         $this->order->address_delivery_id = $contact->address_delivery_id;
-        $this->order->price_list_id = $contact->price_list_id ?: $this->order->price_list_id;
-        $this->order->payment_type_id = $contact->payment_type_id ?: $this->order->payment_type_id;
-        $this->order->address_invoice_id = $contact->invoice_address_id ?: $this->order->address_invoice_id;
-        $this->order->address_delivery_id = $contact->delivery_address_id ?: $this->order->address_delivery_id;
+        $this->order->price_list_id = $contact->price_list_id ?? $this->order->price_list_id;
+        $this->order->payment_type_id = $contact->payment_type_id ?? $this->order->payment_type_id;
+        $this->order->address_invoice_id = $contact->invoice_address_id ?? $this->order->address_invoice_id;
+        $this->order->address_delivery_id = $contact->delivery_address_id ?? $this->order->address_delivery_id;
     }
 
     public function save(): ?false
