@@ -18,8 +18,8 @@ class AddressTypeTest extends BaseSetup
         parent::setUp();
 
         $this->permissions = [
-            'show' => Permission::findOrCreate('api.bank-connections.{id}.get'),
-            'index' => Permission::findOrCreate('api.bank-connections.get'),
+            'show' => Permission::findOrCreate('api.address-types.{id}.get'),
+            'index' => Permission::findOrCreate('api.address-types.get'),
             'create' => Permission::findOrCreate('api.address_types.post'),
             'update' => Permission::findOrCreate('api.address_types.put'),
             'delete' => Permission::findOrCreate('api.address_types.{id}.delete'),

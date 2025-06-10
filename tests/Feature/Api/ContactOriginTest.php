@@ -102,7 +102,7 @@ class ContactOriginTest extends BaseSetup
         $this->user->givePermissionTo($this->permissions['show']);
         Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/contact-origins/ ' . $origin->getKey());
+        $response = $this->actingAs($this->user)->get('/api/contact-origins/' . $origin->getKey());
         $response->assertStatus(200);
 
         $data = $response->json('data');
@@ -117,7 +117,7 @@ class ContactOriginTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $response = $this->actingAs($this->user)
-            ->get('/api/contact-origins/ ' . $this->origins->last()->getKey() + 1);
+            ->get('/api/contact-origins/' . ($this->origins->last()->getKey() + 1));
         $response->assertStatus(404);
     }
 
