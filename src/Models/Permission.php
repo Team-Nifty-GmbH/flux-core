@@ -21,11 +21,6 @@ class Permission extends SpatiePermission
 
     protected $hidden = ['pivot'];
 
-    public function roles(): BelongsToMany
-    {
-        return $this->belongsToMany(Permission::class, 'role_has_permissions');
-    }
-  
     public static function scoutIndexSettings(): ?array
     {
         return static::baseScoutIndexSettings() ?? [
@@ -36,6 +31,11 @@ class Permission extends SpatiePermission
                 'name',
             ],
         ];
+    }
+
+    public function roles(): BelongsToMany
+    {
+        return $this->belongsToMany(Permission::class, 'role_has_permissions');
     }
 
     public function users(): BelongsToMany
