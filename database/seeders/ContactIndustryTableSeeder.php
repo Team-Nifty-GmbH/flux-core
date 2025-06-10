@@ -11,20 +11,20 @@ class ContactIndustryTableSeeder extends Seeder
 {
     public function run(): void
     {
-        $contactIds = Contact::query()->get('id');
+        $contactIds = Contact::query()->pluck('id');
         $cutContactIds = $contactIds->random(bcfloor($contactIds->count() * 0.6));
 
-        $industryIds = Industry::query()->get('id');
+        $industryIds = Industry::query()->pluck('id');
         $cutIndustryIds = $industryIds->random(bcfloor($industryIds->count() * 0.7));
 
-        foreach ($cutContactIds as $cutContactId) {
+        foreach ($cutContactIds as $contactId) {
             $numGroups = rand(1, floor($cutIndustryIds->count() * 0.5));
 
-            $ids = $cutIndustryIds->random($numGroups)->pluck('id')->toArray();
+            $ids = $cutIndustryIds->random($numGroups);
 
             foreach ($ids as $id) {
-                ContactIndustry::factory()->create([
-                    'contact_id' => $cutContactId,
+                ContactIndustry::create([
+                    'contact_id' => $contactId,
                     'industry_id' => $id,
                 ]);
             }

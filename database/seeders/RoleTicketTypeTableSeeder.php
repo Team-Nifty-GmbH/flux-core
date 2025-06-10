@@ -11,21 +11,21 @@ class RoleTicketTypeTableSeeder extends Seeder
 {
     public function run(): void
     {
-        $roleIds = Role::query()->get('id');
+        $roleIds = Role::query()->pluck('id');
         $cutRoleIds = $roleIds->random(bcfloor($roleIds->count() * 0.75));
 
-        $ticketTypeIds = TicketType::query()->get('id');
+        $ticketTypeIds = TicketType::query()->pluck('id');
         $cutTicketTypeIds = $ticketTypeIds->random(bcfloor($ticketTypeIds->count() * 0.6));
 
-        foreach ($cutRoleIds as $cutRoleId) {
+        foreach ($cutRoleIds as $roleId) {
             $numGroups = rand(1, floor($cutTicketTypeIds->count() * 0.5));
 
-            $ids = $cutTicketTypeIds->random($numGroups)->pluck('id')->toArray();
+            $selectedTicketTypeIds = $cutTicketTypeIds->random($numGroups);
 
-            foreach ($ids as $id) {
-                RoleTicketType::factory()->create([
-                    'role_id' => $cutRoleId,
-                    'ticket_type_id' => $id,
+            foreach ($selectedTicketTypeIds as $ticketTypeId) {
+                RoleTicketType::create([
+                    'role_id' => $roleId,
+                    'ticket_type_id' => $ticketTypeId,
                 ]);
             }
         }

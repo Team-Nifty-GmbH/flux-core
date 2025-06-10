@@ -11,21 +11,22 @@ class OrderPositionStockPostingTableSeeder extends Seeder
 {
     public function run(): void
     {
-        $orderPositionIds = OrderPosition::query()->get('id');
+        $orderPositionIds = OrderPosition::query()->pluck('id');
         $cutOrderPositionIds = $orderPositionIds->random(bcfloor($orderPositionIds->count() * 0.3));
 
-        $stockPostingsIds = StockPosting::query()->get('id');
-        $cutStockPostingsIds = $stockPostingsIds->random(bcfloor($stockPostingsIds->count() * 0.6));
+        $stockPostingIds = StockPosting::query()->pluck('id');
+        $cutStockPostingIds = $stockPostingIds->random(bcfloor($stockPostingIds->count() * 0.6));
 
-        foreach ($cutOrderPositionIds as $cutOrderPositionId) {
-            $numGroups = rand(1, floor($cutStockPostingsIds->count() * 0.1));
+        foreach ($cutOrderPositionIds as $orderPositionId) {
+            $numGroups = rand(1, floor($cutStockPostingIds->count() * 0.1));
 
-            $ids = $cutStockPostingsIds->random($numGroups)->pluck('id')->toArray();
+            $selectedStockPostingIds = $cutStockPostingIds->random($numGroups);
 
-            foreach ($ids as $id) {
-                OrderPositionStockPosting::factory()->create([
-                    'order_position_id' => $cutOrderPositionId,
-                    'stock_posting_id' => $id,
+            foreach ($selectedStockPostingIds as $stockPostingId) {
+                OrderPositionStockPosting::create([
+                    'order_position_id' => $orderPositionId,
+                    'stock_posting_id' => $stockPostingId,
+                    'reserved_amount' => rand(1, 100),
                 ]);
             }
         }

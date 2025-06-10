@@ -14,16 +14,16 @@ class ProjectTableSeeder extends Seeder
     public function run(): void
     {
         $clientIds = Client::query()->get('id');
-        $cutClientIds = $clientIds->random(bcfloor($clientIds->count() * 0.75));
+        $cutClientIds = $clientIds->random(max(1, bcfloor($clientIds->count() * 0.75)));
 
         $contactIds = Contact::query()->get('id');
-        $cutContactIds = $contactIds->random(bcfloor($contactIds->count() * 0.75));
+        $cutContactIds = $contactIds->random(max(1, bcfloor($contactIds->count() * 0.75)));
 
         $orderIds = Order::query()->get('id');
-        $cutOrderIds = $orderIds->random(bcfloor($orderIds->count() * 0.75));
+        $cutOrderIds = $orderIds->random(max(1, bcfloor($orderIds->count() * 0.75)));
 
         $userIds = User::query()->get('id');
-        $cutUserIds = $userIds->random(bcfloor($userIds->count() * 0.75));
+        $cutUserIds = $userIds->random(max(1, bcfloor($userIds->count() * 0.75)));
 
         Project::factory()->count(10)->create([
             'client_id' => fn () => $cutClientIds->random()->getKey(),

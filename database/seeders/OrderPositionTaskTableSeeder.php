@@ -11,21 +11,22 @@ class OrderPositionTaskTableSeeder extends Seeder
 {
     public function run(): void
     {
-        $orderPositionIds = OrderPosition::query()->get('id');
+        $orderPositionIds = OrderPosition::query()->pluck('id');
         $cutOrderPositionIds = $orderPositionIds->random(bcfloor($orderPositionIds->count() * 0.3));
 
-        $taskIds = Task::query()->get('id');
+        $taskIds = Task::query()->pluck('id');
         $cutTaskIds = $taskIds->random(bcfloor($taskIds->count() * 0.6));
 
-        foreach ($cutOrderPositionIds as $cutOrderPositionId) {
+        foreach ($cutOrderPositionIds as $orderPositionId) {
             $numGroups = rand(1, floor($cutTaskIds->count() * 0.1));
 
-            $ids = $cutTaskIds->random($numGroups)->pluck('id')->toArray();
+            $selectedTaskIds = $cutTaskIds->random($numGroups);
 
-            foreach ($ids as $id) {
-                OrderPositionTask::factory()->create([
-                    'order_position_id' => $cutOrderPositionId,
-                    'task_id' => $id,
+            foreach ($selectedTaskIds as $taskId) {
+                OrderPositionTask::create([
+                    'order_position_id' => $orderPositionId,
+                    'task_id' => $taskId,
+                    'amount' => rand(1, 100),
                 ]);
             }
         }

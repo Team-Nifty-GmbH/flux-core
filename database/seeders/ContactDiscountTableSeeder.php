@@ -11,21 +11,21 @@ class ContactDiscountTableSeeder extends Seeder
 {
     public function run(): void
     {
-        $contactIds = Contact::query()->get('id');
+        $contactIds = Contact::query()->pluck('id');
         $cutContactIds = $contactIds->random(bcfloor($contactIds->count() * 0.7));
 
-        $discountIds = Discount::query()->get('id');
+        $discountIds = Discount::query()->pluck('id');
         $cutDiscountIds = $discountIds->random(bcfloor($discountIds->count() * 0.7));
 
-        foreach ($cutContactIds as $cutContactId) {
+        foreach ($cutContactIds as $contactId) {
             $numGroups = rand(1, floor($cutDiscountIds->count() * 0.8));
 
-            $ids = $cutDiscountIds->random($numGroups)->pluck('id')->toArray();
+            $selectedDiscountIds = $cutDiscountIds->random($numGroups);
 
-            foreach ($ids as $id) {
-                ContactDiscount::factory()->create([
-                    'contact_id' => $cutContactId,
-                    'discount_id' => $id,
+            foreach ($selectedDiscountIds as $discountId) {
+                ContactDiscount::create([
+                    'contact_id' => $contactId,
+                    'discount_id' => $discountId,
                 ]);
             }
         }

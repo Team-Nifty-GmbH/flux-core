@@ -2,6 +2,7 @@
 
 namespace FluxErp\Database\Seeders;
 
+use Exception;
 use FluxErp\Models\LanguageLine;
 use Illuminate\Database\Seeder;
 
@@ -26,8 +27,13 @@ class LanguageLineTableSeeder extends Seeder
 
         foreach ($langs as $langKey => $langPath) {
             $data = json_decode(file_get_contents($langPath), true);
+
             foreach ($randomKeys as $key) {
-                $translations[$key][$langKey] = $data[$key];
+                try {
+                    $translations[$key][$langKey] = $data[$key];
+                } catch (Exception $e) {
+                    continue;
+                }
             }
         }
 

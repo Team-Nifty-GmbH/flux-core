@@ -11,21 +11,21 @@ class PrinterUserTableSeeder extends Seeder
 {
     public function run(): void
     {
-        $printerIds = Printer::query()->get('id');
+        $printerIds = Printer::query()->pluck('id');
         $cutPrinterIds = $printerIds->random(bcfloor($printerIds->count() * 0.8));
 
-        $userIds = User::query()->get('id');
+        $userIds = User::query()->pluck('id');
         $cutUserIds = $userIds->random(bcfloor($userIds->count() * 0.6));
 
-        foreach ($cutUserIds as $cutUserId) {
+        foreach ($cutUserIds as $userId) {
             $numGroups = rand(1, bcfloor($cutPrinterIds->count() * 0.5));
 
-            $ids = $cutPrinterIds->random($numGroups)->pluck('id')->toArray();
+            $selectedPrinterIds = $cutPrinterIds->random($numGroups);
 
-            foreach ($ids as $id) {
-                PrinterUser::factory()->create([
-                    'user_id' => $cutUserId,
-                    'printer_id' => $id,
+            foreach ($selectedPrinterIds as $printerId) {
+                PrinterUser::create([
+                    'user_id' => $userId,
+                    'printer_id' => $printerId,
                 ]);
             }
         }
