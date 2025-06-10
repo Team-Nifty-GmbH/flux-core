@@ -109,11 +109,6 @@ class Outstanding extends ValueBox implements HasWidgetOptions
         ];
     }
 
-    protected function icon(): string
-    {
-        return 'banknotes';
-    }
-
     protected function getOutstandingQuery(Builder $builder): Builder
     {
         return $builder
@@ -136,5 +131,10 @@ class Outstanding extends ValueBox implements HasWidgetOptions
                 'order_type_id',
                 $this->orderTypeIds
             );
+    }
+
+    protected function icon(): string
+    {
+        return 'banknotes';
     }
 }

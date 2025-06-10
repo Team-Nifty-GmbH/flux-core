@@ -7,7 +7,7 @@
     <div class="flex w-full items-center justify-between">
         <div class="flex w-full items-center justify-between">
             <div class="flex flex-col">
-                <div class="text-lg font-semibold text-gray-500 text-wrap">
+                <div class="text-wrap text-lg font-semibold text-gray-500">
                     {{ __($this->title()) }}
                 </div>
                 <div
@@ -36,7 +36,7 @@
         </div>
     </div>
 
-    <div class="flex flex-col mt-1">
+    <div class="mt-1 flex flex-col">
         <template x-if="$wire.growthRate !== null">
             <div>
                 @if ($shouldBePositive)
@@ -95,7 +95,7 @@
         ></span>
 
         <span
-            class="text-base text-gray-400 mt-2"
+            class="mt-2 text-base text-gray-400"
             x-cloak
             x-show="$wire.previousSum"
             x-text="'{{ __('Previous Period') }} ' + $wire.previousSum"
