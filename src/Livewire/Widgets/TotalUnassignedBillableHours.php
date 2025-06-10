@@ -3,13 +3,19 @@
 namespace FluxErp\Livewire\Widgets;
 
 use Carbon\CarbonInterval;
+use FluxErp\Livewire\Dashboard\Dashboard;
+use FluxErp\Livewire\Support\Widgets\ValueBox;
 use FluxErp\Models\WorkTime;
-use FluxErp\Support\Widgets\ValueBox;
 use Livewire\Attributes\Renderless;
 
 class TotalUnassignedBillableHours extends ValueBox
 {
     public bool $shouldBePositive = true;
+
+    public static function dashboardComponent(): array|string
+    {
+        return Dashboard::class;
+    }
 
     #[Renderless]
     public function calculateSum(): void
@@ -21,10 +27,10 @@ class TotalUnassignedBillableHours extends ValueBox
             ->sum('total_time_ms');
 
         $interval = CarbonInterval::milliseconds($ms)->cascade();
-        $totalHours = floor($interval->totalHours);
-        $minutes = $interval->minutes;
 
-        $this->sum = $totalHours . ' h ' . $minutes . ' min';
+        $interval->locale(app()->getLocale());
+
+        $this->sum = $interval->forHumans(['parts' => 2, 'short' => true, 'join' => true]);
     }
 
     protected function icon(): string

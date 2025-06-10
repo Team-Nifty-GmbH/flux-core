@@ -119,15 +119,6 @@ class TotalUnassignedBillableHoursTest extends BaseSetup
             ]);
     }
 
-    public function calculateDisplayedTime(int $ms): string
-    {
-        $interval = CarbonInterval::milliseconds($ms)->cascade();
-        $totalHours = floor($interval->totalHours);
-        $minutes = $interval->minutes;
-
-        return $totalHours . ' h ' . $minutes . ' min';
-    }
-
     public function test_calculates_correct_sum_of_unassigned_billable_hours(): void
     {
         Livewire::test($this->livewireComponent)
@@ -140,5 +131,14 @@ class TotalUnassignedBillableHoursTest extends BaseSetup
     {
         Livewire::test($this->livewireComponent)
             ->assertStatus(200);
+    }
+
+    protected function calculateDisplayedTime(int $ms): string
+    {
+        $interval = CarbonInterval::milliseconds($ms)->cascade();
+
+        $interval->locale(app()->getLocale());
+
+        return $interval->forHumans(['parts' => 2, 'short' => true, 'join' => true]);
     }
 }
