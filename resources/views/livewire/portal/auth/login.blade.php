@@ -72,7 +72,7 @@
                             <x-input
                                 id="email"
                                 wire:model="email"
-                                :text="__('Email')"
+                                :label="__('Email')"
                                 name="email"
                                 type="email"
                                 required

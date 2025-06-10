@@ -3,20 +3,20 @@
 namespace FluxErp\Rules;
 
 use Closure;
-use Illuminate\Contracts\Validation\Rule;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rules\DatabaseRule;
 
-class ExistsWithIgnore implements Rule
+class ExistsWithIgnore implements ValidationRule
 {
     use DatabaseRule;
 
     /**
      * The ID that should be ignored.
      */
-    private mixed $ignore = null;
+    protected mixed $ignore = null;
 
     public function getColumn(): string
     {
@@ -56,12 +56,7 @@ class ExistsWithIgnore implements Rule
         return $this;
     }
 
-    public function message(): string
-    {
-        return __('validation.exists');
-    }
-
-    public function passes($attribute, $value): bool
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         $attribute = str_contains($attribute, '.') ? pathinfo($attribute, PATHINFO_EXTENSION) : $attribute;
 
@@ -72,7 +67,11 @@ class ExistsWithIgnore implements Rule
             $query = $this->addConditions($query, $this->wheres);
         }
 
-        return $query->exists();
+        if (! $query->exists()) {
+            $fail('validation.exists')->translate([
+                'attribute' => $attribute,
+            ]);
+        }
     }
 
     /**

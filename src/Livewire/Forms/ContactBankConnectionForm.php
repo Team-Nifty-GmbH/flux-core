@@ -22,6 +22,8 @@ class ContactBankConnectionForm extends FluxForm
     #[Locked]
     public ?int $id = null;
 
+    public ?bool $is_credit_account = false;
+
     protected function getActions(): array
     {
         return [

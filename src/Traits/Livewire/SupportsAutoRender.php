@@ -34,6 +34,16 @@ trait SupportsAutoRender
         return Str::kebab(class_basename($this)) . '-modal';
     }
 
+    public function openModal(): void
+    {
+        $modalName = $this->modalName();
+
+        $this->getComponent()
+            ->js(<<<JS
+                \$modalOpen('$modalName');
+            JS);
+    }
+
     protected function buildFormElements(array $properties): array
     {
         $formElements = [];

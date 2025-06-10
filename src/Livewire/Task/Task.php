@@ -18,6 +18,7 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Spatie\Permission\Exceptions\UnauthorizedException;
+use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Task extends Component
 {
@@ -32,6 +33,7 @@ class Task extends Component
     public function mount(string $id): void
     {
         $task = resolve_static(TaskModel::class, 'query')
+            ->with('model')
             ->whereKey($id)
             ->firstOrFail();
 
@@ -44,6 +46,11 @@ class Task extends Component
                 null
             )
         );
+
+        if ($task->model && in_array(InteractsWithDataTables::class, class_implements($task->model))) {
+            $this->task->modelUrl = $task->model->getUrl();
+            $this->task->modelLabel = $task->model->getLabel();
+        }
 
         $this->availableStates = app(TaskModel::class)
             ->getStatesFor('state')
@@ -102,12 +109,19 @@ class Task extends Component
     public function getTabs(): array
     {
         return [
-            TabButton::make('task.general')->text(__('General')),
-            TabButton::make('task.comments')->text(__('Comments'))
+            TabButton::make('task.general')
+                ->text(__('General')),
+            TabButton::make('task.comments')
+                ->isLivewireComponent()
+                ->wireModel('task.id')
+                ->text(__('Comments'))
                 ->attributes([
                     'x-bind:disabled' => '! $wire.task.id',
                 ]),
-            TabButton::make('task.media')->text(__('Media'))
+            TabButton::make('task.media')
+                ->text(__('Media'))
+                ->isLivewireComponent()
+                ->wireModel('task.id')
                 ->attributes([
                     'x-bind:disabled' => '! $wire.task.id',
                 ]),

@@ -36,15 +36,29 @@ export const MentionConfig = (searchModel, element) =>
                 return (
                     await Promise.all(
                         searchModel.map(async (model) => {
+                            let data = {};
+                            if (model === 'user') {
+                                data = {
+                                    where: [
+                                        {
+                                            column: 'is_active',
+                                            operator: '=',
+                                            value: true,
+                                        },
+                                    ],
+                                };
+                            }
+
                             return (
-                                await axios.get(
+                                await axios.post(
                                     `/search/${model}?search=${query}`,
+                                    data,
                                 )
                             ).data.map((item) => {
                                 return {
                                     id: model + ':' + item.id,
                                     label: item.label,
-                                    src: item.src,
+                                    src: item.image,
                                 };
                             });
                         }),

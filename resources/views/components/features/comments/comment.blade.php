@@ -35,12 +35,17 @@
                         </x-dropdown.items>
                     @endcanAction
 
-                    <x-dropdown.items
-                        :text="__('Delete')"
-                        x-bind:disabled="! comment.is_current_user"
-                        wire:click="delete(comment.id).then((success) => { if(success) removeNode(comment)})"
-                        wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Comment')]) }}"
-                    />
+                    @canAction(\FluxErp\Actions\Comment\DeleteComment::class)
+                        <x-dropdown.items>
+                            <span
+                                x-bind:disabled="! comment.is_current_user"
+                                wire:click="delete(comment.id).then((success) => { if(success) removeNode(comment)})"
+                                wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Comment')]) }}"
+                            >
+                                {{ __('Delete') }}
+                            </span>
+                        </x-dropdown.items>
+                    @endcanAction
                 </x-dropdown>
             @endif
         </div>

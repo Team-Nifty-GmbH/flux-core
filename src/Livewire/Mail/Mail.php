@@ -2,7 +2,11 @@
 
 namespace FluxErp\Livewire\Mail;
 
+use FluxErp\Actions\Lead\CreateLead;
+use FluxErp\Actions\PurchaseInvoice\CreatePurchaseInvoice;
+use FluxErp\Actions\Ticket\CreateTicket;
 use FluxErp\Jobs\SyncMailAccountJob;
+use FluxErp\Listeners\MailMessage\CreateMailExecutedSubscriber;
 use FluxErp\Livewire\DataTables\CommunicationList;
 use FluxErp\Livewire\Forms\CommunicationForm;
 use FluxErp\Models\Communication;
@@ -45,6 +49,81 @@ class Mail extends CommunicationList
             'name' => __('All Messages'),
             'children' => [],
         ];
+    }
+
+    #[Renderless]
+    public function createLead(Communication $communication): void
+    {
+        resolve_static(CreateLead::class, 'canPerformAction');
+
+        $ticket = app(CreateMailExecutedSubscriber::class)
+            ->findAddress($communication)
+            ->createLead($communication);
+
+        if (! $ticket) {
+            $this->toast()
+                ->error(__('Could not create lead'))
+                ->send();
+
+            return;
+        }
+
+        $this->toast()
+            ->success(__(':model created', ['model' => __('Lead')]))
+            ->send();
+        $this->js(<<<'JS'
+            $modalClose('show-mail');
+        JS);
+    }
+
+    #[Renderless]
+    public function createPurchaseInvoice(Communication $communication): void
+    {
+        resolve_static(CreatePurchaseInvoice::class, 'canPerformAction');
+
+        $purchaseInvoices = app(CreateMailExecutedSubscriber::class)
+            ->findAddress($communication)
+            ->createPurchaseInvoice($communication);
+
+        if (is_null($purchaseInvoices) || $purchaseInvoices->isEmpty()) {
+            $this->toast()
+                ->error(__('Could not create purchase invoice'))
+                ->send();
+
+            return;
+        }
+
+        $this->toast()
+            ->success(__(':model created', ['model' => __('Purchase Invoice')]))
+            ->send();
+        $this->js(<<<'JS'
+            $modalClose('show-mail');
+        JS);
+    }
+
+    #[Renderless]
+    public function createTicket(Communication $communication): void
+    {
+        resolve_static(CreateTicket::class, 'canPerformAction');
+
+        $ticket = app(CreateMailExecutedSubscriber::class)
+            ->findAddress($communication)
+            ->createTicket($communication);
+
+        if (! $ticket) {
+            $this->toast()
+                ->error(__('Could not create ticket'))
+                ->send();
+
+            return;
+        }
+
+        $this->toast()
+            ->success(__(':model created', ['model' => __('Ticket')]))
+            ->send();
+        $this->js(<<<'JS'
+            $modalClose('show-mail');
+        JS);
     }
 
     public function download(Media $mediaItem): false|BinaryFileResponse

@@ -33,7 +33,10 @@ class UpdateContactBankConnectionRuleset extends FluxRuleset
                 'nullable',
                 app(ModelExists::class, ['model' => Contact::class]),
             ],
-            'iban' => ['string', app(Iban::class)],
+            'iban' => [
+                'string',
+                app(Iban::class),
+            ],
         ];
     }
 }

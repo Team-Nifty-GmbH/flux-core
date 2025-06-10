@@ -5,6 +5,12 @@ export default function comments() {
         initialized: false,
 
         async init() {
+            this.loadComments();
+
+            this.$wire.$watch('modelId', () => this.loadComments());
+        },
+
+        loadComments() {
             Promise.all([
                 this.$wire.loadComments(),
                 this.$wire.loadStickyComments(),

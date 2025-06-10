@@ -24,6 +24,8 @@ Route::middleware('web')
         });
 
         Route::middleware('cache.headers:public;max_age=31536000;etag')->group(function (): void {
+            Route::get('/avatar.svg', [AssetController::class, 'avatar'])
+                ->name('avatar');
             Route::get('/manifest.json', [AssetController::class, 'manifest'])->name('manifest');
             Route::get('favicon.svg', [AssetController::class, 'favicon'])->name('favicon');
             Route::get('/flux-assets/{file}', [AssetController::class, 'asset'])

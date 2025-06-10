@@ -1,52 +1,66 @@
+@use(\Illuminate\Support\Number)
+@use(\FluxErp\Models\PriceList)
+@use(\FluxErp\Models\Currency)
+@use(\Illuminate\Support\Fluent)
 @php
-    $isNet = $model->priceList->is_net;
-    $currency = $model->currency->iso;
-    $formatter = new NumberFormatter(app()->getLocale(), NumberFormatter::CURRENCY);
+    $isNet = ($model->priceList ?? resolve_static(PriceList::class, 'default'))->is_net;
 @endphp
 
 @section('first-page-header')
-<x-flux::print.first-page-header :address="$model->addressInvoice" :$model>
+<x-flux::print.first-page-header
+    :address="Fluent::make($model->address_invoice)"
+    :$model
+>
     <x-slot:right-block>
-        <div class="inline-block">
-            @section('first-page-right-block')
-            <div class="inline-block">
-                @section('first-page-right-block.labels')
-                <div class="font-semibold">{{ __('Order no.') }}:</div>
-                <div class="font-semibold">{{ __('Customer no.') }}:</div>
-                <div class="font-semibold">{{ __('Order Date') }}:</div>
+        @section('first-page-right-block')
+        <table class="border-separate border-spacing-x-2">
+            <tbody class="align-text-top text-xs leading-none">
+                @section('first-page-right-block.rows')
+                <tr class="leading-none">
+                    <td class="py-0 text-left font-semibold">
+                        {{ __('Order no.') }}
+                    </td>
+                    <td class="py-0 text-right">
+                        {{ $model->order_number }}
+                    </td>
+                </tr>
+                <tr class="leading-none">
+                    <td class="py-0 text-left font-semibold">
+                        {{ __('Customer no.') }}
+                    </td>
+                    <td class="py-0 text-right">
+                        {{ $model->contact()->withTrashed()->value('customer_number') }}
+                    </td>
+                </tr>
+                <tr class="leading-none">
+                    <td class="py-0 text-left font-semibold">
+                        {{ __('Order Date') }}
+                    </td>
+                    <td class="py-0 text-right">
+                        {{ $model->order_date->locale(app()->getLocale())->isoFormat('L') }}
+                    </td>
+                </tr>
                 @if ($model->commission)
-                    <div class="font-semibold">{{ __('Commission') }}:</div>
+                    <tr class="leading-none">
+                        <td class="py-0 text-left font-semibold">
+                            {{ __('Commission') }}
+                        </td>
+                        <td class="py-0 text-right">
+                            {{ $model->commission }}
+                        </td>
+                    </tr>
                 @endif
 
                 @show
-            </div>
-            <div class="inline-block pl-6 text-right">
-                @section('first-page-right-block.values')
-                <div>
-                    {{ $model->order_number }}
-                </div>
-                <div>
-                    {{ $model->addressInvoice->contact->customer_number }}
-                </div>
-                <div>
-                    {{ $model->order_date->locale(app()->getLocale())->isoFormat('L') }}
-                </div>
-                @if ($model->commission)
-                    <div>
-                        {{ $model->commission }}
-                    </div>
-                @endif
-
-                @show
-            </div>
-            @show
-        </div>
+            </tbody>
+        </table>
+        @show
     </x-slot>
 </x-flux::print.first-page-header>
 @show
 <main>
     @section('header')
-    <div class="prose-xs prose pb-4 pt-10">
+    <div class="prose-xs pb-4 pt-10">
         {!! Blade::render(html_entity_decode($model->header ?? ''), ['model' => $model]) !!}
     </div>
     @show
@@ -55,17 +69,17 @@
         <table class="w-full table-auto text-xs">
             <thead class="border-b-2 border-black">
                 @section('positions.header')
-                <tr>
-                    <th class="pr-8 text-left font-normal">
+                <tr class="py-2">
+                    <th class="py-2 pr-8 text-left font-normal">
                         {{ __('Pos.') }}
                     </th>
-                    <th class="pr-8 text-left font-normal">
+                    <th class="py-2 pr-8 text-left font-normal">
                         {{ __('Name') }}
                     </th>
-                    <th class="pr-8 text-center font-normal">
+                    <th class="py-2 pr-8 text-center font-normal">
                         {{ __('Amount') }}
                     </th>
-                    <th class="text-right font-normal uppercase">
+                    <th class="py-2 text-right font-normal uppercase">
                         {{ __('Sum') }}
                     </th>
                 </tr>
@@ -76,8 +90,6 @@
                 <x-flux::print.order.order-position
                     :position="$position"
                     :is-net="$isNet"
-                    :currency="$currency"
-                    :formatter="$formatter"
                 />
             @endforeach
 
@@ -107,7 +119,7 @@
                                 {{ $summaryItem->name }}
                             </td>
                             <td class="float-right text-right">
-                                {{ $formatter->formatCurrency($summaryItem->total_net_price, $currency) }}
+                                {{ Number::currency($summaryItem->total_net_price) }}
                             </td>
                         </tr>
                     @endforeach
@@ -132,7 +144,7 @@
                         {{ __('Sum net without discount') }}
                     </td>
                     <td class="w-0 whitespace-nowrap pl-12 text-right">
-                        {{ $formatter->formatCurrency($model->total_base_net_price, $currency) }}
+                        {{ Number::currency($model->total_base_net_price) }}
                     </td>
                 </tr>
                 @foreach ($model->discounts as $discount)
@@ -140,11 +152,11 @@
                         <td class="text-right">
                             <span>{{ data_get($discount, 'name') }}</span>
                             <span>
-                                {{ \Illuminate\Support\Number::percentage(bcmul(data_get($discount, 'discount_percentage', 0), 100)) }}
+                                {{ Number::percentage(bcmul(data_get($discount, 'discount_percentage', 0), 100)) }}
                             </span>
                         </td>
                         <td class="w-0 whitespace-nowrap pl-12 text-right">
-                            {{ $formatter->formatCurrency(bcmul(data_get($discount, 'discount_flat', 0), -1), $currency) }}
+                            {{ Number::currency(bcmul(data_get($discount, 'discount_flat', 0), -1)) }}
                         </td>
                     </tr>
                 @endforeach
@@ -159,7 +171,7 @@
                     {{ __('Sum net') }}
                 </td>
                 <td class="w-0 whitespace-nowrap pl-12 text-right">
-                    {{ $formatter->formatCurrency($model->total_net_price, $currency) }}
+                    {{ Number::currency($model->total_net_price) }}
                 </td>
             </tr>
             @show
@@ -169,13 +181,13 @@
                     <td class="text-right">
                         {{
                             __('Plus :percentage VAT from :total_net', [
-                                'percentage' => format_number($vat['vat_rate_percentage'], NumberFormatter::PERCENT),
-                                'total_net' => $formatter->formatCurrency($vat['total_net_price'], $currency),
+                                'percentage' => Number::percentage(bcmul($vat['vat_rate_percentage'], 100)),
+                                'total_net' => Number::currency($vat['total_net_price']),
                             ])
                         }}
                     </td>
                     <td class="w-0 whitespace-nowrap pl-12 text-right">
-                        {{ $formatter->formatCurrency($vat['total_vat_price'], $currency) }}
+                        {{ Number::currency($vat['total_vat_price']) }}
                     </td>
                 </tr>
             @endforeach
@@ -187,7 +199,7 @@
                     {{ __('Total Gross') }}
                 </td>
                 <td class="w-0 whitespace-nowrap pl-12 text-right">
-                    {{ $formatter->formatCurrency($model->total_gross_price, $currency) }}
+                    {{ Number::currency($model->total_gross_price) }}
                 </td>
             </tr>
             @show
@@ -195,7 +207,7 @@
     </table>
     @show
     @section('footer')
-    <div class="prose-xs prose break-inside-avoid">
+    <div class="prose-xs break-inside-avoid">
         {!! Blade::render(html_entity_decode($model->footer ?? ''), ['model' => $model]) !!}
         {!!
             $model

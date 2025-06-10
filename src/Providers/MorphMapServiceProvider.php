@@ -6,6 +6,7 @@ use FluxErp\Models\Activity;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Address;
 use FluxErp\Models\AddressType;
+use FluxErp\Models\AttributeTranslation;
 use FluxErp\Models\BankConnection;
 use FluxErp\Models\Calendar;
 use FluxErp\Models\CalendarEvent;
@@ -28,15 +29,19 @@ use FluxErp\Models\Currency;
 use FluxErp\Models\Discount;
 use FluxErp\Models\DiscountGroup;
 use FluxErp\Models\EventSubscription;
+use FluxErp\Models\FailedJob;
 use FluxErp\Models\Favorite;
 use FluxErp\Models\FormBuilderField;
 use FluxErp\Models\FormBuilderFieldResponse;
 use FluxErp\Models\FormBuilderForm;
 use FluxErp\Models\FormBuilderResponse;
 use FluxErp\Models\FormBuilderSection;
+use FluxErp\Models\Industry;
 use FluxErp\Models\JobBatch;
 use FluxErp\Models\Language;
 use FluxErp\Models\LanguageLine;
+use FluxErp\Models\Lead;
+use FluxErp\Models\LeadState;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\Lock;
 use FluxErp\Models\Log;
@@ -62,6 +67,7 @@ use FluxErp\Models\Pivots\Communicatable;
 use FluxErp\Models\Pivots\ContactDiscount;
 use FluxErp\Models\Pivots\ContactDiscountGroup;
 use FluxErp\Models\Pivots\JobBatchable;
+use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Models\Pivots\PrinterUser;
 use FluxErp\Models\Pivots\ProductBundleProduct;
 use FluxErp\Models\Pivots\ProductCrossSellingProduct;
@@ -114,6 +120,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'additional_column' => AdditionalColumn::class,
             'address' => Address::class,
             'address_type' => AddressType::class,
+            'attribute_translation' => AttributeTranslation::class,
             'bank_connection' => BankConnection::class,
             'calendar' => Calendar::class,
             'calendar_event' => CalendarEvent::class,
@@ -136,15 +143,19 @@ class MorphMapServiceProvider extends ServiceProvider
             'discount' => Discount::class,
             'discount_group' => DiscountGroup::class,
             'event_subscription' => EventSubscription::class,
+            'failed_job' => FailedJob::class,
             'favorite' => Favorite::class,
             'form_builder_field' => FormBuilderField::class,
             'form_builder_field_response' => FormBuilderFieldResponse::class,
             'form_builder_form' => FormBuilderForm::class,
             'form_builder_response' => FormBuilderResponse::class,
             'form_builder_section' => FormBuilderSection::class,
+            'industry' => Industry::class,
             'job_batch' => JobBatch::class,
             'language' => Language::class,
             'language_line' => LanguageLine::class,
+            'lead' => Lead::class,
+            'lead_state' => LeadState::class,
             'ledger_account' => LedgerAccount::class,
             'lock' => Lock::class,
             'log' => Log::class,
@@ -207,6 +218,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'contact_discount' => ContactDiscount::class,
             'contact_discount_group' => ContactDiscountGroup::class,
             'job_batchable' => JobBatchable::class,
+            'order_transaction' => OrderTransaction::class,
             'printer_user' => PrinterUser::class,
             'product_bundle_product' => ProductBundleProduct::class,
             'product_cross_selling_product' => ProductCrossSellingProduct::class,

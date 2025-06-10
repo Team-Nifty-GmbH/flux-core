@@ -68,7 +68,7 @@ class ProductList extends Component
                     ?->getUrl('thumb_280x280') ?? route('icons', ['name' => 'photo', 'variant' => 'outline']);
 
                 if (auth()->user()->can(route_to_permission('portal.checkout'))) {
-                    $productArray['price'] = $product->price->only([
+                    $productArray['price'] = $product->price?->only([
                         'price',
                         'root_price_flat',
                         'root_discount_percentage',

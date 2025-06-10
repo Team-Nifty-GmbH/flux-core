@@ -31,17 +31,16 @@
     <x-card :header="__('Additional columns')">
         <x-flux::additional-columns
             :model="\FluxErp\Models\SerialNumber::class"
-            :id="$this->serialNumber->id ?? null"
+            :id="data_get($this->serialNumber, 'id')"
             wire="serialNumber"
         />
     </x-card>
     <x-errors />
-    @if ($this->serialNumber->id ?? false)
+    @if ($serialNumberId = data_get($this->serialNumber, 'id'))
         <x-card :header="__('Files')">
-            <livewire:folder-tree
+            <livewire:product.serial-number.media
                 wire:key="{{ uniqid() }}"
-                :model-type="\FluxErp\Models\SerialNumber::class"
-                :model-id="$this->serialNumber->id ?? null"
+                :model-id="$serialNumberId"
             />
         </x-card>
     @endif

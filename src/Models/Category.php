@@ -15,7 +15,6 @@ use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SortableTrait;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Str;
 use Spatie\EloquentSortable\Sortable;
@@ -25,7 +24,10 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 class Category extends FluxModel implements InteractsWithDataTables, Sortable
 {
     use Filterable, HasAdditionalColumns, HasAttributeTranslations, HasPackageFactory, HasParentChildRelations,
-        HasUserModification, HasUuid, LogsActivity, Searchable, SortableTrait;
+        HasUserModification, HasUuid, LogsActivity, SortableTrait;
+    use Searchable {
+        Searchable::scoutIndexSettings as baseScoutIndexSettings;
+    }
 
     public array $sortable = [
         'order_column_name' => 'sort_number',
@@ -57,6 +59,15 @@ class Category extends FluxModel implements InteractsWithDataTables, Sortable
                     }
                 );
             });
+    }
+
+    public static function scoutIndexSettings(): ?array
+    {
+        return static::baseScoutIndexSettings() ?? [
+            'filterableAttributes' => [
+                'model_type',
+            ],
+        ];
     }
 
     protected function casts(): array
@@ -104,11 +115,6 @@ class Category extends FluxModel implements InteractsWithDataTables, Sortable
     public function getUrl(): ?string
     {
         return null;
-    }
-
-    public function media(): HasMany
-    {
-        return $this->hasMany(Media::class);
     }
 
     public function model(): MorphToMany

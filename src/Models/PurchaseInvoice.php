@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Contracts\HasMediaForeignKey;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Communicatable;
 use FluxErp\Traits\HasPackageFactory;
@@ -15,10 +16,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\MediaLibrary\HasMedia;
 
-class PurchaseInvoice extends FluxModel implements HasMedia
+class PurchaseInvoice extends FluxModel implements HasMedia, HasMediaForeignKey
 {
     use Commentable, Communicatable, HasPackageFactory, HasTags, HasUserModification, HasUuid, InteractsWithMedia,
         LogsActivity, SoftDeletes;
+
+    public static function mediaReplaced(int|string|null $oldMediaId, int|string|null $newMediaId): void
+    {
+        static::query()
+            ->where('media_id', $oldMediaId)
+            ->update(['media_id' => $newMediaId]);
+    }
 
     protected static function booted(): void
     {

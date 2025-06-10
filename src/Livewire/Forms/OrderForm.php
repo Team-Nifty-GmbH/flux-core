@@ -91,6 +91,8 @@ class OrderForm extends FluxForm
 
     public ?int $language_id = null;
 
+    public ?int $lead_id = null;
+
     public ?string $logistic_note = null;
 
     #[ExcludeFromActionData]

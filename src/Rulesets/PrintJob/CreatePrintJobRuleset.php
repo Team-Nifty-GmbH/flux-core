@@ -39,6 +39,9 @@ class CreatePrintJobRuleset extends FluxRuleset
                 'string',
                 'max:255',
             ],
+            'is_completed' => [
+                'boolean',
+            ],
         ];
     }
 }

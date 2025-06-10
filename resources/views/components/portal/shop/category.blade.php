@@ -25,7 +25,7 @@
     @if ($category->relationLoaded('children'))
         <div class="flex flex-col gap-1.5">
             @foreach ($category->children ?? [] as $child)
-                <x-portal.shop.category
+                <x-flux::portal.shop.category
                     :path="$path"
                     :level="$level + 1"
                     :category="$child"

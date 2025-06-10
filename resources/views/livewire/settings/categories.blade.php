@@ -7,10 +7,7 @@
                     .querySelector('[x-data]'),
             )
             $tallstackuiSelect('category-parent-id').mergeRequestParams({
-                where: [
-                    ['model_type', '=', $wire.category.model_type],
-                    ['contact_id', '=', $wire.category.id],
-                ],
+                where: [['model_type', '=', $wire.category.model_type]],
             })
         },
     }"
@@ -18,12 +15,16 @@
     @section('modals')
     <x-modal
         id="edit-category-modal"
-        x-on:open="setCategorySearch()"
+        x-on:open="setCategorySearch(); $focusOn('category-name');"
         :title="$category->id ? __('Edit Category') : __('Create Category')"
     >
         <div class="flex flex-col gap-1.5">
             @section('modals.edit-category.content')
-            <x-input wire:model="category.name" :label="__('Name')"></x-input>
+            <x-input
+                id="category-name"
+                wire:model="category.name"
+                :label="__('Name')"
+            ></x-input>
             <div class="mt-2">
                 <x-toggle
                     wire:model="category.is_active"
@@ -35,6 +36,7 @@
                     x-bind:disabled="$wire.category.id"
                     label="{{ __('Model') }}"
                     placeholder="{{ __('Model') }}"
+                    x-on:select="setCategorySearch()"
                     wire:model="category.model_type"
                     required
                     :options="$models"

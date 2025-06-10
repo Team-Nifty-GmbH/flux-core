@@ -3,12 +3,15 @@
 namespace FluxErp\Models;
 
 use Exception;
+use FluxErp\Actions\OrderTransaction\CreateOrderTransaction;
+use FluxErp\Actions\Transaction\CreateTransaction;
 use FluxErp\Casts\Money;
 use FluxErp\Casts\Percentage;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
 use FluxErp\Models\Pivots\OrderSchedule;
+use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Rules\Numeric;
 use FluxErp\States\Order\DeliveryState\DeliveryState;
 use FluxErp\States\Order\OrderState;
@@ -62,11 +65,14 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
 {
     use CascadeSoftDeletes, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasClientAssignment,
         HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasRelatedModel, HasSerialNumberRange,
-        HasStates, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable, Searchable,
-        Trackable {
-            Printable::resolvePrintViews as protected printableResolvePrintViews;
-            HasSerialNumberRange::getSerialNumber as protected hasSerialNumberRangeGetSerialNumber;
-        }
+        HasStates, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable;
+    use Searchable {
+        Searchable::scoutIndexSettings as baseScoutIndexSettings;
+    }
+    use Trackable {
+        Printable::resolvePrintViews as protected printableResolvePrintViews;
+        HasSerialNumberRange::getSerialNumber as protected hasSerialNumberRangeGetSerialNumber;
+    }
 
     public static string $iconName = 'shopping-bag';
 
@@ -88,6 +94,18 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
                 'locked',
             ]
         );
+    }
+
+    public static function scoutIndexSettings(): ?array
+    {
+        return static::baseScoutIndexSettings() ?? [
+            'filterableAttributes' => [
+                'parent_id',
+                'contact_id',
+                'is_locked',
+            ],
+            'sortableAttributes' => ['*'],
+        ];
     }
 
     protected static function booted(): void
@@ -135,6 +153,47 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
             }
 
             if ($order->isDirty('invoice_number')) {
+                $orderPositions = $order->orderPositions()
+                    ->whereNotNull('credit_account_id')
+                    ->where('post_on_credit_account', '!=', 0)
+                    ->get(['id', 'credit_account_id', 'credit_amount', 'post_on_credit_account']);
+
+                DB::transaction(function () use ($order, $orderPositions): void {
+                    foreach ($orderPositions as $orderPosition) {
+                        $multiplier = match (true) {
+                            $orderPosition->post_on_credit_account > 0 => 1,
+                            $orderPosition->post_on_credit_account < 0 => -1,
+                            default => 0,
+                        };
+
+                        if ($multiplier === 0) {
+                            continue;
+                        }
+
+                        $transaction = CreateTransaction::make([
+                            'contact_bank_connection_id' => $orderPosition->credit_account_id,
+                            'currency_id' => $order->currency_id,
+                            'value_date' => $order->order_date,
+                            'booking_date' => $order->invoice_date,
+                            'amount' => bcmul($orderPosition->credit_amount, $multiplier),
+                            'purpose' => $orderPosition->getLabel(),
+                        ])
+                            ->validate()
+                            ->execute();
+
+                        if ($multiplier === -1) {
+                            CreateOrderTransaction::make([
+                                'transaction_id' => $transaction->id,
+                                'order_id' => $order->id,
+                                'amount' => $orderPosition->credit_amount,
+                                'is_accepted' => true,
+                            ])
+                                ->validate()
+                                ->execute();
+                        }
+                    }
+                });
+
                 $order->calculateBalance();
 
                 if (is_null($order->payment_reminder_next_date) && ! is_null($order->invoice_date)) {
@@ -257,7 +316,11 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
     public function calculateBalance(): static
     {
         $this->balance = bcround(
-            bcsub($this->total_gross_price, $this->transactions()->sum('amount'), 9),
+            bcsub(
+                $this->total_gross_price,
+                $this->totalPaid(),
+                9
+            ),
             2
         );
 
@@ -325,7 +388,12 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
         } else {
             if (
                 bccomp(
-                    bcround($this->transactions()->sum('amount'), 2),
+                    bcround(
+                        $this->transactions()
+                            ->withPivot('amount')
+                            ->sum('order_transaction.amount'),
+                        2
+                    ),
                     bcround($this->total_gross_price, 2),
                     2
                 ) === 0
@@ -603,6 +671,11 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
         return $this->hasMany(OrderPosition::class);
     }
 
+    public function orderTransactions(): HasMany
+    {
+        return $this->hasMany(OrderTransaction::class);
+    }
+
     public function orderType(): BelongsTo
     {
         return $this->belongsTo(OrderType::class);
@@ -769,9 +842,16 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
         return $this->hasManyThrough(Task::class, Project::class);
     }
 
-    public function transactions(): HasMany
+    public function totalPaid(): string|float|int
     {
-        return $this->hasMany(Transaction::class);
+        return $this->transactions()
+            ->withPivot('amount')
+            ->sum('order_transaction.amount');
+    }
+
+    public function transactions(): BelongsToMany
+    {
+        return $this->belongsToMany(Transaction::class)->using(OrderTransaction::class);
     }
 
     public function users(): BelongsToMany
