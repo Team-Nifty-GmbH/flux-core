@@ -120,6 +120,8 @@ class ProjectTaskList extends BaseTaskList
                 ]),
             TabButton::make('task.media')
                 ->text(__('Media'))
+                ->isLivewireComponent()
+                ->wireModel('task.id')
                 ->attributes([
                     'x-bind:disabled' => '! $wire.task.id',
                 ]),
