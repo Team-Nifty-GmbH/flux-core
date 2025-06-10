@@ -12,11 +12,11 @@ class LanguageLineFactory extends Factory
     public function definition(): array
     {
         return [
-            'group' => $this->faker->text(20),
-            'key' => $this->faker->text(10),
+            'group' => $this->faker->word(),
+            'key' => $this->faker->slug(),
             'text' => [
-                'en' => $this->faker->realText(60),
-                'de' => $this->faker->realText(60),
+                'en' => $this->faker->sentence(),
+                'de' => $this->faker->sentence(),
             ],
         ];
     }
