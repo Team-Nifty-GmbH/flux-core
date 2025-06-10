@@ -22,11 +22,6 @@ class RecurringRevenueForecast extends BarChart
         'stacked' => true,
     ];
 
-    public static function dashboardComponent(): array|string
-    {
-        return Dashboard::class;
-    }
-
     public ?array $plotOptions = [
         'bar' => [
             'horizontal' => false,
@@ -37,28 +32,17 @@ class RecurringRevenueForecast extends BarChart
 
     public bool $showTotals = true;
 
+    public static function dashboardComponent(): array|string
+    {
+        return Dashboard::class;
+    }
+
     #[Renderless]
     public function calculateByTimeFrame(): void
     {
         $this->skipRender();
         $this->calculateChart();
         $this->updateData();
-    }
-
-    private function createFormattedPeriodDay(Carbon $date): string
-    {
-        return $date->day . ' ' . $date->monthName;
-    }
-
-    private function createFormattedPeriodMonth(Carbon $date): string
-    {
-        return $date->monthName . ' ' . $date->year;
-    }
-
-    private function createFormattedPeriodQuarter(Carbon $date): string
-    {
-        $quarter = ceil($date->month / 3);
-        return 'Q' . $quarter . ' ' . $date->year;
     }
 
     public function calculateChart(): void
@@ -108,24 +92,24 @@ class RecurringRevenueForecast extends BarChart
         }
 
         $orderSchedules = resolve_static(OrderSchedule::class, 'query')
-            ->whereHas('schedule', function($query) {
+            ->whereHas('schedule', function ($query): void {
                 $query->where('is_active', true)
-                    ->where(function ($q) {
+                    ->where(function ($q): void {
                         $q->whereNull('ends_at')
                             ->orWhere('ends_at', '>', Carbon::now());
                     });
             })
             ->with([
-                'order' => function ($query) {
+                'order' => function ($query): void {
                     $query->select(['id', 'client_id', 'total_net_price'])
-                        ->with(['client' => function ($q) {
+                        ->with(['client' => function ($q): void {
                             $q->select(['id', 'name']);
                         }]);
                 },
-                'schedule' => function ($query) {
+                'schedule' => function ($query): void {
                     $query->where('is_active', true)
                         ->select(['id', 'cron_expression', 'created_at', 'ends_at', 'is_active']);
-                }
+                },
             ])
             ->get();
 
@@ -138,11 +122,11 @@ class RecurringRevenueForecast extends BarChart
                 if ($orderSchedule->schedule->created_at > $effectiveStartDate) {
                     $effectiveStartDate = $orderSchedule->schedule->created_at;
                 }
-                $order       = $orderSchedule->order;
-                $clientName  = $order->client->name ?? __('Unknown');
-                $orderValue  = $order->total_net_price;
-                $cron        = new CronExpression($orderSchedule->schedule->cron_expression);
-                $nextRun     = $cron->getNextRunDate($effectiveStartDate);
+                $order = $orderSchedule->order;
+                $clientName = $order->client->name ?? __('Unknown');
+                $orderValue = $order->total_net_price;
+                $cron = new CronExpression($orderSchedule->schedule->cron_expression);
+                $nextRun = $cron->getNextRunDate($effectiveStartDate);
 
                 if (! isset($seriesIndexMap[$clientName])) {
                     $seriesIndexMap[$clientName] = count($series);
@@ -193,5 +177,22 @@ class RecurringRevenueForecast extends BarChart
     public function showTitle(): bool
     {
         return true;
+    }
+
+    private function createFormattedPeriodDay(Carbon $date): string
+    {
+        return $date->day . ' ' . $date->monthName;
+    }
+
+    private function createFormattedPeriodMonth(Carbon $date): string
+    {
+        return $date->monthName . ' ' . $date->year;
+    }
+
+    private function createFormattedPeriodQuarter(Carbon $date): string
+    {
+        $quarter = ceil($date->month / 3);
+
+        return 'Q' . $quarter . ' ' . $date->year;
     }
 }
