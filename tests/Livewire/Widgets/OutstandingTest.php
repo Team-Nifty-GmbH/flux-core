@@ -25,15 +25,15 @@ use Livewire\Livewire;
 
 class OutstandingTest extends BaseSetup
 {
+    public array $orderTypeIds = [];
+
     protected string $livewireComponent = Outstanding::class;
 
     private Currency $currency;
 
-    private string $symbol;
+    private string $inTimeDate;
 
     private string $overDueDate;
-
-    private string $inTimeDate;
 
     protected function setUp(): void
     {
@@ -43,169 +43,156 @@ class OutstandingTest extends BaseSetup
             'is_default' => true,
         ]);
 
-        $this->symbol = Currency::default()->symbol;
-
         $this->overDueDate = Carbon::now()->subDay()->toDateString();
 
         $this->inTimeDate = Carbon::now()->addDay()->toDateString();
+
+        $this->orderTypeIds = resolve_static(OrderType::class, 'query')
+            ->where('is_active', true)
+            ->get(['id', 'order_type_enum'])
+            ->filter(fn (OrderType $orderType) => ! $orderType->order_type_enum->isPurchase()
+                && $orderType->order_type_enum->multiplier() > 0
+            )
+            ->pluck('id')
+            ->toArray();
     }
 
-    public function test_renders_successfully(): void
-    {
-        $this->createData(collect());
-
-        Livewire::test($this->livewireComponent)
-            ->assertStatus(200);
-    }
-
-    public function test_calculate_sum_payment_state_all_time_relations_in_time()
+    public function test_calculate_sum_payment_state_all_time_relations_in_time(): void
     {
         $paymentProps = collect([
             [
-                Paid::class, $this->inTimeDate,
+                'state' => Paid::class,
+                'date' => $this->inTimeDate,
             ],
             [
-                PartialPaid::class, $this->inTimeDate,
+                'state' => PartialPaid::class,
+                'date' => $this->inTimeDate,
             ],
             [
-                Open::class, $this->inTimeDate,
+                'state' => Open::class,
+                'date' => $this->inTimeDate,
             ],
         ]);
 
         $orders = $this->createData($paymentProps);
 
-        $sum = $this->createSumString($orders);
-
-        $subValue = $this->createSubString($orders);
-
         Livewire::test($this->livewireComponent)
             ->call('calculateSum')
-            ->assertSet('sum', $sum)
-            ->assertSet('subValue', $subValue)
+            ->assertSet('sum', $this->createSumString($orders))
+            ->assertSet('subValue', $this->createSubString($orders))
             ->assertHasNoErrors()
             ->assertStatus(200);
     }
 
-    public function test_calculate_sum_payment_state_all_time_relations_over_due()
+    public function test_calculate_sum_payment_state_all_time_relations_over_due(): void
     {
         $paymentProps = collect([
             [
-                Paid::class, $this->overDueDate,
+                'state' => Paid::class,
+                'date' => $this->overDueDate,
             ],
             [
-                PartialPaid::class, $this->overDueDate,
+                'state' => PartialPaid::class,
+                'date' => $this->overDueDate,
             ],
             [
-                Open::class, $this->overDueDate,
+                'state' => Open::class,
+                'date' => $this->overDueDate,
             ],
         ]);
 
         $orders = $this->createData($paymentProps);
 
-        $sum = $this->createSumString($orders);
-
-        $subValue = $this->createSubString($orders);
-
         Livewire::test($this->livewireComponent)
             ->call('calculateSum')
-            ->assertSet('sum', $sum)
-            ->assertSet('subValue', $subValue)
+            ->assertSet('sum', $this->createSumString($orders))
+            ->assertSet('subValue', $this->createSubString($orders))
             ->assertHasNoErrors()
             ->assertStatus(200);
     }
 
-    public function test_calculate_sum_payment_state_paid_time_relations_all()
+    public function test_calculate_sum_payment_state_open_time_relations_all(): void
     {
         $paymentProps = collect([
             [
-                Paid::class, $this->overDueDate,
+                'state' => Open::class,
+                'date' => $this->overDueDate,
             ],
             [
-                Paid::class, $this->inTimeDate,
+                'state' => Open::class,
+                'date' => $this->inTimeDate,
             ],
         ]);
 
         $orders = $this->createData($paymentProps);
 
-        $sum = $this->createSumString($orders);
-
-        $subValue = $this->createSubString($orders);
-
         Livewire::test($this->livewireComponent)
             ->call('calculateSum')
-            ->assertSet('sum', $sum)
-            ->assertSet('subValue', $subValue)
+            ->assertSet('sum', $this->createSumString($orders))
+            ->assertSet('subValue', $this->createSubString($orders))
             ->assertHasNoErrors()
             ->assertStatus(200);
     }
 
-    public function test_calculate_sum_payment_state_partial_paid_time_relations_all()
+    public function test_calculate_sum_payment_state_paid_time_relations_all(): void
     {
         $paymentProps = collect([
             [
-                PartialPaid::class, $this->overDueDate,
+                'state' => Paid::class,
+                'date' => $this->overDueDate,
             ],
             [
-                PartialPaid::class, $this->inTimeDate,
+                'state' => Paid::class,
+                'date' => $this->inTimeDate,
             ],
         ]);
 
         $orders = $this->createData($paymentProps);
 
-        $sum = $this->createSumString($orders);
-
-        $subValue = $this->createSubString($orders);
-
         Livewire::test($this->livewireComponent)
             ->call('calculateSum')
-            ->assertSet('sum', $sum)
-            ->assertSet('subValue', $subValue)
+            ->assertSet('sum', $this->createSumString($orders))
+            ->assertSet('subValue', $this->createSubString($orders))
             ->assertHasNoErrors()
             ->assertStatus(200);
     }
 
-    public function test_calculate_sum_payment_state_open_time_relations_all()
+    public function test_calculate_sum_payment_state_partial_paid_time_relations_all(): void
     {
         $paymentProps = collect([
             [
-                Open::class, $this->overDueDate,
+                'state' => PartialPaid::class,
+                'date' => $this->overDueDate,
             ],
             [
-                Open::class, $this->inTimeDate,
+                'state' => PartialPaid::class,
+                'date' => $this->inTimeDate,
             ],
         ]);
 
         $orders = $this->createData($paymentProps);
 
-        $sum = $this->createSumString($orders);
-
-        $subValue = $this->createSubString($orders);
-
         Livewire::test($this->livewireComponent)
             ->call('calculateSum')
-            ->assertSet('sum', $sum)
-            ->assertSet('subValue', $subValue)
+            ->assertSet('sum', $this->createSumString($orders))
+            ->assertSet('subValue', $this->createSubString($orders))
             ->assertHasNoErrors()
             ->assertStatus(200);
     }
 
-    public function test_calculate_table_empty()
+    public function test_calculate_table_empty(): void
     {
-        $orders = Order::all();
-
-        $sum = $this->createSumString($orders);
-
-        $subValue = $this->createSubString($orders);
+        $orders = Collection::make([]);
 
         Livewire::test($this->livewireComponent)
             ->call('calculateSum')
-            ->assertSet('sum', $sum)
-            ->assertSet('subValue', $subValue)
+            ->assertSet('sum', $this->createSumString($orders))
+            ->assertSet('subValue', $this->createSubString($orders))
             ->assertHasNoErrors()
             ->assertStatus(200);
     }
 
-    public function test_redirect_to_orders()
+    public function test_redirect_to_orders(): void
     {
         Livewire::test($this->livewireComponent)
             ->call('show')
@@ -214,12 +201,20 @@ class OutstandingTest extends BaseSetup
             ->assertStatus(200);
     }
 
-    public function test_redirect_to_over_due()
+    public function test_redirect_to_over_due(): void
     {
         Livewire::test($this->livewireComponent)
             ->call('showOverdue')
             ->assertRedirect(route('accounting.payment-reminders'))
             ->assertHasNoErrors()
+            ->assertStatus(200);
+    }
+
+    public function test_renders_successfully(): void
+    {
+        $this->createData(collect());
+
+        Livewire::test($this->livewireComponent)
             ->assertStatus(200);
     }
 
@@ -249,6 +244,7 @@ class OutstandingTest extends BaseSetup
             ->hasAttached(factory: $this->dbClient, relationship: 'clients')
             ->create([
                 'is_default' => false,
+                'is_direct_debit' => true,
             ]);
 
         $invoice = PurchaseInvoice::factory()->create([
@@ -272,9 +268,9 @@ class OutstandingTest extends BaseSetup
                         'address_delivery_id' => $address->id,
                         'is_locked' => false,
                         'total_gross_price' => 100,
-                        'payment_state' => $paymentProp[0],
-                        'payment_reminder_next_date' => $paymentProp[1],
-
+                        'balance' => 100,
+                        'payment_state' => data_get($paymentProp, 'state'),
+                        'payment_reminder_next_date' => data_get($paymentProp, 'date'),
                     ])
             );
         }
@@ -284,14 +280,21 @@ class OutstandingTest extends BaseSetup
 
     private function createSubString(Collection $orders): string
     {
-        return '<span class="text-negative-600">'
+        return '<span class="text-red-600">'
         . Number::abbreviate(
             $orders
-                ->where('payment_state', '!=', 'paid')
-                ->where('payment_reminder_next_date', '<=', now()->toDate())
+                ->where('balance', '>', 0)
+                ->where('payment_state', '!=', Paid::$name)
+                ->whereNotNull('invoice_number')
+                ->whereNotNull('invoice_date')
+                ->where('payment_reminder_next_date', '<=', now()->endOfDay()->toDate())
+                ->where(
+                    'order_type_id',
+                    $this->orderTypeIds
+                )
                 ->sum('balance'),
             2)
-        . ' ' . $this->symbol . ' ' . __('Overdue')
+        . ' ' . Currency::default()->symbol . ' ' . __('Overdue')
         . '</span>';
     }
 
@@ -299,9 +302,11 @@ class OutstandingTest extends BaseSetup
     {
         return Number::abbreviate(
             $orders
-                ->where('payment_state', '!=', 'paid')
+                ->whereNotNull('invoice_date')
+                ->whereNotNull('invoice_number')
+                ->where('payment_state', '!=', Paid::$name)
                 ->sum('balance'),
             2
-        ) . ' ' . $this->symbol;
+        ) . ' ' . Currency::default()->symbol;
     }
 }
