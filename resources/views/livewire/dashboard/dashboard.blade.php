@@ -20,4 +20,5 @@
             @endsection
         </div>
     </div>
+    <x-flux::editor />
 @endsection

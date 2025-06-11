@@ -132,14 +132,25 @@
         @if ($availableFontSizes && ! $tooltipDropdown)
             <x-button
                 x-on:click.prevent="onClick"
-                x-ref="tippyParent-{{$id}}"
-                x-data="editorFontSizeHandler($refs['tippyParent-{{$id}}'], $refs['fontSizeDropdown-{{$id}}'])"
+                x-ref="tippyParent-fontSize-{{$id}}"
+                x-data="editorFontSizeColorHandler($refs['tippyParent-fontSize-{{$id}}'], $refs['fontSizeDropdown-{{$id}}'])"
                 flat
                 color="secondary"
             >
                 <x-slot:text>
                     <i class="ph ph-text-aa text-lg"></i>
                 </x-slot>
+            </x-button>
+        @endif
+
+        @if(! $tooltipDropdown)
+            <x-button
+                x-on:click.prevent="onClick"
+                x-ref="tippyParent-color-{{$id}}"
+                flat
+                icon="paint-brush"
+                x-data="editorFontSizeColorHandler($refs['tippyParent-color-{{$id}}'], $refs['colorDropDown-{{$id}}'])"
+                color="secondary">
             </x-button>
         @endif
 
@@ -209,6 +220,17 @@
                     x-on:click="editor().chain().focus().setFontSize({{ json_encode($size) }}).run()"
                 ></x-button>
             @endforeach
+        </div>
+    </template>
+    <template x-ref="colorDropDown-{{ $id }}">
+        <div class="flex space-x-1">
+        @foreach($colorPalette as $color)
+           <div class="flex flex-col gap-1">
+            @foreach($color as $shade)
+                   <div class="cursor-pointer min-w-6 min-h-6" style="background-color: {{$shade}}"></div>
+            @endforeach
+           </div>
+        @endforeach
         </div>
     </template>
 </div>

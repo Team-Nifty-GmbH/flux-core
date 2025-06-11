@@ -1,6 +1,6 @@
 import TextStyle from '@tiptap/extension-text-style';
 
-export const FontSizeConfig = TextStyle.extend({
+export const FontSizeColorConfig = TextStyle.extend({
     addOptions() {
         return {
             types: ['textStyle'],
@@ -37,6 +37,18 @@ export const FontSizeConfig = TextStyle.extend({
                             return {};
                         },
                     },
+                    color: {
+                        default: null,
+                        parseHTML: (element) => element.style.color,
+                        renderHTML: (attributes) => {
+                            if (!attributes.color) {
+                                return {};
+                            }
+                            return {
+                                style: `color: ${attributes.color}`,
+                            };
+                        },
+                    },
                 },
             },
         ];
@@ -47,6 +59,19 @@ export const FontSizeConfig = TextStyle.extend({
                 (fontSize) =>
                 ({ chain }) => {
                     return chain().setMark('textStyle', { fontSize });
+                },
+            setColor:
+                (color) =>
+                ({ chain }) => {
+                    return chain().setMark('color', { color }).run();
+                },
+            unsetColor:
+                () =>
+                ({ chain }) => {
+                    return chain()
+                        .setMark('color', { color: null })
+                        .removeEmptyTextStyle()
+                        .run();
                 },
         };
     },
