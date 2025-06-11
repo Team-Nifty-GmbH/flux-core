@@ -136,9 +136,7 @@
                     position="right"
                 >
                     <x-slot:text>
-                        <x-label
-                            :label="__('Rating')"
-                        />
+                        <x-label :label="__('Rating')" />
                     </x-slot>
                 </x-rating>
             </div>
