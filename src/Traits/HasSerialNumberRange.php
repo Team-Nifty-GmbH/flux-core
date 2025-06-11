@@ -23,7 +23,7 @@ trait HasSerialNumberRange
 
             $query = resolve_static(SerialNumberRange::class, 'query')
                 ->where('type', $type)
-                ->where('model_type', app(static::class)->getMorphClass())
+                ->where('model_type', morph_alias(static::class))
                 ->where('client_id', $clientId);
 
             $store = false;
@@ -41,7 +41,7 @@ trait HasSerialNumberRange
                     $serialNumberRange->fill([
                         'client_id' => $clientId,
                         'type' => $type,
-                        'model_type' => app(static::class)->getMorphClass(),
+                        'model_type' => morph_alias(static::class),
                         'stores_serial_numbers' => $store,
                     ])->save();
                 } catch (Exception) {

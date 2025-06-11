@@ -173,7 +173,7 @@ abstract class Metric
 
     protected function getDateColumn(): string
     {
-        return $this->dateColumn ?? $this->query->getModel()->getCreatedAtColumn();
+        return $this->dateColumn ?? $this->query->getModel()->getQualifiedCreatedAtColumn();
     }
 
     protected function resolveBetween(array $range): array
