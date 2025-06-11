@@ -34,20 +34,13 @@
                                 x-bind:class="! addressItem.is_active && 'text-secondary-400 dark:text-gray-200'"
                             >
                                 <div
-                                    class="text-ellipsis whitespace-nowrap text-sm"
+                                    class="text-sm text-ellipsis whitespace-nowrap"
                                 >
                                     @section('left-side-bar.address-list.address')
-                                    <div
-                                        class="font-semibold"
-                                        x-text="addressItem.company"
-                                    ></div>
-                                    <div
-                                        x-text="((addressItem.firstname || '') + ' ' + (addressItem.lastname || '')).trim()"
-                                    ></div>
-                                    <div x-text="addressItem.street"></div>
-                                    <div
-                                        x-text="((addressItem.zip || '') + ' ' + (addressItem.city || '')).trim()"
-                                    ></div>
+                                    <p
+                                        class="first-line:font-semibold"
+                                        x-html="addressItem.postal_address.join('<br>')"
+                                    ></p>
                                     @show
                                 </div>
                                 <div class="flex flex-col gap-0.5">

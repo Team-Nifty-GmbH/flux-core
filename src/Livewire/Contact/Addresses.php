@@ -240,20 +240,8 @@ class Addresses extends Component
             ->orderByDesc('is_invoice_address')
             ->orderByDesc('is_delivery_address')
             ->orderByDesc('is_active')
-            ->get([
-                'id',
-                'contact_id',
-                'company',
-                'firstname',
-                'lastname',
-                'zip',
-                'city',
-                'street',
-                'is_active',
-                'is_main_address',
-                'is_invoice_address',
-                'is_delivery_address',
-            ]);
+            ->get()
+            ->each(fn (Address $address) => $address->append('postal_address'));
 
         foreach ($addresses as $address) {
             $this->listeners[

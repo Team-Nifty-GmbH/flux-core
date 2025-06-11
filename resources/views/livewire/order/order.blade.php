@@ -426,7 +426,7 @@
             </div>
         </div>
         <div
-            class="mt-6 flex flex-col-reverse justify-stretch space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-x-3 sm:space-y-0 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3"
+            class="mt-6 flex flex-col-reverse justify-stretch space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3"
         >
             @if (resolve_static(\FluxErp\Actions\Order\ReplicateOrder::class, 'canPerformAction', [false]))
                 <x-button
@@ -465,10 +465,10 @@
         wire:loading="tab"
         wire:model="tab"
         :tabs="$tabs"
-        class="w-full gap-4 lg:col-start-1 xl:col-span-2 xl:flex"
+        class="grid w-full gap-4 lg:col-start-1 xl:col-span-2 xl:flex"
     >
         <x-slot:prepend>
-            <section class="relative basis-2/12" wire:ignore>
+            <section class="relative basis-2/12 max-w-96" wire:ignore>
                 <div class="sticky top-6 flex flex-col gap-4">
                     @section('contact-address-card')
                     <x-card>
@@ -579,33 +579,10 @@
                             />
                         </div>
                         <div class="text-sm">
-                            <div
-                                x-text="$wire.order.address_invoice.company"
-                            ></div>
-                            <div
-                                x-text="$wire.order.address_invoice.addition"
-                            ></div>
-                            <div
-                                x-text="
-                                    (
-                                        ($wire.order.address_invoice?.firstname || '').trim() +
-                                        ' ' +
-                                        ($wire.order.address_invoice?.lastname || '').trim()
-                                    ).trim()
-                                "
-                            ></div>
-                            <div
-                                x-text="$wire.order.address_invoice.street"
-                            ></div>
-                            <div
-                                x-text="
-                                    (
-                                        ($wire.order.address_invoice?.zip || '').trim() +
-                                        ' ' +
-                                        ($wire.order.address_invoice?.city || '').trim()
-                                    ).trim()
-                                "
-                            ></div>
+                            <p
+                                class="first-line:font-semibold truncate"
+                                x-html="$wire.order.address_invoice.join('<br>')"
+                            ></p>
                         </div>
                     </x-card>
                     @show
@@ -656,33 +633,10 @@
                             class="text-sm"
                             x-bind:class="$wire.order.address_delivery_id === $wire.order.address_invoice_id && 'hidden'"
                         >
-                            <div
-                                x-text="$wire.order.address_delivery?.company"
-                            ></div>
-                            <div
-                                x-text="$wire.order.address_delivery?.addition"
-                            ></div>
-                            <div
-                                x-text="
-                                    (
-                                        ($wire.order.address_delivery?.firstname || '').trim() +
-                                        ' ' +
-                                        ($wire.order.address_delivery?.lastname || '').trim()
-                                    ).trim()
-                                "
-                            ></div>
-                            <div
-                                x-text="$wire.order.address_delivery?.street"
-                            ></div>
-                            <div
-                                x-text="
-                                    (
-                                        ($wire.order.address_invoice?.zip || '').trim() +
-                                        ' ' +
-                                        ($wire.order.address_invoice?.city || '').trim()
-                                    ).trim()
-                                "
-                            ></div>
+                            <p
+                                class="first-line:font-semibold truncate"
+                                x-html="$wire.order.address_delivery.join('<br>')"
+                            ></p>
                         </div>
                     </x-card>
                     @show
@@ -881,7 +835,7 @@
             </section>
         </x-slot>
         <x-slot:append>
-            <section class="relative basis-2/12" wire:ignore>
+            <section class="relative max-w-96 basis-2/12" wire:ignore>
                 <div class="sticky top-6 space-y-6">
                     @section('content.right')
                     <x-card>
@@ -1179,7 +1133,7 @@
                     @show
                     <x-card>
                         <div
-                            class="overflow-hidden text-ellipsis whitespace-nowrap text-sm"
+                            class="overflow-hidden text-sm text-ellipsis whitespace-nowrap"
                         >
                             <div class="flex gap-0.5">
                                 <div class="">{{ __('Created At') }}:</div>
