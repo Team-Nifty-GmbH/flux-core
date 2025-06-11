@@ -129,6 +129,18 @@
                     select="label:name|value:id"
                     :options="$contactOrigins"
                 />
+                <x-rating
+                    x-bind:disabled="! $wire.$parent.edit"
+                    wire:model.number="contact.rating"
+                    :quantity="5"
+                    position="right"
+                >
+                    <x-slot:text>
+                        <x-label
+                            :label="__('Rating')"
+                        />
+                    </x-slot>
+                </x-rating>
             </div>
         </x-card>
         @show
