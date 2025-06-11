@@ -34,7 +34,7 @@
                                 x-bind:class="! addressItem.is_active && 'text-secondary-400 dark:text-gray-200'"
                             >
                                 <div
-                                    class="text-sm text-ellipsis whitespace-nowrap"
+                                    class="text-ellipsis whitespace-nowrap text-sm"
                                 >
                                     @section('left-side-bar.address-list.address')
                                     <p

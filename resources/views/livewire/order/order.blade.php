@@ -426,7 +426,7 @@
             </div>
         </div>
         <div
-            class="mt-6 flex flex-col-reverse justify-stretch space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3"
+            class="mt-6 flex flex-col-reverse justify-stretch space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-x-3 sm:space-y-0 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3"
         >
             @if (resolve_static(\FluxErp\Actions\Order\ReplicateOrder::class, 'canPerformAction', [false]))
                 <x-button
@@ -468,7 +468,7 @@
         class="grid w-full gap-4 lg:col-start-1 xl:col-span-2 xl:flex"
     >
         <x-slot:prepend>
-            <section class="relative basis-2/12 max-w-96" wire:ignore>
+            <section class="relative max-w-96 basis-2/12" wire:ignore>
                 <div class="sticky top-6 flex flex-col gap-4">
                     @section('contact-address-card')
                     <x-card>
@@ -580,7 +580,7 @@
                         </div>
                         <div class="text-sm">
                             <p
-                                class="first-line:font-semibold truncate"
+                                class="truncate first-line:font-semibold"
                                 x-html="$wire.order.address_invoice.join('<br>')"
                             ></p>
                         </div>
@@ -634,7 +634,7 @@
                             x-bind:class="$wire.order.address_delivery_id === $wire.order.address_invoice_id && 'hidden'"
                         >
                             <p
-                                class="first-line:font-semibold truncate"
+                                class="truncate first-line:font-semibold"
                                 x-html="$wire.order.address_delivery.join('<br>')"
                             ></p>
                         </div>
@@ -1133,7 +1133,7 @@
                     @show
                     <x-card>
                         <div
-                            class="overflow-hidden text-sm text-ellipsis whitespace-nowrap"
+                            class="overflow-hidden text-ellipsis whitespace-nowrap text-sm"
                         >
                             <div class="flex gap-0.5">
                                 <div class="">{{ __('Created At') }}:</div>
