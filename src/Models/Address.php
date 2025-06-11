@@ -579,14 +579,16 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
     protected function postalAddress(): Attribute
     {
         return Attribute::get(
-            fn () => array_filter([
-                $this->company,
-                trim($this->firstname . ' ' . $this->lastname),
-                $this->addition,
-                $this->street,
-                trim($this->country?->iso_alpha2 . ' ' . $this->zip . ' ' . $this->city),
-                $this->country?->name,
-            ])
+            fn () => array_values(
+                array_filter([
+                    $this->company,
+                    trim($this->firstname . ' ' . $this->lastname),
+                    $this->addition,
+                    $this->street,
+                    trim($this->zip . ' ' . $this->city),
+                    $this->country?->name,
+                ])
+            )
         );
     }
 }

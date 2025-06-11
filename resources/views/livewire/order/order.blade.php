@@ -465,10 +465,10 @@
         wire:loading="tab"
         wire:model="tab"
         :tabs="$tabs"
-        class="w-full gap-4 lg:col-start-1 xl:col-span-2 xl:flex"
+        class="grid w-full gap-4 lg:col-start-1 xl:col-span-2 xl:flex"
     >
         <x-slot:prepend>
-            <section class="relative basis-2/12" wire:ignore>
+            <section class="relative max-w-96 basis-2/12" wire:ignore>
                 <div class="sticky top-6 flex flex-col gap-4">
                     @section('contact-address-card')
                     <x-card>
@@ -579,33 +579,10 @@
                             />
                         </div>
                         <div class="text-sm">
-                            <div
-                                x-text="$wire.order.address_invoice.company"
-                            ></div>
-                            <div
-                                x-text="$wire.order.address_invoice.addition"
-                            ></div>
-                            <div
-                                x-text="
-                                    (
-                                        ($wire.order.address_invoice?.firstname || '').trim() +
-                                        ' ' +
-                                        ($wire.order.address_invoice?.lastname || '').trim()
-                                    ).trim()
-                                "
-                            ></div>
-                            <div
-                                x-text="$wire.order.address_invoice.street"
-                            ></div>
-                            <div
-                                x-text="
-                                    (
-                                        ($wire.order.address_invoice?.zip || '').trim() +
-                                        ' ' +
-                                        ($wire.order.address_invoice?.city || '').trim()
-                                    ).trim()
-                                "
-                            ></div>
+                            <p
+                                class="truncate first-line:font-semibold"
+                                x-html="$wire.order.address_invoice.join('<br>')"
+                            ></p>
                         </div>
                     </x-card>
                     @show
@@ -656,33 +633,10 @@
                             class="text-sm"
                             x-bind:class="$wire.order.address_delivery_id === $wire.order.address_invoice_id && 'hidden'"
                         >
-                            <div
-                                x-text="$wire.order.address_delivery?.company"
-                            ></div>
-                            <div
-                                x-text="$wire.order.address_delivery?.addition"
-                            ></div>
-                            <div
-                                x-text="
-                                    (
-                                        ($wire.order.address_delivery?.firstname || '').trim() +
-                                        ' ' +
-                                        ($wire.order.address_delivery?.lastname || '').trim()
-                                    ).trim()
-                                "
-                            ></div>
-                            <div
-                                x-text="$wire.order.address_delivery?.street"
-                            ></div>
-                            <div
-                                x-text="
-                                    (
-                                        ($wire.order.address_invoice?.zip || '').trim() +
-                                        ' ' +
-                                        ($wire.order.address_invoice?.city || '').trim()
-                                    ).trim()
-                                "
-                            ></div>
+                            <p
+                                class="truncate first-line:font-semibold"
+                                x-html="$wire.order.address_delivery.join('<br>')"
+                            ></p>
                         </div>
                     </x-card>
                     @show
@@ -881,7 +835,7 @@
             </section>
         </x-slot>
         <x-slot:append>
-            <section class="relative basis-2/12" wire:ignore>
+            <section class="relative max-w-96 basis-2/12" wire:ignore>
                 <div class="sticky top-6 space-y-6">
                     @section('content.right')
                     <x-card>
