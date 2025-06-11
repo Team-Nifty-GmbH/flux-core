@@ -206,8 +206,10 @@ class OrderForm extends FluxForm
                 'users:id,name',
             ]);
 
-            $addressInvoice = app(Address::class, ['attributes' => $values->address_invoice ?? []])->postal_address;
-            $addressDelivery = app(Address::class, ['attributes' => $values->address_delivery ?? []])->postal_address;
+            $addressInvoice = app(Address::class, ['attributes' => $values->address_invoice ?? []])
+                ->postal_address;
+            $addressDelivery = app(Address::class, ['attributes' => $values->address_delivery ?? []])
+                ->postal_address;
 
             $values = array_merge(
                 $values->toArray(),
