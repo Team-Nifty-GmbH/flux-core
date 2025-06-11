@@ -137,8 +137,12 @@ class TotalUnassignedBillableHoursTest extends BaseSetup
     {
         $interval = CarbonInterval::milliseconds($ms)->cascade();
 
-        $interval->locale(app()->getLocale());
+        $totalHours = floor($interval->totalHours);
+        $minutes = $interval->minutes;
 
-        return $interval->forHumans(['parts' => 2, 'short' => true, 'join' => true]);
+        return __('time.hours_minutes', [
+            'hours' => $totalHours,
+            'minutes' => $minutes,
+        ]);
     }
 }

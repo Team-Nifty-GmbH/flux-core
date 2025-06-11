@@ -28,9 +28,13 @@ class TotalUnassignedBillableHours extends ValueBox
 
         $interval = CarbonInterval::milliseconds($ms)->cascade();
 
-        $interval->locale(app()->getLocale());
+        $totalHours = floor($interval->totalHours);
+        $minutes = $interval->minutes;
 
-        $this->sum = $interval->forHumans(['parts' => 2, 'short' => true, 'join' => true]);
+        $this->sum = __('time.hours_minutes', [
+            'hours' => $totalHours,
+            'minutes' => $minutes,
+        ]);
     }
 
     protected function icon(): string
