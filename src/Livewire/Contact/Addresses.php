@@ -159,6 +159,9 @@ class Addresses extends Component
     }
 
     #[Renderless]
+    public function evaluate(): void {}
+
+    #[Renderless]
     public function getListeners(): array
     {
         $model = app(Address::class);
