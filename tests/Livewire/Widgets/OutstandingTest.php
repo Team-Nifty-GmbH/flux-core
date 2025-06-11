@@ -182,7 +182,7 @@ class OutstandingTest extends BaseSetup
 
     public function test_calculate_table_empty(): void
     {
-        $orders = Collection::make([]);
+        $orders = collect();
 
         Livewire::test($this->livewireComponent)
             ->call('calculateSum')
@@ -294,7 +294,7 @@ class OutstandingTest extends BaseSetup
                 )
                 ->sum('balance'),
             2)
-        . ' ' . Currency::default()->symbol . ' ' . __('Overdue')
+        . ' ' . $this->currency->symbol . ' ' . __('Overdue')
         . '</span>';
     }
 
@@ -307,6 +307,6 @@ class OutstandingTest extends BaseSetup
                 ->where('payment_state', '!=', Paid::$name)
                 ->sum('balance'),
             2
-        ) . ' ' . Currency::default()->symbol;
+        ) . ' ' . $this->currency->symbol;
     }
 }
