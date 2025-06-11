@@ -9,7 +9,7 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::table('contacts', function (Blueprint $table): void {
-            $table->unsignedInteger('rating')->default(0)->after('debtor_number');
+            $table->unsignedTinyInteger('rating')->default(0)->after('debtor_number');
         });
     }
 
