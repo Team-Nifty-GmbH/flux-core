@@ -70,7 +70,7 @@ class ContactForm extends FluxForm
 
     public ?int $purchase_payment_type_id = null;
 
-    public ?int $rating = null;
+    public int $rating = 0;
 
     public ?string $vat_id = null;
 
