@@ -120,4 +120,10 @@
             background: #f5f5f5;
         }
     }
+
+    @media print {
+        body {
+            margin-bottom: 30px;
+        }
+    }
 </style>
