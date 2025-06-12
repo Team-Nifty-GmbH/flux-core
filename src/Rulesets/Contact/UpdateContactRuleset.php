@@ -97,7 +97,7 @@ class UpdateContactRuleset extends FluxRuleset
             'customer_number' => 'sometimes|string|max:255',
             'creditor_number' => 'string|max:255|nullable',
             'debtor_number' => 'string|max:255|nullable',
-            'rating' => 'sometimes|integer|min:0|max:5|nullable',
+            'rating' => 'sometimes|integer|min:0|max:5',
             'payment_target_days' => 'sometimes|integer|nullable',
             'payment_reminder_days_1' => 'sometimes|integer|nullable',
             'payment_reminder_days_2' => 'sometimes|integer|nullable',
