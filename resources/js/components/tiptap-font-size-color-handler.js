@@ -49,6 +49,18 @@ export const FontSizeColorConfig = TextStyle.extend({
                             };
                         },
                     },
+                    backgroundColor: {
+                        default: null,
+                        parseHTML: (element) => element.style.backgroundColor,
+                        renderHTML: (attributes) => {
+                            if (!attributes.backgroundColor) {
+                                return {};
+                            }
+                            return {
+                                style: `background-color: ${attributes.backgroundColor}`,
+                            };
+                        },
+                    },
                 },
             },
         ];
@@ -69,6 +81,20 @@ export const FontSizeColorConfig = TextStyle.extend({
                 () =>
                 ({ chain }) => {
                     return chain().setMark('textStyle', { color: null }).run();
+                },
+            setBackgroundColor:
+                (backgroundColor) =>
+                ({ chain }) => {
+                    return chain()
+                        .setMark('textStyle', { backgroundColor })
+                        .run();
+                },
+            unsetBackgroundColor:
+                () =>
+                ({ chain }) => {
+                    return chain()
+                        .setMark('textStyle', { backgroundColor: null })
+                        .run();
                 },
         };
     },

@@ -20,5 +20,4 @@
             @endsection
         </div>
     </div>
-    <x-flux::editor class="w-[200px]" :tooltipDropdown="true" />
 @endsection

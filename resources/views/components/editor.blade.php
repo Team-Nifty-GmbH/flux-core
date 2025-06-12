@@ -143,13 +143,24 @@
             </x-button>
         @endif
 
-        @if (! $tooltipDropdown && $colorPalette)
+        @if ($textColors && ! $tooltipDropdown)
             <x-button
                 x-on:click.prevent="onClick"
                 x-ref="tippyParent-color-{{$id}}"
                 flat
                 icon="paint-brush"
                 x-data="editorFontSizeColorHandler($refs['tippyParent-color-{{$id}}'], $refs['colorDropDown-{{$id}}'])"
+                color="secondary"
+            ></x-button>
+        @endif
+
+        @if ($textBackgroundColors && ! $tooltipDropdown)
+            <x-button
+                x-on:click.prevent="onClick"
+                x-ref="tippyParent-background-color-{{$id}}"
+                flat
+                icon="swatch"
+                x-data="editorFontSizeColorHandler($refs['tippyParent-background-color-{{$id}}'], $refs['backgroundColorDropDown-{{$id}}'])"
                 color="secondary"
             ></x-button>
         @endif
@@ -210,7 +221,7 @@
             ></x-button>
         @endif
 
-        @if ($tooltipDropdown && $colorPalette)
+        @if ($tooltipDropdown && $textColors)
             <div class="mb-2 flex flex-col items-center text-gray-600">
                 <div class="w-full text-left">{{ __("Text Color") }}:</div>
                 <x-button
@@ -221,11 +232,39 @@
                     text="{{ __('Remove Color') }}"
                 />
                 <div class="flex space-x-1">
-                    @foreach ($colorPalette as $color)
+                    @foreach ($textColors as $color)
                         <div class="flex flex-col gap-1">
                             @foreach ($color as $shade)
                                 <div
                                     x-on:click="editor().chain().focus().setColor({{ json_encode($shade) }}).run()"
+                                    class="min-h-6 min-w-6 cursor-pointer"
+                                    style="background-color: {{ $shade }}"
+                                ></div>
+                            @endforeach
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
+        @if ($tooltipDropdown && $textBackgroundColors)
+            <div class="mb-2 flex flex-col items-center text-gray-600">
+                <div class="w-full text-left">
+                    {{ __("Text Background Color") }}:
+                </div>
+                <x-button
+                    x-on:click="editor().chain().focus().unsetBackgroundColor().run()"
+                    class="mb-1 w-full"
+                    flat
+                    color="neutral"
+                    text="{{ __('Remove Color') }}"
+                />
+                <div class="flex space-x-1">
+                    @foreach ($textBackgroundColors as $color)
+                        <div class="flex flex-col gap-1">
+                            @foreach ($color as $shade)
+                                <div
+                                    x-on:click="editor().chain().focus().setBackgroundColor({{ json_encode($shade) }}).run()"
                                     class="min-h-6 min-w-6 cursor-pointer"
                                     style="background-color: {{ $shade }}"
                                 ></div>
@@ -258,11 +297,35 @@
                 text="{{ __('Remove Color') }}"
             />
             <div class="flex space-x-1">
-                @foreach ($colorPalette as $color)
+                @foreach ($textColors as $color)
                     <div class="flex flex-col gap-1">
                         @foreach ($color as $shade)
                             <div
                                 x-on:click="editor().chain().focus().setColor({{ json_encode($shade) }}).run()"
+                                class="min-h-6 min-w-6 cursor-pointer"
+                                style="background-color: {{ $shade }}"
+                            ></div>
+                        @endforeach
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </template>
+    <template x-ref="backgroundColorDropDown-{{ $id }}">
+        <div class="p-1">
+            <x-button
+                x-on:click="editor().chain().focus().unsetBackgroundColor().run()"
+                class="mb-1 w-full"
+                flat
+                color="neutral"
+                text="{{ __('Remove Color') }}"
+            />
+            <div class="flex space-x-1">
+                @foreach ($textBackgroundColors as $color)
+                    <div class="flex flex-col gap-1">
+                        @foreach ($color as $shade)
+                            <div
+                                x-on:click="editor().chain().focus().setBackgroundColor({{ json_encode($shade) }}).run()"
                                 class="min-h-6 min-w-6 cursor-pointer"
                                 style="background-color: {{ $shade }}"
                             ></div>
