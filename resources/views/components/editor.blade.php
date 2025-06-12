@@ -143,15 +143,15 @@
             </x-button>
         @endif
 
-        @if(! $tooltipDropdown)
+        @if (! $tooltipDropdown && $colorPalette)
             <x-button
                 x-on:click.prevent="onClick"
                 x-ref="tippyParent-color-{{$id}}"
                 flat
                 icon="paint-brush"
                 x-data="editorFontSizeColorHandler($refs['tippyParent-color-{{$id}}'], $refs['colorDropDown-{{$id}}'])"
-                color="secondary">
-            </x-button>
+                color="secondary"
+            ></x-button>
         @endif
 
         @if ($availableFontSizes && $tooltipDropdown)
@@ -209,6 +209,32 @@
                 x-on:click="editor().chain().focus().toggleCodeBlock().run()"
             ></x-button>
         @endif
+
+        @if ($tooltipDropdown && $colorPalette)
+            <div class="mb-2 flex flex-col items-center text-gray-600">
+                <div class="w-full text-left">{{ __("Text Color") }}:</div>
+                <x-button
+                    x-on:click="editor().chain().focus().unsetColor().run()"
+                    class="mb-1 w-full"
+                    flat
+                    color="neutral"
+                    text="{{ __('Remove Color') }}"
+                />
+                <div class="flex space-x-1">
+                    @foreach ($colorPalette as $color)
+                        <div class="flex flex-col gap-1">
+                            @foreach ($color as $shade)
+                                <div
+                                    x-on:click="editor().chain().focus().setColor({{ json_encode($shade) }}).run()"
+                                    class="min-h-6 min-w-6 cursor-pointer"
+                                    style="background-color: {{ $shade }}"
+                                ></div>
+                            @endforeach
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
     </template>
     <template x-ref="fontSizeDropdown-{{ $id }}">
         <div class="flex flex-col">
@@ -223,14 +249,27 @@
         </div>
     </template>
     <template x-ref="colorDropDown-{{ $id }}">
-        <div class="flex space-x-1">
-        @foreach($colorPalette as $color)
-           <div class="flex flex-col gap-1">
-            @foreach($color as $shade)
-                   <div class="cursor-pointer min-w-6 min-h-6" style="background-color: {{$shade}}"></div>
-            @endforeach
-           </div>
-        @endforeach
+        <div class="p-1">
+            <x-button
+                x-on:click="editor().chain().focus().unsetColor().run()"
+                class="mb-1 w-full"
+                flat
+                color="neutral"
+                text="{{ __('Remove Color') }}"
+            />
+            <div class="flex space-x-1">
+                @foreach ($colorPalette as $color)
+                    <div class="flex flex-col gap-1">
+                        @foreach ($color as $shade)
+                            <div
+                                x-on:click="editor().chain().focus().setColor({{ json_encode($shade) }}).run()"
+                                class="min-h-6 min-w-6 cursor-pointer"
+                                style="background-color: {{ $shade }}"
+                            ></div>
+                        @endforeach
+                    </div>
+                @endforeach
+            </div>
         </div>
     </template>
 </div>

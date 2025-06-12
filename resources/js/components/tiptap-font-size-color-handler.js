@@ -63,15 +63,12 @@ export const FontSizeColorConfig = TextStyle.extend({
             setColor:
                 (color) =>
                 ({ chain }) => {
-                    return chain().setMark('color', { color }).run();
+                    return chain().setMark('textStyle', { color }).run();
                 },
             unsetColor:
                 () =>
                 ({ chain }) => {
-                    return chain()
-                        .setMark('color', { color: null })
-                        .removeEmptyTextStyle()
-                        .run();
+                    return chain().setMark('textStyle', { color: null }).run();
                 },
         };
     },

@@ -97,7 +97,7 @@ export default function (
                                     getReferenceClientRect: () => ({
                                         width: 0,
                                         height: 0,
-                                        top: cursorPosition.top,
+                                        top: cursorPosition.top + 20,
                                         left: cursorPosition.left,
                                         bottom: cursorPosition.bottom,
                                         right: cursorPosition.right,
