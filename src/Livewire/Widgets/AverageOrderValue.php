@@ -2,8 +2,10 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use FluxErp\Contracts\HasWidgetOptions;
 use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Livewire\Dashboard\Dashboard;
+use FluxErp\Livewire\Order\OrderList;
 use FluxErp\Livewire\Support\Widgets\Charts\LineChart;
 use FluxErp\Models\Order;
 use FluxErp\Support\Metrics\Charts\Line;
@@ -11,9 +13,12 @@ use FluxErp\Support\Metrics\Trend;
 use FluxErp\Support\Metrics\Value;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use FluxErp\Traits\MoneyChartFormattingTrait;
+use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Renderless;
+use Livewire\Livewire;
+use TeamNiftyGmbH\DataTable\Helpers\SessionFilter;
 
-class AverageOrderValue extends LineChart
+class AverageOrderValue extends LineChart implements HasWidgetOptions
 {
     use IsTimeFrameAwareWidget, MoneyChartFormattingTrait;
 
@@ -42,6 +47,7 @@ class AverageOrderValue extends LineChart
             ->setRange($this->timeFrame)
             ->setEndingDate($this->getEnd())
             ->setStartingDate($this->getStart());
+
         $previousMetric = Trend::make($query)
             ->setDateColumn('invoice_date')
             ->setEndingDate($this->getEndPrevious())
@@ -77,9 +83,83 @@ class AverageOrderValue extends LineChart
         $this->xaxis['categories'] = $revenue->getLabels();
     }
 
+    public function options(): array
+    {
+        return [
+            [
+                'label' => static::getLabel(),
+                'method' => 'redirectCurrentPeriod',
+            ],
+            [
+                'label' => __('Previous Period'),
+                'method' => 'redirectPreviousPeriod',
+            ],
+        ];
+    }
+
+    #[Renderless]
+    public function redirectCurrentPeriod(): void
+    {
+        $startCarbon = $this->getStart();
+        $endCarbon = $this->getEnd();
+
+        $start = $startCarbon->toDateString();
+        $end = $endCarbon->toDateString();
+
+        $localizedStart = $startCarbon->translatedFormat('j. F Y');
+        $localizedEnd = $endCarbon->translatedFormat('j. F Y');
+
+        SessionFilter::make(
+            Livewire::new(resolve_static(OrderList::class, 'class'))->getCacheKey(),
+            fn (Builder $query) => $query
+                ->whereNotNull('invoice_date')
+                ->whereNotNull('invoice_number')
+                ->revenue()
+                ->whereBetween('invoice_date', [$start, $end]),
+            static::getLabel() . ' ' . __('between :start and :end', [
+                'start' => $localizedStart,
+                'end' => $localizedEnd,
+            ]),
+        )
+            ->store();
+
+        $this->redirectRoute('orders.orders', navigate: true);
+    }
+
+    #[Renderless]
+    public function redirectPreviousPeriod(): void
+    {
+        $startCarbon = $this->getStartPrevious();
+        $endCarbon = $this->getEndPrevious();
+
+        $start = $startCarbon->toDateString();
+        $end = $endCarbon->toDateString();
+
+        $localizedStart = $startCarbon->translatedFormat('j. F Y');
+        $localizedEnd = $endCarbon->translatedFormat('j. F Y');
+
+        SessionFilter::make(
+            Livewire::new(resolve_static(OrderList::class, 'class'))->getCacheKey(),
+            fn (Builder $query) => $query->whereNotNull('invoice_date')
+                ->whereNotNull('invoice_number')
+                ->revenue()
+                ->whereBetween('invoice_date', [
+                    $start,
+                    $end,
+                ]),
+            static::getLabel() . ' ' . __('between :start and :end', [
+                'start' => $localizedStart,
+                'end' => $localizedEnd,
+            ]),
+        )
+            ->store();
+
+        $this->redirectRoute('orders.orders', navigate: true);
+    }
+
     public function showTitle(): bool
     {
-        return ! $this->showTotals;
+        return true;
     }
 
     protected function getListeners(): array

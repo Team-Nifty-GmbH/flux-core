@@ -87,18 +87,28 @@ class TotalOrdersCount extends LineChart implements HasWidgetOptions
     {
         return [
             [
-                'label' => __('Show'),
-                'method' => 'show',
+                'label' => static::getLabel(),
+                'method' => 'showCurrentPeriod',
+            ],
+            [
+                'label' => __('Previous Period'),
+                'method' => 'showPreviousPeriod',
             ],
         ];
     }
 
     #[Renderless]
-    public function show(): void
+    public function showCurrentPeriod(): void
     {
         // needs to be in an extra variable to avoid serialization issues
-        $start = $this->getStart()->toDateString();
-        $end = $this->getEnd()->toDateString();
+        $startCarbon = $this->getStart();
+        $endCarbon = $this->getEnd();
+
+        $start = $startCarbon->toDateString();
+        $end = $endCarbon->toDateString();
+
+        $localizedStart = $startCarbon->translatedFormat('j. F Y');
+        $localizedEnd = $endCarbon->translatedFormat('j. F Y');
 
         SessionFilter::make(
             Livewire::new(resolve_static(OrderList::class, 'class'))->getCacheKey(),
@@ -109,7 +119,37 @@ class TotalOrdersCount extends LineChart implements HasWidgetOptions
                     $start,
                     $end,
                 ]),
-            __(static::getLabel()),
+            __(static::getLabel()) . ' ' .
+            __('between :start and :end', ['start' => $localizedStart, 'end' => $localizedEnd]),
+        )
+            ->store();
+
+        $this->redirectRoute('orders.orders', navigate: true);
+    }
+
+    #[Renderless]
+    public function showPreviousPeriod(): void
+    {
+        $startCarbon = $this->getStartPrevious();
+        $endCarbon = $this->getEndPrevious();
+
+        $localizedStart = $startCarbon->translatedFormat('j. F Y');
+        $localizedEnd = $endCarbon->translatedFormat('j. F Y');
+
+        $start = $startCarbon->toDateString();
+        $end = $endCarbon->toDateString();
+
+        SessionFilter::make(
+            Livewire::new(resolve_static(OrderList::class, 'class'))->getCacheKey(),
+            fn (Builder $query) => $query->whereNotNull('invoice_date')
+                ->whereNotNull('invoice_number')
+                ->revenue()
+                ->whereBetween('invoice_date', [
+                    $start,
+                    $end,
+                ]),
+            __(static::getLabel()) . ' ' .
+            __('between :start and :end', ['start' => $localizedStart, 'end' => $localizedEnd]),
         )
             ->store();
 
