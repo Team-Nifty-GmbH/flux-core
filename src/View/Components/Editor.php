@@ -9,7 +9,6 @@ use Illuminate\View\Component;
 
 class Editor extends Component
 {
-
     public static array $colorPalette = [
         'red' => [
             '#FFEBEE',
@@ -167,8 +166,8 @@ class Editor extends Component
         public ?array $textBackgroundColors = null
     ) {
         $this->id ??= Str::uuid()->toString();
-        $this->textColors ??= self::$colorPalette;
-        $this->textBackgroundColors ??= self::$colorPalette;
+        $this->textColors ??= static::$colorPalette;
+        $this->textBackgroundColors ??= static::$colorPalette;
     }
 
     public function render(): View|Closure|string
