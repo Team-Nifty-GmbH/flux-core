@@ -48,16 +48,16 @@ class RevenuePurchasesProfitChart extends LineChart
             ->setStartingDate($this->getStart())
             ->sum('total_net_price');
 
+        $purchases->setData(
+            array_map(fn ($value) => (int) bcmul($value, -1, 0), $purchases->getData())
+        );
         $purchasesData = $purchases->getCombinedData();
+
         $profit = [];
         foreach ($revenue->getCombinedData() as $key => $value) {
             $profit[$key] = (int) bcadd($value, data_get($purchasesData, $key, 0), 0);
         }
         $profit = Result::make(array_values($profit), array_keys($profit), null);
-
-        $purchases->setData(
-            array_map(fn ($value) => (int) bcmul($value, -1, 0), $purchases->getData())
-        );
 
         $keys = array_unique(array_merge($revenue->getLabels(), $purchases->getLabels(), $profit->getLabels()));
         $revenue->mergeLabels($keys);
@@ -66,13 +66,11 @@ class RevenuePurchasesProfitChart extends LineChart
 
         // remove all values that are zero in all series
         foreach ($keys as $key) {
-            $data = [
-                $revenue->getCombinedData()[$key] ?? 0,
-                $purchases->getCombinedData()[$key] ?? 0,
-                $profit->getCombinedData()[$key] ?? 0,
-            ];
+            $revenueValue = $revenue->getCombinedData()[$key] ?? 0;
+            $purchasesValue = $purchases->getCombinedData()[$key] ?? 0;
+            $profitValue = $profit->getCombinedData()[$key] ?? 0;
 
-            if (array_sum($data) === 0) {
+            if ($revenueValue === 0 && $purchasesValue === 0 && $profitValue === 0) {
                 $revenue->removeLabel($key);
                 $purchases->removeLabel($key);
                 $profit->removeLabel($key);
