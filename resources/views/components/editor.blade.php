@@ -229,7 +229,7 @@
                     class="mb-1 w-full"
                     flat
                     color="neutral"
-                    text="{{ __('Remove Color') }}"
+                    :text="__('Remove Color')"
                 />
                 <div class="flex space-x-1">
                     @foreach ($textColors as $color)
@@ -257,7 +257,7 @@
                     class="mb-1 w-full"
                     flat
                     color="neutral"
-                    text="{{ __('Remove Color') }}"
+                    :text="__('Remove Color')"
                 />
                 <div class="flex space-x-1">
                     @foreach ($textBackgroundColors as $color)
@@ -294,7 +294,7 @@
                 class="mb-1 w-full"
                 flat
                 color="neutral"
-                text="{{ __('Remove Color') }}"
+                :text="__('Remove Color')"
             />
             <div class="flex space-x-1">
                 @foreach ($textColors as $color)
@@ -318,7 +318,7 @@
                 class="mb-1 w-full"
                 flat
                 color="neutral"
-                text="{{ __('Remove Color') }}"
+                :text="__('Remove Color')"
             />
             <div class="flex space-x-1">
                 @foreach ($textBackgroundColors as $color)
