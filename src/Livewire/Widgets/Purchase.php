@@ -49,6 +49,7 @@ class Purchase extends ValueBox implements HasWidgetOptions
         $this->growthRate = $metric->getGrowthRate();
     }
 
+    #[Renderless]
     public function options(): array
     {
         return [

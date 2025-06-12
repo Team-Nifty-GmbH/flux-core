@@ -83,6 +83,7 @@ class AverageOrderValue extends LineChart implements HasWidgetOptions
         $this->xaxis['categories'] = $revenue->getLabels();
     }
 
+    #[Renderless]
     public function options(): array
     {
         return [

@@ -92,6 +92,7 @@ class ContactsByContactOrigin extends CircleChart implements HasWidgetOptions
         ];
     }
 
+    #[Renderless]
     public function options(): array
     {
         return collect($this->labels)
