@@ -2,11 +2,17 @@
 
 namespace FluxErp\Actions\Contact;
 
+use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Contact;
 use FluxErp\Rulesets\Contact\RestoreContactRuleset;
 
-class RestoreContact extends CreateContact
+class RestoreContact extends FluxAction
 {
+    public static function models(): array
+    {
+        return [Contact::class];
+    }
+
     protected function getRulesets(): string|array
     {
         return RestoreContactRuleset::class;
@@ -19,9 +25,9 @@ class RestoreContact extends CreateContact
             ->onlyTrashed()
             ->whereKey($this->getData('id'))
             ->first();
+        $contact->fill($this->getData());
 
         $contact->restore();
-        $contact->save();
 
         return $contact->withoutRelations()->fresh();
     }
