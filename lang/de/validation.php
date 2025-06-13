@@ -102,8 +102,6 @@ return [
     'missing_with' => 'Das Feld :attribute muss fehlen, wenn :values vorhanden ist.',
     'missing_with_all' => 'Das Feld :attribute muss fehlen, wenn :values vorhanden sind.',
     'multiple_of' => ':Attribute muss ein Vielfaches von :value sein.',
-    'model_exists' => 'Der ausgewählte :attribute existiert nicht.',
-    'model_doesnt_exist' => 'Der ausgewählte :attribute existiert bereits.',
     'no_decimals' => ':Attribute darf keine Nachkommastellen haben.',
     'not_in' => 'Der gewählte Wert für :attribute ist ungültig.',
     'not_regex' => ':Attribute hat ein ungültiges Format.',

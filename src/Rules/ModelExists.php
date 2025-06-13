@@ -33,7 +33,7 @@ class ModelExists extends Builder implements ValidationRule
     {
         $query = $this->clone();
         if ($query->where($this->key, $value)->doesntExist()) {
-            $fail('validation.model_exists')->translate();
+            $fail('validation.exists')->translate();
         }
     }
 }

@@ -13,8 +13,9 @@ use FluxErp\Models\User;
 use FluxErp\Models\VatRate;
 use FluxErp\Rules\ModelDoesntExist;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rulesets\FluxRuleset;
 
-class RestoreContactRuleset extends CreateContactRuleset
+class RestoreContactRuleset extends FluxRuleset
 {
     protected static ?string $model = Contact::class;
 
@@ -34,6 +35,7 @@ class RestoreContactRuleset extends CreateContactRuleset
                     ->where('is_active', true),
             ],
             'client_id' => [
+                'sometimes',
                 'required',
                 'integer',
                 app(ModelExists::class, ['model' => Client::class]),
@@ -103,19 +105,19 @@ class RestoreContactRuleset extends CreateContactRuleset
                 'nullable',
                 app(ModelDoesntExist::class, ['model' => Contact::class, 'key' => 'debtor_number']),
             ],
-            'payment_target_days' => 'sometimes|integer|min:1|nullable',
-            'payment_reminder_days_1' => 'sometimes|integer|min:1|nullable',
-            'payment_reminder_days_2' => 'sometimes|integer|min:1|nullable',
-            'payment_reminder_days_3' => 'sometimes|integer|min:1|nullable',
-            'discount_days' => 'sometimes|integer|min:1|nullable',
-            'discount_percent' => 'sometimes|numeric|min:0|max:100|nullable',
-            'credit_line' => 'sometimes|numeric|min:0|nullable',
-            'vat_id' => 'sometimes|string|max:255|nullable',
-            'vendor_customer_number' => 'sometimes|string|max:255|nullable',
+            'payment_target_days' => 'integer|min:1|nullable',
+            'payment_reminder_days_1' => 'integer|min:1|nullable',
+            'payment_reminder_days_2' => 'integer|min:1|nullable',
+            'payment_reminder_days_3' => 'integer|min:1|nullable',
+            'discount_days' => 'integer|min:1|nullable',
+            'discount_percent' => 'numeric|min:0|max:100|nullable',
+            'credit_line' => 'numeric|min:0|nullable',
+            'vat_id' => 'string|max:255|nullable',
+            'vendor_customer_number' => 'string|max:255|nullable',
             'header' => 'string|nullable',
             'footer' => 'string|nullable',
-            'has_sensitive_reminder' => 'sometimes|boolean',
-            'has_delivery_lock' => 'sometimes|boolean',
+            'has_sensitive_reminder' => 'boolean',
+            'has_delivery_lock' => 'boolean',
         ];
     }
 }

@@ -10,7 +10,7 @@ class ModelDoesntExist extends ModelExists
     {
         $query = $this->clone();
         if ($query->where($this->key, $value)->exists()) {
-            $fail('validation.model_doesnt_exist')->translate();
+            $fail('validation.unique')->translate();
         }
     }
 }

@@ -91,6 +91,10 @@ trait DataTableHasFormEdit
     #[Renderless]
     public function restore(string|int|null $id = null): bool
     {
+        if (! $this->supportRestore()) {
+            throw new InvalidArgumentException('Restore is not supported');
+        }
+
         $this->{$this->formAttributeName()}->reset();
 
         if ($id) {

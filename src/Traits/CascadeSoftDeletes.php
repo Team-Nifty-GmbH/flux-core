@@ -5,7 +5,7 @@ namespace FluxErp\Traits;
 use Closure;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\SoftDeletes as BaseSoftDeletes;
 
 trait CascadeSoftDeletes
 {
@@ -22,6 +22,15 @@ trait CascadeSoftDeletes
         });
     }
 
+    protected function cascadeRestores(string $relationship): void
+    {
+        $closure = function (Model $model): void {
+            isset($model->pivot) ? $model->pivot->restore() : $model->restore();
+        };
+
+        $this->handleSoftDeletedRecords($relationship, $closure);
+    }
+
     protected function cascadeSoftDeletes(string $relationship): void
     {
         $delete = $this->forceDeleting ? 'forceDelete' : 'delete';
@@ -31,23 +40,6 @@ trait CascadeSoftDeletes
         };
 
         $this->handleRecords($relationship, $closure);
-    }
-
-    protected function cascadeSoftRestores(string $relationship): void
-    {
-        $closure = function (Model $model): void {
-            if (isset($model->pivot)) {
-                if ($this->modelImplementsSoftDeletes($model->pivot)) {
-                    $model->pivot->restore();
-                }
-            } else {
-                if ($this->modelImplementsSoftDeletes($model) && $model->trashed()) {
-                    $model->restore();
-                }
-            }
-        };
-
-        $this->handleRecordsWithTrashed($relationship, $closure);
     }
 
     protected function getActiveCascadingDeletes(): array
@@ -60,7 +52,11 @@ trait CascadeSoftDeletes
     protected function getActiveCascadingRestores(): array
     {
         return array_filter($this->getCascadingRestores(), function ($relationship) {
-            return $this->{$relationship}()->onlyTrashed()->exists();
+            /** @var Relation $relation */
+            $relation = $this->{$relationship}();
+
+            return in_array(BaseSoftDeletes::class, class_uses_recursive($relation->getRelated()))
+                && $relation->onlyTrashed()->exists();
         });
     }
 
@@ -87,40 +83,17 @@ trait CascadeSoftDeletes
         }
     }
 
-    protected function handleRecordsWithTrashed(string $relationship, Closure $closure): void
+    protected function handleSoftDeletedRecords(string $relationship, Closure $closure): void
     {
         $fetchMethod = $this->fetchMethod ?? 'get';
 
         if ($fetchMethod == 'chunk') {
-            $this->{$relationship}()->withTrashed()->chunk($this->chunkSize ?? 500, $closure);
+            $this->{$relationship}()->onlyTrashed()->chunk($this->chunkSize ?? 500, $closure);
         } else {
-            foreach ($this->{$relationship}()->withTrashed()->$fetchMethod() as $model) {
+            foreach ($this->{$relationship}()->onlyTrashed()->$fetchMethod() as $model) {
                 $closure($model);
             }
         }
-    }
-
-    protected function hasInvalidCascadingRelationships(): array
-    {
-        $invalidDeletes = array_filter($this->getCascadingDeletes(), function ($relationship) {
-            return ! method_exists($this, $relationship) || ! $this->{$relationship}() instanceof Relation;
-        });
-
-        $invalidRestores = array_filter($this->getCascadingRestores(), function ($relationship) {
-            return ! method_exists($this, $relationship) || ! $this->{$relationship}() instanceof Relation;
-        });
-
-        return array_unique(array_merge($invalidDeletes, $invalidRestores));
-    }
-
-    protected function implementsSoftDeletes(): bool
-    {
-        return method_exists($this, 'runSoftDelete');
-    }
-
-    protected function modelImplementsSoftDeletes(Model $model): bool
-    {
-        return in_array(SoftDeletes::class, class_uses_recursive($model));
     }
 
     protected function runCascadingDeletes(): void
@@ -133,7 +106,7 @@ trait CascadeSoftDeletes
     protected function runCascadingRestores(): void
     {
         foreach ($this->getActiveCascadingRestores() as $relationship) {
-            $this->cascadeSoftRestores($relationship);
+            $this->cascadeRestores($relationship);
         }
     }
 }
