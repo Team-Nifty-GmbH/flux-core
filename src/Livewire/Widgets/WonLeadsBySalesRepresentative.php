@@ -152,8 +152,8 @@ class WonLeadsBySalesRepresentative extends BarChart implements HasWidgetOptions
                 ->where('user_id', $salesRepresentativeId)
                 ->whereBetween('end', [$start, $end])
                 ->whereHas('leadState', fn (Builder $q) => $q->where('is_won', true)),
-            __('Leads von :user', ['user' => $salesRepresentativeName]) . ' ' .
-            __('zwischen :start und :end', ['start' => $localizedStart, 'end' => $localizedEnd]),
+            __('Won leads by :user', ['user' => $salesRepresentativeName]) . ' ' .
+            __('between :start and :end', ['start' => $localizedStart, 'end' => $localizedEnd]),
         )->store();
 
         $this->redirectRoute('sales.leads', navigate: true);
