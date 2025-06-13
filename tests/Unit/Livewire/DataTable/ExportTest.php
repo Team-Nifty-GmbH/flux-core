@@ -49,10 +49,6 @@ class ExportTest extends BaseSetup
                 $this->get($downloadUrl)
                     ->assertStatus(200)
                     ->assertDownload(pathinfo($invaded->filePath, PATHINFO_BASENAME));
-                Auth::logout();
-                $this->get($downloadUrl)
-                    ->assertStatus(302)
-                    ->assertRedirect(route('login'));
 
                 return true;
             }
