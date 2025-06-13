@@ -2,17 +2,23 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use FluxErp\Contracts\HasWidgetOptions;
 use FluxErp\Livewire\Dashboard\Dashboard;
+use FluxErp\Livewire\Lead\LeadList;
 use FluxErp\Livewire\Support\Widgets\Charts\BarChart;
 use FluxErp\Models\User;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
+use FluxErp\Traits\Widgetable;
+use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Js;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
+use Livewire\Livewire;
+use TeamNiftyGmbH\DataTable\Helpers\SessionFilter;
 
-class WonLeadsBySalesRepresentative extends BarChart
+class WonLeadsBySalesRepresentative extends BarChart implements HasWidgetOptions
 {
-    use IsTimeFrameAwareWidget;
+    use IsTimeFrameAwareWidget, Widgetable;
 
     public ?array $chart = [
         'type' => 'bar',
@@ -40,13 +46,6 @@ class WonLeadsBySalesRepresentative extends BarChart
         return Dashboard::class;
     }
 
-    public function mount(): void
-    {
-        $this->userId = $this->userId ?? auth()->id();
-
-        parent::mount();
-    }
-
     #[Renderless]
     public function calculateByTimeFrame(): void
     {
@@ -71,43 +70,93 @@ class WonLeadsBySalesRepresentative extends BarChart
             'teal-400',
         ];
 
+        $start = $this->getStart()->toDateString();
+        $end = $this->getEnd()->toDateString();
+
         $leadCounts = resolve_static(User::class, 'query')
             ->withCount([
-                'leads as total' => function ($query): void {
+                'leads as total' => function ($query) use ($start, $end): void {
                     $query->whereHas('leadState', function ($q): void {
                         $q->where('is_won', 1);
-                    });
+                    })
+                        ->whereBetween('end', [$start, $end]);
                 },
             ])
-            ->limit(10)
-            ->get(['name', 'color'])
+            ->get(['name', 'color', 'id'])
             ->filter(fn ($user) => $user->total > 0);
 
         $data = $leadCounts
             ->map(function ($user) use (&$colors) {
                 return [
+                    'id' => $user->id,
                     'name' => $user->name,
                     'color' => $user->color ?: array_shift($colors),
                     'data' => [$user->total],
                 ];
             })
             ->sortByDesc(fn ($item) => $item['data'][0])
+            ->take(10)
             ->values()
             ->all();
+
+        $this->series = $data;
 
         $this->xaxis = [
             'categories' => [''], // necessary to remove y-label
         ];
 
-        $this->series = $data;
+        $this->actions = $this->options();
     }
 
     #[Js]
     public function dataLabelsFormatter(): string
     {
         return <<<'JS'
-        return opts.w.config.series[opts.seriesIndex].name + ': ' + val;
-    JS;
+            return opts.w.config.series[opts.seriesIndex].name + ': ' + val;
+        JS;
+    }
+
+    #[Renderless]
+    public function options(): array
+    {
+        return collect($this->series)
+            ->map(fn ($data) => [
+                'label' => data_get($data, 'name'),
+                'method' => 'show',
+                'params' => [
+                    'id' => data_get($data, 'id'),
+                    'name' => data_get($data, 'name'),
+                ],
+            ])
+            ->toArray();
+    }
+
+    #[Renderless]
+    public function show(array $params): void
+    {
+        $salesRepresentativeId = $params['id'];
+        $salesRepresentativeName = $params['name'];
+
+        $startCarbon = $this->getStart();
+        $endCarbon = $this->getEnd();
+
+        $start = $startCarbon->toDateString();
+        $end = $endCarbon->toDateString();
+
+        $localizedStart = $startCarbon->translatedFormat('j. F Y');
+        $localizedEnd = $endCarbon->translatedFormat('j. F Y');
+
+        SessionFilter::make(
+            Livewire::new(resolve_static(LeadList::class, 'class'))->getCacheKey(),
+            fn (Builder $query) => $query
+                ->where('user_id', $salesRepresentativeId)
+                ->whereBetween('end', [$start, $end])
+                ->whereHas('leadState', fn (Builder $q) => $q->where('is_won', true)),
+            __('Leads von :user', ['user' => $salesRepresentativeName]) . ' ' .
+            __('zwischen :start und :end', ['start' => $localizedStart, 'end' => $localizedEnd]),
+        )->store();
+
+        $this->redirectRoute('sales.leads', navigate: true);
     }
 
     public function showTitle(): bool
