@@ -33,6 +33,11 @@ class Permission extends SpatiePermission
         ];
     }
 
+    public function roles(): BelongsToMany
+    {
+        return $this->belongsToMany(Permission::class, 'role_has_permissions');
+    }
+
     public function users(): BelongsToMany
     {
         return $this->morphedByMany(
