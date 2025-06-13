@@ -7,7 +7,6 @@ use FluxErp\Livewire\DataTables\BaseDataTable;
 use FluxErp\Models\Client;
 use FluxErp\Notifications\ExportReady;
 use FluxErp\Tests\Livewire\BaseSetup;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
