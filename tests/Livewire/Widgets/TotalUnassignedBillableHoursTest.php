@@ -137,7 +137,7 @@ class TotalUnassignedBillableHoursTest extends BaseSetup
     {
         $interval = CarbonInterval::milliseconds($ms)->cascade();
 
-        $totalHours = floor($interval->totalHours);
+        $totalHours = (int) $interval->totalHours;
         $minutes = $interval->minutes;
 
         return __('time.hours_minutes', [
