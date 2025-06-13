@@ -128,11 +128,17 @@ Route::middleware('web')
         Route::middleware(['auth:web', 'permission'])->group(function (): void {
             Route::get('/', Dashboard::class)->name('dashboard');
 
-            Route::get('/storage/{path}', function (string $path) {
-                return response()->file(Storage::path($path));
+            Route::get('/private-storage/{path}', function (string $path) {
+                return response()
+                    ->file(
+                        Storage::path($path),
+                        [
+                            'Content-Disposition' => 'attachment; filename="' . basename($path) . '"',
+                        ]
+                    );
             })
                 ->where('path', '.*')
-                ->name('storage');
+                ->name('private-storage');
 
             Route::middleware(TrackVisits::class)->group(function (): void {
                 Route::get('/mail', Mail::class)->name('mail');
