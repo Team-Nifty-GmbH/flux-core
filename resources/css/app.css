@@ -25,6 +25,11 @@
     display: none !important;
 }
 
+/* tiptap related */
+strong {
+    color: inherit !important;
+}
+
 @layer components {
     .indent-icon {
         @apply after:content-['↳'];

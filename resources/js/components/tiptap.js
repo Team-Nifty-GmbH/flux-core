@@ -1,7 +1,7 @@
 import { Editor } from '@tiptap/core';
-import { FontSizeConfig } from './tiptap-font-size-handler.js';
 import { LiteralTab } from './tiptap-literal-tab-handler.js';
 import { Underline } from '@tiptap/extension-underline';
+import { FontSizeColorConfig } from './tiptap-font-size-color-handler.js';
 import StarterKit from '@tiptap/starter-kit';
 import { MentionConfig } from './tiptap-mention-handler.js';
 
@@ -50,7 +50,7 @@ export default function (
                     element: element,
                     extensions: [
                         StarterKit,
-                        FontSizeConfig,
+                        FontSizeColorConfig,
                         LiteralTab,
                         Underline,
                         MentionConfig(searchModel, element),
@@ -97,7 +97,7 @@ export default function (
                                     getReferenceClientRect: () => ({
                                         width: 0,
                                         height: 0,
-                                        top: cursorPosition.top,
+                                        top: cursorPosition.top + 20,
                                         left: cursorPosition.left,
                                         bottom: cursorPosition.bottom,
                                         right: cursorPosition.right,
