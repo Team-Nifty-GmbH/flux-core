@@ -11,6 +11,7 @@
     ":job_name started": ":job_name gestartet",
     ":model created": ":model erstellt",
     ":model Export Ready": ":model Export bereit",
+    ":model restored": ":model wiederhergestellt",
     ":model saved": ":model gespeichert",
     ":order_type :order_number dated :order_date": ":order_type :order_number vom :order_date",
     ":time elapsed": ":time vergangen",
