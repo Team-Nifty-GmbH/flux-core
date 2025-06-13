@@ -33,7 +33,7 @@
                 >
                     <div class="flex flex-col gap-2">
                         <div
-                            class="whitespace-nowrap text-lg font-semibold"
+                            class="text-lg font-semibold whitespace-nowrap"
                             x-cloak
                             x-show="livewireOptions.series?.filter((series) => ! series.hideFromTotals).length > 1"
                             x-text="seriesData.name"

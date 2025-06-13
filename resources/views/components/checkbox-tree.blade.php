@@ -69,7 +69,7 @@
             <!-- this is the root level elements only -->
             <li>
                 <div
-                    class="-ml-3 flex cursor-pointer select-none items-center space-x-2 rounded px-1.5 text-sm text-gray-700 dark:text-gray-50"
+                    class="-ml-3 flex cursor-pointer items-center space-x-2 rounded px-1.5 text-sm text-gray-700 select-none dark:text-gray-50"
                     x-on:click="toggleSelect(node)"
                     x-bind:class="selected?.id === node.id ? 'bg-indigo-500 dark:bg-indigo-700 text-white' : ''"
                 >

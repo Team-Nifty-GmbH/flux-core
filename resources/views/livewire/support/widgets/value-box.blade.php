@@ -26,7 +26,7 @@
                 class="flex max-w-full grow flex-wrap items-center gap-4 overflow-hidden"
             >
                 <div
-                    class="flex-none truncate whitespace-nowrap text-2xl font-bold"
+                    class="flex-none truncate text-2xl font-bold whitespace-nowrap"
                     x-text="$wire.sum"
                 ></div>
                 @if ($shouldBePositive)
@@ -86,7 +86,7 @@
                 @endif
             </div>
             <div
-                class="flex-none truncate whitespace-nowrap text-lg font-semibold"
+                class="flex-none truncate text-lg font-semibold whitespace-nowrap"
                 x-html="$wire.subValue"
             ></div>
         </div>

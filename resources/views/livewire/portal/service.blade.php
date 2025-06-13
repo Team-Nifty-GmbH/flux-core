@@ -5,7 +5,7 @@
     <h1 class="pt-5 text-5xl font-bold dark:text-gray-50">
         {{ __('Service request') }}
     </h1>
-    <h2 class="pb-8 pt-20 text-base font-bold uppercase dark:text-gray-50">
+    <h2 class="pt-20 pb-8 text-base font-bold uppercase dark:text-gray-50">
         01. {{ __('Information') }}
     </h2>
     <div class="md:flex md:space-x-12">
@@ -45,7 +45,7 @@
                     wire:model="ticket.description"
                     :placeholder="__('Your subject')"
                 />
-                <h2 class="pb-8 pt-20 text-base font-bold uppercase">
+                <h2 class="pt-20 pb-8 text-base font-bold uppercase">
                     02. {{ __('Attachments') }}
                 </h2>
                 <div class="text-portal-font-color font-bold">

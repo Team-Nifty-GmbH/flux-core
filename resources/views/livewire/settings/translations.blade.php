@@ -47,14 +47,14 @@
                     class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8"
                 >
                     <div
-                        class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg"
+                        class="overflow-hidden shadow ring-1 ring-black/5 md:rounded-lg"
                     >
                         <table class="min-w-full divide-y divide-gray-300">
                             <thead class="bg-gray-50">
                                 <tr class="divide-x divide-gray-200">
                                     <th
                                         scope="col"
-                                        class="py-3.5 pl-4 pr-4 text-left text-sm font-semibold text-gray-900 sm:pl-6"
+                                        class="py-3.5 pr-4 pl-4 text-left text-sm font-semibold text-gray-900 sm:pl-6"
                                     >
                                         {{ __('Name') }}
                                     </th>
@@ -66,7 +66,7 @@
                                     </th>
                                     <th
                                         scope="col"
-                                        class="py-2 pl-2 pr-2 text-left text-sm font-semibold text-gray-900"
+                                        class="py-2 pr-2 pl-2 text-left text-sm font-semibold text-gray-900"
                                     ></th>
                                 </tr>
                             </thead>
@@ -77,14 +77,14 @@
                                     <tr class="divide-x divide-gray-200">
                                         <td
                                             x-text="translation.group + '.' + translation.key"
-                                            class="whitespace-nowrap py-4 pl-4 pr-4 text-sm font-medium text-gray-900 sm:pl-6"
+                                            class="py-4 pr-4 pl-4 text-sm font-medium whitespace-nowrap text-gray-900 sm:pl-6"
                                         />
                                         <td
                                             x-text="translation.text[locale]"
-                                            class="whitespace-nowrap py-4 pl-4 pr-4 text-sm font-medium text-gray-900 sm:pl-6"
+                                            class="py-4 pr-4 pl-4 text-sm font-medium whitespace-nowrap text-gray-900 sm:pl-6"
                                         />
                                         <td
-                                            class="whitespace-nowrap py-2 pl-2 pr-2 text-center text-sm text-gray-500"
+                                            class="py-2 pr-2 pl-2 text-center text-sm whitespace-nowrap text-gray-500"
                                         >
                                             <x-button
                                                 color="secondary"

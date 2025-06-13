@@ -6,7 +6,7 @@
         >
             @include('tall-datatables::livewire.data-table')
         </div>
-        <div class="flex-grow">
+        <div class="grow">
             <livewire:product.stock-posting-list
                 :product-id="$product->id"
                 wire:model="warehouseId"

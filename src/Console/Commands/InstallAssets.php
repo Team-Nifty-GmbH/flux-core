@@ -5,7 +5,7 @@ namespace FluxErp\Console\Commands;
 use Closure;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
-use InvalidArgumentException;
+use Illuminate\Support\Str;
 use RuntimeException;
 use Symfony\Component\Process\Process;
 
@@ -39,9 +39,6 @@ class InstallAssets extends Command
             ? $files
             : [
                 __DIR__ . '/../../../package.json',
-                __DIR__ . '/../../../stubs/tailwind/tailwind.config.mjs',
-                __DIR__ . '/../../../stubs/tailwind/postcss.config.js',
-                __DIR__ . '/../../../stubs/tailwind/vite.config.js',
             ];
 
         if (! $basePath) {
@@ -68,8 +65,14 @@ class InstallAssets extends Command
 
             if ($merge && $oldContent) {
                 // if the file is json parsable merge it recursively
-                $decodedContent = json_decode(str_replace('.', '__dot__', $content), true);
-                $decodedOldContent = json_decode(str_replace('.', '__dot__', $oldContent), true);
+                $decodedContent = json_decode(
+                    str_replace('.', '__dot__', $content),
+                    true
+                );
+                $decodedOldContent = json_decode(
+                    str_replace('.', '__dot__', $oldContent),
+                    true
+                );
 
                 if (is_array($decodedContent) && is_array($decodedOldContent)) {
                     $content = str_replace(
@@ -124,10 +127,16 @@ class InstallAssets extends Command
      */
     public function handle(): void
     {
-        $target = $this->argument('directory');
-        if ($target && ! file_exists($target)) {
-            throw new InvalidArgumentException('The target directory does not exist.');
-        }
+        $this->mergeAssets(
+            resource_path('js/app.js'),
+            __DIR__ . '/../../../stubs/app.js.stub',
+            'import \'./bootstrap\';'
+        );
+        $this->mergeAssets(
+            resource_path('css/app.css'),
+            __DIR__ . '/../../../stubs/app.css.stub',
+            '@import \'tailwindcss\';'
+        );
 
         $this->callSilent('storage:link');
 
@@ -137,7 +146,6 @@ class InstallAssets extends Command
         static::copyStubs(
             force: $this->option('force'),
             merge: $this->option('merge-json'),
-            basePath: $target ? fn ($path = '') => $target . '/' . $path : null,
         );
 
         $this->updateNodePackages(function ($packages) {
@@ -154,17 +162,81 @@ class InstallAssets extends Command
             unlink(resource_path('views/welcome.blade.php'));
         }
 
+        if (! file_exists(resource_path('views/.gitkeep'))) {
+            file_put_contents(resource_path('views/.gitkeep'), '');
+        }
+
+        if (file_exists(database_path('/migrations/0001_01_01_000000_create_users_table.php'))) {
+            unlink(database_path('/migrations/0001_01_01_000000_create_users_table.php'));
+        }
+
+        if (file_exists(database_path('/migrations/0001_01_01_000001_create_cache_table.php'))) {
+            unlink(database_path('/migrations/0001_01_01_000001_create_cache_table.php'));
+        }
+
+        if (file_exists(database_path('/migrations/0001_01_01_000002_create_jobs_table.php'))) {
+            unlink(database_path('/migrations/0001_01_01_000002_create_jobs_table.php'));
+        }
+
         $commands = ['npm install'];
         if (! $this->option('no-build')) {
             $commands[] = 'npm run build';
         }
 
+        $commands[] = 'artisan tallstackui:ide';
+
         $this->runCommands($commands);
+    }
+
+    public function mergeAssets(string $path, string $stubPath, string $insertAfter): void
+    {
+        if (! file_exists($path)) {
+            file_put_contents($path, '');
+        }
+
+        $currentContent = file_get_contents($path);
+        $stubContent = Str::of(file_get_contents($stubPath))->start("\n");
+        $manageStart = '/* --- START - Managed by Flux - do not edit --- */';
+        $manageEnd = '/* --- END - Managed by Flux - do not edit --- */';
+
+        // Check if managed section already exists
+        if (
+            str_contains($currentContent, $manageStart)
+            && str_contains($currentContent, $manageEnd)
+            && $current = Str::between($currentContent, $manageStart, $manageEnd)
+        ) {
+            // Replace existing managed content
+            $currentContent = Str::replace(
+                "$current",
+                "$stubContent",
+                $currentContent
+            );
+        } else {
+            // Insert new managed section
+            if (str_contains($currentContent, $insertAfter)) {
+                $currentContent = str_replace(
+                    $insertAfter,
+                    "$insertAfter\n\n$manageStart\n" . $stubContent . "\n$manageEnd",
+                    $currentContent
+                );
+            } else {
+                // Fallback: append to end of file
+                $currentContent .= "\n\n$manageStart\n" . $stubContent . "\n$manageEnd";
+            }
+        }
+
+        file_put_contents($path, $currentContent);
     }
 
     protected function runCommands($commands): void
     {
-        $process = Process::fromShellCommandline(implode(' && ', $commands), null, null, null, 180);
+        $process = Process::fromShellCommandline(
+            implode(' && ', $commands),
+            null,
+            null,
+            null,
+            180
+        );
 
         if ('\\' !== DIRECTORY_SEPARATOR && file_exists('/dev/tty') && is_readable('/dev/tty')) {
             try {

@@ -1,4 +1,4 @@
-<table class="w-full text-2xs" style="page-break-inside: avoid">
+<table class="text-2xs w-full" style="page-break-inside: avoid">
     <tr colspan="100%" class="text-3xs">
         <td>
             @section('client_address')

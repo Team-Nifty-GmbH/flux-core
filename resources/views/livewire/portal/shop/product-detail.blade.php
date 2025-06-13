@@ -128,7 +128,7 @@
 
             <div class="flex flex-col gap-4">
                 @foreach ($productForm->meta as $name => $value)
-                    <x-card class="!px-0 !py-0">
+                    <x-card class="px-0! py-0!">
                         <x-slot:header>
                             <div class="flex justify-between">
                                 <div
@@ -180,7 +180,7 @@
                         {{ __('Additional Media') }}
                     </h2>
                     @foreach ($productForm->additionalMedia ?? [] as $collection => $media)
-                        <x-card class="!px-0 !py-0">
+                        <x-card class="px-0! py-0!">
                             <x-slot:header>
                                 <div class="flex justify-between gap-4">
                                     <div

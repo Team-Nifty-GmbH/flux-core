@@ -23,7 +23,7 @@
                     select="label:name|value:id"
                     :options="$workTimeTypes"
                 />
-                <div class="mb-2 mt-2">
+                <div class="mt-2 mb-2">
                     <x-toggle
                         :label="__('Is Billable')"
                         wire:model="workTime.is_billable"

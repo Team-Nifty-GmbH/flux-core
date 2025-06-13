@@ -92,7 +92,7 @@
                                     </div>
                                 </div>
                                 <div
-                                    class="whitespace-nowrap text-right text-sm text-gray-500"
+                                    class="text-right text-sm whitespace-nowrap text-gray-500"
                                 >
                                     <time
                                         x-text="formatters.datetime(activity.created_at)"

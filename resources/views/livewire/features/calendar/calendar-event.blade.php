@@ -389,7 +389,7 @@
                         </x-dropdown>
                     </div>
                 </template>
-                <div class="mb-2 mt-4">
+                <div class="mt-4 mb-2">
                     <x-label :label="__('Repeat end')" />
                 </div>
                 <x-radio

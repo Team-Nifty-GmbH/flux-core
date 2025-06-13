@@ -28,7 +28,7 @@
     </div>
     @show
     <div
-        class="mt-6 flex flex-col-reverse justify-end space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-x-3 sm:space-y-0 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3"
+        class="mt-6 flex flex-col-reverse justify-end space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-y-0 sm:space-x-3 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3"
     >
         @section('buttons')
         @canAction(\FluxErp\Actions\WorkTime\CreateWorkTime::class)
@@ -120,7 +120,7 @@
                                                 x-cloak
                                                 x-show="additionalColumn.field_type !== 'checkbox' && additionalColumn.field_type !== 'select'"
                                                 x-model="$wire.ticket.additional_columns[name].value"
-                                                x-bind:class="(additionalColumn.field_type === 'color') && '!w-auto'"
+                                                x-bind:class="(additionalColumn.field_type === 'color') && 'w-auto!'"
                                                 x-bind:type="additionalColumn.field_type"
                                             ></x-input>
                                             <div
@@ -287,7 +287,7 @@
                 @section('attributes')
                 <x-card>
                     <div
-                        class="overflow-hidden text-ellipsis whitespace-nowrap text-sm"
+                        class="overflow-hidden text-sm text-ellipsis whitespace-nowrap"
                     >
                         <div class="flex gap-0.5">
                             <div class="">{{ __('Created At') }}:</div>

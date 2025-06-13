@@ -74,7 +74,7 @@
             x-on:dragleave.prevent="isDropping = false"
         >
             <div
-                class="absolute bottom-0 left-0 right-0 top-0 z-30 flex items-center justify-center bg-blue-500 opacity-90"
+                class="absolute top-0 right-0 bottom-0 left-0 z-30 flex items-center justify-center bg-blue-500 opacity-90"
                 x-show="isDropping"
                 x-cloak
             >
@@ -83,14 +83,14 @@
                 </span>
             </div>
             <label
-                class="order-2 flex w-full cursor-pointer select-none flex-col items-center justify-center rounded-md border-dashed border-gray-300 bg-gray-50 p-10 shadow hover:bg-slate-50 dark:bg-gray-700"
+                class="order-2 flex w-full cursor-pointer flex-col items-center justify-center rounded-md border-dashed border-gray-300 bg-gray-50 p-10 shadow select-none hover:bg-slate-50 dark:bg-gray-700"
                 x-bind:for="uploadObjectId"
             >
                 <div class="pb-3">
                     <x-icon name="arrow-up-on-square" class="h-12 w-12" />
                 </div>
                 <p>{{ __('Click here to select files to upload') }}</p>
-                <em class="italic text-slate-400">
+                <em class="text-slate-400 italic">
                     {{ __('(Or drag files to the page)') }}
                 </em>
                 <div
@@ -119,15 +119,13 @@
                 x-for="(file, index) in $wire.{{ $wireModel }}.stagedFiles"
             >
                 <x-card
-                    class="!px-0 !py-0"
+                    class="px-0! py-0!"
                     x-show="! file.shouldDelete"
                     x-cloak
                 >
                     <div class="flex items-center justify-between text-sm">
                         <div class="flex w-0 flex-1 items-center gap-1.5">
-                            <div
-                                class="flex-shrink-0 rounded-md object-contain"
-                            >
+                            <div class="shrink-0 rounded-md object-contain">
                                 <img
                                     x-bind:src="file.preview_url ? file.preview_url : '#'"
                                     class="h-16 w-16 rounded-md object-cover"
@@ -146,7 +144,7 @@
                                 wire:click="download(file.id)"
                             />
                         </div>
-                        <div class="flex flex-shrink-0 px-4">
+                        <div class="flex shrink-0 px-4">
                             <x-button
                                 color="red"
                                 x-on:click="file.shouldDelete = true"

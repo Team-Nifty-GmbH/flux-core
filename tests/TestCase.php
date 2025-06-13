@@ -41,6 +41,8 @@ abstract class TestCase extends BaseTestCase
         }
 
         parent::setUp();
+
+        $this->withoutVite();
     }
 
     public function getPackageProviders($app): array

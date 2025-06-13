@@ -10,7 +10,7 @@
             {{ $filename }}
         </span>
     </div>
-    <div class="flex flex-shrink-0 space-x-4">
+    <div class="flex shrink-0 space-x-4">
         {{ $buttons ?? '' }}
     </div>
 </div>

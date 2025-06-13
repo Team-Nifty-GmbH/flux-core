@@ -1,4 +1,4 @@
-const swReady = navigator.serviceWorker.ready;
+const swReady = navigator.serviceWorker?.ready;
 
 document.addEventListener('DOMContentLoaded', function () {
     initSW();

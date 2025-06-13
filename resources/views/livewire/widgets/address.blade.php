@@ -106,7 +106,7 @@
         </div>
     </div>
     <hr class="col-span-2" />
-    <div class="pb-2 pt-8 font-semibold uppercase">
+    <div class="pt-8 pb-2 font-semibold uppercase">
         {{ __('Contact options') }}
     </div>
     <div class="grid grid-cols-2 gap-2">

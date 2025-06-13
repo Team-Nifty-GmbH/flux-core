@@ -26,10 +26,10 @@
         <h2 class="text-base font-bold uppercase">
             {{ __('Welcome') }}
         </h2>
-        <h1 class="pb-10 pt-5 text-5xl font-bold">
+        <h1 class="pt-5 pb-10 text-5xl font-bold">
             {{ __('My Tickets') }}
         </h1>
-        <div class="mt-4 justify-end pb-2 pr-2 sm:ml-16 sm:mt-0 sm:flex">
+        <div class="mt-4 justify-end pr-2 pb-2 sm:mt-0 sm:ml-16 sm:flex">
             <x-button
                 color="indigo"
                 :text="__('New Ticket')"

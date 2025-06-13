@@ -70,7 +70,7 @@
                     <div class="mt-3 text-center sm:mt-5">
                         <div x-show="dialogType === 'cancel'" x-cloak>
                             <h3
-                                class="dark:text-dark-200 text-lg font-semibold leading-6 text-gray-700"
+                                class="dark:text-dark-200 text-lg leading-6 font-semibold text-gray-700"
                                 x-html="'{{ __('Cancel :model', ['model' => __('Calendar Event')]) }}'"
                             ></h3>
                             <div class="mt-2">
@@ -82,7 +82,7 @@
                         </div>
                         <div x-show="dialogType === 'delete'" x-cloak>
                             <h3
-                                class="dark:text-dark-200 text-lg font-semibold leading-6 text-gray-700"
+                                class="dark:text-dark-200 text-lg leading-6 font-semibold text-gray-700"
                                 x-html="'{{ __('Delete :model', ['model' => __('Calendar Event')]) }}'"
                             ></h3>
                             <div class="mt-2">

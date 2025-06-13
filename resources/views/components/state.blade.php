@@ -26,7 +26,7 @@
                 <button
                     x-on:click="show = !show"
                     wire:loading.attr="disabled"
-                    wire:loading.class="!cursor-wait"
+                    wire:loading.class="cursor-wait!"
                     type="button"
                     class="group inline-flex w-full items-center justify-center gap-x-2 rounded px-4 py-2 text-sm font-semibold outline-none hover:shadow-sm focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-80 dark:bg-slate-700 dark:ring-slate-600 dark:ring-offset-slate-700 dark:hover:bg-slate-700"
                     x-bind:class="

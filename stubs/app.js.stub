@@ -1,0 +1,2 @@
+import '../../vendor/team-nifty-gmbh/flux-erp/resources/js/flux.js';
+import '../../vendor/team-nifty-gmbh/tall-datatables/resources/js/tall-datatables.js';

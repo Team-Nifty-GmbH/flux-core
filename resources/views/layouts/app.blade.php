@@ -30,7 +30,7 @@
             >
                 <div
                     id="loading-overlay-spinner"
-                    class="bg-secondary-400 dark:bg-secondary-700 fixed inset-0 flex items-center justify-center bg-opacity-60 opacity-0 transition-opacity duration-200 dark:bg-opacity-60"
+                    class="bg-secondary-400/60 dark:bg-secondary-700/60 fixed inset-0 flex items-center justify-center opacity-0 transition-opacity duration-200"
                 >
                     <x-flux::spinner-svg />
                 </div>

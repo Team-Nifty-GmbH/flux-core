@@ -38,7 +38,7 @@
                     <div x-html="detail.image"></div>
                     <div
                         x-show="! detail.image"
-                        class="flex min-h-[12rem] w-full items-center justify-center rounded bg-gray-300 dark:bg-gray-700"
+                        class="flex min-h-48 w-full items-center justify-center rounded bg-gray-300 dark:bg-gray-700"
                     >
                         <svg
                             class="h-12 w-12 text-gray-200"

@@ -125,7 +125,7 @@
             <div class="overflow-auto rounded-md border p-4" id="mail-body"></div>
         </div>
     </x-modal>
-    <section class="flex max-w-[96rem] flex-col gap-4">
+    <section class="flex max-w-384 flex-col gap-4">
         <x-card
             id="mail-folders"
             x-on:folder-tree-select="$wire.set('folderId', $event.detail.id, true)"

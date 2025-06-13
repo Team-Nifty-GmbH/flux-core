@@ -27,6 +27,9 @@
 />
 @stack('meta')
 <tallstackui:script />
-{{ \FluxErp\Facades\Asset::toHtml() }}
+@vite([
+    'resources/css/app.css',
+    'resources/js/app.js',
+])
 @stack('scripts')
 {{ $slot }}
