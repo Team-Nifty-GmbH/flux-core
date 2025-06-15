@@ -78,7 +78,7 @@ class LeadsByLeadState extends CircleChart implements HasWidgetOptions
     {
         return collect($this->labels)
             ->map(fn ($label) => [
-                'label' => __('Leads with Status :lead-state', ['lead-state' => $label]),
+                'label' => __('Leads with status :lead-state', ['lead-state' => $label]),
                 'method' => 'show',
                 'params' => $label,
             ])
@@ -97,7 +97,7 @@ class LeadsByLeadState extends CircleChart implements HasWidgetOptions
                 ->whereBetween('created_at', [$start, $end])
                 ->whereNotNull('lead_state_id')
                 ->whereRelation('leadState', 'name', $leadStateName),
-            __('Leads by status :leadStateName', ['leadStateName' => $leadStateName])
+            __('Leads with status :lead-state', ['lead-state' => $leadStateName])
         )
             ->store();
 
