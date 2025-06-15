@@ -51,4 +51,9 @@ class Purchase extends ValueBox
                 . ',.OrderLocked' => 'calculateSum',
         ];
     }
+
+    protected function icon(): string
+    {
+        return 'credit-card';
+    }
 }

@@ -132,4 +132,9 @@ class Outstanding extends ValueBox implements HasWidgetOptions
                 $this->orderTypeIds
             );
     }
+
+    protected function icon(): string
+    {
+        return 'banknotes';
+    }
 }
