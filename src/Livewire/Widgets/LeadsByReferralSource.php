@@ -23,8 +23,6 @@ class LeadsByReferralSource extends CircleChart implements HasWidgetOptions
         'type' => 'donut',
     ];
 
-    public bool $showTotals = false;
-
     public static function dashboardComponent(): array|string
     {
         return Dashboard::class;
