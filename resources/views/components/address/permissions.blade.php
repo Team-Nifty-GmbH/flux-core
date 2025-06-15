@@ -3,7 +3,7 @@
     <div class="flex justify-between">
         <div>
             <h3
-                class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-50"
+                class="text-lg leading-6 font-medium text-gray-900 dark:text-gray-50"
             >
                 {{ __('Customer portal') }}
             </h3>

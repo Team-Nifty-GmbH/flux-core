@@ -74,9 +74,9 @@
                             <a
                                 @if ((! data_get($navigation, "is_virtual_uri") && data_get($navigation, "children")) || data_get($navigation, "route_name") === "dashboard")
                                     )
-                                    wire:current.exact="bg-indigo-500 dark:bg-indigo-700 !text-white hover:bg-indigo-600 nav-item-active"
+                                    wire:current.exact="bg-indigo-500 dark:bg-indigo-700 text-white! hover:bg-indigo-600 nav-item-active"
                                 @else
-                                    wire:current="bg-indigo-500 dark:bg-indigo-700 !text-white hover:bg-indigo-600 nav-item-active"
+                                    wire:current="bg-indigo-500 dark:bg-indigo-700 text-white! hover:bg-indigo-600 nav-item-active"
                                 @endif
                                 href="{{ data_get($navigation, "uri", "#") }}"
                                 @if ($navigation["children"] ?? false)
@@ -103,7 +103,7 @@
                                 @if ($navigation["children"] ?? false)
                                     <span
                                         aria-hidden="true"
-                                        class="ml-auto pl-2 pr-2"
+                                        class="ml-auto pr-2 pl-2"
                                     >
                                         <x-icon
                                             name="chevron-left"
@@ -155,7 +155,7 @@
                             <span class="truncate text-sm text-white">
                                 {{ __("Frequently visited") }}
                             </span>
-                            <span aria-hidden="true" class="ml-auto pl-2 pr-2">
+                            <span aria-hidden="true" class="ml-auto pr-2 pl-2">
                                 <x-icon
                                     name="chevron-left"
                                     class="h-4 w-4 transform text-white transition-transform"
@@ -213,7 +213,7 @@
                             <span class="truncate text-sm text-white">
                                 {{ __("Favorites") }}
                             </span>
-                            <span aria-hidden="true" class="ml-auto pl-2 pr-2">
+                            <span aria-hidden="true" class="ml-auto pr-2 pl-2">
                                 <x-icon
                                     name="chevron-left"
                                     class="h-4 w-4 transform text-white transition-transform"

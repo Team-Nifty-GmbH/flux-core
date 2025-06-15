@@ -68,7 +68,7 @@
             x-on:dragleave.prevent="isDropping = false"
         >
             <div
-                class="absolute bottom-0 left-0 right-0 top-0 z-30 flex items-center justify-center bg-indigo-500 opacity-90"
+                class="absolute top-0 right-0 bottom-0 left-0 z-30 flex items-center justify-center bg-indigo-500 opacity-90"
                 x-show="isDropping"
             >
                 <span class="text-3xl text-white">
@@ -76,14 +76,14 @@
                 </span>
             </div>
             <label
-                class="order-2 flex w-full cursor-pointer select-none flex-col items-center justify-center rounded-md border-dashed border-gray-300 bg-gray-50 p-10 shadow hover:bg-slate-50 dark:bg-gray-700"
+                class="order-2 flex w-full cursor-pointer flex-col items-center justify-center rounded-md border-dashed border-gray-300 bg-gray-50 p-10 shadow select-none hover:bg-slate-50 dark:bg-gray-700"
                 for="file-upload"
             >
                 <div class="pb-3">
                     <x-icon name="arrow-up-on-square" class="h-12 w-12" />
                 </div>
                 <p>{{ __('Click here to select files to upload') }}</p>
-                <em class="italic text-slate-400">
+                <em class="text-slate-400 italic">
                     {{ __('(Or drag files to the page)') }}
                 </em>
                 <div
@@ -115,7 +115,7 @@
                             x-text="file.name"
                         ></span>
                     </div>
-                    <div class="flex flex-shrink-0 space-x-4">
+                    <div class="flex shrink-0 space-x-4">
                         <x-button
                             color="red"
                             x-on:click="$wire.removeFileUpload('{{ $target }}', index)"

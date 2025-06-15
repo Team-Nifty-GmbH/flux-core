@@ -4,7 +4,7 @@
     <div class="pb-6 md:flex md:items-center md:justify-between md:space-x-5">
         <div class="flex items-start space-x-5">
             @section('dashboard-header.avatar')
-                <div class="flex-shrink-0">
+                <div class="shrink-0">
                     <x-avatar :image="auth()->user()->getAvatarUrl()" />
                 </div>
             @endsection

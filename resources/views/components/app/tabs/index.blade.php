@@ -5,14 +5,14 @@
         <!-- Use an "onChange" listener to redirect the user to the selected tab URL. -->
         <x-select.styled
             wire:model.live="tab"
-            class="mt-4 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-purple-500 focus:outline-none focus:ring-purple-500 sm:text-sm"
+            class="mt-4 block w-full rounded-md border-gray-300 py-2 pr-10 pl-3 text-base focus:border-purple-500 focus:ring-purple-500 focus:outline-none sm:text-sm"
             :options="$items"
             select="label:view|value:label"
         />
     </div>
     <div class="hidden sm:block">
         <div class="border-b border-gray-200">
-            <nav class="-mb-px mt-2 flex space-x-8" aria-label="Tabs">
+            <nav class="mt-2 -mb-px flex space-x-8" aria-label="Tabs">
                 @foreach ($items as $item)
                     <!-- Current: "border-purple-500 text-purple-600", Default: "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-200" -->
                     <div
@@ -23,7 +23,7 @@
                                 ? 'border-purple-500 text-purple-600'
                                 : 'border-transparent text-gray-500'
                         "
-                        class="cursor-pointer whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium hover:border-gray-200 hover:text-gray-700"
+                        class="cursor-pointer border-b-2 px-1 py-4 text-sm font-medium whitespace-nowrap hover:border-gray-200 hover:text-gray-700"
                     >
                         {{ $item['label'] }}
 

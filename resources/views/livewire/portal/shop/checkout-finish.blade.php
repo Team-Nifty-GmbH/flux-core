@@ -1,7 +1,7 @@
 <div class="flex flex-col justify-center gap-8">
     <div>
         <h1
-            class="pb-10 pt-5 text-center text-5xl font-bold text-gray-900 dark:text-gray-50"
+            class="pt-5 pb-10 text-center text-5xl font-bold text-gray-900 dark:text-gray-50"
         >
             {{ __('Thank you for your order!') }}
         </h1>

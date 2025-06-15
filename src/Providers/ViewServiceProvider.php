@@ -4,7 +4,6 @@ namespace FluxErp\Providers;
 
 use Composer\Autoload\ClassLoader;
 use Composer\InstalledVersions;
-use FluxErp\Facades\Asset;
 use FluxErp\View\Layouts\App;
 use FluxErp\View\Layouts\Printing;
 use Illuminate\Support\Facades\Blade;
@@ -32,61 +31,11 @@ class ViewServiceProvider extends ServiceProvider
     {
         Vite::useAggressivePrefetching();
 
-        if (
-            (! $this->app->runningInConsole() || $this->app->runningUnitTests())
-            && file_exists(public_path('build/manifest.json'))
-        ) {
-            // get the real path for the flux package root folder
-            $this->bootAssets();
-        }
-
         $this->customizeTallstackUi();
 
         $this->registerViews();
 
         $this->bootBladeDirectives();
-    }
-
-    protected function bootAssets(): void
-    {
-        Asset::vite(
-            public_path('build'),
-            [
-                static::getRealPackageAssetPath(
-                    'resources/css/app.css',
-                    'team-nifty-gmbh/flux-erp'
-                ),
-                static::getRealPackageAssetPath(
-                    'resources/js/app.js',
-                    'team-nifty-gmbh/flux-erp'
-                ),
-                static::getRealPackageAssetPath(
-                    'resources/js/apex-charts.js',
-                    'team-nifty-gmbh/flux-erp'
-                ),
-                static::getRealPackageAssetPath(
-                    'resources/js/alpine.js',
-                    'team-nifty-gmbh/flux-erp'
-                ),
-                static::getRealPackageAssetPath(
-                    'resources/js/sw.js',
-                    'team-nifty-gmbh/flux-erp'
-                ),
-                static::getRealPackageAssetPath(
-                    'resources/js/tall-datatables.js',
-                    'team-nifty-gmbh/tall-datatables'
-                ),
-            ]
-        );
-
-        if (auth()->guard('web')->check()) {
-            Asset::vite(public_path('build'), [
-                static::getRealPackageAssetPath(
-                    'resources/js/web-push.js',
-                    'team-nifty-gmbh/flux-erp'
-                ),
-            ]);
-        }
     }
 
     protected function bootBladeDirectives(): void
@@ -100,7 +49,7 @@ class ViewServiceProvider extends ServiceProvider
     {
         TallStackUi::personalize()
             ->avatar()
-            ->block('wrapper.class', 'inline-flex shrink-0 items-center justify-center overflow-hidden !bg-secondary-200');
+            ->block('wrapper.class', 'inline-flex shrink-0 items-center justify-center overflow-hidden bg-secondary-200!');
         TallStackUi::personalize()
             ->dropdown()
             ->block('wrapper.second', 'relative inline-block text-left w-full');
@@ -147,7 +96,7 @@ class ViewServiceProvider extends ServiceProvider
         TallStackUi::personalize()
             ->toast('relative')
             ->block('wrapper.first', 'pointer-events-none inset-0 flex flex-col items-end justify-end gap-y-2 px-4 py-4')
-            ->block('wrapper.third', 'dark:bg-dark-700 pointer-events-auto w-full w-full overflow-hidden rounded-xl bg-white shadow-lg ring-1 ring-black ring-opacity-5')
+            ->block('wrapper.third', 'dark:bg-dark-700 pointer-events-auto w-full w-full overflow-hidden rounded-xl bg-white shadow-lg ring-1 ring-black/5')
             ->block('buttons.wrapper.second', 'flex min-h-full flex-col justify-between')
             ->block('buttons.close.wrapper', 'ml-2 flex shrink-0');
 

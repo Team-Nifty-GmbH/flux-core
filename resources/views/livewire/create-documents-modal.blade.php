@@ -41,7 +41,7 @@
             @canAction(\FluxErp\Actions\PrintJob\CreatePrintJob::class)
                 @if (auth()->user()?->printers()->exists())
                     <div
-                        class="overflow-hidden text-ellipsis whitespace-nowrap font-bold"
+                        class="overflow-hidden font-bold text-ellipsis whitespace-nowrap"
                     >
                         {{ __('Print') }}
                     </div>
@@ -49,17 +49,17 @@
             @endcanAction
 
             <div
-                class="overflow-hidden text-ellipsis whitespace-nowrap font-bold"
+                class="overflow-hidden font-bold text-ellipsis whitespace-nowrap"
             >
                 {{ __('Email') }}
             </div>
             <div
-                class="overflow-hidden text-ellipsis whitespace-nowrap font-bold"
+                class="overflow-hidden font-bold text-ellipsis whitespace-nowrap"
             >
                 {{ __('Download') }}
             </div>
             <div
-                class="overflow-hidden text-ellipsis whitespace-nowrap font-bold"
+                class="overflow-hidden font-bold text-ellipsis whitespace-nowrap"
             >
                 {{ __('Force Create') }}
             </div>

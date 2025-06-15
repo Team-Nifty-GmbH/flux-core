@@ -71,7 +71,7 @@
                 </x-slot>
             </x-modal>
         </div>
-        <div class="absolute right-4 top-6 flex gap-1.5">
+        <div class="absolute top-6 right-4 flex gap-1.5">
             <a
                 href="{{ $client?->website }}"
                 target="_blank"

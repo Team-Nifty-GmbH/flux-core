@@ -12,7 +12,7 @@
                 class="grid-stack-item-content"
                 x-bind:class="editGrid ? 'border-4 border-primary-500' : ''"
             >
-                <div class="absolute right-2 top-2 z-10">
+                <div class="absolute top-2 right-2 z-10">
                     <x-button.circle
                         x-cloak
                         x-show="editGrid"

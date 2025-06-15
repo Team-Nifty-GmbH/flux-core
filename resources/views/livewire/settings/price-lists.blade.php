@@ -8,7 +8,7 @@
     <x-modal id="edit-price-list-modal">
         <x-slot
             name="title"
-            class="text-lg font-medium leading-6 text-gray-900 dark:text-white"
+            class="text-lg leading-6 font-medium text-gray-900 dark:text-white"
         >
             {{ __('Edit Price List') }}
         </x-slot>

@@ -482,7 +482,7 @@ const calendar = () => {
                     if (!info.event.allDay) {
                         let calendarBadge = document.createElement('div');
                         calendarBadge.className =
-                            'size-3 rounded-full flex-shrink-0';
+                            'size-3 rounded-full shrink-0';
                         calendarBadge.style.backgroundColor =
                             info.backgroundColor;
                         leftContent.appendChild(calendarBadge);
@@ -503,13 +503,12 @@ const calendar = () => {
 
                     // Right side container for time and status badges
                     let rightContent = document.createElement('div');
-                    rightContent.className =
-                        'flex items-center gap-1 flex-shrink-0';
+                    rightContent.className = 'flex items-center gap-1 shrink-0';
 
                     // Add status badges if they exist
                     if (info.event.extendedProps.appendTitle) {
                         let statusBadges = document.createElement('div');
-                        statusBadges.className = 'flex-shrink-0 mr-1';
+                        statusBadges.className = 'shrink-0 mr-1';
                         statusBadges.innerHTML =
                             info.event.extendedProps.appendTitle;
                         rightContent.appendChild(statusBadges);
@@ -519,7 +518,7 @@ const calendar = () => {
                     if (!info.event.allDay && info.timeText) {
                         let timeNode = document.createElement('div');
                         timeNode.className =
-                            'flex-shrink-0 whitespace-nowrap text-xs';
+                            'shrink-0 whitespace-nowrap text-xs';
 
                         if (info.event.extendedProps.is_cancelled) {
                             timeNode.classList.add('line-through');
