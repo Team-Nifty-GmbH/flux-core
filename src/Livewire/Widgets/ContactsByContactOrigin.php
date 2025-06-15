@@ -47,8 +47,8 @@ class ContactsByContactOrigin extends CircleChart implements HasWidgetOptions
                 ->orderByRaw('COUNT(*) DESC')
         )
             ->setRange($this->timeFrame)
-            ->setEndingDate($this->end)
-            ->setStartingDate($this->start)
+            ->setEndingDate($this->getEnd())
+            ->setStartingDate($this->getStart())
             ->setLabelKey('contactOrigin.name')
             ->count('contact_origin_id');
 
@@ -56,8 +56,8 @@ class ContactsByContactOrigin extends CircleChart implements HasWidgetOptions
             $startDate = $range[0];
             $endDate = $range[1];
         } else {
-            $startDate = $this->start;
-            $endDate = $this->end;
+            $startDate = $this->getStart();
+            $endDate = $this->getEnd();
         }
 
         $unassignedCount = resolve_static(Contact::class, 'query')

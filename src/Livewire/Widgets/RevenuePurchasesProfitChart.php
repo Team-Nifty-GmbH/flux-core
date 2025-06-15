@@ -121,56 +121,13 @@ class RevenuePurchasesProfitChart extends LineChart implements HasWidgetOptions
     #[Renderless]
     public function redirectPurchases(): void
     {
-        $startCarbon = $this->getStart();
-        $endCarbon = $this->getEnd();
-
-        $start = $startCarbon->toDateString();
-        $end = $endCarbon->toDateString();
-
-        $localizedStart = $startCarbon->translatedFormat('j. F Y');
-        $localizedEnd = $endCarbon->translatedFormat('j. F Y');
-
-        SessionFilter::make(
-            Livewire::new(resolve_static(OrderList::class, 'class'))->getCacheKey(),
-            fn (Builder $query) => $query
-                ->whereNotNull('invoice_date')
-                ->whereNotNull('invoice_number')
-                ->purchase()
-                ->where('invoice_date', '>=', $start)
-                ->where('invoice_date', '<=', $end),
-
-            __('Purchases') . ' ' . __('between :start and :end', ['start' => $localizedStart, 'end' => $localizedEnd]),
-        )
-            ->store();
-
-        $this->redirectRoute('orders.orders', navigate: true);
+        $this->redirectByType('purchases');
     }
 
     #[Renderless]
     public function redirectRevenue(): void
     {
-        $startCarbon = $this->getStart();
-        $endCarbon = $this->getEnd();
-
-        $start = $startCarbon->toDateString();
-        $end = $endCarbon->toDateString();
-
-        $localizedStart = $startCarbon->translatedFormat('j. F Y');
-        $localizedEnd = $endCarbon->translatedFormat('j. F Y');
-
-        SessionFilter::make(
-            Livewire::new(resolve_static(OrderList::class, 'class'))->getCacheKey(),
-            fn (Builder $query) => $query
-                ->whereNotNull('invoice_date')
-                ->whereNotNull('invoice_number')
-                ->revenue()
-                ->whereBetween('invoice_date', [$start, $end]),
-
-            __('Revenue') . ' ' . __('between :start and :end', ['start' => $localizedStart, 'end' => $localizedEnd]),
-        )
-            ->store();
-
-        $this->redirectRoute('orders.orders', navigate: true);
+        $this->redirectByType('revenue');
     }
 
     protected function getListeners(): array
@@ -179,5 +136,43 @@ class RevenuePurchasesProfitChart extends LineChart implements HasWidgetOptions
             'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
                 . ',.OrderLocked' => 'calculateByTimeFrame',
         ];
+    }
+
+    #[Renderless]
+    protected function redirectByType(string $type): void
+    {
+        $startCarbon = $this->getStart();
+        $endCarbon = $this->getEnd();
+
+        $start = $startCarbon->toDateString();
+        $end = $endCarbon->toDateString();
+
+        $localizedStart = $startCarbon->translatedFormat('j\. F Y');
+        $localizedEnd = $endCarbon->translatedFormat('j\. F Y');
+
+        $label = match ($type) {
+            'purchases' => __('Purchases') . ' ' . __('between :start and :end', ['start' => $localizedStart, 'end' => $localizedEnd]),
+            'revenue' => __('Revenue') . ' ' . __('between :start and :end', ['start' => $localizedStart, 'end' => $localizedEnd]),
+        };
+
+        $filter = match ($type) {
+            'purchases' => fn (Builder $query) => $query->whereNotNull('invoice_date')
+                ->whereNotNull('invoice_number')
+                ->purchase()
+                ->where('invoice_date', '>=', $start)
+                ->where('invoice_date', '<=', $end),
+            'revenue' => fn (Builder $query) => $query->whereNotNull('invoice_date')
+                ->whereNotNull('invoice_number')
+                ->revenue()
+                ->whereBetween('invoice_date', [$start, $end]),
+        };
+
+        SessionFilter::make(
+            Livewire::new(resolve_static(OrderList::class, 'class'))->getCacheKey(),
+            $filter,
+            $label
+        )->store();
+
+        $this->redirectRoute('orders.orders', navigate: true);
     }
 }
