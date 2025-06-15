@@ -40,11 +40,11 @@ class AddressAddressTypeOrder extends FluxPivot
 
     public function getAddressAttribute(): ?Model
     {
-        $address = $this->fromJson($this->attributes['address'] ?? null);
+        $address = $this->fromJson(data_get($this->attributes, 'address'));
 
         return $address
             ? resolve_static(Address::class, 'query')
-                ->whereKey($address['id'])
+                ->whereKey(data_get($address, 'id'))
                 ->firstOrNew()
                 ->fill($address)
             : $this->address()->first();

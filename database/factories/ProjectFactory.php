@@ -12,13 +12,22 @@ class ProjectFactory extends Factory
 
     public function definition(): array
     {
+        $state = ProjectState::all()->random()::$name;
+        $startDate = $this->faker->date();
+        $endDate = $state === 'done'
+            ? $this->faker->dateTimeBetween($startDate)->format('Y-m-d')
+            : null;
+
         return [
             'name' => $this->faker->jobTitle(),
-            'start_date' => $this->faker->date(),
-            'description' => $this->faker->realText(),
-            'state' => ProjectState::all()->random()::$name,
+            'start_date' => $startDate,
+            'description' => $this->faker->boolean() ? $this->faker->realText() : null,
+            'end_date' => $endDate,
+            'state' => $state,
+            'progress' => $this->faker->randomFloat(2, 0, 1),
             'time_budget' => rand(0, 1000) . ':' . rand(0, 59),
-            'budget' => $this->faker->randomFloat(),
+            'budget' => $this->faker->randomFloat(10000),
+            'total_cost' => $this->faker->randomFloat(10000),
         ];
     }
 }

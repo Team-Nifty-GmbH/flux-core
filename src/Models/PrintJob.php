@@ -4,11 +4,12 @@ namespace FluxErp\Models;
 
 use FluxErp\Contracts\HasMediaForeignKey;
 use FluxErp\Traits\Filterable;
+use FluxErp\Traits\HasPackageFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PrintJob extends FluxModel implements HasMediaForeignKey
 {
-    use Filterable;
+    use Filterable, HasPackageFactory;
 
     public static function mediaReplaced(int|string|null $oldMediaId, int|string|null $newMediaId): void
     {

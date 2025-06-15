@@ -11,6 +11,8 @@ class PaymentReminderFactory extends Factory
 
     public function definition(): array
     {
-        return [];
+        return [
+            'reminder_level' => $this->faker->numberBetween(1, 10),
+        ];
     }
 }
