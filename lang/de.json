@@ -997,7 +997,7 @@
     "Latitude": "Breitengrad",
     "Lay out user": "Auslage Benutzer",
     "Lay Out User Id": "Auslage-Benutzer-ID",
-    "Leads recommended by :referralSourceName": "Leads empfohlen von :referralSourceName",
+    "Leads recommended by :referral-source-name": "Leads empfohlen von :referral-source-name",
     "Leads By Referral Source": "Leads nach Empfehlungsquelle",
     "Lead State": "Lead-Status",
     "Lead State Id": "Lead Status-ID",

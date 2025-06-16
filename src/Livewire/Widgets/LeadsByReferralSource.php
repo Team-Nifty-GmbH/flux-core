@@ -54,23 +54,6 @@ class LeadsByReferralSource extends CircleChart implements HasWidgetOptions
         $this->labels = $metrics->getLabels();
     }
 
-    public function getPlotOptions(): array
-    {
-        return [
-            'pie' => [
-                'donut' => [
-                    'labels' => [
-                        'show' => true,
-                        'total' => [
-                            'show' => true,
-                            'label' => __('Total'),
-                        ],
-                    ],
-                ],
-            ],
-        ];
-    }
-
     #[Renderless]
     public function options(): array
     {
@@ -95,10 +78,27 @@ class LeadsByReferralSource extends CircleChart implements HasWidgetOptions
                 ->whereBetween('created_at', [$start, $end])
                 ->whereNotNull('recommended_by_address_id')
                 ->whereRelation('addressRecommendedBy', 'name', $addressName),
-            __('Leads recommended by :referralSourceName', ['referralSourceName' => $addressName])
+            __('Leads recommended by :referral-source-name', ['referral-source-name' => $addressName])
         )
             ->store();
 
         $this->redirectRoute('sales.leads', navigate: true);
+    }
+
+    protected function getPlotOptions(): array
+    {
+        return [
+            'pie' => [
+                'donut' => [
+                    'labels' => [
+                        'show' => true,
+                        'total' => [
+                            'show' => true,
+                            'label' => __('Total'),
+                        ],
+                    ],
+                ],
+            ],
+        ];
     }
 }
