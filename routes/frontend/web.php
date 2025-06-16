@@ -70,6 +70,7 @@ use FluxErp\Livewire\Settings\Plugins;
 use FluxErp\Livewire\Settings\PriceLists;
 use FluxErp\Livewire\Settings\Printers;
 use FluxErp\Livewire\Settings\PrintJobs;
+use FluxErp\Livewire\Settings\PrintLayoutEditor;
 use FluxErp\Livewire\Settings\ProductOptionGroups;
 use FluxErp\Livewire\Settings\ProductPropertyGroups;
 use FluxErp\Livewire\Settings\Profile;
@@ -240,6 +241,7 @@ Route::middleware('web')
                         Route::get('/plugins', Plugins::class)->name('plugins');
                         Route::get('/price-lists', PriceLists::class)->name('price-lists');
                         Route::get('/print-jobs', PrintJobs::class)->name('print-jobs');
+                        Route::get('/print-layout-editor', PrintLayoutEditor::class)->name('print-layout-editor');
                         Route::get('/printers', Printers::class)->name('printers');
                         Route::get('/product-option-groups', ProductOptionGroups::class)->name('product-option-groups');
                         Route::get('/product-properties', ProductPropertyGroups::class)->name('product-properties');
