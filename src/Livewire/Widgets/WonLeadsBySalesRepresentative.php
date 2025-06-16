@@ -11,7 +11,6 @@ use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use FluxErp\Traits\Widgetable;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Js;
-use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Livewire\Livewire;
 use TeamNiftyGmbH\DataTable\Helpers\SessionFilter;
@@ -38,9 +37,6 @@ class WonLeadsBySalesRepresentative extends BarChart implements HasWidgetOptions
 
     public bool $showTotals = false;
 
-    #[Locked]
-    public ?int $userId = null;
-
     public static function dashboardComponent(): array|string
     {
         return Dashboard::class;
@@ -53,6 +49,7 @@ class WonLeadsBySalesRepresentative extends BarChart implements HasWidgetOptions
         $this->updateData();
     }
 
+    #[Renderless]
     public function calculateChart(): void
     {
         $colors = [
@@ -75,34 +72,32 @@ class WonLeadsBySalesRepresentative extends BarChart implements HasWidgetOptions
 
         $leadCounts = resolve_static(User::class, 'query')
             ->withCount([
-                'leads as total' => function ($query) use ($start, $end): void {
-                    $query->whereHas('leadState', function ($q): void {
-                        $q->where('is_won', 1);
+                'leads as total' => function (Builder $query) use ($start, $end): void {
+                    $query->whereHas('leadState', function (Builder $query): void {
+                        $query->where('is_won', true);
                     })
                         ->whereBetween('end', [$start, $end]);
                 },
             ])
-            ->get(['name', 'color', 'id'])
-            ->filter(fn ($user) => $user->total > 0);
+            ->having('total', '>', 0)
+            ->get(['name', 'color', 'id']);
 
-        $data = $leadCounts
+        $this->series = $leadCounts
             ->map(function ($user) use (&$colors) {
                 return [
                     'id' => $user->id,
                     'name' => $user->name,
-                    'color' => $user->color ?: array_shift($colors),
+                    'color' => $user->color ?? array_shift($colors),
                     'data' => [$user->total],
                 ];
             })
-            ->sortByDesc(fn ($item) => $item['data'][0])
+            ->sortByDesc(fn (array $item): int => data_get($item, 'data.0'))
             ->take(10)
             ->values()
             ->all();
 
-        $this->series = $data;
-
-        $this->xaxis = [
-            'categories' => [''], // necessary to remove y-label
+        $this->yaxis = [
+            'labels' => ['show' => false],
         ];
 
         $this->actions = $this->options();
@@ -120,7 +115,7 @@ class WonLeadsBySalesRepresentative extends BarChart implements HasWidgetOptions
     public function options(): array
     {
         return collect($this->series)
-            ->map(fn ($data) => [
+            ->map(fn (array $data) => [
                 'label' => data_get($data, 'name'),
                 'method' => 'show',
                 'params' => [
@@ -134,8 +129,8 @@ class WonLeadsBySalesRepresentative extends BarChart implements HasWidgetOptions
     #[Renderless]
     public function show(array $params): void
     {
-        $salesRepresentativeId = $params['id'];
-        $salesRepresentativeName = $params['name'];
+        $salesRepresentativeId = data_get($params, 'id');
+        $salesRepresentativeName = data_get($params, 'name');
 
         $startCarbon = $this->getStart();
         $endCarbon = $this->getEnd();
@@ -154,13 +149,9 @@ class WonLeadsBySalesRepresentative extends BarChart implements HasWidgetOptions
                 ->whereHas('leadState', fn (Builder $q) => $q->where('is_won', true)),
             __('Won leads by :user', ['user' => $salesRepresentativeName]) . ' ' .
             __('between :start and :end', ['start' => $localizedStart, 'end' => $localizedEnd]),
-        )->store();
+        )
+            ->store();
 
         $this->redirectRoute('sales.leads', navigate: true);
-    }
-
-    public function showTitle(): bool
-    {
-        return true;
     }
 }
