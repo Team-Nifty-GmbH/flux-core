@@ -1,1 +1,1 @@
-<div>KURAC</div>
+<div>Print</div>
