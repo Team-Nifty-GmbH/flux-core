@@ -98,6 +98,34 @@
                     ]"
                 />
             </div>
+            <div x-bind:class="! edit && 'pointer-events-none'">
+                <x-select.styled
+                    :label="__('Origin')"
+                    wire:model="leadForm.record_origin_id"
+                    select="label:name|value:id"
+                    unfiltered
+                    :request="[
+                        'url' => route('search', \FluxErp\Models\RecordOrigin::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'fields' => [
+                                'name',
+                                'model_type',
+                            ],
+                            'searchFields' => [
+                                'name',
+                            ],
+                            'where' => [
+                                [
+                                    'model_type',
+                                    '=',
+                                    morph_alias(\FluxErp\Models\Lead::class),
+                                ],
+                            ],
+                        ],
+                    ]"
+                />
+            </div>
             <x-number
                 x-bind:readonly="!edit"
                 :label="__('Expected Revenue')"

@@ -205,7 +205,10 @@
                             wire:model="contact.contact_origin_id"
                             searchable
                             select="label:name|value:id"
-                            :options="resolve_static(\FluxErp\Models\ContactOrigin::class, 'query')->where('is_active', true)->get(['id', 'name'])"
+                            :options="resolve_static(\FluxErp\Models\RecordOrigin::class, 'query')
+                                ->where('model_type', morph_alias(\FluxErp\Models\Contact::class))
+                                ->where('is_active', true)
+                            ->get(['id', 'name'])"
                         />
                     </div>
                 </div>

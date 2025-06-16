@@ -8,8 +8,8 @@ use FluxErp\Livewire\Forms\AddressForm;
 use FluxErp\Livewire\Forms\ContactForm;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
-use FluxErp\Models\ContactOrigin;
 use FluxErp\Models\Permission;
+use FluxErp\Models\RecordOrigin;
 use FluxErp\States\Address\AdvertisingState;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithTabs;
@@ -76,7 +76,8 @@ class Addresses extends Component
         return view(
             'flux::livewire.contact.addresses',
             [
-                'contactOrigins' => resolve_static(ContactOrigin::class, 'query')
+                'contactOrigins' => resolve_static(RecordOrigin::class, 'query')
+                    ->where('model_type', morph_alias(Contact::class))
                     ->where('is_active', true)
                     ->get(['id', 'name'])
                     ->toArray(),

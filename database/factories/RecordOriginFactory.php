@@ -2,12 +2,12 @@
 
 namespace FluxErp\Database\Factories;
 
-use FluxErp\Models\ContactOrigin;
+use FluxErp\Models\RecordOrigin;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class ContactOriginFactory extends Factory
+class RecordOriginFactory extends Factory
 {
-    protected $model = ContactOrigin::class;
+    protected $model = RecordOrigin::class;
 
     public function definition(): array
     {

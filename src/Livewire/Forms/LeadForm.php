@@ -47,6 +47,8 @@ class LeadForm extends FluxForm
 
     public ?int $recommended_by_address_id = null;
 
+    public ?int $record_origin_id = null;
+
     public int $score = 0;
 
     public ?string $start = null;

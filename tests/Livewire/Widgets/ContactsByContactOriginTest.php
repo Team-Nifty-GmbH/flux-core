@@ -6,7 +6,7 @@ use Carbon\Carbon;
 use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Livewire\Widgets\ContactsByContactOrigin;
 use FluxErp\Models\Contact;
-use FluxErp\Models\ContactOrigin;
+use FluxErp\Models\RecordOrigin;
 use FluxErp\Tests\Livewire\BaseSetup;
 use Illuminate\Support\Collection;
 use Livewire\Livewire;
@@ -22,17 +22,20 @@ class ContactsByContactOriginTest extends BaseSetup
         parent::setUp();
 
         $this->contactOrigins = collect([
-            ContactOrigin::factory()->create([
+            RecordOrigin::factory()->create([
                 'name' => 'testOrigin1',
                 'is_active' => true,
+                'model_type' => morph_alias(Contact::class),
             ]),
-            ContactOrigin::factory()->create([
+            RecordOrigin::factory()->create([
                 'name' => 'testOrigin2',
                 'is_active' => true,
+                'model_type' => morph_alias(Contact::class),
             ]),
-            ContactOrigin::factory()->create([
+            RecordOrigin::factory()->create([
                 'name' => 'testOrigin3',
                 'is_active' => false,
+                'model_type' => morph_alias(Contact::class),
             ]),
         ]);
 
@@ -45,34 +48,34 @@ class ContactsByContactOriginTest extends BaseSetup
                 ->merge(
                     Contact::factory()->count($quantity)->create([
                         'client_id' => $this->dbClient->getKey(),
-                        'contact_origin_id' => $contactOrigin->id,
+                        'record_origin_id' => $contactOrigin->id,
                     ])
                 )
                 ->merge(
                     Contact::factory()->count($quantity)->create([
                         'client_id' => $this->dbClient->getKey(),
-                        'contact_origin_id' => $contactOrigin->id,
+                        'record_origin_id' => $contactOrigin->id,
                         'created_at' => Carbon::now()->startOfWeek(),
                     ])
                 )
                 ->merge(
                     Contact::factory()->count($quantity)->create([
                         'client_id' => $this->dbClient->getKey(),
-                        'contact_origin_id' => $contactOrigin->id,
+                        'record_origin_id' => $contactOrigin->id,
                         'created_at' => Carbon::now()->startOfMonth(),
                     ])
                 )
                 ->merge(
                     Contact::factory()->count($quantity)->create([
                         'client_id' => $this->dbClient->getKey(),
-                        'contact_origin_id' => $contactOrigin->id,
+                        'record_origin_id' => $contactOrigin->id,
                         'created_at' => Carbon::now()->startOfQuarter(),
                     ])
                 )
                 ->merge(
                     Contact::factory()->count($quantity)->create([
                         'client_id' => $this->dbClient->getKey(),
-                        'contact_origin_id' => $contactOrigin->id,
+                        'record_origin_id' => $contactOrigin->id,
                         'created_at' => Carbon::now()->startOfYear(),
                     ])
                 );
@@ -197,7 +200,7 @@ class ContactsByContactOriginTest extends BaseSetup
             ->assertHasNoErrors();
     }
 
-    private function getContactsCountInTimeFrame(TimeFrameEnum $timeFrame, ContactOrigin $contactOrigin): int
+    private function getContactsCountInTimeFrame(TimeFrameEnum $timeFrame, RecordOrigin $contactOrigin): int
     {
         return $this->contacts
             ->filter(

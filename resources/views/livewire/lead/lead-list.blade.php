@@ -61,6 +61,32 @@
                     ],
                 ]"
             />
+            <x-select.styled
+                :label="__('Origin')"
+                wire:model="leadForm.record_origin_id"
+                select="label:name|value:id"
+                unfiltered
+                :request="[
+                    'url' => route('search', \FluxErp\Models\RecordOrigin::class),
+                    'method' => 'POST',
+                    'params' => [
+                        'fields' => [
+                            'name',
+                            'model_type',
+                        ],
+                        'searchFields' => [
+                            'name',
+                        ],
+                        'where' => [
+                            [
+                                'model_type',
+                                '=',
+                                morph_alias(\FluxErp\Models\Lead::class),
+                            ],
+                        ],
+                    ],
+                ]"
+            />
             <x-rating
                 wire:model.number="leadForm.score"
                 :text="__('Score')"
