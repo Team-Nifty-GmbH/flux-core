@@ -56,29 +56,12 @@ class LeadsByLeadState extends CircleChart implements HasWidgetOptions
         $this->labels = $metrics->getLabels();
     }
 
-    public function getPlotOptions(): array
-    {
-        return [
-            'pie' => [
-                'donut' => [
-                    'labels' => [
-                        'show' => true,
-                        'total' => [
-                            'show' => true,
-                            'label' => __('Total'),
-                        ],
-                    ],
-                ],
-            ],
-        ];
-    }
-
     #[Renderless]
     public function options(): array
     {
         return collect($this->labels)
             ->map(fn ($label) => [
-                'label' => __('Leads with status :lead-state', ['lead-state' => $label]),
+                'label' => __('Leads with state :lead-state', ['lead-state' => $label]),
                 'method' => 'show',
                 'params' => $label,
             ])
@@ -97,10 +80,27 @@ class LeadsByLeadState extends CircleChart implements HasWidgetOptions
                 ->whereBetween('created_at', [$start, $end])
                 ->whereNotNull('lead_state_id')
                 ->whereRelation('leadState', 'name', $leadStateName),
-            __('Leads with status :lead-state', ['lead-state' => $leadStateName])
+            __('Leads with state :lead-state', ['lead-state' => $leadStateName])
         )
             ->store();
 
         $this->redirectRoute('sales.leads', navigate: true);
+    }
+
+    protected function getPlotOptions(): array
+    {
+        return [
+            'pie' => [
+                'donut' => [
+                    'labels' => [
+                        'show' => true,
+                        'total' => [
+                            'show' => true,
+                            'label' => __('Total'),
+                        ],
+                    ],
+                ],
+            ],
+        ];
     }
 }

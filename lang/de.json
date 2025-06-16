@@ -1000,7 +1000,7 @@
     "Lead State": "Lead-Status",
     "Lead State Id": "Lead Status-ID",
     "Lead States": "Lead-Status",
-    "Leads with status :lead-state": "Leads mit Status :lead-state",
+    "Leads with state :lead-state": "Leads mit Status :lead-state",
     "Leave empty to generate a new :attribute.": "Leer lassen, um eine neue :attribute zu erzeugen.",
     "Leave empty to send to the customer.": "Leer lassen, um an den Kunden zu senden.",
     "Ledger Account": "Buchungskonto",
