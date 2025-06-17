@@ -1,13 +1,9 @@
 <div class="relative flex h-80 w-full flex-col justify-between gap-1 p-6">
-    <x-flux::spinner
-        class="absolute inset-0 z-10 bg-white/70"
-        wire:loading.delay
-    />
-
+    <x-flux::spinner/>
     <div class="flex w-full items-center justify-between">
-        <div class="flex w-full items-center justify-between">
+        <div class="flex w-full items-center justify-between overflow-hidden">
             <div class="flex flex-col">
-                <div class="text-wrap text-lg font-semibold text-gray-500">
+                <div class="truncate text-lg font-semibold text-gray-500">
                     {{ __($this->title()) }}
                 </div>
                 <div
@@ -21,16 +17,17 @@
                     :name="$this->icon()"
                     class="text-primary-500 h-12 w-12"
                 />
-
-                @if (class_implements($this, \FluxErp\Contracts\HasWidgetOptions::class))
-                    <x-dropdown icon="ellipsis-vertical" static>
-                        @foreach ($this->options() as $option)
-                            <x-dropdown.items
-                                :text="data_get($option, 'label')"
-                                wire:click="{{ data_get($option, 'method') }}"
-                            />
-                        @endforeach
-                    </x-dropdown>
+                @if ($this instanceof \FluxErp\Contracts\HasWidgetOptions)
+                    <div class="flex-none">
+                        <x-dropdown icon="ellipsis-vertical" static>
+                            @foreach ($this->options() as $option)
+                                <x-dropdown.items
+                                    :text="data_get($option, 'label')"
+                                    wire:click="{{ data_get($option, 'method') }}"
+                                />
+                            @endforeach
+                        </x-dropdown>
+                    </div>
                 @endif
             </div>
         </div>
