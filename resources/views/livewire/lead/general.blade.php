@@ -71,6 +71,27 @@
                     ]"
                 />
             </div>
+            <div x-bind:class="! edit && 'pointer-events-none'" x-cloak x-show="$wire.isLost">
+                <x-select.styled
+                    wire:model="leadForm.lead_loss_reason_id"
+                    select="label:name|value:id"
+                    :label="__('Lead Loss Reason')"
+                    unfiltered
+                    :request="[
+                        'url' => route('search', \FluxErp\Models\LeadLossReason::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'fields' => [
+                                'name',
+                                'id',
+                            ],
+                            'searchFields' => [
+                                'name',
+                            ],
+                        ],
+                    ]"
+                />
+            </div>
             <div x-cloak x-show="$wire.isLost">
                 <x-textarea
                     x-bind:readonly="!edit"
