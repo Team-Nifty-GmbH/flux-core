@@ -13,15 +13,15 @@ use Livewire\Livewire;
 
 class ContactsByContactOriginTest extends BaseSetup
 {
-    private Collection $contactOrigins;
-
     private Collection $contacts;
+
+    private Collection $recordOrigins;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->contactOrigins = collect([
+        $this->recordOrigins = collect([
             RecordOrigin::factory()->create([
                 'name' => 'testOrigin1',
                 'is_active' => true,
@@ -41,41 +41,41 @@ class ContactsByContactOriginTest extends BaseSetup
 
         $this->contacts = collect();
 
-        foreach ($this->contactOrigins as $contactOrigin) {
-            $quantity = $contactOrigin->id === $this->contactOrigins[1]->id ? 2 : 1;
+        foreach ($this->recordOrigins as $recordOrigin) {
+            $quantity = $recordOrigin->id === $this->recordOrigins[1]->id ? 2 : 1;
 
             $this->contacts = $this->contacts
                 ->merge(
                     Contact::factory()->count($quantity)->create([
                         'client_id' => $this->dbClient->getKey(),
-                        'record_origin_id' => $contactOrigin->id,
+                        'record_origin_id' => $recordOrigin->id,
                     ])
                 )
                 ->merge(
                     Contact::factory()->count($quantity)->create([
                         'client_id' => $this->dbClient->getKey(),
-                        'record_origin_id' => $contactOrigin->id,
+                        'record_origin_id' => $recordOrigin->id,
                         'created_at' => Carbon::now()->startOfWeek(),
                     ])
                 )
                 ->merge(
                     Contact::factory()->count($quantity)->create([
                         'client_id' => $this->dbClient->getKey(),
-                        'record_origin_id' => $contactOrigin->id,
+                        'record_origin_id' => $recordOrigin->id,
                         'created_at' => Carbon::now()->startOfMonth(),
                     ])
                 )
                 ->merge(
                     Contact::factory()->count($quantity)->create([
                         'client_id' => $this->dbClient->getKey(),
-                        'record_origin_id' => $contactOrigin->id,
+                        'record_origin_id' => $recordOrigin->id,
                         'created_at' => Carbon::now()->startOfQuarter(),
                     ])
                 )
                 ->merge(
                     Contact::factory()->count($quantity)->create([
                         'client_id' => $this->dbClient->getKey(),
-                        'record_origin_id' => $contactOrigin->id,
+                        'record_origin_id' => $recordOrigin->id,
                         'created_at' => Carbon::now()->startOfYear(),
                     ])
                 );
@@ -113,12 +113,12 @@ class ContactsByContactOriginTest extends BaseSetup
             ->set('timeFrame', $timeFrame)
             ->call('calculateChart')
             ->assertSet('labels', [
-                $this->contactOrigins[1]->name,
-                $this->contactOrigins[0]->name,
+                $this->recordOrigins[1]->name,
+                $this->recordOrigins[0]->name,
             ])
             ->assertSet('series', [
-                $this->getContactsCountInTimeFrame($timeFrame, $this->contactOrigins[1]),
-                $this->getContactsCountInTimeFrame($timeFrame, $this->contactOrigins[0]),
+                $this->getContactsCountInTimeFrame($timeFrame, $this->recordOrigins[1]),
+                $this->getContactsCountInTimeFrame($timeFrame, $this->recordOrigins[0]),
             ])
             ->assertStatus(200)
             ->assertHasNoErrors();
@@ -132,12 +132,12 @@ class ContactsByContactOriginTest extends BaseSetup
             ->set('timeFrame', $timeFrame)
             ->call('calculateChart')
             ->assertSet('labels', [
-                $this->contactOrigins[1]->name,
-                $this->contactOrigins[0]->name,
+                $this->recordOrigins[1]->name,
+                $this->recordOrigins[0]->name,
             ])
             ->assertSet('series', [
-                $this->getContactsCountInTimeFrame($timeFrame, $this->contactOrigins[1]),
-                $this->getContactsCountInTimeFrame($timeFrame, $this->contactOrigins[0]),
+                $this->getContactsCountInTimeFrame($timeFrame, $this->recordOrigins[1]),
+                $this->getContactsCountInTimeFrame($timeFrame, $this->recordOrigins[0]),
             ])
             ->assertStatus(200)
             ->assertHasNoErrors();
@@ -151,12 +151,12 @@ class ContactsByContactOriginTest extends BaseSetup
             ->set('timeFrame', $timeFrame)
             ->call('calculateChart')
             ->assertSet('labels', [
-                $this->contactOrigins[1]->name,
-                $this->contactOrigins[0]->name,
+                $this->recordOrigins[1]->name,
+                $this->recordOrigins[0]->name,
             ])
             ->assertSet('series', [
-                $this->getContactsCountInTimeFrame($timeFrame, $this->contactOrigins[1]),
-                $this->getContactsCountInTimeFrame($timeFrame, $this->contactOrigins[0]),
+                $this->getContactsCountInTimeFrame($timeFrame, $this->recordOrigins[1]),
+                $this->getContactsCountInTimeFrame($timeFrame, $this->recordOrigins[0]),
             ])
             ->assertStatus(200)
             ->assertHasNoErrors();
@@ -170,12 +170,12 @@ class ContactsByContactOriginTest extends BaseSetup
             ->set('timeFrame', $timeFrame)
             ->call('calculateChart')
             ->assertSet('labels', [
-                $this->contactOrigins[1]->name,
-                $this->contactOrigins[0]->name,
+                $this->recordOrigins[1]->name,
+                $this->recordOrigins[0]->name,
             ])
             ->assertSet('series', [
-                $this->getContactsCountInTimeFrame($timeFrame, $this->contactOrigins[1]),
-                $this->getContactsCountInTimeFrame($timeFrame, $this->contactOrigins[0]),
+                $this->getContactsCountInTimeFrame($timeFrame, $this->recordOrigins[1]),
+                $this->getContactsCountInTimeFrame($timeFrame, $this->recordOrigins[0]),
             ])
             ->assertStatus(200)
             ->assertHasNoErrors();
@@ -189,12 +189,12 @@ class ContactsByContactOriginTest extends BaseSetup
             ->set('timeFrame', $timeFrame)
             ->call('calculateChart')
             ->assertSet('labels', [
-                $this->contactOrigins[1]->name,
-                $this->contactOrigins[0]->name,
+                $this->recordOrigins[1]->name,
+                $this->recordOrigins[0]->name,
             ])
             ->assertSet('series', [
-                $this->getContactsCountInTimeFrame($timeFrame, $this->contactOrigins[1]),
-                $this->getContactsCountInTimeFrame($timeFrame, $this->contactOrigins[0]),
+                $this->getContactsCountInTimeFrame($timeFrame, $this->recordOrigins[1]),
+                $this->getContactsCountInTimeFrame($timeFrame, $this->recordOrigins[0]),
             ])
             ->assertStatus(200)
             ->assertHasNoErrors();
@@ -205,7 +205,7 @@ class ContactsByContactOriginTest extends BaseSetup
         return $this->contacts
             ->filter(
                 fn (Contact $contact) => $contact->created_at->between(...$timeFrame->getRange())
-                    && $contact->contactOrigin()
+                    && $contact->origin()
                         ->where('is_active', true)
                         ->where('id', $contactOrigin->id)
                         ->exists()
