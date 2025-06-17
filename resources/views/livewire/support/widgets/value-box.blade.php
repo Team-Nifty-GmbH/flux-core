@@ -1,5 +1,5 @@
 <div class="relative flex h-80 w-full flex-col justify-between gap-1 p-6">
-    <x-flux::spinner/>
+    <x-flux::spinner />
     <div class="flex w-full items-center justify-between">
         <div class="flex w-full items-center justify-between overflow-hidden">
             <div class="flex flex-col">
