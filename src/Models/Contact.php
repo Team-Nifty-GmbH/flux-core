@@ -16,8 +16,8 @@ use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasFrontendAttributes;
-use FluxErp\Traits\HasOrigin;
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasRecordOrigin;
 use FluxErp\Traits\HasSerialNumberRange;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
@@ -40,7 +40,7 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, OffersPrinting
 {
     use CascadeSoftDeletes, Categorizable, Commentable, Communicatable, Filterable, HasAdditionalColumns,
-        HasClientAssignment, HasFrontendAttributes, HasOrigin, HasPackageFactory, HasSerialNumberRange,
+        HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasRecordOrigin, HasSerialNumberRange,
         HasUserModification, HasUuid, InteractsWithMedia, Lockable, LogsActivity, Printable, Searchable;
 
     public static string $iconName = 'users';

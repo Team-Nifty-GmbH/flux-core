@@ -13,7 +13,7 @@ class CreateRecordOriginRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'nullable|string|uuid|unique:contact_origins,uuid',
+            'uuid' => 'nullable|string|uuid|unique:record_origins,uuid',
             'model_type' => [
                 'required',
                 'string',

@@ -32,10 +32,13 @@ class LeadListTest extends BaseSetup
         Livewire::test($this->livewireComponent)
             ->datatableEdit($lead, 'sales.lead.id')
             ->datatableDelete($lead, $this)
-            ->datatableCreate('leadForm', Lead::factory()->make([
-                'address_id' => $address->id,
-                'lead_state_id' => $leadState->id,
-            ])->toArray());
+            ->datatableCreate(
+                'leadForm',
+                Lead::factory()->make([
+                    'address_id' => $address->id,
+                    'lead_state_id' => $leadState->id,
+                ])
+                    ->toArray());
     }
 
     public function test_renders_successfully(): void

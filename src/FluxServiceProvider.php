@@ -603,6 +603,7 @@ class FluxServiceProvider extends ServiceProvider
                             ->assertHasNoErrors()
                             ->assertStatus(200)
                             ->assertCount('data.data', 0);
+
                         if (in_array(SoftDeletes::class, class_uses_recursive($model))) {
                             invade($testCase)->assertSoftDeleted($model);
                         } else {

@@ -200,7 +200,7 @@ class ContactsByContactOriginTest extends BaseSetup
             ->assertHasNoErrors();
     }
 
-    private function getContactsCountInTimeFrame(TimeFrameEnum $timeFrame, RecordOrigin $contactOrigin): int
+    protected function getContactsCountInTimeFrame(TimeFrameEnum $timeFrame, RecordOrigin $contactOrigin): int
     {
         return $this->contacts
             ->filter(

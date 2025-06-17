@@ -195,20 +195,36 @@
                 @section('contact-origin')
                 <div class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4">
                     <label
-                        for="{{ md5('contact.contact_origin_id') }}"
+                        for="{{ md5('contact.record_origin_id') }}"
                         class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2 dark:text-gray-50"
                     >
                         {{ __('Contact Origin') }}
                     </label>
                     <div class="col-span-2">
                         <x-select.styled
-                            wire:model="contact.contact_origin_id"
+                            wire:model="contact.record_origin_id"
                             searchable
                             select="label:name|value:id"
-                            :options="resolve_static(\FluxErp\Models\RecordOrigin::class, 'query')
-                                ->where('model_type', morph_alias(\FluxErp\Models\Contact::class))
-                                ->where('is_active', true)
-                            ->get(['id', 'name'])"
+                            :request="[
+                                'url' => route('search', \FluxErp\Models\RecordOrigin::class),
+                                'method' => 'POST',
+                                'params' => [
+                                    'fields' => [
+                                        'name',
+                                        'model_type',
+                                    ],
+                                    'searchFields' => [
+                                        'name',
+                                    ],
+                                    'where' => [
+                                        [
+                                            'model_type',
+                                            '=',
+                                            morph_alias(\FluxErp\Models\Contact::class),
+                                        ],
+                                    ],
+                                ],
+                            ]"
                         />
                     </div>
                 </div>

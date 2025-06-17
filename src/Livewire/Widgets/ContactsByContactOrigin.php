@@ -5,10 +5,9 @@ namespace FluxErp\Livewire\Widgets;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\Support\Widgets\Charts\CircleChart;
 use FluxErp\Models\Contact;
-use FluxErp\Support\Metrics\Charts\Donut;
+use FluxErp\Models\RecordOrigin;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use FluxErp\Traits\Widgetable;
-use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Renderless;
 
 class ContactsByContactOrigin extends CircleChart
@@ -35,24 +34,23 @@ class ContactsByContactOrigin extends CircleChart
 
     public function calculateChart(): void
     {
-        $query = resolve_static(Contact::class, 'query')
-            ->whereNotNull('origin_id')
-            ->join('record_origins', 'record_origins.id', '=', 'contacts.origin_id')
-            ->where('record_origins.is_active', true)
-            ->where('record_origins.model_type', morph_alias(Contact::class))
-            ->select('record_origins.id', 'record_origins.name', DB::raw('COUNT(*) AS value'))
-            ->groupBy('record_origins.id', 'record_origins.name')
-            ->orderBy('value', 'desc');
+        $start = $this->getStart()->toDateTimeString();
+        $end = $this->getEnd()->toDateTimeString();
 
-        $metrics = Donut::make($query)
-            ->setRange($this->timeFrame)
-            ->setEndingDate($this->getEnd())
-            ->setStartingDate($this->getStart())
-            ->setLabelKey('name')
-            ->count('record_origins.id', 'value');
+        $origins = resolve_static(RecordOrigin::class, 'query')
+            ->where('is_active', true)
+            ->where('model_type', morph_alias(Contact::class))
+            ->withCount([
+                'contacts as value' => function ($q) use ($start, $end): void {
+                    $q->whereBetween('contacts.created_at', [$start, $end]);
+                },
+            ])
+            ->having('value', '>', 0)
+            ->orderByDesc('value')
+            ->get(['id', 'name']);
 
-        $this->series = $metrics->getData();
-        $this->labels = $metrics->getLabels();
+        $this->series = $origins->pluck('value')->all();
+        $this->labels = $origins->pluck('name')->all();
     }
 
     public function getPlotOptions(): array

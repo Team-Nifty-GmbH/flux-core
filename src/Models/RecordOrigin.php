@@ -22,13 +22,11 @@ class RecordOrigin extends FluxModel
 
     public function contacts(): HasMany
     {
-        return $this->hasMany(Contact::class, 'origin_id')
-            ->where('model_type', morph_alias(Contact::class));
+        return $this->hasMany(Contact::class, 'record_origin_id');
     }
 
     public function leads(): HasMany
     {
-        return $this->hasMany(Leads::class, 'origin_id')
-            ->where('model_type', morph_alias(Lead::class));
+        return $this->hasMany(Leads::class, 'record_origin_id');
     }
 }
