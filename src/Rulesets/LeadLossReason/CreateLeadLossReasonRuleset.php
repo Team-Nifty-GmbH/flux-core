@@ -12,7 +12,6 @@ class CreateLeadLossReasonRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'uuid' => 'nullable|string|uuid|unique:contact_origins,uuid',
             'name' => 'required|string|max:255',
             'is_active' => 'boolean',
         ];

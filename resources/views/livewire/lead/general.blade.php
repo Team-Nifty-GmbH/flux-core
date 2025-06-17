@@ -71,7 +71,11 @@
                     ]"
                 />
             </div>
-            <div x-bind:class="! edit && 'pointer-events-none'" x-cloak x-show="$wire.isLost">
+            <div
+                x-bind:class="! edit && 'pointer-events-none'"
+                x-cloak
+                x-show="$wire.isLost"
+            >
                 <x-select.styled
                     wire:model="leadForm.lead_loss_reason_id"
                     select="label:name|value:id"

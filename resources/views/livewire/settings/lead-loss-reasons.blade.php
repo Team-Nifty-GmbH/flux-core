@@ -1,1 +1,1 @@
-{{$leadLossReasonForm->autoRender($__data)}}
+{{ $leadLossReasonForm->autoRender($__data) }}
