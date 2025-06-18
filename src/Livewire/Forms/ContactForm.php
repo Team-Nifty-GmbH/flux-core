@@ -20,8 +20,6 @@ class ContactForm extends FluxForm
 
     public ?int $client_id = null;
 
-    public ?int $contact_origin_id = null;
-
     public ?float $credit_line = null;
 
     public ?string $creditor_number = null;
@@ -72,6 +70,8 @@ class ContactForm extends FluxForm
     public ?int $purchase_payment_type_id = null;
 
     public int $rating = 0;
+
+    public ?int $record_origin_id = null;
 
     public ?string $vat_id = null;
 

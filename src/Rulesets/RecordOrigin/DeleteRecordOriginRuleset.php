@@ -1,16 +1,16 @@
 <?php
 
-namespace FluxErp\Rulesets\ContactOrigin;
+namespace FluxErp\Rulesets\RecordOrigin;
 
-use FluxErp\Models\ContactOrigin;
+use FluxErp\Models\RecordOrigin;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
 
-class DeleteContactOriginRuleset extends FluxRuleset
+class DeleteRecordOriginRuleset extends FluxRuleset
 {
     protected static bool $addAdditionalColumnRules = false;
 
-    protected static ?string $model = ContactOrigin::class;
+    protected static ?string $model = RecordOrigin::class;
 
     public function rules(): array
     {
@@ -18,7 +18,7 @@ class DeleteContactOriginRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => ContactOrigin::class]),
+                app(ModelExists::class, ['model' => RecordOrigin::class]),
             ],
         ];
     }

@@ -5,6 +5,7 @@ namespace FluxErp\Rulesets\Lead;
 use FluxErp\Models\Address;
 use FluxErp\Models\Lead;
 use FluxErp\Models\LeadState;
+use FluxErp\Models\RecordOrigin;
 use FluxErp\Models\User;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\Numeric;
@@ -47,6 +48,11 @@ class UpdateLeadRuleset extends FluxRuleset
                 'required',
                 'integer',
                 app(ModelExists::class, ['model' => LeadState::class]),
+            ],
+            'record_origin_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => RecordOrigin::class]),
             ],
             'user_id' => [
                 'nullable',

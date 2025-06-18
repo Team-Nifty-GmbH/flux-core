@@ -37,20 +37,40 @@
                         class="font-semibold"
                         x-text="window.formatters.datetime($wire.mailMessage.date)"
                     ></div>
-                    <div class="text-sm" x-text="$wire.mailMessage.slug"></div>
+                    <div
+                        class="text-sm"
+                        x-text="$wire.mailMessage.slug"
+                    ></div>
                     <div class="flex justify-end">
                         <x-dropdown position="bottom-start">
                             <x-slot:action>
-                                <x-button icon="chevron-down" x-on:click="show = !show" sm color="secondary" :text="__('Actions')" />
-                            </x-slot:action>
+                                <x-button
+                                    icon="chevron-down"
+                                    x-on:click="show = !show"
+                                    sm
+                                    color="secondary"
+                                    :text="__('Actions')"
+                                />
+                            </x-slot>
                             @canAction(\FluxErp\Actions\Ticket\CreateTicket::class)
-                                <x-dropdown.items :text="__('Create ticket')" wire:click="createTicket($wire.mailMessage.id)" />
+                                <x-dropdown.items
+                                    :text="__('Create ticket')"
+                                    wire:click="createTicket($wire.mailMessage.id)"
+                                />
                             @endcanAction
+
                             @canAction(\FluxErp\Actions\Lead\CreateLead::class)
-                                <x-dropdown.items :text="__('Create lead')" wire:click="createLead($wire.mailMessage.id)" />
+                                <x-dropdown.items
+                                    :text="__('Create lead')"
+                                    wire:click="createLead($wire.mailMessage.id)"
+                                />
                             @endcanAction
+
                             @canAction(\FluxErp\Actions\PurchaseInvoice\CreatePurchaseInvoice::class)
-                                <x-dropdown.items :text="__('Create purchase invoice')" wire:click="createPurchaseInvoice($wire.mailMessage.id)" />
+                                <x-dropdown.items
+                                    :text="__('Create purchase invoice')"
+                                    wire:click="createPurchaseInvoice($wire.mailMessage.id)"
+                                />
                             @endcanAction
                         </x-dropdown>
                     </div>
@@ -89,7 +109,9 @@
                 </template>
             </div>
             <div class="flex gap-1">
-                <template x-for="communicatable in $wire.mailMessage.communicatables">
+                <template
+                    x-for="communicatable in $wire.mailMessage.communicatables"
+                >
                     <x-button
                         color="secondary"
                         sm
@@ -122,7 +144,10 @@
                     </x-button>
                 </template>
             </div>
-            <div class="overflow-auto rounded-md border p-4" id="mail-body"></div>
+            <div
+                class="overflow-auto rounded-md border p-4"
+                id="mail-body"
+            ></div>
         </div>
     </x-modal>
     <section class="flex max-w-[96rem] flex-col gap-4">

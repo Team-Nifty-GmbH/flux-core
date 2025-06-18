@@ -1,14 +1,14 @@
 <?php
 
-namespace FluxErp\Rulesets\ContactOrigin;
+namespace FluxErp\Rulesets\RecordOrigin;
 
-use FluxErp\Models\ContactOrigin;
+use FluxErp\Models\RecordOrigin;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
 
-class UpdateContactOriginRuleset extends FluxRuleset
+class UpdateRecordOriginRuleset extends FluxRuleset
 {
-    protected static ?string $model = ContactOrigin::class;
+    protected static ?string $model = RecordOrigin::class;
 
     public function rules(): array
     {
@@ -16,7 +16,7 @@ class UpdateContactOriginRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                app(ModelExists::class, ['model' => ContactOrigin::class]),
+                app(ModelExists::class, ['model' => RecordOrigin::class]),
             ],
             'name' => 'sometimes|required|string|max:255',
             'is_active' => 'boolean',

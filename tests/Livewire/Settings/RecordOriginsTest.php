@@ -1,14 +1,14 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\DataTables;
+namespace FluxErp\Tests\Livewire\Settings;
 
-use FluxErp\Livewire\DataTables\ContactOriginList;
+use FluxErp\Livewire\Settings\RecordOrigins;
 use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
-class ContactOriginListTest extends TestCase
+class RecordOriginsTest extends TestCase
 {
-    protected string $livewireComponent = ContactOriginList::class;
+    protected string $livewireComponent = RecordOrigins::class;
 
     public function test_renders_successfully(): void
     {

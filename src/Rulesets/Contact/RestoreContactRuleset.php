@@ -4,11 +4,11 @@ namespace FluxErp\Rulesets\Contact;
 
 use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
-use FluxErp\Models\ContactOrigin;
 use FluxErp\Models\Currency;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
+use FluxErp\Models\RecordOrigin;
 use FluxErp\Models\User;
 use FluxErp\Models\VatRate;
 use FluxErp\Rules\ModelDoesntExist;
@@ -49,7 +49,7 @@ class RestoreContactRuleset extends FluxRuleset
             'contact_origin_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => ContactOrigin::class])
+                app(ModelExists::class, ['model' => RecordOrigin::class])
                     ->where('is_active', true),
             ],
             'currency_id' => [

@@ -5,7 +5,7 @@ namespace FluxErp\Livewire\Widgets;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\Support\Widgets\Charts\CircleChart;
 use FluxErp\Models\Contact;
-use FluxErp\Support\Metrics\Charts\Donut;
+use FluxErp\Models\RecordOrigin;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use FluxErp\Traits\Widgetable;
 use Livewire\Attributes\Renderless;
@@ -34,21 +34,23 @@ class ContactsByContactOrigin extends CircleChart
 
     public function calculateChart(): void
     {
-        $metrics = Donut::make(
-            resolve_static(Contact::class, 'query')
-                ->whereNotNull('contact_origin_id')
-                ->join('contact_origins', 'contact_origins.id', '=', 'contacts.contact_origin_id')
-                ->where('contact_origins.is_active', true)
-                ->orderByRaw('COUNT(*) DESC')
-        )
-            ->setRange($this->timeFrame)
-            ->setEndingDate($this->end)
-            ->setStartingDate($this->start)
-            ->setLabelKey('contactOrigin.name')
-            ->count('contact_origin_id');
+        $start = $this->getStart()->toDateTimeString();
+        $end = $this->getEnd()->toDateTimeString();
 
-        $this->series = $metrics->getData();
-        $this->labels = $metrics->getLabels();
+        $origins = resolve_static(RecordOrigin::class, 'query')
+            ->where('is_active', true)
+            ->where('model_type', morph_alias(Contact::class))
+            ->withCount([
+                'contacts as value' => function ($q) use ($start, $end): void {
+                    $q->whereBetween('contacts.created_at', [$start, $end]);
+                },
+            ])
+            ->having('value', '>', 0)
+            ->orderByDesc('value')
+            ->get(['id', 'name']);
+
+        $this->series = $origins->pluck('value')->all();
+        $this->labels = $origins->pluck('name')->all();
     }
 
     public function getPlotOptions(): array
