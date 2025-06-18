@@ -7,16 +7,27 @@ class Result
     public function __construct(
         protected array $data,
         protected array $labels,
-        protected null|string|float|array $growthRate
+        protected null|string|float|array $growthRate,
+        protected array $additionalData = []
     ) {}
 
-    public static function make(array $data, array $labels, null|string|float|array $growthRate): static
-    {
+    public static function make(
+        array $data,
+        array $labels,
+        null|string|float|array $growthRate,
+        array $additionalData = []
+    ): static {
         return app(static::class, [
             'data' => $data,
             'labels' => $labels,
             'growthRate' => $growthRate,
+            'additionalData' => $additionalData,
         ]);
+    }
+
+    public function getAdditionalData(): array
+    {
+        return $this->additionalData;
     }
 
     public function getCombinedData(): array

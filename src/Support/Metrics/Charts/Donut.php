@@ -17,11 +17,20 @@ use UnitEnum;
 
 class Donut extends Metric
 {
+    protected array $additionalColumns = [];
+
     protected string $groupBy;
 
     protected ?string $labelKey = null;
 
     protected ?array $options = null;
+
+    public function additionalColumns(array $columns): static
+    {
+        $this->additionalColumns = $columns;
+
+        return $this;
+    }
 
     public function average(string $column, string $groupBy): Result
     {
@@ -100,25 +109,83 @@ class Donut extends Metric
         return $this->setType('sum', $column, $groupBy);
     }
 
+    protected function extractAdditionalData(array $data): array
+    {
+        if (empty($this->additionalColumns)) {
+            return [];
+        }
+
+        $additionalData = [];
+        $query = $this->query->clone(); // doesnt modify the original
+
+        $selectColumns = [$this->groupBy];
+
+        $relations = [];
+        $directColumns = [];
+
+        foreach ($this->additionalColumns as $column) {
+            if (str_contains($column, '.')) { // is realtion
+                $relationName = explode('.', $column)[0];
+                $relations[] = $relationName;
+            } else {
+                $directColumns[] = $column;
+                $selectColumns[] = DB::raw("MIN($column) as $column");
+            }
+        }
+
+        if (! empty($relations)) { // eager loading
+            $query->with(array_unique($relations));
+        }
+
+        $models = $query
+            ->select($selectColumns)
+            ->groupBy($this->groupBy)
+            ->get();
+
+        foreach ($this->additionalColumns as $column) {
+            $columnData = [];
+
+            foreach (array_keys($data) as $key) {
+                $model = $models->first(function ($model) use ($key) {
+                    $modelKey = data_get($model, $this->labelKey ?? $this->groupBy);
+                    $modelKey = $modelKey instanceof BackedEnum ? $modelKey->value : $modelKey;
+
+                    return (string) $modelKey === (string) $key;
+                });
+
+                // data get to support relationships
+                $columnData[] = $model ? data_get($model, $column) : null;
+            }
+
+            $additionalData[] = $columnData;
+        }
+
+        return $additionalData;
+    }
+
     protected function resolve(): Result
     {
         if (! $this->withGrowthRate) {
             $data = $this->resolveCurrentValue();
+            $additionalData = $this->extractAdditionalData($data);
 
             return Result::make(
                 array_values($data),
                 array_keys($data),
-                null
+                null,
+                $additionalData
             );
         }
 
         $previousData = $this->resolvePreviousValue();
         $currentData = $this->resolveCurrentValue();
+        $additionalData = $this->extractAdditionalData($currentData);
 
         return Result::make(
             array_values($currentData),
             array_keys($currentData),
-            $this->resolveGrowthRate($previousData, $currentData)
+            $this->resolveGrowthRate($previousData, $currentData),
+            $additionalData
         );
     }
 
@@ -156,21 +223,36 @@ class Donut extends Metric
     protected function resolveValue(?array $range): array
     {
         $column = $this->query->getQuery()->getGrammar()->wrap($this->column);
+        $model = $this->query->getModel();
+        $qualifiedKeyName = $model->getQualifiedKeyName();
+
+        $selectColumns = [$this->groupBy];
+        $selectColumns[] = DB::raw("$this->type($column) as result");
+
+        $selectColumns[] = DB::raw("MIN($qualifiedKeyName) as id");
+
+        foreach ($this->additionalColumns as $additionalColumn) {
+            if ($additionalColumn !== 'id' && ! str_contains($additionalColumn, '.')) { // skips relation
+                $selectColumns[] = DB::raw("MIN($additionalColumn) as $additionalColumn");
+            }
+        }
 
         $results = $this->query
             ->clone()
             ->when($range, fn (Builder $query) => $query
                 ->whereBetween(...$this->resolveBetween($range))
             )
-            ->select([$this->groupBy, DB::raw("$this->type($column) as result")])
+            ->select($selectColumns)
             ->groupBy($this->groupBy)
             ->get()
             ->mapWithKeys(function (Model $model) {
                 $key = data_get($model, $this->labelKey ?? $this->groupBy);
                 $key = $key instanceof BackedEnum ? $key->value : $key;
 
+                $result = $this->transformResult($model->result);
+
                 return [
-                    (string) $key => $this->transformResult($model->result),
+                    (string) $key => $result,
                 ];
             })
             ->toArray();
@@ -186,7 +268,7 @@ class Donut extends Metric
             (new ReflectionEnum($cast))->isBacked() &&
             method_exists($cast, 'getLabel')
         ) {
-            $data = Arr::mapWithKeys($data, fn (string $value, mixed $key) => [
+            $data = Arr::mapWithKeys($data, fn ($value, mixed $key) => [
                 $cast::tryFrom($key)?->getLabel() => $value,
             ]);
         }
@@ -195,7 +277,7 @@ class Donut extends Metric
             $cast &&
             is_subclass_of($cast, State::class)
         ) {
-            $data = Arr::mapWithKeys($data, fn (string $value, mixed $key) => [
+            $data = Arr::mapWithKeys($data, fn ($value, mixed $key) => [
                 __($key) => $value,
             ]);
         }
