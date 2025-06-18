@@ -562,6 +562,7 @@
             @show
         </div>
         <x-slot:footer>
+            @section('event-edit.footer')
             <div class="flex w-full justify-between gap-2">
                 <div class="flex justify-start gap-2">
                     <x-button
@@ -575,7 +576,7 @@
                     <x-button
                         :text="__('Cancel Event')"
                         color="red"
-                        x-show="$wire.event.id && !$wire.event.is_cancelled"
+                        x-show="$wire.event.id && !$wire.event.is_cancelled && !$wire.event.calendar_type"
                         x-cloak
                         x-on:click="dialogType = 'cancel'; $modalOpen('confirm-dialog')"
                     />
@@ -609,6 +610,7 @@
                     @endcanAction
                 </div>
             </div>
+            @show
         </x-slot>
     </x-card>
 </div>
