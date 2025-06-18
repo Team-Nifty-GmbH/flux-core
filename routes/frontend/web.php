@@ -22,6 +22,7 @@ use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\DataTables\AddressList;
 use FluxErp\Livewire\DataTables\CommissionList;
 use FluxErp\Livewire\DataTables\ContactList;
+use FluxErp\Livewire\DataTables\LeadLossReasonList;
 use FluxErp\Livewire\DataTables\OrderPositionList;
 use FluxErp\Livewire\DataTables\PaymentRunList;
 use FluxErp\Livewire\DataTables\PurchaseInvoiceList;
@@ -57,6 +58,7 @@ use FluxErp\Livewire\Settings\FailedJobs;
 use FluxErp\Livewire\Settings\Industries;
 use FluxErp\Livewire\Settings\LanguageLines;
 use FluxErp\Livewire\Settings\Languages;
+use FluxErp\Livewire\Settings\LeadLossReasons;
 use FluxErp\Livewire\Settings\LeadStates;
 use FluxErp\Livewire\Settings\LedgerAccounts;
 use FluxErp\Livewire\Settings\Logs;
@@ -169,6 +171,7 @@ Route::middleware('web')
                     ->group(function (): void {
                         Route::get('/leads', LeadList::class)->name('leads');
                         Route::get('/leads/{id}', Lead::class)->name('lead.id');
+                        Route::get('/lead-loss-reasons', LeadLossReasonList::class)->name('lead-loss-reasons');
                     });
 
                 Route::name('orders.')
@@ -228,6 +231,7 @@ Route::middleware('web')
                         Route::get('/failed-jobs', FailedJobs::class)->name('failed-jobs');
                         Route::get('/industries', Industries::class)->name('industries');
                         Route::get('/languages', Languages::class)->name('languages');
+                        Route::get('/lead-loss-reasons', LeadLossReasons::class)->name('lead-loss-reasons');
                         Route::get('/lead-states', LeadStates::class)->name('lead-states');
                         Route::get('/ledger-accounts', LedgerAccounts::class)->name('ledger-accounts');
                         Route::get('/logs', Logs::class)->name('logs');

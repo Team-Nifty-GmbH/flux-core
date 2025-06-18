@@ -125,6 +125,11 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         return route('sales.lead.id', $this->getKey());
     }
 
+    public function leadLossReason(): BelongsTo
+    {
+        return $this->belongsTo(LeadLossReason::class);
+    }
+
     public function leadState(): BelongsTo
     {
         return $this->belongsTo(LeadState::class);
