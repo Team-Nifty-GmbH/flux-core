@@ -66,4 +66,9 @@ class OpenDeliveries extends ValueBox implements HasWidgetOptions
                 . ',.OrderLocked' => 'calculateSum',
         ];
     }
+
+    protected function icon(): string
+    {
+        return 'truck';
+    }
 }
