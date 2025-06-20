@@ -2,16 +2,22 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use Carbon\CarbonInterface;
+use FluxErp\Contracts\HasWidgetOptions;
 use FluxErp\Livewire\Dashboard\Dashboard;
+use FluxErp\Livewire\Order\OrderList;
 use FluxErp\Livewire\Support\Widgets\ValueBox;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Order;
 use FluxErp\Support\Metrics\Value;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Number;
 use Livewire\Attributes\Renderless;
+use Livewire\Livewire;
+use TeamNiftyGmbH\DataTable\Helpers\SessionFilter;
 
-class Purchase extends ValueBox
+class Purchase extends ValueBox implements HasWidgetOptions
 {
     use IsTimeFrameAwareWidget;
 
@@ -42,6 +48,53 @@ class Purchase extends ValueBox
         $this->sum = Number::abbreviate($metric->getValue(), 2) . ' ' . $symbol;
         $this->previousSum = Number::abbreviate($metric->getPreviousValue(), 2) . ' ' . $symbol;
         $this->growthRate = $metric->getGrowthRate();
+    }
+
+    #[Renderless]
+    public function options(): array
+    {
+        return [
+            [
+                'label' => static::getLabel(),
+                'method' => 'show',
+            ],
+            [
+                'label' => __('Previous Period'),
+                'method' => 'showPrevious',
+            ],
+        ];
+    }
+
+    #[Renderless]
+    public function show(): void
+    {
+        $this->applyDateFilter($this->getStart(), $this->getEnd());
+    }
+
+    #[Renderless]
+    public function showPrevious(): void
+    {
+        $this->applyDateFilter($this->getStartPrevious(), $this->getEndPrevious());
+    }
+
+    protected function applyDateFilter(CarbonInterface $startCarbon, CarbonInterface $endCarbon): void
+    {
+        $start = $startCarbon->toDateString();
+        $end = $endCarbon->toDateString();
+
+        $localizedStart = $startCarbon->translatedFormat('j. F Y');
+        $localizedEnd = $endCarbon->translatedFormat('j. F Y');
+
+        SessionFilter::make(
+            Livewire::new(resolve_static(OrderList::class, 'class'))->getCacheKey(),
+            fn (Builder $query) => $query->whereNotNull('invoice_date')
+                ->whereNotNull('invoice_number')
+                ->purchase()
+                ->whereBetween('invoice_date', [$start, $end]),
+            \__('Purchase') . ' ' . \__('between :start and :end', ['start' => $localizedStart, 'end' => $localizedEnd]),
+        )->store();
+
+        $this->redirectRoute('orders.orders', navigate: true);
     }
 
     protected function getListeners(): array
