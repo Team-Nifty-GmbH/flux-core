@@ -13,6 +13,10 @@ class AdditionalColumnFactory extends Factory
     {
         return [
             'name' => $this->faker->firstName(),
+            'label' => $this->faker->text(20),
+            'is_translatable' => $this->faker->boolean(),
+            'is_customer_editable' => $this->faker->boolean(),
+            'is_frontend_visible' => $this->faker->boolean(),
         ];
     }
 }
