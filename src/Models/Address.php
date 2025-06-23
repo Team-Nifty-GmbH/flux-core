@@ -168,6 +168,71 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
 
             $contactUpdates = [];
             $addressesUpdates = [];
+            if ($address->isDirty('contact_id') && ! $address->isDirty($address->primaryKey)) {
+                if (! $oldContactHasAddresses = resolve_static(Address::class, 'query')
+                    ->where('contact_id', $address->getRawOriginal('contact_id'))
+                    ->exists()
+                ) {
+                    resolve_static(Contact::class, 'query')
+                        ->whereKey($address->getRawOriginal('contact_id'))
+                        ->first()
+                        ?->delete();
+                }
+
+                // Updates that need to be done (address itself, old contact and its addresses)
+                $addressUpdates = [];
+                $oldContactUpdates = [];
+                $oldContactAddressesUpdates = [];
+                $firstAddressId = resolve_static(Address::class, 'query')
+                    ->where('contact_id', $address->getRawOriginal('contact_id'))
+                    ->value('id');
+
+                if ($address->getRawOriginal('is_main_address')) {
+                    $oldContactUpdates['main_address_id'] = $firstAddressId;
+                    $oldContactAddressesUpdates['is_main_address'] = true;
+
+                    if ($address->isClean('is_main_address')) {
+                        $addressUpdates['is_main_address'] = false;
+                    }
+                }
+
+                if ($address->getRawOriginal('is_invoice_address')) {
+                    $oldContactUpdates['invoice_address_id'] = $firstAddressId;
+                    $oldContactAddressesUpdates['is_invoice_address'] = true;
+
+                    if ($address->isClean('is_invoice_address')) {
+                        $addressUpdates['is_invoice_address'] = false;
+                    }
+                }
+
+                if ($address->getRawOriginal('is_delivery_address')) {
+                    $oldContactUpdates['delivery_address_id'] = $firstAddressId;
+                    $oldContactAddressesUpdates['is_delivery_address'] = true;
+
+                    if ($address->isClean('is_delivery_address')) {
+                        $addressUpdates['is_delivery_address'] = false;
+                    }
+                }
+
+                // Update address is_main_address, is_invoice_address, is_delivery_address if it's moved to another contact
+                if ($addressUpdates) {
+                    resolve_static(Address::class, 'query')
+                        ->whereKey($address->id)
+                        ->update($addressUpdates);
+                }
+
+                // Update old contact and its addresses
+                if ($oldContactUpdates && $oldContactHasAddresses) {
+                    resolve_static(Contact::class, 'query')
+                        ->whereKey($address->contact_id)
+                        ->update($oldContactUpdates);
+
+                    resolve_static(Address::class, 'query')
+                        ->whereKeyNot($address->id)
+                        ->where('contact_id', $address->getRawOriginal('contact_id'))
+                        ->update($oldContactAddressesUpdates);
+                }
+            }
 
             if ($address->isDirty('is_main_address') && $address->is_main_address) {
                 $contactUpdates += [
@@ -205,8 +270,8 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                     ->update($contactUpdates);
 
                 resolve_static(Address::class, 'query')
+                    ->whereKeyNot($address->id)
                     ->where('contact_id', $address->contact_id)
-                    ->where('id', '!=', $address->id)
                     ->update($addressesUpdates);
             }
         });
