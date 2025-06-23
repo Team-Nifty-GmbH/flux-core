@@ -224,7 +224,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                 // Update old contact and its addresses
                 if ($oldContactUpdates && $oldContactHasAddresses) {
                     resolve_static(Contact::class, 'query')
-                        ->whereKey($address->contact_id)
+                        ->whereKey($address->getRawOriginal('contact_id'))
                         ->update($oldContactUpdates);
 
                     resolve_static(Address::class, 'query')
