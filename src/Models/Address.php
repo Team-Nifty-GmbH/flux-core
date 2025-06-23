@@ -168,7 +168,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
 
             $contactUpdates = [];
             $addressesUpdates = [];
-            if ($address->isDirty('contact_id') && ! $address->isDirty($address->primaryKey)) {
+            if ($address->isDirty('contact_id') && ! $address->isDirty($address->getKeyName())) {
                 if (! $oldContactHasAddresses = resolve_static(Address::class, 'query')
                     ->where('contact_id', $address->getRawOriginal('contact_id'))
                     ->exists()
@@ -217,7 +217,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                 // Update address is_main_address, is_invoice_address, is_delivery_address if it's moved to another contact
                 if ($addressUpdates) {
                     resolve_static(Address::class, 'query')
-                        ->whereKey($address->id)
+                        ->whereKey($address->getKey())
                         ->update($addressUpdates);
                 }
 
@@ -228,7 +228,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                         ->update($oldContactUpdates);
 
                     resolve_static(Address::class, 'query')
-                        ->whereKeyNot($address->id)
+                        ->whereKeyNot($address->getKey())
                         ->where('contact_id', $address->getRawOriginal('contact_id'))
                         ->update($oldContactAddressesUpdates);
                 }
@@ -270,7 +270,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                     ->update($contactUpdates);
 
                 resolve_static(Address::class, 'query')
-                    ->whereKeyNot($address->id)
+                    ->whereKeyNot($address->getKey())
                     ->where('contact_id', $address->contact_id)
                     ->update($addressesUpdates);
             }
