@@ -5,12 +5,12 @@ namespace FluxErp\Livewire\Settings;
 use Illuminate\View\View;
 use Livewire\Component;
 
-class PrintLayoutEditor extends Component
+class PrintLayouts extends Component
 {
 
     public function render():View
     {
-        return view('flux::livewire.settings.print-layout-editor');
+        return view('flux::livewire.settings.print-layout-list');
     }
 
 }

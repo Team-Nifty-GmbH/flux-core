@@ -36,6 +36,7 @@ use FluxErp\Livewire\Media\Media as MediaGrid;
 use FluxErp\Livewire\Order\Order;
 use FluxErp\Livewire\Order\OrderList;
 use FluxErp\Livewire\Order\OrderListByOrderType;
+use FluxErp\Livewire\PrintLayoutEditor;
 use FluxErp\Livewire\Product\Product;
 use FluxErp\Livewire\Product\ProductList;
 use FluxErp\Livewire\Product\SerialNumber\SerialNumber;
@@ -70,7 +71,7 @@ use FluxErp\Livewire\Settings\Plugins;
 use FluxErp\Livewire\Settings\PriceLists;
 use FluxErp\Livewire\Settings\Printers;
 use FluxErp\Livewire\Settings\PrintJobs;
-use FluxErp\Livewire\Settings\PrintLayoutEditor;
+use FluxErp\Livewire\Settings\PrintLayouts;
 use FluxErp\Livewire\Settings\ProductOptionGroups;
 use FluxErp\Livewire\Settings\ProductPropertyGroups;
 use FluxErp\Livewire\Settings\Profile;
@@ -241,7 +242,7 @@ Route::middleware('web')
                         Route::get('/plugins', Plugins::class)->name('plugins');
                         Route::get('/price-lists', PriceLists::class)->name('price-lists');
                         Route::get('/print-jobs', PrintJobs::class)->name('print-jobs');
-                        Route::get('/print-layout-editor', PrintLayoutEditor::class)->name('print-layout-editor');
+                        Route::get('/print-layout-list', PrintLayouts::class)->name('print-layout-list');
                         Route::get('/printers', Printers::class)->name('printers');
                         Route::get('/product-option-groups', ProductOptionGroups::class)->name('product-option-groups');
                         Route::get('/product-properties', ProductPropertyGroups::class)->name('product-properties');
@@ -273,6 +274,9 @@ Route::middleware('web')
             Route::get('/media/{media}/{filename}', function (Media $media) {
                 return $media;
             })->name('media');
+
+            Route::get('print-layout-editor', PrintLayoutEditor::class)
+                ->name('print-layout-editor');
         });
 
         Route::group(['middleware' => ['auth:web']], function (): void {
