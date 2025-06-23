@@ -47,13 +47,11 @@ if (! function_exists('exception_to_notifications')) {
                 $component->addError('', $exception->getMessage());
         }
 
-        if (! $exception instanceof Illuminate\Validation\ValidationException) {
-            Illuminate\Support\Facades\Log::error(
-                $exception->getMessage(),
-                [
-                    'exception' => $exception,
-                    'backtrace' => $exception->getTraceAsString(),
-                ]);
+        if (
+            ! $exception instanceof Illuminate\Validation\ValidationException
+            && ! $exception instanceof Spatie\Permission\Exceptions\UnauthorizedException
+        ) {
+            report($exception);
         }
 
         if ($skipRender) {
