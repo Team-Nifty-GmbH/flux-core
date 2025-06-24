@@ -9,11 +9,7 @@ use Livewire\Component;
 class PrintLayoutEditor extends Component
 {
 
-    #[Layout('flux::layouts.printing',
-        [   'edit' => true,
-            'signaturePath' => false
-        ])
-    ]
+    #[Layout('flux::layouts.print-layout-editor')]
     public function render(): View
     {
         return view('flux::livewire.print-layout-editor');

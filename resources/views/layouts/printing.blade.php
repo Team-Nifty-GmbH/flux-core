@@ -31,11 +31,11 @@
     </head>
     <body class="text-xs">
         @if ($hasHeader ?? true)
-{{--            <x-flux::print.header />--}}
+            <x-flux::print.header />
         @endif
 
         @if ($hasFooter ?? true)
-{{--            <x-flux::print.footer />--}}
+            <x-flux::print.footer />
         @endif
 
         {!! $slot !!}
