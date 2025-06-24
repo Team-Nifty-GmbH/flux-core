@@ -21,6 +21,10 @@ export default function (
             editable: true,
             content: content,
             popUp: null,
+            isClickListenerSet: false,
+            setIsClickListenerSet(value) {
+                this.isClickListenerSet = value;
+            },
             initTextArea(
                 id,
                 element,
@@ -46,6 +50,11 @@ export default function (
 
                 //  access to the parent scope in onSelectionUpdate callback
                 const parent = this;
+                // related to dropdown visibility
+                const onClickHanlder = function (event) {
+                    parent.popUp.show();
+                    parent.setIsClickListenerSet(false);
+                };
                 _editor = new Editor({
                     element: element,
                     extensions: [
@@ -74,7 +83,6 @@ export default function (
                         }
 
                         const { from, to } = editor.state.selection;
-
                         // init popUp if not
                         if (parent.popUp === null) {
                             parent.popUp = window.tippy(element, {
@@ -103,10 +111,29 @@ export default function (
                                         right: cursorPosition.right,
                                     }),
                                 });
-                            parent.popUp.show();
+                            // display the popup when mouse click is released
+                            // multi-line selection is with this enabled
+                            if (!parent.isClickListenerSet) {
+                                element.addEventListener(
+                                    'click',
+                                    onClickHanlder,
+                                    { once: true },
+                                );
+                                parent.setIsClickListenerSet(true);
+                            }
                         } else {
                             if (!parent.popUp.state.isVisible) return;
                             parent.popUp.hide();
+                        }
+                    },
+                    onBlur() {
+                        // clear the listener if the user clicks outside of the editor and the click listener is set
+                        if (parent.isClickListenerSet) {
+                            element.removeEventListener(
+                                'click',
+                                onClickHanlder,
+                            );
+                            parent.setIsClickListenerSet(false);
                         }
                     },
                     onUpdate: ({ editor }) => {
