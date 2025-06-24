@@ -7,10 +7,10 @@ use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\Lead\LeadList;
 use FluxErp\Livewire\Support\Widgets\Charts\CircleChart;
 use FluxErp\Models\Lead;
-use FluxErp\Support\Metrics\Charts\Donut;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use FluxErp\Traits\Widgetable;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Livewire\Livewire;
 use TeamNiftyGmbH\DataTable\Helpers\SessionFilter;
@@ -22,6 +22,9 @@ class LeadsByLeadState extends CircleChart implements HasWidgetOptions
     public ?array $chart = [
         'type' => 'donut',
     ];
+
+    #[Locked]
+    public array $data = [];
 
     public bool $showTotals = false;
 
@@ -40,47 +43,63 @@ class LeadsByLeadState extends CircleChart implements HasWidgetOptions
     #[Renderless]
     public function calculateChart(): void
     {
-        $metrics = Donut::make(
-            resolve_static(Lead::class, 'query')
-                ->with('leadState:id,name')
-                ->whereNotNull('lead_state_id')
-        )
-            ->setDateColumn('created_at')
-            ->setRange($this->timeFrame)
-            ->setEndingDate($this->getEnd())
-            ->setStartingDate($this->getStart())
-            ->setLabelKey('leadState.name')
-            ->count('lead_state_id', 'id');
+        $this->data = resolve_static(Lead::class, 'query')
+            ->whereNotNull('lead_state_id')
+            ->whereBetween(
+                'created_at',
+                [
+                    $this->getStart()->toDateTimeString(),
+                    $this->getEnd()->toDateTimeString(),
+                ]
+            )
+            ->groupBy('lead_state_id')
+            ->with('leadState:id,name,color')
+            ->selectRaw('lead_state_id, count(lead_state_id) as total')
+            ->get()
+            ->map(fn ($lead) => [
+                'id' => $lead->lead_state_id,
+                'name' => $lead->leadState->name,
+                'color' => $lead->leadState->color,
+                'total' => $lead->total,
+            ])
+            ->toArray();
 
-        $this->series = $metrics->getData();
-        $this->labels = $metrics->getLabels();
+        $this->colors = array_column($this->data, 'color');
+        $this->labels = array_column($this->data, 'name');
+        $this->series = array_column($this->data, 'total');
     }
 
     #[Renderless]
     public function options(): array
     {
-        return collect($this->labels)
-            ->map(fn ($label) => [
-                'label' => __('Leads with state :lead-state', ['lead-state' => $label]),
+        return array_map(
+            fn ($data) => [
+                'label' => __('Leads with state :lead-state', ['lead-state' => data_get($data, 'name')]),
                 'method' => 'show',
-                'params' => $label,
-            ])
-            ->toArray();
+                'params' => [
+                    'id' => data_get($data, 'id'),
+                    'name' => data_get($data, 'name'),
+                ],
+            ],
+            $this->data
+        );
     }
 
     #[Renderless]
-    public function show(string $leadStateName): void
+    public function show(array $leadState): void
     {
-        $start = $this->getStart()->toDateString();
-        $end = $this->getEnd()->toDateString();
-
         SessionFilter::make(
             Livewire::new(resolve_static(LeadList::class, 'class'))->getCacheKey(),
             fn (Builder $query) => $query
-                ->whereBetween('created_at', [$start, $end])
-                ->whereNotNull('lead_state_id')
-                ->whereRelation('leadState', 'name', $leadStateName),
-            __('Leads with state :lead-state', ['lead-state' => $leadStateName])
+                ->where('lead_state_id', data_get($leadState, 'id'))
+                ->whereBetween(
+                    'created_at',
+                    [
+                        $this->getStart()->toDateTimeString(),
+                        $this->getEnd()->toDateTimeString(),
+                    ]
+                ),
+            __('Leads with state :lead-state', ['lead-state' => data_get($leadState, 'name')])
         )
             ->store();
 
