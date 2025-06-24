@@ -30,6 +30,12 @@ class TaskForm extends FluxForm
 
     public ?string $model_type = null;
 
+    #[Locked]
+    public ?string $modelLabel = null;
+
+    #[Locked]
+    public ?string $modelUrl = null;
+
     public ?string $name = null;
 
     public ?int $priority = 0;

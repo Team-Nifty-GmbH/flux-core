@@ -106,7 +106,7 @@
                                                     $wire.productPricesUpdate.alteration +
                                                     ($wire.productPricesUpdate.is_percent
                                                         ? '%)'
-                                                        : '{{ \FluxErp\Models\Currency::default()?->symbol }})')
+                                                        : '{{ resolve_static(\FluxErp\Models\Currency::class, 'default')?->symbol }})')
                                             "
                                         />
                                     </x-slot>
@@ -160,7 +160,7 @@
                     loading="updatePrices"
                     color="indigo"
                     :text="__('Save')"
-                    wire:flux-confirm.icon.warning="{{ __('wire:confirm.product-prices-update') }}"
+                    wire:flux-confirm.type.warning="{{ __('wire:confirm.product-prices-update') }}"
                     wire:click="updatePrices().then((success) => {if(success) $modalClose('update-prices-modal');});"
                 />
             </x-slot>

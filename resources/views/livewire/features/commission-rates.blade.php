@@ -1,9 +1,8 @@
-<div x-on:data-table-row-clicked="$wire.show($event.detail.id)">
+<div>
     <x-modal
-        id="edit-commission-rate"
+        id="{{ $commissionRate->modalName() }}"
         z-index="z-30"
-        wire="showModal"
-        :title="$create ? __('Create Commission Rate') : __('Edit Commission Rate')"
+        :title="$commissionRate->id ? __('Edit Commission Rate') : __('Create Commission Rate')"
     >
         <div class="space-y-8 divide-y divide-gray-200">
             <div class="space-y-8 divide-y divide-gray-200">
@@ -15,7 +14,7 @@
                             <x-select.styled
                                 :label="__('Commission Agent')"
                                 wire:model="commissionRate.user_id"
-                                :disabled="! $create"
+                                :disabled="$commissionRate->id"
                                 required
                                 select="label:label|value:id"
                                 unfiltered
@@ -32,8 +31,21 @@
                             <x-select.styled
                                 :label="__('Category')"
                                 wire:model.live="commissionRate.category_id"
-                                select="label:name|value:id"
-                                :options="$categories"
+                                select="label:label|value:id"
+                                unfiltered
+                                :request="[
+                                    'url' => route('search', \FluxErp\Models\Category::class),
+                                    'method' => 'POST',
+                                    'params' => [
+                                        'where' => [
+                                            [
+                                                'column' => 'model_type',
+                                                'operator' => '=',
+                                                'value' => morph_alias(\FluxErp\Models\Product::class),
+                                            ],
+                                        ],
+                                    ],
+                                ]"
                             />
                         </div>
                         <div class="sm:col-span-6">
@@ -71,36 +83,18 @@
             </div>
         </div>
         <x-slot:footer>
-            <div class="w-full">
-                <div class="flex justify-between gap-x-4">
-                    @if (user_can('action.commission-rates.delete'))
-                        <x-button
-                            x-bind:class="! $wire.create || 'invisible'"
-                            flat
-                            color="red"
-                            :text="__('Delete')"
-                            wire:click="delete()"
-                            wire:flux-confirm.type.error="{{  __('wire:confirm.delete', ['model' => __('Commission Rate')]) }}"
-                            :text="__('Delete')"
-                        />
-                    @endif
-
-                    <div class="flex gap-x-2">
-                        <x-button
-                            color="secondary"
-                            light
-                            flat
-                            :text="__('Cancel')"
-                            x-on:click="$modalClose('edit-commission-rate')"
-                        />
-                        <x-button
-                            color="indigo"
-                            :text="__('Save')"
-                            wire:click="save"
-                        />
-                    </div>
-                </div>
-            </div>
+            <x-button
+                color="secondary"
+                light
+                flat
+                :text="__('Cancel')"
+                x-on:click="$modalClose('{{ $commissionRate->modalName() }}')"
+            />
+            <x-button
+                color="indigo"
+                :text="__('Save')"
+                wire:click="save().then((success) => { if(success) $modalClose('{{ $commissionRate->modalName() }}')})"
+            />
         </x-slot>
     </x-modal>
 </div>

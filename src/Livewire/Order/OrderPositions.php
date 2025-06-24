@@ -119,7 +119,7 @@ class OrderPositions extends OrderPositionList
                     && ! $this->order->is_locked
                 )
                 ->attributes([
-                    'wire:flux-confirm.icon.warning' => __(
+                    'wire:flux-confirm.type.warning' => __(
                         'Recalculate prices|Are you sure you want to recalculate the prices?|Cancel|Confirm'
                     ),
                     'wire:click' => 'recalculateOrderPositions(); showSelectedActions = false;',
@@ -237,11 +237,15 @@ class OrderPositions extends OrderPositionList
             try {
                 CreateTask::make([
                     'project_id' => $projectId,
+                    'responsible_user_id' => auth()->id(),
                     'order_position_id' => $modelId,
                     'model_type' => $modelType,
                     'model_id' => $modelId,
                     'name' => $orderPosition->name,
                     'description' => $orderPosition->description,
+                    'users' => [
+                        auth()->id(),
+                    ],
                 ])
                     ->checkPermission()
                     ->validate()
@@ -323,7 +327,7 @@ class OrderPositions extends OrderPositionList
         if ($orderPosition->exists) {
             $this->orderPosition->fill($orderPosition);
         } else {
-            $this->orderPosition->vat_rate_id ??= VatRate::default()->getKey();
+            $this->orderPosition->vat_rate_id ??= resolve_static(VatRate::class, 'default')->getKey();
         }
 
         $this->js(<<<'JS'

@@ -4,31 +4,8 @@
  * Blade Directives
  *
  * @method static bool canAction(string $action)
- * @method static void endCanAction()
- * @method static string extendFlux(string $view)
+ * @method static void endcanAction()
  */
-if (! function_exists('format_number')) {
-    function format_number(
-        string|int|float|null $number,
-        int $style = NumberFormatter::DECIMAL,
-        int $maxFractionDigits = 2,
-        ?string $currencyCode = null
-    ): float|bool|int|string|null {
-        if (! is_numeric($number)) {
-            return $number;
-        }
-
-        $numberFormatter = numfmt_create(app()->getLocale(), $style);
-        numfmt_set_attribute($numberFormatter, NumberFormatter::MAX_FRACTION_DIGITS, $maxFractionDigits);
-
-        if ($style === NumberFormatter::CURRENCY) {
-            return numfmt_format_currency($numberFormatter, $number, $currencyCode);
-        }
-
-        return numfmt_format($numberFormatter, $number);
-    }
-}
-
 if (! function_exists('exception_to_notifications')) {
     function exception_to_notifications(
         Exception $exception,
@@ -70,13 +47,11 @@ if (! function_exists('exception_to_notifications')) {
                 $component->addError('', $exception->getMessage());
         }
 
-        if (! $exception instanceof Illuminate\Validation\ValidationException) {
-            Illuminate\Support\Facades\Log::error(
-                $exception->getMessage(),
-                [
-                    'exception' => $exception,
-                    'backtrace' => $exception->getTraceAsString(),
-                ]);
+        if (
+            ! $exception instanceof Illuminate\Validation\ValidationException
+            && ! $exception instanceof Spatie\Permission\Exceptions\UnauthorizedException
+        ) {
+            report($exception);
         }
 
         if ($skipRender) {

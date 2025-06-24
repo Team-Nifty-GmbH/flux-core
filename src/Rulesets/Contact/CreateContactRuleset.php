@@ -95,6 +95,7 @@ class CreateContactRuleset extends FluxRuleset
             'customer_number' => 'string|max:255|nullable|unique:contacts,customer_number',
             'creditor_number' => 'string|max:255|nullable|unique:contacts,creditor_number',
             'debtor_number' => 'string|max:255|nullable|unique:contacts,debtor_number',
+            'rating' => 'sometimes|integer|min:0|max:5',
             'payment_target_days' => 'sometimes|integer|min:1|nullable',
             'payment_reminder_days_1' => 'sometimes|integer|min:1|nullable',
             'payment_reminder_days_2' => 'sometimes|integer|min:1|nullable',

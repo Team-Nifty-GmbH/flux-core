@@ -148,10 +148,7 @@ class Calendar extends Component
             try {
                 $model = morphed_model(data_get($event, 'extendedProps.calendar_type') ?? '')
                     ?? resolve_static(CalendarEvent::class, 'class');
-                $model::fromCalendarEvent($event, 'update')
-                    ->checkPermission()
-                    ->validate()
-                    ->execute();
+                $this->event->save();
 
                 $this->toast()
                     ->success(__(':model saved', ['model' => __(Str::headline(morph_alias($model)))]))
@@ -300,8 +297,12 @@ class Calendar extends Component
         if (($calendarAttributes['modelType'] ?? false)
             && data_get($calendarAttributes, 'isVirtual', false)
         ) {
-            return resolve_static(morphed_model($calendarAttributes['modelType']), 'query')
-                ->inTimeframe($info['start'], $info['end'], $calendarAttributes)
+            return $this->getCalendarEventsFromModelTypeQuery(
+                $calendarAttributes['modelType'],
+                $info['start'],
+                $info['end'],
+                $calendarAttributes
+            )
                 ->get()
                 ->map(fn (Model $model) => $model->toCalendarEvent($info))
                 ->toArray();
@@ -319,14 +320,8 @@ class Calendar extends Component
         $calendarEvents = $calendar->calendarEvents()
             ->whereNull('repeat')
             ->where(function ($query) use ($info): void {
-                $query->whereBetween('start', [
-                    Carbon::parse($info['start']),
-                    Carbon::parse($info['end']),
-                ])
-                    ->orWhereBetween('end', [
-                        Carbon::parse($info['start']),
-                        Carbon::parse($info['end']),
-                    ]);
+                $query->where('start', '<=', Carbon::parse($info['end']))
+                    ->where('end', '>=', Carbon::parse($info['start']));
             })
             ->with('invited', fn ($query) => $query->withPivot('status'))
             ->get()
@@ -427,8 +422,8 @@ class Calendar extends Component
         }
 
         $this->editEvent([
-            'start' => $start->toDateTimeString(),
-            'end' => $start->addMinutes(15)->toDateTimeString(),
+            'start' => $start->toIso8601String(),
+            'end' => $start->addMinutes(15)->toIso8601String(),
             'allDay' => $allDay,
             'calendar_id' => $this->calendar->id,
             'model_type' => $this->calendar->model_type,
@@ -542,6 +537,16 @@ class Calendar extends Component
         }
 
         return $events;
+    }
+
+    protected function getCalendarEventsFromModelTypeQuery(
+        string $modelType,
+        string $start,
+        string $end,
+        array $calendarAttributes
+    ): Builder {
+        return resolve_static(morphed_model($modelType), 'query')
+            ->inTimeframe($start, $end, $calendarAttributes);
     }
 
     protected function getViews(): array

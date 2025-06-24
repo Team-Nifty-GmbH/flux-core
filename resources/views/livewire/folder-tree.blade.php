@@ -33,7 +33,7 @@
                     @show
                 </x-slot>
                 <div
-                    class="flex w-1/2 flex-col gap-3"
+                    class="flex w-full flex-col gap-3 lg:w-1/2"
                     x-data="{
                         ...filePond(
                             $wire,
@@ -47,8 +47,11 @@
                             },
                             {
                                 uploadDisabled: '{{ __('Upload not allowed - Read Only') }}',
+                                readyForUpload: '{{ __('Ready for upload') }}',
+                                pending: '{{ __('pending') }}',
                             },
                         ),
+                        previewSupported: true,
                         selectionProxy: {},
                         selection: {},
                         countChildren() {
@@ -121,7 +124,7 @@
                     <div
                         x-ref="upload"
                         x-show="! selection.file_name && selected"
-                        class="flex flex-col gap-3"
+                        class="flex w-full flex-col gap-3"
                         x-cloak
                     >
                         <div>
@@ -164,13 +167,16 @@
                                 />
                             @endcanAction
 
-                            <x-button
-                                color="secondary"
-                                light
-                                loading
-                                :text="__('Download folder')"
-                                x-on:click="$wire.downloadCollection(getNodePath(selection, 'collection_name'))"
-                            />
+                            @canAction(\FluxErp\Actions\Media\DownloadMultipleMedia::class)
+                                <x-button
+                                    color="secondary"
+                                    light
+                                    loading
+                                    :text="__('Download folder')"
+                                    x-on:click="$wire.downloadCollection(getNodePath(selection, 'collection_name'))"
+                                />
+                            @endcanAction
+
                             @show
                         </div>
                         @section('folder-tree.upload.attributes')
@@ -220,7 +226,7 @@
                     <div
                         x-show="selection.file_name && selected"
                         x-cloak
-                        class="flex flex-col gap-3"
+                        class="flex w-full flex-col gap-3"
                     >
                         <div class="pb-1.5">
                             <x-button
@@ -284,18 +290,19 @@
                                     x-bind:value="selection.disk"
                                 />
                                 <x-input
-                                    x-show="selection?.disk === 'public'"
                                     :label="__('Link')"
                                     readonly
                                     x-ref="originalLink"
                                     type="text"
                                     x-bind:value="selection.original_url"
                                 >
-                                    <x-slot:append>
+                                    <x-slot:suffix>
                                         <div
                                             class="absolute inset-y-0 right-0 flex items-center p-0.5"
                                         >
                                             <x-button
+                                                x-cloak
+                                                x-show="previewSupported"
                                                 x-on:click="$openDetailModal(selection.original_url)"
                                                 icon="eye"
                                                 class="h-full rounded-l-md"
@@ -315,6 +322,8 @@
                             @endcanAction
 
                             <object
+                                x-on:load="previewSupported = true"
+                                x-on:error="previewSupported = false"
                                 x-on:click="$openDetailModal(selection.original_url)"
                                 class="cursor-pointer object-contain"
                                 x-bind:type="selection.mime_type"

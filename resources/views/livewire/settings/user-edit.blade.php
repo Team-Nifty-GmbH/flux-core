@@ -40,7 +40,7 @@
                 wire:model="userForm.termination_date"
             />
             <x-number
-                :prefix="\FluxErp\Models\Currency::default()?->symbol"
+                :prefix="resolve_static(\FluxErp\Models\Currency::class, 'default')?->symbol"
                 :label="__('Cost Per Hour')"
                 wire:model="userForm.cost_per_hour"
             />
@@ -50,17 +50,20 @@
         @section('user-edit.selects')
         <x-select.styled
             wire:model="userForm.language_id"
+            searchable
             :label="__('Language')"
             select="label:name|value:id"
             :options="$languages"
         />
         <x-select.styled
             wire:model="userForm.timezone"
+            searchable
             :label="__('Timezone')"
             :options="timezone_identifiers_list()"
         />
         <x-select.styled
             wire:model="userForm.parent_id"
+            searchable
             :label="__('Parent')"
             select="label:name|value:id|description:email"
             :options="$users"
@@ -306,7 +309,7 @@
             />
             <livewire:features.commission-rates
                 lazy
-                :userId="$user['id'] ?? null"
+                :user-id="$userForm->id"
                 :contactId="null"
                 cache-key="settings.users.commission-rates"
             />

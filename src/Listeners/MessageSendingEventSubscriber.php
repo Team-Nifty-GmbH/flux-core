@@ -2,9 +2,10 @@
 
 namespace FluxErp\Listeners;
 
+use FluxErp\Actions\Communication\CreateCommunication;
 use FluxErp\Enums\CommunicationTypeEnum;
-use FluxErp\Livewire\Forms\CommunicationForm;
 use FluxErp\Models\Communication;
+use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Support\Str;
@@ -14,23 +15,25 @@ class MessageSendingEventSubscriber
 {
     public function handle(MessageSending $event): void
     {
-        /** @var CommunicationForm $communicationForm */
         if (! $communicationForm = data_get($event, 'data.mailMessageForm')) {
             return;
         }
 
-        if (! $communicationForm instanceof CommunicationForm || ! $communicationForm->communicatables
-        ) {
+        $communicationForm = $communicationForm instanceof Arrayable
+            ? $communicationForm->toArray()
+            : $communicationForm;
+
+        if (! is_array($communicationForm)) {
             return;
         }
 
         // TODO: if a id is set for the attachment an existing media is being attached, create a relation between the communication and the media
-        $communicationForm->attachments = array_filter(
-            $communicationForm->attachments,
+        $communicationForm['attachments'] = array_filter(
+            data_get($communicationForm, 'attachments', []),
             fn ($attachment) => ! data_get($attachment, 'id')
         );
 
-        $communicationForm->attachments = array_filter(
+        $communicationForm['attachments'] = array_filter(
             array_map(
                 function ($attachment) {
                     $attachment['model_type'] = morph_alias(Communication::class);
@@ -40,26 +43,24 @@ class MessageSendingEventSubscriber
 
                     return $attachment;
                 },
-                $communicationForm->attachments
+                data_get($communicationForm, 'attachments', [])
             ),
             fn ($attachment) => ! is_null(data_get($attachment, 'media'))
         );
 
-        $communicationForm->communication_type_enum = CommunicationTypeEnum::Mail->value;
-        $communicationForm->save();
+        $communicationForm['communication_type_enum'] = CommunicationTypeEnum::Mail->value;
+        $communication = CreateCommunication::make($communicationForm)
+            ->validate()
+            ->execute();
 
-        $communication = resolve_static(Communication::class, 'query')
-            ->whereKey($communicationForm->id)
-            ->first();
-
-        foreach ($communicationForm->communicatables as $communicatable) {
-            $communicatableModel = resolve_static(data_get($communicatable, 'communicatable_type'), 'query')
-                ->whereKey(data_get($communicatable, 'communicatable_type'))
+        foreach (data_get($communicationForm, 'communicatables', []) as $communicatable) {
+            $communicatableModel = morphed_model(data_get($communicatable, 'communicatable_type'))::query()
+                ->whereKey(data_get($communicatable, 'communicatable_id'))
                 ->first();
 
             // if the given morph has a contact id always attach to the contact
-            if ($communicatableModel->contact_id) {
-                $communication->contacts()->syncWithoutDetaching($communicatable->contact_id);
+            if ($communicatableModel?->contact_id) {
+                $communication->contacts()->syncWithoutDetaching($communicatableModel->contact_id);
             }
         }
 

@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Features\Calendar;
 
+use Carbon\Carbon;
 use FluxErp\Livewire\Forms\CalendarEventForm;
 use FluxErp\Models\Calendar;
 use FluxErp\Traits\Livewire\Actions;
@@ -25,6 +26,30 @@ class CalendarEvent extends Component
     public function render(): View
     {
         return view('flux::livewire.features.calendar.calendar-event');
+    }
+
+    #[Renderless]
+    #[On('cancel-calendar-event')]
+    public function cancel(): bool
+    {
+        $calendarId = $this->event->calendar_id;
+        $this->event->confirm_option = $this->event->was_repeatable ? 'this' : 'all';
+
+        try {
+            $this->event->cancel();
+        } catch (ValidationException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->js(<<<JS
+            \$modalClose('confirm-dialog');
+            \$modalClose('edit-event-modal');
+            calendar.getEventSourceById('$calendarId')?.refetch();
+        JS);
+
+        return true;
     }
 
     #[Renderless]
@@ -64,6 +89,26 @@ class CalendarEvent extends Component
     }
 
     #[Renderless]
+    public function reactivate(): void
+    {
+        $calendarId = $this->event->calendar_id;
+        $this->event->confirm_option = $this->event->was_repeatable ? 'this' : 'all';
+
+        try {
+            $this->event->reactivate();
+        } catch (ValidationException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->js(<<<JS
+            \$modalClose('edit-event-modal');
+            calendar.getEventSourceById('$calendarId')?.refetch();
+        JS);
+    }
+
+    #[Renderless]
     #[On('save-calendar-event')]
     public function save(): bool
     {
@@ -78,6 +123,13 @@ class CalendarEvent extends Component
             $this->event->confirm_option = 'all';
         }
 
+        if ($this->event->is_all_day) {
+            $this->event->start = ! is_null($this->event->start) ?
+                Carbon::parse($this->event->start)->toDateString() : null;
+            $this->event->end = ! is_null($this->event->end) ?
+                Carbon::parse($this->event->end)->toDateString() : null;
+        }
+
         try {
             $this->event->save();
         } catch (UnauthorizedException|ValidationException $e) {
@@ -89,7 +141,7 @@ class CalendarEvent extends Component
         $this->js(<<<JS
             \$modalClose('confirm-dialog');
             \$modalClose('edit-event-modal');
-            calendar.getEventSourceById('{$this->event->calendar_id}').refetch();
+            calendar.getEventSourceById('{$this->event->calendar_id}')?.refetch();
         JS);
 
         return true;

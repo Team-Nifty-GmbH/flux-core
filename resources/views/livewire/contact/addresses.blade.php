@@ -37,17 +37,10 @@
                                     class="text-ellipsis whitespace-nowrap text-sm"
                                 >
                                     @section('left-side-bar.address-list.address')
-                                    <div
-                                        class="font-semibold"
-                                        x-text="addressItem.company"
-                                    ></div>
-                                    <div
-                                        x-text="((addressItem.firstname || '') + ' ' + (addressItem.lastname || '')).trim()"
-                                    ></div>
-                                    <div x-text="addressItem.street"></div>
-                                    <div
-                                        x-text="((addressItem.zip || '') + ' ' + (addressItem.city || '')).trim()"
-                                    ></div>
+                                    <p
+                                        class="first-line:font-semibold"
+                                        x-html="addressItem.postal_address.join('<br>')"
+                                    ></p>
                                     @show
                                 </div>
                                 <div class="flex flex-col gap-0.5">
@@ -129,6 +122,16 @@
                     select="label:name|value:id"
                     :options="$contactOrigins"
                 />
+                <x-rating
+                    x-bind:disabled="! $wire.$parent.edit"
+                    wire:model.number="contact.rating"
+                    :quantity="5"
+                    position="right"
+                >
+                    <x-slot:text>
+                        <x-label :label="__('Rating')" />
+                    </x-slot>
+                </x-rating>
             </div>
         </x-card>
         @show

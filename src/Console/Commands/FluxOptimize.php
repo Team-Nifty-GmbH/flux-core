@@ -46,7 +46,7 @@ class FluxOptimize extends Command
             }
 
             /** @var Model $model */
-            $this->forget ? Cache::forget('default_' . $alias) : $model::default();
+            $this->forget ? Cache::forget('default_' . $alias) : resolve_static($model, 'default');
         }
     }
 

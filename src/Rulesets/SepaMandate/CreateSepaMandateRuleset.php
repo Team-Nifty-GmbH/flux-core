@@ -28,7 +28,7 @@ class CreateSepaMandateRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => Contact::class]),
             ],
             'contact_bank_connection_id' => [
-                'required',
+                'nullable',
                 'integer',
                 app(ModelExists::class, ['model' => ContactBankConnection::class]),
             ],

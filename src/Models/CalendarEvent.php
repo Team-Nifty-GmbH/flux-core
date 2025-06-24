@@ -3,19 +3,24 @@
 namespace FluxErp\Models;
 
 use Carbon\Carbon;
+use FluxErp\Actions\CalendarEvent\CancelCalendarEvent;
 use FluxErp\Actions\CalendarEvent\CreateCalendarEvent;
 use FluxErp\Actions\CalendarEvent\DeleteCalendarEvent;
+use FluxErp\Actions\CalendarEvent\ReactivateCalendarEvent;
 use FluxErp\Actions\CalendarEvent\UpdateCalendarEvent;
 use FluxErp\Actions\FluxAction;
+use FluxErp\Casts\MorphTo as MorphToCast;
 use FluxErp\Models\Pivots\CalendarEventInvite;
 use FluxErp\Models\Pivots\Inviteable;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\InteractsWithMedia;
 use FluxErp\Traits\LogsActivity;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Arr;
@@ -33,6 +38,8 @@ class CalendarEvent extends FluxModel implements HasMedia
             'create' => CreateCalendarEvent::make($event),
             'update' => UpdateCalendarEvent::make($event),
             'delete' => DeleteCalendarEvent::make($event),
+            'cancel' => CancelCalendarEvent::make($event),
+            'reactivate' => ReactivateCalendarEvent::make($event),
             default => null,
         };
     }
@@ -45,9 +52,12 @@ class CalendarEvent extends FluxModel implements HasMedia
             'repeat_start' => 'datetime',
             'repeat_end' => 'datetime',
             'excluded' => 'array',
+            'cancelled' => 'array',
             'is_all_day' => 'boolean',
             'has_taken_place' => 'boolean',
             'extended_props' => 'array',
+            'cancelled_at' => 'datetime',
+            'cancelled_by' => resolve_static(MorphToCast::class, 'class') . ':name',
         ];
     }
 
@@ -146,12 +156,18 @@ class CalendarEvent extends FluxModel implements HasMedia
         return $this->hasMany(Inviteable::class);
     }
 
+    public function model(): MorphTo
+    {
+        return $this->morphTo('model');
+    }
+
     public function toCalendarEventObject(array $attributes = []): array
     {
         $attributes = array_merge(
             [
                 'calendar_type' => $this->calendar()->value('model_type'),
                 'extendedProps' => array_filter($this->extended_props ?? [], fn ($item) => ! is_array($item)),
+                'is_cancelled' => $this->isCancelled,
             ],
             $attributes
         );
@@ -194,6 +210,8 @@ class CalendarEvent extends FluxModel implements HasMedia
             } else {
                 $repeat['interval'] = $interval[1] ?? null;
             }
+
+            $attributes = array_merge($this->baseDates, $attributes);
         }
 
         $calendarEventObject = array_merge(
@@ -210,8 +228,8 @@ class CalendarEvent extends FluxModel implements HasMedia
                 'recurrences' => $this->recurrences,
                 'allDay' => $this->is_all_day,
                 'has_taken_place' => $this->has_taken_place,
-                'editable' => ! $this->calendar->is_public && ! $this->is_invited,
-                'is_editable' => ! $this->calendar->is_public && ! $this->is_invited,
+                'editable' => ! $this->calendar->is_public && ! $this->is_invited && ! $this->isCancelled,
+                'is_editable' => ! $this->calendar->is_public && ! $this->is_invited && ! $this->isCancelled,
                 'is_invited' => $this->is_invited,
                 'is_public' => $this->calendar->is_public,
                 'status' => $this->status ?: 'busy',
@@ -242,5 +260,50 @@ class CalendarEvent extends FluxModel implements HasMedia
     public function uniqueIds(): array
     {
         return ['ulid'];
+    }
+
+    protected function baseDates(): Attribute
+    {
+        return Attribute::get(function (mixed $value, array $attributes) {
+            if (
+                is_null(data_get($attributes, 'repeat'))
+                || is_null(data_get($attributes, 'id'))
+            ) {
+                return [
+                    'base_start' => data_get($attributes, 'start'),
+                    'base_end' => data_get($attributes, 'end'),
+                ];
+            }
+
+            $id = explode('|', data_get($attributes, 'id') ?? '')[0];
+
+            $event = $this->newQuery()
+                ->whereKey($id)
+                ->first(['start', 'end'])
+                ?->toArray();
+
+            return [
+                'base_start' => data_get($event, 'start'),
+                'base_end' => data_get($event, 'end'),
+            ];
+        });
+    }
+
+    protected function isCancelled(): Attribute
+    {
+        return Attribute::get(function (mixed $value, array $attributes) {
+            if (data_get($attributes, 'cancelled_at')) {
+                return true;
+            }
+
+            if (data_get($attributes, 'repeat') && data_get($attributes, 'cancelled')) {
+                return in_array(
+                    data_get($attributes, 'start'),
+                    json_decode(data_get($attributes, 'cancelled'), true)
+                );
+            }
+
+            return false;
+        });
     }
 }

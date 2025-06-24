@@ -3,10 +3,11 @@
 namespace FluxErp\Livewire\Widgets;
 
 use FluxErp\Enums\TimeFrameEnum;
+use FluxErp\Livewire\Dashboard\Dashboard;
+use FluxErp\Livewire\Support\Widgets\Charts\LineChart;
 use FluxErp\Models\Order;
 use FluxErp\Support\Metrics\Charts\Line;
 use FluxErp\Support\Metrics\Value;
-use FluxErp\Support\Widgets\Charts\LineChart;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use FluxErp\Traits\MoneyChartFormattingTrait;
 use FluxErp\Traits\Widgetable;
@@ -15,6 +16,11 @@ use Livewire\Attributes\Renderless;
 class TotalRevenue extends LineChart
 {
     use IsTimeFrameAwareWidget, MoneyChartFormattingTrait, Widgetable;
+
+    public static function dashboardComponent(): array|string
+    {
+        return Dashboard::class;
+    }
 
     #[Renderless]
     public function calculateByTimeFrame(): void
@@ -35,18 +41,18 @@ class TotalRevenue extends LineChart
         $metric = Line::make($query)
             ->setDateColumn('invoice_date')
             ->setRange($this->timeFrame)
-            ->setEndingDate($this->end?->endOfDay())
-            ->setStartingDate($this->start?->startOfDay());
+            ->setEndingDate($this->getEnd())
+            ->setStartingDate($this->getStart());
         $previousMetric = Line::make($query)
             ->setDateColumn('invoice_date')
-            ->setEndingDate($metric->previousRange()[1])
-            ->setStartingDate($metric->previousRange()[0])
+            ->setEndingDate($this->getEndPrevious())
+            ->setStartingDate($this->getStartPrevious())
             ->setRange(TimeFrameEnum::Custom);
 
         $growth = Value::make($query)
             ->setRange($this->timeFrame)
-            ->setEndingDate($this->end?->endOfDay())
-            ->setStartingDate($this->start?->startOfDay())
+            ->setEndingDate($this->getEnd())
+            ->setStartingDate($this->getStart())
             ->setDateColumn('invoice_date')
             ->withGrowthRate()
             ->sum('total_net_price');
@@ -70,6 +76,11 @@ class TotalRevenue extends LineChart
         ];
 
         $this->xaxis['categories'] = $revenue->getLabels();
+    }
+
+    public function showTitle(): bool
+    {
+        return ! $this->showTotals;
     }
 
     protected function getListeners(): array

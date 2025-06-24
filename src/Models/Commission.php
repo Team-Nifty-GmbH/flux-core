@@ -36,16 +36,16 @@ class Commission extends FluxModel implements InteractsWithDataTables
         return ($this->order_position_id ? $this->orderPosition?->name . ' ' : null) .
             Number::currency(
                 number: $this->total_net_price,
-                in: Currency::default()?->iso ?? '',
+                in: resolve_static(Currency::class, 'default')?->iso ?? '',
                 locale: $this->user->contact?->country?->iso_alpha2
-                    ?? Country::default()?->iso_alpha2
+                    ?? resolve_static(Country::class, 'default')?->iso_alpha2
                     ?? app()->getLocale()
             ) . ' - ' .
             Number::percentage(
                 number: bcmul(data_get($this->commission_rate, 'commission_rate', 0), 100),
                 maxPrecision: 2,
                 locale: $this->user->contact?->country?->iso_alpha2
-                    ?? Country::default()?->iso_alpha2
+                    ?? resolve_static(Country::class, 'default')?->iso_alpha2
                     ?? app()->getLocale()
             );
     }
@@ -58,7 +58,7 @@ class Commission extends FluxModel implements InteractsWithDataTables
                 $this->order->invoice_date
                     ->locale(
                         $this->user->contact?->country?->iso_alpha2
-                        ?? Country::default()?->iso_alpha2
+                        ?? resolve_static(Country::class, 'default')?->iso_alpha2
                         ?? app()->getLocale()
                     )
                     ->isoFormat('L') . ')'
@@ -66,7 +66,7 @@ class Commission extends FluxModel implements InteractsWithDataTables
                 number: bcmul(data_get($this->commission_rate, 'commission_rate', 0), 100),
                 maxPrecision: 2,
                 locale: $this->user->contact?->country?->iso_alpha2
-                ?? Country::default()?->iso_alpha2
+                ?? resolve_static(Country::class, 'default')?->iso_alpha2
                 ?? app()->getLocale()
             ) . ' ' . __('Commission');
     }

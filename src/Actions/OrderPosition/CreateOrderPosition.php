@@ -6,6 +6,7 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Enums\BundleTypeEnum;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Client;
+use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\PriceList;
@@ -40,9 +41,11 @@ class CreateOrderPosition extends FluxAction
 
         $this->data['is_net'] ??= $this->getData('priceList.is_net')
             ?? data_get($order, 'priceList.is_net')
-            ?? data_get(PriceList::default(), 'is_net');
-        $this->data['client_id'] ??= data_get($order, 'client_id') ?? Client::default()?->getKey();
-        $this->data['price_list_id'] ??= data_get($order, 'price_list_id') ?? PriceList::default()?->getKey();
+            ?? data_get(resolve_static(PriceList::class, 'default'), 'is_net');
+        $this->data['client_id'] ??= data_get($order, 'client_id')
+            ?? resolve_static(Client::class, 'default')?->getKey();
+        $this->data['price_list_id'] ??= data_get($order, 'price_list_id')
+            ?? resolve_static(PriceList::class, 'default')?->getKey();
 
         if (is_int($this->getData('sort_number'))) {
             $currentHighestSortNumber = resolve_static(OrderPosition::class, 'query')
@@ -89,7 +92,7 @@ class CreateOrderPosition extends FluxAction
         $orderPosition->fill($this->data);
 
         if (! $this->getData('is_free_text')) {
-            PriceCalculation::fill($orderPosition, $this->data);
+            PriceCalculation::make($orderPosition, $this->data)->calculate();
         }
         unset($orderPosition->discounts, $orderPosition->unit_price);
 
@@ -152,7 +155,7 @@ class CreateOrderPosition extends FluxAction
 
     protected function prepareForValidation(): void
     {
-        $this->data['warehouse_id'] ??= Warehouse::default()?->getKey();
+        $this->data['warehouse_id'] ??= resolve_static(Warehouse::class, 'default')?->getKey();
     }
 
     protected function validateData(): void
@@ -167,6 +170,17 @@ class CreateOrderPosition extends FluxAction
         if ($order->is_locked) {
             $errors += [
                 'is_locked' => [__('Order is locked')],
+            ];
+        }
+
+        if ($this->getData('credit_account_id')
+            && ! resolve_static(ContactBankConnection::class, 'query')
+                ->whereKey($this->getData('credit_account_id'))
+                ->where('contact_id', $order->contact_id)
+                ->exists()
+        ) {
+            $errors += [
+                'credit_account_id' => [__('validation.exists', ['attribute' => 'credit_account_id'])],
             ];
         }
 
@@ -193,11 +207,12 @@ class CreateOrderPosition extends FluxAction
 
                 $originPosition = resolve_static(OrderPosition::class, 'query')
                     ->whereKey($originPositionId)
+                    ->where('order_id', $order->parent_id)
                     ->withSum('descendants as descendantsAmount', 'amount')
                     ->first();
                 $maxAmount = bcsub(
-                    $originPosition->amount,
-                    $originPosition->descendantsAmount ?? 0,
+                    $originPosition?->amount ?? 0,
+                    $originPosition?->descendantsAmount ?? 0,
                 );
 
                 if (bccomp($this->getData('amount') ?? 1, $maxAmount) > 0) {

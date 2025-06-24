@@ -5,6 +5,7 @@ namespace FluxErp\Traits;
 use Closure;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Eloquent\SoftDeletes as BaseSoftDeletes;
 
 trait CascadeSoftDeletes
 {
@@ -15,6 +16,19 @@ trait CascadeSoftDeletes
         static::deleting(function (Model $model): void {
             $model->runCascadingDeletes();
         });
+
+        static::restoring(function (Model $model): void {
+            $model->runCascadingRestores();
+        });
+    }
+
+    protected function cascadeRestores(string $relationship): void
+    {
+        $closure = function (Model $model): void {
+            isset($model->pivot) ? $model->pivot->restore() : $model->restore();
+        };
+
+        $this->handleSoftDeletedRecords($relationship, $closure);
     }
 
     protected function cascadeSoftDeletes(string $relationship): void
@@ -35,9 +49,25 @@ trait CascadeSoftDeletes
         });
     }
 
+    protected function getActiveCascadingRestores(): array
+    {
+        return array_filter($this->getCascadingRestores(), function ($relationship) {
+            /** @var Relation $relation */
+            $relation = $this->{$relationship}();
+
+            return in_array(BaseSoftDeletes::class, class_uses_recursive($relation->getRelated()))
+                && $relation->onlyTrashed()->exists();
+        });
+    }
+
     protected function getCascadingDeletes(): array
     {
         return isset($this->cascadeDeletes) ? (array) $this->cascadeDeletes : [];
+    }
+
+    protected function getCascadingRestores(): array
+    {
+        return isset($this->cascadeRestores) ? (array) $this->cascadeRestores : $this->getCascadingDeletes();
     }
 
     protected function handleRecords(string $relationship, Closure $closure): void
@@ -53,22 +83,30 @@ trait CascadeSoftDeletes
         }
     }
 
-    protected function hasInvalidCascadingRelationships(): array
+    protected function handleSoftDeletedRecords(string $relationship, Closure $closure): void
     {
-        return array_filter($this->getCascadingDeletes(), function ($relationship) {
-            return ! method_exists($this, $relationship) || ! $this->{$relationship}() instanceof Relation;
-        });
-    }
+        $fetchMethod = $this->fetchMethod ?? 'get';
 
-    protected function implementsSoftDeletes(): bool
-    {
-        return method_exists($this, 'runSoftDelete');
+        if ($fetchMethod == 'chunk') {
+            $this->{$relationship}()->onlyTrashed()->chunk($this->chunkSize ?? 500, $closure);
+        } else {
+            foreach ($this->{$relationship}()->onlyTrashed()->$fetchMethod() as $model) {
+                $closure($model);
+            }
+        }
     }
 
     protected function runCascadingDeletes(): void
     {
         foreach ($this->getActiveCascadingDeletes() as $relationship) {
             $this->cascadeSoftDeletes($relationship);
+        }
+    }
+
+    protected function runCascadingRestores(): void
+    {
+        foreach ($this->getActiveCascadingRestores() as $relationship) {
+            $this->cascadeRestores($relationship);
         }
     }
 }

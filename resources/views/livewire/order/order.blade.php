@@ -347,7 +347,7 @@
                         <div
                             class="size-5 cursor-pointer"
                             wire:click="toggleLock()"
-                            wire:flux-confirm.icon.warning="{{ __('Change order lock state') }}|{{ __('Manually locking or unlocking orders can have unexpected side effects.<br><br>Are you Sure?') }}|{{ __('Cancel') }}|{{ __('Continue') }}"
+                            wire:flux-confirm.type.warning="{{ __('Change order lock state') }}|{{ __('Manually locking or unlocking orders can have unexpected side effects.<br><br>Are you Sure?') }}|{{ __('Cancel') }}|{{ __('Continue') }}"
                         >
                             <x-icon
                                 x-cloak
@@ -465,10 +465,10 @@
         wire:loading="tab"
         wire:model="tab"
         :tabs="$tabs"
-        class="w-full gap-4 lg:col-start-1 xl:col-span-2 xl:flex"
+        class="grid w-full gap-4 lg:col-start-1 xl:col-span-2 xl:flex"
     >
         <x-slot:prepend>
-            <section class="relative basis-2/12" wire:ignore>
+            <section class="relative max-w-96 basis-2/12" wire:ignore>
                 <div class="sticky top-6 flex flex-col gap-4">
                     @section('contact-address-card')
                     <x-card>
@@ -579,33 +579,10 @@
                             />
                         </div>
                         <div class="text-sm">
-                            <div
-                                x-text="$wire.order.address_invoice.company"
-                            ></div>
-                            <div
-                                x-text="$wire.order.address_invoice.addition"
-                            ></div>
-                            <div
-                                x-text="
-                                    (
-                                        ($wire.order.address_invoice?.firstname || '').trim() +
-                                        ' ' +
-                                        ($wire.order.address_invoice?.lastname || '').trim()
-                                    ).trim()
-                                "
-                            ></div>
-                            <div
-                                x-text="$wire.order.address_invoice.street"
-                            ></div>
-                            <div
-                                x-text="
-                                    (
-                                        ($wire.order.address_invoice?.zip || '').trim() +
-                                        ' ' +
-                                        ($wire.order.address_invoice?.city || '').trim()
-                                    ).trim()
-                                "
-                            ></div>
+                            <p
+                                class="truncate first-line:font-semibold"
+                                x-html="$wire.order.address_invoice.join('<br>')"
+                            ></p>
                         </div>
                     </x-card>
                     @show
@@ -656,33 +633,10 @@
                             class="text-sm"
                             x-bind:class="$wire.order.address_delivery_id === $wire.order.address_invoice_id && 'hidden'"
                         >
-                            <div
-                                x-text="$wire.order.address_delivery?.company"
-                            ></div>
-                            <div
-                                x-text="$wire.order.address_delivery?.addition"
-                            ></div>
-                            <div
-                                x-text="
-                                    (
-                                        ($wire.order.address_delivery?.firstname || '').trim() +
-                                        ' ' +
-                                        ($wire.order.address_delivery?.lastname || '').trim()
-                                    ).trim()
-                                "
-                            ></div>
-                            <div
-                                x-text="$wire.order.address_delivery?.street"
-                            ></div>
-                            <div
-                                x-text="
-                                    (
-                                        ($wire.order.address_invoice?.zip || '').trim() +
-                                        ' ' +
-                                        ($wire.order.address_invoice?.city || '').trim()
-                                    ).trim()
-                                "
-                            ></div>
+                            <p
+                                class="truncate first-line:font-semibold"
+                                x-html="$wire.order.address_delivery.join('<br>')"
+                            ></p>
                         </div>
                     </x-card>
                     @show
@@ -796,6 +750,44 @@
                                 />
                             @endif
 
+                            <x-select.styled
+                                wire:model="order.lead_id"
+                                select="label:label|value:id"
+                                unfiltered
+                                :request="[
+                                    'url' => route('search', \FluxErp\Models\Lead::class),
+                                    'method' => 'POST',
+                                    'params' => [
+                                        'searchFields' => [
+                                            'name',
+                                        ],
+                                        'select' => [
+                                            'name',
+                                            'id',
+                                        ],
+                                        'whereIn' => [
+                                            [
+                                                'address_id',
+                                                resolve_static(\FluxErp\Models\Address::class, 'query')
+                                                    ->where('contact_id', $order->contact_id)
+                                                    ->pluck('id')
+                                                    ->toArray(),
+                                            ],
+                                        ],
+                                    ],
+                                ]"
+                            >
+                                <x-slot:label>
+                                    <x-link
+                                        icon="link"
+                                        :text="__('Lead')"
+                                        href="#"
+                                        wire:navigate
+                                        x-bind:href="$wire.order.lead_id ? '{{ route('sales.lead.id', ':id') }}'.replace(':id', $wire.order.lead_id) : '#'"
+                                    />
+                                </x-slot>
+                            </x-select.styled>
+
                             @if (count($languages) > 1)
                                 <x-select.styled
                                     :label="__('Language')"
@@ -843,7 +835,7 @@
             </section>
         </x-slot>
         <x-slot:append>
-            <section class="relative basis-2/12" wire:ignore>
+            <section class="relative max-w-96 basis-2/12" wire:ignore>
                 <div class="sticky top-6 space-y-6">
                     @section('content.right')
                     <x-card>
@@ -882,9 +874,8 @@
                                         </template>
                                     </x-dropdown>
                                 </div>
-                                <livewire:features.signature-link-generator
+                                <livewire:order.signature-link-generator
                                     lazy
-                                    :model-type="\FluxErp\Models\Order::class"
                                     wire:model="order.id"
                                 />
                             @endif
@@ -972,7 +963,7 @@
                                                             icon="x-mark"
                                                             2xs
                                                             wire:click="deleteDiscount(discount.id)"
-                                                            wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => 'Discount']) }}"
+                                                            wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Discount')]) }}"
                                                         />
                                                     </div>
                                                 @endif

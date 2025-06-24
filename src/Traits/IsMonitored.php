@@ -136,7 +136,7 @@ trait IsMonitored
             return null;
         }
 
-        return app(QueueMonitor::class)
+        return resolve_static(QueueMonitor::class, 'query')
             ->where('job_id', $jobId)
             ->orderBy('started_at', 'desc')
             ->first();

@@ -34,10 +34,7 @@ class QueueMonitor extends FluxModel
         static::created(function (QueueMonitor $monitor): void {
             $user = auth()->user();
             if (! $user && $context = Context::get('user')) {
-                $context = explode(':', $context);
-                $user = morphed_model($context[0])::query()
-                    ->whereKey($context[1])
-                    ->first();
+                $user = morph_to($context);
             }
 
             if ($user && array_key_exists(MonitorsQueue::class, class_uses_recursive($user))) {
@@ -45,7 +42,7 @@ class QueueMonitor extends FluxModel
                 // ensure that the started notification is only sent once
                 if (! $monitor->job_batch_id) {
                     try {
-                        $user->notify(new JobStartedNotification($monitor));
+                        $user->notify(app(JobStartedNotification::class, ['model' => $monitor]));
                     } catch (Throwable $e) {
                         report($e);
                     }
@@ -59,8 +56,8 @@ class QueueMonitor extends FluxModel
                     try {
                         $user->notify(
                             $monitor->isFinished()
-                                ? new JobFinishedNotification($monitor)
-                                : new JobProcessingNotification($monitor)
+                                ? app(JobFinishedNotification::class, ['model' => $monitor])
+                                : app(JobProcessingNotification::class, ['model' => $monitor])
                         );
                     } catch (Throwable $e) {
                         report($e);
@@ -226,7 +223,12 @@ class QueueMonitor extends FluxModel
 
     public function prunable(): Builder
     {
-        return $this->where('finished_at', '<', now()->subDays(30));
+        return static::query()
+            ->where(
+                'finished_at',
+                '<',
+                now()->subDays(30)
+            );
     }
 
     public function queueMonitorables(): HasMany
@@ -270,7 +272,7 @@ class QueueMonitor extends FluxModel
 
     public function scopeToday(Builder $query): void
     {
-        $query->whereRaw('DATE(started_at) = ?', [now()->subHours(1)->format('Y-m-d')]);
+        $query->whereRaw('DATE(started_at) = ?', [now()->subHour()->format('Y-m-d')]);
     }
 
     public function users(): MorphToMany

@@ -87,6 +87,8 @@
     >
         @foreach (\FluxErp\Enums\BundleTypeEnum::valuesLocalized() as $bundleType)
             <x-radio
+                :id="'bundle-type-enum-' . data_get($bundleType, 'value') . '-radio'"
+                name="bundle-type-enum-radio"
                 wire:model="product.bundle_type_enum"
                 x-bind:disabled="!edit"
                 :label="data_get($bundleType, 'label')"

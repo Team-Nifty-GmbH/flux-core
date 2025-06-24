@@ -91,7 +91,7 @@ class CreateOrdersFromWorkTimes extends DispatchableFluxAction
                         . __('Date') . ': '
                         . $workTime->started_at
                             ->locale($contact->invoiceAddress->language?->language_code
-                                ?? Language::default()?->language_code
+                                ?? resolve_static(Language::class, 'default')?->language_code
                             )
                             ->isoFormat('L')
                         . '<br/>'
@@ -102,7 +102,7 @@ class CreateOrdersFromWorkTimes extends DispatchableFluxAction
                     $orderPosition = CreateOrderPosition::make([
                         'name' => $workTime->name,
                         'description' => $description,
-                        'warehouse_id' => Warehouse::default()?->getKey(),
+                        'warehouse_id' => resolve_static(Warehouse::class, 'default')?->getKey(),
                         'order_id' => $order->getKey(),
                         'product_id' => $product->getKey(),
                         'amount' => $billingAmount,

@@ -212,7 +212,8 @@ class Order extends Component
             ->with('mainAddress:id,contact_id')
             ->first();
 
-        $this->{$orderVariable}->client_id = $contact?->client_id ?? Client::default()->id;
+        $this->{$orderVariable}->client_id = $contact?->client_id
+            ?? resolve_static(Client::class, 'default')->getKey();
         $this->{$orderVariable}->agent_id = $contact?->agent_id ?? $this->{$orderVariable}->agent_id;
         $this->{$orderVariable}->address_invoice_id = $contact?->invoice_address_id ?? $contact?->mainAddress?->id;
         $this->{$orderVariable}->address_delivery_id = $contact?->delivery_address_id ?? $contact?->mainAddress?->id;
@@ -311,7 +312,7 @@ class Order extends Component
             TabButton::make('order.attachments')
                 ->text(__('Attachments'))
                 ->isLivewireComponent()
-                ->wireModel('order'),
+                ->wireModel('order.id'),
             TabButton::make('order.texts')
                 ->text(__('Texts'))
                 ->isLivewireComponent()
@@ -323,7 +324,7 @@ class Order extends Component
             TabButton::make('order.comments')
                 ->text(__('Comments'))
                 ->isLivewireComponent()
-                ->wireModel('order'),
+                ->wireModel('order.id'),
             TabButton::make('order.related')
                 ->text(__('Related processes'))
                 ->isLivewireComponent()

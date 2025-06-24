@@ -38,10 +38,10 @@ class InstallAssets extends Command
         $files = is_array($files)
             ? $files
             : [
-                'package.json',
-                'tailwind.config.mjs',
-                'postcss.config.js',
-                'vite.config.js',
+                __DIR__ . '/../../../package.json',
+                __DIR__ . '/../../../stubs/tailwind/tailwind.config.mjs',
+                __DIR__ . '/../../../stubs/tailwind/postcss.config.js',
+                __DIR__ . '/../../../stubs/tailwind/vite.config.js',
             ];
 
         if (! $basePath) {
@@ -59,7 +59,7 @@ class InstallAssets extends Command
                 $oldContent = file_get_contents($basePath($file));
             }
 
-            $content = file_get_contents(__DIR__ . '/../../../stubs/tailwind/' . $file);
+            $content = file_get_contents($file);
             $content = str_replace(
                 '{{ relative_path }}',
                 substr(realpath(__DIR__ . '/../../../'), strlen($basePath())),
@@ -143,7 +143,7 @@ class InstallAssets extends Command
         $this->updateNodePackages(function ($packages) {
             return data_get(
                 json_decode(
-                    file_get_contents(__DIR__ . '/../../../stubs/tailwind/package.json'),
+                    file_get_contents(__DIR__ . '/../../../package.json'),
                     true
                 ),
                 'devDependencies'

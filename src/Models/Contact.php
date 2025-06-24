@@ -7,6 +7,7 @@ use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Models\Pivots\ContactDiscount;
 use FluxErp\Models\Pivots\ContactDiscountGroup;
 use FluxErp\Models\Pivots\ContactIndustry;
+use FluxErp\Support\Scout\ScoutCustomize;
 use FluxErp\Traits\CascadeSoftDeletes;
 use FluxErp\Traits\Categorizable;
 use FluxErp\Traits\Commentable;
@@ -23,6 +24,7 @@ use FluxErp\Traits\InteractsWithMedia;
 use FluxErp\Traits\Lockable;
 use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\Printable;
+use FluxErp\Traits\Scout\Searchable;
 use FluxErp\View\Printing\Contact\BalanceStatement;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -38,7 +40,7 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
 {
     use CascadeSoftDeletes, Categorizable, Commentable, Communicatable, Filterable, HasAdditionalColumns,
         HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasSerialNumberRange, HasUserModification,
-        HasUuid, InteractsWithMedia, Lockable, LogsActivity, Printable;
+        HasUuid, InteractsWithMedia, Lockable, LogsActivity, Printable, Searchable;
 
     public static string $iconName = 'users';
 
@@ -260,6 +262,13 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
     public function sepaMandates(): HasMany
     {
         return $this->hasMany(SepaMandate::class);
+    }
+
+    public function toSearchableArray(): array
+    {
+        return ScoutCustomize::make($this)
+            ->with('mainAddress')
+            ->toSearchableArray();
     }
 
     public function vatRate(): BelongsTo

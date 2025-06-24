@@ -89,6 +89,36 @@ trait DataTableHasFormEdit
     }
 
     #[Renderless]
+    public function restore(string|int|null $id = null): bool
+    {
+        if (! $this->supportRestore()) {
+            throw new InvalidArgumentException('Restore is not supported');
+        }
+
+        $this->{$this->formAttributeName()}->reset();
+
+        if ($id) {
+            $model = resolve_static($this->model, 'query')
+                ->onlyTrashed()
+                ->whereKey($id)
+                ->firstOrFail();
+            $this->{$this->formAttributeName()}->fill($model);
+        }
+
+        try {
+            $this->{$this->formAttributeName()}->restore();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
+    }
+
+    #[Renderless]
     public function save(): bool
     {
         try {
@@ -183,6 +213,11 @@ trait DataTableHasFormEdit
     }
 
     protected function supportBatchDelete(): bool
+    {
+        return false;
+    }
+
+    protected function supportRestore(): bool
     {
         return false;
     }

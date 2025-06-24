@@ -16,7 +16,8 @@
                     <x-button.circle
                         x-cloak
                         x-show="editGrid"
-                        x-on:click="isLoading ? pendingMessage : removeWidget('{{$widget['id']}}')"
+                        wire:loading.attr="disabled"
+                        x-on:click="removeWidget('{{$widget['id']}}')"
                         class="h-4 w-4 cursor-pointer text-gray-400 shadow-md"
                         icon="trash"
                         color="red"
@@ -26,13 +27,17 @@
                     class="w-full"
                     x-bind:class="editGrid ? 'pointer-events-none' : ''"
                 >
-                    <livewire:is
-                        lazy
-                        :id="$widget['id']"
-                        :component="$widget['component_name'] ?? $widget['class']"
-                        wire:model="params"
-                        wire:key="{{ uniqid() }}"
-                    />
+                    @livewire(
+                        $widget['component_name'] ?? $widget['class'],
+                        array_merge($this->getWidgetAttributes(), [
+                            'config' => data_get($widget, 'config'),
+                            'dashboardComponent' => $this->getName(),
+                            'widgetId' => $widget['id'],
+                            'wire:model' => $this->wireModel(),
+                            'lazy' => true,
+                        ]),
+                        key(uniqid())
+                    )
                 </div>
             </div>
         </div>

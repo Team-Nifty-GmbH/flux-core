@@ -3,11 +3,14 @@
 namespace FluxErp\Livewire\Forms;
 
 use Carbon\Carbon;
+use Carbon\Exceptions\InvalidFormatException;
+use FluxErp\Actions\DispatchableFluxAction;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Helpers\Helper;
 use FluxErp\Models\CalendarEvent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
+use InvalidArgumentException;
 
 class CalendarEventForm extends FluxForm
 {
@@ -35,9 +38,13 @@ class CalendarEventForm extends FluxForm
 
     public bool $is_all_day = false;
 
+    public bool $is_cancelled = false;
+
     public bool $is_editable = true;
 
     public bool $is_repeatable = false;
+
+    public ?array $model = null;
 
     public ?int $model_id = null;
 
@@ -52,23 +59,63 @@ class CalendarEventForm extends FluxForm
         'unit' => 'days',
         'weekdays' => [],
         'monthly' => 'day',
-        'repeat_end' => null,
-        'recurrences' => null,
         'repeat_radio' => null,
     ];
+
+    public ?string $repeat_end = null;
 
     public ?int $repetition = null;
 
     public ?string $start = null;
 
+    public ?string $status = null;
+
     public ?string $title = null;
 
     public bool $was_repeatable = false;
 
+    public function cancel(): void
+    {
+        $action = $this->makeAction('cancel')
+            ->when($this->checkPermission, fn (FluxAction $action) => $action->checkPermission())
+            ->validate();
+
+        if ($this->asyncAction && ! $action instanceof DispatchableFluxAction) {
+            throw new InvalidArgumentException('Async actions must be DispatchableFluxAction');
+        }
+
+        if ($this->asyncAction) {
+            $action->executeAsync();
+            $this->reset();
+
+            return;
+        }
+
+        $response = $action->execute();
+
+        $this->actionResult = $response;
+
+        $this->reset();
+    }
+
     public function fill($values): void
     {
         if ($values instanceof Model) {
+            $model = $values->model;
             $values = $values->toArray();
+        } else {
+            $model = resolve_static(CalendarEvent::class, 'query')
+                ->whereKey(data_get($values, 'id'))
+                ->with(['model'])
+                ->first(['model_type', 'model_id'])
+                ?->model;
+        }
+
+        if ($model && method_exists($model, 'getUrl')) {
+            $this->model = [
+                'label' => $model->getLabel(),
+                'url' => $model->getUrl(),
+            ];
         }
 
         $wasRepeatable = false;
@@ -91,6 +138,18 @@ class CalendarEventForm extends FluxForm
 
     public function fillFromJs(array $values): void
     {
+        if (data_get($values, 'allDay')) {
+            if (is_null(data_get($values, 'end'))) {
+                $values['end'] = $values['start'];
+            } elseif (! Carbon::parse(data_get($values, 'end'))
+                ->isSameDay(Carbon::parse(data_get($values, 'start')))
+            ) {
+                $values['end'] = Carbon::parse(data_get($values, 'end'))
+                    ->subDay()
+                    ->toDateString();
+            }
+        }
+
         $values['is_all_day'] = data_get($values, 'allDay');
 
         $values['repeat'] = [
@@ -99,13 +158,51 @@ class CalendarEventForm extends FluxForm
             'weekdays' => Arr::pull($values, 'weekdays'),
             'monthly' => Arr::pull($values, 'monthly'),
             'repeat_radio' => Arr::pull($values, 'repeat_radio'),
-            'repeat_end' => Arr::pull($values, 'repeat_end'),
-            'recurrences' => Arr::pull($values, 'recurrences'),
         ];
 
         $values['extended_props'] = Arr::pull($values, 'extendedProps.customProperties');
 
         $this->fill($values);
+    }
+
+    public function reactivate(): void
+    {
+        $action = $this->makeAction('reactivate')
+            ->when($this->checkPermission, fn (FluxAction $action) => $action->checkPermission())
+            ->validate();
+
+        if ($this->asyncAction && ! $action instanceof DispatchableFluxAction) {
+            throw new InvalidArgumentException('Async actions must be DispatchableFluxAction');
+        }
+
+        if ($this->asyncAction) {
+            $action->executeAsync();
+            $this->reset();
+
+            return;
+        }
+
+        $response = $action->execute();
+
+        $this->actionResult = $response;
+
+        $this->reset();
+    }
+
+    public function save(): void
+    {
+        if ($this->was_repeatable
+            && $this->has_repeats
+            && $this->confirm_option === 'this'
+        ) {
+            $this->confirm_option = 'future';
+        }
+
+        if (! $this->was_repeatable) {
+            $this->confirm_option = 'all';
+        }
+
+        parent::save();
     }
 
     protected function getActions(): array
@@ -115,7 +212,7 @@ class CalendarEventForm extends FluxForm
 
     protected function makeAction(string $name, ?array $data = null): FluxAction
     {
-        $model = morphed_model(data_get($this->extended_props, 'calendar_type') ?? '')
+        $model = morphed_model($this->calendar_type ?? '')
             ?? resolve_static(CalendarEvent::class, 'class');
 
         $data = $this->toArray();
@@ -132,7 +229,11 @@ class CalendarEventForm extends FluxForm
 
         foreach ($dateProperties as $property) {
             if ($value = data_get($data, $property)) {
-                $data[$property] = Carbon::parse($value)->timezone('UTC')->toDateTimeString();
+                try {
+                    $data[$property] = Carbon::parse($value)->timezone('UTC')->toDateTimeString();
+                } catch (InvalidFormatException) {
+                    //
+                }
             }
         }
 
