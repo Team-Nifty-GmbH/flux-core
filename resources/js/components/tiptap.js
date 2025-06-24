@@ -51,7 +51,7 @@ export default function (
                 //  access to the parent scope in onSelectionUpdate callback
                 const parent = this;
                 // related to dropdown visibility
-                const onClickHanlder = function (event) {
+                const onClickHandler = function (event) {
                     parent.popUp.show();
                     parent.setIsClickListenerSet(false);
                 };
@@ -116,7 +116,7 @@ export default function (
                             if (!parent.isClickListenerSet) {
                                 element.addEventListener(
                                     'click',
-                                    onClickHanlder,
+                                    onClickHandler,
                                     { once: true },
                                 );
                                 parent.setIsClickListenerSet(true);
@@ -131,7 +131,7 @@ export default function (
                         if (parent.isClickListenerSet) {
                             element.removeEventListener(
                                 'click',
-                                onClickHanlder,
+                                onClickHandler,
                             );
                             parent.setIsClickListenerSet(false);
                         }
