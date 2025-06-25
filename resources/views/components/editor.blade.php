@@ -1,5 +1,5 @@
 @props([
-    'editable' => true,
+    "editable" => true,
 ])
 
 <div>
@@ -7,24 +7,24 @@
         <x-label :text="$label ?? ''" />
     </div>
     <div
-        @if ($attributes->has('x-modelable'))
-            x-modelable="{{ $attributes->get('x-modelable') }}"
+        @if ($attributes->has("x-modelable"))
+            x-modelable="{{ $attributes->get("x-modelable") }}"
         @else
             x-modelable="editable"
         @endif
         x-data="setupEditor(
-                @if ($attributes->wire('model')->value())
-                    $wire.$entangle('{{ $attributes->wire('model')->value() }}',
-                    @js($attributes->wire('model')->hasModifier('live'))
+                @if ($attributes->wire("model")->value())
+                    $wire.$entangle('{{ $attributes->wire("model")->value() }}',
+                    @js($attributes->wire("model")->hasModifier("live"))
                     ),
                     {{
-                        $attributes->wire('model')->hasModifier('debounce')
+                        $attributes->wire("model")->hasModifier("debounce")
                             ? Str::before(
-                                $attributes->wire('model')->modifiers()[
+                                $attributes->wire("model")->modifiers()[
                                     $attributes
-                                        ->wire('model')
+                                        ->wire("model")
                                         ->modifiers()
-                                        ->search('debounce') + 1
+                                        ->search("debounce") + 1
                                 ],
                                 "ms",
                             )
@@ -33,7 +33,7 @@
                 @endif
             "
         x-init="initTextArea('{{ $id }}',$refs['editor-{{ $id }}'], @json($transparent), @json($tooltipDropdown), @json($defaultFontSize))"
-        {{ $attributes->whereDoesntStartWith('wire:model') }}
+        {{ $attributes->whereDoesntStartWith("wire:model") }}
         wire:ignore
     >
         <div
