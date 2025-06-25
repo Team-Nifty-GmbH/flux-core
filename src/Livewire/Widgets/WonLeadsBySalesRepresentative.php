@@ -52,19 +52,13 @@ class WonLeadsBySalesRepresentative extends BarChart implements HasWidgetOptions
     #[Renderless]
     public function calculateChart(): void
     {
+        // Default colors of apexcharts
         $colors = [
-            'lime-400',
-            'sky-400',
-            'violet-400',
-            'cyan-400',
-            'blue-400',
-            'purple-400',
-            'green-400',
-            'indigo-400',
-            'fuchsia-400',
-            'emerald-400',
-            'pink-400',
-            'teal-400',
+            '#2E93fA',
+            '#66DA26',
+            '#546E7A',
+            '#E91E63',
+            '#FF9800',
         ];
 
         $start = $this->getStart()->toDateString();
@@ -80,18 +74,19 @@ class WonLeadsBySalesRepresentative extends BarChart implements HasWidgetOptions
                 },
             ])
             ->having('total', '>', 0)
-            ->get(['name', 'color', 'id']);
+            ->orderByDesc('total')
+            ->get();
 
+        $i = 0;
         $this->series = $leadCounts
-            ->map(function ($user) use (&$colors) {
+            ->map(function ($user) use (&$i, $colors): array {
                 return [
                     'id' => $user->id,
                     'name' => $user->name,
-                    'color' => $user->color ?? array_shift($colors),
+                    'color' => $user->color ?? $colors[$i++ % count($colors)],
                     'data' => [$user->total],
                 ];
             })
-            ->sortByDesc(fn (array $item): int => data_get($item, 'data.0'))
             ->take(10)
             ->values()
             ->all();
@@ -99,8 +94,6 @@ class WonLeadsBySalesRepresentative extends BarChart implements HasWidgetOptions
         $this->yaxis = [
             'labels' => ['show' => false],
         ];
-
-        $this->actions = $this->options();
     }
 
     #[Js]
@@ -114,41 +107,33 @@ class WonLeadsBySalesRepresentative extends BarChart implements HasWidgetOptions
     #[Renderless]
     public function options(): array
     {
-        return collect($this->series)
-            ->map(fn (array $data) => [
+        return array_map(
+            fn (array $data) => [
                 'label' => data_get($data, 'name'),
                 'method' => 'show',
                 'params' => [
                     'id' => data_get($data, 'id'),
                     'name' => data_get($data, 'name'),
                 ],
-            ])
-            ->toArray();
+            ],
+            $this->series
+        );
     }
 
     #[Renderless]
     public function show(array $params): void
     {
-        $salesRepresentativeId = data_get($params, 'id');
-        $salesRepresentativeName = data_get($params, 'name');
-
-        $startCarbon = $this->getStart();
-        $endCarbon = $this->getEnd();
-
-        $start = $startCarbon->toDateString();
-        $end = $endCarbon->toDateString();
-
-        $localizedStart = $startCarbon->translatedFormat('j. F Y');
-        $localizedEnd = $endCarbon->translatedFormat('j. F Y');
+        $start = $this->getStart()->toDateString();
+        $end = $this->getEnd()->toDateString();
 
         SessionFilter::make(
             Livewire::new(resolve_static(LeadList::class, 'class'))->getCacheKey(),
             fn (Builder $query) => $query
-                ->where('user_id', $salesRepresentativeId)
+                ->where('user_id', data_get($params, 'id'))
                 ->whereBetween('end', [$start, $end])
                 ->whereHas('leadState', fn (Builder $q) => $q->where('is_won', true)),
-            __('Won leads by :user', ['user' => $salesRepresentativeName]) . ' ' .
-            __('between :start and :end', ['start' => $localizedStart, 'end' => $localizedEnd]),
+            __('Won leads by :user', ['user' => data_get($params, 'name')]) . ' ' .
+            __('between :start and :end', ['start' => $start, 'end' => $end]),
         )
             ->store();
 

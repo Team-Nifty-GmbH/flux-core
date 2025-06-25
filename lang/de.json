@@ -349,6 +349,7 @@
     "Bcc": "BCC",
     "Between": "Zwischen",
     "between": "zwischen",
+    "between :start and :end": "zwischen :start und :end",
     "Bic": "BIC",
     "Birthdays": "Geburtstage",
     "Booking Date": "Buchungsdatum",
