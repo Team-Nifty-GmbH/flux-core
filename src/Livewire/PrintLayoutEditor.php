@@ -12,7 +12,7 @@ class PrintLayoutEditor extends Component
     #[Layout('flux::layouts.print-layout-editor')]
     public function render(): View
     {
-        return view('flux::livewire.print-layout-editor');
+        return view('flux::livewire.a4-page');
     }
 
 }
