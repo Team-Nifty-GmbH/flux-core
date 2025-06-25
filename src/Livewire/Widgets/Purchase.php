@@ -57,41 +57,35 @@ class Purchase extends ValueBox implements HasWidgetOptions
             [
                 'label' => static::getLabel(),
                 'method' => 'show',
+                'params' => 'current',
             ],
             [
                 'label' => __('Previous Period'),
-                'method' => 'showPrevious',
+                'method' => 'show',
+                'params' => 'previous',
             ],
         ];
     }
 
     #[Renderless]
-    public function show(): void
+    public function show(string $period): void
     {
-        $this->applyDateFilter($this->getStart(), $this->getEnd());
-    }
-
-    #[Renderless]
-    public function showPrevious(): void
-    {
-        $this->applyDateFilter($this->getStartPrevious(), $this->getEndPrevious());
-    }
-
-    protected function applyDateFilter(CarbonInterface $startCarbon, CarbonInterface $endCarbon): void
-    {
-        $start = $startCarbon->toDateString();
-        $end = $endCarbon->toDateString();
-
-        $localizedStart = $startCarbon->translatedFormat('j. F Y');
-        $localizedEnd = $endCarbon->translatedFormat('j. F Y');
+        if (strtolower($period) === 'previous') {
+            $start = $this->getStartPrevious()->toDateString();
+            $end = $this->getEndPrevious()->toDateString();
+        } else {
+            $start = $this->getStart()->toDateString();
+            $end = $this->getEnd()->toDateString();
+        }
 
         SessionFilter::make(
             Livewire::new(resolve_static(OrderList::class, 'class'))->getCacheKey(),
-            fn (Builder $query) => $query->whereNotNull('invoice_date')
+            fn (Builder $query) => $query
+                ->whereNotNull('invoice_date')
                 ->whereNotNull('invoice_number')
                 ->purchase()
                 ->whereBetween('invoice_date', [$start, $end]),
-            \__('Purchase') . ' ' . \__('between :start and :end', ['start' => $localizedStart, 'end' => $localizedEnd]),
+            __('Purchase') . ' ' . __('between :start and :end', ['start' => $start, 'end' => $end]),
         )->store();
 
         $this->redirectRoute('orders.orders', navigate: true);

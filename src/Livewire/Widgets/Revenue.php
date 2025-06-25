@@ -54,64 +54,35 @@ class Revenue extends ValueBox implements HasWidgetOptions
             [
                 'label' => static::getLabel(),
                 'method' => 'show',
+                'params' => 'current',
             ],
             [
                 'label' => __('Previous Period'),
                 'method' => 'showPrevious',
+                'params' => 'previous',
             ],
         ];
     }
 
     #[Renderless]
-    public function show(): void
+    public function show(string $period): void
     {
-        $startCarbon = $this->getStart();
-        $endCarbon = $this->getEnd();
-
-        $start = $startCarbon->toDateString();
-        $end = $endCarbon->toDateString();
-
-        $localizedStart = $startCarbon->translatedFormat('j. F Y');
-        $localizedEnd = $endCarbon->translatedFormat('j. F Y');
+        if (strtolower($period) === 'previous') {
+            $start = $this->getStartPrevious()->toDateString();
+            $end = $this->getEndPrevious()->toDateString();
+        } else {
+            $start = $this->getStart()->toDateString();
+            $end = $this->getEnd()->toDateString();
+        }
 
         SessionFilter::make(
             Livewire::new(resolve_static(OrderList::class, 'class'))->getCacheKey(),
-            fn (Builder $query) => $query->whereNotNull('invoice_date')
+            fn (Builder $query) => $query
+                ->whereNotNull('invoice_date')
                 ->whereNotNull('invoice_number')
                 ->revenue()
-                ->whereBetween('invoice_date', [
-                    $start,
-                    $end,
-                ]),
-            __('Revenue') . ' ' . __('between :start and :end', ['start' => $localizedStart, 'end' => $localizedEnd]),
-        )
-            ->store();
-
-        $this->redirectRoute('orders.orders', navigate: true);
-    }
-
-    #[Renderless]
-    public function showPrevious(): void
-    {
-        $startCarbon = $this->getStartPrevious();
-        $endCarbon = $this->getEndPrevious();
-
-        $start = $startCarbon->toDateString();
-        $end = $endCarbon->toDateString();
-
-        $localizedStart = $startCarbon->translatedFormat('j. F Y');
-        $localizedEnd = $endCarbon->translatedFormat('j. F Y');
-
-        SessionFilter::make(
-            Livewire::new(resolve_static(OrderList::class, 'class'))->getCacheKey(),
-            fn (Builder $query) => $query->whereNotNull('invoice_date')
-                ->whereNotNull('invoice_number')
-                ->revenue()
-                ->whereBetween('invoice_date', [
-                    $start,
-                    $end,
-                ]),
-            __('Revenue') . ' ' . __('between :start and :end', ['start' => $localizedStart, 'end' => $localizedEnd]),
+                ->whereBetween('invoice_date', [$start, $end]),
+            __('Revenue') . ' ' . __('between :start and :end', ['start' => $start, 'end' => $end]),
         )
             ->store();
 

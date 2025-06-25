@@ -7,10 +7,11 @@ use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\DataTables\ContactList;
 use FluxErp\Livewire\Support\Widgets\Charts\CircleChart;
 use FluxErp\Models\Contact;
-use FluxErp\Support\Metrics\Charts\Donut;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use FluxErp\Traits\Widgetable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Livewire\Livewire;
 use TeamNiftyGmbH\DataTable\Helpers\SessionFilter;
@@ -22,6 +23,9 @@ class ContactsByContactOrigin extends CircleChart implements HasWidgetOptions
     public ?array $chart = [
         'type' => 'donut',
     ];
+
+    #[Locked]
+    public array $data = [];
 
     public bool $showTotals = false;
 
@@ -39,40 +43,28 @@ class ContactsByContactOrigin extends CircleChart implements HasWidgetOptions
 
     public function calculateChart(): void
     {
-        $assignedMetrics = Donut::make(
-            resolve_static(Contact::class, 'query')
-                ->whereNotNull('contact_origin_id')
-                ->join('contact_origins', 'contact_origins.id', '=', 'contacts.contact_origin_id')
-                ->where('contact_origins.is_active', true)
-                ->orderByRaw('COUNT(*) DESC')
-        )
-            ->setRange($this->timeFrame)
-            ->setEndingDate($this->getEnd())
-            ->setStartingDate($this->getStart())
-            ->setLabelKey('contactOrigin.name')
-            ->count('contact_origin_id');
+        $this->data = resolve_static(Contact::class, 'query')
+            ->whereBetween('created_at', [
+                $this->getStart()->toDateTimeString(),
+                $this->getEnd()->toDateTimeString(),
+            ])
+            ->groupBy('contact_origin_id')
+            ->with('contactOrigin:id,name,is_active')
+            ->selectRaw('contact_origin_id, COUNT(id) as total')
+            ->orderBy('total', 'desc')
+            ->get()
+            ->map(fn (Model $contact) => $contact->contactOrigin?->is_active !== false
+                ? [
+                    'id' => $contact->contact_origin_id,
+                    'label' => $contact->contactOrigin?->name ?? __('Unassigned Contacts'),
+                    'total' => $contact->total,
+                ] : null,
+            )
+            ->filter()
+            ->toArray();
 
-        if ($this->timeFrame && $range = $this->timeFrame->getRange()) {
-            $startDate = $range[0];
-            $endDate = $range[1];
-        } else {
-            $startDate = $this->getStart();
-            $endDate = $this->getEnd();
-        }
-
-        $unassignedCount = resolve_static(Contact::class, 'query')
-            ->whereNull('contact_origin_id')
-            ->where('contacts.created_at', '>=', $startDate)
-            ->where('contacts.created_at', '<=', $endDate)
-            ->count();
-
-        $this->series = $assignedMetrics->getData();
-        $this->labels = $assignedMetrics->getLabels();
-
-        if ($unassignedCount > 0) {
-            $this->series[] = $unassignedCount;
-            $this->labels[] = __('Unassigned Contacts');
-        }
+        $this->labels = array_column($this->data, 'label');
+        $this->series = array_column($this->data, 'total');
     }
 
     public function getPlotOptions(): array
@@ -95,35 +87,31 @@ class ContactsByContactOrigin extends CircleChart implements HasWidgetOptions
     #[Renderless]
     public function options(): array
     {
-        return collect($this->labels)
-            ->map(fn ($label) => [
-                'label' => $label,
+        return array_map(
+            fn (array $data) => [
+                'label' => data_get($data, 'label'),
                 'method' => 'show',
-                'params' => $label,
-            ])
-            ->toArray();
+                'params' => [
+                    'id' => data_get($data, 'id'),
+                    'label' => data_get($data, 'label'),
+                ],
+            ],
+            $this->data
+        );
     }
 
     #[Renderless]
-    public function show(string $contactLabel): void
+    public function show(array $contactOrigin): void
     {
         $start = $this->getStart()->toDateString();
         $end = $this->getEnd()->toDateString();
 
-        $isUnassigned = $contactLabel === __('Unassigned Contacts');
-
         SessionFilter::make(
             Livewire::new(resolve_static(ContactList::class, 'class'))->getCacheKey(),
             fn (Builder $query) => $query
-                ->whereBetween('contacts.created_at', [$start, $end])
-                ->when(! $isUnassigned, function ($q) use ($contactLabel) {
-                    return $q->whereNotNull('contact_origin_id')
-                        ->join('contact_origins', 'contact_origins.id', '=', 'contacts.contact_origin_id')
-                        ->where('contact_origins.is_active', true)
-                        ->where('contact_origins.name', $contactLabel);
-                })
-                ->when($isUnassigned, fn ($q) => $q->whereNull('contacts.contact_origin_id')),
-            __('Contacts by :contact-origin', ['contact-origin' => $contactLabel]),
+                ->where('contact_origin_id', data_get($contactOrigin, 'id'))
+                ->whereBetween('created_at', [$start, $end]),
+            __('Contacts by :contact-origin', ['contact-origin' => data_get($contactOrigin, 'label')]),
         )->store();
 
         $this->redirectRoute('contacts.contacts', navigate: true);

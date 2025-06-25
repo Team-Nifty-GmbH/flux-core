@@ -291,7 +291,7 @@
     "Amount": "Anzahl",
     "amount": "Anzahl",
     "Amount Bundle": "Bundlemenge",
-    "Amount held in :ledger-account": "Betrag auf dem Buchungskonto :ledger-account",
+    "Amount held in Ledger Account :ledger-account": "Betrag auf dem Buchungskonto :ledger-account",
     "Amount By Ledger Account": "Betrag nach Buchungskonto",
     "Amount Packed Products": "Anzahl verpackter Produkte",
     "Ancestors": "Vorgänger",
