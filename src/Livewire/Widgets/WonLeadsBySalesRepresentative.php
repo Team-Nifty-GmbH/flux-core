@@ -10,6 +10,7 @@ use FluxErp\Models\User;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use FluxErp\Traits\Widgetable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Js;
 use Livewire\Attributes\Renderless;
 use Livewire\Livewire;
@@ -79,10 +80,10 @@ class WonLeadsBySalesRepresentative extends BarChart implements HasWidgetOptions
 
         $i = 0;
         $this->series = $leadCounts
-            ->map(function ($user) use (&$i, $colors): array {
+            ->map(function (Model $user) use (&$i, $colors): array {
                 return [
-                    'id' => $user->id,
-                    'name' => $user->name,
+                    'id' => $user->getKey(),
+                    'name' => $user->getLabel(),
                     'color' => $user->color ?? $colors[$i++ % count($colors)],
                     'data' => [$user->total],
                 ];
@@ -131,7 +132,10 @@ class WonLeadsBySalesRepresentative extends BarChart implements HasWidgetOptions
             fn (Builder $query) => $query
                 ->where('user_id', data_get($params, 'id'))
                 ->whereBetween('end', [$start, $end])
-                ->whereHas('leadState', fn (Builder $q) => $q->where('is_won', true)),
+                ->whereHas(
+                    'leadState',
+                    fn (Builder $query) => $query->where('is_won', true)
+                ),
             __('Won leads by :user', ['user' => data_get($params, 'name')]) . ' ' .
             __('between :start and :end', ['start' => $start, 'end' => $end]),
         )
