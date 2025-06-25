@@ -2,7 +2,6 @@
 
 namespace FluxErp\Livewire\Widgets;
 
-use Carbon\CarbonInterface;
 use FluxErp\Contracts\HasWidgetOptions;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\Order\OrderList;
