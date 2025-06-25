@@ -27,10 +27,12 @@ class ReactivateCalendarEvent extends FluxAction
             ->whereKey($this->data['id'])
             ->first();
 
-        $confirmOption = Arr::pull($event, 'confirm_option');
-        $originalStart = Arr::pull($event, 'original_start');
+        $confirmOption = Arr::pull($this->data, 'confirm_option');
+        $originalStart = Arr::pull($this->data, 'original_start');
 
-        $event->fill($this->getData());
+        if ($confirmOption !== 'this') {
+            $event->fill($this->getData());
+        }
 
         return match ($confirmOption) {
             'this' => $event->fill(
@@ -59,6 +61,10 @@ class ReactivateCalendarEvent extends FluxAction
         $event = resolve_static(CalendarEvent::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
+
+        if ($this->getData('confirm_option') === 'this') {
+            $event->start = $this->getData('original_start');
+        }
 
         if (! $event->isCancelled) {
             throw ValidationException::withMessages([

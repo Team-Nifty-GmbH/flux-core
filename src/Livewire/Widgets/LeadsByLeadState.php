@@ -15,7 +15,7 @@ use Livewire\Attributes\Renderless;
 use Livewire\Livewire;
 use TeamNiftyGmbH\DataTable\Helpers\SessionFilter;
 
-class LeadsByReferralSource extends CircleChart implements HasWidgetOptions
+class LeadsByLeadState extends CircleChart implements HasWidgetOptions
 {
     use IsTimeFrameAwareWidget, Widgetable;
 
@@ -25,6 +25,8 @@ class LeadsByReferralSource extends CircleChart implements HasWidgetOptions
 
     #[Locked]
     public array $data = [];
+
+    public bool $showTotals = false;
 
     public static function dashboardComponent(): array|string
     {
@@ -42,7 +44,7 @@ class LeadsByReferralSource extends CircleChart implements HasWidgetOptions
     public function calculateChart(): void
     {
         $this->data = resolve_static(Lead::class, 'query')
-            ->whereNotNull('recommended_by_address_id')
+            ->whereNotNull('lead_state_id')
             ->whereBetween(
                 'created_at',
                 [
@@ -50,18 +52,20 @@ class LeadsByReferralSource extends CircleChart implements HasWidgetOptions
                     $this->getEnd()->toDateTimeString(),
                 ]
             )
-            ->groupBy('recommended_by_address_id')
-            ->with('addressRecommendedBy:id,name')
-            ->selectRaw('recommended_by_address_id, count(recommended_by_address_id) as total')
+            ->groupBy('lead_state_id')
+            ->with('leadState:id,name,color')
+            ->selectRaw('lead_state_id, count(lead_state_id) as total')
             ->get()
             ->map(fn ($lead) => [
-                'id' => $lead->recommended_by_address_id,
-                'label' => $lead->addressRecommendedBy->getLabel(),
+                'id' => $lead->lead_state_id,
+                'name' => $lead->leadState->name,
+                'color' => $lead->leadState->color,
                 'total' => $lead->total,
             ])
             ->toArray();
 
-        $this->labels = array_column($this->data, 'label');
+        $this->colors = array_column($this->data, 'color');
+        $this->labels = array_column($this->data, 'name');
         $this->series = array_column($this->data, 'total');
     }
 
@@ -70,11 +74,11 @@ class LeadsByReferralSource extends CircleChart implements HasWidgetOptions
     {
         return array_map(
             fn (array $data) => [
-                'label' => __('Recommended by :referrer', ['referrer' => data_get($data, 'label')]),
+                'label' => __('Leads with state :lead-state', ['lead-state' => data_get($data, 'name')]),
                 'method' => 'show',
                 'params' => [
                     'id' => data_get($data, 'id'),
-                    'label' => data_get($data, 'label'),
+                    'name' => data_get($data, 'name'),
                 ],
             ],
             $this->data
@@ -82,7 +86,7 @@ class LeadsByReferralSource extends CircleChart implements HasWidgetOptions
     }
 
     #[Renderless]
-    public function show(array $address): void
+    public function show(array $leadState): void
     {
         $start = $this->getStart()->toDateTimeString();
         $end = $this->getEnd()->toDateTimeString();
@@ -90,9 +94,9 @@ class LeadsByReferralSource extends CircleChart implements HasWidgetOptions
         SessionFilter::make(
             Livewire::new(resolve_static(LeadList::class, 'class'))->getCacheKey(),
             fn (Builder $query) => $query
-                ->where('recommended_by_address_id', data_get($address, 'id'))
+                ->where('lead_state_id', data_get($leadState, 'id'))
                 ->whereBetween('created_at', [$start, $end]),
-            __('Leads recommended by :recommended-by', ['recommended-by' => data_get($address, 'label')])
+            __('Leads with state :lead-state', ['lead-state' => data_get($leadState, 'name')])
         )
             ->store();
 

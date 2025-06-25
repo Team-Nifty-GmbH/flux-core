@@ -101,9 +101,14 @@ class ViewServiceProvider extends ServiceProvider
         TallStackUi::personalize()
             ->avatar()
             ->block('wrapper.class', 'inline-flex shrink-0 items-center justify-center overflow-hidden !bg-secondary-200');
+
         TallStackUi::personalize()
             ->dropdown()
             ->block('wrapper.second', 'relative inline-block text-left w-full');
+        TallStackUi::personalize()
+            ->dropdown('items')
+            ->block('item')
+            ->replace('whitespace-nowrap', 'whitespace-normal');
         TallStackUi::personalize()
             ->scope('calendar')
             ->dropdown()
