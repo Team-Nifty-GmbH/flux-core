@@ -43,7 +43,7 @@
         "lodash.kebabcase": "^4.1.1",
         "postcss": "^8.4.32",
         "postcss-import": "^16.1.0",
-        "prettier": "3.5.3",
+        "prettier": "3.6.0",
         "prettier-plugin-blade": "^2.1.21",
         "prettier-plugin-tailwindcss": "^0.6.11",
         "pusher-js": "^8.4.0-rc2",
@@ -53,6 +53,6 @@
         "tippy.js": "^6.3.7",
         "uuid": "^11.1.0",
         "vite": "^6.0.3",
-        "@tiptap/extension-text-style": "2.14.0"
+        "@tiptap/extension-text-style": "2.22.3"
     }
 }

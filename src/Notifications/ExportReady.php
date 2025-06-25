@@ -6,7 +6,6 @@ use FluxErp\Support\Notification\ToastNotification\NotificationAction;
 use FluxErp\Support\Notification\ToastNotification\ToastNotification;
 use FluxErp\Traits\Makeable;
 use Illuminate\Bus\Queueable;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use NotificationChannels\WebPush\WebPushMessage;
 
@@ -30,7 +29,7 @@ class ExportReady extends Notification
             ->accept(
                 NotificationAction::make()
                     ->label(__('Download'))
-                    ->url(Storage::url($this->filePath))
+                    ->url(route('private-storage', ['path' => $this->filePath]))
                     ->download()
             );
     }
