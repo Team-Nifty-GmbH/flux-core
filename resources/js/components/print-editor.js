@@ -4,6 +4,7 @@ window.printEditor = function () {
             this.pxPerCm = this.$refs['scale'].offsetWidth;
             this.pyPerCm = this.$refs['scale'].offsetHeight;
         },
+        isEdit: false,
         pxPerCm: null,
         pyPerCm: null,
         startPointVertical: null,
@@ -140,6 +141,9 @@ window.printEditor = function () {
                     this.startPointHorizontal = e.clientX;
                 }
             }
+        },
+        toggleEdit() {
+            this.isEdit = !this.isEdit;
         },
     };
 };
