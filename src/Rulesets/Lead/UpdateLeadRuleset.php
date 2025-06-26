@@ -38,14 +38,8 @@ class UpdateLeadRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => Address::class]),
             ],
-            'recommended_by_address_id' => [
-                'nullable',
-                'integer',
-                app(ModelExists::class, ['model' => Address::class]),
-            ],
             'lead_loss_reason_id' => [
                 'nullable',
-                'sometimes',
                 'integer',
                 app(ModelExists::class, ['model' => LeadLossReason::class]),
             ],
@@ -54,6 +48,11 @@ class UpdateLeadRuleset extends FluxRuleset
                 'required',
                 'integer',
                 app(ModelExists::class, ['model' => LeadState::class]),
+            ],
+            'recommended_by_address_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => Address::class]),
             ],
             'user_id' => [
                 'nullable',

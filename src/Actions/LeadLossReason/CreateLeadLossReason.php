@@ -23,6 +23,6 @@ class CreateLeadLossReason extends FluxAction
         $leadLossReason = app(LeadLossReason::class, ['attributes' => $this->data]);
         $leadLossReason->save();
 
-        return $leadLossReason->fresh();
+        return $leadLossReason->refresh();
     }
 }

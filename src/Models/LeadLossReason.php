@@ -2,15 +2,16 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Traits\CacheModelQueries;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
+use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
+use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class LeadLossReason extends FluxModel
 {
-    use CacheModelQueries, HasPackageFactory, HasUserModification, LogsActivity;
+    use HasPackageFactory, HasUserModification, HasUuid, LogsActivity, SoftDeletes;
 
     public function casts(): array
     {

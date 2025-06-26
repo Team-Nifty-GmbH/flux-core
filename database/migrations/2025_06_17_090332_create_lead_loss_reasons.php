@@ -10,6 +10,7 @@ return new class() extends Migration
     {
         Schema::create('lead_loss_reasons', function (Blueprint $table): void {
             $table->id();
+            $table->char('uuid', 36);
             $table->string('name');
             $table->boolean('is_active')->default(true);
 
@@ -17,6 +18,8 @@ return new class() extends Migration
             $table->string('created_by')->nullable();
             $table->timestamp('updated_at')->nullable();
             $table->string('updated_by')->nullable();
+            $table->timestamp('deleted_at')->nullable();
+            $table->string('deleted_by')->nullable();
         });
     }
 

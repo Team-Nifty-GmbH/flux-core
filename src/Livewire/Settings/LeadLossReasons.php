@@ -16,6 +16,4 @@ class LeadLossReasons extends LeadLossReasonList
     public LeadLossReasonForm $leadLossReasonForm;
 
     protected ?string $includeBefore = 'flux::livewire.settings.lead-loss-reasons';
-
-    protected string $model = LeadLossReason::class;
 }

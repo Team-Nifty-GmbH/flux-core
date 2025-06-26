@@ -5,7 +5,6 @@ namespace FluxErp\Actions\LeadLossReason;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\LeadLossReason;
 use FluxErp\Rulesets\LeadLossReason\UpdateLeadLossReasonRuleset;
-use Illuminate\Database\Eloquent\Model;
 
 class UpdateLeadLossReason extends FluxAction
 {
@@ -19,10 +18,10 @@ class UpdateLeadLossReason extends FluxAction
         return UpdateLeadLossReasonRuleset::class;
     }
 
-    public function performAction(): Model
+    public function performAction(): LeadLossReason
     {
         $leadLossReason = resolve_static(LeadLossReason::class, 'query')
-            ->whereKey($this->data['id'])
+            ->whereKey($this->getData('id'))
             ->first();
 
         $leadLossReason->fill($this->data);

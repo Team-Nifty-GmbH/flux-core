@@ -22,7 +22,6 @@ use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\DataTables\AddressList;
 use FluxErp\Livewire\DataTables\CommissionList;
 use FluxErp\Livewire\DataTables\ContactList;
-use FluxErp\Livewire\DataTables\LeadLossReasonList;
 use FluxErp\Livewire\DataTables\OrderPositionList;
 use FluxErp\Livewire\DataTables\PaymentRunList;
 use FluxErp\Livewire\DataTables\PurchaseInvoiceList;
@@ -171,7 +170,6 @@ Route::middleware('web')
                     ->group(function (): void {
                         Route::get('/leads', LeadList::class)->name('leads');
                         Route::get('/leads/{id}', Lead::class)->name('lead.id');
-                        Route::get('/lead-loss-reasons', LeadLossReasonList::class)->name('lead-loss-reasons');
                     });
 
                 Route::name('orders.')
