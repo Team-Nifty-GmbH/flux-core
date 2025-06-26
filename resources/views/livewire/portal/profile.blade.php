@@ -1,10 +1,5 @@
-<div
-    x-data="{
-        address: $wire.entangle('address', true),
-        showUserList: $wire.entangle('showUserList', true),
-    }"
->
-    <div x-show="! showUserList">
+<div>
+    <div x-cloak x-show="! $wire.showUserList">
         <div>
             <div
                 class="flex w-full flex-col-reverse justify-between md:flex-row"
@@ -16,7 +11,7 @@
                 </h2>
             </div>
             <h1 class="pt-5 text-5xl font-bold dark:text-white">
-                {{ $address['id'] ?? false ? trim($address['firstname'] . ' ' . $address['lastname']) : __('New address') }}
+                {{ data_get($address, 'id') ? trim(data_get($address, 'firstname') . ' ' . data_get($address, 'lastname')) : __('New address') }}
             </h1>
         </div>
         <form class="pt-12">
@@ -30,6 +25,7 @@
                 </div>
             @endif
 
+            @section('portal.profile.address')
             <div
                 class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-gray-200 sm:pt-5"
             >
@@ -109,7 +105,7 @@
                         wire:model="address.country_id"
                         searchable
                         select="label:name|value:id"
-                        :options="app(\FluxErp\Models\Country::class)->all(['id', 'name'])"
+                        :options="resolve_static(\FluxErp\Models\Country::class, 'query')->get(['id', 'name'])"
                     />
                 </div>
             </div>
@@ -147,7 +143,7 @@
                         wire:model="address.language_id"
                         searchable
                         select="label:name|value:id"
-                        :options="app(\FluxErp\Models\Language::class)->all(['id', 'name'])"
+                        :options="resolve_static(\FluxErp\Models\Language::class, 'query')->get(['id', 'name'])"
                     />
                 </div>
             </div>
@@ -164,6 +160,7 @@
                     <x-password wire:model="loginPassword" />
                 </div>
             </div>
+            @show
         </form>
         @if (auth()->user()->can('profiles.{id?}.get') && auth()->id() !== ($address['id'] ?? ''))
             <div
@@ -277,7 +274,7 @@
                             2xs
                             color="emerald"
                             label="+"
-                            x-on:click.prevent="contactOptions[key].push({type: key, label: key, address_id: address.id})"
+                            x-on:click.prevent="contactOptions[key].push({type: key, label: key, address_id: $wire.address.id})"
                         />
                         <div class="text-sm">
                             <span x-text="key"></span>
@@ -291,7 +288,7 @@
             <x-button color="indigo" :text="__('Save')" wire:click="save" />
         </div>
     </div>
-    <div x-show="showUserList">
+    <div x-cloak x-show="$wire.showUserList">
         <x-portal.profiles></x-portal.profiles>
     </div>
 </div>
