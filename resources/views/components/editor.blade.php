@@ -31,7 +31,7 @@
                             : 0
                     }}
                 @endif
-            "
+            )"
         x-init="initTextArea('{{ $id }}',$refs['editor-{{ $id }}'], @json($transparent), @json($tooltipDropdown), @json($defaultFontSize))"
         {{ $attributes->whereDoesntStartWith("wire:model") }}
         wire:ignore

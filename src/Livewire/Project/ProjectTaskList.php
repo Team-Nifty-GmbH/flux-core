@@ -30,7 +30,7 @@ class ProjectTaskList extends BaseTaskList
 
     public string $taskTab = 'task.general';
 
-    protected string $view = 'flux::livewire.project.project-task-list';
+    protected ?string $includeBefore = 'flux::livewire.project.project-task-list';
 
     public function mount(): void
     {
