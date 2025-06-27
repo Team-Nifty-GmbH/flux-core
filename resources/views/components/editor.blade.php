@@ -32,7 +32,7 @@
                     }}
                 @endif
             )"
-        x-init="initTextArea('{{$id}}',$refs['editor-{{$id}}'], @json($transparent), @json($tooltipDropdown), @json($defaultFontSize))"
+        x-init="initTextArea('{{ $id }}',$refs['editor-{{ $id }}'], @json($transparent), @json($tooltipDropdown), @json($defaultFontSize))"
         {{ $attributes->whereDoesntStartWith("wire:model") }}
         wire:ignore
     >
@@ -132,8 +132,8 @@
         @if ($availableFontSizes && ! $tooltipDropdown)
             <x-button
                 x-on:click.prevent="onClick"
-                x-ref="tippyParent-fontSize-{{$id}}"
-                x-data="editorFontSizeColorHandler($refs['tippyParent-fontSize-{{$id}}'], $refs['fontSizeDropdown-{{$id}}'])"
+                x-ref="tippyParent-fontSize-{{ $id }}"
+                x-data="editorFontSizeColorHandler($refs['tippyParent-fontSize-{{ $id }}'], $refs['fontSizeDropdown-{{ $id }}'])"
                 flat
                 color="secondary"
             >
@@ -146,10 +146,10 @@
         @if ($textColors && ! $tooltipDropdown)
             <x-button
                 x-on:click.prevent="onClick"
-                x-ref="tippyParent-color-{{$id}}"
+                x-ref="tippyParent-color-{{ $id }}"
                 flat
                 icon="paint-brush"
-                x-data="editorFontSizeColorHandler($refs['tippyParent-color-{{$id}}'], $refs['colorDropDown-{{$id}}'])"
+                x-data="editorFontSizeColorHandler($refs['tippyParent-color-{{ $id }}'], $refs['colorDropDown-{{$id}}'])"
                 color="secondary"
             ></x-button>
         @endif
@@ -157,10 +157,10 @@
         @if ($textBackgroundColors && ! $tooltipDropdown)
             <x-button
                 x-on:click.prevent="onClick"
-                x-ref="tippyParent-background-color-{{$id}}"
+                x-ref="tippyParent-background-color-{{ $id }}"
                 flat
                 icon="swatch"
-                x-data="editorFontSizeColorHandler($refs['tippyParent-background-color-{{$id}}'], $refs['backgroundColorDropDown-{{$id}}'])"
+                x-data="editorFontSizeColorHandler($refs['tippyParent-background-color-{{ $id }}'], $refs['backgroundColorDropDown-{{ $id }}'])"
                 color="secondary"
             ></x-button>
         @endif

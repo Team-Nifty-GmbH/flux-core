@@ -54,7 +54,12 @@ class UpdateLead extends FluxAction
                 )
                 ->value('is_lost')
         ) {
-            $this->rules['loss_reason'] = 'required|string|min:8';
+            $this->rules['loss_reason'] = [
+                'required_without:lead_loss_reason_id',
+                'string',
+                'nullable',
+                'min:8',
+            ];
         }
     }
 }

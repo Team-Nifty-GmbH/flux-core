@@ -57,6 +57,7 @@ use FluxErp\Livewire\Settings\FailedJobs;
 use FluxErp\Livewire\Settings\Industries;
 use FluxErp\Livewire\Settings\LanguageLines;
 use FluxErp\Livewire\Settings\Languages;
+use FluxErp\Livewire\Settings\LeadLossReasons;
 use FluxErp\Livewire\Settings\LeadStates;
 use FluxErp\Livewire\Settings\LedgerAccounts;
 use FluxErp\Livewire\Settings\Logs;
@@ -228,6 +229,7 @@ Route::middleware('web')
                         Route::get('/failed-jobs', FailedJobs::class)->name('failed-jobs');
                         Route::get('/industries', Industries::class)->name('industries');
                         Route::get('/languages', Languages::class)->name('languages');
+                        Route::get('/lead-loss-reasons', LeadLossReasons::class)->name('lead-loss-reasons');
                         Route::get('/lead-states', LeadStates::class)->name('lead-states');
                         Route::get('/ledger-accounts', LedgerAccounts::class)->name('ledger-accounts');
                         Route::get('/logs', Logs::class)->name('logs');

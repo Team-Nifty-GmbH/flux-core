@@ -88,29 +88,38 @@ class TotalOrdersCount extends LineChart implements HasWidgetOptions
     {
         return [
             [
-                'label' => __('Show'),
+                'label' => static::getLabel(),
                 'method' => 'show',
+                'params' => 'current',
+            ],
+            [
+                'label' => __('Previous Period'),
+                'method' => 'show',
+                'params' => 'previous',
             ],
         ];
     }
 
     #[Renderless]
-    public function show(): void
+    public function show(string $period): void
     {
-        // needs to be in an extra variable to avoid serialization issues
-        $start = $this->getStart()->toDateString();
-        $end = $this->getEnd()->toDateString();
+        if (strtolower($period) === 'previous') {
+            $start = $this->getStartPrevious()->toDateString();
+            $end = $this->getEndPrevious()->toDateString();
+        } else {
+            $start = $this->getStart()->toDateString();
+            $end = $this->getEnd()->toDateString();
+        }
 
         SessionFilter::make(
             Livewire::new(resolve_static(OrderList::class, 'class'))->getCacheKey(),
-            fn (Builder $query) => $query->whereNotNull('invoice_date')
+            fn (Builder $query) => $query
+                ->whereNotNull('invoice_date')
                 ->whereNotNull('invoice_number')
                 ->revenue()
-                ->whereBetween('invoice_date', [
-                    $start,
-                    $end,
-                ]),
-            __(static::getLabel()),
+                ->whereBetween('invoice_date', [$start, $end]),
+            __(static::getLabel()) . ' '
+            . __('between :start and :end', ['start' => $start, 'end' => $end]),
         )
             ->store();
 
