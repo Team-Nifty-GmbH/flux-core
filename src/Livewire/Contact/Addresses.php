@@ -72,8 +72,7 @@ class Addresses extends Component
 
     public function render(): Application|Factory|View
     {
-        return view(
-            'flux::livewire.contact.addresses');
+        return view('flux::livewire.contact.addresses');
     }
 
     #[Renderless]

@@ -19,9 +19,12 @@ class RecordOrigins extends RecordOriginList
 
     protected function getViewData(): array
     {
-        return array_merge(parent::getViewData(), [
-            'originTypes' => get_models_with_trait(HasRecordOrigin::class),
-        ]);
+        return array_merge(
+            parent::getViewData(),
+            [
+                'originTypes' => get_models_with_trait(HasRecordOrigin::class),
+            ]
+        );
     }
 
     protected function modalName(): string

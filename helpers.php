@@ -28,20 +28,16 @@ if (! function_exists('model_info_all')) {
 }
 
 if (! function_exists('get_models_with_trait')) {
-    function get_models_with_trait(string $trait, ?callable $mapFn = null): array
+    function get_models_with_trait(string $trait, ?callable $mapCallback = null): array
     {
         $morphMap = Illuminate\Database\Eloquent\Relations\Relation::morphMap();
 
         return collect($morphMap)
-            ->filter(function ($modelClass) use ($trait) {
-                return in_array($trait, class_uses_recursive($modelClass));
-            })
-            ->map($mapFn ?? function ($modelClass, $morphAlias) {
-                return [
-                    'label' => __(class_basename($modelClass)),
-                    'id' => $morphAlias,
-                ];
-            })
+            ->filter(fn ($class, $alias) => in_array($trait, class_uses_recursive(morphed_model($alias))))
+            ->map($mapCallback ?? fn ($class, $alias) => [
+                'label' => __(Illuminate\Support\Str::headline($alias)),
+                'value' => $alias,
+            ])
             ->values()
             ->toArray();
     }

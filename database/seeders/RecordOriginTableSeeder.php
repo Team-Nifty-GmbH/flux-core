@@ -10,10 +10,11 @@ class RecordOriginTableSeeder extends Seeder
 {
     public function run(): void
     {
-        RecordOrigin::factory()->count(10)->create([
-            'model_type' => fn () => faker()->randomElement(
-                get_models_with_trait(HasRecordOrigin::class, fn ($modelClass) => morph_alias($modelClass))
-            ),
-        ]);
+        $modelTypes = get_models_with_trait(HasRecordOrigin::class, fn ($class, $alias) => $alias);
+        foreach ($modelTypes as $modelType) {
+            RecordOrigin::factory()->count(5)->create([
+                'model_type' => $modelType,
+            ]);
+        }
     }
 }

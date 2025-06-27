@@ -200,14 +200,14 @@ class ContactsByContactOriginTest extends BaseSetup
             ->assertHasNoErrors();
     }
 
-    protected function getContactsCountInTimeFrame(TimeFrameEnum $timeFrame, RecordOrigin $contactOrigin): int
+    protected function getContactsCountInTimeFrame(TimeFrameEnum $timeFrame, RecordOrigin $recordOrigin): int
     {
         return $this->contacts
             ->filter(
                 fn (Contact $contact) => $contact->created_at->between(...$timeFrame->getRange())
-                    && $contact->origin()
+                    && $contact->recordOrigin()
+                        ->where('id', $recordOrigin->id)
                         ->where('is_active', true)
-                        ->where('id', $contactOrigin->id)
                         ->exists()
             )
             ->count();

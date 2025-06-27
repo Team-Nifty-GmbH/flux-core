@@ -25,7 +25,7 @@ return new class() extends Migration
             $table->renameColumn('record_origin_id', 'contact_origin_id');
             $table->foreign('contact_origin_id')
                 ->references('id')
-                ->on('contact_origins')
+                ->on('record_origins')
                 ->nullOnDelete();
         });
     }

@@ -571,95 +571,14 @@ class FluxServiceProvider extends ServiceProvider
         }
 
         if ($this->app->runningUnitTests()) {
-            if (! Testable::hasMacro('cycleTabs')) {
+            if (! Testable::hasMacro('assertExecutesJs')) {
                 Testable::macro(
-                    'cycleTabs',
-                    function (string $tabPropertyName = 'tab'): void {
-                        $tabs = $this->instance()->getTabs();
-
-                        foreach ($tabs as $tab) {
-                            $this
-                                ->set($tabPropertyName, $tab->component)
-                                ->assertStatus(200);
-
-                            if ($tab->isLivewireComponent) {
-                                $this->assertSeeLivewire($tab->component);
-                            }
-                        }
-
-                        $this->set($tabPropertyName, $tabs[0]->component);
-                    }
-                );
-            }
-
-            if (! Testable::hasMacro('datatableDelete')) {
-                Testable::macro(
-                    'datatableDelete',
-                    function (Model $model, TestCase $testCase): Testable {
-                        $this->assertStatus(200)
-                            ->call('loadData')
-                            ->assertCount('data.data', 1)
-                            ->assertSet('data.data.0.id', $model->getKey())
-                            ->call('delete', $model->getKey())
-                            ->assertHasNoErrors()
-                            ->assertStatus(200)
-                            ->assertCount('data.data', 0);
-
-                        if (in_array(SoftDeletes::class, class_uses_recursive($model))) {
-                            invade($testCase)->assertSoftDeleted($model);
-                        } else {
-                            invade($testCase)->assertDatabaseMissing($model);
-                        }
-
-                        return $this;
-                    }
-                );
-            }
-
-            if (! Testable::hasMacro('datatableEdit')) {
-                Testable::macro(
-                    'datatableEdit',
-                    function (Model $model, string $routeName): Testable {
-                        $this->assertStatus(200)
-                            ->call('loadData')
-                            ->assertCount('data.data', 1)
-                            ->assertSet('data.data.0.id', $model->getKey())
-                            ->call('edit', $model->getKey())
-                            ->assertHasNoErrors()
-                            ->assertStatus(200)
-                            ->assertRedirectToRoute($routeName, $model->getKey());
-
-                        return $this;
-                    }
-                );
-            }
-
-            if (! Testable::hasMacro('datatableCreate')) {
-                Testable::macro(
-                    'datatableCreate',
-                    function (string $formPropertyName, array $formValues = [], ?string $modalName = null): Testable {
-                        if (
-                            is_null($modalName) &&
-                            in_array(
-                                SupportsAutoRender::class,
-                                class_uses_recursive($this->instance()->{$formPropertyName})
-                            )
-                        ) {
-                            $modalName = $this->instance()->{$formPropertyName}->modalName();
-                        }
-
-                        $this->assertStatus(200)
-                            ->call('edit')
-                            ->assertExecutesJs('$modalOpen(\'' . $modalName . '\')');
-
-                        foreach ($formValues as $propertyName => $propertyValue) {
-                            $this->set($formPropertyName . '.' . $propertyName, $propertyValue);
-                        }
-
-                        $this->call('save')
-                            ->assertStatus(200)
-                            ->assertHasNoErrors()
-                            ->assertReturned(true);
+                    'assertExecutesJs',
+                    function (string $js) {
+                        Assert::assertStringContainsString(
+                            $js,
+                            implode(' ', data_get($this->lastState->getEffects(), 'xjs.*.expression', []))
+                        );
 
                         return $this;
                     }
@@ -700,14 +619,95 @@ class FluxServiceProvider extends ServiceProvider
                 );
             }
 
-            if (! Testable::hasMacro('assertExecutesJs')) {
+            if (! Testable::hasMacro('cycleTabs')) {
                 Testable::macro(
-                    'assertExecutesJs',
-                    function (string $js) {
-                        Assert::assertStringContainsString(
-                            $js,
-                            implode(' ', data_get($this->lastState->getEffects(), 'xjs.*.expression', []))
-                        );
+                    'cycleTabs',
+                    function (string $tabPropertyName = 'tab'): void {
+                        $tabs = $this->instance()->getTabs();
+
+                        foreach ($tabs as $tab) {
+                            $this
+                                ->set($tabPropertyName, $tab->component)
+                                ->assertStatus(200);
+
+                            if ($tab->isLivewireComponent) {
+                                $this->assertSeeLivewire($tab->component);
+                            }
+                        }
+
+                        $this->set($tabPropertyName, $tabs[0]->component);
+                    }
+                );
+            }
+
+            if (! Testable::hasMacro('datatableCreate')) {
+                Testable::macro(
+                    'datatableCreate',
+                    function (string $formPropertyName, array $formValues = [], ?string $modalName = null): Testable {
+                        if (
+                            is_null($modalName) &&
+                            in_array(
+                                SupportsAutoRender::class,
+                                class_uses_recursive($this->instance()->{$formPropertyName})
+                            )
+                        ) {
+                            $modalName = $this->instance()->{$formPropertyName}->modalName();
+                        }
+
+                        $this->assertStatus(200)
+                            ->call('edit')
+                            ->assertExecutesJs('$modalOpen(\'' . $modalName . '\')');
+
+                        foreach ($formValues as $propertyName => $propertyValue) {
+                            $this->set($formPropertyName . '.' . $propertyName, $propertyValue);
+                        }
+
+                        $this->call('save')
+                            ->assertStatus(200)
+                            ->assertHasNoErrors()
+                            ->assertReturned(true);
+
+                        return $this;
+                    }
+                );
+            }
+
+            if (! Testable::hasMacro('datatableDelete')) {
+                Testable::macro(
+                    'datatableDelete',
+                    function (Model $model, TestCase $testCase): Testable {
+                        $this->assertStatus(200)
+                            ->call('loadData')
+                            ->assertCount('data.data', 1)
+                            ->assertSet('data.data.0.id', $model->getKey())
+                            ->call('delete', $model->getKey())
+                            ->assertHasNoErrors()
+                            ->assertStatus(200)
+                            ->assertCount('data.data', 0);
+
+                        if (in_array(SoftDeletes::class, class_uses_recursive($model))) {
+                            invade($testCase)->assertSoftDeleted($model);
+                        } else {
+                            invade($testCase)->assertDatabaseMissing($model);
+                        }
+
+                        return $this;
+                    }
+                );
+            }
+
+            if (! Testable::hasMacro('datatableEdit')) {
+                Testable::macro(
+                    'datatableEdit',
+                    function (Model $model, string $routeName): Testable {
+                        $this->assertStatus(200)
+                            ->call('loadData')
+                            ->assertCount('data.data', 1)
+                            ->assertSet('data.data.0.id', $model->getKey())
+                            ->call('edit', $model->getKey())
+                            ->assertHasNoErrors()
+                            ->assertStatus(200)
+                            ->assertRedirectToRoute($routeName, $model->getKey());
 
                         return $this;
                     }

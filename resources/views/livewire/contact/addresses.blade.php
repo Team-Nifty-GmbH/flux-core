@@ -124,10 +124,6 @@
                         'url' => route('search', \FluxErp\Models\RecordOrigin::class),
                         'method' => 'POST',
                         'params' => [
-                            'fields' => [
-                                'name',
-                                'model_type',
-                            ],
                             'searchFields' => [
                                 'name',
                             ],

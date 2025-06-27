@@ -12,7 +12,6 @@
             <x-select.styled
                 :label="__('Origin type')"
                 wire:model="recordOriginForm.model_type"
-                select="label:label|value:id"
                 unfiltered
                 :options="$originTypes"
             />

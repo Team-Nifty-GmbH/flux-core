@@ -46,7 +46,8 @@ class CreateLeadRuleset extends FluxRuleset
             'record_origin_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => RecordOrigin::class]),
+                app(ModelExists::class, ['model' => RecordOrigin::class])
+                    ->where('model_type', morph_alias(Lead::class)),
             ],
             'user_id' => [
                 'nullable',

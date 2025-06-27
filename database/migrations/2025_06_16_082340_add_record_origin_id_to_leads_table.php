@@ -11,7 +11,7 @@ return new class() extends Migration
         Schema::table('leads', function (Blueprint $table): void {
             $table->foreignId('record_origin_id')
                 ->nullable()
-                ->after('lead_state_id')
+                ->after('recommended_by_address_id')
                 ->constrained('record_origins')
                 ->nullOnDelete();
         });

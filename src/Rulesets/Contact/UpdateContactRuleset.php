@@ -53,7 +53,7 @@ class UpdateContactRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => User::class])
                     ->where('is_active', true),
             ],
-            'contact_origin_id' => [
+            'record_origin_id' => [
                 'integer',
                 'nullable',
                 app(ModelExists::class, ['model' => RecordOrigin::class])
