@@ -3,7 +3,9 @@
 namespace FluxErp\Livewire\Widgets;
 
 use Cron\CronExpression;
+use FluxErp\Contracts\HasWidgetOptions;
 use FluxErp\Livewire\Dashboard\Dashboard;
+use FluxErp\Livewire\Order\OrderList;
 use FluxErp\Livewire\Support\Widgets\Charts\BarChart;
 use FluxErp\Models\Pivots\OrderSchedule;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
@@ -11,16 +13,22 @@ use FluxErp\Traits\MoneyChartFormattingTrait;
 use FluxErp\Traits\Widgetable;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Js;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
+use Livewire\Livewire;
+use TeamNiftyGmbH\DataTable\Helpers\SessionFilter;
 use Throwable;
 
-class RecurringRevenueForecast extends BarChart
+class RecurringRevenueForecast extends BarChart implements HasWidgetOptions
 {
     use IsTimeFrameAwareWidget, MoneyChartFormattingTrait, Widgetable;
 
     public ?array $chart = [
         'type' => 'bar',
     ];
+
+    #[Locked]
+    public ?array $orderIds = [];
 
     public ?array $plotOptions = [
         'bar' => [
@@ -100,6 +108,8 @@ class RecurringRevenueForecast extends BarChart
                 }
 
                 $dates[] = $nextRun->format('Y-m-d');
+                $this->orderIds = array_merge($this->orderIds, [$orderSchedule->order->getKey()]);
+
                 data_set(
                     $series,
                     $index . '.data.' . $nextRun->format('Y-m-d'),
@@ -136,6 +146,31 @@ class RecurringRevenueForecast extends BarChart
             })
             ->values()
             ->toArray();
+    }
+
+    public function options(): array
+    {
+        return [
+            [
+                'label' => __('Show'),
+                'method' => 'show',
+            ],
+        ];
+    }
+
+    #[Renderless]
+    public function show(): void
+    {
+        $orderIds = $this->orderIds;
+
+        SessionFilter::make(
+            Livewire::new(resolve_static(OrderList::class, 'class'))->getCacheKey(),
+            fn (Builder $query) => $query->whereKey($orderIds),
+            __(static::getLabel()),
+        )
+            ->store();
+
+        $this->redirectRoute('orders.orders', navigate: true);
     }
 
     public function showTitle(): bool
