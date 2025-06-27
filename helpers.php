@@ -27,6 +27,22 @@ if (! function_exists('model_info_all')) {
     }
 }
 
+if (! function_exists('get_models_with_trait')) {
+    function get_models_with_trait(string $trait, ?callable $mapCallback = null): array
+    {
+        $morphMap = Illuminate\Database\Eloquent\Relations\Relation::morphMap();
+
+        return collect($morphMap)
+            ->filter(fn ($class, $alias) => in_array($trait, class_uses_recursive(morphed_model($alias))))
+            ->map($mapCallback ?? fn ($class, $alias) => [
+                'label' => __(Illuminate\Support\Str::headline($alias)),
+                'value' => $alias,
+            ])
+            ->values()
+            ->toArray();
+    }
+}
+
 if (! function_exists('route_to_permission')) {
     function route_to_permission(Illuminate\Routing\Route|string|null $route = null, bool $checkPermission = true): ?string
     {

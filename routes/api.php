@@ -40,9 +40,6 @@ use FluxErp\Actions\ContactBankConnection\UpdateContactBankConnection;
 use FluxErp\Actions\ContactOption\CreateContactOption;
 use FluxErp\Actions\ContactOption\DeleteContactOption;
 use FluxErp\Actions\ContactOption\UpdateContactOption;
-use FluxErp\Actions\ContactOrigin\CreateContactOrigin;
-use FluxErp\Actions\ContactOrigin\DeleteContactOrigin;
-use FluxErp\Actions\ContactOrigin\UpdateContactOrigin;
 use FluxErp\Actions\Country\CreateCountry;
 use FluxErp\Actions\Country\DeleteCountry;
 use FluxErp\Actions\Country\UpdateCountry;
@@ -163,6 +160,9 @@ use FluxErp\Actions\PurchaseInvoice\UpdatePurchaseInvoice;
 use FluxErp\Actions\PurchaseInvoicePosition\CreatePurchaseInvoicePosition;
 use FluxErp\Actions\PurchaseInvoicePosition\DeletePurchaseInvoicePosition;
 use FluxErp\Actions\PurchaseInvoicePosition\UpdatePurchaseInvoicePosition;
+use FluxErp\Actions\RecordOrigin\CreateRecordOrigin;
+use FluxErp\Actions\RecordOrigin\DeleteRecordOrigin;
+use FluxErp\Actions\RecordOrigin\UpdateRecordOrigin;
 use FluxErp\Actions\Role\CreateRole;
 use FluxErp\Actions\Role\DeleteRole;
 use FluxErp\Actions\Role\UpdateRole;
@@ -236,7 +236,6 @@ use FluxErp\Models\Comment;
 use FluxErp\Models\Contact;
 use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\ContactOption;
-use FluxErp\Models\ContactOrigin;
 use FluxErp\Models\Country;
 use FluxErp\Models\CountryRegion;
 use FluxErp\Models\Currency;
@@ -274,6 +273,7 @@ use FluxErp\Models\ProductProperty;
 use FluxErp\Models\Project;
 use FluxErp\Models\PurchaseInvoice;
 use FluxErp\Models\PurchaseInvoicePosition;
+use FluxErp\Models\RecordOrigin;
 use FluxErp\Models\Role;
 use FluxErp\Models\SepaMandate;
 use FluxErp\Models\SerialNumber;
@@ -407,14 +407,14 @@ Route::prefix('api')
                 Route::put('/contact-options', UpdateContactOption::class);
                 Route::delete('/contact-options', DeleteContactOption::class);
 
-                // ContactOrigins
-                Route::get('/contact-origins/{id}', [BaseController::class, 'show'])
-                    ->defaults('model', ContactOrigin::class);
-                Route::get('/contact-origins', [BaseController::class, 'index'])
-                    ->defaults('model', ContactOrigin::class);
-                Route::post('/contact-origins', CreateContactOrigin::class);
-                Route::put('/contact-origins', UpdateContactOrigin::class);
-                Route::delete('/contact-origins/{id}', DeleteContactOrigin::class);
+                // RecordOrigins
+                Route::get('/record-origins/{id}', [BaseController::class, 'show'])
+                    ->defaults('model', RecordOrigin::class);
+                Route::get('/record-origins', [BaseController::class, 'index'])
+                    ->defaults('model', RecordOrigin::class);
+                Route::post('/record-origins', CreateRecordOrigin::class);
+                Route::put('/record-origins', UpdateRecordOrigin::class);
+                Route::delete('/record-origins/{id}', DeleteRecordOrigin::class);
 
                 // Contacts
                 Route::get('/contacts/{id}', [BaseController::class, 'show'])->defaults('model', Contact::class);

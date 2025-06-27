@@ -6,6 +6,7 @@ use FluxErp\Models\Address;
 use FluxErp\Models\Lead;
 use FluxErp\Models\LeadLossReason;
 use FluxErp\Models\LeadState;
+use FluxErp\Models\RecordOrigin;
 use FluxErp\Models\User;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\Numeric;
@@ -53,6 +54,12 @@ class UpdateLeadRuleset extends FluxRuleset
                 'nullable',
                 'integer',
                 app(ModelExists::class, ['model' => Address::class]),
+            ],
+            'record_origin_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => RecordOrigin::class])
+                    ->where('model_type', morph_alias(Lead::class)),
             ],
             'user_id' => [
                 'nullable',

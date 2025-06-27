@@ -48,15 +48,15 @@ class ContactsByContactOrigin extends CircleChart implements HasWidgetOptions
                 $this->getStart()->toDateTimeString(),
                 $this->getEnd()->toDateTimeString(),
             ])
-            ->groupBy('contact_origin_id')
-            ->with('contactOrigin:id,name,is_active')
-            ->selectRaw('contact_origin_id, COUNT(id) as total')
+            ->groupBy('record_origin_id')
+            ->with('recordOrigin:id,name,is_active')
+            ->selectRaw('record_origin_id, COUNT(id) as total')
             ->orderBy('total', 'desc')
             ->get()
-            ->map(fn (Model $contact) => $contact->contactOrigin?->is_active !== false
+            ->map(fn (Model $contact) => $contact->recordOrigin?->is_active !== false
                 ? [
-                    'id' => $contact->contact_origin_id,
-                    'label' => $contact->contactOrigin?->name ?? __('Unassigned Contacts'),
+                    'id' => $contact->record_origin_id,
+                    'label' => $contact->recordOrigin?->name ?? __('Unassigned Contacts'),
                     'total' => $contact->total,
                 ] : null,
             )
