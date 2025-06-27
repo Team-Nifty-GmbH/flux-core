@@ -98,7 +98,7 @@ class RecurringRevenueForecast extends BarChart implements HasWidgetOptions
                     || $nextRun <= $orderSchedule->schedule->ends_at
                 )
                 && (
-                    is_null($orderSchedule->schedule->recurrences) // Fixed typo here
+                    is_null($orderSchedule->schedule->recurrences)
                     || $currentRecurrence < $orderSchedule->schedule->recurrences
                 )
             ) {
@@ -136,13 +136,12 @@ class RecurringRevenueForecast extends BarChart implements HasWidgetOptions
                 $seriesData = data_get($series, 'data', []);
 
                 $orderedData = $allDates->map(function ($date) use ($seriesData) {
-                    return $seriesData[$date] ?? 0;
+                    return data_get($seriesData, $date) ?? 0;
                 });
 
-                return [
-                    ...$series,
-                    'data' => $orderedData->toArray(),
-                ];
+                $series['data'] = $orderedData->toArray();
+
+                return $series;
             })
             ->values()
             ->toArray();
