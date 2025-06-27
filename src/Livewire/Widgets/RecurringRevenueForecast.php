@@ -23,7 +23,6 @@ class RecurringRevenueForecast extends BarChart
 
     public ?array $plotOptions = [
         'bar' => [
-            'horizontal' => true,
             'endingShape' => 'rounded',
             'columnWidth' => '70%',
         ],
@@ -43,6 +42,7 @@ class RecurringRevenueForecast extends BarChart
         $this->updateData();
     }
 
+    #[Renderless]
     public function calculateChart(): void
     {
         $orderSchedules = resolve_static(OrderSchedule::class, 'query')
@@ -66,6 +66,7 @@ class RecurringRevenueForecast extends BarChart
             ->get();
 
         $series = [];
+        $dates = [];
         foreach ($orderSchedules as $orderSchedule) {
             if (is_null($orderSchedule->schedule->cron_expression)) {
                 continue;
@@ -88,7 +89,7 @@ class RecurringRevenueForecast extends BarChart
                     || $nextRun <= $orderSchedule->schedule->ends_at
                 )
                 && (
-                    is_null($orderSchedule->schedule->recurrencs)
+                    is_null($orderSchedule->schedule->recurrences) // Fixed typo here
                     || $currentRecurrence < $orderSchedule->schedule->recurrences
                 )
             ) {
@@ -97,11 +98,12 @@ class RecurringRevenueForecast extends BarChart
                     data_set($series, $index . '.name', $client->name);
                 }
 
+                $dates[] = $nextRun->format('Y-m-d');
                 data_set(
                     $series,
-                    $index . '.data.0',
+                    $index . '.data.' . $nextRun->format('Y-m-d'),
                     bcadd(
-                        data_get($series, $index . '.data.0') ?? 0,
+                        data_get($series, $index . '.data.' . $nextRun->format('Y-m-d')) ?? 0,
                         $orderSchedule->order->total_net_price ?? 0,
                         2
                     )
@@ -114,7 +116,29 @@ class RecurringRevenueForecast extends BarChart
             }
         }
 
-        $this->series = array_values($series);
+        // Get all unique dates and sort them
+        $allDates = collect($dates)->unique()->sort()->values();
+
+        // Set the x-axis categories
+        $this->xaxis['categories'] = $allDates->toArray();
+
+        // Process series to ensure all dates are present and properly ordered
+        $this->series = collect($series)
+            ->map(function (array $series) use ($allDates) {
+                $seriesData = data_get($series, 'data', []);
+
+                // Map each date to its value, maintaining the sorted order
+                $orderedData = $allDates->map(function ($date) use ($seriesData) {
+                    return $seriesData[$date] ?? 0; // Use 0 for missing dates, or null if preferred
+                });
+
+                return [
+                    ...$series,
+                    'data' => $orderedData->toArray(),
+                ];
+            })
+            ->values()
+            ->toArray();
     }
 
     public function showTitle(): bool
