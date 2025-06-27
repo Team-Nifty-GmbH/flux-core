@@ -22,7 +22,6 @@ use FluxErp\Models\Communication;
 use FluxErp\Models\Contact;
 use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\ContactOption;
-use FluxErp\Models\ContactOrigin;
 use FluxErp\Models\Country;
 use FluxErp\Models\CountryRegion;
 use FluxErp\Models\Currency;
@@ -88,6 +87,7 @@ use FluxErp\Models\Project;
 use FluxErp\Models\PurchaseInvoice;
 use FluxErp\Models\PurchaseInvoicePosition;
 use FluxErp\Models\QueueMonitor;
+use FluxErp\Models\RecordOrigin;
 use FluxErp\Models\Role;
 use FluxErp\Models\Schedule;
 use FluxErp\Models\SepaMandate;
@@ -138,7 +138,6 @@ class MorphMapServiceProvider extends ServiceProvider
             'contact' => Contact::class,
             'contact_bank_connection' => ContactBankConnection::class,
             'contact_option' => ContactOption::class,
-            'contact_origin' => ContactOrigin::class,
             'country' => Country::class,
             'country_region' => CountryRegion::class,
             'currency' => Currency::class,
@@ -191,6 +190,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'purchase_invoice' => PurchaseInvoice::class,
             'purchase_invoice_position' => PurchaseInvoicePosition::class,
             'queue_monitor' => QueueMonitor::class,
+            'record_origin' => RecordOrigin::class,
             'role' => Role::class,
             'schedule' => Schedule::class,
             'sepa_mandate' => SepaMandate::class,

@@ -22,6 +22,7 @@ use FluxErp\Models\Notification;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Role;
+use FluxErp\Traits\Livewire\SupportsAutoRender;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Bus\Dispatcher;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -29,7 +30,9 @@ use Illuminate\Console\Command;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Contracts\Queue\Factory as QueueFactoryContract;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\QueryException;
+use Illuminate\Foundation\Testing\TestCase;
 use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -62,6 +65,7 @@ use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 use Spatie\Translatable\Facades\Translatable;
 use Throwable;
+use function Livewire\invade;
 
 class FluxServiceProvider extends ServiceProvider
 {
@@ -268,7 +272,7 @@ class FluxServiceProvider extends ServiceProvider
                 Menu::register(route: 'settings.system');
                 Menu::register(route: 'settings.additional-columns');
                 Menu::register(route: 'settings.address-types');
-                Menu::register(route: 'settings.contact-origins');
+                Menu::register(route: 'settings.record-origins');
                 Menu::register(route: 'settings.industries');
                 Menu::register(route: 'settings.categories');
                 Menu::register(route: 'settings.tags');
@@ -568,23 +572,16 @@ class FluxServiceProvider extends ServiceProvider
         }
 
         if ($this->app->runningUnitTests()) {
-            if (! Testable::hasMacro('cycleTabs')) {
+            if (! Testable::hasMacro('assertExecutesJs')) {
                 Testable::macro(
-                    'cycleTabs',
-                    function (string $tabPropertyName = 'tab'): void {
-                        $tabs = $this->instance()->getTabs();
+                    'assertExecutesJs',
+                    function (string $js) {
+                        Assert::assertStringContainsString(
+                            $js,
+                            implode(' ', data_get($this->lastState->getEffects(), 'xjs.*.expression', []))
+                        );
 
-                        foreach ($tabs as $tab) {
-                            $this
-                                ->set($tabPropertyName, $tab->component)
-                                ->assertStatus(200);
-
-                            if ($tab->isLivewireComponent) {
-                                $this->assertSeeLivewire($tab->component);
-                            }
-                        }
-
-                        $this->set($tabPropertyName, $tabs[0]->component);
+                        return $this;
                     }
                 );
             }
@@ -623,14 +620,95 @@ class FluxServiceProvider extends ServiceProvider
                 );
             }
 
-            if (! Testable::hasMacro('assertExecutesJs')) {
+            if (! Testable::hasMacro('cycleTabs')) {
                 Testable::macro(
-                    'assertExecutesJs',
-                    function (string $js) {
-                        Assert::assertStringContainsString(
-                            $js,
-                            implode(' ', data_get($this->lastState->getEffects(), 'xjs.*.expression', []))
-                        );
+                    'cycleTabs',
+                    function (string $tabPropertyName = 'tab'): void {
+                        $tabs = $this->instance()->getTabs();
+
+                        foreach ($tabs as $tab) {
+                            $this
+                                ->set($tabPropertyName, $tab->component)
+                                ->assertStatus(200);
+
+                            if ($tab->isLivewireComponent) {
+                                $this->assertSeeLivewire($tab->component);
+                            }
+                        }
+
+                        $this->set($tabPropertyName, $tabs[0]->component);
+                    }
+                );
+            }
+
+            if (! Testable::hasMacro('datatableCreate')) {
+                Testable::macro(
+                    'datatableCreate',
+                    function (string $formPropertyName, array $formValues = [], ?string $modalName = null): Testable {
+                        if (
+                            is_null($modalName) &&
+                            in_array(
+                                SupportsAutoRender::class,
+                                class_uses_recursive($this->instance()->{$formPropertyName})
+                            )
+                        ) {
+                            $modalName = $this->instance()->{$formPropertyName}->modalName();
+                        }
+
+                        $this->assertStatus(200)
+                            ->call('edit')
+                            ->assertExecutesJs('$modalOpen(\'' . $modalName . '\')');
+
+                        foreach ($formValues as $propertyName => $propertyValue) {
+                            $this->set($formPropertyName . '.' . $propertyName, $propertyValue);
+                        }
+
+                        $this->call('save')
+                            ->assertStatus(200)
+                            ->assertHasNoErrors()
+                            ->assertReturned(true);
+
+                        return $this;
+                    }
+                );
+            }
+
+            if (! Testable::hasMacro('datatableDelete')) {
+                Testable::macro(
+                    'datatableDelete',
+                    function (Model $model, TestCase $testCase): Testable {
+                        $this->assertStatus(200)
+                            ->call('loadData')
+                            ->assertCount('data.data', 1)
+                            ->assertSet('data.data.0.id', $model->getKey())
+                            ->call('delete', $model->getKey())
+                            ->assertHasNoErrors()
+                            ->assertStatus(200)
+                            ->assertCount('data.data', 0);
+
+                        if (in_array(SoftDeletes::class, class_uses_recursive($model))) {
+                            invade($testCase)->assertSoftDeleted($model);
+                        } else {
+                            invade($testCase)->assertDatabaseMissing($model);
+                        }
+
+                        return $this;
+                    }
+                );
+            }
+
+            if (! Testable::hasMacro('datatableEdit')) {
+                Testable::macro(
+                    'datatableEdit',
+                    function (Model $model, string $routeName): Testable {
+                        $this->assertStatus(200)
+                            ->call('loadData')
+                            ->assertCount('data.data', 1)
+                            ->assertSet('data.data.0.id', $model->getKey())
+                            ->call('edit', $model->getKey())
+                            ->assertHasNoErrors()
+                            ->assertStatus(200)
+                            ->assertRedirectToRoute($routeName, $model->getKey());
 
                         return $this;
                     }

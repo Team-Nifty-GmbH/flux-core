@@ -19,6 +19,7 @@ use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasDefaultTargetableColumns;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasRecordOrigin;
 use FluxErp\Traits\HasSerialNumberRange;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
@@ -41,7 +42,7 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, OffersPrinting, Targetable
 {
     use CascadeSoftDeletes, Categorizable, Commentable, Communicatable, Filterable, HasAdditionalColumns,
-        HasClientAssignment, HasDefaultTargetableColumns, HasFrontendAttributes, HasPackageFactory,
+        HasClientAssignment, HasDefaultTargetableColumns, HasFrontendAttributes, HasPackageFactory, HasRecordOrigin,
         HasSerialNumberRange, HasUserModification, HasUuid, InteractsWithMedia, Lockable, LogsActivity, Printable,
         Searchable;
 
@@ -100,11 +101,6 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
     public function contactBankConnections(): HasMany
     {
         return $this->hasMany(ContactBankConnection::class);
-    }
-
-    public function contactOrigin(): BelongsTo
-    {
-        return $this->belongsTo(ContactOrigin::class);
     }
 
     public function country(): HasOneThrough
