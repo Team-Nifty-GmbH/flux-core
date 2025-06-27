@@ -19,7 +19,7 @@
                 ></div>
                 {{-- content --}}
                 <x-flux::print.header :client="$this->clientFluent" :subject="$subject"/>
-{{--                <x-flux::print.footer :client="$client"/>--}}
+{{--                <x-flux::print.footer :client="$this->clientFluent"/>--}}
                 {{-- content --}}
                 <div
                     x-cloak
