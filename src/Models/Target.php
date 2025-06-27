@@ -51,15 +51,17 @@ class Target extends FluxModel
         ];
     }
 
-    public function calculateCurrentValue(): string
+    public function calculateCurrentValue(User|int $user): string
     {
+        $userId = $user instanceof User ? $user->getKey() : $user;
+
         return morphed_model($this->model_type)::query()
             ->whereBetween($this->timeframe_column, [$this->start_date, $this->end_date])
             ->where(
                 $this->owner_column,
                 match ($this->owner_column) {
-                    'created_by', 'updated_by' => morph_alias(User::class) . ':' . $this->user_id,
-                    default => $this->user_id,
+                    'created_by', 'updated_by' => morph_alias(User::class) . ':' . $userId,
+                    default => $userId,
                 }
             )
             ->{$this->aggregate_type}($this->aggregate_column);
