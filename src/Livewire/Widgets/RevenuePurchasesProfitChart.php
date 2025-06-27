@@ -9,6 +9,7 @@ use FluxErp\Support\Metrics\Charts\Line;
 use FluxErp\Support\Metrics\Results\Result;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use FluxErp\Traits\MoneyChartFormattingTrait;
+use Livewire\Attributes\Js;
 use Livewire\Attributes\Renderless;
 
 class RevenuePurchasesProfitChart extends LineChart
@@ -96,6 +97,20 @@ class RevenuePurchasesProfitChart extends LineChart
         ];
 
         $this->xaxis['categories'] = $keys;
+    }
+
+    #[Js]
+    public function xAxisFormatter(): string
+    {
+        return <<<'JS'
+            let name;
+            if (typeof val === 'string' && val.includes('->')) {
+                name = val.split('->')[1];
+                val = val.split('->')[0];
+            }
+
+            return new Date(val).toLocaleDateString(document.documentElement.lang) + (name ? ' (' + name + ')' : '')
+        JS;
     }
 
     protected function getListeners(): array

@@ -10,6 +10,7 @@ use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use FluxErp\Traits\MoneyChartFormattingTrait;
 use FluxErp\Traits\Widgetable;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Js;
 use Livewire\Attributes\Renderless;
 use Throwable;
 
@@ -144,5 +145,19 @@ class RecurringRevenueForecast extends BarChart
     public function showTitle(): bool
     {
         return true;
+    }
+
+    #[Js]
+    public function xAxisFormatter(): string
+    {
+        return <<<'JS'
+            let name;
+            if (typeof val === 'string' && val.includes('->')) {
+                name = val.split('->')[1];
+                val = val.split('->')[0];
+            }
+
+            return new Date(val).toLocaleDateString(document.documentElement.lang) + (name ? ' (' + name + ')' : '')
+        JS;
     }
 }

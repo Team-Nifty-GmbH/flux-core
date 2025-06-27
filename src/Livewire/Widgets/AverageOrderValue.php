@@ -11,6 +11,7 @@ use FluxErp\Support\Metrics\Trend;
 use FluxErp\Support\Metrics\Value;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use FluxErp\Traits\MoneyChartFormattingTrait;
+use Livewire\Attributes\Js;
 use Livewire\Attributes\Renderless;
 
 class AverageOrderValue extends LineChart
@@ -80,6 +81,20 @@ class AverageOrderValue extends LineChart
     public function showTitle(): bool
     {
         return ! $this->showTotals;
+    }
+
+    #[Js]
+    public function xAxisFormatter(): string
+    {
+        return <<<'JS'
+            let name;
+            if (typeof val === 'string' && val.includes('->')) {
+                name = val.split('->')[1];
+                val = val.split('->')[0];
+            }
+
+            return new Date(val).toLocaleDateString(document.documentElement.lang) + (name ? ' (' + name + ')' : '')
+        JS;
     }
 
     protected function getListeners(): array
