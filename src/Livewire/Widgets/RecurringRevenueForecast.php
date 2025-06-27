@@ -117,20 +117,16 @@ class RecurringRevenueForecast extends BarChart
             }
         }
 
-        // Get all unique dates and sort them
         $allDates = collect($dates)->unique()->sort()->values();
 
-        // Set the x-axis categories
         $this->xaxis['categories'] = $allDates->toArray();
 
-        // Process series to ensure all dates are present and properly ordered
         $this->series = collect($series)
             ->map(function (array $series) use ($allDates) {
                 $seriesData = data_get($series, 'data', []);
 
-                // Map each date to its value, maintaining the sorted order
                 $orderedData = $allDates->map(function ($date) use ($seriesData) {
-                    return $seriesData[$date] ?? 0; // Use 0 for missing dates, or null if preferred
+                    return $seriesData[$date] ?? 0;
                 });
 
                 return [
