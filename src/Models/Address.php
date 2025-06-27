@@ -7,6 +7,7 @@ use Exception;
 use FluxErp\Actions\Address\UpdateAddress;
 use FluxErp\Contracts\Calendarable;
 use FluxErp\Contracts\OffersPrinting;
+use FluxErp\Contracts\Targetable;
 use FluxErp\Enums\SalutationEnum;
 use FluxErp\Mail\MagicLoginLink;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
@@ -19,6 +20,7 @@ use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasCalendars;
 use FluxErp\Traits\HasCart;
 use FluxErp\Traits\HasClientAssignment;
+use FluxErp\Traits\HasDefaultTargetableColumns;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasTags;
@@ -56,11 +58,12 @@ use Spatie\Permission\Traits\HasRoles;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 use Throwable;
 
-class Address extends FluxAuthenticatable implements Calendarable, HasLocalePreference, HasMedia, InteractsWithDataTables, OffersPrinting
+class Address extends FluxAuthenticatable implements Calendarable, HasLocalePreference, HasMedia, InteractsWithDataTables, OffersPrinting, Targetable
 {
     use Commentable, Communicatable, Filterable, HasAdditionalColumns, HasCalendars, HasCart, HasClientAssignment,
-        HasFrontendAttributes, HasPackageFactory, HasRoles, HasStates, HasTags, HasUserModification, HasUuid,
-        InteractsWithMedia, Lockable, LogsActivity, MonitorsQueue, Notifiable, Printable, SoftDeletes;
+        HasDefaultTargetableColumns, HasFrontendAttributes, HasPackageFactory, HasRoles, HasStates, HasTags,
+        HasUserModification, HasUuid, InteractsWithMedia, Lockable, LogsActivity, MonitorsQueue, Notifiable, Printable,
+        SoftDeletes;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }

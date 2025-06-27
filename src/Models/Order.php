@@ -8,6 +8,7 @@ use FluxErp\Actions\Transaction\CreateTransaction;
 use FluxErp\Casts\Money;
 use FluxErp\Casts\Percentage;
 use FluxErp\Contracts\OffersPrinting;
+use FluxErp\Contracts\Targetable;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
 use FluxErp\Models\Pivots\OrderSchedule;
@@ -61,7 +62,7 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\ModelStates\HasStates;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
-class Order extends FluxModel implements HasMedia, InteractsWithDataTables, OffersPrinting
+class Order extends FluxModel implements HasMedia, InteractsWithDataTables, OffersPrinting, Targetable
 {
     use CascadeSoftDeletes, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasClientAssignment,
         HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasRelatedModel, HasSerialNumberRange,
@@ -86,6 +87,36 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
         'currency',
     ];
 
+    public static function aggregateColumns(string $type): array
+    {
+        return match ($type) {
+            'count' => ['id'],
+            'sum', 'avg' => [
+                'total_base_net_price',
+                'total_base_gross_price',
+                'total_base_discounted_net_price',
+                'total_base_discounted_gross_price',
+                'gross_profit',
+                'total_purchase_price',
+                'total_cost',
+                'margin',
+                'total_net_price',
+                'total_gross_price',
+                'balance',
+            ],
+            default => [],
+        };
+    }
+
+    public static function aggregateTypes(): array
+    {
+        return [
+            'avg',
+            'count',
+            'sum',
+        ];
+    }
+
     public static function getGenericChannelEvents(): array
     {
         return array_merge(
@@ -94,6 +125,17 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
                 'locked',
             ]
         );
+    }
+
+    public static function ownerColumns(): array
+    {
+        return [
+            'approval_user_id',
+            'agent_id',
+            'responsible_user_id',
+            'created_by',
+            'updated_by',
+        ];
     }
 
     public static function scoutIndexSettings(): ?array
@@ -105,6 +147,20 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
                 'is_locked',
             ],
             'sortableAttributes' => ['*'],
+        ];
+    }
+
+    public static function timeframeColumns(): array
+    {
+        return [
+            'order_date',
+            'invoice_date',
+            'system_delivery_date',
+            'system_delivery_date_end',
+            'customer_delivery_date',
+            'date_of_approval',
+            'created_at',
+            'updated_at',
         ];
     }
 

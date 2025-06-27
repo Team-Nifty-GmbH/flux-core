@@ -480,6 +480,19 @@ if (! function_exists('flux_path')) {
     }
 }
 
+if (! function_exists('map_values_to_options')) {
+    function map_values_to_options(array $values): array
+    {
+        return array_map(
+            fn ($value) => [
+                'label' => __(Illuminate\Support\Str::headline($value)),
+                'value' => $value,
+            ],
+            $values
+        );
+    }
+}
+
 if (! function_exists('model')) {
     function model(string $class): Illuminate\Database\Eloquent\Model
     {

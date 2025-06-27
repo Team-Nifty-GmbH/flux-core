@@ -7,6 +7,7 @@ use FluxErp\Actions\Task\UpdateTask;
 use FluxErp\Casts\Money;
 use FluxErp\Casts\TimeDuration;
 use FluxErp\Contracts\Calendarable;
+use FluxErp\Contracts\Targetable;
 use FluxErp\States\Task\TaskState;
 use FluxErp\Support\Scout\ScoutCustomize;
 use FluxErp\Traits\Categorizable;
@@ -33,7 +34,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media as MediaLibraryMedia;
 use Spatie\ModelStates\HasStates;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
-class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDataTables
+class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDataTables, Targetable
 {
     use Categorizable, Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes,
         HasPackageFactory, HasStates, HasTags, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity,
@@ -43,6 +44,28 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
     }
 
     protected ?string $detailRouteName = 'tasks.id';
+
+    public static function aggregateColumns(string $type): array
+    {
+        return match ($type) {
+            'count' => ['id'],
+            'avg', 'sum' => [
+                'time_budget',
+                'budget',
+                'total_cost',
+            ],
+            default => [],
+        };
+    }
+
+    public static function aggregateTypes(): array
+    {
+        return [
+            'count',
+            'avg',
+            'sum',
+        ];
+    }
 
     public static function fromCalendarEvent(array $event, string $action = 'update'): UpdateTask
     {
@@ -55,6 +78,15 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         ]);
     }
 
+    public static function ownerColumns(): array
+    {
+        return [
+            'responsible_user_id',
+            'created_by',
+            'updated_by',
+        ];
+    }
+
     public static function scoutIndexSettings(): ?array
     {
         return static::baseScoutIndexSettings() ?? [
@@ -63,6 +95,16 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
                 'state',
             ],
             'sortableAttributes' => ['*'],
+        ];
+    }
+
+    public static function timeframeColumns(): array
+    {
+        return [
+            'start_date',
+            'due_date',
+            'created_at',
+            'updated_at',
         ];
     }
 

@@ -97,6 +97,7 @@ use FluxErp\Models\Setting;
 use FluxErp\Models\Snapshot;
 use FluxErp\Models\StockPosting;
 use FluxErp\Models\Tag;
+use FluxErp\Models\Target;
 use FluxErp\Models\Task;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\TicketType;
@@ -199,6 +200,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'snapshot' => Snapshot::class,
             'stock_posting' => StockPosting::class,
             'tag' => Tag::class,
+            'target' => Target::class,
             'task' => Task::class,
             'ticket' => Ticket::class,
             'ticket_type' => TicketType::class,
