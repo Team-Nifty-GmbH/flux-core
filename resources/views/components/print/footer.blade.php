@@ -1,4 +1,5 @@
-<footer class="fixed h-auto w-full bg-white text-center">
+{{--TODO: add fixed when printing--}}
+<footer class="h-auto w-full bg-white text-center">
     <div class="footer-content text-2xs leading-3">
         @section('footer.logo')
         <div class="absolute left-0 right-0 m-auto max-h-32 px-6">

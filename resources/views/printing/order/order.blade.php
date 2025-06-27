@@ -8,6 +8,7 @@
 
 @section('first-page-header')
 <x-flux::print.first-page-header
+    :client="$client"
     :address="Fluent::make($model->address_invoice)"
     :$model
 >
@@ -29,7 +30,11 @@
                         {{ __('Customer no.') }}
                     </td>
                     <td class="py-0 text-right">
-                        {{ $model->contact()->withTrashed()->value('customer_number') }}
+                        @if($model instanceof Illuminate\Support\Fluent )
+                            {{ $model->customer_number }}
+                        @else
+                            {{ $model->contact()->withTrashed()->value('customer_number') }}
+                        @endif
                     </td>
                 </tr>
                 <tr class="leading-none">

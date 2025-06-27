@@ -18,8 +18,13 @@
                     class="absolute left-0 top-0 h-[1cm] w-[1cm]"
                 ></div>
                 {{-- content --}}
-                <x-flux::print.header :client="$this->clientFluent" :subject="$subject"/>
-{{--                <x-flux::print.footer :client="$this->clientFluent"/>--}}
+                <div class="h-full flex flex-col ">
+                    <x-flux::print.header :client="$this->clientFluent" :subject="$subject"/>
+                    <div class="flex-1">
+                        {!! $this->orderPrint() !!}
+                    </div>
+                    <x-flux::print.footer :client="$this->clientFluent"/>
+                </div>
                 {{-- content --}}
                 <div
                     x-cloak

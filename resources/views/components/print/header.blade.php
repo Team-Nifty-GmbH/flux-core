@@ -1,4 +1,5 @@
-<header class="fixed h-auto w-full bg-white text-center font-light">
+{{--TODO: add fixed when printing--}}
+<header class="h-auto w-full bg-white text-center font-light">
     <div class="header-content">
         <div>
             @section('subject')
