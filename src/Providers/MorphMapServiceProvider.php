@@ -40,6 +40,7 @@ use FluxErp\Models\JobBatch;
 use FluxErp\Models\Language;
 use FluxErp\Models\LanguageLine;
 use FluxErp\Models\Lead;
+use FluxErp\Models\LeadLossReason;
 use FluxErp\Models\LeadState;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\Lock;
@@ -154,6 +155,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'language' => Language::class,
             'language_line' => LanguageLine::class,
             'lead' => Lead::class,
+            'lead_loss_reason' => LeadLossReason::class,
             'lead_state' => LeadState::class,
             'ledger_account' => LedgerAccount::class,
             'lock' => Lock::class,

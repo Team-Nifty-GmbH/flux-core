@@ -4,6 +4,7 @@ namespace FluxErp\Rulesets\Lead;
 
 use FluxErp\Models\Address;
 use FluxErp\Models\Lead;
+use FluxErp\Models\LeadLossReason;
 use FluxErp\Models\LeadState;
 use FluxErp\Models\RecordOrigin;
 use FluxErp\Models\User;
@@ -38,16 +39,21 @@ class UpdateLeadRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => Address::class]),
             ],
-            'recommended_by_address_id' => [
+            'lead_loss_reason_id' => [
                 'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => Address::class]),
+                app(ModelExists::class, ['model' => LeadLossReason::class]),
             ],
             'lead_state_id' => [
                 'sometimes',
                 'required',
                 'integer',
                 app(ModelExists::class, ['model' => LeadState::class]),
+            ],
+            'recommended_by_address_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => Address::class]),
             ],
             'record_origin_id' => [
                 'nullable',

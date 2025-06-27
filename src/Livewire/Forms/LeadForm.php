@@ -37,6 +37,8 @@ class LeadForm extends FluxForm
     #[Locked]
     public ?int $id = null;
 
+    public ?int $lead_loss_reason_id = null;
+
     public ?int $lead_state_id = null;
 
     public ?string $loss_reason = null;

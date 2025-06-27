@@ -85,18 +85,22 @@
                         x-on:click.stop="node[childrenAttribute] ? toggleOpen(node, $event) : null"
                     ></i>
                     @if ($selectable)
-                        @if ($checkbox?->isNotEmpty())
-                            {{ $checkbox }}
-                        @else
-                            <x-checkbox
-                                sm
-                                x-effect="$el.indeterminate = isIndeterminate(node)"
-                                x-on:change="toggleCheck(node, $event.target.checked)"
-                                x-bind:checked="isChecked(node)"
-                                x-bind:value="node.id"
-                                class="form-checkbox"
-                            />
-                        @endif
+                        <template x-if="node.isSelectable ?? true">
+                            <div>
+                                @if ($checkbox?->isNotEmpty())
+                                    {{ $checkbox }}
+                                @else
+                                    <x-checkbox
+                                        sm
+                                        x-effect="$el.indeterminate = isIndeterminate(node)"
+                                        x-on:change="toggleCheck(node, $event.target.checked)"
+                                        x-bind:checked="isChecked(node)"
+                                        x-bind:value="node.id"
+                                        class="form-checkbox"
+                                    />
+                                @endif
+                            </div>
+                        </template>
                     @endif
 
                     @if (! $hideIcon)
