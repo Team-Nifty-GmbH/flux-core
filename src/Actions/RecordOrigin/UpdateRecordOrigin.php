@@ -22,10 +22,10 @@ class UpdateRecordOrigin extends FluxAction
     public function performAction(): Model
     {
         $recordOrigin = resolve_static(RecordOrigin::class, 'query')
-            ->whereKey($this->data['id'])
+            ->whereKey($this->getData('id'))
             ->first();
 
-        $recordOrigin->fill($this->data);
+        $recordOrigin->fill($this->getData());
         $recordOrigin->save();
 
         return $recordOrigin->withoutRelations()->fresh();

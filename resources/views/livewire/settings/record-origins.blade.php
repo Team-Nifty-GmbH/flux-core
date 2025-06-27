@@ -12,9 +12,9 @@
             <x-select.styled
                 :label="__('Origin type')"
                 wire:model="recordOriginForm.model_type"
-                :options="$originTypeOptions"
                 select="label:label|value:id"
                 unfiltered
+                :options="$originTypes"
             />
         </div>
         <x-toggle
@@ -22,7 +22,6 @@
             :label="__('Is Active')"
         />
     </div>
-
     <x-slot:footer>
         <x-button
             color="secondary"

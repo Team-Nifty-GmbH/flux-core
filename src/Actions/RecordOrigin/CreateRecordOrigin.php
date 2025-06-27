@@ -23,6 +23,6 @@ class CreateRecordOrigin extends FluxAction
         $recordOrigin = app(RecordOrigin::class, ['attributes' => $this->data]);
         $recordOrigin->save();
 
-        return $recordOrigin->fresh();
+        return $recordOrigin->refresh();
     }
 }

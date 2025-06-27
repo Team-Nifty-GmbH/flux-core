@@ -12,7 +12,9 @@ class ContactTableSeeder extends Seeder
     public function run(): void
     {
         $clients = Client::all(['id']);
-        $recordOrigins = RecordOrigin::query()->where('model_type', morph_alias(Contact::class))->get('id');
+        $recordOrigins = RecordOrigin::query()
+            ->where('model_type', morph_alias(Contact::class))
+            ->get('id');
 
         foreach ($clients as $client) {
             Contact::factory()->count(10)->create([

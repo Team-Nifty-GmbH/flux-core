@@ -55,6 +55,7 @@ class CreateContactRuleset extends FluxRuleset
                 'integer',
                 'nullable',
                 app(ModelExists::class, ['model' => RecordOrigin::class])
+                    ->where('model_type', morph_alias(Contact::class))
                     ->where('is_active', true),
             ],
             'currency_id' => [

@@ -21,7 +21,7 @@ class DeleteRecordOrigin extends FluxAction
     public function performAction(): ?bool
     {
         return resolve_static(RecordOrigin::class, 'query')
-            ->whereKey($this->data['id'])
+            ->whereKey($this->getData('id'))
             ->first()
             ->delete();
     }
