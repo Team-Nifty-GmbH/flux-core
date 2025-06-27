@@ -78,6 +78,9 @@ use FluxErp\Actions\Language\UpdateLanguage;
 use FluxErp\Actions\LanguageLine\CreateLanguageLine;
 use FluxErp\Actions\LanguageLine\DeleteLanguageLine;
 use FluxErp\Actions\LanguageLine\UpdateLanguageLine;
+use FluxErp\Actions\LeadLossReason\CreateLeadLossReason;
+use FluxErp\Actions\LeadLossReason\DeleteLeadLossReason;
+use FluxErp\Actions\LeadLossReason\UpdateLeadLossReason;
 use FluxErp\Actions\LedgerAccount\CreateLedgerAccount;
 use FluxErp\Actions\LedgerAccount\DeleteLedgerAccount;
 use FluxErp\Actions\LedgerAccount\UpdateLedgerAccount;
@@ -246,6 +249,7 @@ use FluxErp\Models\FormBuilderResponse;
 use FluxErp\Models\FormBuilderSection;
 use FluxErp\Models\Language;
 use FluxErp\Models\LanguageLine;
+use FluxErp\Models\LeadLossReason;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\Lock;
 use FluxErp\Models\MailAccount;
@@ -502,6 +506,15 @@ Route::prefix('api')
                 Route::post('/languages', CreateLanguage::class);
                 Route::put('/languages', UpdateLanguage::class);
                 Route::delete('/languages/{id}', DeleteLanguage::class);
+
+                // LeadLossReasons
+                Route::get('/lead-loss-reasons/{id}', [BaseController::class, 'show'])
+                    ->defaults('model', LeadLossReason::class);
+                Route::get('/lead-loss-reasons', [BaseController::class, 'index'])
+                    ->defaults('model', LeadLossReason::class);
+                Route::post('/lead-loss-reasons', CreateLeadLossReason::class);
+                Route::put('/lead-loss-reasons', UpdateLeadLossReason::class);
+                Route::delete('/lead-loss-reasons/{id}', DeleteLeadLossReason::class);
 
                 // LedgerAccounts
                 Route::get('/ledger-accounts/{id}', [BaseController::class, 'show'])

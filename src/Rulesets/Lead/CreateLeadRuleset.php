@@ -32,15 +32,15 @@ class CreateLeadRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => Address::class]),
             ],
-            'recommended_by_address_id' => [
-                'nullable',
-                'integer',
-                app(ModelExists::class, ['model' => Address::class]),
-            ],
             'lead_state_id' => [
                 'required',
                 'integer',
                 app(ModelExists::class, ['model' => LeadState::class]),
+            ],
+            'recommended_by_address_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => Address::class]),
             ],
             'user_id' => [
                 'nullable',

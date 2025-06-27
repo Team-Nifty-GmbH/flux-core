@@ -36,9 +36,9 @@
                     x-bind:readonly="!edit"
                     :label="__('Address')"
                     wire:model="leadForm.address_id"
+                    required
                     select="label:label|value:id"
                     unfiltered
-                    required
                     :request="[
                         'url' => route('search', \FluxErp\Models\Address::class),
                         'method' => 'POST',
@@ -56,9 +56,9 @@
                 <x-select.styled
                     x-on:select="$wire.isLost = $event.detail.select.is_lost"
                     wire:model="leadForm.lead_state_id"
-                    select="label:name|value:id"
                     :label="__('Lead State')"
                     x-bind:readonly="!edit"
+                    select="label:name|value:id"
                     unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\LeadState::class),
@@ -66,6 +66,38 @@
                         'params' => [
                             'searchFields' => [
                                 'name',
+                            ],
+                        ],
+                    ]"
+                />
+            </div>
+            <div
+                x-bind:class="! edit && 'pointer-events-none'"
+                x-cloak
+                x-show="$wire.isLost"
+            >
+                <x-select.styled
+                    wire:model="leadForm.lead_loss_reason_id"
+                    :label="__('Lead Loss Reason')"
+                    select="label:name|value:id"
+                    unfiltered
+                    :request="[
+                        'url' => route('search', \FluxErp\Models\LeadLossReason::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'fields' => [
+                                'id',
+                                'name',
+                            ],
+                            'searchFields' => [
+                                'name',
+                            ],
+                            'where' => [
+                                [
+                                    'is_active',
+                                    '=',
+                                    true,
+                                ],
                             ],
                         ],
                     ]"
