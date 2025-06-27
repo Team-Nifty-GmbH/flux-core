@@ -2,21 +2,30 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use FluxErp\Contracts\HasWidgetOptions;
 use FluxErp\Livewire\Dashboard\Dashboard;
+use FluxErp\Livewire\DataTables\ContactList;
 use FluxErp\Livewire\Support\Widgets\Charts\CircleChart;
 use FluxErp\Models\Contact;
-use FluxErp\Support\Metrics\Charts\Donut;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use FluxErp\Traits\Widgetable;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
+use Livewire\Livewire;
+use TeamNiftyGmbH\DataTable\Helpers\SessionFilter;
 
-class ContactsByContactOrigin extends CircleChart
+class ContactsByContactOrigin extends CircleChart implements HasWidgetOptions
 {
     use IsTimeFrameAwareWidget, Widgetable;
 
     public ?array $chart = [
         'type' => 'donut',
     ];
+
+    #[Locked]
+    public array $data = [];
 
     public bool $showTotals = false;
 
@@ -34,21 +43,28 @@ class ContactsByContactOrigin extends CircleChart
 
     public function calculateChart(): void
     {
-        $metrics = Donut::make(
-            resolve_static(Contact::class, 'query')
-                ->whereNotNull('contact_origin_id')
-                ->join('contact_origins', 'contact_origins.id', '=', 'contacts.contact_origin_id')
-                ->where('contact_origins.is_active', true)
-                ->orderByRaw('COUNT(*) DESC')
-        )
-            ->setRange($this->timeFrame)
-            ->setEndingDate($this->end)
-            ->setStartingDate($this->start)
-            ->setLabelKey('contactOrigin.name')
-            ->count('contact_origin_id');
+        $this->data = resolve_static(Contact::class, 'query')
+            ->whereBetween('created_at', [
+                $this->getStart()->toDateTimeString(),
+                $this->getEnd()->toDateTimeString(),
+            ])
+            ->groupBy('contact_origin_id')
+            ->with('contactOrigin:id,name,is_active')
+            ->selectRaw('contact_origin_id, COUNT(id) as total')
+            ->orderBy('total', 'desc')
+            ->get()
+            ->map(fn (Model $contact) => $contact->contactOrigin?->is_active !== false
+                ? [
+                    'id' => $contact->contact_origin_id,
+                    'label' => $contact->contactOrigin?->name ?? __('Unassigned Contacts'),
+                    'total' => $contact->total,
+                ] : null,
+            )
+            ->filter()
+            ->toArray();
 
-        $this->series = $metrics->getData();
-        $this->labels = $metrics->getLabels();
+        $this->labels = array_column($this->data, 'label');
+        $this->series = array_column($this->data, 'total');
     }
 
     public function getPlotOptions(): array
@@ -66,6 +82,39 @@ class ContactsByContactOrigin extends CircleChart
                 ],
             ],
         ];
+    }
+
+    #[Renderless]
+    public function options(): array
+    {
+        return array_map(
+            fn (array $data) => [
+                'label' => data_get($data, 'label'),
+                'method' => 'show',
+                'params' => [
+                    'id' => data_get($data, 'id'),
+                    'label' => data_get($data, 'label'),
+                ],
+            ],
+            $this->data
+        );
+    }
+
+    #[Renderless]
+    public function show(array $contactOrigin): void
+    {
+        $start = $this->getStart()->toDateString();
+        $end = $this->getEnd()->toDateString();
+
+        SessionFilter::make(
+            Livewire::new(resolve_static(ContactList::class, 'class'))->getCacheKey(),
+            fn (Builder $query) => $query
+                ->where('contact_origin_id', data_get($contactOrigin, 'id'))
+                ->whereBetween('created_at', [$start, $end]),
+            __('Contacts by :contact-origin', ['contact-origin' => data_get($contactOrigin, 'label')]),
+        )->store();
+
+        $this->redirectRoute('contacts.contacts', navigate: true);
     }
 
     public function showTitle(): bool
