@@ -7,19 +7,24 @@ use FluxErp\Livewire\DataTables\TargetList;
 use FluxErp\Livewire\Forms\TargetForm;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
 use FluxErp\Traits\Livewire\DataTableHasFormEdit;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Locked;
 
 class Targets extends TargetList
 {
-    use DataTableHasFormEdit;
+    use DataTableHasFormEdit {
+        DataTableHasFormEdit::edit as baseEdit;
+    }
 
     #[Locked]
     public array $aggregateColumns = [];
 
     #[Locked]
     public array $aggregateTypes = [];
+
+    public bool $isSelectable = true;
 
     #[Locked]
     public array $ownerColumns = [];
@@ -32,11 +37,27 @@ class Targets extends TargetList
 
     protected ?string $includeBefore = 'flux::livewire.settings.targets';
 
+    public function edit(string|int|null $id = null): void
+    {
+        $this->baseEdit($id);
+
+        if ($id) {
+            $this->updateAggregateColumnOptions($this->target->aggregate_type);
+            $this->updateSelectableColumns($this->target->model_type);
+        }
+    }
+
+    public function getBuilder(Builder $builder): Builder
+    {
+        return $builder->whereNull('parent_id');
+    }
+
     public function updateAggregateColumnOptions(?string $aggregateType = null): void
     {
         $this->target->reset('aggregate_column');
 
         if ($aggregateType) {
+            /** @var Targetable $model */
             $model = morphed_model($this->target->model_type);
             $this->aggregateColumns = map_values_to_options($model::aggregateColumns($aggregateType));
         } else {
@@ -55,6 +76,7 @@ class Targets extends TargetList
         ]);
 
         if ($modelType) {
+            /** @var Targetable $model */
             $model = morphed_model($modelType);
 
             $this->timeframeColumns = map_values_to_options($model::timeframeColumns());
@@ -80,5 +102,10 @@ class Targets extends TargetList
                     ->toArray(),
             ]
         );
+    }
+
+    protected function supportBatchDelete(): bool
+    {
+        return true;
     }
 }

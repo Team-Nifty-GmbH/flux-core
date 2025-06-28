@@ -1,13 +1,8 @@
 <x-modal :id="$target->modalName()">
     <div class="flex flex-col gap-4">
-        <x-date
-            :label="__('Start')"
-            wire:model="target.start_date"
-        />
-        <x-date
-            :label="__('End')"
-            wire:model="target.end_date"
-        />
+        <x-spinner />
+        <x-date :label="__('Start')" wire:model="target.start_date" />
+        <x-date :label="__('End')" wire:model="target.end_date" />
         <x-select.styled
             :label="__('Model Type')"
             wire:model="target.model_type"
@@ -39,15 +34,12 @@
             wire:model="target.owner_column"
             :options="$ownerColumns"
         />
-        <x-number
-            :label="__('Priority')"
-            wire:model="target.priority"
-        />
+        <x-number :label="__('Priority')" wire:model="target.priority" />
         <x-select.styled
             :label="__('Users')"
             autocomplete="off"
             multiple
-            wire:model="task.users"
+            wire:model="target.users"
             select="label:label|value:id"
             unfiltered
             :request="[

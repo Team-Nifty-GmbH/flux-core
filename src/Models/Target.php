@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use Carbon\CarbonPeriod;
+use FluxErp\Models\Pivots\TargetUser;
 use FluxErp\Traits\HasParentChildRelations;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
@@ -69,6 +70,6 @@ class Target extends FluxModel
 
     public function users(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'target_user');
+        return $this->belongsToMany(User::class, 'target_user')->using(TargetUser::class);
     }
 }
