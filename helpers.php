@@ -584,7 +584,7 @@ if (! function_exists('morph_alias')) {
 
 if (! function_exists('morphed_model')) {
     /**
-     * @return class-string<\Illuminate\Database\Eloquent\Model>|null
+     * @return class-string<Illuminate\Database\Eloquent\Model>|null
      */
     function morphed_model(string $alias): ?string
     {
