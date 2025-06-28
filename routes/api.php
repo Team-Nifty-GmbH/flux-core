@@ -405,7 +405,7 @@ Route::prefix('api')
                     ->defaults('model', ContactOption::class);
                 Route::post('/contact-options', CreateContactOption::class);
                 Route::put('/contact-options', UpdateContactOption::class);
-                Route::delete('/contact-options', DeleteContactOption::class);
+                Route::delete('/contact-options/{id}', DeleteContactOption::class);
 
                 // RecordOrigins
                 Route::get('/record-origins/{id}', [BaseController::class, 'show'])
