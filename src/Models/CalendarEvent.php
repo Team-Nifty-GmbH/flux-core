@@ -10,8 +10,10 @@ use FluxErp\Actions\CalendarEvent\ReactivateCalendarEvent;
 use FluxErp\Actions\CalendarEvent\UpdateCalendarEvent;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Casts\MorphTo as MorphToCast;
+use FluxErp\Contracts\Targetable;
 use FluxErp\Models\Pivots\CalendarEventInvite;
 use FluxErp\Models\Pivots\Inviteable;
+use FluxErp\Traits\HasDefaultTargetableColumns;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\InteractsWithMedia;
@@ -28,9 +30,9 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
 
-class CalendarEvent extends FluxModel implements HasMedia
+class CalendarEvent extends FluxModel implements HasMedia, Targetable
 {
-    use HasPackageFactory, HasUlids, HasUserModification, InteractsWithMedia, LogsActivity;
+    use HasDefaultTargetableColumns, HasPackageFactory, HasUlids, HasUserModification, InteractsWithMedia, LogsActivity;
 
     public static function fromCalendarEvent(array $event, string $action): ?FluxAction
     {
@@ -42,6 +44,16 @@ class CalendarEvent extends FluxModel implements HasMedia
             'reactivate' => ReactivateCalendarEvent::make($event),
             default => null,
         };
+    }
+
+    public static function timeframeColumns(): array
+    {
+        return [
+            'start',
+            'end',
+            'created_at',
+            'updated_at',
+        ];
     }
 
     protected function casts(): array

@@ -496,6 +496,19 @@ if (! function_exists('flux_path')) {
     }
 }
 
+if (! function_exists('map_values_to_options')) {
+    function map_values_to_options(array $values): array
+    {
+        return array_map(
+            fn ($value) => [
+                'label' => __(Illuminate\Support\Str::headline($value)),
+                'value' => $value,
+            ],
+            $values
+        );
+    }
+}
+
 if (! function_exists('model')) {
     function model(string $class): Illuminate\Database\Eloquent\Model
     {
@@ -570,6 +583,9 @@ if (! function_exists('morph_alias')) {
 }
 
 if (! function_exists('morphed_model')) {
+    /**
+     * @return class-string<Illuminate\Database\Eloquent\Model>|null
+     */
     function morphed_model(string $alias): ?string
     {
         $class = Illuminate\Database\Eloquent\Relations\Relation::getMorphedModel($alias);

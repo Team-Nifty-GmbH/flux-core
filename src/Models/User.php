@@ -5,6 +5,7 @@ namespace FluxErp\Models;
 use Exception;
 use FluxErp\Mail\MagicLoginLink;
 use FluxErp\Models\Pivots\PrinterUser;
+use FluxErp\Models\Pivots\TargetUser;
 use FluxErp\Traits\CacheModelQueries;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasCalendars;
@@ -236,6 +237,11 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
     public function settings(): MorphMany
     {
         return $this->morphMany(Setting::class, 'model');
+    }
+
+    public function targets(): BelongsToMany
+    {
+        return $this->belongsToMany(Target::class, 'target_user')->using(TargetUser::class);
     }
 
     public function tasks(): BelongsToMany

@@ -5,6 +5,7 @@ namespace FluxErp\Models;
 use FluxErp\Casts\BcFloat;
 use FluxErp\Casts\Money;
 use FluxErp\Casts\Percentage;
+use FluxErp\Contracts\Targetable;
 use FluxErp\Enums\CreditAccountPostingEnum;
 use FluxErp\Traits\CascadeSoftDeletes;
 use FluxErp\Traits\Commentable;
@@ -34,7 +35,7 @@ use Illuminate\Support\Str;
 use Spatie\EloquentSortable\Sortable;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
-class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortable
+class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortable, Targetable
 {
     use CascadeSoftDeletes, Commentable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes,
         HasPackageFactory, HasParentChildRelations, HasSerialNumberRange, HasTags, HasUserModification, HasUuid,
@@ -53,6 +54,54 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
         'children',
         'commission',
     ];
+
+    public static function aggregateColumns(string $type): array
+    {
+        return match ($type) {
+            'count' => ['id'],
+            'sum', 'avg' => [
+                'amount',
+                'margin',
+                'provision',
+                'purchase_price',
+                'total_base_gross_price',
+                'total_base_net_price',
+                'total_gross_price',
+                'total_net_price',
+                'vat_price',
+                'unit_net_price',
+                'unit_gross_price',
+            ],
+            default => [],
+        };
+    }
+
+    public static function aggregateTypes(): array
+    {
+        return [
+            'avg',
+            'count',
+            'sum',
+        ];
+    }
+
+    public static function ownerColumns(): array
+    {
+        return [
+            'created_by',
+            'updated_by',
+        ];
+    }
+
+    public static function timeframeColumns(): array
+    {
+        return [
+            'customer_delivery_date',
+            'possible_delivery_date',
+            'created_at',
+            'updated_at',
+        ];
+    }
 
     protected static function booted(): void
     {
