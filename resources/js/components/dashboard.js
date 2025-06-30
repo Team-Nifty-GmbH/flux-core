@@ -7,9 +7,6 @@ export default function () {
         emptyLayout: false,
         grid: null,
         isLoading: false,
-        init() {
-            this.reInit().disable();
-        },
         destroy() {
             // destroy grid - on page leave - since livewire caches the component
             if (this.grid !== null) {
@@ -27,7 +24,7 @@ export default function () {
             this.editGrid = mode;
         },
         async syncGridOnNewItem() {
-            const snapshot = Array.from(this.$wire.widgets);
+            const snapshot = Array.from(await this.$wire.widgets);
             const onScreen = this.grid.getGridItems();
             const newSnapshot = [];
             // update x,y coordinates and type of widget if selected
@@ -87,7 +84,7 @@ export default function () {
         },
         async save() {
             this.isLoading = true;
-            const snapshot = Array.from(this.$wire.widgets);
+            const snapshot = Array.from(await this.$wire.widgets);
             const onScreen = this.grid.getGridItems();
             const newSnapshot = [];
             // update x,y coordinates on save
@@ -119,7 +116,6 @@ export default function () {
             }
             const id = uuidv4();
             const selectedWidget = this.$wire.availableWidgets[key];
-
             const placeholder = this.grid.addWidget({
                 id,
                 h: selectedWidget.defaultHeight,
@@ -132,9 +128,8 @@ export default function () {
 
             // sync position of each grid element with the server
             await this.syncGridOnNewItem();
-
             // reload component
-            await this.$wire.$refresh();
+            await this.$wire.resetWidgets();
 
             // re-init grid-stack
             this.reInit();
@@ -148,6 +143,7 @@ export default function () {
             if (this.grid !== null) {
                 this.grid.destroy(false);
             }
+
             // init grid
             this.grid = GridStack.init({
                 margin: 10,
