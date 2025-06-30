@@ -8,7 +8,6 @@ use FluxErp\Livewire\Forms\AddressForm;
 use FluxErp\Livewire\Forms\ContactForm;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
-use FluxErp\Models\ContactOrigin;
 use FluxErp\Models\Permission;
 use FluxErp\States\Address\AdvertisingState;
 use FluxErp\Traits\Livewire\Actions;
@@ -73,15 +72,7 @@ class Addresses extends Component
 
     public function render(): Application|Factory|View
     {
-        return view(
-            'flux::livewire.contact.addresses',
-            [
-                'contactOrigins' => resolve_static(ContactOrigin::class, 'query')
-                    ->where('is_active', true)
-                    ->get(['id', 'name'])
-                    ->toArray(),
-            ]
-        );
+        return view('flux::livewire.contact.addresses');
     }
 
     #[Renderless]
@@ -157,6 +148,9 @@ class Addresses extends Component
 
         $this->edit = false;
     }
+
+    #[Renderless]
+    public function evaluate(): void {}
 
     #[Renderless]
     public function getListeners(): array
@@ -240,20 +234,8 @@ class Addresses extends Component
             ->orderByDesc('is_invoice_address')
             ->orderByDesc('is_delivery_address')
             ->orderByDesc('is_active')
-            ->get([
-                'id',
-                'contact_id',
-                'company',
-                'firstname',
-                'lastname',
-                'zip',
-                'city',
-                'street',
-                'is_active',
-                'is_main_address',
-                'is_invoice_address',
-                'is_delivery_address',
-            ]);
+            ->get()
+            ->each(fn (Address $address) => $address->append('postal_address'));
 
         foreach ($addresses as $address) {
             $this->listeners[

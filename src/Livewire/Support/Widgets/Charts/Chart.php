@@ -17,6 +17,8 @@ abstract class Chart extends Component
 
     public ?array $colors = null;
 
+    public ?array $config = null;
+
     public ?array $dataLabels = [
         'enabled' => false,
     ];

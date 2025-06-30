@@ -5,6 +5,7 @@ namespace FluxErp\Models;
 use Carbon\Carbon;
 use FluxErp\Actions\WorkTime\UpdateWorkTime;
 use FluxErp\Contracts\Calendarable;
+use FluxErp\Contracts\Targetable;
 use FluxErp\Support\Calculation\Rounding;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasPackageFactory;
@@ -16,9 +17,31 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Str;
 
-class WorkTime extends FluxModel implements Calendarable
+class WorkTime extends FluxModel implements Calendarable, Targetable
 {
     use Filterable, HasPackageFactory, HasParentChildRelations, HasUuid, SoftDeletes;
+
+    public static function aggregateColumns(string $type): array
+    {
+        return match ($type) {
+            'count' => ['id'],
+            'avg', 'sum' => [
+                'paused_time_ms',
+                'total_time_ms',
+                'total_cost',
+            ],
+            default => [],
+        };
+    }
+
+    public static function aggregateTypes(): array
+    {
+        return [
+            'avg',
+            'count',
+            'sum',
+        ];
+    }
 
     public static function fromCalendarEvent(array $event, string $action = 'update'): UpdateWorkTime
     {
@@ -40,6 +63,25 @@ class WorkTime extends FluxModel implements Calendarable
                 'taskUpdated',
             ]
         );
+    }
+
+    public static function ownerColumns(): array
+    {
+        return [
+            'user_id',
+            'created_by',
+            'updated_by',
+        ];
+    }
+
+    public static function timeframeColumns(): array
+    {
+        return [
+            'started_at',
+            'ended_at',
+            'created_at',
+            'updated_at',
+        ];
     }
 
     public static function toCalendar(): array

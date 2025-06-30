@@ -247,7 +247,7 @@ class PurchaseInvoiceTest extends BaseSetup
             Carbon::parse($dbPurchaseInvoice->invoice_date)->toDateString()
         );
         $this->assertNull($dbPurchaseInvoice->invoice_number);
-        $this->assertTrue($dbPurchaseInvoice->is_net);
+        $this->assertFalse($dbPurchaseInvoice->is_net);
         $this->assertTrue($this->user->is($dbPurchaseInvoice->getCreatedBy()));
         $this->assertTrue($this->user->is($dbPurchaseInvoice->getUpdatedBy()));
         $this->assertEmpty($dbPurchaseInvoice->purchaseInvoicePositions);

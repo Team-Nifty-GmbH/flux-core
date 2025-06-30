@@ -320,14 +320,8 @@ class Calendar extends Component
         $calendarEvents = $calendar->calendarEvents()
             ->whereNull('repeat')
             ->where(function ($query) use ($info): void {
-                $query->whereBetween('start', [
-                    Carbon::parse($info['start']),
-                    Carbon::parse($info['end']),
-                ])
-                    ->orWhereBetween('end', [
-                        Carbon::parse($info['start']),
-                        Carbon::parse($info['end']),
-                    ]);
+                $query->where('start', '<=', Carbon::parse($info['end']))
+                    ->where('end', '>=', Carbon::parse($info['start']));
             })
             ->with('invited', fn ($query) => $query->withPivot('status'))
             ->get()

@@ -37,6 +37,8 @@ class LeadForm extends FluxForm
     #[Locked]
     public ?int $id = null;
 
+    public ?int $lead_loss_reason_id = null;
+
     public ?int $lead_state_id = null;
 
     public ?string $loss_reason = null;
@@ -46,6 +48,8 @@ class LeadForm extends FluxForm
     public string|float|null $probability_percentage = null;
 
     public ?int $recommended_by_address_id = null;
+
+    public ?int $record_origin_id = null;
 
     public int $score = 0;
 

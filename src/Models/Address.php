@@ -7,6 +7,7 @@ use Exception;
 use FluxErp\Actions\Address\UpdateAddress;
 use FluxErp\Contracts\Calendarable;
 use FluxErp\Contracts\OffersPrinting;
+use FluxErp\Contracts\Targetable;
 use FluxErp\Enums\SalutationEnum;
 use FluxErp\Mail\MagicLoginLink;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
@@ -19,6 +20,7 @@ use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasCalendars;
 use FluxErp\Traits\HasCart;
 use FluxErp\Traits\HasClientAssignment;
+use FluxErp\Traits\HasDefaultTargetableColumns;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasTags;
@@ -56,11 +58,12 @@ use Spatie\Permission\Traits\HasRoles;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 use Throwable;
 
-class Address extends FluxAuthenticatable implements Calendarable, HasLocalePreference, HasMedia, InteractsWithDataTables, OffersPrinting
+class Address extends FluxAuthenticatable implements Calendarable, HasLocalePreference, HasMedia, InteractsWithDataTables, OffersPrinting, Targetable
 {
     use Commentable, Communicatable, Filterable, HasAdditionalColumns, HasCalendars, HasCart, HasClientAssignment,
-        HasFrontendAttributes, HasPackageFactory, HasRoles, HasStates, HasTags, HasUserModification, HasUuid,
-        InteractsWithMedia, Lockable, LogsActivity, MonitorsQueue, Notifiable, Printable, SoftDeletes;
+        HasDefaultTargetableColumns, HasFrontendAttributes, HasPackageFactory, HasRoles, HasStates, HasTags,
+        HasUserModification, HasUuid, InteractsWithMedia, Lockable, LogsActivity, MonitorsQueue, Notifiable, Printable,
+        SoftDeletes;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }
@@ -168,6 +171,71 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
 
             $contactUpdates = [];
             $addressesUpdates = [];
+            if ($address->isDirty('contact_id') && ! $address->isDirty($address->getKeyName())) {
+                if (! $oldContactHasAddresses = resolve_static(Address::class, 'query')
+                    ->where('contact_id', $address->getRawOriginal('contact_id'))
+                    ->exists()
+                ) {
+                    resolve_static(Contact::class, 'query')
+                        ->whereKey($address->getRawOriginal('contact_id'))
+                        ->first()
+                        ?->delete();
+                }
+
+                // Updates that need to be done (address itself, old contact and its addresses)
+                $addressUpdates = [];
+                $oldContactUpdates = [];
+                $oldContactAddressesUpdates = [];
+                $firstAddressId = resolve_static(Address::class, 'query')
+                    ->where('contact_id', $address->getRawOriginal('contact_id'))
+                    ->value('id');
+
+                if ($address->getRawOriginal('is_main_address')) {
+                    $oldContactUpdates['main_address_id'] = $firstAddressId;
+                    $oldContactAddressesUpdates['is_main_address'] = true;
+
+                    if ($address->isClean('is_main_address')) {
+                        $addressUpdates['is_main_address'] = false;
+                    }
+                }
+
+                if ($address->getRawOriginal('is_invoice_address')) {
+                    $oldContactUpdates['invoice_address_id'] = $firstAddressId;
+                    $oldContactAddressesUpdates['is_invoice_address'] = true;
+
+                    if ($address->isClean('is_invoice_address')) {
+                        $addressUpdates['is_invoice_address'] = false;
+                    }
+                }
+
+                if ($address->getRawOriginal('is_delivery_address')) {
+                    $oldContactUpdates['delivery_address_id'] = $firstAddressId;
+                    $oldContactAddressesUpdates['is_delivery_address'] = true;
+
+                    if ($address->isClean('is_delivery_address')) {
+                        $addressUpdates['is_delivery_address'] = false;
+                    }
+                }
+
+                // Update address is_main_address, is_invoice_address, is_delivery_address if it's moved to another contact
+                if ($addressUpdates) {
+                    resolve_static(Address::class, 'query')
+                        ->whereKey($address->getKey())
+                        ->update($addressUpdates);
+                }
+
+                // Update old contact and its addresses
+                if ($oldContactUpdates && $oldContactHasAddresses) {
+                    resolve_static(Contact::class, 'query')
+                        ->whereKey($address->getRawOriginal('contact_id'))
+                        ->update($oldContactUpdates);
+
+                    resolve_static(Address::class, 'query')
+                        ->whereKeyNot($address->getKey())
+                        ->where('contact_id', $address->getRawOriginal('contact_id'))
+                        ->update($oldContactAddressesUpdates);
+                }
+            }
 
             if ($address->isDirty('is_main_address') && $address->is_main_address) {
                 $contactUpdates += [
@@ -205,13 +273,25 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                     ->update($contactUpdates);
 
                 resolve_static(Address::class, 'query')
+                    ->whereKeyNot($address->getKey())
                     ->where('contact_id', $address->contact_id)
-                    ->where('id', '!=', $address->id)
                     ->update($addressesUpdates);
             }
         });
 
         static::deleted(function (Address $address): void {
+            if (! resolve_static(Address::class, 'query')
+                ->where('contact_id', $address->contact_id)
+                ->exists()
+            ) {
+                resolve_static(Contact::class, 'query')
+                    ->whereKey($address->contact_id)
+                    ->first()
+                    ?->delete();
+
+                return;
+            }
+
             $contactUpdates = [];
             $addressesUpdates = [];
             $mainAddress = resolve_static(Address::class, 'query')
@@ -567,14 +647,16 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
     protected function postalAddress(): Attribute
     {
         return Attribute::get(
-            fn () => array_filter([
-                $this->company,
-                trim($this->firstname . ' ' . $this->lastname),
-                $this->addition,
-                $this->street,
-                trim($this->country?->iso_alpha2 . ' ' . $this->zip . ' ' . $this->city),
-                $this->country?->name,
-            ])
+            fn () => array_values(
+                array_filter([
+                    $this->company,
+                    trim($this->firstname . ' ' . $this->lastname),
+                    $this->addition,
+                    $this->street,
+                    trim($this->zip . ' ' . $this->city),
+                    $this->country?->name,
+                ])
+            )
         );
     }
 }

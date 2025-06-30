@@ -2,16 +2,21 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use FluxErp\Contracts\HasWidgetOptions;
 use FluxErp\Livewire\Dashboard\Dashboard;
+use FluxErp\Livewire\Order\OrderList;
 use FluxErp\Livewire\Support\Widgets\ValueBox;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Order;
 use FluxErp\Support\Metrics\Value;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Number;
 use Livewire\Attributes\Renderless;
+use Livewire\Livewire;
+use TeamNiftyGmbH\DataTable\Helpers\SessionFilter;
 
-class Revenue extends ValueBox
+class Revenue extends ValueBox implements HasWidgetOptions
 {
     use IsTimeFrameAwareWidget;
 
@@ -42,11 +47,58 @@ class Revenue extends ValueBox
         $this->growthRate = $metric->getGrowthRate();
     }
 
+    #[Renderless]
+    public function options(): array
+    {
+        return [
+            [
+                'label' => static::getLabel(),
+                'method' => 'show',
+                'params' => 'current',
+            ],
+            [
+                'label' => __('Previous Period'),
+                'method' => 'showPrevious',
+                'params' => 'previous',
+            ],
+        ];
+    }
+
+    #[Renderless]
+    public function show(string $period): void
+    {
+        if (strtolower($period) === 'previous') {
+            $start = $this->getStartPrevious()->toDateString();
+            $end = $this->getEndPrevious()->toDateString();
+        } else {
+            $start = $this->getStart()->toDateString();
+            $end = $this->getEnd()->toDateString();
+        }
+
+        SessionFilter::make(
+            Livewire::new(resolve_static(OrderList::class, 'class'))->getCacheKey(),
+            fn (Builder $query) => $query
+                ->whereNotNull('invoice_date')
+                ->whereNotNull('invoice_number')
+                ->revenue()
+                ->whereBetween('invoice_date', [$start, $end]),
+            __('Revenue') . ' ' . __('between :start and :end', ['start' => $start, 'end' => $end]),
+        )
+            ->store();
+
+        $this->redirectRoute('orders.orders', navigate: true);
+    }
+
     protected function getListeners(): array
     {
         return [
             'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
                 . ',.OrderLocked' => 'calculateSum',
         ];
+    }
+
+    protected function icon(): string
+    {
+        return 'credit-card';
     }
 }

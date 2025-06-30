@@ -30,11 +30,13 @@
                     @livewire(
                         $widget['component_name'] ?? $widget['class'],
                         array_merge($this->getWidgetAttributes(), [
+                            'config' => data_get($widget, 'config'),
+                            'dashboardComponent' => $this->getName(),
                             'widgetId' => $widget['id'],
                             'wire:model' => $this->wireModel(),
                             'lazy' => true,
                         ]),
-                        key(uniqid())
+                        uniqid()
                     )
                 </div>
             </div>

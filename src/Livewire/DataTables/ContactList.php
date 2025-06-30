@@ -59,6 +59,30 @@ class ContactList extends BaseDataTable
     }
 
     #[Renderless]
+    public function restore(int $id): void
+    {
+        $this->contact->fill(
+            resolve_static(Contact::class, 'query')
+                ->withTrashed()
+                ->whereKey($id)
+                ->first()
+        );
+
+        try {
+            $this->contact->restore();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->toast()
+            ->success(__(':model restored', ['model' => __('Contact')]))
+            ->send();
+        $this->loadData();
+    }
+
+    #[Renderless]
     public function save(): bool
     {
         try {

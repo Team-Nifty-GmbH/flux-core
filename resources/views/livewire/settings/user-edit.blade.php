@@ -50,17 +50,20 @@
         @section('user-edit.selects')
         <x-select.styled
             wire:model="userForm.language_id"
+            searchable
             :label="__('Language')"
             select="label:name|value:id"
             :options="$languages"
         />
         <x-select.styled
             wire:model="userForm.timezone"
+            searchable
             :label="__('Timezone')"
             :options="timezone_identifiers_list()"
         />
         <x-select.styled
             wire:model="userForm.parent_id"
+            searchable
             :label="__('Parent')"
             select="label:name|value:id|description:email"
             :options="$users"

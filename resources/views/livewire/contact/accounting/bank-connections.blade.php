@@ -27,12 +27,10 @@
             />
             <x-button
                 color="primary"
-                light
                 wire:click="save().then((success) => { if(success) $modalClose('edit-contact-bank-connection'); })"
                 primary
                 :text="__('Save')"
             />
         </x-slot>
     </x-modal>
-    @include('tall-datatables::livewire.data-table')
 </div>

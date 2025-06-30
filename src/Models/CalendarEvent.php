@@ -6,11 +6,14 @@ use Carbon\Carbon;
 use FluxErp\Actions\CalendarEvent\CancelCalendarEvent;
 use FluxErp\Actions\CalendarEvent\CreateCalendarEvent;
 use FluxErp\Actions\CalendarEvent\DeleteCalendarEvent;
+use FluxErp\Actions\CalendarEvent\ReactivateCalendarEvent;
 use FluxErp\Actions\CalendarEvent\UpdateCalendarEvent;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Casts\MorphTo as MorphToCast;
+use FluxErp\Contracts\Targetable;
 use FluxErp\Models\Pivots\CalendarEventInvite;
 use FluxErp\Models\Pivots\Inviteable;
+use FluxErp\Traits\HasDefaultTargetableColumns;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\InteractsWithMedia;
@@ -27,9 +30,9 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
 
-class CalendarEvent extends FluxModel implements HasMedia
+class CalendarEvent extends FluxModel implements HasMedia, Targetable
 {
-    use HasPackageFactory, HasUlids, HasUserModification, InteractsWithMedia, LogsActivity;
+    use HasDefaultTargetableColumns, HasPackageFactory, HasUlids, HasUserModification, InteractsWithMedia, LogsActivity;
 
     public static function fromCalendarEvent(array $event, string $action): ?FluxAction
     {
@@ -38,8 +41,19 @@ class CalendarEvent extends FluxModel implements HasMedia
             'update' => UpdateCalendarEvent::make($event),
             'delete' => DeleteCalendarEvent::make($event),
             'cancel' => CancelCalendarEvent::make($event),
+            'reactivate' => ReactivateCalendarEvent::make($event),
             default => null,
         };
+    }
+
+    public static function timeframeColumns(): array
+    {
+        return [
+            'start',
+            'end',
+            'created_at',
+            'updated_at',
+        ];
     }
 
     protected function casts(): array
@@ -226,8 +240,8 @@ class CalendarEvent extends FluxModel implements HasMedia
                 'recurrences' => $this->recurrences,
                 'allDay' => $this->is_all_day,
                 'has_taken_place' => $this->has_taken_place,
-                'editable' => ! $this->calendar->is_public && ! $this->is_invited,
-                'is_editable' => ! $this->calendar->is_public && ! $this->is_invited,
+                'editable' => ! $this->calendar->is_public && ! $this->is_invited && ! $this->isCancelled,
+                'is_editable' => ! $this->calendar->is_public && ! $this->is_invited && ! $this->isCancelled,
                 'is_invited' => $this->is_invited,
                 'is_public' => $this->calendar->is_public,
                 'status' => $this->status ?: 'busy',

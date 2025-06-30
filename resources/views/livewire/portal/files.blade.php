@@ -1,6 +1,6 @@
 <div class="dark:text-white">
     <h2 class="text-base font-bold uppercase">
-        {{ $customerClient['name'] }} {{ __('Connect') }}
+        {{ data_get($customerClient, 'name') }} {{ __('Connect') }}
     </h2>
     <h1 class="pt-5 text-5xl font-bold">
         {{ __('My documents') }}
@@ -10,12 +10,11 @@
             @foreach ($serialNumbers as $serialNumber)
                 <h2 class="pb-2 text-base font-bold uppercase">
                     {{ str_pad($loop->index + 1, 2, '0', 0) }} .
-                    {{ $serialNumber['product']['name'] ?? '' }} /
-                    {{ $serialNumber['serial_number'] }}
+                    {{ data_get($serialNumber, 'product.name') }} /
+                    {{ data_get($serialNumber, 'serial_number') }}
                 </h2>
-                <livewire:folder-tree
-                    :model-type="\FluxErp\Models\SerialNumber::class"
-                    :model-id="$serialNumber['id']"
+                <livewire:portal.serial-number.media
+                    :model-id="data_get($serialNumber, 'id')"
                 />
             @endforeach
         </div>
@@ -28,17 +27,17 @@
                     {{ __('Your service request will be processed by our team immediately upon receipt. Do you have an acute problem, feel free to call us.') }}
                 </div>
                 <div class="py-5 font-bold">
-                    <a href="tel:+{{ $customerClient['phone'] }}">
-                        {{ $customerClient['phone'] }}
+                    <a href="tel:+{{ data_get($customerClient, 'phone') }}">
+                        {{ data_get($customerClient, 'phone') }}
                     </a>
                 </div>
-                @foreach ($customerClient['opening_hours'] ?? [] as $openingHour)
+                @foreach (data_get($customerClient, 'opening_hours') ?? [] as $openingHour)
                     <div class="">
-                        {{ $openingHour['day'] }}
+                        {{ data_get($openingHour, 'day') }}
                     </div>
                     <div class="">
-                        {{ $openingHour['start'] }} -
-                        {{ $openingHour['end'] }}
+                        {{ data_get($openingHour, 'start') }} -
+                        {{ data_get($openingHour, 'end') }}
                     </div>
                 @endforeach
             </div>

@@ -181,6 +181,7 @@
                     @endcanAction
 
                     <x-slot:checkbox>
+                        @section('checkbox-slot')
                         <x-checkbox
                             sm
                             x-on:folder-tree-uncheck.window="$el.checked = isChecked(node); $el.indeterminate = isIndeterminate(node);"
@@ -192,6 +193,7 @@
                             x-bind:style="'background-color: ' + node.color"
                             class="form-checkbox"
                         />
+                        @show
                     </x-slot>
                     <x-slot:suffix>
                         <div class="size-6">

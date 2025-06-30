@@ -3,9 +3,12 @@
 namespace FluxErp\Models;
 
 use Exception;
+use FluxErp\Actions\OrderTransaction\CreateOrderTransaction;
+use FluxErp\Actions\Transaction\CreateTransaction;
 use FluxErp\Casts\Money;
 use FluxErp\Casts\Percentage;
 use FluxErp\Contracts\OffersPrinting;
+use FluxErp\Contracts\Targetable;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
 use FluxErp\Models\Pivots\OrderSchedule;
@@ -59,7 +62,7 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\ModelStates\HasStates;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
-class Order extends FluxModel implements HasMedia, InteractsWithDataTables, OffersPrinting
+class Order extends FluxModel implements HasMedia, InteractsWithDataTables, OffersPrinting, Targetable
 {
     use CascadeSoftDeletes, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasClientAssignment,
         HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasRelatedModel, HasSerialNumberRange,
@@ -84,6 +87,36 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
         'currency',
     ];
 
+    public static function aggregateColumns(string $type): array
+    {
+        return match ($type) {
+            'count' => ['id'],
+            'sum', 'avg' => [
+                'total_base_net_price',
+                'total_base_gross_price',
+                'total_base_discounted_net_price',
+                'total_base_discounted_gross_price',
+                'gross_profit',
+                'total_purchase_price',
+                'total_cost',
+                'margin',
+                'total_net_price',
+                'total_gross_price',
+                'balance',
+            ],
+            default => [],
+        };
+    }
+
+    public static function aggregateTypes(): array
+    {
+        return [
+            'avg',
+            'count',
+            'sum',
+        ];
+    }
+
     public static function getGenericChannelEvents(): array
     {
         return array_merge(
@@ -92,6 +125,17 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
                 'locked',
             ]
         );
+    }
+
+    public static function ownerColumns(): array
+    {
+        return [
+            'approval_user_id',
+            'agent_id',
+            'responsible_user_id',
+            'created_by',
+            'updated_by',
+        ];
     }
 
     public static function scoutIndexSettings(): ?array
@@ -103,6 +147,20 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
                 'is_locked',
             ],
             'sortableAttributes' => ['*'],
+        ];
+    }
+
+    public static function timeframeColumns(): array
+    {
+        return [
+            'order_date',
+            'invoice_date',
+            'system_delivery_date',
+            'system_delivery_date_end',
+            'customer_delivery_date',
+            'date_of_approval',
+            'created_at',
+            'updated_at',
         ];
     }
 
@@ -151,6 +209,47 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
             }
 
             if ($order->isDirty('invoice_number')) {
+                $orderPositions = $order->orderPositions()
+                    ->whereNotNull('credit_account_id')
+                    ->where('post_on_credit_account', '!=', 0)
+                    ->get(['id', 'credit_account_id', 'credit_amount', 'post_on_credit_account']);
+
+                DB::transaction(function () use ($order, $orderPositions): void {
+                    foreach ($orderPositions as $orderPosition) {
+                        $multiplier = match (true) {
+                            $orderPosition->post_on_credit_account > 0 => 1,
+                            $orderPosition->post_on_credit_account < 0 => -1,
+                            default => 0,
+                        };
+
+                        if ($multiplier === 0) {
+                            continue;
+                        }
+
+                        $transaction = CreateTransaction::make([
+                            'contact_bank_connection_id' => $orderPosition->credit_account_id,
+                            'currency_id' => $order->currency_id,
+                            'value_date' => $order->order_date,
+                            'booking_date' => $order->invoice_date,
+                            'amount' => bcmul($orderPosition->credit_amount, $multiplier),
+                            'purpose' => $orderPosition->getLabel(),
+                        ])
+                            ->validate()
+                            ->execute();
+
+                        if ($multiplier === -1) {
+                            CreateOrderTransaction::make([
+                                'transaction_id' => $transaction->id,
+                                'order_id' => $order->id,
+                                'amount' => $orderPosition->credit_amount,
+                                'is_accepted' => true,
+                            ])
+                                ->validate()
+                                ->execute();
+                        }
+                    }
+                });
+
                 $order->calculateBalance();
 
                 if (is_null($order->payment_reminder_next_date) && ! is_null($order->invoice_date)) {

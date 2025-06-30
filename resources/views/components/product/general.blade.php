@@ -251,13 +251,13 @@
     <x-card
         class="dark:bg-secondary-700 space-y-2.5 bg-gray-50"
         :header="__('Product Properties')"
+        x-data="{productPropertyGroup: null}"
     >
         @section('product-properties')
         <x-modal
             id="edit-product-properties-modal"
             size="6xl"
             :title="__('Edit Product Properties')"
-            x-data="{productPropertyGroup: null}"
         >
             <div
                 class="flex gap-4"
@@ -310,7 +310,7 @@
                 <x-button
                     color="indigo"
                     :text="__('Save')"
-                    wire:click="addProductProperties().then(() => { close(); })"
+                    wire:click="addProductProperties().then(() => { $modalClose('edit-product-properties-modal'); })"
                 />
             </x-slot>
         </x-modal>

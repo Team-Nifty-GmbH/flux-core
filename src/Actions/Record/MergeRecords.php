@@ -121,6 +121,7 @@ class MergeRecords extends FluxAction
             // On MorphOne and HasOne relations if it is not from the main record,
             // it must be updated accordingly, and the related record from the main record must be deleted.
             // For now, related records from these relations are not replaced to avoid data loss.
+            // Update each related model separately to trigger the model events.
             switch (true) {
                 case $relation instanceof HasOne:
                 case $relation instanceof HasMany:
@@ -136,9 +137,13 @@ class MergeRecords extends FluxAction
                             )
                         )
                         ->whereIn($relation->getQualifiedForeignKeyName(), $this->getData('merge_records.*.id'))
-                        ->update([
-                            $relation->getQualifiedForeignKeyName() => $mainRecord->getKey(),
-                        ]);
+                        ->get()
+                        ->each(fn (Model $model) => $model
+                            ->fill([
+                                $relation->getForeignKeyName() => $mainRecord->getKey(),
+                            ])
+                            ->save()
+                        );
                     break;
                 case $relation instanceof BelongsToMany:
                     // Filter already existing records in the pivot table to avoid duplicate entries

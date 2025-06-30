@@ -4,11 +4,11 @@ namespace FluxErp\Rulesets\Contact;
 
 use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
-use FluxErp\Models\ContactOrigin;
 use FluxErp\Models\Currency;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
+use FluxErp\Models\RecordOrigin;
 use FluxErp\Models\User;
 use FluxErp\Models\VatRate;
 use FluxErp\Rules\ModelExists;
@@ -53,10 +53,11 @@ class UpdateContactRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => User::class])
                     ->where('is_active', true),
             ],
-            'contact_origin_id' => [
+            'record_origin_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => ContactOrigin::class])
+                app(ModelExists::class, ['model' => RecordOrigin::class])
+                    ->where('model_type', morph_alias(Contact::class))
                     ->where('is_active', true),
             ],
             'currency_id' => [
@@ -97,6 +98,7 @@ class UpdateContactRuleset extends FluxRuleset
             'customer_number' => 'sometimes|string|max:255',
             'creditor_number' => 'string|max:255|nullable',
             'debtor_number' => 'string|max:255|nullable',
+            'rating' => 'sometimes|integer|min:0|max:5',
             'payment_target_days' => 'sometimes|integer|nullable',
             'payment_reminder_days_1' => 'sometimes|integer|nullable',
             'payment_reminder_days_2' => 'sometimes|integer|nullable',

@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Mail;
 
+use FluxErp\Actions\Lead\CreateLead;
 use FluxErp\Actions\PurchaseInvoice\CreatePurchaseInvoice;
 use FluxErp\Actions\Ticket\CreateTicket;
 use FluxErp\Jobs\SyncMailAccountJob;
@@ -48,6 +49,31 @@ class Mail extends CommunicationList
             'name' => __('All Messages'),
             'children' => [],
         ];
+    }
+
+    #[Renderless]
+    public function createLead(Communication $communication): void
+    {
+        resolve_static(CreateLead::class, 'canPerformAction');
+
+        $ticket = app(CreateMailExecutedSubscriber::class)
+            ->findAddress($communication)
+            ->createLead($communication);
+
+        if (! $ticket) {
+            $this->toast()
+                ->error(__('Could not create lead'))
+                ->send();
+
+            return;
+        }
+
+        $this->toast()
+            ->success(__(':model created', ['model' => __('Lead')]))
+            ->send();
+        $this->js(<<<'JS'
+            $modalClose('show-mail');
+        JS);
     }
 
     #[Renderless]

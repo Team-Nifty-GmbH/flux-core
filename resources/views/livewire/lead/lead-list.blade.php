@@ -17,7 +17,6 @@
             <x-select.styled
                 :label="__('Commission Agent')"
                 wire:model="leadForm.user_id"
-                required
                 select="label:label|value:id"
                 unfiltered
                 :request="[
@@ -59,6 +58,28 @@
                           'name',
                         ],
                         'with' => 'contact.media',
+                    ],
+                ]"
+            />
+            <x-select.styled
+                :label="__('Origin')"
+                wire:model="leadForm.record_origin_id"
+                select="label:name|value:id"
+                unfiltered
+                :request="[
+                    'url' => route('search', \FluxErp\Models\RecordOrigin::class),
+                    'method' => 'POST',
+                    'params' => [
+                        'searchFields' => [
+                            'name',
+                        ],
+                        'where' => [
+                            [
+                                'model_type',
+                                '=',
+                                morph_alias(\FluxErp\Models\Lead::class),
+                            ],
+                        ],
                     ],
                 ]"
             />

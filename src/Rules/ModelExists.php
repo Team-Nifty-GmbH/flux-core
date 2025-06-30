@@ -11,7 +11,7 @@ class ModelExists extends Builder implements ValidationRule
 {
     public bool $implicit = false;
 
-    private string $key;
+    protected string $key;
 
     public function __construct(Model|string $model, ?string $key = null)
     {
@@ -32,8 +32,8 @@ class ModelExists extends Builder implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         $query = $this->clone();
-        if (! $query->where($this->key, $value)->exists()) {
-            $fail('The selected :attribute does not exist.');
+        if ($query->where($this->key, $value)->doesntExist()) {
+            $fail('validation.exists')->translate();
         }
     }
 }

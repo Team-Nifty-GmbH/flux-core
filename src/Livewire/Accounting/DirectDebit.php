@@ -25,6 +25,7 @@ class DirectDebit extends OrderList
         'total_gross_price',
         'balance',
         'commission',
+        'contact_bank_connection.sepa_mandates.signed_date',
     ];
 
     protected function getSelectedActions(): array

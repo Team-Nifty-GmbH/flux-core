@@ -4,6 +4,7 @@ namespace FluxErp\Livewire\Forms;
 
 use FluxErp\Actions\Contact\CreateContact;
 use FluxErp\Actions\Contact\DeleteContact;
+use FluxErp\Actions\Contact\RestoreContact;
 use FluxErp\Actions\Contact\UpdateContact;
 use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
@@ -18,8 +19,6 @@ class ContactForm extends FluxForm
     public array $categories = [];
 
     public ?int $client_id = null;
-
-    public ?int $contact_origin_id = null;
 
     public ?float $credit_line = null;
 
@@ -70,6 +69,10 @@ class ContactForm extends FluxForm
 
     public ?int $purchase_payment_type_id = null;
 
+    public int $rating = 0;
+
+    public ?int $record_origin_id = null;
+
     public ?string $vat_id = null;
 
     public ?int $vat_rate_id = null;
@@ -100,6 +103,7 @@ class ContactForm extends FluxForm
     {
         return [
             'create' => CreateContact::class,
+            'restore' => RestoreContact::class,
             'update' => UpdateContact::class,
             'delete' => DeleteContact::class,
         ];
