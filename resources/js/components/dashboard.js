@@ -8,6 +8,7 @@ export default function () {
         grid: null,
         isLoading: false,
         destroy() {
+            console.log('Destroying grid');
             // destroy grid - on page leave - since livewire caches the component
             if (this.grid !== null) {
                 this.grid.destroy(false);
@@ -61,6 +62,7 @@ export default function () {
             });
             // sync property
             await this.$wire.syncWidgets(newSnapshot);
+            await this.$wire.set('isLoading', true);
         },
         async syncGridOnDelete() {
             const snapshot = Array.from(this.$wire.widgets);
@@ -81,6 +83,7 @@ export default function () {
             });
             // sync property
             await this.$wire.syncWidgets(newSnapshot);
+            // await this.$wire.set('isLoading', true);
         },
         async save() {
             this.isLoading = true;
@@ -100,20 +103,18 @@ export default function () {
                     newSnapshot.push(widget);
                 }
             });
+            await this.$wire.set('isLoading', true);
             // sync and save to db
             await this.$wire.saveWidgets(newSnapshot);
             // stop edit mode
             this.editGridMode(false);
-            // refresh id
-            await this.$wire.$refresh();
             // stop grid
+            await this.$wire.set('isLoading', false);
             this.reInit().disable();
         },
         async selectWidget(key) {
             this.isLoading = true;
-            if (this.$wire.availableWidgets === null) {
-                this.$wire.availableWidgets = await this.$wire.availableWidgets;
-            }
+
             const id = uuidv4();
             const selectedWidget = this.$wire.availableWidgets[key];
             const placeholder = this.grid.addWidget({
@@ -128,9 +129,9 @@ export default function () {
 
             // sync position of each grid element with the server
             await this.syncGridOnNewItem();
-            // reload component
-            await this.$wire.resetWidgets();
 
+            // reload component
+            await this.$wire.set('isLoading', false);
             // re-init grid-stack
             this.reInit();
         },
@@ -138,10 +139,6 @@ export default function () {
             // check if grid is loading
             if (this.isLoading) {
                 this.isLoading = false;
-            }
-            // clear previous grid state
-            if (this.grid !== null) {
-                this.grid.destroy(false);
             }
 
             // init grid
@@ -156,7 +153,7 @@ export default function () {
                         { w: 2000000, c: 6 },
                     ],
                 },
-            });
+            }).enable();
             return this.grid;
         },
         async removeWidget(id) {
@@ -169,14 +166,13 @@ export default function () {
                 );
             if (el !== undefined) {
                 // remove from grid - keep in snapshot
-                el.style.display = 'none';
+                this.grid.removeWidget(el, true);
                 await this.grid.compact();
 
-                await this.syncGridOnDelete();
-                //  reload component
-                await this.$wire.$refresh();
-                // init grid
-                this.reInit();
+                // await this.syncGridOnDelete();
+                // await this.$wire.set('isLoading', false);
+                // // init grid
+                // this.reInit();
             }
             if (this.isLoading) {
                 this.isLoading = false;

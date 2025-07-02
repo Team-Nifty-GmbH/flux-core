@@ -1,4 +1,7 @@
-<div class="grid-stack" wire:ignore>
+@if($this->isLoading)
+        <div>Loading</div>
+@else
+<div class="grid-stack">
     @forelse ($this->widgets as $widget)
         <div
             class="grid-stack-item relative z-0 rounded-lg"
@@ -34,9 +37,9 @@
                             'dashboardComponent' => $this->getName(),
                             'widgetId' => $widget['id'],
                             'wire:model' => $this->wireModel(),
+                            'wire:key' => $widget['id'],
                             'lazy' => true,
                         ]),
-                        uniqid()
                     )
                 </div>
             </div>
@@ -44,4 +47,5 @@
     @empty
         <div class="col-span-12 h-96"></div>
     @endforelse
+    @endif
 </div>

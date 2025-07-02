@@ -20,6 +20,8 @@ trait RendersWidgets
 
     public array $availableWidgets = [];
 
+    public bool $isLoading = false;
+
     public array $params = [
         'timeFrame' => TimeFrameEnum::ThisMonth,
         'start' => null,
@@ -43,12 +45,14 @@ trait RendersWidgets
         JS);
     }
 
+    #[Renderless]
     public function mountRendersWidgets(): void
     {
         $this->availableWidgets = $this->filterWidgets(Widget::all());
         $this->widgets();
     }
 
+    #[Renderless]
     public function resetWidgets(): void
     {
         $this->widgets();
@@ -111,11 +115,13 @@ trait RendersWidgets
         );
     }
 
+    #[Renderless]
     public function wireModel(): string
     {
         return 'params';
     }
 
+    #[Renderless]
     protected function filterWidgets(array $widgets): array
     {
         $widgets = array_filter(
