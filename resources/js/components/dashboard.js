@@ -159,6 +159,19 @@ export default function () {
             }).enable();
             return this.grid;
         },
+        reInitPlaceholder() {
+            this.grid = GridStack.init({
+                margin: 10,
+                cellHeight: 250,
+                columnOpts: {
+                    breakpointForWindow: true,
+                    breakpoints: [
+                        { w: 1100, c: 1 },
+                        { w: 2000000, c: 6 },
+                    ],
+                },
+            }).disable();
+        },
         async removeWidget(id) {
             this.isLoading = true;
             const el = this.grid

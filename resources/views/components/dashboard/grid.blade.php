@@ -1,6 +1,17 @@
 @if($this->sync)
-<div class="grid-stack" id="stack-1">
-    <div>Loading</div>
+<div x-init="reInitPlaceholder" class="grid-stack" id="stack-1">
+    @foreach ($this->widgets as $widget)
+        <div
+            class="grid-stack-item relative z-0 rounded-lg"
+            gs-id="{{ $widget['id'] }}"
+            gs-w="{{ $widget['width'] }}"
+            gs-h="{{ $widget['height'] }}"
+            gs-x="{{ $widget['order_column'] }}"
+            gs-y="{{ $widget['order_row'] }}"
+        >
+            <div class="grid-stack-item-content w-full h-full bg-gray-100 dark:bg-secondary-600 animate-pulse"></div>
+        </div>
+    @endforeach
 </div>
 @else
 <div class="grid-stack" id="stack-2">

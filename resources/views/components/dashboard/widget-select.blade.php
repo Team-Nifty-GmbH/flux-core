@@ -10,12 +10,13 @@
                 <div
                     x-cloak
                     x-show="isLoading"
-                    class="w-6 h-6 border-4 border-primary-200 border-t-primary-500 dark:border-white dark:border-t-gray-400 rounded-full animate-spin"></div>
+                    class="border-primary-200 border-t-primary-500 h-6 w-6 animate-spin rounded-full border-4 dark:border-white dark:border-t-gray-400"
+                ></div>
             </div>
             @forelse ($this->availableWidgets as $widget)
                 <div
                     x-on:click="isLoading ? null : selectWidget('{{ $widget['component_name'] }}')"
-                    class=" mb-2 w-full cursor-pointer rounded border p-2"
+                    class="mb-2 w-full cursor-pointer rounded border p-2"
                     :class="isLoading ? 'bg-gray-200 dark:bg-secondary-800 cursor-wait' : 'dark:hover:bg-secondary-900 hover:bg-gray-100'"
                 >
                     {{ __($widget['label']) }}
