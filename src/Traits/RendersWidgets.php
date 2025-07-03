@@ -26,6 +26,8 @@ trait RendersWidgets
         'end' => null,
     ];
 
+    public bool $sync = false;
+
     public array $widgets = [];
 
     #[Computed]
@@ -49,6 +51,7 @@ trait RendersWidgets
         $this->widgets();
     }
 
+    #[Renderless]
     public function resetWidgets(): void
     {
         $this->widgets();
@@ -111,6 +114,7 @@ trait RendersWidgets
         );
     }
 
+    #[Renderless]
     public function wireModel(): string
     {
         return 'params';

@@ -7,9 +7,6 @@ export default function () {
         emptyLayout: false,
         grid: null,
         isLoading: false,
-        init() {
-            this.reInit().disable();
-        },
         destroy() {
             // destroy grid - on page leave - since livewire caches the component
             if (this.grid !== null) {
@@ -27,7 +24,7 @@ export default function () {
             this.editGrid = mode;
         },
         async syncGridOnNewItem() {
-            const snapshot = Array.from(this.$wire.widgets);
+            const snapshot = Array.from(await this.$wire.widgets);
             const onScreen = this.grid.getGridItems();
             const newSnapshot = [];
             // update x,y coordinates and type of widget if selected
@@ -51,6 +48,11 @@ export default function () {
                     }
                     newSnapshot.push(widget);
                 } else {
+                    // if widget is not in snapshot and is hidden on a page, skip it
+                    // one canno delete widget from DOM - livewire doesn't like it
+                    if (item.style.display === 'none') {
+                        return;
+                    }
                     // new widget on the screen
                     newSnapshot.push({
                         id: item.gridstackNode.id,
@@ -64,6 +66,7 @@ export default function () {
             });
             // sync property
             await this.$wire.syncWidgets(newSnapshot);
+            await this.$wire.set('sync', true);
         },
         async syncGridOnDelete() {
             const snapshot = Array.from(this.$wire.widgets);
@@ -87,7 +90,7 @@ export default function () {
         },
         async save() {
             this.isLoading = true;
-            const snapshot = Array.from(this.$wire.widgets);
+            const snapshot = Array.from(await this.$wire.widgets);
             const onScreen = this.grid.getGridItems();
             const newSnapshot = [];
             // update x,y coordinates on save
@@ -103,23 +106,20 @@ export default function () {
                     newSnapshot.push(widget);
                 }
             });
+            await this.$wire.set('sync', true);
             // sync and save to db
             await this.$wire.saveWidgets(newSnapshot);
             // stop edit mode
             this.editGridMode(false);
-            // refresh id
-            await this.$wire.$refresh();
             // stop grid
+            await this.$wire.set('sync', false);
             this.reInit().disable();
         },
         async selectWidget(key) {
             this.isLoading = true;
-            if (this.$wire.availableWidgets === null) {
-                this.$wire.availableWidgets = await this.$wire.availableWidgets;
-            }
+
             const id = uuidv4();
             const selectedWidget = this.$wire.availableWidgets[key];
-
             const placeholder = this.grid.addWidget({
                 id,
                 h: selectedWidget.defaultHeight,
@@ -134,8 +134,7 @@ export default function () {
             await this.syncGridOnNewItem();
 
             // reload component
-            await this.$wire.$refresh();
-
+            await this.$wire.set('sync', false);
             // re-init grid-stack
             this.reInit();
         },
@@ -144,10 +143,7 @@ export default function () {
             if (this.isLoading) {
                 this.isLoading = false;
             }
-            // clear previous grid state
-            if (this.grid !== null) {
-                this.grid.destroy(false);
-            }
+
             // init grid
             this.grid = GridStack.init({
                 margin: 10,
@@ -160,8 +156,21 @@ export default function () {
                         { w: 2000000, c: 6 },
                     ],
                 },
-            });
+            }).enable();
             return this.grid;
+        },
+        reInitPlaceholder() {
+            this.grid = GridStack.init({
+                margin: 10,
+                cellHeight: 250,
+                columnOpts: {
+                    breakpointForWindow: true,
+                    breakpoints: [
+                        { w: 1100, c: 1 },
+                        { w: 2000000, c: 6 },
+                    ],
+                },
+            }).disable();
         },
         async removeWidget(id) {
             this.isLoading = true;
@@ -171,20 +180,24 @@ export default function () {
                     (item) =>
                         item.gridstackNode.id.toString() === id.toString(),
                 );
+            // sync first backend then remove from grid - livewire doesn't like revers order
             if (el !== undefined) {
                 // remove from grid - keep in snapshot
                 el.style.display = 'none';
-                await this.grid.compact();
 
                 await this.syncGridOnDelete();
                 //  reload component
-                await this.$wire.$refresh();
-                // init grid
-                this.reInit();
             }
             if (this.isLoading) {
                 this.isLoading = false;
             }
+        },
+        async onPostReset() {
+            await this.$wire.set('sync', true);
+            await this.$wire.set('sync', false);
+            this.reInit().disable();
+            this.isLoading = false;
+            this.editGridMode(false);
         },
     };
 }
