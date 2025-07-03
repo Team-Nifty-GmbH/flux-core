@@ -59,7 +59,7 @@
                     color="red"
                     loading
                     wire:flux-confirm.type.error="{{ __('wire:confirm.cancel.dashboard-edit') }}"
-                    wire:click="resetWidgets().then(() => {reInit().disable(); isLoading = false; editGridMode(false);})"
+                    wire:click="resetWidgets().then(onPostReset.bind($data))"
                     class="flex-shrink-0"
                     :text="__('Cancel')"
                 />

@@ -11,6 +11,7 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Js;
 use Livewire\Attributes\Renderless;
 use Spatie\Permission\Exceptions\PermissionDoesNotExist;
+use function Symfony\Component\Translation\t;
 
 trait RendersWidgets
 {
@@ -20,7 +21,7 @@ trait RendersWidgets
 
     public array $availableWidgets = [];
 
-    public bool $isLoading = false;
+    public bool $sync = false;
 
     public array $params = [
         'timeFrame' => TimeFrameEnum::ThisMonth,

@@ -1,7 +1,9 @@
-@if($this->isLoading)
-        <div>Loading</div>
+@if($this->sync)
+<div class="grid-stack" id="stack-1">
+    <div>Loading</div>
+</div>
 @else
-<div class="grid-stack">
+<div class="grid-stack" id="stack-2">
     @forelse ($this->widgets as $widget)
         <div
             class="grid-stack-item relative z-0 rounded-lg"
