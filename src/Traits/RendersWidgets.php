@@ -46,7 +46,6 @@ trait RendersWidgets
         JS);
     }
 
-    #[Renderless]
     public function mountRendersWidgets(): void
     {
         $this->availableWidgets = $this->filterWidgets(Widget::all());
@@ -122,7 +121,6 @@ trait RendersWidgets
         return 'params';
     }
 
-    #[Renderless]
     protected function filterWidgets(array $widgets): array
     {
         $widgets = array_filter(

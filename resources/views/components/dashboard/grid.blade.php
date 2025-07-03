@@ -50,7 +50,6 @@
                             'dashboardComponent' => $this->getName(),
                             'widgetId' => $widget['id'],
                             'wire:model' => $this->wireModel(),
-                            'wire:key' => $widget['id'],
                             'lazy' => true,
                         ]),
                         key(uniqid())
