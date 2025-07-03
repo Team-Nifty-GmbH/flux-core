@@ -36,7 +36,7 @@
                             'wire:model' => $this->wireModel(),
                             'lazy' => true,
                         ]),
-                        uniqid()
+                        key(uniqid())
                     )
                 </div>
             </div>
