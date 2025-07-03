@@ -53,6 +53,7 @@
                             'wire:key' => $widget['id'],
                             'lazy' => true,
                         ]),
+                        key(uniqid())
                     )
                 </div>
             </div>
