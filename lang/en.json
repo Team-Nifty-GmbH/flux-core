@@ -213,6 +213,7 @@
     "signature_added": "Signature added",
     "tickets.get": "View tickets",
     "tickets.{id}.get": "View ticket details",
+    "time.hours_minutes": ":hours h :minutes min",
     "validation.accepted": "The :attribute must be accepted.",
     "validation.active_url": "The :attribute is not a valid URL.",
     "validation.after": "The :attribute must be a date after :date.",

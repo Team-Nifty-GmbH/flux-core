@@ -120,7 +120,22 @@
                     wire:model.number="contact.contact_origin_id"
                     :label="__('Contact Origin')"
                     select="label:name|value:id"
-                    :options="$contactOrigins"
+                    :request="[
+                        'url' => route('search', \FluxErp\Models\RecordOrigin::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'searchFields' => [
+                                'name',
+                            ],
+                            'where' => [
+                                [
+                                    'model_type',
+                                    '=',
+                                    morph_alias(\FluxErp\Models\Contact::class),
+                                ],
+                            ],
+                        ],
+                    ]"
                 />
                 <x-rating
                     x-bind:disabled="! $wire.$parent.edit"

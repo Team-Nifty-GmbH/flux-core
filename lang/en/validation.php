@@ -24,6 +24,7 @@ return [
     'confirmed' => 'The :attribute confirmation does not match.',
     'contains' => 'The :attribute field is missing a required value.',
     'current_password' => 'The password is incorrect.',
+    'dashboard_component' => 'The widget does not exist or is not configured correctly.',
     'date' => 'The :attribute is not a valid date.',
     'date_equals' => 'The :attribute must be a date equal to :date.',
     'date_format' => 'The :attribute does not match the format :format.',

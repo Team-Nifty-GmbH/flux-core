@@ -5,6 +5,7 @@ namespace FluxErp\Rulesets\Lead;
 use FluxErp\Models\Address;
 use FluxErp\Models\Lead;
 use FluxErp\Models\LeadState;
+use FluxErp\Models\RecordOrigin;
 use FluxErp\Models\User;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\Numeric;
@@ -32,15 +33,21 @@ class CreateLeadRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => Address::class]),
             ],
+            'lead_state_id' => [
+                'required',
+                'integer',
+                app(ModelExists::class, ['model' => LeadState::class]),
+            ],
             'recommended_by_address_id' => [
                 'nullable',
                 'integer',
                 app(ModelExists::class, ['model' => Address::class]),
             ],
-            'lead_state_id' => [
-                'required',
+            'record_origin_id' => [
+                'nullable',
                 'integer',
-                app(ModelExists::class, ['model' => LeadState::class]),
+                app(ModelExists::class, ['model' => RecordOrigin::class])
+                    ->where('model_type', morph_alias(Lead::class)),
             ],
             'user_id' => [
                 'nullable',

@@ -7,11 +7,13 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Lead\UpdateLead;
 use FluxErp\Casts\Money;
 use FluxErp\Contracts\Calendarable;
+use FluxErp\Contracts\Targetable;
 use FluxErp\Traits\Categorizable;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Communicatable;
 use FluxErp\Traits\HasCalendarEvents;
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasRecordOrigin;
 use FluxErp\Traits\HasTags;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
@@ -28,14 +30,45 @@ use Spatie\ModelStates\HasStates;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 
-class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDataTables
+class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDataTables, Targetable
 {
     use Categorizable, Commentable, Communicatable, HasCalendarEvents, HasFrontendAttributes, HasPackageFactory,
-        HasStates, HasTags, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Searchable, SoftDeletes;
+        HasRecordOrigin, HasStates, HasTags, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Searchable,
+        SoftDeletes;
 
     protected $guarded = [
         'id',
     ];
+
+    public static function aggregateColumns(string $type): array
+    {
+        return match ($type) {
+            'count' => ['id'],
+            'sum' => [
+                'expected_revenue',
+                'expected_gross_profit',
+                'weighted_gross_profit',
+                'weighted_revenue',
+            ],
+            'avg' => [
+                'expected_revenue',
+                'expected_gross_profit',
+                'score',
+                'weighted_gross_profit',
+                'weighted_revenue',
+            ],
+            default => [],
+        };
+    }
+
+    public static function aggregateTypes(): array
+    {
+        return [
+            'avg',
+            'count',
+            'sum',
+        ];
+    }
 
     public static function fromCalendarEvent(array $event, string $action): FluxAction
     {
@@ -46,6 +79,25 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
             'end' => data_get($event, 'end'),
             'description' => data_get($event, 'description'),
         ]);
+    }
+
+    public static function ownerColumns(): array
+    {
+        return [
+            'user_id',
+            'created_by',
+            'updated_by',
+        ];
+    }
+
+    public static function timeframeColumns(): array
+    {
+        return [
+            'start',
+            'end',
+            'created_at',
+            'updated_at',
+        ];
     }
 
     public static function toCalendar(): array
@@ -123,6 +175,11 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
     public function getUrl(): ?string
     {
         return route('sales.lead.id', $this->getKey());
+    }
+
+    public function leadLossReason(): BelongsTo
+    {
+        return $this->belongsTo(LeadLossReason::class);
     }
 
     public function leadState(): BelongsTo

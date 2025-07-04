@@ -13,6 +13,7 @@ use FluxErp\Support\Metrics\Value;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use FluxErp\Traits\Widgetable;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Js;
 use Livewire\Attributes\Renderless;
 use Livewire\Livewire;
 use TeamNiftyGmbH\DataTable\Helpers\SessionFilter;
@@ -87,33 +88,56 @@ class TotalOrdersCount extends LineChart implements HasWidgetOptions
     {
         return [
             [
-                'label' => __('Show'),
+                'label' => static::getLabel(),
                 'method' => 'show',
+                'params' => 'current',
+            ],
+            [
+                'label' => __('Previous Period'),
+                'method' => 'show',
+                'params' => 'previous',
             ],
         ];
     }
 
     #[Renderless]
-    public function show(): void
+    public function show(string $period): void
     {
-        // needs to be in an extra variable to avoid serialization issues
-        $start = $this->getStart()->toDateString();
-        $end = $this->getEnd()->toDateString();
+        if (strtolower($period) === 'previous') {
+            $start = $this->getStartPrevious()->toDateString();
+            $end = $this->getEndPrevious()->toDateString();
+        } else {
+            $start = $this->getStart()->toDateString();
+            $end = $this->getEnd()->toDateString();
+        }
 
         SessionFilter::make(
             Livewire::new(resolve_static(OrderList::class, 'class'))->getCacheKey(),
-            fn (Builder $query) => $query->whereNotNull('invoice_date')
+            fn (Builder $query) => $query
+                ->whereNotNull('invoice_date')
                 ->whereNotNull('invoice_number')
                 ->revenue()
-                ->whereBetween('invoice_date', [
-                    $start,
-                    $end,
-                ]),
-            __(static::getLabel()),
+                ->whereBetween('invoice_date', [$start, $end]),
+            __(static::getLabel()) . ' '
+            . __('between :start and :end', ['start' => $start, 'end' => $end]),
         )
             ->store();
 
         $this->redirectRoute('orders.orders', navigate: true);
+    }
+
+    #[Js]
+    public function xAxisFormatter(): string
+    {
+        return <<<'JS'
+            let name;
+            if (typeof val === 'string' && val.includes('->')) {
+                name = val.split('->')[1];
+                val = val.split('->')[0];
+            }
+
+            return new Date(val).toLocaleDateString(document.documentElement.lang) + (name ? ' (' + name + ')' : '')
+        JS;
     }
 
     protected function getListeners(): array

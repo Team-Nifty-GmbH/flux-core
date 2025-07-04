@@ -38,7 +38,16 @@ class Category extends FluxModel implements InteractsWithDataTables, Sortable
         'pivot',
     ];
 
-    public static function booted(): void
+    public static function scoutIndexSettings(): ?array
+    {
+        return static::baseScoutIndexSettings() ?? [
+            'filterableAttributes' => [
+                'model_type',
+            ],
+        ];
+    }
+
+    protected static function booted(): void
     {
         model_info_all()
             ->filter(fn (ModelInfo $modelInfo) => in_array(
@@ -59,15 +68,6 @@ class Category extends FluxModel implements InteractsWithDataTables, Sortable
                     }
                 );
             });
-    }
-
-    public static function scoutIndexSettings(): ?array
-    {
-        return static::baseScoutIndexSettings() ?? [
-            'filterableAttributes' => [
-                'model_type',
-            ],
-        ];
     }
 
     protected function casts(): array

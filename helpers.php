@@ -27,6 +27,22 @@ if (! function_exists('model_info_all')) {
     }
 }
 
+if (! function_exists('get_models_with_trait')) {
+    function get_models_with_trait(string $trait, ?callable $mapCallback = null): array
+    {
+        $morphMap = Illuminate\Database\Eloquent\Relations\Relation::morphMap();
+
+        return collect($morphMap)
+            ->filter(fn ($class, $alias) => in_array($trait, class_uses_recursive(morphed_model($alias))))
+            ->map($mapCallback ?? fn ($class, $alias) => [
+                'label' => __(Illuminate\Support\Str::headline($alias)),
+                'value' => $alias,
+            ])
+            ->values()
+            ->toArray();
+    }
+}
+
 if (! function_exists('route_to_permission')) {
     function route_to_permission(Illuminate\Routing\Route|string|null $route = null, bool $checkPermission = true): ?string
     {
@@ -480,6 +496,19 @@ if (! function_exists('flux_path')) {
     }
 }
 
+if (! function_exists('map_values_to_options')) {
+    function map_values_to_options(array $values): array
+    {
+        return array_map(
+            fn ($value) => [
+                'label' => __(Illuminate\Support\Str::headline($value)),
+                'value' => $value,
+            ],
+            $values
+        );
+    }
+}
+
 if (! function_exists('model')) {
     function model(string $class): Illuminate\Database\Eloquent\Model
     {
@@ -554,6 +583,9 @@ if (! function_exists('morph_alias')) {
 }
 
 if (! function_exists('morphed_model')) {
+    /**
+     * @return class-string<Illuminate\Database\Eloquent\Model>|null
+     */
     function morphed_model(string $alias): ?string
     {
         $class = Illuminate\Database\Eloquent\Relations\Relation::getMorphedModel($alias);
