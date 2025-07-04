@@ -1,4 +1,5 @@
-<div x-data="printEditor()" class="flex h-[29.7cm] items-center space-x-4">
+<div x-data="printEditorMain()"
+     class="flex h-[29.7cm] items-center space-x-4">
     <div class="h-full w-[300px] rounded bg-white shadow"></div>
     <div
         x-init="onInit"
@@ -7,7 +8,7 @@
         <div
             x-on:mousemove.window="isAnyClicked ? onMouseMove($event) : null"
             x-on:mouseup.window="onMouseUp($event)"
-            :class="{'bg-flux-primary-300': isEdit, 'bg-gray-200': !isEdit}"
+            :class="{'bg-flux-primary-300': editMargin, 'bg-gray-200': !editMargin}"
             class="h-full w-full"
             :style="{'padding-left': marginLeft, 'padding-right': marginRight, 'padding-top': marginTop, 'padding-bottom': marginBottom}"
         >
@@ -21,14 +22,14 @@
                 <div class="h-full flex flex-col ">
                     <x-flux::print.header :client="$this->clientFluent" :subject="$subject"/>
                     <div class="flex-1">
-                        {!! $this->orderPrint() !!}
+{{--                        {!! $this->orderPrint() !!}--}}
                     </div>
                     <x-flux::print.footer :client="$this->clientFluent"/>
                 </div>
                 {{-- content --}}
                 <div
                     x-cloak
-                    x-show="isEdit"
+                    x-show="editMargin"
                     x-on:mousedown="onMouseDown($event, 'margin-top')"
                     :class="{'bg-flux-primary-500': isTopClicked, 'bg-flux-primary-700': !isTopClicked}"
                     draggable="false"
@@ -45,7 +46,7 @@
                 </div>
                 <div
                     x-cloak
-                    x-show="isEdit"
+                    x-show="editMargin"
                     x-on:mousedown="onMouseDown($event, 'margin-left')"
                     :class="{'bg-flux-primary-500': isLeftClicked, 'bg-flux-primary-700': !isLeftClicked}"
                     draggable="false"
@@ -62,7 +63,7 @@
                 </div>
                 <div
                     x-cloak
-                    x-show="isEdit"
+                    x-show="editMargin"
                     x-on:mousedown="onMouseDown($event, 'margin-bottom')"
                     :class="{'bg-flux-primary-500': isBottomClicked, 'bg-flux-primary-700': !isBottomClicked}"
                     class="absolute bottom-0 left-1/2 h-6 w-6 -translate-x-1/2 translate-y-1/2 cursor-pointer select-none rounded-full"
@@ -79,7 +80,7 @@
 
                 <div
                     x-cloak
-                    x-show="isEdit"
+                    x-show="editMargin"
                     x-on:mousedown="onMouseDown($event, 'margin-right')"
                     draggable="false"
                     :class="{'bg-flux-primary-500': isRightClicked, 'bg-flux-primary-700': !isRightClicked}"
@@ -97,9 +98,15 @@
             </div>
         </div>
     </div>
-    <div class="h-full w-[300px] rounded p-4 bg-white shadow">
+    <div class="h-full w-[300px] flex flex-col space-y-4 rounded p-4 bg-white shadow">
         <x-button
-            x-on:click="toggleEdit"
+            x-on:click="toggleEditMargin"
             text="Edit Margin"/>
+        <x-button
+            x-on:click="toggleEditHeader"
+            text="Edit Header"/>
+        <x-button
+            x-on:click="toggleEditFooter"
+            text="Edit Footer"/>
     </div>
 </div>

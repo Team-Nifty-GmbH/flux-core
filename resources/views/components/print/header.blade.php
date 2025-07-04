@@ -1,5 +1,9 @@
 {{--TODO: add fixed when printing--}}
-<header class="h-auto w-full bg-white text-center font-light">
+<header
+    x-data="printEditorHeader($data)"
+    class="h-auto w-full bg-white text-center font-light"
+    :class="editHeader ? 'border-2 border-flux-primary-300' : ''"
+>
     <div class="header-content">
         <div>
             @section('subject')

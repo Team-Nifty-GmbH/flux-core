@@ -1,10 +1,21 @@
-window.printEditor = function () {
+window.printEditorMain = function () {
     return {
         onInit() {
             this.pxPerCm = this.$refs['scale'].offsetWidth;
             this.pyPerCm = this.$refs['scale'].offsetHeight;
         },
-        isEdit: false,
+        editMargin: false,
+        editFooter: false,
+        editHeader: false,
+        toggleEditMargin() {
+            this.editMargin = !this.editMargin;
+        },
+        toggleEditFooter() {
+            this.editFooter = !this.editFooter;
+        },
+        toggleEditHeader() {
+            this.editHeader = !this.editHeader;
+        },
         pxPerCm: null,
         pyPerCm: null,
         startPointVertical: null,
@@ -30,6 +41,7 @@ window.printEditor = function () {
             return `${this._marginBottom}cm`;
         },
         get isAnyClicked() {
+            console.log('isAnyClicked called');
             return (
                 this.isTopClicked ||
                 this.isBottomClicked ||
@@ -142,8 +154,17 @@ window.printEditor = function () {
                 }
             }
         },
-        toggleEdit() {
-            this.isEdit = !this.isEdit;
+    };
+};
+
+window.printEditorHeader = function (parent) {
+    return {};
+};
+
+window.printEditorFooter = function (parent) {
+    return {
+        init() {
+            console.log('printEditorFooter initialized', parent);
         },
     };
 };
