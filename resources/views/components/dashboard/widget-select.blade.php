@@ -39,6 +39,6 @@
                     x-on:click="$modalClose('widget-list')"
                 />
             </div>
-        </x-slot:footer>
+        </x-slot>
     </x-modal>
 @endteleport
