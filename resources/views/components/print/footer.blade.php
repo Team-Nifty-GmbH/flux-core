@@ -1,13 +1,35 @@
 {{--TODO: add fixed when printing--}}
 <footer
+    x-on:mousemove.window="isFooterClicked ? onMouseMoveFooter($event) : null"
+    x-on:mouseup.window="onMouseUpFooter($event)"
+    class="relative w-full bg-white text-center"
+    x-ref="footer"
     x-data="printEditorFooter($data)"
-    class="relative h-[1.7cm] w-full bg-white text-center"
+    x-init="onInitFooter()"
     :class="editFooter ? 'border border-flux-primary-300' : ''"
+    :style="{'height': footerHeight}"
 >
+    <div
+        x-cloak
+        x-show="editFooter"
+        x-on:mousedown="onMouseDownFooter($event)"
+        class="absolute top-0 left-1/2 h-6 w-6 z-[100] -translate-x-1/2 -translate-y-1/2 cursor-pointer select-none rounded-full bg-flux-primary-400">
+        <div
+            class="relative flex h-full w-full items-center justify-center"
+        >
+            <div
+                class="absolute bottom-8 h-12 rounded bg-gray-100 p-2 text-lg shadow"
+                x-text="footerHeight"
+            ></div>
+        </div>
+    </div>
     <div class="footer-content h-full text-2xs leading-3">
         @section('footer.logo')
-        <div class="absolute h-full left-0 right-0">
+        <div
+            class="absolute h-full left-0 right-0 z-[50]">
             <img
+                draggable="false"
+                :style="{'height': logoFooterSize}"
                 class="logo-small footer-logo m-auto max-h-full"
                 src="{{ $client->logo_small }}"
             />
@@ -16,7 +38,8 @@
         <div class="w-full">
             <div class="border-semi-black border-t">
                 @section('footer.client-address')
-                <address class="float-left text-left not-italic">
+                <address
+                    class="float-left text-left not-italic">
                     <div class="font-semibold">
                         {{ $client->name ?? '' }}
                     </div>

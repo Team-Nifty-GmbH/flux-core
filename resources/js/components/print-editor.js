@@ -40,6 +40,7 @@ window.printEditorMain = function () {
         get marginBottom() {
             return `${this._marginBottom}cm`;
         },
+        // TODO: rename to isAnyMarginSideClicked
         get isAnyClicked() {
             return (
                 this.isTopClicked ||
@@ -48,6 +49,7 @@ window.printEditorMain = function () {
                 this.isRightClicked
             );
         },
+        // TODO: rename to onMouseDownMargin
         onMouseDown(e, side) {
             switch (side) {
                 case 'margin-top':
@@ -70,7 +72,8 @@ window.printEditorMain = function () {
                     console.warn('Unknown side clicked:', side);
             }
         },
-        onMouseUp(e) {
+        // TODO: rename to onMouseUpMargin
+        onMouseUp() {
             if (this.isTopClicked) {
                 this.isTopClicked = false;
                 this.startPointVertical = null;
@@ -91,6 +94,7 @@ window.printEditorMain = function () {
                 this.startPointHorizontal = null;
             }
         },
+        // TODO: rename to onMouseMoveMargin
         onMouseMove(e) {
             // handler for resizing margins
             if (this.isTopClicked && this.startPointVertical !== null) {
@@ -162,8 +166,67 @@ window.printEditorHeader = function (parent) {
 
 window.printEditorFooter = function (parent) {
     return {
-        init() {
-            console.log('printEditorFooter initialized', parent);
+        _footerHeight: null,
+        _minFooterHeight: null,
+        _maxFooterHeight: 5,
+        isFooterClicked: false,
+        startPointFooterVertical: null,
+        onInitFooter() {
+            // round ceil to 0.1 cm
+            this._footerHeight =
+                Math.ceil(
+                    (10 * this.$refs['footer'].offsetHeight) / parent.pyPerCm,
+                ) / 10;
+
+            this._minFooterHeight = 1.7;
+        },
+        onMouseDownFooter(e) {
+            this.isFooterClicked = true;
+            this.startPointFooterVertical = e.clientY;
+        },
+        onMouseUpFooter() {
+            if (this.isFooterClicked) {
+                this.isFooterClicked = false;
+                this.startPointFooterVertical = null;
+            }
+        },
+        onMouseMoveFooter(e) {
+            if (
+                this.isFooterClicked &&
+                this.startPointFooterVertical !== null
+            ) {
+                const delta =
+                    (this.startPointFooterVertical - e.clientY) /
+                    parent.pyPerCm;
+                if (Math.abs(delta) >= 0.1) {
+                    const newHeight = Math.max(
+                        0,
+                        Math.round(
+                            (this._footerHeight + 0.1 * (delta > 0 ? 1 : -1)) *
+                                100,
+                        ) / 100,
+                    );
+                    if (
+                        newHeight >= this._minFooterHeight &&
+                        newHeight <= this._maxFooterHeight
+                    ) {
+                        this._footerHeight = newHeight;
+                    } else {
+                        return;
+                    }
+                    this.startPointFooterVertical = e.clientY;
+                }
+            }
+        },
+        get footerHeight() {
+            return `${this._footerHeight}cm`;
+        },
+        get logoFooterSize() {
+            if (this._minFooterHeight !== null) {
+                return `${this._minFooterHeight}cm`;
+            } else {
+                return 'auto';
+            }
         },
     };
 };

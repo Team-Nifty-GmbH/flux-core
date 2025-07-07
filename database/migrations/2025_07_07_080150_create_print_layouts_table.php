@@ -16,6 +16,7 @@ return new class() extends Migration
             $table->json('margin')->nullable();
             $table->json('header')->nullable();
             $table->json('footer')->nullable();
+            $table->json('first_page_header')->nullable();
 
             $table->timestamp('created_at')->nullable();
             $table->string('created_by')->nullable();
