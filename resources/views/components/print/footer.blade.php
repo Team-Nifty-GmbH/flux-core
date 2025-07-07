@@ -1,14 +1,14 @@
 {{--TODO: add fixed when printing--}}
 <footer
     x-data="printEditorFooter($data)"
-    class="h-auto w-full bg-white text-center"
-    :class="editFooter ? 'border-2 border-flux-primary-300' : ''"
+    class="relative h-[1.7cm] w-full bg-white text-center"
+    :class="editFooter ? 'border border-flux-primary-300' : ''"
 >
     <div class="footer-content h-full text-2xs leading-3">
         @section('footer.logo')
-        <div class="absolute left-0 right-0 m-auto px-6">
+        <div class="absolute h-full left-0 right-0">
             <img
-                class="logo-small footer-logo m-auto"
+                class="logo-small footer-logo m-auto max-h-full"
                 src="{{ $client->logo_small }}"
             />
         </div>

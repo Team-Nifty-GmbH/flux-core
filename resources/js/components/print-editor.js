@@ -41,7 +41,6 @@ window.printEditorMain = function () {
             return `${this._marginBottom}cm`;
         },
         get isAnyClicked() {
-            console.log('isAnyClicked called');
             return (
                 this.isTopClicked ||
                 this.isBottomClicked ||
