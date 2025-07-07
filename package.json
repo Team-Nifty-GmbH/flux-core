@@ -33,7 +33,7 @@
         "dayjs": "^1.11.11",
         "filepond": "^4.31.3",
         "filepond-plugin-image-preview": "^4.6.12",
-        "gridstack": "^12.2.1",
+        "gridstack": "^12.2.2",
         "laravel-echo": "^2.0.0",
         "laravel-vite-plugin": "^1.0.0",
         "leaflet": "^1.9.4",
