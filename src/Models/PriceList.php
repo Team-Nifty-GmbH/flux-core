@@ -61,6 +61,11 @@ class PriceList extends FluxModel
         return $this->belongsToMany(Discount::class, 'category_price_list');
     }
 
+    public function contacts(): HasMany
+    {
+        return $this->hasMany(Contact::class, 'price_list_id');
+    }
+
     public function discount(): MorphOne
     {
         return $this->morphOne(Discount::class, 'model');

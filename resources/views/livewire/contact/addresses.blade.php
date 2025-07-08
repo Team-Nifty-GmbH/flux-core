@@ -117,7 +117,7 @@
                 <x-select.styled
                     searchable
                     x-bind:disabled="! $wire.$parent.edit"
-                    wire:model.number="contact.contact_origin_id"
+                    wire:model.number="contact.record_origin_id"
                     :label="__('Contact Origin')"
                     select="label:name|value:id"
                     :request="[

@@ -2,4 +2,7 @@
 
 namespace FluxErp\Models\Pivots;
 
-class ContactDiscount extends FluxPivot {}
+class ContactDiscount extends FluxPivot
+{
+    public $timestamps = false;
+}

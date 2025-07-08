@@ -103,7 +103,7 @@ jobs:
         run: npm i
 
       - name: Pint
-        run: ./vendor/bin/pint --test
+        run: ./vendor/bin/pint --test --parallel
 
       - name: Prettier
         run: npx prettier . --check
