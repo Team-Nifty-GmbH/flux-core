@@ -98,15 +98,35 @@
             </div>
         </div>
     </div>
-    <div class="h-full w-[300px] flex flex-col space-y-4 rounded p-4 bg-white shadow">
-        <x-button
-            x-on:click="toggleEditMargin"
-            text="Edit Margin"/>
-        <x-button
-            x-on:click="toggleEditHeader"
-            text="Edit Header"/>
-        <x-button
-            x-on:click="toggleEditFooter"
-            text="Edit Footer"/>
+    <div
+        class="h-full w-[300px] rounded p-4 bg-white shadow">
+        <div
+            x-cloak
+            x-show="!anyEdit"
+            class="flex flex-col space-y-4">
+            <x-button
+                x-on:click="toggleEditMargin"
+                text="Edit Margin"/>
+            <x-button
+                x-on:click="toggleEditHeader"
+                text="Edit Header"/>
+            <x-button
+                x-on:click="toggleEditFooter"
+                text="Edit Footer"/>
+        </div>
+        <div
+            x-cloak
+            x-show="anyEdit"
+            class="h-full flex flex-col justify-end">
+            <div class="flex items-center justify-between">
+                <x-button
+                    x-on:click="closeEditor"
+                    text="Cancel"
+                />
+                <x-button
+                    text="Save"
+                />
+            </div>
+        </div>
     </div>
 </div>

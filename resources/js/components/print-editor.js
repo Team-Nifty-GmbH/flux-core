@@ -49,6 +49,9 @@ window.printEditorMain = function () {
                 this.isRightClicked
             );
         },
+        get anyEdit() {
+            return this.editMargin || this.editFooter || this.editHeader;
+        },
         // TODO: rename to onMouseDownMargin
         onMouseDown(e, side) {
             switch (side) {
@@ -157,6 +160,13 @@ window.printEditorMain = function () {
                 }
             }
         },
+        closeEditor() {
+            // TODO: reset to previous state - reload from server?
+            this.editMargin = false;
+            this.editFooter = false;
+            this.editHeader = false;
+        },
+        async submit(column, data) {},
     };
 };
 
