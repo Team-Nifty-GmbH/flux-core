@@ -14,11 +14,9 @@ class PrintLayoutEditor extends Component
 
     public array $model = [];
 
-    public array $summary = [];
-
     public string $subject = 'Header';
 
-    private function arrayToFluent(array $array)
+    private function arrayToFluent(array $array): Fluent
     {
         foreach ($array as $key => $value) {
             if (is_array($value)) {
@@ -95,14 +93,6 @@ class PrintLayoutEditor extends Component
             'total_gross_price' => 100.00,
             'footer' => '<p>Thank you for your business!</p>',
         ];
-
-        $this->summary = [
-            [
-                'name' => 'Subtotal',
-                'slug_position' => 'slug-subtotal',
-                'total_net_price' => 80.00,
-            ]
-        ];
     }
 
     public function getClientFluentProperty()
@@ -115,18 +105,12 @@ class PrintLayoutEditor extends Component
         return $this->arrayToFluent($this->model);
     }
 
-    public function getSummaryFluentProperty()
-    {
-        return $this->arrayToFluent($this->summary);
-    }
-
     public function orderPrint():View
     {
         return view('flux::printing.order.order',
         [
          'model' => $this->getModelFluentProperty(),
          'client' => $this->getClientFluentProperty(),
-         'summary' => $this->getSummaryFluentProperty(),
         ]);
     }
 

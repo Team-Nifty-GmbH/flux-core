@@ -9,6 +9,7 @@
     :class="editFooter ? 'border border-flux-primary-300' : ''"
     :style="{'height': footerHeight}"
 >
+{{--  footer height related  --}}
     <div
         x-cloak
         x-show="editFooter"
@@ -23,6 +24,7 @@
             ></div>
         </div>
     </div>
+{{--  footer height related  --}}
     <div class="footer-content h-full text-2xs leading-3">
         @section('footer.logo')
         <div
