@@ -1,3 +1,8 @@
+function roundToTwoDecimal(value) {
+    // Round to 0.1 cm
+    return Math.ceil(value * 100) / 100;
+}
+
 window.printEditorMain = function () {
     return {
         onInit() {
@@ -180,24 +185,42 @@ window.printEditorFooter = function (parent) {
         _minFooterHeight: null,
         _maxFooterHeight: 5,
         isFooterClicked: false,
+        isClientClicked: false,
+        _clientPosition: {
+            top: 0,
+            left: 0,
+        },
+        isBankClicked: false,
+        isLogoClicked: false,
         startPointFooterVertical: null,
+        _startPointClient: null,
+        startPointBank: null,
+        startPointLogo: null,
+        elementAlignment: null, // 'top', 'center', 'bottom'
         onInitFooter() {
             // round ceil to 0.1 cm
-            this._footerHeight =
-                Math.ceil(
-                    (10 * this.$refs['footer'].offsetHeight) / parent.pyPerCm,
-                ) / 10;
-
+            this._footerHeight = 1.7;
             this._minFooterHeight = 1.7;
         },
-        onMouseDownFooter(e) {
-            this.isFooterClicked = true;
-            this.startPointFooterVertical = e.clientY;
+        onMouseDownFooter(e, element) {
+            if (element === 'footer') {
+                this.isFooterClicked = true;
+                this.startPointFooterVertical = e.clientY;
+            }
+
+            if (element === 'client') {
+                this.isClientClicked = true;
+                this._startPointClient = { x: e.clientX, y: e.clientY };
+            }
         },
         onMouseUpFooter() {
             if (this.isFooterClicked) {
                 this.isFooterClicked = false;
                 this.startPointFooterVertical = null;
+            }
+            if (this.isClientClicked) {
+                this.isClientClicked = false;
+                this._startPointClient = null;
             }
         },
         onMouseMoveFooter(e) {
@@ -228,8 +251,63 @@ window.printEditorFooter = function (parent) {
                 }
             }
         },
+        onMouseMoveFooterClient(e) {
+            if (this.isClientClicked && this._startPointClient !== null) {
+                const deltaX =
+                    (e.clientX - this._startPointClient.x) / parent.pxPerCm;
+                const deltaY =
+                    (e.clientY - this._startPointClient.y) / parent.pyPerCm;
+                if (Math.abs(deltaX) >= 0.1 && Math.abs(deltaY) < 0.1) {
+                    this._clientPosition.left = Math.max(
+                        0,
+                        roundToTwoDecimal(
+                            this._clientPosition.left +
+                                0.1 * (deltaX > 0 ? 1 : -1),
+                        ),
+                    );
+                    this._startPointClient.x = e.clientX;
+                }
+
+                if (Math.abs(deltaY) >= 0.1 && Math.abs(deltaX) < 0.1) {
+                    this._clientPosition.top = Math.max(
+                        0,
+                        roundToTwoDecimal(
+                            this._clientPosition.top +
+                                0.1 * (deltaY > 0 ? 1 : -1),
+                        ),
+                    );
+                    this._startPointClient.y = e.clientY;
+                }
+
+                if (Math.abs(deltaX) >= 0.1 && Math.abs(deltaY) >= 0.1) {
+                    this._clientPosition.left = Math.max(
+                        0,
+                        roundToTwoDecimal(
+                            this._clientPosition.left +
+                                0.1 * (deltaX > 0 ? 1 : -1),
+                        ),
+                    );
+                    this._startPointClient.x = e.clientX;
+
+                    this._clientPosition.top = Math.max(
+                        0,
+                        roundToTwoDecimal(
+                            this._clientPosition.top +
+                                0.1 * (deltaY > 0 ? 1 : -1),
+                        ),
+                    );
+                    this._startPointClient.y = e.clientY;
+                }
+            }
+        },
         get footerHeight() {
             return `${this._footerHeight}cm`;
+        },
+        get clientPositionTop() {
+            return `${this._clientPosition.top}cm`;
+        },
+        get clientPositionLeft() {
+            return `${this._clientPosition.left}cm`;
         },
         get logoFooterSize() {
             if (this._minFooterHeight !== null) {
@@ -237,6 +315,17 @@ window.printEditorFooter = function (parent) {
             } else {
                 return 'auto';
             }
+        },
+        get _clientFooterSize() {
+            if (this.$refs['client'] === undefined) {
+                throw new Error('Client reference is not defined');
+            }
+            const { width, height } =
+                this.$refs['client'].getBoundingClientRect();
+            return {
+                width: roundToTwoDecimal(width / parent.pxPerCm),
+                height: roundToTwoDecimal(height / parent.pxPerCm),
+            };
         },
     };
 };

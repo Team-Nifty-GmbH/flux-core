@@ -3,17 +3,16 @@
     x-on:mousemove.window="isFooterClicked ? onMouseMoveFooter($event) : null"
     x-on:mouseup.window="onMouseUpFooter($event)"
     class="relative w-full bg-white text-center"
-    x-ref="footer"
     x-data="printEditorFooter($data)"
     x-init="onInitFooter()"
     :class="editFooter ? 'border border-flux-primary-300' : ''"
-    :style="{'height': footerHeight}"
+    :style="{'min-height': footerHeight}"
 >
 {{--  footer height related  --}}
     <div
         x-cloak
         x-show="editFooter"
-        x-on:mousedown="onMouseDownFooter($event)"
+        x-on:mousedown="onMouseDownFooter($event,'footer')"
         class="absolute top-0 left-1/2 h-6 w-6 z-[100] -translate-x-1/2 -translate-y-1/2 cursor-pointer select-none rounded-full bg-flux-primary-400">
         <div
             class="relative flex h-full w-full items-center justify-center"
@@ -41,7 +40,13 @@
             <div class="border-semi-black border-t">
                 @section('footer.client-address')
                 <address
-                    class="float-left text-left not-italic">
+                    x-on:mousemove.window="isClientClicked ? onMouseMoveFooterClient($event) : null"
+                    x-ref="client"
+                    draggable="false"
+                    :class="isClientClicked ? 'bg-flux-primary-300' : ''"
+                    :style="{transform: `translate(${clientPositionLeft}, ${clientPositionTop})`}"
+                    x-on:mousedown="editFooter ?  onMouseDownFooter($event, 'client') : null"
+                    class="z-[100] select-none absolute text-left not-italic">
                     <div class="font-semibold">
                         {{ $client->name ?? '' }}
                     </div>
@@ -66,7 +71,7 @@
                 @show
                 @section('footer.bank-connections')
                 @foreach ($client->bankConnections as $bankConnection)
-                    <div class="float-right pl-3 text-left">
+                    <div class="absolute top-0 right-0 pl-3 text-left">
                         <div class="font-semibold">
                             {{ $bankConnection->bank_name ?? '' }}
                         </div>
