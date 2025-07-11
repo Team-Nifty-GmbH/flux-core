@@ -1,8 +1,13 @@
-function roundToTwoDecimal(value) {
-    // Round to 0.1 cm
-    return Math.ceil(value * 100) / 100;
-}
+import {
+    roundToTwoDecimal,
+    moveHorizontal,
+    moveVertical,
+    moveDiagonal,
+} from './utils/print/utils.js';
 
+const STEP = 0.1; // step in cm
+
+// TODO: add nextFrame to avoid blocking UI - changing margins,height is slow
 window.printEditorMain = function () {
     return {
         onInit() {
@@ -180,6 +185,7 @@ window.printEditorHeader = function (parent) {
 };
 
 window.printEditorFooter = function (parent) {
+    // TODO: add wtahcer for footer height changes - to adjust elements position if needed
     return {
         _footerHeight: null,
         _minFooterHeight: null,
@@ -258,50 +264,109 @@ window.printEditorFooter = function (parent) {
                 const deltaY =
                     (e.clientY - this._startPointClient.y) / parent.pyPerCm;
                 if (Math.abs(deltaX) >= 0.1 && Math.abs(deltaY) < 0.1) {
-                    this._clientPosition.left = Math.max(
+                    const newValue = Math.max(
                         0,
                         roundToTwoDecimal(
                             this._clientPosition.left +
                                 0.1 * (deltaX > 0 ? 1 : -1),
                         ),
                     );
+
+                    if (
+                        newValue + this._clientFooterSize.width <
+                        this._footerWidth
+                    ) {
+                        this._clientPosition.left = newValue;
+                    } else {
+                        this._clientPosition.left =
+                            this._footerWidth - this._clientFooterSize.width;
+                    }
                     this._startPointClient.x = e.clientX;
                 }
 
                 if (Math.abs(deltaY) >= 0.1 && Math.abs(deltaX) < 0.1) {
-                    this._clientPosition.top = Math.max(
+                    const newValue = Math.max(
                         0,
                         roundToTwoDecimal(
                             this._clientPosition.top +
                                 0.1 * (deltaY > 0 ? 1 : -1),
                         ),
                     );
+
+                    // need to add STEP to avoid footer overlap - due to rounding issues
+                    // doesn't happen on x-axis
+                    // TODO:
+                    if (
+                        newValue + this._clientFooterSize.height + STEP <
+                        this._footerHeight
+                    ) {
+                        this._clientPosition.top = newValue;
+                    } else {
+                        this._clientPosition.top = Math.max(
+                            0,
+                            roundToTwoDecimal(
+                                this._footerHeight -
+                                    this._clientFooterSize.height -
+                                    STEP,
+                            ),
+                        );
+                    }
                     this._startPointClient.y = e.clientY;
                 }
 
                 if (Math.abs(deltaX) >= 0.1 && Math.abs(deltaY) >= 0.1) {
-                    this._clientPosition.left = Math.max(
+                    const newValueX = Math.max(
                         0,
                         roundToTwoDecimal(
                             this._clientPosition.left +
                                 0.1 * (deltaX > 0 ? 1 : -1),
                         ),
                     );
-                    this._startPointClient.x = e.clientX;
 
-                    this._clientPosition.top = Math.max(
+                    const newValueY = Math.max(
                         0,
                         roundToTwoDecimal(
                             this._clientPosition.top +
                                 0.1 * (deltaY > 0 ? 1 : -1),
                         ),
                     );
+
+                    if (
+                        newValueX + this._clientFooterSize.width <
+                        this._footerWidth
+                    ) {
+                        this._clientPosition.left = newValueX;
+                    } else {
+                        this._clientPosition.left =
+                            this._footerWidth - this._clientFooterSize.width;
+                    }
+
+                    if (
+                        newValueY + this._clientFooterSize.height + STEP <
+                        this._footerHeight
+                    ) {
+                        this._clientPosition.top = newValueY;
+                    } else {
+                        this._clientPosition.top =
+                            this._footerHeight -
+                            this._clientFooterSize.height -
+                            STEP;
+                    }
+
+                    this._startPointClient.x = e.clientX;
                     this._startPointClient.y = e.clientY;
                 }
             }
         },
         get footerHeight() {
             return `${this._footerHeight}cm`;
+        },
+        get _footerWidth() {
+            if (this.$refs['footer'] === undefined) {
+                throw new Error('Footer reference is not defined');
+            }
+            const { width } = this.$refs['footer'].getBoundingClientRect();
+            return roundToTwoDecimal(width / parent.pxPerCm);
         },
         get clientPositionTop() {
             return `${this._clientPosition.top}cm`;

@@ -5,6 +5,7 @@
     class="relative w-full bg-white text-center"
     x-data="printEditorFooter($data)"
     x-init="onInitFooter()"
+    x-ref="footer"
     :class="editFooter ? 'border border-flux-primary-300' : ''"
     :style="{'min-height': footerHeight}"
 >
@@ -47,6 +48,17 @@
                     :style="{transform: `translate(${clientPositionLeft}, ${clientPositionTop})`}"
                     x-on:mousedown="editFooter ?  onMouseDownFooter($event, 'client') : null"
                     class="z-[100] select-none absolute text-left not-italic">
+                    <div
+                        x-cloak
+                        x-show="editFooter"
+                        class="relative">
+                        <div
+                            x-text="clientPositionTop"
+                            class="absolute left-[-80px] h-12 rounded bg-gray-100 p-2 text-lg shadow"></div>
+                        <div
+                            x-text="clientPositionLeft"
+                            class="absolute top-[-60px] h-12 rounded bg-gray-100 p-2 text-lg shadow"></div>
+                    </div>
                     <div class="font-semibold">
                         {{ $client->name ?? '' }}
                     </div>
