@@ -9,7 +9,7 @@
     :class="editFooter ? 'border border-flux-primary-300' : ''"
     :style="{'min-height': footerHeight}"
 >
-{{--  footer height related  --}}
+{{-- UI  footer height related  --}}
     <div
         x-cloak
         x-show="editFooter"
@@ -24,19 +24,8 @@
             ></div>
         </div>
     </div>
-{{--  footer height related  --}}
+{{-- UI  footer height related  --}}
     <div class="footer-content h-full text-2xs leading-3">
-        @section('footer.logo')
-        <div
-            class="absolute h-full left-0 right-0 z-[50]">
-            <img
-                draggable="false"
-                :style="{'height': logoFooterSize}"
-                class="logo-small footer-logo m-auto max-h-full"
-                src="{{ $client->logo_small }}"
-            />
-        </div>
-        @show
         <div class="w-full">
             <div class="border-semi-black border-t">
                 @section('footer.client-address')
@@ -48,17 +37,21 @@
                     :style="{transform: `translate(${clientPositionLeft}, ${clientPositionTop})`}"
                     x-on:mousedown="editFooter ?  onMouseDownFooter($event, 'client') : null"
                     class="z-[100] select-none absolute text-left not-italic">
+                    {{-- UI client pos related --}}
                     <div
                         x-cloak
                         x-show="editFooter"
                         class="relative">
                         <div
                             x-text="clientPositionTop"
-                            class="absolute left-[-80px] h-12 rounded bg-gray-100 p-2 text-lg shadow"></div>
+                            :style="{top:`${clientFooterSize.height + 0.2}cm`}"
+                            class="absolute h-12 rounded bg-gray-100 p-2 text-lg shadow"></div>
                         <div
                             x-text="clientPositionLeft"
-                            class="absolute top-[-60px] h-12 rounded bg-gray-100 p-2 text-lg shadow"></div>
+                            :style="{left:`${clientFooterSize.width + 0.2}cm`}"
+                            class="absolute h-12 rounded bg-gray-100 p-2 text-lg shadow"></div>
                     </div>
+                    {{-- UI client pos related --}}
                     <div class="font-semibold">
                         {{ $client->name ?? '' }}
                     </div>
@@ -80,6 +73,33 @@
                         </div>
                     </div>
                 </address>
+                @show
+                @section('footer.logo')
+                    <div
+                        x-on:mousemove.window="isLogoFooterClicked ? onMouseMoveFooterLogo($event) : null"
+                        x-ref="logoFooter"
+                        x-on:mousedown="editFooter ?  onMouseDownFooter($event, 'logoFooter') : null"
+                        :style="{'height': logoFooterHeight, transform: `translate(calc(${relativePositionImageLeft} + 50%), 0cm)`}"
+                        class="absolute top-0 right-[50%] translate-x-1/2 z-[50]">
+                        <div
+                            x-cloak
+                            x-show="editFooter"
+                            class="relative">
+                            <div
+                                x-text="absolutePositionImageLeft"
+                                :style="{left:`${logoFooterSize.width + 0.2}cm`}"
+                                class="absolute h-12 rounded bg-gray-100 p-2 text-lg shadow"></div>
+                            <div
+                                x-text="absolutePositionImageTop"
+                                :style="{top:`${logoFooterSize.height + 0.2}cm`}"
+                                class="absolute h-12 rounded bg-gray-100 p-2 text-lg shadow"></div>
+                        </div>
+                        <img
+                            draggable="false"
+                            class="logo-small footer-logo max-h-full"
+                            src="{{ $client->logo_small }}"
+                        />
+                    </div>
                 @show
                 @section('footer.bank-connections')
                 @foreach ($client->bankConnections as $bankConnection)

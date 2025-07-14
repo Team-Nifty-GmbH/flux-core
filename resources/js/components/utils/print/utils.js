@@ -1,6 +1,11 @@
 export function roundToTwoDecimal(value) {
-    // Round to 0.1 cm
+    // Round to 0.01 cm
     return Math.round(value * 100) / 100;
+}
+
+export function roundToOneDecimal(value) {
+    // Round to 0.1 cm
+    return Math.round(value * 10) / 10;
 }
 
 export function moveHorizontal(element, delta) {}
