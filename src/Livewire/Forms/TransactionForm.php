@@ -18,6 +18,8 @@ class TransactionForm extends FluxForm
 
     public array $children = [];
 
+    public ?int $contact_bank_connection_id = null;
+
     public ?string $counterpart_account_number = null;
 
     public ?string $counterpart_bank_name = null;
