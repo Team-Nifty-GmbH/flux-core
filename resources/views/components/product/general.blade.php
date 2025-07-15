@@ -62,6 +62,11 @@
         />
         <x-input
             x-bind:readonly="!edit"
+            label="{{ __('Customs Tariff Number') }}"
+            wire:model="product.customs_tariff_number"
+        />
+        <x-input
+            x-bind:readonly="!edit"
             label="{{ __('Manufacturer product number') }}"
             wire:model="product.manufacturer_product_number"
         />
