@@ -44,7 +44,7 @@ class ClientForm extends FluxForm
 
     public ?string $sepa_text_b2b = null;
 
-    public ?string $sepa_text_b2c = null;
+    public ?string $sepa_text_basic = null;
 
     public ?string $street = null;
 

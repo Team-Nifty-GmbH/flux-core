@@ -14,7 +14,7 @@
         />
         <div x-cloak x-show="! $wire.sepaMandate.id">
             <x-select.styled
-                wire:model="sepaMandate.type"
+                wire:model="sepaMandate.sepa_mandate_type_enum"
                 :label="__('Type')"
                 :options="\FluxErp\Enums\SepaMandateTypeEnum::valuesLocalized()"
             />

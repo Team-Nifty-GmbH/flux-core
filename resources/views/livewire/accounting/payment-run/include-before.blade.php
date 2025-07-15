@@ -69,9 +69,9 @@
                     x-show="$wire.paymentRunForm.payment_run_type_enum === 'direct_debit'"
                 >
                     <x-select.styled
-                        wire:model="paymentRunForm.direct_debit_type"
+                        wire:model="paymentRunForm.sepa_mandate_type_enum"
                         :label="__('Direct debit type')"
-                        :options="['BASIC', 'B2B']"
+                        :options="\FluxErp\Enums\SepaMandateTypeEnum::valuesLocalized()"
                     />
                 </div>
                 <x-toggle

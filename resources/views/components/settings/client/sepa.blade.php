@@ -4,8 +4,8 @@
         wire:model="client.creditor_identifier"
     />
     <x-textarea
-        :label="__('Sepa Text B2C')"
-        wire:model="client.sepa_text_b2c"
+        :label="__('Sepa Text Basic')"
+        wire:model="client.sepa_text_basic"
     />
     <x-textarea
         :label="__('Sepa Text B2B')"

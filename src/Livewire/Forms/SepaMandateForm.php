@@ -22,7 +22,7 @@ class SepaMandateForm extends FluxForm
 
     public ?string $signed_date = null;
 
-    public ?string $type = null;
+    public ?string $sepa_mandate_type_enum = null;
 
     protected function getActions(): array
     {

@@ -2,12 +2,14 @@
 
 namespace FluxErp\Rulesets\PaymentRun;
 
+use FluxErp\Enums\SepaMandateTypeEnum;
 use FluxErp\Models\BankConnection;
 use FluxErp\Models\PaymentRun;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\ValidStateRule;
 use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\States\PaymentRun\PaymentRunState;
+use Illuminate\Validation\Rule;
 
 class UpdatePaymentRunRuleset extends FluxRuleset
 {
@@ -25,6 +27,10 @@ class UpdatePaymentRunRuleset extends FluxRuleset
                 'nullable',
                 'integer',
                 app(ModelExists::class, ['model' => BankConnection::class]),
+            ],
+            'sepa_mandate_type_enum' => [
+                'nullable',
+                Rule::enum(SepaMandateTypeEnum::class),
             ],
             'state' => [
                 'string',

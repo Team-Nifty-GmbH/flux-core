@@ -10,7 +10,7 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::table('sepa_mandates', function (Blueprint $table): void {
-            $table->string('type')
+            $table->string('sepa_mandate_type_enum')
                 ->nullable()
                 ->after('contact_bank_connection_id');
         });
@@ -18,21 +18,21 @@ return new class() extends Migration
         $this->migrateExistingData();
 
         Schema::table('sepa_mandates', function (Blueprint $table): void {
-            $table->string('type')->nullable(false)->change();
+            $table->string('sepa_mandate_type_enum')->nullable(false)->change();
         });
     }
 
     public function down(): void
     {
         Schema::table('sepa_mandates', function (Blueprint $table): void {
-            $table->dropColumn('type');
+            $table->dropColumn('sepa_mandate_type_enum');
         });
     }
 
     private function migrateExistingData(): void
     {
         DB::table('sepa_mandates')
-            ->whereNull('type')
-            ->update(['type' => 'B2C']);
+            ->whereNull('sepa_mandate_type_enum')
+            ->update(['sepa_mandate_type_enum' => 'BASIC']);
     }
 };

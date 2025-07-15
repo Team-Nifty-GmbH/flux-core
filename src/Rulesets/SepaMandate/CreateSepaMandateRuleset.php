@@ -34,7 +34,7 @@ class CreateSepaMandateRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => ContactBankConnection::class]),
             ],
-            'type' => [
+            'sepa_mandate_type_enum' => [
                 'required',
                 Rule::enum(SepaMandateTypeEnum::class),
             ],

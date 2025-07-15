@@ -11,7 +11,7 @@ class PaymentRunForm extends FluxForm
 {
     public ?int $bank_connection_id = null;
 
-    public string $direct_debit_type = 'BASIC';
+    public ?string $sepa_mandate_type_enum = 'BASIC';
 
     #[Locked]
     public ?int $id = null;

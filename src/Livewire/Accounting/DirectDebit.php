@@ -4,7 +4,9 @@ namespace FluxErp\Livewire\Accounting;
 
 use FluxErp\Actions\PaymentRun\CreatePaymentRun;
 use FluxErp\Enums\PaymentRunTypeEnum;
+use FluxErp\Enums\SepaMandateTypeEnum;
 use FluxErp\Livewire\DataTables\OrderList;
+use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\States\Order\PaymentState\Paid;
 use FluxErp\States\PaymentRun\Open;
@@ -26,6 +28,7 @@ class DirectDebit extends OrderList
         'balance',
         'commission',
         'contact_bank_connection.sepa_mandates.signed_date',
+        'contact_bank_connection.sepa_mandates.sepa_mandate_type_enum',
     ];
 
     protected function getSelectedActions(): array
@@ -44,26 +47,33 @@ class DirectDebit extends OrderList
 
     public function createPaymentRun(): void
     {
-        $orderPayments = $this->getSelectedModels()
-            ->map(fn ($order) => [
+        $orderPayments = $this->getSelectedModelsQuery()
+            ->with('contactBankConnection.sepaMandates:id,contact_bank_connection_id,type,signed_date')
+            ->get()
+            ->map(fn (Order $order) => [
                 'order_id' => $order->id,
                 'amount' => bcround($order->balance, 2),
+                'type' => $order->contactBankConnection?->sepaMandates->last()?->type ?? null,
             ])
+            ->groupBy('type')
             ->toArray();
 
-        try {
-            CreatePaymentRun::make([
-                'state' => Open::$name,
-                'payment_run_type_enum' => PaymentRunTypeEnum::DirectDebit,
-                'orders' => $orderPayments,
-            ])
-                ->checkPermission()
-                ->validate()
-                ->execute();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+        foreach ($orderPayments as $type => $payment) {
+            try {
+                CreatePaymentRun::make([
+                    'state' => Open::$name,
+                    'payment_run_type_enum' => PaymentRunTypeEnum::DirectDebit,
+                    'sepa_mandate_type_enum' => SepaMandateTypeEnum::from($type),
+                    'orders' => $orderPayments,
+                ])
+                    ->checkPermission()
+                    ->validate()
+                    ->execute();
+            } catch (ValidationException|UnauthorizedException $e) {
+                exception_to_notifications($e, $this);
 
-            return;
+                return;
+            }
         }
 
         $this->reset('selected');

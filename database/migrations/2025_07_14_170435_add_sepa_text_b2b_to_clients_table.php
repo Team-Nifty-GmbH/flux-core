@@ -13,14 +13,14 @@ return new class() extends Migration
                 ->nullable()
                 ->after('sepa_text');
 
-            $table->renameColumn('sepa_text', 'sepa_text_b2c');
+            $table->renameColumn('sepa_text', 'sepa_text_basic');
         });
     }
 
     public function down(): void
     {
         Schema::table('clients', function (Blueprint $table): void {
-            $table->renameColumn('sepa_text_b2c', 'sepa_text');
+            $table->renameColumn('sepa_text_basic', 'sepa_text');
             $table->dropColumn('sepa_text_b2b');
         });
     }
