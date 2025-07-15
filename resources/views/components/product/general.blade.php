@@ -434,7 +434,7 @@
             <x-select.styled
                 :label="__('Contact')"
                 select="label:label|value:contact_id"
-                x-on:select="$wire.addSupplier($event.detail.select.value); clear();"
+                x-on:select="$wire.addSupplier($event.detail.select.contact_id); clear();"
                 unfiltered
                 :request="[
                     'url' => route('search', \FluxErp\Models\Address::class),
