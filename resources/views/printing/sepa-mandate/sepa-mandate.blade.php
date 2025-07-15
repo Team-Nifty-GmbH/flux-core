@@ -13,7 +13,7 @@
         </span>
     </div>
     <div class="py-4">
-        {!! $model->client->sepa_text !!}
+        {!! $model->sepa_mandate_type_enum === \FluxErp\Enums\SepaMandateTypeEnum::BASIC ? $model->client->sepa_text_basic : $model->client->sepa_text_b2b !!}
     </div>
     <div class="pt-4">
         <span class="font-semibold">{{ __('Account Holder') }}:</span>

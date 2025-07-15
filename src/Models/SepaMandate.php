@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use FluxErp\Contracts\OffersPrinting;
+use FluxErp\Enums\SepaMandateTypeEnum;
 use FluxErp\Traits\Communicatable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasClientAssignment;
@@ -40,6 +41,7 @@ class SepaMandate extends FluxModel implements HasMedia, OffersPrinting
     protected function casts(): array
     {
         return [
+            'sepa_mandate_type_enum' => SepaMandateTypeEnum::class,
             'signed_date' => 'date',
         ];
     }

@@ -3,6 +3,7 @@
 namespace FluxErp\Rulesets\PaymentRun;
 
 use FluxErp\Enums\PaymentRunTypeEnum;
+use FluxErp\Enums\SepaMandateTypeEnum;
 use FluxErp\Models\BankConnection;
 use FluxErp\Models\PaymentRun;
 use FluxErp\Rules\Iban;
@@ -32,6 +33,10 @@ class CreatePaymentRunRuleset extends FluxRuleset
                 'nullable',
                 'integer',
                 app(ModelExists::class, ['model' => BankConnection::class]),
+            ],
+            'sepa_mandate_type_enum' => [
+                'nullable',
+                Rule::enum(SepaMandateTypeEnum::class),
             ],
             'state' => [
                 'string',
