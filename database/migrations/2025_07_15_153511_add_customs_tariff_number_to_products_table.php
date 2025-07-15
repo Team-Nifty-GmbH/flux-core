@@ -9,14 +9,14 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::table('products', function (Blueprint $table): void {
-            $table->string('customs_tariff_code', 64)->nullable()->after('ean');
+            $table->string('customs_tariff_number', 64)->nullable()->after('ean');
         });
     }
 
     public function down(): void
     {
         Schema::table('products', function (Blueprint $table): void {
-            $table->dropColumn('customs_tariff_code');
+            $table->dropColumn('customs_tariff_number');
         });
     }
 };
