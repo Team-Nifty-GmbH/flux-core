@@ -103,6 +103,11 @@
                 wire:model="contact.vat_id"
                 :label="__('VAT number')"
             />
+            <x-input
+                x-bind:disabled="! $wire.$parent.$parent.edit"
+                wire:model="contact.customs_identifier"
+                :label="__('Customs Identifier')"
+            />
         </div>
     </x-card>
     <x-card>
