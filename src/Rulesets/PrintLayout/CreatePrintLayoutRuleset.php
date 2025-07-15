@@ -2,6 +2,8 @@
 
 namespace FluxErp\Rulesets\PrintLayout;
 
+use FluxErp\Models\Client;
+use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\MorphClassExists;
 use FluxErp\Rulesets\FluxRuleset;
 
@@ -13,6 +15,11 @@ class CreatePrintLayoutRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
+            'client_id' => [
+                'required',
+                'integer',
+                app(ModelExists::class, ['model' => Client::class]),
+            ],
             'name' => [
                 'required',
                 'string',

@@ -2,6 +2,8 @@
 
 namespace FluxErp\Livewire;
 
+use FluxErp\Models\Client;
+use FluxErp\Models\PrintLayout;
 use Illuminate\Support\Carbon;
 use Illuminate\View\View;
 use Illuminate\Support\Fluent;
@@ -10,6 +12,9 @@ use Livewire\Component;
 
 class PrintLayoutEditor extends Component
 {
+
+    public array $availableClients = [];
+
     public array $client = [];
 
     public array $model = [];
@@ -30,6 +35,11 @@ class PrintLayoutEditor extends Component
 
     public function mount(): void
     {
+        $this->availableClients = resolve_static(Client::class, 'query')
+            ->orderBy('name')
+            ->get(['id','name'])
+            ->toArray();
+
         $this->client= [
             'name' => 'Client Name',
             'ceo' => 'CEO Name',

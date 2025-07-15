@@ -10,6 +10,9 @@ use Livewire\Attributes\Locked;
 class PrintLayoutForm extends FluxForm
 {
     #[Locked]
+    public ?int $client_id = null;
+
+    #[Locked]
     public ?string $name = null;
 
     public array $margin = [];
