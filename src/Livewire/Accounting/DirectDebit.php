@@ -48,7 +48,11 @@ class DirectDebit extends OrderList
     public function createPaymentRun(): void
     {
         $orderPayments = $this->getSelectedModelsQuery()
-            ->with('contactBankConnection.sepaMandates:id,contact_bank_connection_id,type,signed_date')
+            ->with('contactBankConnection.sepaMandates')
+            ->whereHas(
+                'contactBankConnection.sepaMandates',
+                fn (Builder $query) => $query->whereNotNull('signed_date')
+            )
             ->get()
             ->map(fn (Order $order) => [
                 'order_id' => $order->id,
@@ -58,13 +62,13 @@ class DirectDebit extends OrderList
             ->groupBy('type')
             ->toArray();
 
-        foreach ($orderPayments as $type => $payment) {
+        foreach ($orderPayments as $type => $payments) {
             try {
                 CreatePaymentRun::make([
                     'state' => Open::$name,
                     'payment_run_type_enum' => PaymentRunTypeEnum::DirectDebit,
-                    'sepa_mandate_type_enum' => SepaMandateTypeEnum::from($type),
-                    'orders' => $orderPayments,
+                    'sepa_mandate_type_enum' => SepaMandateTypeEnum::tryFrom($type) ?? SepaMandateTypeEnum::BASIC,
+                    'orders' => $payments,
                 ])
                     ->checkPermission()
                     ->validate()
@@ -78,7 +82,10 @@ class DirectDebit extends OrderList
 
         $this->reset('selected');
 
-        $this->notification()->success(__('Payment Run created.'))->send();
+        $this->toast()
+            ->success(__(':model created', ['model' => __('Payment Run')]))
+            ->send();
+
         $this->loadData();
     }
 

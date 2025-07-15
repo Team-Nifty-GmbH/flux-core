@@ -41,7 +41,7 @@ class SepaMandate extends FluxModel implements HasMedia, OffersPrinting
     protected function casts(): array
     {
         return [
-            'type' => SepaMandateTypeEnum::class,
+            'sepa_mandate_type_enum' => SepaMandateTypeEnum::class,
             'signed_date' => 'date',
         ];
     }
