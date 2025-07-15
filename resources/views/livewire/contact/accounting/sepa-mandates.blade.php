@@ -1,6 +1,6 @@
 {{ $this->renderCreateDocumentsModal() }}
 <x-modal id="edit-sepa-mandate-modal">
-    <div class="flex flex-col gap-1.5">
+    <div class="flex flex-col gap-4">
         <x-select.styled
             wire:model="sepaMandate.contact_bank_connection_id"
             :label="__('Bank connection')"
@@ -12,6 +12,13 @@
             :label="__('Signed Date')"
             :without-time="true"
         />
+        <div x-cloak x-show="! $wire.sepaMandate.id">
+            <x-select.styled
+                wire:model="sepaMandate.type"
+                :label="__('Type')"
+                :options="\FluxErp\Enums\SepaMandateTypeEnum::valuesLocalized()"
+            />
+        </div>
         <x-flux::features.media.upload-form-object
             :label="__('Signed Sepa Mandate')"
             wire:model="signedMandate"

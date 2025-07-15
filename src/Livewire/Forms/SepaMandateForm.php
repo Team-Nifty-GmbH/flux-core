@@ -22,6 +22,8 @@ class SepaMandateForm extends FluxForm
 
     public ?string $signed_date = null;
 
+    public ?string $type = null;
+
     protected function getActions(): array
     {
         return [

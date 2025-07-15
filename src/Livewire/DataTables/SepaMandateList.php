@@ -10,6 +10,7 @@ class SepaMandateList extends BaseDataTable
         'contact_bank_connection.iban',
         'contact_bank_connection.bank_name',
         'signed_date',
+        'type',
     ];
 
     protected string $model = SepaMandate::class;
