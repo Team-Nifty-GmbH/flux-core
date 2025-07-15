@@ -57,7 +57,7 @@ class DirectDebit extends OrderList
             ->map(fn (Order $order) => [
                 'order_id' => $order->id,
                 'amount' => bcround($order->balance, 2),
-                'type' => $order->contactBankConnection?->sepaMandates->last()?->type ?? null,
+                'type' => $order->contactBankConnection?->sepaMandates->last()?->sepa_mandate_type_enum ?? null,
             ])
             ->groupBy('type')
             ->toArray();
