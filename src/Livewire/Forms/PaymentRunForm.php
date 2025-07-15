@@ -11,8 +11,6 @@ class PaymentRunForm extends FluxForm
 {
     public ?int $bank_connection_id = null;
 
-    public ?string $sepa_mandate_type_enum = 'BASIC';
-
     #[Locked]
     public ?int $id = null;
 
@@ -29,6 +27,8 @@ class PaymentRunForm extends FluxForm
 
     #[Locked]
     public ?string $payment_run_type_enum = null;
+
+    public ?string $sepa_mandate_type_enum = 'BASIC';
 
     #[Locked]
     public ?string $total_amount = null;
