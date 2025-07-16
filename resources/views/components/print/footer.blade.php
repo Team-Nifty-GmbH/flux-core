@@ -97,7 +97,7 @@
                         <img
                             draggable="false"
                             class="logo-small footer-logo max-h-full"
-                            src="{{ $client->logo_small }}"
+                            src="{{ $client->logo_small_url }}"
                         />
                     </div>
                 @show
@@ -114,7 +114,7 @@
                             {{ $bankConnection->bic ?? '' }}
                         </div>
                     </div>
-                    @if ($client->logo_small)
+                    @if ($client->logo_small_url)
                         @break
                     @endif
                 @endforeach

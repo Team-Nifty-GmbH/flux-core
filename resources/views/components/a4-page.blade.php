@@ -1,6 +1,3 @@
-<div x-data="printEditorMain()"
-     class="flex h-[29.7cm] items-center space-x-4">
-    <div class="h-full w-[300px] rounded bg-white shadow"></div>
     <div
         x-init="onInit"
         class="h-[29.7cm] min-h-[29.7cm] w-[21cm] min-w-[21cm] bg-white shadow"
@@ -13,20 +10,20 @@
             :style="{'padding-left': marginLeft, 'padding-right': marginRight, 'padding-top': marginTop, 'padding-bottom': marginBottom}"
         >
             <div class="relative h-full w-full bg-white">
-                {{-- scale for converting cm to px --}}
+{{--                 scale for converting cm to px--}}
                 <div
                     x-ref="scale"
                     class="absolute left-0 top-0 h-[1cm] w-[1cm]"
                 ></div>
-                {{-- content --}}
+{{--                 content--}}
                 <div class="h-full flex flex-col ">
-                    <x-flux::print.header :client="$this->clientFluent" :subject="$subject"/>
+                    <x-flux::print.header :client="$this->client" :subject="$this->subject"/>
                     <div class="flex-1">
 {{--                        {!! $this->orderPrint() !!}--}}
                     </div>
-                    <x-flux::print.footer :client="$this->clientFluent"/>
+                    <x-flux::print.footer :client="$this->client"/>
                 </div>
-                {{-- content --}}
+{{--                 content--}}
                 <div
                     x-cloak
                     x-show="editMargin"
@@ -98,35 +95,3 @@
             </div>
         </div>
     </div>
-    <div
-        class="h-full w-[300px] rounded p-4 bg-white shadow">
-        <div
-            x-cloak
-            x-show="!anyEdit"
-            class="flex flex-col space-y-4">
-            <x-button
-                x-on:click="toggleEditMargin"
-                text="Edit Margin"/>
-            <x-button
-                x-on:click="toggleEditHeader"
-                text="Edit Header"/>
-            <x-button
-                x-on:click="toggleEditFooter"
-                text="Edit Footer"/>
-        </div>
-        <div
-            x-cloak
-            x-show="anyEdit"
-            class="h-full flex flex-col justify-end">
-            <div class="flex items-center justify-between">
-                <x-button
-                    x-on:click="closeEditor"
-                    text="Cancel"
-                />
-                <x-button
-                    text="Save"
-                />
-            </div>
-        </div>
-    </div>
-</div>

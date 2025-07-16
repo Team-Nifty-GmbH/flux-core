@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire;
 
+use FluxErp\Livewire\Forms\PrintLayoutForm;
 use FluxErp\Models\Client;
 use FluxErp\Models\PrintLayout;
 use Illuminate\Support\Carbon;
@@ -15,11 +16,15 @@ class PrintLayoutEditor extends Component
 
     public array $availableClients = [];
 
-    public array $client = [];
+    public Client $client;
 
     public array $model = [];
 
     public string $subject = 'Header';
+
+    public ?int $selectedClientId = null;
+
+    public PrintLayoutForm $form;
 
     private function arrayToFluent(array $array): Fluent
     {
@@ -40,28 +45,14 @@ class PrintLayoutEditor extends Component
             ->get(['id','name'])
             ->toArray();
 
-        $this->client= [
-            'name' => 'Client Name',
-            'ceo' => 'CEO Name',
-            'street' => '123 Main St',
-            'postcode' => '12345',
-            'city' => 'City Name',
-            'phone' => '+1234567890',
-            'vat_id' => 'VAT123456',
-            'logo_small' => asset('/pwa-icons/icons-192.png'),
-            'postal_address_one_line' => '123 Main St, City Name, 12345',
-            'bankConnections' => [
-                [
-                    'bank_name' => 'Bank Name',
-                    'iban' => 'DE89370400440532013000',
-                    'bic' => 'COBADEFFXXX',
-                ],
-                [
-                    'bank_name' => 'Another Bank',
-                    'iban' => 'DE89370400440532013001',
-                    'bic' => 'COBADEFFYYY',]
-                ],
-            ];
+        if($this->availableClients) {
+            $this->client = resolve_static(Client::class, 'query')
+                ->whereKey(reset($this->availableClients)['id'])
+                ->first();
+
+            $this->selectedClientId = $this->client->id;
+        }
+
 
         // depending on the print layout set the model data
         $this->model = [
@@ -105,11 +96,6 @@ class PrintLayoutEditor extends Component
         ];
     }
 
-    public function getClientFluentProperty()
-    {
-        return $this->arrayToFluent($this->client);
-    }
-
     public function getModelFluentProperty()
     {
         return $this->arrayToFluent($this->model);
@@ -120,8 +106,13 @@ class PrintLayoutEditor extends Component
         return view('flux::printing.order.order',
         [
          'model' => $this->getModelFluentProperty(),
-         'client' => $this->getClientFluentProperty(),
+         'client' => $this->$client,
         ]);
+    }
+
+    public function updatedSelectedClientId()
+    {
+        dd($this->client->toArray());
     }
 
     #[Layout('flux::layouts.print-layout-editor',[
@@ -129,7 +120,7 @@ class PrintLayoutEditor extends Component
     ])]
     public function render(): View
     {
-        return view('flux::livewire.a4-page');
+        return view('flux::livewire.a4-page-editor');
     }
 
 }

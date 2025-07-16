@@ -18,7 +18,7 @@
             <div class="float-right inline-block max-h-72 w-44 text-right">
                 <img
                     class="logo-small"
-                    src="{{ $client->logo_small }}"
+                    src="{{ $client->logo_small_url }}"
                     alt="logo-small"
                 />
             </div>
