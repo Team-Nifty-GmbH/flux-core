@@ -10,6 +10,9 @@ use FluxErp\Actions\Order\ReplicateOrder;
 use FluxErp\Actions\Order\ToggleLock;
 use FluxErp\Actions\Order\UpdateLockedOrder;
 use FluxErp\Actions\Order\UpdateOrder;
+use FluxErp\Actions\OrderTransaction\CreateOrderTransaction;
+use FluxErp\Actions\Transaction\CreateTransaction;
+use FluxErp\Actions\Transaction\DeleteTransaction;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\FrequenciesEnum;
 use FluxErp\Enums\OrderTypeEnum;
@@ -20,6 +23,7 @@ use FluxErp\Livewire\Forms\OrderForm;
 use FluxErp\Livewire\Forms\OrderReplicateForm;
 use FluxErp\Livewire\Forms\ScheduleForm;
 use FluxErp\Models\Address;
+use FluxErp\Models\BankConnection;
 use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\ContactBankConnection;
@@ -36,10 +40,10 @@ use FluxErp\Models\VatRate;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\CreatesDocuments;
 use FluxErp\Traits\Livewire\WithTabs;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use Illuminate\View\View;
 use Laravel\SerializableClosure\SerializableClosure;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
@@ -147,6 +151,11 @@ class Order extends Component
 
     public function createDocuments(): null|MediaStream|Media
     {
+        $hadInvoiceNumber = resolve_static(OrderModel::class, 'query')
+            ->whereKey($this->order->id)
+            ->whereNotNull('invoice_number')
+            ->exists();
+
         $createDocuments = $this->createDocumentFromItems(
             resolve_static(OrderModel::class, 'query')
                 ->whereKey($this->order->id)
@@ -154,6 +163,31 @@ class Order extends Component
         );
 
         $this->fetchOrder($this->order->id);
+
+        if (
+            ! $hadInvoiceNumber
+            && $this->order->invoice_number
+            && $this->order->parent_id
+            && resolve_static(OrderType::class, 'query')
+                ->whereKey($this->order->order_type_id)
+                ->value('order_type_enum')
+                ->multiplier() < 1
+            && resolve_static(CreateTransaction::class, 'canPerformAction', [false])
+            && resolve_static(CreateOrderTransaction::class, 'canPerformAction', [false])
+            && resolve_static(OrderModel::class, 'query')
+                ->whereKey($this->order->parent_id)
+                ->where('balance', '>=', 0)
+                ->exists()
+        ) {
+            $this->dialog()
+                ->question(
+                    __('Even Out Balance?'),
+                    __('This will subtract the gross total of this order from the parents invoice balance')
+                )
+                ->confirm(__('Yes'), 'evenOutBalance')
+                ->cancel(__('Cancel'))
+                ->send();
+        }
 
         return $createDocuments;
     }
@@ -200,6 +234,101 @@ class Order extends Component
         $this->js(<<<'JS'
             $modalOpen('edit-discount');
         JS);
+    }
+
+    #[Renderless]
+    public function evenOutBalance(): void
+    {
+        $parentOrder = resolve_static(OrderModel::class, 'query')
+            ->whereKey($this->order->parent_id)
+            ->first();
+        $amount = min(
+            bcmul($this->order->total_gross_price, -1),
+            $parentOrder->balance
+        );
+        $bankConnectionId = resolve_static(BankConnection::class, 'query')
+            ->where('is_active', true)
+            ->whereNull('iban')
+            ->value('id');
+        $transaction = null;
+
+        try {
+            $transaction = CreateTransaction::make([
+                'bank_connection_id' => $bankConnectionId,
+                'currency_id' => $this->order->currency_id,
+                'value_date' => now()->toDateString(),
+                'booking_date' => now()->toDateString(),
+                'amount' => $amount,
+                'purpose' => __('Even out balance from :order', ['order' => $this->order->order_number]),
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+            $transactionRefund = CreateTransaction::make([
+                'bank_connection_id' => resolve_static(BankConnection::class, 'query')
+                    ->where('is_active', true)
+                    ->whereNull('iban')
+                    ->value('id'),
+                'currency_id' => $this->order->currency_id,
+                'value_date' => now()->toDateString(),
+                'booking_date' => now()->toDateString(),
+                'amount' => bcmul($amount, -1),
+                'purpose' => __('Even out balance from :order', ['order' => $parentOrder->order_number]),
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            if ($transaction) {
+                DeleteTransaction::make([
+                    'id' => $transaction->getKey(),
+                ])
+                    ->validate()
+                    ->execute();
+            }
+
+            return;
+        }
+
+        try {
+            CreateOrderTransaction::make([
+                'order_id' => $this->order->parent_id,
+                'transaction_id' => $transaction->getKey(),
+                'amount' => $transaction->amount,
+                'is_accepted' => true,
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+            CreateOrderTransaction::make([
+                'order_id' => $this->order->id,
+                'transaction_id' => $transactionRefund->getKey(),
+                'amount' => $transactionRefund->amount,
+                'is_accepted' => true,
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            DeleteTransaction::make([
+                'id' => $transaction->getKey(),
+            ])
+                ->validate()
+                ->execute();
+            DeleteTransaction::make([
+                'id' => $transactionRefund->getKey(),
+            ])
+                ->validate()
+                ->execute();
+
+            return;
+        }
+
+        $this->fetchOrder($this->order->id);
     }
 
     #[Renderless]

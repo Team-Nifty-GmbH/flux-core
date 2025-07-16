@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Order;
 
+use FluxErp\Actions\OrderTransaction\CreateOrderTransaction;
 use FluxErp\Livewire\DataTables\TransactionList;
 use FluxErp\Livewire\Forms\OrderForm;
 use FluxErp\Models\Transaction;
@@ -49,6 +50,33 @@ class Accounting extends TransactionList
         if (! $transaction) {
             $this->transactionForm->amount = $this->order->balance;
         }
+    }
+
+    #[Renderless]
+    public function saveTransaction(): bool
+    {
+        $result = parent::saveTransaction();
+
+        if ($result) {
+            try {
+                CreateOrderTransaction::make([
+                    'order_id' => $this->order->id,
+                    'transaction_id' => $this->transactionForm->id,
+                    'amount' => $this->transactionForm->amount,
+                    'is_accepted' => true,
+                ])
+                    ->checkPermission()
+                    ->validate()
+                    ->execute();
+            } catch (ValidationException|UnauthorizedException $e) {
+                exception_to_notifications($e, $this);
+                $this->deleteTransaction();
+
+                return false;
+            }
+        }
+
+        return $result;
     }
 
     protected function getBuilder(Builder $builder): Builder

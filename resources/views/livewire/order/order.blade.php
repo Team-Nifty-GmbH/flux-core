@@ -279,6 +279,7 @@
             <x-button
                 x-cloak
                 x-show="$wire.replicateOrder.order_positions?.length"
+                loading="saveReplicate"
                 color="indigo"
                 :text="__('Save')"
                 wire:click="saveReplicate()"
