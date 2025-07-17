@@ -17,6 +17,9 @@ export default function () {
         toggleEditHeader() {
             this.editHeader = !this.editHeader;
         },
+        async selectClient(e) {
+            await this.$wire.set('selectedClientId', e.target.value);
+        },
         pxPerCm: null,
         pyPerCm: null,
         startPointVertical: null,

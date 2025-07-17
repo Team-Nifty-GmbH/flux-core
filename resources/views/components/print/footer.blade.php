@@ -1,4 +1,4 @@
-{{--TODO: add fixed when printing--}}
+{{-- TODO: add fixed when printing --}}
 <footer
     x-on:mousemove.window="isFooterClicked ? onMouseMoveFooter($event) : null"
     x-on:mouseup.window="onMouseUpFooter($event)"
@@ -9,22 +9,21 @@
     :class="editFooter ? 'border border-flux-primary-300' : ''"
     :style="{'min-height': footerHeight}"
 >
-{{-- UI  footer height related  --}}
+    {{-- UI  footer height related --}}
     <div
         x-cloak
         x-show="editFooter"
-        x-on:mousedown="onMouseDownFooter($event,'footer')"
-        class="absolute top-0 left-1/2 h-6 w-6 z-[100] -translate-x-1/2 -translate-y-1/2 cursor-pointer select-none rounded-full bg-flux-primary-400">
-        <div
-            class="relative flex h-full w-full items-center justify-center"
-        >
+        x-on:mousedown="onMouseDownFooter($event, 'footer')"
+        class="absolute left-1/2 top-0 z-[100] h-6 w-6 -translate-x-1/2 -translate-y-1/2 cursor-pointer select-none rounded-full bg-flux-primary-400"
+    >
+        <div class="relative flex h-full w-full items-center justify-center">
             <div
                 class="absolute bottom-8 h-12 rounded bg-gray-100 p-2 text-lg shadow"
                 x-text="footerHeight"
             ></div>
         </div>
     </div>
-{{-- UI  footer height related  --}}
+    {{-- UI  footer height related --}}
     <div class="footer-content h-full text-2xs leading-3">
         <div class="w-full">
             <div class="border-semi-black border-t">
@@ -35,21 +34,21 @@
                     draggable="false"
                     :class="isClientClicked ? 'bg-flux-primary-300' : ''"
                     :style="{transform: `translate(${clientPositionLeft}, ${clientPositionTop})`}"
-                    x-on:mousedown="editFooter ?  onMouseDownFooter($event, 'client') : null"
-                    class="z-[100] select-none absolute text-left not-italic">
+                    x-on:mousedown="editFooter ? onMouseDownFooter($event, 'client') : null"
+                    class="absolute z-[100] select-none text-left not-italic"
+                >
                     {{-- UI client pos related --}}
-                    <div
-                        x-cloak
-                        x-show="editFooter"
-                        class="relative">
+                    <div x-cloak x-show="editFooter" class="relative">
                         <div
                             x-text="clientPositionTop"
                             :style="{top:`${clientFooterSize.height + 0.2}cm`}"
-                            class="absolute h-12 rounded bg-gray-100 p-2 text-lg shadow"></div>
+                            class="absolute h-12 rounded bg-gray-100 p-2 text-lg shadow"
+                        ></div>
                         <div
                             x-text="clientPositionLeft"
                             :style="{left:`${clientFooterSize.width + 0.2}cm`}"
-                            class="absolute h-12 rounded bg-gray-100 p-2 text-lg shadow"></div>
+                            class="absolute h-12 rounded bg-gray-100 p-2 text-lg shadow"
+                        ></div>
                     </div>
                     {{-- UI client pos related --}}
                     <div class="font-semibold">
@@ -75,35 +74,35 @@
                 </address>
                 @show
                 @section('footer.logo')
-                    <div
-                        x-on:mousemove.window="isLogoFooterClicked ? onMouseMoveFooterLogo($event) : null"
-                        x-ref="logoFooter"
-                        x-on:mousedown="editFooter ?  onMouseDownFooter($event, 'logoFooter') : null"
-                        :style="{'height': logoFooterHeight, transform: `translate(calc(${relativePositionImageLeft} + 50%), 0cm)`}"
-                        class="absolute top-0 right-[50%] translate-x-1/2 z-[50]">
+                <div
+                    x-on:mousemove.window="isLogoFooterClicked ? onMouseMoveFooterLogo($event) : null"
+                    x-ref="logoFooter"
+                    x-on:mousedown="editFooter ? onMouseDownFooter($event, 'logoFooter') : null"
+                    :style="{'height': logoFooterHeight, transform: `translate(calc(${relativePositionImageLeft} + 50%), 0cm)`}"
+                    class="absolute right-[50%] top-0 z-[50] translate-x-1/2"
+                >
+                    <div x-cloak x-show="editFooter" class="relative">
                         <div
-                            x-cloak
-                            x-show="editFooter"
-                            class="relative">
-                            <div
-                                x-text="absolutePositionImageLeft"
-                                :style="{left:`${logoFooterSize.width + 0.2}cm`}"
-                                class="absolute h-12 rounded bg-gray-100 p-2 text-lg shadow"></div>
-                            <div
-                                x-text="absolutePositionImageTop"
-                                :style="{top:`${logoFooterSize.height + 0.2}cm`}"
-                                class="absolute h-12 rounded bg-gray-100 p-2 text-lg shadow"></div>
-                        </div>
-                        <img
-                            draggable="false"
-                            class="logo-small footer-logo max-h-full"
-                            src="{{ $client->logo_small_url }}"
-                        />
+                            x-text="absolutePositionImageLeft"
+                            :style="{left:`${logoFooterSize.width + 0.2}cm`}"
+                            class="absolute h-12 rounded bg-gray-100 p-2 text-lg shadow"
+                        ></div>
+                        <div
+                            x-text="absolutePositionImageTop"
+                            :style="{top:`${logoFooterSize.height + 0.2}cm`}"
+                            class="absolute h-12 rounded bg-gray-100 p-2 text-lg shadow"
+                        ></div>
                     </div>
+                    <img
+                        draggable="false"
+                        class="logo-small footer-logo max-h-full"
+                        src="{{ $client->logo_small_url }}"
+                    />
+                </div>
                 @show
                 @section('footer.bank-connections')
                 @foreach ($client->bankConnections as $bankConnection)
-                    <div class="absolute top-0 right-0 pl-3 text-left">
+                    <div class="absolute right-0 top-0 pl-3 text-left">
                         <div class="font-semibold">
                             {{ $bankConnection->bank_name ?? '' }}
                         </div>

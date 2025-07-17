@@ -1,4 +1,4 @@
-{{--TODO: add fixed when printing--}}
+{{-- TODO: add fixed when printing --}}
 <header
     x-data="printEditorHeader($data)"
     class="h-auto w-full bg-white text-center font-light"

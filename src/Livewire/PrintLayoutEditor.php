@@ -9,6 +9,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\View\View;
 use Illuminate\Support\Fluent;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
 class PrintLayoutEditor extends Component
@@ -21,6 +22,12 @@ class PrintLayoutEditor extends Component
     public array $model = [];
 
     public string $subject = 'Header';
+
+    #[Url]
+    public string $layoutModel;
+
+    #[Url]
+    public string $name;
 
     public ?int $selectedClientId = null;
 
@@ -51,6 +58,23 @@ class PrintLayoutEditor extends Component
                 ->first();
 
             $this->selectedClientId = $this->client->id;
+
+            $layout = PrintLayout::query()
+                ->where('name', 'flux::printing.' . $this->layoutModel . '.' . $this->name)
+                ->where('client_id', $this->selectedClientId)
+                ->first();
+
+            if($layout) {
+                $this->form->fill($layout->toArray());
+            } else {
+                $this->form->fill([
+                    'client_id' => $this->selectedClientId,
+                    'name' => 'flux::printing.' . $this->layoutModel . '.' . $this->name,
+                    // TODO: need to map the model type to the correct morph alias
+                    'model_type' => $this->layoutModel,
+                ]);
+            }
+
         }
 
 
@@ -116,6 +140,22 @@ class PrintLayoutEditor extends Component
             $this->client = resolve_static(Client::class, 'query')
                 ->whereKey($this->selectedClientId)
                 ->first();
+
+            $layout = PrintLayout::query()
+                ->where('name', 'flux::printing.' . $this->layoutModel . '.' . $this->name)
+                ->where('client_id', $this->selectedClientId)
+                ->first();
+
+            if($layout) {
+                $this->form->fill($layout->toArray());
+            } else {
+                $this->form->reset([
+                    'client_id' => $this->selectedClientId,
+                    'name' => 'flux::printing.' . $this->layoutModel . '.' . $this->name,
+                    // TODO: need to map the model type to the correct morph alias
+                    'model_type' => $this->layoutModel,
+                ]);
+            }
         }
     }
 

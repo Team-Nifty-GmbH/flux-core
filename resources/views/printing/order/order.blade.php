@@ -30,7 +30,7 @@
                         {{ __('Customer no.') }}
                     </td>
                     <td class="py-0 text-right">
-                        @if($model instanceof Illuminate\Support\Fluent )
+                        @if ($model instanceof Illuminate\Support\Fluent)
                             {{ $model->customer_number }}
                         @else
                             {{ $model->contact()->withTrashed()->value('customer_number') }}

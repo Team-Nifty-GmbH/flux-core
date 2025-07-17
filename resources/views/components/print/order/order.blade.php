@@ -14,7 +14,7 @@
             {{ Number::currency($order->total_gross_price) }}
         </td>
         <td class="py-4 text-right align-top">
-            @if($order instanceof Illuminate\Support\Fluent )
+            @if ($order instanceof Illuminate\Support\Fluent)
                 {{ Number::currency($order->total_paid) }}
             @else
                 {{ Number::currency($order->totalPaid()) }}

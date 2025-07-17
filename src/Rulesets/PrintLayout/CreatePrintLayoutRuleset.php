@@ -6,11 +6,24 @@ use FluxErp\Models\Client;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rules\MorphClassExists;
 use FluxErp\Rulesets\FluxRuleset;
+use Illuminate\Support\Arr;
 
 class CreatePrintLayoutRuleset extends FluxRuleset
 {
+    private function fileNames(): string
+    {
+        $path = flux_path('resources/views/printing');
+        $dirs = array_filter(scandir($path), fn($item) => !str_starts_with($item, '.'));
 
-    // TODO: load all file names from printing directory
+        return implode(',', Arr::collapse($printing  = array_map(function ($dir) {
+            $fileNames = array_filter(scandir(flux_path('resources/views/printing') . "/" . $dir),
+                fn($item) => !str_starts_with($item, '.'));
+            // remove extension from file names and add prefix
+            $fileNames = array_map(fn($item) => 'flux::printing' . '.' . $dir . '.' . str_replace('.blade.php', '', $item), $fileNames);
+
+            return array_values($fileNames);
+        }, $dirs)));
+    }
 
     public function rules(): array
     {
@@ -25,6 +38,8 @@ class CreatePrintLayoutRuleset extends FluxRuleset
                 'string',
                 'max:255',
                 'unique:print_layouts,name',
+                'in:' . $this->fileNames(),
+
             ],
             'model_type' => [
                 'required',
