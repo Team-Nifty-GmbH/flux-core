@@ -106,13 +106,17 @@ class PrintLayoutEditor extends Component
         return view('flux::printing.order.order',
         [
          'model' => $this->getModelFluentProperty(),
-         'client' => $this->$client,
+         'client' => $this->client,
         ]);
     }
 
     public function updatedSelectedClientId()
     {
-        dd($this->client->toArray());
+        if($this->selectedClientId !== null && $this->selectedClientId !== $this->client->id) {
+            $this->client = resolve_static(Client::class, 'query')
+                ->whereKey($this->selectedClientId)
+                ->first();
+        }
     }
 
     #[Layout('flux::layouts.print-layout-editor',[

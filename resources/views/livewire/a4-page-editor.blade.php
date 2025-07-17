@@ -2,12 +2,41 @@
      class="flex h-[29.7cm] items-center space-x-4">
     <div class="h-full w-[300px] rounded bg-white shadow p-4">
         @if($this->availableClients)
-{{--            <x-select.styled--}}
-{{--                            label="Selected Client"--}}
-{{--                            wire:model="$selectedClientId"--}}
-{{--                            x-bind:disabled="anyEdit"--}}
-{{--                            select="label:name|value:id"--}}
-{{--                            :options="$availableClients"/>--}}
+            <x-select.native
+                            label="Selected Client"
+                            x-bind:disabled="anyEdit"
+                            x-on:change="async () => {
+                                await $wire.set('selectedClientId', $event.target.value);
+                            }"
+                            select="label:name|value:id"
+                            :options="$availableClients"/>
+            <div class="w-full border-t border-gray-400 mt-4 mb-4"></div>
+            <div class="text-lg text-gray-600 pb-4">Client</div>
+            <div class="flex items-center justify-between">
+            <address class="not-italic">
+                <div class="font-semibold">
+                    {{ $client->name ?? '' }}
+                </div>
+                <div>
+                    {{ $client->ceo ?? '' }}
+                </div>
+                <div>
+                    {{ $client->street ?? '' }}
+                </div>
+                <div>
+                    {{ trim(($client->postcode ?? '') . ' ' . ($client->city ?? '')) }}
+                </div>
+                <div>
+                    {{ $client->phone ?? '' }}
+                </div>
+                <div>
+                    <div>
+                        {{ $client->vat_id }}
+                    </div>
+                </div>
+            </address>
+                <x-toggle />
+            </div>
             <div class="w-full border-t border-gray-400 mt-4 mb-4"></div>
         @endif
         <div class="text-lg text-gray-600 pb-4">Bank Connections</div>
