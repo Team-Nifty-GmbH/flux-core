@@ -62,7 +62,6 @@ class CommunicationTest extends BaseSetup
             'communication_type_enum' => CommunicationTypeEnum::Mail,
         ]);
 
-        // Test that the communication has the auto assign method
         $this->assertTrue(method_exists($communication, 'autoAssign'));
         $this->assertInstanceOf(Communication::class, $communication);
     }
