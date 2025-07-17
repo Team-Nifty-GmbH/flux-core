@@ -10,7 +10,7 @@
             },
         }"
     >
-        <div class="flex grid grid-cols-1">
+        <div class="grid grid-cols-1">
             <div class="max-h-96 overflow-y-auto">
                 <template x-for="order in $wire.paymentRunForm.orders">
                     <x-flux::list-item class="flex justify-between" :item="[]">
@@ -115,6 +115,7 @@
                 <x-button
                     color="indigo"
                     :text="__('Execute Payment Run')"
+                    loading="executePaymentRun"
                     wire:click="executePaymentRun().then((success) => {if(success) $modalClose('execute-payment-run');})"
                 />
             </div>
