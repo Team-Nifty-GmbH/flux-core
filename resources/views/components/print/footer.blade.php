@@ -1,14 +1,6 @@
-{{-- TODO: add fixed when printing --}}
 <footer
-    x-on:mousemove.window="isFooterClicked ? onMouseMoveFooter($event) : null"
-    x-on:mouseup.window="onMouseUpFooter($event)"
-    class="relative w-full bg-white text-center"
-    x-data="printEditorFooter($data)"
-    x-init="onInitFooter()"
-    x-ref="footer"
-    :class="editFooter ? 'border border-flux-primary-300' : ''"
-    :style="{'min-height': footerHeight}"
->
+    x-init="$store.footerStore.register($wire,$refs)"
+    class="relative w-full bg-white text-center h-[1.7cm]">
     {{-- UI  footer height related --}}
     <div
         x-cloak
@@ -19,106 +11,62 @@
         <div class="relative flex h-full w-full items-center justify-center">
             <div
                 class="absolute bottom-8 h-12 rounded bg-gray-100 p-2 text-lg shadow"
-                x-text="footerHeight"
             ></div>
         </div>
     </div>
     {{-- UI  footer height related --}}
     <div class="footer-content h-full text-2xs leading-3">
-        <div class="w-full">
+        <div x-ref="footer-body" class="w-full">
             <div class="border-semi-black border-t">
-                @section('footer.client-address')
-                <address
-                    x-on:mousemove.window="isClientClicked ? onMouseMoveFooterClient($event) : null"
-                    x-ref="client"
-                    draggable="false"
-                    :class="isClientClicked ? 'bg-flux-primary-300' : ''"
-                    :style="{transform: `translate(${clientPositionLeft}, ${clientPositionTop})`}"
-                    x-on:mousedown="editFooter ? onMouseDownFooter($event, 'client') : null"
-                    class="absolute z-[100] select-none text-left not-italic"
-                >
-                    {{-- UI client pos related --}}
-                    <div x-cloak x-show="editFooter" class="relative">
-                        <div
-                            x-text="clientPositionTop"
-                            :style="{top:`${clientFooterSize.height + 0.2}cm`}"
-                            class="absolute h-12 rounded bg-gray-100 p-2 text-lg shadow"
-                        ></div>
-                        <div
-                            x-text="clientPositionLeft"
-                            :style="{left:`${clientFooterSize.width + 0.2}cm`}"
-                            class="absolute h-12 rounded bg-gray-100 p-2 text-lg shadow"
-                        ></div>
-                    </div>
-                    {{-- UI client pos related --}}
-                    <div class="font-semibold">
-                        {{ $client->name ?? '' }}
-                    </div>
-                    <div>
-                        {{ $client->ceo ?? '' }}
-                    </div>
-                    <div>
-                        {{ $client->street ?? '' }}
-                    </div>
-                    <div>
-                        {{ trim(($client->postcode ?? '') . ' ' . ($client->city ?? '')) }}
-                    </div>
-                    <div>
-                        {{ $client->phone ?? '' }}
-                    </div>
-                    <div>
-                        <div>
-                            {{ $client->vat_id }}
-                        </div>
-                    </div>
-                </address>
-                @show
-                @section('footer.logo')
-                <div
-                    x-on:mousemove.window="isLogoFooterClicked ? onMouseMoveFooterLogo($event) : null"
-                    x-ref="logoFooter"
-                    x-on:mousedown="editFooter ? onMouseDownFooter($event, 'logoFooter') : null"
-                    :style="{'height': logoFooterHeight, transform: `translate(calc(${relativePositionImageLeft} + 50%), 0cm)`}"
-                    class="absolute right-[50%] top-0 z-[50] translate-x-1/2"
-                >
-                    <div x-cloak x-show="editFooter" class="relative">
-                        <div
-                            x-text="absolutePositionImageLeft"
-                            :style="{left:`${logoFooterSize.width + 0.2}cm`}"
-                            class="absolute h-12 rounded bg-gray-100 p-2 text-lg shadow"
-                        ></div>
-                        <div
-                            x-text="absolutePositionImageTop"
-                            :style="{top:`${logoFooterSize.height + 0.2}cm`}"
-                            class="absolute h-12 rounded bg-gray-100 p-2 text-lg shadow"
-                        ></div>
-                    </div>
-                    <img
-                        draggable="false"
-                        class="logo-small footer-logo max-h-full"
-                        src="{{ $client->logo_small_url }}"
-                    />
-                </div>
-                @show
-                @section('footer.bank-connections')
-                @foreach ($client->bankConnections as $bankConnection)
-                    <div class="absolute right-0 top-0 pl-3 text-left">
+                <template x-ref="footer-client-{{ $client->id }}">
+                    <address>
                         <div class="font-semibold">
-                            {{ $bankConnection->bank_name ?? '' }}
+                            {{ $client->name ?? '' }}
                         </div>
                         <div>
-                            {{ $bankConnection->iban ?? '' }}
+                            {{ $client->ceo ?? '' }}
                         </div>
                         <div>
-                            {{ $bankConnection->bic ?? '' }}
+                            {{ $client->street ?? '' }}
                         </div>
+                        <div>
+                            {{ trim(($client->postcode ?? '') . ' ' . ($client->city ?? '')) }}
+                        </div>
+                        <div>
+                            {{ $client->phone ?? '' }}
+                        </div>
+                        <div>
+                            <div>
+                                {{ $client->vat_id }}
+                            </div>
+                        </div>
+                    </address>
+                </template>
+                <template x-ref="footer-logo">
+                    <div>
+                        <img
+                            draggable="false"
+                            class="logo-small footer-logo max-h-full"
+                            src="{{ $client->logo_small_url }}"
+                        />
                     </div>
-                    @if ($client->logo_small_url)
-                        @break
-                    @endif
+                </template>
+                @foreach ($client->bankConnections as $index => $bankConnection)
+                    <template x-ref="bank-{{ $bankConnection->id }}">
+                        <div class="absolute text-left">
+                            <div class="font-semibold">
+                                {{ $bankConnection->bank_name ?? '' }}
+                            </div>
+                            <div>
+                                {{ $bankConnection->iban ?? '' }}
+                            </div>
+                            <div>
+                                {{ $bankConnection->bic ?? '' }}
+                            </div>
+                        </div>
+                    </template>
                 @endforeach
 
-                @show
                 <div class="clear-both"></div>
             </div>
         </div>

@@ -9,6 +9,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\View\View;
 use Illuminate\Support\Fluent;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
@@ -43,6 +44,22 @@ class PrintLayoutEditor extends Component
             }
         }
         return new Fluent($array);
+    }
+
+    #[Renderless]
+    public function clientToJson (): array
+    {
+        $client = $this->client->get('id','logo_small_url')->toArray();
+        $bankConnections = $this->client->bankConnections->map(function ($bankConnection) {;
+            return [
+                'id' => $bankConnection->id,
+            ];
+        })->toArray();
+
+        return [
+            'client' => $client,
+            'bank_connection' => $bankConnections,
+        ];
     }
 
     public function mount(): void
