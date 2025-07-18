@@ -62,7 +62,7 @@ class PurchaseInvoiceTest extends BaseSetup
 
         $this->contacts = Contact::factory()->count(2)
             ->has(Address::factory()->set('client_id', $this->dbClient->getKey()))
-            ->for(PriceList::factory())
+            ->for(PriceList::factory()->state(['is_default' => true]))
             ->create([
                 'client_id' => $this->dbClient->getKey(),
                 'payment_type_id' => $this->paymentTypes->random()->id,
