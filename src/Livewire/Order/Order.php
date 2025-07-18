@@ -11,6 +11,7 @@ use FluxErp\Actions\Order\ToggleLock;
 use FluxErp\Actions\Order\UpdateLockedOrder;
 use FluxErp\Actions\Order\UpdateOrder;
 use FluxErp\Actions\OrderTransaction\CreateOrderTransaction;
+use FluxErp\Actions\OrderTransaction\DeleteOrderTransaction;
 use FluxErp\Actions\Transaction\CreateTransaction;
 use FluxErp\Actions\Transaction\DeleteTransaction;
 use FluxErp\Contracts\OffersPrinting;
@@ -248,9 +249,19 @@ class Order extends Component
         );
         $bankConnectionId = resolve_static(BankConnection::class, 'query')
             ->where('is_active', true)
-            ->whereNull('iban')
+            ->where('is_virtual', true)
             ->value('id');
-        $transaction = null;
+
+        if (! $bankConnectionId) {
+            $this->toast()
+                ->error(__('No virtual bank connection found'))
+                ->send();
+
+            return;
+        }
+
+        $createdTransactions = [];
+        $createdOrderTransactions = [];
 
         try {
             $transaction = CreateTransaction::make([
@@ -264,11 +275,10 @@ class Order extends Component
                 ->checkPermission()
                 ->validate()
                 ->execute();
+            $createdTransactions[] = $transaction;
+
             $transactionRefund = CreateTransaction::make([
-                'bank_connection_id' => resolve_static(BankConnection::class, 'query')
-                    ->where('is_active', true)
-                    ->whereNull('iban')
-                    ->value('id'),
+                'bank_connection_id' => $bankConnectionId,
                 'currency_id' => $this->order->currency_id,
                 'value_date' => now()->toDateString(),
                 'booking_date' => now()->toDateString(),
@@ -278,22 +288,9 @@ class Order extends Component
                 ->checkPermission()
                 ->validate()
                 ->execute();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+            $createdTransactions[] = $transactionRefund;
 
-            if ($transaction) {
-                DeleteTransaction::make([
-                    'id' => $transaction->getKey(),
-                ])
-                    ->validate()
-                    ->execute();
-            }
-
-            return;
-        }
-
-        try {
-            CreateOrderTransaction::make([
+            $createdOrderTransactions[] = CreateOrderTransaction::make([
                 'order_id' => $this->order->parent_id,
                 'transaction_id' => $transaction->getKey(),
                 'amount' => $transaction->amount,
@@ -302,7 +299,8 @@ class Order extends Component
                 ->checkPermission()
                 ->validate()
                 ->execute();
-            CreateOrderTransaction::make([
+
+            $createdOrderTransactions[] = CreateOrderTransaction::make([
                 'order_id' => $this->order->id,
                 'transaction_id' => $transactionRefund->getKey(),
                 'amount' => $transactionRefund->amount,
@@ -314,16 +312,29 @@ class Order extends Component
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
-            DeleteTransaction::make([
-                'id' => $transaction->getKey(),
-            ])
-                ->validate()
-                ->execute();
-            DeleteTransaction::make([
-                'id' => $transactionRefund->getKey(),
-            ])
-                ->validate()
-                ->execute();
+            foreach ($createdTransactions as $createdTransaction) {
+                try {
+                    DeleteTransaction::make([
+                        'id' => $createdTransaction->getKey(),
+                    ])
+                        ->validate()
+                        ->execute();
+                } catch (ValidationException|UnauthorizedException $cleanupException) {
+                    exception_to_notifications($cleanupException, $this);
+                }
+            }
+
+            foreach ($createdOrderTransactions as $createdOrderTransaction) {
+                try {
+                    DeleteOrderTransaction::make([
+                        'pivot_id' => $createdOrderTransaction->getKey(),
+                    ])
+                        ->validate()
+                        ->execute();
+                } catch (ValidationException|UnauthorizedException $cleanupException) {
+                    exception_to_notifications($cleanupException, $this);
+                }
+            }
 
             return;
         }

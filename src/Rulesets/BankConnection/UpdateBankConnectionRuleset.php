@@ -46,6 +46,7 @@ class UpdateBankConnectionRuleset extends FluxRuleset
             'name' => 'sometimes|required|string|max:255',
             'credit_limit' => 'nullable|numeric|min:0',
             'is_active' => 'boolean',
+            'is_virtual' => 'boolean',
         ];
     }
 }
