@@ -1,6 +1,5 @@
 import { Editor } from '@tiptap/core';
 import { LiteralTab } from './tiptap-literal-tab-handler.js';
-import { Underline } from '@tiptap/extension-underline';
 import { FontSizeColorConfig } from './tiptap-font-size-color-handler.js';
 import StarterKit from '@tiptap/starter-kit';
 import { MentionConfig } from './tiptap-mention-handler.js';
@@ -51,7 +50,7 @@ export default function (
                 //  access to the parent scope in onSelectionUpdate callback
                 const parent = this;
                 // related to dropdown visibility
-                const onClickHandler = function (event) {
+                const onClickHandler = function () {
                     parent.popUp.show();
                     parent.setIsClickListenerSet(false);
                 };
@@ -61,7 +60,6 @@ export default function (
                         StarterKit,
                         FontSizeColorConfig,
                         LiteralTab,
-                        Underline,
                         MentionConfig(searchModel, element),
                     ],
                     timeout: null,
