@@ -76,6 +76,8 @@ class Accounting extends TransactionList
             }
         }
 
+        $this->loadData();
+
         return $result;
     }
 

@@ -169,15 +169,17 @@ class Order extends Component
             ! $hadInvoiceNumber
             && $this->order->invoice_number
             && $this->order->parent_id
-            && resolve_static(OrderType::class, 'query')
-                ->whereKey($this->order->order_type_id)
-                ->value('order_type_enum')
-                ->multiplier() < 1
+            && (
+                resolve_static(OrderType::class, 'query')
+                    ->whereKey($this->order->order_type_id)
+                    ->value('order_type_enum')
+                    ?->multiplier() ?? 1
+            ) < 1
             && resolve_static(CreateTransaction::class, 'canPerformAction', [false])
             && resolve_static(CreateOrderTransaction::class, 'canPerformAction', [false])
             && resolve_static(OrderModel::class, 'query')
                 ->whereKey($this->order->parent_id)
-                ->where('balance', '>=', 0)
+                ->where('balance', '>', 0)
                 ->exists()
         ) {
             $this->dialog()
@@ -244,7 +246,7 @@ class Order extends Component
             ->whereKey($this->order->parent_id)
             ->first();
         $amount = min(
-            bcmul($this->order->total_gross_price, -1),
+            bcabs($this->order->total_gross_price),
             $parentOrder->balance
         );
         $bankConnectionId = resolve_static(BankConnection::class, 'query')
