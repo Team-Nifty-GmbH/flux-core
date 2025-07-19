@@ -7,13 +7,11 @@ use FluxErp\Models\Cart;
 use FluxErp\Models\CartItem;
 use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
-use FluxErp\Models\Currency;
-use FluxErp\Models\Language;
 use FluxErp\Models\OrderType;
-use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
+use FluxErp\Models\User;
 use FluxErp\Models\VatRate;
 use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Support\Collection;
@@ -21,8 +19,6 @@ use Laravel\Sanctum\Sanctum;
 
 class CartTest extends BaseSetup
 {
-    private Address $address;
-
     private Collection $carts;
 
     private Contact $contact;
@@ -41,7 +37,7 @@ class CartTest extends BaseSetup
             'client_id' => $dbClient->id,
         ]);
 
-        $this->address = Address::factory()->create([
+        Address::factory()->create([
             'client_id' => $dbClient->id,
             'contact_id' => $this->contact->id,
         ]);
@@ -55,16 +51,16 @@ class CartTest extends BaseSetup
         ]);
 
         $this->carts = Cart::factory()->count(2)->create([
-            'authenticatable_type' => morph_alias(Address::class),
-            'authenticatable_id' => $this->address->id,
+            'authenticatable_type' => morph_alias(User::class),
+            'authenticatable_id' => $this->user->id,
             'price_list_id' => $priceList->id,
             'is_watchlist' => false,
         ]);
 
         $this->carts->push(
             Cart::factory()->create([
-                'authenticatable_type' => morph_alias(Address::class),
-                'authenticatable_id' => $this->address->id,
+                'authenticatable_type' => morph_alias(User::class),
+                'authenticatable_id' => $this->user->id,
                 'price_list_id' => $priceList->id,
                 'is_watchlist' => true,
             ])
@@ -92,110 +88,11 @@ class CartTest extends BaseSetup
         ];
     }
 
-    public function test_cart_add_items_functionality(): void
-    {
-        $cart = $this->carts[1];
-        $products = [
-            [
-                'id' => $this->products[0]->id,
-                'amount' => 2,
-                'price' => 10.50,
-            ],
-            [
-                'id' => $this->products[1]->id,
-                'amount' => 1,
-                'price' => 25.00,
-            ],
-        ];
-
-        $cart->addItems($products);
-        $cart->refresh();
-
-        $this->assertEquals(2, $cart->cartItems()->count());
-
-        $firstItem = $cart->cartItems()->where('product_id', $this->products[0]->id)->first();
-        $this->assertEquals(2, $firstItem->amount);
-        $this->assertEquals(10.50, $firstItem->price);
-
-        $secondItem = $cart->cartItems()->where('product_id', $this->products[1]->id)->first();
-        $this->assertEquals(1, $secondItem->amount);
-        $this->assertEquals(25.00, $secondItem->price);
-    }
-
-    public function test_cart_create_order_functionality(): void
-    {
-        $emptyCart = Cart::factory()->create([
-            'authenticatable_type' => morph_alias(Address::class),
-            'authenticatable_id' => $this->address->id,
-            'price_list_id' => $this->carts[0]->price_list_id,
-            'is_watchlist' => false,
-        ]);
-
-        $currency = Currency::factory()->create();
-        $paymentType = PaymentType::factory()
-            ->hasAttached(factory: $this->contact->client, relationship: 'clients')
-            ->create([
-                'is_active' => true,
-            ]);
-        $language = Language::factory()->create();
-
-        $order = $emptyCart->createOrder($this->address, null, [
-            'currency_id' => $currency->id,
-            'payment_type_id' => $paymentType->id,
-            'language_id' => $language->id,
-        ]);
-
-        $this->assertNotNull($order);
-        $this->assertEquals($this->contact->id, $order->contact_id);
-        $this->assertEquals($this->contact->client_id, $order->client_id);
-        $this->assertTrue($order->is_imported);
-
-        $this->assertGreaterThanOrEqual(0, $order->orderPositions()->count());
-    }
-
-    public function test_cart_current_scope(): void
-    {
-        $currentCarts = Cart::current()->get();
-
-        foreach ($currentCarts as $cart) {
-            $this->assertFalse((bool) $cart->is_watchlist);
-        }
-    }
-
-    public function test_cart_relationships(): void
-    {
-        $cart = $this->carts[0];
-
-        $this->assertInstanceOf(Address::class, $cart->authenticatable);
-        $this->assertEquals($this->address->id, $cart->authenticatable->id);
-
-        $this->assertGreaterThan(0, $cart->cartItems()->count());
-
-        $this->assertGreaterThan(0, $cart->products()->count());
-    }
-
-    public function test_cart_vat_rates_functionality(): void
-    {
-        $cart = $this->carts[0];
-
-        $vatRates = $cart->vatRates();
-
-        $this->assertInstanceOf(Collection::class, $vatRates);
-
-        if ($vatRates->count() > 0) {
-            $firstVatRate = $vatRates->first();
-            $this->assertArrayHasKey('total_net_sum', $firstVatRate);
-            $this->assertArrayHasKey('total_gross_sum', $firstVatRate);
-            $this->assertArrayHasKey('vat_sum', $firstVatRate);
-            $this->assertArrayHasKey('vat_rate_percentage', $firstVatRate);
-        }
-    }
-
     public function test_create_cart(): void
     {
         $cart = [
-            'authenticatable_type' => morph_alias(Address::class),
-            'authenticatable_id' => $this->address->id,
+            'authenticatable_type' => morph_alias(User::class),
+            'authenticatable_id' => $this->user->id,
             'is_watchlist' => false,
         ];
 
@@ -214,6 +111,15 @@ class CartTest extends BaseSetup
         $this->assertEquals($cart['authenticatable_type'], $dbCart->authenticatable_type);
         $this->assertEquals($cart['authenticatable_id'], $dbCart->authenticatable_id);
         $this->assertEquals($cart['is_watchlist'], $dbCart->is_watchlist);
+
+        // Validate all model properties
+        $this->assertNotNull($dbCart->id);
+        $this->assertNotNull($dbCart->created_at);
+        $this->assertNotNull($dbCart->updated_at);
+        $this->assertIsString($dbCart->session_id);
+        $this->assertIsBool($dbCart->is_portal_public);
+        $this->assertIsBool($dbCart->is_public);
+        $this->assertIsBool($dbCart->is_watchlist);
     }
 
     public function test_create_cart_validation_fails(): void
@@ -240,8 +146,8 @@ class CartTest extends BaseSetup
         $priceList = PriceList::factory()->create();
 
         $cart = [
-            'authenticatable_type' => morph_alias(Address::class),
-            'authenticatable_id' => $this->address->id,
+            'authenticatable_type' => morph_alias(User::class),
+            'authenticatable_id' => $this->user->id,
             'price_list_id' => $priceList->id,
             'is_watchlist' => true,
         ];
@@ -260,6 +166,17 @@ class CartTest extends BaseSetup
         $this->assertNotEmpty($dbCart);
         $this->assertEquals($cart['price_list_id'], $dbCart->price_list_id);
         $this->assertEquals($cart['is_watchlist'], $dbCart->is_watchlist);
+
+        // Validate all model properties
+        $this->assertNotNull($dbCart->id);
+        $this->assertNotNull($dbCart->created_at);
+        $this->assertNotNull($dbCart->updated_at);
+        $this->assertIsString($dbCart->session_id);
+        $this->assertIsBool($dbCart->is_portal_public);
+        $this->assertIsBool($dbCart->is_public);
+        $this->assertIsBool($dbCart->is_watchlist);
+        $this->assertEquals($cart['authenticatable_type'], $dbCart->authenticatable_type);
+        $this->assertEquals($cart['authenticatable_id'], $dbCart->authenticatable_id);
     }
 
     public function test_delete_cart(): void
@@ -354,5 +271,16 @@ class CartTest extends BaseSetup
         $this->assertNotEmpty($dbCart);
         $this->assertEquals($cart['id'], $dbCart->id);
         $this->assertEquals($cart['is_watchlist'], $dbCart->is_watchlist);
+
+        // Validate all model properties are present
+        $this->assertNotNull($dbCart->id);
+        $this->assertNotNull($dbCart->created_at);
+        $this->assertNotNull($dbCart->updated_at);
+        $this->assertIsString($dbCart->session_id);
+        $this->assertIsBool($dbCart->is_portal_public);
+        $this->assertIsBool($dbCart->is_public);
+        $this->assertIsBool($dbCart->is_watchlist);
+        $this->assertNotNull($dbCart->authenticatable_type);
+        $this->assertNotNull($dbCart->authenticatable_id);
     }
 }

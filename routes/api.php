@@ -211,8 +211,6 @@ use FluxErp\Actions\Ticket\UpdateTicket;
 use FluxErp\Actions\TicketType\CreateTicketType;
 use FluxErp\Actions\TicketType\DeleteTicketType;
 use FluxErp\Actions\TicketType\UpdateTicketType;
-use FluxErp\Actions\Token\CreateToken;
-use FluxErp\Actions\Token\DeleteToken;
 use FluxErp\Actions\Unit\CreateUnit;
 use FluxErp\Actions\Unit\DeleteUnit;
 use FluxErp\Actions\User\CreateUser;
@@ -306,7 +304,6 @@ use FluxErp\Models\Tag;
 use FluxErp\Models\Task;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\TicketType;
-use FluxErp\Models\Token;
 use FluxErp\Models\Unit;
 use FluxErp\Models\User;
 use FluxErp\Models\VatRate;
@@ -867,12 +864,6 @@ Route::prefix('api')
                 Route::post('/tags', CreateTag::class);
                 Route::put('/tags', UpdateTag::class);
                 Route::delete('/tags/{id}', DeleteTag::class);
-
-                // Tokens
-                Route::get('/tokens/{id}', [BaseController::class, 'show'])->defaults('model', Token::class);
-                Route::get('/tokens', [BaseController::class, 'index'])->defaults('model', Token::class);
-                Route::post('/tokens', CreateToken::class);
-                Route::delete('/tokens/{id}', DeleteToken::class);
 
                 // Tasks
                 Route::get('/tasks/{id}', [BaseController::class, 'show'])->defaults('model', Task::class);

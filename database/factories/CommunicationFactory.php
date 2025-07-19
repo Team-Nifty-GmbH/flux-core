@@ -47,10 +47,7 @@ class CommunicationFactory extends Factory
         $emails = [];
 
         for ($i = 0; $i < $count; $i++) {
-            $emails[] = [
-                'email' => $this->faker->email(),
-                'name' => $this->faker->name(),
-            ];
+            $emails[] = $this->faker->email();
         }
 
         return $emails;
