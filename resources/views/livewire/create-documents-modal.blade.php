@@ -2,34 +2,36 @@
     'supportsDocumentPreview' => false,
 ])
 @if ($supportsDocumentPreview)
-    <x-modal
-        id="preview-{{ strtolower($this->getId()) }}"
-        size="6xl"
-        :title="__('Preview')"
-        x-on:close="$el.querySelector('iframe').src = 'data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E'"
-    >
-        <iframe
-            id="preview-iframe"
-            src="data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E"
-            loading="lazy"
-            class="min-h-screen w-full"
-        ></iframe>
-        <x-slot:footer>
-            <x-button
-                color="secondary"
-                light
-                flat
-                :text="__('Cancel')"
-                x-on:click="$modalClose('preview-{{ strtolower($this->getId()) }}')"
-            />
-            <x-button
-                loading
-                color="indigo"
-                :text="__('Download')"
-                wire:click="downloadPreview()"
-            />
-        </x-slot>
-    </x-modal>
+    <div>
+        <x-modal
+            id="preview-{{ strtolower($this->getId()) }}"
+            size="6xl"
+            :title="__('Preview')"
+            x-on:close="$el.querySelector('iframe').src = 'data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E'"
+        >
+            <iframe
+                id="preview-iframe"
+                src="data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E"
+                loading="lazy"
+                class="min-h-screen w-full"
+            ></iframe>
+            <x-slot:footer>
+                <x-button
+                    color="secondary"
+                    light
+                    flat
+                    :text="__('Cancel')"
+                    x-on:click="$modalClose('preview-{{ strtolower($this->getId()) }}')"
+                />
+                <x-button
+                    loading
+                    color="indigo"
+                    :text="__('Download')"
+                    wire:click="downloadPreview()"
+                />
+            </x-slot>
+        </x-modal>
+    </div>
 @endif
 
 <x-modal
