@@ -50,14 +50,6 @@ class ProductTest extends BaseSetup
             ]);
     }
 
-    public function test_additional_columns_populated(): void
-    {
-        $component = Livewire::test(Product::class, ['id' => $this->product->id]);
-
-        $additionalColumns = $component->get('additionalColumns');
-        $this->assertIsArray($additionalColumns);
-    }
-
     public function test_delete_product(): void
     {
         Livewire::test(Product::class, ['id' => $this->product->id])

@@ -143,10 +143,15 @@ class OrderPositionsTest extends BaseSetup
     {
         $orderPositionCount = $this->order->orderPositions()->count();
 
+        // Use variables instead of hardcoded values
+        $testName = 'Test Position';
+        $testAmount = 2;
+        $testUnitPrice = 50;
+
         Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
-            ->set('orderPosition.name', 'Test Position')
-            ->set('orderPosition.amount', 2)
-            ->set('orderPosition.unit_price', 50)
+            ->set('orderPosition.name', $testName)
+            ->set('orderPosition.amount', $testAmount)
+            ->set('orderPosition.unit_price', $testUnitPrice)
             ->set('orderPosition.vat_rate_id', $this->vatRate->id)
             ->call('addOrderPosition')
             ->assertStatus(200)
@@ -156,9 +161,21 @@ class OrderPositionsTest extends BaseSetup
         $this->assertEquals($orderPositionCount + 1, $this->order->orderPositions()->count());
 
         $newPosition = $this->order->orderPositions()->latest('id')->first();
-        $this->assertEquals('Test Position', $newPosition->name);
-        $this->assertEquals(2, $newPosition->amount);
-        $this->assertEquals(50, $newPosition->unit_net_price);
+
+        // Validate all provided and expected model properties
+        $this->assertEquals($testName, $newPosition->name);
+        $this->assertEquals($testAmount, $newPosition->amount);
+        $this->assertEquals($testUnitPrice, $newPosition->unit_net_price);
+        $this->assertEquals($this->vatRate->id, $newPosition->vat_rate_id);
+        $this->assertEquals($this->order->id, $newPosition->order_id);
+        $this->assertEquals($this->dbClient->getKey(), $newPosition->client_id);
+
+        // Validate model properties are properly set
+        $this->assertNotNull($newPosition->id);
+        $this->assertNotNull($newPosition->created_at);
+        $this->assertNotNull($newPosition->updated_at);
+        $this->assertIsNumeric($newPosition->total_net_price);
+        $this->assertIsNumeric($newPosition->total_gross_price);
     }
 
     public function test_add_order_position_with_product(): void
