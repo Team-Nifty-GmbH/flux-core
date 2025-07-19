@@ -13,6 +13,8 @@ class CommissionFactory extends Factory
     {
         return [
             'commission' => $this->faker->randomFloat(5, 0.01),
+            'total_net_price' => $this->faker->randomFloat(2, 100, 10000),
+            'commission_rate' => CommissionRateFactory::new()->make()->toArray(),
         ];
     }
 }
