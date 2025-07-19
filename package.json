@@ -21,7 +21,7 @@
         "@tailwindcss/typography": "^0.5.10",
         "@tiptap/core": "^2.3.1",
         "@tiptap/extension-mention": "^2.5.7",
-        "@tiptap/pm": "^2.3.1",
+        "@tiptap/pm": "^3.0.7",
         "@tiptap/starter-kit": "^3.0.1",
         "@types/lodash.debounce": "^4.0.8",
         "@wireui/alpinejs-hold-directive": "^1.0.1",
