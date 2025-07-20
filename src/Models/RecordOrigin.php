@@ -2,7 +2,6 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Livewire\Contact\Leads;
 use FluxErp\Traits\CacheModelQueries;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
@@ -27,6 +26,6 @@ class RecordOrigin extends FluxModel
 
     public function leads(): HasMany
     {
-        return $this->hasMany(Leads::class, 'record_origin_id');
+        return $this->hasMany(Lead::class, 'record_origin_id');
     }
 }
