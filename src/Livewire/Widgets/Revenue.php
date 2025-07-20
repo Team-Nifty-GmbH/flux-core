@@ -58,7 +58,7 @@ class Revenue extends ValueBox implements HasWidgetOptions
             ],
             [
                 'label' => __('Previous Period'),
-                'method' => 'showPrevious',
+                'method' => 'show',
                 'params' => 'previous',
             ],
         ];
