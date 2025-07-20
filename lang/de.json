@@ -1793,6 +1793,7 @@
     "The media collection is read-only and cannot be modified.": "Die Mediensammlung ist schreibgeschützt und kann nicht geändert werden.",
     "The number has already been taken for this type.": "Die Nummer wurde bereits für diesen Typ vergeben.",
     "The token will not be shown again after closing the modal.": "Das Token wird nach dem Schließen des Dialogs nicht mehr angezeigt.",
+    "The total gross price must match the sum of all position total prices.": "Der Gesamt-Bruttopreis muss der Summe aller Positionen entsprechen.",
     "The transactions are being matched with the orders.": "Die Transaktionen werden den Aufträgen zugeordnet.",
     "This event": "Diesen Termin",
     "This event and following": "Diesen Termin und alle Folgenden",

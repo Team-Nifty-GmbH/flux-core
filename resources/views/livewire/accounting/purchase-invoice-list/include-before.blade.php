@@ -244,6 +244,13 @@
                     wire:model="purchaseInvoiceForm.is_net"
                     :label="__('Is Net')"
                 />
+                <x-number
+                    x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
+                    wire:model="purchaseInvoiceForm.total_gross_price"
+                    step="0.01"
+                    min="0"
+                    :label="__('Total Gross Price')"
+                />
                 <div
                     x-data="{
                         recalculatePrices(position, $event) {
