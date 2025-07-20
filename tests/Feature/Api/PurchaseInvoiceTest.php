@@ -87,6 +87,8 @@ class PurchaseInvoiceTest extends BaseSetup
             ->afterCreating(function (PurchaseInvoice $purchaseInvoice): void {
                 $purchaseInvoice->addMedia(UploadedFile::fake()->image($purchaseInvoice->invoice_number . '.jpeg'))
                     ->toMediaCollection('purchase_invoice');
+
+                $purchaseInvoice->update(['total_gross_price' => $purchaseInvoice->calculateTotalGrossPrice()]);
             })
             ->create([
                 'client_id' => $this->dbClient->getKey(),
@@ -364,6 +366,7 @@ class PurchaseInvoiceTest extends BaseSetup
         $this->assertEquals($dbPurchaseInvoice->payment_type_id, $dbOrder->payment_type_id);
         $this->assertEquals($dbPurchaseInvoice->invoice_date->toDateString(), $dbOrder->invoice_date->toDateString());
         $this->assertEquals($dbPurchaseInvoice->invoice_number, $dbOrder->invoice_number);
+        $this->assertNotNull($dbPurchaseInvoice->total_gross_price);
     }
 
     public function test_finish_purchase_invoice_validation_fails(): void

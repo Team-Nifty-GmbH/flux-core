@@ -110,10 +110,17 @@ class CreateOrderFromPurchaseInvoice extends FluxAction
                 ->errorBag('createOrderFromPurchaseInvoice');
         }
 
-        $positionsGrossSum = collect(data_get($this->data, 'purchase_invoice_positions', []))
-            ->sum('total_price');
+        $purchaseInvoice = resolve_static(PurchaseInvoice::class, 'query')
+            ->whereKey($this->getData('id'))
+            ->with([
+                'purchaseInvoicePositions:id,vat_rate_id,total_price',
+            ])
+            ->first([
+                'id',
+                'is_net',
+            ]);
 
-        if (bccomp($this->getData('total_gross_price'), $positionsGrossSum, 2) !== 0) {
+        if (bccomp($this->getData('total_gross_price'), $purchaseInvoice->calculateTotalGrossPrice(), 2) !== 0) {
             throw ValidationException::withMessages([
                 'total_gross_price' => [__('The total gross price must match the sum of all position total prices.')],
             ])

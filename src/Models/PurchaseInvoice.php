@@ -50,6 +50,29 @@ class PurchaseInvoice extends FluxModel implements HasMedia, HasMediaForeignKey
         ];
     }
 
+    public function calculateTotalGrossPrice(): ?string
+    {
+        $vatRates = resolve_static(VatRate::class, 'query')
+            ->pluck('rate_percentage', 'id')
+            ->toArray();
+
+        return $this->purchaseInvoicePositions?->reduce(
+            function (string $carry, PurchaseInvoicePosition $position) use ($vatRates) {
+                if ($this->is_net) {
+                    $positionGross = net_to_gross(
+                        $position->total_price,
+                        data_get($vatRates, $position->vat_rate_id) ?? 0
+                    );
+                } else {
+                    $positionGross = $position->total_price;
+                }
+
+                return bcadd($carry, $positionGross, 2);
+            },
+            '0'
+        );
+    }
+
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
