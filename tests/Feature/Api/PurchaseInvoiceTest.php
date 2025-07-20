@@ -88,7 +88,9 @@ class PurchaseInvoiceTest extends BaseSetup
                 $purchaseInvoice->addMedia(UploadedFile::fake()->image($purchaseInvoice->invoice_number . '.jpeg'))
                     ->toMediaCollection('purchase_invoice');
 
-                $purchaseInvoice->update(['total_gross_price' => $purchaseInvoice->calculateTotalGrossPrice()]);
+                $purchaseInvoice->update([
+                    'total_gross_price' => bcround($purchaseInvoice->calculateTotalGrossPrice(), 2),
+                ]);
             })
             ->create([
                 'client_id' => $this->dbClient->getKey(),

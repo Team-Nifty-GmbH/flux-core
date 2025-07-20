@@ -67,7 +67,7 @@ class PurchaseInvoice extends FluxModel implements HasMedia, HasMediaForeignKey
                     $positionGross = $position->total_price;
                 }
 
-                return bcadd($carry, $positionGross, 2);
+                return bcadd($carry, $positionGross);
             },
             '0'
         );
