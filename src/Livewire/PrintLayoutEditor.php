@@ -49,7 +49,7 @@ class PrintLayoutEditor extends Component
     #[Renderless]
     public function clientToJson (): array
     {
-        $client = $this->client->get('id','logo_small_url')->toArray();
+        $client = $this->client->toArray();
         $bankConnections = $this->client->bankConnections->map(function ($bankConnection) {;
             return [
                 'id' => $bankConnection->id,
@@ -58,7 +58,7 @@ class PrintLayoutEditor extends Component
 
         return [
             'client' => $client,
-            'bank_connection' => $bankConnections,
+            'bank_connections' => $bankConnections,
         ];
     }
 
