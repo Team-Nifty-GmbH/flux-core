@@ -109,7 +109,6 @@ class PaymentRunPreview extends Component
                 $this->toast()
                     ->success(__(':model created', ['model' => __('Payment Run')]))
                     ->send();
-
             } catch (ValidationException|UnauthorizedException $e) {
                 exception_to_notifications($e, $this);
 
