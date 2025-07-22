@@ -110,7 +110,6 @@ class PaymentRunPreview extends Component
                     ->success(__(':model created', ['model' => __('Payment Run')]))
                     ->send();
 
-                $this->redirectRoute('accounting.payment-runs', navigate: true);
             } catch (ValidationException|UnauthorizedException $e) {
                 exception_to_notifications($e, $this);
 
@@ -127,6 +126,8 @@ class PaymentRunPreview extends Component
                 return;
             }
         }
+
+        $this->redirectRoute('accounting.payment-runs', navigate: true);
     }
 
     #[Renderless]
