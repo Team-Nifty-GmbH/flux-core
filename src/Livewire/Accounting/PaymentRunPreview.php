@@ -45,7 +45,11 @@ class PaymentRunPreview extends Component
                 'addressInvoice',
                 'orderType',
                 'currency',
-                'contactBankConnection.sepaMandates' => fn (HasMany $query) => $query->whereNotNull('signed_date'),
+                'contactBankConnection:id,contact_id',
+                'contactBankConnection.sepaMandates' => function (HasMany $query): void {
+                    $query->select(['id', 'contact_bank_connection_id', 'sepa_mandate_type_enum'])
+                        ->whereNotNull('signed_date');
+                },
             ])
             ->get()
             ->keyBy('id')

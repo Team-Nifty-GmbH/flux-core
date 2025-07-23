@@ -32,7 +32,6 @@
                     {{ __('Actions') }}
                 </x-flux::table.head-cell>
             </x-slot>
-
             <template x-for="order in $wire.orders" :key="order.id">
                 <x-flux::table.row>
                     <x-flux::table.cell
@@ -65,7 +64,6 @@
                     </x-flux::table.cell>
                 </x-flux::table.row>
             </template>
-
             <x-slot:footer>
                 <x-flux::table.head-cell
                     colspan="4"
@@ -80,7 +78,6 @@
                 <x-flux::table.head-cell></x-flux::table.head-cell>
             </x-slot>
         </x-flux::table>
-
         <x-slot:footer>
             <div class="flex justify-end gap-4">
                 <x-button
@@ -88,7 +85,6 @@
                     :text="__('Cancel')"
                     wire:click="cancel"
                 />
-
                 <x-button
                     color="primary"
                     loading="createPaymentRun"
