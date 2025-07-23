@@ -112,14 +112,13 @@ class CartTest extends BaseSetup
         $this->assertEquals($cart['authenticatable_id'], $dbCart->authenticatable_id);
         $this->assertEquals($cart['is_watchlist'], $dbCart->is_watchlist);
 
-        // Validate all model properties
+        // Validate all model properties with expected values
         $this->assertNotNull($dbCart->id);
         $this->assertNotNull($dbCart->created_at);
         $this->assertNotNull($dbCart->updated_at);
-        $this->assertIsString($dbCart->session_id);
-        $this->assertIsBool($dbCart->is_portal_public);
-        $this->assertIsBool($dbCart->is_public);
-        $this->assertIsBool($dbCart->is_watchlist);
+        $this->assertNotEmpty($dbCart->session_id);
+        $this->assertFalse($dbCart->is_portal_public); // Default value
+        $this->assertFalse($dbCart->is_public); // Default value
     }
 
     public function test_create_cart_validation_fails(): void
@@ -167,14 +166,13 @@ class CartTest extends BaseSetup
         $this->assertEquals($cart['price_list_id'], $dbCart->price_list_id);
         $this->assertEquals($cart['is_watchlist'], $dbCart->is_watchlist);
 
-        // Validate all model properties
+        // Validate all model properties with expected values
         $this->assertNotNull($dbCart->id);
         $this->assertNotNull($dbCart->created_at);
         $this->assertNotNull($dbCart->updated_at);
-        $this->assertIsString($dbCart->session_id);
-        $this->assertIsBool($dbCart->is_portal_public);
-        $this->assertIsBool($dbCart->is_public);
-        $this->assertIsBool($dbCart->is_watchlist);
+        $this->assertNotEmpty($dbCart->session_id);
+        $this->assertFalse($dbCart->is_portal_public); // Default value
+        $this->assertFalse($dbCart->is_public); // Default value
         $this->assertEquals($cart['authenticatable_type'], $dbCart->authenticatable_type);
         $this->assertEquals($cart['authenticatable_id'], $dbCart->authenticatable_id);
     }
@@ -272,14 +270,13 @@ class CartTest extends BaseSetup
         $this->assertEquals($cart['id'], $dbCart->id);
         $this->assertEquals($cart['is_watchlist'], $dbCart->is_watchlist);
 
-        // Validate all model properties are present
+        // Validate all model properties with expected values
         $this->assertNotNull($dbCart->id);
         $this->assertNotNull($dbCart->created_at);
         $this->assertNotNull($dbCart->updated_at);
-        $this->assertIsString($dbCart->session_id);
-        $this->assertIsBool($dbCart->is_portal_public);
-        $this->assertIsBool($dbCart->is_public);
-        $this->assertIsBool($dbCart->is_watchlist);
+        $this->assertNotEmpty($dbCart->session_id);
+        $this->assertFalse($dbCart->is_portal_public); // Default value
+        $this->assertFalse($dbCart->is_public); // Default value
         $this->assertNotNull($dbCart->authenticatable_type);
         $this->assertNotNull($dbCart->authenticatable_id);
     }
