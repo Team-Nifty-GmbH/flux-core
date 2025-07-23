@@ -45,6 +45,16 @@ export default function () {
             if (this.isFooterClicked) {
                 this.isFooterClicked = false;
                 this.startPointFooterVertical = null;
+
+                if (this.elemntsOutOfView.length > 0) {
+                    this.visibleElements
+                        .filter((item) =>
+                            this.elemntsOutOfView.includes(item.id),
+                        )
+                        .forEach((element) => {
+                            element.positionBackInBound();
+                        });
+                }
             }
         },
         onMouseMoveFooter(e) {
@@ -108,65 +118,45 @@ export default function () {
                 throw new Error(`Element with id ${id} not found`);
             }
         },
-        addElement(id) {
-            // subscribe to the observer
-        },
-        removeElement(id) {
-            // first remove it from the observer
-            // remove element (from the DOM and from the store)
+        toggleElement($ref, id) {
+            if (this.footer === null) {
+                throw new Error(`Footer Elelement not initialized`);
+            }
+
+            const index = this.visibleElements.findIndex(
+                (item) => item.id === id,
+            );
+            if (index !== -1) {
+                // delete element
+                // remove the observer for the element
+                this.observer.unobserve(this.visibleElements[index].element);
+                this.footer.removeChild(this.visibleElements[index].element);
+                this.visibleElements.splice(index, 1);
+            } else {
+                // add element
+                this.footer.appendChild($ref[id].content.cloneNode(true));
+
+                const element = Array.from(this.footer.children)
+                    .filter((item) => item.id === id)
+                    .pop();
+
+                if (element) {
+                    this.visibleElements.push(new FooterElement(element, this));
+                    this.observer.observe(element);
+                } else {
+                    throw new Error(
+                        `Element with id ${id} not found in footer`,
+                    );
+                }
+            }
         },
         onMouseUp() {
             if (
                 this._selectedElement.id !== null &&
-                this.footer &&
+                this._selectedElement.ref !== null &&
                 this.elemntsOutOfView.includes(this._selectedElement.id)
             ) {
-                const { x, y } = this._selectedElement.ref.position;
-                const { width: widthFooter, height: heightFooter } =
-                    this.footer.getBoundingClientRect();
-                const { width: widthElement, height: heightElement } =
-                    this._selectedElement.ref.size;
-
-                if (x < 0 && y < 0) {
-                    // Element is out of view, reset position
-                    this._selectedElement.ref.position = {
-                        x: 0,
-                        y: 0,
-                    };
-                }
-
-                if (x < 0 && y > 0) {
-                    this._selectedElement.ref.position = {
-                        x: 0,
-                        y:
-                            y + heightElement > heightFooter
-                                ? heightFooter - heightElement
-                                : y,
-                    };
-                }
-
-                if (x > 0 && y < 0) {
-                    this._selectedElement.ref.position = {
-                        x:
-                            x + widthElement > widthFooter
-                                ? widthFooter - widthElement
-                                : x,
-                        y: 0,
-                    };
-                }
-
-                if (x > 0 && y > 0) {
-                    this._selectedElement.ref.position = {
-                        x:
-                            x + widthElement > widthFooter
-                                ? widthFooter - widthElement
-                                : x,
-                        y:
-                            y + heightElement > heightFooter
-                                ? heightFooter - heightElement
-                                : y,
-                    };
-                }
+                this._selectedElement.ref.positionBackInBound();
             }
             this._selectedElement.id = null;
             this._selectedElement.ref = null;
@@ -241,6 +231,5 @@ export default function () {
             }
         },
         async reloadOnClientChange($refs) {},
-        toggleElement(element) {},
     };
 }

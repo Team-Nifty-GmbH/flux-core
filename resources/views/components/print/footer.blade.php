@@ -33,6 +33,7 @@
         <div class="border-semi-black w-full border-t">
             <template x-ref="footer-client-{{ $client->id }}">
                 <address
+                    draggable="false"
                     x-on:mousedown="printStore.editFooter ?  footerStore.onMouseDown($event,'footer-client-{{ $client->id }}') : null"
                     id="footer-client-{{ $client->id }}"
                     class="absolute left-0 top-0 w-fit cursor-pointer select-none text-left not-italic"
@@ -63,6 +64,7 @@
             <template x-ref="footer-logo">
                 <div
                     id="footer-logo"
+                    draggable="false"
                     x-on:mousedown="printStore.editFooter ?  footerStore.onMouseDown($event, 'footer-logo') : null"
                     class="absolute left-0 top-0 h-[1.7cm] w-fit"
                     :class="{'bg-gray-300' : footerStore.selectedElementId === 'footer-logo'}"
@@ -78,6 +80,7 @@
                 <template x-ref="footer-bank-{{ $bankConnection->id }}">
                     <div
                         id="footer-bank-{{ $bankConnection->id }}"
+                        draggable="false"
                         x-on:mousedown="printStore.editFooter ?  footerStore.onMouseDown($event,'footer-bank-{{ $bankConnection->id }}') : null"
                         class="absolute left-0 top-0 w-fit cursor-pointer select-none text-left"
                         :class="{'bg-gray-300' : footerStore.selectedElementId === 'footer-bank-{{ $bankConnection->id }}'}"

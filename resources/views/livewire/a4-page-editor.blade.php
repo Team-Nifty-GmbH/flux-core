@@ -41,7 +41,9 @@
                             </div>
                         </div>
                     </address>
-                    <x-toggle x-bind:value="footerStore.visibleElements.map(e => e.id).includes('footer-client-{{$client->id}}')" />
+                    <x-toggle
+                        x-on:change="footerStore.toggleElement($refs,'footer-client-{{$client->id}}')"
+                        x-bind:value="footerStore.visibleElements.map(e => e.id).includes('footer-client-{{$client->id}}')" />
                 </div>
                 <div class="mb-4 mt-4 w-full border-t border-gray-400"></div>
             </div>
@@ -63,7 +65,9 @@
                             {{ $bankConnection->bic ?? '' }}
                         </div>
                     </div>
-                    <x-toggle x-bind:value="footerStore.visibleElements.map(e => e.id).includes('footer-bank-{{$bankConnection->id}}')" />
+                    <x-toggle
+                        x-on:change="footerStore.toggleElement($refs,'footer-bank-{{$bankConnection->id}}')"
+                        x-bind:value="footerStore.visibleElements.map(e => e.id).includes('footer-bank-{{$bankConnection->id}}')" />
                 </div>
             @endforeach
         </div>
@@ -73,7 +77,9 @@
         <div class="pb-4 text-lg text-gray-600">Logo</div>
         <div class="flex items-center justify-between">
             <img class="h-[1.7cm]" src="{{ $this->client->logo_small_url }}" />
-            <x-toggle x-bind:value="footerStore.visibleElements.map(e => e.id).includes('footer-logo')" />
+            <x-toggle
+                x-on:change="footerStore.toggleElement($refs,'footer-logo')"
+                x-bind:value="footerStore.visibleElements.map(e => e.id).includes('footer-logo')" />
         </div>
     </div>
     </div>
