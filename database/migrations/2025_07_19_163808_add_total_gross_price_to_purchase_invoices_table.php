@@ -9,7 +9,7 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::table('purchase_invoices', function (Blueprint $table): void {
-            $table->decimal('total_gross_price', 10)->nullable()->after('bic');
+            $table->decimal('total_gross_price', 40, 10)->nullable()->after('bic');
         });
     }
 
