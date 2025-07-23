@@ -12,6 +12,7 @@ use FluxErp\Models\PurchaseInvoice;
 use FluxErp\Models\User;
 use FluxErp\Rules\MediaUploadType;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\ContactBankConnection\BankConnectionRuleset;
 use FluxErp\Rulesets\FluxRuleset;
 
@@ -75,6 +76,10 @@ class CreatePurchaseInvoiceRuleset extends FluxRuleset
             'system_delivery_date' => 'date|nullable|required_with:system_delivery_date_end',
             'system_delivery_date_end' => 'date|nullable|after_or_equal:system_delivery_date',
             'invoice_number' => 'nullable|string|max:255',
+            'total_gross_price' => [
+                'nullable',
+                app(Numeric::class, ['min' => 0]),
+            ],
             'is_net' => 'boolean',
 
             'media' => 'required',
