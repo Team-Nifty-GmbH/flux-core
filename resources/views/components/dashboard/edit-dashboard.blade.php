@@ -118,23 +118,21 @@
     />
 
     <x-slot:footer>
-        <div class="flex justify-end gap-1.5">
-            <x-button
-                color="secondary"
-                x-on:click="$modalClose('create-group-modal')"
-                :text="__('Cancel')"
-            />
-            <x-button
-                x-on:click="
-                    if (newGroupName.trim()) {
-                        addNewGroup(newGroupName.trim());
-                        $wire.set('group', newGroupName.trim());
-                        newGroupName = '';
-                        $modalClose('create-group-modal');
-                    }
-                "
-                :text="__('Save')"
-            />
-        </div>
+        <x-button
+            color="secondary"
+            x-on:click="$modalClose('create-group-modal')"
+            :text="__('Cancel')"
+        />
+        <x-button
+            x-on:click="
+                if (newGroupName.trim()) {
+                    addNewGroup(newGroupName.trim());
+                    $wire.set('group', newGroupName.trim());
+                    newGroupName = '';
+                    $modalClose('create-group-modal');
+                }
+            "
+            :text="__('Save')"
+        />
     </x-slot>
 </x-modal>
