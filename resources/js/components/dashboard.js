@@ -27,8 +27,9 @@ export default function () {
             }
         },
         removeNewGroup(groupName) {
+            const normalizedGroupName = groupName.trim();
             this.newGroups = this.newGroups.filter(
-                (group) => group !== groupName,
+                (group) => group.trim() !== normalizedGroupName,
             );
         },
         reinitWithPositionSaving() {
