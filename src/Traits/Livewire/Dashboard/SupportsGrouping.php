@@ -1,6 +1,8 @@
 <?php
 
-namespace FluxErp\Traits\Livewire;
+namespace FluxErp\Traits\Livewire\Dashboard;
+
+use FluxErp\Traits\Livewire\EnsureUsedInLivewire;
 
 trait SupportsGrouping
 {

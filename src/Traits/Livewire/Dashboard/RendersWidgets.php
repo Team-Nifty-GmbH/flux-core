@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\Traits;
+namespace FluxErp\Traits\Livewire\Dashboard;
 
 use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Facades\Widget;

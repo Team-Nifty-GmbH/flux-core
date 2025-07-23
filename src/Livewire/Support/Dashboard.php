@@ -3,7 +3,7 @@
 namespace FluxErp\Livewire\Support;
 
 use FluxErp\Traits\Livewire\Actions;
-use FluxErp\Traits\RendersWidgets;
+use FluxErp\Traits\Livewire\Dashboard\RendersWidgets;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
