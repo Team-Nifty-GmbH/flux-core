@@ -1,18 +1,22 @@
 <div
-    x-data="printEditorMain()"
+    x-init="printStore.onInit($refs)"
+    x-data="{
+        printStore: $store.printStore,
+        footerStore: $store.footerStore,
+    }"
     class="flex h-[29.7cm] items-center space-x-4"
 >
     <div class="h-full w-[300px] rounded bg-white p-4 shadow">
         @if ($this->availableClients)
             <x-select.native
                 label="Selected Client"
-                x-bind:disabled="anyEdit"
-                x-on:change="selectClient"
+                x-bind:disabled="printStore.anyEdit"
+                x-on:change="printStore.selectClient"
                 select="label:name|value:id"
                 :options="$availableClients"
             />
             <div class="mb-4 mt-4 w-full border-t border-gray-400"></div>
-            <div x-show="editFooter" x-cloak>
+            <div x-show="printStore.editFooter" x-cloak>
                 <div class="pb-4 text-lg text-gray-600">Client</div>
                 <div class="flex items-center justify-between">
                     <address class="not-italic">
@@ -37,13 +41,13 @@
                             </div>
                         </div>
                     </address>
-                    <x-toggle x-bind:value="$store.footerStore.visibleElements.map(e => e.id).includes('footer-client-{{$client->id}}')" />
+                    <x-toggle x-bind:value="footerStore.visibleElements.map(e => e.id).includes('footer-client-{{$client->id}}')" />
                 </div>
                 <div class="mb-4 mt-4 w-full border-t border-gray-400"></div>
             </div>
         @endif
 
-            <div x-show="editFooter" x-cloak>
+            <div x-show="printStore.editFooter" x-cloak>
         <div class="pb-4 text-lg text-gray-600">Bank Connections</div>
         <div class="flex flex-col gap-4">
             @foreach ($this->client?->bankConnections ?? [] as $bankConnection)
@@ -59,17 +63,17 @@
                             {{ $bankConnection->bic ?? '' }}
                         </div>
                     </div>
-                    <x-toggle x-bind:value="$store.footerStore.visibleElements.map(e => e.id).includes('footer-bank-{{$bankConnection->id}}')" />
+                    <x-toggle x-bind:value="footerStore.visibleElements.map(e => e.id).includes('footer-bank-{{$bankConnection->id}}')" />
                 </div>
             @endforeach
         </div>
         <div class="mb-4 mt-4 w-full border-t border-gray-400"></div>
         </div>
-        <div x-cloak x-show="editFooter">
+        <div x-cloak x-show="printStore.editFooter">
         <div class="pb-4 text-lg text-gray-600">Logo</div>
         <div class="flex items-center justify-between">
             <img class="h-[1.7cm]" src="{{ $this->client->logo_small_url }}" />
-            <x-toggle x-bind:value="$store.footerStore.visibleElements.map(e => e.id).includes('footer-logo')" />
+            <x-toggle x-bind:value="footerStore.visibleElements.map(e => e.id).includes('footer-logo')" />
         </div>
     </div>
     </div>
@@ -85,18 +89,18 @@
         </div>
     @endif
     <div class="h-full w-[300px] rounded bg-white p-4 shadow">
-        <div x-cloak x-show="!anyEdit" class="flex flex-col space-y-4">
-            <x-button x-on:click="toggleEditMargin" text="Edit Margin" />
-            <x-button x-on:click="toggleEditHeader" text="Edit Header" />
-            <x-button x-on:click="toggleEditFooter" text="Edit Footer" />
+        <div x-cloak x-show="!printStore.anyEdit" class="flex flex-col space-y-4">
+            <x-button x-on:click="printStore.toggleEditMargin()" text="Edit Margin" />
+            <x-button x-on:click="printStore.toggleEditHeader()" text="Edit Header" />
+            <x-button x-on:click="printStore.toggleEditFooter()" text="Edit Footer" />
         </div>
         <div
             x-cloak
-            x-show="anyEdit"
+            x-show="printStore.anyEdit"
             class="flex h-full flex-col justify-end"
         >
             <div class="flex items-center justify-between">
-                <x-button x-on:click="closeEditor" text="Cancel" />
+                <x-button x-on:click="printStore.closeEditor()" text="Cancel" />
                 <x-button text="Save" />
             </div>
         </div>

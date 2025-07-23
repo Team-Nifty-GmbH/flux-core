@@ -1,8 +1,12 @@
-import { intersectionHandlerFactory } from '../../components/utils/print/utils.js';
+import {
+    intersectionHandlerFactory,
+    STEP,
+} from '../../components/utils/print/utils.js';
 import FooterElement from '../../components/print/footerChildElement.js';
 
 export default function () {
     return {
+        pyPerCm: 0,
         observer: null,
         _selectedElement: {
             id: null,
@@ -21,6 +25,58 @@ export default function () {
         },
         component: null,
         footer: null,
+        _footerHeight: 1.7,
+        _minFooterHeight: 1.7,
+        _maxFooterHeight: 5,
+        isFooterClicked: false,
+        startPointFooterVertical: null,
+        onInit(pyPerCm) {
+            if (typeof pyPerCm === 'number' && pyPerCm > 0) {
+                this.pyPerCm = pyPerCm;
+            } else {
+                this.pyPerCm = 38;
+            }
+        },
+        onMouseDownFooter(e) {
+            this.isFooterClicked = true;
+            this.startPointFooterVertical = e.clientY;
+        },
+        onMouseUpFooter() {
+            if (this.isFooterClicked) {
+                this.isFooterClicked = false;
+                this.startPointFooterVertical = null;
+            }
+        },
+        onMouseMoveFooter(e) {
+            if (
+                this.isFooterClicked &&
+                this.startPointFooterVertical !== null
+            ) {
+                const delta =
+                    (this.startPointFooterVertical - e.clientY) / this.pyPerCm;
+                if (Math.abs(delta) >= STEP) {
+                    const newHeight = Math.max(
+                        0,
+                        Math.round(
+                            (this._footerHeight + STEP * (delta > 0 ? 1 : -1)) *
+                                10,
+                        ) / 10,
+                    );
+                    if (
+                        newHeight >= this._minFooterHeight &&
+                        newHeight <= this._maxFooterHeight
+                    ) {
+                        this._footerHeight = newHeight;
+                    } else {
+                        return;
+                    }
+                    this.startPointFooterVertical = e.clientY;
+                }
+            }
+        },
+        get footerHeight() {
+            return `${this._footerHeight}cm`;
+        },
         get selectedElementPos() {
             // returns the position of the selected element
             return { x: 0, y: 0 };
@@ -186,6 +242,5 @@ export default function () {
         },
         async reloadOnClientChange($refs) {},
         toggleElement(element) {},
-        selectElement(id) {},
     };
 }
