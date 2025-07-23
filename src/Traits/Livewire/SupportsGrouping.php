@@ -2,8 +2,6 @@
 
 namespace FluxErp\Traits\Livewire;
 
-use Livewire\Attributes\Url;
-
 trait SupportsGrouping
 {
     use EnsureUsedInLivewire;

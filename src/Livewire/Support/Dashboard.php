@@ -15,12 +15,12 @@ abstract class Dashboard extends Component
 {
     use Actions, RendersWidgets;
 
+    #[Url]
+    public ?string $group = null;
+
     protected bool $canEdit = true;
 
     protected bool $hasTimeSelector = true;
-
-    #[Url]
-    public ?string $group = null;
 
     public static function getDefaultWidgets(): ?array
     {
