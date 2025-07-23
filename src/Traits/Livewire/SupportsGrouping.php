@@ -15,7 +15,10 @@ trait SupportsGrouping
             ->where('group', $groupName)
             ->delete();
 
-        $this->group = null;
+        if ($this->group === $groupName) {
+            $this->group = null;
+        }
+
         $this->widgets();
         $this->dispatch('remove-group', groupName: $groupName);
         $this->updatedGroup();
