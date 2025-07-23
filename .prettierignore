@@ -1,4 +1,5 @@
 resources/views/components/tabs.blade.php
+resources/views/components/dashboard/edit-dashboard.blade.php
 **mail**
 /node_modules
 /public

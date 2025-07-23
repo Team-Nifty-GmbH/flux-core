@@ -3,16 +3,20 @@
 namespace FluxErp\Livewire\Support;
 
 use FluxErp\Traits\Livewire\Actions;
-use FluxErp\Traits\RendersWidgets;
+use FluxErp\Traits\Livewire\Dashboard\RendersWidgets;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Str;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
 abstract class Dashboard extends Component
 {
     use Actions, RendersWidgets;
+
+    #[Url]
+    public ?string $group = null;
 
     protected bool $canEdit = true;
 
