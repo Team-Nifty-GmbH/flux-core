@@ -1,6 +1,6 @@
 @use('FluxErp\Enums\TimeFrameEnum')
 <div class="flex items-center gap-4">
-    <template x-for="group in allGroups()">
+    <template x-for="group in allGroups">
         <div class="relative">
             <x-button
                 wire:loading.attr="disabled"

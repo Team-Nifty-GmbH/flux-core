@@ -8,9 +8,6 @@ trait SupportsGrouping
 {
     use EnsureUsedInLivewire;
 
-    #[Url]
-    public ?string $group = null;
-
     public function deleteGroup(string $groupName): void
     {
         auth()

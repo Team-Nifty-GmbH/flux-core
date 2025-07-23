@@ -8,6 +8,7 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Str;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
 abstract class Dashboard extends Component
@@ -17,6 +18,9 @@ abstract class Dashboard extends Component
     protected bool $canEdit = true;
 
     protected bool $hasTimeSelector = true;
+
+    #[Url]
+    public ?string $group = null;
 
     public static function getDefaultWidgets(): ?array
     {
