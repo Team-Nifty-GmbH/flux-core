@@ -60,25 +60,35 @@ trait RendersWidgets
     #[Renderless]
     public function saveWidgets(?array $widgets = null): void
     {
-        $this->widgets = $widgets;
+        $widgetsToSave = $widgets ?? $this->widgets;
 
-        $existingItemIds = array_filter(Arr::pluck($this->widgets, 'id'), 'is_numeric');
+        $this->widgets = array_merge(
+            array_filter($this->widgets, fn (array $widget) => data_get($widget, 'group') !== $this->group),
+            $widgetsToSave
+        );
+
+        $existingItemIds = array_filter(Arr::pluck($widgetsToSave, 'id'), 'is_numeric');
+
         auth()
             ->user()
             ->widgets()
             ->where('dashboard_component', static::class)
+            ->where('group', $this->group ?? null)
             ->whereNotIn('id', $existingItemIds)
             ->delete();
 
         // create new widgets, update existing widgets
-        foreach ($this->widgets as &$widget) {
+        foreach ($widgetsToSave as &$widget) {
             $savedWidget = auth()
                 ->user()
                 ->widgets()
                 ->updateOrCreate(
                     ['id' => is_numeric(data_get($widget, 'id')) ? data_get($widget, 'id') : null],
                     array_merge(
-                        ['dashboard_component' => static::class],
+                        [
+                            'dashboard_component' => static::class,
+                            'group' => $this->group ?? null,
+                        ],
                         Arr::except($widget, 'id')
                     )
                 );
@@ -91,7 +101,10 @@ trait RendersWidgets
     #[Renderless]
     public function syncWidgets(array $widgets): void
     {
-        $this->widgets = $widgets;
+        $this->widgets = array_merge(
+            array_filter($this->widgets, fn (array $widget) => data_get($widget, 'group') !== $this->group),
+            $widgets
+        );
     }
 
     public function updatedParams(): void

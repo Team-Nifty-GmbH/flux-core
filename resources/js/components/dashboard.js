@@ -7,10 +7,64 @@ export default function () {
         emptyLayout: false,
         grid: null,
         isLoading: false,
+        groups: [],
+        newGroups: [],
+        newGroupName: '',
+        get allGroups() {
+            const merged = [...new Set([...this.groups, ...this.newGroups])];
+            const filteredMerged = merged.filter((group) => group !== null);
+
+            return [null, ...filteredMerged];
+        },
+        updateGroups() {
+            this.groups = [
+                ...new Set(this.$wire.widgets.map((widget) => widget.group)),
+            ];
+        },
+        addNewGroup(groupName) {
+            if (groupName && !this.newGroups.includes(groupName)) {
+                this.newGroups.push(groupName);
+            }
+        },
+        removeNewGroup(groupName) {
+            this.newGroups = this.newGroups.filter(
+                (group) => group !== groupName,
+            );
+        },
+        reinitWithPositionSaving() {
+            setTimeout(() => {
+                this.updateGroups();
+                if (this.grid) {
+                    try {
+                        this.grid.destroy(false);
+                    } catch (e) {
+                        console.warn('GridStack destroy failed:', e);
+                    }
+                    this.grid = null;
+                }
+
+                this.$nextTick(() => {
+                    this.reInit().disable();
+                });
+            }, 100);
+        },
         destroy() {
             // destroy grid - on page leave - since livewire caches the component
             if (this.grid !== null) {
-                this.grid.destroy(false);
+                try {
+                    this.grid.removeAll(false);
+                    this.grid.destroy(false);
+                } catch (error) {
+                    console.warn('GridStack destroy failed:', error);
+                    try {
+                        const gridEl = document.querySelector('.grid-stack');
+                        if (gridEl && gridEl.gridstack) {
+                            delete gridEl.gridstack;
+                        }
+                    } catch (cleanupError) {
+                        console.warn('GridStack cleanup failed:', cleanupError);
+                    }
+                }
                 this.grid = null;
             }
         },
@@ -61,6 +115,7 @@ export default function () {
                         order_column: item.gridstackNode.x,
                         order_row: item.gridstackNode.y,
                         component_name: item.gridstackNode.component_name,
+                        group: item.gridstackNode.group,
                     });
                 }
             });
@@ -129,6 +184,7 @@ export default function () {
                 placeholder.gridstackNode.x;
             placeholder.gridstackNode.order_row = placeholder.gridstackNode.y;
             placeholder.gridstackNode.component_name = key;
+            placeholder.gridstackNode.group = this.$wire.group;
 
             // sync position of each grid element with the server
             await this.syncGridOnNewItem();
@@ -144,25 +200,37 @@ export default function () {
                 this.isLoading = false;
             }
 
-            // init grid
-            this.grid = GridStack.init({
-                margin: 10,
-                cellHeight: 250,
-                alwaysShowResizeHandle: true,
-                columnOpts: {
-                    breakpointForWindow: true,
-                    breakpoints: [
-                        { w: 1100, c: 1 },
-                        { w: 2000000, c: 6 },
-                    ],
-                },
-            }).enable();
-            return this.grid;
+            this.updateGroups();
+
+            try {
+                // init grid
+                this.grid = GridStack.init({
+                    margin: 10,
+                    cellHeight: 250,
+                    alwaysShowResizeHandle: true,
+                    float: true,
+                    columnOpts: {
+                        breakpointForWindow: true,
+                        breakpoints: [
+                            { w: 1100, c: 1 },
+                            { w: 2000000, c: 6 },
+                        ],
+                    },
+                }).enable();
+
+                return this.grid;
+            } catch (error) {
+                console.error('GridStack init failed:', error);
+                return { disable: () => {} };
+            }
         },
         reInitPlaceholder() {
+            this.updateGroups();
+
             this.grid = GridStack.init({
                 margin: 10,
                 cellHeight: 250,
+                float: true,
                 columnOpts: {
                     breakpointForWindow: true,
                     breakpoints: [
