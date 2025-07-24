@@ -74,7 +74,7 @@ class Task extends Component
         try {
             $tag = CreateTag::make([
                 'name' => $name,
-                'type' => app(TaskModel::class)->getMorphClass(),
+                'type' => morph_alias(TaskModel::class),
             ])
                 ->checkPermission()
                 ->validate()
