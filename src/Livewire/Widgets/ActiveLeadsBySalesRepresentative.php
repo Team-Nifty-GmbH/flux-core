@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\Widgets;
 
 use FluxErp\Contracts\HasWidgetOptions;
+use FluxErp\Enums\ChartColorEnum;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\Lead\LeadList;
 use FluxErp\Livewire\Support\Widgets\Charts\BarChart;
@@ -37,6 +38,10 @@ class ActiveLeadsBySalesRepresentative extends BarChart implements HasWidgetOpti
 
     public bool $showTotals = false;
 
+    public ?array $yaxis = [
+        'labels' => ['show' => false],
+    ];
+
     public static function dashboardComponent(): array|string
     {
         return Dashboard::class;
@@ -52,15 +57,6 @@ class ActiveLeadsBySalesRepresentative extends BarChart implements HasWidgetOpti
     #[Renderless]
     public function calculateChart(): void
     {
-        // Default colors of apexcharts
-        $colors = [
-            '#2E93fA',
-            '#66DA26',
-            '#546E7A',
-            '#E91E63',
-            '#FF9800',
-        ];
-
         $start = $this->getStart()->toDateString();
         $end = $this->getEnd()->toDateString();
 
@@ -81,21 +77,17 @@ class ActiveLeadsBySalesRepresentative extends BarChart implements HasWidgetOpti
 
         $i = 0;
         $this->series = $leadCounts
-            ->map(function (User $user) use (&$i, $colors): array {
+            ->map(function (User $user) use (&$i): array {
                 return [
                     'id' => $user->getKey(),
                     'name' => $user->getLabel(),
-                    'color' => $user->color ?? $colors[$i++ % count($colors)],
+                    'color' => $user->color ?: ChartColorEnum::forIndex($i++)->hex(),
                     'data' => [$user->total],
                 ];
             })
-            ->take(15)
+            ->take(25)
             ->values()
             ->all();
-
-        $this->yaxis = [
-            'labels' => ['show' => false],
-        ];
     }
 
     #[Js]
@@ -132,7 +124,7 @@ class ActiveLeadsBySalesRepresentative extends BarChart implements HasWidgetOpti
             Livewire::new(resolve_static(LeadList::class, 'class'))->getCacheKey(),
             fn (Builder $query) => $query
                 ->where('user_id', data_get($params, 'id'))
-                ->whereBetween('end', [$start, $end])
+                ->whereValueBetween(now(), ['start', 'end'])
                 ->whereHas(
                     'leadState',
                     fn (Builder $query) => $query
