@@ -100,7 +100,7 @@ class Task extends Component
                 ->validate()
                 ->execute();
 
-            $this->redirect(route('tasks'));
+            $this->redirectRoute('tasks', navigate: true);
         } catch (Exception $e) {
             exception_to_notifications($e, $this);
         }
