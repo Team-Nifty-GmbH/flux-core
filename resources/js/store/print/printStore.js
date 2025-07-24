@@ -8,8 +8,9 @@ export default function ($footerStore) {
         editMargin: false,
         editFooter: false,
         editHeader: false,
-        async selectClient(e) {
-            await this.$wire.set('selectedClientId', e.target.value);
+        async selectClient(e, $wire, $refs) {
+            await $wire.set('selectedClientId', e.target.value);
+            await $footerStore.reload($refs);
         },
         pxPerCm: null,
         pyPerCm: null,
@@ -23,6 +24,9 @@ export default function ($footerStore) {
         isBottomClicked: false,
         isLeftClicked: false,
         isRightClicked: false,
+        get loading() {
+            return $footerStore.loading;
+        },
         get marginLeft() {
             return `${this._marginLeft}cm`;
         },
@@ -164,11 +168,17 @@ export default function ($footerStore) {
         toggleEditHeader() {
             this.editHeader = !this.editHeader;
         },
-        closeEditor() {
+        async closeEditor($refs) {
+            await $footerStore.reload($refs, false);
             // TODO: reset to previous state - reload from server?
             this.editMargin = false;
             this.editFooter = false;
             this.editHeader = false;
+        },
+        async submit($wire) {
+            const footer = $footerStore.prepareToSubmit();
+            console.log(await $wire.set('form.footer', footer, false));
+            console.log(await $wire.get('form'));
         },
     };
 }

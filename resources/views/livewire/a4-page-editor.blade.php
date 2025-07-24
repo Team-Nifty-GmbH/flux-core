@@ -10,8 +10,8 @@
         @if ($this->availableClients)
             <x-select.native
                 label="Selected Client"
-                x-bind:disabled="printStore.anyEdit"
-                x-on:change="printStore.selectClient"
+                x-bind:disabled="printStore.anyEdit || printStore.loading"
+                x-on:change="printStore.selectClient($event,$wire,$refs)"
                 select="label:name|value:id"
                 :options="$availableClients"
             />
@@ -84,7 +84,12 @@
     </div>
     </div>
     @if ($this->availableClients)
-        <x-flux::a4-page />
+        <div class="relative">
+            <div x-cloak x-show="printStore.loading" class="absolute w-full h-full z-[500] bg-gray-300">
+                <div class="animate-pulse w-full h-full bg-gray-100"></div>
+            </div>
+            <x-flux::a4-page />
+        </div>
     @else
         <div
             class="flex h-full w-[21cm] flex-col items-center justify-center rounded bg-white shadow"
@@ -96,9 +101,15 @@
     @endif
     <div class="h-full w-[300px] rounded bg-white p-4 shadow">
         <div x-cloak x-show="!printStore.anyEdit" class="flex flex-col space-y-4">
-            <x-button x-on:click="printStore.toggleEditMargin()" text="Edit Margin" />
-            <x-button x-on:click="printStore.toggleEditHeader()" text="Edit Header" />
-            <x-button x-on:click="printStore.toggleEditFooter()" text="Edit Footer" />
+            <x-button
+                x-bind:disabled="printStore.loading"
+                x-on:click="printStore.toggleEditMargin()" text="Edit Margin" />
+            <x-button
+                x-bind:disabled="printStore.loading"
+                x-on:click="printStore.toggleEditHeader()" text="Edit Header" />
+            <x-button
+                x-bind:disabled="printStore.loading"
+                x-on:click="printStore.toggleEditFooter()" text="Edit Footer" />
         </div>
         <div
             x-cloak
@@ -106,8 +117,12 @@
             class="flex h-full flex-col justify-end"
         >
             <div class="flex items-center justify-between">
-                <x-button x-on:click="printStore.closeEditor()" text="Cancel" />
-                <x-button text="Save" />
+                <x-button
+                    x-bind:disabled="printStore.loading"
+                    x-on:click="printStore.closeEditor($refs)" text="Cancel" />
+                <x-button
+                    x-bind:disabled="printStore.loading"
+                    x-on:click="printStore.submit($wire)" text="Submit" />
             </div>
         </div>
     </div>

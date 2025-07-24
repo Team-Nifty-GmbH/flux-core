@@ -30,7 +30,7 @@
         <div x-text="`${roundToOneDecimal(footerStore.selectedElementPos.x / footerStore.pxPerCm)}cm`"></div>
     </div>
     <div x-cloak x-show="footerStore.selectedElementId !== null"
-         :style="{'transform': `translate(${footerStore.selectedElementPos.x}px,${footerStore.selectedElementPos.y - 50}px)` }"
+         :style="{'transform': `translate(${footerStore.selectedElementPos.x}px,${footerStore.selectedElementPos.y - 40}px)` }"
          class="absolute left-0 top-0 z-[100] rounded shadow p-2 bg-gray-100">
         <div x-text="`${roundToOneDecimal(footerStore.selectedElementPos.y / footerStore.pyPerCm)}cm`"></div>
     </div>
@@ -43,7 +43,9 @@
         x-on:mousemove.window="footerStore.isFooterClicked ? footerStore.onMouseMoveFooter($event) : false"
     >
         <div class="border-semi-black w-full border-t">
-            <template x-ref="footer-client-{{ $client->id }}">
+            <template
+                id="{{ $client->id }}"
+                x-ref="footer-client-{{ $client->id }}">
                 <address
                     draggable="false"
                     x-on:mousedown="printStore.editFooter ?  footerStore.onMouseDown($event,'footer-client-{{ $client->id }}') : null"
@@ -73,7 +75,9 @@
                     </div>
                 </address>
             </template>
-            <template x-ref="footer-logo">
+            <template
+                id="{{ $client->id }}"
+                x-ref="footer-logo">
                 <div
                     id="footer-logo"
                     draggable="false"
@@ -89,7 +93,9 @@
                 </div>
             </template>
             @foreach ($client->bankConnections as $index => $bankConnection)
-                <template x-ref="footer-bank-{{ $bankConnection->id }}">
+                <template
+                    id="{{ uniqid() }}"
+                    x-ref="footer-bank-{{ $bankConnection->id }}">
                     <div
                         id="footer-bank-{{ $bankConnection->id }}"
                         draggable="false"

@@ -7,6 +7,7 @@ import FooterElement from '../../components/print/footerChildElement.js';
 
 export default function () {
     return {
+        loading: false,
         pxPerCm: 0,
         pyPerCm: 0,
         observer: null,
@@ -25,7 +26,7 @@ export default function () {
             horizontal: null,
             vertical: null,
         },
-        component: null,
+        _component: null,
         footer: null,
         _footerHeight: 1.7,
         _minFooterHeight: 1.7,
@@ -44,6 +45,12 @@ export default function () {
             } else {
                 this.pxPerCm = 37.79527559055118; // 1cm in pixels, based on 96 DPI
             }
+        },
+        get component() {
+            if (this._component === null) {
+                throw new Error('Component not initialized');
+            }
+            return this._component();
         },
         onMouseDownFooter(e) {
             this.isFooterClicked = true;
@@ -197,7 +204,8 @@ export default function () {
             }
         },
         async register($wire, $refs) {
-            this.component = $wire;
+            this.loading = true;
+            this._component = () => $wire;
             this.footer = $refs['footer'];
             // Check if footer already exists
             if ((await $wire.get('form.footer')).length > 0) {
@@ -228,7 +236,8 @@ export default function () {
                     .map((item) => new FooterElement(item, this));
 
                 ['start', 'middle', 'end'].forEach((position, index) => {
-                    this.visibleElements[index].init(position);
+                    this.visibleElements[index] &&
+                        this.visibleElements[index].init(position);
                 });
             }
 
@@ -245,8 +254,84 @@ export default function () {
                     this.observer.observe(e.element);
                 });
             }
+            this.loading = false;
         },
-        async reloadOnClientChange($refs) {},
-        prepareToSubmit() {},
+        async reload($refs, isClientChange = true) {
+            this.loading = true;
+            if (this.observer) {
+                this.observer.disconnect();
+            }
+
+            // if client is not chaged - Livewire will not remove the cloned elements
+            if (!isClientChange) {
+                this.visibleElements.forEach((item) => {
+                    this.footer.removeChild(item.element);
+                });
+            }
+
+            this.visibleElements = [];
+            this.elemntsOutOfView = [];
+
+            if ((await this.component.get('form.footer')).length > 0) {
+                console.log('Footer already exists, loading...');
+            } else {
+                const data = await this.component.clientToJson();
+                const clientId = data.client.id;
+                const imgUrl = data.client.logo_small_url;
+                const bankConnections = data.bank_connections;
+                this._footerHeight = 1.7;
+                // clone client
+                this.footer.appendChild(
+                    $refs[`footer-client-${clientId}`].content.cloneNode(true),
+                );
+                // clone logo
+                imgUrl &&
+                    this.footer.appendChild(
+                        $refs['footer-logo'].content.cloneNode(true),
+                    );
+                // clone first bank connection
+                bankConnections.length > 0 &&
+                    this.footer.appendChild(
+                        $refs[
+                            `footer-bank-${bankConnections[0].id}`
+                        ].content.cloneNode(true),
+                    );
+                this.visibleElements = Array.from(this.footer.children)
+                    .filter((item) => item.id && true)
+                    .map((item) => new FooterElement(item, this));
+
+                ['start', 'middle', 'end'].forEach((position, index) => {
+                    this.visibleElements[index] &&
+                        this.visibleElements[index].init(position);
+                });
+            }
+
+            if (this.footer) {
+                this.observer = new IntersectionObserver(
+                    intersectionHandlerFactory(this),
+                    {
+                        root: this.footer,
+                        rootMargin: '0px',
+                        threshold: 0.99,
+                    },
+                );
+                this.visibleElements.forEach((e) => {
+                    this.observer.observe(e.element);
+                });
+            }
+            this.loading = false;
+        },
+        prepareToSubmit() {
+            return {
+                height: this._footerHeight,
+                elements: this.visibleElements.map((item) => {
+                    return {
+                        id: item.id,
+                        x: roundToOneDecimal(item.position.x / this.pxPerCm),
+                        y: roundToOneDecimal(item.position.y / this.pyPerCm),
+                    };
+                }),
+            };
+        },
     };
 }
