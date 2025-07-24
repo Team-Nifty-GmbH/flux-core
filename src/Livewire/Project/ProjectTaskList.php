@@ -3,6 +3,7 @@
 namespace FluxErp\Livewire\Project;
 
 use FluxErp\Actions\Task\DeleteTask;
+use FluxErp\Actions\Task\UpdateTask;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\DataTables\TaskList as BaseTaskList;
 use FluxErp\Livewire\Forms\TaskForm;
@@ -52,7 +53,6 @@ class ProjectTaskList extends BaseTaskList
             ->toArray();
     }
 
-    #[Renderless]
     protected function getTableActions(): array
     {
         return [
@@ -63,6 +63,21 @@ class ProjectTaskList extends BaseTaskList
                     'x-on:click' => '$wire.edit()',
                 ]),
         ];
+    }
+
+    protected function getRowActions(): array
+    {
+        return array_merge(
+            parent::getRowActions(),
+            [
+                DataTableButton::make()
+                    ->text(__('Edit'))
+                    ->color('indigo')
+                    ->icon('pencil')
+                    ->when(fn () => resolve_static(UpdateTask::class, 'canPerformAction', [false]))
+                    ->wireClick('edit(record.id)'),
+            ],
+        );
     }
 
     #[Renderless]
