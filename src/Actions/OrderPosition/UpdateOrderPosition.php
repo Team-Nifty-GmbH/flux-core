@@ -104,7 +104,9 @@ class UpdateOrderPosition extends FluxAction
                 });
         }
 
-        $orderPosition->syncTags($tags);
+        if (! is_null($tags)) {
+            $orderPosition->tags()->sync($tags);
+        }
 
         return $orderPosition->withoutRelations()->fresh();
     }
