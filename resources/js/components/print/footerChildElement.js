@@ -27,8 +27,7 @@ export default class FooterChildElement {
         const { x, y } = this.position;
         const { width: widthFooter, height: heightFooter } = this.parentSize;
         const { width: widthElement, height: heightElement } = this.size;
-
-        if (x < 0 && y < 0) {
+        if (x <= 0 && y <= 0) {
             // Element is out of view, reset position
             this.position = {
                 x: 0,
@@ -36,7 +35,7 @@ export default class FooterChildElement {
             };
         }
 
-        if (x < 0 && y > 0) {
+        if (x <= 0 && y >= 0) {
             this.position = {
                 x: 0,
                 y:
@@ -46,7 +45,7 @@ export default class FooterChildElement {
             };
         }
 
-        if (x > 0 && y < 0) {
+        if (x >= 0 && y <= 0) {
             this.position = {
                 x:
                     x + widthElement > widthFooter
@@ -56,7 +55,7 @@ export default class FooterChildElement {
             };
         }
 
-        if (x > 0 && y > 0) {
+        if (x >= 0 && y >= 0) {
             this.position = {
                 x:
                     x + widthElement > widthFooter
@@ -91,7 +90,11 @@ export default class FooterChildElement {
         ) {
             this._position = { x: value.x, y: value.y };
             this.element.style.transform = `translate(${value.x}px,${value.y}px)`;
-            // TODO: update store with new position on selected element - if selected
+            // to display the element in the correct position in the footer
+            if (this.store._selectedElement) {
+                this.store._selectedElement.x = value.x;
+                this.store._selectedElement.y = value.y;
+            }
         } else {
             throw new Error(
                 'Position must be an object with x and y properties',

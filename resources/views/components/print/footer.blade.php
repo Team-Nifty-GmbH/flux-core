@@ -23,6 +23,18 @@
          </div>
     </div>
     {{-- UI  footer height related --}}
+    {{-- UI position of a selected element --}}
+    <div x-cloak x-show="footerStore.selectedElementId !== null"
+         :style="{'transform': `translate(${footerStore.selectedElementPos.x -50}px,${footerStore.selectedElementPos.y}px)` }"
+         class="absolute left-0 top-0 z-[100] rounded shadow p-2 bg-gray-100">
+        <div x-text="`${roundToOneDecimal(footerStore.selectedElementPos.x / footerStore.pxPerCm)}cm`"></div>
+    </div>
+    <div x-cloak x-show="footerStore.selectedElementId !== null"
+         :style="{'transform': `translate(${footerStore.selectedElementPos.x}px,${footerStore.selectedElementPos.y - 50}px)` }"
+         class="absolute left-0 top-0 z-[100] rounded shadow p-2 bg-gray-100">
+        <div x-text="`${roundToOneDecimal(footerStore.selectedElementPos.y / footerStore.pyPerCm)}cm`"></div>
+    </div>
+    {{-- UI position of a selected element --}}
     <div
         x-ref="footer"
         class="footer-content relative h-full text-2xs leading-3"

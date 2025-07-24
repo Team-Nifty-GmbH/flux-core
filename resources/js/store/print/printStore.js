@@ -3,7 +3,7 @@ export default function ($footerStore) {
         onInit($refs) {
             this.pxPerCm = $refs['scale'].offsetWidth;
             this.pyPerCm = $refs['scale'].offsetHeight;
-            $footerStore.onInit(this.pyPerCm);
+            $footerStore.onInit(this.pxPerCm, this.pyPerCm);
         },
         editMargin: false,
         editFooter: false,

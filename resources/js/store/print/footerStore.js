@@ -1,11 +1,13 @@
 import {
     intersectionHandlerFactory,
+    roundToOneDecimal,
     STEP,
 } from '../../components/utils/print/utils.js';
 import FooterElement from '../../components/print/footerChildElement.js';
 
 export default function () {
     return {
+        pxPerCm: 0,
         pyPerCm: 0,
         observer: null,
         _selectedElement: {
@@ -30,11 +32,17 @@ export default function () {
         _maxFooterHeight: 5,
         isFooterClicked: false,
         startPointFooterVertical: null,
-        onInit(pyPerCm) {
+        onInit(pxPerCm, pyPerCm) {
             if (typeof pyPerCm === 'number' && pyPerCm > 0) {
                 this.pyPerCm = pyPerCm;
             } else {
-                this.pyPerCm = 38;
+                this.pyPerCm = 37.79527559055118; // 1cm in pixels, based on 96 DPI
+            }
+
+            if (typeof pxPerCm === 'number' && pxPerCm > 0) {
+                this.pxPerCm = pxPerCm;
+            } else {
+                this.pxPerCm = 37.79527559055118; // 1cm in pixels, based on 96 DPI
             }
         },
         onMouseDownFooter(e) {
@@ -88,7 +96,15 @@ export default function () {
             return `${this._footerHeight}cm`;
         },
         get selectedElementPos() {
-            // returns the position of the selected element
+            if (
+                this._selectedElement.x !== null &&
+                this._selectedElement.y !== null
+            ) {
+                return {
+                    x: this._selectedElement.x,
+                    y: this._selectedElement.y,
+                };
+            }
             return { x: 0, y: 0 };
         },
         get selectedElementId() {
@@ -231,5 +247,6 @@ export default function () {
             }
         },
         async reloadOnClientChange($refs) {},
+        prepareToSubmit() {},
     };
 }
