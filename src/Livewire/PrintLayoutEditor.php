@@ -6,12 +6,14 @@ use FluxErp\Livewire\Forms\PrintLayoutForm;
 use FluxErp\Models\Client;
 use FluxErp\Models\PrintLayout;
 use Illuminate\Support\Carbon;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Illuminate\Support\Fluent;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class PrintLayoutEditor extends Component
 {
@@ -151,10 +153,12 @@ class PrintLayoutEditor extends Component
         ]);
     }
 
-    public function updatedSelectedClientId()
+    public function selectClient(int $clientId): void
     {
-        if($this->selectedClientId !== null && $this->selectedClientId !== $this->client->id) {
-            $this->client = resolve_static(Client::class, 'query')
+        if($clientId !== $this->selectedClientId) {
+                $this->selectedClientId = $clientId;
+
+                $this->client = resolve_static(Client::class, 'query')
                 ->whereKey($this->selectedClientId)
                 ->first();
 
@@ -166,13 +170,28 @@ class PrintLayoutEditor extends Component
             if($layout) {
                 $this->form->fill($layout->toArray());
             } else {
-                $this->form->reset([
-                    'client_id' => $this->selectedClientId,
-                    'name' => 'flux::printing.' . $this->layoutModel . '.' . $this->name,
-                    // TODO: need to map the model type to the correct morph alias
-                    'model_type' => $this->layoutModel,
+                $this->form->fill([
+                'id'=> null,
+                'client_id' => $this->selectedClientId,
+                'name' => 'flux::printing.' . $this->layoutModel . '.' . $this->name,
+                 // TODO: need to map the model type to the correct morph alias
+                'model_type' => $this->layoutModel,
                 ]);
             }
+        }
+    }
+
+    #[Renderless]
+    public function save(): bool
+    {
+        try {
+            $this->form->save();
+            return true;
+        } catch (ValidationException|UnauthorizedException $e)
+        {
+            dd($e);
+//            exception_to_notifications($e, $this);
+            return false;
         }
     }
 

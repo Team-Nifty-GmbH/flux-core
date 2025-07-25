@@ -207,9 +207,14 @@ export default function () {
             this.loading = true;
             this._component = () => $wire;
             this.footer = $refs['footer'];
-            // Check if footer already exists
-            if ((await $wire.get('form.footer')).length > 0) {
-                console.log('Footer already exists, loading...');
+            // Check if footer already exists - by default empty array is returned
+            const footerJson = await $wire.get('form.footer');
+
+            if (
+                !Array.isArray(footerJson) &&
+                Object.keys(footerJson).length > 0
+            ) {
+                this._mapFooter($refs, footerJson);
             } else {
                 const data = await $wire.clientToJson();
                 const clientId = data.client.id;
@@ -256,6 +261,27 @@ export default function () {
             }
             this.loading = false;
         },
+        _mapFooter($refs, json) {
+            this._footerHeight = json.height ?? 1.7;
+            json.elements?.forEach((item) => {
+                const element =
+                    $refs[item.id] && $refs[item.id].content.cloneNode(true);
+                if (element) {
+                    this.footer.appendChild(element);
+                    const children = Array.from(this.footer.children);
+                    const index = children.findIndex((el) => el.id === item.id);
+                    if (index !== -1) {
+                        const child = children[index];
+                        this.visibleElements.push(
+                            new FooterElement(child, this).init({
+                                x: item.x * this.pxPerCm,
+                                y: item.y * this.pyPerCm,
+                            }),
+                        );
+                    }
+                }
+            });
+        },
         async reload($refs, isClientChange = true) {
             this.loading = true;
             if (this.observer) {
@@ -272,8 +298,13 @@ export default function () {
             this.visibleElements = [];
             this.elemntsOutOfView = [];
 
-            if ((await this.component.get('form.footer')).length > 0) {
-                console.log('Footer already exists, loading...');
+            const footerJson = await this.component.get('form.footer');
+
+            if (
+                !Array.isArray(footerJson) &&
+                Object.keys(footerJson).length > 0
+            ) {
+                this._mapFooter($refs, footerJson);
             } else {
                 const data = await this.component.clientToJson();
                 const clientId = data.client.id;

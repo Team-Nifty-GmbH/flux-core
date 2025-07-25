@@ -9,7 +9,8 @@ export default function ($footerStore) {
         editFooter: false,
         editHeader: false,
         async selectClient(e, $wire, $refs) {
-            await $wire.set('selectedClientId', e.target.value);
+            await $wire.selectClient(e.target.value);
+            console.log(await $wire.get('form'));
             await $footerStore.reload($refs);
         },
         pxPerCm: null,
@@ -170,15 +171,19 @@ export default function ($footerStore) {
         },
         async closeEditor($refs) {
             await $footerStore.reload($refs, false);
-            // TODO: reset to previous state - reload from server?
             this.editMargin = false;
             this.editFooter = false;
             this.editHeader = false;
         },
         async submit($wire) {
             const footer = $footerStore.prepareToSubmit();
-            console.log(await $wire.set('form.footer', footer, false));
-            console.log(await $wire.get('form'));
+            await $wire.set('form.footer', footer, false);
+            const response = await $wire.save();
+            if (response) {
+                this.editMargin = false;
+                this.editFooter = false;
+                this.editHeader = false;
+            }
         },
     };
 }

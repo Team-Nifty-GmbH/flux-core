@@ -3,7 +3,7 @@ export default class FooterChildElement {
         this.element = element;
         this._position = { x: 0, y: 0 };
         this.store = $store;
-        this.startPosition = null;
+        // this.startPosition = null;
         // cash the size to avoid recalculating it multiple times (bad performance)
         this._elementSize = null;
     }
@@ -88,6 +88,7 @@ export default class FooterChildElement {
             value.x !== undefined &&
             value.y !== undefined
         ) {
+            // if the element is out of bounds, reset it to
             this._position = { x: value.x, y: value.y };
             this.element.style.transform = `translate(${value.x}px,${value.y}px)`;
             // to display the element in the correct position in the footer
@@ -123,9 +124,23 @@ export default class FooterChildElement {
                     y: 0,
                 };
             }
-
-            this.startPosition = startPosition;
         } else {
+            if (
+                typeof startPosition === 'object' &&
+                startPosition.x !== undefined &&
+                startPosition.y !== undefined
+            ) {
+                this.position = {
+                    x: startPosition.x,
+                    y: startPosition.y,
+                };
+            } else {
+                throw new Error(
+                    'Start position must be a string or an object with x and y properties',
+                );
+            }
         }
+
+        return this;
     }
 }

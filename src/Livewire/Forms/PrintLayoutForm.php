@@ -54,9 +54,9 @@ class PrintLayoutForm extends FluxForm
     protected function getActions(): array
     {
         return [
-            CreatePrintLayout::class,
-            UpdatePrintLayout::class,
-            DeletePrintLayout::class,
+            'create' => CreatePrintLayout::class,
+            'update' => UpdatePrintLayout::class,
+            'delete' => DeletePrintLayout::class,
         ];
     }
 }

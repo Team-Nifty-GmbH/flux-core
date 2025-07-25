@@ -37,7 +37,6 @@ class CreatePrintLayoutRuleset extends FluxRuleset
                 'required',
                 'string',
                 'max:255',
-                'unique:print_layouts,name',
                 'in:' . $this->fileNames(),
 
             ],
