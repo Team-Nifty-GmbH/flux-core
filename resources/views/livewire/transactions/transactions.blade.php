@@ -28,6 +28,26 @@
             wire:model="transactionForm.counterpart_bank_name"
             :label="__('Counterpart Bank Name')"
         />
+        <x-select.styled
+            multiple
+            wire:model.number="transactionForm.categories"
+            :label="__('Categories')"
+            select="label:label|value:id"
+            unfiltered
+            :request="[
+                'url' => route('search', \FluxErp\Models\Category::class),
+                'method' => 'POST',
+                'params' => [
+                    'where' => [
+                        [
+                            'model_type',
+                            '=',
+                            morph_alias(\FluxErp\Models\Transaction::class),
+                        ],
+                    ],
+                ],
+            ]"
+        />
         <x-textarea
             wire:model="transactionForm.purpose"
             :label="__('Purpose')"

@@ -5,6 +5,7 @@ namespace FluxErp\Livewire\Forms;
 use FluxErp\Actions\Transaction\CreateTransaction;
 use FluxErp\Actions\Transaction\DeleteTransaction;
 use FluxErp\Actions\Transaction\UpdateTransaction;
+use FluxErp\Models\Transaction;
 use Illuminate\Support\Carbon;
 use Livewire\Attributes\Locked;
 
@@ -15,6 +16,8 @@ class TransactionForm extends FluxForm
     public ?int $bank_connection_id = null;
 
     public ?string $booking_date = null;
+
+    public array $categories = [];
 
     public array $children = [];
 
@@ -52,6 +55,13 @@ class TransactionForm extends FluxForm
 
     public function fill($values): void
     {
+        if ($values instanceof Transaction) {
+            $values->loadMissing('categories:id');
+
+            $values = $values->toArray();
+            $values['categories'] = array_column($values['categories'] ?? [], 'id');
+        }
+
         parent::fill($values);
 
         $this->value_date = ! is_null($valueDate = data_get($values, 'value_date')) ?

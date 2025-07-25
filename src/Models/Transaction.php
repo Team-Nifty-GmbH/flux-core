@@ -43,6 +43,7 @@ class Transaction extends FluxModel implements InteractsWithDataTables
             'amount' => Money::class,
             'balance' => Money::class,
             'is_ignored' => 'boolean',
+            'flux_ai_structured_data' => 'array',
         ];
     }
 

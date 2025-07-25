@@ -13,6 +13,14 @@ class UpdateTransactionRuleset extends FluxRuleset
 {
     protected static ?string $model = Transaction::class;
 
+    public static function getRules(): array
+    {
+        return array_merge(
+            parent::getRules(),
+            resolve_static(CategoryRuleset::class, 'getRules'),
+        );
+    }
+
     public function rules(): array
     {
         return [
