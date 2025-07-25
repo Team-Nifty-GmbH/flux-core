@@ -56,6 +56,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Spatie\MediaLibrary\HasMedia;
@@ -580,7 +581,7 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
                     'total_net_price' => bcround($item->total_net_price, 2),
                 ];
             })
-            ->when($this->shipping_costs_vat_price, function (Collection $vats): Collection {
+            ->when($this->shipping_costs_vat_price, function (SupportCollection $vats): SupportCollection {
                 return $vats->put(
                     $this->shipping_costs_vat_rate_percentage,
                     [
