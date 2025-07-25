@@ -1,5 +1,5 @@
 <div
-    x-init="printStore.onInit($refs)"
+    x-init="printStore.onInit($wire,$refs)"
     x-data="{
         printStore: $store.printStore,
         footerStore: $store.footerStore,

@@ -1,20 +1,22 @@
 export default function ($footerStore) {
     return {
-        onInit($refs) {
+        async onInit($wire, $refs) {
             this.pxPerCm = $refs['scale'].offsetWidth;
             this.pyPerCm = $refs['scale'].offsetHeight;
             $footerStore.onInit(this.pxPerCm, this.pyPerCm);
+            await this.register($wire);
         },
         editMargin: false,
         editFooter: false,
         editHeader: false,
         async selectClient(e, $wire, $refs) {
             await $wire.selectClient(e.target.value);
-            console.log(await $wire.get('form'));
             await $footerStore.reload($refs);
         },
         pxPerCm: null,
         pyPerCm: null,
+        _loading: false,
+        _component: null,
         startPointVertical: null,
         startPointHorizontal: null,
         _marginTop: 2,
@@ -26,7 +28,13 @@ export default function ($footerStore) {
         isLeftClicked: false,
         isRightClicked: false,
         get loading() {
-            return $footerStore.loading;
+            return $footerStore.loading || this._loading;
+        },
+        get component() {
+            if (this._component === null) {
+                throw new Error('Component not initialized');
+            }
+            return this._component();
         },
         get marginLeft() {
             return `${this._marginLeft}cm`;
@@ -175,9 +183,33 @@ export default function ($footerStore) {
             this.editFooter = false;
             this.editHeader = false;
         },
+        async register($wire) {
+            this._loading = true;
+            this._component = () => $wire;
+
+            const margin = await $wire.get('form.margin');
+            if (!Array.isArray(margin) && Object.keys(margin).length > 0) {
+                this._marginBottom = margin.marginBottom || 2;
+                this._marginTop = margin.marginTop || 2;
+                this._marginLeft = margin.marginLeft || 2;
+                this._marginRight = margin.marginRight || 2;
+            }
+            this._loading = false;
+        },
+        async reload($refs) {},
+        prepareToSubmit() {
+            return {
+                marginTop: this._marginTop,
+                marginBottom: this._marginBottom,
+                marginLeft: this._marginLeft,
+                marginRight: this._marginRight,
+            };
+        },
         async submit($wire) {
+            const margins = this.prepareToSubmit();
             const footer = $footerStore.prepareToSubmit();
             await $wire.set('form.footer', footer, false);
+            await $wire.set('form.margin', margins, false);
             const response = await $wire.save();
             if (response) {
                 this.editMargin = false;
