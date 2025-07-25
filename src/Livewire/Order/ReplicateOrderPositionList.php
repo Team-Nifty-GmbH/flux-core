@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\View\ComponentAttributeBag;
 use Livewire\Attributes\Modelable;
-use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableRowAttributes;
 
 class ReplicateOrderPositionList extends OrderPositionList
 {
+    public array $alreadyTakenPositions = [];
+
     public array $enabledCols = [
         'slug_position',
         'name',
@@ -26,19 +27,14 @@ class ReplicateOrderPositionList extends OrderPositionList
 
     public bool $isSelectable = true;
 
-    #[Modelable]
     public ?int $orderId;
+
+    #[Modelable]
+    public array $selected = [];
 
     protected function getSelectedActions(): array
     {
-        return [
-            DataTableButton::make()
-                ->text(__('Take'))
-                ->color('indigo')
-                ->attributes([
-                    'x-on:click' => '$wire.$parent.takeOrderPositions($wire.selected).then(() => {$wire.selected = [];});',
-                ]),
-        ];
+        return [];
     }
 
     public function getFormatters(): array
@@ -63,7 +59,9 @@ class ReplicateOrderPositionList extends OrderPositionList
     {
         return $builder
             ->where('order_id', $this->orderId)
-            ->withSum('descendants as descendantsAmount', 'amount')
+            ->withSum(['descendants as descendantsAmount' => function (Builder $query): void {
+                $query->whereNull('deleted_at');
+            }], 'amount')
             ->whereNull('parent_id')
             ->orderBy('sort_number');
     }
@@ -82,7 +80,7 @@ class ReplicateOrderPositionList extends OrderPositionList
 
         foreach ($tree as $key => &$item) {
             $totalAmount = bcsub($item['amount'], $item['descendantsAmount'] ?? 0, 2);
-            if (bccomp($totalAmount, 0) !== 1) {
+            if (bccomp($totalAmount, 0) !== 1 || in_array($item['id'], $this->alreadyTakenPositions)) {
                 unset($tree[$key]);
 
                 continue;

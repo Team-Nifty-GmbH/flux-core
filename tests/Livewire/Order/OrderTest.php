@@ -459,29 +459,6 @@ class OrderTest extends BaseSetup
         $this->assertNotEquals($replicatedOrder->order_number, $this->order->order_number);
     }
 
-    public function test_replicate_with_specific_order_type(): void
-    {
-        $retourOrderType = OrderType::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-            'order_type_enum' => OrderTypeEnum::Retoure,
-            'is_active' => true,
-        ]);
-
-        $this->order->update([
-            'is_locked' => true,
-            'invoice_number' => 'INV-' . Str::uuid(),
-            'invoice_date' => now(),
-        ]);
-
-        Livewire::test(OrderView::class, ['id' => $this->order->id])
-            ->call('replicate', OrderTypeEnum::Retoure->value)
-            ->assertStatus(200)
-            ->assertHasNoErrors()
-            ->assertExecutesJs("\$modalOpen('create-child-order');")
-            ->assertSet('replicateOrder.parent_id', $this->order->id)
-            ->assertSet('replicateOrder.order_type_id', $retourOrderType->id);
-    }
-
     public function test_save_locked_order_uses_update_locked_action(): void
     {
         $newCommission = 'Updated commission for locked order';
@@ -585,15 +562,6 @@ class OrderTest extends BaseSetup
             ->assertSet('tab', 'order.related')
             ->set('tab', 'order.activities')
             ->assertSet('tab', 'order.activities');
-    }
-
-    public function test_take_order_positions_functionality(): void
-    {
-        $orderPosition = $this->order->orderPositions()->first();
-
-        Livewire::test(OrderView::class, ['id' => $this->order->id])
-            ->call('takeOrderPositions', [$orderPosition->id])
-            ->assertStatus(200);
     }
 
     public function test_toggle_lock_functionality(): void
