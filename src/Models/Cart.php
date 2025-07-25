@@ -24,6 +24,15 @@ class Cart extends FluxModel
 {
     use HasPackageFactory, HasUuid, SoftDeletes;
 
+    protected function casts(): array
+    {
+        return [
+            'is_portal_public' => 'boolean',
+            'is_public' => 'boolean',
+            'is_watchlist' => 'boolean',
+        ];
+    }
+
     public function addItems(array|int $products): static
     {
         $products = Arr::wrap(is_array($products) && ! array_is_list($products) ? [$products] : $products);

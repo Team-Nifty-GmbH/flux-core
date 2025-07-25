@@ -74,7 +74,7 @@ class Task extends Component
         try {
             $tag = CreateTag::make([
                 'name' => $name,
-                'type' => app(TaskModel::class)->getMorphClass(),
+                'type' => morph_alias(TaskModel::class),
             ])
                 ->checkPermission()
                 ->validate()
@@ -100,7 +100,7 @@ class Task extends Component
                 ->validate()
                 ->execute();
 
-            $this->redirect(route('tasks'));
+            $this->redirectRoute('tasks', navigate: true);
         } catch (Exception $e) {
             exception_to_notifications($e, $this);
         }
