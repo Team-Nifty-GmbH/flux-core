@@ -28,6 +28,8 @@ class OrderTest extends BaseSetup
 {
     private Order $order;
 
+    private OrderType $orderType;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -50,7 +52,7 @@ class OrderTest extends BaseSetup
         $currency = Currency::factory()->create();
         $vatRate = VatRate::factory()->create();
 
-        $orderType = OrderType::factory()->create([
+        $this->orderType = OrderType::factory()->create([
             'client_id' => $this->dbClient->getKey(),
             'order_type_enum' => OrderTypeEnum::Order,
             'print_layouts' => ['invoice'],
@@ -84,7 +86,7 @@ class OrderTest extends BaseSetup
             ->create([
                 'client_id' => $this->dbClient->getKey(),
                 'language_id' => $this->defaultLanguage->id,
-                'order_type_id' => $orderType->id,
+                'order_type_id' => $this->orderType->id,
                 'payment_type_id' => $paymentType->id,
                 'price_list_id' => $priceList->id,
                 'contact_id' => $this->contact->id,
@@ -606,5 +608,464 @@ class OrderTest extends BaseSetup
             ->assertSet('order.is_locked', true);
 
         $this->assertTrue($this->order->refresh()->is_locked);
+    }
+
+    public function test_vat_calculation_prevents_negative_amounts(): void
+    {
+        // Test that flat discounts don't create negative amounts
+        $vatRate19 = VatRate::factory()->create(['rate_percentage' => 0.19]);
+
+        $order = Order::factory()
+            ->has(OrderPosition::factory()
+                ->for($vatRate19)
+                ->state([
+                    'amount' => 1,
+                    'unit_net_price' => 100,
+                    'total_base_net_price' => 100,
+                    'total_net_price' => 100,
+                    'vat_rate_percentage' => 0.19,
+                    'client_id' => $this->dbClient->getKey(),
+                    'is_alternative' => false,
+                ])
+            )
+            ->create([
+                'client_id' => $this->dbClient->getKey(),
+                'language_id' => $this->defaultLanguage->id,
+                'order_type_id' => $this->orderType->id,
+                'currency_id' => Currency::factory()->create()->id,
+                'contact_id' => $contact = Contact::factory()->create(['client_id' => $this->dbClient->getKey()])->id,
+                'address_invoice_id' => Address::factory()->create(['client_id' => $this->dbClient->getKey(), 'contact_id' => $contact])->id,
+                'price_list_id' => PriceList::factory()->create()->id,
+                'payment_type_id' => PaymentType::factory()->create()->id,
+                'shipping_costs_net_price' => 0,
+                'shipping_costs_gross_price' => 0,
+                'shipping_costs_vat_price' => 0,
+            ]);
+
+        // Add flat discount larger than order total
+        $order->discounts()->create([
+            'discount' => 150, // More than the 100 order total
+            'is_percentage' => false,
+            'order_column' => 1,
+        ]);
+
+        $order->calculatePrices()->save();
+
+        // Should be 0, not negative
+        $this->assertEquals('0.00', $order->total_net_price);
+
+        $vat19 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.1900000000');
+        $this->assertEquals('0.00', $vat19['total_net_price']);
+        $this->assertEquals('0.00', $vat19['total_vat_price']);
+    }
+
+    public function test_vat_calculation_with_combined_discounts(): void
+    {
+        // Test complex scenario: position discount + percentage header + flat header
+        $vatRate7 = VatRate::factory()->create(['rate_percentage' => 0.07]);
+        $vatRate19 = VatRate::factory()->create(['rate_percentage' => 0.19]);
+
+        $order = Order::factory()
+            ->has(OrderPosition::factory()
+                ->for($vatRate19)
+                ->state([
+                    'amount' => 1,
+                    'unit_net_price' => 100,
+                    'total_base_net_price' => 100,
+                    'total_net_price' => 50, // 50% position discount
+                    'discount_percentage' => 0.5,
+                    'vat_rate_percentage' => 0.19,
+                    'client_id' => $this->dbClient->getKey(),
+                    'is_alternative' => false,
+                ])
+            )
+            ->has(OrderPosition::factory()
+                ->for($vatRate7)
+                ->state([
+                    'amount' => 1,
+                    'unit_net_price' => 100,
+                    'total_base_net_price' => 100,
+                    'total_net_price' => 100, // no position discount
+                    'vat_rate_percentage' => 0.07,
+                    'client_id' => $this->dbClient->getKey(),
+                    'is_alternative' => false,
+                ])
+            )
+            ->create([
+                'client_id' => $this->dbClient->getKey(),
+                'language_id' => $this->defaultLanguage->id,
+                'order_type_id' => $this->orderType->id,
+                'currency_id' => Currency::factory()->create()->id,
+                'contact_id' => $contact = Contact::factory()->create(['client_id' => $this->dbClient->getKey()])->id,
+                'address_invoice_id' => Address::factory()->create(['client_id' => $this->dbClient->getKey(), 'contact_id' => $contact])->id,
+                'price_list_id' => PriceList::factory()->create()->id,
+                'payment_type_id' => PaymentType::factory()->create()->id,
+                'shipping_costs_net_price' => 0,
+                'shipping_costs_gross_price' => 0,
+                'shipping_costs_vat_price' => 0,
+            ]);
+
+        // Add 50% header discount first
+        $order->discounts()->create([
+            'discount' => 0.5,
+            'is_percentage' => true,
+            'order_column' => 1,
+        ]);
+
+        // Add 37.50 flat discount after percentage
+        $order->discounts()->create([
+            'discount' => 37.5,
+            'is_percentage' => false,
+            'order_column' => 2,
+        ]);
+
+        $order->calculatePrices()->save();
+
+        $this->assertEquals('37.50', $order->total_net_price);
+
+        // After 50% header: 19% = 25, 7% = 50, total = 75
+        // After 37.50 flat: proportional distribution of remaining 37.50
+        $vat19 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.1900000000');
+        $vat7 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.0700000000');
+
+        // 19% portion: 25/75 * 37.50 = 12.50
+        $this->assertEquals('12.50', $vat19['total_net_price']);
+        $this->assertEquals('2.37', $vat19['total_vat_price']);
+
+        // 7% portion: 50/75 * 37.50 = 25.00
+        $this->assertEquals('25.00', $vat7['total_net_price']);
+        $this->assertEquals('1.75', $vat7['total_vat_price']);
+    }
+
+    public function test_vat_calculation_with_flat_header_discount(): void
+    {
+        // Create order with flat amount header discount
+        $vatRate7 = VatRate::factory()->create(['rate_percentage' => 0.07]);
+        $vatRate19 = VatRate::factory()->create(['rate_percentage' => 0.19]);
+
+        $order = Order::factory()
+            ->has(OrderPosition::factory()
+                ->for($vatRate19)
+                ->state([
+                    'amount' => 1,
+                    'unit_net_price' => 100,
+                    'total_base_net_price' => 100,
+                    'total_net_price' => 50, // 50% position discount
+                    'discount_percentage' => 0.5,
+                    'vat_rate_percentage' => 0.19,
+                    'client_id' => $this->dbClient->getKey(),
+                    'is_alternative' => false,
+                ])
+            )
+            ->has(OrderPosition::factory()
+                ->for($vatRate7)
+                ->state([
+                    'amount' => 1,
+                    'unit_net_price' => 100,
+                    'total_base_net_price' => 100,
+                    'total_net_price' => 100, // no position discount
+                    'vat_rate_percentage' => 0.07,
+                    'client_id' => $this->dbClient->getKey(),
+                    'is_alternative' => false,
+                ])
+            )
+            ->create([
+                'client_id' => $this->dbClient->getKey(),
+                'language_id' => $this->defaultLanguage->id,
+                'order_type_id' => $this->orderType->id,
+                'currency_id' => Currency::factory()->create()->id,
+                'contact_id' => $contact = Contact::factory()->create(['client_id' => $this->dbClient->getKey()])->id,
+                'address_invoice_id' => Address::factory()->create(['client_id' => $this->dbClient->getKey(), 'contact_id' => $contact])->id,
+                'price_list_id' => PriceList::factory()->create()->id,
+                'payment_type_id' => PaymentType::factory()->create()->id,
+                'shipping_costs_net_price' => 0,
+                'shipping_costs_gross_price' => 0,
+                'shipping_costs_vat_price' => 0,
+            ]);
+
+        // Add 37.50 flat header discount (25% of 150)
+        $order->discounts()->create([
+            'discount' => 37.5,
+            'is_percentage' => false,
+            'order_column' => 1,
+        ]);
+
+        $order->calculatePrices()->save();
+
+        $this->assertEquals('112.50', $order->total_net_price);
+
+        // Check proportional distribution of flat discount
+        $vat19 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.1900000000');
+        $vat7 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.0700000000');
+
+        // 19% portion: 50/150 * 112.50 = 37.50
+        $this->assertEquals('37.50', $vat19['total_net_price']);
+        $this->assertEquals('7.12', $vat19['total_vat_price']);
+
+        // 7% portion: 100/150 * 112.50 = 75.00
+        $this->assertEquals('75.00', $vat7['total_net_price']);
+        $this->assertEquals('5.25', $vat7['total_vat_price']);
+    }
+
+    public function test_vat_calculation_with_floating_point_precision(): void
+    {
+        // Test with values that typically cause floating point issues
+        $vatRate19 = VatRate::factory()->create(['rate_percentage' => 0.19]);
+        $vatRate7 = VatRate::factory()->create(['rate_percentage' => 0.07]);
+
+        $order = Order::factory()
+            ->has(OrderPosition::factory()
+                ->for($vatRate19)
+                ->state([
+                    'amount' => 1,
+                    'unit_net_price' => 0.1,  // Problematic floating point value
+                    'total_base_net_price' => 0.1,
+                    'total_net_price' => 0.1,
+                    'vat_rate_percentage' => 0.19,
+                    'client_id' => $this->dbClient->getKey(),
+                    'is_alternative' => false,
+                ])
+            )
+            ->has(OrderPosition::factory()
+                ->for($vatRate19)
+                ->state([
+                    'amount' => 1,
+                    'unit_net_price' => 0.2,  // Another problematic value
+                    'total_base_net_price' => 0.2,
+                    'total_net_price' => 0.2,
+                    'vat_rate_percentage' => 0.19,
+                    'client_id' => $this->dbClient->getKey(),
+                    'is_alternative' => false,
+                ])
+            )
+            ->has(OrderPosition::factory()
+                ->for($vatRate7)
+                ->state([
+                    'amount' => 1,
+                    'unit_net_price' => 0.3,  // 0.1 + 0.2 = 0.3 is a classic floating point problem
+                    'total_base_net_price' => 0.3,
+                    'total_net_price' => 0.3,
+                    'vat_rate_percentage' => 0.07,
+                    'client_id' => $this->dbClient->getKey(),
+                    'is_alternative' => false,
+                ])
+            )
+            ->create([
+                'client_id' => $this->dbClient->getKey(),
+                'language_id' => $this->defaultLanguage->id,
+                'order_type_id' => $this->orderType->id,
+                'currency_id' => Currency::factory()->create()->id,
+                'contact_id' => $contact = Contact::factory()->create(['client_id' => $this->dbClient->getKey()])->id,
+                'address_invoice_id' => Address::factory()->create(['client_id' => $this->dbClient->getKey(), 'contact_id' => $contact])->id,
+                'price_list_id' => PriceList::factory()->create()->id,
+                'payment_type_id' => PaymentType::factory()->create()->id,
+                'shipping_costs_net_price' => 0,
+                'shipping_costs_gross_price' => 0,
+                'shipping_costs_vat_price' => 0,
+            ]);
+
+        // Add a flat discount that would cause rounding issues
+        $order->discounts()->create([
+            'discount' => 0.17,  // Discount that doesn't divide evenly
+            'is_percentage' => false,
+            'order_column' => 1,
+        ]);
+
+        $order->calculatePrices()->save();
+
+        // Total should be 0.60 - 0.17 = 0.43
+        $this->assertEquals('0.43', $order->total_net_price);
+
+        $vat19 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.1900000000');
+        $vat7 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.0700000000');
+
+        // Check that proportional distribution works correctly with bcmath
+        // 19% group had 0.30 out of 0.60 = 50%
+        // So they get 50% of 0.43 = 0.215
+        $this->assertEquals('0.22', $vat19['total_net_price']); // Rounded from 0.215
+        $this->assertEquals('0.04', $vat19['total_vat_price']); // 0.22 * 0.19 = 0.0418
+
+        // 7% group had 0.30 out of 0.60 = 50%
+        // So they get 50% of 0.43 = 0.215
+        $this->assertEquals('0.22', $vat7['total_net_price']); // Rounded from 0.215
+        $this->assertEquals('0.02', $vat7['total_vat_price']); // 0.22 * 0.07 = 0.0154
+    }
+
+    public function test_vat_calculation_with_percentage_header_discount(): void
+    {
+        // Create order with header percentage discount
+        $vatRate7 = VatRate::factory()->create(['rate_percentage' => 0.07]);
+        $vatRate19 = VatRate::factory()->create(['rate_percentage' => 0.19]);
+
+        $order = Order::factory()
+            ->has(OrderPosition::factory()
+                ->for($vatRate19)
+                ->state([
+                    'amount' => 1,
+                    'unit_net_price' => 100,
+                    'total_base_net_price' => 100,
+                    'total_net_price' => 50, // 50% position discount
+                    'discount_percentage' => 0.5,
+                    'vat_rate_percentage' => 0.19,
+                    'client_id' => $this->dbClient->getKey(),
+                    'is_alternative' => false,
+                ])
+            )
+            ->has(OrderPosition::factory()
+                ->for($vatRate7)
+                ->state([
+                    'amount' => 1,
+                    'unit_net_price' => 100,
+                    'total_base_net_price' => 100,
+                    'total_net_price' => 100, // no position discount
+                    'vat_rate_percentage' => 0.07,
+                    'client_id' => $this->dbClient->getKey(),
+                    'is_alternative' => false,
+                ])
+            )
+            ->create([
+                'client_id' => $this->dbClient->getKey(),
+                'language_id' => $this->defaultLanguage->id,
+                'order_type_id' => $this->orderType->id,
+                'currency_id' => Currency::factory()->create()->id,
+                'contact_id' => $contact = Contact::factory()->create(['client_id' => $this->dbClient->getKey()])->id,
+                'address_invoice_id' => Address::factory()->create(['client_id' => $this->dbClient->getKey(), 'contact_id' => $contact])->id,
+                'price_list_id' => PriceList::factory()->create()->id,
+                'payment_type_id' => PaymentType::factory()->create()->id,
+                'shipping_costs_net_price' => 0,
+                'shipping_costs_gross_price' => 0,
+                'shipping_costs_vat_price' => 0,
+            ]);
+
+        // Add 50% header discount
+        $order->discounts()->create([
+            'discount' => 0.5,
+            'is_percentage' => true,
+            'order_column' => 1,
+        ]);
+
+        $order->calculatePrices()->save();
+
+        $this->assertEquals('75.00', $order->total_net_price);
+
+        // Check VAT calculations after header discount
+        $vat19 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.1900000000');
+        $vat7 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.0700000000');
+
+        $this->assertEquals('25.00', $vat19['total_net_price']); // 50 * 0.5
+        $this->assertEquals('4.75', $vat19['total_vat_price']);
+        $this->assertEquals('50.00', $vat7['total_net_price']); // 100 * 0.5
+        $this->assertEquals('3.50', $vat7['total_vat_price']);
+    }
+
+    public function test_vat_calculation_with_position_discounts(): void
+    {
+        // Create order with mixed VAT rates and position discounts
+        $vatRate7 = VatRate::factory()->create(['rate_percentage' => 0.07]);
+        $vatRate19 = VatRate::factory()->create(['rate_percentage' => 0.19]);
+
+        $order = Order::factory()
+            ->has(OrderPosition::factory()
+                ->for($vatRate19)
+                ->state([
+                    'amount' => 1,
+                    'unit_net_price' => 100,
+                    'total_base_net_price' => 100,
+                    'total_net_price' => 50, // 50% position discount
+                    'discount_percentage' => 0.5,
+                    'vat_rate_percentage' => 0.19,
+                    'client_id' => $this->dbClient->getKey(),
+                    'is_alternative' => false,
+                ])
+            )
+            ->has(OrderPosition::factory()
+                ->for($vatRate7)
+                ->state([
+                    'amount' => 1,
+                    'unit_net_price' => 100,
+                    'total_base_net_price' => 100,
+                    'total_net_price' => 100, // no position discount
+                    'vat_rate_percentage' => 0.07,
+                    'client_id' => $this->dbClient->getKey(),
+                    'is_alternative' => false,
+                ])
+            )
+            ->create([
+                'client_id' => $this->dbClient->getKey(),
+                'language_id' => $this->defaultLanguage->id,
+                'order_type_id' => $this->orderType->id,
+                'currency_id' => Currency::factory()->create()->id,
+                'contact_id' => $contact = Contact::factory()->create(['client_id' => $this->dbClient->getKey()])->id,
+                'address_invoice_id' => Address::factory()->create(['client_id' => $this->dbClient->getKey(), 'contact_id' => $contact])->id,
+                'price_list_id' => PriceList::factory()->create()->id,
+                'payment_type_id' => PaymentType::factory()->create()->id,
+                'shipping_costs_net_price' => 0,
+                'shipping_costs_gross_price' => 0,
+                'shipping_costs_vat_price' => 0,
+            ]);
+
+        $order->calculatePrices()->save();
+
+        $this->assertEquals('150.00', $order->total_net_price);
+        $this->assertEquals(2, count($order->total_vats));
+
+        // Check individual VAT calculations
+        $vat19 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.1900000000');
+        $vat7 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.0700000000');
+
+        $this->assertEquals('50.00', $vat19['total_net_price']);
+        $this->assertEquals('9.50', $vat19['total_vat_price']);
+        $this->assertEquals('100.00', $vat7['total_net_price']);
+        $this->assertEquals('7.00', $vat7['total_vat_price']);
+    }
+
+    public function test_vat_calculation_with_repeating_decimals(): void
+    {
+        // Test with 1/3 values that create repeating decimals
+        $vatRate19 = VatRate::factory()->create(['rate_percentage' => 0.19]);
+
+        $order = Order::factory()
+            ->has(OrderPosition::factory()
+                ->for($vatRate19)
+                ->state([
+                    'amount' => 1,
+                    'unit_net_price' => 100,
+                    'total_base_net_price' => 100,
+                    'total_net_price' => 100,
+                    'vat_rate_percentage' => 0.19,
+                    'client_id' => $this->dbClient->getKey(),
+                    'is_alternative' => false,
+                ])
+            )
+            ->create([
+                'client_id' => $this->dbClient->getKey(),
+                'language_id' => $this->defaultLanguage->id,
+                'order_type_id' => $this->orderType->id,
+                'currency_id' => Currency::factory()->create()->id,
+                'contact_id' => $contact = Contact::factory()->create(['client_id' => $this->dbClient->getKey()])->id,
+                'address_invoice_id' => Address::factory()->create(['client_id' => $this->dbClient->getKey(), 'contact_id' => $contact])->id,
+                'price_list_id' => PriceList::factory()->create()->id,
+                'payment_type_id' => PaymentType::factory()->create()->id,
+                'shipping_costs_net_price' => 0,
+                'shipping_costs_gross_price' => 0,
+                'shipping_costs_vat_price' => 0,
+            ]);
+
+        // Add percentage discount that creates repeating decimal (1/3)
+        $order->discounts()->create([
+            'discount' => 0.333333333,  // 33.3333333%
+            'is_percentage' => true,
+            'order_column' => 1,
+        ]);
+
+        $order->calculatePrices()->save();
+
+        // 100 * (1 - 0.333333) = 66.6667, but bcround should round to 66.67
+        $this->assertEquals('66.67', $order->total_net_price);
+
+        $vat19 = collect($order->total_vats)->firstWhere('vat_rate_percentage', '0.1900000000');
+
+        $this->assertEquals('66.67', $vat19['total_net_price']);
+        $this->assertEquals('12.67', $vat19['total_vat_price']); // 66.67 * 0.19 = 12.6673
     }
 }
