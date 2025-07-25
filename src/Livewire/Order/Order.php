@@ -43,6 +43,7 @@ use FluxErp\Traits\Livewire\CreatesDocuments;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Laravel\SerializableClosure\SerializableClosure;
@@ -677,7 +678,10 @@ class Order extends Component
         $orderPositions = resolve_static(OrderPosition::class, 'query')
             ->whereIntegerInRaw('order_positions.id', $positionIds)
             ->where('order_positions.order_id', $this->order->id)
-            ->leftJoin('order_positions AS descendants', 'order_positions.id', '=', 'descendants.origin_position_id')
+            ->leftJoin('order_positions AS descendants', function (JoinClause $join): void {
+                $join->on('order_positions.id', '=', 'descendants.origin_position_id')
+                    ->whereNull('descendants.deleted_at');
+            })
             ->selectRaw(
                 'order_positions.id' .
                 ', order_positions.amount' .
