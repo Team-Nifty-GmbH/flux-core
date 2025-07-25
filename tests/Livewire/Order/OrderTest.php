@@ -28,6 +28,8 @@ class OrderTest extends BaseSetup
 {
     private Order $order;
 
+    private OrderType $orderType;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -50,7 +52,7 @@ class OrderTest extends BaseSetup
         $currency = Currency::factory()->create();
         $vatRate = VatRate::factory()->create();
 
-        $orderType = OrderType::factory()->create([
+        $this->orderType = OrderType::factory()->create([
             'client_id' => $this->dbClient->getKey(),
             'order_type_enum' => OrderTypeEnum::Order,
             'print_layouts' => ['invoice'],
@@ -84,7 +86,7 @@ class OrderTest extends BaseSetup
             ->create([
                 'client_id' => $this->dbClient->getKey(),
                 'language_id' => $this->defaultLanguage->id,
-                'order_type_id' => $orderType->id,
+                'order_type_id' => $this->orderType->id,
                 'payment_type_id' => $paymentType->id,
                 'price_list_id' => $priceList->id,
                 'contact_id' => $this->contact->id,
