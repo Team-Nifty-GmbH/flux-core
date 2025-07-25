@@ -678,9 +678,9 @@ class Order extends Component
         $orderPositions = resolve_static(OrderPosition::class, 'query')
             ->whereIntegerInRaw('order_positions.id', $positionIds)
             ->where('order_positions.order_id', $this->order->id)
-            ->leftJoin('order_positions AS descendants', function (JoinClause $join) {
+            ->leftJoin('order_positions AS descendants', function (JoinClause $join): void {
                 $join->on('order_positions.id', '=', 'descendants.origin_position_id')
-                     ->whereNull('descendants.deleted_at');
+                    ->whereNull('descendants.deleted_at');
             })
             ->selectRaw(
                 'order_positions.id' .
