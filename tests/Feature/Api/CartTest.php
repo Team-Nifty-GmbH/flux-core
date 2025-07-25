@@ -55,6 +55,8 @@ class CartTest extends BaseSetup
             'authenticatable_id' => $this->user->id,
             'price_list_id' => $priceList->id,
             'is_watchlist' => false,
+            'is_portal_public' => false,
+            'is_public' => false,
         ]);
 
         $this->carts->push(
@@ -63,6 +65,8 @@ class CartTest extends BaseSetup
                 'authenticatable_id' => $this->user->id,
                 'price_list_id' => $priceList->id,
                 'is_watchlist' => true,
+                'is_portal_public' => false,
+                'is_public' => false,
             ])
         );
 
