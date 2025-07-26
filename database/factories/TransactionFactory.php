@@ -20,6 +20,8 @@ class TransactionFactory extends Factory
             'counterpart_name' => $this->faker->name(),
             'counterpart_iban' => $this->faker->iban(),
             'counterpart_bank_name' => $this->faker->company(),
+            'bank_connection_id' => \FluxErp\Models\BankConnection::factory(),
+            'currency_id' => \FluxErp\Models\Currency::factory(),
         ];
     }
 }
