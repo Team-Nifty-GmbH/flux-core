@@ -19,6 +19,8 @@ class OrderTransaction extends FluxPivot
 
     protected $primaryKey = 'pivot_id';
 
+    protected $table = 'order_transaction';
+
     protected static function booted(): void
     {
         static::saved(function (OrderTransaction $orderTransaction): void {
