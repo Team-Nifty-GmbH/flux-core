@@ -15,6 +15,7 @@ class TagFactory extends Factory
             'name' => $this->faker->unique()->word(),
             'slug' => $this->faker->unique()->slug(),
             'type' => $this->faker->optional()->word(),
+            'color' => $this->faker->optional()->hexColor(),
             'order_column' => $this->faker->optional()->numberBetween(1, 100),
         ];
     }
