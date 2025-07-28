@@ -588,12 +588,12 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
                         'vat_rate_percentage' => $this->shipping_costs_vat_rate_percentage,
                         'total_vat_price' => bcadd(
                             $this->shipping_costs_vat_price,
-                            $vats->get($this->shipping_costs_vat_rate_percentage)['total_vat_price'] ?? 0,
+                            data_get($vats->get($this->shipping_costs_vat_rate_percentage), 'total_vat_price') ?? 0,
                             9
                         ),
                         'total_net_price' => bcadd(
                             $this->shipping_costs_net_price,
-                            $vats->get($this->shipping_costs_vat_rate_percentage)['total_net_price'] ?? 0,
+                            data_get($vats->get($this->shipping_costs_vat_rate_percentage), 'total_net_price') ?? 0,
                             9
                         ),
                     ]
