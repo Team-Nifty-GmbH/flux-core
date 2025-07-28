@@ -51,8 +51,8 @@ class CreateChildOrder extends Component
             || ! $this->type
             || ! in_array($this->type, [OrderTypeEnum::Retoure->value, OrderTypeEnum::SplitOrder->value])
             || resolve_static(OrderType::class, 'query')
-                ->where('is_active', true)
                 ->where('order_type_enum', $this->type)
+                ->where('is_active', true)
                 ->doesntExist()
             || ! $parentOrder
         ) {
