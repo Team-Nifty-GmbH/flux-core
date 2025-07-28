@@ -35,7 +35,7 @@ class PurchaseInvoice extends FluxModel implements HasMedia, HasMediaForeignKey
         });
 
         static::saving(function (PurchaseInvoice $model): void {
-            if ($model->isDirty('iban')) {
+            if ($model->isDirty('iban') && is_string($model->iban)) {
                 $model->iban = str_replace(' ', '', strtoupper($model->iban));
             }
         });
