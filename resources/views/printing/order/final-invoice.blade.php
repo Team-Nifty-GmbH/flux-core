@@ -5,7 +5,7 @@
 
     foreach ($model->children as $child) {
         $totalNetPrice = bcsub($totalNetPrice, $child->total_net_price);
-        foreach ($child->total_vats as $childVat) {
+        foreach ($child->total_vats ?? [] as $childVat) {
             data_set(
                 $totalVats[data_get($childVat, 'vat_rate_percentage')],
                 'total_vat_price',
@@ -25,7 +25,7 @@
         }
     }
 
-    $totalGross = bcadd(
+    $totalGrossPrice = bcadd(
         $totalNetPrice,
         array_reduce(
             $totalVats,
@@ -165,7 +165,7 @@
                     {{ __('Total Gross') }}
                 </td>
                 <td class="w-0 whitespace-nowrap pl-12 text-right">
-                    {{ Number::currency($totalGross) }}
+                    {{ Number::currency($totalGrossPrice) }}
                 </td>
             </tr>
         @show
