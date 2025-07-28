@@ -526,7 +526,12 @@ class Order extends Component
     #[Renderless]
     public function replicate(?string $orderTypeEnum = null): void
     {
-        if (in_array($orderTypeEnum, [OrderTypeEnum::Retoure->value, OrderTypeEnum::SplitOrder->value])) {
+        if (
+            resolve_static(OrderType::class, 'query')
+                ->where('is_active', true)
+                ->where('order_type_enum', $orderTypeEnum)
+                ->exists()
+            && in_array($orderTypeEnum, [OrderTypeEnum::Retoure->value, OrderTypeEnum::SplitOrder->value])) {
             $this->redirectRoute(
                 'orders.create-child-order',
                 [

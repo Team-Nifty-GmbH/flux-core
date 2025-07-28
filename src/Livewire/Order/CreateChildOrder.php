@@ -4,7 +4,7 @@ namespace FluxErp\Livewire\Order;
 
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\Forms\OrderReplicateForm;
-use FluxErp\Models\Order as OrderModel;
+use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\OrderType;
 use FluxErp\Traits\Livewire\Actions;
@@ -35,7 +35,7 @@ class CreateChildOrder extends Component
 
     public function mount(): void
     {
-        $parentOrderModel = resolve_static(OrderModel::class, 'query')
+        $parentOrder = resolve_static(Order::class, 'query')
             ->whereKey($this->orderId)
             ->with([
                 'addresses',
@@ -47,17 +47,22 @@ class CreateChildOrder extends Component
             ->first();
 
         if (
-            ! $this->orderId || ! $this->type
+            ! $this->orderId
+            || ! $this->type
             || ! in_array($this->type, [OrderTypeEnum::Retoure->value, OrderTypeEnum::SplitOrder->value])
-            || ! $parentOrderModel
+            || resolve_static(OrderType::class, 'query')
+                ->where('is_active', true)
+                ->where('order_type_enum', $this->type)
+                ->doesNotExist()
+            || ! $parentOrder
         ) {
             $this->redirectRoute('orders.orders', navigate: true);
 
             return;
         }
 
-        $this->parentOrder = $parentOrderModel->toArray();
-        $this->parentOrder['avatarUrl'] = $parentOrderModel->getAvatarUrl();
+        $this->parentOrder = $parentOrder->toArray();
+        $this->parentOrder['avatarUrl'] = $parentOrder->getAvatarUrl();
 
         $this->replicateOrder->fill($this->parentOrder);
         $this->replicateOrder->parent_id = $this->orderId;

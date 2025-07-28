@@ -84,12 +84,12 @@
                                     >
                                         <div class="flex-1">
                                             <span>
-                                                {{ $position["name"] }}
+                                                {{ data_get($position, "name") }}
                                             </span>
                                             <div
                                                 class="text-sm text-gray-600 dark:text-gray-400"
                                             >
-                                                {!! $position["description"] !!}
+                                                {!! data_get($position, "description") !!}
                                             </div>
                                         </div>
                                         <div class="ml-4 text-right">
