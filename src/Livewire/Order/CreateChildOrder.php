@@ -53,7 +53,7 @@ class CreateChildOrder extends Component
             || resolve_static(OrderType::class, 'query')
                 ->where('is_active', true)
                 ->where('order_type_enum', $this->type)
-                ->doesNotExist()
+                ->doesntExist()
             || ! $parentOrder
         ) {
             $this->redirectRoute('orders.orders', navigate: true);
