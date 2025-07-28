@@ -7,7 +7,6 @@ import FooterElement from '../../components/print/footerChildElement.js';
 
 export default function () {
     return {
-        loading: false,
         pxPerCm: 0,
         pyPerCm: 0,
         observer: null,
@@ -61,15 +60,16 @@ export default function () {
                 this.isFooterClicked = false;
                 this.startPointFooterVertical = null;
 
-                if (this.elemntsOutOfView.length > 0) {
-                    this.visibleElements
-                        .filter((item) =>
-                            this.elemntsOutOfView.includes(item.id),
-                        )
-                        .forEach((element) => {
-                            element.positionBackInBound();
-                        });
-                }
+                this.repositionOnMouseUp();
+            }
+        },
+        repositionOnMouseUp() {
+            if (this.elemntsOutOfView.length > 0) {
+                this.visibleElements
+                    .filter((item) => this.elemntsOutOfView.includes(item.id))
+                    .forEach((element) => {
+                        element.positionBackInBound();
+                    });
             }
         },
         onMouseMoveFooter(e) {
@@ -204,7 +204,6 @@ export default function () {
             }
         },
         async register($wire, $refs) {
-            this.loading = true;
             this._component = () => $wire;
             this.footer = $refs['footer'];
             // Check if footer already exists - by default empty array is returned
@@ -259,7 +258,6 @@ export default function () {
                     this.observer.observe(e.element);
                 });
             }
-            this.loading = false;
         },
         _mapFooter($refs, json) {
             this._footerHeight = json.height ?? 1.7;
@@ -283,7 +281,6 @@ export default function () {
             });
         },
         async reload($refs, isClientChange = true) {
-            this.loading = true;
             if (this.observer) {
                 this.observer.disconnect();
             }
@@ -350,7 +347,6 @@ export default function () {
                     this.observer.observe(e.element);
                 });
             }
-            this.loading = false;
         },
         prepareToSubmit() {
             return {

@@ -1,17 +1,23 @@
+import { STEP } from '../../components/utils/print/utils.js';
 export default function ($footerStore) {
     return {
         async onInit($wire, $refs) {
+            this._loading = true;
             this.pxPerCm = $refs['scale'].offsetWidth;
             this.pyPerCm = $refs['scale'].offsetHeight;
             $footerStore.onInit(this.pxPerCm, this.pyPerCm);
             await this.register($wire);
+            this._loading = false;
         },
         editMargin: false,
         editFooter: false,
         editHeader: false,
         async selectClient(e, $wire, $refs) {
+            this._loading = true;
             await $wire.selectClient(e.target.value);
+            await this.reload();
             await $footerStore.reload($refs);
+            this._loading = false;
         },
         pxPerCm: null,
         pyPerCm: null,
@@ -28,7 +34,7 @@ export default function ($footerStore) {
         isLeftClicked: false,
         isRightClicked: false,
         get loading() {
-            return $footerStore.loading || this._loading;
+            return this._loading;
         },
         get component() {
             if (this._component === null) {
@@ -104,6 +110,9 @@ export default function ($footerStore) {
                 this.isRightClicked = false;
                 this.startPointHorizontal = null;
             }
+
+            // adjust position of the footer elements if there is overlap with the margin
+            $footerStore.repositionOnMouseUp();
         },
         // TODO: rename to onMouseMoveMargin
         onMouseMove(e) {
@@ -112,12 +121,10 @@ export default function ($footerStore) {
                 const delta =
                     (this.startPointVertical - e.clientY) / this.pyPerCm;
                 if (Math.abs(delta) >= 0.1) {
-                    this._marginTop = Math.max(
-                        0,
-                        Math.round(
-                            (this._marginTop + 0.1 * (delta > 0 ? -1 : 1)) * 10,
-                        ) / 10,
+                    const value = roundToOneDecimal(
+                        this._marginTop + 0.1 * (delta > 0 ? -1 : 1),
                     );
+                    this._marginTop = value < 5 ? Math.max(0, value) : 5;
                     this.startPointVertical = e.clientY;
                 }
             }
@@ -125,14 +132,11 @@ export default function ($footerStore) {
             if (this.isBottomClicked && this.startPointVertical !== null) {
                 const delta =
                     (this.startPointVertical - e.clientY) / this.pyPerCm;
-                if (Math.abs(delta) >= 0.1) {
-                    this._marginBottom = Math.max(
-                        0,
-                        Math.round(
-                            (this._marginBottom + 0.1 * (delta > 0 ? 1 : -1)) *
-                                10,
-                        ) / 10,
+                if (Math.abs(delta) >= STEP) {
+                    const value = roundToOneDecimal(
+                        this._marginBottom + STEP * (delta > 0 ? 1 : -1),
                     );
+                    this._marginBottom = value < 5 ? Math.max(0, value) : 5;
                     this.startPointVertical = e.clientY;
                 }
             }
@@ -140,14 +144,11 @@ export default function ($footerStore) {
             if (this.isLeftClicked && this.startPointHorizontal !== null) {
                 const delta =
                     (this.startPointHorizontal - e.clientX) / this.pxPerCm;
-                if (Math.abs(delta) >= 0.1) {
-                    this._marginLeft = Math.max(
-                        0,
-                        Math.round(
-                            (this._marginLeft + 0.1 * (delta > 0 ? -1 : 1)) *
-                                10,
-                        ) / 10,
+                if (Math.abs(delta) >= STEP) {
+                    const value = roundToOneDecimal(
+                        this._marginLeft + STEP * (delta > 0 ? -1 : 1),
                     );
+                    this._marginLeft = value < 5 ? Math.max(0, value) : 5;
                     this.startPointHorizontal = e.clientX;
                 }
             }
@@ -155,20 +156,16 @@ export default function ($footerStore) {
             if (this.isRightClicked && this.startPointHorizontal !== null) {
                 const delta =
                     (this.startPointHorizontal - e.clientX) / this.pxPerCm;
-                if (Math.abs(delta) >= 0.1) {
-                    this._marginRight = Math.max(
-                        0,
-                        Math.round(
-                            (this._marginRight + 0.1 * (delta > 0 ? 1 : -1)) *
-                                10,
-                        ) / 10,
+                if (Math.abs(delta) >= STEP) {
+                    const value = roundToOneDecimal(
+                        this._marginRight + STEP * (delta > 0 ? 1 : -1),
                     );
+                    this._marginRight = value < 5 ? Math.max(0, value) : 5;
                     this.startPointHorizontal = e.clientX;
                 }
             }
         },
         toggleEditMargin() {
-            console.log(this);
             this.editMargin = !this.editMargin;
         },
         toggleEditFooter() {
@@ -178,25 +175,36 @@ export default function ($footerStore) {
             this.editHeader = !this.editHeader;
         },
         async closeEditor($refs) {
+            this._loading = true;
+            await this.reload();
             await $footerStore.reload($refs, false);
             this.editMargin = false;
             this.editFooter = false;
             this.editHeader = false;
-        },
-        async register($wire) {
-            this._loading = true;
-            this._component = () => $wire;
-
-            const margin = await $wire.get('form.margin');
-            if (!Array.isArray(margin) && Object.keys(margin).length > 0) {
-                this._marginBottom = margin.marginBottom || 2;
-                this._marginTop = margin.marginTop || 2;
-                this._marginLeft = margin.marginLeft || 2;
-                this._marginRight = margin.marginRight || 2;
-            }
             this._loading = false;
         },
-        async reload($refs) {},
+        _setMargin(margin) {
+            if (!Array.isArray(margin) && Object.keys(margin).length > 0) {
+                this._marginTop = margin.marginTop;
+                this._marginBottom = margin.marginBottom;
+                this._marginLeft = margin.marginLeft;
+                this._marginRight = margin.marginRight;
+            } else {
+                this._marginTop = 2;
+                this._marginLeft = 2;
+                this._marginBottom = 2;
+                this._marginRight = 2;
+            }
+        },
+        async register($wire) {
+            this._component = () => $wire;
+            const margin = await $wire.get('form.margin');
+            this._setMargin(margin);
+        },
+        async reload() {
+            const margin = await this.component.get('form.margin');
+            this._setMargin(margin);
+        },
         prepareToSubmit() {
             return {
                 marginTop: this._marginTop,
