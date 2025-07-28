@@ -261,7 +261,7 @@ class Order extends Component
                 ->color('red')
                 ->when(function () {
                     return resolve_static(ReplicateOrder::class, 'canPerformAction', [false])
-                        && $this->order->invoice_date
+                        && $this->order->invoice_number
                         && resolve_static(OrderType::class, 'query')
                             ->whereKey($this->order->order_type_id)
                             ->whereIn('order_type_enum', [
@@ -284,7 +284,7 @@ class Order extends Component
                 ->color('indigo')
                 ->when(function () {
                     return resolve_static(ReplicateOrder::class, 'canPerformAction', [false])
-                        && ! $this->order->invoice_date
+                        && ! $this->order->invoice_number
                         && resolve_static(OrderType::class, 'query')
                             ->whereKey($this->order->order_type_id)
                             ->where('order_type_enum', OrderTypeEnum::Order->value)
