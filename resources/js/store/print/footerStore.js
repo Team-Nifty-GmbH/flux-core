@@ -31,7 +31,9 @@ export default function () {
         _minFooterHeight: 1.7,
         _maxFooterHeight: 5,
         isFooterClicked: false,
+        isImgResizeClicked: false,
         startPointFooterVertical: null,
+        startPointFooterImageResize: null,
         onInit(pxPerCm, pyPerCm) {
             if (typeof pyPerCm === 'number' && pyPerCm > 0) {
                 this.pyPerCm = pyPerCm;
@@ -49,6 +51,7 @@ export default function () {
             if (this._component === null) {
                 throw new Error('Component not initialized');
             }
+
             return this._component();
         },
         onMouseDownFooter(e) {
@@ -82,10 +85,9 @@ export default function () {
                 if (Math.abs(delta) >= STEP) {
                     const newHeight = Math.max(
                         0,
-                        Math.round(
-                            (this._footerHeight + STEP * (delta > 0 ? 1 : -1)) *
-                                10,
-                        ) / 10,
+                        roundToOneDecimal(
+                            this._footerHeight + STEP * (delta > 0 ? 1 : -1),
+                        ),
                     );
                     if (
                         newHeight >= this._minFooterHeight &&
@@ -156,7 +158,7 @@ export default function () {
                 this.footer.removeChild(this.visibleElements[index].element);
                 this.visibleElements.splice(index, 1);
             } else {
-                // add element
+                // add an element
                 this.footer.appendChild($ref[id].content.cloneNode(true));
 
                 const element = Array.from(this.footer.children)
@@ -203,6 +205,34 @@ export default function () {
                 throw new Error(`Element not selected`);
             }
         },
+        onMouseDownResize(e, id) {
+            if (!this.isImgResizeClicked && id === 'footer-logo') {
+                this.isImgResizeClicked = true;
+                this.startPointFooterImageResize = e.clientY;
+
+                const index = this.visibleElements.findIndex(
+                    (item) => item.id === id,
+                );
+                if (index !== -1) {
+                    this._selectedElement.id = id;
+                    this._selectedElement.ref = this.visibleElements[index];
+                    const { x, y } = this.visibleElements[index].position;
+                    this._selectedElement.x = x;
+                    this._selectedElement.y = y;
+                    this._selectedElement.startX = e.clientX;
+                    this._selectedElement.startY = e.clientY;
+                } else {
+                    throw new Error(`Element with id ${id} not found`);
+                }
+            }
+        },
+        onMouseUpResize() {
+            if (this.isImgResizeClicked) {
+                this.isImgResizeClicked = false;
+                this.startPointFooterImageResize = null;
+            }
+        },
+        onMouseMoveResize(e) {},
         async register($wire, $refs) {
             this._component = () => $wire;
             this.footer = $refs['footer'];
@@ -348,6 +378,11 @@ export default function () {
                 });
             }
         },
+        resizeElement(id) {
+            if (id !== 'footer-logo') {
+                throw new Error('Resize is only supported for footer-logo');
+            }
+        },
         prepareToSubmit() {
             return {
                 height: this._footerHeight,
@@ -356,6 +391,10 @@ export default function () {
                         id: item.id,
                         x: roundToOneDecimal(item.position.x / this.pxPerCm),
                         y: roundToOneDecimal(item.position.y / this.pyPerCm),
+                        height:
+                            item.height !== null
+                                ? roundToOneDecimal(item.height / this.pyPerCm)
+                                : null,
                     };
                 }),
             };

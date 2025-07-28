@@ -1,4 +1,4 @@
-import { STEP } from '../../components/utils/print/utils.js';
+import { roundToOneDecimal, STEP } from '../../components/utils/print/utils.js';
 export default function ($footerStore) {
     return {
         async onInit($wire, $refs) {

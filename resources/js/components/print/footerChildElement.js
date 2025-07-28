@@ -3,9 +3,9 @@ export default class FooterChildElement {
         this.element = element;
         this._position = { x: 0, y: 0 };
         this.store = $store;
-        // this.startPosition = null;
         // cash the size to avoid recalculating it multiple times (bad performance)
         this._elementSize = null;
+        this._height = null;
     }
 
     get id() {
@@ -14,7 +14,7 @@ export default class FooterChildElement {
 
     get size() {
         // since the size of an element doesent cange, we can cache it
-        if (this._elementSize !== null) {
+        if (this._elementSize !== null && this.typeOfElement !== 'img') {
             return this._elementSize;
         } else {
             const { width, height } = this.element.getBoundingClientRect();
@@ -73,6 +73,10 @@ export default class FooterChildElement {
         return this.element.parentElement;
     }
 
+    get typeOfElement() {
+        return this.element.dataset.type ?? 'unknown';
+    }
+
     get parentSize() {
         if (this.parent) {
             const { width, height } = this.parent.getBoundingClientRect();
@@ -103,8 +107,24 @@ export default class FooterChildElement {
         }
     }
 
+    set height(value) {
+        if (this.typeOfElement !== 'img') {
+            throw new Error('Height can only be set for img elements');
+        }
+        if (typeof value !== 'number') {
+            throw new Error('Height must be a number');
+        }
+
+        this.element.style.height = `${value}px`;
+        this._height = value;
+    }
+
     get position() {
         return this._position;
+    }
+
+    get height() {
+        return this._height;
     }
 
     // 'start | 'middle' | 'end' | 'coordinates'

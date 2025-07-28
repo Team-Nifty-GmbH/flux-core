@@ -3,7 +3,7 @@
     class="relative w-full bg-white text-center"
     x-on:mouseup.window="footerStore.onMouseUp()"
     x-on:mousemove.window="
-        footerStore.selectedElementId !== null
+        footerStore.selectedElementId !== null && !footerStore.isImgResizeClicked
             ? footerStore.onMouseMove($event)
             : null
     "
@@ -42,12 +42,16 @@
         x-on:mouseup.window="footerStore.onMouseUpFooter($event)"
         x-on:mousemove.window="footerStore.isFooterClicked ? footerStore.onMouseMoveFooter($event) : false"
     >
-        <div class="border-semi-black w-full border-t">
+        <div
+            x-on:mouseup.window="footerStore.onMouseUpResize($event)"
+            x-on:mousemove.window="footerStore.isImgResizeClicked ? footerStore.onMouseMoveResize($event) : false"
+            class="border-semi-black w-full border-t">
             <template
                 id="{{ $client->id }}"
                 x-ref="footer-client-{{ $client->id }}">
                 <address
                     draggable="false"
+                    data-type="container"
                     x-on:mousedown="printStore.editFooter ?  footerStore.onMouseDown($event,'footer-client-{{ $client->id }}') : null"
                     id="footer-client-{{ $client->id }}"
                     class="absolute left-0 top-0 w-fit cursor-pointer select-none text-left not-italic"
@@ -81,10 +85,16 @@
                 <div
                     id="footer-logo"
                     draggable="false"
+                    data-type="img"
                     x-on:mousedown="printStore.editFooter ?  footerStore.onMouseDown($event, 'footer-logo') : null"
                     class="absolute left-0 top-0 h-[1.7cm] w-fit"
                     :class="{'bg-gray-300' : footerStore.selectedElementId === 'footer-logo'}"
                 >
+                    <div x-cloak x-show="printStore.editFooter" class="relative w-full">
+                        <x-icon
+                            x-on:mousedown.stop="footerStore.onMouseDownResize($event, 'footer-logo')"
+                            name="arrows-pointing-out" class="absolute cursor-pointer right-0 top-0 h-4 w-4 rounded-full"></x-icon>
+                    </div>
                     <img
                         draggable="false"
                         class="logo-small footer-logo max-h-full w-fit"
@@ -99,6 +109,7 @@
                     <div
                         id="footer-bank-{{ $bankConnection->id }}"
                         draggable="false"
+                        data-type="container"
                         x-on:mousedown="printStore.editFooter ?  footerStore.onMouseDown($event,'footer-bank-{{ $bankConnection->id }}') : null"
                         class="absolute left-0 top-0 w-fit cursor-pointer select-none text-left"
                         :class="{'bg-gray-300' : footerStore.selectedElementId === 'footer-bank-{{ $bankConnection->id }}'}"
