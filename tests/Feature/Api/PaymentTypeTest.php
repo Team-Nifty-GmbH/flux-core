@@ -218,9 +218,9 @@ class PaymentTypeTest extends BaseSetup
                     $jsonPaymentType->payment_discount_target === $paymentType->payment_discount_target &&
                     $jsonPaymentType->payment_discount_percentage === $paymentType->payment_discount_percentage &&
                     $jsonPaymentType->is_active === $paymentType->is_active &&
-                    Carbon::parse($jsonPaymentType->created_at)->toDateTimeString() === 
+                    Carbon::parse($jsonPaymentType->created_at)->toDateTimeString() ===
                         Carbon::parse($paymentType->created_at)->toDateTimeString() &&
-                    Carbon::parse($jsonPaymentType->updated_at)->toDateTimeString() === 
+                    Carbon::parse($jsonPaymentType->updated_at)->toDateTimeString() ===
                         Carbon::parse($paymentType->updated_at)->toDateTimeString();
             });
         }
