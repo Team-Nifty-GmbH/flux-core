@@ -167,10 +167,10 @@ class PaymentTypeTest extends BaseSetup
         $this->assertEquals($this->paymentTypes[0]->payment_discount_percentage,
             $jsonPaymentType->payment_discount_percentage);
         $this->assertEquals($this->paymentTypes[0]->is_active, $jsonPaymentType->is_active);
-        $this->assertEquals(Carbon::parse($this->paymentTypes[0]->created_at),
-            Carbon::parse($jsonPaymentType->created_at));
-        $this->assertEquals(Carbon::parse($this->paymentTypes[0]->updated_at),
-            Carbon::parse($jsonPaymentType->updated_at));
+        $this->assertEquals(Carbon::parse($this->paymentTypes[0]->created_at)->toDateTimeString(),
+            Carbon::parse($jsonPaymentType->created_at)->toDateTimeString());
+        $this->assertEquals(Carbon::parse($this->paymentTypes[0]->updated_at)->toDateTimeString(),
+            Carbon::parse($jsonPaymentType->updated_at)->toDateTimeString());
     }
 
     public function test_get_payment_type_include_not_allowed(): void
@@ -218,8 +218,10 @@ class PaymentTypeTest extends BaseSetup
                     $jsonPaymentType->payment_discount_target === $paymentType->payment_discount_target &&
                     $jsonPaymentType->payment_discount_percentage === $paymentType->payment_discount_percentage &&
                     $jsonPaymentType->is_active === $paymentType->is_active &&
-                    Carbon::parse($jsonPaymentType->created_at) === Carbon::parse($paymentType->created_at) &&
-                    Carbon::parse($jsonPaymentType->updated_at) === Carbon::parse($paymentType->updated_at);
+                    Carbon::parse($jsonPaymentType->created_at)->toDateTimeString() === 
+                        Carbon::parse($paymentType->created_at)->toDateTimeString() &&
+                    Carbon::parse($jsonPaymentType->updated_at)->toDateTimeString() === 
+                        Carbon::parse($paymentType->updated_at)->toDateTimeString();
             });
         }
     }
