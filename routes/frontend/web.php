@@ -34,6 +34,7 @@ use FluxErp\Livewire\Lead\Lead;
 use FluxErp\Livewire\Lead\LeadList;
 use FluxErp\Livewire\Mail\Mail;
 use FluxErp\Livewire\Media\Media as MediaGrid;
+use FluxErp\Livewire\Order\CreateChildOrder;
 use FluxErp\Livewire\Order\Order;
 use FluxErp\Livewire\Order\OrderList;
 use FluxErp\Livewire\Order\OrderListByOrderType;
@@ -180,6 +181,7 @@ Route::middleware('web')
                         Route::get('/list', OrderList::class)->name('orders');
                         Route::get('/list/{orderType}', OrderListByOrderType::class)->name('order-type');
                         Route::get('/order-positions/list', OrderPositionList::class)->name('order-positions');
+                        Route::get('/create-child-order', CreateChildOrder::class)->name('create-child-order');
                         Route::get('/{id}', Order::class)->where('id', '[0-9]+')->name('id');
                     });
 
