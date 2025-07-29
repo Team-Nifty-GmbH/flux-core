@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateProductProductPropertiesTable extends Migration
+return new class() extends Migration
 {
     public function up(): void
     {
@@ -23,4 +23,4 @@ class CreateProductProductPropertiesTable extends Migration
     {
         Schema::dropIfExists('product_product_property');
     }
-}
+};

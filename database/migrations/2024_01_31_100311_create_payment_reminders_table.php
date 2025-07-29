@@ -11,11 +11,15 @@ return new class() extends Migration
         Schema::create('payment_reminders', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
-            $table->unsignedBigInteger('order_id');
             $table->unsignedBigInteger('media_id')->nullable();
+            $table->unsignedBigInteger('order_id');
             $table->unsignedInteger('reminder_level');
-            $table->timestamps();
-            $table->softDeletes();
+            $table->timestamp('created_at')->nullable();
+            $table->string('created_by')->nullable();
+            $table->timestamp('updated_at')->nullable();
+            $table->string('updated_by')->nullable();
+            $table->timestamp('deleted_at')->nullable();
+            $table->string('deleted_by')->nullable();
 
             $table->foreign('order_id')->references('id')->on('orders');
             $table->foreign('media_id')->references('id')->on('media')->nullOnDelete();

@@ -11,28 +11,30 @@ return new class() extends Migration
         Schema::create('serial_number_ranges', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
-            $table->unsignedBigInteger('product_id');
+            $table->foreignId('client_id')->nullable()->constrained('clients');
+            $table->string('unique_key')->unique();
+            $table->string('model_type');
+            $table->unsignedBigInteger('model_id')->nullable();
+            $table->string('type');
             $table->bigInteger('current_number', false, true)->default(0);
             $table->string('prefix')->nullable();
-            $table->string('affix')->nullable();
+            $table->string('suffix')->nullable();
             $table->text('description')->nullable();
-            $table->timestamp('created_at')->nullable()
-                ->comment('A timestamp reflecting the time of record-creation.');
-            $table->unsignedBigInteger('created_by')->nullable()
-                ->comment('A unique identifier number for the table users of the user that created this record.');
-            $table->timestamp('updated_at')->nullable()
-                ->comment('A timestamp reflecting the time of the last change for this record.');
-            $table->unsignedBigInteger('updated_by')->nullable()
-                ->comment('A unique identifier number for the table users of the user that changed this record last.');
-            $table->timestamp('deleted_at')->nullable()
-                ->comment('A timestamp reflecting the time of record-deletion.');
-            $table->unsignedBigInteger('deleted_by')->nullable()
-                ->comment('A unique identifier number for the table users of the user that deleted this record.');
+            $table->integer('length')->nullable()
+                ->comment('The length of the serial number. The serial number will be padded with leading zeros.');
+            $table->boolean('is_pre_filled')->default(false)
+                ->comment('A flag to indicate if the serial number is picked from the serial_numbers table.');
+            $table->boolean('is_randomized')->default(false)
+                ->comment('A flag indicating whether this range generates a random serial number.');
+            $table->boolean('stores_serial_numbers')->default(false)
+                ->comment('A flag indicating whether this range creates a new serial_numbers record.');
 
-            $table->foreign('product_id')->references('id')->on('products');
-            $table->foreign('created_by')->references('id')->on('users');
-            $table->foreign('updated_by')->references('id')->on('users');
-            $table->foreign('deleted_by')->references('id')->on('users');
+            $table->timestamp('created_at')->nullable();
+            $table->string('created_by')->nullable();
+            $table->timestamp('updated_at')->nullable();
+            $table->string('updated_by')->nullable();
+            $table->timestamp('deleted_at')->nullable();
+            $table->string('deleted_by')->nullable();
         });
     }
 

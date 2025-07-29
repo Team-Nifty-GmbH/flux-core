@@ -11,28 +11,20 @@ return new class() extends Migration
         Schema::create('tickets', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
-            $table->unsignedBigInteger('address_id');
-            $table->unsignedBigInteger('ticket_status_id');
+            $table->foreignId('ticket_type_id')->nullable()->constrained('ticket_types');
+            $table->morphs('authenticatable');
+            $table->nullableMorphs('model');
+            $table->string('ticket_number');
             $table->string('title');
             $table->text('description')->nullable();
-            $table->timestamp('created_at')->nullable()
-                ->comment('A timestamp reflecting the time of record-creation.');
-            $table->unsignedBigInteger('created_by')->nullable()
-                ->comment('A unique identifier number for the table users of the user that created this record.');
-            $table->timestamp('updated_at')->nullable()
-                ->comment('A timestamp reflecting the time of the last change for this record.');
-            $table->unsignedBigInteger('updated_by')->nullable()
-                ->comment('A unique identifier number for the table users of the user that changed this record last.');
-            $table->timestamp('deleted_at')->nullable()
-                ->comment('A timestamp reflecting the time of record-deletion.');
-            $table->unsignedBigInteger('deleted_by')->nullable()
-                ->comment('A unique identifier number for the table users of the user that deleted this record.');
-
-            $table->foreign('address_id')->references('id')->on('addresses');
-            $table->foreign('ticket_status_id')->references('id')->on('ticket_statuses');
-            $table->foreign('created_by')->references('id')->on('users');
-            $table->foreign('updated_by')->references('id')->on('users');
-            $table->foreign('deleted_by')->references('id')->on('users');
+            $table->string('state')->nullable();
+            $table->decimal('total_cost', 10)->nullable();
+            $table->timestamp('created_at')->nullable();
+            $table->string('created_by')->nullable();
+            $table->timestamp('updated_at')->nullable();
+            $table->string('updated_by')->nullable();
+            $table->timestamp('deleted_at')->nullable();
+            $table->string('deleted_by')->nullable();
         });
     }
 

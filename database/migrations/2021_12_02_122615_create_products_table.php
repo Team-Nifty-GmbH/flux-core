@@ -4,27 +4,40 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateProductsTable extends Migration
+return new class() extends Migration
 {
     public function up(): void
     {
         Schema::create('products', function (Blueprint $table): void {
-            // IDS
             $table->id();
             $table->char('uuid', 36);
 
-            // FOREIGNS
+            // FOREIGN KEYS
+            $table->foreignId('cover_media_id')
+                ->nullable()
+                ->constrained('media')
+                ->nullOnDelete();
             $table->unsignedBigInteger('parent_id')->nullable();
-            $table->unsignedBigInteger('vat_rate_id')->nullable();
-            $table->unsignedBigInteger('unit_id')->nullable();
             $table->unsignedBigInteger('purchase_unit_id')->nullable();
             $table->unsignedBigInteger('reference_unit_id')->nullable();
+            $table->unsignedBigInteger('unit_id')->nullable();
+            $table->unsignedBigInteger('vat_rate_id')->nullable();
 
             // TEXT STRING INT
             $table->text('product_number')->nullable();
-            $table->text('name')->nullable();
-            $table->text('description')->nullable();
+            $table->string('product_type')->nullable();
+            $table->string('bundle_type_enum')->nullable();
+            $table->string('name')->nullable();
+            $table->longText('description')->nullable();
+            $table->decimal('weight_gram', 40, 10)->nullable();
+            $table->decimal('dimension_length_mm', 40, 10)->nullable();
+            $table->decimal('dimension_width_mm', 40, 10)->nullable();
+            $table->decimal('dimension_height_mm', 40, 10)->nullable();
+            $table->decimal('selling_unit', 40, 10)->nullable();
+            $table->decimal('basic_unit', 40, 10)->nullable();
+            $table->string('time_unit_enum')->nullable();
             $table->text('ean')->nullable();
+            $table->string('customs_tariff_number', 64)->nullable();
             $table->integer('min_delivery_time')->nullable();
             $table->integer('max_delivery_time')->nullable();
             $table->integer('restock_time')->nullable();
@@ -32,48 +45,32 @@ class CreateProductsTable extends Migration
             $table->float('min_purchase')->nullable();
             $table->float('max_purchase')->nullable();
             $table->text('seo_keywords')->nullable();
-            $table->text('locked_by_user_id')->nullable();
-            $table->text('manufacturer_product_number')->nullable();
+            $table->json('search_aliases')->nullable();
             $table->text('posting_account')->nullable();
             $table->float('warning_stock_amount')->nullable();
 
             // BOOLEANS
-            $table->integer('option_bundle_type')->nullable();
+            $table->boolean('has_serial_number')->default(false);
             $table->boolean('is_active')->default(true);
-            $table->boolean('is_shipping_free')->default(false);
-            $table->boolean('is_valid_bundle_status')->default(false);
-            $table->boolean('is_required_product_serial_number')->default(false);
-            $table->boolean('is_required_manufacturer_serial_number')->default(false);
-            $table->boolean('is_auto_create_serial_number')->default(false);
-            $table->boolean('is_product_serial_number')->default(false);
-            $table->boolean('is_active_always_export_in_web_shop')->default(false);
             $table->boolean('is_active_export_to_web_shop')->default(false);
-            $table->boolean('is_force_active')->default(false);
-            $table->boolean('is_force_inactive')->default(false);
+            $table->boolean('is_bundle')->default(false);
+            $table->boolean('is_highlight')->default(false);
+            $table->boolean('is_nos')->default(false);
+            $table->boolean('is_service')->default(false);
+            $table->boolean('is_shipping_free')->default(false);
 
-            // TIMESTAMPS
-            $table->timestamp('created_at')->nullable()
-                ->comment('A timestamp reflecting the time of record-creation.');
-            $table->unsignedBigInteger('created_by')->nullable()
-                ->comment('A unique identifier number for the table users of the user that created this record.');
-            $table->timestamp('updated_at')->nullable()
-                ->comment('A timestamp reflecting the time of the last change for this record.');
-            $table->unsignedBigInteger('updated_by')->nullable()
-                ->comment('A unique identifier number for the table users of the user that changed this record last.');
-            $table->timestamp('deleted_at')->nullable()
-                ->comment('A timestamp reflecting the time of record-deletion.');
-            $table->unsignedBigInteger('deleted_by')->nullable()
-                ->comment('A unique identifier number for the table users of the user that deleted this record.');
+            $table->timestamp('created_at')->nullable();
+            $table->string('created_by')->nullable();
+            $table->timestamp('updated_at')->nullable();
+            $table->string('updated_by')->nullable();
+            $table->timestamp('deleted_at')->nullable();
+            $table->string('deleted_by')->nullable();
 
-            // DB FOREIGNS
             $table->foreign('parent_id')->references('id')->on('products');
             $table->foreign('vat_rate_id')->references('id')->on('vat_rates');
             $table->foreign('unit_id')->references('id')->on('units');
             $table->foreign('purchase_unit_id')->references('id')->on('units');
             $table->foreign('reference_unit_id')->references('id')->on('units');
-            $table->foreign('created_by')->references('id')->on('users');
-            $table->foreign('updated_by')->references('id')->on('users');
-            $table->foreign('deleted_by')->references('id')->on('users');
         });
     }
 
@@ -81,4 +78,4 @@ class CreateProductsTable extends Migration
     {
         Schema::dropIfExists('products');
     }
-}
+};

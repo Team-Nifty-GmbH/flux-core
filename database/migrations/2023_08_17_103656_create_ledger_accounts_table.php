@@ -6,26 +6,25 @@ use Illuminate\Support\Facades\Schema;
 
 return new class() extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('ledger_accounts', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
-            $table->string('number')->unique();
+            $table->foreignId('client_id')
+                ->constrained()
+                ->cascadeOnDelete();
+            $table->string('number');
             $table->string('name');
             $table->string('description')->nullable();
             $table->string('ledger_account_type_enum');
             $table->boolean('is_automatic')->default(false);
             $table->timestamps();
+
+            $table->unique(['number', 'ledger_account_type_enum', 'client_id']);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('ledger_accounts');

@@ -15,32 +15,10 @@ return new class() extends Migration
             $table->foreignId('order_id')->constrained()->cascadeOnDelete();
             $table->foreignId('schedule_id')->constrained()->cascadeOnDelete();
         });
-
-        $this->migrateSchedules();
     }
 
     public function down(): void
     {
         Schema::dropIfExists('order_schedule');
-    }
-
-    protected function migrateSchedules(): void
-    {
-        $orderSchedules = DB::table('schedules')
-            ->whereJsonContainsKey('parameters->orderId')
-            ->whereJsonContainsKey('parameters->orderTypeId')
-            ->where('class', ProcessSubscriptionOrder::class)
-            ->get(['id', 'parameters']);
-
-        foreach ($orderSchedules as $orderSchedule) {
-            $orderId = data_get(json_decode($orderSchedule->parameters, true), 'orderId');
-
-            if ($orderId) {
-                DB::table('order_schedule')->insert([
-                    'order_id' => $orderId,
-                    'schedule_id' => $orderSchedule->id,
-                ]);
-            }
-        }
     }
 };

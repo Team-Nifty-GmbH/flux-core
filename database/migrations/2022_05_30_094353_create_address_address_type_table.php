@@ -4,15 +4,13 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateAddressAddressTypeTable extends Migration
+return new class() extends Migration
 {
     public function up(): void
     {
         Schema::create('address_address_type', function (Blueprint $table): void {
-            $table->unsignedBigInteger('address_id')
-                ->comment('A unique identifier number for the table addresses.');
-            $table->unsignedBigInteger('address_type_id')
-                ->comment('A unique identifier number for the table address types.');
+            $table->unsignedBigInteger('address_id');
+            $table->unsignedBigInteger('address_type_id');
 
             $table->primary(['address_id', 'address_type_id']);
             $table->foreign('address_id')->references('id')->on('addresses');
@@ -24,4 +22,4 @@ class CreateAddressAddressTypeTable extends Migration
     {
         Schema::dropIfExists('address_address_type');
     }
-}
+};

@@ -11,15 +11,18 @@ return new class() extends Migration
         Schema::create('purchase_invoice_positions', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
-            $table->foreignId('purchase_invoice_id')->constrained()->cascadeOnDelete();
             $table->foreignId('ledger_account_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('product_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('purchase_invoice_id')->constrained()->cascadeOnDelete();
             $table->foreignId('vat_rate_id')->nullable()->constrained()->nullOnDelete();
             $table->string('name')->nullable();
-            $table->decimal('amount', 40, 10, true)->default(1);
-            $table->decimal('unit_price', 40, 10, true)->nullable();
-            $table->decimal('total_price', 40, 10, true)->nullable();
-            $table->timestamps();
+            $table->decimal('amount', 40, 10);
+            $table->decimal('unit_price', 40, 10)->nullable();
+            $table->decimal('total_price', 40, 10)->nullable();
+            $table->timestamp('created_at')->nullable();
+            $table->string('created_by')->nullable();
+            $table->timestamp('updated_at')->nullable();
+            $table->string('updated_by')->nullable();
         });
     }
 

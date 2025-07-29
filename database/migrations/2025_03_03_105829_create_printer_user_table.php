@@ -12,6 +12,8 @@ return new class() extends Migration
             $table->id('pivot_id');
             $table->foreignId('printer_id')->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->string('default_size')->nullable();
+            $table->boolean('is_default')->default(false);
         });
     }
 

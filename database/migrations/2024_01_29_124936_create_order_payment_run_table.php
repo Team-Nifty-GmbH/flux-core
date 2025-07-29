@@ -17,6 +17,7 @@ return new class() extends Migration
                 ->constrained()
                 ->cascadeOnDelete();
             $table->decimal('amount', 40, 10);
+            $table->boolean('success')->default(false);
         });
     }
 

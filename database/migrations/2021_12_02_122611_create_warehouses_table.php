@@ -4,34 +4,26 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateWarehousesTable extends Migration
+return new class() extends Migration
 {
     public function up(): void
     {
         Schema::create('warehouses', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
-            $table->unsignedBigInteger('address_id');
+            $table->unsignedBigInteger('address_id')->nullable();
 
-            $table->text('name');
+            $table->string('name');
+            $table->boolean('is_default')->default(false);
 
-            $table->timestamp('created_at')->nullable()
-                ->comment('A timestamp reflecting the time of record-creation.');
-            $table->unsignedBigInteger('created_by')->nullable()
-                ->comment('A unique identifier number for the table users of the user that created this record.');
-            $table->timestamp('updated_at')->nullable()
-                ->comment('A timestamp reflecting the time of the last change for this record.');
-            $table->unsignedBigInteger('updated_by')->nullable()
-                ->comment('A unique identifier number for the table users of the user that changed this record last.');
-            $table->timestamp('deleted_at')->nullable()
-                ->comment('A timestamp reflecting the time of record-deletion.');
-            $table->unsignedBigInteger('deleted_by')->nullable()
-                ->comment('A unique identifier number for the table users of the user that deleted this record.');
+            $table->timestamp('created_at')->nullable();
+            $table->string('created_by')->nullable();
+            $table->timestamp('updated_at')->nullable();
+            $table->string('updated_by')->nullable();
+            $table->timestamp('deleted_at')->nullable();
+            $table->string('deleted_by')->nullable();
 
             $table->foreign('address_id')->references('id')->on('addresses');
-            $table->foreign('created_by')->references('id')->on('users');
-            $table->foreign('updated_by')->references('id')->on('users');
-            $table->foreign('deleted_by')->references('id')->on('users');
         });
     }
 
@@ -39,4 +31,4 @@ class CreateWarehousesTable extends Migration
     {
         Schema::dropIfExists('warehouses');
     }
-}
+};

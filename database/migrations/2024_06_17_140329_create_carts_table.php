@@ -20,8 +20,12 @@ return new class() extends Migration
             $table->boolean('is_portal_public')->default(false);
             $table->boolean('is_public')->default(false);
             $table->boolean('is_watchlist')->default(false);
-            $table->timestamps();
-            $table->softDeletes();
+            $table->timestamp('created_at')->nullable();
+            $table->string('created_by')->nullable();
+            $table->timestamp('updated_at')->nullable();
+            $table->string('updated_by')->nullable();
+            $table->timestamp('deleted_at')->nullable();
+            $table->string('deleted_by')->nullable();
         });
     }
 

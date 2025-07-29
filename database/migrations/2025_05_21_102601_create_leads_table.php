@@ -15,6 +15,10 @@ return new class() extends Migration
                 ->nullable()
                 ->constrained('addresses')
                 ->nullOnDelete();
+            $table->foreignId('lead_loss_reason_id')
+                ->nullable()
+                ->constrained('lead_loss_reasons')
+                ->nullOnDelete();
             $table->foreignId('lead_state_id')
                 ->nullable()
                 ->constrained('lead_states')
@@ -23,9 +27,14 @@ return new class() extends Migration
                 ->nullable()
                 ->constrained('addresses')
                 ->nullOnDelete();
+            $table->foreignId('record_origin_id')
+                ->nullable()
+                ->constrained('record_origins')
+                ->nullOnDelete();
             $table->foreignId('user_id')
+                ->nullable()
                 ->constrained('users')
-                ->cascadeOnDelete();
+                ->nullOnDelete();
 
             $table->string('name');
             $table->text('description')->nullable();
@@ -37,6 +46,8 @@ return new class() extends Migration
             $table->decimal('expected_gross_profit', 40, 10)->nullable();
             $table->decimal('expected_gross_profit_percentage', 11, 10)->nullable();
             $table->unsignedInteger('score')->default(0);
+            $table->decimal('weighted_gross_profit', 40, 10)->nullable();
+            $table->decimal('weighted_revenue', 40, 10)->nullable();
 
             $table->timestamp('created_at')->nullable();
             $table->string('created_by')->nullable();

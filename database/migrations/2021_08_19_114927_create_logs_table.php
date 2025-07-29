@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateLogsTable extends Migration
+return new class() extends Migration
 {
     public function up(): void
     {
@@ -19,6 +19,7 @@ class CreateLogsTable extends Migration
             $table->dateTime('record_datetime');
             $table->longText('extra');
             $table->longText('formatted');
+            $table->boolean('is_done')->default(false);
             $table->timestamps();
         });
     }
@@ -27,4 +28,4 @@ class CreateLogsTable extends Migration
     {
         Schema::dropIfExists('logs');
     }
-}
+};

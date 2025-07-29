@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class() extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('product_cross_sellings', function (Blueprint $table): void {
@@ -22,9 +19,6 @@ return new class() extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('product_cross_sellings');

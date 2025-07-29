@@ -4,32 +4,27 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateProductPropertiesTable extends Migration
+return new class() extends Migration
 {
     public function up(): void
     {
         Schema::create('product_properties', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
+            $table->foreignId('product_property_group_id')
+                ->nullable()
+                ->constrained('product_property_groups')
+                ->nullOnDelete();
+            $table->string('name');
+            $table->string('property_type_enum')
+                ->default('text');
 
-            $table->text('name');
-
-            $table->timestamp('created_at')->nullable()
-                ->comment('A timestamp reflecting the time of record-creation.');
-            $table->unsignedBigInteger('created_by')->nullable()
-                ->comment('A unique identifier number for the table users of the user that created this record.');
-            $table->timestamp('updated_at')->nullable()
-                ->comment('A timestamp reflecting the time of the last change for this record.');
-            $table->unsignedBigInteger('updated_by')->nullable()
-                ->comment('A unique identifier number for the table users of the user that changed this record last.');
-            $table->timestamp('deleted_at')->nullable()
-                ->comment('A timestamp reflecting the time of record-deletion.');
-            $table->unsignedBigInteger('deleted_by')->nullable()
-                ->comment('A unique identifier number for the table users of the user that deleted this record.');
-
-            $table->foreign('created_by')->references('id')->on('users');
-            $table->foreign('updated_by')->references('id')->on('users');
-            $table->foreign('deleted_by')->references('id')->on('users');
+            $table->timestamp('created_at')->nullable();
+            $table->string('created_by')->nullable();
+            $table->timestamp('updated_at')->nullable();
+            $table->string('updated_by')->nullable();
+            $table->timestamp('deleted_at')->nullable();
+            $table->string('deleted_by')->nullable();
         });
     }
 
@@ -37,4 +32,4 @@ class CreateProductPropertiesTable extends Migration
     {
         Schema::dropIfExists('product_properties');
     }
-}
+};

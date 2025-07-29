@@ -20,6 +20,7 @@ return new class() extends Migration
             $table->decimal('total_net', 40, 10);
             $table->decimal('total_gross', 40, 10);
             $table->decimal('total', 40, 10);
+            $table->unsignedInteger('order_column')->nullable()->index();
             $table->timestamps();
         });
     }

@@ -17,10 +17,14 @@ return new class() extends Migration
                 ->cascadeOnDelete();
             $table->string('state')->default('open');
             $table->string('payment_run_type_enum');
+            $table->string('sepa_mandate_type_enum')->nullable();
             $table->date('instructed_execution_date')->nullable();
-            $table->boolean('is_single_booking')->default(false);
+            $table->boolean('is_single_booking')->default(true);
             $table->boolean('is_instant_payment')->default(false);
-            $table->timestamps();
+            $table->timestamp('created_at')->nullable();
+            $table->string('created_by')->nullable();
+            $table->timestamp('updated_at')->nullable();
+            $table->string('updated_by')->nullable();
         });
     }
 
