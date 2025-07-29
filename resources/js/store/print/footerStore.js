@@ -21,10 +21,6 @@ export default function () {
         },
         visibleElements: [],
         elemntsOutOfView: [],
-        alignment: {
-            horizontal: null,
-            vertical: null,
-        },
         _component: null,
         footer: null,
         _footerHeight: 1.7,
@@ -33,7 +29,6 @@ export default function () {
         isFooterClicked: false,
         isImgResizeClicked: false,
         startPointFooterVertical: null,
-        startPointFooterImageResize: null,
         onInit(pxPerCm, pyPerCm) {
             if (typeof pyPerCm === 'number' && pyPerCm > 0) {
                 this.pyPerCm = pyPerCm;

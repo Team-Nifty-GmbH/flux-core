@@ -2,6 +2,7 @@
     x-init="printStore.onInit($wire,$refs)"
     x-data="{
         printStore: $store.printStore,
+        haederStore: $store.headerStore,
         footerStore: $store.footerStore,
     }"
     class="flex h-[29.7cm] items-center space-x-4"

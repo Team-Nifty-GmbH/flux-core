@@ -1,10 +1,11 @@
 import { roundToOneDecimal, STEP } from '../../components/utils/print/utils.js';
-export default function ($footerStore) {
+export default function ($headerStore, $footerStore) {
     return {
         async onInit($wire, $refs) {
             this._loading = true;
             this.pxPerCm = $refs['scale'].offsetWidth;
             this.pyPerCm = $refs['scale'].offsetHeight;
+            $headerStore.onInit(this.pxPerCm, this.pyPerCm);
             $footerStore.onInit(this.pxPerCm, this.pyPerCm);
             await this.register($wire);
             this._loading = false;

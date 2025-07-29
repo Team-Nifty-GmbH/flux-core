@@ -24,7 +24,7 @@ class PrintLayoutEditor extends Component
 
     public array $model = [];
 
-    public string $subject = 'Header';
+    public string $subject = '';
 
     #[Url]
     public string $layoutModel;
@@ -66,6 +66,7 @@ class PrintLayoutEditor extends Component
 
     public function mount(): void
     {
+        $this->subject = $this->name;
         $this->availableClients = resolve_static(Client::class, 'query')
             ->orderBy('name')
             ->get(['id','name'])
