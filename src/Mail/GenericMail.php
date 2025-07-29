@@ -131,7 +131,7 @@ class GenericMail extends Mailable
                 $this->mailMessageForm,
                 'subject',
                 Blade::render(
-                    data_get($this->mailMessageForm, 'subject', ''),
+                    html_entity_decode(data_get($this->mailMessageForm, 'subject', '')),
                     $bladeParameters ?? []
                 )
             );
@@ -139,7 +139,7 @@ class GenericMail extends Mailable
                 $this->mailMessageForm,
                 'html_body',
                 Blade::render(
-                    data_get($this->mailMessageForm, 'html_body', ''),
+                    html_entity_decode(data_get($this->mailMessageForm, 'html_body', '')),
                     $bladeParameters ?? []
                 )
             );
@@ -147,7 +147,7 @@ class GenericMail extends Mailable
                 $this->mailMessageForm,
                 'text_body',
                 Blade::render(
-                    data_get($this->mailMessageForm, 'text_body', ''),
+                    html_entity_decode(data_get($this->mailMessageForm, 'text_body', '')) ?? '',
                     $bladeParameters ?? []
                 )
             );
