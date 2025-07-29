@@ -115,16 +115,41 @@ trait RendersWidgets
     #[Renderless]
     public function widgets(): void
     {
-        $this->widgets = array_values(
-            $this->filterWidgets(
-                auth()
-                    ->user()
-                    ?->widgets()
-                    ->where('dashboard_component', static::class)
-                    ->get()
-                    ->toArray() ?: static::getDefaultWidgets() ?? []
-            )
-        );
+        $userWidgets = auth()
+            ->user()
+            ?->widgets()
+            ->where('dashboard_component', static::class)
+            ->get()
+            ->groupBy('group');
+
+        $allWidgets = [];
+
+        $defaultWidgets = static::getDefaultWidgets() ?? [];
+        $defaultGroups = collect($defaultWidgets)->pluck('group')->unique()->filter();
+        $userGroups = $userWidgets ? $userWidgets->keys() : collect();
+        $allGroups = $defaultGroups->merge($userGroups)->unique();
+
+        foreach ($allGroups as $group) {
+            if ($userWidgets && $userWidgets->has($group)) {
+                $allWidgets = array_merge($allWidgets, $userWidgets->get($group)->toArray());
+            } else {
+                $groupDefaults = collect($defaultWidgets)
+                    ->filter(fn (array $widget) => data_get($widget, 'group') === $group)
+                    ->toArray();
+                $allWidgets = array_merge($allWidgets, $groupDefaults);
+            }
+        }
+
+        if ($userWidgets && $userWidgets->has(null)) {
+            $allWidgets = array_merge($allWidgets, $userWidgets->get(null)->toArray());
+        } else {
+            $nullGroupDefaults = collect($defaultWidgets)
+                ->filter(fn (array $widget) => is_null(data_get($widget, 'group')))
+                ->toArray();
+            $allWidgets = array_merge($allWidgets, $nullGroupDefaults);
+        }
+
+        $this->widgets = array_values($this->filterWidgets($allWidgets));
     }
 
     #[Renderless]
