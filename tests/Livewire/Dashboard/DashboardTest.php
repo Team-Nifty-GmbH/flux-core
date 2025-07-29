@@ -89,12 +89,12 @@ class DashboardTest extends BaseSetup
             ->test(Dashboard::class)
             ->call('saveWidgets', [
                 [
-                    'id' => Str::uuid(),
+                    'id' => Str::uuid()->toString(),
                     'height' => 2,
                     'width' => 2,
                     'order_column' => 0,
                     'order_row' => 0,
-                    'component_name' => $componentName = Str::uuid(),
+                    'component_name' => $componentName = Str::uuid()->toString(),
                 ],
             ])
             ->assertHasNoErrors();
@@ -205,7 +205,7 @@ class DashboardTest extends BaseSetup
         $livewire->set('widgets', $widgets)
             ->call('saveWidgets', $widgets)
             ->assertOk()
-            ->call('$refresh')
+            ->call('widgets')
             ->assertOk()
             ->assertDontSee('Hello from sample component')
             ->assertDontSeeLivewire('sample-component');
