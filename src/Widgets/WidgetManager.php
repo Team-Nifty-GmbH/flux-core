@@ -95,14 +95,17 @@ class WidgetManager
         }
     }
 
-    public function get(string $name): ?array
+    public function get(string $name, array $defaultAttributes = []): ?array
     {
-        return collect($this->widgets)
-            ->when(
-                class_exists($name),
-                fn (Collection $widgets) => $widgets->keyBy('class')
-            )
-            ->get($name);
+        return array_merge(
+            collect($this->widgets)
+                ->when(
+                    class_exists($name),
+                    fn (Collection $widgets) => $widgets->keyBy('class')
+                )
+                ->get($name) ?? [],
+            $defaultAttributes
+        );
     }
 
     /**
