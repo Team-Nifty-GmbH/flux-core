@@ -105,7 +105,7 @@ class WidgetManager
                 )
                 ->get($name) ?? [],
             $defaultAttributes
-        );
+        ) ?: null;
     }
 
     /**
