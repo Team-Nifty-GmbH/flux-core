@@ -60,12 +60,7 @@ trait RendersWidgets
     #[Renderless]
     public function saveWidgets(?array $widgets = null): void
     {
-        $widgetsToSave = $widgets ?? $this->widgets;
-
-        $this->widgets = array_merge(
-            array_filter($this->widgets, fn (array $widget) => data_get($widget, 'group') !== $this->group),
-            $widgetsToSave
-        );
+        $widgetsToSave = array_values($widgets ?? $this->widgets);
 
         $existingItemIds = array_filter(Arr::pluck($widgetsToSave, 'id'), 'is_numeric');
 
@@ -78,7 +73,8 @@ trait RendersWidgets
             ->delete();
 
         // create new widgets, update existing widgets
-        foreach ($widgetsToSave as &$widget) {
+        $savedWidgets = [];
+        foreach ($widgetsToSave as $widget) {
             $savedWidget = auth()
                 ->user()
                 ->widgets()
@@ -92,10 +88,19 @@ trait RendersWidgets
                         Arr::except($widget, 'id')
                     )
                 );
-            $widget['id'] = $savedWidget->id;
+            $mergedWidget = array_merge($widget, $savedWidget->toArray());
+            $mergedWidget['id'] = $savedWidget->id;
+            $savedWidgets[] = $mergedWidget;
         }
 
-        $this->widgets();
+        $this->widgets = array_values(array_merge(
+            array_filter($this->widgets, fn (array $widget) => data_get($widget, 'group') !== $this->group),
+            $savedWidgets
+        ));
+
+        if (! $widgetsToSave) {
+            $this->widgets();
+        }
     }
 
     #[Renderless]
