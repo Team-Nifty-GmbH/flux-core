@@ -447,11 +447,12 @@
         </x-slot>
     </x-modal>
 
-    <x-modal id="bulk-pdf-upload-modal" lg scrollable>
-        <x-slot:title>
-            {{ __('Bulk PDF Upload') }}
-        </x-slot>
-
+    <x-modal
+        id="bulk-pdf-upload-modal"
+        lg
+        scrollable
+        :title="__('Bulk PDF Upload')"
+    >
         <div class="space-y-4">
             <div class="text-sm text-gray-600">
                 {{ __('Select multiple PDF files to upload as purchase invoices. Each PDF will create a separate purchase invoice.') }}

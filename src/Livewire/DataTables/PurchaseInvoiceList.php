@@ -197,12 +197,9 @@ class PurchaseInvoiceList extends BaseDataTable
         foreach ($filesToProcess as $file) {
             try {
                 $this->purchaseInvoiceForm->reset();
-                $this->mediaForm->reset();
-
-                $this->mediaForm->uploadedFile = [$file];
                 $this->purchaseInvoiceForm->media = $file;
-
                 $this->purchaseInvoiceForm->save();
+
                 $successCount++;
             } catch (ValidationException|UnauthorizedException $e) {
                 exception_to_notifications($e, $this);
