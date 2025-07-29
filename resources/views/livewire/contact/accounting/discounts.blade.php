@@ -1,25 +1,28 @@
-<x-modal wire:close="resetDiscount()" id="edit-discount-modal">
-    <div class="flex flex-col gap-1.5">
-        <x-select.styled
-            :label="__('Type')"
-            x-on:select="$wire.discountForm.model_id = null"
-            wire:model="discountForm.model_type"
-            :options="[
-                [
-                    'label' => __('Product'),
-                    'value' => morph_alias(\FluxErp\Models\Product::class),
-                ],
-                [
-                    'label' => __('Category'),
-                    'value' => morph_alias(\FluxErp\Models\Category::class),
-                ],
-            ]"
-        />
+<x-modal x-on:close="$wire.resetDiscount()" id="edit-discount-modal">
+    <div class="flex flex-col gap-4">
+        <div x-cloak x-show="! $wire.discountForm.id">
+            <x-select.styled
+                :label="__('Type')"
+                x-on:select="$wire.discountForm.model_id = null"
+                wire:model="discountForm.model_type"
+                :options="[
+                    [
+                        'label' => __('Product'),
+                        'value' => morph_alias(\FluxErp\Models\Product::class),
+                    ],
+                    [
+                        'label' => __('Category'),
+                        'value' => morph_alias(\FluxErp\Models\Category::class),
+                    ],
+                ]"
+            />
+        </div>
         <div
             x-cloak
             x-show="
-                $wire.discountForm.model_type ===
-                    '{{ morph_alias(\FluxErp\Models\Category::class) }}'
+                ! $wire.discountForm.id &&
+                    $wire.discountForm.model_type ===
+                        '{{ morph_alias(\FluxErp\Models\Category::class) }}'
             "
         >
             <x-select.styled
@@ -46,8 +49,9 @@
         <div
             x-cloak
             x-show="
-                $wire.discountForm.model_type ===
-                    '{{ morph_alias(\FluxErp\Models\Product::class) }}'
+                ! $wire.discountForm.id &&
+                    $wire.discountForm.model_type ===
+                        '{{ morph_alias(\FluxErp\Models\Product::class) }}'
             "
         >
             <x-select.styled

@@ -2,16 +2,10 @@
 
 namespace FluxErp\Livewire\Lead;
 
-use FluxErp\Livewire\FolderTree;
+use FluxErp\Livewire\Support\FolderTree;
 use FluxErp\Models\Lead;
-use Livewire\Attributes\Locked;
-use Livewire\Attributes\Modelable;
 
 class Attachments extends FolderTree
 {
-    #[Modelable]
-    public ?int $modelId = null;
-
-    #[Locked]
-    public ?string $modelType = Lead::class;
+    protected string $modelType = Lead::class;
 }

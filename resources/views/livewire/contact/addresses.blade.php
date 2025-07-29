@@ -37,17 +37,10 @@
                                     class="text-ellipsis whitespace-nowrap text-sm"
                                 >
                                     @section('left-side-bar.address-list.address')
-                                    <div
-                                        class="font-semibold"
-                                        x-text="addressItem.company"
-                                    ></div>
-                                    <div
-                                        x-text="((addressItem.firstname || '') + ' ' + (addressItem.lastname || '')).trim()"
-                                    ></div>
-                                    <div x-text="addressItem.street"></div>
-                                    <div
-                                        x-text="((addressItem.zip || '') + ' ' + (addressItem.city || '')).trim()"
-                                    ></div>
+                                    <p
+                                        class="first-line:font-semibold"
+                                        x-html="addressItem.postal_address.join('<br>')"
+                                    ></p>
                                     @show
                                 </div>
                                 <div class="flex flex-col gap-0.5">
@@ -124,11 +117,36 @@
                 <x-select.styled
                     searchable
                     x-bind:disabled="! $wire.$parent.edit"
-                    wire:model.number="contact.contact_origin_id"
+                    wire:model.number="contact.record_origin_id"
                     :label="__('Contact Origin')"
                     select="label:name|value:id"
-                    :options="$contactOrigins"
+                    :request="[
+                        'url' => route('search', \FluxErp\Models\RecordOrigin::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'searchFields' => [
+                                'name',
+                            ],
+                            'where' => [
+                                [
+                                    'model_type',
+                                    '=',
+                                    morph_alias(\FluxErp\Models\Contact::class),
+                                ],
+                            ],
+                        ],
+                    ]"
                 />
+                <x-rating
+                    x-bind:disabled="! $wire.$parent.edit"
+                    wire:model.number="contact.rating"
+                    :quantity="5"
+                    position="right"
+                >
+                    <x-slot:text>
+                        <x-label :label="__('Rating')" />
+                    </x-slot>
+                </x-rating>
             </div>
         </x-card>
         @show

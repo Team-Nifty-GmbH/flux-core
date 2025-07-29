@@ -22,6 +22,9 @@ use FluxErp\Actions\Calendar\UpdateCalendar;
 use FluxErp\Actions\CalendarEvent\CreateCalendarEvent;
 use FluxErp\Actions\CalendarEvent\DeleteCalendarEvent;
 use FluxErp\Actions\CalendarEvent\UpdateCalendarEvent;
+use FluxErp\Actions\Cart\CreateCart;
+use FluxErp\Actions\Cart\DeleteCart;
+use FluxErp\Actions\Cart\UpdateCart;
 use FluxErp\Actions\Category\CreateCategory;
 use FluxErp\Actions\Category\DeleteCategory;
 use FluxErp\Actions\Category\UpdateCategory;
@@ -31,6 +34,12 @@ use FluxErp\Actions\Client\UpdateClient;
 use FluxErp\Actions\Comment\CreateComment;
 use FluxErp\Actions\Comment\DeleteComment;
 use FluxErp\Actions\Comment\UpdateComment;
+use FluxErp\Actions\Commission\CreateCommission;
+use FluxErp\Actions\Commission\DeleteCommission;
+use FluxErp\Actions\Commission\UpdateCommission;
+use FluxErp\Actions\Communication\CreateCommunication;
+use FluxErp\Actions\Communication\DeleteCommunication;
+use FluxErp\Actions\Communication\UpdateCommunication;
 use FluxErp\Actions\Contact\CreateContact;
 use FluxErp\Actions\Contact\DeleteContact;
 use FluxErp\Actions\Contact\UpdateContact;
@@ -40,9 +49,6 @@ use FluxErp\Actions\ContactBankConnection\UpdateContactBankConnection;
 use FluxErp\Actions\ContactOption\CreateContactOption;
 use FluxErp\Actions\ContactOption\DeleteContactOption;
 use FluxErp\Actions\ContactOption\UpdateContactOption;
-use FluxErp\Actions\ContactOrigin\CreateContactOrigin;
-use FluxErp\Actions\ContactOrigin\DeleteContactOrigin;
-use FluxErp\Actions\ContactOrigin\UpdateContactOrigin;
 use FluxErp\Actions\Country\CreateCountry;
 use FluxErp\Actions\Country\DeleteCountry;
 use FluxErp\Actions\Country\UpdateCountry;
@@ -72,12 +78,21 @@ use FluxErp\Actions\FormBuilderResponse\DeleteFormBuilderResponse;
 use FluxErp\Actions\FormBuilderSection\CreateFormBuilderSection;
 use FluxErp\Actions\FormBuilderSection\DeleteFormBuilderSection;
 use FluxErp\Actions\FormBuilderSection\UpdateFormBuilderSection;
+use FluxErp\Actions\Industry\CreateIndustry;
+use FluxErp\Actions\Industry\DeleteIndustry;
+use FluxErp\Actions\Industry\UpdateIndustry;
 use FluxErp\Actions\Language\CreateLanguage;
 use FluxErp\Actions\Language\DeleteLanguage;
 use FluxErp\Actions\Language\UpdateLanguage;
 use FluxErp\Actions\LanguageLine\CreateLanguageLine;
 use FluxErp\Actions\LanguageLine\DeleteLanguageLine;
 use FluxErp\Actions\LanguageLine\UpdateLanguageLine;
+use FluxErp\Actions\LeadLossReason\CreateLeadLossReason;
+use FluxErp\Actions\LeadLossReason\DeleteLeadLossReason;
+use FluxErp\Actions\LeadLossReason\UpdateLeadLossReason;
+use FluxErp\Actions\LeadState\CreateLeadState;
+use FluxErp\Actions\LeadState\DeleteLeadState;
+use FluxErp\Actions\LeadState\UpdateLeadState;
 use FluxErp\Actions\LedgerAccount\CreateLedgerAccount;
 use FluxErp\Actions\LedgerAccount\DeleteLedgerAccount;
 use FluxErp\Actions\LedgerAccount\UpdateLedgerAccount;
@@ -160,6 +175,9 @@ use FluxErp\Actions\PurchaseInvoice\UpdatePurchaseInvoice;
 use FluxErp\Actions\PurchaseInvoicePosition\CreatePurchaseInvoicePosition;
 use FluxErp\Actions\PurchaseInvoicePosition\DeletePurchaseInvoicePosition;
 use FluxErp\Actions\PurchaseInvoicePosition\UpdatePurchaseInvoicePosition;
+use FluxErp\Actions\RecordOrigin\CreateRecordOrigin;
+use FluxErp\Actions\RecordOrigin\DeleteRecordOrigin;
+use FluxErp\Actions\RecordOrigin\UpdateRecordOrigin;
 use FluxErp\Actions\Role\CreateRole;
 use FluxErp\Actions\Role\DeleteRole;
 use FluxErp\Actions\Role\UpdateRole;
@@ -227,13 +245,15 @@ use FluxErp\Models\AddressType;
 use FluxErp\Models\BankConnection;
 use FluxErp\Models\Calendar;
 use FluxErp\Models\CalendarEvent;
+use FluxErp\Models\Cart;
 use FluxErp\Models\Category;
 use FluxErp\Models\Client;
 use FluxErp\Models\Comment;
+use FluxErp\Models\Commission;
+use FluxErp\Models\Communication;
 use FluxErp\Models\Contact;
 use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\ContactOption;
-use FluxErp\Models\ContactOrigin;
 use FluxErp\Models\Country;
 use FluxErp\Models\CountryRegion;
 use FluxErp\Models\Currency;
@@ -244,8 +264,11 @@ use FluxErp\Models\FormBuilderFieldResponse;
 use FluxErp\Models\FormBuilderForm;
 use FluxErp\Models\FormBuilderResponse;
 use FluxErp\Models\FormBuilderSection;
+use FluxErp\Models\Industry;
 use FluxErp\Models\Language;
 use FluxErp\Models\LanguageLine;
+use FluxErp\Models\LeadLossReason;
+use FluxErp\Models\LeadState;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\Lock;
 use FluxErp\Models\MailAccount;
@@ -270,6 +293,7 @@ use FluxErp\Models\ProductProperty;
 use FluxErp\Models\Project;
 use FluxErp\Models\PurchaseInvoice;
 use FluxErp\Models\PurchaseInvoicePosition;
+use FluxErp\Models\RecordOrigin;
 use FluxErp\Models\Role;
 use FluxErp\Models\SepaMandate;
 use FluxErp\Models\SerialNumber;
@@ -333,7 +357,8 @@ Route::prefix('api')
                 // AddressTypes
                 Route::get('/address-types/{id}', [BaseController::class, 'show'])
                     ->defaults('model', AddressType::class);
-                Route::get('/address-types', [BaseController::class, 'index'])->defaults('model', AddressType::class);
+                Route::get('/address-types', [BaseController::class, 'index'])
+                    ->defaults('model', AddressType::class);
                 Route::post('/address-types', CreateAddressType::class);
                 Route::put('/address-types', UpdateAddressType::class);
                 Route::delete('/address-types/{id}', DeleteAddressType::class);
@@ -363,6 +388,15 @@ Route::prefix('api')
                 Route::put('/calendar-events', UpdateCalendarEvent::class);
                 Route::delete('/calendar-events/{id}', DeleteCalendarEvent::class);
 
+                // Carts
+                Route::get('/carts/{id}', [BaseController::class, 'show'])
+                    ->defaults('model', Cart::class);
+                Route::get('/carts', [BaseController::class, 'index'])
+                    ->defaults('model', Cart::class);
+                Route::post('/carts', CreateCart::class);
+                Route::put('/carts', UpdateCart::class);
+                Route::delete('/carts/{id}', DeleteCart::class);
+
                 // Categories
                 Route::get('/categories/{id}', [BaseController::class, 'show'])->defaults('model', Category::class);
                 Route::get('/categories', [BaseController::class, 'index'])->defaults('model', Category::class);
@@ -384,6 +418,24 @@ Route::prefix('api')
                 Route::put('/comments', UpdateComment::class);
                 Route::delete('/comments/{id}', DeleteComment::class);
 
+                // Communications
+                Route::get('/communications/{id}', [BaseController::class, 'show'])
+                    ->defaults('model', Communication::class);
+                Route::get('/communications', [BaseController::class, 'index'])
+                    ->defaults('model', Communication::class);
+                Route::post('/communications', CreateCommunication::class);
+                Route::put('/communications', UpdateCommunication::class);
+                Route::delete('/communications/{id}', DeleteCommunication::class);
+
+                // Commissions
+                Route::get('/commissions/{id}', [BaseController::class, 'show'])
+                    ->defaults('model', Commission::class);
+                Route::get('/commissions', [BaseController::class, 'index'])
+                    ->defaults('model', Commission::class);
+                Route::post('/commissions', CreateCommission::class);
+                Route::put('/commissions', UpdateCommission::class);
+                Route::delete('/commissions/{id}', DeleteCommission::class);
+
                 // ContactBankConnections
                 Route::get('/contact-bank-connections/{id}', [BaseController::class, 'show'])
                     ->defaults('model', ContactBankConnection::class);
@@ -402,14 +454,23 @@ Route::prefix('api')
                 Route::put('/contact-options', UpdateContactOption::class);
                 Route::delete('/contact-options', DeleteContactOption::class);
 
-                // ContactOrigins
-                Route::get('/contact-origins/{id}', [BaseController::class, 'show'])
-                    ->defaults('model', ContactOrigin::class);
-                Route::get('/contact-origins', [BaseController::class, 'index'])
-                    ->defaults('model', ContactOrigin::class);
-                Route::post('/contact-origins', CreateContactOrigin::class);
-                Route::put('/contact-origins', UpdateContactOrigin::class);
-                Route::delete('/contact-origins/{id}', DeleteContactOrigin::class);
+                // Industries
+                Route::get('/industries/{id}', [BaseController::class, 'show'])
+                    ->defaults('model', Industry::class);
+                Route::get('/industries', [BaseController::class, 'index'])
+                    ->defaults('model', Industry::class);
+                Route::post('/industries', CreateIndustry::class);
+                Route::put('/industries', UpdateIndustry::class);
+                Route::delete('/industries/{id}', DeleteIndustry::class);
+
+                // RecordOrigins
+                Route::get('/record-origins/{id}', [BaseController::class, 'show'])
+                    ->defaults('model', RecordOrigin::class);
+                Route::get('/record-origins', [BaseController::class, 'index'])
+                    ->defaults('model', RecordOrigin::class);
+                Route::post('/record-origins', CreateRecordOrigin::class);
+                Route::put('/record-origins', UpdateRecordOrigin::class);
+                Route::delete('/record-origins/{id}', DeleteRecordOrigin::class);
 
                 // Contacts
                 Route::get('/contacts/{id}', [BaseController::class, 'show'])->defaults('model', Contact::class);
@@ -501,6 +562,24 @@ Route::prefix('api')
                 Route::post('/languages', CreateLanguage::class);
                 Route::put('/languages', UpdateLanguage::class);
                 Route::delete('/languages/{id}', DeleteLanguage::class);
+
+                // LeadLossReasons
+                Route::get('/lead-loss-reasons/{id}', [BaseController::class, 'show'])
+                    ->defaults('model', LeadLossReason::class);
+                Route::get('/lead-loss-reasons', [BaseController::class, 'index'])
+                    ->defaults('model', LeadLossReason::class);
+                Route::post('/lead-loss-reasons', CreateLeadLossReason::class);
+                Route::put('/lead-loss-reasons', UpdateLeadLossReason::class);
+                Route::delete('/lead-loss-reasons/{id}', DeleteLeadLossReason::class);
+
+                // LeadStates
+                Route::get('/lead-states/{id}', [BaseController::class, 'show'])
+                    ->defaults('model', LeadState::class);
+                Route::get('/lead-states', [BaseController::class, 'index'])
+                    ->defaults('model', LeadState::class);
+                Route::post('/lead-states', CreateLeadState::class);
+                Route::put('/lead-states', UpdateLeadState::class);
+                Route::delete('/lead-states/{id}', DeleteLeadState::class);
 
                 // LedgerAccounts
                 Route::get('/ledger-accounts/{id}', [BaseController::class, 'show'])

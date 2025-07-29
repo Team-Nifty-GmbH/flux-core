@@ -3,8 +3,11 @@
 namespace FluxErp\Models;
 
 use FluxErp\Contracts\OffersPrinting;
+use FluxErp\Contracts\Targetable;
 use FluxErp\Enums\CommunicationTypeEnum;
 use FluxErp\Models\Pivots\Communicatable;
+use FluxErp\Support\Scout\ScoutCustomize;
+use FluxErp\Traits\HasDefaultTargetableColumns;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasTags;
 use FluxErp\Traits\HasUserModification;
@@ -26,10 +29,21 @@ use InvalidArgumentException;
 use Meilisearch\Endpoints\Indexes;
 use Spatie\MediaLibrary\HasMedia;
 
-class Communication extends FluxModel implements HasMedia, OffersPrinting
+class Communication extends FluxModel implements HasMedia, OffersPrinting, Targetable
 {
-    use HasPackageFactory, HasTags, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity,
-        Printable, Searchable, SoftDeletes;
+    use HasDefaultTargetableColumns, HasPackageFactory, HasTags, HasUserModification, HasUuid, InteractsWithMedia,
+        LogsActivity, Printable, Searchable, SoftDeletes;
+
+    public static function timeframeColumns(): array
+    {
+        return [
+            'date',
+            'started_at',
+            'ended_at',
+            'created_at',
+            'updated_at',
+        ];
+    }
 
     protected static function booted(): void
     {
@@ -169,10 +183,9 @@ class Communication extends FluxModel implements HasMedia, OffersPrinting
 
     public function toSearchableArray(): array
     {
-        $array = $this->toArray();
-        unset($array['html_body']);
-
-        return $array;
+        return ScoutCustomize::make($this)
+            ->except('html_body')
+            ->toSearchableArray();
     }
 
     protected function bccMail(): Attribute

@@ -10,6 +10,7 @@ use FluxErp\Http\Middleware\TrackVisits;
 use FluxErp\Livewire\Accounting\DirectDebit;
 use FluxErp\Livewire\Accounting\MoneyTransfer;
 use FluxErp\Livewire\Accounting\PaymentReminder;
+use FluxErp\Livewire\Accounting\PaymentRunPreview;
 use FluxErp\Livewire\Accounting\TransactionAssignments;
 use FluxErp\Livewire\Accounting\TransactionList;
 use FluxErp\Livewire\Auth\Login;
@@ -33,6 +34,7 @@ use FluxErp\Livewire\Lead\Lead;
 use FluxErp\Livewire\Lead\LeadList;
 use FluxErp\Livewire\Mail\Mail;
 use FluxErp\Livewire\Media\Media as MediaGrid;
+use FluxErp\Livewire\Order\CreateChildOrder;
 use FluxErp\Livewire\Order\Order;
 use FluxErp\Livewire\Order\OrderList;
 use FluxErp\Livewire\Order\OrderListByOrderType;
@@ -48,7 +50,6 @@ use FluxErp\Livewire\Settings\AddressTypes;
 use FluxErp\Livewire\Settings\BankConnections;
 use FluxErp\Livewire\Settings\Categories;
 use FluxErp\Livewire\Settings\Clients;
-use FluxErp\Livewire\Settings\ContactOrigins;
 use FluxErp\Livewire\Settings\Countries;
 use FluxErp\Livewire\Settings\Currencies;
 use FluxErp\Livewire\Settings\CustomerPortal;
@@ -58,6 +59,7 @@ use FluxErp\Livewire\Settings\FailedJobs;
 use FluxErp\Livewire\Settings\Industries;
 use FluxErp\Livewire\Settings\LanguageLines;
 use FluxErp\Livewire\Settings\Languages;
+use FluxErp\Livewire\Settings\LeadLossReasons;
 use FluxErp\Livewire\Settings\LeadStates;
 use FluxErp\Livewire\Settings\LedgerAccounts;
 use FluxErp\Livewire\Settings\Logs;
@@ -75,10 +77,13 @@ use FluxErp\Livewire\Settings\ProductOptionGroups;
 use FluxErp\Livewire\Settings\ProductPropertyGroups;
 use FluxErp\Livewire\Settings\Profile;
 use FluxErp\Livewire\Settings\QueueMonitor;
+use FluxErp\Livewire\Settings\RecordOrigins;
 use FluxErp\Livewire\Settings\Scheduling;
 use FluxErp\Livewire\Settings\SerialNumberRanges;
 use FluxErp\Livewire\Settings\Settings;
+use FluxErp\Livewire\Settings\System;
 use FluxErp\Livewire\Settings\Tags;
+use FluxErp\Livewire\Settings\Targets;
 use FluxErp\Livewire\Settings\TicketTypes;
 use FluxErp\Livewire\Settings\Tokens;
 use FluxErp\Livewire\Settings\Units;
@@ -128,11 +133,17 @@ Route::middleware('web')
         Route::middleware(['auth:web', 'permission'])->group(function (): void {
             Route::get('/', Dashboard::class)->name('dashboard');
 
-            Route::get('/storage/{path}', function (string $path) {
-                return response()->file(Storage::path($path));
+            Route::get('/private-storage/{path}', function (string $path) {
+                return response()
+                    ->file(
+                        Storage::path($path),
+                        [
+                            'Content-Disposition' => 'attachment; filename="' . basename($path) . '"',
+                        ]
+                    );
             })
                 ->where('path', '.*')
-                ->name('storage');
+                ->name('private-storage');
 
             Route::middleware(TrackVisits::class)->group(function (): void {
                 Route::get('/mail', Mail::class)->name('mail');
@@ -171,6 +182,7 @@ Route::middleware('web')
                         Route::get('/list', OrderList::class)->name('orders');
                         Route::get('/list/{orderType}', OrderListByOrderType::class)->name('order-type');
                         Route::get('/order-positions/list', OrderPositionList::class)->name('order-positions');
+                        Route::get('/create-child-order', CreateChildOrder::class)->name('create-child-order');
                         Route::get('/{id}', Order::class)->where('id', '[0-9]+')->name('id');
                     });
 
@@ -200,6 +212,7 @@ Route::middleware('web')
                             ->name('transaction-assignments');
                         Route::get('/direct-debit', DirectDebit::class)->name('direct-debit');
                         Route::get('/money-transfer', MoneyTransfer::class)->name('money-transfer');
+                        Route::get('/payment-run-preview', PaymentRunPreview::class)->name('payment-run-preview');
                         Route::get('/payment-runs', PaymentRunList::class)->name('payment-runs');
                     });
 
@@ -215,7 +228,7 @@ Route::middleware('web')
                         Route::get('/categories', Categories::class)->name('categories');
                         Route::get('/clients', Clients::class)->name('clients');
                         Route::get('/clients/{client}/customer-portal', CustomerPortal::class)->name('customer-portal');
-                        Route::get('/contact-origins', ContactOrigins::class)->name('contact-origins');
+                        Route::get('/record-origins', RecordOrigins::class)->name('record-origins');
                         Route::get('/countries', Countries::class)->name('countries');
                         Route::get('/currencies', Currencies::class)->name('currencies');
                         Route::get('/discount-groups', DiscountGroups::class)->name('discount-groups');
@@ -223,6 +236,7 @@ Route::middleware('web')
                         Route::get('/failed-jobs', FailedJobs::class)->name('failed-jobs');
                         Route::get('/industries', Industries::class)->name('industries');
                         Route::get('/languages', Languages::class)->name('languages');
+                        Route::get('/lead-loss-reasons', LeadLossReasons::class)->name('lead-loss-reasons');
                         Route::get('/lead-states', LeadStates::class)->name('lead-states');
                         Route::get('/ledger-accounts', LedgerAccounts::class)->name('ledger-accounts');
                         Route::get('/logs', Logs::class)->name('logs');
@@ -241,7 +255,9 @@ Route::middleware('web')
                         Route::get('/queue-monitor', QueueMonitor::class)->name('queue-monitor');
                         Route::get('/scheduling', Scheduling::class)->name('scheduling');
                         Route::get('/serial-number-ranges', SerialNumberRanges::class)->name('serial-number-ranges');
+                        Route::get('/system', System::class)->name('system');
                         Route::get('/tags', Tags::class)->name('tags');
+                        Route::get('/targets', Targets::class)->name('targets');
                         Route::get('/ticket-types', TicketTypes::class)->name('ticket-types');
                         Route::get('/tokens', Tokens::class)->name('tokens');
                         Route::get('/translations', LanguageLines::class)->name('translations');

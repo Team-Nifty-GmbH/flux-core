@@ -62,7 +62,7 @@ class PurchaseInvoiceTest extends BaseSetup
 
         $this->contacts = Contact::factory()->count(2)
             ->has(Address::factory()->set('client_id', $this->dbClient->getKey()))
-            ->for(PriceList::factory())
+            ->for(PriceList::factory()->state(['is_default' => true]))
             ->create([
                 'client_id' => $this->dbClient->getKey(),
                 'payment_type_id' => $this->paymentTypes->random()->id,
@@ -87,6 +87,10 @@ class PurchaseInvoiceTest extends BaseSetup
             ->afterCreating(function (PurchaseInvoice $purchaseInvoice): void {
                 $purchaseInvoice->addMedia(UploadedFile::fake()->image($purchaseInvoice->invoice_number . '.jpeg'))
                     ->toMediaCollection('purchase_invoice');
+
+                $purchaseInvoice->update([
+                    'total_gross_price' => bcround($purchaseInvoice->calculateTotalGrossPrice(), 2),
+                ]);
             })
             ->create([
                 'client_id' => $this->dbClient->getKey(),
@@ -247,7 +251,7 @@ class PurchaseInvoiceTest extends BaseSetup
             Carbon::parse($dbPurchaseInvoice->invoice_date)->toDateString()
         );
         $this->assertNull($dbPurchaseInvoice->invoice_number);
-        $this->assertTrue($dbPurchaseInvoice->is_net);
+        $this->assertFalse($dbPurchaseInvoice->is_net);
         $this->assertTrue($this->user->is($dbPurchaseInvoice->getCreatedBy()));
         $this->assertTrue($this->user->is($dbPurchaseInvoice->getUpdatedBy()));
         $this->assertEmpty($dbPurchaseInvoice->purchaseInvoicePositions);
@@ -364,6 +368,7 @@ class PurchaseInvoiceTest extends BaseSetup
         $this->assertEquals($dbPurchaseInvoice->payment_type_id, $dbOrder->payment_type_id);
         $this->assertEquals($dbPurchaseInvoice->invoice_date->toDateString(), $dbOrder->invoice_date->toDateString());
         $this->assertEquals($dbPurchaseInvoice->invoice_number, $dbOrder->invoice_number);
+        $this->assertEquals($this->purchaseInvoices[0]->total_gross_price, $dbPurchaseInvoice->total_gross_price);
     }
 
     public function test_finish_purchase_invoice_validation_fails(): void

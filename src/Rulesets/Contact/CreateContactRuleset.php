@@ -4,11 +4,11 @@ namespace FluxErp\Rulesets\Contact;
 
 use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
-use FluxErp\Models\ContactOrigin;
 use FluxErp\Models\Currency;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
+use FluxErp\Models\RecordOrigin;
 use FluxErp\Models\User;
 use FluxErp\Models\VatRate;
 use FluxErp\Rules\ModelExists;
@@ -51,10 +51,11 @@ class CreateContactRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => User::class])
                     ->where('is_active', true),
             ],
-            'contact_origin_id' => [
+            'record_origin_id' => [
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => ContactOrigin::class])
+                app(ModelExists::class, ['model' => RecordOrigin::class])
+                    ->where('model_type', morph_alias(Contact::class))
                     ->where('is_active', true),
             ],
             'currency_id' => [
@@ -95,6 +96,7 @@ class CreateContactRuleset extends FluxRuleset
             'customer_number' => 'string|max:255|nullable|unique:contacts,customer_number',
             'creditor_number' => 'string|max:255|nullable|unique:contacts,creditor_number',
             'debtor_number' => 'string|max:255|nullable|unique:contacts,debtor_number',
+            'rating' => 'sometimes|integer|min:0|max:5',
             'payment_target_days' => 'sometimes|integer|min:1|nullable',
             'payment_reminder_days_1' => 'sometimes|integer|min:1|nullable',
             'payment_reminder_days_2' => 'sometimes|integer|min:1|nullable',
@@ -103,6 +105,7 @@ class CreateContactRuleset extends FluxRuleset
             'discount_percent' => 'sometimes|numeric|min:0|max:100|nullable',
             'credit_line' => 'sometimes|numeric|min:0|nullable',
             'vat_id' => 'sometimes|string|max:255|nullable',
+            'customs_identifier' => 'sometimes|string|max:255|nullable',
             'vendor_customer_number' => 'sometimes|string|max:255|nullable',
             'header' => 'string|nullable',
             'footer' => 'string|nullable',

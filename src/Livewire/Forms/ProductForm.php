@@ -28,6 +28,8 @@ class ProductForm extends FluxForm
 
     public ?int $cover_media_id = null;
 
+    public ?string $customs_tariff_number = null;
+
     public ?string $description = null;
 
     public ?float $dimension_height_mm = null;

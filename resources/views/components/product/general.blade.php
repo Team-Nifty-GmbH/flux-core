@@ -62,6 +62,11 @@
         />
         <x-input
             x-bind:readonly="!edit"
+            label="{{ __('Customs Tariff Number') }}"
+            wire:model="product.customs_tariff_number"
+        />
+        <x-input
+            x-bind:readonly="!edit"
             label="{{ __('Manufacturer product number') }}"
             wire:model="product.manufacturer_product_number"
         />
@@ -251,13 +256,13 @@
     <x-card
         class="dark:bg-secondary-700 space-y-2.5 bg-gray-50"
         :header="__('Product Properties')"
+        x-data="{productPropertyGroup: null}"
     >
         @section('product-properties')
         <x-modal
             id="edit-product-properties-modal"
             size="6xl"
             :title="__('Edit Product Properties')"
-            x-data="{productPropertyGroup: null}"
         >
             <div
                 class="flex gap-4"
@@ -276,7 +281,7 @@
                     class="w-1/2"
                 >
                     <x-card>
-                        <x-slot:title>
+                        <x-slot:header>
                             <span x-text="productPropertyGroup?.name"></span>
                         </x-slot>
                         <template
@@ -310,7 +315,7 @@
                 <x-button
                     color="indigo"
                     :text="__('Save')"
-                    wire:click="addProductProperties().then(() => { close(); })"
+                    wire:click="addProductProperties().then(() => { $modalClose('edit-product-properties-modal'); })"
                 />
             </x-slot>
         </x-modal>
@@ -434,7 +439,7 @@
             <x-select.styled
                 :label="__('Contact')"
                 select="label:label|value:contact_id"
-                x-on:select="$wire.addSupplier($event.detail.select.value); clear();"
+                x-on:select="$wire.addSupplier($event.detail.select.contact_id); clear();"
                 unfiltered
                 :request="[
                     'url' => route('search', \FluxErp\Models\Address::class),

@@ -72,7 +72,15 @@ class PaymentRunList extends BaseDataTable
 
     public function executePaymentRun(): bool
     {
-        // TODO: Create SEPA File in xml format
+        try {
+            $this->paymentRunForm->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
 
         return true;
     }

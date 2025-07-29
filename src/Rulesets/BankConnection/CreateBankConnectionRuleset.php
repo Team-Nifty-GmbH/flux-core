@@ -40,6 +40,7 @@ class CreateBankConnectionRuleset extends FluxRuleset
             'iban' => ['nullable', 'string', app(Iban::class), 'unique:bank_connections,iban'],
             'credit_limit' => 'nullable|numeric|min:0',
             'is_active' => 'boolean',
+            'is_virtual' => 'boolean',
         ];
     }
 }

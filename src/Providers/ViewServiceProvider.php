@@ -101,9 +101,14 @@ class ViewServiceProvider extends ServiceProvider
         TallStackUi::personalize()
             ->avatar()
             ->block('wrapper.class', 'inline-flex shrink-0 items-center justify-center overflow-hidden !bg-secondary-200');
+
         TallStackUi::personalize()
             ->dropdown()
             ->block('wrapper.second', 'relative inline-block text-left w-full');
+        TallStackUi::personalize()
+            ->dropdown('items')
+            ->block('item')
+            ->replace('whitespace-nowrap', 'whitespace-normal');
         TallStackUi::personalize()
             ->scope('calendar')
             ->dropdown()
@@ -126,6 +131,7 @@ class ViewServiceProvider extends ServiceProvider
 
         TallStackUi::personalize()
             ->card()
+            ->block('header.wrapper.border', 'dark:border-b-dark-600 border-b border-gray-100 p-2')
             ->block('header.text.size', 'text-sm font-medium w-full');
 
         TallStackUi::personalize()

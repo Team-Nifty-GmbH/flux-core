@@ -4,9 +4,11 @@ namespace FluxErp\Models;
 
 use Exception;
 use FluxErp\Contracts\OffersPrinting;
+use FluxErp\Contracts\Targetable;
 use FluxErp\Models\Pivots\ContactDiscount;
 use FluxErp\Models\Pivots\ContactDiscountGroup;
 use FluxErp\Models\Pivots\ContactIndustry;
+use FluxErp\Support\Scout\ScoutCustomize;
 use FluxErp\Traits\CascadeSoftDeletes;
 use FluxErp\Traits\Categorizable;
 use FluxErp\Traits\Commentable;
@@ -14,8 +16,10 @@ use FluxErp\Traits\Communicatable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasClientAssignment;
+use FluxErp\Traits\HasDefaultTargetableColumns;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasRecordOrigin;
 use FluxErp\Traits\HasSerialNumberRange;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
@@ -35,11 +39,12 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\File;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
-class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, OffersPrinting
+class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, OffersPrinting, Targetable
 {
     use CascadeSoftDeletes, Categorizable, Commentable, Communicatable, Filterable, HasAdditionalColumns,
-        HasClientAssignment, HasFrontendAttributes, HasPackageFactory, HasSerialNumberRange, HasUserModification,
-        HasUuid, InteractsWithMedia, Lockable, LogsActivity, Printable, Searchable;
+        HasClientAssignment, HasDefaultTargetableColumns, HasFrontendAttributes, HasPackageFactory, HasRecordOrigin,
+        HasSerialNumberRange, HasUserModification, HasUuid, InteractsWithMedia, Lockable, LogsActivity, Printable,
+        Searchable;
 
     public static string $iconName = 'users';
 
@@ -96,11 +101,6 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
     public function contactBankConnections(): HasMany
     {
         return $this->hasMany(ContactBankConnection::class);
-    }
-
-    public function contactOrigin(): BelongsTo
-    {
-        return $this->belongsTo(ContactOrigin::class);
     }
 
     public function country(): HasOneThrough
@@ -265,12 +265,9 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
 
     public function toSearchableArray(): array
     {
-        $this->refresh()->loadMissing('mainAddress');
-
-        return array_merge(
-            $this->mainAddress?->toSearchableArray() ?? [],
-            $this->toArray(),
-        );
+        return ScoutCustomize::make($this)
+            ->with('mainAddress')
+            ->toSearchableArray();
     }
 
     public function vatRate(): BelongsTo

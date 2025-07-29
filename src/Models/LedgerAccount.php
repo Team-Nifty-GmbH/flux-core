@@ -4,6 +4,7 @@ namespace FluxErp\Models;
 
 use FluxErp\Enums\LedgerAccountTypeEnum;
 use FluxErp\Traits\CacheModelQueries;
+use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\Scout\Searchable;
@@ -11,7 +12,21 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class LedgerAccount extends FluxModel
 {
-    use CacheModelQueries, HasPackageFactory, HasUuid, Searchable;
+    use CacheModelQueries, HasClientAssignment, HasPackageFactory, HasUuid;
+    use Searchable {
+        Searchable::scoutIndexSettings as baseScoutIndexSettings;
+    }
+
+    public static function scoutIndexSettings(): ?array
+    {
+        return static::baseScoutIndexSettings() ?? [
+            'filterableAttributes' => [
+                'ledger_account_type_enum',
+                'is_automatic',
+            ],
+            'sortableAttributes' => ['*'],
+        ];
+    }
 
     protected function casts(): array
     {

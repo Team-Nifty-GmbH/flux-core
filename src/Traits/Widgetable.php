@@ -4,9 +4,15 @@ namespace FluxErp\Traits;
 
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Str;
+use Livewire\Attributes\Locked;
 
 trait Widgetable
 {
+    #[Locked]
+    public ?string $dashboardComponent = null;
+
+    abstract public static function dashboardComponent(): array|string;
+
     public static function getLabel(): string
     {
         if (app()->runningInConsole()) {

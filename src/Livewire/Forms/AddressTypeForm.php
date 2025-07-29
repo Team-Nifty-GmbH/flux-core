@@ -5,6 +5,7 @@ namespace FluxErp\Livewire\Forms;
 use FluxErp\Actions\AddressType\CreateAddressType;
 use FluxErp\Actions\AddressType\DeleteAddressType;
 use FluxErp\Actions\AddressType\UpdateAddressType;
+use Livewire\Attributes\Locked;
 
 class AddressTypeForm extends FluxForm
 {

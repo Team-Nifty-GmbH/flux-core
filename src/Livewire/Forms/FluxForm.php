@@ -76,6 +76,7 @@ abstract class FluxForm extends BaseForm
 
         if ($this->asyncAction) {
             $action->executeAsync();
+            $this->reset();
 
             return;
         }
@@ -101,6 +102,30 @@ abstract class FluxForm extends BaseForm
         return app($this->modelClass)->query()
             ->where($this->getKey(), data_get($this, $this->getKey()))
             ->first();
+    }
+
+    public function restore(): void
+    {
+        $action = $this->makeAction('restore')
+            ->when($this->checkPermission, fn (FluxAction $action) => $action->checkPermission())
+            ->validate();
+
+        if ($this->asyncAction && ! $action instanceof DispatchableFluxAction) {
+            throw new InvalidArgumentException('Async actions must be DispatchableFluxAction');
+        }
+
+        if ($this->asyncAction) {
+            $action->executeAsync();
+            $this->reset();
+
+            return;
+        }
+
+        $response = $action->execute();
+
+        $this->actionResult = $response;
+
+        $this->fill($response);
     }
 
     public function save(): void

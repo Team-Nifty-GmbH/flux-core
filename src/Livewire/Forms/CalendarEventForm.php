@@ -4,11 +4,13 @@ namespace FluxErp\Livewire\Forms;
 
 use Carbon\Carbon;
 use Carbon\Exceptions\InvalidFormatException;
+use FluxErp\Actions\DispatchableFluxAction;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Helpers\Helper;
 use FluxErp\Models\CalendarEvent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
+use InvalidArgumentException;
 
 class CalendarEventForm extends FluxForm
 {
@@ -35,6 +37,8 @@ class CalendarEventForm extends FluxForm
     public array $invited = [];
 
     public bool $is_all_day = false;
+
+    public bool $is_cancelled = false;
 
     public bool $is_editable = true;
 
@@ -69,6 +73,30 @@ class CalendarEventForm extends FluxForm
     public ?string $title = null;
 
     public bool $was_repeatable = false;
+
+    public function cancel(): void
+    {
+        $action = $this->makeAction('cancel')
+            ->when($this->checkPermission, fn (FluxAction $action) => $action->checkPermission())
+            ->validate();
+
+        if ($this->asyncAction && ! $action instanceof DispatchableFluxAction) {
+            throw new InvalidArgumentException('Async actions must be DispatchableFluxAction');
+        }
+
+        if ($this->asyncAction) {
+            $action->executeAsync();
+            $this->reset();
+
+            return;
+        }
+
+        $response = $action->execute();
+
+        $this->actionResult = $response;
+
+        $this->reset();
+    }
 
     public function fill($values): void
     {
@@ -135,6 +163,30 @@ class CalendarEventForm extends FluxForm
         $values['extended_props'] = Arr::pull($values, 'extendedProps.customProperties');
 
         $this->fill($values);
+    }
+
+    public function reactivate(): void
+    {
+        $action = $this->makeAction('reactivate')
+            ->when($this->checkPermission, fn (FluxAction $action) => $action->checkPermission())
+            ->validate();
+
+        if ($this->asyncAction && ! $action instanceof DispatchableFluxAction) {
+            throw new InvalidArgumentException('Async actions must be DispatchableFluxAction');
+        }
+
+        if ($this->asyncAction) {
+            $action->executeAsync();
+            $this->reset();
+
+            return;
+        }
+
+        $response = $action->execute();
+
+        $this->actionResult = $response;
+
+        $this->reset();
     }
 
     public function save(): void

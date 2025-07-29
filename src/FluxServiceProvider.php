@@ -3,8 +3,6 @@
 namespace FluxErp;
 
 use Closure;
-use FluxErp\Console\Commands\Init\InitEnv;
-use FluxErp\Console\Commands\Init\InitPermissions;
 use FluxErp\Facades\Action;
 use FluxErp\Facades\Menu;
 use FluxErp\Facades\ProductType;
@@ -19,21 +17,12 @@ use FluxErp\Http\Middleware\Permissions;
 use FluxErp\Http\Middleware\PortalMiddleware;
 use FluxErp\Http\Middleware\SetJobAuthenticatedUserMiddleware;
 use FluxErp\Models\Activity;
-use FluxErp\Models\Address;
-use FluxErp\Models\Category;
 use FluxErp\Models\Currency;
-use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\Notification;
-use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\Permission;
-use FluxErp\Models\Product;
-use FluxErp\Models\Project;
 use FluxErp\Models\Role;
-use FluxErp\Models\SerialNumber;
-use FluxErp\Models\Task;
-use FluxErp\Models\Ticket;
-use FluxErp\Models\User;
+use FluxErp\Traits\Livewire\SupportsAutoRender;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Bus\Dispatcher;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -41,7 +30,9 @@ use Illuminate\Console\Command;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Contracts\Queue\Factory as QueueFactoryContract;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\QueryException;
+use Illuminate\Foundation\Testing\TestCase;
 use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -74,6 +65,7 @@ use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 use Spatie\Translatable\Facades\Translatable;
 use Throwable;
+use function Livewire\invade;
 
 class FluxServiceProvider extends ServiceProvider
 {
@@ -175,25 +167,14 @@ class FluxServiceProvider extends ServiceProvider
     protected function bootCommands(): void
     {
         if (! $this->app->runningInConsole()) {
-            // commands required for installation
-            $this->commands(InitEnv::class);
-            $this->commands(InitPermissions::class);
-
-            return;
-        }
-
-        $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator(__DIR__ . '/Console/Commands')
-        );
-        $commandClasses = [];
-
-        foreach ($iterator as $file) {
-            if ($file->isFile() && $file->getExtension() === 'php') {
-                $classPath = str_replace([__DIR__ . '/', '/'], ['', '\\'], $file->getPathname());
-                $classNamespace = '\\FluxErp\\';
-                $class = $classNamespace . str_replace('.php', '', $classPath);
-                $commandClasses[] = $class;
-            }
+            $commandClasses = Cache::remember(
+                'flux.commands',
+                now()->addDay(),
+                fn () => $this->findCommands()
+            );
+        } else {
+            $commandClasses = $this->findCommands();
+            Cache::put('flux.commands', $commandClasses, now()->addDay());
         }
 
         $this->commands($commandClasses);
@@ -288,12 +269,15 @@ class FluxServiceProvider extends ServiceProvider
             label: 'Settings',
             order: 9999,
             closure: function (): void {
+                Menu::register(route: 'settings.system');
                 Menu::register(route: 'settings.additional-columns');
                 Menu::register(route: 'settings.address-types');
-                Menu::register(route: 'settings.contact-origins');
+                Menu::register(route: 'settings.record-origins');
                 Menu::register(route: 'settings.industries');
                 Menu::register(route: 'settings.categories');
                 Menu::register(route: 'settings.tags');
+                Menu::register(route: 'settings.targets');
+                Menu::register(route: 'settings.lead-loss-reasons');
                 Menu::register(route: 'settings.lead-states');
                 Menu::register(route: 'settings.email-templates');
                 Menu::register(route: 'settings.tokens');
@@ -373,6 +357,25 @@ class FluxServiceProvider extends ServiceProvider
         RouteFacade::pattern('id', '[0-9]+');
     }
 
+    protected function findCommands(): array
+    {
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator(__DIR__ . '/Console/Commands')
+        );
+        $commandClasses = [];
+
+        foreach ($iterator as $file) {
+            if ($file->isFile() && $file->getExtension() === 'php') {
+                $classPath = str_replace([__DIR__ . '/', '/'], ['', '\\'], $file->getPathname());
+                $classNamespace = '\\FluxErp\\';
+                $class = $classNamespace . str_replace('.php', '', $classPath);
+                $commandClasses[] = $class;
+            }
+        }
+
+        return $commandClasses;
+    }
+
     protected function offerPublishing(): void
     {
         $this->publishes([
@@ -430,89 +433,14 @@ class FluxServiceProvider extends ServiceProvider
             config(['permission.display_permission_in_exception' => true]);
             config(['activitylog.activitymodel' => resolve_static(Activity::class, 'class')]);
             config(['media-library.media_downloader' => MediaLibraryDownloader::class]);
-            config([
-                'scout.meilisearch.index-settings' => [
-                    resolve_static(Address::class, 'class') => [
-                        'filterableAttributes' => [
-                            'is_main_address',
-                            'contact_id',
-                        ],
-                        'sortableAttributes' => ['*'],
-                    ],
-                    resolve_static(Category::class, 'class') => [
-                        'filterableAttributes' => [
-                            'model_type',
-                        ],
-                    ],
-                    resolve_static(LedgerAccount::class, 'class') => [
-                        'filterableAttributes' => [
-                            'ledger_account_type_enum',
-                            'is_automatic',
-                        ],
-                        'sortableAttributes' => ['*'],
-                    ],
-                    resolve_static(Order::class, 'class') => [
-                        'filterableAttributes' => [
-                            'parent_id',
-                            'contact_id',
-                            'is_locked',
-                        ],
-                        'sortableAttributes' => ['*'],
-                    ],
-                    resolve_static(Permission::class, 'class') => [
-                        'filterableAttributes' => [
-                            'guard_name',
-                        ],
-                        'sortableAttributes' => [
-                            'name',
-                        ],
-                    ],
-                    resolve_static(Product::class, 'class') => [
-                        'filterableAttributes' => [
-                            'is_active',
-                            'parent_id',
-                        ],
-                        'sortableAttributes' => ['*'],
-                    ],
-                    resolve_static(Project::class, 'class') => [
-                        'filterableAttributes' => [
-                            'parent_id',
-                            'state',
-                        ],
-                        'sortableAttributes' => ['*'],
-                    ],
-                    resolve_static(SerialNumber::class, 'class') => [
-                        'filterableAttributes' => [
-                            'address_id',
-                        ],
-                    ],
-                    resolve_static(Task::class, 'class') => [
-                        'filterableAttributes' => [
-                            'project_id',
-                            'state',
-                        ],
-                        'sortableAttributes' => ['*'],
-                    ],
-                    resolve_static(Ticket::class, 'class') => [
-                        'filterableAttributes' => [
-                            'authenticatable_type',
-                            'authenticatable_id',
-                            'state',
-                        ],
-                        'sortableAttributes' => ['*'],
-                    ],
-                    resolve_static(User::class, 'class') => [
-                        'filterableAttributes' => [
-                            'is_active',
-                        ],
-                    ],
-                ],
-            ]);
         });
         $this->mergeConfigFrom(__DIR__ . '/../config/flux.php', 'flux');
         $this->mergeConfigFrom(__DIR__ . '/../config/notifications.php', 'notifications');
         config(['auth' => require __DIR__ . '/../config/auth.php']);
-        config(['logging' => array_merge_recursive(config('logging'), require __DIR__ . '/../config/logging.php')]);
+
+        if (! app()->configurationIsCached()) {
+            config(['logging' => array_merge_recursive(config('logging'), require __DIR__ . '/../config/logging.php')]);
+        }
 
         if ($this->app->runningInConsole()) {
             config([
@@ -645,23 +573,16 @@ class FluxServiceProvider extends ServiceProvider
         }
 
         if ($this->app->runningUnitTests()) {
-            if (! Testable::hasMacro('cycleTabs')) {
+            if (! Testable::hasMacro('assertExecutesJs')) {
                 Testable::macro(
-                    'cycleTabs',
-                    function (string $tabPropertyName = 'tab'): void {
-                        $tabs = $this->instance()->getTabs();
+                    'assertExecutesJs',
+                    function (string $js) {
+                        Assert::assertStringContainsString(
+                            $js,
+                            implode(' ', data_get($this->lastState->getEffects(), 'xjs.*.expression', []))
+                        );
 
-                        foreach ($tabs as $tab) {
-                            $this
-                                ->set($tabPropertyName, $tab->component)
-                                ->assertStatus(200);
-
-                            if ($tab->isLivewireComponent) {
-                                $this->assertSeeLivewire($tab->component);
-                            }
-                        }
-
-                        $this->set($tabPropertyName, $tabs[0]->component);
+                        return $this;
                     }
                 );
             }
@@ -700,14 +621,95 @@ class FluxServiceProvider extends ServiceProvider
                 );
             }
 
-            if (! Testable::hasMacro('assertExecutesJs')) {
+            if (! Testable::hasMacro('cycleTabs')) {
                 Testable::macro(
-                    'assertExecutesJs',
-                    function (string $js) {
-                        Assert::assertStringContainsString(
-                            $js,
-                            implode(' ', data_get($this->lastState->getEffects(), 'xjs.*.expression', []))
-                        );
+                    'cycleTabs',
+                    function (string $tabPropertyName = 'tab'): void {
+                        $tabs = $this->instance()->getTabs();
+
+                        foreach ($tabs as $tab) {
+                            $this
+                                ->set($tabPropertyName, $tab->component)
+                                ->assertStatus(200);
+
+                            if ($tab->isLivewireComponent) {
+                                $this->assertSeeLivewire($tab->component);
+                            }
+                        }
+
+                        $this->set($tabPropertyName, $tabs[0]->component);
+                    }
+                );
+            }
+
+            if (! Testable::hasMacro('datatableCreate')) {
+                Testable::macro(
+                    'datatableCreate',
+                    function (string $formPropertyName, array $formValues = [], ?string $modalName = null): Testable {
+                        if (
+                            is_null($modalName) &&
+                            in_array(
+                                SupportsAutoRender::class,
+                                class_uses_recursive($this->instance()->{$formPropertyName})
+                            )
+                        ) {
+                            $modalName = $this->instance()->{$formPropertyName}->modalName();
+                        }
+
+                        $this->assertStatus(200)
+                            ->call('edit')
+                            ->assertExecutesJs('$modalOpen(\'' . $modalName . '\')');
+
+                        foreach ($formValues as $propertyName => $propertyValue) {
+                            $this->set($formPropertyName . '.' . $propertyName, $propertyValue);
+                        }
+
+                        $this->call('save')
+                            ->assertStatus(200)
+                            ->assertHasNoErrors()
+                            ->assertReturned(true);
+
+                        return $this;
+                    }
+                );
+            }
+
+            if (! Testable::hasMacro('datatableDelete')) {
+                Testable::macro(
+                    'datatableDelete',
+                    function (Model $model, TestCase $testCase): Testable {
+                        $this->assertStatus(200)
+                            ->call('loadData')
+                            ->assertCount('data.data', 1)
+                            ->assertSet('data.data.0.id', $model->getKey())
+                            ->call('delete', $model->getKey())
+                            ->assertHasNoErrors()
+                            ->assertStatus(200)
+                            ->assertCount('data.data', 0);
+
+                        if (in_array(SoftDeletes::class, class_uses_recursive($model))) {
+                            invade($testCase)->assertSoftDeleted($model);
+                        } else {
+                            invade($testCase)->assertDatabaseMissing($model);
+                        }
+
+                        return $this;
+                    }
+                );
+            }
+
+            if (! Testable::hasMacro('datatableEdit')) {
+                Testable::macro(
+                    'datatableEdit',
+                    function (Model $model, string $routeName): Testable {
+                        $this->assertStatus(200)
+                            ->call('loadData')
+                            ->assertCount('data.data', 1)
+                            ->assertSet('data.data.0.id', $model->getKey())
+                            ->call('edit', $model->getKey())
+                            ->assertHasNoErrors()
+                            ->assertStatus(200)
+                            ->assertRedirectToRoute($routeName, $model->getKey());
 
                         return $this;
                     }

@@ -3,7 +3,10 @@
     edit: true,
 }">
     <div id="new-task-modal">
-        <x-modal id="task-form-modal">
+        <x-modal
+            id="task-form-modal"
+            x-on:close="$wire.set('taskTab', 'task.general')"
+        >
             <x-flux::tabs
                 wire:model.live="taskTab"
                 wire:loading="taskTab"
@@ -11,17 +14,6 @@
             />
             <x-slot:footer>
                 <div class="flex justify-between gap-x-4">
-                    <div x-bind:class="$wire.task.id > 0 || 'invisible'">
-                        <x-button
-                            flat
-                            color="red"
-                            :text="__('Delete')"
-                            wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Task')]) }}"
-                            wire:click="delete().then((success) => {
-                                if (success) close();
-                            })"
-                        />
-                    </div>
                     <div class="flex justify-end gap-x-2">
                         <x-button
                             color="secondary"
@@ -41,11 +33,5 @@
                 </div>
             </x-slot>
         </x-modal>
-    </div>
-    <div
-        wire:ignore
-        x-on:data-table-row-clicked="$wire.edit($event.detail.id)"
-    >
-        @include('tall-datatables::livewire.data-table')
     </div>
 </div>

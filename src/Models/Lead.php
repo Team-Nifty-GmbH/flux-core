@@ -7,9 +7,13 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Lead\UpdateLead;
 use FluxErp\Casts\Money;
 use FluxErp\Contracts\Calendarable;
+use FluxErp\Contracts\Targetable;
 use FluxErp\Traits\Categorizable;
 use FluxErp\Traits\Commentable;
+use FluxErp\Traits\Communicatable;
 use FluxErp\Traits\HasCalendarEvents;
+use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasRecordOrigin;
 use FluxErp\Traits\HasTags;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
@@ -26,14 +30,45 @@ use Spatie\ModelStates\HasStates;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 
-class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDataTables
+class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDataTables, Targetable
 {
-    use Categorizable, Commentable, HasCalendarEvents, HasFrontendAttributes, HasStates, HasTags, HasUserModification,
-        HasUuid, InteractsWithMedia, LogsActivity, Searchable, SoftDeletes;
+    use Categorizable, Commentable, Communicatable, HasCalendarEvents, HasFrontendAttributes, HasPackageFactory,
+        HasRecordOrigin, HasStates, HasTags, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Searchable,
+        SoftDeletes;
 
     protected $guarded = [
         'id',
     ];
+
+    public static function aggregateColumns(string $type): array
+    {
+        return match ($type) {
+            'count' => ['id'],
+            'sum' => [
+                'expected_revenue',
+                'expected_gross_profit',
+                'weighted_gross_profit',
+                'weighted_revenue',
+            ],
+            'avg' => [
+                'expected_revenue',
+                'expected_gross_profit',
+                'score',
+                'weighted_gross_profit',
+                'weighted_revenue',
+            ],
+            default => [],
+        };
+    }
+
+    public static function aggregateTypes(): array
+    {
+        return [
+            'avg',
+            'count',
+            'sum',
+        ];
+    }
 
     public static function fromCalendarEvent(array $event, string $action): FluxAction
     {
@@ -44,6 +79,25 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
             'end' => data_get($event, 'end'),
             'description' => data_get($event, 'description'),
         ]);
+    }
+
+    public static function ownerColumns(): array
+    {
+        return [
+            'user_id',
+            'created_by',
+            'updated_by',
+        ];
+    }
+
+    public static function timeframeColumns(): array
+    {
+        return [
+            'start',
+            'end',
+            'created_at',
+            'updated_at',
+        ];
     }
 
     public static function toCalendar(): array
@@ -66,10 +120,9 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
     protected static function booted(): void
     {
         static::saving(function (Lead $lead): void {
-            $lead->expected_gross_profit_percentage = percentage_of(
-                $lead->expected_revenue ?? 0,
-                $lead->expected_gross_profit ?? 0,
-            );
+            $lead->expected_gross_profit_percentage = $lead->expected_revenue && $lead->expected_gross_profit
+                ? bcround(bcdiv($lead->expected_gross_profit, $lead->expected_revenue), 4)
+                : 0;
 
             if ($lead->isDirty('lead_state_id')
                 && ! is_null(($probability = $lead->leadState()->value('probability_percentage')))
@@ -124,6 +177,11 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         return route('sales.lead.id', $this->getKey());
     }
 
+    public function leadLossReason(): BelongsTo
+    {
+        return $this->belongsTo(LeadLossReason::class);
+    }
+
     public function leadState(): BelongsTo
     {
         return $this->belongsTo(LeadState::class);
@@ -136,8 +194,8 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         ?array $info = null
     ): void {
         $builder->where(function (Builder $query) use ($start, $end): void {
-            $query->whereBetween('start', [$start, $end])
-                ->orWhereBetween('end', [$start, $end])
+            $query->where('start', '<=', $end)
+                ->where('end', '>=', $start)
                 ->orWhereBetween('created_at', [$start, $end]);
         });
     }

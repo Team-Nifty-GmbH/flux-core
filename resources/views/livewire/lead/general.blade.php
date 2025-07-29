@@ -20,7 +20,6 @@
                 <x-select.styled
                     :label="__('Commission Agent')"
                     wire:model="leadForm.user_id"
-                    required
                     select="label:label|value:id"
                     unfiltered
                     :request="[
@@ -37,9 +36,9 @@
                     x-bind:readonly="!edit"
                     :label="__('Address')"
                     wire:model="leadForm.address_id"
+                    required
                     select="label:label|value:id"
                     unfiltered
-                    required
                     :request="[
                         'url' => route('search', \FluxErp\Models\Address::class),
                         'method' => 'POST',
@@ -57,9 +56,9 @@
                 <x-select.styled
                     x-on:select="$wire.isLost = $event.detail.select.is_lost"
                     wire:model="leadForm.lead_state_id"
-                    select="label:name|value:id"
                     :label="__('Lead State')"
                     x-bind:readonly="!edit"
+                    select="label:name|value:id"
                     unfiltered
                     :request="[
                         'url' => route('search', \FluxErp\Models\LeadState::class),
@@ -67,6 +66,38 @@
                         'params' => [
                             'searchFields' => [
                                 'name',
+                            ],
+                        ],
+                    ]"
+                />
+            </div>
+            <div
+                x-bind:class="! edit && 'pointer-events-none'"
+                x-cloak
+                x-show="$wire.isLost"
+            >
+                <x-select.styled
+                    wire:model="leadForm.lead_loss_reason_id"
+                    :label="__('Lead Loss Reason')"
+                    select="label:name|value:id"
+                    unfiltered
+                    :request="[
+                        'url' => route('search', \FluxErp\Models\LeadLossReason::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'fields' => [
+                                'id',
+                                'name',
+                            ],
+                            'searchFields' => [
+                                'name',
+                            ],
+                            'where' => [
+                                [
+                                    'is_active',
+                                    '=',
+                                    true,
+                                ],
                             ],
                         ],
                     ]"
@@ -99,19 +130,39 @@
                     ]"
                 />
             </div>
-            <x-currency
+            <div x-bind:class="! edit && 'pointer-events-none'">
+                <x-select.styled
+                    :label="__('Origin')"
+                    wire:model="leadForm.record_origin_id"
+                    select="label:name|value:id"
+                    unfiltered
+                    :request="[
+                        'url' => route('search', \FluxErp\Models\RecordOrigin::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'searchFields' => [
+                                'name',
+                            ],
+                            'where' => [
+                                [
+                                    'model_type',
+                                    '=',
+                                    morph_alias(\FluxErp\Models\Lead::class),
+                                ],
+                            ],
+                        ],
+                    ]"
+                />
+            </div>
+            <x-number
                 x-bind:readonly="!edit"
                 :label="__('Expected Revenue')"
-                :locale="app()->getLocale()"
-                :symbol="resolve_static(\FluxErp\Models\Currency::class, 'default')?->symbol"
-                wire:model.blur="leadForm.expected_revenue"
+                wire:model="leadForm.expected_revenue"
             />
-            <x-currency
+            <x-number
                 x-bind:readonly="!edit"
                 :label="__('Expected Gross Profit')"
-                :locale="app()->getLocale()"
-                :symbol="resolve_static(\FluxErp\Models\Currency::class, 'default')?->symbol"
-                wire:model.blur="leadForm.expected_gross_profit"
+                wire:model="leadForm.expected_gross_profit"
             />
             <div x-bind:class="! edit && 'pointer-events-none'">
                 <x-rating

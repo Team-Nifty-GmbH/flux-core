@@ -6,6 +6,7 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Enums\BundleTypeEnum;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Client;
+use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\PriceList;
@@ -169,6 +170,17 @@ class CreateOrderPosition extends FluxAction
         if ($order->is_locked) {
             $errors += [
                 'is_locked' => [__('Order is locked')],
+            ];
+        }
+
+        if ($this->getData('credit_account_id')
+            && ! resolve_static(ContactBankConnection::class, 'query')
+                ->whereKey($this->getData('credit_account_id'))
+                ->where('contact_id', $order->contact_id)
+                ->exists()
+        ) {
+            $errors += [
+                'credit_account_id' => [__('validation.exists', ['attribute' => 'credit_account_id'])],
             ];
         }
 

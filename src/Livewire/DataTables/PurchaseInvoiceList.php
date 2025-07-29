@@ -55,6 +55,7 @@ class PurchaseInvoiceList extends BaseDataTable
         ];
     }
 
+    #[Renderless]
     public function delete(): bool
     {
         try {
@@ -70,6 +71,7 @@ class PurchaseInvoiceList extends BaseDataTable
         return true;
     }
 
+    #[Renderless]
     public function downloadMedia(Media $media): false|BinaryFileResponse
     {
         if (! file_exists($media->getPath())) {
@@ -119,6 +121,7 @@ class PurchaseInvoiceList extends BaseDataTable
         $this->purchaseInvoiceForm->findMostUsedLedgerAccountId();
     }
 
+    #[Renderless]
     public function finish(): bool
     {
         try {
@@ -151,6 +154,7 @@ class PurchaseInvoiceList extends BaseDataTable
         }
     }
 
+    #[Renderless]
     public function save(): bool
     {
         $this->purchaseInvoiceForm->media = $this->mediaForm->uploadedFile[0] ?? null;

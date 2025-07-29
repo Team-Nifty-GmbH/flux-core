@@ -118,6 +118,88 @@ export default function ($wire) {
             this.mapLivewireData($wire.options);
             this.chart.updateOptions(this.options);
         },
+        toKebabCase(str) {
+            return str
+                .replace(/([a-z])([A-Z])/g, '$1-$2') // Insert dash between lowercase and uppercase
+                .toLowerCase();
+        },
+
+        // Alternative: Extract only the data you actually need
+        extractUsefulEventData(eventName, args) {
+            switch (eventName) {
+                case 'legendClick':
+                    return {
+                        seriesIndex: args[1],
+                        seriesName:
+                            args[2]?.globals?.seriesNames?.[args[1]] || null,
+                        isHidden:
+                            args[2]?.globals?.collapsedSeriesIndices?.includes(
+                                args[1],
+                            ) || false,
+                    };
+
+                case 'markerClick':
+                    return {
+                        seriesIndex: args[2]?.seriesIndex,
+                        dataPointIndex: args[2]?.dataPointIndex,
+                        value:
+                            args[2]?.config?.series?.[args[2]?.seriesIndex]
+                                ?.data?.[args[2]?.dataPointIndex] || null,
+                    };
+
+                case 'dataPointSelection':
+                    return {
+                        seriesIndex: args[2]?.seriesIndex,
+                        dataPointIndex: args[2]?.dataPointIndex,
+                        selectedDataPoints: args[2]?.selectedDataPoints || [],
+                    };
+
+                default:
+                    // For other events, try to extract basic info safely
+                    return {
+                        eventType: eventName,
+                        timestamp: Date.now(),
+                    };
+            }
+        },
+
+        smartForwardEvent(eventName, ...args) {
+            const kebabEventName = this.toKebabCase(eventName);
+
+            // Use the safer extraction method
+            const payload = this.extractUsefulEventData(eventName, args);
+            this.$dispatch(`apex-${kebabEventName}`, {
+                type: eventName,
+                payload: payload,
+            });
+        },
+
+        generateEvents() {
+            const events = {};
+            const apexEvents = [
+                'beforeMount',
+                'mounted',
+                'updated',
+                'click',
+                'legendClick',
+                'markerClick',
+                'selection',
+                'dataPointSelection',
+                'beforeZoom',
+                'beforeResetZoom',
+                'zoomed',
+                'scrolled',
+                'brushScrolled',
+            ];
+
+            apexEvents.forEach((eventName) => {
+                events[eventName] = (...args) => {
+                    this.smartForwardEvent(eventName, ...args);
+                };
+            });
+
+            return events;
+        },
         mapLivewireData(options) {
             options = JSON.parse(JSON.stringify(options));
             options.series = options.series || [];
@@ -224,6 +306,7 @@ export default function ($wire) {
                     type: null,
                     height: this.height,
                     fontFamily: 'inherit',
+                    events: this.generateEvents(),
                 },
                 dataLabels: {
                     formatter:

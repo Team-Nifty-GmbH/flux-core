@@ -187,16 +187,15 @@
                 light
                 x-on:click="$modalClose('edit-mail')"
                 class="mr-2"
-            >
-                {{ __('Cancel') }}
-            </x-button>
+                :text="__('Cancel')"
+            />
             <x-button
                 color="indigo"
+                loading="send"
                 wire:click="send().then((success) => {if(success) $modalClose('edit-mail');})"
                 class="ml-auto"
-            >
-                {{ __('Send') }}
-            </x-button>
+                :text="__('Send')"
+            />
         </x-slot>
     </x-modal>
 </div>

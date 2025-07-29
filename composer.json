@@ -29,7 +29,7 @@
         "spatie/laravel-translatable": "^6.0",
         "spatie/laravel-translation-loader": "^2.7",
         "spatie/pdf-to-image": "^3.0",
-        "tallstackui/tallstackui": "^2.8",
+        "tallstackui/tallstackui": "^2.12",
         "team-nifty-gmbh/tall-datatables": "^1.0",
         "webklex/laravel-imap": "^6.1"
     },

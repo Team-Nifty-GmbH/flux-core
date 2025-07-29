@@ -2,8 +2,8 @@
 
 namespace FluxErp\Livewire\Product\SerialNumber;
 
+use FluxErp\Livewire\Support\Comments as BaseComments;
 use FluxErp\Models\SerialNumber;
-use FluxErp\Support\Livewire\Comments as BaseComments;
 
 class Comments extends BaseComments
 {

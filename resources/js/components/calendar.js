@@ -174,8 +174,37 @@ const calendar = () => {
                     ? end.format()
                     : end.add(1, 'day').format();
             } else {
-                event.start = dayjs(event.start).utc(true).format();
-                event.end = dayjs(event.end).utc(true).format();
+                if (event.base_start) {
+                    event.start = dayjs(event.start).utc(true);
+
+                    let diff =
+                        dayjs(event.base_start).utc(true).local().utcOffset() -
+                        event.start.local().utcOffset();
+
+                    if (diff !== 0) {
+                        event.start = event.start.add(diff, 'minute');
+                    }
+
+                    event.start = event.start.format();
+                } else {
+                    event.start = dayjs(event.start).utc(true).format();
+                }
+
+                if (event.base_end) {
+                    event.end = dayjs(event.end).utc(true);
+
+                    let diff =
+                        dayjs(event.base_end).utc(true).local().utcOffset() -
+                        event.end.local().utcOffset();
+
+                    if (diff !== 0) {
+                        event.end = event.end.add(diff, 'minute');
+                    }
+
+                    event.end = event.end.format();
+                } else {
+                    event.end = dayjs(event.end).utc(true).format();
+                }
             }
 
             event.repeat_end = event.repeat_end
@@ -462,6 +491,11 @@ const calendar = () => {
                     // Title container with better overflow handling
                     let titleContainer = document.createElement('span');
                     titleContainer.className = 'truncate min-w-0 flex-1';
+
+                    if (info.event.extendedProps.is_cancelled) {
+                        titleContainer.classList.add('line-through');
+                    }
+
                     titleContainer.innerHTML = info.event.title;
                     leftContent.appendChild(titleContainer);
 
@@ -486,6 +520,11 @@ const calendar = () => {
                         let timeNode = document.createElement('div');
                         timeNode.className =
                             'flex-shrink-0 whitespace-nowrap text-xs';
+
+                        if (info.event.extendedProps.is_cancelled) {
+                            timeNode.classList.add('line-through');
+                        }
+
                         timeNode.innerHTML = info.timeText;
                         rightContent.appendChild(timeNode);
                     }

@@ -2,8 +2,8 @@
 
 namespace FluxErp\Livewire\SignaturePublicLink;
 
+use FluxErp\Livewire\Support\Comments as BaseComments;
 use FluxErp\Models\Order;
-use FluxErp\Support\Livewire\Comments as BaseComments;
 
 class Comments extends BaseComments
 {

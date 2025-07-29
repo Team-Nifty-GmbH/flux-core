@@ -13,8 +13,8 @@
         </x-flux::checkbox-tree>
     </x-card>
     <x-card>
-        <x-slot:title>
-            <div x-text="$wire.setting.path" />
+        <x-slot:header>
+            <div x-text="$wire.setting.path"></div>
         </x-slot>
         <x-flux::spinner />
         @if ($settingComponent = data_get($setting, 'component'))

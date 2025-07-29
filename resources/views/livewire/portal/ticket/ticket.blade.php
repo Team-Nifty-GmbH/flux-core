@@ -84,9 +84,8 @@
                     >
                         {{ __('Attachments') }}
                     </h2>
-                    <livewire:folder-tree
-                        :model-type="\FluxErp\Models\Ticket::class"
-                        :model-id="$ticket['id']"
+                    <livewire:portal.ticket.media
+                        :model-id="data_get($ticket, 'id')"
                     />
                 </div>
             </div>

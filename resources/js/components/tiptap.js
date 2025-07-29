@@ -1,7 +1,6 @@
 import { Editor } from '@tiptap/core';
-import { FontSizeConfig } from './tiptap-font-size-handler.js';
 import { LiteralTab } from './tiptap-literal-tab-handler.js';
-import { Underline } from '@tiptap/extension-underline';
+import { FontSizeColorConfig } from './tiptap-font-size-color-handler.js';
 import StarterKit from '@tiptap/starter-kit';
 import { MentionConfig } from './tiptap-mention-handler.js';
 
@@ -21,6 +20,10 @@ export default function (
             editable: true,
             content: content,
             popUp: null,
+            isClickListenerSet: false,
+            setIsClickListenerSet(value) {
+                this.isClickListenerSet = value;
+            },
             initTextArea(
                 id,
                 element,
@@ -46,13 +49,17 @@ export default function (
 
                 //  access to the parent scope in onSelectionUpdate callback
                 const parent = this;
+                // related to dropdown visibility
+                const onClickHandler = function () {
+                    parent.popUp.show();
+                    parent.setIsClickListenerSet(false);
+                };
                 _editor = new Editor({
                     element: element,
                     extensions: [
                         StarterKit,
-                        FontSizeConfig,
+                        FontSizeColorConfig,
                         LiteralTab,
-                        Underline,
                         MentionConfig(searchModel, element),
                     ],
                     timeout: null,
@@ -74,7 +81,6 @@ export default function (
                         }
 
                         const { from, to } = editor.state.selection;
-
                         // init popUp if not
                         if (parent.popUp === null) {
                             parent.popUp = window.tippy(element, {
@@ -97,16 +103,35 @@ export default function (
                                     getReferenceClientRect: () => ({
                                         width: 0,
                                         height: 0,
-                                        top: cursorPosition.top,
+                                        top: cursorPosition.top + 20,
                                         left: cursorPosition.left,
                                         bottom: cursorPosition.bottom,
                                         right: cursorPosition.right,
                                     }),
                                 });
-                            parent.popUp.show();
+                            // display the popup when mouse click is released
+                            // multi-line selection is with this enabled
+                            if (!parent.isClickListenerSet) {
+                                element.addEventListener(
+                                    'click',
+                                    onClickHandler,
+                                    { once: true },
+                                );
+                                parent.setIsClickListenerSet(true);
+                            }
                         } else {
                             if (!parent.popUp.state.isVisible) return;
                             parent.popUp.hide();
+                        }
+                    },
+                    onBlur() {
+                        // clear the listener if the user clicks outside of the editor and the click listener is set
+                        if (parent.isClickListenerSet) {
+                            element.removeEventListener(
+                                'click',
+                                onClickHandler,
+                            );
+                            parent.setIsClickListenerSet(false);
                         }
                     },
                     onUpdate: ({ editor }) => {

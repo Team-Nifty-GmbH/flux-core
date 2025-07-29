@@ -6,6 +6,7 @@ use FluxErp\Models\Activity;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Address;
 use FluxErp\Models\AddressType;
+use FluxErp\Models\AttributeTranslation;
 use FluxErp\Models\BankConnection;
 use FluxErp\Models\Calendar;
 use FluxErp\Models\CalendarEvent;
@@ -21,7 +22,6 @@ use FluxErp\Models\Communication;
 use FluxErp\Models\Contact;
 use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\ContactOption;
-use FluxErp\Models\ContactOrigin;
 use FluxErp\Models\Country;
 use FluxErp\Models\CountryRegion;
 use FluxErp\Models\Currency;
@@ -29,16 +29,19 @@ use FluxErp\Models\Discount;
 use FluxErp\Models\DiscountGroup;
 use FluxErp\Models\EmailTemplate;
 use FluxErp\Models\EventSubscription;
+use FluxErp\Models\FailedJob;
 use FluxErp\Models\Favorite;
 use FluxErp\Models\FormBuilderField;
 use FluxErp\Models\FormBuilderFieldResponse;
 use FluxErp\Models\FormBuilderForm;
 use FluxErp\Models\FormBuilderResponse;
 use FluxErp\Models\FormBuilderSection;
+use FluxErp\Models\Industry;
 use FluxErp\Models\JobBatch;
 use FluxErp\Models\Language;
 use FluxErp\Models\LanguageLine;
 use FluxErp\Models\Lead;
+use FluxErp\Models\LeadLossReason;
 use FluxErp\Models\LeadState;
 use FluxErp\Models\LedgerAccount;
 use FluxErp\Models\Lock;
@@ -85,6 +88,7 @@ use FluxErp\Models\Project;
 use FluxErp\Models\PurchaseInvoice;
 use FluxErp\Models\PurchaseInvoicePosition;
 use FluxErp\Models\QueueMonitor;
+use FluxErp\Models\RecordOrigin;
 use FluxErp\Models\Role;
 use FluxErp\Models\Schedule;
 use FluxErp\Models\SepaMandate;
@@ -94,6 +98,7 @@ use FluxErp\Models\Setting;
 use FluxErp\Models\Snapshot;
 use FluxErp\Models\StockPosting;
 use FluxErp\Models\Tag;
+use FluxErp\Models\Target;
 use FluxErp\Models\Task;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\TicketType;
@@ -118,6 +123,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'additional_column' => AdditionalColumn::class,
             'address' => Address::class,
             'address_type' => AddressType::class,
+            'attribute_translation' => AttributeTranslation::class,
             'bank_connection' => BankConnection::class,
             'calendar' => Calendar::class,
             'calendar_event' => CalendarEvent::class,
@@ -133,7 +139,6 @@ class MorphMapServiceProvider extends ServiceProvider
             'contact' => Contact::class,
             'contact_bank_connection' => ContactBankConnection::class,
             'contact_option' => ContactOption::class,
-            'contact_origin' => ContactOrigin::class,
             'country' => Country::class,
             'country_region' => CountryRegion::class,
             'currency' => Currency::class,
@@ -141,16 +146,19 @@ class MorphMapServiceProvider extends ServiceProvider
             'discount_group' => DiscountGroup::class,
             'email_template' => EmailTemplate::class,
             'event_subscription' => EventSubscription::class,
+            'failed_job' => FailedJob::class,
             'favorite' => Favorite::class,
             'form_builder_field' => FormBuilderField::class,
             'form_builder_field_response' => FormBuilderFieldResponse::class,
             'form_builder_form' => FormBuilderForm::class,
             'form_builder_response' => FormBuilderResponse::class,
             'form_builder_section' => FormBuilderSection::class,
+            'industry' => Industry::class,
             'job_batch' => JobBatch::class,
             'language' => Language::class,
             'language_line' => LanguageLine::class,
             'lead' => Lead::class,
+            'lead_loss_reason' => LeadLossReason::class,
             'lead_state' => LeadState::class,
             'ledger_account' => LedgerAccount::class,
             'lock' => Lock::class,
@@ -184,6 +192,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'purchase_invoice' => PurchaseInvoice::class,
             'purchase_invoice_position' => PurchaseInvoicePosition::class,
             'queue_monitor' => QueueMonitor::class,
+            'record_origin' => RecordOrigin::class,
             'role' => Role::class,
             'schedule' => Schedule::class,
             'sepa_mandate' => SepaMandate::class,
@@ -193,6 +202,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'snapshot' => Snapshot::class,
             'stock_posting' => StockPosting::class,
             'tag' => Tag::class,
+            'target' => Target::class,
             'task' => Task::class,
             'ticket' => Ticket::class,
             'ticket_type' => TicketType::class,

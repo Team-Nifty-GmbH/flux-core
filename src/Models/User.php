@@ -5,6 +5,7 @@ namespace FluxErp\Models;
 use Exception;
 use FluxErp\Mail\MagicLoginLink;
 use FluxErp\Models\Pivots\PrinterUser;
+use FluxErp\Models\Pivots\TargetUser;
 use FluxErp\Traits\CacheModelQueries;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasCalendars;
@@ -43,8 +44,10 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
 {
     use CacheModelQueries, Filterable, HasCalendars, HasCalendarUserSettings, HasCart, HasDatatableUserSettings,
         HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasPushSubscriptions, HasRoles,
-        HasUserModification, HasUuid, HasWidgets, InteractsWithMedia, MonitorsQueue, Notifiable, Searchable,
-        SoftDeletes;
+        HasUserModification, HasUuid, HasWidgets, InteractsWithMedia, MonitorsQueue, Notifiable, SoftDeletes;
+    use Searchable {
+        Searchable::scoutIndexSettings as baseScoutIndexSettings;
+    }
 
     public static string $iconName = 'user';
 
@@ -67,6 +70,15 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
     public static function hasPermission(): bool
     {
         return false;
+    }
+
+    public static function scoutIndexSettings(): ?array
+    {
+        return static::baseScoutIndexSettings() ?? [
+            'filterableAttributes' => [
+                'is_active',
+            ],
+        ];
     }
 
     protected static function booted(): void
@@ -225,6 +237,11 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
     public function settings(): MorphMany
     {
         return $this->morphMany(Setting::class, 'model');
+    }
+
+    public function targets(): BelongsToMany
+    {
+        return $this->belongsToMany(Target::class, 'target_user')->using(TargetUser::class);
     }
 
     public function tasks(): BelongsToMany

@@ -11,6 +11,7 @@ use FluxErp\Enums\LedgerAccountTypeEnum;
 use FluxErp\Models\Client;
 use FluxErp\Models\Currency;
 use FluxErp\Models\OrderPosition;
+use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Locked;
 
 class PurchaseInvoiceForm extends FluxForm
@@ -62,12 +63,14 @@ class PurchaseInvoiceForm extends FluxForm
 
     public ?string $system_delivery_date_end = null;
 
+    public ?string $total_gross_price = null;
+
     public function findMostUsedLedgerAccountId(): void
     {
         $this->lastLedgerAccountId = resolve_static(OrderPosition::class, 'query')
             ->whereHas(
                 'ledgerAccount',
-                fn ($query) => $query->where('ledger_account_type_enum', LedgerAccountTypeEnum::Expense)
+                fn (Builder $query) => $query->where('ledger_account_type_enum', LedgerAccountTypeEnum::Expense)
             )
             ->whereHas('order', fn ($query) => $query->where('contact_id', $this->contact_id))
             ->groupBy('ledger_account_id')

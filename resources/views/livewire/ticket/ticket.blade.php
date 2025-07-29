@@ -174,9 +174,8 @@
                                 </div>
                             </x-slot>
                             @section('content.attachments')
-                            <livewire:folder-tree
-                                :model-type="\FluxErp\Models\Ticket::class"
-                                :model-id="$ticket->id"
+                            <livewire:ticket.media
+                                :model-id="data_get($ticket, 'id')"
                             />
                             @show
                         </x-card>

@@ -9,6 +9,8 @@ use Livewire\Attributes\Locked;
 
 class MailFolderForm extends FluxForm
 {
+    public ?bool $can_create_lead = false;
+
     public ?bool $can_create_purchase_invoice = false;
 
     public ?bool $can_create_ticket = false;

@@ -2,8 +2,8 @@
 
 namespace FluxErp\Livewire\Accounting\Transactions;
 
+use FluxErp\Livewire\Support\Comments as BaseComments;
 use FluxErp\Models\Transaction;
-use FluxErp\Support\Livewire\Comments as BaseComments;
 
 class Comments extends BaseComments
 {

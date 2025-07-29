@@ -2,19 +2,30 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use FluxErp\Contracts\HasWidgetOptions;
+use FluxErp\Livewire\Dashboard\Dashboard;
+use FluxErp\Livewire\Order\OrderList;
+use FluxErp\Livewire\Support\Widgets\ValueBox;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Order;
 use FluxErp\Support\Metrics\Value;
-use FluxErp\Support\Widgets\ValueBox;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Number;
 use Livewire\Attributes\Renderless;
+use Livewire\Livewire;
+use TeamNiftyGmbH\DataTable\Helpers\SessionFilter;
 
-class Purchase extends ValueBox
+class Purchase extends ValueBox implements HasWidgetOptions
 {
     use IsTimeFrameAwareWidget;
 
     public bool $shouldBePositive = false;
+
+    public static function dashboardComponent(): array|string
+    {
+        return Dashboard::class;
+    }
 
     #[Renderless]
     public function calculateSum(): void
@@ -26,8 +37,8 @@ class Purchase extends ValueBox
                 ->purchase()
         )
             ->setRange($this->timeFrame)
-            ->setEndingDate($this->end?->endOfDay())
-            ->setStartingDate($this->start?->startOfDay())
+            ->setEndingDate($this->getEnd())
+            ->setStartingDate($this->getStart())
             ->setDateColumn('invoice_date')
             ->withGrowthRate()
             ->sum('total_net_price');
@@ -38,11 +49,57 @@ class Purchase extends ValueBox
         $this->growthRate = $metric->getGrowthRate();
     }
 
+    #[Renderless]
+    public function options(): array
+    {
+        return [
+            [
+                'label' => static::getLabel(),
+                'method' => 'show',
+                'params' => 'current',
+            ],
+            [
+                'label' => __('Previous Period'),
+                'method' => 'show',
+                'params' => 'previous',
+            ],
+        ];
+    }
+
+    #[Renderless]
+    public function show(string $period): void
+    {
+        if (strtolower($period) === 'previous') {
+            $start = $this->getStartPrevious()->toDateString();
+            $end = $this->getEndPrevious()->toDateString();
+        } else {
+            $start = $this->getStart()->toDateString();
+            $end = $this->getEnd()->toDateString();
+        }
+
+        SessionFilter::make(
+            Livewire::new(resolve_static(OrderList::class, 'class'))->getCacheKey(),
+            fn (Builder $query) => $query
+                ->whereNotNull('invoice_date')
+                ->whereNotNull('invoice_number')
+                ->purchase()
+                ->whereBetween('invoice_date', [$start, $end]),
+            __('Purchase') . ' ' . __('between :start and :end', ['start' => $start, 'end' => $end]),
+        )->store();
+
+        $this->redirectRoute('orders.orders', navigate: true);
+    }
+
     protected function getListeners(): array
     {
         return [
             'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
                 . ',.OrderLocked' => 'calculateSum',
         ];
+    }
+
+    protected function icon(): string
+    {
+        return 'credit-card';
     }
 }
