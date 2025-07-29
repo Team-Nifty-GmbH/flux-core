@@ -24,12 +24,12 @@
     </div>
     {{-- UI  footer height related --}}
     {{-- UI position of a selected element --}}
-    <div x-cloak x-show="footerStore.selectedElementId !== null"
+    <div x-cloak x-show="!footerStore.isImgResizeClicked && footerStore.selectedElementId !== null"
          :style="{'transform': `translate(${footerStore.selectedElementPos.x -50}px,${footerStore.selectedElementPos.y}px)` }"
          class="absolute left-0 top-0 z-[100] rounded shadow p-2 bg-gray-100">
         <div x-text="`${roundToOneDecimal(footerStore.selectedElementPos.x / footerStore.pxPerCm)}cm`"></div>
     </div>
-    <div x-cloak x-show="footerStore.selectedElementId !== null"
+    <div x-cloak x-show="!footerStore.isImgResizeClicked && footerStore.selectedElementId !== null"
          :style="{'transform': `translate(${footerStore.selectedElementPos.x}px,${footerStore.selectedElementPos.y - 40}px)` }"
          class="absolute left-0 top-0 z-[100] rounded shadow p-2 bg-gray-100">
         <div x-text="`${roundToOneDecimal(footerStore.selectedElementPos.y / footerStore.pyPerCm)}cm`"></div>
@@ -87,17 +87,19 @@
                     draggable="false"
                     data-type="img"
                     x-on:mousedown="printStore.editFooter ?  footerStore.onMouseDown($event, 'footer-logo') : null"
-                    class="absolute left-0 top-0 h-[1.7cm] w-fit"
-                    :class="{'bg-gray-300' : footerStore.selectedElementId === 'footer-logo'}"
+                    class="absolute left-0 top-0 h-[1.7cm] select-none"
+                    :class="{'bg-gray-300' : !footerStore.isImgResizeClicked && footerStore.selectedElementId === 'footer-logo'}"
                 >
-                    <div x-cloak x-show="printStore.editFooter" class="relative w-full">
+                    <div
+                        draggable="false"
+                        x-cloak x-show="printStore.editFooter" class="relative w-full">
                         <x-icon
                             x-on:mousedown.stop="footerStore.onMouseDownResize($event, 'footer-logo')"
                             name="arrows-pointing-out" class="absolute cursor-pointer right-0 top-0 h-4 w-4 rounded-full"></x-icon>
                     </div>
                     <img
                         draggable="false"
-                        class="logo-small footer-logo max-h-full w-fit"
+                        class="logo-small footer-logo max-h-full w-full"
                         src="{{ $client->logo_small_url }}"
                     />
                 </div>

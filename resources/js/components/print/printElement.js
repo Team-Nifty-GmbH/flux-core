@@ -1,4 +1,4 @@
-export default class FooterChildElement {
+export default class PrintElement {
     constructor(element, $store) {
         this.element = element;
         this._position = { x: 0, y: 0 };
@@ -6,6 +6,7 @@ export default class FooterChildElement {
         // cash the size to avoid recalculating it multiple times (bad performance)
         this._elementSize = null;
         this._height = null;
+        this._width = null;
     }
 
     get id() {
@@ -119,12 +120,28 @@ export default class FooterChildElement {
         this._height = value;
     }
 
+    set width(value) {
+        if (this.typeOfElement !== 'img') {
+            throw new Error('Width can only be set for img elements');
+        }
+        if (typeof value !== 'number') {
+            throw new Error('Width must be a number');
+        }
+
+        this.element.style.width = `${value}px`;
+        this._width = value;
+    }
+
     get position() {
         return this._position;
     }
 
     get height() {
         return this._height;
+    }
+
+    get width() {
+        return this._width;
     }
 
     // 'start | 'middle' | 'end' | 'coordinates'
@@ -154,6 +171,8 @@ export default class FooterChildElement {
                     x: startPosition.x,
                     y: startPosition.y,
                 };
+                startPosition.width && (this.width = startPosition.width);
+                startPosition.height && (this.height = startPosition.height);
             } else {
                 throw new Error(
                     'Start position must be a string or an object with x and y properties',

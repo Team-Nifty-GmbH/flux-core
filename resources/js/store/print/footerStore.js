@@ -3,7 +3,7 @@ import {
     roundToOneDecimal,
     STEP,
 } from '../../components/utils/print/utils.js';
-import FooterElement from '../../components/print/footerChildElement.js';
+import PrintElement from '../../components/print/printElement.js';
 
 export default function () {
     return {
@@ -89,8 +89,13 @@ export default function () {
                             this._footerHeight + STEP * (delta > 0 ? 1 : -1),
                         ),
                     );
+                    // take in the account the resized logo size
                     if (
-                        newHeight >= this._minFooterHeight &&
+                        newHeight >=
+                            Math.max(
+                                this._adjustedMinFooterHeight(),
+                                this._minFooterHeight,
+                            ) &&
                         newHeight <= this._maxFooterHeight
                     ) {
                         this._footerHeight = newHeight;
@@ -128,20 +133,7 @@ export default function () {
             }
         },
         onMouseDown(e, id) {
-            const index = this.visibleElements.findIndex(
-                (item) => item.id === id,
-            );
-            if (index !== -1) {
-                this._selectedElement.id = id;
-                this._selectedElement.ref = this.visibleElements[index];
-                const { x, y } = this.visibleElements[index].position;
-                this._selectedElement.x = x;
-                this._selectedElement.y = y;
-                this._selectedElement.startX = e.clientX;
-                this._selectedElement.startY = e.clientY;
-            } else {
-                throw new Error(`Element with id ${id} not found`);
-            }
+            this._selectElement(e, id);
         },
         toggleElement($ref, id) {
             if (this.footer === null) {
@@ -166,7 +158,7 @@ export default function () {
                     .pop();
 
                 if (element) {
-                    this.visibleElements.push(new FooterElement(element, this));
+                    this.visibleElements.push(new PrintElement(element, this));
                     this.observer.observe(element);
                 } else {
                     throw new Error(
@@ -175,6 +167,7 @@ export default function () {
                 }
             }
         },
+        // this method runs every time when mouse is released - hence no need to duplicate clean logic in onMouseUpResize
         onMouseUp() {
             if (
                 this._selectedElement.id !== null &&
@@ -208,31 +201,53 @@ export default function () {
         onMouseDownResize(e, id) {
             if (!this.isImgResizeClicked && id === 'footer-logo') {
                 this.isImgResizeClicked = true;
-                this.startPointFooterImageResize = e.clientY;
-
-                const index = this.visibleElements.findIndex(
-                    (item) => item.id === id,
-                );
-                if (index !== -1) {
-                    this._selectedElement.id = id;
-                    this._selectedElement.ref = this.visibleElements[index];
-                    const { x, y } = this.visibleElements[index].position;
-                    this._selectedElement.x = x;
-                    this._selectedElement.y = y;
-                    this._selectedElement.startX = e.clientX;
-                    this._selectedElement.startY = e.clientY;
-                } else {
-                    throw new Error(`Element with id ${id} not found`);
-                }
+                this._selectElement(e, id);
             }
         },
         onMouseUpResize() {
             if (this.isImgResizeClicked) {
                 this.isImgResizeClicked = false;
-                this.startPointFooterImageResize = null;
             }
         },
-        onMouseMoveResize(e) {},
+        onMouseMoveResize(e) {
+            if (this._selectedElement.ref !== null) {
+                const deltaY = e.clientY - this._selectedElement.startY;
+                // resize between min and max height
+                if (deltaY > 0) {
+                    const maxHeight = this._footerHeight * this.pyPerCm;
+                    const startHeight =
+                        this._selectedElement.ref.height ??
+                        this._selectedElement.ref.size.height;
+                    const newHeight = startHeight + 1;
+                    if (newHeight < maxHeight) {
+                        const newWidth =
+                            (this._selectedElement.ref.width ??
+                                this._selectedElement.ref.size.width) *
+                            (newHeight / startHeight);
+
+                        this._selectedElement.ref.height = newHeight;
+                        this._selectedElement.ref.width = newWidth;
+                    }
+                } else if (deltaY < 0) {
+                    const minHeight =
+                        (this._minFooterHeight - 1) * this.pyPerCm;
+                    const startHeight =
+                        this._selectedElement.ref.height ??
+                        this._selectedElement.ref.size.height;
+                    const newHeight = startHeight - 1;
+                    if (newHeight > minHeight) {
+                        const newWidth =
+                            (this._selectedElement.ref.width ??
+                                this._selectedElement.ref.size.width) *
+                            (newHeight / startHeight);
+                        this._selectedElement.ref.height = newHeight;
+                        this._selectedElement.ref.width = newWidth;
+                    }
+                }
+
+                this._selectedElement.startY = e.clientY;
+            }
+        },
         async register($wire, $refs) {
             this._component = () => $wire;
             this.footer = $refs['footer'];
@@ -267,7 +282,7 @@ export default function () {
                     );
                 this.visibleElements = Array.from(this.footer.children)
                     .filter((item) => item.id && true)
-                    .map((item) => new FooterElement(item, this));
+                    .map((item) => new PrintElement(item, this));
 
                 ['start', 'middle', 'end'].forEach((position, index) => {
                     this.visibleElements[index] &&
@@ -301,14 +316,49 @@ export default function () {
                     if (index !== -1) {
                         const child = children[index];
                         this.visibleElements.push(
-                            new FooterElement(child, this).init({
+                            new PrintElement(child, this).init({
                                 x: item.x * this.pxPerCm,
                                 y: item.y * this.pyPerCm,
+                                ...(item.width && {
+                                    width: item.width * this.pxPerCm,
+                                }),
+                                ...(item.height && {
+                                    height: item.height * this.pyPerCm,
+                                }),
                             }),
                         );
                     }
                 }
             });
+        },
+        _selectElement(e, id) {
+            const index = this.visibleElements.findIndex(
+                (item) => item.id === id,
+            );
+            if (index !== -1) {
+                this._selectedElement.id = id;
+                this._selectedElement.ref = this.visibleElements[index];
+                const { x, y } = this.visibleElements[index].position;
+                this._selectedElement.x = x;
+                this._selectedElement.y = y;
+                this._selectedElement.startX = e.clientX;
+                this._selectedElement.startY = e.clientY;
+            } else {
+                throw new Error(`Element with id ${id} not found`);
+            }
+        },
+        _adjustedMinFooterHeight() {
+            // for now only logo is resized - if in future other elements will be resized, this method should be updated
+            // to search for the heihest element and return its height
+            const indexOfLogo = this.visibleElements.findIndex(
+                (item) => item.id === 'footer-logo',
+            );
+            if (indexOfLogo !== -1) {
+                const element = this.visibleElements[indexOfLogo];
+                return roundToOneDecimal((element.height || 0) / this.pyPerCm);
+            } else {
+                return 0;
+            }
         },
         async reload($refs, isClientChange = true) {
             if (this.observer) {
@@ -356,7 +406,7 @@ export default function () {
                     );
                 this.visibleElements = Array.from(this.footer.children)
                     .filter((item) => item.id && true)
-                    .map((item) => new FooterElement(item, this));
+                    .map((item) => new PrintElement(item, this));
 
                 ['start', 'middle', 'end'].forEach((position, index) => {
                     this.visibleElements[index] &&
@@ -391,6 +441,10 @@ export default function () {
                         id: item.id,
                         x: roundToOneDecimal(item.position.x / this.pxPerCm),
                         y: roundToOneDecimal(item.position.y / this.pyPerCm),
+                        width:
+                            item.width !== null
+                                ? roundToOneDecimal(item.width / this.pxPerCm)
+                                : null,
                         height:
                             item.height !== null
                                 ? roundToOneDecimal(item.height / this.pyPerCm)
