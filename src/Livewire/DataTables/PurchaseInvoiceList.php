@@ -2,6 +2,8 @@
 
 namespace FluxErp\Livewire\DataTables;
 
+use FluxErp\Actions\Media\UploadMedia;
+use FluxErp\Actions\PurchaseInvoice\CreatePurchaseInvoice;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\Forms\MediaUploadForm;
 use FluxErp\Livewire\Forms\PurchaseInvoiceForm;
@@ -13,18 +15,20 @@ use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PurchaseInvoice;
 use FluxErp\Models\VatRate;
+use FluxErp\Traits\Livewire\WithFilePond;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\ComponentAttributeBag;
 use Livewire\Attributes\Renderless;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class PurchaseInvoiceList extends BaseDataTable
 {
-    use WithFileUploads;
+    use WithFilePond, WithFileUploads;
 
     public array $enabledCols = [
         'url',
@@ -51,7 +55,18 @@ class PurchaseInvoiceList extends BaseDataTable
             DataTableButton::make()
                 ->color('indigo')
                 ->text(__('Upload'))
+                ->when(fn () => resolve_static(UploadMedia::class, 'canPerformAction', [false])
+                    && resolve_static(CreatePurchaseInvoice::class, 'canPerformAction', [false])
+                )
                 ->wireClick('edit'),
+            DataTableButton::make()
+                ->text(__('Bulk PDF Upload'))
+                ->when(fn () => resolve_static(UploadMedia::class, 'canPerformAction', [false])
+                    && resolve_static(CreatePurchaseInvoice::class, 'canPerformAction', [false])
+                )
+                ->xOnClick(<<<'JS'
+                    $modalOpen('bulk-pdf-upload-modal')
+                JS),
         ];
     }
 
@@ -152,6 +167,66 @@ class PurchaseInvoiceList extends BaseDataTable
                 ],
             ];
         }
+    }
+
+    #[Renderless]
+    public function processBulkUpload(array $tempFileNames): bool
+    {
+        if (! $tempFileNames) {
+            $this->notification()
+                ->error(__('Please select at least one PDF file.'))
+                ->send();
+
+            return false;
+        }
+
+        $filesToProcess = array_filter($this->files, function (TemporaryUploadedFile $file) use ($tempFileNames) {
+            return in_array($file->getFilename(), $tempFileNames);
+        });
+
+        if (! $filesToProcess) {
+            $this->notification()
+                ->error(__('No valid files found for upload.'))->send();
+
+            return false;
+        }
+
+        $successCount = 0;
+        $errorCount = 0;
+
+        foreach ($filesToProcess as $file) {
+            try {
+                $this->purchaseInvoiceForm->reset();
+                $this->mediaForm->reset();
+
+                $this->mediaForm->uploadedFile = [$file];
+                $this->purchaseInvoiceForm->media = $file;
+
+                $this->purchaseInvoiceForm->save();
+                $successCount++;
+            } catch (ValidationException|UnauthorizedException $e) {
+                exception_to_notifications($e, $this);
+
+                $errorCount++;
+            }
+        }
+
+        $this->files = [];
+        $this->loadData();
+
+        if ($successCount > 0) {
+            $this->notification()
+                ->success(__(':count PDF(s) successfully uploaded.', ['count' => $successCount]))
+                ->send();
+        }
+
+        if ($errorCount > 0) {
+            $this->notification()
+                ->error(__(':count PDF(s) could not be uploaded.', ['count' => $errorCount]))
+                ->send();
+        }
+
+        return $successCount > 0;
     }
 
     #[Renderless]
