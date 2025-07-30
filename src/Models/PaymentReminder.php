@@ -50,6 +50,11 @@ class PaymentReminder extends FluxModel implements HasMediaForeignKey, OffersPri
         });
     }
 
+    public function getEmailTemplateType(): ?string
+    {
+        return morph_alias(static::class);
+    }
+
     public function getPaymentReminderText(): ?PaymentReminderText
     {
         return app(PaymentReminderText::class)

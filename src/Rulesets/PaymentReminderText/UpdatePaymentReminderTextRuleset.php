@@ -19,12 +19,6 @@ class UpdatePaymentReminderTextRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => PaymentReminderText::class]),
             ],
-            'mail_to' => 'nullable|array',
-            'mail_to.*' => 'email',
-            'mail_cc' => 'nullable|array',
-            'mail_cc.*' => 'email',
-            'mail_subject' => 'nullable|string',
-            'mail_body' => 'nullable|string',
             'reminder_subject' => 'nullable|string',
             'reminder_body' => 'sometimes|required|string',
             'reminder_level' => [

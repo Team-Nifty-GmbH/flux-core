@@ -75,8 +75,8 @@ class EmailTemplates extends EmailTemplateList
         $modelTypes = [
             [
                 'value' => null,
-                'label' => __('General')
-            ]
+                'label' => __('General'),
+            ],
         ];
 
         foreach (Relation::morphMap() as $key => $modelClass) {
