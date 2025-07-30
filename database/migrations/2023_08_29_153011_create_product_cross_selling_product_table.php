@@ -12,8 +12,10 @@ return new class() extends Migration
             $table->id();
             $table->foreignId('product_cross_selling_id')
                 ->constrained('product_cross_sellings')
-                ->onDelete('cascade');
-            $table->foreignId('product_id')->constrained('products')->onDelete('cascade');
+                ->cascadeOnDelete();
+            $table->foreignId('product_id')
+                ->constrained('products')
+                ->cascadeOnDelete();
 
             $table->unique(['product_cross_selling_id', 'product_id'], 'product_cross_selling_product_unique');
         });

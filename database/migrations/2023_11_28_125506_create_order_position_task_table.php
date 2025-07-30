@@ -10,9 +10,13 @@ return new class() extends Migration
     {
         Schema::create('order_position_task', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('order_position_id')->references('id')->on('order_positions')->cascadeOnDelete();
-            $table->foreignId('task_id')->references('id')->on('tasks')->cascadeOnDelete();
-            $table->decimal('amount', 40, 10, true);
+            $table->foreignId('order_position_id')
+                ->constrained('order_positions')
+                ->cascadeOnDelete();
+            $table->foreignId('task_id')
+                ->constrained('tasks')
+                ->cascadeOnDelete();
+            $table->decimal('amount', 40, 10);
         });
     }
 

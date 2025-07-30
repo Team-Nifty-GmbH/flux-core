@@ -21,7 +21,8 @@ return new class() extends Migration
 
             $table->foreign('serial_number_range_id')
                 ->references('id')
-                ->on('serial_number_ranges');
+                ->on('serial_number_ranges')
+                ->nullOnDelete();
         });
     }
 

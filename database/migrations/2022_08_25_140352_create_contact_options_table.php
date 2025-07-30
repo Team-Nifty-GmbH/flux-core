@@ -19,7 +19,7 @@ return new class() extends Migration
             $table->timestamp('updated_at')->nullable();
             $table->string('updated_by')->nullable();
 
-            $table->foreign('address_id')->references('id')->on('addresses');
+            $table->foreign('address_id')->references('id')->on('addresses')->cascadeOnDelete();
         });
     }
 

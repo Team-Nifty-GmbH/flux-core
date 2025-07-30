@@ -10,8 +10,8 @@ return new class() extends Migration
     {
         Schema::create('client_payment_type', function (Blueprint $table): void {
             $table->id('pivot_id');
-            $table->foreignId('client_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('payment_type_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('client_id')->constrained('clients')->cascadeOnDelete();
+            $table->foreignId('payment_type_id')->constrained('payment_types')->cascadeOnDelete();
         });
     }
 

@@ -13,8 +13,14 @@ return new class() extends Migration
             $table->unsignedBigInteger('address_type_id');
 
             $table->primary(['address_id', 'address_type_id']);
-            $table->foreign('address_id')->references('id')->on('addresses');
-            $table->foreign('address_type_id')->references('id')->on('address_types');
+            $table->foreign('address_id')
+                ->references('id')
+                ->on('addresses')
+                ->cascadeOnDelete();
+            $table->foreign('address_type_id')
+                ->references('id')
+                ->on('address_types')
+                ->cascadeOnDelete();
         });
     }
 

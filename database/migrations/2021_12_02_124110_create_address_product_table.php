@@ -13,8 +13,8 @@ return new class() extends Migration
             $table->unsignedBigInteger('product_id');
 
             $table->primary(['address_id', 'product_id']);
-            $table->foreign('address_id')->references('id')->on('addresses');
-            $table->foreign('product_id')->references('id')->on('products');
+            $table->foreign('address_id')->references('id')->on('addresses')->cascadeOnDelete();
+            $table->foreign('product_id')->references('id')->on('products')->cascadeOnDelete();
         });
     }
 

@@ -22,15 +22,11 @@ return new class() extends Migration
 
         Schema::table('users', function (Blueprint $table): void {
             $table->char('uuid', 36)->unique()->after('id');
-            $table->foreignId('contact_id')
-                ->nullable()
-                ->after('uuid')
-                ->constrained('contacts')
-                ->nullOnDelete();
             $table->foreignId('currency_id')
                 ->nullable()
-                ->after('contact_id')
-                ->constrained('currencies');
+                ->after('uuid')
+                ->constrained('currencies')
+                ->nullOnDelete();
             $table->foreignId('language_id')
                 ->after('currency_id')
                 ->constrained('languages');

@@ -8,6 +8,10 @@ return new class() extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('lead_states')) {
+            return;
+        }
+
         Schema::create('lead_states', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);

@@ -10,8 +10,8 @@ return new class() extends Migration
     {
         Schema::create('printer_user', function (Blueprint $table): void {
             $table->id('pivot_id');
-            $table->foreignId('printer_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('printer_id')->constrained('printers')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->string('default_size')->nullable();
             $table->boolean('is_default')->default(false);
         });

@@ -18,7 +18,6 @@ return new class() extends Migration
             $table->boolean('is_notifiable')->default(false);
             $table->timestamps();
 
-            $table->foreign('user_id')->references('id')->on('users');
             $table->index(['model_type', 'model_id']);
         });
     }

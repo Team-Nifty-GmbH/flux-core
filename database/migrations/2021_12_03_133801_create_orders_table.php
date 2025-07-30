@@ -26,9 +26,9 @@ return new class() extends Migration
                 ->nullable()
                 ->constrained('users')
                 ->nullOnDelete();
-            $table->unsignedBigInteger('client_id');
+            $table->foreignId('client_id')
+                ->constrained('clients');
             $table->foreignId('contact_bank_connection_id')
-                ->after('contact_id')
                 ->nullable()
                 ->constrained('contact_bank_connections')
                 ->nullOnDelete();
@@ -41,14 +41,22 @@ return new class() extends Migration
                 ->nullOnDelete();
             $table->foreignId('currency_id')
                 ->constrained('currencies');
-            $table->unsignedBigInteger('language_id')->nullable();
+            $table->foreignId('language_id')
+                ->nullable()
+                ->constrained('languages')
+                ->nullOnDelete();
             $table->foreignId('lead_id')
                 ->nullable()
                 ->constrained('leads')
                 ->nullOnDelete();
-            $table->unsignedBigInteger('order_type_id');
-            $table->unsignedBigInteger('parent_id')->nullable();
-            $table->unsignedBigInteger('payment_type_id');
+            $table->foreignId('order_type_id')
+                ->constrained('order_types');
+            $table->foreignId('parent_id')
+                ->nullable()
+                ->constrained('orders')
+                ->nullOnDelete();
+            $table->foreignId('payment_type_id')
+                ->constrained('payment_types');
             $table->foreignId('price_list_id')
                 ->constrained('price_lists');
             $table->foreignId('responsible_user_id')

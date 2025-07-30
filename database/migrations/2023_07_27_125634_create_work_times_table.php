@@ -13,7 +13,7 @@ return new class() extends Migration
             $table->char('uuid', 36);
             $table->foreignId('contact_id')
                 ->nullable()
-                ->constrained()
+                ->constrained('contacts')
                 ->cascadeOnDelete();
             $table->foreignId('order_position_id')
                 ->nullable()

@@ -29,10 +29,21 @@ return new class() extends Migration
             $table->timestamp('deleted_at')->nullable();
             $table->string('deleted_by')->nullable();
 
-            $table->foreign('user_id')->references('id')->on('users');
-            $table->foreign('commission_rate_id')->references('id')->on('commission_rates')->nullOnDelete();
-            $table->foreign('order_id')->references('id')->on('orders')->nullOnDelete();
-            $table->foreign('order_position_id')->references('id')->on('order_positions')->nullOnDelete();
+            $table->foreign('commission_rate_id')
+                ->references('id')
+                ->on('commission_rates')
+                ->nullOnDelete();
+            $table->foreign('order_id')
+                ->references('id')
+                ->on('orders')
+                ->nullOnDelete();
+            $table->foreign('order_position_id')
+                ->references('id')
+                ->on('order_positions')
+                ->nullOnDelete();
+            $table->foreign('user_id')
+                ->references('id')
+                ->on('users');
         });
     }
 

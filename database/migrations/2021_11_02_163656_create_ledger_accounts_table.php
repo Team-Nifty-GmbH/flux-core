@@ -8,11 +8,15 @@ return new class() extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('ledger_accounts')) {
+            return;
+        }
+
         Schema::create('ledger_accounts', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
             $table->foreignId('client_id')
-                ->constrained()
+                ->constrained('clients')
                 ->cascadeOnDelete();
             $table->string('number');
             $table->string('name');

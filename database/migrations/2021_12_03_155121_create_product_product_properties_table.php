@@ -14,8 +14,14 @@ return new class() extends Migration
             $table->text('value')->nullable();
 
             $table->primary(['product_id', 'product_prop_id']);
-            $table->foreign('product_id')->references('id')->on('products');
-            $table->foreign('product_prop_id')->references('id')->on('product_properties');
+            $table->foreign('product_id')
+                ->references('id')
+                ->on('products')
+                ->cascadeOnDelete();
+            $table->foreign('product_prop_id')
+                ->references('id')
+                ->on('product_properties')
+                ->cascadeOnDelete();
         });
     }
 

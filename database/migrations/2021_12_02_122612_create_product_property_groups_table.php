@@ -8,16 +8,14 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::create('vat_rates', function (Blueprint $table): void {
+        if (Schema::hasTable('product_property_groups')) {
+            return;
+        }
+
+        Schema::create('product_property_groups', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
-
             $table->string('name');
-            $table->decimal('rate_percentage', 40, 10);
-            $table->text('footer_text')->nullable();
-            $table->boolean('is_default')->default(false);
-            $table->boolean('is_tax_exemption')->default(false);
-
             $table->timestamp('created_at')->nullable();
             $table->string('created_by')->nullable();
             $table->timestamp('updated_at')->nullable();
@@ -29,6 +27,6 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('vat_rates');
+        Schema::dropIfExists('product_property_groups');
     }
 };

@@ -8,23 +8,31 @@ return new class() extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('stock_postings')) {
+            return;
+        }
+
         Schema::create('stock_postings', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
             $table->foreignId('order_position_id')
                 ->nullable()
-                ->constrained()
+                ->constrained('order_positions')
                 ->nullOnDelete();
             $table->foreignId('parent_id')
                 ->nullable()
                 ->constrained('stock_postings')
                 ->nullOnDelete();
-            $table->unsignedBigInteger('product_id');
+            $table->foreignId('product_id')
+                ->constrained('products')
+                ->cascadeOnDelete();
             $table->foreignId('serial_number_id')
                 ->nullable()
-                ->constrained()
+                ->constrained('serial_numbers')
                 ->nullOnDelete();
-            $table->unsignedBigInteger('warehouse_id');
+            $table->foreignId('warehouse_id')
+                ->constrained('warehouses')
+                ->cascadeOnDelete();
 
             $table->decimal('stock', 40, 10)->nullable();
             $table->decimal('remaining_stock', 40, 10)->nullable();
@@ -40,9 +48,6 @@ return new class() extends Migration
             $table->string('updated_by')->nullable();
             $table->timestamp('deleted_at')->nullable();
             $table->string('deleted_by')->nullable();
-
-            $table->foreign('warehouse_id')->references('id')->on('warehouses');
-            $table->foreign('product_id')->references('id')->on('products');
         });
     }
 

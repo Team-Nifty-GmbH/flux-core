@@ -11,10 +11,21 @@ return new class() extends Migration
         Schema::create('purchase_invoice_positions', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
-            $table->foreignId('ledger_account_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('product_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('purchase_invoice_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('vat_rate_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('ledger_account_id')
+                ->nullable()
+                ->constrained('ledger_accounts')
+                ->nullOnDelete();
+            $table->foreignId('product_id')
+                ->nullable()
+                ->constrained('products')
+                ->nullOnDelete();
+            $table->foreignId('purchase_invoice_id')
+                ->constrained('purchase_invoices')
+                ->cascadeOnDelete();
+            $table->foreignId('vat_rate_id')
+                ->nullable()
+                ->constrained('vat_rates')
+                ->nullOnDelete();
             $table->string('name')->nullable();
             $table->decimal('amount', 40, 10);
             $table->decimal('unit_price', 40, 10)->nullable();

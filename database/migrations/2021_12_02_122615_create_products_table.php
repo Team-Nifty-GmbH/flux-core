@@ -17,11 +17,26 @@ return new class() extends Migration
                 ->nullable()
                 ->constrained('media')
                 ->nullOnDelete();
-            $table->unsignedBigInteger('parent_id')->nullable();
-            $table->unsignedBigInteger('purchase_unit_id')->nullable();
-            $table->unsignedBigInteger('reference_unit_id')->nullable();
-            $table->unsignedBigInteger('unit_id')->nullable();
-            $table->unsignedBigInteger('vat_rate_id')->nullable();
+            $table->foreignId('parent_id')
+                ->nullable()
+                ->constrained('products')
+                ->nullOnDelete();
+            $table->foreignId('purchase_unit_id')
+                ->nullable()
+                ->constrained('units')
+                ->nullOnDelete();
+            $table->foreignId('reference_unit_id')
+                ->nullable()
+                ->constrained('units')
+                ->nullOnDelete();
+            $table->foreignId('unit_id')
+                ->nullable()
+                ->constrained('units')
+                ->nullOnDelete();
+            $table->foreignId('vat_rate_id')
+                ->nullable()
+                ->constrained('vat_rates')
+                ->nullOnDelete();
 
             // TEXT STRING INT
             $table->text('product_number')->nullable();
@@ -65,12 +80,6 @@ return new class() extends Migration
             $table->string('updated_by')->nullable();
             $table->timestamp('deleted_at')->nullable();
             $table->string('deleted_by')->nullable();
-
-            $table->foreign('parent_id')->references('id')->on('products');
-            $table->foreign('vat_rate_id')->references('id')->on('vat_rates');
-            $table->foreign('unit_id')->references('id')->on('units');
-            $table->foreign('purchase_unit_id')->references('id')->on('units');
-            $table->foreign('reference_unit_id')->references('id')->on('units');
         });
     }
 

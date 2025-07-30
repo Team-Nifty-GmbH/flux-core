@@ -8,6 +8,10 @@ return new class() extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('addresses')) {
+            return;
+        }
+
         Schema::create('addresses', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
@@ -54,9 +58,9 @@ return new class() extends Migration
             $table->timestamp('deleted_at')->nullable();
             $table->string('deleted_by')->nullable();
 
-            $table->foreign('contact_id')->references('id')->on('contacts');
-            $table->foreign('country_id')->references('id')->on('countries');
-            $table->foreign('language_id')->references('id')->on('languages');
+            $table->foreign('contact_id')->references('id')->on('contacts')->cascadeOnDelete();
+            $table->foreign('country_id')->references('id')->on('countries')->nullOnDelete();
+            $table->foreign('language_id')->references('id')->on('languages')->nullOnDelete();
         });
     }
 

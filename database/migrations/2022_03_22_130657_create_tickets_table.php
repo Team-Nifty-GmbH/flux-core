@@ -11,7 +11,10 @@ return new class() extends Migration
         Schema::create('tickets', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
-            $table->foreignId('ticket_type_id')->nullable()->constrained('ticket_types');
+            $table->foreignId('ticket_type_id')
+                ->nullable()
+                ->constrained('ticket_types')
+                ->nullOnDelete();
             $table->morphs('authenticatable');
             $table->nullableMorphs('model');
             $table->string('ticket_number');

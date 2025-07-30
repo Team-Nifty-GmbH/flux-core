@@ -8,6 +8,10 @@ return new class() extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('contacts')) {
+            return;
+        }
+
         Schema::create('contacts', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
@@ -24,21 +28,9 @@ return new class() extends Migration
                 ->nullable()
                 ->constrained('currencies')
                 ->nullOnDelete();
-            $table->foreignId('delivery_address_id')
-                ->nullable()
-                ->constrained('addresses')
-                ->nullOnDelete();
             $table->foreignId('expense_ledger_account_id')
                 ->nullable()
                 ->constrained('ledger_accounts')
-                ->nullOnDelete();
-            $table->foreignId('invoice_address_id')
-                ->nullable()
-                ->constrained('addresses')
-                ->nullOnDelete();
-            $table->foreignId('main_address_id')
-                ->nullable()
-                ->constrained('addresses')
                 ->nullOnDelete();
             $table->foreignId('payment_type_id')
                 ->nullable()

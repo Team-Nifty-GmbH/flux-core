@@ -27,13 +27,16 @@ return new class() extends Migration
 
             $table->foreign('client_id')
                 ->references('id')
-                ->on('clients');
+                ->on('clients')
+                ->cascadeOnDelete();
             $table->foreign('contact_id')
                 ->references('id')
-                ->on('contacts');
+                ->on('contacts')
+                ->cascadeOnDelete();
             $table->foreign('contact_bank_connection_id')
                 ->references('id')
-                ->on('contact_bank_connections');
+                ->on('contact_bank_connections')
+                ->nullOnDelete();
 
             $table->unique(['client_id', 'mandate_reference_number']);
         });

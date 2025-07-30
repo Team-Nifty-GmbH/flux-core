@@ -13,8 +13,14 @@ return new class() extends Migration
             $table->unsignedBigInteger('role_id');
             $table->unsignedBigInteger('ticket_type_id');
 
-            $table->foreign('role_id')->references('id')->on('roles')->cascadeOnDelete();
-            $table->foreign('ticket_type_id')->references('id')->on('ticket_types')->cascadeOnDelete();
+            $table->foreign('role_id')
+                ->references('id')
+                ->on('roles')
+                ->cascadeOnDelete();
+            $table->foreign('ticket_type_id')
+                ->references('id')
+                ->on('ticket_types')
+                ->cascadeOnDelete();
         });
     }
 

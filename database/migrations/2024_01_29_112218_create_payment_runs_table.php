@@ -13,7 +13,7 @@ return new class() extends Migration
             $table->char('uuid', 36);
             $table->foreignId('bank_connection_id')
                 ->nullable()
-                ->constrained()
+                ->constrained('bank_connections')
                 ->cascadeOnDelete();
             $table->string('state')->default('open');
             $table->string('payment_run_type_enum');

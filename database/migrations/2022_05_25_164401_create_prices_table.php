@@ -11,8 +11,8 @@ return new class() extends Migration
         Schema::create('prices', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
-            $table->unsignedBigInteger('product_id');
             $table->unsignedBigInteger('price_list_id');
+            $table->unsignedBigInteger('product_id');
             $table->decimal('price', 40, 10)
                 ->comment('The actual price as number for this database entry.');
             $table->timestamp('created_at')->nullable();
@@ -22,8 +22,14 @@ return new class() extends Migration
             $table->timestamp('deleted_at')->nullable();
             $table->string('deleted_by')->nullable();
 
-            $table->foreign('price_list_id')->references('id')->on('price_lists');
-            $table->foreign('product_id')->references('id')->on('products');
+            $table->foreign('price_list_id')
+                ->references('id')
+                ->on('price_lists')
+                ->cascadeOnDelete();
+            $table->foreign('product_id')
+                ->references('id')
+                ->on('products')
+                ->cascadeOnDelete();
         });
     }
 

@@ -10,8 +10,8 @@ return new class() extends Migration
     {
         Schema::create('client_product', function (Blueprint $table): void {
             $table->id('pivot_id');
-            $table->foreignId('client_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('product_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('client_id')->constrained('clients')->cascadeOnDelete();
+            $table->foreignId('product_id')->constrained('products')->cascadeOnDelete();
         });
     }
 

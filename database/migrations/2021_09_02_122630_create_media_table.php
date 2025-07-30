@@ -11,7 +11,7 @@ return new class() extends Migration
         Schema::create('media', function (Blueprint $table): void {
             $table->bigIncrements('id');
             $table->char('uuid', 36)->nullable()->unique();
-            $table->foreignId('parent_id')->nullable()->constrained('media');
+            $table->foreignId('parent_id')->nullable()->constrained('media')->nullOnDelete();
             $table->morphs('model');
             $table->string('collection_name');
             $table->string('name');

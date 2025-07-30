@@ -8,11 +8,19 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::create('lead_loss_reasons', function (Blueprint $table): void {
+        if (Schema::hasTable('vat_rates')) {
+            return;
+        }
+
+        Schema::create('vat_rates', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
+
             $table->string('name');
-            $table->boolean('is_active')->default(true);
+            $table->decimal('rate_percentage', 40, 10);
+            $table->text('footer_text')->nullable();
+            $table->boolean('is_default')->default(false);
+            $table->boolean('is_tax_exemption')->default(false);
 
             $table->timestamp('created_at')->nullable();
             $table->string('created_by')->nullable();
@@ -25,6 +33,6 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('lead_loss_reasons');
+        Schema::dropIfExists('vat_rates');
     }
 };

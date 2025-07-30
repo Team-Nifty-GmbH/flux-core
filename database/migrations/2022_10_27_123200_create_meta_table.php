@@ -13,7 +13,7 @@ return new class() extends Migration
             $table->id();
             $table->foreignId('additional_column_id')
                 ->nullable()
-                ->constrained()
+                ->constrained('additional_columns')
                 ->cascadeOnDelete();
             $table->morphs('model');
             $table->string('key')->nullable();

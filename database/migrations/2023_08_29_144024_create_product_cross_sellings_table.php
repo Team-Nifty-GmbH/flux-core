@@ -11,7 +11,7 @@ return new class() extends Migration
         Schema::create('product_cross_sellings', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
-            $table->foreignId('product_id')->constrained('products')->onDelete('cascade');
+            $table->foreignId('product_id')->constrained('products')->cascadeOnDelete();
             $table->string('name');
             $table->integer('order_column')->default(0);
             $table->boolean('is_active')->default(true);

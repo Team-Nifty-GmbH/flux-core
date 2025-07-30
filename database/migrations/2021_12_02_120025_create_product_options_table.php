@@ -24,7 +24,8 @@ return new class() extends Migration
 
             $table->foreign('product_option_group_id')
                 ->references('id')
-                ->on('product_option_groups');
+                ->on('product_option_groups')
+                ->cascadeOnDelete();
         });
     }
 

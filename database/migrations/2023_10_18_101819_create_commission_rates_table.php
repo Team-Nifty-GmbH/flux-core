@@ -23,10 +23,10 @@ return new class() extends Migration
             $table->timestamp('deleted_at')->nullable();
             $table->string('deleted_by')->nullable();
 
-            $table->foreign('user_id')->references('id')->on('users');
-            $table->foreign('contact_id')->references('id')->on('contacts')->cascadeOnDelete();
             $table->foreign('category_id')->references('id')->on('categories')->cascadeOnDelete();
+            $table->foreign('contact_id')->references('id')->on('contacts')->cascadeOnDelete();
             $table->foreign('product_id')->references('id')->on('products')->cascadeOnDelete();
+            $table->foreign('user_id')->references('id')->on('users');
         });
     }
 

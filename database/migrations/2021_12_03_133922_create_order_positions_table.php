@@ -8,6 +8,10 @@ return new class() extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('order_positions')) {
+            return;
+        }
+
         Schema::create('order_positions', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
@@ -35,7 +39,7 @@ return new class() extends Migration
                 ->nullOnDelete();
             $table->foreignId('parent_id')
                 ->nullable()
-                ->constrained('orders')
+                ->constrained('order_positions')
                 ->cascadeOnDelete();
             $table->foreignId('price_list_id')
                 ->nullable()
@@ -92,7 +96,6 @@ return new class() extends Migration
                 ->comment('A decimal containing the order-position total price gross after all calculations.');
             $table->decimal('vat_price', 40, 10)
                 ->nullable()
-                ->after('total_net_price')
                 ->comment('A decimal containing the tax for this order-position.');
             $table->decimal('unit_net_price', 40, 10)
                 ->nullable()
@@ -105,7 +108,6 @@ return new class() extends Migration
                 ->comment('A decimal, containing the vat-rate in percent, that is cached for easier and faster readability of this order-position.');
             $table->decimal('amount_packed_products', 40, 10)
                 ->nullable()
-                ->after('vat_rate')
                 ->comment('A decimal containing the amount of packed products for this order-position.');
             $table->date('customer_delivery_date')
                 ->nullable()

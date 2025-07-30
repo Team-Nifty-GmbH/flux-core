@@ -10,8 +10,8 @@ return new class() extends Migration
     {
         Schema::create('order_transaction', function (Blueprint $table): void {
             $table->id('pivot_id');
-            $table->foreignId('transaction_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('order_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('transaction_id')->constrained('transactions')->cascadeOnDelete();
+            $table->foreignId('order_id')->constrained('orders')->cascadeOnDelete();
             $table->decimal('amount', 40, 10);
             $table->boolean('is_accepted')->default(false);
             $table->timestamps();

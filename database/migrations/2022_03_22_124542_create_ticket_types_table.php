@@ -8,6 +8,10 @@ return new class() extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('ticket_types')) {
+            return;
+        }
+
         Schema::create('ticket_types', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);

@@ -13,8 +13,15 @@ return new class() extends Migration
             $table->unsignedBigInteger('product_id');
             $table->unsignedBigInteger('product_option_id');
 
-            $table->foreign('product_id')->references('id')->on('products');
-            $table->foreign('product_option_id')->references('id')->on('product_options');
+            $table->foreign('product_id')
+                ->references('id')
+                ->on('products')
+                ->cascadeOnDelete();
+            $table->foreign('product_option_id')
+                ->references('id')
+                ->on('product_options')
+                ->cascadeOnDelete();
+
             $table->unique(['product_id', 'product_option_id']);
         });
     }

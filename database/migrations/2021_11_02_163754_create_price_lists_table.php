@@ -8,12 +8,17 @@ return new class() extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('price_lists')) {
+            return;
+        }
+
         Schema::create('price_lists', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
             $table->foreignId('parent_id')
                 ->nullable()
-                ->constrained('price_lists');
+                ->constrained('price_lists')
+                ->nullOnDelete();
             $table->string('name')
                 ->comment('A string containing a descriptive name for the current price-list.');
             $table->string('price_list_code')->unique();

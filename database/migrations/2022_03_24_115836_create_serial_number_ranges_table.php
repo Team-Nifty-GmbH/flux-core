@@ -11,7 +11,7 @@ return new class() extends Migration
         Schema::create('serial_number_ranges', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
-            $table->foreignId('client_id')->nullable()->constrained('clients');
+            $table->foreignId('client_id')->nullable()->constrained('clients')->nullOnDelete();
             $table->string('unique_key')->unique();
             $table->string('model_type');
             $table->unsignedBigInteger('model_id')->nullable();

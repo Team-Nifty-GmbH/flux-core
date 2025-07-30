@@ -11,7 +11,10 @@ return new class() extends Migration
         Schema::create('warehouses', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
-            $table->unsignedBigInteger('address_id')->nullable();
+            $table->foreignId('address_id')
+                ->nullable()
+                ->constrained('addresses')
+                ->nullOnDelete();
 
             $table->string('name');
             $table->boolean('is_default')->default(false);
@@ -22,8 +25,6 @@ return new class() extends Migration
             $table->string('updated_by')->nullable();
             $table->timestamp('deleted_at')->nullable();
             $table->string('deleted_by')->nullable();
-
-            $table->foreign('address_id')->references('id')->on('addresses');
         });
     }
 

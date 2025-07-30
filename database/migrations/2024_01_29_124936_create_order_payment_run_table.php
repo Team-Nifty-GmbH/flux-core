@@ -11,10 +11,10 @@ return new class() extends Migration
         Schema::create('order_payment_run', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('order_id')
-                ->constrained()
+                ->constrained('orders')
                 ->cascadeOnDelete();
             $table->foreignId('payment_run_id')
-                ->constrained()
+                ->constrained('payment_runs')
                 ->cascadeOnDelete();
             $table->decimal('amount', 40, 10);
             $table->boolean('success')->default(false);

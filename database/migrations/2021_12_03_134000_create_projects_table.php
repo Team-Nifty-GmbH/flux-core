@@ -8,10 +8,16 @@ return new class() extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('projects')) {
+            return;
+        }
+
         Schema::create('projects', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
-            $table->foreignId('client_id')->constrained('clients')->cascadeOnDelete();
+            $table->foreignId('client_id')
+                ->constrained('clients')
+                ->cascadeOnDelete();
             $table->foreignId('contact_id')
                 ->nullable()
                 ->constrained('contacts')
@@ -20,7 +26,10 @@ return new class() extends Migration
                 ->nullable()
                 ->constrained('orders')
                 ->nullOnDelete();
-            $table->unsignedBigInteger('parent_id')->nullable();
+            $table->foreignId('parent_id')
+                ->nullable()
+                ->constrained('projects')
+                ->nullOnDelete();
             $table->foreignId('responsible_user_id')
                 ->nullable()
                 ->constrained('users')
@@ -42,9 +51,6 @@ return new class() extends Migration
             $table->string('updated_by')->nullable();
             $table->timestamp('deleted_at')->nullable();
             $table->string('deleted_by')->nullable();
-
-
-            $table->foreign('parent_id')->references('id')->on('projects');
         });
     }
 

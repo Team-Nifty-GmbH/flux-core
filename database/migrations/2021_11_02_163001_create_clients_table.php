@@ -8,13 +8,13 @@ return new class() extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('clients')) {
+            return;
+        }
+
         Schema::create('clients', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
-            $table->foreignId('commission_credit_note_order_type_id')
-                ->nullable()
-                ->constrained('order_types')
-                ->nullOnDelete();
             $table->foreignId('country_id')->nullable()->constrained('countries')->nullOnDelete();
             $table->string('name');
             $table->string('client_code')->unique();

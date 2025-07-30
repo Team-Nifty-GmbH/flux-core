@@ -12,8 +12,8 @@ return new class() extends Migration
     {
         Schema::create('order_schedule', function (Blueprint $table): void {
             $table->id('pivot_id');
-            $table->foreignId('order_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('schedule_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('order_id')->constrained('orders')->cascadeOnDelete();
+            $table->foreignId('schedule_id')->constrained('schedules')->cascadeOnDelete();
         });
     }
 
