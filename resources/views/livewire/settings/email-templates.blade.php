@@ -76,7 +76,7 @@
                         >
                             <button
                                 type="button"
-                                x-on:click="$wire.emailTemplateForm.cc.splice($wire.emailTemplateForm.cc.indexOf(to), 1)"
+                                x-on:click="$wire.emailTemplateForm.cc.splice($wire.emailTemplateForm.cc.indexOf(cc), 1)"
                             >
                                 <x-icon name="x-mark" class="h-4 w-4" />
                             </button>
