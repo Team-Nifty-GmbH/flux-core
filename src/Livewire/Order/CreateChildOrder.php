@@ -12,6 +12,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -21,10 +22,15 @@ class CreateChildOrder extends Component
 {
     use Actions;
 
+    #[Locked]
+    public array $availableOrderTypes = [];
+
     #[Url]
     public ?int $orderId = null;
 
     public ?array $parentOrder = null;
+
+    public ?float $percentage = null;
 
     public OrderReplicateForm $replicateOrder;
 
@@ -50,10 +56,6 @@ class CreateChildOrder extends Component
             ! $this->orderId
             || ! $this->type
             || ! in_array($this->type, [OrderTypeEnum::Retoure->value, OrderTypeEnum::SplitOrder->value])
-            || resolve_static(OrderType::class, 'query')
-                ->where('order_type_enum', $this->type)
-                ->where('is_active', true)
-                ->doesntExist()
             || ! $parentOrder
         ) {
             $this->redirectRoute('orders.orders', navigate: true);
@@ -67,14 +69,20 @@ class CreateChildOrder extends Component
         $this->replicateOrder->fill($this->parentOrder);
         $this->replicateOrder->parent_id = $this->orderId;
         $this->replicateOrder->order_positions = [];
-        $this->replicateOrder->order_type_id = resolve_static(OrderType::class, 'query')
+
+        $this->availableOrderTypes = resolve_static(OrderType::class, 'query')
             ->where('order_type_enum', $this->type)
             ->where('is_active', true)
             ->when(
                 $this->type === OrderTypeEnum::SplitOrder->value,
                 fn (Builder $query) => $query->where('is_hidden', false)
             )
-            ->value('id');
+            ->get(['id', 'name'])
+            ->toArray();
+
+        if (count($this->availableOrderTypes) === 1) {
+            $this->replicateOrder->order_type_id = data_get($this->availableOrderTypes, '0.id');
+        }
     }
 
     public function render(): View
@@ -125,18 +133,22 @@ class CreateChildOrder extends Component
 
     public function takeOrderPositions(): void
     {
-        $alreadySelectedIds = array_column($this->replicateOrder->order_positions, 'id');
+        $takeAllWithPercentage = $this->percentage && $this->percentage > 0;
 
-        $newPositionIds = array_diff($this->selectedPositions, $alreadySelectedIds);
+        if ($takeAllWithPercentage) {
+            $this->replicateOrder->order_positions = [];
+        } else {
+            $alreadySelectedIds = array_column($this->replicateOrder->order_positions, 'id');
+            $positionIds = array_diff($this->selectedPositions, $alreadySelectedIds);
 
-        if (! $newPositionIds) {
-            $this->selectedPositions = [];
+            if (! $positionIds) {
+                $this->selectedPositions = [];
 
-            return;
+                return;
+            }
         }
 
-        $orderPositions = resolve_static(OrderPosition::class, 'query')
-            ->whereKey($newPositionIds)
+        $query = resolve_static(OrderPosition::class, 'query')
             ->where('order_positions.order_id', $this->orderId)
             ->with(['product.unit:id,abbreviation'])
             ->leftJoin('order_positions AS descendants', function (JoinClause $join): void {
@@ -168,22 +180,37 @@ class CreateChildOrder extends Component
                 'order_positions.is_net',
             ])
             ->where('order_positions.is_bundle_position', false)
-            ->havingRaw('order_positions.amount > descendantAmount')
-            ->get();
+            ->havingRaw('order_positions.amount > descendantAmount');
+
+        if (! $takeAllWithPercentage) {
+            $query->whereKey($positionIds);
+        }
+
+        $orderPositions = $query->get();
 
         foreach ($orderPositions as $orderPosition) {
-            $this->replicateOrder->order_positions[] = [
-                'id' => $orderPosition->id,
-                'amount' => $orderPosition->totalAmount,
-                'name' => $orderPosition->name,
-                'description' => $orderPosition->description,
-                'unit_net_price' => $orderPosition->unit_net_price,
-                'unit_gross_price' => $orderPosition->unit_gross_price,
-                'total_net_price' => $orderPosition->total_net_price,
-                'total_gross_price' => $orderPosition->total_gross_price,
-                'is_net' => $orderPosition->is_net,
-                'unit_abbreviation' => $orderPosition->product?->unit?->abbreviation,
-            ];
+            $amount = $takeAllWithPercentage
+                ? round($orderPosition->totalAmount * ($this->percentage / 100), 2)
+                : $orderPosition->totalAmount;
+
+            if ($amount > 0) {
+                $this->replicateOrder->order_positions[] = [
+                    'id' => $orderPosition->id,
+                    'amount' => $amount,
+                    'name' => $orderPosition->name,
+                    'description' => $orderPosition->description,
+                    'unit_net_price' => $orderPosition->unit_net_price,
+                    'unit_gross_price' => $orderPosition->unit_gross_price,
+                    'total_net_price' => $orderPosition->total_net_price,
+                    'total_gross_price' => $orderPosition->total_gross_price,
+                    'is_net' => $orderPosition->is_net,
+                    'unit_abbreviation' => $orderPosition->product?->unit?->abbreviation,
+                ];
+            }
+        }
+
+        if ($takeAllWithPercentage) {
+            $this->percentage = null;
         }
 
         $this->selectedPositions = [];

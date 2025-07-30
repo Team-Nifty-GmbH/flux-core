@@ -47,6 +47,38 @@
         </div>
 
         <x-card>
+            <div class="mb-6">
+                <x-select.styled
+                    wire:model="replicateOrder.order_type_id"
+                    required
+                    :label="__('Select Order Type')"
+                    select="label:name|value:id"
+                    :options="$availableOrderTypes"
+                />
+            </div>
+
+            <div class="mb-4 flex items-end gap-3">
+                <div class="flex-1">
+                    <x-number
+                        wire:model="percentage"
+                        :label="__('Take all with percentage')"
+                        min="0"
+                        max="100"
+                        step="0.01"
+                        :placeholder="__('Enter percentage (e.g. 50 for 50%)')"
+                    />
+                </div>
+                <x-button
+                    color="indigo"
+                    :text="__('Take All')"
+                    loading="takeOrderPositions"
+                    wire:click="takeOrderPositions"
+                    x-bind:disabled="!$wire.percentage || $wire.percentage <= 0"
+                />
+            </div>
+
+            <hr class="mb-6" />
+
             <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 <div>
                     <h3 class="text-md mb-4 font-semibold">
@@ -66,6 +98,7 @@
                             :text="__('Take')"
                             x-show="$wire.selectedPositions.length > 0"
                             x-cloak
+                            loading="takeOrderPositions"
                             wire:click="takeOrderPositions"
                         />
                     </div>
@@ -160,7 +193,7 @@
                     :text="$this->getTitle()"
                     wire:click="save"
                     loading
-                    x-bind:disabled="!$wire.replicateOrder.order_positions.length"
+                    x-bind:disabled="!$wire.replicateOrder.order_type_id || !$wire.replicateOrder.order_positions.length"
                 />
             </div>
         </x-card>
