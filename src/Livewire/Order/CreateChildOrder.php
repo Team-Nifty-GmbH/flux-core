@@ -12,6 +12,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -20,6 +21,9 @@ use Spatie\Permission\Exceptions\UnauthorizedException;
 class CreateChildOrder extends Component
 {
     use Actions;
+
+    #[Locked]
+    public array $availableOrderTypes = [];
 
     #[Url]
     public ?int $orderId = null;
@@ -50,10 +54,6 @@ class CreateChildOrder extends Component
             ! $this->orderId
             || ! $this->type
             || ! in_array($this->type, [OrderTypeEnum::Retoure->value, OrderTypeEnum::SplitOrder->value])
-            || resolve_static(OrderType::class, 'query')
-                ->where('order_type_enum', $this->type)
-                ->where('is_active', true)
-                ->doesntExist()
             || ! $parentOrder
         ) {
             $this->redirectRoute('orders.orders', navigate: true);
@@ -67,14 +67,20 @@ class CreateChildOrder extends Component
         $this->replicateOrder->fill($this->parentOrder);
         $this->replicateOrder->parent_id = $this->orderId;
         $this->replicateOrder->order_positions = [];
-        $this->replicateOrder->order_type_id = resolve_static(OrderType::class, 'query')
+
+        $this->availableOrderTypes = resolve_static(OrderType::class, 'query')
             ->where('order_type_enum', $this->type)
             ->where('is_active', true)
             ->when(
                 $this->type === OrderTypeEnum::SplitOrder->value,
                 fn (Builder $query) => $query->where('is_hidden', false)
             )
-            ->value('id');
+            ->get(['id', 'name'])
+            ->toArray();
+
+        if (count($this->availableOrderTypes) === 1) {
+            $this->replicateOrder->order_type_id = data_get($this->availableOrderTypes, '0.id');
+        }
     }
 
     public function render(): View

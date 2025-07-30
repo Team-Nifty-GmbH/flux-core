@@ -47,6 +47,19 @@
         </div>
 
         <x-card>
+            <div class="mb-6">
+                <x-select.styled
+                    wire:model="replicateOrder.order_type_id"
+                    :options="$availableOrderTypes"
+                    :label="__('Select Order Type')"
+                    select="label:name|value:id"
+                    required
+                />
+                @error('replicateOrder.order_type_id')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
             <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 <div>
                     <h3 class="text-md mb-4 font-semibold">
@@ -160,7 +173,7 @@
                     :text="$this->getTitle()"
                     wire:click="save"
                     loading
-                    x-bind:disabled="!$wire.replicateOrder.order_positions.length"
+                    x-bind:disabled="!$wire.replicateOrder.order_type_id || !$wire.replicateOrder.order_positions.length"
                 />
             </div>
         </x-card>
