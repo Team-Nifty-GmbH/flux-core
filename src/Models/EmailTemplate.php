@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
 use FluxErp\Traits\Scout\Searchable;
@@ -15,7 +16,7 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class EmailTemplate extends FluxModel implements HasMedia, InteractsWithDataTables
 {
-    use HasUuid, InteractsWithMedia, Searchable;
+    use HasPackageFactory, HasUuid, InteractsWithMedia, Searchable;
 
     protected $guarded = [
         'id',
