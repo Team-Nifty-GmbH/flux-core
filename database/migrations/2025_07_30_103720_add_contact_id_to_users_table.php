@@ -12,7 +12,7 @@ return new class() extends Migration
             return;
         }
 
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table): void {
             $table->foreignId('contact_id')
                 ->nullable()
                 ->after('uuid')

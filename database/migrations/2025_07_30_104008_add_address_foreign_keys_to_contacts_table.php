@@ -19,7 +19,7 @@ return new class() extends Migration
             return;
         }
 
-        Schema::table('contacts', function (Blueprint $table) {
+        Schema::table('contacts', function (Blueprint $table): void {
             $table->foreignId('delivery_address_id')
                 ->nullable()
                 ->after('currency_id')
