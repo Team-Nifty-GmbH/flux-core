@@ -41,6 +41,7 @@ use FluxErp\Traits\Printable;
 use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\Trackable;
 use FluxErp\View\Printing\Order\DeliveryNote;
+use FluxErp\View\Printing\Order\FinalInvoice;
 use FluxErp\View\Printing\Order\Invoice;
 use FluxErp\View\Printing\Order\Offer;
 use FluxErp\View\Printing\Order\OrderConfirmation;
@@ -314,6 +315,9 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
             'total_purchase_price' => Money::class,
             'total_cost' => Money::class,
             'margin' => Money::class,
+            'subtotal_net_price' => Money::class,
+            'subtotal_gross_price' => Money::class,
+            'subtotal_vats' => 'array',
             'total_net_price' => Money::class,
             'total_gross_price' => Money::class,
             'total_vats' => 'array',
@@ -676,18 +680,43 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
 
     public function getPrintViews(): array
     {
-        return $this->orderType?->order_type_enum->isPurchase()
-            ? [
+        // This has to be done this way, as this method is also called on order types settings with an empty order.
+        if ($this->orderType?->order_type_enum->isPurchase()) {
+            $printViews = [
                 'supplier-order' => SupplierOrder::class,
-            ]
-            : [
+            ];
+        } else {
+            $printViews = [
                 'invoice' => Invoice::class,
+                'final-invoice' => FinalInvoice::class,
                 'offer' => Offer::class,
                 'order-confirmation' => OrderConfirmation::class,
                 'retoure' => Retoure::class,
                 'refund' => Refund::class,
                 'delivery-note' => DeliveryNote::class,
             ];
+        }
+
+        if ($this->orderType?->order_type_enum === OrderTypeEnum::Order) {
+            $children = $this->children()
+                ->pluck('invoice_number')
+                ->toArray();
+
+            if (
+                $children
+                && count($children) === count(array_filter($children))
+            ) {
+                // If all children have an invoice number, only show final invoice
+                unset($printViews['invoice']);
+            } elseif ($children) {
+                // If the order has children, but not all have an invoice number, remove invoice and final invoice
+                unset($printViews['invoice'], $printViews['final-invoice']);
+            }
+        } elseif ($this->orderType) {
+            unset($printViews['final-invoice']);
+        }
+
+        return $printViews;
     }
 
     public function getSerialNumber(string|array $types, ?int $clientId = null): static
