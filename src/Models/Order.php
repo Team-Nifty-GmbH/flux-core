@@ -664,6 +664,11 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
         return null;
     }
 
+    public function getEmailTemplateType(): ?string
+    {
+        return morph_alias(static::class);
+    }
+
     public function getLabel(): ?string
     {
         return $this->orderType?->name . ' - ' . $this->order_number . ' - ' . data_get($this->address_invoice, 'name');

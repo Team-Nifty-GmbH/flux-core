@@ -26,6 +26,8 @@ class EmailTemplateForm extends FluxForm
 
     public ?array $media = null;
 
+    public ?string $model_type = null;
+
     public ?string $name = null;
 
     public ?string $subject = null;

@@ -446,6 +446,11 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
         return implode(', ', $this->postal_address);
     }
 
+    public function getEmailTemplateType(): ?string
+    {
+        return morph_alias(static::class);
+    }
+
     public function getLabel(): ?string
     {
         return $this->name;

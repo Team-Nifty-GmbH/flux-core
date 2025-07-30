@@ -148,6 +148,11 @@ class Communication extends FluxModel implements HasMedia, OffersPrinting, Targe
         return $this->morphedByMany(Contact::class, 'communicatable', 'communicatable');
     }
 
+    public function getEmailTemplateType(): ?string
+    {
+        return morph_alias(static::class);
+    }
+
     public function getPrintViews(): array
     {
         return [

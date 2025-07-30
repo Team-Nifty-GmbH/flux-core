@@ -10,6 +10,7 @@ use FluxErp\Models\Contact;
 use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Discount;
+use FluxErp\Models\EmailTemplate;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Models\OrderType;
@@ -52,13 +53,13 @@ class OrderTest extends BaseSetup
         $currency = Currency::factory()->create();
         $vatRate = VatRate::factory()->create();
 
-        $this->orderType = OrderType::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-            'order_type_enum' => OrderTypeEnum::Order,
-            'print_layouts' => ['invoice'],
-            'mail_subject' => 'Test Order {{ $order->order_number }}',
-            'mail_body' => '<p>Test order body content</p>',
-        ]);
+        $this->orderType = OrderType::factory()
+            ->has(EmailTemplate::factory()->state(['model_type', 'order']), 'emailTemplate')
+            ->create([
+                'client_id' => $this->dbClient->getKey(),
+                'order_type_enum' => OrderTypeEnum::Order,
+                'print_layouts' => ['invoice'],
+            ]);
 
         $paymentType = PaymentType::factory()
             ->hasAttached(factory: $this->dbClient, relationship: 'clients')

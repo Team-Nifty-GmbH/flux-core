@@ -32,7 +32,8 @@
     <x-modal :id="$emailTemplateForm->modalName()">
         <div class="flex flex-col gap-4">
             <x-input wire:model="emailTemplateForm.name" :label="__('Name')" />
-                    <div class="flex flex-col gap-1.5">
+            <x-select.styled wire:model="emailTemplateForm.model_type" :label="__('Model Type')" :options="$modelTypes" />
+            <div class="flex flex-col gap-1.5">
             <x-label :label="__('To')" />
             <div class="flex gap-1">
                 <template x-for="to in $wire.emailTemplateForm.to || []">

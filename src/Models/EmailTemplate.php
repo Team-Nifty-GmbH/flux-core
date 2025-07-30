@@ -7,6 +7,7 @@ use FluxErp\Traits\InteractsWithMedia;
 use FluxErp\Traits\Scout\Searchable;
 use Illuminate\Database\Eloquent\Casts\AsHtmlString;
 use Illuminate\Database\Eloquent\Casts\AsStringable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 use Illuminate\Support\Stringable;
 use Spatie\MediaLibrary\HasMedia;
@@ -57,5 +58,10 @@ class EmailTemplate extends FluxModel implements HasMedia, InteractsWithDataTabl
     public function getUrl(): ?string
     {
         return null;
+    }
+
+    public function orderTypes(): HasMany
+    {
+        return $this->hasMany(OrderType::class);
     }
 }

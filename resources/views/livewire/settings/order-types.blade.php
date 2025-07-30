@@ -58,13 +58,11 @@
                         wire:model="orderType.is_visible_in_sidebar"
                         :label="__('Is Visible In Sidebar')"
                     />
-                    <x-input
-                        wire:model="orderType.mail_subject"
-                        :label="__('Mail Subject')"
-                    />
-                    <x-flux::editor
-                        wire:model="orderType.mail_body"
-                        :label="__('Mail Body')"
+                    <x-select.styled
+                        :label="__('Email Template')"
+                        wire:model="orderType.email_template_id"
+                        select="label:name|value:id"
+                        :options="resolve_static(\FluxErp\Models\EmailTemplate::class, 'query')->where('model_type', 'order')->orWhereNull('model_type')->get(['id', 'name'])->toArray()"
                     />
                 </div>
             </div>

@@ -3,12 +3,15 @@
 namespace FluxErp\Livewire\Settings;
 
 use FluxErp\Actions\Media\DeleteMedia;
+use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Livewire\DataTables\EmailTemplateList;
 use FluxErp\Livewire\Forms\EmailTemplateForm;
 use FluxErp\Models\EmailTemplate;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
 use FluxErp\Traits\Livewire\DataTableHasFormEdit;
 use FluxErp\Traits\Livewire\WithFilePond;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
@@ -24,6 +27,16 @@ class EmailTemplates extends EmailTemplateList
     public EmailTemplateForm $emailTemplateForm;
 
     protected ?string $includeBefore = 'flux::livewire.settings.email-templates';
+
+    public function getViewData(): array
+    {
+        return array_merge(
+            parent::getViewData(),
+            [
+                'modelTypes' => $this->getModelTypes(),
+            ]
+        );
+    }
 
     #[Renderless]
     public function save(): bool
@@ -55,5 +68,26 @@ class EmailTemplates extends EmailTemplateList
         }
 
         return $result;
+    }
+
+    protected function getModelTypes(): array
+    {
+        $modelTypes = [
+            [
+                'value' => null,
+                'label' => __('General')
+            ]
+        ];
+
+        foreach (Relation::morphMap() as $key => $modelClass) {
+            if (is_a($modelClass, OffersPrinting::class, true)) {
+                $modelTypes[] = [
+                    'value' => $key,
+                    'label' => __(Str::headline($key)),
+                ];
+            }
+        }
+
+        return $modelTypes;
     }
 }
