@@ -18,6 +18,7 @@ export default function ($headerStore, $footerStore) {
             await $wire.selectClient(e.target.value);
             await this.reload();
             await $footerStore.reload($refs);
+            await $headerStore.reload($refs);
             this._loading = false;
         },
         pxPerCm: null,
@@ -112,8 +113,9 @@ export default function ($headerStore, $footerStore) {
                 this.startPointHorizontal = null;
             }
 
-            // adjust position of the footer elements if there is overlap with the margin
+            // adjust the position of the header/footer/first-page-header elements if there is overlap with the margin
             $footerStore.repositionOnMouseUp();
+            $headerStore.repositionOnMouseUp();
         },
         // TODO: rename to onMouseMoveMargin
         onMouseMove(e) {
@@ -179,6 +181,7 @@ export default function ($headerStore, $footerStore) {
             this._loading = true;
             await this.reload();
             await $footerStore.reload($refs, false);
+            await $headerStore.reload($refs, false);
             this.editMargin = false;
             this.editFooter = false;
             this.editHeader = false;
@@ -217,8 +220,13 @@ export default function ($headerStore, $footerStore) {
         async submit($wire) {
             const margins = this.prepareToSubmit();
             const footer = $footerStore.prepareToSubmit();
-            await $wire.set('form.footer', footer, false);
-            await $wire.set('form.margin', margins, false);
+            const header = $headerStore.prepareToSubmit();
+            await Promise.all([
+                $wire.set('form.footer', footer, false),
+                $wire.set('form.header', header, false),
+                $wire.set('form.margin', margins, false),
+            ]);
+
             const response = await $wire.save();
             if (response) {
                 this.editMargin = false;

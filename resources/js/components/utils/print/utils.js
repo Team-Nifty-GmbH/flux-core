@@ -11,12 +11,12 @@ export function intersectionHandlerFactory($store) {
             const { target, isIntersecting } = entry;
             if (isIntersecting) {
                 // remove the element from array if are back in view
-                const index = $store.elemntsOutOfView.indexOf(target.id);
+                const index = $store.elementsOutOfView.indexOf(target.id);
                 if (index !== -1) {
-                    $store.elemntsOutOfView.splice(index, 1);
+                    $store.elementsOutOfView.splice(index, 1);
                 }
             } else {
-                $store.elemntsOutOfView.push(target.id);
+                $store.elementsOutOfView.push(target.id);
             }
         });
     };

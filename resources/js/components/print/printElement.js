@@ -26,7 +26,7 @@ export default class PrintElement {
 
     positionBackInBound() {
         const { x, y } = this.position;
-        const { width: widthFooter, height: heightFooter } = this.parentSize;
+        const { width: widthParent, height: heightParent } = this.parentSize;
         const { width: widthElement, height: heightElement } = this.size;
         if (x <= 0 && y <= 0) {
             // Element is out of view, reset position
@@ -40,8 +40,8 @@ export default class PrintElement {
             this.position = {
                 x: 0,
                 y:
-                    y + heightElement > heightFooter
-                        ? heightFooter - heightElement
+                    y + heightElement > heightParent
+                        ? heightParent - heightElement
                         : y,
             };
         }
@@ -49,8 +49,8 @@ export default class PrintElement {
         if (x >= 0 && y <= 0) {
             this.position = {
                 x:
-                    x + widthElement > widthFooter
-                        ? widthFooter - widthElement
+                    x + widthElement > widthParent
+                        ? widthParent - widthElement
                         : x,
                 y: 0,
             };
@@ -59,12 +59,12 @@ export default class PrintElement {
         if (x >= 0 && y >= 0) {
             this.position = {
                 x:
-                    x + widthElement > widthFooter
-                        ? widthFooter - widthElement
+                    x + widthElement > widthParent
+                        ? widthParent - widthElement
                         : x,
                 y:
-                    y + heightElement > heightFooter
-                        ? heightFooter - heightElement
+                    y + heightElement > heightParent
+                        ? heightParent - heightElement
                         : y,
             };
         }
@@ -144,7 +144,7 @@ export default class PrintElement {
         return this._width;
     }
 
-    // 'start | 'middle' | 'end' | 'coordinates'
+    // 'start | 'middle' | 'end'
 
     init(startPosition) {
         if (typeof startPosition === 'string') {

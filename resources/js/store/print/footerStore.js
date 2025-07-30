@@ -20,7 +20,7 @@ export default function () {
             startY: null,
         },
         visibleElements: [],
-        elemntsOutOfView: [],
+        elementsOutOfView: [],
         _component: null,
         footer: null,
         _footerHeight: 1.7,
@@ -62,9 +62,9 @@ export default function () {
             }
         },
         repositionOnMouseUp() {
-            if (this.elemntsOutOfView.length > 0) {
+            if (this.elementsOutOfView.length > 0) {
                 this.visibleElements
-                    .filter((item) => this.elemntsOutOfView.includes(item.id))
+                    .filter((item) => this.elementsOutOfView.includes(item.id))
                     .forEach((element) => {
                         element.positionBackInBound();
                     });
@@ -119,14 +119,6 @@ export default function () {
         get selectedElementId() {
             return this._selectedElement.id;
         },
-        get footerSize() {
-            if (this.footer) {
-                const { height, width } = this.footer.getBoundingClientRect();
-                return { width, height };
-            } else {
-                return { width: 0, height: 0 };
-            }
-        },
         onMouseDown(e, id) {
             this._selectElement(e, id);
         },
@@ -167,7 +159,7 @@ export default function () {
             if (
                 this._selectedElement.id !== null &&
                 this._selectedElement.ref !== null &&
-                this.elemntsOutOfView.includes(this._selectedElement.id)
+                this.elementsOutOfView.includes(this._selectedElement.id)
             ) {
                 this._selectedElement.ref.positionBackInBound();
             }
@@ -368,7 +360,7 @@ export default function () {
             }
 
             this.visibleElements = [];
-            this.elemntsOutOfView = [];
+            this.elementsOutOfView = [];
 
             const footerJson = await this.component.get('form.footer');
 
@@ -421,11 +413,6 @@ export default function () {
                 this.visibleElements.forEach((e) => {
                     this.observer.observe(e.element);
                 });
-            }
-        },
-        resizeElement(id) {
-            if (id !== 'footer-logo') {
-                throw new Error('Resize is only supported for footer-logo');
             }
         },
         prepareToSubmit() {

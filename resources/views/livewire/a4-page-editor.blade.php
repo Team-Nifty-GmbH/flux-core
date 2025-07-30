@@ -2,7 +2,7 @@
     x-init="printStore.onInit($wire,$refs)"
     x-data="{
         printStore: $store.printStore,
-        haederStore: $store.headerStore,
+        headerStore: $store.headerStore,
         footerStore: $store.footerStore,
     }"
     class="flex h-[29.7cm] items-center space-x-4"
@@ -16,7 +16,17 @@
                 select="label:name|value:id"
                 :options="$availableClients"
             />
-            <div class="mb-4 mt-4 w-full border-t border-gray-400"></div>
+            <div class="mb-4 mt-4 w-full border-t border-gray-300"></div>
+            <div x-cloak x-show="printStore.editHeader">
+                <div  class="flex items-center justify-between">
+                    <div class=" text-lg text-gray-600">Subject</div>
+                    <x-toggle
+                        x-on:change="headerStore.toggleElement($refs,'header-subject')"
+                        x-bind:value="headerStore.visibleElements.map(e => e.id).includes('header-subject')"
+                    />
+                </div>
+                <div class="mb-4 mt-4 w-full border-t border-gray-300"></div>
+            </div>
             <div x-show="printStore.editFooter" x-cloak>
                 <div class="pb-4 text-lg text-gray-600">Client</div>
                 <div class="flex items-center justify-between">
@@ -46,7 +56,7 @@
                         x-on:change="footerStore.toggleElement($refs,'footer-client-{{$client->id}}')"
                         x-bind:value="footerStore.visibleElements.map(e => e.id).includes('footer-client-{{$client->id}}')" />
                 </div>
-                <div class="mb-4 mt-4 w-full border-t border-gray-400"></div>
+                <div class="mb-4 mt-4 w-full border-t border-gray-300"></div>
             </div>
         @endif
 
@@ -72,17 +82,29 @@
                 </div>
             @endforeach
         </div>
-        <div class="mb-4 mt-4 w-full border-t border-gray-400"></div>
+        <div class="mb-4 mt-4 w-full border-t border-gray-300"></div>
         </div>
+            @if($this->client->logo_small_url)
         <div x-cloak x-show="printStore.editFooter">
-        <div class="pb-4 text-lg text-gray-600">Logo</div>
-        <div class="flex items-center justify-between">
-            <img class="h-[1.7cm]" src="{{ $this->client->logo_small_url }}" />
-            <x-toggle
+            <div class="pb-4 text-lg text-gray-600">Logo</div>
+            <div class="flex items-center justify-between">
+                <img class="h-[1.7cm]" src="{{ $this->client->logo_small_url }}" />
+                <x-toggle
                 x-on:change="footerStore.toggleElement($refs,'footer-logo')"
                 x-bind:value="footerStore.visibleElements.map(e => e.id).includes('footer-logo')" />
+            </div>
         </div>
-    </div>
+                <div x-cloak x-show="printStore.editHeader">
+                    <div class="pb-4 text-lg text-gray-600">Logo</div>
+                    <div class="flex items-center justify-between">
+                        <img class="h-[1.7cm]" src="{{ $this->client->logo_small_url }}" />
+                        <x-toggle
+                            x-on:change="headerStore.toggleElement($refs,'header-logo')"
+                            x-bind:value="headerStore.visibleElements.map(e => e.id).includes('header-logo')"
+                        />
+                    </div>
+                </div>
+            @endif
     </div>
     @if ($this->availableClients)
         <div class="relative">
