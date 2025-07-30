@@ -893,7 +893,7 @@
                             <div
                                 x-cloak
                                 x-show="
-                                    $wire.order.total_net_price !==
+                                    ($wire.order.subtotal_net_price ?? $wire.order.total_net_price) !==
                                         ($wire.order.total_base_net_price ?? '0.0000000000')
                                 "
                             >
@@ -1012,6 +1012,34 @@
                                 <div>
                                     <span
                                         x-html="formatters.coloredMoney(($wire.order.total_discount_flat ?? 0) * -1)"
+                                    ></span>
+                                </div>
+                            </div>
+                            <div
+                                class="flex justify-between p-2.5"
+                                x-cloak
+                                x-show="$wire.order.subtotal_net_price > 0"
+                            >
+                                <div>
+                                    {{ __('Subtotal net') }}
+                                </div>
+                                <div>
+                                    <span
+                                        x-html="formatters.coloredMoney($wire.order.subtotal_net_price)"
+                                    ></span>
+                                </div>
+                            </div>
+                            <div
+                                class="flex justify-between p-2.5 opacity-50"
+                                x-cloak
+                                x-show="$wire.order.subtotal_net_price > 0"
+                            >
+                                <div>
+                                    {{ __('Split Orders net') }}
+                                </div>
+                                <div>
+                                    <span
+                                        x-html="formatters.coloredMoney($wire.order.total_net_price - $wire.order.subtotal_net_price)"
                                     ></span>
                                 </div>
                             </div>

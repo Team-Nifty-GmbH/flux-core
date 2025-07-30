@@ -1702,6 +1702,7 @@
     "Smtp Port": "SMTP-Port",
     "Sort Number": "Sortiernummer",
     "Split Order": "Teilauftrag",
+    "Split Orders net": "Teilaufträge netto",
     "stale": "Veraltet",
     "Start": "Start",
     "Start automatic assignment": "Automatische Zuordnung starten",

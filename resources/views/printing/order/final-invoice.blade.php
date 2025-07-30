@@ -1,41 +1,4 @@
 @extends('flux::printing.order.order')
-@php
-    $totalNetPrice = $model->total_net_price;
-    $totalVats = \Illuminate\Support\Arr::keyBy($model->total_vats ?? [], 'vat_rate_percentage');
-
-    foreach ($model->children as $child) {
-        $totalNetPrice = bcsub($totalNetPrice, $child->total_net_price);
-        foreach ($child->total_vats ?? [] as $childVat) {
-            data_set(
-                $totalVats[data_get($childVat, 'vat_rate_percentage')],
-                'total_vat_price',
-                bcsub(
-                    data_get($totalVats[data_get($childVat, 'vat_rate_percentage')], 'total_vat_price') ?? 0,
-                    data_get($childVat, 'total_vat_price') ?? 0,
-                )
-            );
-            data_set(
-                $totalVats[data_get($childVat, 'vat_rate_percentage')],
-                'total_net_price',
-                bcsub(
-                    data_get($totalVats[data_get($childVat, 'vat_rate_percentage')], 'total_net_price') ?? 0,
-                    data_get($childVat, 'total_net_price') ?? 0,
-                )
-            );
-        }
-    }
-
-    $totalGrossPrice = bcadd(
-        $totalNetPrice,
-        array_reduce(
-            $totalVats,
-            function ($carry, $vat) {
-                return bcadd($carry, data_get($vat, 'total_vat_price') ?? 0);
-            },
-            0
-        )
-    );
-@endphp
 
 @section('first-page-right-block.rows')
     @parent
@@ -75,23 +38,23 @@
                     {{ __('Subtotal net') }}
                 </td>
                 <td class="w-0 whitespace-nowrap pl-12 text-right">
-                    {{ Number::currency($model->total_net_price) }}
+                    {{ Number::currency($model->subtotal_net_price) }}
                 </td>
             </tr>
         @show
         @section('total.subtotal.vats')
-            @foreach ($model->total_vats ?? [] as $vat)
+            @foreach ($model->subtotal_vats ?? [] as $subTotalVat)
                 <tr>
                     <td class="text-right">
                         {{
                             __('Plus :percentage VAT from :total_net', [
-                                'percentage' => Number::percentage(bcmul($vat['vat_rate_percentage'], 100)),
-                                'total_net' => Number::currency($vat['total_net_price']),
+                                'percentage' => Number::percentage(bcmul($subTotalVat['vat_rate_percentage'], 100)),
+                                'total_net' => Number::currency($subTotalVat['total_net_price']),
                             ])
                         }}
                     </td>
                     <td class="w-0 whitespace-nowrap pl-12 text-right">
-                        {{ Number::currency($vat['total_vat_price']) }}
+                        {{ Number::currency($subTotalVat['total_vat_price']) }}
                     </td>
                 </tr>
                 <tr class="border-b"></tr>
@@ -136,12 +99,12 @@
                     {{ __('Sum net') }}
                 </td>
                 <td class="w-0 whitespace-nowrap pl-12 text-right">
-                    {{ Number::currency($totalNetPrice) }}
+                    {{ Number::currency($model->total_net_price) }}
                 </td>
             </tr>
         @show
         @section('total.net.vats')
-            @foreach ($totalVats ?? [] as $totalVat)
+            @foreach ($model->total_vats ?? [] as $totalVat)
                 <tr>
                     <td class="text-right">
                         {{
@@ -165,7 +128,7 @@
                     {{ __('Total Gross') }}
                 </td>
                 <td class="w-0 whitespace-nowrap pl-12 text-right">
-                    {{ Number::currency($totalGrossPrice) }}
+                    {{ Number::currency($model->total_gross_price) }}
                 </td>
             </tr>
         @show

@@ -140,6 +140,12 @@ class OrderForm extends FluxForm
 
     public ?string $state = null;
 
+    public ?string $subtotal_gross_price = null;
+
+    public ?string $subtotal_net_price = null;
+
+    public ?array $subtotal_vats = null;
+
     public ?string $system_delivery_date = null;
 
     public ?string $system_delivery_date_end = null;
