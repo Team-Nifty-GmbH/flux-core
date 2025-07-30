@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('orders', function (Blueprint $table) {
+        Schema::table('orders', function (Blueprint $table): void {
             $table->decimal('subtotal_net_price', 40, 10)
                 ->nullable()
                 ->after('margin');
@@ -23,7 +23,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('orders', function (Blueprint $table) {
+        Schema::table('orders', function (Blueprint $table): void {
             $table->dropColumn([
                 'subtotal_net_price',
                 'subtotal_gross_price',
