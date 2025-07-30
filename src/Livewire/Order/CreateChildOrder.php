@@ -30,11 +30,11 @@ class CreateChildOrder extends Component
 
     public ?array $parentOrder = null;
 
+    public ?float $percentage = null;
+
     public OrderReplicateForm $replicateOrder;
 
     public array $selectedPositions = [];
-
-    public ?float $percentage = null;
 
     #[Url]
     public ?string $type = null;
@@ -135,7 +135,7 @@ class CreateChildOrder extends Component
     {
         // Check if percentage is set for "take all" functionality
         $takeAllWithPercentage = $this->percentage && $this->percentage > 0;
-        
+
         if ($takeAllWithPercentage) {
             // Take all positions with percentage
             $this->replicateOrder->order_positions = [];
@@ -147,6 +147,7 @@ class CreateChildOrder extends Component
 
             if (! $positionIds) {
                 $this->selectedPositions = [];
+
                 return;
             }
         }
@@ -192,7 +193,7 @@ class CreateChildOrder extends Component
         $orderPositions = $query->get();
 
         foreach ($orderPositions as $orderPosition) {
-            $amount = $takeAllWithPercentage 
+            $amount = $takeAllWithPercentage
                 ? round($orderPosition->totalAmount * ($this->percentage / 100), 2)
                 : $orderPosition->totalAmount;
 
@@ -215,7 +216,7 @@ class CreateChildOrder extends Component
         if ($takeAllWithPercentage) {
             $this->percentage = null;
         }
-        
+
         $this->selectedPositions = [];
     }
 }

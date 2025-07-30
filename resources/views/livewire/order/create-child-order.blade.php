@@ -55,9 +55,6 @@
                     select="label:name|value:id"
                     required
                 />
-                @error('replicateOrder.order_type_id')
-                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                @enderror
             </div>
 
             <div class="mb-4 flex items-end gap-3">
