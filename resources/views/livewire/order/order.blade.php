@@ -1039,7 +1039,11 @@
                                 </div>
                                 <div>
                                     <span
-                                        x-html="formatters.coloredMoney($wire.order.total_net_price - $wire.order.subtotal_net_price)"
+                                        x-html="
+                                            formatters.coloredMoney(
+                                                $wire.order.total_net_price - $wire.order.subtotal_net_price,
+                                            )
+                                        "
                                     ></span>
                                 </div>
                             </div>
