@@ -131,7 +131,7 @@ trait RendersWidgets
 
         $defaultWidgets = static::getDefaultWidgets() ?? [];
         $defaultGroups = collect($defaultWidgets)->pluck('group')->unique()->filter();
-        $userGroups = $userWidgets ? $userWidgets->keys() : collect();
+        $userGroups = $userWidgets ? $userWidgets->keys()->filter() : collect();
         $allGroups = $defaultGroups->merge($userGroups)->unique();
 
         foreach ($allGroups as $group) {
