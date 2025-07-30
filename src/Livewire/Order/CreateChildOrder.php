@@ -34,6 +34,8 @@ class CreateChildOrder extends Component
 
     public array $selectedPositions = [];
 
+    public ?float $percentage = null;
+
     #[Url]
     public ?string $type = null;
 
@@ -131,18 +133,25 @@ class CreateChildOrder extends Component
 
     public function takeOrderPositions(): void
     {
-        $alreadySelectedIds = array_column($this->replicateOrder->order_positions, 'id');
+        // Check if percentage is set for "take all" functionality
+        $takeAllWithPercentage = $this->percentage && $this->percentage > 0;
+        
+        if ($takeAllWithPercentage) {
+            // Take all positions with percentage
+            $this->replicateOrder->order_positions = [];
+            $positionIds = [];
+        } else {
+            // Take only selected positions
+            $alreadySelectedIds = array_column($this->replicateOrder->order_positions, 'id');
+            $positionIds = array_diff($this->selectedPositions, $alreadySelectedIds);
 
-        $newPositionIds = array_diff($this->selectedPositions, $alreadySelectedIds);
-
-        if (! $newPositionIds) {
-            $this->selectedPositions = [];
-
-            return;
+            if (! $positionIds) {
+                $this->selectedPositions = [];
+                return;
+            }
         }
 
-        $orderPositions = resolve_static(OrderPosition::class, 'query')
-            ->whereKey($newPositionIds)
+        $query = resolve_static(OrderPosition::class, 'query')
             ->where('order_positions.order_id', $this->orderId)
             ->with(['product.unit:id,abbreviation'])
             ->leftJoin('order_positions AS descendants', function (JoinClause $join): void {
@@ -174,24 +183,39 @@ class CreateChildOrder extends Component
                 'order_positions.is_net',
             ])
             ->where('order_positions.is_bundle_position', false)
-            ->havingRaw('order_positions.amount > descendantAmount')
-            ->get();
+            ->havingRaw('order_positions.amount > descendantAmount');
 
-        foreach ($orderPositions as $orderPosition) {
-            $this->replicateOrder->order_positions[] = [
-                'id' => $orderPosition->id,
-                'amount' => $orderPosition->totalAmount,
-                'name' => $orderPosition->name,
-                'description' => $orderPosition->description,
-                'unit_net_price' => $orderPosition->unit_net_price,
-                'unit_gross_price' => $orderPosition->unit_gross_price,
-                'total_net_price' => $orderPosition->total_net_price,
-                'total_gross_price' => $orderPosition->total_gross_price,
-                'is_net' => $orderPosition->is_net,
-                'unit_abbreviation' => $orderPosition->product?->unit?->abbreviation,
-            ];
+        if (! $takeAllWithPercentage) {
+            $query->whereKey($positionIds);
         }
 
+        $orderPositions = $query->get();
+
+        foreach ($orderPositions as $orderPosition) {
+            $amount = $takeAllWithPercentage 
+                ? round($orderPosition->totalAmount * ($this->percentage / 100), 2)
+                : $orderPosition->totalAmount;
+
+            if ($amount > 0) {
+                $this->replicateOrder->order_positions[] = [
+                    'id' => $orderPosition->id,
+                    'amount' => $amount,
+                    'name' => $orderPosition->name,
+                    'description' => $orderPosition->description,
+                    'unit_net_price' => $orderPosition->unit_net_price,
+                    'unit_gross_price' => $orderPosition->unit_gross_price,
+                    'total_net_price' => $orderPosition->total_net_price,
+                    'total_gross_price' => $orderPosition->total_gross_price,
+                    'is_net' => $orderPosition->is_net,
+                    'unit_abbreviation' => $orderPosition->product?->unit?->abbreviation,
+                ];
+            }
+        }
+
+        if ($takeAllWithPercentage) {
+            $this->percentage = null;
+        }
+        
         $this->selectedPositions = [];
     }
 }
