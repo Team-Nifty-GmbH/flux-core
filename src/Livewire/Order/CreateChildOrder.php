@@ -133,15 +133,11 @@ class CreateChildOrder extends Component
 
     public function takeOrderPositions(): void
     {
-        // Check if percentage is set for "take all" functionality
         $takeAllWithPercentage = $this->percentage && $this->percentage > 0;
 
         if ($takeAllWithPercentage) {
-            // Take all positions with percentage
             $this->replicateOrder->order_positions = [];
-            $positionIds = [];
         } else {
-            // Take only selected positions
             $alreadySelectedIds = array_column($this->replicateOrder->order_positions, 'id');
             $positionIds = array_diff($this->selectedPositions, $alreadySelectedIds);
 

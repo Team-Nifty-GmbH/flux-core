@@ -50,10 +50,10 @@
             <div class="mb-6">
                 <x-select.styled
                     wire:model="replicateOrder.order_type_id"
-                    :options="$availableOrderTypes"
+                    required
                     :label="__('Select Order Type')"
                     select="label:name|value:id"
-                    required
+                    :options="$availableOrderTypes"
                 />
             </div>
 
