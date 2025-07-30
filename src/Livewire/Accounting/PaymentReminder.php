@@ -11,12 +11,10 @@ use FluxErp\Models\Media;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentReminder as PaymentReminderModel;
-use FluxErp\Models\PaymentReminderText;
 use FluxErp\States\Order\PaymentState\Paid;
 use FluxErp\Traits\Livewire\CreatesDocuments;
 use FluxErp\View\Printing\PaymentReminder\PaymentReminderView;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 use Laravel\SerializableClosure\SerializableClosure;
 use Spatie\MediaLibrary\Support\MediaStream;
@@ -68,7 +66,6 @@ class PaymentReminder extends OrderList
         }
 
         $documents = collect();
-        $reminderTextExists = [];
         foreach ($orders as $order) {
             try {
                 $paymentReminder = CreatePaymentReminder::make([
@@ -76,27 +73,6 @@ class PaymentReminder extends OrderList
                 ])
                     ->validate()
                     ->execute();
-
-                $reminderTextExists[$paymentReminder->reminder_level] ??=
-                    resolve_static(PaymentReminderText::class, 'query')
-                        ->where('reminder_level', '<=', $paymentReminder->reminder_level)
-                        ->orderBy('reminder_level', 'desc')
-                        ->exists();
-
-                if (! data_get($reminderTextExists, $paymentReminder->reminder_level)) {
-                    $this->notification()
-                        ->error(
-                            __(
-                                'No payment reminder text found for level :level',
-                                [
-                                    'level' => $paymentReminder->reminder_level,
-                                ]
-                            )
-                        );
-                    $paymentReminder->forceDelete();
-
-                    continue;
-                }
 
                 $documents->push($paymentReminder);
             } catch (ValidationException $e) {
@@ -170,7 +146,7 @@ class PaymentReminder extends OrderList
 
     protected function getCc(OffersPrinting $item): array
     {
-        return Arr::wrap($item->getPaymentReminderText()?->mail_cc);
+        return [];
     }
 
     protected function getCommunicatableId(OffersPrinting $item): int
@@ -194,13 +170,9 @@ class PaymentReminder extends OrderList
         ];
     }
 
-    protected function getHtmlBody(OffersPrinting $item): string
+    protected function getDefaultTemplateId(OffersPrinting $item): ?int
     {
-        return html_entity_decode(
-            $item->getPaymentReminderText()?->mail_body
-                    ?? $item->getPaymentReminderText()?->reminder_body
-                    ?? ''
-        );
+        return null;
     }
 
     protected function getPrintLayouts(): array
@@ -210,22 +182,8 @@ class PaymentReminder extends OrderList
         ];
     }
 
-    protected function getSubject(OffersPrinting $item): string
-    {
-        return html_entity_decode($item->getPaymentReminderText()?->mail_subject ?? '') ?:
-            __(
-                'Payment Reminder :level for invoice :invoice_number',
-                [
-                    'level' => $item->reminder_level,
-                    'invoice_number' => $item->order->invoice_number,
-                ]
-            );
-    }
-
     protected function getTo(OffersPrinting $item, array $documents): array
     {
-        return Arr::wrap($item->getPaymentReminderText()?->mail_to
-            ?: $item->order->contact->invoiceAddress->email_primary
-        );
+        return [$item->order->contact->invoiceAddress->email_primary ?? $item->order->contact->mainAddress->email_primary];
     }
 }

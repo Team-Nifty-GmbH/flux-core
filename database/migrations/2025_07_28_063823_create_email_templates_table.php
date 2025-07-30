@@ -15,6 +15,7 @@ return new class() extends Migration
             $table->json('to')->nullable();
             $table->json('cc')->nullable();
             $table->json('bcc')->nullable();
+            $table->string('model_type')->nullable();
             $table->string('subject')->nullable();
             $table->text('html_body')->nullable();
             $table->text('text_body')->nullable();

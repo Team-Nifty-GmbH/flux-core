@@ -189,19 +189,9 @@ class Contact extends Component
             ->getAvatarUrl();
     }
 
-    protected function getHtmlBody(OffersPrinting $item): string
-    {
-        return '';
-    }
-
     protected function getPrintLayouts(): array
     {
         return app(ContactModel::class)->resolvePrintViews();
-    }
-
-    protected function getSubject(OffersPrinting $item): string
-    {
-        return __('Balance Statement :date', ['date' => now()->format('d.m.Y')]);
     }
 
     protected function getTo(OffersPrinting $item, array $documents): array

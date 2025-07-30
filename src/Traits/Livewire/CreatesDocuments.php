@@ -8,11 +8,11 @@ use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Livewire\Forms\PrintJobForm;
 use FluxErp\Models\Media;
 use FluxErp\View\Printing\PrintableView;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use Illuminate\View\View;
 use InvalidArgumentException;
 use Laravel\SerializableClosure\SerializableClosure;
 use Livewire\Attributes\Locked;
@@ -50,11 +50,7 @@ trait CreatesDocuments
 
     abstract public function createDocuments(): null|MediaStream|Media;
 
-    abstract protected function getHtmlBody(OffersPrinting $item): string;
-
     abstract protected function getPrintLayouts(): array;
-
-    abstract protected function getSubject(OffersPrinting $item): string;
 
     abstract protected function getTo(OffersPrinting $item, array $documents): array;
 
@@ -200,6 +196,8 @@ trait CreatesDocuments
         $downloadItems = [];
         $printIds = [];
         $mailMessages = [];
+        $defaultTemplateIds = [];
+
         foreach ($items as $item) {
             match ($item) {
                 is_a($item, OffersPrinting::class, true) => $item->fresh(),
@@ -299,13 +297,13 @@ trait CreatesDocuments
                 }
 
                 $mailAttachments[] = $this->getAttachments($item);
-                $mailMessages[] = [
+                $mailMessage = [
                     'to' => $this->getTo($item, $createDocuments),
                     'cc' => $this->getCc($item),
                     'bcc' => $this->getBcc($item),
-                    'subject' => $this->getSubject($item),
+                    'subject' => '',
                     'attachments' => array_filter($mailAttachments),
-                    'html_body' => $this->getHtmlBody($item),
+                    'html_body' => '',
                     'blade_parameters_serialized' => is_string($bladeParameters),
                     'blade_parameters' => $bladeParameters,
                     'communicatables' => [
@@ -315,10 +313,31 @@ trait CreatesDocuments
                         ],
                     ],
                 ];
+
+                $mailMessage['model_type'] = $item->getEmailTemplateType();
+                if (method_exists($this, 'getDefaultTemplateId')) {
+                    $emailTemplateId = $this->getDefaultTemplateId($item);
+                    $mailMessage['default_template_id'] = $emailTemplateId;
+                    if ($emailTemplateId !== null) {
+                        $defaultTemplateIds[] = $emailTemplateId;
+                    }
+                }
+
+                $mailMessages[] = $mailMessage;
             }
         }
 
         if ($mailMessages) {
+            // Check if all items have the same default template ID
+            $uniqueTemplateIds = collect($defaultTemplateIds)->unique();
+            if ($uniqueTemplateIds->count() === 1 && count($mailMessages) > 1) {
+                // Set the common template ID for all messages
+                $commonTemplateId = $uniqueTemplateIds->first();
+                foreach ($mailMessages as &$mailMessage) {
+                    $mailMessage['default_template_id'] = $commonTemplateId;
+                }
+            }
+
             $sessionKey = 'mail_' . Str::uuid()->toString();
             session()->put($sessionKey, $mailMessages);
             $this->dispatch('createFromSession', key: $sessionKey)->to('edit-mail');
