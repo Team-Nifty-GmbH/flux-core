@@ -30,7 +30,8 @@ class CreateTransactionRuleset extends FluxRuleset
                 'exclude_unless:bank_connection_id,null',
                 'integer',
                 'nullable',
-                app(ModelExists::class, ['model' => ContactBankConnection::class]),
+                app(ModelExists::class, ['model' => ContactBankConnection::class])
+                    ->where('is_credit_account', true),
             ],
             'currency_id' => [
                 'integer',

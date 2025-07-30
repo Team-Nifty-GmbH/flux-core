@@ -10,6 +10,7 @@ use FluxErp\Http\Middleware\TrackVisits;
 use FluxErp\Livewire\Accounting\DirectDebit;
 use FluxErp\Livewire\Accounting\MoneyTransfer;
 use FluxErp\Livewire\Accounting\PaymentReminder;
+use FluxErp\Livewire\Accounting\PaymentRunPreview;
 use FluxErp\Livewire\Accounting\TransactionAssignments;
 use FluxErp\Livewire\Accounting\TransactionList;
 use FluxErp\Livewire\Auth\Login;
@@ -33,6 +34,7 @@ use FluxErp\Livewire\Lead\Lead;
 use FluxErp\Livewire\Lead\LeadList;
 use FluxErp\Livewire\Mail\Mail;
 use FluxErp\Livewire\Media\Media as MediaGrid;
+use FluxErp\Livewire\Order\CreateChildOrder;
 use FluxErp\Livewire\Order\Order;
 use FluxErp\Livewire\Order\OrderList;
 use FluxErp\Livewire\Order\OrderListByOrderType;
@@ -179,6 +181,7 @@ Route::middleware('web')
                         Route::get('/list', OrderList::class)->name('orders');
                         Route::get('/list/{orderType}', OrderListByOrderType::class)->name('order-type');
                         Route::get('/order-positions/list', OrderPositionList::class)->name('order-positions');
+                        Route::get('/create-child-order', CreateChildOrder::class)->name('create-child-order');
                         Route::get('/{id}', Order::class)->where('id', '[0-9]+')->name('id');
                     });
 
@@ -208,6 +211,7 @@ Route::middleware('web')
                             ->name('transaction-assignments');
                         Route::get('/direct-debit', DirectDebit::class)->name('direct-debit');
                         Route::get('/money-transfer', MoneyTransfer::class)->name('money-transfer');
+                        Route::get('/payment-run-preview', PaymentRunPreview::class)->name('payment-run-preview');
                         Route::get('/payment-runs', PaymentRunList::class)->name('payment-runs');
                     });
 

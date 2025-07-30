@@ -63,6 +63,8 @@ class PurchaseInvoiceForm extends FluxForm
 
     public ?string $system_delivery_date_end = null;
 
+    public ?string $total_gross_price = null;
+
     public function findMostUsedLedgerAccountId(): void
     {
         $this->lastLedgerAccountId = resolve_static(OrderPosition::class, 'query')

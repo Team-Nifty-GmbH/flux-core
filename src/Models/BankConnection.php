@@ -27,6 +27,7 @@ class BankConnection extends FluxModel
     {
         return [
             'is_active' => 'boolean',
+            'is_virtual' => 'boolean',
         ];
     }
 

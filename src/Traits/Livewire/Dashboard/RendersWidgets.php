@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\Traits;
+namespace FluxErp\Traits\Livewire\Dashboard;
 
 use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Facades\Widget;
@@ -60,38 +60,56 @@ trait RendersWidgets
     #[Renderless]
     public function saveWidgets(?array $widgets = null): void
     {
-        $this->widgets = $widgets;
+        $widgetsToSave = array_values($widgets ?? $this->widgets);
 
-        $existingItemIds = array_filter(Arr::pluck($this->widgets, 'id'), 'is_numeric');
+        $existingItemIds = array_filter(Arr::pluck($widgetsToSave, 'id'), 'is_numeric');
+
         auth()
             ->user()
             ->widgets()
             ->where('dashboard_component', static::class)
+            ->where('group', $this->group ?? null)
             ->whereNotIn('id', $existingItemIds)
             ->delete();
 
         // create new widgets, update existing widgets
-        foreach ($this->widgets as &$widget) {
+        $savedWidgets = [];
+        foreach ($widgetsToSave as $widget) {
             $savedWidget = auth()
                 ->user()
                 ->widgets()
                 ->updateOrCreate(
                     ['id' => is_numeric(data_get($widget, 'id')) ? data_get($widget, 'id') : null],
                     array_merge(
-                        ['dashboard_component' => static::class],
+                        [
+                            'dashboard_component' => static::class,
+                            'group' => $this->group ?? null,
+                        ],
                         Arr::except($widget, 'id')
                     )
                 );
-            $widget['id'] = $savedWidget->id;
+            $mergedWidget = array_merge($widget, $savedWidget->toArray());
+            $mergedWidget['id'] = $savedWidget->id;
+            $savedWidgets[] = $mergedWidget;
         }
 
-        $this->widgets();
+        $this->widgets = array_values(array_merge(
+            array_filter($this->widgets, fn (array $widget) => data_get($widget, 'group') !== $this->group),
+            $savedWidgets
+        ));
+
+        if (! $widgetsToSave) {
+            $this->widgets();
+        }
     }
 
     #[Renderless]
     public function syncWidgets(array $widgets): void
     {
-        $this->widgets = $widgets;
+        $this->widgets = array_merge(
+            array_filter($this->widgets, fn (array $widget) => data_get($widget, 'group') !== $this->group),
+            $widgets
+        );
     }
 
     public function updatedParams(): void
@@ -102,16 +120,41 @@ trait RendersWidgets
     #[Renderless]
     public function widgets(): void
     {
-        $this->widgets = array_values(
-            $this->filterWidgets(
-                auth()
-                    ->user()
-                    ?->widgets()
-                    ->where('dashboard_component', static::class)
-                    ->get()
-                    ->toArray() ?: static::getDefaultWidgets() ?? []
-            )
-        );
+        $userWidgets = auth()
+            ->user()
+            ?->widgets()
+            ->where('dashboard_component', static::class)
+            ->get()
+            ->groupBy('group');
+
+        $allWidgets = [];
+
+        $defaultWidgets = static::getDefaultWidgets() ?? [];
+        $defaultGroups = collect($defaultWidgets)->pluck('group')->unique()->filter();
+        $userGroups = $userWidgets ? $userWidgets->keys() : collect();
+        $allGroups = $defaultGroups->merge($userGroups)->unique();
+
+        foreach ($allGroups as $group) {
+            if ($userWidgets && $userWidgets->has($group)) {
+                $allWidgets = array_merge($allWidgets, $userWidgets->get($group)->toArray());
+            } else {
+                $groupDefaults = collect($defaultWidgets)
+                    ->filter(fn (array $widget) => data_get($widget, 'group') === $group)
+                    ->toArray();
+                $allWidgets = array_merge($allWidgets, $groupDefaults);
+            }
+        }
+
+        if ($userWidgets && $userWidgets->has(null)) {
+            $allWidgets = array_merge($allWidgets, $userWidgets->get(null)->toArray());
+        } else {
+            $nullGroupDefaults = collect($defaultWidgets)
+                ->filter(fn (array $widget) => is_null(data_get($widget, 'group')))
+                ->toArray();
+            $allWidgets = array_merge($allWidgets, $nullGroupDefaults);
+        }
+
+        $this->widgets = array_values($this->filterWidgets($allWidgets));
     }
 
     #[Renderless]

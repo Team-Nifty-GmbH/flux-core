@@ -10,6 +10,10 @@ use FluxErp\Actions\Order\ReplicateOrder;
 use FluxErp\Actions\Order\ToggleLock;
 use FluxErp\Actions\Order\UpdateLockedOrder;
 use FluxErp\Actions\Order\UpdateOrder;
+use FluxErp\Actions\OrderTransaction\CreateOrderTransaction;
+use FluxErp\Actions\OrderTransaction\DeleteOrderTransaction;
+use FluxErp\Actions\Transaction\CreateTransaction;
+use FluxErp\Actions\Transaction\DeleteTransaction;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Enums\FrequenciesEnum;
 use FluxErp\Enums\OrderTypeEnum;
@@ -20,6 +24,7 @@ use FluxErp\Livewire\Forms\OrderForm;
 use FluxErp\Livewire\Forms\OrderReplicateForm;
 use FluxErp\Livewire\Forms\ScheduleForm;
 use FluxErp\Models\Address;
+use FluxErp\Models\BankConnection;
 use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\ContactBankConnection;
@@ -27,7 +32,6 @@ use FluxErp\Models\Discount;
 use FluxErp\Models\Language;
 use FluxErp\Models\Media;
 use FluxErp\Models\Order as OrderModel;
-use FluxErp\Models\OrderPosition;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
@@ -36,10 +40,10 @@ use FluxErp\Models\VatRate;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\CreatesDocuments;
 use FluxErp\Traits\Livewire\WithTabs;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use Illuminate\View\View;
 use Laravel\SerializableClosure\SerializableClosure;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
@@ -66,8 +70,6 @@ class Order extends Component
     public OrderReplicateForm $replicateOrder;
 
     public ScheduleForm $schedule;
-
-    public array $selectedOrderPositions = [];
 
     public array $states = [];
 
@@ -147,6 +149,11 @@ class Order extends Component
 
     public function createDocuments(): null|MediaStream|Media
     {
+        $hadInvoiceNumber = resolve_static(OrderModel::class, 'query')
+            ->whereKey($this->order->id)
+            ->whereNotNull('invoice_number')
+            ->exists();
+
         $createDocuments = $this->createDocumentFromItems(
             resolve_static(OrderModel::class, 'query')
                 ->whereKey($this->order->id)
@@ -154,6 +161,33 @@ class Order extends Component
         );
 
         $this->fetchOrder($this->order->id);
+
+        if (
+            ! $hadInvoiceNumber
+            && $this->order->invoice_number
+            && $this->order->parent_id
+            && (
+                resolve_static(OrderType::class, 'query')
+                    ->whereKey($this->order->order_type_id)
+                    ->value('order_type_enum')
+                    ?->multiplier() ?? 1
+            ) < 1
+            && resolve_static(CreateTransaction::class, 'canPerformAction', [false])
+            && resolve_static(CreateOrderTransaction::class, 'canPerformAction', [false])
+            && resolve_static(OrderModel::class, 'query')
+                ->whereKey($this->order->parent_id)
+                ->where('balance', '>', 0)
+                ->exists()
+        ) {
+            $this->dialog()
+                ->question(
+                    __('Even Out Balance?'),
+                    __('This will subtract the gross total of this order from the parents invoice balance')
+                )
+                ->confirm(__('Yes'), 'evenOutBalance')
+                ->cancel(__('Cancel'))
+                ->send();
+        }
 
         return $createDocuments;
     }
@@ -200,6 +234,111 @@ class Order extends Component
         $this->js(<<<'JS'
             $modalOpen('edit-discount');
         JS);
+    }
+
+    #[Renderless]
+    public function evenOutBalance(): void
+    {
+        $parentOrder = resolve_static(OrderModel::class, 'query')
+            ->whereKey($this->order->parent_id)
+            ->first();
+        $amount = min(
+            bcabs($this->order->total_gross_price),
+            $parentOrder->balance
+        );
+        $bankConnectionId = resolve_static(BankConnection::class, 'query')
+            ->where('is_active', true)
+            ->where('is_virtual', true)
+            ->value('id');
+
+        if (! $bankConnectionId) {
+            $this->toast()
+                ->error(__('No virtual bank connection found'))
+                ->send();
+
+            return;
+        }
+
+        $createdTransactions = [];
+        $createdOrderTransactions = [];
+
+        try {
+            $transaction = CreateTransaction::make([
+                'bank_connection_id' => $bankConnectionId,
+                'currency_id' => $this->order->currency_id,
+                'value_date' => now()->toDateString(),
+                'booking_date' => now()->toDateString(),
+                'amount' => $amount,
+                'purpose' => __('Even out balance from :order', ['order' => $this->order->order_number]),
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+            $createdTransactions[] = $transaction;
+
+            $transactionRefund = CreateTransaction::make([
+                'bank_connection_id' => $bankConnectionId,
+                'currency_id' => $this->order->currency_id,
+                'value_date' => now()->toDateString(),
+                'booking_date' => now()->toDateString(),
+                'amount' => bcmul($amount, -1),
+                'purpose' => __('Even out balance from :order', ['order' => $parentOrder->order_number]),
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+            $createdTransactions[] = $transactionRefund;
+
+            $createdOrderTransactions[] = CreateOrderTransaction::make([
+                'order_id' => $this->order->parent_id,
+                'transaction_id' => $transaction->getKey(),
+                'amount' => $transaction->amount,
+                'is_accepted' => true,
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+
+            $createdOrderTransactions[] = CreateOrderTransaction::make([
+                'order_id' => $this->order->id,
+                'transaction_id' => $transactionRefund->getKey(),
+                'amount' => $transactionRefund->amount,
+                'is_accepted' => true,
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            foreach ($createdTransactions as $createdTransaction) {
+                try {
+                    DeleteTransaction::make([
+                        'id' => $createdTransaction->getKey(),
+                    ])
+                        ->validate()
+                        ->execute();
+                } catch (ValidationException|UnauthorizedException $cleanupException) {
+                    exception_to_notifications($cleanupException, $this);
+                }
+            }
+
+            foreach ($createdOrderTransactions as $createdOrderTransaction) {
+                try {
+                    DeleteOrderTransaction::make([
+                        'pivot_id' => $createdOrderTransaction->getKey(),
+                    ])
+                        ->validate()
+                        ->execute();
+                } catch (ValidationException|UnauthorizedException $cleanupException) {
+                    exception_to_notifications($cleanupException, $this);
+                }
+            }
+
+            return;
+        }
+
+        $this->fetchOrder($this->order->id);
     }
 
     #[Renderless]
@@ -276,7 +415,7 @@ class Order extends Component
                 })
                 ->attributes([
                     'class' => 'w-full',
-                    'x-on:click' => '$wire.replicate(\'' . OrderTypeEnum::Retoure->value . '\')',
+                    'wire:click' => 'replicate(\'' . OrderTypeEnum::Retoure->value . '\')',
                 ]),
             DataTableButton::make()
                 ->text(__('Create Split-Order'))
@@ -297,7 +436,7 @@ class Order extends Component
                 })
                 ->attributes([
                     'class' => 'w-full',
-                    'x-on:click' => '$wire.replicate(\'' . OrderTypeEnum::SplitOrder->value . '\')',
+                    'wire:click' => 'replicate(\'' . OrderTypeEnum::SplitOrder->value . '\')',
                 ]),
         ];
     }
@@ -362,12 +501,6 @@ class Order extends Component
     }
 
     #[Renderless]
-    public function recalculateReplicateOrderPositions(): void
-    {
-        $this->replicateOrder->order_positions = array_values($this->replicateOrder->order_positions);
-    }
-
-    #[Renderless]
     public function reOrderDiscount(Discount $discount, int $index): bool
     {
         try {
@@ -393,37 +526,31 @@ class Order extends Component
     #[Renderless]
     public function replicate(?string $orderTypeEnum = null): void
     {
+        if (
+            resolve_static(OrderType::class, 'query')
+                ->where('order_type_enum', $orderTypeEnum)
+                ->where('is_active', true)
+                ->exists()
+            && in_array($orderTypeEnum, [OrderTypeEnum::Retoure->value, OrderTypeEnum::SplitOrder->value])) {
+            $this->redirectRoute(
+                'orders.create-child-order',
+                [
+                    'orderId' => $this->order->id,
+                    'type' => $orderTypeEnum,
+                ],
+                navigate: true
+            );
+
+            return;
+        }
+
         $this->replicateOrder->fill($this->order->toArray());
         $this->fetchContactData();
 
-        $replicateOrderTypes = resolve_static(OrderType::class, 'query')
-            ->where('order_type_enum', $orderTypeEnum)
-            ->where('is_active', true)
-            ->get(['id'])
-            ->toArray();
+        $this->replicateOrder->order_positions = null;
 
-        if ($replicateOrderTypes) {
-            $this->replicateOrder->parent_id = $this->order->id;
-            $this->replicateOrder->order_positions = [];
-            if (count($replicateOrderTypes) === 1) {
-                $this->replicateOrder->order_type_id = $replicateOrderTypes[0]['id'];
-            }
-
-            $this->js(<<<'JS'
-                $modalOpen('create-child-order');
-            JS);
-        } else {
-            $this->replicateOrder->order_positions = null;
-            $this->skipRender();
-
-            $this->js(<<<'JS'
-                $modalOpen('replicate-order');
-            JS);
-        }
-
-        $orderTypeIds = json_encode(array_column($replicateOrderTypes, 'id'));
-        $this->js(<<<JS
-            \$tallstackuiSelect('replicate-order-order-type').mergeRequestParams({whereIn: [['id', $orderTypeIds]]})
+        $this->js(<<<'JS'
+            $modalOpen('replicate-order');
         JS);
     }
 
@@ -526,41 +653,6 @@ class Order extends Component
             $this->getAvailableStates(['state', 'payment_state', 'delivery_state']);
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
-        }
-    }
-
-    #[Renderless]
-    public function takeOrderPositions(array $positionIds): void
-    {
-        $orderPositions = resolve_static(OrderPosition::class, 'query')
-            ->whereIntegerInRaw('order_positions.id', $positionIds)
-            ->where('order_positions.order_id', $this->order->id)
-            ->leftJoin('order_positions AS descendants', 'order_positions.id', '=', 'descendants.origin_position_id')
-            ->selectRaw(
-                'order_positions.id' .
-                ', order_positions.amount' .
-                ', order_positions.name' .
-                ', order_positions.description' .
-                ', SUM(COALESCE(descendants.amount, 0)) AS descendantAmount' .
-                ', order_positions.amount - SUM(COALESCE(descendants.amount, 0)) AS totalAmount'
-            )
-            ->groupBy([
-                'order_positions.id',
-                'order_positions.amount',
-                'order_positions.name',
-                'order_positions.description',
-            ])
-            ->where('order_positions.is_bundle_position', false)
-            ->havingRaw('order_positions.amount > descendantAmount')
-            ->get();
-
-        foreach ($orderPositions as $orderPosition) {
-            $this->replicateOrder->order_positions[] = [
-                'id' => $orderPosition->id,
-                'amount' => $orderPosition->totalAmount,
-                'name' => $orderPosition->name,
-                'description' => $orderPosition->description,
-            ];
         }
     }
 

@@ -57,6 +57,8 @@ class OrderForm extends FluxForm
 
     public ?array $currency = null;
 
+    public ?int $currency_id = null;
+
     public ?string $delivery_state = null;
 
     public array $discounts = [];

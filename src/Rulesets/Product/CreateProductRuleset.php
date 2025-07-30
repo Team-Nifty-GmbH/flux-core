@@ -96,6 +96,7 @@ class CreateProductRuleset extends FluxRuleset
                 Rule::enum(TimeUnitEnum::class),
             ],
             'ean' => 'string|nullable',
+            'customs_tariff_number' => 'string|nullable|max:64',
             'stock' => 'integer|nullable',
             'min_delivery_time' => 'integer|nullable',
             'max_delivery_time' => 'integer|nullable',

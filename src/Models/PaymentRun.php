@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use FluxErp\Enums\PaymentRunTypeEnum;
+use FluxErp\Enums\SepaMandateTypeEnum;
 use FluxErp\States\PaymentRun\PaymentRunState;
 use FluxErp\Traits\HasFrontendAttributes;
 use FluxErp\Traits\HasUserModification;
@@ -20,6 +21,7 @@ class PaymentRun extends FluxModel
         return [
             'state' => PaymentRunState::class,
             'payment_run_type_enum' => PaymentRunTypeEnum::class,
+            'sepa_mandate_type_enum' => SepaMandateTypeEnum::class,
             'instructed_execution_date' => 'date',
             'is_instant_payment' => 'boolean',
         ];

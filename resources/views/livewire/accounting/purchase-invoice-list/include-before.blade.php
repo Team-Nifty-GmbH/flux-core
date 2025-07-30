@@ -4,6 +4,7 @@
         size="full"
         scope="fullscreen"
         scrollable
+        persistent
     >
         <div
             class="grid h-full min-h-screen content-stretch gap-4 sm:grid-cols-2"
@@ -244,6 +245,13 @@
                     wire:model="purchaseInvoiceForm.is_net"
                     :label="__('Is Net')"
                 />
+                <x-number
+                    x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
+                    wire:model="purchaseInvoiceForm.total_gross_price"
+                    step="0.01"
+                    min="0"
+                    :label="__('Total Gross Price')"
+                />
                 <div
                     x-data="{
                         recalculatePrices(position, $event) {
@@ -397,6 +405,7 @@
                             x-cloak
                             x-show="$wire.purchaseInvoiceForm.id && ! $wire.purchaseInvoiceForm.order_id"
                             :text="__('Delete')"
+                            loading="delete"
                             wire:click="delete().then((success) => { if (success) $modalClose('edit-purchase-invoice-modal'); })"
                             wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Purchase Invoice')]) }}"
                         />
@@ -417,6 +426,7 @@
                         x-cloak
                         x-show="! $wire.purchaseInvoiceForm.order_id"
                         :text="__('Save')"
+                        loading="save"
                         wire:click="save().then((success) => { if (success) $modalClose('edit-purchase-invoice-modal'); })"
                     />
                     @canAction(\FluxErp\Actions\PurchaseInvoice\CreateOrderFromPurchaseInvoice::class)
@@ -425,6 +435,7 @@
                             x-cloak
                             x-show="$wire.purchaseInvoiceForm.id && ! $wire.purchaseInvoiceForm.order_id"
                             :text="__('Finish')"
+                            loading="finish"
                             wire:click="finish().then((success) => { if (success) $modalClose('edit-purchase-invoice-modal'); })"
                         />
                     @endcanAction
@@ -433,6 +444,72 @@
                 </div>
             </div>
             @show
+        </x-slot>
+    </x-modal>
+
+    <x-modal
+        id="bulk-pdf-upload-modal"
+        lg
+        scrollable
+        :title="__('Bulk PDF Upload')"
+    >
+        <div class="space-y-4">
+            <div class="text-sm text-gray-600">
+                {{ __('Select multiple PDF files to upload as purchase invoices. Each PDF will create a separate purchase invoice.') }}
+            </div>
+
+            <div
+                wire:ignore
+                x-data="{
+                    ...filePond(
+                        $wire,
+                        $refs.upload,
+                        '{{ Auth::user()?->language?->language_code }}',
+                        {
+                            title: '{{ __('File will be replaced') }}',
+                            description: '{{ __('Do you want to proceed?') }}',
+                            labelAccept: '{{ __('Accept') }}',
+                            labelReject: '{{ __('Undo') }}',
+                        },
+                        {
+                            uploadDisabled: '{{ __('Upload not allowed - Read Only') }}',
+                        },
+                    ),
+                }"
+            >
+                <div x-ref="upload">
+                    @canAction(\FluxErp\Actions\Media\UploadMedia::class)
+                        <div class="flex flex-col items-end">
+                            <div class="mb-4 w-full">
+                                <input
+                                    x-init="loadFilePond(() => 0)"
+                                    id="filepond-drop"
+                                    type="file"
+                                    multiple
+                                    accept="application/pdf"
+                                />
+                            </div>
+                            <x-button
+                                :text="__('Upload PDFs')"
+                                x-cloak
+                                x-show="tempFilesId.length !== 0 && isLoadingFiles.length === 0"
+                                x-bind:disabled="isLoadingFiles.length > 0"
+                                loading="processBulkUpload"
+                                wire:click="processBulkUpload(tempFilesId).then((success) => { if(success) { clearPond(); $modalClose('bulk-pdf-upload-modal'); } })"
+                            />
+                        </div>
+                    @endcanAction
+                </div>
+            </div>
+        </div>
+
+        <x-slot:footer>
+            <x-button
+                color="secondary"
+                light
+                :text="__('Cancel')"
+                x-on:click="$modalClose('bulk-pdf-upload-modal');"
+            />
         </x-slot>
     </x-modal>
 </div>

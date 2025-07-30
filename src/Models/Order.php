@@ -57,6 +57,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Spatie\MediaLibrary\HasMedia;
@@ -389,24 +390,27 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
 
     public function calculateDiscounts(): static
     {
-        $this->total_net_price = $this->discounts()
-            ->ordered()
-            ->get(['id', 'discount', 'is_percentage'])
-            ->reduce(
-                function (string|float|int $previous, Discount $discount): string|float|int {
-                    $new = $discount->is_percentage
-                        ? discount($previous, $discount->discount)
-                        : bcsub($previous, $discount->discount, 9);
+        $this->total_net_price = bcround(
+            $this->discounts()
+                ->ordered()
+                ->get(['id', 'discount', 'is_percentage'])
+                ->reduce(
+                    function (string|float|int $previous, Discount $discount): string|float|int {
+                        $new = $discount->is_percentage
+                            ? max(0, discount($previous, $discount->discount))
+                            : max(0, bcsub($previous, $discount->discount, 9));
 
-                    $discount->update([
-                        'discount_percentage' => diff_percentage($previous, $new),
-                        'discount_flat' => bcsub($previous, $new, 9),
-                    ]);
+                        $discount->update([
+                            'discount_percentage' => diff_percentage($previous, $new),
+                            'discount_flat' => bcsub($previous, $new, 9),
+                        ]);
 
-                    return $new;
-                },
-                $this->total_net_price ?? 0
-            );
+                        return $new;
+                    },
+                    $this->total_net_price ?? 0
+                ),
+            2
+        );
 
         $this->total_discount_percentage = diff_percentage($this->total_base_net_price, $this->total_net_price);
         $this->total_discount_flat = bcsub($this->total_base_net_price, $this->total_net_price, 9);
@@ -540,59 +544,68 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
 
     public function calculateTotalVats(): static
     {
-        $totalVats = $this->orderPositions()
+        $vatGroups = $this->orderPositions()
             ->where('is_alternative', false)
             ->whereNotNull('vat_rate_percentage')
             ->groupBy('vat_rate_percentage')
-            ->selectRaw('sum(vat_price) as total_vat_price,
-                sum(total_net_price) as total_net_price,
-                sum(total_base_net_price) as total_base_net_price,
-                sum(total_base_gross_price) as total_base_gross_price,
-                vat_rate_percentage'
-            )
+            ->selectRaw('sum(total_net_price) as total_net_price, vat_rate_percentage')
             ->get()
-            ->map(function (OrderPosition $item) {
-                if ($this->total_discount_percentage) {
-                    $item->total_net_price = discount(
-                        $item->total_base_net_price,
-                        $this->total_discount_percentage
-                    );
-                    $item->total_vat_price = bcsub(
-                        discount($item->total_base_gross_price, $this->total_discount_percentage),
-                        $item->total_net_price
-                    );
-                }
+            ->keyBy('vat_rate_percentage');
 
-                return $item->only(
+        foreach ($this->discounts()->ordered()->get() as $discount) {
+            if ($discount->is_percentage) {
+                $vatGroups->transform(function (OrderPosition $item) use ($discount): OrderPosition {
+                    $item->total_net_price = discount($item->total_net_price, $discount->discount);
+
+                    return $item;
+                });
+            } else {
+                $total = $vatGroups->reduce(function (string $carry, OrderPosition $item): string {
+                    return bcadd($carry, $item->total_net_price, 9);
+                }, '0');
+
+                if (bccomp($total, '0', 9) > 0) {
+                    $remainingTotal = max(0, bcsub($total, $discount->discount, 9));
+
+                    $vatGroups->transform(function (OrderPosition $item) use ($total, $remainingTotal): OrderPosition {
+                        $proportion = bcdiv($item->total_net_price, $total, 9);
+                        $item->total_net_price = bcmul($remainingTotal, $proportion, 9);
+
+                        return $item;
+                    });
+                }
+            }
+        }
+
+        $this->total_vats = $vatGroups
+            ->map(function (OrderPosition $item): array {
+                return [
+                    'vat_rate_percentage' => $item->vat_rate_percentage,
+                    'total_vat_price' => bcround(bcmul($item->total_net_price, $item->vat_rate_percentage, 9), 2),
+                    'total_net_price' => bcround($item->total_net_price, 2),
+                ];
+            })
+            ->when($this->shipping_costs_vat_price, function (SupportCollection $vats): SupportCollection {
+                return $vats->put(
+                    $this->shipping_costs_vat_rate_percentage,
                     [
-                        'vat_rate_percentage',
-                        'total_vat_price',
-                        'total_net_price',
+                        'vat_rate_percentage' => $this->shipping_costs_vat_rate_percentage,
+                        'total_vat_price' => bcadd(
+                            $this->shipping_costs_vat_price,
+                            data_get($vats->get($this->shipping_costs_vat_rate_percentage), 'total_vat_price') ?? 0,
+                            9
+                        ),
+                        'total_net_price' => bcadd(
+                            $this->shipping_costs_net_price,
+                            data_get($vats->get($this->shipping_costs_vat_rate_percentage), 'total_net_price') ?? 0,
+                            9
+                        ),
                     ]
                 );
             })
-            ->keyBy('vat_rate_percentage');
-
-        if ($this->shipping_costs_vat_price) {
-            $totalVats->put(
-                $this->shipping_costs_vat_rate_percentage,
-                [
-                    'total_vat_price' => bcadd(
-                        $this->shipping_costs_vat_price,
-                        $totalVats->get($this->shipping_costs_vat_rate_percentage)['total_vat_price'] ?? 0,
-                        9
-                    ),
-                    'total_net_price' => bcadd(
-                        $this->shipping_costs_net_price,
-                        $totalVats->get($this->shipping_costs_vat_rate_percentage)['total_net_price'] ?? 0,
-                        9
-                    ),
-                    'vat_rate_percentage' => $this->shipping_costs_vat_rate_percentage,
-                ]
-            );
-        }
-
-        $this->total_vats = $totalVats->sortBy('vat_rate_percentage')->values();
+            ->sortBy('vat_rate_percentage')
+            ->values()
+            ->toArray();
 
         return $this;
     }

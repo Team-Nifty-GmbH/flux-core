@@ -131,6 +131,7 @@ class ViewServiceProvider extends ServiceProvider
 
         TallStackUi::personalize()
             ->card()
+            ->block('header.wrapper.border', 'dark:border-b-dark-600 border-b border-gray-100 p-2')
             ->block('header.text.size', 'text-sm font-medium w-full');
 
         TallStackUi::personalize()

@@ -17,6 +17,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Conditionable;
 use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 use Spatie\Permission\Exceptions\UnauthorizedException;
+use Throwable;
 
 abstract class FluxAction
 {
@@ -54,18 +55,33 @@ abstract class FluxAction
 
     public function __serialize(): array
     {
-        return [
+        $data = [
             'data' => $this->data,
-            'rules' => $this->rules,
             'result' => $this->result,
         ];
+
+        try {
+            serialize($this->rules);
+        } catch (Throwable) {
+            return $data;
+        }
+
+        $data['rules'] = $this->rules;
+
+        return $data;
     }
 
     public function __unserialize(array $data): void
     {
-        $this->data = $data['data'];
-        $this->rules = $data['rules'];
-        $this->result = $data['result'];
+        $this->data = data_get($data, 'data');
+        $this->result = data_get($data, 'result');
+        $rules = data_get($data, 'rules');
+
+        if (! is_null($rules)) {
+            $this->rules = $rules;
+        } else {
+            $this->setRulesFromRulesets();
+        }
     }
 
     public static function canPerformAction(bool $throwException = true): bool

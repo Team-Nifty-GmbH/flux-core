@@ -28,6 +28,8 @@ class ContactForm extends FluxForm
 
     public ?string $customer_number = null;
 
+    public ?string $customs_identifier = null;
+
     public ?string $debtor_number = null;
 
     public ?int $discount_days = null;

@@ -10,7 +10,7 @@
             },
         }"
     >
-        <div class="flex grid grid-cols-1">
+        <div class="grid grid-cols-1">
             <div class="max-h-96 overflow-y-auto">
                 <template x-for="order in $wire.paymentRunForm.orders">
                     <x-flux::list-item class="flex justify-between" :item="[]">
@@ -69,9 +69,9 @@
                     x-show="$wire.paymentRunForm.payment_run_type_enum === 'direct_debit'"
                 >
                     <x-select.styled
-                        wire:model="paymentRunForm.direct_debit_type"
+                        wire:model="paymentRunForm.sepa_mandate_type_enum"
                         :label="__('Direct debit type')"
-                        :options="['BASIC', 'B2B']"
+                        :options="\FluxErp\Enums\SepaMandateTypeEnum::valuesLocalized()"
                     />
                 </div>
                 <x-toggle
@@ -115,6 +115,7 @@
                 <x-button
                     color="indigo"
                     :text="__('Execute Payment Run')"
+                    loading="executePaymentRun"
                     wire:click="executePaymentRun().then((success) => {if(success) $modalClose('execute-payment-run');})"
                 />
             </div>

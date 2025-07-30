@@ -3,12 +3,17 @@
 namespace FluxErp\Livewire\Widgets;
 
 use Carbon\CarbonInterval;
+use FluxErp\Contracts\HasWidgetOptions;
 use FluxErp\Livewire\Dashboard\Dashboard;
+use FluxErp\Livewire\DataTables\WorkTimeList;
 use FluxErp\Livewire\Support\Widgets\ValueBox;
 use FluxErp\Models\WorkTime;
+use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Renderless;
+use Livewire\Livewire;
+use TeamNiftyGmbH\DataTable\Helpers\SessionFilter;
 
-class TotalUnassignedBillableHours extends ValueBox
+class TotalUnassignedBillableHours extends ValueBox implements HasWidgetOptions
 {
     public bool $shouldBePositive = true;
 
@@ -35,6 +40,34 @@ class TotalUnassignedBillableHours extends ValueBox
             'hours' => $totalHours,
             'minutes' => $minutes,
         ]);
+    }
+
+    #[Renderless]
+    public function options(): array
+    {
+        return [
+            [
+                'label' => __('Show'),
+                'method' => 'show',
+            ],
+        ];
+    }
+
+    #[Renderless]
+    public function show(): void
+    {
+        SessionFilter::make(
+            Livewire::new(resolve_static(WorkTimeList::class, 'class'))->getCacheKey(),
+            fn (Builder $query) => $query
+                ->whereNull('order_position_id')
+                ->where('is_billable', true)
+                ->where('is_daily_work_time', false)
+                ->where('total_time_ms', '>', 0),
+            __(static::getLabel()),
+        )
+            ->store();
+
+        $this->redirectRoute('accounting.work-times', navigate: true);
     }
 
     protected function icon(): string

@@ -7,10 +7,8 @@ use FluxErp\Enums\PaymentRunTypeEnum;
 use FluxErp\Livewire\DataTables\OrderList;
 use FluxErp\Models\OrderType;
 use FluxErp\States\Order\PaymentState\Paid;
-use FluxErp\States\PaymentRun\Open;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Validation\ValidationException;
-use Spatie\Permission\Exceptions\UnauthorizedException;
+use Livewire\Attributes\Renderless;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class DirectDebit extends OrderList
@@ -26,7 +24,10 @@ class DirectDebit extends OrderList
         'balance',
         'commission',
         'contact_bank_connection.sepa_mandates.signed_date',
+        'contact_bank_connection.sepa_mandates.sepa_mandate_type_enum',
     ];
+
+    protected PaymentRunTypeEnum $paymentRunTypeEnum = PaymentRunTypeEnum::DirectDebit;
 
     protected function getSelectedActions(): array
     {
@@ -34,42 +35,28 @@ class DirectDebit extends OrderList
             DataTableButton::make()
                 ->color('indigo')
                 ->text(__('Create Payment Run'))
-                ->attributes([
-                    'wire:click' => 'createPaymentRun',
-                    'wire:flux-confirm' => __('Create Payment Run|Do you really want to create the Payment Run?|Cancel|Yes'),
-                ])
+                ->wireClick('createPaymentRun')
                 ->when(resolve_static(CreatePaymentRun::class, 'canPerformAction', [false])),
         ];
     }
 
+    #[Renderless]
     public function createPaymentRun(): void
     {
-        $orderPayments = $this->getSelectedModels()
-            ->map(fn ($order) => [
-                'order_id' => $order->id,
-                'amount' => bcround($order->balance, 2),
-            ])
-            ->toArray();
+        $selectedOrders = $this->getSelectedModelsQuery()->get($this->modelKeyName);
 
-        try {
-            CreatePaymentRun::make([
-                'state' => Open::$name,
-                'payment_run_type_enum' => PaymentRunTypeEnum::DirectDebit,
-                'orders' => $orderPayments,
-            ])
-                ->checkPermission()
-                ->validate()
-                ->execute();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+        if ($selectedOrders->isEmpty()) {
+            $this->toast()
+                ->error(__('Please select at least one order.'))
+                ->send();
 
             return;
         }
 
-        $this->reset('selected');
+        session(['payment_run_preview_orders' => $selectedOrders->toArray()]);
+        session(['payment_run_type_enum' => $this->paymentRunTypeEnum]);
 
-        $this->notification()->success(__('Payment Run created.'))->send();
-        $this->loadData();
+        $this->redirectRoute('accounting.payment-run-preview', navigate: true);
     }
 
     protected function getBuilder(Builder $builder): Builder

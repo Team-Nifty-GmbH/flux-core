@@ -26,6 +26,8 @@ class BankConnectionForm extends FluxForm
 
     public bool $is_active = true;
 
+    public bool $is_virtual = false;
+
     public ?int $ledger_account_id = null;
 
     public ?string $name = null;

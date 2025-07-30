@@ -3,6 +3,7 @@
 namespace FluxErp\Tests\Feature\Api;
 
 use Carbon\Carbon;
+use FluxErp\Enums\SepaMandateTypeEnum;
 use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\ContactBankConnection;
@@ -77,6 +78,7 @@ class SepaMandateTest extends BaseSetup
             'client_id' => $this->sepaMandates[0]->client_id,
             'contact_id' => $this->contacts[0]->id,
             'contact_bank_connection_id' => $this->contactBankConnections[1]->id,
+            'sepa_mandate_type_enum' => SepaMandateTypeEnum::BASIC->name,
         ];
 
         $this->user->givePermissionTo($this->permissions['create']);
@@ -94,6 +96,7 @@ class SepaMandateTest extends BaseSetup
         $this->assertEquals($sepaMandate['client_id'], $dbSepaMandate->client_id);
         $this->assertEquals($sepaMandate['contact_id'], $dbSepaMandate->contact_id);
         $this->assertEquals($sepaMandate['contact_bank_connection_id'], $dbSepaMandate->contact_bank_connection_id);
+        $this->assertEquals($sepaMandate['sepa_mandate_type_enum'], $dbSepaMandate->sepa_mandate_type_enum->name);
         $this->assertNull($dbSepaMandate->signed_date);
         $this->assertTrue($this->user->is($dbSepaMandate->getCreatedBy()));
         $this->assertTrue($this->user->is($dbSepaMandate->getUpdatedBy()));
@@ -105,6 +108,7 @@ class SepaMandateTest extends BaseSetup
             'client_id' => $this->sepaMandates[0]->client_id,
             'contact_id' => $this->contacts[2]->id,
             'contact_bank_connection_id' => $this->contactBankConnections[1]->id,
+            'sepa_mandate_type_enum' => SepaMandateTypeEnum::B2B->name,
             'signed_date' => date('Y-m-d'),
         ];
 
@@ -121,6 +125,7 @@ class SepaMandateTest extends BaseSetup
             'client_id' => $this->sepaMandates[0]->client_id,
             'contact_id' => $this->contacts[0]->id,
             'contact_bank_connection_id' => $this->contactBankConnections[2]->id,
+            'sepa_mandate_type_enum' => SepaMandateTypeEnum::BASIC->name,
             'signed_date' => date('Y-m-d'),
         ];
 
@@ -137,6 +142,7 @@ class SepaMandateTest extends BaseSetup
             'client_id' => $this->sepaMandates[0]->client_id,
             'contact_id' => $this->contacts[0]->id,
             'contact_bank_connection_id' => $this->contactBankConnections[1]->id,
+            'sepa_mandate_type_enum' => SepaMandateTypeEnum::BASIC->name,
             'signed_date' => date('Y-m-d'),
         ];
 
@@ -155,6 +161,7 @@ class SepaMandateTest extends BaseSetup
         $this->assertEquals($sepaMandate['client_id'], $dbSepaMandate->client_id);
         $this->assertEquals($sepaMandate['contact_id'], $dbSepaMandate->contact_id);
         $this->assertEquals($sepaMandate['contact_bank_connection_id'], $dbSepaMandate->contact_bank_connection_id);
+        $this->assertEquals($sepaMandate['sepa_mandate_type_enum'], $dbSepaMandate->sepa_mandate_type_enum->name);
         $this->assertEquals($sepaMandate['signed_date'], $dbSepaMandate->signed_date->toDateString());
         $this->assertTrue($this->user->is($dbSepaMandate->getCreatedBy()));
         $this->assertTrue($this->user->is($dbSepaMandate->getUpdatedBy()));
@@ -173,6 +180,9 @@ class SepaMandateTest extends BaseSetup
 
         $response = $this->actingAs($this->user)->post('/api/sepa-mandates', $sepaMandate);
         $response->assertStatus(422);
+        $response->assertJsonValidationErrorFor('contact_id');
+        $response->assertJsonValidationErrorFor('contact_bank_connection_id');
+        $response->assertJsonValidationErrorFor('sepa_mandate_type_enum');
     }
 
     public function test_delete_sepa_mandate(): void
@@ -215,6 +225,8 @@ class SepaMandateTest extends BaseSetup
         $this->assertEquals($this->sepaMandates[0]->contact_id, $jsonSepaMandate->contact_id);
         $this->assertEquals($this->sepaMandates[0]->contact_bank_connection_id,
             $jsonSepaMandate->contact_bank_connection_id);
+        $this->assertEquals($this->sepaMandates[0]->sepa_mandate_type_enum->name,
+            $jsonSepaMandate->sepa_mandate_type_enum);
 
         if (is_null($this->sepaMandates[0]->signed_date)) {
             $this->assertNull($jsonSepaMandate->signed_date);
@@ -259,6 +271,7 @@ class SepaMandateTest extends BaseSetup
                     $jsonSepaMandate->client_id === $sepaMandate->client_id &&
                     $jsonSepaMandate->contact_id === $sepaMandate->contact_id &&
                     $jsonSepaMandate->contact_bank_connection_id === $sepaMandate->contact_bank_connection_id &&
+                    $jsonSepaMandate->sepa_mandate_type_enum === $sepaMandate->sepa_mandate_type_enum &&
                     $jsonSepaMandate->signed_date === $sepaMandate->signed_date &&
                     Carbon::parse($jsonSepaMandate->created_at) === Carbon::parse($sepaMandate->created_at) &&
                     Carbon::parse($jsonSepaMandate->updated_at) === Carbon::parse($sepaMandate->updated_at);

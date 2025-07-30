@@ -10,6 +10,7 @@
         },
     }"
 >
+    @include('flux::livewire.transactions.transactions')
     <x-card :header="__('Payment Conditions')">
         <div class="flex flex-col gap-4">
             <div>
