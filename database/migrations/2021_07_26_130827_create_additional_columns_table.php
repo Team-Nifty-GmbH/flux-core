@@ -14,7 +14,7 @@ return new class() extends Migration
             $table->string('model_type');
             $table->unsignedBigInteger('model_id')->nullable();
             $table->string('field_type')->default('text');
-            $table->json('label')->nullable();
+            $table->string('label')->nullable();
             $table->json('config')->nullable();
             $table->json('validations')->nullable();
             $table->json('values')->nullable();

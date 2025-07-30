@@ -65,7 +65,7 @@ return new class() extends Migration
             $table->float('warning_stock_amount')->nullable();
 
             // BOOLEANS
-            $table->boolean('has_serial_number')->default(false);
+            $table->boolean('has_serial_numbers')->default(false);
             $table->boolean('is_active')->default(true);
             $table->boolean('is_active_export_to_web_shop')->default(false);
             $table->boolean('is_bundle')->default(false);
