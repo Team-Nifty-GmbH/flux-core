@@ -370,6 +370,24 @@ export default function ($wire) {
                             },
                         },
                     },
+                    radialBar: {
+                        dataLabels: {
+                            total: {
+                                show: true,
+                                label: 'Total',
+                                formatter:
+                                    this.plotOptionsTotalFormatter ??
+                                    function (w) {
+                                        return w.globals.seriesTotals.reduce(
+                                            (a, b) => {
+                                                return a + b;
+                                            },
+                                            0,
+                                        );
+                                    },
+                            }
+                        }
+                    }
                 },
             };
         },
