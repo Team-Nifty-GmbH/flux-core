@@ -61,7 +61,7 @@ class SepaMandate extends FluxModel implements HasMedia, OffersPrinting
         return $this->belongsTo(ContactBankConnection::class);
     }
 
-    public function getEmailTemplateType(): ?string
+    public function getEmailTemplateModelType(): ?string
     {
         return morph_alias(static::class);
     }

@@ -170,11 +170,6 @@ class PaymentReminder extends OrderList
         ];
     }
 
-    protected function getDefaultTemplateId(OffersPrinting $item): ?int
-    {
-        return null;
-    }
-
     protected function getPrintLayouts(): array
     {
         return [

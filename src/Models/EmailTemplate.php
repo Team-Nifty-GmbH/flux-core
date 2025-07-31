@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use FluxErp\Traits\HasPackageFactory;
+use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
 use FluxErp\Traits\Scout\Searchable;
@@ -16,7 +17,7 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class EmailTemplate extends FluxModel implements HasMedia, InteractsWithDataTables
 {
-    use HasPackageFactory, HasUuid, InteractsWithMedia, Searchable;
+    use HasPackageFactory, HasUserModification, HasUuid, InteractsWithMedia, Searchable;
 
     protected $guarded = [
         'id',
@@ -41,19 +42,25 @@ class EmailTemplate extends FluxModel implements HasMedia, InteractsWithDataTabl
 
     public function getDescription(): ?string
     {
-        return ($this->html_tmplate ?? $this->text_template)->stripTags()->limit(100);
+        return Str::of(
+            html_entity_decode(
+                $this->subject ?? $this->html_body?->toHtml() ?? $this->text_body
+            )
+        )
+            ?->stripTags()
+            ->limit();
     }
 
     public function getLabel(): ?string
     {
-        return $this->subject->limit(50);
+        return $this->name;
     }
 
     public function getTextBodyAttribute($value): ?Stringable
     {
         return $value
             ? Str::of($value)
-            : Str::of($this->html_body->toHtml())->stripTags();
+            : Str::of($this->html_body?->toHtml() ?? '')->stripTags();
     }
 
     public function getUrl(): ?string

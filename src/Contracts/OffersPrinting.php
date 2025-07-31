@@ -11,7 +11,7 @@ interface OffersPrinting
 
     public function getAvailableViews(): array;
 
-    public function getEmailTemplateType(): ?string;
+    public function getEmailTemplateModelType(): ?string;
 
     public function getPrintViews(): array;
 

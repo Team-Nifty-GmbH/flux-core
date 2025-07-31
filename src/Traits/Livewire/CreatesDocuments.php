@@ -301,9 +301,9 @@ trait CreatesDocuments
                     'to' => $this->getTo($item, $createDocuments),
                     'cc' => $this->getCc($item),
                     'bcc' => $this->getBcc($item),
-                    'subject' => '',
+                    'subject' => null,
                     'attachments' => array_filter($mailAttachments),
-                    'html_body' => '',
+                    'html_body' => null,
                     'blade_parameters_serialized' => is_string($bladeParameters),
                     'blade_parameters' => $bladeParameters,
                     'communicatables' => [
@@ -314,7 +314,7 @@ trait CreatesDocuments
                     ],
                 ];
 
-                $mailMessage['model_type'] = $item->getEmailTemplateType();
+                $mailMessage['model_type'] = $item->getEmailTemplateModelType();
                 if (method_exists($this, 'getDefaultTemplateId')) {
                     $emailTemplateId = $this->getDefaultTemplateId($item);
                     $mailMessage['default_template_id'] = $emailTemplateId;

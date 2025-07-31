@@ -664,7 +664,7 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
         return null;
     }
 
-    public function getEmailTemplateType(): ?string
+    public function getEmailTemplateModelType(): ?string
     {
         return morph_alias(static::class);
     }

@@ -80,7 +80,7 @@ class EmailTemplates extends EmailTemplateList
         ];
 
         foreach (Relation::morphMap() as $key => $modelClass) {
-            if (is_a($modelClass, OffersPrinting::class, true)) {
+            if (is_a(resolve_static($modelClass, 'class'), OffersPrinting::class, true)) {
                 $modelTypes[] = [
                     'value' => $key,
                     'label' => __(Str::headline($key)),

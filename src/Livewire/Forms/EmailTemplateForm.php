@@ -38,11 +38,11 @@ class EmailTemplateForm extends FluxForm
 
     public function fill($values): void
     {
+        parent::fill($values);
+
         if ($values instanceof EmailTemplate) {
             $this->media = $values->getMedia()->toArray();
         }
-
-        parent::fill($values);
     }
 
     protected function getActions(): array

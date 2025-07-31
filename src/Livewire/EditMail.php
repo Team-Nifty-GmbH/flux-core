@@ -42,7 +42,7 @@ class EditMail extends Component
 
     public ?array $templateData = null;
 
-    public ?string $templateType = null;
+    public ?string $templateModelType = null;
 
     protected $listeners = [
         'create',
@@ -75,88 +75,51 @@ class EditMail extends Component
     #[Renderless]
     public function applyTemplate(): void
     {
-        if (! $this->selectedTemplateId) {
-            return;
-        }
-
-        if ($this->multiple) {
-            if (
-                ! $template = resolve_static(EmailTemplate::class, 'query')
-                    ->whereKey($this->selectedTemplateId)
-                    ->first()
-            ) {
-                return;
-            }
-
-            $templateAttachments = $template->getMedia()
-                ->map(fn (\Spatie\MediaLibrary\MediaCollections\Models\Media $media) => [
-                    'name' => $media->file_name,
-                    'id' => $media->getKey(),
-                ]
-                )
-                ->toArray();
-
-            $this->mailMessage->fill([
-                'cc' => array_merge($this->mailMessage->cc ?? [], $template->cc ?? []),
-                'bcc' => array_merge($this->mailMessage->bcc ?? [], $template->bcc ?? []),
-                'subject' => html_entity_decode((string) ($template->subject ?? '')),
-                'html_body' => html_entity_decode((string) ($template->html_body ?? '')),
-                'text_body' => html_entity_decode((string) ($template->text_body ?? '')),
-                'attachments' => array_merge($this->mailMessage->attachments ?? [], $templateAttachments),
-            ]);
-
-            return;
-        }
-
         if (
-            ! $template = resolve_static(EmailTemplate::class, 'query')
+            ! $this->selectedTemplateId
+            || ! $template = resolve_static(EmailTemplate::class, 'query')
                 ->whereKey($this->selectedTemplateId)
                 ->first()
         ) {
             return;
         }
 
-        $renderedSubject = (string) ($template->subject ?? '');
-        $renderedHtmlBody = (string) ($template->html_body ?? '');
-        $renderedTextBody = (string) ($template->text_body ?? '');
+        $renderedSubject = html_entity_decode($template->subject ?? '');
+        $renderedHtmlBody = html_entity_decode($template->html_body ?? '');
+        $renderedTextBody = html_entity_decode($template->text_body ?? '');
+        $templateAttachments = $template->getMedia()
+            ->map(fn (\Spatie\MediaLibrary\MediaCollections\Models\Media $media) => [
+                'id' => $media->getKey(),
+                'name' => $media->file_name,
+            ])
+            ->toArray();
 
-        if ($this->templateData && ! $this->multiple) {
+        if (! $this->multiple && $this->templateData) {
             try {
-                $renderedSubject = Blade::render(
-                    html_entity_decode($template->subject ?? ''),
-                    $this->templateData
-                );
-                $renderedHtmlBody = Blade::render(
-                    html_entity_decode($template->html_body ?? ''),
-                    $this->templateData
-                );
-                $renderedTextBody = Blade::render(
-                    html_entity_decode($template->text_body ?? ''),
-                    $this->templateData
-                );
+                $renderedSubject = Blade::render($renderedSubject, $this->templateData);
+                $renderedHtmlBody = Blade::render($renderedHtmlBody, $this->templateData);
+                $renderedTextBody = Blade::render($renderedTextBody, $this->templateData);
             } catch (Exception $e) {
-                $this->notification()->error(__('Template rendering failed: ') . $e->getMessage())->send();
+                $this->notification()
+                    ->error(__('Template rendering failed: ') . $e->getMessage())
+                    ->send();
             }
         }
 
-        $templateAttachments = $template->getMedia()
-            ->map(
-                fn (\Spatie\MediaLibrary\MediaCollections\Models\Media $media) => [
-                    'name' => $media->file_name,
-                    'id' => $media->getKey(),
-                ]
-            )
-            ->toArray();
-
-        $this->mailMessage->fill([
-            'to' => $this->mailMessage->to ?: ($template->to ?? []),
+        $fillData = [
             'cc' => array_merge($this->mailMessage->cc ?? [], $template->cc ?? []),
             'bcc' => array_merge($this->mailMessage->bcc ?? [], $template->bcc ?? []),
             'subject' => $renderedSubject,
             'html_body' => $renderedHtmlBody,
             'text_body' => $renderedTextBody,
             'attachments' => array_merge($this->mailMessage->attachments ?? [], $templateAttachments),
-        ]);
+        ];
+
+        if (! $this->multiple) {
+            $fillData['to'] = $this->mailMessage->to ?: ($template->to ?? []);
+        }
+
+        $this->mailMessage->fill($fillData);
     }
 
     #[Renderless]
@@ -171,14 +134,14 @@ class EditMail extends Component
     #[Renderless]
     public function create(
         array|CommunicationForm|Model $values,
-        ?string $templateType = null,
+        ?string $templateModelType = null,
         ?array $templateData = null,
         ?int $defaultTemplateId = null
     ): void {
         $this->multiple = false;
         $this->sessionKey = null;
         $this->reset('mailMessages');
-        $this->templateType = $templateType;
+        $this->templateModelType = $templateModelType;
         $this->templateData = $templateData;
 
         if ($values instanceof Model || is_array($values)) {
@@ -189,8 +152,10 @@ class EditMail extends Component
 
         $this->emailTemplates = resolve_static(EmailTemplate::class, 'query')
             ->when(
-                $this->templateType,
-                fn (Builder $query) => $query->where('model_type', $this->templateType)->orWhereNull('model_type')
+                $this->templateModelType,
+                fn (Builder $query) => $query
+                    ->where('model_type', $this->templateModelType)
+                    ->orWhereNull('model_type')
             )
             ->get(['id', 'name'])
             ->toArray();
@@ -215,7 +180,7 @@ class EditMail extends Component
             $data = count($data) === 1 && Arr::isList($data) ? $data[0] : $data;
             session()->forget($key);
 
-            $templateType = data_get($data, 'model_type');
+            $templateModelType = data_get($data, 'model_type');
             $templateData = data_get($data, 'template_data');
             $defaultTemplateId = data_get($data, 'default_template_id');
 
@@ -229,7 +194,7 @@ class EditMail extends Component
             $data['blade_parameters_serialized'] = false;
             $data['blade_parameters'] = null;
 
-            $this->create($data, $templateType, $templateData, $defaultTemplateId);
+            $this->create($data, $templateModelType, $templateData, $defaultTemplateId);
         } else {
             $this->createMany($data);
             $this->sessionKey = $key;
@@ -242,7 +207,7 @@ class EditMail extends Component
         $sessionKey = $this->sessionKey;
 
         if (count($mailMessages) === 1) {
-            $data = $mailMessages[0];
+            $data = Arr::first($mailMessages);
             if ($sessionKey) {
                 session()->forget($sessionKey);
             }
@@ -255,39 +220,50 @@ class EditMail extends Component
             $data['blade_parameters_serialized'] = false;
             $data['blade_parameters'] = null;
 
-            $templateType = data_get($data, 'model_type');
+            $templateModelType = data_get($data, 'model_type');
             $templateData = data_get($data, 'template_data');
             $defaultTemplateId = data_get($data, 'default_template_id');
 
             $renderedData = [];
-            if (! blank($data['subject'])) {
-                $renderedData['subject'] = Blade::render($data['subject'], $bladeParams);
+
+            if (! blank(data_get($data, 'subject'))) {
+                $renderedData['subject'] = Blade::render(
+                    html_entity_decode(data_get($data, 'subject')),
+                    $bladeParams
+                );
             }
-            if (! blank($data['html_body'])) {
-                $renderedData['html_body'] = Blade::render($data['html_body'], $bladeParams);
+
+            if (! blank(data_get($data, 'html_body'))) {
+                $renderedData['html_body'] = Blade::render(
+                    html_entity_decode(data_get($data, 'html_body')),
+                    $bladeParams
+                );
             }
-            if (! blank($data['text_body'])) {
-                $renderedData['text_body'] = Blade::render($data['text_body'], $bladeParams);
+
+            if (! blank(data_get($data, 'text_body'))) {
+                $renderedData['text_body'] = Blade::render(
+                    html_entity_decode(data_get($data, 'text_body')),
+                    $bladeParams
+                );
             }
 
             $data = array_merge($data, $renderedData);
-            $this->create($data, $templateType, $templateData, $defaultTemplateId);
+            $this->create($data, $templateModelType, $templateData, $defaultTemplateId);
 
             return;
         }
 
-        $firstMessage = $mailMessages[0];
-        $templateType = data_get($firstMessage, 'model_type');
+        $firstMessage = Arr::first($mailMessages);
+        $templateModelType = data_get($firstMessage, 'model_type');
         $templateData = data_get($firstMessage, 'template_data');
 
         $templateIds = collect($mailMessages)
             ->pluck('default_template_id')
-            ->unique();
-        $defaultTemplateId = $templateIds->count() === 1 && ! is_null($templateIds->first())
-            ? $templateIds->first()
-            : null;
+            ->unique()
+            ->filter();
+        $defaultTemplateId = $templateIds->first();
 
-        $this->create($firstMessage, $templateType, $templateData, $defaultTemplateId);
+        $this->create($firstMessage, $templateModelType, $templateData, $defaultTemplateId);
         $this->sessionKey = $sessionKey;
         $this->mailMessage->reset('attachments');
 
@@ -336,8 +312,8 @@ class EditMail extends Component
             $templateAttachments = $template->getMedia()
                 ->map(
                     fn (\Spatie\MediaLibrary\MediaCollections\Models\Media $media) => [
-                        'name' => $media->file_name,
                         'id' => $media->getKey(),
+                        'name' => $media->file_name,
                     ]
                 )
                 ->toArray();
@@ -353,7 +329,7 @@ class EditMail extends Component
             if (! $mailMessage instanceof CommunicationForm) {
                 $this->mailMessage->reset();
 
-                $originalAttachments = $mailMessage['attachments'] ?? [];
+                $originalAttachments = data_get($mailMessage, 'attachments') ?? [];
                 $mergedAttachments = array_merge($originalAttachments, $templateAttachments);
 
                 $this->mailMessage->fill(array_merge(

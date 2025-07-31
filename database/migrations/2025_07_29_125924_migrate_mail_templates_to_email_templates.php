@@ -10,6 +10,14 @@ return new class() extends Migration
 {
     public function up(): void
     {
+        Schema::table('order_types', function (Blueprint $table): void {
+            $table->foreignId('email_template_id')
+                ->nullable()
+                ->after('name')
+                ->constrained('email_templates')
+                ->nullOnDelete();
+        });
+
         $orderTypes = DB::table('order_types')
             ->select('id', 'name', 'mail_subject', 'mail_body')
             ->whereNotNull('mail_subject')
@@ -18,7 +26,7 @@ return new class() extends Migration
 
         foreach ($orderTypes as $orderType) {
             if ($orderType->mail_subject || $orderType->mail_body) {
-                DB::table('email_templates')->insert([
+                $emailTemplateId = DB::table('email_templates')->insertGetId([
                     'uuid' => Str::uuid()->toString(),
                     'name' => 'Order Type: ' . $orderType->name,
                     'model_type' => 'order',
@@ -28,6 +36,10 @@ return new class() extends Migration
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
+
+                DB::table('order_types')
+                    ->where('id', $orderType->id)
+                    ->update(['email_template_id' => $emailTemplateId]);
             }
         }
 
@@ -61,29 +73,6 @@ return new class() extends Migration
         Schema::table('payment_reminder_texts', function (Blueprint $table): void {
             $table->dropColumn(['mail_subject', 'mail_body', 'mail_to', 'mail_cc']);
         });
-
-        Schema::table('order_types', function (Blueprint $table): void {
-            $table->foreignId('email_template_id')
-                ->nullable()
-                ->after('description')
-                ->constrained('email_templates')
-                ->nullOnDelete();
-        });
-
-        $existingOrderTypes = DB::table('order_types')->get(['id', 'name']);
-
-        foreach ($existingOrderTypes as $orderType) {
-            $template = DB::table('email_templates')
-                ->where('name', 'Order Type: ' . $orderType->name)
-                ->where('model_type', 'order')
-                ->first();
-
-            if ($template) {
-                DB::table('order_types')
-                    ->where('id', $orderType->id)
-                    ->update(['email_template_id' => $template->id]);
-            }
-        }
     }
 
     public function down(): void

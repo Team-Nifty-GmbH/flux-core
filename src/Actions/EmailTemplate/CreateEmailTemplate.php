@@ -20,9 +20,10 @@ class CreateEmailTemplate extends FluxAction
 
     public function performAction(): EmailTemplate
     {
+        /** @var EmailTemplate $emailTemplate */
         $emailTemplate = app(EmailTemplate::class, ['attributes' => $this->getData()]);
         $emailTemplate->save();
 
-        return $emailTemplate->fresh();
+        return $emailTemplate->refresh();
     }
 }

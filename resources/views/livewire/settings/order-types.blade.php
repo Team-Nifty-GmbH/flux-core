@@ -16,7 +16,7 @@
                         :placeholder="__('Select a Client')"
                         wire:model="orderType.client_id"
                         select="label:name|value:id"
-                        :options="$clients"
+                        :request="route('search', \FluxErp\Models\Client::class)"
                     />
                     <x-select.styled
                         :label="__('Order Type')"
@@ -61,8 +61,16 @@
                     <x-select.styled
                         :label="__('Email Template')"
                         wire:model="orderType.email_template_id"
-                        select="label:name|value:id"
-                        :options="resolve_static(\FluxErp\Models\EmailTemplate::class, 'query')->where('model_type', 'order')->orWhereNull('model_type')->get(['id', 'name'])->toArray()"
+                        select="label:label|value:id"
+                        :request="[
+                            'url' => route('search', \FluxErp\Models\EmailTemplate::class),
+                            'method' => 'POST',
+                            'params' => [
+                                'searchFields' => [
+                                    'name',
+                                ],
+                            ],
+                        ]"
                     />
                 </div>
             </div>

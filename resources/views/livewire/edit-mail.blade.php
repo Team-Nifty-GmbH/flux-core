@@ -134,12 +134,11 @@
                     wire:model.live="selectedTemplateId"
                     :label="__('Email Template')"
                     select="label:name|value:id"
-                    :options="[]"
                     wire:change="applyTemplate"
+                    :options="[]"
                 />
             </div>
             <x-select.styled
-                label=""
                 required
                 wire:model="mailMessage.mail_account_id"
                 :label="__('Send From')"
