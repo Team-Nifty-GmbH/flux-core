@@ -4,6 +4,7 @@ namespace FluxErp\View\Components;
 
 use Closure;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Str;
 use Illuminate\View\Component;
 use ReflectionClass;
@@ -196,11 +197,27 @@ class Editor extends Component
     {
         $parsedVariables = [];
 
-        foreach ($this->bladeVariables as $variableName => $modelClass) {
-            if (class_exists($modelClass)) {
-                $modelData = $this->extractModelData($modelClass);
-                $modelData['variableName'] = $variableName;
-                $parsedVariables[] = $modelData;
+        foreach ($this->bladeVariables as $variableName => $morphOrClass) {
+            if (str_contains($morphOrClass, ':')) {
+                // Morph format: 'product:173'
+                [$morphType, $morphId] = explode(':', $morphOrClass, 2);
+
+                // Get model class from morph map
+                $morphMap = Relation::morphMap();
+                if (isset($morphMap[$morphType])) {
+                    $modelClass = $morphMap[$morphType];
+                    $modelData = $this->extractModelData($modelClass);
+                    $modelData['variableName'] = $variableName;
+                    $modelData['morphType'] = $morphType;
+                    $modelData['morphId'] = $morphId;
+                    $parsedVariables[] = $modelData;
+                }
+            } else {
+                if (class_exists($morphOrClass)) {
+                    $modelData = $this->extractModelData($morphOrClass);
+                    $modelData['variableName'] = $variableName;
+                    $parsedVariables[] = $modelData;
+                }
             }
         }
 

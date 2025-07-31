@@ -11,14 +11,6 @@
             label="{{ __('Name') }}"
             wire:model="product.name"
         />
-        <x-flux::editor
-            x-model="edit"
-            wire:model="product.description"
-            :label="__('Description')"
-            :blade-variables="[
-                'product' => \FluxErp\Models\Product::class,
-            ]"
-        />
         @show
     </x-card>
     <x-card class="space-y-2.5" :header="__('Attributes')">

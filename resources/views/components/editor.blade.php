@@ -37,7 +37,7 @@
             tooltipDropdown: @json($tooltipDropdown),
             defaultFontSize: @json($defaultFontSize),
             bladeSupport: @json($bladeSupport || !empty($bladeVariables)),
-            bladeModelData: @js($bladeModelData)
+            bladeModelData: @js($bladeModelData ?? [])
         })"
         {{ $attributes->whereDoesntStartWith("wire:model") }}
         wire:ignore

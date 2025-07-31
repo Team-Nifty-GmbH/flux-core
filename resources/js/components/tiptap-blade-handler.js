@@ -14,6 +14,7 @@ export const BladeConfig = Extension.create({
 
     addProseMirrorPlugins() {
         const variables = this.options.variables || [];
+        const extension = this;
 
         const plugins = [
             new Plugin({
@@ -113,7 +114,6 @@ export const BladeConfig = Extension.create({
 let suggestionTooltip = null;
 
 function createAutocompletePlugin(variables) {
-
         return new Plugin({
             key: new PluginKey('bladeAutocomplete'),
             state: {
@@ -303,12 +303,12 @@ function showSuggestionTooltip(view, suggestions, selectedIndex) {
         suggestionTooltip.destroy();
     }
 
-    const tooltipElement = createTooltipElement(suggestions, selectedIndex);
+    const tooltipElement = createTooltipElement(suggestions, selectedIndex, view);
 
     suggestionTooltip = window.tippy(document.body, {
         content: tooltipElement,
         showOnCreate: true,
-        interactive: false,
+        interactive: true,
         trigger: 'manual',
         placement: 'bottom-start',
         getReferenceClientRect: () => ({
@@ -325,7 +325,7 @@ function showSuggestionTooltip(view, suggestions, selectedIndex) {
 function updateSuggestionTooltip(view, suggestions, selectedIndex) {
     if (!suggestionTooltip || suggestions.length === 0) return;
 
-    const tooltipElement = createTooltipElement(suggestions, selectedIndex);
+    const tooltipElement = createTooltipElement(suggestions, selectedIndex, view);
     suggestionTooltip.setContent(tooltipElement);
 }
 
@@ -336,7 +336,7 @@ function hideSuggestionTooltip() {
     }
 }
 
-function createTooltipElement(suggestions, selectedIndex) {
+function createTooltipElement(suggestions, selectedIndex, view) {
     const container = document.createElement('div');
     container.className = 'bg-white dark:bg-secondary-800 border border-secondary-300 dark:border-secondary-600 rounded-md shadow-lg max-w-xs';
 
@@ -347,6 +347,19 @@ function createTooltipElement(suggestions, selectedIndex) {
                 ? 'bg-primary-100 dark:bg-primary-900 text-primary-900 dark:text-primary-100'
                 : 'hover:bg-secondary-100 dark:hover:bg-secondary-700 text-secondary-900 dark:text-secondary-100'
         }`;
+
+        // Add click handler
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (view) {
+                // Get plugin state using the key directly
+                const pluginKey = new PluginKey('bladeAutocomplete');
+                const pluginState = pluginKey.getState(view.state);
+                insertSuggestion(view, suggestion, pluginState ? pluginState.query : '');
+                hideSuggestionTooltip();
+            }
+        });
 
         const name = document.createElement('div');
         name.className = 'font-medium';
