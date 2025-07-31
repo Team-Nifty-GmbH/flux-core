@@ -37,93 +37,93 @@
                 :label="__('Model Type')"
                 :options="$modelTypes"
             />
-        <div class="flex flex-col gap-1.5">
-            <x-label :label="__('To')" />
-            <div class="flex gap-1">
-                <template x-for="to in $wire.emailTemplateForm.to || []">
-                    <x-badge flat color="indigo" cl>
-                        <x-slot:text>
-                            <span x-text="to"></span>
-                        </x-slot>
-                        <x-slot
-                            name="right"
-                            class="relative flex h-2 w-2 items-center"
-                        >
-                            <button
-                                type="button"
-                                x-on:click="$wire.emailTemplateForm.to.splice($wire.emailTemplateForm.to.indexOf(to), 1)"
+            <div class="flex flex-col gap-1.5">
+                <x-label :label="__('To')" />
+                <div class="flex gap-1">
+                    <template x-for="to in $wire.emailTemplateForm.to || []">
+                        <x-badge flat color="indigo" cl>
+                            <x-slot:text>
+                                <span x-text="to"></span>
+                            </x-slot>
+                            <x-slot
+                                name="right"
+                                class="relative flex h-2 w-2 items-center"
                             >
-                                <x-icon name="x-mark" class="h-4 w-4" />
-                            </button>
-                        </x-slot>
-                    </x-badge>
-                </template>
+                                <button
+                                    type="button"
+                                    x-on:click="$wire.emailTemplateForm.to.splice($wire.emailTemplateForm.to.indexOf(to), 1)"
+                                >
+                                    <x-icon name="x-mark" class="h-4 w-4" />
+                                </button>
+                            </x-slot>
+                        </x-badge>
+                    </template>
+                </div>
+                <x-input
+                    :placeholder="__('Add a new to')"
+                    x-on:blur="addReceiver($event, 'to')"
+                    x-on:keyup="addReceiver($event, 'to')"
+                    class="w-full"
+                />
             </div>
-            <x-input
-                :placeholder="__('Add a new to')"
-                x-on:blur="addReceiver($event, 'to')"
-                x-on:keyup="addReceiver($event, 'to')"
-                class="w-full"
-            />
-        </div>
-        <div class="flex flex-col gap-1.5">
-            <x-label :label="__('CC')" />
-            <div class="flex gap-1">
-                <template x-for="cc in $wire.emailTemplateForm.cc || []">
-                    <x-badge flat color="indigo" cl>
-                        <x-slot:text>
-                            <span x-text="cc"></span>
-                        </x-slot>
-                        <x-slot
-                            name="right"
-                            class="relative flex h-2 w-2 items-center"
-                        >
-                            <button
-                                type="button"
-                                x-on:click="$wire.emailTemplateForm.cc.splice($wire.emailTemplateForm.cc.indexOf(cc), 1)"
+            <div class="flex flex-col gap-1.5">
+                <x-label :label="__('CC')" />
+                <div class="flex gap-1">
+                    <template x-for="cc in $wire.emailTemplateForm.cc || []">
+                        <x-badge flat color="indigo" cl>
+                            <x-slot:text>
+                                <span x-text="cc"></span>
+                            </x-slot>
+                            <x-slot
+                                name="right"
+                                class="relative flex h-2 w-2 items-center"
                             >
-                                <x-icon name="x-mark" class="h-4 w-4" />
-                            </button>
-                        </x-slot>
-                    </x-badge>
-                </template>
+                                <button
+                                    type="button"
+                                    x-on:click="$wire.emailTemplateForm.cc.splice($wire.emailTemplateForm.cc.indexOf(cc), 1)"
+                                >
+                                    <x-icon name="x-mark" class="h-4 w-4" />
+                                </button>
+                            </x-slot>
+                        </x-badge>
+                    </template>
+                </div>
+                <x-input
+                    :placeholder="__('Add a new cc')"
+                    x-on:blur="addReceiver($event, 'cc')"
+                    x-on:keyup="addReceiver($event, 'cc')"
+                    class="w-full"
+                />
             </div>
-            <x-input
-                :placeholder="__('Add a new cc')"
-                x-on:blur="addReceiver($event, 'cc')"
-                x-on:keyup="addReceiver($event, 'cc')"
-                class="w-full"
-            />
-        </div>
-        <div class="flex flex-col gap-1.5">
-            <x-label :label="__('BCC')" />
-            <div class="flex gap-1">
-                <template x-for="bcc in $wire.emailTemplateForm.bcc || []">
-                    <x-badge flat color="indigo" cl>
-                        <x-slot:text>
-                            <span x-text="bcc"></span>
-                        </x-slot>
-                        <x-slot
-                            name="right"
-                            class="relative flex h-2 w-2 items-center"
-                        >
-                            <button
-                                type="button"
-                                x-on:click="$wire.emailTemplateForm.bcc.splice($wire.emailTemplateForm.bcc.indexOf(to), 1)"
+            <div class="flex flex-col gap-1.5">
+                <x-label :label="__('BCC')" />
+                <div class="flex gap-1">
+                    <template x-for="bcc in $wire.emailTemplateForm.bcc || []">
+                        <x-badge flat color="indigo" cl>
+                            <x-slot:text>
+                                <span x-text="bcc"></span>
+                            </x-slot>
+                            <x-slot
+                                name="right"
+                                class="relative flex h-2 w-2 items-center"
                             >
-                                <x-icon name="x-mark" class="h-4 w-4" />
-                            </button>
-                        </x-slot>
-                    </x-badge>
-                </template>
+                                <button
+                                    type="button"
+                                    x-on:click="$wire.emailTemplateForm.bcc.splice($wire.emailTemplateForm.bcc.indexOf(bcc), 1)"
+                                >
+                                    <x-icon name="x-mark" class="h-4 w-4" />
+                                </button>
+                            </x-slot>
+                        </x-badge>
+                    </template>
+                </div>
+                <x-input
+                    :placeholder="__('Add a new bcc')"
+                    x-on:blur="addReceiver($event, 'bcc')"
+                    x-on:keyup="addReceiver($event, 'bcc')"
+                    class="w-full"
+                />
             </div>
-            <x-input
-                :placeholder="__('Add a new bcc')"
-                x-on:blur="addReceiver($event, 'bcc')"
-                x-on:keyup="addReceiver($event, 'bcc')"
-                class="w-full"
-            />
-        </div>
             <x-textarea
                 wire:model="emailTemplateForm.subject"
                 :label="__('Subject')"
@@ -234,7 +234,7 @@
                         @endcanAction
                     </div>
                 </div>
-        </div>
+            </div>
             <x-flux::editor
                 wire:model="emailTemplateForm.html_body"
                 :label="__('Html Body')"

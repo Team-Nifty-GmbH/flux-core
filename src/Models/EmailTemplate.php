@@ -44,10 +44,10 @@ class EmailTemplate extends FluxModel implements HasMedia, InteractsWithDataTabl
     {
         return Str::of(
             html_entity_decode(
-                $this->subject ?? $this->html_body?->toHtml() ?? $this->text_body
+                $this->subject ?? $this->html_body?->toHtml() ?? $this->text_body ?? ''
             )
         )
-            ?->stripTags()
+            ->stripTags()
             ->limit();
     }
 

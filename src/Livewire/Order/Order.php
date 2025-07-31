@@ -812,6 +812,11 @@ class Order extends Component
             ->resolvePrintViews();
     }
 
+    protected function getSubject(OffersPrinting $item): string
+    {
+        return __(Str::headline($item->orderType->name)) . ' ' . $item->order_number;
+    }
+
     protected function getTo(OffersPrinting $item, array $documents): array
     {
         // add invoice address email if an invoice is being sent

@@ -13,7 +13,7 @@ return new class() extends Migration
         Schema::table('order_types', function (Blueprint $table): void {
             $table->foreignId('email_template_id')
                 ->nullable()
-                ->after('name')
+                ->after('client_id')
                 ->constrained('email_templates')
                 ->nullOnDelete();
         });

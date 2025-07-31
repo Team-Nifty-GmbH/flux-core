@@ -194,6 +194,11 @@ class Contact extends Component
         return app(ContactModel::class)->resolvePrintViews();
     }
 
+    protected function getSubject(OffersPrinting $item): string
+    {
+        return __('Balance Statement :date', ['date' => now()->format('d.m.Y')]);
+    }
+
     protected function getTo(OffersPrinting $item, array $documents): array
     {
         return [$item->invoiceAddress->email_primary ?? $item->mainAddress->email_primary];

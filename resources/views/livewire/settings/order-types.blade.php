@@ -69,6 +69,13 @@
                                 'searchFields' => [
                                     'name',
                                 ],
+                                'where' => [
+                                    [
+                                        'model_type',
+                                        '=',
+                                        morph_alias(\FluxErp\Models\Order::class),
+                                    ],
+                                ],
                             ],
                         ]"
                     />

@@ -15,8 +15,8 @@ class EmailTemplateTableSeeder extends Seeder
             ->filter(fn (string $modelClass) => is_a(
                 resolve_static($modelClass, 'class'),
                 OffersPrinting::class,
-                true)
-            )
+                true
+            ))
             ->each(fn (string $modelClass, string $modelType) => EmailTemplate::factory()
                 ->create([
                     'model_type' => $modelType,

@@ -301,7 +301,7 @@ trait CreatesDocuments
                     'to' => $this->getTo($item, $createDocuments),
                     'cc' => $this->getCc($item),
                     'bcc' => $this->getBcc($item),
-                    'subject' => null,
+                    'subject' => $this->getSubject($item, $createDocuments),
                     'attachments' => array_filter($mailAttachments),
                     'html_body' => null,
                     'blade_parameters_serialized' => is_string($bladeParameters),
@@ -420,6 +420,11 @@ trait CreatesDocuments
             'view' => $view,
             'name' => __($view),
         ];
+    }
+
+    protected function getSubject(OffersPrinting $item, array $documents): ?string
+    {
+        return null;
     }
 
     protected function supportsDocumentPreview(): bool

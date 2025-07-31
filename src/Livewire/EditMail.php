@@ -261,7 +261,10 @@ class EditMail extends Component
             ->pluck('default_template_id')
             ->unique()
             ->filter();
-        $defaultTemplateId = $templateIds->first();
+
+        if ($templateIds->count() === 1) {
+            $defaultTemplateId = $templateIds->first();
+        }
 
         $this->create($firstMessage, $templateModelType, $templateData, $defaultTemplateId);
         $this->sessionKey = $sessionKey;

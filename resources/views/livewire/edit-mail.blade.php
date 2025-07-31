@@ -132,9 +132,9 @@
             <div class="flex-1" id="email-template">
                 <x-select.styled
                     wire:model.live="selectedTemplateId"
+                    wire:change="applyTemplate"
                     :label="__('Email Template')"
                     select="label:name|value:id"
-                    wire:change="applyTemplate"
                     :options="[]"
                 />
             </div>
