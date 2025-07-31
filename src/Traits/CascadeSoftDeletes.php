@@ -67,7 +67,7 @@ trait CascadeSoftDeletes
 
     protected function getCascadingRestores(): array
     {
-        return isset($this->cascadeRestores) ? (array) $this->cascadeRestores : $this->getCascadingDeletes();
+        return property_exists($this, 'cascadeRestores') ? (array) $this->cascadeRestores : $this->getCascadingDeletes();
     }
 
     protected function handleRecords(string $relationship, Closure $closure): void
