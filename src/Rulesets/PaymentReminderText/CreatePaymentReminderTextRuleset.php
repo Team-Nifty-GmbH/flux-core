@@ -13,12 +13,6 @@ class CreatePaymentReminderTextRuleset extends FluxRuleset
     {
         return [
             'uuid' => 'nullable|string|uuid|unique:payment_reminders,uuid',
-            'mail_to' => 'nullable|array',
-            'mail_to.*' => 'email',
-            'mail_cc' => 'nullable|array',
-            'mail_cc.*' => 'email',
-            'mail_subject' => 'nullable|string',
-            'mail_body' => 'nullable|string',
             'reminder_subject' => 'nullable|string',
             'reminder_body' => 'required|string',
             'reminder_level' => [

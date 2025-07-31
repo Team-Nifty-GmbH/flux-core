@@ -736,7 +736,7 @@ class Order extends Component
                         'order_column',
                         'is_percentage',
                     ]),
-                'orderType:id,name,mail_subject,mail_body,print_layouts,order_type_enum',
+                'orderType:id,name,email_template_id,print_layouts,order_type_enum',
                 'priceList:id,name,is_net',
                 'users:id,name',
             ])
@@ -798,9 +798,9 @@ class Order extends Component
         );
     }
 
-    protected function getHtmlBody(OffersPrinting $item): string
+    protected function getDefaultTemplateId(OffersPrinting $item): ?int
     {
-        return html_entity_decode($item->orderType->mail_body);
+        return $item->orderType?->email_template_id;
     }
 
     protected function getPrintLayouts(): array
@@ -814,9 +814,7 @@ class Order extends Component
 
     protected function getSubject(OffersPrinting $item): string
     {
-        return html_entity_decode(
-            $item->orderType->mail_subject ?? '{{ $order->orderType->name }} {{ $order->order_number }}'
-        );
+        return __(Str::headline($item->orderType->name)) . ' ' . $item->order_number;
     }
 
     protected function getTo(OffersPrinting $item, array $documents): array

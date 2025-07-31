@@ -91,11 +91,11 @@ class GenericMail extends Mailable
             }
 
             if (is_array($attachment) && ($attachment['id'] ?? false)) {
-                return Media::query()->whereKey($attachment['id'])->first();
+                return resolve_static(Media::class, 'query')->whereKey($attachment['id'])->first();
             }
 
             if (is_int($attachment)) {
-                return Media::query()->whereKey($attachment)->first();
+                return resolve_static(Media::class, 'query')->whereKey($attachment)->first();
             }
 
             return $attachment;
@@ -157,8 +157,6 @@ class GenericMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            html: data_get($this->mailMessageForm, 'html_body'),
-            text: data_get($this->mailMessageForm, 'text_body'),
             markdown: 'flux::emails.generic',
         );
     }

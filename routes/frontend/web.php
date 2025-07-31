@@ -54,6 +54,7 @@ use FluxErp\Livewire\Settings\Countries;
 use FluxErp\Livewire\Settings\Currencies;
 use FluxErp\Livewire\Settings\CustomerPortal;
 use FluxErp\Livewire\Settings\DiscountGroups;
+use FluxErp\Livewire\Settings\EmailTemplates;
 use FluxErp\Livewire\Settings\FailedJobs;
 use FluxErp\Livewire\Settings\Industries;
 use FluxErp\Livewire\Settings\LanguageLines;
@@ -231,6 +232,7 @@ Route::middleware('web')
                         Route::get('/countries', Countries::class)->name('countries');
                         Route::get('/currencies', Currencies::class)->name('currencies');
                         Route::get('/discount-groups', DiscountGroups::class)->name('discount-groups');
+                        Route::get('/email-templates', EmailTemplates::class)->name('email-templates');
                         Route::get('/failed-jobs', FailedJobs::class)->name('failed-jobs');
                         Route::get('/industries', Industries::class)->name('industries');
                         Route::get('/languages', Languages::class)->name('languages');

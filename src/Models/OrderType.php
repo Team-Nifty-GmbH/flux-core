@@ -43,6 +43,11 @@ class OrderType extends FluxModel
         return $this->belongsTo(Client::class);
     }
 
+    public function emailTemplate(): BelongsTo
+    {
+        return $this->belongsTo(EmailTemplate::class);
+    }
+
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);

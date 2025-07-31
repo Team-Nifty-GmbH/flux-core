@@ -191,6 +191,11 @@ class Contact extends FluxModel implements HasMedia, InteractsWithDataTables, Of
         return null;
     }
 
+    public function getEmailTemplateModelType(): ?string
+    {
+        return morph_alias(static::class);
+    }
+
     public function getLabel(): ?string
     {
         return $this->customer_number;
