@@ -111,7 +111,7 @@ return new class() extends Migration
             $table->date('payment_reminder_next_date')->nullable();
 
             // string
-            $table->string('order_number')->unique();
+            $table->string('order_number');
             $table->string('commission')->nullable();
             $table->string('iban')->nullable();
             $table->string('account_holder')->nullable();
