@@ -385,9 +385,9 @@ export default function ($wire) {
                                             0,
                                         );
                                     },
-                            }
-                        }
-                    }
+                            },
+                        },
+                    },
                 },
             };
         },
