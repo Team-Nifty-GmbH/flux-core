@@ -179,18 +179,32 @@ class Editor extends Component
         $this->textColors ??= static::$colorPalette;
         $this->textBackgroundColors ??= static::$colorPalette;
 
-        if ($this->bladeSupport && $this->bladeModel) {
-            $this->bladeModelData = $this->extractModelData($this->bladeModel);
-        }
-
-        if ($this->bladeSupport && ! empty($this->bladeVariables)) {
+        if (! empty($this->bladeVariables)) {
+            $this->bladeSupport = true;
             $this->parseBladeVariables();
+        } elseif ($this->bladeSupport && $this->bladeModel) {
+            $this->bladeModelData = $this->extractModelData($this->bladeModel);
         }
     }
 
     public function render(): View|Closure|string
     {
         return view('flux::components.editor');
+    }
+
+    protected function parseBladeVariables(): void
+    {
+        $parsedVariables = [];
+
+        foreach ($this->bladeVariables as $variableName => $modelClass) {
+            if (class_exists($modelClass)) {
+                $modelData = $this->extractModelData($modelClass);
+                $modelData['variableName'] = $variableName;
+                $parsedVariables[] = $modelData;
+            }
+        }
+
+        $this->bladeModelData = $parsedVariables;
     }
 
     protected function extractModelData(string $modelClass): array

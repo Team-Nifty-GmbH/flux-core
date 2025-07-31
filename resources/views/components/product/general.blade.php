@@ -15,6 +15,9 @@
             x-model="edit"
             wire:model="product.description"
             :label="__('Description')"
+            :blade-variables="[
+                'product' => \FluxErp\Models\Product::class,
+            ]"
         />
         @show
     </x-card>

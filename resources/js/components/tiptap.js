@@ -68,9 +68,7 @@ export default function (
                 if (bladeSupport && bladeModelData) {
                     extensions.push(
                         BladeConfig.configure({
-                            availableModel: bladeModelData.name.toLowerCase(),
-                            modelAttributes: bladeModelData.attributes,
-                            modelMethods: bladeModelData.methods,
+                            variables: Array.isArray(bladeModelData) ? bladeModelData : [bladeModelData],
                         })
                     );
                 }

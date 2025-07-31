@@ -7,19 +7,13 @@ export const BladeConfig = Extension.create({
 
     addOptions() {
         return {
-            availableModel: null,
-            modelAttributes: [],
-            modelMethods: [],
+            variables: [],
             onBladeCodeChange: null,
         };
     },
 
     addProseMirrorPlugins() {
-        const modelData = this.options.modelAttributes ? {
-            name: this.options.availableModel,
-            attributes: this.options.modelAttributes,
-            methods: this.options.modelMethods
-        } : null;
+        const variables = this.options.variables || [];
 
         const plugins = [
             new Plugin({
@@ -89,8 +83,8 @@ export const BladeConfig = Extension.create({
             })
         ];
 
-        if (modelData) {
-            plugins.push(createAutocompletePlugin(modelData));
+        if (variables.length > 0) {
+            plugins.push(createAutocompletePlugin(variables));
         }
 
         return plugins;
@@ -98,24 +92,18 @@ export const BladeConfig = Extension.create({
 
     addCommands() {
         return {
-            insertModelVariable: () => ({ tr, state }) => {
+            insertVariable: (variableName) => ({ tr, state, dispatch }) => {
                 const { selection } = state;
-                const bladeCode = `{{ $${this.options.availableModel}-> }}`;
+                const bladeCode = `{{ $${variableName}-> }}`;
+                
                 tr.insertText(bladeCode, selection.from, selection.to);
+                
+                // Position cursor between -> and }}
                 const newPos = selection.from + bladeCode.length - 3;
-                tr.setSelection(state.selection.constructor.near(tr.doc.resolve(newPos)));
-                return true;
-            },
-            insertModelAttribute: (attribute) => ({ tr, state }) => {
-                const { selection } = state;
-                const bladeCode = `{{ $${this.options.availableModel}->${attribute} }}`;
-                tr.insertText(bladeCode, selection.from, selection.to);
-                return true;
-            },
-            insertModelMethod: (method) => ({ tr, state }) => {
-                const { selection } = state;
-                const bladeCode = `{{ $${this.options.availableModel}->${method}() }}`;
-                tr.insertText(bladeCode, selection.from, selection.to);
+                const resolvedPos = tr.doc.resolve(Math.min(newPos, tr.doc.content.size));
+                tr.setSelection(state.selection.constructor.near(resolvedPos));
+                
+                if (dispatch) dispatch(tr);
                 return true;
             },
         };
@@ -124,7 +112,7 @@ export const BladeConfig = Extension.create({
 
 let suggestionTooltip = null;
 
-function createAutocompletePlugin(modelData) {
+function createAutocompletePlugin(variables) {
 
         return new Plugin({
             key: new PluginKey('bladeAutocomplete'),
@@ -154,17 +142,20 @@ function createAutocompletePlugin(modelData) {
                     const bladeMatch = textBefore.match(/\{\{\s*\$(\w+)(?:->([\w>-]+))?->\s*(\w*)$/);
 
                     if (bladeMatch) {
-                        const [, modelName, chain, partial] = bladeMatch;
+                        const [, variableName, chain, partial] = bladeMatch;
 
-                        if (modelName.toLowerCase() === modelData.name.toLowerCase()) {
+                        // Find the variable with matching name
+                        const variable = variables.find(v => v.variableName.toLowerCase() === variableName.toLowerCase());
+                        
+                        if (variable) {
                             let suggestions = [];
 
                             if (chain) {
-                                suggestions = getChainedSuggestions(modelData, chain, partial);
+                                suggestions = getChainedSuggestions(variable, chain, partial);
                             } else {
                                 suggestions = [
-                                    ...modelData.attributes,
-                                    ...modelData.methods
+                                    ...variable.attributes,
+                                    ...variable.methods
                                 ].filter(item =>
                                     partial === '' || item.name.toLowerCase().startsWith(partial.toLowerCase())
                                 );
@@ -181,12 +172,15 @@ function createAutocompletePlugin(modelData) {
 
                     const basicBladeMatch = textBefore.match(/\{\{\s*\$(\w+)->\s*$/);
                     if (basicBladeMatch) {
-                        const [, modelName] = basicBladeMatch;
+                        const [, variableName] = basicBladeMatch;
 
-                        if (modelName.toLowerCase() === modelData.name.toLowerCase()) {
+                        // Find the variable with matching name
+                        const variable = variables.find(v => v.variableName.toLowerCase() === variableName.toLowerCase());
+                        
+                        if (variable) {
                             const suggestions = [
-                                ...modelData.attributes,
-                                ...modelData.methods
+                                ...variable.attributes,
+                                ...variable.methods
                             ];
 
                             return {
@@ -290,10 +284,10 @@ function createAutocompletePlugin(modelData) {
         });
     }
 
-function getChainedSuggestions(modelData, chain, partial) {
+function getChainedSuggestions(variable, chain, partial) {
     return [
-        ...modelData.attributes,
-        ...modelData.methods
+        ...variable.attributes,
+        ...variable.methods
     ].filter(item =>
         item.name.toLowerCase().startsWith(partial.toLowerCase())
     );

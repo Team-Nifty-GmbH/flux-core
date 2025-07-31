@@ -3,8 +3,10 @@ import axios from 'axios';
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
 import tippy from 'tippy.js';
+import tiptap from './components/tiptap.js';
 
 window.tippy = tippy;
+window.tiptap = tiptap;
 
 window._ = _;
 
