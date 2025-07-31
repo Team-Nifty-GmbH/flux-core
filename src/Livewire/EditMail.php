@@ -262,6 +262,7 @@ class EditMail extends Component
             ->unique()
             ->filter();
 
+        $defaultTemplateId = null;
         if ($templateIds->count() === 1) {
             $defaultTemplateId = $templateIds->first();
         }

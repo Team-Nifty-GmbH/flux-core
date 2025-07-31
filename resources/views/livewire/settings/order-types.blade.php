@@ -76,6 +76,10 @@
                                         morph_alias(\FluxErp\Models\Order::class),
                                     ],
                                 ],
+                                'whereNull' => [
+                                    'model_type',
+                                    'or',
+                                ],
                             ],
                         ]"
                     />

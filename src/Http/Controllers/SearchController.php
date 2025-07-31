@@ -98,11 +98,11 @@ class SearchController extends Controller
         }
 
         if ($request->has('whereNull')) {
-            $query->whereNull($request->get('whereNull'));
+            $query->whereNull(...$request->get('whereNull'));
         }
 
         if ($request->has('whereNotNull')) {
-            $query->whereNotNull($request->get('whereNotNull'));
+            $query->whereNotNull(...$request->get('whereNotNull'));
         }
 
         if ($request->has('whereBetween')) {
