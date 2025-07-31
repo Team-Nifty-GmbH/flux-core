@@ -1,6 +1,7 @@
 import headerStore from './store/print/headerStore.js';
 import footerStore from './store/print/footerStore.js';
 import printStore from './store/print/printStore.js';
+import firstPageHeaderStore from './store/print/firstPageHeaderStore.js';
 import { roundToOneDecimal } from './components/utils/print/utils.js';
 
 // IMPORTANT: if store methods are passed as reference to x-on directives,
@@ -13,10 +14,12 @@ window.roundToOneDecimal = roundToOneDecimal;
 document.addEventListener('alpine:init', () => {
     window.Alpine.store('footerStore', footerStore());
     window.Alpine.store('headerStore', headerStore());
+    window.Alpine.store('firstPageHeaderStore', firstPageHeaderStore());
     window.Alpine.store(
         'printStore',
         printStore(
             window.Alpine.store('headerStore'),
+            window.Alpine.store('firstPageHeaderStore'),
             window.Alpine.store('footerStore'),
         ),
     );

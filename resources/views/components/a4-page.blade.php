@@ -16,16 +16,24 @@
             ></div>
             {{-- content --}}
             <div class="flex h-full flex-col">
-                <x-flux::print.header
+                <x-flux::print.edit.header
                     :client="$this->client"
                     :subject="$this->subject"
                 />
+                    <x-flux::print.edit.order.first-page-header
+                        :client="$this->client"
+                        :subject="$this->subject"
+                        :address="$this->getModelFluentProperty()->address_invoice"
+                        :model="$this->getModelFluentProperty()"
+                        right-block="test"
+                    />
                 <div class="flex-1">
-                    {{-- {!! $this->orderPrint() !!} --}}
+                    <div class="bg-gray-100 w-full h-full text-[48px] font-medium text-gray-300 flex items-center justify-center">
+                        Content
+                    </div>
                 </div>
-                <x-flux::print.footer :client="$this->client" />
+                <x-flux::print.edit.footer :client="$this->client" />
             </div>
-            {{-- content --}}
             <div
                 x-cloak
                 x-show="printStore.editMargin"

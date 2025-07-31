@@ -3,6 +3,7 @@
     x-data="{
         printStore: $store.printStore,
         headerStore: $store.headerStore,
+        firstPageHeaderStore: $store.firstPageHeaderStore,
         footerStore: $store.footerStore,
     }"
     class="flex h-[29.7cm] items-center space-x-4"
@@ -130,6 +131,9 @@
             <x-button
                 x-bind:disabled="printStore.loading"
                 x-on:click="printStore.toggleEditHeader()" text="Edit Header" />
+            <x-button
+                x-bind:disabled="printStore.loading"
+                x-on:click="printStore.toggleEditFirstPageHeader()" text="Edit First Page Header" />
             <x-button
                 x-bind:disabled="printStore.loading"
                 x-on:click="printStore.toggleEditFooter()" text="Edit Footer" />

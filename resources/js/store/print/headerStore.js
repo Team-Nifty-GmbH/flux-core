@@ -106,7 +106,7 @@ export default function () {
                             this._headerHeight + STEP * (delta > 0 ? -1 : 1),
                         ),
                     );
-                    console.log(this._adjustedMinHeaderHeight());
+
                     // take in the account the resized logo size
                     if (
                         newHeight >=

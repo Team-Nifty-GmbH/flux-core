@@ -100,16 +100,12 @@ class PrintLayoutEditor extends Component
 
         // depending on the print layout set the model data
         $this->model = [
-            'order' => [
-                'oder_number' => 'ORD123456',
-                'invoice_number' => 'INV123456',
-                'invoice_date' => Carbon::make('2023-10-01'),
-                'total_gross_price' => 100.00,
-                'total_paid' => 50.00,
-                'balance' => 50.00,
-            ],
             'order_date'=> Carbon::make('2023-10-01'),
+            'customer_number' => 'CUST123',
+            'order_number' => 'ORD123456',
+            'commission' => 5.00,
             'address_invoice' => [
+                'company' => 'Example Company',
                 'firstname' => 'John',
                 'lastname' => 'Doe',
                 'addition' => 'Mr.',
@@ -117,41 +113,12 @@ class PrintLayoutEditor extends Component
                 'zip' => '67890',
                 'city' => 'Another City',
             ],
-            'orderPositions' => [
-                [
-                    'name' => 'Product 1',
-                    'amount' => 2,
-                    'slug_position' => 'product-1',
-                    'is_alternative' => true,
-                    'product_number' => 'PROD123',
-                    'description' => 'Description of Product 1',
-                    'is_free_text' => false,
-                    'is_bundle_position' => false,
-                    'total_base_net_price' => 50.00,
-                    'total_base_gross_price' => 60.00,
-                    'total_net_price' => 40.00,
-                    'total_gross_price' => 48.00,
-                ],
-            ],
-            'discounts' => [],
-            'total_net_price' => 80.00,
-            'total_gross_price' => 100.00,
-            'footer' => '<p>Thank you for your business!</p>',
         ];
     }
 
-    public function getModelFluentProperty()
+    public function getModelFluentProperty() : Fluent
     {
         return $this->arrayToFluent($this->model);
-    }
-
-    public function orderPrint():View
-    {
-        return view('flux::printing.order.order',
-        [
-         'model' => $this->getModelFluentProperty(),
-         'client' => $this->client,
-        ]);
     }
 
     public function selectClient(int $clientId): void
@@ -190,15 +157,13 @@ class PrintLayoutEditor extends Component
             return true;
         } catch (ValidationException|UnauthorizedException $e)
         {
-            dd($e);
-//            exception_to_notifications($e, $this);
+            // TODO: import the library for exception_to_notifications
+            exception_to_notifications($e, $this);
             return false;
         }
     }
 
-    #[Layout('flux::layouts.print-layout-editor',[
-        'subject' => 'Layout Editor',
-    ])]
+    #[Layout('flux::layouts.print-layout-editor')]
     public function render(): View
     {
         return view('flux::livewire.a4-page-editor');

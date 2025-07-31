@@ -161,6 +161,13 @@ export default class PrintElement {
                     y: 0,
                 };
             }
+
+            if (startPosition === 'bottom-start') {
+                this.position = {
+                    x: 0,
+                    y: this.parentSize.height - this.size.height,
+                };
+            }
         } else {
             if (
                 typeof startPosition === 'object' &&

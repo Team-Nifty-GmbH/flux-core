@@ -1,11 +1,12 @@
 import { roundToOneDecimal, STEP } from '../../components/utils/print/utils.js';
-export default function ($headerStore, $footerStore) {
+export default function ($headerStore, $firstPageHeaderStore, $footerStore) {
     return {
         async onInit($wire, $refs) {
             this._loading = true;
             this.pxPerCm = $refs['scale'].offsetWidth;
             this.pyPerCm = $refs['scale'].offsetHeight;
             $headerStore.onInit(this.pxPerCm, this.pyPerCm);
+            $firstPageHeaderStore.onInit(this.pxPerCm, this.pyPerCm);
             $footerStore.onInit(this.pxPerCm, this.pyPerCm);
             await this.register($wire);
             this._loading = false;
@@ -13,6 +14,7 @@ export default function ($headerStore, $footerStore) {
         editMargin: false,
         editFooter: false,
         editHeader: false,
+        editFirstPageHeader: false,
         async selectClient(e, $wire, $refs) {
             this._loading = true;
             await $wire.selectClient(e.target.value);
@@ -66,7 +68,12 @@ export default function ($headerStore, $footerStore) {
             );
         },
         get anyEdit() {
-            return this.editMargin || this.editFooter || this.editHeader;
+            return (
+                this.editMargin ||
+                this.editFooter ||
+                this.editHeader ||
+                this.editFirstPageHeader
+            );
         },
         // TODO: rename to onMouseDownMargin
         onMouseDown(e, side) {
@@ -177,6 +184,9 @@ export default function ($headerStore, $footerStore) {
         toggleEditHeader() {
             this.editHeader = !this.editHeader;
         },
+        toggleEditFirstPageHeader() {
+            this.editFirstPageHeader = !this.editFirstPageHeader;
+        },
         async closeEditor($refs) {
             this._loading = true;
             await this.reload();
@@ -185,6 +195,7 @@ export default function ($headerStore, $footerStore) {
             this.editMargin = false;
             this.editFooter = false;
             this.editHeader = false;
+            this.editFirstPageHeader = false;
             this._loading = false;
         },
         _setMargin(margin) {
@@ -232,6 +243,7 @@ export default function ($headerStore, $footerStore) {
                 this.editMargin = false;
                 this.editFooter = false;
                 this.editHeader = false;
+                this.editFirstPageHeader = false;
             }
         },
     };
