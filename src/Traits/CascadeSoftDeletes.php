@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes as BaseSoftDeletes;
+use Illuminate\Support\Arr;
 
 trait CascadeSoftDeletes
 {
@@ -62,12 +63,16 @@ trait CascadeSoftDeletes
 
     protected function getCascadingDeletes(): array
     {
-        return isset($this->cascadeDeletes) ? (array) $this->cascadeDeletes : [];
+        return property_exists($this, 'cascadeDeletes') && $this->cascadeDeletes
+            ? Arr::wrap($this->cascadeDeletes)
+            : [];
     }
 
     protected function getCascadingRestores(): array
     {
-        return isset($this->cascadeRestores) ? (array) $this->cascadeRestores : $this->getCascadingDeletes();
+        return property_exists($this, 'cascadeRestores') && $this->cascadeRestores
+            ? Arr::wrap($this->cascadeRestores)
+            : $this->getCascadingDeletes();
     }
 
     protected function handleRecords(string $relationship, Closure $closure): void
