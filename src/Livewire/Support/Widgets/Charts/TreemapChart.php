@@ -5,6 +5,7 @@ namespace FluxErp\Livewire\Support\Widgets\Charts;
 use FluxErp\Traits\Widgetable;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Livewire\Attributes\Js;
 
 abstract class TreemapChart extends Chart
 {
