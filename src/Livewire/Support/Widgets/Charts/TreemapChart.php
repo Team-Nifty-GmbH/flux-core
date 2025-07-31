@@ -20,7 +20,6 @@ abstract class TreemapChart extends Chart
 
     public ?array $plotOptions = [
         'treemap' => [
-            'spacing' => 10,
             'enableShades' => true,
             'shadeIntensity' => 0.5,
             'reverseNegativeShade' => true,
