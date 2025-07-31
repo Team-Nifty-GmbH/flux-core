@@ -6,6 +6,11 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Str;
 use Illuminate\View\Component;
+use ReflectionClass;
+use ReflectionException;
+use ReflectionMethod;
+use ReflectionNamedType;
+use ReflectionUnionType;
 
 class Editor extends Component
 {
@@ -163,15 +168,118 @@ class Editor extends Component
             36,
         ],
         public ?array $textColors = null,
-        public ?array $textBackgroundColors = null
+        public ?array $textBackgroundColors = null,
+
+        public bool $bladeSupport = false,
+        public ?string $bladeModel = null,
+        public ?array $bladeModelData = null,
+        public array $bladeVariables = []
     ) {
         $this->id ??= Str::uuid()->toString();
         $this->textColors ??= static::$colorPalette;
         $this->textBackgroundColors ??= static::$colorPalette;
+
+        if ($this->bladeSupport && $this->bladeModel) {
+            $this->bladeModelData = $this->extractModelData($this->bladeModel);
+        }
+
+        if ($this->bladeSupport && ! empty($this->bladeVariables)) {
+            $this->parseBladeVariables();
+        }
     }
 
     public function render(): View|Closure|string
     {
         return view('flux::components.editor');
+    }
+
+    protected function extractModelData(string $modelClass): array
+    {
+        if (! class_exists($modelClass)) {
+            return ['name' => '', 'attributes' => [], 'methods' => []];
+        }
+
+        $reflection = new ReflectionClass($modelClass);
+        $instance = app($modelClass);
+
+        $attributes = [];
+        $methods = [];
+
+        if (method_exists($instance, 'getFillable')) {
+            foreach ($instance->getFillable() as $fillable) {
+                $attributes[] = [
+                    'name' => $fillable,
+                    'type' => 'attribute',
+                    'description' => __('Model attribute: :name', ['name' => $fillable]),
+                    'displayName' => __(Str::headline($fillable)),
+                ];
+            }
+        }
+
+        if (method_exists($instance, 'getCasts')) {
+            foreach (array_keys($instance->getCasts()) as $cast) {
+                if (! in_array($cast, array_column($attributes, 'name'))) {
+                    $attributes[] = [
+                        'name' => $cast,
+                        'type' => 'cast',
+                        'description' => __('Model cast: :name', ['name' => $cast]),
+                        'displayName' => __(Str::headline($cast)),
+                    ];
+                }
+            }
+        }
+
+        foreach ($reflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
+            if ($method->class === $modelClass &&
+                ! $method->isStatic() &&
+                ! str_starts_with($method->name, '_') &&
+                ! in_array($method->name, ['save', 'delete', 'update', 'create'])) {
+                $params = [];
+                foreach ($method->getParameters() as $param) {
+                    $paramType = 'mixed';
+                    if ($param->getType()) {
+                        $type = $param->getType();
+                        if ($type instanceof ReflectionNamedType) {
+                            $paramType = $type->getName();
+                        } elseif ($type instanceof ReflectionUnionType) {
+                            $paramType = implode('|', array_map(fn ($t) => $t->getName(), $type->getTypes()));
+                        }
+                    }
+
+                    if ($param->isOptional()) {
+                        try {
+                            $defaultValue = $param->getDefaultValue();
+                            $defaultStr = is_null($defaultValue) ? 'null' : var_export($defaultValue, true);
+                            $params[] = "{$paramType} \${$param->name} = {$defaultStr}";
+                        } catch (ReflectionException $e) {
+                            $params[] = "{$paramType} \${$param->name} = null";
+                        }
+                    } else {
+                        $params[] = "{$paramType} \${$param->name}";
+                    }
+                }
+
+                $methods[] = [
+                    'name' => $method->name,
+                    'type' => 'method',
+                    'parameters' => $params,
+                    'description' => __('Model method: :name(:params)', [
+                        'name' => $method->name,
+                        'params' => implode(', ', $params),
+                    ]),
+                    'displayName' => __(Str::headline($method->name)),
+                ];
+            }
+        }
+
+        $variableName = Str::camel(class_basename($modelClass));
+
+        return [
+            'name' => class_basename($modelClass),
+            'fullName' => $modelClass,
+            'variableName' => $variableName,
+            'attributes' => $attributes,
+            'methods' => $methods,
+        ];
     }
 }

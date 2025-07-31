@@ -32,7 +32,13 @@
                     }}
                 @endif
             )"
-        x-init="initTextArea('{{ $id }}',$refs['editor-{{ $id }}'], @json($transparent), @json($tooltipDropdown), @json($defaultFontSize))"
+        x-init="initTextArea('{{ $id }}',$refs['editor-{{ $id }}'], {
+            transparent: @json($transparent),
+            tooltipDropdown: @json($tooltipDropdown), 
+            defaultFontSize: @json($defaultFontSize),
+            bladeSupport: @json($bladeSupport),
+            bladeModelData: @js($bladeModelData)
+        })"
         {{ $attributes->whereDoesntStartWith("wire:model") }}
         wire:ignore
     >
@@ -219,6 +225,85 @@
                 icon="code-bracket-square"
                 x-on:click="editor().chain().focus().toggleCodeBlock().run()"
             ></x-button>
+        @endif
+
+        @if ($bladeSupport && $bladeModelData)
+            <div class="border-l border-secondary-300 dark:border-secondary-600 mx-2"></div>
+            
+            <div class="flex items-center space-x-1">
+                <span class="text-xs text-secondary-600 dark:text-secondary-400 font-medium px-2">
+                    {{ __('Blade:') }}
+                </span>
+                
+                <x-button
+                    x-on:click="editor().commands.insertModelVariable()"
+                    flat
+                    color="primary" 
+                    class="text-xs"
+                    :text="'$' . $bladeModelData['variableName']"
+                    :title="__('Insert variable: $:var', ['var' => $bladeModelData['variableName']])"
+                />
+            </div>
+            
+            <div class="relative">
+                <x-button
+                    x-on:click.prevent="$refs['bladeAttributesDropdown-{{ $id }}'].style.display = $refs['bladeAttributesDropdown-{{ $id }}'].style.display === 'block' ? 'none' : 'block'"
+                    flat
+                    color="primary"
+                    class="text-xs"
+                    text="{{ __('Attributes') }}"
+                />
+                <div 
+                    x-ref="bladeAttributesDropdown-{{ $id }}"
+                    class="absolute top-full left-0 mt-1 bg-white dark:bg-secondary-800 border border-secondary-300 dark:border-secondary-600 rounded-md shadow-lg z-50 min-w-48 max-h-60 overflow-y-auto"
+                    style="display: none;"
+                >
+                    @foreach($bladeModelData['attributes'] as $attribute)
+                        <button
+                            type="button"
+                            x-on:click="editor().commands.insertModelAttribute('{{ $attribute['name'] }}'); $refs['bladeAttributesDropdown-{{ $id }}'].style.display = 'none'"
+                            class="w-full px-3 py-2 text-left text-xs hover:bg-secondary-100 dark:hover:bg-secondary-700 border-b border-secondary-200 dark:border-secondary-600 last:border-b-0"
+                        >
+                            <div class="font-medium text-secondary-900 dark:text-secondary-100">
+                                {{ $attribute['name'] }}
+                            </div>
+                            <div class="text-secondary-500 dark:text-secondary-400 text-xs">
+                                {{ $attribute['description'] }}
+                            </div>
+                        </button>
+                    @endforeach
+                </div>
+            </div>
+
+            <div class="relative">
+                <x-button
+                    x-on:click.prevent="$refs['bladeMethodsDropdown-{{ $id }}'].style.display = $refs['bladeMethodsDropdown-{{ $id }}'].style.display === 'block' ? 'none' : 'block'"
+                    flat
+                    color="primary"
+                    class="text-xs"
+                    text="{{ __('Methods') }}"
+                />
+                <div 
+                    x-ref="bladeMethodsDropdown-{{ $id }}"
+                    class="absolute top-full left-0 mt-1 bg-white dark:bg-secondary-800 border border-secondary-300 dark:border-secondary-600 rounded-md shadow-lg z-50 min-w-64 max-h-60 overflow-y-auto"
+                    style="display: none;"
+                >
+                    @foreach($bladeModelData['methods'] as $method)
+                        <button
+                            type="button"
+                            x-on:click="editor().commands.insertModelMethod('{{ $method['name'] }}'); $refs['bladeMethodsDropdown-{{ $id }}'].style.display = 'none'"
+                            class="w-full px-3 py-2 text-left text-xs hover:bg-secondary-100 dark:hover:bg-secondary-700 border-b border-secondary-200 dark:border-secondary-600 last:border-b-0"
+                        >
+                            <div class="font-medium text-secondary-900 dark:text-secondary-100">
+                                {{ $method['name'] }}()
+                            </div>
+                            <div class="text-secondary-500 dark:text-secondary-400 text-xs">
+                                {{ $method['description'] }}
+                            </div>
+                        </button>
+                    @endforeach
+                </div>
+            </div>
         @endif
 
         @if ($tooltipDropdown && $textColors)

@@ -1,6 +1,7 @@
 import { Editor } from '@tiptap/core';
 import { LiteralTab } from './tiptap-literal-tab-handler.js';
 import { FontSizeColorConfig } from './tiptap-font-size-color-handler.js';
+import { BladeConfig } from './tiptap-blade-handler.js';
 import StarterKit from '@tiptap/starter-kit';
 import { MentionConfig } from './tiptap-mention-handler.js';
 
@@ -8,6 +9,8 @@ export default function (
     content,
     debounceDelay = 0,
     searchModel = ['user', 'role'],
+    bladeSupport = false,
+    bladeModelData = null,
 ) {
     return () => {
         let _editor;
@@ -24,13 +27,14 @@ export default function (
             setIsClickListenerSet(value) {
                 this.isClickListenerSet = value;
             },
-            initTextArea(
-                id,
-                element,
-                isTransparent,
-                showTooltipDropdown,
-                initFontSize,
-            ) {
+            initTextArea(id, element, options = {}) {
+                const {
+                    transparent: isTransparent = false,
+                    tooltipDropdown: showTooltipDropdown = false,
+                    defaultFontSize: initFontSize = null,
+                    bladeSupport = false,
+                    bladeModelData = null
+                } = options;
                 const popUp = this.$refs[`popWindow-${id}`];
                 const controlPanel = this.$refs[`controlPanel-${id}`];
                 const commands = this.$refs[`commands-${id}`];
@@ -54,14 +58,26 @@ export default function (
                     parent.popUp.show();
                     parent.setIsClickListenerSet(false);
                 };
+                const extensions = [
+                    StarterKit,
+                    FontSizeColorConfig,
+                    LiteralTab,
+                    MentionConfig(searchModel, element),
+                ];
+
+                if (bladeSupport && bladeModelData) {
+                    extensions.push(
+                        BladeConfig.configure({
+                            availableModel: bladeModelData.name.toLowerCase(),
+                            modelAttributes: bladeModelData.attributes,
+                            modelMethods: bladeModelData.methods,
+                        })
+                    );
+                }
+
                 _editor = new Editor({
                     element: element,
-                    extensions: [
-                        StarterKit,
-                        FontSizeColorConfig,
-                        LiteralTab,
-                        MentionConfig(searchModel, element),
-                    ],
+                    extensions: extensions,
                     timeout: null,
                     content: this.content,
                     editable: this.editable,
