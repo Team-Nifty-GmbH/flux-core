@@ -1,5 +1,4 @@
 <footer
-    x-init="footerStore.register($wire, $refs)"
     class="relative w-full bg-white text-center"
     x-on:mouseup.window="footerStore.onMouseUp()"
     x-on:mousemove.window="

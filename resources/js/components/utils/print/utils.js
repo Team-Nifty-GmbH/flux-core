@@ -21,3 +21,7 @@ export function intersectionHandlerFactory($store) {
         });
     };
 }
+
+export function nextTick() {
+    return Promise.resolve();
+}

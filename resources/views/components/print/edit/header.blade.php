@@ -1,5 +1,4 @@
 <header
-    x-init="headerStore.register($wire, $refs)"
     class="h-[1.7cm] w-full bg-white text-center relative"
     x-on:mouseup.window="headerStore.onMouseUp()"
     x-on:mousemove.window="

@@ -1,7 +1,7 @@
 <div
 
-    x-init="firstPageHeaderStore.register($wire, $refs)"
-    class="relative w-full">
+{{--    x-init="firstPageHeaderStore.register($wire, $refs)"--}}
+    class="relative w-full box-border">
     <div
         x-on:mouseup.window="firstPageHeaderStore.onMouseUpFirstPageHeader($event)"
         x-on:mousemove.window="
@@ -10,7 +10,7 @@
                 : null
         "
         x-ref="first-page-header"
-        class="h-[7cm]"
+        class="h-[7cm] box-border"
         :style="`height: ${firstPageHeaderStore.height};`"
     >
 
@@ -48,7 +48,8 @@
     >
             <div
                 id="first-page-header-client-name"
-                class="absolute left-0 top-0 text-5xl font-semibold">
+                data-type="container"
+                class="absolute left-0 top-0 text-5xl font-semibold select-none">
                 {{ $client->name }}
             </div>
     </template>
@@ -58,7 +59,8 @@
     >
         <div
             id="first-page-header-postal-address-one-line"
-            class="absolute left-0 top-0 text-2xs w-fit">
+            data-type="container"
+            class="absolute left-0 top-0 text-2xs w-fit select-none">
             <div>
                 {{ $client->postal_address_one_line }}
             </div>
@@ -71,7 +73,8 @@
     >
         <address
             id="first-page-header-address"
-            class="absolute left-0 top-0 text-xs not-italic">
+            data-type="container"
+            class="absolute left-0 top-0 text-xs not-italic select-none">
             <div class="font-semibold">
                 {{ $address->company ?? '' }}
             </div>
@@ -100,7 +103,8 @@
     >
         <h1
             id="first-page-header-subject"
-            class="absolute left-0 top-0 text-xl font-semibold">
+            data-type="container"
+            class="absolute left-0 top-0 text-xl font-semibold select-none">
             {{ $subject ?? '' }}
         </h1>
     </template>
@@ -110,7 +114,8 @@
     >
         <table
             id="first-page-header-right-block"
-            class="absolute left-0 top-0 w-[7cm]">
+            data-type="container"
+            class="absolute left-0 top-0 w-[7cm] select-none">
             <tbody class="align-text-top text-xs leading-none">
                 <tr class="leading-none">
                     <td class="text-left font-semibold">

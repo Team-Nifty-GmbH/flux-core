@@ -238,6 +238,7 @@ export default function () {
         async register($wire, $refs) {
             this._component = () => $wire;
             this.footer = $refs['footer'];
+
             // Check if footer already exists - by default empty array is returned
             const footerJson = await $wire.get('form.footer');
 
@@ -370,11 +371,11 @@ export default function () {
             ) {
                 this._mapFooter($refs, footerJson);
             } else {
+                this._footerHeight = 1.7;
                 const data = await this.component.clientToJson();
                 const clientId = data.client.id;
                 const imgUrl = data.client.logo_small_url;
                 const bankConnections = data.bank_connections;
-                this._footerHeight = 1.7;
                 // clone client
                 this.footer.appendChild(
                     $refs[`footer-client-${clientId}`].content.cloneNode(true),

@@ -9,6 +9,14 @@ export default function ($headerStore, $firstPageHeaderStore, $footerStore) {
             $firstPageHeaderStore.onInit(this.pxPerCm, this.pyPerCm);
             $footerStore.onInit(this.pxPerCm, this.pyPerCm);
             await this.register($wire);
+            // to register other stores - main store needs to be registered first
+            // to render correctly the margins first - if registrations run in parallel
+            // the child elements will have incorrect width and height
+            await Promise.all([
+                $headerStore.register($wire, $refs),
+                $firstPageHeaderStore.register($wire, $refs),
+                $footerStore.register($wire, $refs),
+            ]);
             this._loading = false;
         },
         editMargin: false,
@@ -19,8 +27,9 @@ export default function ($headerStore, $firstPageHeaderStore, $footerStore) {
             this._loading = true;
             await $wire.selectClient(e.target.value);
             await this.reload();
-            await $footerStore.reload($refs);
             await $headerStore.reload($refs);
+            await $firstPageHeaderStore.reload($refs);
+            await $footerStore.reload($refs);
             this._loading = false;
         },
         pxPerCm: null,
@@ -123,6 +132,7 @@ export default function ($headerStore, $firstPageHeaderStore, $footerStore) {
             // adjust the position of the header/footer/first-page-header elements if there is overlap with the margin
             $footerStore.repositionOnMouseUp();
             $headerStore.repositionOnMouseUp();
+            $firstPageHeaderStore.repositionOnMouseUp();
         },
         // TODO: rename to onMouseMoveMargin
         onMouseMove(e) {
@@ -192,6 +202,7 @@ export default function ($headerStore, $firstPageHeaderStore, $footerStore) {
             await this.reload();
             await $footerStore.reload($refs, false);
             await $headerStore.reload($refs, false);
+            await $firstPageHeaderStore.reload($refs, false);
             this.editMargin = false;
             this.editFooter = false;
             this.editHeader = false;
@@ -230,12 +241,14 @@ export default function ($headerStore, $firstPageHeaderStore, $footerStore) {
         },
         async submit($wire) {
             const margins = this.prepareToSubmit();
-            const footer = $footerStore.prepareToSubmit();
             const header = $headerStore.prepareToSubmit();
+            const firstPageHeader = $firstPageHeaderStore.prepareToSubmit();
+            const footer = $footerStore.prepareToSubmit();
             await Promise.all([
                 $wire.set('form.footer', footer, false),
                 $wire.set('form.header', header, false),
                 $wire.set('form.margin', margins, false),
+                $wire.set('form.first_page_header', firstPageHeader, false),
             ]);
 
             const response = await $wire.save();

@@ -250,6 +250,7 @@ export default function () {
             ) {
                 this._mapHeader($refs, headerJson);
             } else {
+                this._headerHeight = this._minHeaderHeight;
                 const { client } = await this.component.clientToJson();
                 const imgUrl = client.logo_small_url;
 
