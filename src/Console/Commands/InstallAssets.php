@@ -38,17 +38,26 @@ class InstallAssets extends Command
         $files = is_array($files)
             ? $files
             : [
-                __DIR__ . '/../../../package.json',
-                __DIR__ . '/../../../stubs/tailwind/tailwind.config.mjs',
-                __DIR__ . '/../../../stubs/tailwind/postcss.config.js',
-                __DIR__ . '/../../../stubs/tailwind/vite.config.js',
+                'package.json',
+                'tailwind.config.mjs',
+                'postcss.config.js',
+                'vite.config.js',
             ];
+
+        $stubFiles = [
+            'package.json' => __DIR__ . '/../../../package.json',
+            'tailwind.config.mjs' => __DIR__ . '/../../../stubs/tailwind/tailwind.config.mjs',
+            'postcss.config.js' => __DIR__ . '/../../../stubs/tailwind/postcss.config.js',
+            'vite.config.js' => __DIR__ . '/../../../stubs/tailwind/vite.config.js',
+        ];
 
         if (! $basePath) {
             $basePath = fn ($path = '') => base_path($path);
         }
 
         foreach ($files as $file) {
+            $stubFile = $stubFiles[$file] ?? $file;
+
             if (file_exists($basePath($file)) && ! $force && ! $merge) {
                 continue;
             }
@@ -59,7 +68,7 @@ class InstallAssets extends Command
                 $oldContent = file_get_contents($basePath($file));
             }
 
-            $content = file_get_contents($file);
+            $content = file_get_contents($stubFile);
             $content = str_replace(
                 '{{ relative_path }}',
                 substr(realpath(__DIR__ . '/../../../'), strlen($basePath())),
