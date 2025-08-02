@@ -13,7 +13,6 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\Mechanisms\ComponentRegistry;
 use Spatie\Permission\Exceptions\PermissionDoesNotExist;
-use Spatie\Permission\Exceptions\UnauthorizedException;
 use Spatie\Permission\Traits\HasRoles;
 
 class Settings extends Component

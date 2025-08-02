@@ -9,7 +9,13 @@
             name-attribute="label"
             :with-search="true"
         >
-            <div x-init.once="if ({{ ! is_null($setting) }}) { selected = @js($setting); }"></div>
+            <div
+                x-init.once="
+                    if ({{ ! is_null($setting) }}) {
+                        selected = @js($setting)
+                    }
+                "
+            ></div>
             <x-slot:nodeIcon></x-slot>
         </x-flux::checkbox-tree>
     </x-card>
