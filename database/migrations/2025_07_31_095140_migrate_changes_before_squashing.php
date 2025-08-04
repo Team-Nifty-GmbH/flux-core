@@ -84,7 +84,7 @@ return new class() extends Migration
         });
 
         Schema::table('bank_connections', function (Blueprint $table): void {
-            $table->dropForeign(['currency_id']);
+            $table->dropForeign('accounts_currency_id_foreign');
 
             $table->foreign('currency_id')
                 ->references('id')
@@ -525,7 +525,7 @@ return new class() extends Migration
         Schema::table('bank_connections', function (Blueprint $table): void {
             $table->dropForeign(['currency_id']);
 
-            $table->foreign('currency_id')
+            $table->foreign('currency_id', 'accounts_currency_id_foreign')
                 ->references('id')
                 ->on('currencies');
         });
