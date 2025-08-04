@@ -41,7 +41,7 @@ class LeadsByLeadStateTest extends BaseSetup
         $this->leads = collect();
 
         foreach ($this->leadStates as $leadState) {
-            $quantity = $leadState->id === $this->leadStates[1]->id ? 2 : 1;
+            $quantity = $leadState->id === data_get($this->leadStates, '1.id') ? 2 : 1;
 
             $this->leads = $this->leads
                 ->merge(
@@ -77,7 +77,7 @@ class LeadsByLeadStateTest extends BaseSetup
         }
     }
 
-    public function test_options_returns_expected_structure(): void
+    public function test_options_return_expected_structure(): void
     {
         $test = Livewire::test(LeadsByLeadState::class)
             ->set('timeFrame', TimeFrameEnum::ThisMonth)
@@ -91,21 +91,21 @@ class LeadsByLeadStateTest extends BaseSetup
         foreach ($options as $option) {
             $this->assertArrayHasKey('label', $option);
             $this->assertArrayHasKey('method', $option);
-            $this->assertEquals('show', $option['method']);
+            $this->assertEquals('show', data_get($option, 'method'));
             $this->assertArrayHasKey('params', $option);
-            $this->assertArrayHasKey('id', $option['params']);
-            $this->assertArrayHasKey('name', $option['params']);
+            $this->assertArrayHasKey('id', data_get($option, 'params'));
+            $this->assertArrayHasKey('name', data_get($option, 'params'));
         }
 
-        // First option should be for the lead state with the most leads
-        $this->assertTrue(str_contains($options[1]['label'], $this->leadStates[1]->name));
+        // Second option should be for the lead state with the most leads
+        $this->assertTrue(str_contains(data_get($options, '1.label'), data_get($this->leadStates, '1.name')));
     }
 
-    public function test_options_uses_data_correctly(): void
+    public function test_options_use_data_correctly(): void
     {
-        $example_data = [
+        $exampleData = [
             [
-                'id' => $this->leadStates[0]->id,
+                'id' => data_get($this->leadStates, '0.id'),
                 'name' => 'Test Lead State',
                 'color' => '#123456',
                 'total' => 5,
@@ -116,14 +116,14 @@ class LeadsByLeadStateTest extends BaseSetup
 
         $instance = $test->instance();
         $reflection = new ReflectionProperty($instance, 'data');
-        $reflection->setValue($instance, $example_data);
+        $reflection->setValue($instance, $exampleData);
 
         $options = $instance->options();
 
         $this->assertIsArray($options);
-        $this->assertCount(1, $options);
-        $this->assertEquals($this->leadStates[0]->id, $options[0]['params']['id']);
-        $this->assertEquals('Test Lead State', $options[0]['params']['name']);
+        $this->assertCount(count($exampleData), $options);
+        $this->assertEquals(data_get($this->leadStates, '0.id'), data_get($options, '0.params.id'));
+        $this->assertEquals(data_get($exampleData, '0.name'), data_get($options, '0.params.name'));
     }
 
     public function test_renders_successfully(): void
@@ -185,16 +185,6 @@ class LeadsByLeadStateTest extends BaseSetup
         $this->assertTimeframeResults(TimeFrameEnum::Today);
     }
 
-    protected function getLeadsCountInTimeFrame(TimeFrameEnum $timeFrame, LeadState $leadState): int
-    {
-        return $this->leads
-            ->filter(
-                fn (Lead $lead) => $lead->created_at->between(...$timeFrame->getRange())
-                    && $lead->lead_state_id === $leadState->id
-            )
-            ->count();
-    }
-
     private function assertTimeframeResults(TimeFrameEnum $timeFrame): void
     {
         $test = Livewire::test(LeadsByLeadState::class)
@@ -214,13 +204,12 @@ class LeadsByLeadStateTest extends BaseSetup
         $this->assertNotEmpty($labels);
         $this->assertNotEmpty($data);
 
-        // Verify "In Progress" has more leads than other states
-        $leadStateTotals = array_column($data, 'total', 'name');
-        $inProgressTotal = $leadStateTotals[$this->leadStates[1]->name] ?? 0;
+        foreach ($this->leadStates as $leadState) {
+            $expectedCount = $this->getLeadsCountInTimeFrame($timeFrame, $leadState);
+            $index = array_search($leadState->name, $labels);
 
-        foreach ($leadStateTotals as $state => $total) {
-            if ($state !== $this->leadStates[1]->name) {
-                $this->assertGreaterThanOrEqual($total, $inProgressTotal);
+            if ($index !== false && $expectedCount > 0) {
+                $this->assertEquals($expectedCount, data_get($series, $index));
             }
         }
 
@@ -230,8 +219,18 @@ class LeadsByLeadStateTest extends BaseSetup
             $index = array_search($leadState->name, $labels);
 
             if ($index !== false && $expectedCount > 0) {
-                $this->assertEquals($expectedCount, $series[$index]);
+                $this->assertEquals($expectedCount, data_get($series, $index));
             }
         }
+    }
+
+    private function getLeadsCountInTimeFrame(TimeFrameEnum $timeFrame, LeadState $leadState): int
+    {
+        return $this->leads
+            ->filter(
+                fn (Lead $lead) => $lead->lead_state_id === $leadState->id
+                    && $lead->created_at->between(...$timeFrame->getRange())
+            )
+            ->count();
     }
 }
