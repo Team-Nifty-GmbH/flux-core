@@ -635,21 +635,6 @@ return new class() extends Migration
         });
 
         Schema::table('orders', function (Blueprint $table): void {
-            $table->dropColumn([
-                'delivery_type_id',
-                'logistics_id',
-                'unit_price_price_list_id',
-                'header_discount',
-                'number_of_packages',
-                'tracking_email',
-                'payment_texts',
-                'has_logistic_notify_phone_number',
-                'has_logistic_notify_number',
-                'is_new_customer',
-                'is_merge_invoice',
-                'is_paid',
-            ]);
-
             $table->unsignedBigInteger('unit_price_price_list_id')->nullable()->after('price_list_id');
             $table->unsignedBigInteger('delivery_type_id')->nullable()->after('unit_price_price_list_id');
             $table->unsignedBigInteger('logistics_id')->nullable()->after('delivery_type_id');
