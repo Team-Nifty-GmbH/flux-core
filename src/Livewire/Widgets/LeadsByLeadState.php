@@ -81,7 +81,7 @@ class LeadsByLeadState extends CircleChart implements HasWidgetOptions
                     'name' => data_get($data, 'name'),
                 ],
             ],
-            $this->data ?? []
+            $this->data
         );
     }
 
