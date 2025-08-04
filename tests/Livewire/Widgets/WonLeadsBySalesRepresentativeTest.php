@@ -51,7 +51,7 @@ class WonLeadsBySalesRepresentativeTest extends BaseSetup
         $this->leads = collect();
 
         foreach ($this->users as $user) {
-            $quantity = $user->id === $this->users[1]->id ? 2 : 1;
+            $quantity = $user->id === data_get($this->users, '1.id') ? 2 : 1;
 
             $this->leads = $this->leads
                 ->merge(
@@ -92,7 +92,7 @@ class WonLeadsBySalesRepresentativeTest extends BaseSetup
         }
     }
 
-    public function test_options_returns_empty_array_when_series_is_null(): void
+    public function test_options_return_empty_array_when_series_is_null(): void
     {
         $test = Livewire::test(WonLeadsBySalesRepresentative::class);
 
@@ -107,7 +107,7 @@ class WonLeadsBySalesRepresentativeTest extends BaseSetup
         });
     }
 
-    public function test_options_returns_expected_structure(): void
+    public function test_options_return_expected_structure(): void
     {
         $test = Livewire::test(WonLeadsBySalesRepresentative::class)
             ->set('timeFrame', TimeFrameEnum::ThisMonth)
@@ -123,23 +123,23 @@ class WonLeadsBySalesRepresentativeTest extends BaseSetup
         foreach ($options as $option) {
             $this->assertArrayHasKey('label', $option);
             $this->assertArrayHasKey('method', $option);
-            $this->assertEquals('show', $option['method']);
+            $this->assertEquals('show', data_get($option, 'method'));
             $this->assertArrayHasKey('params', $option);
-            $this->assertArrayHasKey('id', $option['params']);
-            $this->assertArrayHasKey('name', $option['params']);
+            $this->assertArrayHasKey('id', data_get($option, 'params'));
+            $this->assertArrayHasKey('name', data_get($option, 'params'));
 
-            $this->assertContains($option['label'], $expectedLabels);
+            $this->assertContains(data_get($option, 'label'), $expectedLabels);
         }
 
-        // First option should be the one with the most leads
-        $this->assertEquals($this->users[1]->getLabel(), $options[0]['label']);
+        // Second option should be the one with the most leads
+        $this->assertEquals($this->users[1]->getLabel(), data_get($options, '0.label'));
     }
 
-    public function test_options_uses_series_data_correctly(): void
+    public function test_options_use_data_correctly(): void
     {
-        $example_series = [
+        $exampleSeries = [
             [
-                'id' => $this->users[0]->id,
+                'id' => data_get($this->users, '0.id'),
                 'name' => 'Test Sales Rep',
                 'color' => '#123456',
                 'data' => [5],
@@ -150,15 +150,15 @@ class WonLeadsBySalesRepresentativeTest extends BaseSetup
 
         $instance = $test->instance();
         $reflection = new ReflectionProperty($instance, 'series');
-        $reflection->setValue($instance, $example_series);
+        $reflection->setValue($instance, $exampleSeries);
 
         $options = $instance->options();
 
         $this->assertIsArray($options);
         $this->assertCount(1, $options);
-        $this->assertEquals('Test Sales Rep', $options[0]['label']);
-        $this->assertEquals($this->users[0]->id, $options[0]['params']['id']);
-        $this->assertEquals('Test Sales Rep', $options[0]['params']['name']);
+        $this->assertEquals('Test Sales Rep', data_get($options, '0.label'));
+        $this->assertEquals(data_get($this->users, '0.id'), data_get($options, '0.params.id'));
+        $this->assertEquals('Test Sales Rep', data_get($options, '0.params.name'));
     }
 
     public function test_renders_successfully(): void
@@ -220,17 +220,6 @@ class WonLeadsBySalesRepresentativeTest extends BaseSetup
         $this->assertTimeframeResults(TimeFrameEnum::Today);
     }
 
-    protected function getWonLeadsCountInTimeFrame(TimeFrameEnum $timeFrame, User $user): int
-    {
-        return $this->leads
-            ->filter(
-                fn (Lead $lead) => $lead->end->between(...$timeFrame->getRange())
-                    && $lead->user_id === $user->id
-                    && $lead->leadState->is_won === true
-            )
-            ->count();
-    }
-
     private function assertTimeframeResults(TimeFrameEnum $timeFrame): void
     {
         $test = Livewire::test(WonLeadsBySalesRepresentative::class)
@@ -244,7 +233,18 @@ class WonLeadsBySalesRepresentativeTest extends BaseSetup
         $this->assertNotEmpty($series);
 
         // Verify sales rep 2 has more leads than the other reps
-        $this->assertEquals($this->users[1]->getLabel(), $series[0]['name']);
-        $this->assertEquals($this->getWonLeadsCountInTimeFrame($timeFrame, $this->users[1]), $series[0]['data'][0]);
+        $this->assertEquals(data_get($this->users, '1.name'), data_get($series, '0.name'));
+        $this->assertEquals($this->getWonLeadCountInTimeFrame($timeFrame, data_get($this->users, '1')), data_get($series, '0.data.0'));
+    }
+
+    private function getWonLeadCountInTimeFrame(TimeFrameEnum $timeFrame, User $user): int
+    {
+        return $this->leads
+            ->filter(
+                fn (Lead $lead) => $lead->user_id === $user->id
+                    && $lead->leadState->is_won === true
+                    && $lead->end->between(...$timeFrame->getRange())
+            )
+            ->count();
     }
 }
