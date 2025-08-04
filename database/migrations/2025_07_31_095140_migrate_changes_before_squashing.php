@@ -355,7 +355,7 @@ return new class() extends Migration
         Schema::table('sepa_mandates', function (Blueprint $table): void {
             $table->dropForeign(['client_id']);
             $table->dropForeign(['contact_id']);
-            $table->dropForeign(['contact_bank_connection_id']);
+            $table->dropForeign('sepa_mandates_bank_connection_id_foreign');
 
             $table->foreign('client_id')
                 ->references('id')
@@ -780,7 +780,7 @@ return new class() extends Migration
             $table->foreign('contact_id')
                 ->references('id')
                 ->on('contacts');
-            $table->foreign('contact_bank_connection_id')
+            $table->foreign('contact_bank_connection_id', 'sepa_mandates_bank_connection_id_foreign')
                 ->references('id')
                 ->on('contact_bank_connections');
         });
