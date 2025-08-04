@@ -102,7 +102,7 @@ class RevenueByTopCustomers extends CircleChart implements HasWidgetOptions
                     'label' => data_get($data, 'label'),
                 ],
             ],
-            $this->data
+            $this->data ?? []
         );
     }
 
