@@ -11,14 +11,14 @@ use Illuminate\Validation\ValidationException;
 
 class DeleteLanguage extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeleteLanguageRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Language::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeleteLanguageRuleset::class;
     }
 
     public function performAction(): ?bool
@@ -56,7 +56,9 @@ class DeleteLanguage extends FluxAction
         }
 
         if ($errors) {
-            throw ValidationException::withMessages($errors)->errorBag('deleteLanguage');
+            throw ValidationException::withMessages($errors)
+                ->errorBag('deleteLanguage')
+                ->status(423);
         }
     }
 }

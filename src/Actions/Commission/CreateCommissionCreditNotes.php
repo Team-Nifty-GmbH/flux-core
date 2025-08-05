@@ -25,14 +25,14 @@ class CreateCommissionCreditNotes extends DispatchableFluxAction
 
     protected ?int $vatRateId = null;
 
-    protected function getRulesets(): string|array
-    {
-        return CreateCommissionCreditNotesRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Commission::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateCommissionCreditNotesRuleset::class;
     }
 
     public function performAction(): OrderCollection
@@ -156,7 +156,8 @@ class CreateCommissionCreditNotes extends DispatchableFluxAction
             }
         }
 
-        $this->vatRateId = $this->getData('vat_rate_id') ?? VatRate::default()?->getKey();
+        $this->vatRateId = $this->getData('vat_rate_id')
+            ?? resolve_static(VatRate::class, 'default')?->getKey();
 
         if (! $this->vatRateId) {
             $errors += [

@@ -18,12 +18,81 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class Tags extends TagList
 {
-    protected ?string $includeBefore = 'flux::livewire.settings.tags';
+    #[Locked]
+    public bool $isSelectable = true;
 
     public TagForm $tagForm;
 
-    #[Locked]
-    public bool $isSelectable = true;
+    protected ?string $includeBefore = 'flux::livewire.settings.tags';
+
+    protected function getTableActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->text(__('New'))
+                ->icon('plus')
+                ->color('indigo')
+                ->when(resolve_static(CreateTag::class, 'canPerformAction', [false]))
+                ->attributes([
+                    'wire:click' => 'edit',
+                ]),
+        ];
+    }
+
+    protected function getRowActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->text(__('Edit'))
+                ->icon('pencil')
+                ->color('indigo')
+                ->when(resolve_static(UpdateTag::class, 'canPerformAction', [false]))
+                ->attributes([
+                    'wire:click' => 'edit(record.id)',
+                ]),
+            DataTableButton::make()
+                ->text(__('Delete'))
+                ->color('red')
+                ->icon('trash')
+                ->when(resolve_static(DeleteTag::class, 'canPerformAction', [false]))
+                ->attributes([
+                    'wire:click' => 'delete(record.id)',
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Tag')]),
+                ]),
+        ];
+    }
+
+    protected function getSelectedActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->text(__('Delete'))
+                ->color('red')
+                ->when(resolve_static(DeleteTag::class, 'canPerformAction', [false]))
+                ->attributes([
+                    'wire:click' => 'deleteSelected',
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Tag')]),
+                ]),
+        ];
+    }
+
+    public function delete(Tag $tag): bool
+    {
+        $this->tagForm->reset();
+        $this->tagForm->fill($tag);
+
+        try {
+            $this->tagForm->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
+    }
 
     #[Renderless]
     public function deleteSelected(): void
@@ -46,55 +115,29 @@ class Tags extends TagList
         $this->reset('selected');
     }
 
-    protected function getTableActions(): array
+    public function edit(Tag $tag): void
     {
-        return [
-            DataTableButton::make()
-                ->label(__('New'))
-                ->icon('plus')
-                ->color('primary')
-                ->when(resolve_static(CreateTag::class, 'canPerformAction', [false]))
-                ->attributes([
-                    'wire:click' => 'edit',
-                ]),
-        ];
+        $this->tagForm->reset();
+        $this->tagForm->fill($tag);
+
+        $this->js(<<<'JS'
+            $modalOpen('edit-tag-modal');
+        JS);
     }
 
-    protected function getRowActions(): array
+    public function save(): bool
     {
-        return [
-            DataTableButton::make()
-                ->label(__('Edit'))
-                ->icon('pencil')
-                ->color('primary')
-                ->when(resolve_static(UpdateTag::class, 'canPerformAction', [false]))
-                ->attributes([
-                    'wire:click' => 'edit(record.id)',
-                ]),
-            DataTableButton::make()
-                ->label(__('Delete'))
-                ->color('negative')
-                ->icon('trash')
-                ->when(resolve_static(DeleteTag::class, 'canPerformAction', [false]))
-                ->attributes([
-                    'wire:click' => 'delete(record.id)',
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Tag')]),
-                ]),
-        ];
-    }
+        try {
+            $this->tagForm->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
 
-    protected function getSelectedActions(): array
-    {
-        return [
-            DataTableButton::make()
-                ->label(__('Delete'))
-                ->color('negative')
-                ->when(resolve_static(DeleteTag::class, 'canPerformAction', [false]))
-                ->attributes([
-                    'wire:click' => 'deleteSelected',
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Tag')]),
-                ]),
-        ];
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
     }
 
     protected function getViewData(): array
@@ -115,48 +158,5 @@ class Tags extends TagList
                     ->toArray(),
             ]
         );
-    }
-
-    public function edit(Tag $tag): void
-    {
-        $this->tagForm->reset();
-        $this->tagForm->fill($tag);
-
-        $this->js(<<<'JS'
-            $openModal('edit-tag-modal');
-        JS);
-    }
-
-    public function save(): bool
-    {
-        try {
-            $this->tagForm->save();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
-    }
-
-    public function delete(Tag $tag): bool
-    {
-        $this->tagForm->reset();
-        $this->tagForm->fill($tag);
-
-        try {
-            $this->tagForm->delete();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
     }
 }

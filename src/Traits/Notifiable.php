@@ -23,11 +23,6 @@ trait Notifiable
         return $this->morphMany(EventSubscription::class, 'subscribable');
     }
 
-    public function notificationSettings(): MorphMany
-    {
-        return $this->morphMany(NotificationSetting::class, 'notifiable');
-    }
-
     public function notificationChannels(Notification $notification): array
     {
         $query = $this
@@ -53,6 +48,11 @@ trait Notifiable
         $defaultChannels = array_diff($notification::defaultChannels($this), $inactiveChannels);
 
         return array_values(array_unique(array_merge($activeChannels, $defaultChannels)));
+    }
+
+    public function notificationSettings(): MorphMany
+    {
+        return $this->morphMany(NotificationSetting::class, 'notifiable');
     }
 
     public function subscribeNotificationChannel(string $channel): ?EventSubscription

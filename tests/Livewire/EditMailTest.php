@@ -7,7 +7,7 @@ use Livewire\Livewire;
 
 class EditMailTest extends BaseSetup
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::actingAs($this->user)
             ->test(EditMail::class)

@@ -10,39 +10,33 @@ use Livewire\Attributes\Locked;
 
 class CalendarForm extends FluxForm
 {
-    #[Locked]
-    public ?int $id = null;
-
-    public ?int $parent_id = null;
-
-    public ?string $model_type = null;
-
-    public ?string $name = null;
-
-    public ?string $description = null;
-
     public ?string $color = null;
 
     public ?array $custom_properties = null;
+
+    public ?string $description = null;
 
     public bool $has_notifications = true;
 
     public bool $has_repeatable_events = true;
 
+    #[Locked]
+    public int|string|null $id = null;
+
+    #[Locked]
     public bool $is_editable = true;
+
+    public bool $is_group = false;
 
     public bool $is_public = false;
 
-    public ?int $user_id = null;
+    public ?string $model_type = null;
 
-    protected function getActions(): array
-    {
-        return [
-            'create' => CreateCalendar::class,
-            'update' => UpdateCalendar::class,
-            'delete' => DeleteCalendar::class,
-        ];
-    }
+    public ?string $name = null;
+
+    public string|int|null $parent_id = null;
+
+    public ?int $user_id = null;
 
     public function fill($values): void
     {
@@ -53,5 +47,43 @@ class CalendarForm extends FluxForm
         }
 
         parent::fill($values);
+
+        $this->user_id ??= auth()->id();
+        $this->color ??= '#' . dechex(rand(0x000000, 0xFFFFFF));
+    }
+
+    public function fromCalendarObject(?array $calendar): void
+    {
+        if (! $calendar) {
+            $this->reset();
+
+            return;
+        }
+
+        $mappedArray = [];
+
+        foreach ($calendar as $key => $value) {
+            $mappedArray[Str::snake($key)] = $value;
+        }
+
+        $this->fill($mappedArray);
+    }
+
+    public function toActionData(): array
+    {
+        if (! is_int($this->parent_id)) {
+            $this->parent_id = null;
+        }
+
+        return parent::toActionData();
+    }
+
+    protected function getActions(): array
+    {
+        return [
+            'create' => CreateCalendar::class,
+            'update' => UpdateCalendar::class,
+            'delete' => DeleteCalendar::class,
+        ];
     }
 }

@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use Exception;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
@@ -21,15 +22,50 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 class SerialNumber extends FluxModel implements HasMedia, InteractsWithDataTables
 {
     use Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes, HasPackageFactory, HasUserModification,
-        HasUuid, InteractsWithMedia, LogsActivity, Searchable;
+        HasUuid, InteractsWithMedia, LogsActivity;
+    use Searchable {
+        Searchable::scoutIndexSettings as baseScoutIndexSettings;
+    }
+
+    public static string $iconName = 'tag';
 
     protected ?string $detailRouteName = 'products.serial-numbers.id?';
 
-    public static string $iconName = 'tag';
+    public static function scoutIndexSettings(): ?array
+    {
+        return static::baseScoutIndexSettings() ?? [
+            'filterableAttributes' => [
+                'address_id',
+            ],
+        ];
+    }
 
     public function addresses(): BelongsToMany
     {
         return $this->belongsToMany(Address::class, 'address_serial_number')->withPivot('quantity');
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function getAvatarUrl(): ?string
+    {
+        return $this->getFirstMediaUrl('avatar') ?: static::icon()->getUrl();
+    }
+
+    public function getDescription(): ?string
+    {
+        return null;
+    }
+
+    public function getLabel(): ?string
+    {
+        return $this->serial_number . ' - ' . $this->product?->name;
+    }
+
+    public function getUrl(): ?string
+    {
+        return $this->detailRoute();
     }
 
     public function product(): HasOneThrough
@@ -40,28 +76,5 @@ class SerialNumber extends FluxModel implements HasMedia, InteractsWithDataTable
     public function stockPostings(): HasMany
     {
         return $this->hasMany(StockPosting::class);
-    }
-
-    public function getLabel(): ?string
-    {
-        return $this->serial_number . ' - ' . $this->product?->name;
-    }
-
-    public function getDescription(): ?string
-    {
-        return null;
-    }
-
-    public function getUrl(): ?string
-    {
-        return $this->detailRoute();
-    }
-
-    /**
-     * @throws \Exception
-     */
-    public function getAvatarUrl(): ?string
-    {
-        return $this->getFirstMediaUrl('avatar') ?: static::icon()->getUrl();
     }
 }

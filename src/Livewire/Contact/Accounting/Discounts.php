@@ -17,23 +17,23 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class Discounts extends DiscountList
 {
-    protected ?string $includeBefore = 'flux::livewire.contact.accounting.discounts';
+    #[Modelable]
+    public int $contactId;
 
     public DiscountForm $discountForm;
 
-    #[Modelable]
-    public int $contactId;
+    protected ?string $includeBefore = 'flux::livewire.contact.accounting.discounts';
 
     protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
-                ->label(__('New'))
+                ->text(__('New'))
                 ->icon('plus')
                 ->xOnClick(<<<'JS'
-                    $openModal('edit-discount');
+                    $modalOpen('edit-discount-modal');
                 JS)
-                ->color('primary'),
+                ->color('indigo'),
         ];
     }
 
@@ -41,48 +41,21 @@ class Discounts extends DiscountList
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
+                ->text(__('Edit'))
                 ->icon('pencil')
                 ->when(fn () => resolve_static(UpdateDiscount::class, 'canPerformAction', [false]))
                 ->wireClick('edit(record.id)')
-                ->color('primary'),
+                ->color('indigo'),
             DataTableButton::make()
-                ->label(__('Delete'))
+                ->text(__('Delete'))
                 ->icon('trash')
                 ->when(fn () => resolve_static(DeleteDiscount::class, 'canPerformAction', [false]))
                 ->attributes([
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Discount')]),
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Discount')]),
                     'wire:click' => 'delete(record.id)',
                 ])
-                ->color('negative'),
+                ->color('red'),
         ];
-    }
-
-    protected function getBuilder(Builder $builder): Builder
-    {
-        return parent::getBuilder($builder)
-            ->whereRelation(
-                'contacts',
-                'contacts.id',
-                $this->contactId
-            );
-    }
-
-    #[Renderless]
-    public function resetDiscount(): void
-    {
-        $this->discountForm->reset();
-    }
-
-    #[Renderless]
-    public function edit(Discount $discount): void
-    {
-        $this->discountForm->reset();
-        $this->discountForm->fill($discount);
-
-        $this->js(<<<'JS'
-            $openModal('edit-discount');
-        JS);
     }
 
     #[Renderless]
@@ -100,6 +73,23 @@ class Discounts extends DiscountList
         }
 
         $this->loadData();
+    }
+
+    #[Renderless]
+    public function edit(Discount $discount): void
+    {
+        $this->discountForm->reset();
+        $this->discountForm->fill($discount);
+
+        $this->js(<<<'JS'
+            $modalOpen('edit-discount-modal');
+        JS);
+    }
+
+    #[Renderless]
+    public function resetDiscount(): void
+    {
+        $this->discountForm->reset();
     }
 
     #[Renderless]
@@ -138,5 +128,15 @@ class Discounts extends DiscountList
         $this->loadData();
 
         return true;
+    }
+
+    protected function getBuilder(Builder $builder): Builder
+    {
+        return parent::getBuilder($builder)
+            ->whereRelation(
+                'contacts',
+                'contacts.id',
+                $this->contactId
+            );
     }
 }

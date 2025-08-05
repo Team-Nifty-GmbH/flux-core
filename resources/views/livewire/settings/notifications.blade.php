@@ -1,65 +1,96 @@
-<div class="py-6"
-     x-data="{
+<div
+    class="py-6"
+    x-data="{
         notifications: $wire.entangle('notifications', true),
         notificationChannels: $wire.entangle('notificationChannels', true),
         notificationSettings: $wire.entangle('notificationSettings'),
         notification: $wire.entangle('notification'),
-        }"
+    }"
 >
-    <x-modal.card wire:model.live="detailModal" x-on:close="$wire.closeModal()">
+    <x-modal
+        id="edit-notification-settings-modal"
+        wire="detailModal"
+        x-on:close="$wire.closeModal()"
+    >
         <x-slot name="title">
             {{ __('Notification Settings') }}
         </x-slot>
         <template x-for="(notificationChannel, name) in notification">
-            <div class="space-y-2 pb-6" x-bind:hidden="notificationChannel.name === 'database'">
+            <div
+                class="space-y-2 pb-6"
+                x-bind:hidden="notificationChannel.name === 'database'"
+            >
                 <div class="flex space-x-1.5">
-                    <x-checkbox x-model="notificationChannel.is_active"></x-checkbox>
+                    <x-checkbox
+                        x-model="notificationChannel.is_active"
+                    ></x-checkbox>
                     <div x-text="notificationChannel.name"></div>
                 </div>
-                <template x-for="(channelValue, index) in notificationChannel.channel_value">
+                <template
+                    x-for="(channelValue, index) in notificationChannel.channel_value"
+                >
                     <div class="flex">
                         <div class="flex items-center pr-1.5 transition-all">
-                            <x-button.circle 2xs negative label="-" x-on:click.prevent="_.pull(notificationChannel.channel_value, channelValue)"></x-button.circle>
+                            <x-button.circle
+                                2xs
+                                color="red"
+                                label="-"
+                                x-on:click.prevent="_.pull(notificationChannel.channel_value, channelValue)"
+                            ></x-button.circle>
                         </div>
                         <div class="w-full">
-                            <x-input class="flex-grow" x-model="notificationChannel.channel_value[index]">
-                            </x-input>
+                            <x-input
+                                class="flex-grow"
+                                x-model="notificationChannel.channel_value[index]"
+                            ></x-input>
                         </div>
                     </div>
                 </template>
-                <x-button.circle 2xs positive label="+" x-on:click="notificationChannel.channel_value.push(null)"/>
+                <x-button.circle
+                    2xs
+                    color="emerald"
+                    label="+"
+                    x-on:click="notificationChannel.channel_value.push(null)"
+                />
             </div>
         </template>
-        <x-slot name="footer">
-            <div class="w-full">
-                <div
-                    class="flex justify-end gap-x-4">
-                    <div class="flex">
-                        <x-button flat :label="__('Cancel')" x-on:click="close"/>
-                        <x-button primary :label="__('Save')" wire:click="save()"/>
-                    </div>
-                </div>
-            </div>
+        <x-slot:footer>
+            <x-button
+                color="secondary"
+                light
+                flat
+                :text="__('Cancel')"
+                x-on:click="$modalClose('edit-notification-settings-modal')"
+            />
+            <x-button color="indigo" :text="__('Save')" wire:click="save()" />
         </x-slot>
-    </x-modal.card>
+    </x-modal>
     <div class="px-4 sm:px-6 lg:px-8">
         <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">
-                <h1 class="text-xl font-semibold dark:text-white">{{ __('Notifications') }}</h1>
-                <div class="mt-2 text-sm text-gray-300">{{ __('Here you can manage notification settings...') }}</div>
+                <h1 class="text-xl font-semibold dark:text-white">
+                    {{ __('Notifications') }}
+                </h1>
+                <div class="mt-2 text-sm text-gray-300">
+                    {{ __('Here you can manage notification settings...') }}
+                </div>
             </div>
         </div>
         <x-flux::table>
             <x-slot name="header">
                 <th class="col-span-2">{{ __('Notification') }}</th>
             </x-slot>
-            <template x-for="(notification,key) in notificationSettings">
+            <template x-for="(notification, key) in notificationSettings">
                 <x-flux::table.row>
                     <td>
                         <div x-text="$wire.translate(key)"></div>
                     </td>
                     <td>
-                        <x-button primary :label="__('Edit')" x-on:click="$wire.show(key)" />
+                        <x-button
+                            color="indigo"
+                            :text="__('Edit')"
+                            x-on:click="$wire.show(key)"
+                        />
                     </td>
                 </x-flux::table.row>
             </template>

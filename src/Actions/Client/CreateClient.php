@@ -9,14 +9,14 @@ use Illuminate\Support\Arr;
 
 class CreateClient extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateClientRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Client::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateClientRuleset::class;
     }
 
     public function performAction(): Client

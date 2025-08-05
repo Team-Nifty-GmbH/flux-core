@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('serial_numbers', function (Blueprint $table) {
+        Schema::table('serial_numbers', function (Blueprint $table): void {
             $table->string('supplier_serial_number')->nullable()->after('serial_number');
 
             $table->dropForeign(['product_id']);
@@ -21,7 +21,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('serial_numbers', function (Blueprint $table) {
+        Schema::table('serial_numbers', function (Blueprint $table): void {
             $table->dropColumn('supplier_serial_number');
 
             $table->unsignedBigInteger('product_id')->nullable()->after('serial_number_range_id');

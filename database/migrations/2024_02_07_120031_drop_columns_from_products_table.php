@@ -11,7 +11,7 @@ return new class() extends Migration
      */
     public function up(): void
     {
-        Schema::table('products', function (Blueprint $table) {
+        Schema::table('products', function (Blueprint $table): void {
             $table->dropColumn([
                 'manufacturer_product_number',
                 'is_required_manufacturer_serial_number',
@@ -26,7 +26,7 @@ return new class() extends Migration
      */
     public function down(): void
     {
-        Schema::table('products', function (Blueprint $table) {
+        Schema::table('products', function (Blueprint $table): void {
             $table->text('manufacturer_product_number')->nullable()->after('seo_keywords');
             $table->boolean('is_required_manufacturer_serial_number')
                 ->default(false)

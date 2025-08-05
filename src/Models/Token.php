@@ -10,15 +10,15 @@ class Token extends FluxAuthenticatable
 {
     use HasRoles, MassPrunable;
 
+    public ?string $token = null;
+
     protected $guarded = [
         'id',
     ];
 
-    public ?string $token = null;
-
     protected static function booted(): void
     {
-        static::deleting(function (Token $model) {
+        static::deleting(function (Token $model): void {
             $model->tokens()->delete();
         });
     }
@@ -26,40 +26,9 @@ class Token extends FluxAuthenticatable
     protected function casts(): array
     {
         return [
+            'abilities' => 'array',
             'expires_at' => 'datetime',
         ];
-    }
-
-    public function use(): bool
-    {
-        if ($this->uses === null) {
-            $this->uses = 1;
-        } else {
-            $this->increment('uses');
-        }
-
-        return $this->save();
-    }
-
-    public function hasExpired(): bool
-    {
-        return ! ($this->expires_at === null) && now()->gt($this->expires_at);
-    }
-
-    public function hasUrlBinding(): bool
-    {
-        return $this->url !== null;
-    }
-
-    public function matchesUrlBinding(): bool
-    {
-        return $this->hasUrlBinding()
-            && parse_url(request()->url(), PHP_URL_PATH) === parse_url($this->url, PHP_URL_PATH);
-    }
-
-    public function hasMaxUsageLimit(): bool
-    {
-        return $this->max_uses > 0;
     }
 
     public function hasExceededMaxUsage(): bool
@@ -70,24 +39,35 @@ class Token extends FluxAuthenticatable
         return $this->hasMaxUsageLimit() && ($usageCount >= $maxUsageLimit);
     }
 
+    public function hasExpired(): bool
+    {
+        return ! ($this->expires_at === null) && now()->gt($this->expires_at);
+    }
+
+    public function hasMaxUsageLimit(): bool
+    {
+        return $this->max_uses > 0;
+    }
+
+    public function hasUrlBinding(): bool
+    {
+        return $this->url !== null;
+    }
+
     public function isValid(): bool
     {
         return ! ($this->hasExpired() || $this->hasExceededMaxUsage() || ! $this->matchesUrlBinding());
     }
 
-    public function scopeValid(Builder $query): Builder
+    public function matchesUrlBinding(): bool
     {
-        return $query
-            ->where(function ($query) {
-                return $query
-                    ->where('max_uses', '=', '0')
-                    ->orWhereRaw('uses < max_uses');
-            })
-            ->where(function ($query) {
-                return $query
-                    ->whereNull('expires_at')
-                    ->orWhere('expires_at', '>', now());
-            });
+        return $this->hasUrlBinding()
+            && parse_url(request()->url(), PHP_URL_PATH) === parse_url($this->url, PHP_URL_PATH);
+    }
+
+    public function prunable(): Builder
+    {
+        return static::query()->invalid();
     }
 
     public function scopeInvalid(Builder $query): Builder
@@ -105,8 +85,29 @@ class Token extends FluxAuthenticatable
             });
     }
 
-    public function prunable()
+    public function scopeValid(Builder $query): Builder
     {
-        return static::query()->invalid();
+        return $query
+            ->where(function ($query) {
+                return $query
+                    ->where('max_uses', '=', '0')
+                    ->orWhereRaw('uses < max_uses');
+            })
+            ->where(function ($query) {
+                return $query
+                    ->whereNull('expires_at')
+                    ->orWhere('expires_at', '>', now());
+            });
+    }
+
+    public function use(): bool
+    {
+        if ($this->uses === null) {
+            $this->uses = 1;
+        } else {
+            $this->increment('uses');
+        }
+
+        return $this->save();
     }
 }

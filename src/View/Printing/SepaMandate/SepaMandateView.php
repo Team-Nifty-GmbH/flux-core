@@ -16,11 +16,6 @@ class SepaMandateView extends PrintableView
         $this->model = $sepaMandate;
     }
 
-    public function getModel(): SepaMandate
-    {
-        return $this->model;
-    }
-
     public function render(): View|Factory
     {
         return view('print::sepa-mandate.sepa-mandate', [
@@ -31,6 +26,11 @@ class SepaMandateView extends PrintableView
     public function getFileName(): string
     {
         return $this->getSubject();
+    }
+
+    public function getModel(): SepaMandate
+    {
+        return $this->model;
     }
 
     public function getSubject(): string

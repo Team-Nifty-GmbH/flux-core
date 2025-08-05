@@ -42,7 +42,7 @@ class CreateLockedWorkTime extends CreateWorkTime
             $this->data['parent_id'] = resolve_static(WorkTime::class, 'query')
                 ->where('user_id', $this->data['user_id'])
                 ->where('started_at', '<=', Carbon::parse($this->data['started_at'])->toDateTimeString())
-                ->where(function ($query) {
+                ->where(function ($query): void {
                     $query->where('ended_at', '>', Carbon::parse($this->data['started_at'])->toDateTimeString())
                         ->orWhereNull('ended_at');
                 })
@@ -56,7 +56,7 @@ class CreateLockedWorkTime extends CreateWorkTime
         parent::validateData();
 
         if ($endedAt = data_get($this->data, 'ended_at')) {
-            $totalTimeMs = Carbon::parse($endedAt)->diffInMilliseconds(Carbon::parse($this->data['started_at']))
+            $totalTimeMs = Carbon::parse($this->data['started_at'])->diffInMilliseconds(Carbon::parse($endedAt), true)
                 - data_get($this->data, 'paused_time_ms', 0);
 
             if ($totalTimeMs < 0) {

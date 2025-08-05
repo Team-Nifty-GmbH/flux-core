@@ -9,15 +9,15 @@ use Livewire\Attributes\Locked;
 
 class ProductBundleProductForm extends FluxForm
 {
+    public ?int $bundle_product_id = null;
+
+    public ?float $count = null;
+
     #[Locked]
     public ?int $id = null;
 
     #[Locked]
     public ?int $product_id = null;
-
-    public ?int $bundle_product_id = null;
-
-    public ?float $count = null;
 
     protected function getActions(): array
     {

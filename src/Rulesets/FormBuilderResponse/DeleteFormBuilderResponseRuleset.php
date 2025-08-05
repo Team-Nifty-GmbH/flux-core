@@ -8,9 +8,9 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class DeleteFormBuilderResponseRuleset extends FluxRuleset
 {
-    protected static ?string $model = FormBuilderResponse::class;
-
     protected static bool $addAdditionalColumnRules = false;
+
+    protected static ?string $model = FormBuilderResponse::class;
 
     public function rules(): array
     {

@@ -11,20 +11,20 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateSerialNumberRange extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateSerialNumberRangeRuleset::class;
-    }
-
     public static function models(): array
     {
         return [SerialNumberRange::class];
     }
 
+    protected function getRulesets(): string|array
+    {
+        return UpdateSerialNumberRangeRuleset::class;
+    }
+
     public function performAction(): Model
     {
         $serialNumberRange = resolve_static(SerialNumberRange::class, 'query')
-            ->whereKey($this->data['id'])
+            ->whereKey($this->getData('id'))
             ->first();
 
         $serialNumberRange->fill($this->data);
@@ -39,12 +39,14 @@ class UpdateSerialNumberRange extends FluxAction
 
         if ((array_key_exists('prefix', $this->data) || array_key_exists('affix', $this->data))
             && resolve_static(SerialNumber::class, 'query')
-                ->where('serial_number_range_id', $this->data['id'])
+                ->where('serial_number_range_id', $this->getData('id'))
                 ->exists()
         ) {
             throw ValidationException::withMessages([
                 'serial_numbers' => [__('Serial number range has serial numbers')],
-            ])->errorBag('updateSerialNumberRange');
+            ])
+                ->errorBag('updateSerialNumberRange')
+                ->status(423);
         }
     }
 }

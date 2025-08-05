@@ -15,17 +15,17 @@ return [
 
     'channels' => [
         'mail' => [
-            'driver' => \Illuminate\Notifications\Channels\MailChannel::class,
+            'driver' => Illuminate\Notifications\Channels\MailChannel::class,
             'method' => 'toMail',
         ],
         'database' => [
-            'driver' => \Illuminate\Notifications\Channels\DatabaseChannel::class,
+            'driver' => Illuminate\Notifications\Channels\DatabaseChannel::class,
         ],
         'broadcast' => [
-            'driver' => \Illuminate\Notifications\Channels\BroadcastChannel::class,
+            'driver' => Illuminate\Notifications\Channels\BroadcastChannel::class,
         ],
         'web_push' => [
-            'driver' => \NotificationChannels\WebPush\WebPushChannel::class,
+            'driver' => NotificationChannels\WebPush\WebPushChannel::class,
             'method' => 'toWebPush',
         ],
     ],

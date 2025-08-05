@@ -15,23 +15,17 @@ abstract class Metric
 {
     use Conditionable, Macroable;
 
-    protected Builder $query;
-
-    protected string $type;
-
     protected string $column;
-
-    protected ?TimeFrameEnum $range = null;
-
-    protected ?CarbonImmutable $startingDate = null;
-
-    protected ?CarbonImmutable $endingDate = null;
-
-    protected bool $withGrowthRate = false;
 
     protected ?string $dateColumn = null;
 
+    protected ?CarbonImmutable $endingDate = null;
+
     protected GrowthRateTypeEnum $growthRateType = GrowthRateTypeEnum::Percentage;
+
+    protected Builder $query;
+
+    protected TimeFrameEnum|false|null $range = null;
 
     protected array $ranges = [
         TimeFrameEnum::Today,
@@ -42,6 +36,12 @@ abstract class Metric
         TimeFrameEnum::ThisYear,
         TimeFrameEnum::Custom,
     ];
+
+    protected ?CarbonImmutable $startingDate = null;
+
+    protected string $type;
+
+    protected bool $withGrowthRate = false;
 
     abstract protected function resolve(): mixed;
 
@@ -55,19 +55,28 @@ abstract class Metric
         return app(static::class, ['query' => $query]);
     }
 
-    public function setStartingDate(string|CarbonImmutable|null $startingDate): static
+    public function currentRange(): ?array
     {
-        $this->startingDate = is_string($startingDate) ? CarbonImmutable::parse($startingDate) : $startingDate;
-        $this->endingDate ??= CarbonImmutable::now();
+        $range = $this->getRange();
 
-        return $this;
+        if ($this->startingDate && $this->endingDate && $range === TimeFrameEnum::Custom) {
+            return [
+                $this->startingDate,
+                $this->endingDate,
+            ];
+        }
+
+        return $range instanceof TimeFrameEnum ? $range->getRange() : null;
     }
 
-    public function setEndingDate(string|CarbonImmutable|null $endingDate): static
+    public function getRange(): TimeFrameEnum|false
     {
-        $this->endingDate = is_string($endingDate) ? CarbonImmutable::parse($endingDate) : $endingDate;
+        return $this->range ?? data_get($this->getRanges(), '0', TimeFrameEnum::ThisWeek);
+    }
 
-        return $this;
+    public function getRanges(): array
+    {
+        return $this->ranges;
     }
 
     public function modifyQuery(callable $callback): static
@@ -77,9 +86,32 @@ abstract class Metric
         return $this;
     }
 
-    public function withGrowthRate(bool $withGrowthRate = true): static
+    public function previousRange(): ?array
     {
-        $this->withGrowthRate = $withGrowthRate;
+        $range = $this->getRange();
+
+        if ($this->startingDate && $this->endingDate && $range === TimeFrameEnum::Custom) {
+            $range = $this->startingDate->diffInDays($this->endingDate);
+
+            return [
+                $this->startingDate->subDays($range * 2),
+                $this->endingDate->subDays($range),
+            ];
+        }
+
+        return $range->getPreviousRange();
+    }
+
+    public function setDateColumn(string $dateColumn): static
+    {
+        $this->dateColumn = $dateColumn;
+
+        return $this;
+    }
+
+    public function setEndingDate(string|CarbonImmutable|null $endingDate): static
+    {
+        $this->endingDate = is_string($endingDate) ? CarbonImmutable::parse($endingDate) : $endingDate;
 
         return $this;
     }
@@ -117,56 +149,31 @@ abstract class Metric
         return $this;
     }
 
-    public function getRange(): TimeFrameEnum
+    public function setStartingDate(string|CarbonImmutable|null $startingDate): static
     {
-        return $this->range ?? data_get($this->getRanges(), '0', TimeFrameEnum::ThisWeek);
-    }
-
-    public function getRanges(): array
-    {
-        return $this->ranges;
-    }
-
-    public function setDateColumn(string $dateColumn): static
-    {
-        $this->dateColumn = $dateColumn;
+        $this->startingDate = is_string($startingDate) ? CarbonImmutable::parse($startingDate) : $startingDate;
+        $this->endingDate ??= CarbonImmutable::now();
 
         return $this;
     }
 
-    public function previousRange(): ?array
+    public function withGrowthRate(bool $withGrowthRate = true): static
     {
-        $range = $this->getRange();
+        $this->withGrowthRate = $withGrowthRate;
 
-        if ($this->startingDate && $this->endingDate && $range === TimeFrameEnum::Custom) {
-            $range = $this->startingDate->diffInDays($this->endingDate);
-
-            return [
-                $this->startingDate->subDays($range * 2),
-                $this->endingDate->subDays($range),
-            ];
-        }
-
-        return $range->getPreviousRange();
+        return $this;
     }
 
-    public function currentRange(): ?array
+    public function withoutRange(): static
     {
-        $range = $this->getRange();
+        $this->range = false;
 
-        if ($this->startingDate && $this->endingDate && $range === TimeFrameEnum::Custom) {
-            return [
-                $this->startingDate,
-                $this->endingDate,
-            ];
-        }
-
-        return $range->getRange();
+        return $this;
     }
 
     protected function getDateColumn(): string
     {
-        return $this->dateColumn ?? $this->query->getModel()->getCreatedAtColumn();
+        return $this->dateColumn ?? $this->query->getModel()->getQualifiedCreatedAtColumn();
     }
 
     protected function resolveBetween(array $range): array

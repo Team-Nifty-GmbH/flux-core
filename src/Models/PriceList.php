@@ -21,20 +21,15 @@ class PriceList extends FluxModel
     use CacheModelQueries, HasDefault, HasPackageFactory, HasParentChildRelations, HasUserModification, HasUuid,
         LogsActivity, SoftDeletes;
 
-    protected function casts(): array
+    public static function hasPermission(): bool
     {
-        return [
-            'rounding_method_enum' => RoundingMethodEnum::class,
-            'is_net' => 'boolean',
-            'is_default' => 'boolean',
-            'is_purchase' => 'boolean',
-        ];
+        return false;
     }
 
     protected static function booted(): void
     {
         static::saving(
-            function (Model $model) {
+            function (Model $model): void {
                 if ($model->isDirty('is_purchase')) {
                     if ($model->is_purchase) {
                         $model->setUpdatedDefault();
@@ -51,14 +46,24 @@ class PriceList extends FluxModel
         );
     }
 
-    public static function hasPermission(): bool
+    protected function casts(): array
     {
-        return false;
+        return [
+            'rounding_method_enum' => RoundingMethodEnum::class,
+            'is_net' => 'boolean',
+            'is_default' => 'boolean',
+            'is_purchase' => 'boolean',
+        ];
     }
 
     public function categoryDiscounts(): BelongsToMany
     {
         return $this->belongsToMany(Discount::class, 'category_price_list');
+    }
+
+    public function contacts(): HasMany
+    {
+        return $this->hasMany(Contact::class, 'price_list_id');
     }
 
     public function discount(): MorphOne

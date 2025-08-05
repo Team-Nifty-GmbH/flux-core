@@ -8,9 +8,9 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class DeletePaymentReminderTextRuleset extends FluxRuleset
 {
-    protected static ?string $model = PaymentReminderText::class;
-
     protected static bool $addAdditionalColumnRules = false;
+
+    protected static ?string $model = PaymentReminderText::class;
 
     public function rules(): array
     {

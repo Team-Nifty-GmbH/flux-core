@@ -16,12 +16,12 @@ class ProductList extends Component
 {
     use WithPagination;
 
-    public ?string $search = null;
+    #[Url]
+    public ?int $category = null;
 
     public ?string $orderBy = 'is_highlight';
 
-    #[Url]
-    public ?int $category = null;
+    public ?string $search = null;
 
     public function render(): View
     {
@@ -48,12 +48,12 @@ class ProductList extends Component
         $result = $builder
             ->webshop()
             ->when(! $this->search, fn (Builder $query) => $query->whereNull('parent_id'))
-            ->when($this->orderBy, function (Builder $query, string $orderBy) {
+            ->when($this->orderBy, function (Builder $query, string $orderBy): void {
                 $query->orderByDesc($orderBy);
             })
             ->orderByDesc('id')
-            ->when($this->category, function (Builder $query, int $category) {
-                $query->whereHas('categories', function (Builder $query) use ($category) {
+            ->when($this->category, function (Builder $query, int $category): void {
+                $query->whereHas('categories', function (Builder $query) use ($category): void {
                     $query->where('category_id', $category);
                 });
             })
@@ -68,7 +68,7 @@ class ProductList extends Component
                     ?->getUrl('thumb_280x280') ?? route('icons', ['name' => 'photo', 'variant' => 'outline']);
 
                 if (auth()->user()->can(route_to_permission('portal.checkout'))) {
-                    $productArray['price'] = $product->price->only([
+                    $productArray['price'] = $product->price?->only([
                         'price',
                         'root_price_flat',
                         'root_discount_percentage',

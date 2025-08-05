@@ -20,7 +20,7 @@ class CreateWarehouseRuleset extends FluxRuleset
                 'nullable',
                 app(ModelExists::class, ['model' => Address::class]),
             ],
-            'name' => 'required|string',
+            'name' => 'required|string|max:255',
             'is_default' => 'boolean',
         ];
     }

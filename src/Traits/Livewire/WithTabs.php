@@ -14,6 +14,26 @@ trait WithTabs
 
     abstract public function getTabs(): array;
 
+    public function getTabButton(string $component): TabButton
+    {
+        $this->setTabsToRender($this->getTabs());
+
+        // fire event to get tab buttons that are registered
+        event('tabs.rendering: ' . get_class($this), $this);
+
+        return collect($this->getTabsToRender())->keyBy('component')->toArray()[$component];
+    }
+
+    public function getTabsToRender(): array
+    {
+        return $this->_tabs;
+    }
+
+    public function mergeTabsToRender(array $tabs): void
+    {
+        $this->_tabs = array_merge($this->_tabs, $tabs);
+    }
+
     /**
      * @throws ViewException
      */
@@ -32,28 +52,8 @@ trait WithTabs
         return $this;
     }
 
-    public function getTabButton(string $component): TabButton
-    {
-        $this->setTabsToRender($this->getTabs());
-
-        // fire event to get tab buttons that are registered
-        event('tabs.rendering: ' . get_class($this), $this);
-
-        return collect($this->getTabsToRender())->keyBy('component')->toArray()[$component];
-    }
-
     public function setTabsToRender(array $tabs): void
     {
         $this->_tabs = $tabs;
-    }
-
-    public function getTabsToRender(): array
-    {
-        return $this->_tabs;
-    }
-
-    public function mergeTabsToRender(array $tabs): void
-    {
-        $this->_tabs = array_merge($this->_tabs, $tabs);
     }
 }

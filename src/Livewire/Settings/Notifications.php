@@ -20,20 +20,20 @@ class Notifications extends Component
 {
     use Actions;
 
-    public array $notifications = [];
-
-    public array $notificationSettings = [];
-
-    public array $notification = [];
-
-    public string $notificationType = '';
+    public bool $detailModal = false;
 
     #[Locked]
     public array $dirtyNotificationChannels = [];
 
+    public array $notification = [];
+
     public array $notificationChannels = [];
 
-    public bool $detailModal = false;
+    public array $notifications = [];
+
+    public array $notificationSettings = [];
+
+    public string $notificationType = '';
 
     public function mount(): void
     {
@@ -98,11 +98,18 @@ class Notifications extends Component
         return view('flux::livewire.settings.notifications');
     }
 
+    public function closeModal(): void
+    {
+        $this->detailModal = false;
+
+        $this->skipRender();
+    }
+
     public function save(): void
     {
         $this->getDirtyNotificationChannels($this->notification);
 
-        array_walk($this->dirtyNotificationChannels, function (&$item) {
+        array_walk($this->dirtyNotificationChannels, function (&$item): void {
             $item['channel_value'] = array_values(array_filter(array_unique($item['channel_value'])));
         });
 
@@ -117,7 +124,7 @@ class Notifications extends Component
                     $this->notification()->error(
                         title: __('Notification setting could not be saved'),
                         description: implode(', ', Arr::flatten($response['errors']))
-                    );
+                    )->send();
                 }
             }
         }
@@ -147,13 +154,6 @@ class Notifications extends Component
         }
 
         $this->dirtyNotificationChannels = $this->notification;
-
-        $this->skipRender();
-    }
-
-    public function closeModal(): void
-    {
-        $this->detailModal = false;
 
         $this->skipRender();
     }

@@ -12,56 +12,26 @@ use Livewire\Attributes\Locked;
 
 class AddressForm extends FluxForm
 {
-    #[Locked]
-    public ?int $id = null;
+    public ?string $addition = null;
 
-    public ?int $client_id = null;
-
-    public ?int $language_id = null;
-
-    public ?int $country_id = null;
-
-    public ?int $contact_id = null;
+    // relations
+    public array $additional_columns = [];
 
     public ?string $advertising_state = null;
 
-    public ?string $company = null;
-
-    public ?string $title = null;
-
-    public ?string $salutation = null;
-
-    public ?string $firstname = null;
-
-    public ?string $lastname = null;
-
-    public ?string $name = null;
-
-    public ?string $addition = null;
-
-    public ?string $mailbox = null;
-
-    public ?string $mailbox_city = null;
-
-    public ?string $mailbox_zip = null;
-
-    public string|float|null $latitude = null;
-
-    public string|float|null $longitude = null;
-
-    public ?string $zip = null;
+    public bool $can_login = false;
 
     public ?string $city = null;
 
-    public ?string $street = null;
+    public ?int $client_id = null;
 
-    public ?string $url = null;
+    public ?string $company = null;
 
-    public ?string $email_primary = null;
+    public ?int $contact_id = null;
 
-    public ?string $phone = null;
+    public array $contact_options = [];
 
-    public ?string $phone_mobile = null;
+    public ?int $country_id = null;
 
     public ?string $date_of_birth = null;
 
@@ -69,37 +39,60 @@ class AddressForm extends FluxForm
 
     public ?string $email = null;
 
-    public ?string $password = null;
+    public ?string $email_primary = null;
+
+    public ?string $firstname = null;
 
     public ?bool $has_formal_salutation = null;
 
-    public bool $is_main_address = false;
-
-    public bool $is_invoice_address = false;
-
-    public bool $is_delivery_address = false;
+    #[Locked]
+    public ?int $id = null;
 
     public bool $is_active = true;
 
-    public bool $can_login = false;
+    public bool $is_delivery_address = false;
 
-    // relations
-    public array $additional_columns = [];
+    public bool $is_invoice_address = false;
 
-    public array $contact_options = [];
+    public bool $is_main_address = false;
+
+    public ?int $language_id = null;
+
+    public ?string $lastname = null;
+
+    public string|float|null $latitude = null;
+
+    public string|float|null $longitude = null;
+
+    public ?string $mailbox = null;
+
+    public ?string $mailbox_city = null;
+
+    public ?string $mailbox_zip = null;
+
+    public ?string $name = null;
+
+    public ?string $password = null;
 
     public ?array $permissions = null;
 
+    public ?string $phone = null;
+
+    public ?string $phone_mobile = null;
+
+    public ?string $salutation = null;
+
+    public ?array $search_aliases = null;
+
+    public ?string $street = null;
+
     public array $tags = [];
 
-    protected function getActions(): array
-    {
-        return [
-            'create' => CreateAddress::class,
-            'update' => UpdateAddress::class,
-            'delete' => DeleteAddress::class,
-        ];
-    }
+    public ?string $title = null;
+
+    public ?string $url = null;
+
+    public ?string $zip = null;
 
     public function fill($values): void
     {
@@ -129,7 +122,13 @@ class AddressForm extends FluxForm
         }
     }
 
-    public function toArray(): array
+    #[Computed]
+    public function postalAddress(): array
+    {
+        return app(Address::class)->fill($this->toArray())->postal_address;
+    }
+
+    public function toActionData(): array
     {
         $data = parent::toArray();
 
@@ -142,9 +141,12 @@ class AddressForm extends FluxForm
         return $data;
     }
 
-    #[Computed]
-    public function postalAddress(): array
+    protected function getActions(): array
     {
-        return app(Address::class)->fill($this->toArray())->postal_address;
+        return [
+            'create' => CreateAddress::class,
+            'update' => UpdateAddress::class,
+            'delete' => DeleteAddress::class,
+        ];
     }
 }

@@ -1,19 +1,44 @@
-<x-modal name="widget-list">
-    <x-card>
-        <div class="h-full p-2.5 overflow-auto">
-            <h2 class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400 pb-6">{{ __('Available Widgets') }}</h2>
-            @forelse($this->availableWidgets as $widget)
+@teleport('body')
+    <x-modal id="widget-list" scrollable>
+        <div class="h-full overflow-auto p-2.5">
+            <div class="flex items-center justify-between pb-6">
+                <h2
+                    class="flex-1 truncate text-lg font-semibold text-gray-700 dark:text-gray-400"
+                >
+                    {{ __('Available Widgets') }}
+                </h2>
                 <div
-                    x-on:click="selectWidget('{{ $widget['component_name'] }}')"
-                    class="w-full cursor-pointer mb-2 p-2 border rounded hover:bg-gray-100 dark:hover:bg-secondary-900"
+                    x-cloak
+                    x-show="isLoading"
+                    class="border-primary-200 border-t-primary-500 h-6 w-6 animate-spin rounded-full border-4 dark:border-white dark:border-t-gray-400"
+                ></div>
+            </div>
+            @forelse ($this->availableWidgets as $widget)
+                <div
+                    x-on:click="isLoading ? null : selectWidget('{{ $widget['component_name'] }}')"
+                    class="mb-2 w-full cursor-pointer rounded border p-2"
+                    :class="isLoading ? 'bg-gray-200 dark:bg-secondary-800 cursor-wait' : 'dark:hover:bg-secondary-900 hover:bg-gray-100'"
                 >
                     {{ __($widget['label']) }}
                 </div>
             @empty
-                <div class="h-full mx-auto flex flex-col justify-center items-center">
-                    <h2 class="text-2xl font-medium">{{ __('No widgets available') }}</h2>
+                <div
+                    class="mx-auto flex h-full flex-col items-center justify-center"
+                >
+                    <h2 class="text-2xl font-medium">
+                        {{ __('No widgets available') }}
+                    </h2>
                 </div>
             @endforelse
         </div>
-    </x-card>
-</x-modal>
+        <x-slot:footer>
+            <div class="flex justify-end">
+                <x-button
+                    color="secondary"
+                    :text="__('Close')"
+                    x-on:click="$modalClose('widget-list')"
+                />
+            </div>
+        </x-slot>
+    </x-modal>
+@endteleport

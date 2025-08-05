@@ -12,6 +12,14 @@ class CreateContactBankConnectionRuleset extends FluxRuleset
 {
     protected static ?string $model = ContactBankConnection::class;
 
+    public static function getRules(): array
+    {
+        return array_merge(
+            resolve_static(BankConnectionRuleset::class, 'getRules'),
+            parent::getRules()
+        );
+    }
+
     public function rules(): array
     {
         return [
@@ -21,15 +29,18 @@ class CreateContactBankConnectionRuleset extends FluxRuleset
                 'nullable',
                 app(ModelExists::class, ['model' => Contact::class]),
             ],
-            'iban' => ['required', 'string', app(Iban::class)],
+            'iban' => [
+                'required_if_declined:is_credit_account',
+                'exclude_if:is_credit_account,true',
+                'string',
+                app(Iban::class),
+            ],
+            'bank_name' => [
+                'required_if_accepted:is_credit_account',
+                'string',
+                'nullable',
+            ],
+            'is_credit_account' => 'boolean',
         ];
-    }
-
-    public static function getRules(): array
-    {
-        return array_merge(
-            resolve_static(BankConnectionRuleset::class, 'getRules'),
-            parent::getRules()
-        );
     }
 }

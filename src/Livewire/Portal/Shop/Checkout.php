@@ -17,13 +17,13 @@ use Livewire\Attributes\Rule;
 
 class Checkout extends Cart
 {
-    public ?string $comment = null;
+    public AddressForm $address;
 
-    public ?string $delivery_date = null;
+    public ?string $comment = null;
 
     public ?string $commission = null;
 
-    public AddressForm $address;
+    public ?string $delivery_date = null;
 
     public AddressForm $deliveryAddress;
 
@@ -43,35 +43,6 @@ class Checkout extends Cart
     public function render(): View
     {
         return view('flux::livewire.portal.shop.checkout');
-    }
-
-    #[Renderless]
-    public function loadAddress(Address $address): void
-    {
-        $this->address->reset();
-        $this->address->fill($address->toArray());
-        $this->edit = ! $address->id;
-    }
-
-    #[Renderless]
-    public function loadTermsAndConditions(): string
-    {
-        return auth()->user()->contact->client->terms_and_conditions ?? '';
-    }
-
-    public function saveDeliveryAddress(): bool
-    {
-        try {
-            $this->address->validate(resolve_static(PostalAddressRuleset::class, 'getRules'));
-        } catch (ValidationException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->deliveryAddress->fill($this->address->toArray());
-
-        return true;
     }
 
     public function buy(): void
@@ -111,7 +82,9 @@ class Checkout extends Cart
             ])->validate()->execute();
         }
 
-        $this->notification()->success('Order placed successfully!');
+        $this->notification()
+            ->success('Order placed successfully!')
+            ->send();
         event(PortalOrderCreated::make($order));
 
         if (auth('address')->check()) {
@@ -119,5 +92,34 @@ class Checkout extends Cart
         }
 
         $this->redirect(route('portal.checkout-finish'), true);
+    }
+
+    #[Renderless]
+    public function loadAddress(Address $address): void
+    {
+        $this->address->reset();
+        $this->address->fill($address->toArray());
+        $this->edit = ! $address->id;
+    }
+
+    #[Renderless]
+    public function loadTermsAndConditions(): string
+    {
+        return auth()->user()->contact->client->terms_and_conditions ?? '';
+    }
+
+    public function saveDeliveryAddress(): bool
+    {
+        try {
+            $this->address->validate(resolve_static(PostalAddressRuleset::class, 'getRules'));
+        } catch (ValidationException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->deliveryAddress->fill($this->address->toArray());
+
+        return true;
     }
 }

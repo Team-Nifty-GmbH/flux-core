@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Order;
 
+use FluxErp\Actions\OrderTransaction\CreateOrderTransaction;
 use FluxErp\Livewire\DataTables\TransactionList;
 use FluxErp\Livewire\Forms\OrderForm;
 use FluxErp\Models\Transaction;
@@ -13,32 +14,16 @@ use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class Accounting extends TransactionList
 {
-    #[Modelable]
-    public OrderForm $order;
-
-    protected string $view = 'flux::livewire.order.accounting';
-
     public array $enabledCols = [
         'value_date',
         'amount',
         'purpose',
     ];
 
-    protected function getBuilder(Builder $builder): Builder
-    {
-        return $builder->where('order_id', $this->order->id);
-    }
+    #[Modelable]
+    public OrderForm $order;
 
-    #[Renderless]
-    public function editTransaction(?Transaction $transaction): void
-    {
-        parent::editTransaction($transaction);
-
-        $this->transactionForm->order_id = $this->order->id;
-        if (! $transaction) {
-            $this->transactionForm->amount = $this->order->balance;
-        }
-    }
+    protected ?string $includeBefore = 'flux::livewire.order.accounting';
 
     public function deleteTransaction(): bool
     {
@@ -54,5 +39,50 @@ class Accounting extends TransactionList
         $this->loadData();
 
         return true;
+    }
+
+    #[Renderless]
+    public function editTransaction(?Transaction $transaction): void
+    {
+        parent::editTransaction($transaction);
+
+        $this->transactionForm->order_id = $this->order->id;
+        if (! $transaction) {
+            $this->transactionForm->amount = $this->order->balance;
+        }
+    }
+
+    #[Renderless]
+    public function saveTransaction(): bool
+    {
+        $result = parent::saveTransaction();
+
+        if ($result) {
+            try {
+                CreateOrderTransaction::make([
+                    'order_id' => $this->order->id,
+                    'transaction_id' => $this->transactionForm->id,
+                    'amount' => $this->transactionForm->amount,
+                    'is_accepted' => true,
+                ])
+                    ->checkPermission()
+                    ->validate()
+                    ->execute();
+            } catch (ValidationException|UnauthorizedException $e) {
+                exception_to_notifications($e, $this);
+                $this->deleteTransaction();
+
+                return false;
+            }
+        }
+
+        $this->loadData();
+
+        return $result;
+    }
+
+    protected function getBuilder(Builder $builder): Builder
+    {
+        return $builder->whereHas('orders', fn (Builder $builder) => $builder->whereKey($this->order->id));
     }
 }

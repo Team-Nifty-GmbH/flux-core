@@ -5,13 +5,10 @@ namespace FluxErp\Tests\Livewire\Task;
 use FluxErp\Livewire\Task\Task as TaskView;
 use FluxErp\Models\Task;
 use FluxErp\Tests\Livewire\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;
 
 class TaskTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Task $task;
 
     protected function setUp(): void
@@ -21,25 +18,16 @@ class TaskTest extends BaseSetup
         $this->task = Task::factory()->create();
     }
 
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(TaskView::class, ['id' => $this->task->id])
             ->assertStatus(200);
     }
 
-    public function test_switch_tabs()
+    public function test_switch_tabs(): void
     {
-        $component = Livewire::actingAs($this->user)
-            ->test(TaskView::class, ['id' => $this->task->id]);
-
-        foreach (Livewire::new(TaskView::class)->getTabs() as $tab) {
-            $component
-                ->set('taskTab', $tab->component)
-                ->assertStatus(200);
-
-            if ($tab->isLivewireComponent) {
-                $component->assertSeeLivewire($tab->component);
-            }
-        }
+        Livewire::actingAs($this->user)
+            ->test(TaskView::class, ['id' => $this->task->id])
+            ->cycleTabs('taskTab');
     }
 }

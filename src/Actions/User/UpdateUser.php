@@ -12,19 +12,20 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateUser extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateUserRuleset::class;
-    }
-
     public static function models(): array
     {
         return [User::class];
     }
 
+    protected function getRulesets(): string|array
+    {
+        return UpdateUserRuleset::class;
+    }
+
     public function performAction(): Model
     {
         $mailAccounts = Arr::pull($this->data, 'mail_accounts');
+        $printers = Arr::pull($this->data, 'printers');
 
         $user = resolve_static(User::class, 'query')
             ->whereKey($this->data['id'])
@@ -37,8 +38,12 @@ class UpdateUser extends FluxAction
             $user->mailAccounts()->sync($mailAccounts);
         }
 
+        if (! is_null($printers)) {
+            $user->printers()->sync($printers);
+        }
+
         // Delete all tokens of the user if the user is set to is_active = false
-        if (! ($this->data['is_active'] ?? true)) {
+        if ($this->getData('is_active') === false) {
             $user->tokens()->delete();
             $user->locks()->delete();
         }
@@ -55,14 +60,27 @@ class UpdateUser extends FluxAction
                 'email' => $this->rules['email'] . ',' . ($this->data['id'] ?? 0),
             ]
         );
+
+        if (array_key_exists('password', $this->data) && is_null($this->getData('password'))) {
+            unset($this->data['password']);
+        }
     }
 
     protected function validateData(): void
     {
+        if ($this->getData('termination_date')) {
+            $user = resolve_static(User::class, 'query')
+                ->whereKey($this->data['id'])
+                ->first();
+
+            $this->data['employment_date'] ??= $user->employment_date;
+            $this->data['termination_date'] ??= $user->termination_date;
+        }
+
         parent::validateData();
 
-        if ($this->data['parent_id'] ?? false) {
-            $user = resolve_static(User::class, 'query')
+        if ($this->getData('parent_id')) {
+            $user ??= resolve_static(User::class, 'query')
                 ->whereKey($this->data['id'])
                 ->first();
 

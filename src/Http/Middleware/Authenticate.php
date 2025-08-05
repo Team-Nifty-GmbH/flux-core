@@ -2,6 +2,7 @@
 
 namespace FluxErp\Http\Middleware;
 
+use Closure;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\Middleware\Authenticate as BaseAuthenticate;
 use Illuminate\Support\Facades\Route;
@@ -11,7 +12,7 @@ class Authenticate extends BaseAuthenticate
     /**
      * @throws AuthenticationException
      */
-    public function handle($request, \Closure $next, ...$guards): mixed
+    public function handle($request, Closure $next, ...$guards): mixed
     {
         // if a token is set in get parameters, set it as the bearer token
         if ($request->get('token')) {

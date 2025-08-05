@@ -2,24 +2,22 @@
 
 namespace FluxErp\Console\Commands\Scout;
 
-use FluxErp\Traits\HasClientAssignment;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use FluxErp\Traits\Scout\Searchable;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
 use Laravel\Scout\Console\SyncIndexSettingsCommand as BaseSyncIndexSettingsCommand;
 use Laravel\Scout\EngineManager;
-use TeamNiftyGmbH\DataTable\Helpers\ModelInfo;
 
 class SyncIndexSettingsCommand extends BaseSyncIndexSettingsCommand
 {
-    protected $signature = 'scout:sync-index-settings
+    protected $signature = 'flux-scout:sync-index-settings
                             {model? : The model class name you would like to sync the index settings for.}';
 
     /**
      * Execute the console command.
-     *
-     * @return void
      */
-    public function handle(EngineManager $manager)
+    public function handle(EngineManager $manager): void
     {
         $engine = $manager->engine();
 
@@ -31,62 +29,44 @@ class SyncIndexSettingsCommand extends BaseSyncIndexSettingsCommand
             return;
         }
 
-        try {
-            $indexes = (array) config('scout.' . $driver . '.index-settings', []);
+        $searchableModels = collect(Relation::morphMap())
+            ->map(fn (string $class) => resolve_static($class, 'class'))
+            ->filter(fn (string $class) => in_array(Searchable::class, class_uses_recursive($class))
+                && method_exists($class, 'scoutIndexSettings')
+            )
+            ->unique()
+            ->when(
+                $this->argument('model'),
+                fn (Collection $collection) => $collection->filter(
+                    fn (string $class) => $class === $this->argument('model')
+                )
+            )
+            ->values()
+            ->toArray();
 
-            if ($this->argument('model')) {
-                $indexes = [$this->argument('model') => $indexes[$this->argument('model')] ?? []];
+        foreach ($searchableModels as $model) {
+            if (! method_exists($model, 'scoutIndexSettings')) {
+                $this->error('The model [' . $model . '] does not have a "scoutIndexSettings" method.');
+
+                continue;
             }
 
-            if (count($indexes)) {
-                foreach ($indexes as $name => $settings) {
-                    if (! is_array($settings)) {
-                        $name = $settings;
+            $settings = $model::scoutIndexSettings();
+            if (
+                config('scout.soft_delete', false)
+                && in_array(SoftDeletes::class, class_uses_recursive($model))
+                && ! in_array('__soft_deleted', data_get($settings, 'filterableAttributes', []))
+            ) {
+                $settings['filterableAttributes'][] = '__soft_deleted';
+            }
 
-                        $settings = [];
-                    }
+            if (is_array($settings) && count($settings)) {
+                $engine->updateIndexSettings($indexName = $this->indexName($model), $settings);
 
-                    if (class_exists($name)) {
-                        $model = app($name);
-                    }
-
-                    $uses = class_uses_recursive($model);
-                    if (isset($model) &&
-                        config('scout.soft_delete', false) &&
-                        in_array(SoftDeletes::class, $uses)
-                    ) {
-                        $settings['filterableAttributes'][] = '__soft_deleted';
-                    }
-
-                    if (isset($model)
-                        && in_array(HasClientAssignment::class, $uses)
-                        && $model->isRelation('client')
-                        && ($relation = $model->client()) instanceof BelongsTo
-                    ) {
-                        $settings['filterableAttributes'][] = $relation->getForeignKeyName();
-                    }
-
-                    if (isset($model) &&
-                        array_key_exists('sortableAttributes', $settings)
-                        && in_array('*', $settings['sortableAttributes'])
-                        && $driver === 'meilisearch'
-                    ) {
-                        $settings['sortableAttributes'] = ModelInfo::forModel(get_class($model))
-                            ->attributes
-                            ->pluck('name')
-                            ->toArray();
-                        $settings['sortableAttributes'] = array_values(array_filter($settings['sortableAttributes']));
-                    }
-
-                    $engine->updateIndexSettings($indexName = $this->indexName($name), $settings);
-
-                    $this->info('Settings for the [' . $indexName . '] index synced successfully.');
-                }
+                $this->info('Settings for the [' . $indexName . '] index synced successfully.');
             } else {
-                $this->info('No index settings found for the "' . $driver . '" engine.');
+                $this->info('No settings found for the [' . $model . '] model.');
             }
-        } catch (\Exception $exception) {
-            $this->error($exception->getMessage());
         }
     }
 }

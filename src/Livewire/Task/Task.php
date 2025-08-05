@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Task;
 
+use Exception;
 use FluxErp\Actions\Tag\CreateTag;
 use FluxErp\Actions\Task\DeleteTask;
 use FluxErp\Htmlables\TabButton;
@@ -17,20 +18,22 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Spatie\Permission\Exceptions\UnauthorizedException;
+use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Task extends Component
 {
     use Actions, WithTabs;
 
+    public array $availableStates = [];
+
     public TaskForm $task;
 
     public string $taskTab = 'task.general';
 
-    public array $availableStates = [];
-
     public function mount(string $id): void
     {
         $task = resolve_static(TaskModel::class, 'query')
+            ->with('model')
             ->whereKey($id)
             ->firstOrFail();
 
@@ -43,6 +46,11 @@ class Task extends Component
                 null
             )
         );
+
+        if ($task->model && in_array(InteractsWithDataTables::class, class_implements($task->model))) {
+            $this->task->modelUrl = $task->model->getUrl();
+            $this->task->modelLabel = $task->model->getLabel();
+        }
 
         $this->availableStates = app(TaskModel::class)
             ->getStatesFor('state')
@@ -60,35 +68,64 @@ class Task extends Component
         return view('flux::livewire.task.task');
     }
 
+    #[Renderless]
+    public function addTag(string $name): void
+    {
+        try {
+            $tag = CreateTag::make([
+                'name' => $name,
+                'type' => morph_alias(TaskModel::class),
+            ])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->task->tags[] = $tag->id;
+        $this->js(<<<'JS'
+            edit = true;
+        JS);
+    }
+
+    #[Renderless]
+    public function delete(): void
+    {
+        try {
+            DeleteTask::make($this->task->toArray())
+                ->checkPermission()
+                ->validate()
+                ->execute();
+
+            $this->redirectRoute('tasks', navigate: true);
+        } catch (Exception $e) {
+            exception_to_notifications($e, $this);
+        }
+    }
+
     public function getTabs(): array
     {
         return [
-            TabButton::make('task.general')->label(__('General')),
-            TabButton::make('task.comments')->label(__('Comments'))
+            TabButton::make('task.general')
+                ->text(__('General')),
+            TabButton::make('task.comments')
+                ->isLivewireComponent()
+                ->wireModel('task.id')
+                ->text(__('Comments'))
                 ->attributes([
                     'x-bind:disabled' => '! $wire.task.id',
                 ]),
-            TabButton::make('task.media')->label(__('Media'))
+            TabButton::make('task.media')
+                ->text(__('Media'))
+                ->isLivewireComponent()
+                ->wireModel('task.id')
                 ->attributes([
                     'x-bind:disabled' => '! $wire.task.id',
                 ]),
         ];
-    }
-
-    public function save(): array|bool
-    {
-        try {
-            $this->task->save();
-        } catch (\Exception $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->notification()->success(__(':model saved', ['model' => __('Task')]));
-        $this->skipRender();
-
-        return true;
     }
 
     public function resetForm(): void
@@ -109,41 +146,19 @@ class Task extends Component
         );
     }
 
-    #[Renderless]
-    public function delete(): void
+    public function save(): array|bool
     {
         try {
-            DeleteTask::make($this->task->toArray())
-                ->checkPermission()
-                ->validate()
-                ->execute();
-
-            $this->redirect(route('tasks'));
-        } catch (\Exception $e) {
-            exception_to_notifications($e, $this);
-        }
-    }
-
-    #[Renderless]
-    public function addTag(string $name): void
-    {
-        try {
-            $tag = CreateTag::make([
-                'name' => $name,
-                'type' => app(TaskModel::class)->getMorphClass(),
-            ])
-                ->checkPermission()
-                ->validate()
-                ->execute();
-        } catch (ValidationException|UnauthorizedException $e) {
+            $this->task->save();
+        } catch (Exception $e) {
             exception_to_notifications($e, $this);
 
-            return;
+            return false;
         }
 
-        $this->task->tags[] = $tag->id;
-        $this->js(<<<'JS'
-            edit = true;
-        JS);
+        $this->notification()->success(__(':model saved', ['model' => __('Task')]))->send();
+        $this->skipRender();
+
+        return true;
     }
 }

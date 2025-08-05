@@ -9,29 +9,54 @@ use Illuminate\Support\HtmlString;
 
 trait IsMonitored
 {
+    private int $progressCurrentChunk = 0;
+
     private ?int $progressLastUpdated = null;
 
-    private int $progressCurrentChunk = 0;
+    public static function keepMonitorOnSuccess(): bool
+    {
+        return true;
+    }
+
+    public function accept(NotificationAction $action): void
+    {
+        $this->getQueueMonitor()->update([
+            'accept' => serialize($action),
+        ]);
+    }
 
     public function getName(): string
     {
         return get_class($this);
     }
 
-    public function queueUpdate(array $attributes): void
+    public function message(HtmlString|string $message): void
     {
-        if ($this->isQueueProgressOnCooldown($progress = data_get($attributes, 'progress', 0))) {
-            return;
-        }
+        $this->getQueueMonitor()->update([
+            'message' => is_a($message, HtmlString::class, true)
+                ? $message->toHtml()
+                : $message,
+        ]);
+    }
 
+    public function progressCooldown(): int
+    {
+        return 0;
+    }
+
+    public function queueData(array $data, bool $merge = false): void
+    {
         if (! $monitor = $this->getQueueMonitor()) {
             return;
         }
 
-        $progress = $progress / 100;
-        $attributes['progress'] = $progress;
+        if ($merge) {
+            $data = array_merge($monitor->data, $data);
+        }
 
-        $monitor->update($attributes);
+        $monitor->update([
+            'data' => $data,
+        ]);
     }
 
     public function queueProgress(int $progress): void
@@ -65,26 +90,20 @@ trait IsMonitored
         );
     }
 
-    public function queueData(array $data, bool $merge = false): void
+    public function queueUpdate(array $attributes): void
     {
+        if ($this->isQueueProgressOnCooldown($progress = data_get($attributes, 'progress', 0))) {
+            return;
+        }
+
         if (! $monitor = $this->getQueueMonitor()) {
             return;
         }
 
-        if ($merge) {
-            $data = array_merge($monitor->data, $data);
-        }
+        $progress = $progress / 100;
+        $attributes['progress'] = $progress;
 
-        $monitor->update([
-            'data' => $data,
-        ]);
-    }
-
-    public function accept(NotificationAction $action): void
-    {
-        $this->getQueueMonitor()->update([
-            'accept' => serialize($action),
-        ]);
+        $monitor->update($attributes);
     }
 
     public function reject(NotificationAction $reject): void
@@ -92,28 +111,6 @@ trait IsMonitored
         $this->getQueueMonitor()->update([
             'reject' => serialize($reject),
         ]);
-    }
-
-    public function message(HtmlString|string $message): void
-    {
-        $this->getQueueMonitor()->update([
-            'message' => is_a($message, HtmlString::class, true)
-                ? $message->toHtml()
-                : $message,
-        ]);
-    }
-
-    private function isQueueProgressOnCooldown(float|int $progress): bool
-    {
-        if (in_array($progress, [0, 25, 50, 75, 100])) {
-            return false;
-        }
-
-        if (is_null($this->progressLastUpdated)) {
-            return false;
-        }
-
-        return time() - $this->progressLastUpdated < $this->progressCooldown();
     }
 
     protected function deleteQueueMonitor(): void
@@ -139,19 +136,22 @@ trait IsMonitored
             return null;
         }
 
-        return app(QueueMonitor::class)
+        return resolve_static(QueueMonitor::class, 'query')
             ->where('job_id', $jobId)
             ->orderBy('started_at', 'desc')
             ->first();
     }
 
-    public static function keepMonitorOnSuccess(): bool
+    private function isQueueProgressOnCooldown(float|int $progress): bool
     {
-        return true;
-    }
+        if (in_array($progress, [0, 25, 50, 75, 100])) {
+            return false;
+        }
 
-    public function progressCooldown(): int
-    {
-        return 0;
+        if (is_null($this->progressLastUpdated)) {
+            return false;
+        }
+
+        return time() - $this->progressLastUpdated < $this->progressCooldown();
     }
 }

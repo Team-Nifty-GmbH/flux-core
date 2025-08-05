@@ -8,9 +8,9 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class DeleteWarehouseRuleset extends FluxRuleset
 {
-    protected static ?string $model = Warehouse::class;
-
     protected static bool $addAdditionalColumnRules = false;
+
+    protected static ?string $model = Warehouse::class;
 
     public function rules(): array
     {

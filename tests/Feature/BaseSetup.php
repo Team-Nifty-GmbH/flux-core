@@ -10,11 +10,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class BaseSetup extends TestCase
 {
-    protected User $user;
-
     protected Model $dbClient;
 
     protected string $defaultLanguageCode;
+
+    protected User $user;
 
     protected function setUp(): void
     {

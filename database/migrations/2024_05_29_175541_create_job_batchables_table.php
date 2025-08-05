@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::create('job_batchables', function (Blueprint $table) {
+        Schema::create('job_batchables', function (Blueprint $table): void {
             $table->string('job_batch_id');
             $table->morphs('job_batchable', 'job_batchable_index');
             $table->boolean('notify_on_finish')->default(false);

@@ -11,14 +11,14 @@ use Illuminate\Validation\ValidationException;
 
 class DeleteCountry extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeleteCountryRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Country::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeleteCountryRuleset::class;
     }
 
     public function performAction(): ?bool
@@ -59,7 +59,9 @@ class DeleteCountry extends FluxAction
         }
 
         if ($errors) {
-            throw ValidationException::withMessages($errors)->errorBag('deleteCountry');
+            throw ValidationException::withMessages($errors)
+                ->errorBag('deleteCountry')
+                ->status(423);
         }
     }
 }

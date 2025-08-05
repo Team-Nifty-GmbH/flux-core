@@ -10,18 +10,18 @@ use FluxErp\Rulesets\Ticket\UpdateTicketRuleset;
 use FluxErp\Traits\Notifiable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class UpdateTicket extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateTicketRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Ticket::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateTicketRuleset::class;
     }
 
     public function performAction(): Model
@@ -68,13 +68,5 @@ class UpdateTicket extends FluxAction
                     ?->hasAdditionalColumnsValidationRules() ?? []
             );
         }
-    }
-
-    protected function validateData(): void
-    {
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(Ticket::class));
-
-        $this->data = $validator->validate();
     }
 }

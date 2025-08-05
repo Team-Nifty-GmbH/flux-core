@@ -9,7 +9,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('serial_number_ranges', function (Blueprint $table) {
+        Schema::table('serial_number_ranges', function (Blueprint $table): void {
             $table->string('model_type')->after('uuid');
             $table->unsignedBigInteger('model_id')->nullable()->after('model_type');
             $table->string('type')->after('model_id');
@@ -29,7 +29,7 @@ return new class() extends Migration
 
         DB::statement('UPDATE serial_number_ranges SET model_type = "FluxErp\\\\Models\\\\Product", model_id = product_id');
 
-        Schema::table('serial_number_ranges', function (Blueprint $table) {
+        Schema::table('serial_number_ranges', function (Blueprint $table): void {
             $table->dropForeign(['product_id']);
             $table->dropColumn('product_id');
 
@@ -39,13 +39,13 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('serial_number_ranges', function (Blueprint $table) {
+        Schema::table('serial_number_ranges', function (Blueprint $table): void {
             $table->dropForeign(['client_id']);
 
             $table->unsignedBigInteger('product_id')->after('uuid');
         });
 
-        Schema::table('serial_numbers', function (Blueprint $table) {
+        Schema::table('serial_numbers', function (Blueprint $table): void {
             $table->dropForeign(['serial_number_range_id']);
             $table->foreign('serial_number_range_id')
                 ->references('id')
@@ -56,14 +56,14 @@ return new class() extends Migration
         DB::statement('DELETE FROM serial_number_ranges WHERE model_type != "FluxErp\\\\Models\\\\Product"');
         DB::statement('UPDATE serial_number_ranges SET product_id = model_id WHERE model_type = "FluxErp\\\\Models\\\\Product"');
 
-        Schema::table('serial_numbers', function (Blueprint $table) {
+        Schema::table('serial_numbers', function (Blueprint $table): void {
             $table->dropForeign(['serial_number_range_id']);
             $table->foreign('serial_number_range_id')
                 ->references('id')
                 ->on('serial_number_ranges');
         });
 
-        Schema::table('serial_number_ranges', function (Blueprint $table) {
+        Schema::table('serial_number_ranges', function (Blueprint $table): void {
             $table->foreign('product_id')->references('id')->on('products');
             $table->dropColumn([
                 'type',

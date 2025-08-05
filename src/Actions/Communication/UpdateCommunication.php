@@ -14,14 +14,14 @@ use Illuminate\Support\Carbon;
 
 class UpdateCommunication extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateCommunicationRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Communication::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateCommunicationRuleset::class;
     }
 
     public function performAction(): Model
@@ -38,7 +38,7 @@ class UpdateCommunication extends FluxAction
         $endedAt = data_get($this->data, 'ended_at');
 
         if (is_null(data_get($this->data, 'total_time_ms')) && $startedAt && $endedAt) {
-            $this->data['total_time_ms'] = Carbon::parse($endedAt)->diffInMilliseconds(Carbon::parse($startedAt));
+            $this->data['total_time_ms'] = Carbon::parse($startedAt)->diffInMilliseconds(Carbon::parse($endedAt), true);
         }
 
         $communication->fill($this->data);

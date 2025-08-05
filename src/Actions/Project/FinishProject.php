@@ -7,17 +7,23 @@ use FluxErp\Models\Project;
 use FluxErp\Rulesets\Project\FinishProjectRuleset;
 use FluxErp\States\Project\Done;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Response;
 
 class FinishProject extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return FinishProjectRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Project::class];
+    }
+
+    protected static function getSuccessCode(): ?int
+    {
+        return parent::getSuccessCode() ?? Response::HTTP_OK;
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return FinishProjectRuleset::class;
     }
 
     public function performAction(): Model

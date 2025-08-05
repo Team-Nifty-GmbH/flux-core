@@ -2,34 +2,36 @@
 
 namespace FluxErp\Livewire\Project;
 
-use FluxErp\Actions\Task\DeleteTask;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\DataTables\TaskList as BaseTaskList;
 use FluxErp\Livewire\Forms\TaskForm;
 use FluxErp\Models\Task;
+use FluxErp\Support\Livewire\Attributes\DataTableForm;
 use FluxErp\Traits\Livewire\Actions;
+use FluxErp\Traits\Livewire\DataTableHasFormEdit;
 use FluxErp\Traits\Livewire\WithTabs;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
-use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
-use Spatie\Permission\Exceptions\UnauthorizedException;
-use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class ProjectTaskList extends BaseTaskList
 {
-    use Actions, WithTabs;
-
-    protected string $view = 'flux::livewire.project.project-task-list';
-
-    public string $taskTab = 'task.general';
-
-    public TaskForm $task;
+    use Actions, DataTableHasFormEdit, WithTabs {
+        DataTableHasFormEdit::edit as editForm;
+    }
 
     public array $availableStates = [];
 
+    public bool $hasNoRedirect = true;
+
     public ?int $projectId;
 
-    public bool $hasNoRedirect = true;
+    #[DataTableForm]
+    public TaskForm $task;
+
+    public string $taskTab = 'task.general';
+
+    protected ?string $includeBefore = 'flux::livewire.project.project-task-list';
 
     public function mount(): void
     {
@@ -52,40 +54,18 @@ class ProjectTaskList extends BaseTaskList
     }
 
     #[Renderless]
-    protected function getTableActions(): array
+    public function edit(string|int|null $id = null): void
     {
-        return [
-            DataTableButton::make()
-                ->label(__('New'))
-                ->color('primary')
-                ->attributes([
-                    'x-on:click' => '$wire.edit()',
-                ]),
-        ];
-    }
+        $task = resolve_static(Task::class, 'query')
+            ->where('project_id', $this->projectId)
+            ->when($id, fn (Builder $query) => $query->whereKey($id))
+            ->firstOrFail();
 
-    #[Renderless]
-    public function getTabs(): array
-    {
-        return [
-            TabButton::make('task.general')->label(__('General')),
-            TabButton::make('task.comments')->label(__('Comments'))
-                ->attributes([
-                    'x-bind:disabled' => '! $wire.task.id',
-                ]),
-            TabButton::make('task.media')->label(__('Media'))
-                ->attributes([
-                    'x-bind:disabled' => '! $wire.task.id',
-                ]),
-        ];
-    }
-
-    public function edit(Task $task): void
-    {
         $this->reset('taskTab');
         $task->project_id = $this->projectId;
-        $this->task->reset();
-        $this->task->fill($task);
+
+        $this->editForm($id);
+
         $this->task->users = $task->users()->pluck('users.id')->toArray();
         $this->task->additionalColumns = array_intersect_key(
             $task->toArray(),
@@ -94,48 +74,38 @@ class ProjectTaskList extends BaseTaskList
                 null
             )
         );
-
-        $this->js(<<<'JS'
-            $openModal('task-form-modal');
-        JS);
     }
 
     #[Renderless]
-    public function save(): bool
+    public function getTabs(): array
     {
-        try {
-            $this->task->save();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
-    }
-
-    public function delete(): bool
-    {
-        try {
-            DeleteTask::make($this->task->toArray())
-                ->checkPermission()
-                ->validate()
-                ->execute();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
+        return [
+            TabButton::make('task.general')
+                ->text(__('General')),
+            TabButton::make('task.comments')
+                ->isLivewireComponent()
+                ->wireModel('task.id')
+                ->text(__('Comments'))
+                ->attributes([
+                    'x-bind:disabled' => '! $wire.task.id',
+                ]),
+            TabButton::make('task.media')
+                ->text(__('Media'))
+                ->isLivewireComponent()
+                ->wireModel('task.id')
+                ->attributes([
+                    'x-bind:disabled' => '! $wire.task.id',
+                ]),
+        ];
     }
 
     public function updatedTaskTab(): void
     {
         $this->forceRender();
+    }
+
+    protected function getBuilder(Builder $builder): Builder
+    {
+        return $builder->where('project_id', $this->projectId);
     }
 }

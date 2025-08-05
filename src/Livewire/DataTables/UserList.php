@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Builder;
 
 class UserList extends BaseDataTable
 {
-    protected string $model = User::class;
+    public array $bottomAppend = [
+        'name' => 'email',
+    ];
 
     public array $enabledCols = [
         'id',
@@ -23,16 +25,7 @@ class UserList extends BaseDataTable
         'name' => 'avatar',
     ];
 
-    public array $bottomAppend = [
-        'name' => 'email',
-    ];
-
-    protected function getLeftAppends(): array
-    {
-        return [
-            'name' => 'avatar',
-        ];
-    }
+    protected string $model = User::class;
 
     protected function getBottomAppends(): array
     {
@@ -44,6 +37,13 @@ class UserList extends BaseDataTable
     protected function getBuilder(Builder $builder): Builder
     {
         return $builder->with('media');
+    }
+
+    protected function getLeftAppends(): array
+    {
+        return [
+            'name' => 'avatar',
+        ];
     }
 
     protected function getReturnKeys(): array

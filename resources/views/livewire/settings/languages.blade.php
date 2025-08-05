@@ -1,40 +1,44 @@
-<x-modal wire:model="editModal">
-    <x-card :title="$selectedLanguage->id ?? false ? __('Edit Language') : __('Create Language')">
-        <div class="space-y-8 divide-y divide-gray-200">
-            <div class="space-y-8 divide-y divide-gray-200">
-                <div>
-                    <div class="mt-6 grid grid-cols-1 sm:grid-cols-6">
-                        <div class="space-y-3 sm:col-span-6">
-                            <x-input wire:model="selectedLanguage.name" :label="__('Language Name')"/>
-                            <x-input wire:model="selectedLanguage.iso_name" :label="__('ISO Name')"/>
-                            <x-input wire:model="selectedLanguage.language_code" :label="__('Language Code')"
-                                     list="language-code-data" autocomplete="off"/>
-                            <x-toggle wire:model.boolean="selectedLanguage.is_default" :label="__('Is Default')" />
-                        </div>
-                    </div>
-                </div>
-            </div>
+<x-modal
+    id="edit-language-modal"
+    wire="editModal"
+    :title="$selectedLanguage->id ?? false ? __('Edit Language') : __('Create Language')"
+>
+    <div class="flex flex-col gap-1.5">
+        <x-input
+            wire:model="selectedLanguage.name"
+            :label="__('Language Name')"
+        />
+        <x-input
+            wire:model="selectedLanguage.iso_name"
+            :label="__('ISO Name')"
+        />
+        <x-input
+            wire:model="selectedLanguage.language_code"
+            :label="__('Language Code')"
+            list="language-code-data"
+            autocomplete="off"
+        />
+        <div class="mt-2">
+            <x-toggle
+                wire:model.boolean="selectedLanguage.is_default"
+                :label="__('Is Default')"
+            />
         </div>
-        <x-slot name="footer">
-            <div class="flex justify-between gap-x-4">
-                @if(resolve_static(\FluxErp\Actions\Language\DeleteLanguage::class, 'canPerformAction', [false]))
-                    <div x-bind:class="$wire.selectedLanguage.id > 0 || 'invisible'">
-                        <x-button
-                            flat
-                            negative
-                            :label="__('Delete')"
-                            wire:flux-confirm.icon.error="{{ __('wire:confirm.delete', ['model' => __('Language')]) }}"
-                            wire:click="delete().then((success) => {if(success) close();});"
-                        />
-                    </div>
-                @endif
-                <div class="flex">
-                    <x-button flat :label="__('Cancel')" x-on:click="close"/>
-                    <x-button primary :label="__('Save')" wire:click="save().then((success) => {if(success) close();});"/>
-                </div>
-            </div>
-        </x-slot>
-    </x-card>
+    </div>
+    <x-slot:footer>
+        <x-button
+            color="secondary"
+            light
+            flat
+            :text="__('Cancel')"
+            x-on:click="$modalClose('edit-language-modal')"
+        />
+        <x-button
+            color="indigo"
+            :text="__('Save')"
+            wire:click="save().then((success) => {if(success) $modalClose('edit-language-modal');});"
+        />
+    </x-slot>
 </x-modal>
 <datalist id="language-code-data">
     <option>af_ZA</option>

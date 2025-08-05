@@ -7,6 +7,7 @@ use FluxErp\Livewire\Forms\AddressForm;
 use FluxErp\Livewire\Forms\ContactForm;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
+use FluxErp\Models\Permission;
 use FluxErp\Tests\Livewire\BaseSetup;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -14,9 +15,9 @@ use Livewire\Livewire;
 
 class AddressesTest extends BaseSetup
 {
-    private ContactForm $contactForm;
-
     private AddressForm $addressForm;
+
+    private ContactForm $contactForm;
 
     protected function setUp(): void
     {
@@ -40,29 +41,7 @@ class AddressesTest extends BaseSetup
         $this->addressForm->fill($address);
     }
 
-    public function test_renders_successfully()
-    {
-        Livewire::test(Addresses::class)
-            ->assertStatus(200);
-    }
-
-    public function test_switch_tabs()
-    {
-        $component = Livewire::actingAs($this->user)
-            ->test(Addresses::class, ['contact' => $this->contactForm, 'address' => $this->addressForm]);
-
-        foreach (Livewire::new(Addresses::class)->getTabs() as $tab) {
-            $component
-                ->set('tab', $tab->component)
-                ->assertStatus(200);
-
-            if ($tab->isLivewireComponent) {
-                $component->assertSeeLivewire($tab->component);
-            }
-        }
-    }
-
-    public function test_can_save_address()
+    public function test_can_save_address(): void
     {
         Livewire::actingAs($this->user)
             ->test(Addresses::class, ['contact' => $this->contactForm, 'address' => $this->addressForm])
@@ -77,7 +56,7 @@ class AddressesTest extends BaseSetup
         $this->assertDatabaseHas('addresses', ['id' => $this->addressForm->id, 'street' => $street]);
     }
 
-    public function test_can_update_password()
+    public function test_can_update_password(): void
     {
         Address::query()
             ->whereKey($this->addressForm->id)
@@ -106,10 +85,24 @@ class AddressesTest extends BaseSetup
         );
     }
 
-    public function test_replicate_address()
+    public function test_renders_successfully(): void
     {
+        Livewire::test(Addresses::class)
+            ->assertStatus(200);
+    }
+
+    public function test_replicate_address(): void
+    {
+        $originalAddress = Address::query()
+            ->whereKey($this->addressForm->id)
+            ->first();
+        $originalAddress->givePermissionTo(Permission::findOrCreate(Str::random(), 'address'));
+        $this->addressForm->fill($originalAddress->fresh());
+
         $component = Livewire::actingAs($this->user)
             ->test(Addresses::class, ['contact' => $this->contactForm, 'address' => $this->addressForm])
+            ->assertNotSet('address.permissions', null)
+            ->assertCount('address.permissions', 1)
             ->call('replicate')
             ->assertStatus(200)
             ->assertHasNoErrors()
@@ -120,5 +113,27 @@ class AddressesTest extends BaseSetup
 
         $this->assertGreaterThan($this->addressForm->id, $component->get('address.id'));
         $this->assertDatabaseHas('addresses', ['lastname' => $lastname]);
+
+        $dbAddress = Address::query()
+            ->whereKey($component->get('address.id'))
+            ->with('permissions')
+            ->first();
+
+        $this->assertEmpty($dbAddress->permissions);
+        $this->assertDatabaseMissing(
+            'meta',
+            [
+                'model_id' => $dbAddress->id,
+                'model_type' => $dbAddress->getMorphClass(),
+                'key' => 'permissions',
+            ]
+        );
+    }
+
+    public function test_switch_tabs(): void
+    {
+        Livewire::actingAs($this->user)
+            ->test(Addresses::class, ['contact' => $this->contactForm, 'address' => $this->addressForm])
+            ->cycleTabs();
     }
 }

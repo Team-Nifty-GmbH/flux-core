@@ -20,6 +20,11 @@ class OrderType extends FluxModel
     use CacheModelQueries, Filterable, HasClientAssignment, HasEnums, HasPackageFactory, HasUserModification, HasUuid,
         LogsActivity, SoftDeletes;
 
+    public static function hasPermission(): bool
+    {
+        return false;
+    }
+
     protected function casts(): array
     {
         return [
@@ -36,6 +41,11 @@ class OrderType extends FluxModel
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
+    }
+
+    public function emailTemplate(): BelongsTo
+    {
+        return $this->belongsTo(EmailTemplate::class);
     }
 
     public function orders(): HasMany

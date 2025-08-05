@@ -15,6 +15,18 @@ class UpdateAddressRuleset extends FluxRuleset
 {
     protected static ?string $model = Address::class;
 
+    public static function getRules(): array
+    {
+        return array_merge(
+            parent::getRules(),
+            resolve_static(PostalAddressRuleset::class, 'getRules'),
+            resolve_static(AddressTypeRuleset::class, 'getRules'),
+            resolve_static(ContactOptionRuleset::class, 'getRules'),
+            resolve_static(TagRuleset::class, 'getRules'),
+            resolve_static(PermissionRuleset::class, 'getRules')
+        );
+    }
+
     public function rules(): array
     {
         return [
@@ -46,30 +58,24 @@ class UpdateAddressRuleset extends FluxRuleset
                 ValidStateRule::make(AdvertisingState::class),
             ],
             'date_of_birth' => 'date|nullable',
-            'department' => 'string|nullable',
+            'department' => 'string|max:255|nullable',
             'email' => [
                 'required_if_accepted:can_login',
                 'email',
+                'max:255',
                 'nullable',
             ],
-            'password' => 'string|nullable',
+            'search_aliases' => [
+                'array',
+                'nullable',
+            ],
+            'search_aliases.*' => 'string|max:255|distinct:ignore_case',
+            'password' => 'string|max:255|nullable',
             'is_main_address' => 'boolean',
             'is_invoice_address' => 'boolean',
             'is_delivery_address' => 'boolean',
             'is_active' => 'boolean',
             'can_login' => 'boolean',
         ];
-    }
-
-    public static function getRules(): array
-    {
-        return array_merge(
-            parent::getRules(),
-            resolve_static(PostalAddressRuleset::class, 'getRules'),
-            resolve_static(AddressTypeRuleset::class, 'getRules'),
-            resolve_static(ContactOptionRuleset::class, 'getRules'),
-            resolve_static(TagRuleset::class, 'getRules'),
-            resolve_static(PermissionRuleset::class, 'getRules')
-        );
     }
 }

@@ -4,12 +4,9 @@ namespace FluxErp\Tests\Feature\Web;
 
 use FluxErp\Models\Permission;
 use FluxErp\Models\Project;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class ProjectsTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Project $project;
 
     protected function setUp(): void
@@ -21,30 +18,14 @@ class ProjectsTest extends BaseSetup
         ]);
     }
 
-    public function test_projects_list_page()
+    public function test_projects_id_no_user(): void
     {
-        $this->user->givePermissionTo(Permission::findOrCreate('projects.get', 'web'));
-
-        $this->actingAs($this->user, 'web')->get('/projects')
-            ->assertStatus(200);
-    }
-
-    public function test_projects_list_no_user()
-    {
-        $this->get('/projects')
+        $this->get('/projects/' . $this->project->id)
             ->assertStatus(302)
             ->assertRedirect(route('login'));
     }
 
-    public function test_projects_list_without_permission()
-    {
-        Permission::findOrCreate('projects.get', 'web');
-
-        $this->actingAs($this->user, 'web')->get('/projects')
-            ->assertStatus(403);
-    }
-
-    public function test_projects_id_page()
+    public function test_projects_id_page(): void
     {
         $this->user->givePermissionTo(Permission::findOrCreate('projects.{id}.get', 'web'));
 
@@ -52,22 +33,7 @@ class ProjectsTest extends BaseSetup
             ->assertStatus(200);
     }
 
-    public function test_projects_id_no_user()
-    {
-        $this->get('/projects/' . $this->project->id)
-            ->assertStatus(302)
-            ->assertRedirect(route('login'));
-    }
-
-    public function test_projects_id_without_permission()
-    {
-        Permission::findOrCreate('projects.{id}.get', 'web');
-
-        $this->actingAs($this->user, 'web')->get('/projects/' . $this->project->id)
-            ->assertStatus(403);
-    }
-
-    public function test_projects_id_project_not_found()
+    public function test_projects_id_project_not_found(): void
     {
         $this->project->delete();
 
@@ -75,5 +41,36 @@ class ProjectsTest extends BaseSetup
 
         $this->actingAs($this->user, 'web')->get('/projects/' . $this->project->id)
             ->assertStatus(404);
+    }
+
+    public function test_projects_id_without_permission(): void
+    {
+        Permission::findOrCreate('projects.{id}.get', 'web');
+
+        $this->actingAs($this->user, 'web')->get('/projects/' . $this->project->id)
+            ->assertStatus(403);
+    }
+
+    public function test_projects_list_no_user(): void
+    {
+        $this->get('/projects')
+            ->assertStatus(302)
+            ->assertRedirect(route('login'));
+    }
+
+    public function test_projects_list_page(): void
+    {
+        $this->user->givePermissionTo(Permission::findOrCreate('projects.get', 'web'));
+
+        $this->actingAs($this->user, 'web')->get('/projects')
+            ->assertStatus(200);
+    }
+
+    public function test_projects_list_without_permission(): void
+    {
+        Permission::findOrCreate('projects.get', 'web');
+
+        $this->actingAs($this->user, 'web')->get('/projects')
+            ->assertStatus(403);
     }
 }

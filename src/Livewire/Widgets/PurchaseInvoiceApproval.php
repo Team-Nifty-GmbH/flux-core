@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Traits\Widgetable;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -10,6 +11,21 @@ use Livewire\Component;
 class PurchaseInvoiceApproval extends Component
 {
     use Widgetable;
+
+    public static function dashboardComponent(): array|string
+    {
+        return Dashboard::class;
+    }
+
+    public static function getDefaultHeight(): int
+    {
+        return 2;
+    }
+
+    public static function getDefaultWidth(): int
+    {
+        return 2;
+    }
 
     public function render(): View|Factory
     {
@@ -42,15 +58,5 @@ class PurchaseInvoiceApproval extends Component
     public function placeholder(): View|Factory
     {
         return view('flux::livewire.placeholders.horizontal-bar');
-    }
-
-    public static function getDefaultWidth(): int
-    {
-        return 2;
-    }
-
-    public static function getDefaultHeight(): int
-    {
-        return 2;
     }
 }

@@ -18,12 +18,6 @@ class MediaList extends BaseDataTable
 {
     use Actions;
 
-    protected string $model = Media::class;
-
-    public ?string $includeBefore = 'flux::livewire.datatables.media-list';
-
-    public MediaForm $mediaForm;
-
     public array $enabledCols = [
         'file_name',
         'collection_name',
@@ -33,90 +27,54 @@ class MediaList extends BaseDataTable
         'url' => 'image',
     ];
 
-    protected function getBuilder(Builder $builder): Builder
-    {
-        return $builder->addSelect('model_type', 'disk', 'conversions_disk');
-    }
+    public ?string $includeBefore = 'flux::livewire.datatables.media-list';
 
-    protected function itemToArray($item): array
-    {
-        /** @var Media $item */
-        $item->makeVisible('collection_name');
+    public MediaForm $mediaForm;
 
-        $itemArray = parent::itemToArray($item);
-        $itemArray['url'] = $item->hasGeneratedConversion('thumb')
-            ? $item->getUrl('thumb')
-            : (
-                Str::startsWith($item->mime_type, 'image/')
-                    ? $item->getUrl('thumb')
-                    : route('icons', ['name' => 'document'])
-            );
-
-        return $itemArray;
-    }
+    protected string $model = Media::class;
 
     protected function getRowActions(): array
     {
         return [
-            DataTableButton::make(icon: 'save')
-                ->label(__('Download'))
+            DataTableButton::make()
+                ->icon('arrow-down-tray')
+                ->text(__('Download'))
                 ->attributes([
-                    'x-on:click' => '$wire.downloadMedia(record.id)',
+                    'x-on:click' => 'show = false; $wire.downloadMedia(record.id)',
                 ]),
-            DataTableButton::make(icon: 'pencil')
-                ->label(__('Edit'))
-                ->wireClick('edit(record.id)'),
-            DataTableButton::make(icon: 'eye')
-                ->label(__('View'))
-                ->href('record.url')
+            DataTableButton::make()
+                ->icon('pencil')
+                ->text(__('Edit'))
+                ->wireClick('edit(record.id); show = false;'),
+            DataTableButton::make()
+                ->icon('eye')
+                ->text(__('View'))
+                ->href('record.original_url')
                 ->attributes([
                     'target' => '_blank',
-                    'x-bind:href' => 'record.url',
+                    'x-bind:href' => 'record.original_url',
                 ]),
-            DataTableButton::make(icon: 'trash')
-                ->color('negative')
-                ->label(__('Delete'))
+            DataTableButton::make()
+                ->icon('trash')
+                ->color('red')
+                ->text(__('Delete'))
                 ->when(fn () => resolve_static(DeleteMedia::class, 'canPerformAction', [false]))
                 ->attributes([
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Media')]),
-                    'wire:click' => 'deleteMedia(record.id)',
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Media')]),
+                    'wire:click' => 'deleteMedia(record.id).then(() => show = false)',
                 ]),
-        ];
-    }
-
-    protected function getLeftAppends(): array
-    {
-        return [
-            'name' => [
-                'url',
-            ],
         ];
     }
 
     public function downloadMedia(Media $media): false|BinaryFileResponse
     {
         if (! file_exists($media->getPath())) {
-            $this->notification()->error(__('The file does not exist anymore.'));
+            $this->notification()->error(__('The file does not exist anymore.'))->send();
 
             return false;
         }
 
         return response()->download($media->getPath(), $media->file_name);
-    }
-
-    public function save(): bool
-    {
-        try {
-            $this->mediaForm->save();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
     }
 
     #[Renderless]
@@ -135,7 +93,54 @@ class MediaList extends BaseDataTable
         $this->mediaForm->fill($media);
 
         $this->js(<<<'JS'
-            $openModal('edit-media');
+            $modalOpen('edit-media');
         JS);
+    }
+
+    public function save(): bool
+    {
+        try {
+            $this->mediaForm->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
+    }
+
+    protected function getBuilder(Builder $builder): Builder
+    {
+        return $builder->addSelect('model_type', 'disk', 'conversions_disk');
+    }
+
+    protected function getLeftAppends(): array
+    {
+        return [
+            'name' => [
+                'url',
+            ],
+        ];
+    }
+
+    protected function itemToArray($item): array
+    {
+        /** @var Media $item */
+        $item->makeVisible('collection_name');
+
+        $itemArray = parent::itemToArray($item);
+        $itemArray['url'] = $item->hasGeneratedConversion('thumb')
+            ? $item->getUrl('thumb')
+            : (
+                Str::startsWith($item->mime_type, 'image/')
+                    ? $item->getUrl('thumb')
+                    : route('icons', ['name' => 'document'])
+            );
+        $itemArray['original_url'] = $item->original_url;
+
+        return $itemArray;
     }
 }

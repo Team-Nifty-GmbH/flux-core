@@ -20,9 +20,9 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class ProductDetail extends Component
 {
-    public ProductForm $productForm;
-
     public array $groups = [];
+
+    public ProductForm $productForm;
 
     #[Url]
     public ?int $variant = null;
@@ -50,6 +50,29 @@ class ProductDetail extends Component
         return view('flux::livewire.portal.shop.product-detail');
     }
 
+    public function downloadMedia(array|int $media, ?string $collectionName = null): void
+    {
+        $media = resolve_static(MediaModel::class, 'query')
+            ->whereIntegerInRaw('id', Arr::wrap($media))
+            ->get();
+
+        count($media) > 1
+            ? $this->redirectRoute(
+                'portal.media.download-multiple',
+                [
+                    'ids' => $media->pluck('id')->implode(','),
+                    'filename' => $this->productForm->name . ($collectionName ? ' - ' . $collectionName : ''),
+                ]
+            )
+            : $this->redirectRoute(
+                'portal.media',
+                [
+                    'media' => $media->first()->id,
+                    'filename' => $media->first()->file_name,
+                ]
+            );
+    }
+
     public function selectOption(ProductOption $option): void
     {
         $this->groups[$option->product_option_group_id] = $option->id;
@@ -74,29 +97,6 @@ class ProductDetail extends Component
 
         $this->fillProductForm($product);
         $this->variant = $product->id;
-    }
-
-    public function downloadMedia(array|int $media, ?string $collectionName = null): void
-    {
-        $media = resolve_static(MediaModel::class, 'query')
-            ->whereIntegerInRaw('id', Arr::wrap($media))
-            ->get();
-
-        count($media) > 1
-            ? $this->redirectRoute(
-                'portal.media.download-multiple',
-                [
-                    'ids' => $media->pluck('id')->implode(','),
-                    'filename' => $this->productForm->name . ($collectionName ? ' - ' . $collectionName : ''),
-                ]
-            )
-            : $this->redirectRoute(
-                'portal.media',
-                [
-                    'media' => $media->first()->id,
-                    'filename' => $media->first()->file_name,
-                ]
-            );
     }
 
     protected function fillProductForm(Product $product): void
@@ -133,9 +133,8 @@ class ProductDetail extends Component
                         $productForm->reset();
                         $productForm->fill($productArray);
 
-                        return $productForm->toArray();
-                    }
-                    )
+                        return app(Product::class)->withoutMeta()->forceFill($productForm->toArray());
+                    })
                 )
                 ->values()
         );
@@ -168,7 +167,7 @@ class ProductDetail extends Component
         $product->media()
             ->get()
             ->merge($product->parent?->media()->get() ?? [])
-            ->each(function (Media $media) {
+            ->each(function (Media $media): void {
                 $this->productForm->additionalMedia[$media->collection_name][$media->id] = [
                     'id' => $media->id,
                     'name' => $media->name,

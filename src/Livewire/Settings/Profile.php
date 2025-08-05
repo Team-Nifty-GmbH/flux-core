@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Settings;
 
+use Exception;
 use FluxErp\Actions\NotificationSetting\UpdateNotificationSetting;
 use FluxErp\Livewire\Forms\UserForm;
 use FluxErp\Models\Language;
@@ -21,19 +22,19 @@ class Profile extends Component
 {
     use Actions, WithFileUploads;
 
-    public UserForm $user;
+    public $avatar;
+
+    public array $dirtyNotifications = [];
 
     public array $languages = [];
+
+    public array $notificationChannels = [];
 
     public array $notifications = [];
 
     public array $notificationSettings = [];
 
-    public array $notificationChannels = [];
-
-    public array $dirtyNotifications = [];
-
-    public $avatar;
+    public UserForm $user;
 
     public function mount(): void
     {
@@ -92,9 +93,9 @@ class Profile extends Component
         }
     }
 
-    public function updatingNotificationSettings($value, $key): void
+    public function render(): View|Factory|Application
     {
-        $this->dirtyNotifications[] = $key;
+        return view('flux::livewire.settings.profile');
     }
 
     public function getRules(): array
@@ -104,36 +105,15 @@ class Profile extends Component
         ];
     }
 
-    public function render(): View|Factory|Application
-    {
-        return view('flux::livewire.settings.profile');
-    }
-
-    public function updatedAvatar(): void
-    {
-        $this->collection = 'avatar';
-        try {
-            $response = $this->saveFileUploadsToMediaLibrary(
-                'avatar',
-                auth()->id(),
-                app(User::class)->getMorphClass()
-            );
-        } catch (\Exception $e) {
-            exception_to_notifications($e, $this);
-
-            return;
-        }
-
-        $this->avatar = $response[0]['original_url'];
-    }
-
     public function save(): void
     {
         $this->validate();
 
         try {
             $this->user->save();
-            $this->notification()->success(__(':model saved', ['model' => __('My Profile')]));
+            $this->notification()
+                ->success(__(':model saved', ['model' => __('My Profile')]))
+                ->send();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
         }
@@ -161,5 +141,28 @@ class Profile extends Component
         }
 
         $this->skipRender();
+    }
+
+    public function updatedAvatar(): void
+    {
+        $this->collection = 'avatar';
+        try {
+            $response = $this->saveFileUploadsToMediaLibrary(
+                'avatar',
+                auth()->id(),
+                app(User::class)->getMorphClass()
+            );
+        } catch (Exception $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->avatar = $response[0]['original_url'];
+    }
+
+    public function updatingNotificationSettings($value, $key): void
+    {
+        $this->dirtyNotifications[] = $key;
     }
 }

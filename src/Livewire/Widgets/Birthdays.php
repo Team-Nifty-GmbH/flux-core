@@ -2,12 +2,18 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use FluxErp\Livewire\Dashboard\Dashboard;
+use FluxErp\Livewire\Support\Widgets\ValueList;
 use FluxErp\Models\Address;
-use FluxErp\Support\Widgets\ValueList;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class Birthdays extends ValueList
 {
+    public static function dashboardComponent(): array|string
+    {
+        return Dashboard::class;
+    }
+
     public function calculateList(): void
     {
         $query = resolve_static(Address::class, 'query')

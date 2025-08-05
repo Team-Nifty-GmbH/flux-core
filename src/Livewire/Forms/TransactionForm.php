@@ -10,50 +10,45 @@ use Livewire\Attributes\Locked;
 
 class TransactionForm extends FluxForm
 {
-    #[Locked]
-    public ?int $id = null;
+    public ?float $amount = null;
 
     public ?int $bank_connection_id = null;
 
+    public ?string $booking_date = null;
+
+    public array $children = [];
+
+    public ?int $contact_bank_connection_id = null;
+
+    public ?string $counterpart_account_number = null;
+
+    public ?string $counterpart_bank_name = null;
+
+    public ?string $counterpart_bic = null;
+
+    public ?string $counterpart_iban = null;
+
+    public ?string $counterpart_name = null;
+
     public ?int $currency_id = null;
 
-    public ?int $parent_id = null;
+    public ?string $difference = null;
+
+    #[Locked]
+    public ?int $id = null;
+
+    public bool $is_ignored = false;
 
     #[Locked]
     public ?int $order_id = null;
 
-    public ?string $value_date = null;
-
-    public ?string $booking_date = null;
-
-    public ?float $amount = null;
+    public ?int $parent_id = null;
 
     public ?string $purpose = null;
 
     public ?string $type = null;
 
-    public ?string $counterpart_name = null;
-
-    public ?string $counterpart_account_number = null;
-
-    public ?string $counterpart_iban = null;
-
-    public ?string $counterpart_bic = null;
-
-    public ?string $counterpart_bank_name = null;
-
-    public array $children = [];
-
-    public ?string $difference = null;
-
-    protected function getActions(): array
-    {
-        return [
-            'create' => CreateTransaction::class,
-            'update' => UpdateTransaction::class,
-            'delete' => DeleteTransaction::class,
-        ];
-    }
+    public ?string $value_date = null;
 
     public function fill($values): void
     {
@@ -63,5 +58,14 @@ class TransactionForm extends FluxForm
             Carbon::parse($valueDate)->toDateString() : null;
         $this->booking_date = ! is_null($bookingDate = data_get($values, 'booking_date')) ?
             Carbon::parse($bookingDate)->toDateString() : null;
+    }
+
+    protected function getActions(): array
+    {
+        return [
+            'create' => CreateTransaction::class,
+            'update' => UpdateTransaction::class,
+            'delete' => DeleteTransaction::class,
+        ];
     }
 }

@@ -8,9 +8,9 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class DeleteSerialNumberRuleset extends FluxRuleset
 {
-    protected static ?string $model = SerialNumber::class;
-
     protected static bool $addAdditionalColumnRules = false;
+
+    protected static ?string $model = SerialNumber::class;
 
     public function rules(): array
     {

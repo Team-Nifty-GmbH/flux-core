@@ -13,18 +13,17 @@ use FluxErp\Rulesets\Ticket\CreateTicketRuleset;
 use FluxErp\Traits\Notifiable;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
 
 class CreateTicket extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateTicketRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Ticket::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateTicketRuleset::class;
     }
 
     public function performAction(): Ticket
@@ -98,13 +97,5 @@ class CreateTicket extends FluxAction
                     ?->hasAdditionalColumnsValidationRules() ?? []
             );
         }
-    }
-
-    protected function validateData(): void
-    {
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(Ticket::class));
-
-        $this->data = $validator->validate();
     }
 }

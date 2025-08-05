@@ -8,19 +8,6 @@ use Illuminate\Database\Eloquent\Builder;
 
 class TicketList extends BaseDataTable
 {
-    protected string $model = Ticket::class;
-
-    public array $columnLabels = [
-        'ticket_type.name' => 'Ticket type',
-    ];
-
-    public array $enabledCols = [
-        'title',
-        'state',
-        'ticket_type.name',
-        'created_at',
-    ];
-
     public array $availableCols = [
         'title',
         'description',
@@ -30,9 +17,23 @@ class TicketList extends BaseDataTable
         'created_at',
     ];
 
+    public array $availableRelations = [];
+
+    public array $columnLabels = [
+        'ticket_type.name' => 'Ticket type',
+    ];
+
+    public array $enabledCols = [
+        'ticket_number',
+        'title',
+        'state',
+        'ticket_type.name',
+        'created_at',
+    ];
+
     public array $sortable = ['*'];
 
-    public array $availableRelations = [];
+    protected string $model = Ticket::class;
 
     protected function getBuilder(Builder $builder): Builder
     {

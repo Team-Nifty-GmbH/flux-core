@@ -2,11 +2,12 @@
 
 namespace FluxErp\Livewire\Portal\Ticket;
 
-use FluxErp\Livewire\Features\Comments\Comments as BaseComments;
+use FluxErp\Livewire\Support\Comments as BaseComments;
+use FluxErp\Models\Ticket;
 
 class Comments extends BaseComments
 {
-    public string $modelType = \FluxErp\Models\Ticket::class;
-
     public bool $isPublic = false;
+
+    protected string $modelType = Ticket::class;
 }

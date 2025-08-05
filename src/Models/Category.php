@@ -5,6 +5,7 @@ namespace FluxErp\Models;
 use FluxErp\Traits\Categorizable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
+use FluxErp\Traits\HasAttributeTranslations;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasParentChildRelations;
 use FluxErp\Traits\HasUserModification;
@@ -14,7 +15,6 @@ use FluxErp\Traits\Scout\Searchable;
 use FluxErp\Traits\SortableTrait;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Str;
 use Spatie\EloquentSortable\Sortable;
@@ -23,33 +23,38 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class Category extends FluxModel implements InteractsWithDataTables, Sortable
 {
-    use Filterable, HasAdditionalColumns, HasPackageFactory, HasParentChildRelations, HasUserModification,
-        HasUuid, LogsActivity, Searchable, SortableTrait;
-
-    protected $hidden = [
-        'pivot',
-    ];
+    use Filterable, HasAdditionalColumns, HasAttributeTranslations, HasPackageFactory, HasParentChildRelations,
+        HasUserModification, HasUuid, LogsActivity, SortableTrait;
+    use Searchable {
+        Searchable::scoutIndexSettings as baseScoutIndexSettings;
+    }
 
     public array $sortable = [
         'order_column_name' => 'sort_number',
         'sort_when_creating' => true,
     ];
 
-    protected function casts(): array
+    protected $hidden = [
+        'pivot',
+    ];
+
+    public static function scoutIndexSettings(): ?array
     {
-        return [
-            'is_active' => 'boolean',
+        return static::baseScoutIndexSettings() ?? [
+            'filterableAttributes' => [
+                'model_type',
+            ],
         ];
     }
 
-    public static function booted(): void
+    protected static function booted(): void
     {
         model_info_all()
             ->filter(fn (ModelInfo $modelInfo) => in_array(
                 Categorizable::class,
                 class_uses_recursive($modelInfo->class)
             ))
-            ->each(function (ModelInfo $modelInfo) {
+            ->each(function (ModelInfo $modelInfo): void {
                 $relationName = Str::of(class_basename($modelInfo->class))->camel()->plural()->toString();
 
                 if (method_exists(static::class, $relationName)) {
@@ -65,6 +70,13 @@ class Category extends FluxModel implements InteractsWithDataTables, Sortable
             });
     }
 
+    protected function casts(): array
+    {
+        return [
+            'is_active' => 'boolean',
+        ];
+    }
+
     public function assigned(): Attribute
     {
         return Attribute::make(
@@ -77,25 +89,9 @@ class Category extends FluxModel implements InteractsWithDataTables, Sortable
         return $this->belongsToMany(Discount::class, 'category_price_list');
     }
 
-    public function media(): HasMany
+    public function getAvatarUrl(): ?string
     {
-        return $this->hasMany(Media::class);
-    }
-
-    public function model(): MorphToMany
-    {
-        return $this->model_type
-            ? $this->morphedByMany(morphed_model($this->model_type), 'categorizable')
-            : new MorphToMany(
-                static::query(),
-                $this,
-                '',
-                '',
-                '',
-                '',
-                '',
-                ''
-            );
+        return null;
     }
 
     public function getDescription(): ?string
@@ -121,8 +117,26 @@ class Category extends FluxModel implements InteractsWithDataTables, Sortable
         return null;
     }
 
-    public function getAvatarUrl(): ?string
+    public function model(): MorphToMany
     {
-        return null;
+        return $this->model_type
+            ? $this->morphedByMany(morphed_model($this->model_type), 'categorizable')
+            : new MorphToMany(
+                static::query(),
+                $this,
+                '',
+                '',
+                '',
+                '',
+                '',
+                ''
+            );
+    }
+
+    protected function translatableAttributes(): array
+    {
+        return [
+            'name',
+        ];
     }
 }

@@ -1,23 +1,37 @@
-<x-modal wire:close="resetDiscount()" name="edit-discount">
-    <x-card class="flex flex-col gap-4" footer-classes="flex justify-end gap-1.5">
-        <x-select
-            :options="[
-                morph_alias(\FluxErp\Models\Product::class) => __('Product'),
-                morph_alias(\FluxErp\Models\Category::class) => __('Category'),
-            ]"
-            option-key-value
-            :label="__('Type')"
-            x-on:selected="$wire.discountForm.model_id = null"
-            wire:model="discountForm.model_type"
-        />
-        <div x-cloak x-show="$wire.discountForm.model_type === '{{ morph_alias(\FluxErp\Models\Category::class) }}'">
-            <x-select
+<x-modal x-on:close="$wire.resetDiscount()" id="edit-discount-modal">
+    <div class="flex flex-col gap-4">
+        <div x-cloak x-show="! $wire.discountForm.id">
+            <x-select.styled
+                :label="__('Type')"
+                x-on:select="$wire.discountForm.model_id = null"
+                wire:model="discountForm.model_type"
+                :options="[
+                    [
+                        'label' => __('Product'),
+                        'value' => morph_alias(\FluxErp\Models\Product::class),
+                    ],
+                    [
+                        'label' => __('Category'),
+                        'value' => morph_alias(\FluxErp\Models\Category::class),
+                    ],
+                ]"
+            />
+        </div>
+        <div
+            x-cloak
+            x-show="
+                ! $wire.discountForm.id &&
+                    $wire.discountForm.model_type ===
+                        '{{ morph_alias(\FluxErp\Models\Category::class) }}'
+            "
+        >
+            <x-select.styled
                 :label="__('Category')"
                 wire:model="discountForm.model_id"
-                option-value="id"
-                option-label="name"
-                :async-data="[
-                    'api' => route('search', \FluxErp\Models\Category::class),
+                select="label:name|value:id"
+                unfiltered
+                :request="[
+                    'url' => route('search', \FluxErp\Models\Category::class),
                     'method' => 'POST',
                     'params' => [
                         'fields' => ['id', 'name'],
@@ -32,18 +46,21 @@
                 ]"
             />
         </div>
-        <div x-cloak x-show="$wire.discountForm.model_type === '{{ morph_alias(\FluxErp\Models\Product::class) }}'">
-            <x-select
+        <div
+            x-cloak
+            x-show="
+                ! $wire.discountForm.id &&
+                    $wire.discountForm.model_type ===
+                        '{{ morph_alias(\FluxErp\Models\Product::class) }}'
+            "
+        >
+            <x-select.styled
                 :label="__('Product')"
                 wire:model="discountForm.model_id"
-                option-value="id"
-                option-label="label"
-                option-description="product_number"
-                :template="[
-                    'name'   => 'user-option',
-                ]"
-                :async-data="[
-                    'api' => route('search', \FluxErp\Models\Product::class),
+                select="label:label|value:id|description:product_number"
+                unfiltered
+                :request="[
+                    'url' => route('search', \FluxErp\Models\Product::class),
                     'method' => 'POST',
                     'params' => [
                         'fields' => [
@@ -61,27 +78,27 @@
             wire:model="discountForm.is_percentage"
         />
         <div x-cloak x-show="$wire.discountForm.is_percentage">
-            <x-inputs.number
-                 :label="__('Discount Percent')"
-                 wire:model="discountForm.discount"
-                 step="0.01"
-                 min="-100"
-                 max="100"
+            <x-number
+                :label="__('Discount Percent')"
+                wire:model="discountForm.discount"
+                step="0.01"
+                min="-100"
+                max="100"
             />
         </div>
         <div x-cloak x-show="! $wire.discountForm.is_percentage">
-            <x-inputs.number
+            <x-number
                 :label="__('Discount Flat')"
                 wire:model="discountForm.discount"
                 step="0.01"
             />
         </div>
-        <x-slot:footer>
-            <x-button
-                primary
-                :label="__('Save')"
-                wire:click="save().then((success) => {if(success) close();})"
-            />
-        </x-slot:footer>
-    </x-card>
+    </div>
+    <x-slot:footer>
+        <x-button
+            color="indigo"
+            :text="__('Save')"
+            wire:click="save().then((success) => {if(success) $modalClose('edit-discount-modal');})"
+        />
+    </x-slot>
 </x-modal>

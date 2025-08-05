@@ -6,12 +6,12 @@ use FluxErp\Models\DiscountGroup;
 
 class DiscountGroupList extends BaseDataTable
 {
-    protected string $model = DiscountGroup::class;
-
     public array $enabledCols = [
         'name',
         'is_active',
     ];
+
+    protected string $model = DiscountGroup::class;
 
     public function getDiscounts(DiscountGroup $discountGroup): array
     {

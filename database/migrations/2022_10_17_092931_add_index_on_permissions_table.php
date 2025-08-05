@@ -8,14 +8,14 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('permissions', function (Blueprint $table) {
+        Schema::table('permissions', function (Blueprint $table): void {
             $table->index(['name', 'guard_name']);
         });
     }
 
     public function down(): void
     {
-        Schema::table('permissions', function (Blueprint $table) {
+        Schema::table('permissions', function (Blueprint $table): void {
             $table->dropIndex('permissions_name_guard_name_index');
         });
     }

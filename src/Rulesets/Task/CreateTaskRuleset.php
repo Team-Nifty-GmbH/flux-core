@@ -17,6 +17,17 @@ class CreateTaskRuleset extends FluxRuleset
 {
     protected static ?string $model = Task::class;
 
+    public static function getRules(): array
+    {
+        return array_merge(
+            parent::getRules(),
+            resolve_static(UserRuleset::class, 'getRules'),
+            resolve_static(OrderPositionRuleset::class, 'getRules'),
+            resolve_static(CategoryRuleset::class, 'getRules'),
+            resolve_static(TagRuleset::class, 'getRules')
+        );
+    }
+
     public function rules(): array
     {
         return [
@@ -39,6 +50,7 @@ class CreateTaskRuleset extends FluxRuleset
             'model_type' => [
                 'required_with:model_id',
                 'string',
+                'max:255',
                 'nullable',
                 app(MorphClassExists::class),
             ],
@@ -48,7 +60,7 @@ class CreateTaskRuleset extends FluxRuleset
                 'nullable',
                 app(MorphExists::class),
             ],
-            'name' => 'required|string',
+            'name' => 'required|string|max:255',
             'description' => 'string|nullable',
             'start_date' => 'date|nullable',
             'due_date' => 'date|nullable|after_or_equal:start_date',
@@ -60,16 +72,5 @@ class CreateTaskRuleset extends FluxRuleset
             'time_budget' => 'nullable|regex:/[0-9]*:[0-5][0-9]/',
             'budget' => 'numeric|nullable|min:0',
         ];
-    }
-
-    public static function getRules(): array
-    {
-        return array_merge(
-            parent::getRules(),
-            resolve_static(UserRuleset::class, 'getRules'),
-            resolve_static(OrderPositionRuleset::class, 'getRules'),
-            resolve_static(CategoryRuleset::class, 'getRules'),
-            resolve_static(TagRuleset::class, 'getRules')
-        );
     }
 }

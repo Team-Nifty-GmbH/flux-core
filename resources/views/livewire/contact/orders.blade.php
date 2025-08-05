@@ -1,156 +1,145 @@
-<div x-data="{
-        order: $wire.entangle('order'),
-    }"
->
-    <x-modal name="create-order">
-        <x-card :title="__('New Order')">
-            <section>
-                <div class="space-y-2.5 divide-y divide-secondary-200">
-                    <x-select
-                        :options="$orderTypes"
-                        option-label="name"
-                        option-value="id"
-                        :label="__('Order type')"
-                        wire:model="order.order_type_id"
+<div>
+    <x-modal id="create-order-modal" :title="__('New Order')">
+        <section>
+            <div class="divide-secondary-200 space-y-2.5 divide-y">
+                <x-select.styled
+                    :label="__('Order type')"
+                    wire:model="order.order_type_id"
+                    select="label:name|value:id"
+                    :options="$orderTypes"
+                />
+                <div class="pt-4">
+                    <x-select.styled
+                        :label="__('Contact')"
+                        class="pb-4"
+                        wire:model="order.contact_id"
+                        required
+                        disabled
+                        x-on:select="updateContactId($event.detail.select.value)"
+                        select="label:label|value:contact_id"
+                        unfiltered
+                        :request="[
+                            'url' => route('search', \FluxErp\Models\Address::class),
+                            'method' => 'POST',
+                            'params' => [
+                                'option-value' => 'contact_id',
+                                'fields' => [
+                                    'name',
+                                    'contact_id',
+                                    'firstname',
+                                    'lastname',
+                                    'company',
+                                ],
+                                'where' => [
+                                    [
+                                        'is_main_address',
+                                        '=',
+                                        true,
+                                    ],
+                                ],
+                                'with' => 'contact.media',
+                            ],
+                        ]"
                     />
-                    <div class="pt-4">
-                        <x-select
-                            :label="__('Contact')"
+                    <div id="invoice-address-id">
+                        <x-select.styled
                             class="pb-4"
-                            wire:model="order.contact_id"
-                            option-value="contact_id"
-                            option-label="label"
-                            option-description="description"
-                            :clearable="false"
-                            disabled
-                            x-on:selected="updateContactId($event.detail.contact_id)"
-                            template="user-option"
-                            :async-data="[
-                                'api' => route('search', \FluxErp\Models\Address::class),
+                            :label="__('Invoice Address')"
+                            wire:model="order.address_invoice_id"
+                            required
+                            select="label:label|value:id"
+                            unfiltered
+                            :request="[
+                                'url' => route('search', \FluxErp\Models\Address::class),
                                 'method' => 'POST',
                                 'params' => [
-                                    'option-value' => 'contact_id',
-                                    'fields' => [
-                                        'name',
-                                        'contact_id',
-                                        'firstname',
-                                        'lastname',
-                                        'company',
-                                    ],
+                                    'with' => 'contact.media',
                                     'where' => [
                                         [
-                                            'is_main_address',
+                                            'contact_id',
                                             '=',
-                                            true,
+                                            $order->contact_id,
                                         ],
                                     ],
-                                    'with' => 'contact.media',
                                 ],
                             ]"
                         />
-                        <div id="invoice-address-id">
-                            <x-select
-                                class="pb-4"
-                                :label="__('Invoice Address')"
-                                wire:model="order.address_invoice_id"
-                                option-value="id"
-                                option-label="label"
-                                option-description="description"
-                                :clearable="false"
-                                :async-data="[
-                                    'api' => route('search', \FluxErp\Models\Address::class),
-                                    'method' => 'POST',
-                                    'params' => [
-                                        'with' => 'contact.media',
-                                        'where' => [
-                                            [
-                                                'contact_id',
-                                                '=',
-                                                $order->contact_id,
-                                            ],
-                                        ],
-                                    ],
-                                ]"
-                            />
-                        </div>
-                        <div id="delivery-address-id">
-                            <x-select
-                                :label="__('Delivery Address')"
-                                class="pb-4"
-                                wire:model="order.address_delivery_id"
-                                option-value="id"
-                                option-label="label"
-                                option-description="description"
-                                :clearable="false"
-                                :async-data="[
-                                    'api' => route('search', \FluxErp\Models\Address::class),
-                                    'method' => 'POST',
-                                    'params' => [
-                                        'with' => 'contact.media',
-                                        'where' => [
-                                            [
-                                                'contact_id',
-                                                '=',
-                                                $order->contact_id,
-                                            ],
-                                        ],
-                                    ],
-                                ]"
-                            />
-                        </div>
                     </div>
-                    <div class="space-y-3 pt-4">
-                        <x-select
-                            :label="__('Client')"
-                            :options="$clients"
-                            option-value="id"
-                            option-label="name"
-                            :clearable="false"
-                            autocomplete="off"
-                            wire:model="order.client_id"
-                        />
-                        <x-select
-                            :label="__('Price list')"
-                            :options="$priceLists"
-                            option-value="id"
-                            option-label="name"
-                            :clearable="false"
-                            autocomplete="off"
-                            wire:model="order.price_list_id"
-                        />
-                        <x-select
-                            :label="__('Payment method')"
-                            :options="$paymentTypes"
-                            option-value="id"
-                            option-label="name"
-                            :clearable="false"
-                            autocomplete="off"
-                            wire:model="order.payment_type_id"
-                        />
-                        <x-select
-                            :label="__('Language')"
-                            :options="$languages"
-                            option-value="id"
-                            option-label="name"
-                            :clearable="false"
-                            autocomplete="off"
-                            wire:model="order.language_id"
+                    <div id="delivery-address-id">
+                        <x-select.styled
+                            :label="__('Delivery Address')"
+                            class="pb-4"
+                            wire:model="order.address_delivery_id"
+                            required
+                            select="label:label|value:id"
+                            unfiltered
+                            :request="[
+                                'url' => route('search', \FluxErp\Models\Address::class),
+                                'method' => 'POST',
+                                'params' => [
+                                    'with' => 'contact.media',
+                                    'where' => [
+                                        [
+                                            'contact_id',
+                                            '=',
+                                            $order->contact_id,
+                                        ],
+                                    ],
+                                ],
+                            ]"
                         />
                     </div>
                 </div>
-            </section>
-            <x-errors />
-            <x-slot name="footer">
-                <div class="flex justify-end gap-x-4">
-                    <div class="flex">
-                        <x-button flat :label="__('Cancel')" x-on:click="close" />
-                        <x-button spinner primary :label="__('Save')" wire:click="save" />
-                    </div>
+                <div class="space-y-3 pt-4">
+                    <x-select.styled
+                        :label="__('Client')"
+                        required
+                        autocomplete="off"
+                        wire:model="order.client_id"
+                        select="label:name|value:id"
+                        :options="$clients"
+                    />
+                    <x-select.styled
+                        :label="__('Price list')"
+                        required
+                        autocomplete="off"
+                        wire:model="order.price_list_id"
+                        select="label:name|value:id"
+                        :options="$priceLists"
+                    />
+                    <x-select.styled
+                        :label="__('Payment method')"
+                        required
+                        autocomplete="off"
+                        wire:model="order.payment_type_id"
+                        select="label:name|value:id"
+                        :options="$paymentTypes"
+                    />
+                    <x-select.styled
+                        :label="__('Language')"
+                        required
+                        autocomplete="off"
+                        wire:model="order.language_id"
+                        select="label:name|value:id"
+                        :options="$languages"
+                    />
                 </div>
-            </x-slot>
-        </x-card>
+            </div>
+        </section>
+        <x-slot:footer>
+            <x-button
+                color="secondary"
+                light
+                flat
+                :text="__('Cancel')"
+                x-on:click="$modalClose('create-order-modal')"
+            />
+            <x-button
+                loading
+                color="indigo"
+                :text="__('Save')"
+                wire:click="save"
+            />
+        </x-slot>
     </x-modal>
-    <div wire:ignore>
-        @include('tall-datatables::livewire.data-table')
-    </div>
 </div>

@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('price_lists', function (Blueprint $table) {
+        Schema::table('price_lists', function (Blueprint $table): void {
             $table->string('rounding_method_enum')->default('none')->after('price_list_code');
             $table->integer('rounding_precision')->nullable()->after('rounding_method_enum');
             $table->unsignedInteger('rounding_number')->nullable()->after('rounding_precision');
@@ -18,7 +18,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('price_lists', function (Blueprint $table) {
+        Schema::table('price_lists', function (Blueprint $table): void {
             $table->dropColumn([
                 'rounding_method_enum',
                 'rounding_precision',

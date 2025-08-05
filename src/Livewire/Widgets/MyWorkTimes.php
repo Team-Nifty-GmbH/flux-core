@@ -2,12 +2,11 @@
 
 namespace FluxErp\Livewire\Widgets;
 
-use Carbon\Carbon;
-use FluxErp\Enums\TimeFrameEnum;
+use FluxErp\Livewire\Dashboard\Dashboard;
+use FluxErp\Livewire\Support\Widgets\Charts\BarChart;
 use FluxErp\Models\WorkTime;
 use FluxErp\Models\WorkTimeType;
 use FluxErp\Support\Metrics\Charts\Bar;
-use FluxErp\Support\Widgets\Charts\BarChart;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use Livewire\Attributes\Js;
 use Livewire\Attributes\Locked;
@@ -16,16 +15,6 @@ use Livewire\Attributes\Renderless;
 class MyWorkTimes extends BarChart
 {
     use IsTimeFrameAwareWidget;
-
-    public bool $showTotals = true;
-
-    public ?array $plotOptions = [
-        'bar' => [
-            'horizontal' => true,
-            'endingShape' => 'rounded',
-            'columnWidth' => '55%',
-        ],
-    ];
 
     public ?array $chart = [
         'type' => 'bar',
@@ -36,57 +25,29 @@ class MyWorkTimes extends BarChart
         'enabled' => true,
     ];
 
+    public ?array $plotOptions = [
+        'bar' => [
+            'horizontal' => true,
+            'endingShape' => 'rounded',
+            'columnWidth' => '55%',
+        ],
+    ];
+
+    public bool $showTotals = true;
+
     #[Locked]
     public ?int $userId = null;
+
+    public static function dashboardComponent(): array|string
+    {
+        return Dashboard::class;
+    }
 
     public function mount(): void
     {
         $this->userId = $this->userId ?? auth()->id();
 
         parent::mount();
-    }
-
-    #[Js]
-    public function toolTipFormatter(): string
-    {
-        return <<<'JS'
-            let hours = val / 3600000;
-            return hours.toFixed(2) + 'h';
-        JS;
-    }
-
-    #[Js]
-    public function dataLabelsFormatter(): string
-    {
-        return <<<'JS'
-            if (val > 3600000) {
-                let hours = val / 3600000;
-                return hours.toFixed(2) + 'h';
-            } else {
-                let minutes = val / 60000;
-                return minutes.toFixed(0) + 'm';
-            }
-        JS;
-    }
-
-    #[Js]
-    public function yAxisFormatter(): string
-    {
-        return <<<'JS'
-            let name;
-            if (typeof val === 'string' && val.includes('->')) {
-                name = val.split('->')[1];
-                val = val.split('->')[0];
-            }
-
-            return new Date(val).toLocaleDateString(document.documentElement.lang) + (name ? ' (' + name + ')' : '')
-        JS;
-    }
-
-    #[Js]
-    public function xAxisFormatter(): string
-    {
-        return $this->toolTipFormatter();
     }
 
     #[Renderless]
@@ -103,12 +64,7 @@ class MyWorkTimes extends BarChart
         $baseQuery = resolve_static(WorkTime::class, 'query')
             ->where('user_id', $this->userId)
             ->where('is_locked', true)
-            ->when($this->timeFrame === TimeFrameEnum::Custom && $this->start, function ($query) {
-                $query->where('started_at', '>=', Carbon::parse($this->start));
-            })
-            ->when($this->timeFrame === TimeFrameEnum::Custom && $this->end, function ($query) {
-                $query->where('started_at', '<=', Carbon::parse($this->end)->endOfDay());
-            });
+            ->whereBetween('started_at', [$this->getStart(), $this->getEnd()]);
 
         $workDays = Bar::make(
             $baseQuery
@@ -118,8 +74,8 @@ class MyWorkTimes extends BarChart
         )
             ->setDateColumn('started_at')
             ->setRange($this->timeFrame)
-            ->setEndingDate($this->end)
-            ->setStartingDate($this->start)
+            ->setEndingDate($this->getEnd())
+            ->setStartingDate($this->getStart())
             ->sum('total_time_ms');
 
         $pause = Bar::make(
@@ -130,8 +86,8 @@ class MyWorkTimes extends BarChart
         )
             ->setDateColumn('started_at')
             ->setRange($this->timeFrame)
-            ->setEndingDate($this->end)
-            ->setStartingDate($this->start)
+            ->setEndingDate($this->getEnd())
+            ->setStartingDate($this->getStart())
             ->sum('total_time_ms');
 
         $data = [
@@ -185,8 +141,8 @@ class MyWorkTimes extends BarChart
             )
                 ->setDateColumn('started_at')
                 ->setRange($this->timeFrame)
-                ->setEndingDate($this->end)
-                ->setStartingDate($this->start)
+                ->setEndingDate($this->getEnd())
+                ->setStartingDate($this->getStart())
                 ->sum('total_time_ms');
 
             if (array_sum($typeData->getData()) > 0) {
@@ -207,8 +163,51 @@ class MyWorkTimes extends BarChart
         $this->series = array_values($data);
     }
 
+    #[Js]
+    public function dataLabelsFormatter(): string
+    {
+        return <<<'JS'
+            if (val > 3600000) {
+                let hours = val / 3600000;
+                return hours.toFixed(2) + 'h';
+            } else {
+                let minutes = val / 60000;
+                return minutes.toFixed(0) + 'm';
+            }
+        JS;
+    }
+
     public function showTitle(): bool
     {
         return false;
+    }
+
+    #[Js]
+    public function toolTipFormatter(): string
+    {
+        return <<<'JS'
+            let hours = val / 3600000;
+            return hours.toFixed(2) + 'h';
+        JS;
+    }
+
+    #[Js]
+    public function xAxisFormatter(): string
+    {
+        return $this->toolTipFormatter();
+    }
+
+    #[Js]
+    public function yAxisFormatter(): string
+    {
+        return <<<'JS'
+            let name;
+            if (typeof val === 'string' && val.includes('->')) {
+                name = val.split('->')[1];
+                val = val.split('->')[0];
+            }
+
+            return new Date(val).toLocaleDateString(document.documentElement.lang) + (name ? ' (' + name + ')' : '')
+        JS;
     }
 }

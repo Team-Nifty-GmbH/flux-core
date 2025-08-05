@@ -8,9 +8,9 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class DeleteCurrencyRuleset extends FluxRuleset
 {
-    protected static ?string $model = Currency::class;
-
     protected static bool $addAdditionalColumnRules = false;
+
+    protected static ?string $model = Currency::class;
 
     public function rules(): array
     {

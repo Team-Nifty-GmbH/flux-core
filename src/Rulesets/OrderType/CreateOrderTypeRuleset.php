@@ -4,6 +4,7 @@ namespace FluxErp\Rulesets\OrderType;
 
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Client;
+use FluxErp\Models\EmailTemplate;
 use FluxErp\Models\OrderType;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
@@ -22,10 +23,13 @@ class CreateOrderTypeRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => Client::class]),
             ],
-            'name' => 'required|string',
+            'name' => 'required|string|max:255',
             'description' => 'string|nullable',
-            'mail_subject' => 'string|nullable',
-            'mail_body' => 'string|nullable',
+            'email_template_id' => [
+                'nullable',
+                'integer',
+                app(ModelExists::class, ['model' => EmailTemplate::class]),
+            ],
             'print_layouts' => 'array|nullable',
             'print_layouts.*' => 'required|string',
             'post_stock_print_layouts' => 'array|nullable',

@@ -12,18 +12,17 @@ use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Rulesets\Contact\CreateContactRuleset;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Validator;
 
 class CreateContact extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateContactRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Contact::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateContactRuleset::class;
     }
 
     public function performAction(): Contact
@@ -31,6 +30,7 @@ class CreateContact extends FluxAction
         $discountGroups = Arr::pull($this->data, 'discount_groups');
         $discounts = Arr::pull($this->data, 'discounts');
         $mainAddress = Arr::pull($this->data, 'main_address');
+        $industries = Arr::pull($this->data, 'industries');
 
         $contact = app(Contact::class, ['attributes' => $this->data]);
         $contact->save();
@@ -59,6 +59,10 @@ class CreateContact extends FluxAction
             $contact->discountGroups()->attach($discountGroups);
         }
 
+        if ($industries) {
+            $contact->industries()->attach($industries);
+        }
+
         if (! ($this->data['customer_number'] ?? false)) {
             $contact->getSerialNumber(
                 'customer_number',
@@ -83,17 +87,9 @@ class CreateContact extends FluxAction
 
     protected function prepareForValidation(): void
     {
-        $this->data['client_id'] ??= Client::default()?->getKey();
-        $this->data['price_list_id'] ??= PriceList::default()?->getKey();
-        $this->data['payment_type_id'] ??= PaymentType::default()?->getKey();
-        $this->data['currency_id'] ??= Currency::default()?->getKey();
-    }
-
-    protected function validateData(): void
-    {
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(Contact::class));
-
-        $this->data = $validator->validate();
+        $this->data['client_id'] ??= resolve_static(Client::class, 'default')?->getKey();
+        $this->data['price_list_id'] ??= resolve_static(PriceList::class, 'default')?->getKey();
+        $this->data['payment_type_id'] ??= resolve_static(PaymentType::class, 'default')?->getKey();
+        $this->data['currency_id'] ??= resolve_static(Currency::class, 'default')?->getKey();
     }
 }

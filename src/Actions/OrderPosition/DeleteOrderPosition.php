@@ -9,23 +9,21 @@ use Illuminate\Validation\ValidationException;
 
 class DeleteOrderPosition extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeleteOrderPositionRuleset::class;
-    }
-
     public static function models(): array
     {
         return [OrderPosition::class];
     }
 
+    protected function getRulesets(): string|array
+    {
+        return DeleteOrderPositionRuleset::class;
+    }
+
     public function performAction(): ?bool
     {
         $orderPosition = resolve_static(OrderPosition::class, 'query')
-            ->whereKey($this->data['id'])
+            ->whereKey($this->getData('id'))
             ->first();
-
-        $orderPosition->children()->delete();
 
         return $orderPosition->delete();
     }

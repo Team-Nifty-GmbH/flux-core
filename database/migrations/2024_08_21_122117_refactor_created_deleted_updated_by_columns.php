@@ -85,17 +85,113 @@ return new class() extends Migration
         Schema::enableForeignKeyConstraints();
     }
 
+    private function migrateDown(string $tableName): void
+    {
+        if (Schema::hasColumn($tableName, 'created_by')) {
+            DB::table($tableName)
+                ->whereNotLike('created_by', 'user:%')
+                ->update(['created_by' => null]);
+
+            DB::table($tableName)
+                ->where(DB::raw("SUBSTRING_INDEX(created_by, ':', -1)"), 'REGEXP', '^[0-9]+$')
+                ->whereNotExists(function ($query): void {
+                    $query->select(DB::raw(1))
+                        ->from('users')
+                        ->whereColumn('users.id', DB::raw("SUBSTRING_INDEX(created_by, ':', -1)"));
+                })
+                ->update(['created_by' => null]);
+
+            DB::table($tableName)
+                ->where(DB::raw("SUBSTRING_INDEX(created_by, ':', -1)"), 'REGEXP', '^[0-9]+$')
+                ->whereExists(function ($query): void {
+                    $query->select(DB::raw(1))
+                        ->from('users')
+                        ->whereColumn('users.id', DB::raw("SUBSTRING_INDEX(created_by, ':', -1)"));
+                })
+                ->update([
+                    'created_by' => DB::raw("SUBSTRING_INDEX(created_by, ':', -1)"),
+                ]);
+
+            Schema::table($tableName, function (Blueprint $table): void {
+                $table->unsignedBigInteger('created_by')->nullable()->change();
+                $table->foreign('created_by')->references('id')->on('users')->nullOnDelete();
+            });
+        }
+
+        if (Schema::hasColumn($tableName, 'updated_by')) {
+            DB::table($tableName)
+                ->whereNotLike('updated_by', 'user:%')
+                ->update(['updated_by' => null]);
+
+            DB::table($tableName)
+                ->where(DB::raw("SUBSTRING_INDEX(updated_by, ':', -1)"), 'REGEXP', '^[0-9]+$')
+                ->whereNotExists(function ($query): void {
+                    $query->select(DB::raw(1))
+                        ->from('users')
+                        ->whereColumn('users.id', DB::raw("SUBSTRING_INDEX(updated_by, ':', -1)"));
+                })
+                ->update(['updated_by' => null]);
+
+            DB::table($tableName)
+                ->where(DB::raw("SUBSTRING_INDEX(updated_by, ':', -1)"), 'REGEXP', '^[0-9]+$')
+                ->whereExists(function ($query): void {
+                    $query->select(DB::raw(1))
+                        ->from('users')
+                        ->whereColumn('users.id', DB::raw("SUBSTRING_INDEX(updated_by, ':', -1)"));
+                })
+                ->update([
+                    'updated_by' => DB::raw("SUBSTRING_INDEX(updated_by, ':', -1)"),
+                ]);
+
+            Schema::table($tableName, function (Blueprint $table): void {
+                $table->unsignedBigInteger('updated_by')->nullable()->change();
+                $table->foreign('updated_by')->references('id')->on('users')->nullOnDelete();
+            });
+        }
+
+        if (Schema::hasColumn($tableName, 'deleted_by')) {
+            DB::table($tableName)
+                ->whereNotLike('deleted_by', 'user:%')
+                ->update(['deleted_by' => null]);
+
+            DB::table($tableName)
+                ->where(DB::raw("SUBSTRING_INDEX(deleted_by, ':', -1)"), 'REGEXP', '^[0-9]+$')
+                ->whereNotExists(function ($query): void {
+                    $query->select(DB::raw(1))
+                        ->from('users')
+                        ->whereColumn('users.id', DB::raw("SUBSTRING_INDEX(deleted_by, ':', -1)"));
+                })
+                ->update(['deleted_by' => null]);
+
+            DB::table($tableName)
+                ->where(DB::raw("SUBSTRING_INDEX(deleted_by, ':', -1)"), 'REGEXP', '^[0-9]+$')
+                ->whereExists(function ($query): void {
+                    $query->select(DB::raw(1))
+                        ->from('users')
+                        ->whereColumn('users.id', DB::raw("SUBSTRING_INDEX(deleted_by, ':', -1)"));
+                })
+                ->update([
+                    'deleted_by' => DB::raw("SUBSTRING_INDEX(deleted_by, ':', -1)"),
+                ]);
+
+            Schema::table($tableName, function (Blueprint $table): void {
+                $table->unsignedBigInteger('deleted_by')->nullable()->change();
+                $table->foreign('deleted_by')->references('id')->on('users')->nullOnDelete();
+            });
+        }
+    }
+
     private function migrateUp(string $tableName, string $morphAlias): void
     {
         if (Schema::hasColumn($tableName, 'created_by')) {
             try {
-                Schema::table($tableName, function (Blueprint $table) {
+                Schema::table($tableName, function (Blueprint $table): void {
                     $table->dropForeign(['created_by']);
                 });
             } catch (QueryException) {
             }
 
-            Schema::table($tableName, function (Blueprint $table) {
+            Schema::table($tableName, function (Blueprint $table): void {
                 $table->string('created_by')->nullable()->change();
             });
 
@@ -112,13 +208,13 @@ return new class() extends Migration
 
         if (Schema::hasColumn($tableName, 'updated_by')) {
             try {
-                Schema::table($tableName, function (Blueprint $table) {
+                Schema::table($tableName, function (Blueprint $table): void {
                     $table->dropForeign(['updated_by']);
                 });
             } catch (QueryException) {
             }
 
-            Schema::table($tableName, function (Blueprint $table) {
+            Schema::table($tableName, function (Blueprint $table): void {
                 $table->string('updated_by')->nullable()->change();
             });
 
@@ -135,13 +231,13 @@ return new class() extends Migration
 
         if (Schema::hasColumn($tableName, 'deleted_by')) {
             try {
-                Schema::table($tableName, function (Blueprint $table) {
+                Schema::table($tableName, function (Blueprint $table): void {
                     $table->dropForeign(['deleted_by']);
                 });
             } catch (QueryException) {
             }
 
-            Schema::table($tableName, function (Blueprint $table) {
+            Schema::table($tableName, function (Blueprint $table): void {
                 $table->string('deleted_by')->nullable()->change();
             });
 
@@ -154,102 +250,6 @@ return new class() extends Migration
                 ->update([
                     "{$tableName}.deleted_by" => DB::raw("CONCAT({$this->activitiesTableName}.causer_type, ':', {$this->activitiesTableName}.causer_id)"),
                 ]);
-        }
-    }
-
-    private function migrateDown(string $tableName): void
-    {
-        if (Schema::hasColumn($tableName, 'created_by')) {
-            DB::table($tableName)
-                ->whereNotLike('created_by', 'user:%')
-                ->update(['created_by' => null]);
-
-            DB::table($tableName)
-                ->where(DB::raw("SUBSTRING_INDEX(created_by, ':', -1)"), 'REGEXP', '^[0-9]+$')
-                ->whereNotExists(function ($query) {
-                    $query->select(DB::raw(1))
-                        ->from('users')
-                        ->whereColumn('users.id', DB::raw("SUBSTRING_INDEX(created_by, ':', -1)"));
-                })
-                ->update(['created_by' => null]);
-
-            DB::table($tableName)
-                ->where(DB::raw("SUBSTRING_INDEX(created_by, ':', -1)"), 'REGEXP', '^[0-9]+$')
-                ->whereExists(function ($query) {
-                    $query->select(DB::raw(1))
-                        ->from('users')
-                        ->whereColumn('users.id', DB::raw("SUBSTRING_INDEX(created_by, ':', -1)"));
-                })
-                ->update([
-                    'created_by' => DB::raw("SUBSTRING_INDEX(created_by, ':', -1)"),
-                ]);
-
-            Schema::table($tableName, function (Blueprint $table) {
-                $table->unsignedBigInteger('created_by')->nullable()->change();
-                $table->foreign('created_by')->references('id')->on('users')->nullOnDelete();
-            });
-        }
-
-        if (Schema::hasColumn($tableName, 'updated_by')) {
-            DB::table($tableName)
-                ->whereNotLike('updated_by', 'user:%')
-                ->update(['updated_by' => null]);
-
-            DB::table($tableName)
-                ->where(DB::raw("SUBSTRING_INDEX(updated_by, ':', -1)"), 'REGEXP', '^[0-9]+$')
-                ->whereNotExists(function ($query) {
-                    $query->select(DB::raw(1))
-                        ->from('users')
-                        ->whereColumn('users.id', DB::raw("SUBSTRING_INDEX(updated_by, ':', -1)"));
-                })
-                ->update(['updated_by' => null]);
-
-            DB::table($tableName)
-                ->where(DB::raw("SUBSTRING_INDEX(updated_by, ':', -1)"), 'REGEXP', '^[0-9]+$')
-                ->whereExists(function ($query) {
-                    $query->select(DB::raw(1))
-                        ->from('users')
-                        ->whereColumn('users.id', DB::raw("SUBSTRING_INDEX(updated_by, ':', -1)"));
-                })
-                ->update([
-                    'updated_by' => DB::raw("SUBSTRING_INDEX(updated_by, ':', -1)"),
-                ]);
-
-            Schema::table($tableName, function (Blueprint $table) {
-                $table->unsignedBigInteger('updated_by')->nullable()->change();
-                $table->foreign('updated_by')->references('id')->on('users')->nullOnDelete();
-            });
-        }
-
-        if (Schema::hasColumn($tableName, 'deleted_by')) {
-            DB::table($tableName)
-                ->whereNotLike('deleted_by', 'user:%')
-                ->update(['deleted_by' => null]);
-
-            DB::table($tableName)
-                ->where(DB::raw("SUBSTRING_INDEX(deleted_by, ':', -1)"), 'REGEXP', '^[0-9]+$')
-                ->whereNotExists(function ($query) {
-                    $query->select(DB::raw(1))
-                        ->from('users')
-                        ->whereColumn('users.id', DB::raw("SUBSTRING_INDEX(deleted_by, ':', -1)"));
-                })
-                ->update(['deleted_by' => null]);
-
-            DB::table($tableName)
-                ->where(DB::raw("SUBSTRING_INDEX(deleted_by, ':', -1)"), 'REGEXP', '^[0-9]+$')
-                ->whereExists(function ($query) {
-                    $query->select(DB::raw(1))
-                        ->from('users')
-                        ->whereColumn('users.id', DB::raw("SUBSTRING_INDEX(deleted_by, ':', -1)"));
-                })
-                ->update([
-                    'deleted_by' => DB::raw("SUBSTRING_INDEX(deleted_by, ':', -1)"),
-                ]);
-
-            Schema::table($tableName, function (Blueprint $table) {
-                $table->unsignedBigInteger('deleted_by')->nullable()->change();
-                $table->foreign('deleted_by')->references('id')->on('users')->nullOnDelete();
-            });
         }
     }
 };

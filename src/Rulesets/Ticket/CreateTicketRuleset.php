@@ -16,6 +16,14 @@ class CreateTicketRuleset extends FluxRuleset
 {
     protected static ?string $model = Ticket::class;
 
+    public static function getRules(): array
+    {
+        return array_merge(
+            parent::getRules(),
+            resolve_static(UserRuleset::class, 'getRules')
+        );
+    }
+
     public function rules(): array
     {
         return [
@@ -23,6 +31,7 @@ class CreateTicketRuleset extends FluxRuleset
             'authenticatable_type' => [
                 'required',
                 'string',
+                'max:255',
                 app(MorphClassExists::class, ['implements' => Authenticatable::class]),
             ],
             'authenticatable_id' => [
@@ -33,6 +42,7 @@ class CreateTicketRuleset extends FluxRuleset
             'model_type' => [
                 'required_with:model_id',
                 'string',
+                'max:255',
                 app(MorphClassExists::class),
             ],
             'model_id' => [
@@ -45,20 +55,12 @@ class CreateTicketRuleset extends FluxRuleset
                 'nullable',
                 app(ModelExists::class, ['model' => TicketType::class]),
             ],
-            'title' => 'required|string',
+            'title' => 'required|string|max:255',
             'description' => 'required|string|min:12',
             'state' => [
                 'string',
                 ValidStateRule::make(TicketState::class),
             ],
         ];
-    }
-
-    public static function getRules(): array
-    {
-        return array_merge(
-            parent::getRules(),
-            resolve_static(UserRuleset::class, 'getRules')
-        );
     }
 }

@@ -29,6 +29,44 @@ class QueueMonitor extends FluxModel
 {
     use HasFrontendAttributes, HasStates, MassPrunable;
 
+    public static function booted(): void
+    {
+        static::created(function (QueueMonitor $monitor): void {
+            $user = auth()->user();
+            if (! $user && $context = Context::get('user')) {
+                $user = morph_to($context);
+            }
+
+            if ($user && array_key_exists(MonitorsQueue::class, class_uses_recursive($user))) {
+                $user->queueMonitors()->attach($monitor);
+                // ensure that the started notification is only sent once
+                if (! $monitor->job_batch_id) {
+                    try {
+                        $user->notify(app(JobStartedNotification::class, ['model' => $monitor]));
+                    } catch (Throwable $e) {
+                        report($e);
+                    }
+                }
+            }
+        });
+
+        static::updated(function (QueueMonitor $monitor): void {
+            if (! $monitor->job_batch_id) {
+                $monitor->users->each(function ($user) use ($monitor): void {
+                    try {
+                        $user->notify(
+                            $monitor->isFinished()
+                                ? app(JobFinishedNotification::class, ['model' => $monitor])
+                                : app(JobProcessingNotification::class, ['model' => $monitor])
+                        );
+                    } catch (Throwable $e) {
+                        report($e);
+                    }
+                });
+            }
+        });
+    }
+
     protected function casts(): array
     {
         return [
@@ -44,70 +82,9 @@ class QueueMonitor extends FluxModel
         ];
     }
 
-    public static function booted(): void
-    {
-        static::created(function (QueueMonitor $monitor) {
-            $user = auth()->user();
-            if (! $user && $context = Context::get('user')) {
-                $context = explode(':', $context);
-                $user = morphed_model($context[0])::query()
-                    ->whereKey($context[1])
-                    ->first();
-            }
-
-            if ($user && array_key_exists(MonitorsQueue::class, class_uses_recursive($user))) {
-                $user->queueMonitors()->attach($monitor);
-                // ensure that the started notification is only sent once
-                if (! $monitor->job_batch_id) {
-                    try {
-                        $user->notify(new JobStartedNotification($monitor));
-                    } catch (Throwable $e) {
-                        report($e);
-                    }
-                }
-            }
-        });
-
-        static::updated(function (QueueMonitor $monitor) {
-            if (! $monitor->job_batch_id) {
-                $monitor->users->each(function ($user) use ($monitor) {
-                    try {
-                        $user->notify(
-                            $monitor->isFinished()
-                                ? new JobFinishedNotification($monitor)
-                                : new JobProcessingNotification($monitor)
-                        );
-                    } catch (Throwable $e) {
-                        report($e);
-                    }
-                });
-            }
-        });
-    }
-
     public function addresses(): MorphToMany
     {
         return $this->morphedByMany(Address::class, 'queue_monitorable', 'queue_monitorables');
-    }
-
-    public function jobBatch(): BelongsTo
-    {
-        return $this->belongsTo(JobBatch::class);
-    }
-
-    public function queueMonitorables(): HasMany
-    {
-        return $this->hasMany(QueueMonitorable::class);
-    }
-
-    public function users(): MorphToMany
-    {
-        return $this->morphedByMany(User::class, 'queue_monitorable', 'queue_monitorables');
-    }
-
-    public function prunable(): Builder
-    {
-        return $this->where('finished_at', '<', now()->subDays(30));
     }
 
     public function broadcastWith(): array
@@ -116,20 +93,48 @@ class QueueMonitor extends FluxModel
         return ['model' => Arr::except($this->withoutRelations()->toArray(), ['exception'])];
     }
 
-    public function getJobName(): string
+    public function canBeRetried(): bool
     {
-        return class_exists($this->name)
-            ? __(str(class_basename($this->name))->headline()->toString())
-            : $this->name;
+        return ! $this->retried
+            && ! is_a($this->status, Failed::class, true)
+            && ! is_null($this->job_uuid);
     }
 
-    public function getStartedAtExact(): ?Carbon
+    public function getElapsedInterval(?Carbon $end = null): CarbonInterval
     {
-        if (is_null($this->started_at_exact)) {
+        if (is_null($end)) {
+            $end = $this->getFinishedAtExact() ?? $this->finished_at ?? now();
+        }
+
+        $startedAt = $this->getStartedAtExact() ?? $this->started_at;
+
+        if (is_null($startedAt)) {
+            return CarbonInterval::seconds(0);
+        }
+
+        return $startedAt->diffAsCarbonInterval($end);
+    }
+
+    public function getElapsedSeconds(?Carbon $end = null): int
+    {
+        return (int) $this->getElapsedInterval($end)->totalSeconds;
+    }
+
+    public function getException(bool $rescue = true): ?Throwable
+    {
+        if (is_null($this->exception_class)) {
             return null;
         }
 
-        return Carbon::parse($this->started_at_exact);
+        if (! $rescue) {
+            return new $this->exception_class($this->exception_message);
+        }
+
+        try {
+            return new $this->exception_class($this->exception_message);
+        } catch (Exception) {
+            return null;
+        }
     }
 
     public function getFinishedAtExact(): ?Carbon
@@ -141,9 +146,11 @@ class QueueMonitor extends FluxModel
         return Carbon::parse($this->finished_at_exact);
     }
 
-    public function getRemainingSeconds(?Carbon $now = null): float
+    public function getJobName(): string
     {
-        return $this->getRemainingInterval($now)->totalSeconds;
+        return class_exists($this->name)
+            ? __(str(class_basename($this->name))->headline()->toString())
+            : $this->name;
     }
 
     public function getRemainingInterval(?Carbon $now = null): CarbonInterval
@@ -172,50 +179,18 @@ class QueueMonitor extends FluxModel
         }
     }
 
-    public function getElapsedSeconds(?Carbon $end = null): int
+    public function getRemainingSeconds(?Carbon $now = null): float
     {
-        return (int) $this->getElapsedInterval($end)->totalSeconds;
+        return $this->getRemainingInterval($now)->totalSeconds;
     }
 
-    public function getElapsedInterval(?Carbon $end = null): CarbonInterval
+    public function getStartedAtExact(): ?Carbon
     {
-        if (is_null($end)) {
-            $end = $this->getFinishedAtExact() ?? $this->finished_at ?? now();
-        }
-
-        $startedAt = $this->getStartedAtExact() ?? $this->started_at;
-
-        if (is_null($startedAt)) {
-            return CarbonInterval::seconds(0);
-        }
-
-        return $startedAt->diffAsCarbonInterval($end);
-    }
-
-    public function getException(bool $rescue = true): ?Throwable
-    {
-        if (is_null($this->exception_class)) {
+        if (is_null($this->started_at_exact)) {
             return null;
         }
 
-        if (! $rescue) {
-            return new $this->exception_class($this->exception_message);
-        }
-
-        try {
-            return new $this->exception_class($this->exception_message);
-        } catch (Exception) {
-            return null;
-        }
-    }
-
-    public function isFinished(): bool
-    {
-        if ($this->hasFailed()) {
-            return true;
-        }
-
-        return ! is_null($this->finished_at);
+        return Carbon::parse($this->started_at_exact);
     }
 
     public function hasFailed(): bool
@@ -232,6 +207,35 @@ class QueueMonitor extends FluxModel
         return ! $this->hasFailed();
     }
 
+    public function isFinished(): bool
+    {
+        if ($this->hasFailed()) {
+            return true;
+        }
+
+        return ! is_null($this->finished_at);
+    }
+
+    public function jobBatch(): BelongsTo
+    {
+        return $this->belongsTo(JobBatch::class);
+    }
+
+    public function prunable(): Builder
+    {
+        return static::query()
+            ->where(
+                'finished_at',
+                '<',
+                now()->subDays(30)
+            );
+    }
+
+    public function queueMonitorables(): HasMany
+    {
+        return $this->hasMany(QueueMonitorable::class);
+    }
+
     public function retry(): void
     {
         $this->retried = true;
@@ -244,11 +248,14 @@ class QueueMonitor extends FluxModel
         }
     }
 
-    public function canBeRetried(): bool
+    public function scopeFailed(Builder $query): void
     {
-        return ! $this->retried
-            && ! is_a($this->status, Failed::class, true)
-            && ! is_null($this->job_uuid);
+        $query->whereState('state', Failed::class);
+    }
+
+    public function scopeLastHour(Builder $query): void
+    {
+        $query->where('started_at', '>', now()->subHours(1));
     }
 
     public function scopeOrdered(Builder $query): void
@@ -258,23 +265,18 @@ class QueueMonitor extends FluxModel
             ->orderBy('started_at_exact', 'desc');
     }
 
-    public function scopeLastHour(Builder $query): void
+    public function scopeSucceeded(Builder $query): void
     {
-        $query->where('started_at', '>', now()->subHours(1));
+        $query->whereState('state', Succeeded::class);
     }
 
     public function scopeToday(Builder $query): void
     {
-        $query->whereRaw('DATE(started_at) = ?', [now()->subHours(1)->format('Y-m-d')]);
+        $query->whereRaw('DATE(started_at) = ?', [now()->subHour()->format('Y-m-d')]);
     }
 
-    public function scopeFailed(Builder $query): void
+    public function users(): MorphToMany
     {
-        $query->whereState('state', Failed::class);
-    }
-
-    public function scopeSucceeded(Builder $query): void
-    {
-        $query->whereState('state', Succeeded::class);
+        return $this->morphedByMany(User::class, 'queue_monitorable', 'queue_monitorables');
     }
 }

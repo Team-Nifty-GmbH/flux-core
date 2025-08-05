@@ -6,14 +6,15 @@ use FluxErp\Actions\PaymentRun\CreatePaymentRun;
 use FluxErp\Enums\PaymentRunTypeEnum;
 use FluxErp\Livewire\DataTables\OrderList;
 use FluxErp\Models\OrderType;
-use FluxErp\States\PaymentRun\Open;
+use FluxErp\States\Order\PaymentState\Paid;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Validation\ValidationException;
-use Spatie\Permission\Exceptions\UnauthorizedException;
+use Livewire\Attributes\Renderless;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class DirectDebit extends OrderList
 {
+    public array $accounts = [];
+
     public array $enabledCols = [
         'invoice_number',
         'invoice_date',
@@ -22,22 +23,40 @@ class DirectDebit extends OrderList
         'total_gross_price',
         'balance',
         'commission',
+        'contact_bank_connection.sepa_mandates.signed_date',
+        'contact_bank_connection.sepa_mandates.sepa_mandate_type_enum',
     ];
 
-    public array $accounts = [];
+    protected PaymentRunTypeEnum $paymentRunTypeEnum = PaymentRunTypeEnum::DirectDebit;
 
     protected function getSelectedActions(): array
     {
         return [
             DataTableButton::make()
-                ->color('primary')
-                ->label(__('Create Payment Run'))
-                ->attributes([
-                    'wire:click' => 'createPaymentRun',
-                    'wire:flux-confirm' => __('Create Payment Run|Do you really want to create the Payment Run?|Cancel|Yes'),
-                ])
+                ->color('indigo')
+                ->text(__('Create Payment Run'))
+                ->wireClick('createPaymentRun')
                 ->when(resolve_static(CreatePaymentRun::class, 'canPerformAction', [false])),
         ];
+    }
+
+    #[Renderless]
+    public function createPaymentRun(): void
+    {
+        $selectedOrders = $this->getSelectedModelsQuery()->get($this->modelKeyName);
+
+        if ($selectedOrders->isEmpty()) {
+            $this->toast()
+                ->error(__('Please select at least one order.'))
+                ->send();
+
+            return;
+        }
+
+        session(['payment_run_preview_orders' => $selectedOrders->toArray()]);
+        session(['payment_run_type_enum' => $this->paymentRunTypeEnum]);
+
+        $this->redirectRoute('accounting.payment-run-preview', navigate: true);
     }
 
     protected function getBuilder(Builder $builder): Builder
@@ -51,7 +70,7 @@ class DirectDebit extends OrderList
             ->pluck('id');
 
         return $builder->whereRelation('paymentType', 'is_direct_debit', true)
-            ->where(function (Builder $query) {
+            ->where(function (Builder $query): void {
                 $query
                     ->whereHas(
                         'paymentRuns',
@@ -60,37 +79,8 @@ class DirectDebit extends OrderList
                     ->orWhereDoesntHave('paymentRuns');
             })
             ->where('balance', '>', 0)
+            ->whereNotState('payment_state', Paid::class)
             ->whereNotNull('invoice_number')
             ->whereIntegerInRaw('order_type_id', $orderTypes);
-    }
-
-    public function createPaymentRun(): void
-    {
-        $orderPayments = $this->getSelectedModels()
-            ->map(fn ($order) => [
-                'order_id' => $order->id,
-                'amount' => bcround($order->balance, 2),
-            ])
-            ->toArray();
-
-        try {
-            CreatePaymentRun::make([
-                'state' => Open::$name,
-                'payment_run_type_enum' => PaymentRunTypeEnum::DirectDebit,
-                'orders' => $orderPayments,
-            ])
-                ->checkPermission()
-                ->validate()
-                ->execute();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return;
-        }
-
-        $this->reset('selected');
-
-        $this->notification()->success(__('Payment Run created.'));
-        $this->loadData();
     }
 }

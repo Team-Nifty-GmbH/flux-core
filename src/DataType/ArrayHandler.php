@@ -7,14 +7,14 @@ namespace FluxErp\DataType;
  */
 class ArrayHandler implements HandlerInterface
 {
-    public function getDataType(): string
-    {
-        return 'array';
-    }
-
     public function canHandleValue(mixed $value): bool
     {
         return is_array($value);
+    }
+
+    public function getDataType(): string
+    {
+        return 'array';
     }
 
     public function serializeValue(mixed $value): string

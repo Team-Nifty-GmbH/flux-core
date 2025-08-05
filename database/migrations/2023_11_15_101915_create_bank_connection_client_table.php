@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::create('bank_connection_client', function (Blueprint $table) {
+        Schema::create('bank_connection_client', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('client_id')->constrained('clients')->cascadeOnDelete();
             $table->foreignId('bank_connection_id')->constrained('bank_connections')->cascadeOnDelete();

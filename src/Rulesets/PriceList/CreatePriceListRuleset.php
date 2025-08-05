@@ -10,6 +10,15 @@ class CreatePriceListRuleset extends FluxRuleset
 {
     protected static ?string $model = PriceList::class;
 
+    public static function getRules(): array
+    {
+        return array_merge(
+            parent::getRules(),
+            resolve_static(DiscountRuleset::class, 'getRules'),
+            resolve_static(RoundingRuleset::class, 'getRules')
+        );
+    }
+
     public function rules(): array
     {
         return [
@@ -19,20 +28,11 @@ class CreatePriceListRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => PriceList::class]),
             ],
-            'name' => 'required|string',
-            'price_list_code' => 'required|string|unique:price_lists,price_list_code',
+            'name' => 'required|string|max:255',
+            'price_list_code' => 'required|string|max:255|unique:price_lists,price_list_code',
             'is_net' => 'required|boolean',
             'is_default' => 'boolean',
             'is_purchase' => 'boolean',
         ];
-    }
-
-    public static function getRules(): array
-    {
-        return array_merge(
-            parent::getRules(),
-            resolve_static(DiscountRuleset::class, 'getRules'),
-            resolve_static(RoundingRuleset::class, 'getRules')
-        );
     }
 }

@@ -13,6 +13,7 @@ use FluxErp\Livewire\Forms\ProductPricesUpdateForm;
 use FluxErp\Models\Client;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\VatRate;
+use FluxErp\Traits\Livewire\DataTable\SupportsLocalization;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
@@ -21,28 +22,32 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class ProductList extends BaseProductList
 {
-    protected ?string $includeBefore = 'flux::livewire.product.product-list';
+    use SupportsLocalization;
 
     public ?string $cacheKey = 'product.product-list';
+
+    public bool $isSelectable = true;
+
+    public array $priceLists = [];
 
     public ProductForm $product;
 
     public ProductPricesUpdateForm $productPricesUpdate;
 
-    public array $vatRates = [];
-
-    public array $priceLists = [];
-
     public array $productTypes = [];
 
-    public bool $isSelectable = true;
+    public array $vatRates = [];
+
+    protected ?string $includeBefore = 'flux::livewire.product.product-list';
 
     public function mount(): void
     {
         parent::mount();
 
-        $this->vatRates = app(VatRate::class)->all(['id', 'name', 'rate_percentage'])->toArray();
-        $priceList = PriceList::default()?->toArray() ?? [];
+        $this->vatRates = resolve_static(VatRate::class, 'query')
+            ->get(['id', 'name', 'rate_percentage'])
+            ->toArray();
+        $priceList = resolve_static(PriceList::class, 'default')?->toArray() ?? [];
         $priceList['is_editable'] = true;
 
         $this->priceLists = [$priceList];
@@ -54,6 +59,38 @@ class ProductList extends BaseProductList
                 'label' => __(Str::headline($key)),
             ])
             ->toArray();
+    }
+
+    protected function getTableActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->color('indigo')
+                ->text(__('New'))
+                ->icon('plus')
+                ->when(fn () => resolve_static(CreateProduct::class, 'canPerformAction', [false]))
+                ->xOnClick(<<<'JS'
+                    $wire.new().then(() => {$modalOpen('create-product-modal');});
+                JS),
+        ];
+    }
+
+    protected function getSelectedActions(): array
+    {
+        return [
+            DataTableButton::make()
+                ->text(__('Add to cart'))
+                ->icon('shopping-cart')
+                ->when(resolve_static(CreateCartItem::class, 'canPerformAction', [false]))
+                ->wireClick('addSelectedToCart; showSelectedActions = false;'),
+            DataTableButton::make()
+                ->text(__('Update prices'))
+                ->color('amber')
+                ->when(resolve_static(ProductPricesUpdate::class, 'canPerformAction', [false]))
+                ->xOnClick(<<<'JS'
+                    $modalOpen('update-prices-modal');
+                JS),
+        ];
     }
 
     #[Renderless]
@@ -69,18 +106,18 @@ class ProductList extends BaseProductList
         $this->reset('selected');
     }
 
+    public function getPriceLists(): array
+    {
+        return data_get($this->priceLists, '0', []);
+    }
+
     #[Renderless]
     public function new(): void
     {
         $this->product->reset();
 
-        $this->product->client_id = Client::default()?->getKey();
+        $this->product->client_id = resolve_static(Client::class, 'default')?->getKey();
         $this->product->product_type = data_get(ProductType::getDefault(), 'type');
-    }
-
-    public function getPriceLists(): array
-    {
-        return data_get($this->priceLists, '0', []);
     }
 
     #[Renderless]
@@ -134,51 +171,31 @@ class ProductList extends BaseProductList
         return true;
     }
 
-    protected function getSelectedActions(): array
-    {
-        return [
-            DataTableButton::make()
-                ->label(__('Add to cart'))
-                ->icon('shopping-cart')
-                ->when(resolve_static(CreateCartItem::class, 'canPerformAction', [false]))
-                ->wireClick('addSelectedToCart; showSelectedActions = false;'),
-            DataTableButton::make()
-                ->label(__('Update prices'))
-                ->color('warning')
-                ->when(resolve_static(ProductPricesUpdate::class, 'canPerformAction', [false]))
-                ->xOnClick(<<<'JS'
-                    $openModal('update-prices');
-                JS),
-        ];
-    }
-
-    protected function getTableActions(): array
-    {
-        return [
-            DataTableButton::make()
-                ->color('primary')
-                ->label(__('New'))
-                ->icon('plus')
-                ->when(fn () => resolve_static(CreateProduct::class, 'canPerformAction', [false]))
-                ->xOnClick(<<<'JS'
-                    $wire.new().then(() => {$openModal('create-product');});
-                JS),
-        ];
-    }
-
     protected function getViewData(): array
     {
         return array_merge(
             parent::getViewData(),
             [
+                'selectablePriceLists' => resolve_static(PriceList::class, 'query')
+                    ->get(['id', 'name'])
+                    ->toArray(),
                 'vatRates' => resolve_static(VatRate::class, 'query')
                     ->get(['id', 'name', 'rate_percentage'])
                     ->toArray(),
                 'roundingMethods' => RoundingMethodEnum::valuesLocalized(),
                 'roundingModes' => [
-                    'round' => __('Round'),
-                    'ceil' => __('Round up'),
-                    'floor' => __('Round down'),
+                    [
+                        'label' => __('Round'),
+                        'value' => 'round',
+                    ],
+                    [
+                        'label' => __('Round up'),
+                        'value' => 'ceil',
+                    ],
+                    [
+                        'label' => __('Round down'),
+                        'value' => 'floor',
+                    ],
                 ],
             ]
         );

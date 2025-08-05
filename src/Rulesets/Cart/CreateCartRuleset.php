@@ -22,6 +22,7 @@ class CreateCartRuleset extends FluxRuleset
                 'required_with:authenticatable_id',
                 'nullable',
                 'string',
+                'max:255',
                 app(MorphClassExists::class, ['uses' => HasCart::class]),
             ],
             'authenticatable_id' => [
@@ -42,7 +43,7 @@ class CreateCartRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => PriceList::class]),
             ],
-            'session_id' => 'required|string',
+            'session_id' => 'required|string|max:255',
             'name' => 'nullable|string|max:255',
             'is_portal_public' => 'boolean',
             'is_public' => 'boolean',

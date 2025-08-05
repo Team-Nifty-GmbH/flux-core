@@ -5,6 +5,9 @@ namespace FluxErp\Models;
 use FluxErp\Casts\BcFloat;
 use FluxErp\Casts\Money;
 use FluxErp\Casts\Percentage;
+use FluxErp\Contracts\Targetable;
+use FluxErp\Enums\CreditAccountPostingEnum;
+use FluxErp\Traits\CascadeSoftDeletes;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasClientAssignment;
@@ -16,7 +19,6 @@ use FluxErp\Traits\HasTags;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\LogsActivity;
-use FluxErp\Traits\SoftDeletes;
 use FluxErp\Traits\SortableTrait;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -28,64 +30,126 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Spatie\EloquentSortable\Sortable;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
-class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortable
+class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortable, Targetable
 {
-    use Commentable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes, HasPackageFactory,
-        HasParentChildRelations, HasSerialNumberRange, HasTags, HasUserModification, HasUuid, LogsActivity, SoftDeletes,
-        SortableTrait {
-            SortableTrait::setHighestOrderNumber as protected parentSetHighestOrderNumber;
-        }
-
-    protected $appends = [
-        'unit_price',
-    ];
+    use CascadeSoftDeletes, Commentable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes,
+        HasPackageFactory, HasParentChildRelations, HasSerialNumberRange, HasTags, HasUserModification, HasUuid,
+        LogsActivity, SortableTrait;
 
     public array $sortable = [
         'order_column_name' => 'sort_number',
         'sort_when_creating' => true,
     ];
 
-    protected static function booted(): void
+    protected $appends = [
+        'unit_price',
+    ];
+
+    protected array $cascadeDeletes = [
+        'children',
+        'commission',
+    ];
+
+    public static function aggregateColumns(string $type): array
     {
-        static::deleted(function (OrderPosition $orderPosition) {
-            $orderPosition->workTime()->update(['order_position_id' => null]);
-            $orderPosition->creditNoteCommission()->update(['credit_note_order_position_id' => null]);
-            $orderPosition->commission()->delete();
-        });
+        return match ($type) {
+            'count' => ['id'],
+            'sum', 'avg' => [
+                'amount',
+                'margin',
+                'provision',
+                'purchase_price',
+                'total_base_gross_price',
+                'total_base_net_price',
+                'total_gross_price',
+                'total_net_price',
+                'vat_price',
+                'unit_net_price',
+                'unit_gross_price',
+            ],
+            default => [],
+        };
     }
 
-    public function setHighestOrderNumber(): void
+    public static function aggregateTypes(): array
     {
-        $this->parentSetHighestOrderNumber();
+        return [
+            'avg',
+            'count',
+            'sum',
+        ];
+    }
 
-        $this->slug_position = ($this->parent ? $this->parent->slug_position . '.' : null)
-            . $this->sort_number;
+    public static function ownerColumns(): array
+    {
+        return [
+            'created_by',
+            'updated_by',
+        ];
+    }
+
+    public static function timeframeColumns(): array
+    {
+        return [
+            'customer_delivery_date',
+            'possible_delivery_date',
+            'created_at',
+            'updated_at',
+        ];
+    }
+
+    protected static function booted(): void
+    {
+        static::deleted(function (OrderPosition $orderPosition): void {
+            $orderPosition->workTime()->update(['order_position_id' => null]);
+            $orderPosition->creditNoteCommission()->update(['credit_note_order_position_id' => null]);
+            $orderPosition->order->recalculateOrderPositionSlugPositions();
+        });
+
+        static::saved(function (OrderPosition $orderPosition): void {
+            if ($orderPosition->isDirty('sort_number') || $orderPosition->isDirty('parent_id')) {
+                if ($orderPosition->isDirty('parent_id')) {
+                    DB::statement('SET @row_number = 0');
+
+                    resolve_static(OrderPosition::class, 'query')
+                        ->where('order_id', $orderPosition->order_id)
+                        ->where('parent_id', $orderPosition->getOriginal('parent_id'))
+                        ->orderBy('sort_number')
+                        ->update([
+                            'sort_number' => DB::raw('(@row_number:=@row_number+1)'),
+                        ]);
+                }
+
+                $orderPosition->order->recalculateOrderPositionSlugPositions();
+            }
+        });
     }
 
     protected function casts(): array
     {
         return [
-            'product_prices' => 'array',
-            'total_net_price' => Money::class,
-            'total_gross_price' => Money::class,
-            'unit_net_price' => Money::class,
-            'unit_gross_price' => Money::class,
-            'vat_price' => Money::class,
+            'amount' => BcFloat::class,
+            'discount_percentage' => Percentage::class,
             'margin' => Money::class,
             'provision' => Money::class,
             'purchase_price' => Money::class,
-            'total_base_price' => Money::class,
             'total_base_gross_price' => Money::class,
             'total_base_net_price' => Money::class,
+            'total_gross_price' => Money::class,
+            'total_net_price' => Money::class,
+            'vat_price' => Money::class,
+            'unit_net_price' => Money::class,
+            'unit_gross_price' => Money::class,
             'vat_rate_percentage' => Percentage::class,
             'customer_delivery_date' => 'date:Y-m-d',
             'possible_delivery_date' => 'date:Y-m-d',
-            'discount_percentage' => Percentage::class,
-            'amount' => BcFloat::class,
+            'product_prices' => 'array',
+            'post_on_credit_account' => CreditAccountPostingEnum::class,
             'is_alternative' => 'boolean',
             'is_net' => 'boolean',
             'is_free_text' => 'boolean',
@@ -93,55 +157,11 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
         ];
     }
 
-    public function getChildrenAttribute(): Collection
+    public function buildSortQuery(): Builder
     {
-        return $this->children()->get()->append('children');
-    }
-
-    public function getTagsAttribute(): Collection
-    {
-        return $this->tags()->get();
-    }
-
-    protected function slugPosition(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => array_reduce(
-                explode('.', $value),
-                fn ($carry, $item) => (is_null($carry) ? '' : $carry . '.') . ltrim($item, '0')
-            ),
-            set: fn ($value) => array_reduce(
-                explode('.', $value),
-                fn ($carry, $item) => (is_null($carry) ? '' : $carry . '.') . Str::padLeft($item, 8, '0')
-            ),
-        );
-    }
-
-    protected function totalNetPrice(): Attribute
-    {
-        return Attribute::get(
-            fn ($value) => $this->is_free_text && ! $value
-                ? $this->subTotalNet() ?: null
-                : $value
-        );
-    }
-
-    protected function totalGrossPrice(): Attribute
-    {
-        return Attribute::get(
-            fn ($value) => $this->is_free_text && ! $value
-                ? $this->subTotalGross() ?: null
-                : $value
-        );
-    }
-
-    protected function unitPrice(): Attribute
-    {
-        return Attribute::get(
-            fn ($value) => $this->is_net
-                ? $this->unit_net_price
-                : $this->unit_gross_price
-        );
+        return static::query()
+            ->where('order_id', $this->order_id)
+            ->where('parent_id', $this->parent_id);
     }
 
     public function client(): BelongsTo
@@ -189,6 +209,36 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
     public function discounts(): MorphMany
     {
         return $this->morphMany(Discount::class, 'model');
+    }
+
+    public function getAvatarUrl(): ?string
+    {
+        return $this->product?->getAvatarUrl();
+    }
+
+    public function getChildrenAttribute(): Collection
+    {
+        return $this->children()->get()->append('children');
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function getLabel(): ?string
+    {
+        return $this->name;
+    }
+
+    public function getTagsAttribute(): Collection
+    {
+        return $this->tags()->get();
+    }
+
+    public function getUrl(): ?string
+    {
+        return $this->order?->getUrl();
     }
 
     public function ledgerAccount(): BelongsTo
@@ -273,44 +323,90 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
         return $this->hasOne(WorkTime::class);
     }
 
-    private function subTotalNet(): string
+    protected function slugPosition(): Attribute
     {
-        return (string) (($this->relations['children'] ?? $this->children())
-            ->where('is_alternative', false)
-            ->sum('total_net_price'));
+        return Attribute::make(
+            get: fn ($value) => array_reduce(
+                explode('.', $value ?? ''),
+                fn ($carry, $item) => (is_null($carry) ? '' : $carry . '.') . ltrim($item, '0')
+            ),
+            set: fn ($value) => array_reduce(
+                explode('.', $value ?? ''),
+                fn ($carry, $item) => (is_null($carry) ? '' : $carry . '.') . Str::padLeft($item, 8, '0')
+            ),
+        );
     }
 
-    private function subTotalGross(): string
+    protected function subTotalGross(): string|float|null
     {
-        return (string) (($this->relations['children'] ?? $this->children())
-            ->where('is_alternative', false)
-            ->sum('total_gross_price'));
+        $result = DB::select('
+            WITH RECURSIVE child_items AS (
+                SELECT id, total_gross_price, is_alternative
+                FROM order_positions
+                WHERE id = ?
+
+                UNION ALL
+
+                SELECT op.id, op.total_gross_price, op.is_alternative
+                FROM order_positions op
+                INNER JOIN child_items ci ON op.parent_id = ci.id
+                WHERE op.is_alternative = false
+            )
+            SELECT SUM(total_gross_price) as total
+            FROM child_items
+            WHERE id != ? AND is_alternative = false
+        ', [$this->getKey(), $this->getKey()]);
+
+        return (string) data_get($result, '0.total', 0);
     }
 
-    public function buildSortQuery(): Builder
+    protected function subTotalNet(): string|float|null
     {
-        return static::query()
-            ->where('order_id', $this->order_id)
-            ->where('parent_id', $this->parent_id);
+        $result = DB::select('
+            WITH RECURSIVE child_items AS (
+                SELECT id, total_net_price, is_alternative
+                FROM order_positions
+                WHERE id = ?
+
+                UNION ALL
+
+                SELECT op.id, op.total_net_price, op.is_alternative
+                FROM order_positions op
+                INNER JOIN child_items ci ON op.parent_id = ci.id
+                WHERE op.is_alternative = false
+            )
+            SELECT SUM(total_net_price) as total
+            FROM child_items
+            WHERE id != ? AND is_alternative = false
+        ', [$this->getKey(), $this->getKey()]);
+
+        return (string) data_get($result, '0.total', 0);
     }
 
-    public function getLabel(): ?string
+    protected function totalGrossPrice(): Attribute
     {
-        return $this->name;
+        return Attribute::make(
+            get: fn ($value) => $this->is_free_text && ! $value
+                ? $this->subTotalGross() ?: null
+                : $value
+        );
     }
 
-    public function getDescription(): ?string
+    protected function totalNetPrice(): Attribute
     {
-        return $this->description;
+        return Attribute::make(
+            get: fn ($value) => $this->is_free_text && ! $value
+                ? $this->subTotalNet() ?: null
+                : $value
+        );
     }
 
-    public function getUrl(): ?string
+    protected function unitPrice(): Attribute
     {
-        return $this->order?->getUrl();
-    }
-
-    public function getAvatarUrl(): ?string
-    {
-        return $this->product?->getAvatarUrl();
+        return Attribute::make(
+            get: fn ($value) => $this->is_net
+                ? $this->unit_net_price
+                : $this->unit_gross_price
+        );
     }
 }

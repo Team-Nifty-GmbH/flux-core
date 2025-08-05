@@ -10,14 +10,14 @@ use Illuminate\Validation\ValidationException;
 
 class CreateEventSubscription extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateEventSubscriptionRuleset::class;
-    }
-
     public static function models(): array
     {
         return [EventSubscription::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateEventSubscriptionRuleset::class;
     }
 
     public function performAction(): EventSubscription

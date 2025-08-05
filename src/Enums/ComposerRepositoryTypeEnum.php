@@ -10,9 +10,9 @@ enum ComposerRepositoryTypeEnum: string
 
     case Composer = 'composer';
 
-    case Vcs = 'vcs';
-
     case Package = 'package';
 
     case Path = 'path';
+
+    case Vcs = 'vcs';
 }

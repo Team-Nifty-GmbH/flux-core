@@ -4,20 +4,21 @@ namespace FluxErp\Actions\ProductOptionGroup;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\ProductOption\DeleteProductOption;
+use FluxErp\Models\ProductOption;
 use FluxErp\Models\ProductOptionGroup;
 use FluxErp\Rulesets\ProductOptionGroup\DeleteProductOptionGroupRuleset;
 use Illuminate\Validation\ValidationException;
 
 class DeleteProductOptionGroup extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeleteProductOptionGroupRuleset::class;
-    }
-
     public static function models(): array
     {
         return [ProductOptionGroup::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeleteProductOptionGroupRuleset::class;
     }
 
     public function performAction(): array|bool|null
@@ -38,5 +39,19 @@ class DeleteProductOptionGroup extends FluxAction
 
         return ! array_filter($productOptions, fn ($item) => ! $item) ?
             $productOptionGroup->delete() : ['product_options' => $productOptions];
+    }
+
+    protected function validateData(): void
+    {
+        if (resolve_static(ProductOption::class, 'query')
+            ->where('product_option_group_id', $this->getData('id'))
+            ->whereHas('products')
+            ->exists()
+        ) {
+            throw ValidationException::withMessages([
+                'id' => ['Product with given Product Option exists.'],
+            ])
+                ->status(423);
+        }
     }
 }

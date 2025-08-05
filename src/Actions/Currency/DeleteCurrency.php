@@ -11,14 +11,14 @@ use Illuminate\Validation\ValidationException;
 
 class DeleteCurrency extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeleteCurrencyRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Currency::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeleteCurrencyRuleset::class;
     }
 
     public function performAction(): ?bool
@@ -45,7 +45,9 @@ class DeleteCurrency extends FluxAction
         ) {
             throw ValidationException::withMessages([
                 'country' => [__('Currency referenced by a country')],
-            ])->errorBag('deleteCurrency');
+            ])
+                ->errorBag('deleteCurrency')
+                ->status(423);
         }
     }
 }

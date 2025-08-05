@@ -8,7 +8,7 @@ class CreatePaymentNoticesTable extends Migration
 {
     public function up(): void
     {
-        Schema::create('payment_notices', function (Blueprint $table) {
+        Schema::create('payment_notices', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
             $table->unsignedBigInteger('client_id');

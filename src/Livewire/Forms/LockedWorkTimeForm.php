@@ -11,32 +11,14 @@ use Livewire\Attributes\Locked;
 
 class LockedWorkTimeForm extends FluxForm
 {
-    #[Locked]
-    public ?int $id = null;
-
-    public ?int $user_id = null;
-
     public ?int $contact_id = null;
 
-    public ?int $order_position_id = null;
-
-    public ?int $parent_id = null;
-
-    public ?int $work_time_type_id = null;
-
-    public ?string $trackable_type = null;
-
-    public ?int $trackable_id = null;
-
-    public ?string $started_at = null;
+    public ?string $description = null;
 
     public ?string $ended_at = null;
 
-    public ?int $paused_time_ms = null;
-
-    public ?string $name = null;
-
-    public ?string $description = null;
+    #[Locked]
+    public ?int $id = null;
 
     public ?bool $is_billable = null;
 
@@ -49,9 +31,52 @@ class LockedWorkTimeForm extends FluxForm
     #[Locked]
     public bool $is_pause = false;
 
-    public ?string $paused_time = null;
+    public ?string $local_ended_at = null;
+
+    public ?string $local_started_at = null;
+
+    public ?string $name = null;
+
+    public ?int $order_position_id = null;
 
     public ?string $original_paused_time = null;
+
+    public ?int $parent_id = null;
+
+    public ?string $paused_time = null;
+
+    public ?int $paused_time_ms = null;
+
+    public ?string $started_at = null;
+
+    public ?int $trackable_id = null;
+
+    public ?string $trackable_type = null;
+
+    public ?int $user_id = null;
+
+    public ?int $work_time_type_id = null;
+
+    public function __toString(): string
+    {
+        return (string) $this->id;
+    }
+
+    public function fill($values): void
+    {
+        parent::fill($values);
+
+        $this->started_at = $this->started_at ? Carbon::parse($this->started_at)->format('Y-m-d H:i:s') : null;
+        $this->ended_at = $this->ended_at ? Carbon::parse($this->ended_at)->format('Y-m-d H:i:s') : null;
+
+        if ($this->paused_time_ms) {
+            $minutes = ($pauseInMinutes = (int) ($this->paused_time_ms / 60000)) % 60;
+            $hours = ($pauseInMinutes - $minutes) / 60;
+
+            $this->paused_time = $hours . ':' . sprintf('%02d', $minutes);
+            $this->original_paused_time = $this->paused_time;
+        }
+    }
 
     protected function getActions(): array
     {
@@ -88,29 +113,24 @@ class LockedWorkTimeForm extends FluxForm
             }
         }
 
+        if (data_get($workTime, 'started_at')) {
+            $workTime['started_at'] = Carbon::parse(
+                data_get($workTime, 'local_started_at') ?? data_get($workTime, 'started_at')
+            )
+                ->setTimezone('UTC')
+                ->toDateTimeString();
+        }
+
+        if (data_get($workTime, 'ended_at')) {
+            $workTime['ended_at'] = Carbon::parse(
+                data_get($workTime, 'local_ended_at') ?? data_get($workTime, 'ended_at')
+            )
+                ->setTimezone('UTC')
+                ->toDateTimeString();
+        }
+
         $workTime['is_locked'] = (bool) $workTime['ended_at'];
 
         return $this->getActions()[$name]::make($workTime);
-    }
-
-    public function __toString(): string
-    {
-        return (string) $this->id;
-    }
-
-    public function fill($values): void
-    {
-        parent::fill($values);
-
-        $this->started_at = $this->started_at ? Carbon::parse($this->started_at)->format('Y-m-d H:i:s') : null;
-        $this->ended_at = $this->ended_at ? Carbon::parse($this->ended_at)->format('Y-m-d H:i:s') : null;
-
-        if ($this->paused_time_ms) {
-            $minutes = ($pauseInMinutes = (int) ($this->paused_time_ms / 60000)) % 60;
-            $hours = ($pauseInMinutes - $minutes) / 60;
-
-            $this->paused_time = $hours . ':' . sprintf('%02d', $minutes);
-            $this->original_paused_time = $this->paused_time;
-        }
     }
 }

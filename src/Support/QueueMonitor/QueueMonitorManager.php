@@ -16,9 +16,20 @@ use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Queue\Events\JobQueued;
 use Illuminate\Support\Carbon;
+use Throwable;
 
 class QueueMonitorManager
 {
+    public static function getJobClass(object $job): object|string
+    {
+        return method_exists($job, 'resolveName') ? $job->resolveName() : $job;
+    }
+
+    public static function getJobId(Job $job): string
+    {
+        return $job->getJobId() ?? md5($job->getRawBody());
+    }
+
     public static function handle(JobQueued|JobProcessing|JobProcessed|JobFailed|JobExceptionOccurred $event): void
     {
         $method = lcfirst(class_basename($event));
@@ -28,60 +39,13 @@ class QueueMonitorManager
         }
     }
 
-    protected static function jobQueued(JobQueued $event): void
+    public static function shouldBeMonitored(object $job): bool
     {
-        resolve_static(QueueMonitor::class, 'query')
-            ->create([
-                'job_batch_id' => $event->job->batchId ?? null,
-                'job_id' => $event->id,
-                'name' => get_class(static::getJobClass($event->job)),
-                'queue' => $event->job->queue ?: 'default',
-                'state' => Queued::class,
-                'queued_at' => now(),
-                'data' => $data ?? null,
-            ]);
-    }
-
-    protected static function jobProcessing(JobProcessing $event): void
-    {
-        $now = Carbon::now();
-
-        $monitor = resolve_static(QueueMonitor::class, 'query')
-            ->where('job_id', $jobId = static::getJobId($event->job))
-            ->where('queue', $event->job->getQueue() ?? config('queue.default'))
-            ->whereState('state', Queued::class)
-            ->firstOrNew();
-
-        $monitor->fill([
-            'job_uuid' => $event->job->uuid(),
-            'job_id' => static::getJobId($event->job),
-            'queue' => $event->job->getQueue() ?: config('queue.default'),
-            'name' => static::getJobClass($event->job),
-            'started_at' => $now,
-            'started_at_exact' => $now->format('Y-m-d H:i:s.u'),
-            'attempt' => $event->job->attempts(),
-            'state' => Running::class,
-        ]);
-        $monitor->save();
-
-        // Mark jobs with same job id (different execution) as stale
-        resolve_static(QueueMonitor::class, 'query')
-            ->whereNot('id', $monitor->id)
-            ->where('job_id', $jobId)
-            ->whereNotState('state', Failed::class)
-            ->whereNull('finished_at')
-            ->each(function (QueueMonitor $monitor) {
-                $monitor->update([
-                    'finished_at' => $now = Carbon::now(),
-                    'finished_at_exact' => $now->format('Y-m-d H:i:s.u'),
-                    'state' => Stale::class,
-                ]);
-            });
-    }
-
-    protected static function jobProcessed(JobProcessed $event): void
-    {
-        static::jobFinished($event->job, Succeeded::class);
+        return is_a(
+            static::getJobClass($job),
+            ShouldBeMonitored::class,
+            true
+        );
     }
 
     protected static function jobExceptionOccurred(JobExceptionOccurred $event): void
@@ -94,7 +58,7 @@ class QueueMonitorManager
         static::jobFinished($event->job, Failed::class);
     }
 
-    protected static function jobFinished(Job $job, string $state, ?\Throwable $exception = null): void
+    protected static function jobFinished(Job $job, string $state, ?Throwable $exception = null): void
     {
         $monitor = resolve_static(QueueMonitor::class, 'query')
             ->where('job_id', static::getJobId($job))
@@ -149,22 +113,59 @@ class QueueMonitorManager
         $monitor->update($attributes);
     }
 
-    public static function shouldBeMonitored(object $job): bool
+    protected static function jobProcessed(JobProcessed $event): void
     {
-        return is_a(
-            static::getJobClass($job),
-            ShouldBeMonitored::class,
-            true
-        );
+        static::jobFinished($event->job, Succeeded::class);
     }
 
-    public static function getJobClass(object $job): object|string
+    protected static function jobProcessing(JobProcessing $event): void
     {
-        return method_exists($job, 'resolveName') ? $job->resolveName() : $job;
+        $now = Carbon::now();
+
+        $monitor = resolve_static(QueueMonitor::class, 'query')
+            ->where('job_id', $jobId = static::getJobId($event->job))
+            ->where('queue', $event->job->getQueue() ?? config('queue.default'))
+            ->whereState('state', Queued::class)
+            ->firstOrNew();
+
+        $monitor->fill([
+            'job_uuid' => $event->job->uuid(),
+            'job_id' => static::getJobId($event->job),
+            'queue' => $event->job->getQueue() ?: config('queue.default'),
+            'name' => static::getJobClass($event->job),
+            'started_at' => $now,
+            'started_at_exact' => $now->format('Y-m-d H:i:s.u'),
+            'attempt' => $event->job->attempts(),
+            'state' => Running::class,
+        ]);
+        $monitor->save();
+
+        // Mark jobs with same job id (different execution) as stale
+        resolve_static(QueueMonitor::class, 'query')
+            ->whereNot('id', $monitor->id)
+            ->where('job_id', $jobId)
+            ->whereNotState('state', Failed::class)
+            ->whereNull('finished_at')
+            ->each(function (QueueMonitor $monitor): void {
+                $monitor->update([
+                    'finished_at' => $now = Carbon::now(),
+                    'finished_at_exact' => $now->format('Y-m-d H:i:s.u'),
+                    'state' => Stale::class,
+                ]);
+            });
     }
 
-    public static function getJobId(Job $job): string
+    protected static function jobQueued(JobQueued $event): void
     {
-        return $job->getJobId() ?? md5($job->getRawBody());
+        resolve_static(QueueMonitor::class, 'query')
+            ->create([
+                'job_batch_id' => $event->job->batchId ?? null,
+                'job_id' => $event->id,
+                'name' => get_class(static::getJobClass($event->job)),
+                'queue' => $event->job->queue ?: 'default',
+                'state' => Queued::class,
+                'queued_at' => now(),
+                'data' => $data ?? null,
+            ]);
     }
 }

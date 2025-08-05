@@ -3,6 +3,7 @@
 namespace FluxErp\Actions\Product\ProductBundleProduct;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Enums\BundleTypeEnum;
 use FluxErp\Models\Pivots\ProductBundleProduct;
 use FluxErp\Models\Product;
 use FluxErp\Rulesets\Product\ProductBundleProduct\CreateProductBundleProductRuleset;
@@ -10,14 +11,14 @@ use Illuminate\Validation\Rule;
 
 class CreateProductBundleProduct extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateProductBundleProductRuleset::class;
-    }
-
     public static function models(): array
     {
         return [ProductBundleProduct::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateProductBundleProductRuleset::class;
     }
 
     public function performAction(): ProductBundleProduct
@@ -29,6 +30,7 @@ class CreateProductBundleProduct extends FluxAction
             ->whereKey($this->data['product_id'])
             ->first()
             ->update([
+                'bundle_type_enum' => BundleTypeEnum::Standard,
                 'is_bundle' => true,
             ]);
 

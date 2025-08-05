@@ -8,7 +8,7 @@ class CreateStructuresTable extends Migration
 {
     public function up(): void
     {
-        Schema::create('structures', function (Blueprint $table) {
+        Schema::create('structures', function (Blueprint $table): void {
             $table->id();
             $table->unsignedBigInteger('parent_id')->nullable();
             $table->string('model')->index();

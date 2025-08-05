@@ -10,10 +10,6 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class OrderList extends BaseDataTable
 {
-    protected string $model = Order::class;
-
-    public bool $isSelectable = true;
-
     public array $enabledCols = [
         'order_type.name',
         'order_date',
@@ -27,39 +23,25 @@ class OrderList extends BaseDataTable
         'commission',
     ];
 
+    public bool $isSelectable = true;
+
     public bool $showModal = false;
+
+    protected string $model = Order::class;
 
     protected function getSelectedActions(): array
     {
         return [
             DataTableButton::make()
                 ->icon('trash')
-                ->label(__('Delete'))
-                ->color('negative')
+                ->text(__('Delete'))
+                ->color('red')
                 ->when(fn () => resolve_static(DeleteOrder::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'delete',
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Orders')]),
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Orders')]),
                 ]),
         ];
-    }
-
-    public function getFormatters(): array
-    {
-        $formatters = parent::getFormatters();
-
-        array_walk($formatters, function (&$formatter) {
-            if ($formatter === 'money') {
-                $formatter = ['coloredMoney', ['property' => 'currency.iso']];
-            }
-        });
-
-        return $formatters;
-    }
-
-    protected function getReturnKeys(): array
-    {
-        return array_merge(parent::getReturnKeys(), ['currency.iso']);
     }
 
     public function delete(): void
@@ -84,12 +66,30 @@ class OrderList extends BaseDataTable
             }
         }
 
-        $this->notification()->success(__('Deleted :count orders', ['count' => $deleted]));
+        $this->notification()->success(__('Deleted :count orders', ['count' => $deleted]))->send();
 
         if ($deleted > 0) {
             $this->loadData();
         }
 
         $this->reset('selected');
+    }
+
+    public function getFormatters(): array
+    {
+        $formatters = parent::getFormatters();
+
+        array_walk($formatters, function (&$formatter): void {
+            if ($formatter === 'money') {
+                $formatter = ['coloredMoney', ['property' => 'currency.iso']];
+            }
+        });
+
+        return $formatters;
+    }
+
+    protected function getReturnKeys(): array
+    {
+        return array_merge(parent::getReturnKeys(), ['currency.iso']);
     }
 }

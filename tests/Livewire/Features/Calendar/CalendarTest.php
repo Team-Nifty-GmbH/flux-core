@@ -2,18 +2,17 @@
 
 namespace FluxErp\Tests\Livewire\Features\Calendar;
 
-use FluxErp\Livewire\Features\Calendar\FluxCalendar;
-use FluxErp\Tests\Livewire\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use FluxErp\Livewire\Features\Calendar\Calendar;
+use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
-class CalendarTest extends BaseSetup
+class CalendarTest extends TestCase
 {
-    use DatabaseTransactions;
+    protected string $livewireComponent = Calendar::class;
 
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
-        Livewire::test(FluxCalendar::class)
+        Livewire::test($this->livewireComponent)
             ->assertStatus(200);
     }
 }

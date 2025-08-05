@@ -15,14 +15,14 @@ class DateTimeHandler implements HandlerInterface
      */
     protected string $format = 'Y-m-d H:i:s.uO';
 
-    public function getDataType(): string
-    {
-        return 'datetime';
-    }
-
     public function canHandleValue(mixed $value): bool
     {
         return $value instanceof DateTimeInterface;
+    }
+
+    public function getDataType(): string
+    {
+        return 'datetime';
     }
 
     public function serializeValue(mixed $value): string

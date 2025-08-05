@@ -3,12 +3,12 @@
 namespace FluxErp\Livewire\Widgets;
 
 use FluxErp\Enums\GrowthRateTypeEnum;
-use FluxErp\Enums\TimeFrameEnum;
+use FluxErp\Livewire\Dashboard\Dashboard;
+use FluxErp\Livewire\Support\Widgets\ValueList;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use FluxErp\Support\Calculation\Rounding;
-use FluxErp\Support\Widgets\ValueList;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Number;
@@ -18,12 +18,9 @@ class TopProductsByRevenue extends ValueList
 {
     use IsTimeFrameAwareWidget;
 
-    protected function getListeners(): array
+    public static function dashboardComponent(): array|string
     {
-        return [
-            'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
-                . ',.OrderLocked' => 'calculateList',
-        ];
+        return Dashboard::class;
     }
 
     #[Renderless]
@@ -42,21 +39,7 @@ class TopProductsByRevenue extends ValueList
             ->whereHas(
                 'order',
                 fn (Builder $query) => $query
-                    ->when(
-                        $this->timeFrame === TimeFrameEnum::Custom,
-                        function (Builder $query) {
-                            $diff = $this->end->diffInDays($this->start);
-
-                            return $query->whereBetween(
-                                'invoice_date',
-                                [$this->start->subDays($diff), $this->end->subDays($diff)]
-                            );
-                        },
-                        fn (Builder $query) => $query->whereBetween(
-                            'invoice_date',
-                            $this->timeFrame->getPreviousRange()
-                        )
-                    )
+                    ->whereBetween('invoice_date', [$this->getStartPrevious(), $this->getEndPrevious()])
                     ->revenue()
             )
             ->limit($this->limit)
@@ -66,12 +49,18 @@ class TopProductsByRevenue extends ValueList
         $this->items = $query->map(fn ($item) => [
             'label' => $item->product?->name,
             'value' => Number::abbreviate(Rounding::round($item->total_net_price ?? 0, 0))
-                . ' ' . Currency::default()->symbol,
+                . ' ' . resolve_static(Currency::class, 'default')->symbol,
             'growthRate' => GrowthRateTypeEnum::Percentage->getValue(
                 $previous->get($item->product_id)?->total_net_price ?? 0,
                 $item->total_net_price ?? 0
             ),
         ])->toArray();
+    }
+
+    #[Renderless]
+    public function hasMore(): bool
+    {
+        return $this->limit < $this->query()->count();
     }
 
     #[Renderless]
@@ -82,10 +71,12 @@ class TopProductsByRevenue extends ValueList
         $this->calculateList();
     }
 
-    #[Renderless]
-    public function hasMore(): bool
+    protected function getListeners(): array
     {
-        return $this->limit < $this->query()->count();
+        return [
+            'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
+                . ',.OrderLocked' => 'calculateList',
+        ];
     }
 
     protected function hasLoadMore(): bool
@@ -101,11 +92,7 @@ class TopProductsByRevenue extends ValueList
             ->whereHas(
                 'order',
                 fn (Builder $query) => $query
-                    ->when(
-                        $this->timeFrame === TimeFrameEnum::Custom,
-                        fn (Builder $query) => $query->whereBetween('invoice_date', [$this->start, $this->end]),
-                        fn (Builder $query) => $query->whereBetween('invoice_date', $this->timeFrame->getRange())
-                    )
+                    ->whereBetween('invoice_date', [$this->getStart(), $this->getEnd()])
                     ->revenue()
             )
             ->whereHas('product');

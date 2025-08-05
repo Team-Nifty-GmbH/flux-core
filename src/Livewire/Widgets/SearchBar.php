@@ -9,15 +9,15 @@ use Livewire\Component;
 
 class SearchBar extends Component
 {
-    protected $listeners = ['renderSearchBarWidget'];
+    public bool $show = false;
 
     public ?string $widgetComponent = null;
 
-    public string $widgetModel = '';
-
     public ?int $widgetId = null;
 
-    public bool $show = false;
+    public string $widgetModel = '';
+
+    protected $listeners = ['renderSearchBarWidget'];
 
     public function render(): View|Factory|Application
     {

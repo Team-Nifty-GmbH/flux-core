@@ -2,43 +2,52 @@
 
 namespace FluxErp\Rules;
 
+use Closure;
 use Illuminate\Contracts\Validation\DataAwareRule;
-use Illuminate\Contracts\Validation\Rule;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rules\DatabaseRule;
 
-class UniqueInFieldDependence implements DataAwareRule, Rule
+class UniqueInFieldDependence implements DataAwareRule, ValidationRule
 {
     use DatabaseRule;
 
-    private array $data = [];
+    protected array $data = [];
 
-    private array $dependingFields;
+    protected array $dependingFields;
 
-    private bool $ignoreSelf;
+    protected bool $ignoreSelf;
 
-    private string $model;
+    protected string $key;
 
-    private string $key;
+    protected string $model;
 
-    /**
-     * Create a new rule instance.
-     *
-     * @return void
-     */
-    public function __construct(string $model, string|array $dependingField, bool $ignoreSelf = true, ?string $key = null)
-    {
+    public function __construct(
+        string $model,
+        string|array $dependingField,
+        bool $ignoreSelf = true,
+        ?string $key = null
+    ) {
         $this->dependingFields = is_array($dependingField) ? $dependingField : [$dependingField];
         $this->ignoreSelf = $ignoreSelf;
         $this->model = $model;
         $this->key = $key ?: (app($model))->getKeyName();
     }
 
-    /**
-     * Determine if the validation rule passes.
-     */
-    public function passes($attribute, $value): bool
+    public function message(): string
+    {
+        return 'The %s has already been taken.';
+    }
+
+    public function setData(array $data): static
+    {
+        $this->data = $data;
+
+        return $this;
+    }
+
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         /** @var Model $model */
         $model = app($this->model);
@@ -62,7 +71,9 @@ class UniqueInFieldDependence implements DataAwareRule, Rule
                         ->first();
 
                     if (! $dependingFieldData || ! array_key_exists($field, $dependingFieldData->attributesToArray())) {
-                        return false;
+                        $fail(sprintf($this->message(), $attribute))->translate();
+
+                        return;
                     }
                 }
             }
@@ -81,39 +92,26 @@ class UniqueInFieldDependence implements DataAwareRule, Rule
                 if ($keyData[$explodedValue] ?? false) {
                     $keyData = $keyData[$explodedValue];
                 } else {
-                    return false;
+                    $fail(sprintf($this->message(), $attribute))->translate();
+
+                    return;
                 }
             }
         }
 
-        return ! $model->query()
+        if ($model->query()
             ->where(array_pop($explodedAttribute), $value)
-            ->where(function (Builder $query) use ($explodedDependingFields, $dependingFieldValues) {
+            ->where(function (Builder $query) use ($explodedDependingFields, $dependingFieldValues): void {
                 foreach ($explodedDependingFields as $key => $explodedDependingField) {
                     $query->where(array_pop($explodedDependingField), $dependingFieldValues[$key]);
                 }
             })
-            ->when($this->ignoreSelf, function (Builder $query) use ($keyData) {
+            ->when($this->ignoreSelf, function (Builder $query) use ($keyData): void {
                 $query->whereKeyNot($keyData);
             })
-            ->exists();
-    }
-
-    /**
-     * Get the validation error message.
-     */
-    public function message(): string
-    {
-        return 'The :attribute has already been taken.';
-    }
-
-    /**
-     * @return $this|UniqueInFieldDependence
-     */
-    public function setData($data): self
-    {
-        $this->data = $data;
-
-        return $this;
+            ->exists()
+        ) {
+            $fail(sprintf($this->message(), $attribute))->translate();
+        }
     }
 }

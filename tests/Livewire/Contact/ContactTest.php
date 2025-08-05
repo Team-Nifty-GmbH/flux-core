@@ -33,24 +33,22 @@ class ContactTest extends TestCase
         ]);
     }
 
-    public function test_renders_successfully()
+    public function test_can_delete_contact(): void
+    {
+        Livewire::test(Contact::class, ['id' => $this->contact->id])
+            ->call('delete')
+            ->assertHasNoErrors()
+            ->assertRedirectToRoute('contacts.contacts');
+    }
+
+    public function test_renders_successfully(): void
     {
         Livewire::test(Contact::class, ['id' => $this->contact->id])
             ->assertStatus(200);
     }
 
-    public function test_switch_tabs()
+    public function test_switch_tabs(): void
     {
-        $component = Livewire::test(Contact::class, ['id' => $this->contact->id]);
-
-        foreach (Livewire::new(Contact::class)->getTabs() as $tab) {
-            $component
-                ->set('tab', $tab->component)
-                ->assertStatus(200);
-
-            if ($tab->isLivewireComponent) {
-                $component->assertSeeLivewire($tab->component);
-            }
-        }
+        Livewire::test(Contact::class, ['id' => $this->contact->id])->cycleTabs();
     }
 }

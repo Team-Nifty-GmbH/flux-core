@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Str;
 use Illuminate\View\Component;
+use Imagick;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
@@ -25,21 +26,31 @@ abstract class PrintableView extends Component
 {
     use Makeable;
 
+    private static ?string $layout = 'flux::layouts.printing';
+
     public PDF $pdf;
 
     public bool $preview = false;
 
-    private static ?string $layout = 'flux::layouts.printing';
-
-    private ?\Imagick $imagick = null;
-
-    abstract public function getModel(): ?Model;
+    private ?Imagick $imagick = null;
 
     abstract public function getFileName(): string;
 
+    abstract public function getModel(): ?Model;
+
     abstract public function getSubject(): string;
 
-    public static function shouldForceRecreate(): bool
+    public static function getLayout(): ?string
+    {
+        return static::$layout;
+    }
+
+    public static function setLayout(?string $layout): void
+    {
+        static::$layout = $layout;
+    }
+
+    public static function shouldForceDownload(): bool
     {
         return false;
     }
@@ -49,19 +60,44 @@ abstract class PrintableView extends Component
         return false;
     }
 
-    public static function shouldForceDownload(): bool
-    {
-        return false;
-    }
-
     public static function shouldForcePrint(): bool
     {
         return false;
     }
 
-    public function shouldStore(): bool
+    public static function shouldForceRecreate(): bool
     {
-        return true;
+        return false;
+    }
+
+    public function attachToModel(?Model $model = null): ?Media
+    {
+        $model = is_null($model) ? $this->getModel() : $model;
+
+        if (! $model instanceof Model
+            || ! $model instanceof HasMedia
+        ) {
+            return null;
+        }
+
+        $resource = fopen('php://memory', 'rb+');
+        fwrite($resource, $this->pdf->output());
+        rewind($resource);
+
+        $data = [
+            'model_type' => $model->getMorphClass(),
+            'model_id' => $model->getKey(),
+            'collection_name' => $this->getCollectionName(),
+            'file_name' => now()->format('Y-m-d_H-i-s') . '_' . Str::finish($this->getFileName(), '.pdf'),
+            'name' => now()->format('Y-m-d_H-i-s') . '_' . $this->getFileName(),
+            'media' => $resource,
+            'media_type' => 'stream',
+        ];
+
+        return UploadMedia::make($data)
+            ->force()
+            ->validate()
+            ->execute();
     }
 
     public function preview(bool $preview = true): static
@@ -69,16 +105,6 @@ abstract class PrintableView extends Component
         $this->preview = $preview;
 
         return $this;
-    }
-
-    public static function setLayout(?string $layout): void
-    {
-        static::$layout = $layout;
-    }
-
-    public static function getLayout(): ?string
-    {
-        return static::$layout;
     }
 
     public function print(): static
@@ -137,7 +163,7 @@ abstract class PrintableView extends Component
                     int $pageNumber,
                     int $pageCount,
                     Canvas $canvas
-                ) use ($textX, $textY, $canvasWidth, $canvasHeight, $text, $font) {
+                ) use ($textX, $textY, $canvasWidth, $canvasHeight, $text, $font): void {
                     $canvas->rotate(45, $canvasWidth / 2, $canvasHeight / 2);
                     $canvas->text($textX, $textY, $text, $font, 110);
                     $canvas->set_opacity(0.2, 'Multiply');
@@ -172,59 +198,39 @@ abstract class PrintableView extends Component
         return $this->renderWithLayout();
     }
 
-    public function streamPDF(?string $fileName = null): Response
-    {
-        return $this->pdf->stream(Str::finish($fileName ?? $this->getFileName(), '.pdf'));
-    }
-
     public function savePDF(?string $fileName = null, ?string $disk = null): PDF
     {
         return $this->pdf->save(Str::finish($fileName ?? $this->getFileName(), '.pdf'), $disk);
     }
 
-    public function attachToModel(?Model $model = null): ?Media
+    public function shouldStore(): bool
     {
-        $model = is_null($model) ? $this->getModel() : $model;
-
-        if (! $model instanceof Model
-            || ! $model instanceof HasMedia
-        ) {
-            return null;
-        }
-
-        $resource = fopen('php://memory', 'rb+');
-        fwrite($resource, $this->pdf->output());
-        rewind($resource);
-
-        $data = [
-            'model_type' => $model->getMorphClass(),
-            'model_id' => $model->getKey(),
-            'collection_name' => $this->getCollectionName(),
-            'file_name' => now()->format('Y-m-d_H-i-s') . '_' . Str::finish($this->getFileName(), '.pdf'),
-            'name' => now()->format('Y-m-d_H-i-s') . '_' . $this->getFileName(),
-            'media' => $resource,
-            'media_type' => 'stream',
-        ];
-
-        return UploadMedia::make($data)
-            ->force()
-            ->validate()
-            ->execute();
+        return true;
     }
 
-    protected function renderWithLayout(): \Illuminate\View\View
+    public function streamPDF(?string $fileName = null): Response
     {
-        return is_null(static::$layout)
-            ? $this->render()
-            : view(
-                static::$layout,
-                [
-                    'slot' => $this->render(),
-                    'pageCss' => $this->getPageCss(),
-                    'hasHeader' => $this->renderHeader(),
-                    'hasFooter' => $this->renderFooter(),
-                ]
-            );
+        return $this->pdf->stream(Str::finish($fileName ?? $this->getFileName(), '.pdf'));
+    }
+
+    protected function getCollectionName(): string
+    {
+        return Str::kebab(class_basename($this));
+    }
+
+    protected function getPageCss(): array
+    {
+        return ['margin' => ['32mm', '20mm', '28mm', '18mm']];
+    }
+
+    protected function getPaperOrientation(): string
+    {
+        return 'portrait';
+    }
+
+    protected function getPaperSize(): array|string
+    {
+        return 'A4';
     }
 
     protected function hydrateSharedData(): void
@@ -233,15 +239,13 @@ abstract class PrintableView extends Component
 
         $client = $model?->client ?? Client::query()->first();
 
-        $logoSmall = $client->getFirstMedia('logo_small');
-
-        if ($logo = $client->getFirstMedia('logo')) {
+        if (($logo = $client->getFirstMedia('logo')) && file_exists($logo->getPath())) {
             $client->logo = File::mimeType($logo->getPath()) === 'image/svg+xml'
                 ? $logo->getUrl('png')
                 : $logo->getUrl();
         }
 
-        if ($logoSmall = $client->getFirstMedia('logo_small')) {
+        if (($logoSmall = $client->getFirstMedia('logo_small')) && file_exists($logoSmall->getPath())) {
             $client->logo_small = File::mimeType($logoSmall->getPath()) === 'image/svg+xml'
                 ? $logoSmall->getUrl('png')
                 : $logoSmall->getUrl();
@@ -267,24 +271,9 @@ abstract class PrintableView extends Component
         $this->imagick?->destroy();
     }
 
-    protected function getCollectionName(): string
+    protected function renderFooter(): bool
     {
-        return Str::kebab(class_basename($this));
-    }
-
-    protected function getPaperSize(): array|string
-    {
-        return 'A4';
-    }
-
-    protected function getPaperOrientation(): string
-    {
-        return 'portrait';
-    }
-
-    protected function getPageCss(): array
-    {
-        return ['margin' => ['32mm', '20mm', '28mm', '18mm']];
+        return true;
     }
 
     protected function renderHeader(): bool
@@ -292,8 +281,18 @@ abstract class PrintableView extends Component
         return true;
     }
 
-    protected function renderFooter(): bool
+    protected function renderWithLayout(): \Illuminate\View\View
     {
-        return true;
+        return is_null(static::$layout)
+            ? $this->render()
+            : view(
+                static::$layout,
+                [
+                    'slot' => $this->render(),
+                    'pageCss' => $this->getPageCss(),
+                    'hasHeader' => $this->renderHeader(),
+                    'hasFooter' => $this->renderFooter(),
+                ]
+            );
     }
 }

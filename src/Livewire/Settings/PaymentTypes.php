@@ -10,13 +10,14 @@ use FluxErp\Livewire\Forms\PaymentTypeForm;
 use FluxErp\Models\Client;
 use FluxErp\Models\PaymentType;
 use FluxErp\Traits\Livewire\Actions;
+use FluxErp\Traits\Livewire\DataTable\SupportsLocalization;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class PaymentTypes extends PaymentTypeList
 {
-    use Actions;
+    use Actions, SupportsLocalization;
 
     public ?string $includeBefore = 'flux::livewire.settings.payment-types';
 
@@ -26,9 +27,9 @@ class PaymentTypes extends PaymentTypeList
     {
         return [
             DataTableButton::make()
-                ->label(__('New'))
+                ->text(__('New'))
                 ->icon('plus')
-                ->color('primary')
+                ->color('indigo')
                 ->when(resolve_static(CreatePaymentType::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'edit',
@@ -36,31 +37,45 @@ class PaymentTypes extends PaymentTypeList
         ];
     }
 
-    protected function getViewData(): array
-    {
-        return array_merge(
-            parent::getViewData(),
-            [
-                'clients' => resolve_static(Client::class, 'query')
-                    ->select(['id', 'name'])
-                    ->get()
-                    ->toArray(),
-            ]
-        );
-    }
-
     protected function getRowActions(): array
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
+                ->text(__('Edit'))
                 ->icon('pencil')
-                ->color('primary')
+                ->color('indigo')
                 ->when(resolve_static(UpdatePaymentType::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'edit(record.id)',
                 ]),
+            DataTableButton::make()
+                ->text(__('Delete'))
+                ->color('red')
+                ->icon('trash')
+                ->when(resolve_static(DeletePaymentType::class, 'canPerformAction', [false]))
+                ->attributes([
+                    'wire:click' => 'delete(record.id)',
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Currency')]),
+                ]),
         ];
+    }
+
+    public function delete(PaymentType $paymentType): bool
+    {
+        $this->paymentType->reset();
+        $this->paymentType->fill($paymentType);
+
+        try {
+            $this->paymentType->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
     }
 
     public function edit(PaymentType $paymentType): void
@@ -69,7 +84,7 @@ class PaymentTypes extends PaymentTypeList
         $this->paymentType->fill($paymentType);
 
         $this->js(<<<'JS'
-            $openModal('edit-payment-type');
+            $modalOpen('edit-payment-type-modal');
         JS);
     }
 
@@ -88,21 +103,16 @@ class PaymentTypes extends PaymentTypeList
         return true;
     }
 
-    public function delete(): bool
+    protected function getViewData(): array
     {
-        try {
-            DeletePaymentType::make($this->paymentType->toArray())
-                ->checkPermission()
-                ->validate()
-                ->execute();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
+        return array_merge(
+            parent::getViewData(),
+            [
+                'clients' => resolve_static(Client::class, 'query')
+                    ->select(['id', 'name'])
+                    ->get()
+                    ->toArray(),
+            ]
+        );
     }
 }

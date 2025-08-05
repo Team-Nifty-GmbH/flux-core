@@ -8,11 +8,11 @@ enum LedgerAccountTypeEnum: string
 {
     use EnumTrait;
 
-    case Revenue = 'revenue';
+    case Asset = 'asset';
 
     case Expense = 'expense';
 
-    case Asset = 'asset';
-
     case Liability = 'liability';
+
+    case Revenue = 'revenue';
 }

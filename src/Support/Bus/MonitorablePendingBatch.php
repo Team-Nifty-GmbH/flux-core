@@ -20,8 +20,10 @@ class MonitorablePendingBatch extends PendingBatch
     {
         parent::__construct($container, $jobs);
 
-        $this->before(function (Batch $batch) {
-            $jobBatch = app(JobBatch::class)->whereKey($batch->id)->first();
+        $this->before(function (Batch $batch): void {
+            $jobBatch = resolve_static(JobBatch::class, 'query')
+                ->whereKey($batch->id)
+                ->first();
 
             $user = auth()->user();
             if (! $user && $context = Context::get('user')) {
@@ -34,22 +36,22 @@ class MonitorablePendingBatch extends PendingBatch
             if ($user && array_key_exists(MonitorsQueue::class, class_uses_recursive($user))) {
                 $user->jobBatches()->attach($jobBatch);
                 try {
-                    $user->notify(new BatchStartedNotification($jobBatch));
+                    $user->notify(app(BatchStartedNotification::class, ['model' => $jobBatch]));
                 } catch (Throwable $e) {
                     report($e);
                 }
             }
         });
 
-        $this->progress(function (Batch $batch) {
+        $this->progress(function (Batch $batch): void {
             $jobBatch = app(JobBatch::class)->whereKey($batch->id)->first();
 
-            $jobBatch->users->each(function ($user) use ($jobBatch) {
+            $jobBatch->users->each(function ($user) use ($jobBatch): void {
                 try {
                     $user->notify(
                         $jobBatch->isFinished()
-                            ? new BatchFinishedNotification($jobBatch)
-                            : new BatchProcessingNotification($jobBatch)
+                            ? app(BatchFinishedNotification::class, ['model' => $jobBatch])
+                            : app(BatchProcessingNotification::class, ['model' => $jobBatch])
                     );
                 } catch (Throwable $e) {
                     report($e);
@@ -57,12 +59,14 @@ class MonitorablePendingBatch extends PendingBatch
             });
         });
 
-        $this->finally(function (Batch $batch) {
-            $jobBatch = app(JobBatch::class)->whereKey($batch->id)->first();
+        $this->finally(function (Batch $batch): void {
+            $jobBatch = resolve_static(JobBatch::class, 'query')
+                ->whereKey($batch->id)
+                ->first();
 
-            $jobBatch->users->each(function ($user) use ($jobBatch) {
+            $jobBatch->users->each(function ($user) use ($jobBatch): void {
                 try {
-                    $user->notify(new BatchFinishedNotification($jobBatch));
+                    $user->notify(app(BatchFinishedNotification::class, ['model' => $jobBatch]));
                 } catch (Throwable $e) {
                     report($e);
                 }

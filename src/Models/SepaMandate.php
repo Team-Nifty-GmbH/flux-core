@@ -3,6 +3,7 @@
 namespace FluxErp\Models;
 
 use FluxErp\Contracts\OffersPrinting;
+use FluxErp\Enums\SepaMandateTypeEnum;
 use FluxErp\Traits\Communicatable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasClientAssignment;
@@ -25,7 +26,7 @@ class SepaMandate extends FluxModel implements HasMedia, OffersPrinting
 
     protected static function booted(): void
     {
-        static::saving(function (SepaMandate $mandate) {
+        static::saving(function (SepaMandate $mandate): void {
             // reset to original
             if ($mandate->wasChanged('mandate_reference_number')) {
                 $mandate->mandate_reference_number = $mandate->getOriginal('mandate_reference_number');
@@ -40,6 +41,7 @@ class SepaMandate extends FluxModel implements HasMedia, OffersPrinting
     protected function casts(): array
     {
         return [
+            'sepa_mandate_type_enum' => SepaMandateTypeEnum::class,
             'signed_date' => 'date',
         ];
     }
@@ -59,11 +61,9 @@ class SepaMandate extends FluxModel implements HasMedia, OffersPrinting
         return $this->belongsTo(ContactBankConnection::class);
     }
 
-    public function registerMediaCollections(): void
+    public function getEmailTemplateModelType(): ?string
     {
-        $this->addMediaCollection('signed_mandate')
-            ->acceptsMimeTypes(['application/pdf', 'image/jpeg', 'image/png', 'image/svg+xml'])
-            ->singleFile();
+        return morph_alias(static::class);
     }
 
     public function getPrintViews(): array
@@ -71,5 +71,12 @@ class SepaMandate extends FluxModel implements HasMedia, OffersPrinting
         return [
             'sepa-mandate' => SepaMandateView::class,
         ];
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('signed_mandate')
+            ->acceptsMimeTypes(['application/pdf', 'image/jpeg', 'image/png', 'image/svg+xml'])
+            ->singleFile();
     }
 }

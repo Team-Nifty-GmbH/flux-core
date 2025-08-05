@@ -8,7 +8,7 @@ class CreateProductPropertiesTable extends Migration
 {
     public function up(): void
     {
-        Schema::create('product_properties', function (Blueprint $table) {
+        Schema::create('product_properties', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
 

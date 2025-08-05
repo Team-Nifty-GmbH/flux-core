@@ -2,20 +2,18 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use FluxErp\Livewire\Dashboard\Dashboard;
+use FluxErp\Livewire\Support\Widgets\ValueList;
 use FluxErp\Models\Activity;
-use FluxErp\Support\Widgets\ValueList;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Renderless;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class RecentActivities extends ValueList
 {
-    protected function getListeners(): array
+    public static function dashboardComponent(): array|string
     {
-        return [
-            'echo-private:' . resolve_static(Activity::class, 'getBroadcastChannel')
-                . ',.ActivityCreated' => 'calculateList',
-        ];
+        return Dashboard::class;
     }
 
     #[Renderless]
@@ -63,6 +61,14 @@ class RecentActivities extends ValueList
     }
 
     #[Renderless]
+    public function hasMore(): bool
+    {
+        return $this->limit < resolve_static(Activity::class, 'query')
+            ->whereNot('event', 'visit')
+            ->count();
+    }
+
+    #[Renderless]
     public function showMore(): void
     {
         $this->limit += 10;
@@ -70,12 +76,12 @@ class RecentActivities extends ValueList
         $this->calculateList();
     }
 
-    #[Renderless]
-    public function hasMore(): bool
+    protected function getListeners(): array
     {
-        return $this->limit < resolve_static(Activity::class, 'query')
-            ->whereNot('event', 'visit')
-            ->count();
+        return [
+            'echo-private:' . resolve_static(Activity::class, 'getBroadcastChannel')
+                . ',.ActivityCreated' => 'calculateList',
+        ];
     }
 
     protected function hasLoadMore(): bool

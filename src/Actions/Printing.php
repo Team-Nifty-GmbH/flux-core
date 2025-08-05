@@ -11,18 +11,18 @@ use Illuminate\View\View;
 
 class Printing extends FluxAction
 {
-    public Printable $printable;
-
     public Model $model;
 
-    public function boot($data): void
-    {
-        parent::boot($data);
+    public Printable $printable;
 
-        $this->validate();
-        $this->model = morphed_model($this->data['model_type'])::query()
-            ->whereKey($this->data['model_id'])
-            ->first();
+    public static function models(): array
+    {
+        return [];
+    }
+
+    protected static function getReturnResult(): bool
+    {
+        return parent::getReturnResult() ?? true;
     }
 
     protected function getRulesets(): string|array
@@ -30,19 +30,18 @@ class Printing extends FluxAction
         return PrintingRuleset::class;
     }
 
-    public static function models(): array
-    {
-        return [];
-    }
-
     public function performAction(): View|Factory|PrintableView
     {
+        $this->model = morphed_model($this->data['model_type'])::query()
+            ->whereKey($this->data['model_id'])
+            ->first();
+
         $this->printable = $this->model
             ->print()
-            ->preview(data_get($this->data, 'preview', false) && ! data_get($this->data, 'html', false));
-        $printClass = $this->printable->getViewClass($this->data['view']);
+            ->preview($this->getData('preview') && ! $this->getData('html'));
+        $printClass = $this->printable->getViewClass($this->getData('view'));
 
-        return ($this->data['html'] ?? false)
+        return $this->getData('html')
             ? $this->printable->renderView($printClass)
             : $this->printable->printView($printClass);
     }

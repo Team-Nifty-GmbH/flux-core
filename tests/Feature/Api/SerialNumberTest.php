@@ -10,22 +10,19 @@ use FluxErp\Models\SerialNumberRange;
 use FluxErp\Models\StockPosting;
 use FluxErp\Models\Warehouse;
 use FluxErp\Tests\Feature\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
 class SerialNumberTest extends BaseSetup
 {
-    use DatabaseTransactions;
+    private array $permissions;
 
     private Collection $products;
 
-    private Collection $serialNumbers;
-
     private Collection $serialNumberRanges;
 
-    private array $permissions;
+    private Collection $serialNumbers;
 
     protected function setUp(): void
     {
@@ -67,48 +64,7 @@ class SerialNumberTest extends BaseSetup
         ];
     }
 
-    public function test_get_serial_number()
-    {
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/serial-numbers/' . $this->serialNumbers[0]->id);
-        $response->assertStatus(200);
-
-        $serialNumber = json_decode($response->getContent())->data;
-
-        $this->assertEquals($this->serialNumbers[0]->id, $serialNumber->id);
-        $this->assertEquals($this->serialNumbers[0]->serial_number_range_id, $serialNumber->serial_number_range_id);
-        $this->assertEquals($this->serialNumbers[0]->serial_number, $serialNumber->serial_number);
-        $this->assertEquals($this->serialNumbers[0]->supplier_serial_number, $serialNumber->supplier_serial_number);
-    }
-
-    public function test_get_serial_number_serial_number_not_found()
-    {
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/serial-numbers/' . $this->serialNumbers[2]->id + 10000);
-        $response->assertStatus(404);
-    }
-
-    public function test_get_serial_numbers()
-    {
-        $this->user->givePermissionTo($this->permissions['index']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/serial-numbers');
-        $response->assertStatus(200);
-
-        $serialNumbers = json_decode($response->getContent())->data->data;
-
-        $this->assertEquals($this->serialNumbers[0]->id, $serialNumbers[0]->id);
-        $this->assertEquals($this->serialNumbers[0]->serial_number_range_id, $serialNumbers[0]->serial_number_range_id);
-        $this->assertEquals($this->serialNumbers[0]->serial_number, $serialNumbers[0]->serial_number);
-        $this->assertEquals($this->serialNumbers[0]->supplier_serial_number, $serialNumbers[0]->supplier_serial_number);
-    }
-
-    public function test_create_serial_number()
+    public function test_create_serial_number(): void
     {
         $serialNumber = [
             'serial_number_range_id' => $this->serialNumberRanges[0]->id,
@@ -133,7 +89,7 @@ class SerialNumberTest extends BaseSetup
         $this->assertEquals($serialNumber['supplier_serial_number'], $dbSerialNumber->supplier_serial_number);
     }
 
-    public function test_create_serial_number_from_supplier_serial_number()
+    public function test_create_serial_number_from_supplier_serial_number(): void
     {
         $serialNumber = [
             'serial_number_range_id' => $this->serialNumberRanges[0]->id,
@@ -159,7 +115,7 @@ class SerialNumberTest extends BaseSetup
         $this->assertEquals($serialNumber['supplier_serial_number'], $dbSerialNumber->supplier_serial_number);
     }
 
-    public function test_create_serial_number_validation_fails()
+    public function test_create_serial_number_validation_fails(): void
     {
         $serialNumber = [
             'serial_number_range_id' => $this->serialNumberRanges[0]->id,
@@ -175,7 +131,68 @@ class SerialNumberTest extends BaseSetup
         $response->assertStatus(422);
     }
 
-    public function test_update_serial_number()
+    public function test_delete_serial_number(): void
+    {
+        $this->user->givePermissionTo($this->permissions['delete']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->delete('/api/serial-numbers/' . $this->serialNumbers[0]->id);
+        $response->assertStatus(204);
+
+        $this->assertFalse(SerialNumber::query()->whereKey($this->serialNumbers[0]->id)->exists());
+    }
+
+    public function test_delete_serial_number_serial_number_not_found(): void
+    {
+        $this->user->givePermissionTo($this->permissions['delete']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->delete('/api/serial-numbers/' . ++$this->serialNumbers[2]->id);
+        $response->assertStatus(404);
+    }
+
+    public function test_get_serial_number(): void
+    {
+        $this->user->givePermissionTo($this->permissions['show']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->get('/api/serial-numbers/' . $this->serialNumbers[0]->id);
+        $response->assertStatus(200);
+
+        $serialNumber = json_decode($response->getContent())->data;
+
+        $this->assertEquals($this->serialNumbers[0]->id, $serialNumber->id);
+        $this->assertEquals($this->serialNumbers[0]->serial_number_range_id, $serialNumber->serial_number_range_id);
+        $this->assertEquals($this->serialNumbers[0]->serial_number, $serialNumber->serial_number);
+        $this->assertEquals($this->serialNumbers[0]->supplier_serial_number, $serialNumber->supplier_serial_number);
+    }
+
+    public function test_get_serial_number_serial_number_not_found(): void
+    {
+        $this->user->givePermissionTo($this->permissions['show']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->get('/api/serial-numbers/' . $this->serialNumbers[2]->id + 10000);
+        $response->assertStatus(404);
+    }
+
+    public function test_get_serial_numbers(): void
+    {
+        $this->user->givePermissionTo($this->permissions['index']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->get('/api/serial-numbers');
+        $response->assertStatus(200);
+
+        $serialNumbers = json_decode($response->getContent())->data->data;
+
+        $this->assertEquals($this->serialNumbers[0]->id, $serialNumbers[0]->id);
+        $this->assertEquals($this->serialNumbers[0]->serial_number_range_id, $serialNumbers[0]->serial_number_range_id);
+        $this->assertEquals($this->serialNumbers[0]->serial_number, $serialNumbers[0]->serial_number);
+        $this->assertEquals($this->serialNumbers[0]->supplier_serial_number, $serialNumbers[0]->supplier_serial_number);
+    }
+
+    public function test_update_serial_number(): void
     {
         $serialNumber = [
             'id' => $this->serialNumbers[0]->id,
@@ -201,7 +218,21 @@ class SerialNumberTest extends BaseSetup
         $this->assertEquals($this->serialNumbers[0]->supp, $dbSerialNumber->supp);
     }
 
-    public function test_update_serial_number_with_additional_columns()
+    public function test_update_serial_number_validation_fails(): void
+    {
+        $serialNumber = [
+            'id' => $this->serialNumbers[0]->id,
+            'serial_number' => null,
+        ];
+
+        $this->user->givePermissionTo($this->permissions['update']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->put('/api/serial-numbers', $serialNumber);
+        $response->assertStatus(422);
+    }
+
+    public function test_update_serial_number_with_additional_columns(): void
     {
         $additionalColumn = AdditionalColumn::factory()->create([
             'model_type' => morph_alias(SerialNumber::class),
@@ -228,39 +259,5 @@ class SerialNumberTest extends BaseSetup
         $this->assertEquals($serialNumber[$additionalColumn->name], $dbSerialNumber->{$additionalColumn->name});
         $this->assertEquals($this->serialNumbers[0]->serial_number, $dbSerialNumber->serial_number);
         $this->assertEquals($this->serialNumbers[0]->serial_number_range_id, $dbSerialNumber->serial_number_range_id);
-    }
-
-    public function test_update_serial_number_validation_fails()
-    {
-        $serialNumber = [
-            'id' => $this->serialNumbers[0]->id,
-            'serial_number' => null,
-        ];
-
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->put('/api/serial-numbers', $serialNumber);
-        $response->assertStatus(422);
-    }
-
-    public function test_delete_serial_number()
-    {
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->delete('/api/serial-numbers/' . $this->serialNumbers[0]->id);
-        $response->assertStatus(204);
-
-        $this->assertFalse(SerialNumber::query()->whereKey($this->serialNumbers[0]->id)->exists());
-    }
-
-    public function test_delete_serial_number_serial_number_not_found()
-    {
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->delete('/api/serial-numbers/' . ++$this->serialNumbers[2]->id);
-        $response->assertStatus(404);
     }
 }

@@ -11,10 +11,19 @@ trait HasDefault
 
     private bool $updatedDefault = false;
 
+    public static function default(): ?static
+    {
+        return Cache::memo()
+            ->rememberForever(
+                'default_' . morph_alias(static::class),
+                fn () => resolve_static(static::class, 'query')->where(static::$defaultColumn, true)->first()
+            );
+    }
+
     protected static function bootHasDefault(): void
     {
         static::saving(
-            function (Model $model) {
+            function (Model $model): void {
                 if ($model->isDirty(static::$defaultColumn)) {
                     Cache::forget('default_' . morph_alias(static::class));
 
@@ -33,7 +42,7 @@ trait HasDefault
             }
         );
 
-        static::saved(function (Model $model) {
+        static::saved(function (Model $model): void {
             if ($model->getUpdatedDefault()) {
                 static::query()
                     ->whereKeyNot($model->getKey())
@@ -42,7 +51,7 @@ trait HasDefault
             }
         });
 
-        static::deleted(function (Model $model) {
+        static::deleted(function (Model $model): void {
             if ($model->{static::$defaultColumn}) {
                 $default = static::query()->first();
                 if ($default) {
@@ -53,21 +62,13 @@ trait HasDefault
         });
     }
 
-    public static function default(): ?static
+    public function getUpdatedDefault(): bool
     {
-        return Cache::rememberForever(
-            'default_' . morph_alias(static::class),
-            fn () => resolve_static(static::class, 'query')->where(static::$defaultColumn, true)->first()
-        );
+        return $this->updatedDefault;
     }
 
     public function setUpdatedDefault(bool $updated = true): void
     {
         $this->updatedDefault = $updated;
-    }
-
-    public function getUpdatedDefault(): bool
-    {
-        return $this->updatedDefault;
     }
 }

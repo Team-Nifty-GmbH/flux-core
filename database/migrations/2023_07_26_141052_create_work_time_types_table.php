@@ -11,7 +11,7 @@ return new class() extends Migration
      */
     public function up(): void
     {
-        Schema::create('work_time_types', function (Blueprint $table) {
+        Schema::create('work_time_types', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
             $table->json('name');

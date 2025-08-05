@@ -8,9 +8,9 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class DeleteCountryRegionRuleset extends FluxRuleset
 {
-    protected static ?string $model = CountryRegion::class;
-
     protected static bool $addAdditionalColumnRules = false;
+
+    protected static ?string $model = CountryRegion::class;
 
     public function rules(): array
     {

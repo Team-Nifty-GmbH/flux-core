@@ -2,17 +2,15 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use FluxErp\Livewire\Dashboard\Dashboard;
+use FluxErp\Livewire\Support\Widgets\ValueList;
 use FluxErp\Models\WorkTime;
-use FluxErp\Support\Widgets\ValueList;
 
 class ActiveTaskTimes extends ValueList
 {
-    protected function getListeners(): array
+    public static function dashboardComponent(): array|string
     {
-        return [
-            'echo-private:' . resolve_static(WorkTime::class, 'getBroadcastChannel')
-                . ',.WorkTimeTaskUpdated' => 'calculateList',
-        ];
+        return Dashboard::class;
     }
 
     public function calculateList(): void
@@ -34,5 +32,13 @@ class ActiveTaskTimes extends ValueList
                 ->isoFormat('L LT'),
         ])
             ->toArray();
+    }
+
+    protected function getListeners(): array
+    {
+        return [
+            'echo-private:' . resolve_static(WorkTime::class, 'getBroadcastChannel')
+                . ',.WorkTimeTaskUpdated' => 'calculateList',
+        ];
     }
 }

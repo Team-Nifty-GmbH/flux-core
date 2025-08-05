@@ -6,18 +6,17 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Category;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\Category\CreateCategoryRuleset;
-use Illuminate\Support\Facades\Validator;
 
 class CreateCategory extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateCategoryRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Category::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateCategoryRuleset::class;
     }
 
     public function performAction(): Category
@@ -42,13 +41,5 @@ class CreateCategory extends FluxAction
                 ],
             ]
         );
-    }
-
-    protected function validateData(): void
-    {
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(Category::class));
-
-        $this->data = $validator->validate();
     }
 }

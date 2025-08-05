@@ -14,9 +14,9 @@ use InvalidArgumentException;
 
 class Printable
 {
-    public array $views = [];
-
     public bool $preview = false;
+
+    public array $views = [];
 
     public function __construct(public Model|Collection $dataSet)
     {
@@ -27,13 +27,6 @@ class Printable
         }
 
         $this->views = $dataSet->resolvePrintViews();
-
-        return $this;
-    }
-
-    public function preview(bool $preview = true): static
-    {
-        $this->preview = $preview;
 
         return $this;
     }
@@ -51,29 +44,6 @@ class Printable
         }
 
         throw new InvalidArgumentException('Method ' . $name . ' doesnt exist');
-    }
-
-    public function getViewClass(string $name): string
-    {
-        $view = $this->views[$name] ?? null;
-
-        if (! $view) {
-            throw new InvalidArgumentException('No view found for ' . $name);
-        }
-
-        return resolve_static($view, 'class');
-    }
-
-    public function printView(string $view, ...$arguments): PrintableView
-    {
-        /** @var PrintableView $view */
-        return $view::make($this->dataSet)->preview($this->preview)->print(...$arguments);
-    }
-
-    public function renderView(string $view): View|Factory
-    {
-        /** @var PrintableView $view */
-        return $view::make($this->dataSet)->renderAndHydrate();
     }
 
     public static function injectPageCount(PDF $PDF): void
@@ -94,5 +64,35 @@ class Printable
     private static function insertNullByteBeforeEachCharacter(string $string): string
     {
         return "\u{0000}" . substr(chunk_split($string, 1, "\u{0000}"), 0, -1);
+    }
+
+    public function getViewClass(string $name): string
+    {
+        $view = $this->views[$name] ?? null;
+
+        if (! $view) {
+            throw new InvalidArgumentException('No view found for ' . $name);
+        }
+
+        return resolve_static($view, 'class');
+    }
+
+    public function preview(bool $preview = true): static
+    {
+        $this->preview = $preview;
+
+        return $this;
+    }
+
+    public function printView(string $view, ...$arguments): PrintableView
+    {
+        /** @var PrintableView $view */
+        return $view::make($this->dataSet)->preview($this->preview)->print(...$arguments);
+    }
+
+    public function renderView(string $view): View|Factory
+    {
+        /** @var PrintableView $view */
+        return $view::make($this->dataSet)->renderAndHydrate();
     }
 }

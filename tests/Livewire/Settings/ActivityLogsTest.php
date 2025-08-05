@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class ActivityLogsTest extends TestCase
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(ActivityLogs::class)
             ->assertStatus(200);

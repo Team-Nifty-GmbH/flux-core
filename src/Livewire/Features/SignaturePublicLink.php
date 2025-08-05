@@ -23,18 +23,18 @@ class SignaturePublicLink extends Component
 {
     use Actions, WithFileUploads;
 
-    public MediaUploadForm $signature;
-
-    #[Locked]
-    public ?string $uuid;
+    #[Url]
+    public ?string $model = null;
 
     #[Url(as: 'print-view')]
     public ?string $printView = null;
 
-    #[Url]
-    public ?string $model = null;
+    public MediaUploadForm $signature;
 
     public $signatureUpload = null;
+
+    #[Locked]
+    public ?string $uuid;
 
     public function mount(): void
     {
@@ -51,6 +51,24 @@ class SignaturePublicLink extends Component
                 ->firstOr(fn () => [])
         );
         $this->signature->custom_properties['name'] ??= auth()->user()?->name;
+    }
+
+    public function render(): string
+    {
+        config(['livewire.layout' => 'flux::layouts.printing']);
+        // This ensures livewire recognizes the content and wraps the view around it
+        // override the x-layouts.print with an empty div
+        PrintableView::setLayout(null);
+
+        return Blade::render(
+            '<div>{!! $view !!} @include(\'flux::livewire.features.signature-public-link\')</div>',
+            [
+                'view' => $this->getModel()->print()->renderView($this->getPrintClass()),
+                'modelInstance' => morphed_model($this->model)::query()
+                    ->where('uuid', $this->uuid)
+                    ->firstOrFail(),
+            ]
+        );
     }
 
     public function save(): bool
@@ -84,7 +102,10 @@ class SignaturePublicLink extends Component
             ]);
 
             try {
-                $this->signature->force()->save();
+                $this->signature
+                    ->setCheckPermission(false)
+                    ->force()
+                    ->save();
 
                 event(DocumentSignedEvent::make($this->signature->getActionResult()));
             } catch (ValidationException|UnauthorizedException $e) {
@@ -108,24 +129,6 @@ class SignaturePublicLink extends Component
             ));
 
         return true;
-    }
-
-    public function render(): string
-    {
-        config(['livewire.layout' => 'flux::layouts.printing']);
-        // This ensures livewire recognizes the content and wraps the view around it
-        // override the x-layouts.print with an empty div
-        PrintableView::setLayout(null);
-
-        return Blade::render(
-            '<div>{!! $view !!} @include(\'flux::livewire.features.signature-public-link\')</div>',
-            [
-                'view' => $this->getModel()->print()->renderView($this->getPrintClass()),
-                'modelInstance' => morphed_model($this->model)::query()
-                    ->where('uuid', $this->uuid)
-                    ->firstOrFail(),
-            ]
-        );
     }
 
     protected function getModel(): Model

@@ -2,15 +2,18 @@
 
 namespace FluxErp\Traits\Livewire;
 
+use BadMethodCallException;
 use FluxErp\Actions\Printing;
 use FluxErp\Contracts\OffersPrinting;
+use FluxErp\Livewire\Forms\PrintJobForm;
 use FluxErp\Models\Media;
 use FluxErp\View\Printing\PrintableView;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use Illuminate\View\View;
+use InvalidArgumentException;
 use Laravel\SerializableClosure\SerializableClosure;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
@@ -23,15 +26,6 @@ trait CreatesDocuments
 {
     use Actions, EnsureUsedInLivewire;
 
-    public array $printLayouts = [];
-
-    public array $selectedPrintLayouts = [
-        'print' => [],
-        'email' => [],
-        'download' => [],
-        'force' => [],
-    ];
-
     #[Locked]
     public array $forcedPrintLayouts = [
         'print' => [],
@@ -43,22 +37,58 @@ trait CreatesDocuments
     #[Locked]
     public array $previewData = [];
 
-    abstract protected function getTo(OffersPrinting $item, array $documents): array;
+    public PrintJobForm $printJobForm;
 
-    abstract protected function getSubject(OffersPrinting $item): string;
+    public array $printLayouts = [];
 
-    abstract protected function getHtmlBody(OffersPrinting $item): string;
-
-    abstract protected function getPrintLayouts(): array;
+    public array $selectedPrintLayouts = [
+        'print' => [],
+        'email' => [],
+        'download' => [],
+        'force' => [],
+    ];
 
     abstract public function createDocuments(): null|MediaStream|Media;
 
-    public function renderCreateDocumentsModal(): View
+    abstract protected function getPrintLayouts(): array;
+
+    abstract protected function getTo(OffersPrinting $item, array $documents): array;
+
+    #[Renderless]
+    public function downloadPreview(): ?StreamedResponse
     {
-        return view(
-            'flux::livewire.create-documents-modal',
-            ['supportsDocumentPreview' => $this->supportsDocumentPreview()]
+        if (! $this->supportsDocumentPreview()) {
+            throw new BadMethodCallException('Document preview is not supported');
+        }
+
+        try {
+            $pdf = Printing::make($this->previewData)
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return null;
+        }
+
+        return response()->streamDownload(
+            fn () => print ($pdf->pdf->output()),
+            Str::finish($pdf->getFileName(), '.pdf')
         );
+    }
+
+    public function mountCreatesDocuments(): void
+    {
+        if (
+            $defaultPrinter = auth()->user()
+                ?->printers()
+                ->where('printer_user.is_default', true)
+                ->first(['id', 'default_size'])
+        ) {
+            $this->printJobForm->printer_id = $defaultPrinter->id;
+            $this->printJobForm->size = $defaultPrinter->default_size;
+        }
     }
 
     #[Renderless]
@@ -91,8 +121,9 @@ trait CreatesDocuments
             }
         }
 
-        $this->js(<<<'JS'
-            $openModal('create-documents');
+        $id = strtolower($this->getId());
+        $this->js(<<<JS
+            \$modalOpen('create-documents-$id');
         JS);
     }
 
@@ -100,11 +131,11 @@ trait CreatesDocuments
     public function openPreview(string $printView, string $modelType, int|string $modelId): void
     {
         if (! in_array($printView, array_keys($this->getPrintLayouts()))) {
-            throw new \InvalidArgumentException('Invalid print view');
+            throw new InvalidArgumentException('Invalid print view');
         }
 
         if (! $this->supportsDocumentPreview()) {
-            throw new \BadMethodCallException('Document preview is not supported');
+            throw new BadMethodCallException('Document preview is not supported');
         }
 
         $this->previewData = [
@@ -115,33 +146,38 @@ trait CreatesDocuments
         ];
         $route = route('print.render', $this->previewData);
 
+        $id = strtolower($this->getId());
         $this->js(<<<JS
-            document.getElementById('preview-iframe').src = '$route';
-            \$openModal(document.getElementById('preview'));
+            document.getElementById('preview-$id').querySelector('iframe').src = '$route';
+            \$modalOpen('preview-$id');
         JS);
     }
 
-    #[Renderless]
-    public function downloadPreview(): ?StreamedResponse
+    public function renderCreateDocumentsModal(): View
     {
-        if (! $this->supportsDocumentPreview()) {
-            throw new \BadMethodCallException('Document preview is not supported');
-        }
-
-        try {
-            $pdf = Printing::make($this->previewData)
-                ->checkPermission()
-                ->validate()
-                ->execute();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return null;
-        }
-
-        return response()->streamDownload(
-            fn () => print ($pdf->pdf->output()),
-            Str::finish($pdf->getFileName(), '.pdf')
+        return view(
+            'flux::livewire.create-documents-modal',
+            [
+                'supportsDocumentPreview' => $this->supportsDocumentPreview(),
+                'printers' => auth()->user()
+                    ?->printers()
+                    ->where('is_active', true)
+                    ->get([
+                        'id',
+                        'name',
+                        'location',
+                        'media_sizes',
+                    ])
+                    ->toArray() ?? [],
+                'mediaSizes' => (
+                    $this->printJobForm->printer_id
+                        ? auth()->user()
+                            ?->printers()
+                            ->whereKey($this->printJobForm->printer_id)
+                            ->value('media_sizes')
+                        : null
+                ) ?? [''],
+            ]
         );
     }
 
@@ -160,6 +196,8 @@ trait CreatesDocuments
         $downloadItems = [];
         $printIds = [];
         $mailMessages = [];
+        $defaultTemplateIds = [];
+
         foreach ($items as $item) {
             match ($item) {
                 is_a($item, OffersPrinting::class, true) => $item->fresh(),
@@ -233,7 +271,6 @@ trait CreatesDocuments
                 }
 
                 if ($isPrint) {
-                    // TODO: add to print queue for spooler
                     $printIds[] = $media->getKey();
                 }
 
@@ -260,22 +297,47 @@ trait CreatesDocuments
                 }
 
                 $mailAttachments[] = $this->getAttachments($item);
-                $mailMessages[] = [
+                $mailMessage = [
                     'to' => $this->getTo($item, $createDocuments),
                     'cc' => $this->getCc($item),
                     'bcc' => $this->getBcc($item),
-                    'subject' => $this->getSubject($item),
+                    'subject' => $this->getSubject($item, $createDocuments),
                     'attachments' => array_filter($mailAttachments),
-                    'html_body' => $this->getHtmlBody($item),
+                    'html_body' => null,
                     'blade_parameters_serialized' => is_string($bladeParameters),
                     'blade_parameters' => $bladeParameters,
-                    'communicatable_type' => $this->getCommunicatableType($item),
-                    'communicatable_id' => $this->getCommunicatableId($item),
+                    'communicatables' => [
+                        [
+                            'communicatable_type' => $this->getCommunicatableType($item),
+                            'communicatable_id' => $this->getCommunicatableId($item),
+                        ],
+                    ],
                 ];
+
+                $mailMessage['model_type'] = $item->getEmailTemplateModelType();
+                if (method_exists($this, 'getDefaultTemplateId')) {
+                    $emailTemplateId = $this->getDefaultTemplateId($item);
+                    $mailMessage['default_template_id'] = $emailTemplateId;
+                    if ($emailTemplateId !== null) {
+                        $defaultTemplateIds[] = $emailTemplateId;
+                    }
+                }
+
+                $mailMessages[] = $mailMessage;
             }
         }
 
         if ($mailMessages) {
+            // Check if all items have the same default template ID
+            $uniqueTemplateIds = collect($defaultTemplateIds)->unique();
+            if ($uniqueTemplateIds->count() === 1 && count($mailMessages) > 1) {
+                // Set the common template ID for all messages
+                $commonTemplateId = $uniqueTemplateIds->first();
+                foreach ($mailMessages as &$mailMessage) {
+                    $mailMessage['default_template_id'] = $commonTemplateId;
+                }
+            }
+
             $sessionKey = 'mail_' . Str::uuid()->toString();
             session()->put($sessionKey, $mailMessages);
             $this->dispatch('createFromSession', key: $sessionKey)->to('edit-mail');
@@ -302,12 +364,32 @@ trait CreatesDocuments
                 ->addMedia($files);
         }
 
+        if ($printIds && $this->printJobForm->printer_id) {
+            foreach ($printIds as $printId) {
+                $this->printJobForm->reset('id');
+                $this->printJobForm->media_id = $printId;
+
+                try {
+                    $this->printJobForm->save();
+                } catch (ValidationException|UnauthorizedException $e) {
+                    exception_to_notifications($e, $this);
+                }
+            }
+
+            $this->printJobForm->reset();
+        }
+
         return null;
     }
 
-    protected function supportsDocumentPreview(): bool
+    protected function getAttachments(OffersPrinting $item): array
     {
-        return false;
+        return [];
+    }
+
+    protected function getBcc(OffersPrinting $item): array
+    {
+        return [];
     }
 
     protected function getBladeParameters(): array|SerializableClosure|null
@@ -315,9 +397,9 @@ trait CreatesDocuments
         return null;
     }
 
-    protected function getCommunicatableType(OffersPrinting $item): string
+    protected function getCc(OffersPrinting $item): array
     {
-        return $item->getMorphClass();
+        return [];
     }
 
     protected function getCommunicatableId(OffersPrinting $item): int
@@ -325,9 +407,9 @@ trait CreatesDocuments
         return $item->getKey();
     }
 
-    protected function getAttachments(OffersPrinting $item): array
+    protected function getCommunicatableType(OffersPrinting $item): string
     {
-        return [];
+        return $item->getMorphClass();
     }
 
     protected function getCreateAttachmentArray(OffersPrinting $item, string $view): array
@@ -340,13 +422,13 @@ trait CreatesDocuments
         ];
     }
 
-    protected function getCc(OffersPrinting $item): array
+    protected function getSubject(OffersPrinting $item, array $documents): ?string
     {
-        return [];
+        return null;
     }
 
-    protected function getBcc(OffersPrinting $item): array
+    protected function supportsDocumentPreview(): bool
     {
-        return [];
+        return false;
     }
 }

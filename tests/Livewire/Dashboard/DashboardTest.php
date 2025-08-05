@@ -8,15 +8,12 @@ use FluxErp\Models\User;
 use FluxErp\Models\Widget;
 use FluxErp\Tests\Livewire\BaseSetup;
 use FluxErp\Traits\Widgetable;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\Livewire;
 
 class DashboardTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     public array $components = [];
 
     protected function setUp(): void
@@ -26,6 +23,11 @@ class DashboardTest extends BaseSetup
         $this->components[] = new class() extends Component
         {
             use Widgetable;
+
+            public static function dashboardComponent(): string
+            {
+                return Dashboard::class;
+            }
 
             public function render(): string
             {
@@ -44,6 +46,11 @@ class DashboardTest extends BaseSetup
         {
             use Widgetable;
 
+            public static function dashboardComponent(): string
+            {
+                return Dashboard::class;
+            }
+
             public function render(): string
             {
                 return <<<'blade'
@@ -61,6 +68,7 @@ class DashboardTest extends BaseSetup
             'widgetable_type' => morph_alias(User::class),
             'widgetable_id' => $this->user->id,
             'component_name' => 'sample-component',
+            'dashboard_component' => data_get($this->components, '0')::dashboardComponent(),
             'name' => 'Widget 1',
             'width' => 2,
             'height' => 1,
@@ -74,19 +82,32 @@ class DashboardTest extends BaseSetup
         $this->actingAs($this->user, 'web');
     }
 
-    public function test_dashboard_widget_rendering()
+    public function test_can_add_widget(): void
     {
-        // Perform the Livewire test
         Livewire::withoutLazyLoading()
+            ->actingAs($this->user, 'web')
             ->test(Dashboard::class)
-            ->assertOk()
-            ->assertSee('Hello from sample component')
-            ->assertDontSee('Hello from sample component 2')
-            ->assertSeeLivewire('sample-component')
-            ->assertDontSeeLivewire('sample-component-2');
+            ->call('saveWidgets', [
+                [
+                    'id' => Str::uuid()->toString(),
+                    'height' => 2,
+                    'width' => 2,
+                    'order_column' => 0,
+                    'order_row' => 0,
+                    'component_name' => $componentName = Str::uuid()->toString(),
+                ],
+            ])
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseHas('widgets', [
+            'widgetable_type' => morph_alias(User::class),
+            'widgetable_id' => $this->user->id,
+            'component_name' => $componentName,
+            'dashboard_component' => Dashboard::class,
+        ]);
     }
 
-    public function test_dashboard_hide_widget_without_permission()
+    public function test_dashboard_hide_widget_without_permission(): void
     {
         Livewire::withoutLazyLoading()
             ->test(Dashboard::class)
@@ -100,7 +121,28 @@ class DashboardTest extends BaseSetup
             ->assertDontSeeLivewire('sample-component');
     }
 
-    public function test_dashboard_show_widget_with_permission()
+    public function test_dashboard_hides_widgets_from_different_dashboard_component(): void
+    {
+        Widget::query()->create([
+            'widgetable_type' => morph_alias(User::class),
+            'widgetable_id' => $this->user->id,
+            'component_name' => 'sample-component-other-dashboard',
+            'dashboard_component' => 'App\Livewire\SomeOtherDashboard',
+            'name' => 'Widget for Other Dashboard',
+            'width' => 2,
+            'height' => 1,
+        ]);
+
+        $component = Livewire::withoutLazyLoading()->test(Dashboard::class);
+
+        $component->assertOk()
+            ->assertSeeLivewire('sample-component')
+            ->assertDontSeeLivewire('sample-component-2');
+
+        $this->assertArrayNotHasKey('sample-component-from-other-dashboard', $component->get('widgets'));
+    }
+
+    public function test_dashboard_show_widget_with_permission(): void
     {
         $permission = Permission::findOrCreate('widget.sample-component', 'web');
 
@@ -117,27 +159,22 @@ class DashboardTest extends BaseSetup
             ->assertSeeLivewire('sample-component');
     }
 
-    public function test_dashboard_widget_removal()
+    public function test_dashboard_unregistered_widget(): void
     {
-        $livewire = Livewire::withoutLazyLoading()
-            ->test(Dashboard::class);
-
-        $livewire->assertSee('Hello from sample component')
+        Livewire::withoutLazyLoading()
+            ->test(Dashboard::class)
+            ->assertSee('Hello from sample component')
             ->assertSeeLivewire('sample-component');
 
-        $widgets = $livewire->get('widgets');
-        unset($widgets[0]);
+        \FluxErp\Facades\Widget::unregister('sample-component');
 
-        $livewire->set('widgets', $widgets)
-            ->call('saveWidgets', $widgets)
-            ->assertOk()
-            ->call('$refresh')
-            ->assertOk()
+        Livewire::withoutLazyLoading()
+            ->test(Dashboard::class)
             ->assertDontSee('Hello from sample component')
             ->assertDontSeeLivewire('sample-component');
     }
 
-    public function test_dashboard_update_widget()
+    public function test_dashboard_update_widget(): void
     {
         $livewire = Livewire::withoutLazyLoading()
             ->test(Dashboard::class);
@@ -154,42 +191,35 @@ class DashboardTest extends BaseSetup
             ->assertSet('widgets.0.height', 3);
     }
 
-    public function test_dashboard_unregistered_widget()
+    public function test_dashboard_widget_removal(): void
     {
-        Livewire::withoutLazyLoading()
-            ->test(Dashboard::class)
-            ->assertSee('Hello from sample component')
+        $livewire = Livewire::withoutLazyLoading()
+            ->test(Dashboard::class);
+
+        $livewire->assertSee('Hello from sample component')
             ->assertSeeLivewire('sample-component');
 
-        \FluxErp\Facades\Widget::unregister('sample-component');
+        $widgets = $livewire->get('widgets');
+        unset($widgets[0]);
 
-        Livewire::withoutLazyLoading()
-            ->test(Dashboard::class)
+        $livewire->set('widgets', $widgets)
+            ->call('saveWidgets', $widgets)
+            ->assertOk()
+            ->call('widgets')
+            ->assertOk()
             ->assertDontSee('Hello from sample component')
             ->assertDontSeeLivewire('sample-component');
     }
 
-    public function test_can_add_widget()
+    public function test_dashboard_widget_rendering(): void
     {
+        // Perform the Livewire test
         Livewire::withoutLazyLoading()
-            ->actingAs($this->user, 'web')
             ->test(Dashboard::class)
-            ->call('saveWidgets', [
-                [
-                    'id' => Str::uuid(),
-                    'height' => 2,
-                    'width' => 2,
-                    'order_column' => 0,
-                    'order_row' => 0,
-                    'component_name' => $componentName = Str::uuid(),
-                ],
-            ])
-            ->assertHasNoErrors();
-
-        $this->assertDatabaseHas('widgets', [
-            'widgetable_type' => morph_alias(User::class),
-            'widgetable_id' => $this->user->id,
-            'component_name' => $componentName,
-        ]);
+            ->assertOk()
+            ->assertSee('Hello from sample component')
+            ->assertDontSee('Hello from sample component 2')
+            ->assertSeeLivewire('sample-component')
+            ->assertDontSeeLivewire('sample-component-2');
     }
 }

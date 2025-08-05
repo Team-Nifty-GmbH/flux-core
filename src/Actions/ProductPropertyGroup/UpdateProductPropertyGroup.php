@@ -14,14 +14,14 @@ use Illuminate\Support\Arr;
 
 class UpdateProductPropertyGroup extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateProductPropertyGroupRuleset::class;
-    }
-
     public static function models(): array
     {
         return [ProductPropertyGroup::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateProductPropertyGroupRuleset::class;
     }
 
     public function performAction(): Model

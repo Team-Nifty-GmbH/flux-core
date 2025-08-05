@@ -21,7 +21,7 @@ class UserTableSeeder extends Seeder
                 'password' => $password,
                 'language_id' => fn () => $languages->random()->id,
             ])
-            ->each(function (User $user) {
+            ->each(function (User $user): void {
                 $user->assignRole('Super Admin');
                 $row = 0;
                 $col = 0;
@@ -29,6 +29,7 @@ class UserTableSeeder extends Seeder
                     $user->widgets()->create([
                         'name' => $widget['label'],
                         'component_name' => $widget['component_name'],
+                        'dashboard_component' => Arr::first(Arr::wrap($widget['dashboard_component'])),
                         'width' => data_get($widget, 'defaultWidth', 1),
                         'height' => data_get($widget, 'defaultHeight', 1),
                         'order_column' => $col,

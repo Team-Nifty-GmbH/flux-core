@@ -11,14 +11,14 @@ use Illuminate\Validation\ValidationException;
 
 class UpdateCalendar extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateCalendarRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Calendar::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateCalendarRuleset::class;
     }
 
     public function performAction(): Model
@@ -26,6 +26,11 @@ class UpdateCalendar extends FluxAction
         $calendar = resolve_static(Calendar::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
+
+        if ($calendar->is_group) {
+            $this->data['custom_properties'] = null;
+            $this->data['has_repeatable_events'] = false;
+        }
 
         $calendar->fill($this->data);
         $calendar->save();

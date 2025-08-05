@@ -15,26 +15,26 @@ class LoginTest extends DuskTestCase
         $this->createLoginUser();
     }
 
+    public function test_login(): void
+    {
+        $this->browse(function (Browser $browser): void {
+            $browser->visit('/login')
+                ->type('email', $this->user->email)
+                ->type('password', $this->password)
+                ->clickAndWaitForReload('@login-button')
+                ->assertRouteIs('dashboard');
+        });
+    }
+
     public function test_login_wrong_credentials(): void
     {
-        $this->browse(function (Browser $browser) {
+        $this->browse(function (Browser $browser): void {
             $browser->visit('/login')
                 ->type('email', 'test@test.de')
                 ->type('password', 'password')
                 ->click('@login-button')
                 ->waitForText('Login failed')
                 ->assertSee('Login failed');
-        });
-    }
-
-    public function test_login()
-    {
-        $this->browse(function (Browser $browser) {
-            $browser->visit('/login')
-                ->type('email', $this->user->email)
-                ->type('password', $this->password)
-                ->clickAndWaitForReload('@login-button')
-                ->assertRouteIs('dashboard');
         });
     }
 }

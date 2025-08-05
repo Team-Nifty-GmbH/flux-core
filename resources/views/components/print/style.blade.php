@@ -1,5 +1,4 @@
 <style>
-
     @section('style.font')
         html {
             font-family: 'Montserrat';
@@ -7,7 +6,7 @@
     @show
 
     p {
-        margin-bottom: 10px;
+        margin-bottom: 2px;
     }
 
     li {
@@ -119,6 +118,12 @@
 
         html {
             background: #f5f5f5;
+        }
+    }
+
+    @media print {
+        body {
+            margin-bottom: 30px;
         }
     }
 </style>

@@ -9,10 +9,9 @@ use FluxErp\Rulesets\Role\UpdateUserRolesRuleset;
 
 class UpdateUserRoles extends FluxAction
 {
-    protected function boot(array $data): void
+    public static function models(): array
     {
-        parent::boot($data);
-        $this->data = $this->data ? array_merge(['assign' => true], $this->data) : [];
+        return [Role::class, User::class];
     }
 
     public static function name(): string
@@ -20,14 +19,15 @@ class UpdateUserRoles extends FluxAction
         return 'user.update-roles';
     }
 
-    public static function models(): array
-    {
-        return [Role::class, User::class];
-    }
-
     protected function getRulesets(): string|array
     {
         return UpdateUserRolesRuleset::class;
+    }
+
+    protected function boot(array $data): void
+    {
+        parent::boot($data);
+        $this->data = $this->data ? array_merge(['assign' => true], $this->data) : [];
     }
 
     public function performAction(): array

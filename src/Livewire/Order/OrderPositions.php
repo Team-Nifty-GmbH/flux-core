@@ -27,10 +27,9 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableRowAttributes;
 
 class OrderPositions extends OrderPositionList
 {
-    #[Modelable]
-    public OrderForm $order;
+    public ?string $cacheKey = 'order.order-positions';
 
-    public bool $isSelectable = true;
+    public ?string $discount = null;
 
     public array $enabledCols = [
         'slug_position',
@@ -40,21 +39,26 @@ class OrderPositions extends OrderPositionList
         'total_net_price',
     ];
 
+    public bool $hasNoRedirect = true;
+
     public ?bool $isSearchable = false;
 
-    public array $sortable = [];
+    public bool $isSelectable = true;
 
-    public int $perPage = 100;
+    #[Modelable]
+    public OrderForm $order;
 
     public OrderPositionForm $orderPosition;
 
-    public ?string $cacheKey = 'order.order-positions';
+    public string $orderPositionsView = 'table';
 
-    public ?string $discount = null;
+    public int $perPage = 100;
 
-    public bool $hasNoRedirect = true;
+    public array $sortable = [];
 
-    protected string $view = 'flux::livewire.order.order-positions';
+    protected ?string $includeAfter = 'flux::livewire.order.order-list-footer';
+
+    protected ?string $includeBefore = 'flux::livewire.order.order-list-header';
 
     public function mount(): void
     {
@@ -64,53 +68,16 @@ class OrderPositions extends OrderPositionList
         $this->page = 1;
     }
 
-    public function getBuilder(Builder $builder): Builder
+    protected function getTableActions(): array
     {
-        return $builder->where('order_id', $this->order->id)->reorder('slug_position');
-    }
-
-    public function getListeners(): array
-    {
-        return array_merge(
-            parent::getListeners(),
-            [
-                'create-tasks' => 'createTasks',
-                'order:add-products' => 'addProducts',
-            ]
-        );
-    }
-
-    public function getViewData(): array
-    {
-        return array_merge(
-            parent::getViewData(),
-            [
-                'vatRates' => resolve_static(VatRate::class, 'query')
-                    ->get(['id', 'name', 'rate_percentage'])
-                    ->toArray(),
-            ]
-        );
-    }
-
-    public function getSelectAttributes(): ComponentAttributeBag
-    {
-        return new ComponentAttributeBag([
-            'x-show' => '! record.is_bundle_position && ! record.is_locked',
-        ]);
-    }
-
-    protected function getRowAttributes(): DataTableRowAttributes
-    {
-        return DataTableRowAttributes::make()
-            ->bind(
-                'class',
-                "{
-                    'bg-gray-200 dark:bg-secondary-700 font-bold': (record.is_free_text && record.depth === 0 && record.has_children),
-                    'opacity-90': record.is_alternative,
-                    'opacity-50 sortable-filter': record.is_bundle_position,
-                    'font-semibold': record.is_free_text
-                }"
-            );
+        return [
+            DataTableButton::make()
+                ->icon('bars-3')
+                ->wireClick('switchView(\'list\')'),
+            DataTableButton::make()
+                ->icon('table-cells')
+                ->wireClick('switchView(\'table\')'),
+        ];
     }
 
     protected function getRowActions(): array
@@ -118,7 +85,7 @@ class OrderPositions extends OrderPositionList
         return [
             DataTableButton::make()
                 ->icon('pencil')
-                ->color('primary')
+                ->color('indigo')
                 ->when(fn () => resolve_static(UpdateOrderPosition::class, 'canPerformAction', [false])
                     && ! $this->order->is_locked
                 )
@@ -132,9 +99,9 @@ class OrderPositions extends OrderPositionList
             DataTableButton::make()
                 ->icon('eye')
                 ->attributes([
-                    'x-cloak' => 'true',
-                    'x-show' => 'record.product_id',
                     'wire:click' => 'showProduct(record.product_id)',
+                    'x-cloak' => true,
+                    'x-show' => 'record.product_id',
                 ]),
         ];
     }
@@ -143,249 +110,55 @@ class OrderPositions extends OrderPositionList
     {
         return [
             DataTableButton::make()
-                ->label(__('Create tasks'))
+                ->text(__('Create tasks'))
                 ->when(fn () => resolve_static(CreateTask::class, 'canPerformAction', [false]))
-                ->xOnClick('$openModal(\'create-tasks\')'),
+                ->xOnClick('$modalOpen(\'create-tasks\')'),
             DataTableButton::make()
-                ->label(__('Recalculate prices'))
+                ->text(__('Recalculate prices'))
                 ->when(fn () => resolve_static(UpdateOrderPosition::class, 'canPerformAction', [false])
                     && ! $this->order->is_locked
                 )
                 ->attributes([
-                    'wire:flux-confirm.icon.warning' => __(
+                    'wire:flux-confirm.type.warning' => __(
                         'Recalculate prices|Are you sure you want to recalculate the prices?|Cancel|Confirm'
                     ),
                     'wire:click' => 'recalculateOrderPositions(); showSelectedActions = false;',
                 ]),
             DataTableButton::make()
-                ->label(__('Discount selected positions'))
+                ->text(__('Discount selected positions'))
                 ->when(fn () => resolve_static(UpdateOrderPosition::class, 'canPerformAction', [false])
                     && ! $this->order->is_locked
                 )
                 ->xOnClick(<<<'JS'
-                    $openModal('edit-position-discount');
+                    $modalOpen('edit-position-discount');
                 JS),
             DataTableButton::make()
-                ->label(__('Replicate'))
+                ->text(__('Replicate'))
                 ->when(fn () => resolve_static(CreateOrderPosition::class, 'canPerformAction', [false])
                     && ! $this->order->is_locked
                 )
                 ->wireClick('replicateSelected()'),
             DataTableButton::make()
-                ->label(__('Delete'))
+                ->text(__('Delete'))
                 ->icon('trash')
-                ->color('negative')
+                ->color('red')
                 ->when(fn () => resolve_static(DeleteOrderPosition::class, 'canPerformAction', [false])
                     && ! $this->order->is_locked
                 )
                 ->attributes([
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Order positions')]),
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Order positions')]),
                     'wire:click' => 'deleteSelectedOrderPositions(); showSelectedActions = false;',
                 ]),
         ];
     }
 
-    public function getFormatters(): array
-    {
-        return array_merge(
-            parent::getFormatters(),
-            [
-                'slug_position' => 'string',
-                'alternative_tag' => ['state', [__('Alternative') => 'negative']],
-            ]
-        );
-    }
-
-    protected function getLeftAppends(): array
-    {
-        return [
-            'name' => 'indentation',
-        ];
-    }
-
-    protected function getRightAppends(): array
-    {
-        return [
-            'name' => 'alternative_tag',
-        ];
-    }
-
-    protected function getTopAppends(): array
-    {
-        return [
-            'name' => 'product_number',
-        ];
-    }
-
-    protected function getReturnKeys(): array
-    {
-        return array_merge(
-            parent::getReturnKeys(),
-            [
-                'client_id',
-                'ledger_account_id',
-                'order_id',
-                'parent_id',
-                'price_id',
-                'price_list_id',
-                'product_id',
-                'vat_rate_id',
-                'warehouse_id',
-                'amount',
-                'amount_bundle',
-                'discount_percentage',
-                'purchase_price',
-                'total_base_gross_price',
-                'total_base_net_price',
-                'total_gross_price',
-                'vat_price',
-                'unit_net_price',
-                'unit_gross_price',
-                'vat_rate_percentage',
-                'description',
-                'name',
-                'product_number',
-                'sort_number',
-                'is_alternative',
-                'is_net',
-                'is_free_text',
-                'is_bundle_position',
-                'depth',
-                'has_children',
-                'unit_price',
-                'alternative_tag',
-                'indentation',
-            ]
-        );
-    }
-
-    protected function itemToArray($item): array
-    {
-        $item = parent::itemToArray($item);
-
-        $item['indentation'] = '';
-        $item['unit_price'] = data_get($item, 'is_net')
-            ? data_get($item, 'unit_net_price', 0)
-            : data_get($item, 'unit_gross_price', 0);
-        $item['alternative_tag'] = data_get($item, 'is_alternative') ? __('Alternative') : '';
-
-        if (($depth = str_word_count(data_get($item, 'slug_position', ''), 0, '.')) > 0) {
-            $indent = $depth * 20;
-            $item['indentation'] = <<<HTML
-                    <div class="text-right indent-icon" style="width:{$indent}px;">
-                    </div>
-                    HTML;
-        }
-
-        return $item;
-    }
-
-    #[Renderless]
-    public function showProduct(Product $product): void
-    {
-        $this->js(<<<JS
-            \$openDetailModal('{$product->getUrl()}');
-        JS);
-    }
-
-    #[Renderless]
-    public function createTasks(int $projectId): void
-    {
-        foreach ($this->getSelectedModelsQuery()->get(['id', 'name', 'description']) as $orderPosition) {
-            // check if the task already exists or the selected order position is not a numeric value
-            if (resolve_static(Task::class, 'query')
-                ->where('project_id', $projectId)
-                ->where('order_position_id', $modelId = $orderPosition->getKey())
-                ->where('model_type', $modelType = $orderPosition->getMorphClass())
-                ->where('model_id', $modelId)
-                ->exists()
-            ) {
-                continue;
-            }
-
-            try {
-                CreateTask::make([
-                    'project_id' => $projectId,
-                    'order_position_id' => $modelId,
-                    'model_type' => $modelType,
-                    'model_id' => $modelId,
-                    'name' => $orderPosition->name,
-                    'description' => $orderPosition->description,
-                ])
-                    ->checkPermission()
-                    ->validate()
-                    ->execute();
-            } catch (ValidationException|UnauthorizedException $e) {
-                exception_to_notifications($e, $this);
-            }
-        }
-    }
-
-    #[Renderless]
-    public function editOrderPosition(?OrderPosition $orderPosition = null): void
-    {
-        $this->orderPosition->is_net = $this->order->getPriceList()->is_net;
-        if ($orderPosition->exists) {
-            $this->orderPosition->fill($orderPosition);
-        }
-
-        $this->js(<<<'JS'
-            $openModal('edit-order-position');
-        JS);
-    }
-
-    #[Renderless]
-    public function replicateSelected(): void
-    {
-        $this->orderPosition->reset();
-        foreach ($this->getSelectedModelsQuery()
-            ->where('is_bundle_position', false)
-            ->get() as $orderPosition
-        ) {
-            $this->orderPosition->fill($orderPosition);
-            $this->orderPosition->reset(
-                'id',
-                'origin_position_id',
-                'parent_id',
-                'sort_number',
-                'slug_position',
-            );
-            $this->addOrderPosition(false);
-        }
-
-        $this->reset('selected');
-        $this->recalculateOrderTotals();
-        $this->loadData();
-    }
-
-    #[Renderless]
-    public function changedProductId(Product $product): void
-    {
-        $priceList = $this->orderPosition->price_list_id
-            ? resolve_static(PriceList::class, 'query')
-                ->whereKey($this->orderPosition->price_list_id)
-                ->first([
-                    'id',
-                    'parent_id',
-                    'rounding_method_enum',
-                    'rounding_precision',
-                    'rounding_number',
-                    'rounding_mode',
-                    'is_net',
-                ])
-            : $this->order->getPriceList();
-        $this->orderPosition->fillFromProduct($product);
-        $this->orderPosition->is_net = $this->order->getPriceList()->is_net;
-        $this->orderPosition->unit_price = PriceHelper::make($this->orderPosition->getProduct())
-            ->setPriceList($priceList ?? $this->order->getPriceList())
-            ->setContact($this->order->getContact())
-            ->price()
-            ?->price ?? 0;
-    }
-
     #[Renderless]
     public function addOrderPosition(bool $reload = true): bool
     {
+        if ($this->orderPositionsView !== 'table') {
+            $this->forceRender();
+        }
+
         $this->orderPosition->order_id = $this->order->id;
         $this->orderPosition->vat_rate_id = $this->order->vat_rate_id ?? $this->orderPosition->vat_rate_id;
 
@@ -422,9 +195,228 @@ class OrderPositions extends OrderPositionList
     }
 
     #[Renderless]
-    public function resetOrderPosition(): void
+    public function changedProductId(Product $product): void
     {
-        $this->orderPosition->reset();
+        $priceList = $this->orderPosition->price_list_id
+            ? resolve_static(PriceList::class, 'query')
+                ->whereKey($this->orderPosition->price_list_id)
+                ->first([
+                    'id',
+                    'parent_id',
+                    'rounding_method_enum',
+                    'rounding_precision',
+                    'rounding_number',
+                    'rounding_mode',
+                    'is_net',
+                ])
+            : $this->order->getPriceList();
+        $this->orderPosition->fillFromProduct($product);
+        $this->orderPosition->is_net = $this->order->getPriceList()->is_net;
+        $this->orderPosition->unit_price = PriceHelper::make($this->orderPosition->getProduct())
+            ->setPriceList($priceList ?? $this->order->getPriceList())
+            ->setContact($this->order->getContact())
+            ->price()
+            ?->price ?? 0;
+    }
+
+    #[Renderless]
+    public function createTasks(int $projectId): void
+    {
+        foreach ($this->getSelectedModelsQuery()->get(['id', 'name', 'description']) as $orderPosition) {
+            // check if the task already exists or the selected order position is not a numeric value
+            if (resolve_static(Task::class, 'query')
+                ->where('project_id', $projectId)
+                ->where('order_position_id', $modelId = $orderPosition->getKey())
+                ->where('model_type', $modelType = $orderPosition->getMorphClass())
+                ->where('model_id', $modelId)
+                ->exists()
+            ) {
+                continue;
+            }
+
+            try {
+                CreateTask::make([
+                    'project_id' => $projectId,
+                    'responsible_user_id' => auth()->id(),
+                    'order_position_id' => $modelId,
+                    'model_type' => $modelType,
+                    'model_id' => $modelId,
+                    'name' => $orderPosition->name,
+                    'description' => $orderPosition->description,
+                    'users' => [
+                        auth()->id(),
+                    ],
+                ])
+                    ->checkPermission()
+                    ->validate()
+                    ->execute();
+            } catch (ValidationException|UnauthorizedException $e) {
+                exception_to_notifications($e, $this);
+            }
+        }
+    }
+
+    #[Renderless]
+    public function deleteOrderPosition(): bool
+    {
+        if ($this->orderPositionsView !== 'table') {
+            $this->forceRender();
+        }
+
+        try {
+            $this->orderPosition->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+        $this->recalculateOrderTotals();
+
+        return true;
+    }
+
+    #[Renderless]
+    public function deleteSelectedOrderPositions(): void
+    {
+        try {
+            $this->getSelectedModelsQuery()->pluck('id')->each(function (int $id): void {
+                DeleteOrderPosition::make(['id' => $id])
+                    ->checkPermission()
+                    ->validate()
+                    ->execute();
+            });
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+        }
+
+        $this->loadData();
+        $this->recalculateOrderTotals();
+
+        $this->reset('selected');
+    }
+
+    #[Renderless]
+    public function discountSelectedPositions(): void
+    {
+        $discount = bcdiv($this->discount, 100);
+        foreach ($this->getSelectedModelsQuery()->get(['id']) as $orderPositions) {
+            try {
+                UpdateOrderPosition::make([
+                    'id' => $orderPositions->id,
+                    'discount_percentage' => $discount,
+                ])
+                    ->checkPermission()
+                    ->validate()
+                    ->execute();
+            } catch (ValidationException|UnauthorizedException $e) {
+                exception_to_notifications($e, $this);
+            }
+        }
+
+        $this->loadData();
+        $this->recalculateOrderTotals();
+        $this->discount = null;
+    }
+
+    #[Renderless]
+    public function editOrderPosition(?OrderPosition $orderPosition = null): void
+    {
+        $this->orderPosition->is_net = $this->order->getPriceList()->is_net;
+        if ($orderPosition->exists) {
+            $this->orderPosition->fill($orderPosition);
+        } else {
+            $this->orderPosition->vat_rate_id ??= resolve_static(VatRate::class, 'default')->getKey();
+        }
+
+        $this->js(<<<'JS'
+            $modalOpen('edit-order-position');
+        JS);
+    }
+
+    public function getBuilder(Builder $builder): Builder
+    {
+        return $builder->where('order_id', $this->order->id)->reorder('slug_position');
+    }
+
+    public function getFormatters(): array
+    {
+        return array_merge(
+            parent::getFormatters(),
+            [
+                'slug_position' => 'string',
+                'alternative_tag' => ['state', [__('Alternative') => 'red']],
+            ]
+        );
+    }
+
+    public function getListeners(): array
+    {
+        return array_merge(
+            parent::getListeners(),
+            [
+                'create-tasks' => 'createTasks',
+                'order:add-products' => 'addProducts',
+            ]
+        );
+    }
+
+    public function getSelectAttributes(): ComponentAttributeBag
+    {
+        return new ComponentAttributeBag([
+            'x-show' => '! record.is_bundle_position && ! record.is_locked',
+        ]);
+    }
+
+    public function getSortableOrderPositions(): array
+    {
+        resolve_static(OrderPosition::class, 'addGlobalScope', [
+            'scope' => 'sorted',
+            'implementation' => function (Builder $query): void {
+                $query->ordered();
+            },
+        ]);
+
+        return resolve_static(OrderPosition::class, 'familyTree')
+            ->where('order_id', $this->order->id)
+            ->whereNull('parent_id')
+            ->get()
+            ->toArray();
+    }
+
+    public function getViewData(): array
+    {
+        return array_merge(
+            parent::getViewData(),
+            [
+                'vatRates' => resolve_static(VatRate::class, 'query')
+                    ->get(['id', 'name', 'rate_percentage'])
+                    ->toArray(),
+            ]
+        );
+    }
+
+    public function movePosition(OrderPosition $position, int $newPosition, ?int $parentId = null): void
+    {
+        $newPosition = $newPosition + 1;
+        if ($position->parent_id === $parentId && $position->sort_number === $newPosition) {
+            return;
+        }
+
+        try {
+            UpdateOrderPosition::make([
+                'id' => $position->id,
+                'parent_id' => $parentId,
+                'sort_number' => $newPosition,
+            ])
+                ->validate()
+                ->execute();
+
+            $this->forceRender();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+        }
     }
 
     #[Renderless]
@@ -470,63 +462,174 @@ class OrderPositions extends OrderPositionList
     }
 
     #[Renderless]
-    public function discountSelectedPositions(): void
+    public function replicateSelected(): void
     {
-        $discount = bcdiv($this->discount, 100);
-        foreach ($this->getSelectedModelsQuery()->get(['id']) as $orderPositions) {
-            try {
-                UpdateOrderPosition::make([
-                    'id' => $orderPositions->id,
-                    'discount_percentage' => $discount,
-                ])
-                    ->checkPermission()
-                    ->validate()
-                    ->execute();
-            } catch (ValidationException|UnauthorizedException $e) {
-                exception_to_notifications($e, $this);
-            }
+        $this->orderPosition->reset();
+        foreach ($this->getSelectedModelsQuery()
+            ->where('is_bundle_position', false)
+            ->get() as $orderPosition
+        ) {
+            $this->orderPosition->fill($orderPosition);
+            $this->orderPosition->reset(
+                'id',
+                'origin_position_id',
+                'parent_id',
+                'sort_number',
+                'slug_position',
+            );
+            $this->addOrderPosition(false);
         }
-
-        $this->loadData();
-        $this->recalculateOrderTotals();
-        $this->discount = null;
-    }
-
-    #[Renderless]
-    public function deleteSelectedOrderPositions(): void
-    {
-        try {
-            $this->getSelectedModelsQuery()->pluck('id')->each(function (int $id) {
-                DeleteOrderPosition::make(['id' => $id])
-                    ->checkPermission()
-                    ->validate()
-                    ->execute();
-            });
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-        }
-
-        $this->loadData();
-        $this->recalculateOrderTotals();
 
         $this->reset('selected');
+        $this->recalculateOrderTotals();
+        $this->loadData();
     }
 
     #[Renderless]
-    public function deleteOrderPosition(): bool
+    public function resetOrderPosition(): void
     {
-        try {
-            $this->orderPosition->delete();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+        $this->orderPosition->reset();
+    }
 
-            return false;
+    #[Renderless]
+    public function showProduct(Product $product): void
+    {
+        $this->js(<<<JS
+            \$openDetailModal('{$product->getUrl()}');
+        JS);
+    }
+
+    public function switchView(string $view): void
+    {
+        if ($view === $this->orderPositionsView) {
+            return;
         }
 
-        $this->loadData();
-        $this->recalculateOrderTotals();
+        if ($view !== 'table') {
+            $this->data = [];
+        } else {
+            $this->loadData();
+        }
 
-        return true;
+        $this->forceRender();
+
+        $this->orderPositionsView = $view;
+
+        $this->cacheState();
+    }
+
+    protected function compileStoredLayout(): array
+    {
+        $savedFilter = parent::compileStoredLayout();
+
+        data_set($savedFilter, 'settings.orderPositionsView', $this->orderPositionsView);
+
+        return $savedFilter;
+    }
+
+    protected function getLayout(): string
+    {
+        return $this->orderPositionsView === 'table'
+            ? 'tall-datatables::layouts.table'
+            : 'flux::order.sort-order-positions';
+    }
+
+    protected function getLeftAppends(): array
+    {
+        return [
+            'name' => 'indentation',
+        ];
+    }
+
+    protected function getReturnKeys(): array
+    {
+        return array_merge(
+            parent::getReturnKeys(),
+            [
+                'client_id',
+                'ledger_account_id',
+                'order_id',
+                'parent_id',
+                'price_id',
+                'price_list_id',
+                'product_id',
+                'vat_rate_id',
+                'warehouse_id',
+                'amount',
+                'amount_bundle',
+                'discount_percentage',
+                'purchase_price',
+                'total_base_gross_price',
+                'total_base_net_price',
+                'total_gross_price',
+                'vat_price',
+                'unit_net_price',
+                'unit_gross_price',
+                'vat_rate_percentage',
+                'description',
+                'name',
+                'product_number',
+                'sort_number',
+                'is_alternative',
+                'is_net',
+                'is_free_text',
+                'is_bundle_position',
+                'depth',
+                'has_children',
+                'unit_price',
+                'alternative_tag',
+                'indentation',
+            ]
+        );
+    }
+
+    protected function getRightAppends(): array
+    {
+        return [
+            'name' => 'alternative_tag',
+        ];
+    }
+
+    protected function getRowAttributes(): DataTableRowAttributes
+    {
+        return DataTableRowAttributes::make()
+            ->bind(
+                'class',
+                "{
+                    'bg-gray-200 dark:bg-secondary-700 font-bold': (record.is_free_text && record.depth === 0 && record.has_children),
+                    'opacity-90': record.is_alternative,
+                    'opacity-50 sortable-filter': record.is_bundle_position,
+                    'font-semibold': record.is_free_text
+                }"
+            );
+    }
+
+    protected function getTopAppends(): array
+    {
+        return [
+            'name' => 'product_number',
+        ];
+    }
+
+    protected function itemToArray($item): array
+    {
+        $item = parent::itemToArray($item);
+
+        $item['indentation'] = '';
+        $item['unit_price'] = data_get($item, 'is_net')
+            ? data_get($item, 'unit_net_price', 0)
+            : data_get($item, 'unit_gross_price', 0);
+        $item['alternative_tag'] = data_get($item, 'is_alternative') ? __('Alternative') : '';
+
+        if (($depth = str_word_count(data_get($item, 'slug_position', ''), 0, '.')) > 0) {
+            $indent = $depth * 20;
+            $item['indentation'] = <<<HTML
+                    <div class="text-right indent-icon" style="width:{$indent}px;">
+                    </div>
+                    HTML;
+        }
+
+        return $item;
     }
 
     protected function recalculateOrderTotals(): void

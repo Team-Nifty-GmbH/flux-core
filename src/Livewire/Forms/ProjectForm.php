@@ -11,36 +11,43 @@ use Livewire\Form;
 
 class ProjectForm extends Form
 {
-    #[Locked]
-    public ?int $id = null;
+    public array $additionalColumns = [];
+
+    public ?string $budget = null;
 
     public ?int $client_id = null;
 
     public ?int $contact_id = null;
 
-    public ?int $order_id = null;
+    public ?string $description = null;
 
-    public ?int $responsible_user_id = null;
+    public ?string $end_date = null;
+
+    #[Locked]
+    public ?int $id = null;
+
+    public ?string $name = null;
+
+    public ?int $order_id = null;
 
     public ?int $parent_id = null;
 
     public ?string $project_number = null;
 
-    public ?string $name = null;
+    public ?int $responsible_user_id = null;
 
     public ?string $start_date = null;
-
-    public ?string $end_date = null;
-
-    public ?string $description = null;
 
     public string $state = 'open';
 
     public ?string $time_budget = null;
 
-    public ?string $budget = null;
+    public function reset(...$properties): void
+    {
+        parent::reset(...$properties);
 
-    public array $additionalColumns = [];
+        $this->client_id = resolve_static(Client::class, 'default')?->getKey();
+    }
 
     public function save(): void
     {
@@ -56,12 +63,5 @@ class ProjectForm extends Form
         $response = $action->validate()->execute();
 
         $this->fill($response);
-    }
-
-    public function reset(...$properties): void
-    {
-        parent::reset(...$properties);
-
-        $this->client_id = Client::default()?->getKey();
     }
 }

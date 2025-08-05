@@ -10,15 +10,17 @@ use Livewire\Attributes\Locked;
 class SepaMandateForm extends FluxForm
 {
     #[Locked]
-    public ?int $id = null;
-
-    #[Locked]
     public ?int $client_id = null;
+
+    public ?int $contact_bank_connection_id = null;
 
     #[Locked]
     public ?int $contact_id = null;
 
-    public ?int $contact_bank_connection_id = null;
+    #[Locked]
+    public ?int $id = null;
+
+    public ?string $sepa_mandate_type_enum = null;
 
     public ?string $signed_date = null;
 

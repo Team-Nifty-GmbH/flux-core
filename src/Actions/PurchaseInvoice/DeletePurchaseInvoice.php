@@ -8,20 +8,20 @@ use FluxErp\Rulesets\PurchaseInvoice\DeletePurchaseInvoiceRuleset;
 
 class DeletePurchaseInvoice extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeletePurchaseInvoiceRuleset::class;
-    }
-
     public static function models(): array
     {
         return [PurchaseInvoice::class];
     }
 
+    protected function getRulesets(): string|array
+    {
+        return DeletePurchaseInvoiceRuleset::class;
+    }
+
     public function performAction(): ?bool
     {
         return resolve_static(PurchaseInvoice::class, 'query')
-            ->whereKey($this->data['id'])
+            ->whereKey($this->getData('id'))
             ->first()
             ->delete();
     }

@@ -13,11 +13,11 @@ use FluxErp\Models\Client;
 use FluxErp\Models\Country;
 use FluxErp\Models\Scopes\UserClientScope;
 use FluxErp\Traits\Livewire\Actions;
+use FluxErp\Traits\Livewire\WithFileUploads;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
-use Livewire\WithFileUploads;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
@@ -25,41 +25,22 @@ class Clients extends ClientList
 {
     use Actions, WithFileUploads, WithTabs;
 
-    protected string $view = 'flux::livewire.settings.clients';
-
-    public string $tab = 'general';
-
     public ClientForm $client;
 
     public MediaUploadForm $logo;
 
     public MediaUploadForm $logoSmall;
 
-    protected function getViewData(): array
-    {
-        return array_merge(
-            parent::getViewData(),
-            [
-                'bankConnections' => resolve_static(BankConnection::class, 'query')
-                    ->where('is_active', true)
-                    ->select(['bank_connections.id', 'name'])
-                    ->get()
-                    ->toArray(),
-                'countries' => resolve_static(Country::class, 'query')
-                    ->orderBy('iso_alpha2', 'ASC')
-                    ->select(['id', 'name', 'iso_alpha2'])
-                    ->get()
-                    ->toArray(),
-            ]
-        );
-    }
+    public string $tab = 'general';
+
+    protected string $view = 'flux::livewire.settings.clients';
 
     protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
-                ->label(__('Create'))
-                ->color('primary')
+                ->text(__('Create'))
+                ->color('indigo')
                 ->icon('plus')
                 ->attributes([
                     'wire:click' => 'show()',
@@ -72,16 +53,16 @@ class Clients extends ClientList
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
-                ->color('primary')
+                ->text(__('Edit'))
+                ->color('indigo')
                 ->icon('pencil')
                 ->attributes([
                     'wire:click' => 'show(record.id)',
                 ])
                 ->when(resolve_static(UpdateClient::class, 'canPerformAction', [false])),
             DataTableButton::make()
-                ->label(__('Customer portal'))
-                ->color('primary')
+                ->text(__('Customer portal'))
+                ->color('indigo')
                 ->icon('user')
                 ->attributes([
                     'wire:click' => 'showCustomerPortal(record.id)',
@@ -90,28 +71,34 @@ class Clients extends ClientList
         ];
     }
 
-    protected function getBuilder(Builder $builder): Builder
+    #[Renderless]
+    public function delete(): bool
     {
-        return $builder->withoutGlobalScope(UserClientScope::class);
+        try {
+            $this->client->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
     }
 
-    #[Renderless]
-    public function show(?Client $record = null): void
+    public function getTabs(): array
     {
-        $this->client->reset();
-        $record->load('bankConnections:id');
-        $client = $record->toArray();
-        $client['bank_connections'] = array_column($client['bank_connections'], 'id');
-        $client['opening_hours'] = $client['opening_hours'] ?? [];
-
-        $this->client->fill($client);
-
-        $this->logo->fill($record->getMedia('logo')->first() ?? []);
-        $this->logoSmall->fill($record->getMedia('logo_small')->first() ?? []);
-
-        $this->js(<<<'JS'
-            $openModal('edit-client');
-        JS);
+        return [
+            TabButton::make('general')
+                ->text(__('General')),
+            TabButton::make('settings.client.logos')
+                ->text(__('Logos')),
+            TabButton::make('settings.client.terms-and-conditions')
+                ->text(__('Terms and Conditions')),
+            TabButton::make('settings.client.sepa')
+                ->text(__('SEPA')),
+        ];
     }
 
     #[Renderless]
@@ -149,7 +136,7 @@ class Clients extends ClientList
             }
         }
 
-        $this->notification()->success(__(':model saved', ['model' => __('Client')]));
+        $this->notification()->success(__(':model saved', ['model' => __('Client')]))->send();
 
         $this->loadData();
 
@@ -157,19 +144,22 @@ class Clients extends ClientList
     }
 
     #[Renderless]
-    public function delete(): bool
+    public function show(?Client $record = null): void
     {
-        try {
-            $this->client->delete();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
+        $this->client->reset();
+        $record->load('bankConnections:id');
+        $client = $record->toArray();
+        $client['bank_connections'] = array_column($client['bank_connections'], 'id');
+        $client['opening_hours'] = $client['opening_hours'] ?? [];
 
-            return false;
-        }
+        $this->client->fill($client);
 
-        $this->loadData();
+        $this->logo->fill($record->getMedia('logo')->first() ?? []);
+        $this->logoSmall->fill($record->getMedia('logo_small')->first() ?? []);
 
-        return true;
+        $this->js(<<<'JS'
+            $modalOpen('edit-client');
+        JS);
     }
 
     public function showCustomerPortal(Client $record): void
@@ -177,22 +167,32 @@ class Clients extends ClientList
         $this->redirect(route('settings.customer-portal', ['client' => $record->id]), true);
     }
 
-    public function getTabs(): array
-    {
-        return [
-            TabButton::make('general')
-                ->label(__('General')),
-            TabButton::make('settings.client.logos')
-                ->label(__('Logos')),
-            TabButton::make('settings.client.terms-and-conditions')
-                ->label(__('Terms and Conditions')),
-            TabButton::make('settings.client.sepa')
-                ->label(__('SEPA')),
-        ];
-    }
-
     public function updatingTab(): void
     {
         $this->forceRender();
+    }
+
+    protected function getBuilder(Builder $builder): Builder
+    {
+        return $builder->withoutGlobalScope(UserClientScope::class);
+    }
+
+    protected function getViewData(): array
+    {
+        return array_merge(
+            parent::getViewData(),
+            [
+                'bankConnections' => resolve_static(BankConnection::class, 'query')
+                    ->where('is_active', true)
+                    ->select(['bank_connections.id', 'name'])
+                    ->get()
+                    ->toArray(),
+                'countries' => resolve_static(Country::class, 'query')
+                    ->orderBy('iso_alpha2', 'ASC')
+                    ->select(['id', 'name', 'iso_alpha2'])
+                    ->get()
+                    ->toArray(),
+            ]
+        );
     }
 }

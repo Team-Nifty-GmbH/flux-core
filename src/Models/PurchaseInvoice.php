@@ -2,6 +2,7 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Contracts\HasMediaForeignKey;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Communicatable;
 use FluxErp\Traits\HasPackageFactory;
@@ -15,19 +16,26 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\MediaLibrary\HasMedia;
 
-class PurchaseInvoice extends FluxModel implements HasMedia
+class PurchaseInvoice extends FluxModel implements HasMedia, HasMediaForeignKey
 {
     use Commentable, Communicatable, HasPackageFactory, HasTags, HasUserModification, HasUuid, InteractsWithMedia,
         LogsActivity, SoftDeletes;
 
+    public static function mediaReplaced(int|string|null $oldMediaId, int|string|null $newMediaId): void
+    {
+        static::query()
+            ->where('media_id', $oldMediaId)
+            ->update(['media_id' => $newMediaId]);
+    }
+
     protected static function booted(): void
     {
-        static::creating(function (PurchaseInvoice $model) {
+        static::creating(function (PurchaseInvoice $model): void {
             $model->invoice_date = $model->invoice_date ?: now()->toDateString();
         });
 
-        static::saving(function (PurchaseInvoice $model) {
-            if ($model->isDirty('iban')) {
+        static::saving(function (PurchaseInvoice $model): void {
+            if ($model->isDirty('iban') && is_string($model->iban)) {
                 $model->iban = str_replace(' ', '', strtoupper($model->iban));
             }
         });
@@ -38,7 +46,31 @@ class PurchaseInvoice extends FluxModel implements HasMedia
         return [
             'invoice_date' => 'date',
             'is_net' => 'boolean',
+            'total_gross_price' => 'decimal:2',
         ];
+    }
+
+    public function calculateTotalGrossPrice(): ?string
+    {
+        $vatRates = resolve_static(VatRate::class, 'query')
+            ->pluck('rate_percentage', 'id')
+            ->toArray();
+
+        return $this->purchaseInvoicePositions?->reduce(
+            function (string $carry, PurchaseInvoicePosition $position) use ($vatRates) {
+                if ($this->is_net) {
+                    $positionGross = net_to_gross(
+                        $position->total_price,
+                        data_get($vatRates, $position->vat_rate_id) ?? 0
+                    );
+                } else {
+                    $positionGross = $position->total_price;
+                }
+
+                return bcadd($carry, $positionGross);
+            },
+            '0'
+        );
     }
 
     public function client(): BelongsTo

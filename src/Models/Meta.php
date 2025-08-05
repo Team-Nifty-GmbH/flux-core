@@ -12,6 +12,10 @@ class Meta extends FluxModel
 {
     use HasTimestamps;
 
+    protected $cachedValue;
+
+    protected ?string $forceType = null;
+
     protected $guarded = [
         'id',
         'metable_type',
@@ -30,21 +34,17 @@ class Meta extends FluxModel
 
     protected $table = 'meta';
 
-    protected $cachedValue;
-
-    protected ?string $forceType = null;
+    /**
+     * Load the datatype Registry from the container.
+     */
+    public static function getDataTypeRegistry(): Registry
+    {
+        return app('datatype.registry');
+    }
 
     public function additionalColumn(): BelongsTo
     {
         return $this->belongsTo(AdditionalColumn::class);
-    }
-
-    /**
-     * Metable Relation.
-     */
-    public function metable(): MorphTo
-    {
-        return $this->morphTo('model');
     }
 
     /**
@@ -55,6 +55,14 @@ class Meta extends FluxModel
         $this->forceType = $value;
 
         return $this;
+    }
+
+    /**
+     * Retrieve the underlying serialized value.
+     */
+    public function getRawValueAttribute(): ?string
+    {
+        return $this->attributes['value'] ?? null;
     }
 
     /**
@@ -75,56 +83,11 @@ class Meta extends FluxModel
     }
 
     /**
-     * Mutator for value.
-     *
-     * The `type` attribute will be automatically updated to match the datatype of the input.
-     *
-     *
-     * @throws \FluxErp\Exceptions\DataTypeException
+     * Metable Relation.
      */
-    public function setValueAttribute(mixed $value): void
+    public function metable(): MorphTo
     {
-        $registry = $this->getDataTypeRegistry();
-
-        $this->attributes['type'] = $this->forceType ?? $registry->getTypeForValue($value);
-
-        $this->attributes['value'] = is_null($value)
-            ? $value
-            : $registry->getHandlerForType($this->attributes['type'])->serializeValue($value);
-
-        $this->cachedValue = null;
-    }
-
-    /**
-     * Retrieve the underlying serialized value.
-     */
-    public function getRawValueAttribute(): ?string
-    {
-        return $this->attributes['value'] ?? null;
-    }
-
-    /**
-     * Load the datatype Registry from the container.
-     */
-    public static function getDataTypeRegistry(): Registry
-    {
-        return app('datatype.registry');
-    }
-
-    /**
-     * Query records where value is considered empty.
-     */
-    public function scopeWhereValueEmpty(Builder $query): void
-    {
-        $query->where(fn ($q) => $q->whereNull('value')->orWhere('value', '=', ''));
-    }
-
-    /**
-     * Query records where value is considered not empty.
-     */
-    public function scopeWhereValueNotEmpty(Builder $query): void
-    {
-        $query->where(fn ($q) => $q->whereNotNull('value')->where('value', '!=', ''));
+        return $this->morphTo('model');
     }
 
     /**
@@ -142,6 +105,14 @@ class Meta extends FluxModel
             : $registry->getHandlerForType($type)->serializeValue($value);
 
         $query->where('type', $type)->where('value', $operator, $serializedValue);
+    }
+
+    /**
+     * Query records where value is considered empty.
+     */
+    public function scopeWhereValueEmpty(Builder $query): void
+    {
+        $query->where(fn ($q) => $q->whereNull('value')->orWhere('value', '=', ''));
     }
 
     /**
@@ -163,10 +134,39 @@ class Meta extends FluxModel
             ];
         });
 
-        $query->where(function ($query) use ($serializedValues) {
-            $serializedValues->groupBy('type')->each(function ($values, $type) use ($query) {
+        $query->where(function ($query) use ($serializedValues): void {
+            $serializedValues->groupBy('type')->each(function ($values, $type) use ($query): void {
                 $query->orWhere(fn ($q) => $q->where('type', $type)->whereIn('value', $values->pluck('value')));
             });
         });
+    }
+
+    /**
+     * Query records where value is considered not empty.
+     */
+    public function scopeWhereValueNotEmpty(Builder $query): void
+    {
+        $query->where(fn ($q) => $q->whereNotNull('value')->where('value', '!=', ''));
+    }
+
+    /**
+     * Mutator for value.
+     *
+     * The `type` attribute will be automatically updated to match the datatype of the input.
+     *
+     *
+     * @throws \FluxErp\Exceptions\DataTypeException
+     */
+    public function setValueAttribute(mixed $value): void
+    {
+        $registry = $this->getDataTypeRegistry();
+
+        $this->attributes['type'] = $this->forceType ?? $registry->getTypeForValue($value);
+
+        $this->attributes['value'] = is_null($value)
+            ? $value
+            : $registry->getHandlerForType($this->attributes['type'])->serializeValue($value);
+
+        $this->cachedValue = null;
     }
 }

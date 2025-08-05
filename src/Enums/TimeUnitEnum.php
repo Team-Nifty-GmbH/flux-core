@@ -8,48 +8,16 @@ enum TimeUnitEnum: string
 {
     use EnumTrait;
 
-    case Second = 'Second';
-
-    case Minute = 'Minute';
-
-    case Hour = 'Hour';
-
-    case Day = 'Day';
-
-    case Week = 'Week';
-
-    case Month = 'Month';
-
-    case Year = 'Year';
-
-    public function convertFromMilliseconds($milliseconds): string
-    {
-        return $this->convertFromSeconds(bcdiv($milliseconds, 1000));
-    }
-
-    public function convertFromSeconds($seconds): string|float|int
+    public function convertFromDays($days): string|float|int
     {
         return match ($this) {
-            self::Second => $seconds,
-            self::Minute => bcdiv($seconds, 60),
-            self::Hour => bcdiv($seconds, 3600),
-            self::Day => bcdiv($seconds, 86400),
-            self::Week => bcdiv($seconds, 604800),
-            self::Month => bcdiv($seconds, 2592000),
-            self::Year => bcdiv($seconds, 31536000),
-        };
-    }
-
-    public function convertFromMinutes($minutes): string|float|int
-    {
-        return match ($this) {
-            self::Second => bcmul($minutes, 60),
-            self::Minute => $minutes,
-            self::Hour => bcdiv($minutes, 60),
-            self::Day => bcdiv($minutes, 1440),
-            self::Week => bcdiv($minutes, 10080),
-            self::Month => bcdiv($minutes, 43200),
-            self::Year => bcdiv($minutes, 525600),
+            self::Second => bcmul($days, 86400),
+            self::Minute => bcmul($days, 1440),
+            self::Hour => bcmul($days, 24),
+            self::Day => $days,
+            self::Week => bcdiv($days, 7),
+            self::Month => bcdiv($days, 30),
+            self::Year => bcdiv($days, 365),
         };
     }
 
@@ -66,16 +34,21 @@ enum TimeUnitEnum: string
         };
     }
 
-    public function convertFromDays($days): string|float|int
+    public function convertFromMilliseconds($milliseconds): string
+    {
+        return $this->convertFromSeconds(bcdiv($milliseconds, 1000));
+    }
+
+    public function convertFromMinutes($minutes): string|float|int
     {
         return match ($this) {
-            self::Second => bcmul($days, 86400),
-            self::Minute => bcmul($days, 1440),
-            self::Hour => bcmul($days, 24),
-            self::Day => $days,
-            self::Week => bcdiv($days, 7),
-            self::Month => bcdiv($days, 30),
-            self::Year => bcdiv($days, 365),
+            self::Second => bcmul($minutes, 60),
+            self::Minute => $minutes,
+            self::Hour => bcdiv($minutes, 60),
+            self::Day => bcdiv($minutes, 1440),
+            self::Week => bcdiv($minutes, 10080),
+            self::Month => bcdiv($minutes, 43200),
+            self::Year => bcdiv($minutes, 525600),
         };
     }
 
@@ -92,6 +65,19 @@ enum TimeUnitEnum: string
         };
     }
 
+    public function convertFromSeconds($seconds): string|float|int
+    {
+        return match ($this) {
+            self::Second => $seconds,
+            self::Minute => bcdiv($seconds, 60),
+            self::Hour => bcdiv($seconds, 3600),
+            self::Day => bcdiv($seconds, 86400),
+            self::Week => bcdiv($seconds, 604800),
+            self::Month => bcdiv($seconds, 2592000),
+            self::Year => bcdiv($seconds, 31536000),
+        };
+    }
+
     public function convertFromYears($years): string|float|int
     {
         return match ($this) {
@@ -104,4 +90,18 @@ enum TimeUnitEnum: string
             self::Year => $years,
         };
     }
+
+    case Day = 'Day';
+
+    case Hour = 'Hour';
+
+    case Minute = 'Minute';
+
+    case Month = 'Month';
+
+    case Second = 'Second';
+
+    case Week = 'Week';
+
+    case Year = 'Year';
 }

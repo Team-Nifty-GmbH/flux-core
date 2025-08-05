@@ -9,14 +9,14 @@ use Livewire\Attributes\Locked;
 
 class WarehouseForm extends FluxForm
 {
+    public ?int $address_id = null;
+
     #[Locked]
     public ?int $id = null;
 
-    public ?int $address_id = null;
+    public bool $is_default = false;
 
     public ?string $name = null;
-
-    public bool $is_default = false;
 
     protected function getActions(): array
     {

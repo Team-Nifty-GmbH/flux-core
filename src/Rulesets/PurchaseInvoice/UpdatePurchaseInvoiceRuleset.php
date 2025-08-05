@@ -11,12 +11,29 @@ use FluxErp\Models\PurchaseInvoice;
 use FluxErp\Models\PurchaseInvoicePosition;
 use FluxErp\Models\User;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\ContactBankConnection\BankConnectionRuleset;
 use FluxErp\Rulesets\FluxRuleset;
 
 class UpdatePurchaseInvoiceRuleset extends FluxRuleset
 {
     protected static ?string $model = PurchaseInvoice::class;
+
+    public static function getRules(): array
+    {
+        return array_merge(
+            parent::getRules(),
+            resolve_static(BankConnectionRuleset::class, 'getRules'),
+            resolve_static(PurchaseInvoicePositionRuleset::class, 'getRules'),
+            resolve_static(TagRuleset::class, 'getRules'),
+            [
+                'purchase_invoice_positions.*.id' => [
+                    'integer',
+                    app(ModelExists::class, ['model' => PurchaseInvoicePosition::class]),
+                ],
+            ]
+        );
+    }
 
     public function rules(): array
     {
@@ -65,26 +82,14 @@ class UpdatePurchaseInvoiceRuleset extends FluxRuleset
             'invoice_date' => 'date',
             'system_delivery_date' => 'date|nullable|required_with:system_delivery_date_end',
             'system_delivery_date_end' => 'date|nullable|after_or_equal:system_delivery_date',
-            'invoice_number' => 'nullable|string',
+            'invoice_number' => 'nullable|string|max:255',
+            'total_gross_price' => [
+                'nullable',
+                app(Numeric::class, ['min' => 0]),
+            ],
             'is_net' => 'boolean',
 
             'purchase_invoice_positions' => 'array',
         ];
-    }
-
-    public static function getRules(): array
-    {
-        return array_merge(
-            parent::getRules(),
-            resolve_static(BankConnectionRuleset::class, 'getRules'),
-            resolve_static(PurchaseInvoicePositionRuleset::class, 'getRules'),
-            resolve_static(TagRuleset::class, 'getRules'),
-            [
-                'purchase_invoice_positions.*.id' => [
-                    'integer',
-                    app(ModelExists::class, ['model' => PurchaseInvoicePosition::class]),
-                ],
-            ]
-        );
     }
 }

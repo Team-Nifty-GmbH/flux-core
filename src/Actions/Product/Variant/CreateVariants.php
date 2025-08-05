@@ -11,14 +11,14 @@ use Illuminate\Database\Eloquent\Collection;
 
 class CreateVariants extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateVariantsRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Product::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateVariantsRuleset::class;
     }
 
     public function performAction(): Collection

@@ -39,7 +39,6 @@ class WebhookEventSubscriber
     public function subscribe($events): array
     {
         return [
-
         ];
     }
 }

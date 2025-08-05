@@ -8,9 +8,9 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class QueueMonitorable extends FluxPivot
 {
-    protected $table = 'queue_monitorables';
-
     public $timestamps = false;
+
+    protected $table = 'queue_monitorables';
 
     protected function casts(): array
     {

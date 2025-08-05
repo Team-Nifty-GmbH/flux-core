@@ -8,14 +8,14 @@ use FluxErp\Rulesets\WorkTime\CreateWorkTimeRuleset;
 
 class CreateWorkTime extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateWorkTimeRuleset::class;
-    }
-
     public static function models(): array
     {
         return [WorkTime::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateWorkTimeRuleset::class;
     }
 
     public function performAction(): WorkTime

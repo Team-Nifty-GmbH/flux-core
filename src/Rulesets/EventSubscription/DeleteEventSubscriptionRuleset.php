@@ -8,9 +8,9 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class DeleteEventSubscriptionRuleset extends FluxRuleset
 {
-    protected static ?string $model = EventSubscription::class;
-
     protected static bool $addAdditionalColumnRules = false;
+
+    protected static ?string $model = EventSubscription::class;
 
     public function rules(): array
     {

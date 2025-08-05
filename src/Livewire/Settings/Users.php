@@ -2,50 +2,75 @@
 
 namespace FluxErp\Livewire\Settings;
 
-use FluxErp\Traits\Livewire\Actions;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
-use Livewire\Component;
-use Livewire\WithPagination;
+use FluxErp\Actions\User\CreateUser;
+use FluxErp\Actions\User\UpdateUser;
+use FluxErp\Livewire\DataTables\UserList;
+use FluxErp\Livewire\Forms\UserForm;
+use FluxErp\Models\User;
+use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Renderless;
+use Spatie\Permission\Exceptions\UnauthorizedException;
+use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
-class Users extends Component
+class Users extends UserList
 {
-    use Actions, WithPagination;
+    public UserForm $userForm;
 
-    public string $search = '';
+    protected ?string $includeBefore = 'flux::livewire.settings.users';
 
-    public bool $showUserModal = false;
-
-    public int $userId = 0;
-
-    protected $listeners = [
-        'closeModal',
-    ];
-
-    public function render(): View|Factory|Application
+    protected function getTableActions(): array
     {
-        return view('flux::livewire.settings.users');
+        return [
+            DataTableButton::make()
+                ->text(__('Create'))
+                ->color('indigo')
+                ->icon('plus')
+                ->when(resolve_static(CreateUser::class, 'canPerformAction', [false]))
+                ->wireClick('edit()'),
+        ];
     }
 
-    public function show(?int $id = null): void
+    protected function getRowActions(): array
     {
-        if ($this->showUserModal) {
+        return [
+            DataTableButton::make()
+                ->text(__('Edit'))
+                ->color('indigo')
+                ->icon('pencil')
+                ->when(resolve_static(UpdateUser::class, 'canPerformAction', [false]))
+                ->wireClick('edit(record.id)'),
+        ];
+    }
+
+    #[Renderless]
+    public function edit(User $user): void
+    {
+        if ($user->exists) {
+            $this->redirectRoute('settings.users.edit', ['user' => $user->getKey()], navigate: true);
+
             return;
         }
 
-        $this->userId = $id ?? 0;
-        $this->dispatch('show', $id)->to('settings.user-edit');
-        $this->showUserModal = true;
+        $this->userForm->reset();
+        $this->js(<<<'JS'
+            $modalOpen('create-user-modal');
+        JS);
     }
 
-    public function closeModal(): void
+    #[Renderless]
+    public function save(): bool
     {
-        $this->reset();
-    }
+        try {
+            $this->userForm->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
 
-    public function delete(): void
-    {
-        $this->dispatch('delete')->to('settings.user-edit');
+            return false;
+        }
+
+        $this->loadData();
+        $this->edit($this->userForm->getActionResult());
+
+        return true;
     }
 }

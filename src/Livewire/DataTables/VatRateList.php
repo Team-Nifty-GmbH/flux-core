@@ -6,8 +6,6 @@ use FluxErp\Models\VatRate;
 
 class VatRateList extends BaseDataTable
 {
-    protected string $model = VatRate::class;
-
     public array $enabledCols = [
         'name',
         'rate_percentage',
@@ -16,4 +14,6 @@ class VatRateList extends BaseDataTable
     public array $formatters = [
         'rate_percentage' => 'percentage',
     ];
+
+    protected string $model = VatRate::class;
 }

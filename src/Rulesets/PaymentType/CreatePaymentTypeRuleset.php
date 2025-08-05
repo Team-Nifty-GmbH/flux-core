@@ -10,11 +10,20 @@ class CreatePaymentTypeRuleset extends FluxRuleset
 {
     protected static ?string $model = PaymentType::class;
 
+    public static function getRules(): array
+    {
+        return array_merge(
+            parent::getRules(),
+            resolve_static(ClientRuleset::class, 'getRules'),
+            ['clients' => 'required|array'],
+        );
+    }
+
     public function rules(): array
     {
         return [
             'uuid' => 'nullable|string|uuid|unique:payment_types,uuid',
-            'name' => 'required|string',
+            'name' => 'required|string|max:255',
             'description' => 'string|nullable',
             'payment_reminder_days_1' => 'integer|nullable',
             'payment_reminder_days_2' => 'integer|nullable',
@@ -34,14 +43,5 @@ class CreatePaymentTypeRuleset extends FluxRuleset
             'is_sales' => 'boolean',
             'requires_manual_transfer' => 'boolean',
         ];
-    }
-
-    public static function getRules(): array
-    {
-        return array_merge(
-            parent::getRules(),
-            resolve_static(ClientRuleset::class, 'getRules'),
-            ['clients' => 'required|array'],
-        );
     }
 }

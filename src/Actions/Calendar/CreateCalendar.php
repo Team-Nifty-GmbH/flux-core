@@ -9,14 +9,14 @@ use Illuminate\Support\Arr;
 
 class CreateCalendar extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateCalendarRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Calendar::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateCalendarRuleset::class;
     }
 
     public function performAction(): Calendar
@@ -31,5 +31,12 @@ class CreateCalendar extends FluxAction
         }
 
         return $calendar->fresh();
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if ($this->getData('is_group')) {
+            $this->data['has_repeatable_events'] = false;
+        }
     }
 }

@@ -38,79 +38,11 @@ class GenericMail extends Mailable
             ? resolve_static(Client::class, 'query')
                 ->whereKey(data_get($this->mailMessageForm, 'client_id'))
                 ->first()
-            : Client::default();
+            : resolve_static(Client::class, 'default');
 
         $this->mailMessageForm = $this->mailMessageForm instanceof Arrayable
             ? $this->mailMessageForm->toArray()
             : $this->mailMessageForm;
-    }
-
-    public function build(): void
-    {
-        if ($mailAccountId = data_get($this->mailMessageForm, 'mail_account_id')) {
-            $mailAccount = resolve_static(MailAccount::class, 'query')
-                ->whereKey($mailAccountId)
-                ->first();
-
-            config([
-                'mail.default' => 'mail_account',
-                'mail.mailers.mail_account.transport' => $mailAccount->smtp_mailer,
-                'mail.mailers.mail_account.username' => $mailAccount->smtp_email,
-                'mail.mailers.mail_account.password' => $mailAccount->smtp_password,
-                'mail.mailers.mail_account.host' => $mailAccount->smtp_host,
-                'mail.mailers.mail_account.port' => $mailAccount->smtp_port,
-                'mail.mailers.mail_account.encryption' => $mailAccount->smtp_encryption,
-                'mail.from.address' => $mailAccount->smtp_email,
-                'mail.from.name' => auth()->user()?->name,
-            ]);
-        }
-
-        if ($this->bladeParameters) {
-            $bladeParameters = $this->bladeParameters instanceof SerializableClosure
-                ? $this->bladeParameters->getClosure()()
-                : $this->bladeParameters;
-
-            data_set(
-                $this->mailMessageForm,
-                'subject',
-                Blade::render(
-                    data_get($this->mailMessageForm, 'subject', ''),
-                    $bladeParameters ?? []
-                )
-            );
-            data_set(
-                $this->mailMessageForm,
-                'html_body',
-                Blade::render(
-                    data_get($this->mailMessageForm, 'html_body', ''),
-                    $bladeParameters ?? []
-                )
-            );
-            data_set(
-                $this->mailMessageForm,
-                'text_body',
-                Blade::render(
-                    data_get($this->mailMessageForm, 'text_body', ''),
-                    $bladeParameters ?? []
-                )
-            );
-        }
-    }
-
-    public function envelope(): Envelope
-    {
-        return new Envelope(
-            subject: data_get($this->mailMessageForm, 'subject'),
-        );
-    }
-
-    public function content(): Content
-    {
-        return new Content(
-            html: data_get($this->mailMessageForm, 'html_body'),
-            text: data_get($this->mailMessageForm, 'text_body'),
-            markdown: 'flux::emails.generic',
-        );
     }
 
     /**
@@ -159,14 +91,80 @@ class GenericMail extends Mailable
             }
 
             if (is_array($attachment) && ($attachment['id'] ?? false)) {
-                return Media::query()->whereKey($attachment['id'])->first();
+                return resolve_static(Media::class, 'query')->whereKey($attachment['id'])->first();
             }
 
             if (is_int($attachment)) {
-                return Media::query()->whereKey($attachment)->first();
+                return resolve_static(Media::class, 'query')->whereKey($attachment)->first();
             }
 
             return $attachment;
         }, data_get($this->mailMessageForm, 'attachments', [])));
+    }
+
+    public function build(): void
+    {
+        if ($mailAccountId = data_get($this->mailMessageForm, 'mail_account_id')) {
+            $mailAccount = resolve_static(MailAccount::class, 'query')
+                ->whereKey($mailAccountId)
+                ->first();
+
+            config([
+                'mail.default' => 'mail_account',
+                'mail.mailers.mail_account.transport' => $mailAccount->smtp_mailer,
+                'mail.mailers.mail_account.username' => $mailAccount->smtp_email,
+                'mail.mailers.mail_account.password' => $mailAccount->smtp_password,
+                'mail.mailers.mail_account.host' => $mailAccount->smtp_host,
+                'mail.mailers.mail_account.port' => $mailAccount->smtp_port,
+                'mail.mailers.mail_account.encryption' => $mailAccount->smtp_encryption,
+                'mail.from.address' => $mailAccount->smtp_email,
+                'mail.from.name' => auth()->user()?->name,
+            ]);
+        }
+
+        if ($this->bladeParameters) {
+            $bladeParameters = $this->bladeParameters instanceof SerializableClosure
+                ? $this->bladeParameters->getClosure()()
+                : $this->bladeParameters;
+
+            data_set(
+                $this->mailMessageForm,
+                'subject',
+                Blade::render(
+                    html_entity_decode(data_get($this->mailMessageForm, 'subject', '')),
+                    $bladeParameters ?? []
+                )
+            );
+            data_set(
+                $this->mailMessageForm,
+                'html_body',
+                Blade::render(
+                    html_entity_decode(data_get($this->mailMessageForm, 'html_body', '')),
+                    $bladeParameters ?? []
+                )
+            );
+            data_set(
+                $this->mailMessageForm,
+                'text_body',
+                Blade::render(
+                    html_entity_decode(data_get($this->mailMessageForm, 'text_body', '')) ?? '',
+                    $bladeParameters ?? []
+                )
+            );
+        }
+    }
+
+    public function content(): Content
+    {
+        return new Content(
+            markdown: 'flux::emails.generic',
+        );
+    }
+
+    public function envelope(): Envelope
+    {
+        return new Envelope(
+            subject: data_get($this->mailMessageForm, 'subject'),
+        );
     }
 }

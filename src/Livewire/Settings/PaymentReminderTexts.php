@@ -8,23 +8,27 @@ use FluxErp\Actions\PaymentReminderText\UpdatePaymentReminderText;
 use FluxErp\Livewire\DataTables\PaymentReminderTextList;
 use FluxErp\Livewire\Forms\PaymentReminderTextForm;
 use FluxErp\Models\PaymentReminderText;
+use FluxErp\Traits\Livewire\Actions;
+use FluxErp\Traits\Livewire\DataTable\SupportsLocalization;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class PaymentReminderTexts extends PaymentReminderTextList
 {
-    protected ?string $includeBefore = 'flux::livewire.settings.payment-reminder-texts';
+    use Actions, SupportsLocalization;
 
     public PaymentReminderTextForm $paymentReminderTextForm;
+
+    protected ?string $includeBefore = 'flux::livewire.settings.payment-reminder-texts';
 
     protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
-                ->label(__('New'))
+                ->text(__('New'))
                 ->icon('plus')
-                ->color('primary')
+                ->color('indigo')
                 ->when(resolve_static(CreatePaymentReminderText::class, 'canPerformAction', [false]))
                 ->attributes([
                     'wire:click' => 'edit',
@@ -36,27 +40,33 @@ class PaymentReminderTexts extends PaymentReminderTextList
     {
         return [
             DataTableButton::make()
-                ->label(__('Edit'))
+                ->text(__('Edit'))
                 ->icon('pencil')
-                ->color('primary')
+                ->color('indigo')
                 ->when(resolve_static(UpdatePaymentReminderText::class, 'canPerformAction', [false]))
                 ->wireClick('edit(record.id)'),
             DataTableButton::make()
-                ->label(__('Delete'))
+                ->text(__('Delete'))
                 ->icon('trash')
-                ->color('negative')
+                ->color('red')
                 ->when(resolve_static(DeletePaymentReminderText::class, 'canPerformAction', [false]))
                 ->attributes([
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Payment Reminder Text')]),
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Payment Reminder Text')]),
                     'wire:click' => 'delete(record.id)',
                 ]),
         ];
     }
 
-    public function save(): bool
+    public function delete(PaymentReminderText $paymentReminderText): bool
     {
+        $this->paymentReminderTextForm->reset();
+        $this->paymentReminderTextForm->fill($paymentReminderText);
+
         try {
-            $this->paymentReminderTextForm->save();
+            DeletePaymentReminderText::make($this->paymentReminderTextForm)
+                ->checkPermission()
+                ->validate()
+                ->execute();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 
@@ -74,20 +84,14 @@ class PaymentReminderTexts extends PaymentReminderTextList
         $this->paymentReminderTextForm->fill($paymentReminderText);
 
         $this->js(<<<'JS'
-            $openModal('edit-payment-reminder-text');
+            $modalOpen('edit-payment-reminder-text-modal');
         JS);
     }
 
-    public function delete(PaymentReminderText $paymentReminderText): bool
+    public function save(): bool
     {
-        $this->paymentReminderTextForm->reset();
-        $this->paymentReminderTextForm->fill($paymentReminderText);
-
         try {
-            DeletePaymentReminderText::make($this->paymentReminderTextForm)
-                ->checkPermission()
-                ->validate()
-                ->execute();
+            $this->paymentReminderTextForm->save();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
 

@@ -9,7 +9,7 @@ use FluxErp\Traits\HasParentMorphClass;
 
 class ModelTest extends TestCase
 {
-    public function test_model_customization()
+    public function test_model_customization(): void
     {
         $class = new class() extends Language
         {
@@ -31,7 +31,7 @@ class ModelTest extends TestCase
         );
     }
 
-    public function test_model_relation()
+    public function test_model_relation(): void
     {
         $class = new class() extends Language
         {

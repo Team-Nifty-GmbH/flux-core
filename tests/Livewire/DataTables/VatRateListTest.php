@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class VatRateListTest extends TestCase
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(VatRateList::class)
             ->assertStatus(200);

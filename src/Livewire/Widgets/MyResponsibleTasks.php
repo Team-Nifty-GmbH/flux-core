@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\States\Task\TaskState;
 use FluxErp\Traits\Widgetable;
 use Illuminate\Contracts\View\Factory;
@@ -12,11 +13,19 @@ class MyResponsibleTasks extends Component
 {
     use Widgetable;
 
-    public function getListeners()
+    public static function dashboardComponent(): array|string
     {
-        return [
-            'echo-private:' . auth()->user()->broadcastChannel() . ',.TaskLocked' => 'render',
-        ];
+        return Dashboard::class;
+    }
+
+    public static function getDefaultHeight(): int
+    {
+        return 2;
+    }
+
+    public static function getDefaultWidth(): int
+    {
+        return 2;
     }
 
     public function render(): View|Factory
@@ -38,18 +47,15 @@ class MyResponsibleTasks extends Component
         );
     }
 
+    public function getListeners()
+    {
+        return [
+            'echo-private:' . auth()->user()->broadcastChannel() . ',.TaskLocked' => 'render',
+        ];
+    }
+
     public function placeholder(): View|Factory
     {
         return view('flux::livewire.placeholders.horizontal-bar');
-    }
-
-    public static function getDefaultWidth(): int
-    {
-        return 2;
-    }
-
-    public static function getDefaultHeight(): int
-    {
-        return 2;
     }
 }

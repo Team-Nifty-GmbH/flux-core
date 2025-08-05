@@ -16,7 +16,7 @@ class BankConnection extends FluxModel
 
     protected static function booted(): void
     {
-        static::saving(function (BankConnection $model) {
+        static::saving(function (BankConnection $model): void {
             if ($model->isDirty('iban') && ! is_null($model->iban)) {
                 $model->iban = str_replace(' ', '', strtoupper($model->iban));
             }
@@ -27,6 +27,7 @@ class BankConnection extends FluxModel
     {
         return [
             'is_active' => 'boolean',
+            'is_virtual' => 'boolean',
         ];
     }
 

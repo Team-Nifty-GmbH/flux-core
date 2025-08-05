@@ -3,9 +3,9 @@
 if (! function_exists('all_models')) {
     function all_models(): Illuminate\Support\Collection
     {
-        return \TeamNiftyGmbH\DataTable\Helpers\ModelFinder::all()
+        return TeamNiftyGmbH\DataTable\Helpers\ModelFinder::all()
             ->merge(
-                \TeamNiftyGmbH\DataTable\Helpers\ModelFinder::all(
+                TeamNiftyGmbH\DataTable\Helpers\ModelFinder::all(
                     flux_path('src/Models'),
                     flux_path('src'),
                     'FluxErp'
@@ -17,9 +17,9 @@ if (! function_exists('all_models')) {
 if (! function_exists('model_info_all')) {
     function model_info_all(): Illuminate\Support\Collection
     {
-        return \TeamNiftyGmbH\DataTable\Helpers\ModelInfo::forAllModels()
+        return TeamNiftyGmbH\DataTable\Helpers\ModelInfo::forAllModels()
             ->merge(
-                \TeamNiftyGmbH\DataTable\Helpers\ModelInfo::forAllModels(
+                TeamNiftyGmbH\DataTable\Helpers\ModelInfo::forAllModels(
                     flux_path('src/Models'),
                     flux_path('src'),
                     'FluxErp')
@@ -27,48 +27,72 @@ if (! function_exists('model_info_all')) {
     }
 }
 
+if (! function_exists('get_models_with_trait')) {
+    function get_models_with_trait(string $trait, ?callable $mapCallback = null): array
+    {
+        $morphMap = Illuminate\Database\Eloquent\Relations\Relation::morphMap();
+
+        return collect($morphMap)
+            ->filter(fn ($class, $alias) => in_array($trait, class_uses_recursive(morphed_model($alias))))
+            ->map($mapCallback ?? fn ($class, $alias) => [
+                'label' => __(Illuminate\Support\Str::headline($alias)),
+                'value' => $alias,
+            ])
+            ->values()
+            ->toArray();
+    }
+}
+
 if (! function_exists('route_to_permission')) {
     function route_to_permission(Illuminate\Routing\Route|string|null $route = null, bool $checkPermission = true): ?string
     {
-        $route = is_string($route) ? \Illuminate\Support\Facades\Route::getRoutes()->getByName($route) : $route;
-        $route = $route ?: \Illuminate\Support\Facades\Route::current();
+        $route = is_string($route) ? Illuminate\Support\Facades\Route::getRoutes()->getByName($route) : $route;
+        $route = $route ?: Illuminate\Support\Facades\Route::current();
 
-        if ($route === null) {
+        if (is_null($route)) {
             return null;
         }
 
-        $guards = array_keys(\Illuminate\Support\Arr::prependKeysWith(config('auth.guards'), 'auth:'));
+        $guards = array_keys(config('auth.guards'));
         // Add auth as it's the default guard but still guarded
-        $guards[] = 'auth';
+        $authGuard = Illuminate\Support\Arr::first(Illuminate\Support\Arr::where(
+            $route->middleware(),
+            fn ($value) => str_starts_with($value, 'auth:')
+        ));
+
+        $guard = explode(',', explode(':', $authGuard)[1] ?? '');
         $defaultGuard = config('auth.defaults.guard');
-        $guard = explode(':', \Illuminate\Support\Arr::first(array_intersect($route->middleware(), $guards)));
 
         // Allow if route is not guarded in any way.
-        if (! array_intersect($route->middleware(), $guards) || ! $route->getPermissionName()) {
+        if (! array_intersect($guard, $guards) || ! $route->getPermissionName()) {
             return null;
+        }
+
+        if (! $checkPermission) {
+            return $route->getPermissionName();
         }
 
         try {
             $permission = resolve_static(
-                \Spatie\Permission\Models\Permission::class,
+                Spatie\Permission\Models\Permission::class,
                 'findByName',
                 [
                     'name' => $route->getPermissionName(),
-                    'guardName' => $guard[1] ?? $defaultGuard,
+                    'guardName' => $guard[0] ?? $defaultGuard,
                 ]
             );
-        } catch (\Spatie\Permission\Exceptions\PermissionDoesNotExist $e) {
+        } catch (Spatie\Permission\Exceptions\PermissionDoesNotExist $e) {
             $permission = null;
         }
 
-        return $checkPermission ? $permission?->name : $route->getPermissionName();
+        return $permission?->name;
     }
 }
 
 if (! function_exists('user_can')) {
     function user_can(Illuminate\Routing\Route|string|array $permission): bool
     {
-        $permissionName = $permission instanceof \Illuminate\Routing\Route ?
+        $permissionName = $permission instanceof Illuminate\Routing\Route ?
             route_to_permission($permission) :
             $permission;
 
@@ -95,7 +119,7 @@ if (! function_exists('get_subclasses_of')) {
         }
 
         $classes = array_filter($autoload, function ($item) use ($namespaces) {
-            return \Illuminate\Support\Str::startsWith($item, $namespaces);
+            return Illuminate\Support\Str::startsWith($item, $namespaces);
         });
 
         $subclasses = [];
@@ -135,7 +159,7 @@ if (! function_exists('qualify_model')) {
         if (
             str_contains($model, '\\')
             && class_exists($model)
-            && is_a($model, \Illuminate\Database\Eloquent\Model::class, true)
+            && is_a($model, Illuminate\Database\Eloquent\Model::class, true)
         ) {
             return resolve_static($model, 'class');
         }
@@ -186,11 +210,25 @@ if (! function_exists('discount')) {
 if (! function_exists('diff_percentage')) {
     function diff_percentage(string $old, string $new): string
     {
-        if (bccomp($old, 0) === 0) {
+        if (bccomp($old, 0) === 0 || bccomp($new, 0) === 0) {
             return '0';
         }
 
         return bcround(bcdiv(bcsub($old, $new, 9), $old, 9), 4);
+    }
+}
+
+if (! function_exists('percentage_of')) {
+    function percentage_of(string|float|int|null $total, string|float|int|null $part): string
+    {
+        $total ??= '0';
+        $part ??= '0';
+
+        if (bccomp($total, 0) === 0 || bccomp($part, 0) === 0) {
+            return '0';
+        }
+
+        return bcround(bcmul(bcdiv($part, $total, 9), 100, 9), 4);
     }
 }
 
@@ -200,27 +238,27 @@ if (! function_exists('event_subscribers')) {
         ?int $modelId = null,
         ?string $modelType = null
     ): Illuminate\Support\Collection {
-        return resolve_static(\FluxErp\Models\EventSubscription::class, 'query')
+        return resolve_static(FluxErp\Models\EventSubscription::class, 'query')
             ->when(
                 auth()->user(),
-                function (Illuminate\Database\Eloquent\Builder $query) {
-                    $query->whereNot(function (Illuminate\Database\Eloquent\Builder $query) {
+                function (Illuminate\Database\Eloquent\Builder $query): void {
+                    $query->whereNot(function (Illuminate\Database\Eloquent\Builder $query): void {
                         $query->where('subscribable_type', auth()->user()->getMorphClass())
                             ->where('subscribable_id', auth()->id());
                     });
                 }
             )
-            ->where(function (Illuminate\Database\Eloquent\Builder $query) use ($event, $modelId, $modelType) {
-                $query->where(function (Illuminate\Database\Eloquent\Builder $query) use ($event) {
+            ->where(function (Illuminate\Database\Eloquent\Builder $query) use ($event, $modelId, $modelType): void {
+                $query->where(function (Illuminate\Database\Eloquent\Builder $query) use ($event): void {
                     $query->where('event', $event)
                         ->whereNull('model_id');
                 })
-                    ->orWhere(function ($query) use ($event, $modelId, $modelType) {
+                    ->orWhere(function ($query) use ($event, $modelId, $modelType): void {
                         $query->where('event', $event)
-                            ->when($modelType, function ($query) use ($modelType) {
+                            ->when($modelType, function ($query) use ($modelType): void {
                                 $query->where('model_type', $modelType);
                             })
-                            ->when($modelId && $modelType, function ($query) use ($modelId) {
+                            ->when($modelId && $modelType, function ($query) use ($modelId): void {
                                 $query->where('model_id', $modelId);
                             });
                     })
@@ -274,15 +312,20 @@ if (! function_exists('eloquent_model_event')) {
 }
 
 if (! function_exists('to_flat_tree')) {
-    function to_flat_tree(array $tree, string $key = 'id', string $parentKey = 'parent_id', array $parent = []): array
-    {
+    function to_flat_tree(
+        array|Illuminate\Contracts\Support\Arrayable $tree,
+        string $key = 'id',
+        string $parentKey = 'parent_id',
+        array $parent = []
+    ): array {
         $flat = [];
+        $tree = $tree instanceof Illuminate\Contracts\Support\Arrayable ? $tree->toArray() : $tree;
         $siblings = count($tree);
         $padding = max(strlen($siblings), 2);
 
         $loop = 1;
         foreach ($tree as $node) {
-            $suffix = \Illuminate\Support\Str::padLeft($loop, $padding, '0');
+            $suffix = Illuminate\Support\Str::padLeft($loop, $padding, '0');
 
             $node['slug_position'] = ($parent['slug_position'] ?? false)
                 ? $parent['slug_position'] . '.' . $suffix
@@ -293,8 +336,8 @@ if (! function_exists('to_flat_tree')) {
             $node['has_siblings'] = $siblings > 1;
 
             // Set primary key if not exists
-            $node[$key] = $node[$key] ?? \Illuminate\Support\Str::uuid()->toString();
-            $sanitized = \Illuminate\Support\Arr::except($node, 'children');
+            $node[$key] = $node[$key] ?? Illuminate\Support\Str::uuid()->toString();
+            $sanitized = Illuminate\Support\Arr::except($node, 'children');
 
             // Set parent key
             if ($parent) {
@@ -322,7 +365,7 @@ if (! function_exists('to_tree')) {
         string $childrenKey = 'children'
     ): array {
         $tree = [];
-        $lookup = \Illuminate\Support\Arr::keyBy($flat, $key);
+        $lookup = Illuminate\Support\Arr::keyBy($flat, $key);
 
         foreach ($lookup as $node) {
             if ($node[$parentKey] ?? false) {
@@ -344,18 +387,18 @@ if (! function_exists('meilisearch_import_sync')) {
         }
 
         if (! class_exists($model)
-            || ! in_array(\Laravel\Scout\Searchable::class, class_uses($model))
-            || ! is_subclass_of($model, \Illuminate\Database\Eloquent\Model::class)
+            || ! in_array(Laravel\Scout\Searchable::class, class_uses($model))
+            || ! is_subclass_of($model, Illuminate\Database\Eloquent\Model::class)
         ) {
             throw new InvalidArgumentException('Invalid model: ' . $model);
         }
 
-        \Illuminate\Support\Facades\Artisan::call(\FluxErp\Console\Commands\Scout\ImportCommand::class, [
+        Illuminate\Support\Facades\Artisan::call(FluxErp\Console\Commands\Scout\ImportCommand::class, [
             'model' => $model,
         ]);
 
-        $client = new \MeiliSearch\Client(config('scout.meilisearch.host'), config('scout.meilisearch.key'));
-        $from = $client->getTasks((new \MeiliSearch\Contracts\TasksQuery())
+        $client = new MeiliSearch\Client(config('scout.meilisearch.host'), config('scout.meilisearch.key'));
+        $from = $client->getTasks((new MeiliSearch\Contracts\TasksQuery())
             ->setIndexUids([app($model)->searchableAs()])
             ->setLimit(1))
             ->getFrom();
@@ -363,11 +406,11 @@ if (! function_exists('meilisearch_import_sync')) {
         $client->waitForTask($from);
 
         // Sync the settings and wait for the result
-        \Illuminate\Support\Facades\Artisan::call(
-            \FluxErp\Console\Commands\Scout\SyncIndexSettingsCommand::class,
+        Illuminate\Support\Facades\Artisan::call(
+            FluxErp\Console\Commands\Scout\SyncIndexSettingsCommand::class,
             ['model' => $model]
         );
-        $from = $client->getTasks((new \MeiliSearch\Contracts\TasksQuery())
+        $from = $client->getTasks((new MeiliSearch\Contracts\TasksQuery())
             ->setIndexUids([app($model)->searchableAs()])
             ->setLimit(1))
             ->getFrom();
@@ -387,16 +430,16 @@ if (! function_exists('faker')) {
 if (! function_exists('livewire_component_exists')) {
     function livewire_component_exists(string $classOrAlias): bool
     {
-        $componentRegistry = app(\Livewire\Mechanisms\ComponentRegistry::class);
+        $componentRegistry = app(Livewire\Mechanisms\ComponentRegistry::class);
         try {
             $class = $componentRegistry->getClass($classOrAlias);
-        } catch (\Livewire\Exceptions\ComponentNotFoundException) {
+        } catch (Livewire\Exceptions\ComponentNotFoundException) {
             $class = false;
         }
 
         try {
             $alias = $componentRegistry->getName($classOrAlias);
-        } catch (\Livewire\Exceptions\ComponentNotFoundException) {
+        } catch (Livewire\Exceptions\ComponentNotFoundException) {
             $alias = false;
         }
 
@@ -450,6 +493,19 @@ if (! function_exists('flux_path')) {
     function flux_path(string $path = ''): string
     {
         return __DIR__ . ($path ? DIRECTORY_SEPARATOR . $path : $path);
+    }
+}
+
+if (! function_exists('map_values_to_options')) {
+    function map_values_to_options(array $values): array
+    {
+        return array_map(
+            fn ($value) => [
+                'label' => __(Illuminate\Support\Str::headline($value)),
+                'value' => $value,
+            ],
+            $values
+        );
     }
 }
 
@@ -508,7 +564,7 @@ if (! function_exists('class_to_broadcast_channel')) {
         }
 
         return str_replace('\\', '.', $class)
-            . ($withParam ? '.{' . \Illuminate\Support\Str::camel(class_basename($class)) . '}' : '');
+            . ($withParam ? '.{' . Illuminate\Support\Str::camel(class_basename($class)) . '}' : '');
     }
 }
 
@@ -517,19 +573,22 @@ if (! function_exists('morph_alias')) {
     {
         $class = resolve_static($class, 'class');
 
-        if (in_array(\FluxErp\Traits\HasParentMorphClass::class, class_uses_recursive($class))) {
+        if (in_array(FluxErp\Traits\HasParentMorphClass::class, class_uses_recursive($class))) {
             return $class::getParentMorphClass();
         }
 
-        /** @var \Illuminate\Database\Eloquent\Model $class */
-        return \Illuminate\Database\Eloquent\Relations\Relation::getMorphAlias($class);
+        /** @var Illuminate\Database\Eloquent\Model $class */
+        return Illuminate\Database\Eloquent\Relations\Relation::getMorphAlias($class);
     }
 }
 
 if (! function_exists('morphed_model')) {
+    /**
+     * @return class-string<Illuminate\Database\Eloquent\Model>|null
+     */
     function morphed_model(string $alias): ?string
     {
-        $class = \Illuminate\Database\Eloquent\Relations\Relation::getMorphedModel($alias);
+        $class = Illuminate\Database\Eloquent\Relations\Relation::getMorphedModel($alias);
 
         if (is_null($class)) {
             return null;
@@ -540,17 +599,17 @@ if (! function_exists('morphed_model')) {
 }
 
 if (! function_exists('morph_to')) {
-    function morph_to(string $type, ?int $id = null, bool $returnBuilder = false): Illuminate\Database\Eloquent\Model|Illuminate\Database\Eloquent\Builder|null
+    function morph_to(?string $type = null, ?int $id = null, bool $returnBuilder = false): Illuminate\Database\Eloquent\Model|Illuminate\Database\Eloquent\Builder|null
     {
-        if (is_null($id) && str_contains($type, ':')) {
+        if (is_null($id) && str_contains($type ?? '', ':')) {
             [$type, $id] = explode(':', $type);
         }
 
-        if (is_null($id)) {
+        if (is_null($id) || is_null($type)) {
             return null;
         }
 
-        /** @var \Illuminate\Database\Eloquent\Model $model */
+        /** @var Illuminate\Database\Eloquent\Model $model */
         $model = morphed_model($type);
         $query = $model::query()->whereKey($id);
 

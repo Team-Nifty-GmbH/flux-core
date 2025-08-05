@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::create('locks', function (Blueprint $table) {
+        Schema::create('locks', function (Blueprint $table): void {
             $table->id();
             $table->morphs('model');
             $table->timestamp('created_at')->nullable()

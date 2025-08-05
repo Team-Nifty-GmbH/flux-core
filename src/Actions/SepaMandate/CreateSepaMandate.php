@@ -11,14 +11,14 @@ use Illuminate\Validation\ValidationException;
 
 class CreateSepaMandate extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateSepaMandateRuleset::class;
-    }
-
     public static function models(): array
     {
         return [SepaMandate::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateSepaMandateRuleset::class;
     }
 
     public function performAction(): SepaMandate
@@ -34,8 +34,8 @@ class CreateSepaMandate extends FluxAction
         parent::validateData();
 
         $clientContactExists = resolve_static(Contact::class, 'query')
-            ->whereKey($this->data['contact_id'])
-            ->where('client_id', $this->data['client_id'])
+            ->whereKey($this->getData('contact_id'))
+            ->where('client_id', $this->getData('client_id'))
             ->exists();
 
         $errors = [];
@@ -43,13 +43,15 @@ class CreateSepaMandate extends FluxAction
             $errors[] = ['contact_id' => [__('Client has no such contact')]];
         }
 
-        $contactBankConnectionExists = resolve_static(ContactBankConnection::class, 'query')
-            ->whereKey($this->data['contact_bank_connection_id'])
-            ->where('contact_id', $this->data['contact_id'])
-            ->exists();
+        if ($bankConnectionId = $this->getData('contact_bank_connection_id')) {
+            $contactBankConnectionExists = resolve_static(ContactBankConnection::class, 'query')
+                ->whereKey($bankConnectionId)
+                ->where('contact_id', $this->getData('contact_id'))
+                ->exists();
 
-        if (! $contactBankConnectionExists) {
-            $errors[] = ['bank_connection_id' => [__('Contact has no such bank connection')]];
+            if (! $contactBankConnectionExists) {
+                $errors[] = ['bank_connection_id' => [__('Contact has no such bank connection')]];
+            }
         }
 
         if ($errors) {

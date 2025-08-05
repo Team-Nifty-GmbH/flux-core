@@ -44,7 +44,15 @@ class ProcessSubscriptionOrder implements Repeatable
         $order->order_type_id = $orderType->id;
         $order->system_delivery_date = $latestChild?->system_delivery_date_end?->addDay() ??
             $order->system_delivery_date ?? $order->order_date;
-        $order->system_delivery_date_end = now();
+
+        $currentDate = now();
+        if ($currentDate->startOfDay()->equalTo($order->system_delivery_date)) {
+            $order->system_delivery_date_end = $currentDate->addDay();
+        } elseif ($currentDate->startOfDay()->isBefore($order->system_delivery_date)) {
+            $order->system_delivery_date_end = $order->system_delivery_date->copy()->addDay();
+        } else {
+            $order->system_delivery_date_end = $currentDate;
+        }
 
         try {
             ReplicateOrder::make($order)->validate()->execute();
@@ -69,6 +77,16 @@ class ProcessSubscriptionOrder implements Repeatable
         return true;
     }
 
+    public static function defaultCron(): ?CronExpression
+    {
+        return null;
+    }
+
+    public static function description(): ?string
+    {
+        return 'Process given Subscription Order.';
+    }
+
     public static function isRepeatable(): bool
     {
         return true;
@@ -79,21 +97,11 @@ class ProcessSubscriptionOrder implements Repeatable
         return class_basename(static::class);
     }
 
-    public static function description(): ?string
-    {
-        return 'Process given Subscription Order.';
-    }
-
     public static function parameters(): array
     {
         return [
             'orderId' => null,
             'orderTypeId' => null,
         ];
-    }
-
-    public static function defaultCron(): ?CronExpression
-    {
-        return null;
     }
 }

@@ -13,36 +13,19 @@ class MediaUploadForm extends MediaForm
 {
     public array $stagedFiles = [];
 
-    protected bool $force = false;
+    public array|TemporaryUploadedFile|null $uploadedFile = null;
 
     protected array|TemporaryUploadedFile|Media|null $file = null;
 
-    public array|TemporaryUploadedFile|null $uploadedFile = null;
+    protected bool $force = false;
 
-    protected function getActions(): array
+    public function __set(string $name, $value): void
     {
-        return array_merge(
-            parent::getActions(),
-            [
-                'create' => UploadMedia::class,
-                'replace' => ReplaceMedia::class,
-            ]
-        );
-    }
+        $this->{$name} = $value;
 
-    protected function makeAction(string $name, ?array $data = null): FluxAction
-    {
-        return parent::makeAction($name, $data)->force($this->force);
-    }
-
-    public function generatePreviewUrls(): void
-    {
-        if (is_array($this->file)) {
-            foreach ($this->file as $file) {
-                $this->stagedFiles[] = $this->arrayFromUpload($file);
-            }
-        } else {
-            $this->stagedFiles = [$this->arrayFromUpload($this->file)];
+        if ($name === 'file') {
+            $this->generatePreviewUrls();
+            $this->uploadedFile = $value;
         }
     }
 
@@ -72,6 +55,27 @@ class MediaUploadForm extends MediaForm
         return $this;
     }
 
+    public function generatePreviewUrls(): void
+    {
+        if (is_array($this->file)) {
+            foreach ($this->file as $file) {
+                $this->stagedFiles[] = $this->arrayFromUpload($file);
+            }
+        } else {
+            $this->stagedFiles = [$this->arrayFromUpload($this->file)];
+        }
+    }
+
+    public function replace(): void
+    {
+        $response = $this->makeAction('replace')
+            ->validate()
+            ->when($this->checkPermission, fn (FluxAction $action) => $action->checkPermission())
+            ->execute();
+
+        $this->fill($response);
+    }
+
     public function save(): void
     {
         $stagedFiles = collect($this->stagedFiles)->sortBy(fn ($file) => $file['shouldDelete'] ?? false);
@@ -89,26 +93,6 @@ class MediaUploadForm extends MediaForm
             } else {
                 $this->create();
             }
-        }
-    }
-
-    public function replace(): void
-    {
-        $response = $this->makeAction('replace')
-            ->validate()
-            ->when($this->checkPermission, fn (FluxAction $action) => $action->checkPermission())
-            ->execute();
-
-        $this->fill($response);
-    }
-
-    public function __set(string $name, $value): void
-    {
-        $this->{$name} = $value;
-
-        if ($name === 'file') {
-            $this->generatePreviewUrls();
-            $this->uploadedFile = $value;
         }
     }
 
@@ -130,5 +114,21 @@ class MediaUploadForm extends MediaForm
             'preview_url' => $file->isPreviewable() ? $file->temporaryUrl() : route('icons', ['name' => 'document']),
             'media' => $file->getRealPath(),
         ];
+    }
+
+    protected function getActions(): array
+    {
+        return array_merge(
+            parent::getActions(),
+            [
+                'create' => UploadMedia::class,
+                'replace' => ReplaceMedia::class,
+            ]
+        );
+    }
+
+    protected function makeAction(string $name, ?array $data = null): FluxAction
+    {
+        return parent::makeAction($name, $data)->force($this->force);
     }
 }

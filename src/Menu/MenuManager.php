@@ -2,6 +2,7 @@
 
 namespace FluxErp\Menu;
 
+use Closure;
 use FluxErp\Models\Permission;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Arr;
@@ -14,125 +15,17 @@ class MenuManager
 {
     use Macroable;
 
-    protected array $resolved = [];
-
     protected array $registered = [];
 
     protected array $registeredGroups = [];
 
-    /**
-     * @throws \Symfony\Component\Routing\Exception\RouteNotFoundException
-     */
-    public function register(
-        string|Route $route,
-        ?string $icon = null,
-        ?string $label = null,
-        ?int $order = null,
-        ?array $params = null,
-        ?string $path = null
-    ): void {
-        $this->registered[] = [
-            'route' => $route,
-            'icon' => $icon,
-            'label' => $label,
-            'order' => $order,
-            'params' => $params,
-            'path' => $path,
-        ];
-    }
+    protected array $resolved = [];
 
-    public function group(
-        string $path,
-        ?string $icon = null,
-        ?string $label = null,
-        ?int $order = null,
-        ?\Closure $closure = null): void
+    public function all(): array
     {
-        data_set($this->registeredGroups, $path, [
-            'label' => $label ?? data_get($this->registeredGroups, $path . '.label'),
-            'icon' => $icon ?? data_get($this->registeredGroups, $path . '.icon'),
-            'order' => $order ?? data_get($this->registeredGroups, $path . '.order'),
-            'children' => data_get($this->registeredGroups, $path . '.children', []),
-            'closure' => array_merge(data_get($this->registeredGroups, $path . '.closure', []), [$closure]),
-        ]);
-    }
+        $this->resolve();
 
-    protected function resolve(): void
-    {
-        foreach ($this->registeredGroups as $path => $group) {
-            data_set($this->resolved, $path, array_merge(
-                data_get($this->resolved, $path) ?? [],
-                [
-                    'label' => $group['label'] ?? Str::afterLast($path, '.'),
-                    'icon' => $group['icon'],
-                    'order' => $group['order'],
-                    'children' => [],
-                ]
-            ));
-
-            if (count($group['closure'] ?? []) > 0) {
-                foreach ($group['closure'] as $closure) {
-                    $closure($this);
-                }
-            }
-        }
-
-        foreach ($this->registered as $item) {
-            extract($item);
-            $resolvedRoute = is_string($route)
-                ? app('router')->getRoutes()->getByName($route)
-                : $route;
-
-            if (filter_var($route, FILTER_VALIDATE_URL)) {
-                $resolvedRoute = (new Route(['GET'], $route, fn () => null))
-                    ->setUri($route)
-                    ->name($label ?? str($route)->slug());
-            }
-
-            if (! $resolvedRoute) {
-                throw new RouteNotFoundException('No route found for ' . $route);
-            }
-
-            $routeName = $resolvedRoute->getName()
-                ?? str($resolvedRoute->uri())->replace('/', '.')->toString();
-
-            $guards = array_values(
-                array_filter(
-                    $resolvedRoute->middleware(),
-                    fn ($guard) => str_starts_with($guard, 'auth:')
-                )
-            );
-            $guard = array_shift($guards);
-            $guard = str_replace('auth:', '', $guard);
-
-            $path = data_get($item, 'path');
-            $path ??= str_contains($routeName, '.') && ! str_ends_with($routeName, '.')
-                ? Str::beforeLast($routeName, '.') . '.children.' . Str::afterLast($routeName, '.')
-                : (str_ends_with($routeName, '.') ? rtrim($routeName, '.') : $routeName);
-
-            data_set($this->resolved, $path, array_merge(
-                data_get($this->resolved, $path) ?? [],
-                [
-                    'label' => $label ?? Str::afterLast($path, '.'),
-                    'uri' => app('url')->toRoute($resolvedRoute, data_get($item, 'params', []), true),
-                    'icon' => $icon,
-                    'route_name' => $routeName,
-                    'guard' => $guard ?: null,
-                    'domain' => $resolvedRoute->getDomain(),
-                    'permission' => $resolvedRoute->getPermissionName(),
-                    'order' => $order
-                        ?? count(
-                            data_get($this->resolved, Str::beforeLast($path, '.'))
-                                ?: (str_contains($path, '.') ? [] : $this->resolved)
-                        ),
-                ])
-            );
-        }
-    }
-
-    public function unregister(string $name): void
-    {
-        unset($this->resolved[$name]);
+        return $this->sortMultiDimensional($this->resolved);
     }
 
     public function clear(): void
@@ -140,13 +33,6 @@ class MenuManager
         $this->resolved = [];
         $this->registered = [];
         $this->registeredGroups = [];
-    }
-
-    public function all(): array
-    {
-        $this->resolve();
-
-        return $this->sortMultiDimensional($this->resolved);
     }
 
     public function forGuard(string $guard, ?string $group = null, bool $ignorePermissions = false): array
@@ -197,7 +83,124 @@ class MenuManager
         return $this->resolved[$name] ?? null;
     }
 
-    private function sortMultiDimensional(array $array, ?\Closure $filter = null): array
+    public function group(
+        string $path,
+        ?string $icon = null,
+        ?string $label = null,
+        ?int $order = null,
+        ?Closure $closure = null): void
+    {
+        data_set($this->registeredGroups, $path, [
+            'label' => $label ?? data_get($this->registeredGroups, $path . '.label'),
+            'icon' => $icon ?? data_get($this->registeredGroups, $path . '.icon'),
+            'order' => $order ?? data_get($this->registeredGroups, $path . '.order'),
+            'children' => data_get($this->registeredGroups, $path . '.children', []),
+            'closure' => array_merge(data_get($this->registeredGroups, $path . '.closure', []), [$closure]),
+        ]);
+    }
+
+    /**
+     * @throws RouteNotFoundException
+     */
+    public function register(
+        string|Route $route,
+        ?string $icon = null,
+        ?string $label = null,
+        ?int $order = null,
+        ?array $params = null,
+        ?string $path = null
+    ): void {
+        $this->registered[] = [
+            'route' => $route,
+            'icon' => $icon,
+            'label' => $label,
+            'order' => $order,
+            'params' => $params,
+            'path' => $path,
+        ];
+    }
+
+    public function unregister(string $name): void
+    {
+        unset($this->resolved[$name]);
+    }
+
+    protected function resolve(): void
+    {
+        foreach ($this->registeredGroups as $path => $group) {
+            data_set($this->resolved, $path, array_merge(
+                data_get($this->resolved, $path) ?? [],
+                [
+                    'label' => $group['label'] ?? Str::afterLast($path, '.'),
+                    'icon' => $group['icon'],
+                    'order' => $group['order'],
+                    'children' => [],
+                ]
+            ));
+
+            if (count($group['closure'] ?? []) > 0) {
+                foreach ($group['closure'] as $closure) {
+                    $closure($this);
+                }
+            }
+        }
+
+        foreach ($this->registered as $item) {
+            extract($item);
+            $resolvedRoute = is_string($route)
+                ? app('router')->getRoutes()->getByName($route)
+                : $route;
+
+            if (filter_var($route, FILTER_VALIDATE_URL)) {
+                $resolvedRoute = (new Route(['GET'], $route, fn () => null))
+                    ->setUri($route)
+                    ->name($label ?? str($route)->slug());
+            }
+
+            if (! $resolvedRoute) {
+                unset($this->registered[array_search($item, $this->registered)]);
+
+                continue;
+            }
+
+            $routeName = $resolvedRoute->getName()
+                ?? str($resolvedRoute->uri())->replace('/', '.')->toString();
+
+            $guards = array_values(
+                array_filter(
+                    $resolvedRoute->middleware(),
+                    fn ($guard) => str_starts_with($guard, 'auth:')
+                )
+            );
+            $guard = array_shift($guards);
+            $guard = str_replace('auth:', '', $guard);
+
+            $path = data_get($item, 'path');
+            $path ??= str_contains($routeName, '.') && ! str_ends_with($routeName, '.')
+                ? Str::beforeLast($routeName, '.') . '.children.' . Str::afterLast($routeName, '.')
+                : (str_ends_with($routeName, '.') ? rtrim($routeName, '.') : $routeName);
+
+            data_set($this->resolved, $path, array_merge(
+                data_get($this->resolved, $path) ?? [],
+                [
+                    'label' => $label ?? Str::afterLast($path, '.'),
+                    'uri' => app('url')->toRoute($resolvedRoute, data_get($item, 'params', []), true),
+                    'icon' => $icon,
+                    'route_name' => $routeName,
+                    'guard' => $guard ?: null,
+                    'domain' => $resolvedRoute->getDomain(),
+                    'permission' => $resolvedRoute->getPermissionName(),
+                    'order' => $order
+                        ?? count(
+                            data_get($this->resolved, Str::beforeLast($path, '.'))
+                                ?: (str_contains($path, '.') ? [] : $this->resolved)
+                        ),
+                ])
+            );
+        }
+    }
+
+    private function sortMultiDimensional(array $array, ?Closure $filter = null): array
     {
         $array = array_filter($array, $filter);
 

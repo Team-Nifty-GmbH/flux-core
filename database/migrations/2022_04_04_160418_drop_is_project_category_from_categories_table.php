@@ -11,28 +11,28 @@ return new class() extends Migration
     {
         $this->migrateProjectCategories();
 
-        Schema::table('categories', function (Blueprint $table) {
+        Schema::table('categories', function (Blueprint $table): void {
             $table->dropColumn('is_project_category');
         });
     }
 
     public function down(): void
     {
-        Schema::table('categories', function (Blueprint $table) {
+        Schema::table('categories', function (Blueprint $table): void {
             $table->boolean('is_project_category')->after('sort_number');
         });
 
         $this->rollbackProjectCategories();
     }
 
-    private function migrateProjectCategories()
+    private function migrateProjectCategories(): void
     {
         DB::table('categories')
             ->where('is_project_category', true)
             ->update(['model' => 'FluxErp\\Models\\ProjectTask']);
     }
 
-    private function rollbackProjectCategories()
+    private function rollbackProjectCategories(): void
     {
         DB::table('categories')
             ->where('model', 'FluxErp\\Models\\ProjectTask')

@@ -10,20 +10,20 @@ use Illuminate\Validation\ValidationException;
 
 class DeleteUser extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeleteUserRuleset::class;
-    }
-
     public static function models(): array
     {
         return [User::class];
     }
 
+    protected function getRulesets(): string|array
+    {
+        return DeleteUserRuleset::class;
+    }
+
     public function performAction(): ?bool
     {
         $user = resolve_static(User::class, 'query')
-            ->whereKey($this->data['id'])
+            ->whereKey($this->getData('id'))
             ->first();
 
         $user->tokens()->delete();
@@ -38,10 +38,12 @@ class DeleteUser extends FluxAction
     {
         parent::validateData();
 
-        if ($this->data['id'] == Auth::id()) {
+        if ($this->getData('id') == Auth::id()) {
             throw ValidationException::withMessages([
                 'id' => [__('Cannot delete yourself')],
-            ])->errorBag('deleteUser');
+            ])
+                ->status(403)
+                ->errorBag('deleteUser');
         }
     }
 }

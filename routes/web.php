@@ -17,13 +17,15 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware('web')
-    ->group(function () {
-        Route::middleware('signed')->group(function () {
+    ->group(function (): void {
+        Route::middleware('signed')->group(function (): void {
             Route::get('/login-link', LoginLinkController::class)->name('login-link');
             Route::get('/signature-public/{uuid}', SignaturePublicLink::class)->name('signature.public');
         });
 
-        Route::middleware('cache.headers:public;max_age=31536000;etag')->group(function () {
+        Route::middleware('cache.headers:public;max_age=31536000;etag')->group(function (): void {
+            Route::get('/avatar.svg', [AssetController::class, 'avatar'])
+                ->name('avatar');
             Route::get('/manifest.json', [AssetController::class, 'manifest'])->name('manifest');
             Route::get('favicon.svg', [AssetController::class, 'favicon'])->name('favicon');
             Route::get('/flux-assets/{file}', [AssetController::class, 'asset'])

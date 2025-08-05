@@ -10,10 +10,11 @@ use FluxErp\Providers\EventServiceProvider;
 use FluxErp\Providers\MorphMapServiceProvider;
 use FluxErp\Providers\SanctumServiceProvider;
 use FluxErp\Providers\ViewServiceProvider;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Laravel\Scout\ScoutServiceProvider;
 use Livewire\LivewireServiceProvider;
+use Maatwebsite\Excel\ExcelServiceProvider;
 use NotificationChannels\WebPush\WebPushServiceProvider;
 use Orchestra\Testbench\Concerns\CreatesApplication;
 use Spatie\Activitylog\ActivitylogServiceProvider;
@@ -23,14 +24,13 @@ use Spatie\QueryBuilder\QueryBuilderServiceProvider;
 use Spatie\Tags\TagsServiceProvider;
 use Spatie\Translatable\TranslatableServiceProvider;
 use Spatie\TranslationLoader\TranslationServiceProvider;
-use TeamNiftyGmbH\Calendar\CalendarServiceProvider;
+use TallStackUi\Facades\TallStackUi;
+use TallStackUi\TallStackUiServiceProvider;
 use TeamNiftyGmbH\DataTable\DataTableServiceProvider;
-use WireUi\Heroicons\HeroiconsServiceProvider;
-use WireUi\Providers\WireUiServiceProvider;
 
 abstract class TestCase extends BaseTestCase
 {
-    use CreatesApplication, DatabaseTransactions;
+    use CreatesApplication, RefreshDatabase;
 
     protected $loadEnvironmentVariables = true;
 
@@ -50,14 +50,12 @@ abstract class TestCase extends BaseTestCase
             TranslationServiceProvider::class,
             TranslatableServiceProvider::class,
             LivewireServiceProvider::class,
+            TallStackUiServiceProvider::class,
             ViewServiceProvider::class,
             PermissionServiceProvider::class,
             TagsServiceProvider::class,
             ScoutServiceProvider::class,
-            HeroiconsServiceProvider::class,
-            WireUiServiceProvider::class,
             MediaLibraryServiceProvider::class,
-            CalendarServiceProvider::class,
             QueryBuilderServiceProvider::class,
             DataTableServiceProvider::class,
             ActivitylogServiceProvider::class,
@@ -69,6 +67,7 @@ abstract class TestCase extends BaseTestCase
             MorphMapServiceProvider::class,
             EventServiceProvider::class,
             ServiceProvider::class,
+            ExcelServiceProvider::class,
         ];
     }
 
@@ -79,5 +78,12 @@ abstract class TestCase extends BaseTestCase
         $app['config']->set('flux.install_done', true);
         $app['config']->set('auth.defaults.guard', 'sanctum');
         $app['config']->set('cache.default', 'array');
+    }
+
+    protected function getPackageAliases($app): array
+    {
+        return [
+            'TallStackUi' => TallStackUi::class,
+        ];
     }
 }

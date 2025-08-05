@@ -11,18 +11,6 @@ class UpdateProductPropertyGroupRuleset extends FluxRuleset
 {
     protected static ?string $model = ProductPropertyGroup::class;
 
-    public function rules(): array
-    {
-        return [
-            'id' => [
-                'required',
-                'integer',
-                app(ModelExists::class, ['model' => ProductPropertyGroup::class]),
-            ],
-            'name' => 'required|string',
-        ];
-    }
-
     public static function getRules(): array
     {
         return array_merge(
@@ -37,5 +25,17 @@ class UpdateProductPropertyGroupRuleset extends FluxRuleset
                 ],
             ]
         );
+    }
+
+    public function rules(): array
+    {
+        return [
+            'id' => [
+                'required',
+                'integer',
+                app(ModelExists::class, ['model' => ProductPropertyGroup::class]),
+            ],
+            'name' => 'required|string|max:255',
+        ];
     }
 }

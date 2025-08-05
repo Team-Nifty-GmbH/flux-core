@@ -12,13 +12,13 @@ class CurrencyForm extends FluxForm
     #[Locked]
     public ?int $id = null;
 
-    public ?string $name = null;
+    public bool $is_default = false;
 
     public ?string $iso = null;
 
-    public ?string $symbol = null;
+    public ?string $name = null;
 
-    public bool $is_default = false;
+    public ?string $symbol = null;
 
     protected function getActions(): array
     {

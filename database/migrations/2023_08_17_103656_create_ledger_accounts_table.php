@@ -11,7 +11,7 @@ return new class() extends Migration
      */
     public function up(): void
     {
-        Schema::create('ledger_accounts', function (Blueprint $table) {
+        Schema::create('ledger_accounts', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
             $table->string('number')->unique();

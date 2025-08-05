@@ -11,44 +11,49 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class Orders extends OrderList
 {
-    protected string $view = 'flux::livewire.contact.orders';
-
     #[Modelable]
     public ContactForm $contact;
 
-    protected function getBuilder(Builder $builder): Builder
-    {
-        return $builder->where('contact_id', $this->contact->id);
-    }
+    protected ?string $includeBefore = 'flux::livewire.contact.orders';
 
     protected function getTableActions(): array
     {
-        return [
-            DataTableButton::make()
-                ->label(__('Balance Statement'))
-                ->wireClick('$parent.openCreateDocumentsModal()'),
-            DataTableButton::make()
-                ->icon('plus')
-                ->color('primary')
-                ->label(__('New order'))
-                ->wireClick('createOrder'),
-        ];
+        return array_merge(
+            parent::getTableActions(),
+            [
+                DataTableButton::make()
+                    ->text(__('Balance Statement'))
+                    ->wireClick('$parent.openCreateDocumentsModal()'),
+            ]
+        );
     }
 
     #[Renderless]
-    public function createOrder(): void
+    public function create(): void
     {
-        $this->order->reset();
         $this->order->contact_id = $this->contact->id;
-
-        $this->js(<<<'JS'
-            $openModal('create-order');
+        $contactId = $this->contact->id;
+        $this->js(<<<JS
+            \$tallstackuiSelect('invoice-address-id').mergeRequestParams({
+                where: [['contact_id', '=', $contactId]],
+            })
+            \$tallstackuiSelect('delivery-address-id').mergeRequestParams({
+                where: [['contact_id', '=', $contactId]],
+            })
         JS);
+        $this->fetchContactData();
+
+        parent::create();
     }
 
     #[Renderless]
     public function getCacheKey(): string
     {
         return parent::getCacheKey() . $this->contact->id;
+    }
+
+    protected function getBuilder(Builder $builder): Builder
+    {
+        return $builder->where('contact_id', $this->contact->id);
     }
 }

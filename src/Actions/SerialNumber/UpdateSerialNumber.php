@@ -6,19 +6,18 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Models\SerialNumber;
 use FluxErp\Rulesets\SerialNumber\UpdateSerialNumberRuleset;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 class UpdateSerialNumber extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateSerialNumberRuleset::class;
-    }
-
     public static function models(): array
     {
         return [SerialNumber::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateSerialNumberRuleset::class;
     }
 
     public function performAction(): Model
@@ -35,16 +34,13 @@ class UpdateSerialNumber extends FluxAction
 
     protected function validateData(): void
     {
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(SerialNumber::class));
+        parent::validateData();
 
-        $this->data = $validator->validate();
-
+        $errors = [];
         $serialNumber = resolve_static(SerialNumber::class, 'query')
             ->whereKey($this->data['id'])
             ->first();
 
-        $errors = [];
         if (
             ($this->data['product_id'] ?? false) &&
             $serialNumber->product_id &&

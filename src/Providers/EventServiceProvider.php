@@ -35,7 +35,9 @@ use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Queue\Events\JobQueued;
 use Illuminate\Queue\QueueManager;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Event;
+use TallStackUi\View\Components\Form\Date;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -77,27 +79,37 @@ class EventServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        Event::listen(JobQueued::class, function (JobQueued $event) {
+        Event::listen(JobQueued::class, function (JobQueued $event): void {
             QueueMonitorManager::handle($event);
         });
 
         /** @var QueueManager $manager */
         $manager = app(QueueManager::class);
 
-        $manager->before(static function (JobProcessing $event) {
+        $manager->before(static function (JobProcessing $event): void {
             QueueMonitorManager::handle($event);
         });
 
-        $manager->after(static function (JobProcessed $event) {
+        $manager->after(static function (JobProcessed $event): void {
             QueueMonitorManager::handle($event);
         });
 
-        $manager->failing(static function (JobFailed $event) {
+        $manager->failing(static function (JobFailed $event): void {
             QueueMonitorManager::handle($event);
         });
 
-        $manager->exceptionOccurred(static function (JobExceptionOccurred $event) {
+        $manager->exceptionOccurred(static function (JobExceptionOccurred $event): void {
             QueueMonitorManager::handle($event);
+        });
+
+        $this->app->resolving(Date::class, function (Date $component) {
+            $component->start = Carbon::getWeekStartsAt();
+
+            if ($format = data_get(Carbon::getTranslator()->getMessages(), 'de.formats.L')) {
+                $component->format = $format;
+            }
+
+            return $component;
         });
     }
 }

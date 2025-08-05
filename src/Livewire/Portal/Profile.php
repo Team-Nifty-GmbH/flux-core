@@ -22,15 +22,15 @@ class Profile extends Component
 
     public array $addresses = [];
 
-    public string $view = 'flux::livewire.portal.profile';
+    public array $contactOptions = [];
 
     public ?string $loginPassword = null;
-
-    public array $contactOptions = [];
 
     public array $permissions = [];
 
     public bool $showUserList = false;
+
+    public string $view = 'flux::livewire.portal.profile';
 
     public function mount(?string $id = null): void
     {
@@ -78,22 +78,6 @@ class Profile extends Component
         return view($this->view, $this->addresses);
     }
 
-    public function showUsers(): void
-    {
-        if (! auth()->user()->can('profiles.{id?}.get')) {
-            return;
-        }
-
-        $this->addresses = resolve_static(Address::class, 'query')
-            ->where('contact_id', auth()->user()->contact_id)
-            ->get()
-            ->toArray();
-
-        $this->showUserList = true;
-
-        $this->skipRender();
-    }
-
     public function save(): void
     {
         $action = $addressId = data_get($this->address, 'id') ? UpdateAddress::class : CreateAddress::class;
@@ -126,7 +110,23 @@ class Profile extends Component
             return;
         }
 
-        $this->notification()->success(__(':model saved', ['model' => __('My Profile')]));
+        $this->notification()->success(__(':model saved', ['model' => __('My Profile')]))->send();
         $this->loginPassword = null;
+    }
+
+    public function showUsers(): void
+    {
+        if (! auth()->user()->can('profiles.{id?}.get')) {
+            return;
+        }
+
+        $this->addresses = resolve_static(Address::class, 'query')
+            ->where('contact_id', auth()->user()->contact_id)
+            ->get()
+            ->toArray();
+
+        $this->showUserList = true;
+
+        $this->skipRender();
     }
 }

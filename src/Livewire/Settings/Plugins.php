@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Settings;
 
+use Exception;
 use FluxErp\Actions\Plugins\Install;
 use FluxErp\Actions\Plugins\ToggleActive;
 use FluxErp\Actions\Plugins\Uninstall;
@@ -21,6 +22,7 @@ use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
+use RuntimeException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 
 #[Lazy]
@@ -28,37 +30,69 @@ class Plugins extends Component
 {
     use Actions, WithFileUploads;
 
-    public array $installed = [];
-
-    public string $search = '';
-
     public MediaUploadForm $file;
 
-    public array $searchResult = [];
-
-    public ?string $readme = null;
-
-    public array $update = [];
+    public array $installed = [];
 
     public bool $offerRefresh = false;
 
+    public int $outdated = 0;
+
+    public ?string $readme = null;
+
+    public string $search = '';
+
+    public array $searchResult = [];
+
     public ?string $settingsComponent = null;
 
-    public int $outdated = 0;
+    public array $update = [];
 
     public function mount(): void
     {
         $this->getInstalled();
     }
 
-    public function placeholder(): View
-    {
-        return view('flux::livewire.placeholders.horizontal-bar');
-    }
-
     public function render(): View
     {
         return view('flux::livewire.settings.plugins');
+    }
+
+    public function updated($key): void
+    {
+        $path = explode('.', $key);
+
+        if (($path[2] ?? false) === 'is_active') {
+            $this->skipRender();
+            $this->toggleActive($path[1]);
+        }
+    }
+
+    #[Renderless]
+    public function checkForUpdates(): void
+    {
+        try {
+            $updates = app('composer')->outdated();
+        } catch (ProcessFailedException $e) {
+            $this->notification()->error(__('Failed to check for updates.'))->send();
+            $this->addError('checkForUpdates', $e->getMessage());
+
+            return;
+        }
+
+        $updates = collect($updates['installed'] ?? [])
+            ->keyBy('name')
+            ->toArray();
+
+        $this->outdated = count($updates);
+
+        foreach ($this->installed as $key => &$package) {
+            if (array_key_exists($key, $updates)) {
+                $package = array_merge($package, $updates[$key]);
+            } else {
+                unset($package['latest']);
+            }
+        }
     }
 
     public function getInstalled(): void
@@ -82,21 +116,25 @@ class Plugins extends Component
         $this->installed = ['team-nifty-gmbh/flux-erp' => $flux] + $this->installed;
     }
 
-    public function more(string $package): void
+    #[Renderless]
+    public function install(string $package): bool
     {
-        $packageInfo = app('composer')->show($package);
         try {
-            $readme = file_get_contents($packageInfo['path'] . DIRECTORY_SEPARATOR . 'README.md');
-            $this->readme = Str::markdown($readme);
-        } catch (\Exception) {
-            $this->readme = null;
+            Install::make(['packages' => [$package], 'migrate' => true])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (Exception $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
         }
 
-        $this->settingsComponent = $this->installed[$package]['settings'] ?? null;
+        $this->offerRefresh = true;
+        $this->notification()->success(__('Package :package installed successfully.', ['package' => $package]))->send();
+        $this->getInstalled();
 
-        $this->js(<<<'JS'
-            $openModal('more');
-        JS);
+        return true;
     }
 
     #[Renderless]
@@ -127,6 +165,109 @@ class Plugins extends Component
         }
     }
 
+    public function more(string $package): void
+    {
+        $packageInfo = app('composer')->show($package);
+        try {
+            $readme = file_get_contents($packageInfo['path'] . DIRECTORY_SEPARATOR . 'README.md');
+            $this->readme = Str::markdown($readme);
+        } catch (Exception) {
+            $this->readme = null;
+        }
+
+        $this->settingsComponent = $this->installed[$package]['settings'] ?? null;
+
+        $this->js(<<<'JS'
+            $modalOpen('more');
+        JS);
+    }
+
+    public function placeholder(): View
+    {
+        return view('flux::livewire.placeholders.horizontal-bar');
+    }
+
+    #[Renderless]
+    public function showChangeLog(string $package, string $version): void
+    {
+        $packageInfo = $this->installed[$package];
+        $this->update = ['package' => $package, 'version' => $version];
+
+        if (str_starts_with($packageInfo['source'], 'https://github.com')) {
+            $changeLog = Http::withHeader('Accept', 'application/vnd.github.v3+json')
+                ->get('https://api.github.com/repos/' . $package . '/releases/tags/' . $version)
+                ->json('body');
+
+            $this->update['readme'] = Str::markdown($changeLog ?? '### ' . __('No changelog found'));
+            $this->update['readme'] = str_replace('<a', '<a target="_blank"', $this->update['readme']);
+        }
+
+        $this->js(<<<'JS'
+            $modalOpen('update');
+        JS);
+    }
+
+    public function toggleActive(string $packageName): void
+    {
+        try {
+            ToggleActive::make(['packages' => [$packageName]])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (Exception $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->offerRefresh = true;
+    }
+
+    #[Renderless]
+    public function uninstall(string|array $packages, bool $rollback = false): void
+    {
+        $packages = is_array($packages) ? $packages : [$packages];
+
+        try {
+            Uninstall::make(['packages' => $packages, 'rollback' => $rollback])
+                ->validate()
+                ->checkPermission()
+                ->execute();
+        } catch (RuntimeException|UnauthorizedException|ValidationException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->offerRefresh = true;
+        $this->notification()
+            ->success(
+                __('Package :package uninstalled successfully.', ['package' => implode(',', $packages)])
+            );
+
+        if ($this->offerRefresh) {
+            $this->getInstalled();
+        }
+    }
+
+    public function updateAll(): void
+    {
+        try {
+            Update::make([])
+                ->checkPermission()
+                ->validate()
+                ->execute();
+        } catch (RuntimeException|UnauthorizedException|ValidationException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->notification()->success(__('Packages updated successfully'))->send();
+
+        $this->checkForUpdates();
+    }
+
     public function updatedSearch(): void
     {
         $this->skipRender();
@@ -149,53 +290,6 @@ class Plugins extends Component
     }
 
     #[Renderless]
-    public function checkForUpdates(): void
-    {
-        try {
-            $updates = app('composer')->outdated();
-        } catch (ProcessFailedException $e) {
-            $this->notification()->error(__('Failed to check for updates.'));
-            $this->addError('checkForUpdates', $e->getMessage());
-
-            return;
-        }
-
-        $updates = collect($updates['installed'] ?? [])
-            ->keyBy('name')
-            ->toArray();
-
-        $this->outdated = count($updates);
-
-        foreach ($this->installed as $key => &$package) {
-            if (array_key_exists($key, $updates)) {
-                $package = array_merge($package, $updates[$key]);
-            } else {
-                unset($package['latest']);
-            }
-        }
-    }
-
-    #[Renderless]
-    public function showChangeLog(string $package, string $version): void
-    {
-        $packageInfo = $this->installed[$package];
-        $this->update = ['package' => $package, 'version' => $version];
-
-        if (str_starts_with($packageInfo['source'], 'https://github.com')) {
-            $changeLog = Http::withHeader('Accept', 'application/vnd.github.v3+json')
-                ->get('https://api.github.com/repos/' . $package . '/releases/tags/' . $version)
-                ->json('body');
-
-            $this->update['readme'] = Str::markdown($changeLog ?? '### ' . __('No changelog found'));
-            $this->update['readme'] = str_replace('<a', '<a target="_blank"', $this->update['readme']);
-        }
-
-        $this->js(<<<'JS'
-            $openModal('update');
-        JS);
-    }
-
-    #[Renderless]
     public function updatePackages(array|string|null $packages): void
     {
         $packages = is_array($packages) ? $packages : [$packages];
@@ -205,106 +299,14 @@ class Plugins extends Component
                 ->checkPermission()
                 ->validate()
                 ->execute();
-        } catch (\RuntimeException|UnauthorizedException|ValidationException $e) {
+        } catch (RuntimeException|UnauthorizedException|ValidationException $e) {
             exception_to_notifications($e, $this);
 
             return;
         }
 
-        $this->notification()->success(__('Packages updated successfully'));
+        $this->notification()->success(__('Packages updated successfully'))->send();
 
         $this->checkForUpdates();
-    }
-
-    public function updateAll(): void
-    {
-        try {
-            Update::make([])
-                ->checkPermission()
-                ->validate()
-                ->execute();
-        } catch (\RuntimeException|UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
-
-            return;
-        }
-
-        $this->notification()->success(__('Packages updated successfully'));
-
-        $this->checkForUpdates();
-    }
-
-    #[Renderless]
-    public function uninstall(string|array $packages, bool $rollback = false): void
-    {
-        $packages = is_array($packages) ? $packages : [$packages];
-
-        try {
-            Uninstall::make(['packages' => $packages, 'rollback' => $rollback])
-                ->validate()
-                ->checkPermission()
-                ->execute();
-        } catch (\RuntimeException|UnauthorizedException|ValidationException $e) {
-            exception_to_notifications($e, $this);
-
-            return;
-        }
-
-        $this->offerRefresh = true;
-        $this->notification()
-            ->success(
-                __('Package :package uninstalled successfully.', ['package' => implode(',', $packages)])
-            );
-
-        if ($this->offerRefresh) {
-            $this->getInstalled();
-        }
-    }
-
-    #[Renderless]
-    public function install(string $package): bool
-    {
-        try {
-            Install::make(['packages' => [$package], 'migrate' => true])
-                ->checkPermission()
-                ->validate()
-                ->execute();
-        } catch (\Exception $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->offerRefresh = true;
-        $this->notification()->success(__('Package :package installed successfully.', ['package' => $package]));
-        $this->getInstalled();
-
-        return true;
-    }
-
-    public function updated($key): void
-    {
-        $path = explode('.', $key);
-
-        if (($path[2] ?? false) === 'is_active') {
-            $this->skipRender();
-            $this->toggleActive($path[1]);
-        }
-    }
-
-    public function toggleActive(string $packageName): void
-    {
-        try {
-            ToggleActive::make(['packages' => [$packageName]])
-                ->checkPermission()
-                ->validate()
-                ->execute();
-        } catch (\Exception $e) {
-            exception_to_notifications($e, $this);
-
-            return;
-        }
-
-        $this->offerRefresh = true;
     }
 }

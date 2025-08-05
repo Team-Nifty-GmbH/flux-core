@@ -4,23 +4,12 @@ namespace FluxErp\Rules;
 
 use Closure;
 use Illuminate\Contracts\Validation\DataAwareRule;
-use Illuminate\Contracts\Validation\InvokableRule;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Translation\PotentiallyTranslatedString;
 
-class ExistsWithForeign implements DataAwareRule, InvokableRule
+class ExistsWithForeign implements DataAwareRule, ValidationRule
 {
     protected array $data;
-
-    /**
-     * @return $this|ExistsWithForeign
-     */
-    public function setData($data): self
-    {
-        $this->data = $data;
-
-        return $this;
-    }
 
     /**
      * @param  string  $foreignAttribute  Example: client_id, the value is retrieved from the validation data array
@@ -36,24 +25,24 @@ class ExistsWithForeign implements DataAwareRule, InvokableRule
      * @param  string|null  $throughForeign  The foreign key on $throughTable that has to match on $throughLocal.
      */
     public function __construct(
-        public string $foreignAttribute,
-        public string $table,
-        public string $column = 'id',
-        public ?string $baseTable = null,
-        public ?string $attributeColumn = null,
-        public ?string $throughTable = null,
-        public string $throughLocal = 'id',
-        public ?string $throughForeign = null
+        protected string $foreignAttribute,
+        protected string $table,
+        protected string $column = 'id',
+        protected ?string $baseTable = null,
+        protected ?string $attributeColumn = null,
+        protected ?string $throughTable = null,
+        protected string $throughLocal = 'id',
+        protected ?string $throughForeign = null
     ) {}
 
-    /**
-     * Run the validation rule.
-     *
-     * @param  string  $attribute
-     * @param  mixed  $value
-     * @param  Closure(string): PotentiallyTranslatedString  $fail
-     */
-    public function __invoke($attribute, $value, $fail): void
+    public function setData(array $data): static
+    {
+        $this->data = $data;
+
+        return $this;
+    }
+
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         $prefix = strpos($attribute, '.') ? pathinfo($attribute, PATHINFO_FILENAME) : null;
         $data = data_get($this->data, $prefix);
@@ -76,6 +65,8 @@ class ExistsWithForeign implements DataAwareRule, InvokableRule
 
             if (! $foreignAttributeValue) {
                 $fail('validation.required')->translate(['attribute' => $this->foreignAttribute]);
+
+                return;
             }
         }
 
@@ -85,10 +76,10 @@ class ExistsWithForeign implements DataAwareRule, InvokableRule
         // the foreignAttribute.
         $this->attributeColumn = $this->attributeColumn ?: $this->foreignAttribute;
 
-        // If $throughLocal is NOT id its a BelongsTo.
-        // If $throughLocal is id its a Has relation.
+        // If $throughLocal is NOT id it's a BelongsTo.
+        // If $throughLocal is id it's a Has relation.
         if ($this->throughLocal !== 'id' && ! $this->throughForeign) {
-            // Its a BelongsTo, the default related key is id.
+            // It's a BelongsTo, the default related key is id.
             $this->throughForeign = 'id';
         }
 
@@ -98,7 +89,7 @@ class ExistsWithForeign implements DataAwareRule, InvokableRule
             $query->where($this->table . '.' . $this->column, $value);
             $query->join(
                 $this->throughTable,
-                function ($join) use ($foreignAttributeValue) {
+                function ($join) use ($foreignAttributeValue): void {
                     $join->on(
                         $this->table . '.' . $this->throughLocal,
                         '=',

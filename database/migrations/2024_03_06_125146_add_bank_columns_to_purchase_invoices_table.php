@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('purchase_invoices', function (Blueprint $table) {
+        Schema::table('purchase_invoices', function (Blueprint $table): void {
             $table->string('iban')->nullable()->after('hash');
             $table->string('account_holder')->nullable()->after('iban');
             $table->string('bank_name')->nullable()->after('account_holder');
@@ -18,7 +18,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('purchase_invoices', function (Blueprint $table) {
+        Schema::table('purchase_invoices', function (Blueprint $table): void {
             $table->dropColumn(['iban', 'account_holder', 'bank_name', 'bic']);
         });
     }

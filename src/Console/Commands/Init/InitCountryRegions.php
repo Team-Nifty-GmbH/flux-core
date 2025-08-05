@@ -8,9 +8,9 @@ use Illuminate\Console\Command;
 
 class InitCountryRegions extends Command
 {
-    protected $signature = 'init:country-regions';
-
     protected $description = 'Initiates Country Regions and fills table with data.';
+
+    protected $signature = 'init:country-regions';
 
     public function handle(): void
     {

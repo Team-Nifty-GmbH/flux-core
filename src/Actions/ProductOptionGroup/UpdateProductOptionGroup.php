@@ -11,18 +11,17 @@ use FluxErp\Models\ProductOptionGroup;
 use FluxErp\Rulesets\ProductOptionGroup\UpdateProductOptionGroupRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Validator;
 
 class UpdateProductOptionGroup extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateProductOptionGroupRuleset::class;
-    }
-
     public static function models(): array
     {
         return [ProductOptionGroup::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateProductOptionGroupRuleset::class;
     }
 
     public function performAction(): Model
@@ -49,13 +48,5 @@ class UpdateProductOptionGroup extends FluxAction
         }
 
         return $productOptionGroup->withoutRelations()->fresh();
-    }
-
-    protected function validateData(): void
-    {
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(ProductOptionGroup::class));
-
-        $this->data = $validator->validate();
     }
 }

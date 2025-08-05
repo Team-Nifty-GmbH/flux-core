@@ -3,15 +3,17 @@
 namespace FluxErp\Http\Controllers;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Event;
 use Laravel\Scout\Searchable;
+use Laravel\Scout\SearchableScope;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
 class SearchController extends Controller
 {
-    public function __invoke(Request $request, $model)
+    public function __invoke(Request $request, ?string $model = null)
     {
         // check if $model is a morph alias
         $model = morphed_model($model) ?? $model;
@@ -30,28 +32,37 @@ class SearchController extends Controller
 
         Event::dispatch('tall-datatables-searching', $request);
 
-        if ($request->has('selected')) {
+        if (! blank($request->get('selected')) && blank($request->get('search'))) {
             $selected = $request->get('selected');
             $optionValue = $request->get('option-value') ?: (app($model))->getKeyName();
 
             $query = resolve_static($model, 'query');
             is_array($selected)
-                ? $query->whereIn($optionValue, $selected)
+                ? $query->whereIn($optionValue, Arr::wrap($selected))
                 : $query->where($optionValue, $selected);
-        } elseif ($request->has('search') && $isSearchable) {
+        } elseif ($request->has('search') && $isSearchable && ! $request->get('searchFields')) {
+            /** @var Builder $perPageSearch */
+            $perPageSearch = count(Arr::except(
+                app($model)->getGlobalScopes(),
+                [
+                    SoftDeletingScope::class,
+                    SearchableScope::class,
+                ]
+            )) === 0 ? 20 : 1000;
+
             $query = ! is_string($request->get('search'))
                 ? resolve_static($model, 'query')->limit(20)
                 : resolve_static($model, 'search', ['query' => $request->get('search')])
-                    ->toEloquentBuilder();
+                    ->toEloquentBuilder(perPage: $perPageSearch);
         } elseif ($request->has('search')) {
             $query = resolve_static($model, 'query');
-            $query->where(function (Builder $query) use ($request) {
+            $query->where(function (Builder $query) use ($request): void {
                 foreach (Arr::wrap($request->get('searchFields')) as $field) {
                     $query->orWhere($field, 'like', '%' . $request->get('search') . '%');
                 }
             });
         } else {
-            /** @var \Illuminate\Database\Eloquent\Builder $query */
+            /** @var Builder $query */
             $query = resolve_static($model, 'query');
         }
 
@@ -66,11 +77,7 @@ class SearchController extends Controller
         }
 
         if ($request->has('orderBy')) {
-            $query->orderBy($request->get('orderBy'));
-        }
-
-        if ($request->has('orderDirection')) {
-            $query->orderBy($request->get('orderDirection'));
+            $query->orderBy($request->get('orderBy'), $request->get('orderDirection', 'asc'));
         }
 
         if ($request->has('where')) {
@@ -79,6 +86,7 @@ class SearchController extends Controller
 
         if ($request->has('whereIn')) {
             foreach ($request->get('whereIn') as $whereIn) {
+                $whereIn[1] = Arr::wrap($whereIn[1]);
                 $query->whereIn(...$whereIn);
             }
         }
@@ -90,11 +98,11 @@ class SearchController extends Controller
         }
 
         if ($request->has('whereNull')) {
-            $query->whereNull($request->get('whereNull'));
+            $query->whereNull(...$request->get('whereNull'));
         }
 
         if ($request->has('whereNotNull')) {
-            $query->whereNotNull($request->get('whereNotNull'));
+            $query->whereNotNull(...$request->get('whereNotNull'));
         }
 
         if ($request->has('whereBetween')) {
@@ -140,7 +148,7 @@ class SearchController extends Controller
         $result = $query->latest()->get();
 
         if ($request->has('appends')) {
-            $result->each(function ($item) use ($request) {
+            $result->each(function ($item) use ($request): void {
                 $item->append(array_intersect($item->getAppends(), $request->get('appends')));
             });
         }
@@ -152,7 +160,7 @@ class SearchController extends Controller
                         'id' => $item->getKey(),
                         'label' => $item->getLabel(),
                         'description' => $item->getDescription(),
-                        'src' => $item->getAvatarUrl(),
+                        'image' => $item->getAvatarUrl(),
                     ],
                     $item->only($request->get('fields', [])),
                     $item->only($request->get('appends', [])),

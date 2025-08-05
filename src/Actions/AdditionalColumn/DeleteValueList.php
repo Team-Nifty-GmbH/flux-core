@@ -9,14 +9,14 @@ use Illuminate\Validation\ValidationException;
 
 class DeleteValueList extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeleteValueListRuleset::class;
-    }
-
     public static function models(): array
     {
         return [AdditionalColumn::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeleteValueListRuleset::class;
     }
 
     public function performAction(): ?bool
@@ -39,7 +39,9 @@ class DeleteValueList extends FluxAction
         ) {
             throw ValidationException::withMessages([
                 'model_has_values' => [__('Value list referenced by at least one model instance')],
-            ])->errorBag('deleteValueList');
+            ])
+                ->errorBag('deleteValueList')
+                ->status(423);
         }
     }
 }

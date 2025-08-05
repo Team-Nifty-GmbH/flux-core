@@ -9,9 +9,9 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class FillOrderPositionsRuleset extends FluxRuleset
 {
-    protected static ?string $model = OrderPosition::class;
-
     protected static bool $addAdditionalColumnRules = false;
+
+    protected static ?string $model = OrderPosition::class;
 
     public function rules(): array
     {

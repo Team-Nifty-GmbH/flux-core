@@ -12,7 +12,7 @@ return new class() extends Migration
      */
     public function up(): void
     {
-        Schema::table('tickets', function (Blueprint $table) {
+        Schema::table('tickets', function (Blueprint $table): void {
             $table->string('authenticatable_type')->after('uuid');
             $table->unsignedBigInteger('authenticatable_id')->after('authenticatable_type');
 
@@ -28,7 +28,7 @@ return new class() extends Migration
 
         $this->migrateAddressId();
 
-        Schema::table('tickets', function (Blueprint $table) {
+        Schema::table('tickets', function (Blueprint $table): void {
             $table->dropForeign('tickets_address_id_foreign');
             $table->dropColumn('address_id');
         });
@@ -39,7 +39,7 @@ return new class() extends Migration
      */
     public function down(): void
     {
-        Schema::table('tickets', function (Blueprint $table) {
+        Schema::table('tickets', function (Blueprint $table): void {
             $table->unsignedBigInteger('address_id')->after('uuid');
 
             $table->dropIndex('tickets_model_type_model_id_index');
@@ -54,7 +54,7 @@ return new class() extends Migration
 
         $this->rollbackAddressId();
 
-        Schema::table('tickets', function (Blueprint $table) {
+        Schema::table('tickets', function (Blueprint $table): void {
             $table->foreign('address_id')->references('id')->on('addresses');
 
             $table->dropIndex('tickets_authenticatable_type_authenticatable_id_index');

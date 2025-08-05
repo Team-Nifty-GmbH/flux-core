@@ -21,43 +21,16 @@ class Permissions extends RoleList
 {
     public ?string $includeBefore = 'flux::livewire.settings.permissions';
 
-    public RoleForm $roleForm;
-
     public array $permissions = [];
 
-    #[Renderless]
-    public function getPermissionTree(): array
-    {
-        $permissions = Permission::query()
-            ->where('guard_name', $this->roleForm->guard_name)
-            ->pluck('id', 'name')
-            ->toArray();
-
-        return $this->preparePermissions(Arr::undotToTree(
-            array: $permissions,
-            translate: fn (string $key) => $key === 'get' ? __('permission.get') : __(Str::headline($key))
-        ));
-    }
-
-    protected function getViewData(): array
-    {
-        return array_merge(
-            parent::getViewData(),
-            [
-                'guards' => array_keys(config('auth.guards')),
-                'users' => resolve_static(User::class, 'query')
-                    ->get(['id', 'name'])
-                    ->toArray(),
-            ]
-        );
-    }
+    public RoleForm $roleForm;
 
     protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
-                ->label(__('Create'))
-                ->color('primary')
+                ->text(__('Create'))
+                ->color('indigo')
                 ->icon('plus')
                 ->attributes([
                     'wire:click' => 'edit()',
@@ -70,15 +43,15 @@ class Permissions extends RoleList
     {
         return [
             DataTableButton::make()
-                ->label(__('Assign users'))
-                ->color('primary')
+                ->text(__('Assign users'))
+                ->color('indigo')
                 ->attributes([
                     'wire:click' => 'editUsers(record.id)',
                 ])
                 ->when(resolve_static(UpdateRole::class, 'canPerformAction', [false])),
             DataTableButton::make()
-                ->label(__('Edit permissions'))
-                ->color('primary')
+                ->text(__('Edit permissions'))
+                ->color('indigo')
                 ->attributes([
                     'x-cloak',
                     'x-show' => 'record.name !== \'Super Admin\'',
@@ -86,50 +59,16 @@ class Permissions extends RoleList
                 ])
                 ->when(resolve_static(UpdateRole::class, 'canPerformAction', [false])),
             DataTableButton::make()
-                ->label(__('Delete'))
-                ->color('negative')
+                ->text(__('Delete'))
+                ->color('red')
                 ->attributes([
                     'x-cloak',
                     'x-show' => 'record.name !== \'Super Admin\'',
                     'wire:click' => 'delete(record.id)',
-                    'wire:flux-confirm.icon.error' => __('wire:confirm.delete', ['model' => __('Role')]),
+                    'wire:flux-confirm.type.error' => __('wire:confirm.delete', ['model' => __('Role')]),
                 ])
                 ->when(resolve_static(DeleteRole::class, 'canPerformAction', [false])),
         ];
-    }
-
-    #[Renderless]
-    public function editUsers(Role $role): void
-    {
-        $this->edit($role, 'edit-role-users');
-    }
-
-    #[Renderless]
-    public function edit(?Role $role, string $modal = 'edit-role-permissions'): void
-    {
-        $this->roleForm->reset();
-        $this->roleForm->fill($role);
-        $this->permissions = $this->getPermissionTree();
-
-        $this->js(<<<JS
-            \$openModal('$modal');
-        JS);
-    }
-
-    #[Renderless]
-    public function save(): bool
-    {
-        try {
-            $this->roleForm->save();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
     }
 
     #[Renderless]
@@ -149,6 +88,67 @@ class Permissions extends RoleList
         $this->loadData();
 
         return true;
+    }
+
+    #[Renderless]
+    public function edit(?Role $role, string $modal = 'edit-role-permissions-modal'): void
+    {
+        $this->roleForm->reset();
+        $this->roleForm->fill($role);
+        $this->permissions = $this->getPermissionTree();
+
+        $this->js(<<<JS
+            \$modalOpen('$modal');
+        JS);
+    }
+
+    #[Renderless]
+    public function editUsers(Role $role): void
+    {
+        $this->edit($role, 'edit-role-users-modal');
+    }
+
+    #[Renderless]
+    public function getPermissionTree(): array
+    {
+        $permissions = Permission::query()
+            ->where('guard_name', $this->roleForm->guard_name)
+            ->pluck('id', 'name')
+            ->toArray();
+
+        return $this->preparePermissions(Arr::undotToTree(
+            array: $permissions,
+            translate: fn (string $key) => $key === 'get' ? __('permission.get') : __(Str::headline($key))
+        ));
+    }
+
+    #[Renderless]
+    public function save(): bool
+    {
+        try {
+            $this->roleForm->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
+    }
+
+    protected function getViewData(): array
+    {
+        return array_merge(
+            parent::getViewData(),
+            [
+                'guards' => array_keys(config('auth.guards')),
+                'users' => resolve_static(User::class, 'query')
+                    ->get(['id', 'name'])
+                    ->toArray(),
+            ]
+        );
     }
 
     protected function preparePermissions(array $tree, array $parent = []): array

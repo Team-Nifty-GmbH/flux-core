@@ -13,14 +13,27 @@ class MorphExists implements DataAwareRule, ValidationRule
 
     private string $modelAttribute;
 
-    public function __construct(string $modelAttribute = 'model_type')
+    private bool $withPrefix;
+
+    public function __construct(string $modelAttribute = 'model_type', bool $withPrefix = true)
     {
         $this->modelAttribute = $modelAttribute;
+        $this->withPrefix = $withPrefix;
+    }
+
+    public function setData(array $data): static
+    {
+        $this->data = $data;
+
+        return $this;
     }
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $prefix = strpos($attribute, '.') ? pathinfo($attribute, PATHINFO_FILENAME) . '.' : null;
+        $prefix = null;
+        if ($this->withPrefix) {
+            $prefix = strpos($attribute, '.') ? pathinfo($attribute, PATHINFO_FILENAME) . '.' : null;
+        }
 
         $model = data_get($this->data, $prefix . $this->modelAttribute);
 
@@ -42,12 +55,5 @@ class MorphExists implements DataAwareRule, ValidationRule
         if (! resolve_static($model, 'query')->whereKey($value)->exists()) {
             $fail(sprintf('Record with id %s doesnt exist in %s.', $value, $model))->translate();
         }
-    }
-
-    public function setData($data): static
-    {
-        $this->data = $data;
-
-        return $this;
     }
 }

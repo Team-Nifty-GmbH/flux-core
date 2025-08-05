@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Portal;
 
+use Exception;
 use FluxErp\Actions\Ticket\CreateTicket;
 use FluxErp\Models\SerialNumber;
 use FluxErp\Models\Ticket;
@@ -10,6 +11,7 @@ use FluxErp\Traits\Livewire\WithAddressAuth;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class Service extends Component
@@ -18,13 +20,14 @@ class Service extends Component
 
     public $attachments = [];
 
-    public array $ticket;
+    public array $contactData = [];
+
+    #[Locked]
+    public string $modelType = Ticket::class;
 
     public array $serialNumber;
 
-    public array $contactData = [];
-
-    public string $modelType = Ticket::class;
+    public array $ticket;
 
     protected $listeners = [
         'updateFilesArray',
@@ -67,7 +70,7 @@ class Service extends Component
             $ticket = CreateTicket::make($this->ticket)
                 ->validate()
                 ->execute();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             exception_to_notifications($e, $this);
 
             return false;
@@ -75,11 +78,11 @@ class Service extends Component
 
         try {
             $this->saveFileUploadsToMediaLibrary('attachments', $ticket->id, app(Ticket::class)->getMorphClass());
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             exception_to_notifications($e, $this);
         }
 
-        $this->notification()->success(__('Ticket created…'));
+        $this->notification()->success(__('Ticket created…'))->send();
         Event::dispatch('customerTicket.created', $ticket);
 
         $this->redirect(route('portal.dashboard'), true);

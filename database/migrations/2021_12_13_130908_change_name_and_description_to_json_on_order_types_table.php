@@ -9,7 +9,7 @@ class ChangeNameAndDescriptionToJsonOnOrderTypesTable extends Migration
 {
     public function up(): void
     {
-        Schema::table('order_types', function (Blueprint $table) {
+        Schema::table('order_types', function (Blueprint $table): void {
             $table->json('name')->change();
             $table->json('description')->nullable()->change();
         });
@@ -21,7 +21,7 @@ class ChangeNameAndDescriptionToJsonOnOrderTypesTable extends Migration
     {
         $this->rollbackNameAndDescription();
 
-        Schema::table('order_types', function (Blueprint $table) {
+        Schema::table('order_types', function (Blueprint $table): void {
             $table->string('name')->change();
             $table->string('description')->nullable()->change();
         });
@@ -31,7 +31,7 @@ class ChangeNameAndDescriptionToJsonOnOrderTypesTable extends Migration
     {
         $orderTypes = DB::table('order_types')->get()->toArray();
 
-        array_walk($orderTypes, function (&$item) {
+        array_walk($orderTypes, function (&$item): void {
             $item->name = json_encode([config('app.locale') => $item->name]);
             $item->description = json_encode([config('app.locale') => $item->description]);
             $item = (array) $item;
@@ -44,7 +44,7 @@ class ChangeNameAndDescriptionToJsonOnOrderTypesTable extends Migration
     {
         $orderTypes = DB::table('order_types')->get()->toArray();
 
-        array_walk($orderTypes, function (&$item) {
+        array_walk($orderTypes, function (&$item): void {
             $item->name = substr(json_decode($item->name)->{config('app.locale')}, 0, 255);
             $item->description = substr(json_decode($item->description)->{config('app.locale')}, 0, 255);
             $item = (array) $item;

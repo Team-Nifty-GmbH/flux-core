@@ -14,27 +14,27 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class OrderDetail extends Component
 {
-    public array $order = [];
+    public array $attachments = [];
+
+    public array $availableCols;
+
+    public array $childAvailableCols;
+
+    public array $childEnabledCols;
 
     public array $childOrders = [];
 
-    public array $attachments = [];
+    public bool $detailModal = false;
+
+    public array $enabledCols;
+
+    public array $order = [];
 
     public array $positionDetails = [];
 
     public array $positionsSummary = [];
 
     public array $selected = [];
-
-    public bool $detailModal = false;
-
-    public array $enabledCols;
-
-    public array $availableCols;
-
-    public array $childEnabledCols;
-
-    public array $childAvailableCols;
 
     public array $ticketTypes = [];
 
@@ -90,7 +90,8 @@ class OrderDetail extends Component
                 'total_net_price',
                 'unit_net_price',
                 'total_gross_price',
-                'unit_gross_price', ]
+                'unit_gross_price',
+            ]
         );
 
         // get the latest attachment per collection_name where disk is public
@@ -115,14 +116,15 @@ class OrderDetail extends Component
             [
                 'id',
                 'parent_id',
-                'order_number',
-                'commission',
+                'address_invoice',
                 'payment_target',
                 'payment_discount_tar',
                 'header',
                 'footer',
                 'logistic_note',
                 'payment_texts',
+                'order_number',
+                'commission',
                 'order_date',
                 'invoice_date',
                 'invoice_number',
@@ -134,9 +136,11 @@ class OrderDetail extends Component
                 'total_net_price',
                 'total_gross_price',
                 'total_vats',
-                'order_type',
-                'address_invoice',
+                'created_by',
+
+                'agent',
                 'currency',
+                'order_type',
             ]
         ));
 
@@ -188,30 +192,6 @@ class OrderDetail extends Component
         $this->skipRender();
     }
 
-    public function selectPosition(int $id): void
-    {
-        $position = resolve_static(OrderPosition::class, 'query')
-            ->whereKey($id)
-            ->first();
-
-        $image = $position->product?->getFirstMedia('images')
-            ?? $position->product?->parent?->getFirstMedia('images');
-
-        $serialNumber = $position->serialNumbers()->select(['serial_numbers.id', 'serial_number'])->get()
-            ?: $position->origin?->serialNumbers()->select(['serial_numbers.id', 'serial_number'])->get();
-
-        $this->positionDetails = $position->toArray();
-        $this->positionDetails['serial_number'] = $serialNumber->toArray();
-        $this->positionDetails['product'] = $position
-            ->product()
-            ->select(['id', 'description', 'product_number'])
-            ->first()
-            ?->toArray();
-
-        $this->positionDetails['image'] = $image?->toHtml();
-        $this->detailModal = true;
-    }
-
     #[Renderless]
     public function downloadInvoice(): BinaryFileResponse
     {
@@ -249,6 +229,30 @@ class OrderDetail extends Component
             ->log($mediaItem->collection_name . ' ' . $mediaItem->name);
 
         return response()->download($mediaItem->getPath(), $mediaItem->file_name);
+    }
+
+    public function selectPosition(int $id): void
+    {
+        $position = resolve_static(OrderPosition::class, 'query')
+            ->whereKey($id)
+            ->first();
+
+        $image = $position->product?->getFirstMedia('images')
+            ?? $position->product?->parent?->getFirstMedia('images');
+
+        $serialNumber = $position->serialNumbers()->select(['serial_numbers.id', 'serial_number'])->get()
+            ?: $position->origin?->serialNumbers()->select(['serial_numbers.id', 'serial_number'])->get();
+
+        $this->positionDetails = $position->toArray();
+        $this->positionDetails['serial_number'] = $serialNumber->toArray();
+        $this->positionDetails['product'] = $position
+            ->product()
+            ->select(['id', 'description', 'product_number'])
+            ->first()
+            ?->toArray();
+
+        $this->positionDetails['image'] = $image?->toHtml();
+        $this->detailModal = true;
     }
 
     protected function renderTree(array|Collection $tree, int $level = 0, string $loopPrefix = '', $parent = null): void

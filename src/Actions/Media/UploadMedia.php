@@ -16,14 +16,14 @@ class UploadMedia extends FluxAction
 {
     protected bool $force = false;
 
-    protected function getRulesets(): string|array
-    {
-        return UploadMediaRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Media::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UploadMediaRuleset::class;
     }
 
     public function force($force = true): static

@@ -2,6 +2,7 @@
 
 namespace FluxErp\Traits;
 
+use Exception;
 use FluxErp\Models\SerialNumber;
 use FluxErp\Models\SerialNumberRange;
 use Illuminate\Support\Facades\DB;
@@ -22,7 +23,7 @@ trait HasSerialNumberRange
 
             $query = resolve_static(SerialNumberRange::class, 'query')
                 ->where('type', $type)
-                ->where('model_type', app(static::class)->getMorphClass())
+                ->where('model_type', morph_alias(static::class))
                 ->where('client_id', $clientId);
 
             $store = false;
@@ -40,10 +41,10 @@ trait HasSerialNumberRange
                     $serialNumberRange->fill([
                         'client_id' => $clientId,
                         'type' => $type,
-                        'model_type' => app(static::class)->getMorphClass(),
+                        'model_type' => morph_alias(static::class),
                         'stores_serial_numbers' => $store,
                     ])->save();
-                } catch (\Exception) {
+                } catch (Exception) {
                     $serialNumberRange = $query->firstOrNew();
                 }
             }
@@ -51,7 +52,7 @@ trait HasSerialNumberRange
             if (! $serialNumberRange->is_pre_filled && ! $serialNumberRange->is_randomized) {
                 $serialNumberRange = DB::transaction(function () use ($serialNumberRange) {
                     $serialNumberRange = resolve_static(SerialNumberRange::class, 'query')
-                        ->whereKey($serialNumberRange->id)
+                        ->whereKey($serialNumberRange->getKey())
                         ->lockForUpdate()
                         ->first();
                     $serialNumberRange->increment('current_number');

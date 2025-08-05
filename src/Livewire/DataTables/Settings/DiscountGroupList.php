@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\DataTables\Settings;
 
+use Exception;
 use FluxErp\Actions\DiscountGroup\CreateDiscountGroup;
 use FluxErp\Actions\DiscountGroup\DeleteDiscountGroup;
 use FluxErp\Actions\DiscountGroup\UpdateDiscountGroup;
@@ -11,58 +12,38 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class DiscountGroupList extends BaseDiscountGroupList
 {
-    protected function getRowActions(): array
-    {
-        return [
-            DataTableButton::make()
-                ->label(__('Edit'))
-                ->icon('pencil')
-                ->color('primary')
-                ->attributes([
-                    'x-on:click' => 'editItem(record.id)',
-                ]),
-            DataTableButton::make()
-                ->label(__('Delete'))
-                ->icon('trash')
-                ->color('negative')
-                ->attributes([
-                    'x-on:click' => 'deleteItem(record.id)',
-                    'wire:loading.attr' => 'disabled',
-                ]),
-        ];
-    }
-
     protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
-                ->label(__('Create'))
+                ->text(__('Create'))
                 ->icon('plus')
-                ->color('primary')
+                ->color('indigo')
                 ->attributes([
                     'x-on:click' => 'editItem(null)',
                 ]),
         ];
     }
 
-    public function saveItem(array $discountGroup): bool
+    protected function getRowActions(): array
     {
-        $discountGroup['discounts'] = array_map(fn ($discount) => $discount['id'], $discountGroup['discounts']);
-        $action = ($discountGroup['id'] ?? false)
-            ? UpdateDiscountGroup::make($discountGroup)
-            : CreateDiscountGroup::make($discountGroup);
-
-        try {
-            $action->checkPermission()->validate()->execute();
-        } catch (\Exception $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
+        return [
+            DataTableButton::make()
+                ->text(__('Edit'))
+                ->icon('pencil')
+                ->color('indigo')
+                ->attributes([
+                    'x-on:click' => 'editItem(record.id)',
+                ]),
+            DataTableButton::make()
+                ->text(__('Delete'))
+                ->icon('trash')
+                ->color('red')
+                ->attributes([
+                    'x-on:click' => 'deleteItem(record.id)',
+                    'wire:loading.attr' => 'disabled',
+                ]),
+        ];
     }
 
     public function deleteItem(DiscountGroup $discountGroup): void
@@ -74,7 +55,7 @@ class DiscountGroupList extends BaseDiscountGroupList
                 ->checkPermission()
                 ->validate()
                 ->execute();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             exception_to_notifications($e, $this);
 
             return;
@@ -86,5 +67,25 @@ class DiscountGroupList extends BaseDiscountGroupList
     public function loadDiscountGroup(DiscountGroup $discountGroup): array
     {
         return $discountGroup?->load('discounts.model')->toArray();
+    }
+
+    public function saveItem(array $discountGroup): bool
+    {
+        $discountGroup['discounts'] = array_map(fn ($discount) => $discount['id'], $discountGroup['discounts']);
+        $action = ($discountGroup['id'] ?? false)
+            ? UpdateDiscountGroup::make($discountGroup)
+            : CreateDiscountGroup::make($discountGroup);
+
+        try {
+            $action->checkPermission()->validate()->execute();
+        } catch (Exception $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
+        }
+
+        $this->loadData();
+
+        return true;
     }
 }

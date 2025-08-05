@@ -2,6 +2,7 @@
 
 namespace FluxErp\Rulesets\Product;
 
+use FluxErp\Enums\BundleTypeEnum;
 use FluxErp\Enums\TimeUnitEnum;
 use FluxErp\Models\Media;
 use FluxErp\Models\Product;
@@ -17,6 +18,38 @@ use Illuminate\Validation\Rule;
 class UpdateProductRuleset extends FluxRuleset
 {
     protected static ?string $model = Product::class;
+
+    public static function getRules(): array
+    {
+        return array_merge(
+            parent::getRules(),
+            resolve_static(ClientRuleset::class, 'getRules'),
+            resolve_static(ProductOptionRuleset::class, 'getRules'),
+            resolve_static(ProductPropertyRuleset::class, 'getRules'),
+            resolve_static(PriceRuleset::class, 'getRules'),
+            resolve_static(BundleProductRuleset::class, 'getRules'),
+            resolve_static(SupplierRuleset::class, 'getRules'),
+            resolve_static(CategoryRuleset::class, 'getRules'),
+            resolve_static(TagRuleset::class, 'getRules'),
+            Arr::prependKeysWith(
+                array_merge(
+                    Arr::except(
+                        resolve_static(CreateProductCrossSellingRuleset::class, 'getRules'),
+                        ['product_id']
+                    ),
+                    [
+                        'id' => [
+                            'sometimes',
+                            'required',
+                            'integer',
+                            app(ModelExists::class, ['model' => ProductCrossSelling::class]),
+                        ],
+                    ]
+                ),
+                'product_cross_sellings.*.'
+            )
+        );
+    }
 
     public function rules(): array
     {
@@ -58,8 +91,14 @@ class UpdateProductRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => Unit::class]),
             ],
 
+            'bundle_type_enum' => [
+                'required_if_accepted:is_bundle',
+                'nullable',
+                Rule::enum(BundleTypeEnum::class),
+            ],
+
             'product_number' => 'string|nullable',
-            'name' => 'string',
+            'name' => 'string|max:255',
             'description' => 'string|nullable',
             'weight_gram' => 'numeric|nullable',
             'dimension_length_mm' => 'numeric|nullable',
@@ -73,6 +112,7 @@ class UpdateProductRuleset extends FluxRuleset
                 Rule::enum(TimeUnitEnum::class),
             ],
             'ean' => 'string|nullable',
+            'customs_tariff_number' => 'string|nullable|max:64',
             'stock' => 'integer|nullable',
             'min_delivery_time' => 'integer|nullable',
             'max_delivery_time' => 'integer|nullable',
@@ -81,50 +121,26 @@ class UpdateProductRuleset extends FluxRuleset
             'min_purchase' => 'numeric|nullable',
             'max_purchase' => 'numeric|nullable',
             'seo_keywords' => 'string|nullable',
-            'manufacturer_product_number' => 'string|nullable',
-            'posting_account' => 'string|nullable',
+            'search_aliases' => [
+                'array',
+                'nullable',
+            ],
+            'search_aliases.*' => 'string|max:255|distinct',
+            'posting_account' => 'string|max:255|nullable',
             'warning_stock_amount' => 'numeric|nullable',
 
             'is_active' => 'boolean',
             'is_highlight' => 'boolean',
-            'is_bundle' => 'boolean',
+            'is_bundle' => [
+                'required_with:bundle_type_enum',
+                'required_if:bundle_type_enum,null',
+                'boolean',
+            ],
             'is_service' => 'boolean',
             'is_shipping_free' => 'boolean',
             'has_serial_numbers' => 'boolean',
             'is_nos' => 'boolean',
             'is_active_export_to_web_shop' => 'boolean',
         ];
-    }
-
-    public static function getRules(): array
-    {
-        return array_merge(
-            parent::getRules(),
-            resolve_static(ClientRuleset::class, 'getRules'),
-            resolve_static(ProductOptionRuleset::class, 'getRules'),
-            resolve_static(ProductPropertyRuleset::class, 'getRules'),
-            resolve_static(PriceRuleset::class, 'getRules'),
-            resolve_static(BundleProductRuleset::class, 'getRules'),
-            resolve_static(SupplierRuleset::class, 'getRules'),
-            resolve_static(CategoryRuleset::class, 'getRules'),
-            resolve_static(TagRuleset::class, 'getRules'),
-            Arr::prependKeysWith(
-                array_merge(
-                    Arr::except(
-                        resolve_static(CreateProductCrossSellingRuleset::class, 'getRules'),
-                        ['product_id']
-                    ),
-                    [
-                        'id' => [
-                            'sometimes',
-                            'required',
-                            'integer',
-                            app(ModelExists::class, ['model' => ProductCrossSelling::class]),
-                        ],
-                    ]
-                ),
-                'product_cross_sellings.*.'
-            )
-        );
     }
 }

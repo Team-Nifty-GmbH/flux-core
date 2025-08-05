@@ -9,32 +9,30 @@ use Livewire\Attributes\Locked;
 
 class OrderTypeForm extends FluxForm
 {
-    #[Locked]
-    public ?int $id = null;
-
     public ?int $client_id = null;
-
-    public ?string $name = null;
 
     public ?string $description = null;
 
-    public ?string $mail_subject = null;
+    public ?int $email_template_id = null;
 
-    public ?string $mail_body = null;
-
-    public ?array $print_layouts = [];
-
-    public ?array $post_stock_print_layouts = [];
-
-    public ?array $reserve_stock_print_layouts = [];
-
-    public ?string $order_type_enum = null;
+    #[Locked]
+    public ?int $id = null;
 
     public bool $is_active = true;
 
     public bool $is_hidden = false;
 
     public bool $is_visible_in_sidebar = true;
+
+    public ?string $name = null;
+
+    public ?string $order_type_enum = null;
+
+    public ?array $post_stock_print_layouts = [];
+
+    public ?array $print_layouts = [];
+
+    public ?array $reserve_stock_print_layouts = [];
 
     public function fill($values): void
     {

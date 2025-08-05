@@ -8,7 +8,6 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Str;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
 
@@ -16,11 +15,9 @@ class Notifications extends Component
 {
     use Actions;
 
-    public array $notifications = [];
+    public int $loaded = 0;
 
     public int $unread = 0;
-
-    public bool $showNotifications = false;
 
     public function mount(): void
     {
@@ -33,20 +30,70 @@ class Notifications extends Component
     }
 
     #[Renderless]
+    public function acceptNotify(Notification $notification): void
+    {
+        $accept = data_get($notification->data, 'accept');
+        $notification->markAsRead();
+        $this->unread = $this->unread - 1;
+
+        $this->js(<<<'JS'
+            $slideClose('notifications-slide');
+        JS);
+
+        if (data_get($accept, 'url')) {
+            $this->redirect(data_get($accept, 'url'), navigate: data_get($accept, 'download') ? false : true);
+
+            return;
+        }
+    }
+
+    #[Renderless]
+    public function closeNotifications(): void
+    {
+        $this->loaded = 0;
+
+        $this->js(<<<'JS'
+            removeAll();
+        JS);
+    }
+
+    #[Renderless]
+    public function markAllAsRead(): void
+    {
+        auth()->user()->unreadNotifications->markAsRead();
+        $this->unread = 0;
+
+        $this->js(<<<'JS'
+            $slideClose('notifications-slide');
+        JS);
+    }
+
+    #[Renderless]
+    public function markAsRead(Notification $notification): void
+    {
+        $notification->markAsRead();
+
+        $this->unread = $this->unread - 1;
+        if (! $this->unread) {
+            $this->js(<<<'JS'
+                $slideClose('notifications-slide');
+            JS);
+        }
+    }
+
+    #[Renderless]
     public function sendNotify(array $notify): void
     {
         if (request()->header('referer') === data_get($notify, 'accept.url')) {
             return;
         }
 
-        $notify['description'] = Str::limit(data_get($notify, 'description'), 75);
-
         if (! is_null(data_get($notify, 'progress'))) {
             $notify['description'] = Blade::render(<<<'BLADE'
-                {!! $notify['description'] !!}
+                {!! data_get($notify, 'description') !!}
                 <div class="flex gap-1.5 items-center h-6">
                     <div class="overflow-hidden h-2 text-xs flex rounded bg-gray-200 dark:bg-gray-700 w-full">
-                        <div x-bind:style="{width: notification.progress * 100 + '%'}" class="transition-all shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-primary-500 dark:bg-primary-700"></div>
+                        <div x-bind:style="{width: notification.progress * 100 + '%'}" class="transition-all shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-indigo-500 dark:bg-indigo-700"></div>
                     </div>
                 </div>
             BLADE, ['notify' => $notify]);
@@ -56,63 +103,48 @@ class Notifications extends Component
             $notify['timeout'] = 0;
         }
 
-        if (data_get($notify, 'accept')) {
-            $this->notification()->confirm($notify);
+        /** @var Notification $notification */
+        $notification = resolve_static(Notification::class, 'query')
+            ->whereKey(data_get($notify, 'id'))
+            ->firstOrNew();
+
+        if ($notification->exists) {
+            $notification->markAsRead();
         } else {
-            $this->notification()->send($notify);
+            $notification->data = $notify;
+            $notification->created_at = now();
         }
 
-        $this->notifications[data_get($notify, 'id')] = $notify;
-        resolve_static(Notification::class, 'query')->whereKey($notify['id'])->first()?->markAsRead();
+        $notification->toast($this)
+            ->id(data_get($notify, 'contextId'))
+            ->send();
     }
 
     #[Renderless]
     public function showNotifications(): void
     {
-        $this->showNotifications = true;
-
-        $this->getNotification();
-    }
-
-    #[Renderless]
-    public function getNotification(): array
-    {
         auth()->user()
             ->unreadNotifications()
-            ->limit(20)
+            ->offset($this->loaded)
+            ->limit($this->loaded + 20)
             ?->get()
-            ->each(function ($notification) {
-                $notificationOptions = $notification->data;
-                $notificationOptions['notification_id'] = $notification->id;
-                $notificationOptions['timeout'] = 0;
-                $notificationOptions['rejectLabel'] = 0;
-                $notificationOptions['onClose'] = [
-                    'method' => 'markAsRead',
-                    'params' => $notification->id,
-                ];
-                $this->notifications[] = $notificationOptions;
+            ->each(function (Notification $notification): void {
+                $notification
+                    ->toast($this)
+                    ->setEventName('toast-list')
+                    ->persistent()
+                    ->hook([
+                        'close' => [
+                            'method' => 'markAsRead',
+                            'params' => $notification->getKey(),
+                        ],
+                    ])
+                    ->send();
             });
 
-        return $this->notifications;
-    }
-
-    #[Renderless]
-    public function markAsRead(string $id): void
-    {
-        resolve_static(Notification::class, 'query')->whereKey($id)->first()?->markAsRead();
-        $index = array_search($id, array_column($this->notifications, 'id'));
-        unset($this->notifications[$index]);
-
-        $this->unread = $this->unread - 1;
-        if (! $this->unread) {
-            $this->showNotifications = false;
-        }
-    }
-
-    #[Renderless]
-    public function markAllAsRead(): void
-    {
-        auth()->user()->unreadNotifications->markAsRead();
-        $this->unread = 0;
+        $this->loaded = $this->loaded + 20;
+        $this->js(<<<'JS'
+            $slideOpen('notifications-slide');
+        JS);
     }
 }

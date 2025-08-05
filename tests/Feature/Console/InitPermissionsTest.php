@@ -5,24 +5,21 @@ namespace FluxErp\Tests\Feature\Console;
 use FluxErp\Facades\Action;
 use FluxErp\Facades\Widget;
 use FluxErp\Htmlables\TabButton;
+use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\Product\Product;
 use FluxErp\Models\Permission;
 use FluxErp\Tests\Feature\BaseSetup;
 use FluxErp\Traits\Livewire\WithTabs;
 use FluxErp\Traits\Widgetable;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Event;
 use Livewire\Component;
 use Livewire\Livewire;
 use Livewire\Mechanisms\ComponentRegistry;
-
 use function Livewire\invade;
 
 class InitPermissionsTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
-    public function test_init_permissions()
+    public function test_init_permissions(): void
     {
         $actionsWithPermission = 0;
         foreach (Action::all() as $action) {
@@ -50,6 +47,11 @@ class InitPermissionsTest extends BaseSetup
         {
             use Widgetable;
 
+            public static function dashboardComponent(): string
+            {
+                return Dashboard::class;
+            }
+
             public function render()
             {
                 return <<<'blade'
@@ -66,9 +68,9 @@ class InitPermissionsTest extends BaseSetup
         Widget::register('custom-widget-that-never-exists', 'custom-widget-that-never-exists');
 
         // Add Custom Tab
-        Event::listen('tabs.rendering: ' . Product::class, function (Component $component) {
+        Event::listen('tabs.rendering: ' . Product::class, function (Component $component): void {
             $component->mergeTabsToRender([
-                TabButton::make('custom-tab-that-never-exists', label: 'Custom Tab'),
+                TabButton::make('custom-tab-that-never-exists')->text('Custom Tab'),
             ]);
         });
 
@@ -79,7 +81,8 @@ class InitPermissionsTest extends BaseSetup
         // Execute artisan command
         $this->artisan('init:permissions')
             ->assertExitCode(0)
-            ->expectsOutput('Registering action permissions…')
+            ->expectsOutput('Registering action permissions for guard web…')
+            ->expectsOutput('Registering action permissions for guard sanctum…')
             ->expectsOutput('Registering route permissions…')
             ->expectsOutput('Registering widget permissions…')
             ->expectsOutput('Registering tab permissions…');
@@ -96,10 +99,26 @@ class InitPermissionsTest extends BaseSetup
         );
 
         // Assert all action permissions created
-        $this->assertEquals($actionsWithPermission, Permission::query()->where('name', 'like', 'action.%')->count());
+        $this->assertEquals(
+            $actionsWithPermission,
+            Permission::query()
+                ->where('guard_name', 'web')
+                ->where('name', 'like', 'action.%')
+                ->count()
+        );
+        $this->assertEquals(
+            $actionsWithPermission,
+            Permission::query()
+                ->where('guard_name', 'sanctum')
+                ->where('name', 'like', 'action.%')
+                ->count()
+        );
 
         // Assert all widget permissions created
-        $this->assertEquals(count(Widget::all()), Permission::query()->where('name', 'like', 'widget.%')->count());
+        $this->assertEquals(
+            count(Widget::all()),
+            Permission::query()->where('name', 'like', 'widget.%')->count()
+        );
 
         // Assert all tab permissions created (plus one for custom tab)
         $this->assertEquals(

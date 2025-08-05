@@ -8,7 +8,7 @@ class CreateCommentsTable extends Migration
 {
     public function up(): void
     {
-        Schema::create('comments', function (Blueprint $table) {
+        Schema::create('comments', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
             $table->morphs('model');

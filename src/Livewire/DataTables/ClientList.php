@@ -6,8 +6,6 @@ use FluxErp\Models\Client;
 
 class ClientList extends BaseDataTable
 {
-    protected string $model = Client::class;
-
     public array $enabledCols = [
         'name',
         'client_code',
@@ -16,4 +14,6 @@ class ClientList extends BaseDataTable
         'city',
         'phone',
     ];
+
+    protected string $model = Client::class;
 }

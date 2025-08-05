@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('stock_postings', function (Blueprint $table) {
+        Schema::table('stock_postings', function (Blueprint $table): void {
             $table->decimal('purchase_price', 40, 10)->nullable()->after('posting')
                 ->comment('The full price paid for the entirety of this stock posting.');
         });
@@ -16,7 +16,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('stock_postings', function (Blueprint $table) {
+        Schema::table('stock_postings', function (Blueprint $table): void {
             $table->dropColumn('purchase_price');
         });
     }

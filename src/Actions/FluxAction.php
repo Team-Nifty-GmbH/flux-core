@@ -5,6 +5,7 @@ namespace FluxErp\Actions;
 use FluxErp\Models\Permission;
 use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\Traits\Action\HasActionEvents;
+use FluxErp\Traits\Action\SupportsApiRequests;
 use FluxErp\Traits\Makeable;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Events\Dispatcher;
@@ -16,24 +17,25 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Conditionable;
 use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 use Spatie\Permission\Exceptions\UnauthorizedException;
+use Throwable;
 
 abstract class FluxAction
 {
-    use Conditionable, HasActionEvents, Makeable;
-
-    protected array $data;
-
-    protected array $rules = [];
-
-    protected mixed $result = null;
+    use Conditionable, HasActionEvents, Makeable, SupportsApiRequests;
 
     protected static ?Dispatcher $dispatcher;
 
-    protected bool $keepEmptyStrings = false;
+    protected static bool $hasPermission = true;
 
     protected ?Authenticatable $actingAs;
 
-    protected static bool $hasPermission = true;
+    protected array $data;
+
+    protected bool $keepEmptyStrings = false;
+
+    protected mixed $result = null;
+
+    protected array $rules = [];
 
     abstract public static function models(): array;
 
@@ -49,6 +51,87 @@ abstract class FluxAction
         $this->boot($data);
 
         $this->fireActionEvent(event: 'booted', halt: false);
+    }
+
+    public function __serialize(): array
+    {
+        $data = [
+            'data' => $this->data,
+            'result' => $this->result,
+        ];
+
+        try {
+            serialize($this->rules);
+        } catch (Throwable) {
+            return $data;
+        }
+
+        $data['rules'] = $this->rules;
+
+        return $data;
+    }
+
+    public function __unserialize(array $data): void
+    {
+        $this->data = data_get($data, 'data');
+        $this->result = data_get($data, 'result');
+        $rules = data_get($data, 'rules');
+
+        if (! is_null($rules)) {
+            $this->rules = $rules;
+        } else {
+            $this->setRulesFromRulesets();
+        }
+    }
+
+    public static function canPerformAction(bool $throwException = true): bool
+    {
+        if (! static::hasPermission() || (app()->runningInConsole() && ! app()->runningUnitTests())) {
+            return true;
+        }
+
+        try {
+            resolve_static(
+                Permission::class,
+                'findByName',
+                [
+                    'name' => 'action.' . static::name(),
+                ]
+            );
+        } catch (PermissionDoesNotExist) {
+            return true;
+        }
+
+        if (! auth()->user()?->can('action.' . static::name())) {
+            if ($throwException) {
+                throw UnauthorizedException::forPermissions(['action.' . static::name()]);
+            } else {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public static function description(): ?string
+    {
+        return Str::of(class_basename(static::class))
+            ->headline()
+            ->lower()
+            ->toString();
+    }
+
+    public static function hasPermission(): bool
+    {
+        return static::$hasPermission;
+    }
+
+    public static function name(): string
+    {
+        $exploded = explode('_', Str::snake(class_basename(static::class)));
+        $function = array_shift($exploded);
+
+        return implode('_', $exploded) . '.' . $function;
     }
 
     protected static function bootTraits(): void
@@ -67,96 +150,6 @@ abstract class FluxAction
         }
     }
 
-    protected function boot(array $data): void
-    {
-        $this->setData($data, $this->keepEmptyStrings ?? false);
-    }
-
-    public static function canPerformAction(bool $throwException = true): bool
-    {
-        if (! static::hasPermission()) {
-            return true;
-        }
-
-        try {
-            resolve_static(
-                Permission::class,
-                'findByName',
-                [
-                    'name' => 'action.' . static::name(),
-                ]
-            );
-        } catch (PermissionDoesNotExist) {
-            return true;
-        }
-
-        if (! auth()->user()->can('action.' . static::name())) {
-            if ($throwException) {
-                throw UnauthorizedException::forPermissions(['action.' . static::name()]);
-            } else {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    public function checkPermission(): static
-    {
-        static::canPerformAction();
-
-        return $this;
-    }
-
-    public static function hasPermission(): bool
-    {
-        return static::$hasPermission;
-    }
-
-    public static function name(): string
-    {
-        $exploded = explode('_', Str::snake(class_basename(static::class)));
-        $function = array_shift($exploded);
-
-        return implode('_', $exploded) . '.' . $function;
-    }
-
-    public static function description(): ?string
-    {
-        return Str::of(class_basename(static::class))
-            ->headline()
-            ->lower()
-            ->toString();
-    }
-
-    public function actingAs(?Authenticatable $user = null): static
-    {
-        $this->actingAs = $user;
-
-        return $this;
-    }
-
-    public function getActingAs(): ?Authenticatable
-    {
-        return $this->actingAs;
-    }
-
-    public function setData(array|Arrayable $data, bool $keepEmptyStrings = false): static
-    {
-        if (! is_array($data)) {
-            $data = $data->toArray();
-        }
-
-        $this->data = $keepEmptyStrings ? $data : $this->convertEmptyStringToNull($data);
-
-        return $this;
-    }
-
-    public function getData(?string $key = null, mixed $default = null): mixed
-    {
-        return $key ? data_get($this->data, $key, $default) : $this->data;
-    }
-
     /**
      * @return class-string<FluxRuleset>|array<int, class-string<FluxRuleset>>
      */
@@ -165,30 +158,14 @@ abstract class FluxAction
         return [];
     }
 
-    public function setRulesFromRulesets(): static
+    protected function boot(array $data): void
     {
-        foreach (Arr::wrap($this->getRulesets()) as $ruleset) {
-            $this->mergeRules(resolve_static($ruleset, 'getRules'));
-        }
-
-        return $this;
+        $this->setData($data, $this->keepEmptyStrings ?? false);
     }
 
-    public function setRules(array $rules): static
+    public function actingAs(?Authenticatable $user = null): static
     {
-        $this->rules = $rules;
-
-        return $this;
-    }
-
-    public function getRules(): array
-    {
-        return $this->rules;
-    }
-
-    public function mergeRules(array $rules): static
-    {
-        $this->rules = array_merge($this->rules, $rules);
+        $this->actingAs = $user;
 
         return $this;
     }
@@ -205,16 +182,11 @@ abstract class FluxAction
         return $this;
     }
 
-    public function setResult(mixed $result): static
+    public function checkPermission(): static
     {
-        $this->result = $result;
+        static::canPerformAction();
 
         return $this;
-    }
-
-    public function getResult(): mixed
-    {
-        return $this->result;
     }
 
     final public function execute(): mixed
@@ -240,9 +212,7 @@ abstract class FluxAction
             }
         }
 
-        DB::transaction(function () {
-            $this->result = $this->performAction();
-        });
+        DB::transaction(fn () => $this->result = $this->performAction(), 5);
 
         if ($current) {
             if (method_exists(auth(), 'login')) {
@@ -263,6 +233,67 @@ abstract class FluxAction
         return $this->result;
     }
 
+    public function getActingAs(): ?Authenticatable
+    {
+        return $this->actingAs;
+    }
+
+    public function getData(?string $key = null, mixed $default = null): mixed
+    {
+        return $key ? data_get($this->data, $key, $default) : $this->data;
+    }
+
+    public function getResult(): mixed
+    {
+        return $this->result;
+    }
+
+    public function getRules(): array
+    {
+        return $this->rules;
+    }
+
+    public function mergeRules(array $rules): static
+    {
+        $this->rules = array_merge($this->rules, $rules);
+
+        return $this;
+    }
+
+    public function setData(array|Arrayable $data, bool $keepEmptyStrings = false): static
+    {
+        if (! is_array($data)) {
+            $data = $data->toArray();
+        }
+
+        $this->data = $keepEmptyStrings ? $data : $this->convertEmptyStringToNull($data);
+
+        return $this;
+    }
+
+    public function setResult(mixed $result): static
+    {
+        $this->result = $result;
+
+        return $this;
+    }
+
+    public function setRules(array $rules): static
+    {
+        $this->rules = $rules;
+
+        return $this;
+    }
+
+    public function setRulesFromRulesets(): static
+    {
+        foreach (Arr::wrap($this->getRulesets()) as $ruleset) {
+            $this->mergeRules(resolve_static($ruleset, 'getRules'));
+        }
+
+        return $this;
+    }
+
     final public function validate(): static
     {
         if (! $this->rules) {
@@ -281,16 +312,6 @@ abstract class FluxAction
         return $this;
     }
 
-    protected function prepareForValidation(): void
-    {
-        //
-    }
-
-    protected function validateData(): void
-    {
-        $this->data = Validator::validate($this->data, $this->getRules());
-    }
-
     protected function convertEmptyStringToNull(array $data): array
     {
         return array_map(function ($value) {
@@ -302,19 +323,13 @@ abstract class FluxAction
         }, $data);
     }
 
-    public function __serialize(): array
+    protected function prepareForValidation(): void
     {
-        return [
-            'data' => $this->data,
-            'rules' => $this->rules,
-            'result' => $this->result,
-        ];
+        //
     }
 
-    public function __unserialize(array $data): void
+    protected function validateData(): void
     {
-        $this->data = $data['data'];
-        $this->rules = $data['rules'];
-        $this->result = $data['result'];
+        $this->data = Validator::validate($this->getData(), $this->getRules());
     }
 }

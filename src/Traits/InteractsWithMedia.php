@@ -13,6 +13,15 @@ trait InteractsWithMedia
 {
     use \Spatie\MediaLibrary\InteractsWithMedia;
 
+    public function addMediaCollection(string $name): MediaCollection
+    {
+        $mediaCollection = MediaCollection::create($name);
+
+        $this->mediaCollections[$name] = $mediaCollection;
+
+        return $mediaCollection;
+    }
+
     public function getMediaAsTree(): array
     {
         $mediaCollections = array_unique(
@@ -39,40 +48,9 @@ trait InteractsWithMedia
         return $this->calculateTree($mediaCollections);
     }
 
-    private function calculateTree(array $mediaCollections, ?string $prefix = null): array
+    public function getMediaModel(): string
     {
-        $node = [];
-        foreach ($mediaCollections as $key => $item) {
-            $isStatic = $item['is_static'] ?? false;
-            if (is_array($item)) {
-                unset($item['is_static']);
-            }
-
-            $node[] = [
-                'name' => __($key),
-                'id' => Str::uuid()->toString(),
-                'is_static' => $isStatic,
-                'collection_name' => $prefix . $key,
-                'children' => is_array($item) ?
-                    array_merge(
-                        $this->calculateTree($item, $prefix . $key . '.'),
-                        $this->media()
-                            ->where('collection_name', $prefix . $key)
-                            ->orderBy('name', 'ASC')
-                            ->get()
-                            ->makeVisible(['id', 'name', 'file_name', 'collection_name', 'disk', 'size', 'mime_type', 'created_at'])
-                            ->toArray(),
-                    ) :
-                    $this->media()
-                        ->where('collection_name', $prefix . $key)
-                        ->orderBy('name', 'ASC')
-                        ->get(['id', 'name', 'file_name', 'collection_name', 'disk', 'size', 'mime_type', 'created_at'])
-                        ->makeVisible(['name', 'collection_name'])
-                        ->toArray(),
-            ];
-        }
-
-        return $node;
+        return resolve_static(FluxMedia::class, 'class');
     }
 
     /**
@@ -116,17 +94,39 @@ trait InteractsWithMedia
             ->optimize();
     }
 
-    public function addMediaCollection(string $name): MediaCollection
+    private function calculateTree(array $mediaCollections, ?string $prefix = null): array
     {
-        $mediaCollection = MediaCollection::create($name);
+        $node = [];
+        foreach ($mediaCollections as $key => $item) {
+            $isStatic = $item['is_static'] ?? false;
+            if (is_array($item)) {
+                unset($item['is_static']);
+            }
 
-        $this->mediaCollections[$name] = $mediaCollection;
+            $node[] = [
+                'name' => __($key),
+                'id' => Str::uuid()->toString(),
+                'is_static' => $isStatic,
+                'collection_name' => $prefix . $key,
+                'children' => is_array($item) ?
+                    array_merge(
+                        $this->calculateTree($item, $prefix . $key . '.'),
+                        $this->media()
+                            ->where('collection_name', $prefix . $key)
+                            ->orderBy('name', 'ASC')
+                            ->get()
+                            ->makeVisible(['id', 'name', 'file_name', 'collection_name', 'disk', 'size', 'mime_type', 'created_at'])
+                            ->toArray(),
+                    ) :
+                    $this->media()
+                        ->where('collection_name', $prefix . $key)
+                        ->orderBy('name', 'ASC')
+                        ->get(['id', 'name', 'file_name', 'collection_name', 'disk', 'size', 'mime_type', 'created_at'])
+                        ->makeVisible(['name', 'collection_name'])
+                        ->toArray(),
+            ];
+        }
 
-        return $mediaCollection;
-    }
-
-    public function getMediaModel(): string
-    {
-        return resolve_static(FluxMedia::class, 'class');
+        return $node;
     }
 }

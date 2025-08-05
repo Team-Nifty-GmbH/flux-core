@@ -10,6 +10,7 @@ use FluxErp\Models\PaymentType;
 use FluxErp\Models\PurchaseInvoice;
 use FluxErp\Models\User;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rules\Numeric;
 use FluxErp\Rulesets\ContactBankConnection\BankConnectionRuleset;
 use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\Rulesets\PurchaseInvoicePosition\UpdatePurchaseInvoicePositionRuleset;
@@ -17,6 +18,21 @@ use Illuminate\Support\Arr;
 
 class CreateOrderFromPurchaseInvoiceRuleset extends FluxRuleset
 {
+    public static function getRules(): array
+    {
+        return array_merge(
+            parent::getRules(),
+            resolve_static(BankConnectionRuleset::class, 'getRules'),
+            [
+                'purchase_invoice_positions' => 'array',
+            ],
+            Arr::prependKeysWith(
+                resolve_static(UpdatePurchaseInvoicePositionRuleset::class, 'getRules'),
+                'purchase_invoice_positions.*'
+            ),
+        );
+    }
+
     public function rules(): array
     {
         return [
@@ -62,24 +78,13 @@ class CreateOrderFromPurchaseInvoiceRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => PaymentType::class]),
             ],
-            'invoice_number' => 'required|string',
+            'invoice_number' => 'required|string|max:255',
             'invoice_date' => 'required|date',
+            'total_gross_price' => [
+                'required',
+                app(Numeric::class, ['min' => 0]),
+            ],
             'is_net' => 'boolean',
         ];
-    }
-
-    public static function getRules(): array
-    {
-        return array_merge(
-            parent::getRules(),
-            resolve_static(BankConnectionRuleset::class, 'getRules'),
-            [
-                'purchase_invoice_positions' => 'array',
-            ],
-            Arr::prependKeysWith(
-                resolve_static(UpdatePurchaseInvoicePositionRuleset::class, 'getRules'),
-                'purchase_invoice_positions.*'
-            ),
-        );
     }
 }

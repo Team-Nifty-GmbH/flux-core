@@ -9,14 +9,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class UpdateProductProperty extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateProductPropertyRuleset::class;
-    }
-
     public static function models(): array
     {
         return [ProductProperty::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateProductPropertyRuleset::class;
     }
 
     public function performAction(): Model

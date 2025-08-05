@@ -7,8 +7,6 @@ use FluxErp\Models\Role;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Artisan;
 use Spatie\Activitylog\Facades\CauserResolver;
-use TeamNiftyGmbH\Calendar\Database\Seeders\CalendarEventTableSeeder;
-use TeamNiftyGmbH\Calendar\Database\Seeders\CalendarTableSeeder;
 
 class FluxSeeder extends Seeder
 {
@@ -26,12 +24,15 @@ class FluxSeeder extends Seeder
         $this->call(CountryTableSeeder::class);
         $this->call(CountryRegionTableSeeder::class);
         $this->call(PriceListTableSeeder::class);
+        $this->call(LeadLossReasonTableSeeder::class);
+        $this->call(LeadStateTableSeeder::class);
 
         $this->call(ClientTableSeeder::class);
         $this->call(BankConnectionTableSeeder::class);
         $this->call(PaymentTypeTableSeeder::class);
         $this->call(OrderTypeTableSeeder::class);
-        $this->call(ContactOriginTableSeeder::class);
+        $this->call(RecordOriginTableSeeder::class);
+        $this->call(IndustryTableSeeder::class);
 
         $this->call(ContactTableSeeder::class);
         $this->call(AddressTypeTableSeeder::class);
@@ -40,6 +41,7 @@ class FluxSeeder extends Seeder
         $this->call(CategoryTableSeeder::class);
         $this->call(ProjectTableSeeder::class);
         $this->call(TaskTableSeeder::class);
+        $this->call(LeadTableSeeder::class);
 
         $this->call(WorkTimeTypeTableSeeder::class);
         $this->call(WorkTimeTableSeeder::class);

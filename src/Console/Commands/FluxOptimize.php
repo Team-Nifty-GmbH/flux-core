@@ -13,11 +13,11 @@ use Illuminate\Support\Str;
 
 class FluxOptimize extends Command
 {
-    protected $signature = 'flux:optimize';
-
     protected $description = 'Warms the cache for the Flux application';
 
     protected bool $forget = false;
+
+    protected $signature = 'flux:optimize';
 
     public function handle(): void
     {
@@ -31,6 +31,13 @@ class FluxOptimize extends Command
         }
     }
 
+    protected function optimizeActions(): void
+    {
+        foreach (Action::getDiscoveries() as $cacheKey => $actions) {
+            Cache::forget($cacheKey);
+        }
+    }
+
     protected function optimizeDefaultModels(): void
     {
         foreach (Relation::morphMap() as $alias => $model) {
@@ -39,26 +46,7 @@ class FluxOptimize extends Command
             }
 
             /** @var Model $model */
-            $this->forget ? Cache::forget('default_' . $alias) : $model::default();
-        }
-    }
-
-    protected function optimizeActions(): void
-    {
-        foreach (Action::getDiscoveries() as $cacheKey => $actions) {
-            Cache::forget($cacheKey);
-        }
-    }
-
-    protected function optimizeViewClasses(): void
-    {
-        Cache::forget('flux.view_classes.' . Str::slug('FluxErp\\Livewire\\'));
-    }
-
-    protected function optimizeRepeatable(): void
-    {
-        foreach (Repeatable::getDiscoveries() as $cacheKey => $repeatables) {
-            Cache::forget($cacheKey);
+            $this->forget ? Cache::forget('default_' . $alias) : resolve_static($model, 'default');
         }
     }
 
@@ -72,5 +60,17 @@ class FluxOptimize extends Command
 
         // warm the cache for all models
         model_info_all();
+    }
+
+    protected function optimizeRepeatable(): void
+    {
+        foreach (Repeatable::getDiscoveries() as $cacheKey => $repeatables) {
+            Cache::forget($cacheKey);
+        }
+    }
+
+    protected function optimizeViewClasses(): void
+    {
+        Cache::forget('flux.view_classes.' . Str::slug('FluxErp\\Livewire\\'));
     }
 }

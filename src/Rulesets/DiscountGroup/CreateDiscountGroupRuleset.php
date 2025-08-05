@@ -9,20 +9,20 @@ class CreateDiscountGroupRuleset extends FluxRuleset
 {
     protected static ?string $model = DiscountGroup::class;
 
-    public function rules(): array
-    {
-        return [
-            'uuid' => 'nullable|string|uuid|unique:discount_groups,uuid',
-            'name' => 'required|string',
-            'is_active' => 'boolean',
-        ];
-    }
-
     public static function getRules(): array
     {
         return array_merge(
             parent::getRules(),
             resolve_static(DiscountRuleset::class, 'getRules')
         );
+    }
+
+    public function rules(): array
+    {
+        return [
+            'uuid' => 'nullable|string|uuid|unique:discount_groups,uuid',
+            'name' => 'required|string|max:255',
+            'is_active' => 'boolean',
+        ];
     }
 }

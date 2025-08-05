@@ -21,15 +21,24 @@ class Role extends SpatieRole implements InteractsWithDataTables
 
     protected $hidden = ['pivot'];
 
-    public function users(): BelongsToMany
+    public function getAvatarUrl(): ?string
     {
-        return $this->morphedByMany(
-            User::class,
-            'model',
-            config('permission.table_names.model_has_roles'),
-            config('permission.column_names.role_pivot_key'),
-            config('permission.column_names.model_morph_key')
-        );
+        return route('icons', ['name' => 'users']);
+    }
+
+    public function getDescription(): ?string
+    {
+        return null;
+    }
+
+    public function getLabel(): ?string
+    {
+        return $this->name;
+    }
+
+    public function getUrl(): ?string
+    {
+        return null;
     }
 
     public function notify($instance): void
@@ -46,23 +55,14 @@ class Role extends SpatieRole implements InteractsWithDataTables
         }
     }
 
-    public function getLabel(): ?string
+    public function users(): BelongsToMany
     {
-        return $this->name;
-    }
-
-    public function getDescription(): ?string
-    {
-        return null;
-    }
-
-    public function getUrl(): ?string
-    {
-        return null;
-    }
-
-    public function getAvatarUrl(): ?string
-    {
-        return route('icons', ['name' => 'users']);
+        return $this->morphedByMany(
+            User::class,
+            'model',
+            config('permission.table_names.model_has_roles'),
+            config('permission.column_names.role_pivot_key'),
+            config('permission.column_names.model_morph_key')
+        );
     }
 }

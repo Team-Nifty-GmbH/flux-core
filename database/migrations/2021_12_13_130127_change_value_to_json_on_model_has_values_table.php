@@ -9,7 +9,7 @@ class ChangeValueToJsonOnModelHasValuesTable extends Migration
 {
     public function up(): void
     {
-        Schema::table('model_has_values', function (Blueprint $table) {
+        Schema::table('model_has_values', function (Blueprint $table): void {
             $table->json('value')->change();
         });
 
@@ -20,16 +20,16 @@ class ChangeValueToJsonOnModelHasValuesTable extends Migration
     {
         $this->rollbackName();
 
-        Schema::table('model_has_values', function (Blueprint $table) {
+        Schema::table('model_has_values', function (Blueprint $table): void {
             $table->string('value')->change();
         });
     }
 
-    private function migrateName()
+    private function migrateName(): void
     {
         $mhv = DB::table('model_has_values')->get()->toArray();
 
-        array_walk($mhv, function (&$item) {
+        array_walk($mhv, function (&$item): void {
             $item->value = json_encode([config('app.locale') => $item->value]);
             $item = (array) $item;
         });
@@ -37,11 +37,11 @@ class ChangeValueToJsonOnModelHasValuesTable extends Migration
         DB::table('model_has_values')->upsert($mhv, ['id']);
     }
 
-    private function rollbackName()
+    private function rollbackName(): void
     {
         $mhv = DB::table('model_has_values')->get()->toArray();
 
-        array_walk($mhv, function (&$item) {
+        array_walk($mhv, function (&$item): void {
             $item->value = substr(json_decode($item->value)->{config('app.locale')}, 0, 255);
             $item = (array) $item;
         });

@@ -8,7 +8,7 @@ class AddCommentIdOnCommentsTable extends Migration
 {
     public function up(): void
     {
-        Schema::table('comments', function (Blueprint $table) {
+        Schema::table('comments', function (Blueprint $table): void {
             $table->unsignedBigInteger('comment_id')->nullable()->after('model_id');
 
             $table->foreign('comment_id')->references('id')->on('comments');
@@ -17,7 +17,7 @@ class AddCommentIdOnCommentsTable extends Migration
 
     public function down(): void
     {
-        Schema::table('comments', function (Blueprint $table) {
+        Schema::table('comments', function (Blueprint $table): void {
             $table->dropForeign('comments_comment_id_foreign');
             $table->dropColumn('comment_id');
         });

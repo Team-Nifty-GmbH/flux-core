@@ -3,20 +3,30 @@
 namespace FluxErp\Rules;
 
 use Closure;
-use Illuminate\Contracts\Validation\Rule;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rules\DatabaseRule;
 
-class ExistsWithIgnore implements Rule
+class ExistsWithIgnore implements ValidationRule
 {
     use DatabaseRule;
 
     /**
      * The ID that should be ignored.
      */
-    private mixed $ignore = null;
+    protected mixed $ignore = null;
+
+    public function getColumn(): string
+    {
+        return $this->column;
+    }
+
+    public function getTable(): Model|string
+    {
+        return $this->table;
+    }
 
     /**
      * Ignore the given ID during the exists check.
@@ -46,7 +56,7 @@ class ExistsWithIgnore implements Rule
         return $this;
     }
 
-    public function passes($attribute, $value): bool
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         $attribute = str_contains($attribute, '.') ? pathinfo($attribute, PATHINFO_EXTENSION) : $attribute;
 
@@ -57,12 +67,11 @@ class ExistsWithIgnore implements Rule
             $query = $this->addConditions($query, $this->wheres);
         }
 
-        return $query->exists();
-    }
-
-    public function message(): string
-    {
-        return __('validation.exists');
+        if (! $query->exists()) {
+            $fail('validation.exists')->translate([
+                'attribute' => $attribute,
+            ]);
+        }
     }
 
     /**
@@ -72,7 +81,7 @@ class ExistsWithIgnore implements Rule
     {
         foreach ($conditions as $key => $value) {
             if ($value instanceof Closure) {
-                $query->where(function ($query) use ($value) {
+                $query->where(function ($query) use ($value): void {
                     $value($query);
                 });
             } elseif (is_array($value)) {
@@ -99,15 +108,5 @@ class ExistsWithIgnore implements Rule
         } else {
             $query->where($key, $extraValue);
         }
-    }
-
-    public function getTable(): Model|string
-    {
-        return $this->table;
-    }
-
-    public function getColumn(): string
-    {
-        return $this->column;
     }
 }

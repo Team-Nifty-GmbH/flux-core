@@ -2,7 +2,9 @@
 
 namespace FluxErp\Livewire\DataTables;
 
+use Exception;
 use FluxErp\Actions\Ticket\CreateTicket;
+use FluxErp\Actions\WorkTime\CreateWorkTime;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\TicketType;
@@ -11,13 +13,16 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\Renderless;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class TicketList extends BaseDataTable
 {
     use WithFileUploads;
 
-    protected string $view = 'flux::livewire.ticket.tickets';
+    public array $additionalColumns;
+
+    public $attachments;
 
     public array $enabledCols = [
         'ticket_number',
@@ -29,29 +34,27 @@ class TicketList extends BaseDataTable
         'created_at',
     ];
 
-    protected string $model = Ticket::class;
-
-    public array $ticket;
+    #[Locked]
+    public ?int $modelId = null;
 
     #[Locked]
     public ?string $modelType = null;
 
-    #[Locked]
-    public ?int $modelId = null;
+    public array $selectedAdditionalColumns = [];
+
+    public bool $showTicketModal = false;
+
+    public array $ticket;
 
     public ?int $ticketTypeId = null;
 
-    public array $selectedAdditionalColumns = [];
-
     public array $ticketTypes;
 
-    public array $additionalColumns;
+    protected ?string $includeBefore = 'flux::livewire.ticket.tickets';
 
-    public $attachments;
+    protected string $model = Ticket::class;
 
     private ?int $oldTicketTypeId = null;
-
-    public bool $showTicketModal = false;
 
     public function mount(): void
     {
@@ -68,7 +71,7 @@ class TicketList extends BaseDataTable
             ->when(
                 $modelType,
                 fn (Builder $query) => $query->where(
-                    function (Builder $query) use ($modelType) {
+                    function (Builder $query) use ($modelType): void {
                         $query->where('model_type', $modelType)
                             ->orWhereNull('model_type');
                     }),
@@ -91,8 +94,8 @@ class TicketList extends BaseDataTable
     {
         return [
             DataTableButton::make()
-                ->label(__('Create'))
-                ->color('primary')
+                ->text(__('Create'))
+                ->color('indigo')
                 ->icon('plus')
                 ->attributes([
                     'x-on:click' => '$wire.show()',
@@ -100,44 +103,18 @@ class TicketList extends BaseDataTable
         ];
     }
 
-    protected function getBuilder(Builder $builder): Builder
+    protected function getRowActions(): array
     {
-        return $builder->with([
-            'ticketType:id,name',
-            'authenticatable',
-            'model',
-        ]);
-    }
-
-    protected function itemToArray($item): array
-    {
-        $returnArray = parent::itemToArray($item);
-
-        /** @var Ticket $item */
-        if ($related = $item->morphTo('model')->getResults()) {
-            $returnArray['related'] = method_exists($related, 'getLabel') ? $related->getLabel() : null;
-        }
-
-        $returnArray['user'] = $item->authenticatable?->getLabel();
-
-        return $returnArray;
-    }
-
-    public function show(): void
-    {
-        $this->ticket = [
-            'title' => null,
-            'description' => null,
+        return [
+            DataTableButton::make()
+                ->icon('clock')
+                ->text(__('Track Time'))
+                ->when(fn () => resolve_static(CreateWorkTime::class, 'canPerformAction', [false]))
+                ->wireClick('startTimeTracking(record.id)'),
         ];
-
-        $this->ticketTypeId = null;
-        $this->selectedAdditionalColumns = [];
-        $this->filesArray = [];
-        $this->attachments = [];
-
-        $this->showTicketModal = true;
     }
 
+    #[Renderless]
     public function save(): void
     {
         $this->ticket = array_merge($this->ticket, [
@@ -156,7 +133,7 @@ class TicketList extends BaseDataTable
                 ->checkPermission()
                 ->validate()
                 ->execute();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             exception_to_notifications($e, $this);
 
             return;
@@ -164,15 +141,48 @@ class TicketList extends BaseDataTable
 
         try {
             $this->saveFileUploadsToMediaLibrary('attachments', $ticket->id, morph_alias(Ticket::class));
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             exception_to_notifications($e, $this);
         }
 
-        $this->notification()->success(__('Ticket created…'));
+        $this->notification()->success(__('Ticket created…'))->send();
 
         $this->showTicketModal = false;
-        $this->skipRender();
         $this->loadData();
+    }
+
+    public function show(): void
+    {
+        $this->ticket = [
+            'title' => null,
+            'description' => null,
+        ];
+
+        $this->ticketTypeId = null;
+        $this->selectedAdditionalColumns = [];
+        $this->filesArray = [];
+        $this->attachments = [];
+
+        $this->showTicketModal = true;
+    }
+
+    #[Renderless]
+    public function startTimeTracking(Ticket $ticket): void
+    {
+        $ticket->title = json_encode($ticket->title);
+        $ticket->description = json_encode($ticket->description);
+
+        $this->js(<<<JS
+            \$dispatch(
+                'start-time-tracking',
+                {
+                    trackable_type: '{$ticket->getMorphClass()}',
+                    trackable_id: {$ticket->getKey()},
+                    name: {$ticket->title},
+                    description: {$ticket->description}
+                }
+            );
+        JS);
     }
 
     public function updatedAttachments(): void
@@ -197,5 +207,28 @@ class TicketList extends BaseDataTable
 
         $this->selectedAdditionalColumns = $this->ticketTypeId ?
             $ticketTypeAdditionalColumns[$this->ticketTypeId] ?? [] : [];
+    }
+
+    protected function getBuilder(Builder $builder): Builder
+    {
+        return $builder->with([
+            'ticketType:id,name',
+            'authenticatable',
+            'model',
+        ]);
+    }
+
+    protected function itemToArray($item): array
+    {
+        $returnArray = parent::itemToArray($item);
+
+        /** @var Ticket $item */
+        if ($related = $item->morphTo('model')->getResults()) {
+            $returnArray['related'] = method_exists($related, 'getLabel') ? $related->getLabel() : null;
+        }
+
+        $returnArray['user'] = $item->authenticatable?->getLabel();
+
+        return $returnArray;
     }
 }

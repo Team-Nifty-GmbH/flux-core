@@ -9,20 +9,20 @@ use Livewire\Attributes\Locked;
 
 class LedgerAccountForm extends FluxForm
 {
-    #[Locked]
-    public ?int $id = null;
-
     public ?int $client_id = null;
-
-    public ?string $number = null;
-
-    public ?string $name = null;
 
     public ?string $description = null;
 
-    public ?string $ledger_account_type_enum = null;
+    #[Locked]
+    public ?int $id = null;
 
     public bool $is_automatic = false;
+
+    public ?string $ledger_account_type_enum = null;
+
+    public ?string $name = null;
+
+    public ?string $number = null;
 
     protected function getActions(): array
     {

@@ -11,6 +11,14 @@ class UpdatePaymentTypeRuleset extends FluxRuleset
 {
     protected static ?string $model = PaymentType::class;
 
+    public static function getRules(): array
+    {
+        return array_merge(
+            parent::getRules(),
+            resolve_static(ClientRuleset::class, 'getRules'),
+        );
+    }
+
     public function rules(): array
     {
         return [
@@ -19,7 +27,7 @@ class UpdatePaymentTypeRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => PaymentType::class]),
             ],
-            'name' => 'string',
+            'name' => 'sometimes|required|string|max:255',
             'description' => 'string|nullable',
             'payment_reminder_days_1' => 'integer|nullable',
             'payment_reminder_days_2' => 'integer|nullable',
@@ -39,13 +47,5 @@ class UpdatePaymentTypeRuleset extends FluxRuleset
             'is_sales' => 'boolean',
             'requires_manual_transfer' => 'boolean',
         ];
-    }
-
-    public static function getRules(): array
-    {
-        return array_merge(
-            parent::getRules(),
-            resolve_static(ClientRuleset::class, 'getRules'),
-        );
     }
 }

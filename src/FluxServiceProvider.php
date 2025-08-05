@@ -3,8 +3,6 @@
 namespace FluxErp;
 
 use Closure;
-use FluxErp\Console\Commands\Init\InitEnv;
-use FluxErp\Console\Commands\Init\InitPermissions;
 use FluxErp\Facades\Action;
 use FluxErp\Facades\Menu;
 use FluxErp\Facades\ProductType;
@@ -18,34 +16,25 @@ use FluxErp\Http\Middleware\Localization;
 use FluxErp\Http\Middleware\Permissions;
 use FluxErp\Http\Middleware\PortalMiddleware;
 use FluxErp\Http\Middleware\SetJobAuthenticatedUserMiddleware;
-use FluxErp\Livewire\Features\Calendar\CalendarOverview;
 use FluxErp\Models\Activity;
-use FluxErp\Models\Address;
-use FluxErp\Models\Calendar;
-use FluxErp\Models\CalendarEvent;
-use FluxErp\Models\Category;
-use FluxErp\Models\Client;
-use FluxErp\Models\LedgerAccount;
-use FluxErp\Models\Order;
+use FluxErp\Models\Currency;
+use FluxErp\Models\Notification;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\Permission;
-use FluxErp\Models\Product;
-use FluxErp\Models\Project;
 use FluxErp\Models\Role;
-use FluxErp\Models\SerialNumber;
-use FluxErp\Models\Task;
-use FluxErp\Models\Ticket;
-use FluxErp\Models\User;
-use FluxErp\Support\Validator\ValidatorFactory;
-use FluxErp\Traits\HasClientAssignment;
+use FluxErp\Traits\Livewire\SupportsAutoRender;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Bus\Dispatcher;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Contracts\Queue\Factory as QueueFactoryContract;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\QueryException;
+use Illuminate\Foundation\Testing\TestCase;
 use Illuminate\Http\Request as HttpRequest;
+use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Routing\Route;
@@ -62,63 +51,44 @@ use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
-use Laravel\Sanctum\Http\Middleware\CheckAbilities;
+use Laravel\Sanctum\Http\Middleware\CheckForAnyAbility;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
-use Laravel\Scout\Builder;
 use Livewire\Component;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
 use PHPUnit\Framework\Assert;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use ReflectionClass;
 use RegexIterator;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 use Spatie\Translatable\Facades\Translatable;
+use Throwable;
+use function Livewire\invade;
 
 class FluxServiceProvider extends ServiceProvider
 {
+    public static bool $registerApiRoutes = true;
+
     public static bool $registerFluxRoutes = true;
 
     public static bool $registerPortalRoutes = true;
 
-    public static bool $registerApiRoutes = true;
-
-    /**
-     * Register any application services.
-     */
-    public function register(): void
-    {
-        if ($this->app->runningInConsole()) {
-            $this->offerPublishing();
-        }
-
-        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
-        $this->app->bind(
-            'path.lang',
-            fn () => [__DIR__ . '/../lang', base_path('lang')]
-        );
-
-        $this->loadJsonTranslationsFrom(__DIR__ . '/../lang');
-        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'flux');
-        $this->registerConfig();
-        $this->registerMarcos();
-        $this->registerExtensions();
-
-        Translatable::fallback(
-            fallbackAny: true,
-        );
-
-        app('livewire')->componentHook(SupportFormObjects::class);
-        $this->app->bind(\TeamNiftyGmbH\Calendar\Models\Calendar::class, Calendar::class);
-        $this->app->bind(\TeamNiftyGmbH\Calendar\Models\CalendarEvent::class, CalendarEvent::class);
-    }
-
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
+        Model::automaticallyEagerLoadRelationships();
+
+        $this->app->booted(function (): void {
+            try {
+                if ($iso = resolve_static(Currency::class, 'default')?->iso) {
+                    Number::useCurrency($iso);
+                }
+            } catch (QueryException) {
+            }
+        });
+        Number::useLocale(app()->getLocale());
+
         bcscale(9);
         $this->bootMiddleware();
         $this->bootCommands();
@@ -128,10 +98,6 @@ class FluxServiceProvider extends ServiceProvider
         $this->bootRoutes();
         $this->registerLivewireComponents();
         $this->registerBladeComponents();
-
-        // special case for calendar event to load into correct namespace
-        Blade::component('flux::components.calendar.event-edit', 'tall-calendar::event-edit');
-        Blade::component('flux::components.calendar.calendar-list', 'tall-calendar::calendar-list');
 
         if (static::$registerFluxRoutes && (! $this->app->runningInConsole() || $this->app->runningUnitTests())) {
             $this->bootFluxMenu();
@@ -170,11 +136,340 @@ class FluxServiceProvider extends ServiceProvider
         if (! $this->app->runningInConsole() || $this->app->runningUnitTests()) {
             ProductType::register(name: 'product', class: \FluxErp\Livewire\Product\Product::class, default: true);
         }
-
-        Livewire::component('calendar-overview', CalendarOverview::class);
     }
 
-    protected function registerMarcos(): void
+    public function register(): void
+    {
+        if ($this->app->runningInConsole()) {
+            $this->offerPublishing();
+        }
+
+        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+        $this->app->bind(
+            'path.lang',
+            fn () => [__DIR__ . '/../lang', base_path('lang')]
+        );
+
+        $this->loadJsonTranslationsFrom(__DIR__ . '/../lang');
+        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'flux');
+        $this->registerConfig();
+        $this->registerMacros();
+        $this->registerExtensions();
+
+        Translatable::fallback(
+            fallbackAny: true,
+        );
+
+        app('livewire')->componentHook(SupportFormObjects::class);
+        $this->app->bind(DatabaseNotification::class, Notification::class);
+    }
+
+    protected function bootCommands(): void
+    {
+        if (! $this->app->runningInConsole()) {
+            $commandClasses = Cache::remember(
+                'flux.commands',
+                now()->addDay(),
+                fn () => $this->findCommands()
+            );
+        } else {
+            $commandClasses = $this->findCommands();
+            Cache::put('flux.commands', $commandClasses, now()->addDay());
+        }
+
+        $this->commands($commandClasses);
+    }
+
+    protected function bootFluxMenu(): void
+    {
+        Menu::register(route: 'dashboard', icon: 'home', order: -9999);
+
+        Menu::group(
+            path: 'sales',
+            icon: 'shopping-cart',
+            label: 'Sales',
+            closure: function (): void {
+                Menu::register(route: 'sales.leads');
+            }
+        );
+
+        Menu::group(
+            path: 'orders',
+            icon: 'briefcase',
+            label: 'Orders',
+            closure: function (): void {
+                foreach (resolve_static(OrderType::class, 'query')
+                    ->where('is_visible_in_sidebar', true)
+                    ->where('is_active', true)
+                    ->get(['id', 'name']) as $orderType
+                ) {
+                    Menu::register(
+                        route: 'orders.order-type',
+                        label: $orderType->name,
+                        params: ['orderType' => $orderType->id],
+                        path: 'orders.children.order-type-' . $orderType->id
+                    );
+                }
+                Menu::register(route: 'orders.orders', label: __('All orders'));
+                Menu::register(route: 'orders.order-positions');
+            }
+        );
+
+        Menu::group(
+            path: 'contacts',
+            icon: 'identification',
+            label: 'Contacts',
+            closure: function (): void {
+                Menu::register(route: 'contacts.contacts');
+                Menu::register(route: 'contacts.addresses');
+                Menu::register(route: 'contacts.communications');
+            }
+        );
+
+        Menu::register(route: 'tasks', icon: 'clipboard-document');
+        Menu::register(route: 'tickets', icon: 'wrench-screwdriver');
+        Menu::register(route: 'projects', icon: 'briefcase');
+
+        Menu::group(
+            path: 'accounting',
+            icon: 'banknotes',
+            label: 'Accounting',
+            closure: function (): void {
+                Menu::register(route: 'accounting.work-times');
+                Menu::register(route: 'accounting.commissions');
+                Menu::register(route: 'accounting.payment-reminders');
+                Menu::register(route: 'accounting.purchase-invoices');
+                Menu::register(route: 'accounting.transactions');
+                Menu::register(route: 'accounting.transaction-assignments');
+                Menu::register(route: 'accounting.direct-debit');
+                Menu::register(route: 'accounting.money-transfer');
+                Menu::register(route: 'accounting.payment-runs');
+            }
+        );
+
+        Menu::group(
+            path: 'products',
+            icon: 'square-3-stack-3d',
+            label: 'Products',
+            closure: function (): void {
+                Menu::register(route: 'products.products');
+                Menu::register(route: 'products.serial-numbers');
+            }
+        );
+
+        Menu::register(route: 'mail', icon: 'envelope');
+        Menu::register(route: 'calendars', icon: 'calendar');
+
+        Menu::register(route: 'media-grid', icon: 'photo', label: 'media');
+        Menu::register(route: 'settings', icon: 'cog', label: 'settings');
+
+        Menu::group(
+            path: 'settings',
+            icon: 'cog',
+            label: 'Settings',
+            order: 9999,
+            closure: function (): void {
+                Menu::register(route: 'settings.system');
+                Menu::register(route: 'settings.additional-columns');
+                Menu::register(route: 'settings.address-types');
+                Menu::register(route: 'settings.record-origins');
+                Menu::register(route: 'settings.industries');
+                Menu::register(route: 'settings.categories');
+                Menu::register(route: 'settings.tags');
+                Menu::register(route: 'settings.targets');
+                Menu::register(route: 'settings.lead-loss-reasons');
+                Menu::register(route: 'settings.lead-states');
+                Menu::register(route: 'settings.email-templates');
+                Menu::register(route: 'settings.tokens');
+                Menu::register(route: 'settings.product-option-groups');
+                Menu::register(route: 'settings.product-properties');
+                Menu::register(route: 'settings.clients');
+                Menu::register(route: 'settings.bank-connections');
+                Menu::register(route: 'settings.countries');
+                Menu::register(route: 'settings.currencies');
+                Menu::register(route: 'settings.discount-groups');
+                Menu::register(route: 'settings.languages');
+                Menu::register(route: 'settings.ledger-accounts');
+                Menu::register(route: 'settings.logs');
+                Menu::register(route: 'settings.activity-logs');
+                Menu::register(route: 'settings.notifications');
+                Menu::register(route: 'settings.order-types');
+                Menu::register(route: 'settings.permissions');
+                Menu::register(route: 'settings.price-lists');
+                Menu::register(route: 'settings.print-jobs');
+                Menu::register(route: 'settings.printers');
+                Menu::register(route: 'settings.ticket-types');
+                Menu::register(route: 'settings.translations');
+                Menu::register(route: 'settings.units');
+                Menu::register(route: 'settings.users');
+                Menu::register(route: 'settings.mail-accounts');
+                Menu::register(route: 'settings.work-time-types');
+                Menu::register(route: 'settings.vat-rates');
+                Menu::register(route: 'settings.payment-types');
+                Menu::register(route: 'settings.payment-reminder-texts');
+                Menu::register(route: 'settings.warehouses');
+                Menu::register(route: 'settings.serial-number-ranges');
+                Menu::register(route: 'settings.scheduling');
+                Menu::register(route: 'settings.queue-monitor');
+                Menu::register(route: 'settings.failed-jobs');
+                Menu::register(route: 'settings.plugins');
+            }
+        );
+    }
+
+    protected function bootPortalMenu(): void
+    {
+        Menu::register(route: 'portal.dashboard', icon: 'home', order: -9999);
+        Menu::register(route: 'portal.calendar', icon: 'calendar');
+        Menu::register(route: 'portal.products', icon: 'square-3-stack-3d');
+        Menu::register(route: 'portal.files', icon: 'folder-open');
+        Menu::register(route: 'portal.orders', icon: 'shopping-bag');
+        Menu::register(route: 'portal.tickets', icon: 'wrench-screwdriver');
+    }
+
+    protected function bootRoutes(): void
+    {
+        if (static::$registerFluxRoutes || static::$registerPortalRoutes) {
+            Authenticate::redirectUsing(fn (HttpRequest $request) => route('login', absolute: false));
+        }
+
+        $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
+
+        if (static::$registerApiRoutes) {
+            $this->loadRoutesFrom(__DIR__ . '/../routes/api.php');
+        }
+
+        if (static::$registerPortalRoutes) {
+            $this->loadRoutesFrom(__DIR__ . '/../routes/frontend/portal.php');
+        }
+
+        if (static::$registerFluxRoutes) {
+            $this->loadRoutesFrom(__DIR__ . '/../routes/frontend/web.php');
+        }
+
+        if (static::$registerApiRoutes) {
+            RateLimiter::for('api', function (HttpRequest $request) {
+                return Limit::perMinute(config('flux.rate_limit'))
+                    ->by(optional($request->user())->id ?: $request->ip());
+            });
+        }
+
+        RouteFacade::pattern('id', '[0-9]+');
+    }
+
+    protected function findCommands(): array
+    {
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator(__DIR__ . '/Console/Commands')
+        );
+        $commandClasses = [];
+
+        foreach ($iterator as $file) {
+            if ($file->isFile() && $file->getExtension() === 'php') {
+                $classPath = str_replace([__DIR__ . '/', '/'], ['', '\\'], $file->getPathname());
+                $classNamespace = '\\FluxErp\\';
+                $class = $classNamespace . str_replace('.php', '', $classPath);
+                $commandClasses[] = $class;
+            }
+        }
+
+        return $commandClasses;
+    }
+
+    protected function offerPublishing(): void
+    {
+        $this->publishes([
+            __DIR__ . '/../database/migrations' => database_path('migrations'),
+        ], 'flux-migrations');
+        $this->publishes([
+            __DIR__ . '/../database/seeders' => database_path('seeders'),
+        ], 'flux-seeders');
+        $this->publishes([
+            __DIR__ . '/../config/flux.php' => config_path('flux.php'),
+        ], 'flux-config');
+        $this->publishes([
+            __DIR__ . '/../resources/views' => resource_path('views/vendor/flux'),
+        ], 'flux-views');
+        $this->publishes([
+            __DIR__ . '/../lang' => base_path('lang/vendor/team-nifty-gmbh/flux'),
+        ], 'flux-translations');
+        $this->publishes([
+            __DIR__ . '/../public/build' => public_path('vendor/team-nifty-gmbh/flux'),
+        ], 'flux-assets');
+        $this->publishes([
+            __DIR__ . '/../docker' => base_path('docker'),
+        ], 'flux-docker');
+    }
+
+    protected function registerBladeComponents(): void
+    {
+        $directoryIterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator(__DIR__ . '/../resources/views/components')
+        );
+        $phpFiles = new RegexIterator($directoryIterator, '/\.blade\.php$/');
+
+        foreach ($phpFiles as $phpFile) {
+            $relativePath = Str::replace(__DIR__ . '/../resources/views/components/', '', $phpFile->getRealPath());
+            $relativePath = Str::replace(DIRECTORY_SEPARATOR, '.', Str::remove('.blade.php', $relativePath));
+            $relativePath = Str::afterLast($relativePath, 'views.components.');
+            Blade::component('flux::components.' . $relativePath, Str::remove('.index', $relativePath));
+        }
+
+        Blade::componentNamespace('FluxErp\\View\\Components', 'flux');
+    }
+
+    protected function registerConfig(): void
+    {
+        $this->booted(function (): void {
+            config([
+                'tallstackui.settings.toast.z-index' => 'z-50',
+                'tallstackui.settings.toast.timeout' => 5,
+                'tallstackui.settings.dialog.z-index' => 'z-40',
+                'tallstackui.settings.modal.z-index' => 'z-30',
+                'tallstackui.settings.slide.z-index' => 'z-30',
+            ]);
+            config(['permission.models.role' => resolve_static(Role::class, 'class')]);
+            config(['permission.models.permission' => resolve_static(Permission::class, 'class')]);
+            config(['permission.display_permission_in_exception' => true]);
+            config(['activitylog.activitymodel' => resolve_static(Activity::class, 'class')]);
+            config(['media-library.media_downloader' => MediaLibraryDownloader::class]);
+        });
+        $this->mergeConfigFrom(__DIR__ . '/../config/flux.php', 'flux');
+        $this->mergeConfigFrom(__DIR__ . '/../config/notifications.php', 'notifications');
+        config(['auth' => require __DIR__ . '/../config/auth.php']);
+
+        if (! app()->configurationIsCached()) {
+            config(['logging' => array_merge_recursive(config('logging'), require __DIR__ . '/../config/logging.php')]);
+        }
+
+        if ($this->app->runningInConsole()) {
+            config([
+                'tinker.alias' => [
+                    'FluxErp\\Models\\',
+                    'FluxErp\\Actions\\',
+                ],
+            ]);
+        }
+    }
+
+    protected function registerLivewireComponents(): void
+    {
+        $livewireNamespace = 'FluxErp\\Livewire\\';
+
+        foreach ($this->getViewClassAliasFromNamespace($livewireNamespace) as $alias => $class) {
+            try {
+                if (is_a($class, Component::class, true)
+                    && ! (new ReflectionClass($class))->isAbstract()
+                ) {
+                    Livewire::component($alias, $class);
+                }
+            } catch (Throwable) {
+                Cache::forget('flux.view-classes.' . Str::slug($livewireNamespace));
+            }
+        }
+    }
+
+    protected function registerMacros(): void
     {
         if (! Arr::hasMacro('sortByPattern')) {
             Arr::macro('sortByPattern', function (array $array, array $pattern) {
@@ -278,19 +573,46 @@ class FluxServiceProvider extends ServiceProvider
         }
 
         if ($this->app->runningUnitTests()) {
-            if (! Testable::hasMacro('assertWireuiNotification')) {
+            if (! Testable::hasMacro('assertExecutesJs')) {
                 Testable::macro(
-                    'assertWireuiNotification',
-                    function (?string $title = null, ?string $icon = null, ?string $description = null) {
-                        $this->assertDispatched(
-                            'wireui:notification',
-                            function (string $eventName, array $params) use ($title, $icon, $description) {
-                                $options = data_get($params, '0.options');
+                    'assertExecutesJs',
+                    function (string $js) {
+                        Assert::assertStringContainsString(
+                            $js,
+                            implode(' ', data_get($this->lastState->getEffects(), 'xjs.*.expression', []))
+                        );
 
-                                return array_key_exists('componentId', $params[0])
-                                    && (is_null($icon) || data_get($options, 'icon') === $icon)
-                                    && (is_null($title) || data_get($options, 'title') === $title)
-                                    && (is_null($description) || data_get($options, 'description') === $description);
+                        return $this;
+                    }
+                );
+            }
+
+            if (! Testable::hasMacro('assertToastNotification')) {
+                Testable::macro(
+                    'assertToastNotification',
+                    function (
+                        ?string $title = null,
+                        ?string $type = null,
+                        ?string $description = null,
+                        ?bool $expandable = null,
+                        ?int $timeout = null,
+                        ?bool $persistent = null,
+                        string|int|null $id = null
+                    ) {
+                        $this->assertDispatched(
+                            'tallstackui:toast',
+                            function (
+                                string $eventName,
+                                array $params
+                            ) use ($title, $type, $description, $expandable, $timeout, $persistent, $id) {
+                                return array_key_exists('component', $params)
+                                    && (is_null($type) || data_get($params, 'type') === $type)
+                                    && (is_null($title) || data_get($params, 'title') === $title)
+                                    && (is_null($description) || data_get($params, 'description') === $description)
+                                    && (is_null($expandable) || data_get($params, 'expandable') === $expandable)
+                                    && (is_null($timeout) || data_get($params, 'timeout') === $timeout)
+                                    && (is_null($persistent) || data_get($params, 'persistent') === $persistent)
+                                    && (is_null($id) || data_get($params, 'persistent') === $id);
                             }
                         );
 
@@ -299,14 +621,95 @@ class FluxServiceProvider extends ServiceProvider
                 );
             }
 
-            if (! Testable::hasMacro('assertExecutesJs')) {
+            if (! Testable::hasMacro('cycleTabs')) {
                 Testable::macro(
-                    'assertExecutesJs',
-                    function (string $js) {
-                        Assert::assertStringContainsString(
-                            $js,
-                            implode(' ', data_get($this->lastState->getEffects(), 'xjs', []))
-                        );
+                    'cycleTabs',
+                    function (string $tabPropertyName = 'tab'): void {
+                        $tabs = $this->instance()->getTabs();
+
+                        foreach ($tabs as $tab) {
+                            $this
+                                ->set($tabPropertyName, $tab->component)
+                                ->assertStatus(200);
+
+                            if ($tab->isLivewireComponent) {
+                                $this->assertSeeLivewire($tab->component);
+                            }
+                        }
+
+                        $this->set($tabPropertyName, $tabs[0]->component);
+                    }
+                );
+            }
+
+            if (! Testable::hasMacro('datatableCreate')) {
+                Testable::macro(
+                    'datatableCreate',
+                    function (string $formPropertyName, array $formValues = [], ?string $modalName = null): Testable {
+                        if (
+                            is_null($modalName) &&
+                            in_array(
+                                SupportsAutoRender::class,
+                                class_uses_recursive($this->instance()->{$formPropertyName})
+                            )
+                        ) {
+                            $modalName = $this->instance()->{$formPropertyName}->modalName();
+                        }
+
+                        $this->assertStatus(200)
+                            ->call('edit')
+                            ->assertExecutesJs('$modalOpen(\'' . $modalName . '\')');
+
+                        foreach ($formValues as $propertyName => $propertyValue) {
+                            $this->set($formPropertyName . '.' . $propertyName, $propertyValue);
+                        }
+
+                        $this->call('save')
+                            ->assertStatus(200)
+                            ->assertHasNoErrors()
+                            ->assertReturned(true);
+
+                        return $this;
+                    }
+                );
+            }
+
+            if (! Testable::hasMacro('datatableDelete')) {
+                Testable::macro(
+                    'datatableDelete',
+                    function (Model $model, TestCase $testCase): Testable {
+                        $this->assertStatus(200)
+                            ->call('loadData')
+                            ->assertCount('data.data', 1)
+                            ->assertSet('data.data.0.id', $model->getKey())
+                            ->call('delete', $model->getKey())
+                            ->assertHasNoErrors()
+                            ->assertStatus(200)
+                            ->assertCount('data.data', 0);
+
+                        if (in_array(SoftDeletes::class, class_uses_recursive($model))) {
+                            invade($testCase)->assertSoftDeleted($model);
+                        } else {
+                            invade($testCase)->assertDatabaseMissing($model);
+                        }
+
+                        return $this;
+                    }
+                );
+            }
+
+            if (! Testable::hasMacro('datatableEdit')) {
+                Testable::macro(
+                    'datatableEdit',
+                    function (Model $model, string $routeName): Testable {
+                        $this->assertStatus(200)
+                            ->call('loadData')
+                            ->assertCount('data.data', 1)
+                            ->assertSet('data.data.0.id', $model->getKey())
+                            ->call('edit', $model->getKey())
+                            ->assertHasNoErrors()
+                            ->assertStatus(200)
+                            ->assertRedirectToRoute($routeName, $model->getKey());
 
                         return $this;
                     }
@@ -340,177 +743,28 @@ class FluxServiceProvider extends ServiceProvider
             return $this;
         });
 
-        Command::macro('removeLastLine', function () {
+        Command::macro('removeLastLine', function (): void {
             $this->output->write("\x1b[1A\r\x1b[K");
         });
     }
 
-    protected function offerPublishing(): void
+    private function bootMiddleware(): void
     {
-        $this->publishes([
-            __DIR__ . '/../database/migrations' => database_path('migrations'),
-        ], 'flux-migrations');
-        $this->publishes([
-            __DIR__ . '/../database/seeders' => database_path('seeders'),
-        ], 'flux-seeders');
-        $this->publishes([
-            __DIR__ . '/../config/flux.php' => config_path('flux.php'),
-        ], 'flux-config');
-        $this->publishes([
-            __DIR__ . '/../resources/views' => resource_path('views/vendor/flux'),
-        ], 'flux-views');
-        $this->publishes([
-            __DIR__ . '/../lang' => base_path('lang/vendor/team-nifty-gmbh/flux'),
-        ], 'flux-translations');
-        $this->publishes([
-            __DIR__ . '/../public/build' => public_path('vendor/team-nifty-gmbh/flux'),
-        ], 'flux-assets');
-        $this->publishes([
-            __DIR__ . '/../docker' => base_path('docker'),
-        ], 'flux-docker');
-    }
+        /** @var Kernel $kernel */
+        $kernel = $this->app->make(Kernel::class);
+        $kernel->prependMiddlewareToGroup('api', EnsureFrontendRequestsAreStateful::class);
 
-    protected function registerConfig(): void
-    {
-        $this->loadViewsFrom(__DIR__ . '/../resources/views/vendor/wireui', 'wireui');
-        $this->mergeConfigFrom(__DIR__ . '/../config/flux.php', 'flux');
-        $this->mergeConfigFrom(__DIR__ . '/../config/notifications.php', 'notifications');
-        config(['permission.models.role' => resolve_static(Role::class, 'class')]);
-        config(['permission.models.permission' => resolve_static(Permission::class, 'class')]);
-        config(['permission.display_permission_in_exception' => true]);
-        config(['auth' => require __DIR__ . '/../config/auth.php']);
-        config(['activitylog.activitymodel' => resolve_static(Activity::class, 'class')]);
-        config(['logging' => array_merge_recursive(config('logging'), require __DIR__ . '/../config/logging.php')]);
-        config(['wireui.heroicons.alias' => 'heroicons']);
-        config(['wireui.modal' => [
-            'zIndex' => env('WIREUI_MODAL_Z_INDEX', 'z-20'),
-            'maxWidth' => env('WIREUI_MODAL_MAX_WIDTH', '2xl'),
-            'spacing' => env('WIREUI_MODAL_SPACING', 'p-4'),
-            'align' => env('WIREUI_MODAL_ALIGN', 'start'),
-            'blur' => env('WIREUI_MODAL_BLUR', false),
-        ]]);
-        config(['media-library.media_downloader' => MediaLibraryDownloader::class]);
-        config([
-            'scout.meilisearch.index-settings' => [
-                resolve_static(Address::class, 'class') => [
-                    'filterableAttributes' => [
-                        'is_main_address',
-                        'contact_id',
-                    ],
-                    'sortableAttributes' => ['*'],
-                ],
-                resolve_static(Category::class, 'class') => [
-                    'filterableAttributes' => [
-                        'model_type',
-                    ],
-                ],
-                resolve_static(LedgerAccount::class, 'class') => [
-                    'filterableAttributes' => [
-                        'ledger_account_type_enum',
-                        'is_automatic',
-                    ],
-                    'sortableAttributes' => ['*'],
-                ],
-                resolve_static(Order::class, 'class') => [
-                    'filterableAttributes' => [
-                        'parent_id',
-                        'contact_id',
-                        'is_locked',
-                    ],
-                    'sortableAttributes' => ['*'],
-                ],
-                resolve_static(Permission::class, 'class') => [
-                    'filterableAttributes' => [
-                        'guard_name',
-                    ],
-                    'sortableAttributes' => [
-                        'name',
-                    ],
-                ],
-                resolve_static(Product::class, 'class') => [
-                    'filterableAttributes' => [
-                        'is_active',
-                        'parent_id',
-                    ],
-                    'sortableAttributes' => ['*'],
-                ],
-                resolve_static(Project::class, 'class') => [
-                    'filterableAttributes' => [
-                        'parent_id',
-                        'state',
-                    ],
-                    'sortableAttributes' => ['*'],
-                ],
-                resolve_static(SerialNumber::class, 'class') => [
-                    'filterableAttributes' => [
-                        'address_id',
-                    ],
-                ],
-                resolve_static(Task::class, 'class') => [
-                    'filterableAttributes' => [
-                        'project_id',
-                        'state',
-                    ],
-                    'sortableAttributes' => ['*'],
-                ],
-                resolve_static(Ticket::class, 'class') => [
-                    'filterableAttributes' => [
-                        'authenticatable_type',
-                        'authenticatable_id',
-                        'state',
-                    ],
-                    'sortableAttributes' => ['*'],
-                ],
-                resolve_static(User::class, 'class') => [
-                    'filterableAttributes' => [
-                        'is_active',
-                    ],
-                ],
-            ],
-        ]);
+        $kernel->appendMiddlewareToGroup('web', Localization::class);
+        $kernel->appendMiddlewareToGroup('web', AuthContextMiddleware::class);
+        $kernel->appendMiddlewareToGroup('web', PortalMiddleware::class);
 
-        if ($this->app->runningInConsole()) {
-            config([
-                'tinker.alias' => [
-                    'FluxErp\\Models\\',
-                    'FluxErp\\Actions\\',
-                ],
-            ]);
-        }
-    }
+        $this->app['router']->aliasMiddleware('ability', CheckForAnyAbility::class);
+        $this->app['router']->aliasMiddleware('role', RoleMiddleware::class);
+        $this->app['router']->aliasMiddleware('role_or_permission', RoleOrPermissionMiddleware::class);
+        $this->app['router']->aliasMiddleware('permission', Permissions::class);
+        $this->app['router']->aliasMiddleware('localization', Localization::class);
 
-    protected function registerBladeComponents(): void
-    {
-        $directoryIterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator(__DIR__ . '/../resources/views/components')
-        );
-        $phpFiles = new RegexIterator($directoryIterator, '/\.blade\.php$/');
-
-        foreach ($phpFiles as $phpFile) {
-            $relativePath = Str::replace(__DIR__ . '/../resources/views/components/', '', $phpFile->getRealPath());
-            $relativePath = Str::replace(DIRECTORY_SEPARATOR, '.', Str::remove('.blade.php', $relativePath));
-            $relativePath = Str::afterLast($relativePath, 'views.components.');
-            Blade::component('flux::components.' . $relativePath, Str::remove('.index', $relativePath));
-        }
-
-        Blade::componentNamespace('FluxErp\\View\\Components', 'flux');
-    }
-
-    protected function registerLivewireComponents(): void
-    {
-        $livewireNamespace = 'FluxErp\\Livewire\\';
-
-        foreach ($this->getViewClassAliasFromNamespace($livewireNamespace) as $alias => $class) {
-            try {
-                if (is_a($class, Component::class, true)
-                    && ! (new \ReflectionClass($class))->isAbstract()
-                ) {
-                    Livewire::component($alias, $class);
-                }
-            } catch (\Throwable) {
-                Cache::forget('flux.view-classes.' . Str::slug($livewireNamespace));
-            }
-        }
+        Bus::pipeThrough([app(SetJobAuthenticatedUserMiddleware::class)]);
     }
 
     private function getViewClassAliasFromNamespace(string $namespace, ?string $directoryPath = null): array
@@ -535,7 +789,7 @@ class FluxServiceProvider extends ServiceProvider
 
             if (class_exists($class)) {
                 $exploded = explode('\\', $relativePath);
-                array_walk($exploded, function (&$value) {
+                array_walk($exploded, function (&$value): void {
                     $value = Str::snake(Str::remove('.php', $value), '-');
                 });
 
@@ -545,209 +799,6 @@ class FluxServiceProvider extends ServiceProvider
         }
 
         return Cache::rememberForever('flux.view-classes.' . Str::slug($namespace), fn () => $components);
-    }
-
-    protected function bootRoutes(): void
-    {
-        if (static::$registerFluxRoutes || static::$registerPortalRoutes) {
-            Authenticate::redirectUsing(fn (HttpRequest $request) => route('login', absolute: false));
-        }
-
-        $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
-
-        if (static::$registerApiRoutes) {
-            $this->loadRoutesFrom(__DIR__ . '/../routes/api.php');
-        }
-
-        if (static::$registerPortalRoutes) {
-            $this->loadRoutesFrom(__DIR__ . '/../routes/frontend/portal.php');
-        }
-
-        if (static::$registerFluxRoutes) {
-            $this->loadRoutesFrom(__DIR__ . '/../routes/frontend/web.php');
-        }
-
-        if (static::$registerApiRoutes) {
-            RateLimiter::for('api', function (HttpRequest $request) {
-                return Limit::perMinute(config('flux.rate_limit'))
-                    ->by(optional($request->user())->id ?: $request->ip());
-            });
-        }
-
-        RouteFacade::pattern('id', '[0-9]+');
-    }
-
-    protected function bootFluxMenu(): void
-    {
-        Menu::register(route: 'dashboard', icon: 'home', order: -9999);
-
-        Menu::group(
-            path: 'orders',
-            icon: 'briefcase',
-            label: 'Orders',
-            closure: function () {
-                foreach (resolve_static(OrderType::class, 'query')
-                    ->where('is_visible_in_sidebar', true)
-                    ->where('is_active', true)
-                    ->get(['id', 'name']) as $orderType
-                ) {
-                    Menu::register(
-                        route: 'orders.order-type',
-                        label: $orderType->name,
-                        params: ['orderType' => $orderType->id],
-                        path: 'orders.children.order-type-' . $orderType->id
-                    );
-                }
-                Menu::register(route: 'orders.orders', label: __('All orders'));
-                Menu::register(route: 'orders.order-positions');
-            }
-        );
-
-        Menu::group(
-            path: 'contacts',
-            icon: 'identification',
-            label: 'Contacts',
-            closure: function () {
-                Menu::register(route: 'contacts.contacts');
-                Menu::register(route: 'contacts.communications');
-            }
-        );
-
-        Menu::register(route: 'tasks', icon: 'clipboard-document');
-        Menu::register(route: 'tickets', icon: 'wrench-screwdriver');
-        Menu::register(route: 'projects', icon: 'briefcase');
-
-        Menu::group(
-            path: 'accounting',
-            icon: 'banknotes',
-            label: 'Accounting',
-            closure: function () {
-                Menu::register(route: 'accounting.work-times');
-                Menu::register(route: 'accounting.commissions');
-                Menu::register(route: 'accounting.payment-reminders');
-                Menu::register(route: 'accounting.purchase-invoices');
-                Menu::register(route: 'accounting.transactions');
-                Menu::register(route: 'accounting.direct-debit');
-                Menu::register(route: 'accounting.money-transfer');
-                Menu::register(route: 'accounting.payment-runs');
-            }
-        );
-
-        Menu::group(
-            path: 'products',
-            icon: 'square-3-stack-3d',
-            label: 'Products',
-            closure: function () {
-                Menu::register(route: 'products.products');
-                Menu::register(route: 'products.serial-numbers');
-            }
-        );
-
-        Menu::register(route: 'mail', icon: 'envelope');
-        Menu::register(route: 'calendars', icon: 'calendar');
-
-        Menu::register(route: 'media-grid', icon: 'photo', label: 'media');
-        Menu::register(route: 'settings', icon: 'cog', label: 'settings');
-
-        Menu::group(
-            path: 'settings',
-            icon: 'cog',
-            label: 'Settings',
-            order: 9999,
-            closure: function () {
-                Menu::register(route: 'settings.additional-columns');
-                Menu::register(route: 'settings.address-types');
-                Menu::register(route: 'settings.contact-origins');
-                Menu::register(route: 'settings.categories');
-                Menu::register(route: 'settings.tags');
-                Menu::register(route: 'settings.product-option-groups');
-                Menu::register(route: 'settings.product-properties');
-                Menu::register(route: 'settings.clients');
-                Menu::register(route: 'settings.bank-connections');
-                Menu::register(route: 'settings.countries');
-                Menu::register(route: 'settings.currencies');
-                Menu::register(route: 'settings.discount-groups');
-                Menu::register(route: 'settings.languages');
-                Menu::register(route: 'settings.ledger-accounts');
-                Menu::register(route: 'settings.logs');
-                Menu::register(route: 'settings.activity-logs');
-                Menu::register(route: 'settings.notifications');
-                Menu::register(route: 'settings.order-types');
-                Menu::register(route: 'settings.permissions');
-                Menu::register(route: 'settings.price-lists');
-                Menu::register(route: 'settings.ticket-types');
-                Menu::register(route: 'settings.translations');
-                Menu::register(route: 'settings.units');
-                Menu::register(route: 'settings.users');
-                Menu::register(route: 'settings.mail-accounts');
-                Menu::register(route: 'settings.work-time-types');
-                Menu::register(route: 'settings.vat-rates');
-                Menu::register(route: 'settings.payment-types');
-                Menu::register(route: 'settings.payment-reminder-texts');
-                Menu::register(route: 'settings.warehouses');
-                Menu::register(route: 'settings.serial-number-ranges');
-                Menu::register(route: 'settings.scheduling');
-                Menu::register(route: 'settings.queue-monitor');
-                Menu::register(route: 'settings.failed-jobs');
-                Menu::register(route: 'settings.plugins');
-            }
-        );
-    }
-
-    protected function bootPortalMenu(): void
-    {
-        Menu::register(route: 'portal.dashboard', icon: 'home', order: -9999);
-        Menu::register(route: 'portal.calendar', icon: 'calendar');
-        Menu::register(route: 'portal.products', icon: 'square-3-stack-3d');
-        Menu::register(route: 'portal.files', icon: 'folder-open');
-        Menu::register(route: 'portal.orders', icon: 'shopping-bag');
-        Menu::register(route: 'portal.tickets', icon: 'wrench-screwdriver');
-    }
-
-    protected function bootCommands(): void
-    {
-        if (! $this->app->runningInConsole()) {
-            // commands required for installation
-            $this->commands(InitEnv::class);
-            $this->commands(InitPermissions::class);
-
-            return;
-        }
-
-        $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator(__DIR__ . '/Console/Commands')
-        );
-        $commandClasses = [];
-
-        foreach ($iterator as $file) {
-            if ($file->isFile() && $file->getExtension() === 'php') {
-                $classPath = str_replace([__DIR__ . '/', '/'], ['', '\\'], $file->getPathname());
-                $classNamespace = '\\FluxErp\\';
-                $class = $classNamespace . str_replace('.php', '', $classPath);
-                $commandClasses[] = $class;
-            }
-        }
-
-        $this->commands($commandClasses);
-    }
-
-    private function bootMiddleware(): void
-    {
-        /** @var Kernel $kernel */
-        $kernel = $this->app->make(Kernel::class);
-        $kernel->prependMiddlewareToGroup('api', EnsureFrontendRequestsAreStateful::class);
-
-        $kernel->appendMiddlewareToGroup('web', Localization::class);
-        $kernel->appendMiddlewareToGroup('web', AuthContextMiddleware::class);
-        $kernel->appendMiddlewareToGroup('web', PortalMiddleware::class);
-
-        $this->app['router']->aliasMiddleware('abilities', CheckAbilities::class);
-        $this->app['router']->aliasMiddleware('role', RoleMiddleware::class);
-        $this->app['router']->aliasMiddleware('role_or_permission', RoleOrPermissionMiddleware::class);
-        $this->app['router']->aliasMiddleware('permission', Permissions::class);
-        $this->app['router']->aliasMiddleware('localization', Localization::class);
-
-        Bus::pipeThrough([app(SetJobAuthenticatedUserMiddleware::class)]);
     }
 
     private function registerExtensions(): void
@@ -765,33 +816,9 @@ class FluxServiceProvider extends ServiceProvider
         );
 
         $this->app->extend(
-            Builder::class,
-            function (Builder $scoutBuilder) {
-                if (($user = auth()->user()) instanceof User
-                    && in_array(HasClientAssignment::class, class_uses_recursive($scoutBuilder->model))
-                    && $scoutBuilder->model->isRelation('client')
-                    && ($relation = $scoutBuilder->model->client()) instanceof BelongsTo
-                ) {
-                    $clients = $user->clients()->pluck('id')->toArray() ?: Client::query()->pluck('id')->toArray();
-
-                    $scoutBuilder->whereIn($relation->getForeignKeyName(), $clients);
-                }
-
-                return $scoutBuilder;
-            }
-        );
-
-        $this->app->extend(
             'composer',
             function () {
                 return $this->app->get(Composer::class);
-            }
-        );
-
-        $this->app->extend(
-            'validator',
-            function () {
-                return $this->app->get(ValidatorFactory::class);
             }
         );
     }

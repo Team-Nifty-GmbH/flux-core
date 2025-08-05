@@ -8,7 +8,7 @@ class AddFieldsToAddressesTable extends Migration
 {
     public function up(): void
     {
-        Schema::table('addresses', function (Blueprint $table) {
+        Schema::table('addresses', function (Blueprint $table): void {
             $table->string('salutation')->nullable()->after('company');
             $table->string('zip')->nullable()->after('lastname');
             $table->string('city')->nullable()->after('zip');
@@ -19,7 +19,7 @@ class AddFieldsToAddressesTable extends Migration
 
     public function down(): void
     {
-        Schema::table('addresses', function (Blueprint $table) {
+        Schema::table('addresses', function (Blueprint $table): void {
             $table->dropColumn(['salutation', 'zip', 'city', 'street', 'url']);
         });
     }

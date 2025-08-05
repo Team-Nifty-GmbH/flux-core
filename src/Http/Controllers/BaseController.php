@@ -14,13 +14,49 @@ use Laravel\Scout\Searchable;
 
 class BaseController extends Controller
 {
-    protected object $model;
+    public function index(Request $request, string $model): JsonResponse
+    {
+        $model = app($model);
+        if ($request->filled('search') && ! in_array(Searchable::class, class_uses($model))) {
+            return ResponseHelper::createResponseFromBase(
+                statusCode: 400,
+                data: ['search' => 'Search not allowed on given model.']
+            );
+        }
+
+        $page = max((int) $request->page, 1);
+        $perPage = $request->per_page > 500 || $request->per_page < 1 ? 25 : $request->per_page;
+
+        if ($request->search) {
+            $result = ModelFilter::filterModel(
+                model: $model::class,
+                search: $request->search,
+                filter: $request->filter,
+                include: $request->include,
+                sort: $request->sort
+            );
+
+            $data = $result['data']->paginate($perPage, $page, [], $result['urlParams']);
+        } else {
+            $query = in_array(Filterable::class, class_uses_recursive($model)) ?
+                QueryBuilder::filterModel($model, $request) :
+                $model::query();
+            $data = $query->paginate($perPage)->appends($request->query());
+        }
+
+        return ResponseHelper::createResponseFromBase(
+            statusCode: 200,
+            data: $data,
+            additions: $request->search ? ['url_params' => $result['urlParams']] : null
+        )->setEncodingOptions(JSON_UNESCAPED_SLASHES);
+    }
 
     /**
      * @throws ValidationException
      */
-    public function show(string $id, Request $request): JsonResponse
+    public function show(string $id, string $model, Request $request): JsonResponse
     {
+        $model = app($model);
         $validation = [
             'include' => 'string',
         ];
@@ -36,7 +72,7 @@ class BaseController extends Controller
         $includes = [];
         if ($validated['include'] ?? false) {
             $includes = explode(',', trim($validated['include'], " \t\n\r\0\x0B,"));
-            $allowedIncludes = array_diff(array_keys($this->model->relationships()), ['additionalColumns']);
+            $allowedIncludes = array_diff(array_keys($model->relationships()), ['additionalColumns']);
             $notAllowedIncludes = array_diff($includes, $allowedIncludes);
 
             if (count($notAllowedIncludes) > 0) {
@@ -50,7 +86,7 @@ class BaseController extends Controller
             }
         }
 
-        $instance = $this->model::query()
+        $instance = $model::query()
             ->whereKey($id)
             ->when($validated['include'] ?? false, function ($query) use ($includes) {
                 return $query->with($includes);
@@ -63,41 +99,5 @@ class BaseController extends Controller
 
         return ResponseHelper::createResponseFromBase(statusCode: 200, data: $instance)
             ->setEncodingOptions(JSON_UNESCAPED_SLASHES);
-    }
-
-    public function index(Request $request): JsonResponse
-    {
-        if ($request->filled('search') && ! in_array(Searchable::class, class_uses($this->model))) {
-            return ResponseHelper::createResponseFromBase(
-                statusCode: 400,
-                data: ['search' => 'Search not allowed on given model.']
-            );
-        }
-
-        $page = max((int) $request->page, 1);
-        $perPage = $request->per_page > 500 || $request->per_page < 1 ? 25 : $request->per_page;
-
-        if ($request->search) {
-            $result = ModelFilter::filterModel(
-                model: $this->model::class,
-                search: $request->search,
-                filter: $request->filter,
-                include: $request->include,
-                sort: $request->sort
-            );
-
-            $data = $result['data']->paginate($perPage, $page, [], $result['urlParams']);
-        } else {
-            $query = in_array(Filterable::class, class_uses_recursive($this->model)) ?
-                QueryBuilder::filterModel($this->model, $request) :
-                $this->model::query();
-            $data = $query->paginate($perPage)->appends($request->query());
-        }
-
-        return ResponseHelper::createResponseFromBase(
-            statusCode: 200,
-            data: $data,
-            additions: $request->search ? ['url_params' => $result['urlParams']] : null
-        )->setEncodingOptions(JSON_UNESCAPED_SLASHES);
     }
 }

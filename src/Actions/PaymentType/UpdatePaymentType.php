@@ -7,18 +7,17 @@ use FluxErp\Models\PaymentType;
 use FluxErp\Rulesets\PaymentType\UpdatePaymentTypeRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Validator;
 
 class UpdatePaymentType extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdatePaymentTypeRuleset::class;
-    }
-
     public static function models(): array
     {
         return [PaymentType::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdatePaymentTypeRuleset::class;
     }
 
     public function performAction(): Model
@@ -39,7 +38,7 @@ class UpdatePaymentType extends FluxAction
         return $paymentType->withoutRelations()->fresh();
     }
 
-    protected function validateData(): void
+    protected function prepareForValidation(): void
     {
         if (($this->data['is_default'] ?? false)
             && ! resolve_static(PaymentType::class, 'query')
@@ -49,10 +48,5 @@ class UpdatePaymentType extends FluxAction
         ) {
             $this->rules['is_default'] .= '|accepted';
         }
-
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(PaymentType::class));
-
-        $this->data = $validator->validate();
     }
 }

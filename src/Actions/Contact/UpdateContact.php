@@ -9,25 +9,25 @@ use FluxErp\Models\PaymentType;
 use FluxErp\Rulesets\Contact\UpdateContactRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 class UpdateContact extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateContactRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Contact::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateContactRuleset::class;
     }
 
     public function performAction(): Model
     {
         $discountGroups = Arr::pull($this->data, 'discount_groups');
         $discounts = Arr::pull($this->data, 'discounts');
+        $industries = Arr::pull($this->data, 'industries');
 
         $contact = resolve_static(Contact::class, 'query')
             ->whereKey($this->data['id'])
@@ -69,6 +69,10 @@ class UpdateContact extends FluxAction
             $contact->discountGroups()->sync($discountGroups);
         }
 
+        if (! is_null($industries)) {
+            $contact->industries()->sync($industries);
+        }
+
         return $contact->withoutRelations()->fresh();
     }
 
@@ -84,10 +88,7 @@ class UpdateContact extends FluxAction
 
     protected function validateData(): void
     {
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(Contact::class));
-
-        $this->data = $validator->validate();
+        parent::validateData();
 
         $errors = [];
 

@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('stock_postings', function (Blueprint $table) {
+        Schema::table('stock_postings', function (Blueprint $table): void {
             $table->foreignId('parent_id')
                 ->nullable()
                 ->after('product_id')
@@ -32,7 +32,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('stock_postings', function (Blueprint $table) {
+        Schema::table('stock_postings', function (Blueprint $table): void {
             $table->dropForeign(['parent_id']);
             $table->dropForeign(['order_position_id']);
             $table->dropForeign(['serial_number_id']);

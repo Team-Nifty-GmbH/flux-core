@@ -6,23 +6,9 @@ use Laravel\Dusk\Browser;
 
 class LoginTest extends PortalDuskTestCase
 {
-    public function test_login_wrong_credentials()
+    public function test_login_successful(): void
     {
-        $this->browse(function (Browser $browser) {
-            $browser
-                ->visit($this->baseUrl())
-                ->assertSee('For more transparency, quality and speed in all service processes')
-                ->type('email', 'user@usertest.de')
-                ->type('password', 'testpassword')
-                ->press('Login')
-                ->waitForText('Login failed')
-                ->assertSee('Login failed');
-        });
-    }
-
-    public function test_login_successful()
-    {
-        $this->browse(function (Browser $browser) {
+        $this->browse(function (Browser $browser): void {
             $browser
                 ->visit($this->baseUrl())
                 ->assertSee(__('For more transparency, quality and speed in all service processes'))
@@ -37,6 +23,20 @@ class LoginTest extends PortalDuskTestCase
 
             $browser->waitForText($this->user->name)
                 ->assertSee($this->user->name);
+        });
+    }
+
+    public function test_login_wrong_credentials(): void
+    {
+        $this->browse(function (Browser $browser): void {
+            $browser
+                ->visit($this->baseUrl())
+                ->assertSee('For more transparency, quality and speed in all service processes')
+                ->type('email', 'user@usertest.de')
+                ->type('password', 'testpassword')
+                ->press('Login')
+                ->waitForText('Login failed')
+                ->assertSee('Login failed');
         });
     }
 }

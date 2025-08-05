@@ -10,18 +10,17 @@ use FluxErp\Rulesets\Task\UpdateTaskRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Validator;
 
 class UpdateTask extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return UpdateTaskRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Task::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return UpdateTaskRuleset::class;
     }
 
     public function performAction(): Model
@@ -71,13 +70,5 @@ class UpdateTask extends FluxAction
         $task->save();
 
         return $task->withoutRelations()->fresh();
-    }
-
-    protected function validateData(): void
-    {
-        $validator = Validator::make($this->data, $this->rules);
-        $validator->addModel(app(Task::class));
-
-        $this->data = $validator->validated();
     }
 }

@@ -8,9 +8,9 @@ use FluxErp\Rulesets\FluxRuleset;
 
 class DeletePurchaseInvoicePositionRuleset extends FluxRuleset
 {
-    protected static ?string $model = PurchaseInvoicePosition::class;
-
     protected static bool $addAdditionalColumnRules = false;
+
+    protected static ?string $model = PurchaseInvoicePosition::class;
 
     public function rules(): array
     {

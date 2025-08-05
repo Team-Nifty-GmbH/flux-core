@@ -3,10 +3,11 @@
 namespace FluxErp\Livewire\Widgets;
 
 use FluxErp\Contracts\HasWidgetOptions;
+use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\Order\OrderList;
+use FluxErp\Livewire\Support\Widgets\ValueBox;
 use FluxErp\Models\Order;
 use FluxErp\States\Order\DeliveryState\Open;
-use FluxErp\Support\Widgets\ValueBox;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Renderless;
 use Livewire\Livewire;
@@ -16,12 +17,9 @@ class OpenDeliveries extends ValueBox implements HasWidgetOptions
 {
     public bool $shouldBePositive = false;
 
-    protected function getListeners(): array
+    public static function dashboardComponent(): array|string
     {
-        return [
-            'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
-                . ',.OrderLocked' => 'calculateSum',
-        ];
+        return Dashboard::class;
     }
 
     #[Renderless]
@@ -59,5 +57,18 @@ class OpenDeliveries extends ValueBox implements HasWidgetOptions
             ->store();
 
         $this->redirectRoute('orders.orders', navigate: true);
+    }
+
+    protected function getListeners(): array
+    {
+        return [
+            'echo-private:' . resolve_static(Order::class, 'getBroadcastChannel')
+                . ',.OrderLocked' => 'calculateSum',
+        ];
+    }
+
+    protected function icon(): string
+    {
+        return 'truck';
     }
 }

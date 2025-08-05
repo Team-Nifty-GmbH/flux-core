@@ -11,7 +11,6 @@ use FluxErp\Rulesets\OrderPosition\CreateOrderPositionRuleset;
 use FluxErp\Rulesets\OrderPosition\FillOrderPositionsRuleset;
 use FluxErp\Rulesets\OrderPosition\UpdateOrderPositionRuleset;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -19,9 +18,9 @@ use Illuminate\Validation\ValidationException;
 
 class FillOrderPositions extends FluxAction
 {
-    protected function getRulesets(): string|array
+    public static function models(): array
     {
-        return FillOrderPositionsRuleset::class;
+        return [OrderPosition::class, Order::class];
     }
 
     public static function name(): string
@@ -29,9 +28,9 @@ class FillOrderPositions extends FluxAction
         return 'order-position.fill-multiple';
     }
 
-    public static function models(): array
+    protected function getRulesets(): string|array
     {
-        return [OrderPosition::class, Order::class];
+        return FillOrderPositionsRuleset::class;
     }
 
     public function performAction(): array
@@ -116,6 +115,156 @@ class FillOrderPositions extends FluxAction
         }
 
         $this->data['order_positions'] = $orderPositions;
+    }
+
+    private function fillOrderPosition(array $data, bool $simulate, ?int $parentId = null): array
+    {
+        $originalChildren = Arr::pull($data, 'children', []);
+
+        if (is_int($data['id'] ?? false)) {
+            $orderPosition = resolve_static(OrderPosition::class, 'query')
+                ->whereKey($data['id'])
+                ->first();
+
+            $orderPosition->fill($data);
+        } else {
+            $orderPosition = app(OrderPosition::class, ['attributes' => $data]);
+        }
+
+        // If parentId !== null, set parent_id
+        if ($parentId) {
+            $orderPosition->parent_id = $parentId;
+        }
+
+        // Fill product info if not already filled
+        if ($orderPosition->product) {
+            $orderPosition->ean_code = $orderPosition->ean_code ?: $orderPosition->product->ean;
+            $orderPosition->unit_gram_weight = $orderPosition->unit_gram_weight ?:
+                $orderPosition->product->weight_gram;
+            $orderPosition->product_number = $orderPosition->product_number ?:
+                $orderPosition->product->product_number;
+        }
+
+        // Fill prices if not already filled
+        if (! $orderPosition->is_free_text && is_null($orderPosition->vat_price)) {
+            PriceCalculation::make($orderPosition, $data)->calculate();
+        }
+
+        // If simulate = false, save order position, keep track of saved ids
+        if (! $simulate) {
+            $discounts = $orderPosition->discounts;
+            unset($orderPosition->discounts);
+            $orderPosition->save();
+
+            $existingDiscounts = $discounts->filter(fn ($discount) => $discount['id'] ?? false)->toArray();
+            $newDiscounts = $discounts->filter(fn ($discount) => ! ($discount['id'] ?? false))->toArray();
+
+            $orderPosition->discounts()->whereIntegerNotInRaw('id', array_column($existingDiscounts, 'id'))->delete();
+            $orderPosition->discounts()->createMany($newDiscounts);
+            foreach ($existingDiscounts as $discount) {
+                $orderPosition->discounts()->whereKey($discount['id'])->update($discount);
+            }
+
+            $ids = [$orderPosition->id];
+        }
+
+        // Create Children
+        $children = app(OrderPosition::class)->newCollection();
+        foreach ($originalChildren as $child) {
+            if ($child['is_bundle_position']) {
+                $child['amount'] = bcmul($child['amount_bundle'], $orderPosition->amount);
+            }
+
+            $filled = $this->fillOrderPosition($child, $simulate, $orderPosition->id);
+
+            $children->push($filled['orderPositions']);
+            if (! $simulate) {
+                $ids = array_merge($ids, $filled['ids']);
+            }
+        }
+
+        // Fill bundle positions if not already exists
+        if ($orderPosition->product?->is_bundle && ! $originalChildren) {
+            foreach ($orderPosition->product->bundleProducts as $index => $bundleProduct) {
+                $position = app(OrderPosition::class, [
+                    'attributes' => [
+                        'client_id' => $orderPosition->client_id,
+                        'order_id' => $orderPosition->order_id,
+                        'parent_id' => $orderPosition->id,
+                        'product_id' => $bundleProduct->id,
+                        'amount' => bcmul($bundleProduct->pivot->count, $orderPosition->amount),
+                        'ean_code' => $bundleProduct->ean,
+                        'unit_gram_weight' => $bundleProduct->weight_gram,
+                        'description' => $bundleProduct->description,
+                        'name' => $bundleProduct->name,
+                        'product_number' => $bundleProduct->product_number,
+                        'sort_number' => $orderPosition->sort_number + $index,
+                        'is_free_text' => true,
+                        'is_bundle_position' => true,
+                    ],
+                ]);
+
+                // Save bundle position and keep track of saved ids
+                if (! $simulate) {
+                    $position->save();
+
+                    $ids[] = $position->id;
+                }
+
+                $children->push($position->withoutRelations());
+            }
+        }
+
+        $orderPosition->setRelation('children', $children);
+
+        $loadedRelations = $orderPosition->getRelations();
+        $orderPosition = $orderPosition->toArray();
+
+        foreach ($loadedRelations as $key => $loadedRelation) {
+            unset($orderPosition[$key]);
+        }
+
+        return [
+            'orderPositions' => array_merge($orderPosition, ['children' => $children->toArray()]),
+            'ids' => $ids ?? [],
+        ];
+    }
+
+    private function validateBundlePositions(array $bundlePositions): array
+    {
+        $errors = [];
+        foreach ($bundlePositions as $key => $bundlePosition) {
+            // Bundle positions must have a product_id, an amount and no prices
+            $validator = Validator::make($bundlePosition, [
+                'product_id' => 'required|integer|exists:products,id,deleted_at,NULL',
+                'amount' => [
+                    'required',
+                    new Numeric(),
+                ],
+
+                'unit_gross_price' => ['sometimes', Rule::in([null])],
+                'unit_net_price' => ['sometimes', Rule::in([null])],
+                'total_gross_price' => ['sometimes', Rule::in([null])],
+                'total_net_price' => ['sometimes', Rule::in([null])],
+                'total_base_gross_price' => ['sometimes', Rule::in([null])],
+                'total_base_net_price' => ['sometimes', Rule::in([null])],
+                'discount_percentage' => ['sometimes', Rule::in([null])],
+                'margin' => ['sometimes', Rule::in([null])],
+                'provision' => ['sometimes', Rule::in([null])],
+                'vat_price' => ['sometimes', Rule::in([null])],
+                'vat_rate_percentage' => ['sometimes', Rule::in([null])],
+                'vat_rate_id' => ['sometimes', Rule::in([null])],
+
+                'is_free_text' => 'required|boolean|accepted',
+                'is_bundle_position' => 'required|boolean|accepted',
+            ]);
+
+            if ($validator->fails()) {
+                $errors[$key] = $validator->errors()->toArray();
+            }
+        }
+
+        return $errors;
     }
 
     private function validateOrderPosition(array $orderPosition, array $rules, ?array $parent = null): array
@@ -323,156 +472,6 @@ class FillOrderPositions extends FluxAction
         return [
             'errors' => array_filter($errors),
             'validated' => $validated,
-        ];
-    }
-
-    private function validateBundlePositions(array $bundlePositions): array
-    {
-        $errors = [];
-        foreach ($bundlePositions as $key => $bundlePosition) {
-            // Bundle positions must have a product_id, an amount and no prices
-            $validator = Validator::make($bundlePosition, [
-                'product_id' => 'required|integer|exists:products,id,deleted_at,NULL',
-                'amount' => [
-                    'required',
-                    new Numeric(),
-                ],
-
-                'unit_gross_price' => ['sometimes', Rule::in([null])],
-                'unit_net_price' => ['sometimes', Rule::in([null])],
-                'total_gross_price' => ['sometimes', Rule::in([null])],
-                'total_net_price' => ['sometimes', Rule::in([null])],
-                'total_base_gross_price' => ['sometimes', Rule::in([null])],
-                'total_base_net_price' => ['sometimes', Rule::in([null])],
-                'discount_percentage' => ['sometimes', Rule::in([null])],
-                'margin' => ['sometimes', Rule::in([null])],
-                'provision' => ['sometimes', Rule::in([null])],
-                'vat_price' => ['sometimes', Rule::in([null])],
-                'vat_rate_percentage' => ['sometimes', Rule::in([null])],
-                'vat_rate_id' => ['sometimes', Rule::in([null])],
-
-                'is_free_text' => 'required|boolean|accepted',
-                'is_bundle_position' => 'required|boolean|accepted',
-            ]);
-
-            if ($validator->fails()) {
-                $errors[$key] = $validator->errors()->toArray();
-            }
-        }
-
-        return $errors;
-    }
-
-    private function fillOrderPosition(array $data, bool $simulate, ?int $parentId = null): array
-    {
-        $originalChildren = Arr::pull($data, 'children', []);
-
-        if (is_int($data['id'] ?? false)) {
-            $orderPosition = resolve_static(OrderPosition::class, 'query')
-                ->whereKey($data['id'])
-                ->first();
-
-            $orderPosition->fill($data);
-        } else {
-            $orderPosition = app(OrderPosition::class, ['attributes' => $data]);
-        }
-
-        // If parentId !== null, set parent_id
-        if ($parentId) {
-            $orderPosition->parent_id = $parentId;
-        }
-
-        // Fill product info if not already filled
-        if ($orderPosition->product) {
-            $orderPosition->ean_code = $orderPosition->ean_code ?: $orderPosition->product->ean;
-            $orderPosition->unit_gram_weight = $orderPosition->unit_gram_weight ?:
-                $orderPosition->product->weight_gram;
-            $orderPosition->product_number = $orderPosition->product_number ?:
-                $orderPosition->product->product_number;
-        }
-
-        // Fill prices if not already filled
-        if (! $orderPosition->is_free_text && is_null($orderPosition->vat_price)) {
-            PriceCalculation::fill($orderPosition, $data);
-        }
-
-        // If simulate = false, save order position, keep track of saved ids
-        if (! $simulate) {
-            $discounts = $orderPosition->discounts;
-            unset($orderPosition->discounts);
-            $orderPosition->save();
-
-            $existingDiscounts = $discounts->filter(fn ($discount) => $discount['id'] ?? false)->toArray();
-            $newDiscounts = $discounts->filter(fn ($discount) => ! ($discount['id'] ?? false))->toArray();
-
-            $orderPosition->discounts()->whereIntegerNotInRaw('id', array_column($existingDiscounts, 'id'))->delete();
-            $orderPosition->discounts()->createMany($newDiscounts);
-            foreach ($existingDiscounts as $discount) {
-                $orderPosition->discounts()->whereKey($discount['id'])->update($discount);
-            }
-
-            $ids = [$orderPosition->id];
-        }
-
-        // Create Children
-        $children = Collection::make();
-        foreach ($originalChildren as $child) {
-            if ($child['is_bundle_position']) {
-                $child['amount'] = bcmul($child['amount_bundle'], $orderPosition->amount);
-            }
-
-            $filled = $this->fillOrderPosition($child, $simulate, $orderPosition->id);
-
-            $children->push($filled['orderPositions']);
-            if (! $simulate) {
-                $ids = array_merge($ids, $filled['ids']);
-            }
-        }
-
-        // Fill bundle positions if not already exists
-        if ($orderPosition->product?->is_bundle && ! $originalChildren) {
-            foreach ($orderPosition->product->bundleProducts as $index => $bundleProduct) {
-                $position = app(OrderPosition::class, [
-                    'attributes' => [
-                        'client_id' => $orderPosition->client_id,
-                        'order_id' => $orderPosition->order_id,
-                        'parent_id' => $orderPosition->id,
-                        'product_id' => $bundleProduct->id,
-                        'amount' => bcmul($bundleProduct->pivot->count, $orderPosition->amount),
-                        'ean_code' => $bundleProduct->ean,
-                        'unit_gram_weight' => $bundleProduct->weight_gram,
-                        'description' => $bundleProduct->description,
-                        'name' => $bundleProduct->name,
-                        'product_number' => $bundleProduct->product_number,
-                        'sort_number' => $orderPosition->sort_number + $index,
-                        'is_free_text' => true,
-                        'is_bundle_position' => true,
-                    ],
-                ]);
-
-                // Save bundle position and keep track of saved ids
-                if (! $simulate) {
-                    $position->save();
-
-                    $ids[] = $position->id;
-                }
-
-                $children->push($position->withoutRelations());
-            }
-        }
-
-        $orderPosition->setRelation('children', $children);
-
-        $loadedRelations = $orderPosition->getRelations();
-        $orderPosition = $orderPosition->toArray();
-
-        foreach ($loadedRelations as $key => $loadedRelation) {
-            unset($orderPosition[$key]);
-        }
-
-        return [
-            'orderPositions' => array_merge($orderPosition, ['children' => $children->toArray()]),
-            'ids' => $ids ?? [],
         ];
     }
 }

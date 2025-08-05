@@ -2,6 +2,7 @@
 
 namespace FluxErp\Tests\Feature\Api;
 
+use FluxErp\Enums\BundleTypeEnum;
 use FluxErp\Models\Client;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Product;
@@ -11,28 +12,25 @@ use FluxErp\Models\ProductProperty;
 use FluxErp\Models\Unit;
 use FluxErp\Models\VatRate;
 use FluxErp\Tests\Feature\BaseSetup;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
 class ProductTest extends BaseSetup
 {
-    use DatabaseTransactions;
-
     private Collection $clients;
 
-    private Collection $products;
-
-    private Collection $vatRates;
-
-    private Collection $units;
-
-    private Collection $productProperties;
+    private array $permissions;
 
     private Collection $productOptions;
 
-    private array $permissions;
+    private Collection $productProperties;
+
+    private Collection $products;
+
+    private Collection $units;
+
+    private Collection $vatRates;
 
     protected function setUp(): void
     {
@@ -68,50 +66,7 @@ class ProductTest extends BaseSetup
         ];
     }
 
-    public function test_get_product()
-    {
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/products/' . $this->products[0]->id);
-        $response->assertStatus(200);
-
-        $product = json_decode($response->getContent())->data;
-
-        $this->assertEquals($this->products[0]->id, $product->id);
-        $this->assertEquals($this->products[0]->name, $product->name);
-        $this->assertEquals($this->products[0]->description, $product->description);
-        $this->assertEquals($this->products[0]->vat_rate_id, $product->vat_rate_id);
-        $this->assertEquals($this->products[0]->unit_id, $product->unit_id);
-    }
-
-    public function test_get_product_product_not_found()
-    {
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/products/' . $this->products[2]->id + 10000);
-        $response->assertStatus(404);
-    }
-
-    public function test_get_products()
-    {
-        $this->user->givePermissionTo($this->permissions['index']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->get('/api/products');
-        $response->assertStatus(200);
-
-        $products = json_decode($response->getContent())->data;
-
-        $this->assertEquals($products->data[0]->id, $this->products[0]->id);
-        $this->assertEquals($products->data[0]->name, $this->products[0]->name);
-        $this->assertEquals($products->data[0]->description, $this->products[0]->description);
-        $this->assertEquals($products->data[0]->vat_rate_id, $this->products[0]->vat_rate_id);
-        $this->assertEquals($products->data[0]->unit_id, $this->products[0]->unit_id);
-    }
-
-    public function test_create_product()
+    public function test_create_product(): void
     {
         $defaultVatRate = VatRate::factory()
             ->create([
@@ -168,7 +123,7 @@ class ProductTest extends BaseSetup
         $this->assertFalse($dbProduct->is_active_export_to_web_shop);
     }
 
-    public function test_create_product_maximum()
+    public function test_create_product_maximum(): void
     {
         $product = [
             'name' => Str::random(),
@@ -178,6 +133,7 @@ class ProductTest extends BaseSetup
             'purchase_unit_id' => $this->units[1]->id,
             'reference_unit_id' => $this->units[2]->id,
             'product_number' => Str::random(),
+            'bundle_type_enum' => BundleTypeEnum::Standard->value,
             'description' => Str::random(),
             'weight_gram' => rand(1, 1000),
             'dimension_length_mm' => rand(1, 1000),
@@ -269,7 +225,7 @@ class ProductTest extends BaseSetup
         );
     }
 
-    public function test_create_product_validation_fails()
+    public function test_create_product_validation_fails(): void
     {
         $product = [
             'name' => rand(1, 999),
@@ -282,7 +238,82 @@ class ProductTest extends BaseSetup
         $response->assertStatus(422);
     }
 
-    public function test_update_product()
+    public function test_delete_product(): void
+    {
+        $this->user->givePermissionTo($this->permissions['delete']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->delete('/api/products/' . $this->products[0]->id);
+        $response->assertStatus(204);
+
+        $this->assertFalse(Product::query()->whereKey($this->products[0]->id)->exists());
+    }
+
+    public function test_delete_product_product_has_children(): void
+    {
+        $this->products[1]->parent_id = $this->products[2]->id;
+        $this->products[1]->save();
+
+        $this->user->givePermissionTo($this->permissions['delete']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->delete('/api/products/' . $this->products[2]->id);
+        $response->assertStatus(423);
+    }
+
+    public function test_delete_product_product_not_found(): void
+    {
+        $this->user->givePermissionTo($this->permissions['delete']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->delete('/api/products/' . ++$this->products[2]->id);
+        $response->assertStatus(404);
+    }
+
+    public function test_get_product(): void
+    {
+        $this->user->givePermissionTo($this->permissions['show']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->get('/api/products/' . $this->products[0]->id);
+        $response->assertStatus(200);
+
+        $product = json_decode($response->getContent())->data;
+
+        $this->assertEquals($this->products[0]->id, $product->id);
+        $this->assertEquals($this->products[0]->name, $product->name);
+        $this->assertEquals($this->products[0]->description, $product->description);
+        $this->assertEquals($this->products[0]->vat_rate_id, $product->vat_rate_id);
+        $this->assertEquals($this->products[0]->unit_id, $product->unit_id);
+    }
+
+    public function test_get_product_product_not_found(): void
+    {
+        $this->user->givePermissionTo($this->permissions['show']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->get('/api/products/' . $this->products[2]->id + 10000);
+        $response->assertStatus(404);
+    }
+
+    public function test_get_products(): void
+    {
+        $this->user->givePermissionTo($this->permissions['index']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this->actingAs($this->user)->get('/api/products');
+        $response->assertStatus(200);
+
+        $products = json_decode($response->getContent())->data;
+
+        $this->assertEquals($products->data[0]->id, $this->products[0]->id);
+        $this->assertEquals($products->data[0]->name, $this->products[0]->name);
+        $this->assertEquals($products->data[0]->description, $this->products[0]->description);
+        $this->assertEquals($products->data[0]->vat_rate_id, $this->products[0]->vat_rate_id);
+        $this->assertEquals($products->data[0]->unit_id, $this->products[0]->unit_id);
+    }
+
+    public function test_update_product(): void
     {
         $this->products[0]->bundleProducts()->sync([$this->products[1]->id => ['count' => rand()]]);
         $this->products[0]->is_bundle = true;
@@ -366,7 +397,7 @@ class ProductTest extends BaseSetup
         $this->assertFalse($dbProduct->bundleProducts()->exists());
     }
 
-    public function test_update_products()
+    public function test_update_products(): void
     {
         $products = [
             [
@@ -385,7 +416,7 @@ class ProductTest extends BaseSetup
         $response = $this->actingAs($this->user)->put('/api/products', $products);
         $response->assertStatus(200);
 
-        $responses = json_decode($response->getContent())->responses;
+        $responses = json_decode($response->getContent())->data->items;
 
         $this->assertEquals($products[0]['id'], $responses[0]->data->id);
         $this->assertEquals($products[0]['name'], $responses[0]->data->name);
@@ -445,37 +476,5 @@ class ProductTest extends BaseSetup
             $this->products[1]->is_active_export_to_web_shop,
             $responses[1]->data->is_active_export_to_web_shop
         );
-    }
-
-    public function test_delete_product()
-    {
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->delete('/api/products/' . $this->products[0]->id);
-        $response->assertStatus(204);
-
-        $this->assertFalse(Product::query()->whereKey($this->products[0]->id)->exists());
-    }
-
-    public function test_delete_product_product_not_found()
-    {
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->delete('/api/products/' . ++$this->products[2]->id);
-        $response->assertStatus(404);
-    }
-
-    public function test_delete_product_product_has_children()
-    {
-        $this->products[1]->parent_id = $this->products[2]->id;
-        $this->products[1]->save();
-
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->delete('/api/products/' . $this->products[2]->id);
-        $response->assertStatus(423);
     }
 }

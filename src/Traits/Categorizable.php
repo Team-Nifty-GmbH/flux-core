@@ -7,7 +7,6 @@ use FluxErp\Rules\ModelExists;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Arr;
@@ -23,17 +22,44 @@ trait Categorizable
 
     public static function bootCategorizable(): void
     {
-        static::saving(function (Model $model) {
+        static::saving(function (Model $model): void {
             // before saving remove virtual attributes
             $model->sanitize();
         });
 
-        static::saved(function (Model $model) {
+        static::saved(function (Model $model): void {
             // after saving attach the attributes
             if (! is_null(static::$categoryIds)) {
                 $model->categories()->sync(static::$categoryIds);
             }
         });
+    }
+
+    public function categories(): MorphToMany
+    {
+        return $this->morphToMany(Category::class, 'categorizable')
+            ->using(\FluxErp\Models\Pivots\Categorizable::class);
+    }
+
+    public function category(): MorphToMany|BelongsTo
+    {
+        return $this->hasCategoryIdAttribute() ? $this->belongsTo(Category::class) : $this->categories();
+    }
+
+    /**
+     * returns the first category id if only one category is assigned
+     * if set is used the category id is set into a static variable
+     */
+    public function categoryId(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $this->hasCategoryIdAttribute()
+                ? $value
+                : ($this->categories()->count() === 1 ? $this->categories()->first()?->id : null),
+            set: fn ($value) => $this->hasCategoryIdAttribute()
+                ? $value
+                : static::$categoryIds = $value
+        );
     }
 
     /**
@@ -58,30 +84,18 @@ trait Categorizable
         $this->mergeFillable(array_merge($unguarded, ['category_id', 'categories']));
     }
 
-    public function categories(): MorphToMany
-    {
-        return $this->morphToMany(Category::class, 'categorizable')
-            ->using(\FluxErp\Models\Pivots\Categorizable::class);
-    }
-
-    public function category(): MorphToMany|BelongsTo
-    {
-        return $this->hasCategoryIdAttribute() ? $this->belongsTo(Category::class) : $this->categories();
-    }
-
-    public function getFirstCategory(): HasOne
-    {
-        return $this->hasOne(Category::class, 'id', 'category_id');
-    }
-
     /**
      * intercept the set method on the categories model.
      * this saves the validated categories for later in a static variable
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function setCategoriesAttribute(array $value): void
+    public function setCategoriesAttribute(?array $value = null): void
     {
+        if (is_null($value)) {
+            return;
+        }
+
         if (! empty($value) && array_is_list($value) && is_array($value[0])) {
             $value = Arr::pluck($value, 'id');
         }
@@ -104,22 +118,6 @@ trait Categorizable
         }
 
         self::$categoryIds = $validator->validated();
-    }
-
-    /**
-     * returns the first category id if only one category is assigned
-     * if set is used the category id is set into a static variable
-     */
-    public function categoryId(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => $this->hasCategoryIdAttribute()
-                ? $value
-                : ($this->categories()->count() === 1 ? $this->categories()->first()?->id : null),
-            set: fn ($value) => $this->hasCategoryIdAttribute()
-                ? $value
-                : self::$categoryIds = $value
-        );
     }
 
     /**

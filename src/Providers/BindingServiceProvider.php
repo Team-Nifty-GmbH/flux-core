@@ -22,6 +22,16 @@ use Spatie\MediaLibrary\Support\UrlGenerator\DefaultUrlGenerator;
 
 class BindingServiceProvider extends ServiceProvider implements DeferrableProvider
 {
+    public function provides(): array
+    {
+        return [
+            Registry::class,
+            'datatype.registry',
+            DefaultUrlGenerator::class,
+            StatefulGuard::class,
+        ];
+    }
+
     public function register(): void
     {
         $this->app->bind(StatefulGuard::class, fn () => Auth::guard('web'));
@@ -50,15 +60,5 @@ class BindingServiceProvider extends ServiceProvider implements DeferrableProvid
         });
 
         $this->app->alias(Registry::class, 'datatype.registry');
-    }
-
-    public function provides(): array
-    {
-        return [
-            Registry::class,
-            'datatype.registry',
-            DefaultUrlGenerator::class,
-            StatefulGuard::class,
-        ];
     }
 }

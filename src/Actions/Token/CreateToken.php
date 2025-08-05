@@ -5,23 +5,30 @@ namespace FluxErp\Actions\Token;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Token;
 use FluxErp\Rulesets\Token\CreateTokenRuleset;
+use Illuminate\Support\Arr;
 
 class CreateToken extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateTokenRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Token::class];
     }
 
-    public function performAction(): mixed
+    protected function getRulesets(): string|array
     {
+        return CreateTokenRuleset::class;
+    }
+
+    public function performAction(): Token
+    {
+        $permissions = Arr::pull($this->data, 'permissions');
+
         $token = app(Token::class, ['attributes' => $this->data]);
         $token->save();
+
+        if ($permissions) {
+            $token->givePermissionTo($permissions);
+        }
 
         $plainTextToken = $token->createToken(
             $this->getData('name'),
@@ -30,7 +37,7 @@ class CreateToken extends FluxAction
         )->plainTextToken;
 
         $token = $token->fresh();
-        $token->token = $plainTextToken;
+        $token->plain_text_token = $plainTextToken;
 
         return $token;
     }

@@ -2,13 +2,20 @@
 
 namespace FluxErp\Traits;
 
+use Closure;
+
 trait Printable
 {
     public static array $registeredPrintViews = [];
 
-    public static function registerPrintView(string $name, \Closure|string $viewClass): void
+    public static function registerPrintView(string $name, Closure|string $viewClass): void
     {
         static::$registeredPrintViews[$name] = $viewClass;
+    }
+
+    public function getAvailableViews(): array
+    {
+        return array_keys(array_merge($this->getPrintViews(), static::$registeredPrintViews));
     }
 
     public function getPrintViews(): array
@@ -16,9 +23,9 @@ trait Printable
         return [];
     }
 
-    public function getAvailableViews(): array
+    public function print(): \FluxErp\Printing\Printable
     {
-        return array_keys(array_merge($this->getPrintViews(), static::$registeredPrintViews));
+        return new \FluxErp\Printing\Printable($this);
     }
 
     public function resolvePrintViews(): array
@@ -30,17 +37,12 @@ trait Printable
                 continue;
             }
 
-            if ($view instanceof \Closure) {
+            if ($view instanceof Closure) {
                 $resolvedClosure = $view($this);
                 $printViews[$name] = $resolvedClosure ?: null;
             }
         }
 
         return array_filter($printViews);
-    }
-
-    public function print(): \FluxErp\Printing\Printable
-    {
-        return new \FluxErp\Printing\Printable($this);
     }
 }

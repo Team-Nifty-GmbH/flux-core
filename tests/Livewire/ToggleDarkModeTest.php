@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class ToggleDarkModeTest extends TestCase
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(ToggleDarkMode::class)
             ->assertStatus(200);

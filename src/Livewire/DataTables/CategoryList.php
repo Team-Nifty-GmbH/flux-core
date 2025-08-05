@@ -8,17 +8,24 @@ use Illuminate\Support\Arr;
 
 class CategoryList extends BaseDataTable
 {
-    protected string $model = Category::class;
-
     public array $enabledCols = [
         'name',
         'model_type',
         'is_active',
     ];
 
+    protected string $model = Category::class;
+
     protected function getBuilder(Builder $builder): Builder
     {
         return $builder->whereNull('parent_id')->with('children');
+    }
+
+    protected function getLeftAppends(): array
+    {
+        return [
+            'name' => 'indentation',
+        ];
     }
 
     protected function getResultFromQuery(Builder $query): array
@@ -41,12 +48,5 @@ class CategoryList extends BaseDataTable
         }
 
         return $tree;
-    }
-
-    protected function getLeftAppends(): array
-    {
-        return [
-            'name' => 'indentation',
-        ];
     }
 }

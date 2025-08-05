@@ -1,4 +1,5 @@
-import {v4 as uuidv4} from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
+import { destroy } from 'filepond';
 
 export default function folders(
     getTreePromise,
@@ -7,9 +8,10 @@ export default function folders(
     multiSelect = false,
     nameAttribute = 'label',
     childrenAttribute = 'children',
+    parentIdAttribute = 'parent_id',
     selectedCallback = null,
     checkedCallback = null,
-    searchAttributes = null
+    searchAttributes = null,
 ) {
     return {
         checked: checked,
@@ -23,10 +25,13 @@ export default function folders(
         multiSelect: multiSelect,
         nameAttribute: nameAttribute,
         childrenAttribute: childrenAttribute,
+        parentIdAttribute: parentIdAttribute,
         selectedCallback: selectedCallback,
         checkedCallback: checkedCallback,
+
         async init() {
             await this.refresh();
+            this.checkedCallback = this.checkedCallback?.bind(this);
 
             if (typeof this.property === 'string') {
                 this.$watch(property, (newFolders) => {
@@ -67,21 +72,21 @@ export default function folders(
             }
         },
         closeFolder(node) {
-            this.openFolders = this.openFolders.filter(id => id !== node.id);
+            this.openFolders = this.openFolders.filter((id) => id !== node.id);
         },
         openAllSubfolders(node) {
             const traverse = (currentNode) => {
                 if (!this.openFolders.includes(currentNode.id)) {
                     this.openFolder(currentNode);
                 }
-                currentNode.children?.forEach(child => traverse(child));
+                currentNode.children?.forEach((child) => traverse(child));
             };
             traverse(node);
         },
         closeAllSubfolders(node) {
             const traverse = (currentNode) => {
                 this.closeFolder(currentNode);
-                currentNode.children?.forEach(child => traverse(child));
+                currentNode.children?.forEach((child) => traverse(child));
             };
             traverse(node);
         },
@@ -89,71 +94,107 @@ export default function folders(
             return this.openFolders.includes(node.id);
         },
         isLeaf(node) {
-            return !node.children || node.children.length === 0;
+            return !Array.isArray(node.children) || node.children.length === 0;
+        },
+        getNodeById(nodeId) {
+            if (!nodeId) return null;
+
+            const traverse = (nodes) => {
+                for (let i = 0; i < nodes.length; i++) {
+                    if (nodes[i].id === nodeId) {
+                        return nodes[i];
+                    }
+
+                    if (nodes[i][this.childrenAttribute]) {
+                        const found = traverse(
+                            nodes[i][this.childrenAttribute],
+                        );
+                        if (found) return found;
+                    }
+                }
+                return null;
+            };
+
+            return traverse(this.tree);
         },
         toggleCheck(node, isChecked) {
             const traverse = (currentNode, check) => {
                 if (check) {
                     if (!this.checked.includes(currentNode.id)) {
-                        this.checked.push(currentNode.id);
+                        this.check(currentNode);
                     }
                 } else {
-                    this.checked = this.checked.filter(id => id !== currentNode.id);
+                    this.unCheck(currentNode);
                 }
-                currentNode.children?.forEach(child => traverse(child, check));
+                this.$dispatch(
+                    'folder-tree-check-toggle',
+                    currentNode,
+                    isChecked,
+                );
+
+                currentNode.children?.forEach((child) =>
+                    traverse(child, check),
+                );
             };
             traverse(node, isChecked);
 
-            this.updateParentStates(node);
+            this.$dispatch('folder-tree-check-updated', this.checked);
+        },
+        unCheck(node) {
+            this.checked = this.checked.filter((id) => id !== node.id);
+            this.$dispatch('folder-tree-uncheck', node, this.checked);
+        },
+        check(node) {
+            this.checked.push(node.id);
+            this.$dispatch('folder-tree-check', node, this.checked);
         },
         isChecked(node) {
+            if (typeof this.checkedCallback === 'function') {
+                return this.checkedCallback(node);
+            }
+
             if (this.isLeaf(node)) {
                 return this.checked.includes(node.id);
             }
 
-            return (node.children || []).every(child => this.isChecked(child));
+            if (!Array.isArray(node.children)) {
+                node.children = [];
+            }
+
+            return (node.children || []).every((child) =>
+                this.isChecked(child),
+            );
         },
         isIndeterminate(node) {
             if (this.isLeaf(node)) {
                 return false; // Leaf nodes can't be indeterminate
             }
 
-            const childStates = (node.children || []).map(child => this.isChecked(child) || this.isIndeterminate(child));
-            const allChecked = childStates.every(state => state);
-            const anyChecked = childStates.some(state => state);
+            if (!Array.isArray(node.children)) {
+                node.children = [];
+            }
+            const childStates = (node.children || []).map(
+                (child) => this.isChecked(child) || this.isIndeterminate(child),
+            );
+            const allChecked = childStates.every((state) => state);
+            const anyChecked = childStates.some((state) => state);
+
             return anyChecked && !allChecked;
-        },
-        updateParentStates(node) {
-            if (!node.parent) {
-                return;
-            }
-
-            const parent = node.parent;
-            const childIds = parent.children.map(child => child.id);
-            const selectedChildren = childIds.filter(id => this.checked.includes(id));
-
-            if (selectedChildren.length === 0) {
-                this.checked = this.checked.filter(id => id !== parent.id);
-            } else if (selectedChildren.length === childIds.length) {
-                if (!this.checked.includes(parent.id)) {
-                    this.checked.push(parent.id);
-                }
-            }
-
-            this.updateParentStates(parent);
         },
         toggleSelect(node) {
             this.selected?.id === node.id ? this.unselect() : this.select(node);
+            this.$dispatch('folder-tree-select-toggle', node, this.selected);
         },
         select(node) {
-            this.$dispatch('folder-tree-select', node, this.selected);
-
             this.selected = node;
             if (this.selectedCallback) {
                 this.selectedCallback(node, this.selected);
             }
+
+            this.$dispatch('folder-tree-select', node);
         },
         unselect() {
+            this.$dispatch('folder-tree-unselect', this.selected);
             this.selected = null;
         },
         removeNode(node) {
@@ -184,10 +225,10 @@ export default function folders(
             this.unselect();
         },
         searchNodes(data, search = null) {
-            if (! Array.isArray(data) && typeof data !== 'object') {
+            if (!Array.isArray(data) && typeof data !== 'object') {
                 return [];
             }
-            
+
             if (!search) {
                 return Array.isArray(data) ? data : Object.values(data); // Convert object to array if necessary
             }
@@ -201,22 +242,29 @@ export default function folders(
                 if (Array.isArray(node[this.childrenAttribute])) {
                     filteredChildren = node[this.childrenAttribute]
                         .map(traverse)
-                        .filter(child => child !== null); // Remove non-matching children
+                        .filter((child) => child !== null); // Remove non-matching children
                 }
 
                 // Check if the current node matches the search term (in the `nameAttribute`)
-                const matches = this.getSearchAttributes().some(attribute => {
+                const matches = this.getSearchAttributes().some((attribute) => {
                     return node[attribute].toLowerCase().includes(lowerSearch);
                 });
 
                 // If the node matches, include it along with ALL its children
                 if (matches) {
-                    return { ...node, [this.childrenAttribute]: node[this.childrenAttribute] || [] };
+                    return {
+                        ...node,
+                        [this.childrenAttribute]:
+                            node[this.childrenAttribute] || [],
+                    };
                 }
 
                 // If children match but the node itself does not, include the filtered children
                 if (filteredChildren.length > 0) {
-                    return { ...node, [this.childrenAttribute]: filteredChildren };
+                    return {
+                        ...node,
+                        [this.childrenAttribute]: filteredChildren,
+                    };
                 }
 
                 return null; // Exclude non-matching nodes
@@ -225,10 +273,10 @@ export default function folders(
             // Convert data to an array if it's an object, then filter
             return (Array.isArray(data) ? data : Object.values(data))
                 .map(traverse)
-                .filter(node => node !== null); // Remove null (non-matching) nodes
+                .filter((node) => node !== null); // Remove null (non-matching) nodes
         },
         addFolder(node = null, attributes = {}) {
-            let id = uuidv4();
+            let id = attributes.id || uuidv4();
             let target = node ? node.children : this.tree;
 
             if (node) {
@@ -244,7 +292,7 @@ export default function folders(
             }
 
             attributes.id = id;
-            attributes.parent_id = node?.id ?? null;
+            attributes[this.parentIdAttribute] = node?.id ?? null;
             target.push(attributes);
 
             const newNode = target[target.length - 1];
@@ -257,14 +305,37 @@ export default function folders(
             const traverseAndUpdate = (nodes) => {
                 for (let i = 0; i < nodes.length; i++) {
                     if (nodes[i].id === attributes.id) {
+                        const nodeCopy = { ...nodes[i] };
                         Object.assign(nodes[i], attributes);
 
-                        this.$dispatch('folder-tree-folder-updated', nodes[i], attributes);
+                        if (
+                            nodeCopy[this.parentIdAttribute] !==
+                            attributes[this.parentIdAttribute]
+                        ) {
+                            let parentNode = this.getNodeById(
+                                attributes[this.parentIdAttribute],
+                            );
+                            this.removeNode(nodes[i]);
+
+                            if (!parentNode[this.childrenAttribute]) {
+                                parentNode[this.childrenAttribute] = [];
+                            }
+
+                            parentNode[this.childrenAttribute].push(nodeCopy);
+                        }
+
+                        this.$dispatch(
+                            'folder-tree-folder-updated',
+                            nodes[i],
+                            attributes,
+                        );
                         return true; // Node found and updated
                     }
 
                     if (nodes[i][this.childrenAttribute]) {
-                        if (traverseAndUpdate(nodes[i][this.childrenAttribute])) {
+                        if (
+                            traverseAndUpdate(nodes[i][this.childrenAttribute])
+                        ) {
                             return true;
                         }
                     }
@@ -277,7 +348,7 @@ export default function folders(
         getNodePath(node, attribute = 'id') {
             node = node || this.selected;
 
-            if (! node) {
+            if (!node) {
                 return null;
             }
 
@@ -291,8 +362,13 @@ export default function folders(
                         }
 
                         if (currentNode[this.childrenAttribute]) {
-                            for (const child of currentNode[this.childrenAttribute]) {
-                                const result = traverse(child, [...currentPath, currentNode[attribute]]);
+                            for (const child of currentNode[
+                                this.childrenAttribute
+                            ]) {
+                                const result = traverse(child, [
+                                    ...currentPath,
+                                    currentNode[attribute],
+                                ]);
                                 if (result) {
                                     return result;
                                 }
@@ -312,6 +388,6 @@ export default function folders(
             };
 
             return findPath(node);
-        }
+        },
     };
 }

@@ -13,7 +13,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::create('ticket_statuses', function (Blueprint $table) {
+        Schema::create('ticket_statuses', function (Blueprint $table): void {
             $table->id();
             $table->string('name')->unique();
             $table->string('color')->nullable();

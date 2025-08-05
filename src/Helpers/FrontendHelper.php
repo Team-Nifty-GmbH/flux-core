@@ -7,6 +7,43 @@ use Illuminate\Support\Carbon;
 
 class FrontendHelper
 {
+    public static function getContrastColor($hexColor): string
+    {
+        // hexColor RGB
+        $red1 = hexdec(substr($hexColor, 1, 2));
+        $green1 = hexdec(substr($hexColor, 3, 2));
+        $blue1 = hexdec(substr($hexColor, 5, 2));
+
+        // Black RGB
+        $blackColor = '#000000';
+        $red2BlackColor = hexdec(substr($blackColor, 1, 2));
+        $green2BlackColor = hexdec(substr($blackColor, 3, 2));
+        $blue2BlackColor = hexdec(substr($blackColor, 5, 2));
+
+        // Calc contrast ratio
+        $lightness1 = 0.2126 * pow($red1 / 255, 2.2) +
+            0.7152 * pow($green1 / 255, 2.2) +
+            0.0722 * pow($blue1 / 255, 2.2);
+
+        $lightness2 = 0.2126 * pow($red2BlackColor / 255, 2.2) +
+            0.7152 * pow($green2BlackColor / 255, 2.2) +
+            0.0722 * pow($blue2BlackColor / 255, 2.2);
+
+        if ($lightness1 > $lightness2) {
+            $contrastRatio = (int) (($lightness1 + 0.05) / ($lightness2 + 0.05));
+        } else {
+            $contrastRatio = (int) (($lightness2 + 0.05) / ($lightness1 + 0.05));
+        }
+
+        // If contrast is more than 5, return black color
+        if ($contrastRatio > 5) {
+            return '#000000';
+        } else {
+            // if not, return white color.
+            return '#FFFFFF';
+        }
+    }
+
     /**
      * This function displays the relative time of a specific
      * CustomDateTime object against the current (now) timestamp.
@@ -89,43 +126,6 @@ class FrontendHelper
         $code = substr($code, 0, 6);
 
         return '#' . $code;
-    }
-
-    public static function getContrastColor($hexColor): string
-    {
-        // hexColor RGB
-        $red1 = hexdec(substr($hexColor, 1, 2));
-        $green1 = hexdec(substr($hexColor, 3, 2));
-        $blue1 = hexdec(substr($hexColor, 5, 2));
-
-        // Black RGB
-        $blackColor = '#000000';
-        $red2BlackColor = hexdec(substr($blackColor, 1, 2));
-        $green2BlackColor = hexdec(substr($blackColor, 3, 2));
-        $blue2BlackColor = hexdec(substr($blackColor, 5, 2));
-
-        // Calc contrast ratio
-        $lightness1 = 0.2126 * pow($red1 / 255, 2.2) +
-            0.7152 * pow($green1 / 255, 2.2) +
-            0.0722 * pow($blue1 / 255, 2.2);
-
-        $lightness2 = 0.2126 * pow($red2BlackColor / 255, 2.2) +
-            0.7152 * pow($green2BlackColor / 255, 2.2) +
-            0.0722 * pow($blue2BlackColor / 255, 2.2);
-
-        if ($lightness1 > $lightness2) {
-            $contrastRatio = (int) (($lightness1 + 0.05) / ($lightness2 + 0.05));
-        } else {
-            $contrastRatio = (int) (($lightness2 + 0.05) / ($lightness1 + 0.05));
-        }
-
-        // If contrast is more than 5, return black color
-        if ($contrastRatio > 5) {
-            return '#000000';
-        } else {
-            // if not, return white color.
-            return '#FFFFFF';
-        }
     }
 
     public static function stringToTailwindColor(string $string): string

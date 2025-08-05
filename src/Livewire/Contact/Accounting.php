@@ -16,10 +16,10 @@ class Accounting extends Component
 {
     use Actions, WithTabs;
 
-    public string $tab = 'contact.accounting.general';
-
     #[Modelable]
     public ContactForm $contact;
+
+    public string $tab = 'contact.accounting.general';
 
     public function render(): Factory|Application|View
     {
@@ -30,19 +30,23 @@ class Accounting extends Component
     {
         return [
             TabButton::make('contact.accounting.general')
-                ->label(__('General'))
+                ->text(__('General'))
                 ->isLivewireComponent()
                 ->wireModel('contact'),
             TabButton::make('contact.accounting.bank-connections')
-                ->label(__('Bank connections'))
+                ->text(__('Bank connections'))
                 ->isLivewireComponent()
                 ->wireModel('contact.id'),
             TabButton::make('contact.accounting.discounts')
-                ->label(__('Discounts')),
+                ->text(__('Discounts')),
             TabButton::make('contact.accounting.sepa-mandates')
-                ->label(__('Sepa Mandates'))
+                ->text(__('Sepa Mandates'))
                 ->isLivewireComponent()
                 ->wireModel('contact'),
+            TabButton::make('contact.accounting.credit-accounts')
+                ->text(__('Credit Accounts'))
+                ->isLivewireComponent()
+                ->wireModel('contact.id'),
         ];
     }
 }

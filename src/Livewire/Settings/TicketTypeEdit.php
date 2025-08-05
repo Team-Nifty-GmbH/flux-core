@@ -20,26 +20,19 @@ class TicketTypeEdit extends Component
 {
     use Actions;
 
-    public TicketTypeForm $ticketType;
+    public bool $isNew = true;
 
     public array $models;
 
     public array $roles;
 
-    public bool $isNew = true;
+    public TicketTypeForm $ticketType;
 
     protected $listeners = [
         'show',
         'save',
         'delete',
     ];
-
-    public function getRules(): array
-    {
-        $rules = ($this->isNew ? CreateTicketType::make([]) : UpdateTicketType::make($this->ticketType))->getRules();
-
-        return Arr::prependKeysWith($rules, 'ticketType.');
-    }
 
     public function mount(): void
     {
@@ -63,6 +56,43 @@ class TicketTypeEdit extends Component
         return view('flux::livewire.settings.ticket-type-edit');
     }
 
+    #[Renderless]
+    public function delete(): void
+    {
+        $ticketType = ['id' => $this->ticketType->id];
+        try {
+            $this->ticketType->delete();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->dispatch('closeModal', $ticketType, true)->to('settings.ticket-types');
+    }
+
+    public function getRules(): array
+    {
+        $rules = ($this->isNew ? CreateTicketType::make([]) : UpdateTicketType::make($this->ticketType))->getRules();
+
+        return Arr::prependKeysWith($rules, 'ticketType.');
+    }
+
+    #[Renderless]
+    public function save(): void
+    {
+        try {
+            $this->ticketType->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return;
+        }
+
+        $this->notification()->success(__(':model saved', ['model' => __('Ticket Type')]))->send();
+        $this->dispatch('closeModal', $this->ticketType)->to('settings.ticket-types');
+    }
+
     public function show(array $ticketType = []): void
     {
         $this->ticketType->reset();
@@ -77,35 +107,5 @@ class TicketTypeEdit extends Component
                 ->whereKey($this->ticketType->id)
                 ->pluck('rtt.role_id')
                 ->toArray();
-    }
-
-    #[Renderless]
-    public function save(): void
-    {
-        try {
-            $this->ticketType->save();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return;
-        }
-
-        $this->notification()->success(__(':model saved', ['model' => __('Ticket Type')]));
-        $this->dispatch('closeModal', $this->ticketType)->to('settings.ticket-types');
-    }
-
-    #[Renderless]
-    public function delete(): void
-    {
-        $ticketType = ['id' => $this->ticketType->id];
-        try {
-            $this->ticketType->delete();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return;
-        }
-
-        $this->dispatch('closeModal', $ticketType, true)->to('settings.ticket-types');
     }
 }

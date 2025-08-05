@@ -2,15 +2,12 @@
 
 namespace FluxErp\Livewire\DataTables;
 
+use FluxErp\Actions\WorkTime\CreateWorkTime;
 use FluxErp\Models\Task;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class TaskList extends BaseDataTable
 {
-    protected string $model = Task::class;
-
-    public bool $showFilterInputs = true;
-
     public array $enabledCols = [
         'due_date',
         'name',
@@ -25,12 +22,17 @@ class TaskList extends BaseDataTable
         'progress' => 'percentage',
     ];
 
+    public bool $showFilterInputs = true;
+
+    protected string $model = Task::class;
+
     protected function getRowActions(): array
     {
         return [
             DataTableButton::make()
                 ->icon('clock')
-                ->label(__('Track Time'))
+                ->text(__('Track Time'))
+                ->when(fn () => resolve_static(CreateWorkTime::class, 'canPerformAction', [false]))
                 ->xOnClick(<<<'JS'
                     $event.stopPropagation();
                     $dispatch(

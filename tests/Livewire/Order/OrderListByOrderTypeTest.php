@@ -10,7 +10,7 @@ use Livewire\Livewire;
 
 class OrderListByOrderTypeTest extends BaseSetup
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         $orderType = OrderType::factory()->create([
             'client_id' => $this->dbClient->getKey(),

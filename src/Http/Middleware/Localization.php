@@ -6,6 +6,7 @@ use Closure;
 use FluxErp\Models\Language;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Throwable;
 
 class Localization
 {
@@ -13,14 +14,14 @@ class Localization
     {
         try {
             $userLanguage = Auth::user()?->language?->language_code;
-        } catch (\Throwable) {
+        } catch (Throwable) {
             $userLanguage = null;
         }
 
         app()->setlocale(
             $request->header('content-language') ??
             $userLanguage ??
-            Language::default()?->language_code ??
+            resolve_static(Language::class, 'default')?->language_code ??
             config('app.locale')
         );
 

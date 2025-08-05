@@ -22,6 +22,7 @@ class CreateScheduleRuleset extends FluxRuleset
             'name' => [
                 'required',
                 'string',
+                'max:255',
                 Rule::in(Repeatable::all()->keys()),
             ],
             'description' => 'string|nullable',

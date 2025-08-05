@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 class LogoutTest extends TestCase
 {
-    public function test_renders_successfully()
+    public function test_renders_successfully(): void
     {
         Livewire::test(Logout::class)
             ->assertStatus(200);

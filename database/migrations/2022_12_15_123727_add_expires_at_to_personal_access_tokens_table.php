@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('personal_access_tokens', function (Blueprint $table) {
+        Schema::table('personal_access_tokens', function (Blueprint $table): void {
             if (Schema::hasColumn('personal_access_tokens', 'expires_at')) {
                 return;
             }
@@ -19,7 +19,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('personal_access_tokens', function (Blueprint $table) {
+        Schema::table('personal_access_tokens', function (Blueprint $table): void {
             $table->dropColumn('expires_at');
         });
     }

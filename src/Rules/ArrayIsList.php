@@ -2,38 +2,34 @@
 
 namespace FluxErp\Rules;
 
-use Illuminate\Contracts\Validation\Rule;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
 
-class ArrayIsList implements Rule
+class ArrayIsList implements ValidationRule
 {
-    /**
-     * Determine if the validation rule passes.
-     *
-     * @param  string  $attribute
-     * @param  mixed  $value
-     */
-    public function passes($attribute, $value): bool
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if (! is_array($value)) {
-            return false;
+            $fail($this->message())->translate();
+
+            return;
         } elseif (! array_is_list($value)) {
-            return false;
+            $fail($this->message())->translate();
+
+            return;
         }
 
         foreach ($value as $item) {
             if (! is_string($item) && ! is_int($item) && ! is_numeric($item)) {
-                return false;
+                $fail($this->message())->translate();
+
+                return;
             }
         }
-
-        return true;
     }
 
-    /**
-     * Get the validation error message.
-     */
-    public function message(): string
+    protected function message(): string
     {
-        return __('Array must be a list');
+        return 'Array must be a list';
     }
 }

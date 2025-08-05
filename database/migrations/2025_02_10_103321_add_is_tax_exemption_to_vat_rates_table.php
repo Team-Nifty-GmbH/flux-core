@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('vat_rates', function (Blueprint $table) {
+        Schema::table('vat_rates', function (Blueprint $table): void {
             $table->boolean('is_tax_exemption')
                 ->default(false)
                 ->after('is_default');
@@ -17,7 +17,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('vat_rates', function (Blueprint $table) {
+        Schema::table('vat_rates', function (Blueprint $table): void {
             $table->dropColumn('is_tax_exemption');
         });
     }

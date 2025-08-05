@@ -11,7 +11,7 @@ return new class() extends Migration
      */
     public function up(): void
     {
-        Schema::table('currencies', function (Blueprint $table) {
+        Schema::table('currencies', function (Blueprint $table): void {
             $table->boolean('is_default')->default(false)->after('symbol');
         });
     }
@@ -21,7 +21,7 @@ return new class() extends Migration
      */
     public function down(): void
     {
-        Schema::table('currencies', function (Blueprint $table) {
+        Schema::table('currencies', function (Blueprint $table): void {
             $table->dropColumn('is_default');
         });
     }

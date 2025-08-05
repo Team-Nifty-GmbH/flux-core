@@ -10,14 +10,14 @@ use Illuminate\Validation\ValidationException;
 
 class CreateLedgerAccount extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return CreateLedgerAccountRuleset::class;
-    }
-
     public static function models(): array
     {
         return [LedgerAccount::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return CreateLedgerAccountRuleset::class;
     }
 
     public function performAction(): mixed
@@ -32,7 +32,7 @@ class CreateLedgerAccount extends FluxAction
     {
         parent::prepareForValidation();
 
-        $this->data['client_id'] ??= Client::default()->getKey();
+        $this->data['client_id'] ??= resolve_static(Client::class, 'default')->getKey();
     }
 
     protected function validateData(): void

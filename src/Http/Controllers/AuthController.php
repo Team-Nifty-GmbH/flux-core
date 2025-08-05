@@ -4,7 +4,6 @@ namespace FluxErp\Http\Controllers;
 
 use FluxErp\Helpers\ResponseHelper;
 use FluxErp\Models\Address;
-use FluxErp\Models\InterfaceUser;
 use FluxErp\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -60,17 +59,6 @@ class AuthController extends Controller
         }
 
         if (count($abilities) < 1) {
-            $user = resolve_static(InterfaceUser::class, 'query')
-                ->where('name', $request->email)
-                ->where('is_active', true)
-                ->first();
-
-            if ($user && Hash::check($request->password, $user->password)) {
-                $abilities = ['interface'];
-            }
-        }
-
-        if (count($abilities) < 1) {
             return ResponseHelper::createResponseFromBase(
                 statusCode: 401,
                 data: ['credentials' => 'invalid credentials']
@@ -89,24 +77,6 @@ class AuthController extends Controller
         );
     }
 
-    public function authenticateWeb(Request $request): RedirectResponse
-    {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
-        ]);
-
-        if (Auth::guard('web')->attempt(array_merge($credentials, ['is_active' => true]))) {
-            $request->session()->regenerate();
-
-            return redirect()->intended(route('dashboard'));
-        }
-
-        return back()->withErrors([
-            'email' => __('auth.failed'),
-        ])->onlyInput('email');
-    }
-
     public function authenticatePortal(Request $request): RedirectResponse
     {
         $credentials = $request->validate([
@@ -123,6 +93,24 @@ class AuthController extends Controller
             $request->session()->regenerate();
 
             return redirect()->intended(route('portal.dashboard'));
+        }
+
+        return back()->withErrors([
+            'email' => __('auth.failed'),
+        ])->onlyInput('email');
+    }
+
+    public function authenticateWeb(Request $request): RedirectResponse
+    {
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ]);
+
+        if (Auth::guard('web')->attempt(array_merge($credentials, ['is_active' => true]))) {
+            $request->session()->regenerate();
+
+            return redirect()->intended(route('dashboard'));
         }
 
         return back()->withErrors([

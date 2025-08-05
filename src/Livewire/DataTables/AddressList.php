@@ -3,14 +3,15 @@
 namespace FluxErp\Livewire\DataTables;
 
 use FluxErp\Actions\Contact\CreateContact;
+use FluxErp\Actions\Lead\CreateLead;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Livewire\Forms\ContactForm;
+use FluxErp\Livewire\Forms\LeadForm;
 use FluxErp\Models\Address;
 use FluxErp\Models\Media;
 use FluxErp\Traits\Livewire\CreatesDocuments;
+use FluxErp\Traits\Livewire\DataTable\AllowRecordMerging;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Routing\Redirector;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -21,13 +22,9 @@ use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class AddressList extends BaseDataTable
 {
-    use CreatesDocuments;
+    use AllowRecordMerging, CreatesDocuments;
 
-    protected ?string $includeBefore = 'flux::livewire.contact.contacts';
-
-    protected string $model = Address::class;
-
-    public bool $isSelectable = true;
+    public ContactForm $contact;
 
     public array $enabledCols = [
         'avatar',
@@ -45,24 +42,30 @@ class AddressList extends BaseDataTable
         'avatar' => 'image',
     ];
 
+    public bool $isSelectable = true;
+
+    public LeadForm $leadForm;
+
     public bool $showMap = false;
 
-    public ContactForm $contact;
+    protected ?string $includeBefore = 'flux::livewire.contact.address-list';
+
+    protected string $model = Address::class;
 
     protected function getTableActions(): array
     {
         return [
             DataTableButton::make()
-                ->label(__('Show on Map'))
-                ->color('primary')
-                ->icon('globe')
+                ->text(__('Show on Map'))
+                ->color('indigo')
+                ->icon('globe-alt')
                 ->wireClick('$toggle(\'showMap\', true)'),
             DataTableButton::make()
-                ->label(__('Create'))
-                ->color('primary')
+                ->text(__('Create'))
+                ->color('indigo')
                 ->icon('plus')
                 ->attributes([
-                    'x-on:click' => '$wire.show()',
+                    'x-on:click' => '$modalOpen(\'create-contact-modal\')',
                 ])
                 ->when(fn () => resolve_static(CreateContact::class, 'canPerformAction', [false])),
         ];
@@ -73,60 +76,82 @@ class AddressList extends BaseDataTable
         return [
             DataTableButton::make()
                 ->icon('document-text')
-                ->label(__('Create Documents'))
-                ->color('primary')
+                ->text(__('Create Documents'))
+                ->color('indigo')
                 ->wireClick('openCreateDocumentsModal'),
             DataTableButton::make()
-                ->label(__('Send Mail'))
-                ->color('primary')
+                ->text(__('Send Mail'))
+                ->color('indigo')
                 ->wireClick('createMailMessage'),
+            DataTableButton::make()
+                ->text(__('Create Leads'))
+                ->color('indigo')
+                ->wireClick('openLeadsModal')
+                ->when(fn () => resolve_static(CreateLead::class, 'canPerformAction', [false])),
         ];
     }
 
-    protected function getBuilder(Builder $builder): Builder
+    #[Renderless]
+    public function createDocuments(): null|MediaStream|Media
     {
-        // add contact_id to the select statement to ensure that the contact route is available
-        return $builder->addSelect('contact_id')->with('contact.media');
+        $response = $this->createDocumentFromItems($this->getSelectedModels(), true);
+        $this->loadData();
+        $this->reset('selected');
+
+        return $response;
     }
 
-    protected function getReturnKeys(): array
+    #[Renderless]
+    public function createLeads(): bool
     {
-        return array_merge(parent::getReturnKeys(), ['contact_id']);
-    }
+        $created = 0;
+        foreach ($this->getSelectedModelsQuery()->with('contact:id,agent_id')->get(['id', 'contact_id']) as $address) {
+            $leadForm = clone $this->leadForm;
+            $leadForm->address_id = $address->getKey();
+            $leadForm->user_id = $address->contact?->agent_id ?? auth()->id();
 
-    protected function itemToArray($item): array
-    {
-        $returnArray = parent::itemToArray($item);
-        $returnArray['avatar'] = $item->getAvatarUrl();
+            try {
+                $leadForm->save();
+            } catch (ValidationException|UnauthorizedException $e) {
+                exception_to_notifications($e, $this);
 
-        return $returnArray;
-    }
+                continue;
+            }
 
-    public function show(): void
-    {
-        $this->contact->reset();
-
-        $this->js(
-            <<<'JS'
-               $openModal('new-contact');
-            JS
-        );
-    }
-
-    public function save(): false|RedirectResponse|Redirector
-    {
-        try {
-            $this->contact->save();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
+            $created++;
         }
 
-        $this->notification()->success(__(':model saved', ['model' => __('Contact')]));
+        $this->toast()
+            ->success(__(':count leads created', ['count' => $created]))
+            ->send();
 
-        return redirect(route('contacts.id?', ['id' => $this->contact->id]));
+        return true;
     }
+
+    #[Renderless]
+    public function createMailMessage(): void
+    {
+        $mailMessages = [];
+        foreach ($this->getSelectedModels() as $model) {
+            $mailMessages[] = [
+                'to' => $this->getTo($model, []),
+                'cc' => $this->getCc($model),
+                'bcc' => $this->getBcc($model),
+                'subject' => null,
+                'html_body' => null,
+                'communicatable_type' => $this->getCommunicatableType($model),
+                'communicatable_id' => $this->getCommunicatableId($model),
+            ];
+        }
+
+        $sessionKey = 'mail_' . Str::uuid()->toString();
+        session()->put($sessionKey, $mailMessages);
+
+        $this->dispatch('createFromSession', key: $sessionKey)->to('edit-mail');
+    }
+
+    #[Renderless]
+    public function evaluate(): void {}
 
     #[Renderless]
     public function loadData(): void
@@ -136,12 +161,6 @@ class AddressList extends BaseDataTable
         if ($this->showMap) {
             $this->updatedShowMap();
         }
-    }
-
-    #[Renderless]
-    public function updatedShowMap(): void
-    {
-        $this->dispatch('load-map');
     }
 
     #[Renderless]
@@ -173,46 +192,49 @@ class AddressList extends BaseDataTable
             ->toArray();
     }
 
-    public function createMailMessage(): void
+    #[Renderless]
+    public function openLeadsModal(): void
     {
-        $mailMessages = [];
-        foreach ($this->getSelectedModels() as $model) {
-            $mailMessages[] = [
-                'to' => $this->getTo($model, []),
-                'cc' => $this->getCc($model),
-                'bcc' => $this->getBcc($model),
-                'subject' => null,
-                'html_body' => null,
-                'communicatable_type' => $this->getCommunicatableType($model),
-                'communicatable_id' => $this->getCommunicatableId($model),
-            ];
+        $this->leadForm->reset();
+        $this->leadForm->openModal();
+    }
+
+    #[Renderless]
+    public function resetForm(): void
+    {
+        $this->contact->reset();
+    }
+
+    #[Renderless]
+    public function save(): bool
+    {
+        try {
+            $this->contact->save();
+        } catch (ValidationException|UnauthorizedException $e) {
+            exception_to_notifications($e, $this);
+
+            return false;
         }
 
-        $sessionKey = 'mail_' . Str::uuid()->toString();
-        session()->put($sessionKey, $mailMessages);
+        $this->toast()
+            ->success(__(':model saved', ['model' => __('Contact')]))
+            ->send();
 
-        $this->dispatch('createFromSession', key: $sessionKey)->to('edit-mail');
+        $this->redirectRoute('contacts.id?', ['id' => $this->contact->id], navigate: true);
+
+        return true;
     }
 
-    public function createDocuments(): null|MediaStream|Media
+    #[Renderless]
+    public function updatedShowMap(): void
     {
-        $response = $this->createDocumentFromItems($this->getSelectedModels(), true);
-        $this->loadData();
-        $this->reset('selected');
-
-        return $response;
+        $this->dispatch('load-map');
     }
 
-    protected function getTo(OffersPrinting $item, array $documents): array
+    protected function getBuilder(Builder $builder): Builder
     {
-        return Arr::wrap(
-            $item->email_primary ?? $item->contactOptions->where('type', 'email')->first()?->value ?? []
-        );
-    }
-
-    protected function getSubject(OffersPrinting $item): string
-    {
-        return __('Address Label');
+        // add contact_id to the select statement to ensure that the contact route is available
+        return $builder->addSelect('contact_id')->with('contact.media');
     }
 
     protected function getHtmlBody(OffersPrinting $item): string
@@ -223,5 +245,30 @@ class AddressList extends BaseDataTable
     protected function getPrintLayouts(): array
     {
         return app(Address::class)->getPrintViews();
+    }
+
+    protected function getReturnKeys(): array
+    {
+        return array_merge(parent::getReturnKeys(), ['contact_id']);
+    }
+
+    protected function getSubject(OffersPrinting $item): string
+    {
+        return __('Address Label');
+    }
+
+    protected function getTo(OffersPrinting $item, array $documents): array
+    {
+        return Arr::wrap(
+            $item->email_primary ?? $item->contactOptions->where('type', 'email')->first()?->value ?? []
+        );
+    }
+
+    protected function itemToArray($item): array
+    {
+        $returnArray = parent::itemToArray($item);
+        $returnArray['avatar'] = $item->getAvatarUrl();
+
+        return $returnArray;
     }
 }

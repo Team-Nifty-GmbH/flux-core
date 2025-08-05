@@ -6,17 +6,23 @@ use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Task;
 use FluxErp\Rulesets\Task\FinishTaskRuleset;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Response;
 
 class FinishTask extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return FinishTaskRuleset::class;
-    }
-
     public static function models(): array
     {
         return [Task::class];
+    }
+
+    protected static function getSuccessCode(): ?int
+    {
+        return parent::getSuccessCode() ?? Response::HTTP_OK;
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return FinishTaskRuleset::class;
     }
 
     public function performAction(): Model
