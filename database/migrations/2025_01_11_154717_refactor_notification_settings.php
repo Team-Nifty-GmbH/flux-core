@@ -8,7 +8,7 @@ return new class() extends Migration
 {
     public function up(): void
     {
-        Schema::table('event_subscriptions', function (Blueprint $table) {
+        Schema::table('event_subscriptions', function (Blueprint $table): void {
             $table->string('channel')->after('subscribable_type')->index();
 
             $table->dropColumn(['event', 'model_type', 'model_id']);
@@ -17,7 +17,7 @@ return new class() extends Migration
 
     public function down(): void
     {
-        Schema::table('event_subscriptions', function (Blueprint $table) {
+        Schema::table('event_subscriptions', function (Blueprint $table): void {
             $table->dropColumn(['channel']);
 
             $table->string('model_type')->after('subscribable_type');

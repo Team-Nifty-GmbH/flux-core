@@ -8,6 +8,16 @@ use Illuminate\Validation\ValidationException;
 
 class NotificationEloquentEventSubscriber
 {
+    public function subscribe($events): array
+    {
+        return [
+            'eloquent.created: *' => 'subscribeNotifications',
+            'eloquent.updated: *' => 'subscribeNotifications',
+            'eloquent.restored: *' => 'subscribeNotifications',
+            'eloquent.deleted: *' => 'subscribeNotifications',
+        ];
+    }
+
     public function subscribeNotifications($event, $model): void
     {
         $model = data_get($model, 0);
@@ -33,18 +43,7 @@ class NotificationEloquentEventSubscriber
                     ->validate()
                     ->execute();
             } catch (ValidationException) {
-
             }
         }
-    }
-
-    public function subscribe($events): array
-    {
-        return [
-            'eloquent.created: *' => 'subscribeNotifications',
-            'eloquent.updated: *' => 'subscribeNotifications',
-            'eloquent.restored: *' => 'subscribeNotifications',
-            'eloquent.deleted: *' => 'subscribeNotifications',
-        ];
     }
 }

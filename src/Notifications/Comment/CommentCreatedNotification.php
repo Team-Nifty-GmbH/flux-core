@@ -27,6 +27,13 @@ class CommentCreatedNotification extends SubscribableNotification implements Sho
         );
     }
 
+    public function subscribe(): array
+    {
+        return [
+            'eloquent.created: ' . resolve_static(Comment::class, 'class') => 'sendNotification',
+        ];
+    }
+
     public function toMail(object $notifiable): MailMessage
     {
         return parent::toMail($notifiable)
@@ -55,21 +62,14 @@ class CommentCreatedNotification extends SubscribableNotification implements Sho
         return parent::via($notifiable);
     }
 
-    public function subscribe(): array
+    protected function getDescription(): ?string
     {
-        return [
-            'eloquent.created: ' . resolve_static(Comment::class, 'class') => 'sendNotification',
-        ];
+        return $this->model->comment;
     }
 
     protected function getNotificationIcon(): ?string
     {
         return 'chat';
-    }
-
-    protected function getDescription(): ?string
-    {
-        return $this->model->comment;
     }
 
     protected function getTitle(): string

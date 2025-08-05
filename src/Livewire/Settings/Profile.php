@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Settings;
 
+use Closure;
 use Exception;
 use FluxErp\Actions\NotificationSetting\UpdateNotificationSetting;
 use FluxErp\Livewire\Forms\UserForm;
@@ -16,6 +17,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
+use ReflectionFunction;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class Profile extends Component
@@ -47,8 +49,8 @@ class Profile extends Component
         $this->notificationChannels = config('notifications.channels');
         foreach (Event::getFacadeRoot()->getRawListeners() as $event => $listeners) {
             foreach (Event::getFacadeRoot()->getListeners($event) as $listener) {
-                /** @var \Closure $listener */
-                $notificationClass = data_get((new \ReflectionFunction($listener))->getStaticVariables(), 'listener.0');
+                /** @var Closure $listener */
+                $notificationClass = data_get((new ReflectionFunction($listener))->getStaticVariables(), 'listener.0');
                 if (is_subclass_of($notificationClass, SubscribableNotification::class)) {
                     $this->notifications[] = $notificationClass;
                 }

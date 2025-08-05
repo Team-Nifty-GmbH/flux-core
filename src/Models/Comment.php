@@ -33,9 +33,19 @@ class Comment extends FluxModel implements HasMedia
         'model_type',
     ];
 
+    public static function getGenericChannelEvents(): array
+    {
+        return [];
+    }
+
+    public static function restoring($callback): void
+    {
+        static::registerModelEvent('restoring', $callback);
+    }
+
     protected static function booted(): void
     {
-        static::saving(function (Comment $comment) {
+        static::saving(function (Comment $comment): void {
             if ($comment->isDirty('comment')) {
                 preg_match_all('/data-id="([^:]+:\d+)"/', $comment->comment, $matches);
                 collect(data_get($matches, 1, []))
@@ -44,26 +54,16 @@ class Comment extends FluxModel implements HasMedia
                     ->filter(function (Model $notifiable) {
                         return in_array(Notifiable::class, class_uses_recursive($notifiable));
                     })
-                    ->each(function (Model $notifiable) use ($comment) {
+                    ->each(function (Model $notifiable) use ($comment): void {
                         $notifiable->subscribeNotificationChannel($comment->broadcastChannel());
                     });
             }
         });
     }
 
-    public static function restoring($callback): void
-    {
-        static::registerModelEvent('restoring', $callback);
-    }
-
     public function broadcastChannel(): string
     {
         return str_replace('\\', '.', morphed_model($this->model_type)) . '.' . $this->model_id;
-    }
-
-    public static function getGenericChannelEvents(): array
-    {
-        return [];
     }
 
     public function broadcastWith(): array

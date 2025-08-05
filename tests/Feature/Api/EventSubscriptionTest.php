@@ -6,7 +6,6 @@ use FluxErp\Models\Comment;
 use FluxErp\Models\EventSubscription;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Ticket;
-use FluxErp\Models\User;
 use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -18,9 +17,9 @@ class EventSubscriptionTest extends BaseSetup
 
     private Collection $eventSubscriptions;
 
-    private Collection $tickets;
-
     private array $permissions;
+
+    private Collection $tickets;
 
     protected function setUp(): void
     {

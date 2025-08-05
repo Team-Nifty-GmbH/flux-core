@@ -2,6 +2,7 @@
 
 namespace FluxErp\Support\Notification;
 
+use Exception;
 use FluxErp\Contracts\HasToastNotification;
 use FluxErp\Models\EventSubscription;
 use FluxErp\Models\User;
@@ -17,20 +18,20 @@ use NotificationChannels\WebPush\WebPushMessage;
 
 abstract class SubscribableNotification extends Notification implements HasToastNotification
 {
-    public ?string $route = null;
-
     public object $event;
 
     public ?Model $model;
+
+    public ?string $route = null;
+
+    abstract protected function getTitle(): string;
+
+    abstract public function subscribe(): array;
 
     public function __construct()
     {
         $this->route = request()->header('referer');
     }
-
-    abstract public function subscribe(): array;
-
-    abstract protected function getTitle(): string;
 
     public static function sendsTo(): array
     {
@@ -39,33 +40,15 @@ abstract class SubscribableNotification extends Notification implements HasToast
         ];
     }
 
-    public function via(object $notifiable): array
-    {
-        if (! in_array(get_class($notifiable), static::sendsTo())) {
-            return [];
-        }
-
-        return parent::via($notifiable);
-    }
-
     public function sendNotification(object $event): void
     {
         $this->event = $event;
         $this->model = $this->getModelFromEvent($this->event);
 
         $this->getSubscriptionsForEvent($this->event)
-            ->each(function (object $notifiable) {
+            ->each(function (object $notifiable): void {
                 $notifiable->notify($this);
             });
-    }
-
-    public function toWebPush(object $notifiable): ?WebPushMessage
-    {
-        if (! method_exists($notifiable, 'pushSubscriptions') || ! $notifiable->pushSubscriptions()->exists()) {
-            return null;
-        }
-
-        return $this->toToastNotification($notifiable)->toWebPush();
     }
 
     public function toArray(object $notifiable): array
@@ -94,44 +77,22 @@ abstract class SubscribableNotification extends Notification implements HasToast
             ->accept($this->getAcceptAction($notifiable));
     }
 
-    protected function getSubscriptionsForEvent(object $event): Collection
+    public function toWebPush(object $notifiable): ?WebPushMessage
     {
-        return resolve_static(EventSubscription::class, 'query')
-            ->with('subscribable')
-            ->where(function (Builder $query) {
-                $query->whereNot('subscribable_type', auth()->user()?->getMorphClass())
-                    ->orWhere('subscribable_id', '!=', auth()->id());
-            })
-            ->where('channel', $this->getChannelFromEvent($event))
-            ->whereHas('subscribable', fn (Builder $query) => $query->where('is_active', true))
-            ->get()
-            ->map(fn (EventSubscription $subscription) => $subscription->subscribable)
-            ->unique()
-            ->filter(fn ($notifiable) => in_array(Notifiable::class, class_uses_recursive($notifiable)));
+        if (! method_exists($notifiable, 'pushSubscriptions') || ! $notifiable->pushSubscriptions()->exists()) {
+            return null;
+        }
+
+        return $this->toToastNotification($notifiable)->toWebPush();
     }
 
-    protected function getNotificationIcon(): ?string
+    public function via(object $notifiable): array
     {
-        return null;
-    }
+        if (! in_array(get_class($notifiable), static::sendsTo())) {
+            return [];
+        }
 
-    protected function getChannelFromEvent(object $event): string
-    {
-        return method_exists($event, 'broadcastChannel')
-            ? $event->broadcastChannel()
-            : throw new \Exception('Event must have a broadcast channel.');
-    }
-
-    protected function getModelFromEvent(object $event): ?Model
-    {
-        return $event instanceof Model
-            ? $event
-            : null;
-    }
-
-    protected function getDescription(): ?string
-    {
-        return null;
+        return parent::via($notifiable);
     }
 
     protected function getAcceptAction(object $notifiable): NotificationAction
@@ -151,5 +112,45 @@ abstract class SubscribableNotification extends Notification implements HasToast
                         )
                     )
             );
+    }
+
+    protected function getChannelFromEvent(object $event): string
+    {
+        return method_exists($event, 'broadcastChannel')
+            ? $event->broadcastChannel()
+            : throw new Exception('Event must have a broadcast channel.');
+    }
+
+    protected function getDescription(): ?string
+    {
+        return null;
+    }
+
+    protected function getModelFromEvent(object $event): ?Model
+    {
+        return $event instanceof Model
+            ? $event
+            : null;
+    }
+
+    protected function getNotificationIcon(): ?string
+    {
+        return null;
+    }
+
+    protected function getSubscriptionsForEvent(object $event): Collection
+    {
+        return resolve_static(EventSubscription::class, 'query')
+            ->with('subscribable')
+            ->where(function (Builder $query): void {
+                $query->whereNot('subscribable_type', auth()->user()?->getMorphClass())
+                    ->orWhere('subscribable_id', '!=', auth()->id());
+            })
+            ->where('channel', $this->getChannelFromEvent($event))
+            ->whereHas('subscribable', fn (Builder $query) => $query->where('is_active', true))
+            ->get()
+            ->map(fn (EventSubscription $subscription) => $subscription->subscribable)
+            ->unique()
+            ->filter(fn ($notifiable) => in_array(Notifiable::class, class_uses_recursive($notifiable)));
     }
 }

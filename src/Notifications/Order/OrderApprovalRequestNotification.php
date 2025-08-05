@@ -15,6 +15,11 @@ class OrderApprovalRequestNotification extends SubscribableNotification
         ];
     }
 
+    protected function getDescription(): ?string
+    {
+        return $this->model->getLabel();
+    }
+
     protected function getModelFromEvent(object $event): ?Model
     {
         return $event->order;
@@ -28,10 +33,5 @@ class OrderApprovalRequestNotification extends SubscribableNotification
                 'username' => auth()->user()?->getLabel() ?? __('Unknown'),
             ],
         );
-    }
-
-    protected function getDescription(): ?string
-    {
-        return $this->model->getLabel();
     }
 }

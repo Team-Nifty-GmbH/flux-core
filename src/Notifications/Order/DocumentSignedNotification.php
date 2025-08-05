@@ -21,22 +21,6 @@ class DocumentSignedNotification extends SubscribableNotification implements Sho
         ];
     }
 
-    protected function getTitle(): string
-    {
-        return __(
-            ':username signed your :model',
-            [
-                'username' => data_get($this->model, 'custom_properties.name', __('Unknown')),
-                'model' => __('your ' . $this->model->model->getMorphClass()),
-            ],
-        );
-    }
-
-    protected function getModelFromEvent(object $event): ?Model
-    {
-        return $event->signature;
-    }
-
     protected function getAcceptAction(object $notifiable): NotificationAction
     {
         return NotificationAction::make()
@@ -48,5 +32,21 @@ class DocumentSignedNotification extends SubscribableNotification implements Sho
     {
         return __(Str::of($this->model->name)->after('signature-')->headline()->toString()) . ' - ' .
             $this->model->model->getLabel();
+    }
+
+    protected function getModelFromEvent(object $event): ?Model
+    {
+        return $event->signature;
+    }
+
+    protected function getTitle(): string
+    {
+        return __(
+            ':username signed your :model',
+            [
+                'username' => data_get($this->model, 'custom_properties.name', __('Unknown')),
+                'model' => __('your ' . $this->model->model->getMorphClass()),
+            ],
+        );
     }
 }

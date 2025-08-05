@@ -76,12 +76,14 @@
                 </th>
             </template>
         </x-slot>
-        @foreach($notificationSettings as $notificationName => $notification)
+        @foreach ($notificationSettings as $notificationName => $notification)
             <tr>
                 <td>
-                    <div>{{ __(Str::of(class_basename($notificationName))->before('Notification')->headline()->toString()) }}</div>
+                    <div>
+                        {{ __( Str::of(class_basename($notificationName))->before('Notification')->headline()->toString(),) }}
+                    </div>
                 </td>
-                @foreach($notification as $channel => $channelSettings)
+                @foreach ($notification as $channel => $channelSettings)
                     <td>
                         <x-checkbox
                             wire:model.live="notificationSettings.{{ $notificationName }}.{{ $channel }}.is_active"

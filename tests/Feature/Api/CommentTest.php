@@ -171,6 +171,41 @@ class CommentTest extends BaseSetup
         Notification::assertNothingSentTo($this->user);
     }
 
+    public function test_create_comment_sends_notification_to_address(): void
+    {
+        Notification::fake();
+        config(['queue.default' => 'sync']);
+
+        $address = Address::factory()
+            ->for(Contact::factory()->create(['client_id' => $this->dbClient->id]))
+            ->create([
+                'client_id' => $this->dbClient->id,
+                'is_active' => true,
+                'is_main_address' => true,
+            ]);
+
+        $ticket = Ticket::factory()->create([
+            'authenticatable_type' => morph_alias(Address::class),
+            'authenticatable_id' => $address->id,
+        ]);
+        $address->subscribeNotificationChannel($ticket->broadcastChannel());
+
+        $this->user->givePermissionTo($this->permissions['create']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this
+            ->actingAs($this->user)
+            ->post('/api/comments', [
+                'model_id' => $ticket->id,
+                'model_type' => morph_alias(Ticket::class),
+                'comment' => 'test comment',
+                'is_internal' => false,
+            ]);
+        $response->assertStatus(201);
+
+        Notification::assertSentTo($address, CommentCreatedNotification::class);
+    }
+
     public function test_create_comment_validation_fails(): void
     {
         $comment = [
@@ -349,40 +384,5 @@ class CommentTest extends BaseSetup
         $this->assertEquals($this->comment->parent_id, $dbComment->parent_id);
         $this->assertEquals($this->comment->comment, $dbComment->comment);
         $this->assertEquals($comment['is_sticky'], $dbComment->is_sticky);
-    }
-
-    public function test_create_comment_sends_notification_to_address()
-    {
-        Notification::fake();
-        config(['queue.default' => 'sync']);
-
-        $address = Address::factory()
-            ->for(Contact::factory()->create(['client_id' => $this->dbClient->id]))
-            ->create([
-                'client_id' => $this->dbClient->id,
-                'is_active' => true,
-                'is_main_address' => true,
-            ]);
-
-        $ticket = Ticket::factory()->create([
-            'authenticatable_type' => morph_alias(Address::class),
-            'authenticatable_id' => $address->id,
-        ]);
-        $address->subscribeNotificationChannel($ticket->broadcastChannel());
-
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this
-            ->actingAs($this->user)
-            ->post('/api/comments', [
-                'model_id' => $ticket->id,
-                'model_type' => morph_alias(Ticket::class),
-                'comment' => 'test comment',
-                'is_internal' => false,
-            ]);
-        $response->assertStatus(201);
-
-        Notification::assertSentTo($address, CommentCreatedNotification::class);
     }
 }

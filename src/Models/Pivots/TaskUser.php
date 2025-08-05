@@ -8,13 +8,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TaskUser extends FluxPivot
 {
-    protected $guarded = [
-        'id',
-    ];
+    public $incrementing = true;
 
     public $timestamps = false;
 
-    public $incrementing = true;
+    protected $guarded = [
+        'id',
+    ];
 
     public function task(): BelongsTo
     {

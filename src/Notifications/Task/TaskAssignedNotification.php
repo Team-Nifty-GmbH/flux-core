@@ -20,24 +20,14 @@ class TaskAssignedNotification extends SubscribableNotification implements Shoul
         ];
     }
 
-    protected function getModelFromEvent(object $event): ?Model
-    {
-        return $event->task;
-    }
-
-    protected function getTitle(): string
-    {
-        return __(
-            ':username assigned you a task',
-            [
-                'username' => auth()->user()?->getLabel() ?? __('Unknown'),
-            ],
-        );
-    }
-
     protected function getDescription(): ?string
     {
         return $this->model->name;
+    }
+
+    protected function getModelFromEvent(object $event): ?Model
+    {
+        return $event->task;
     }
 
     protected function getNotificationIcon(): ?string
@@ -49,5 +39,15 @@ class TaskAssignedNotification extends SubscribableNotification implements Shoul
     {
         return parent::getSubscriptionsForEvent($event)
             ->intersect($event->getSubscribers());
+    }
+
+    protected function getTitle(): string
+    {
+        return __(
+            ':username assigned you a task',
+            [
+                'username' => auth()->user()?->getLabel() ?? __('Unknown'),
+            ],
+        );
     }
 }

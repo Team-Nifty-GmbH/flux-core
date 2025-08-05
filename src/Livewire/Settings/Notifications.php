@@ -2,8 +2,8 @@
 
 namespace FluxErp\Livewire\Settings;
 
+use Closure;
 use FluxErp\Models\NotificationSetting;
-use FluxErp\Services\NotificationSettingsService;
 use FluxErp\Support\Notification\SubscribableNotification;
 use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\Foundation\Application;
@@ -15,6 +15,7 @@ use Illuminate\Support\Str;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
+use ReflectionFunction;
 
 class Notifications extends Component
 {
@@ -40,8 +41,8 @@ class Notifications extends Component
         $this->notificationChannels = config('notifications.channels');
         foreach (Event::getFacadeRoot()->getRawListeners() as $event => $listeners) {
             foreach (Event::getFacadeRoot()->getListeners($event) as $listener) {
-                /** @var \Closure $listener */
-                $notificationClass = data_get((new \ReflectionFunction($listener))->getStaticVariables(), 'listener.0');
+                /** @var Closure $listener */
+                $notificationClass = data_get((new ReflectionFunction($listener))->getStaticVariables(), 'listener.0');
                 if (is_subclass_of($notificationClass, SubscribableNotification::class)) {
                     $this->notifications[] = $notificationClass;
                 }
@@ -158,6 +159,12 @@ class Notifications extends Component
         $this->skipRender();
     }
 
+    #[Renderless]
+    public function translate(string $key): string
+    {
+        return __(Str::headline(class_basename($key)));
+    }
+
     private function getDirtyNotificationChannels(array $notification): void
     {
         $dirty = collect(Arr::dot($notification))->where(
@@ -179,11 +186,5 @@ class Notifications extends Component
             $data['notification_type'] = $this->notificationType;
             $this->dirtyNotificationChannels[$path[0]] = $data;
         }
-    }
-
-    #[Renderless]
-    public function translate(string $key): string
-    {
-        return __(Str::headline(class_basename($key)));
     }
 }

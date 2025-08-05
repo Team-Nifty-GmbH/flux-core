@@ -26,6 +26,16 @@ class SubscribableEvent implements ShouldDispatchAfterCommit
             ?->broadcastChannel();
     }
 
+    public function getSubscribers(): ?Collection
+    {
+        return $this->subscribers;
+    }
+
+    public function getUnsubscribers(): ?Collection
+    {
+        return $this->unsubscribers;
+    }
+
     public function subscribeChannel(array|Arrayable $subscribers, string $type = User::class): static
     {
         $this->subscribers ??= collect();
@@ -38,7 +48,7 @@ class SubscribableEvent implements ShouldDispatchAfterCommit
                     ->first()
             )
             ->filter()
-            ->each(function (Model $subscriber) {
+            ->each(function (Model $subscriber): void {
                 try {
                     $subscriber->subscribeNotificationChannel($this->broadcastChannel());
                     $this->subscribers->push($subscriber);
@@ -61,7 +71,7 @@ class SubscribableEvent implements ShouldDispatchAfterCommit
                     ->first()
             )
             ->filter()
-            ->each(function (Model $subscriber) {
+            ->each(function (Model $subscriber): void {
                 try {
                     $subscriber->unsubscribeNotificationChannel($this->broadcastChannel());
                     $this->unsubscribers->push($subscriber);
@@ -70,15 +80,5 @@ class SubscribableEvent implements ShouldDispatchAfterCommit
             });
 
         return $this;
-    }
-
-    public function getUnsubscribers(): ?Collection
-    {
-        return $this->unsubscribers;
-    }
-
-    public function getSubscribers(): ?Collection
-    {
-        return $this->subscribers;
     }
 }

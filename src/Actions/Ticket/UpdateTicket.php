@@ -10,7 +10,6 @@ use FluxErp\Rulesets\Ticket\UpdateTicketRuleset;
 use FluxErp\Traits\Notifiable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
-use Illuminate\Validation\ValidationException;
 
 class UpdateTicket extends FluxAction
 {

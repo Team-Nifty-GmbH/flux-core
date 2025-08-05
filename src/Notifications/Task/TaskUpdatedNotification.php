@@ -18,16 +18,6 @@ class TaskUpdatedNotification extends SubscribableNotification implements Should
         ];
     }
 
-    protected function getTitle(): string
-    {
-        return __(
-            ':username updated a task',
-            [
-                'username' => $this->model->getUpdatedBy()?->getLabel() ?? __('Unknown'),
-            ],
-        );
-    }
-
     protected function getDescription(): ?string
     {
         return $this->model->name;
@@ -36,5 +26,15 @@ class TaskUpdatedNotification extends SubscribableNotification implements Should
     protected function getNotificationIcon(): ?string
     {
         return 'clipboard-list';
+    }
+
+    protected function getTitle(): string
+    {
+        return __(
+            ':username updated a task',
+            [
+                'username' => $this->model->getUpdatedBy()?->getLabel() ?? __('Unknown'),
+            ],
+        );
     }
 }

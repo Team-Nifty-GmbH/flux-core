@@ -20,24 +20,14 @@ class TicketAssignedNotification extends SubscribableNotification implements Sho
         ];
     }
 
-    protected function getModelFromEvent(object $event): ?Model
-    {
-        return $event->ticket;
-    }
-
-    protected function getTitle(): string
-    {
-        return __(
-            ':username assigned you a ticket',
-            [
-                'username' => auth()->user()?->getLabel() ?? __('Unknown'),
-            ],
-        );
-    }
-
     protected function getDescription(): ?string
     {
         return $this->model->name;
+    }
+
+    protected function getModelFromEvent(object $event): ?Model
+    {
+        return $event->ticket;
     }
 
     protected function getNotificationIcon(): ?string
@@ -49,5 +39,15 @@ class TicketAssignedNotification extends SubscribableNotification implements Sho
     {
         return parent::getSubscriptionsForEvent($event)
             ->intersect($event->getSubscribers());
+    }
+
+    protected function getTitle(): string
+    {
+        return __(
+            ':username assigned you a ticket',
+            [
+                'username' => auth()->user()?->getLabel() ?? __('Unknown'),
+            ],
+        );
     }
 }

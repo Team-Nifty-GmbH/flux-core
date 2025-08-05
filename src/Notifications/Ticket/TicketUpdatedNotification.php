@@ -18,16 +18,6 @@ class TicketUpdatedNotification extends SubscribableNotification implements Shou
         ];
     }
 
-    protected function getTitle(): string
-    {
-        return __(
-            ':username updated a ticket',
-            [
-                'username' => $this->model->getUpdatedBy()?->getLabel() ?? __('Unknown'),
-            ],
-        );
-    }
-
     protected function getDescription(): ?string
     {
         return $this->model->name;
@@ -36,5 +26,15 @@ class TicketUpdatedNotification extends SubscribableNotification implements Shou
     protected function getNotificationIcon(): ?string
     {
         return 'support';
+    }
+
+    protected function getTitle(): string
+    {
+        return __(
+            ':username updated a ticket',
+            [
+                'username' => $this->model->getUpdatedBy()?->getLabel() ?? __('Unknown'),
+            ],
+        );
     }
 }
