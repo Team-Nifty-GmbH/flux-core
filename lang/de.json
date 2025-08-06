@@ -14,6 +14,7 @@
     ":model restored": ":model wiederhergestellt",
     ":model saved": ":model gespeichert",
     ":order_type :order_number dated :order_date": ":order_type :order_number vom :order_date",
+    ":success email(s) sent, :failed failed": ":success E-Mail(s) gesendet, :failed fehlgeschlagen",
     ":time elapsed": ":time vergangen",
     ":time remaining": ":time verbleibend",
     ":username commented on :model": ":username hat :model kommentiert",
