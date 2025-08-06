@@ -29,6 +29,6 @@ abstract class TimelineChart extends Chart
     {
         return <<<'JS'
             return new Date(val).toLocaleDateString(document.documentElement.lang);
-    JS;
+        JS;
     }
 }
