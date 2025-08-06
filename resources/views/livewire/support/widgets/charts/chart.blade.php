@@ -6,18 +6,17 @@
         <x-flux::spinner />
     @endif
 
-    <div class="flex items-center justify-between gap-4">
-        <div>
+    <div class="flex w-full flex-row items-center justify-between gap-2">
+        <div class="min-w-0 flex-1">
             @section('title')
             @if ($this->showTitle())
-                <div class="flex w-full justify-between px-6">
+                <div class="flex w-full pl-6 pr-2">
                     <h2 class="truncate text-lg font-semibold text-gray-400">
                         {{ $this->getLabel() }}
                     </h2>
                 </div>
             @endif
         </div>
-
         @show
         <div class="flex items-center gap-4">
             @section('options')
