@@ -52,6 +52,11 @@
         @endpersist
 
         @auth('web')
+            <script>
+                document.addEventListener('DOMContentLoaded', () => {
+                    Echo.join('presence_channel');
+                });
+            </script>
             @persist('mail')
                 <div id="mail">
                     <livewire:edit-mail lazy />
