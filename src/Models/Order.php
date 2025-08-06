@@ -210,7 +210,7 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
                 $order->getSerialNumber('order_number');
             }
 
-            if ($order->isDirty('invoice_number')) {
+            if ($order->isDirty('invoice_number') && ! is_null($order->invoice_number)) {
                 $orderPositions = $order->orderPositions()
                     ->whereNotNull('credit_account_id')
                     ->where('post_on_credit_account', '!=', 0)
@@ -219,8 +219,8 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
                 DB::transaction(function () use ($order, $orderPositions): void {
                     foreach ($orderPositions as $orderPosition) {
                         $multiplier = match (true) {
-                            $orderPosition->post_on_credit_account > 0 => 1,
-                            $orderPosition->post_on_credit_account < 0 => -1,
+                            $orderPosition->post_on_credit_account->value > 0 => 1,
+                            $orderPosition->post_on_credit_account->value < 0 => -1,
                             default => 0,
                         };
 

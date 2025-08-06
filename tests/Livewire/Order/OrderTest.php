@@ -2,6 +2,8 @@
 
 namespace FluxErp\Tests\Livewire\Order;
 
+use FluxErp\Actions\ContactBankConnection\CalculateContactBankConnectionBalance;
+use FluxErp\Enums\CreditAccountPostingEnum;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Invokable\ProcessSubscriptionOrder;
 use FluxErp\Livewire\Order\Order as OrderView;
@@ -16,6 +18,7 @@ use FluxErp\Models\OrderPosition;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
+use FluxErp\Models\Transaction;
 use FluxErp\Models\VatRate;
 use FluxErp\States\Order\DeliveryState\Delivered;
 use FluxErp\States\Order\Open;
@@ -347,6 +350,222 @@ class OrderTest extends BaseSetup
             ->assertHasNoErrors();
 
         $this->assertTrue($this->order->refresh()->is_confirmed);
+    }
+
+    public function test_order_position_with_credit_account(): void
+    {
+        Storage::fake();
+
+        Currency::factory()->create(['is_default' => true]);
+
+        $contact = Contact::factory()->create([
+            'client_id' => $this->dbClient->getKey(),
+            'has_delivery_lock' => false,
+            'credit_line' => null,
+        ]);
+
+        $creditAccount = ContactBankConnection::factory()
+            ->has(Transaction::factory()->state([
+                'amount' => 1000,
+                'currency_id' => Currency::first()->getKey(),
+                'value_date' => now(),
+                'purpose' => 'Initial balance',
+            ]))
+            ->create([
+                'contact_id' => $contact->getKey(),
+                'is_credit_account' => true,
+            ]);
+
+        CalculateContactBankConnectionBalance::make([
+            'id' => $creditAccount->getKey(),
+        ])
+            ->validate()
+            ->execute();
+        $creditAccount->refresh();
+
+        $this->assertEquals($creditAccount->balance, 1000.00);
+
+        $vatRate = VatRate::factory()->create(['rate_percentage' => 0.19]);
+        $currency = Currency::factory()->create();
+
+        $order = Order::factory()->create([
+            'client_id' => $this->dbClient->getKey(),
+            'language_id' => $this->defaultLanguage->getKey(),
+            'order_type_id' => $this->orderType->getKey(),
+            'currency_id' => $currency->getKey(),
+            'contact_id' => $contact->getKey(),
+            'address_invoice_id' => Address::factory()
+                ->create([
+                    'client_id' => $this->dbClient->getKey(),
+                    'contact_id' => $contact->getKey(),
+                ])
+                ->getKey(),
+            'price_list_id' => PriceList::factory()->create()->getKey(),
+            'payment_type_id' => PaymentType::factory()->create()->getKey(),
+            'is_locked' => false,
+            'invoice_number' => null,
+        ]);
+
+        $orderPosition = OrderPosition::factory()->create([
+            'order_id' => $order->getKey(),
+            'client_id' => $this->dbClient->getKey(),
+            'vat_rate_id' => $vatRate->getKey(),
+            'credit_account_id' => $creditAccount->getKey(),
+            'post_on_credit_account' => CreditAccountPostingEnum::Credit,
+            'credit_amount' => 250.00,
+            'amount' => 1,
+            'unit_net_price' => 250.00,
+            'unit_gross_price' => 297.50,
+            'total_net_price' => 250.00,
+            'total_gross_price' => 297.50,
+            'total_base_net_price' => 250.00,
+            'total_base_gross_price' => 297.50,
+            'vat_price' => 47.50,
+            'vat_rate_percentage' => 0.19,
+            'is_alternative' => false,
+            'is_free_text' => false,
+        ]);
+
+        $order->calculatePrices()->save();
+
+        $this->assertNotNull($orderPosition->credit_account_id);
+        $this->assertEquals($creditAccount->id, $orderPosition->credit_account_id);
+        $this->assertEquals(CreditAccountPostingEnum::Credit, $orderPosition->post_on_credit_account);
+        $this->assertEquals('250.00', $orderPosition->credit_amount);
+
+        $this->assertTrue($creditAccount->is_credit_account);
+        $this->assertEquals($contact->getKey(), $creditAccount->contact_id);
+
+        $initialBalance = $creditAccount->balance;
+
+        $component = Livewire::test(OrderView::class, ['id' => $order->getKey()]);
+        $componentId = strtolower($component->id());
+
+        $component
+            ->assertSet('order.invoice_number', null)
+            ->call('openCreateDocumentsModal')
+            ->assertExecutesJs("\$modalOpen('create-documents-$componentId')")
+            ->set([
+                'selectedPrintLayouts' => [
+                    'download' => ['invoice'],
+                ],
+            ])
+            ->call('createDocuments')
+            ->assertStatus(200)
+            ->assertHasNoErrors()
+            ->assertNotSet('order.invoice_number', null);
+
+        $creditAccount->refresh();
+
+        $this->assertEquals(bcadd($initialBalance, '250.00', 2), $creditAccount->balance);
+    }
+
+    public function test_order_position_with_credit_account_debit(): void
+    {
+        Storage::fake();
+
+        Currency::factory()->create(['is_default' => true]);
+
+        $contact = Contact::factory()->create([
+            'client_id' => $this->dbClient->getKey(),
+            'has_delivery_lock' => false,
+            'credit_line' => null,
+        ]);
+
+        $creditAccount = ContactBankConnection::factory()
+            ->has(Transaction::factory()->state([
+                'amount' => 1000,
+                'currency_id' => Currency::first()->getKey(),
+                'value_date' => now(),
+                'purpose' => 'Initial balance',
+            ]))
+            ->create([
+                'contact_id' => $contact->getKey(),
+                'is_credit_account' => true,
+            ]);
+
+        CalculateContactBankConnectionBalance::make([
+            'id' => $creditAccount->getKey(),
+        ])
+            ->validate()
+            ->execute();
+        $creditAccount->refresh();
+
+        $this->assertEquals($creditAccount->balance, 1000.00);
+
+        $vatRate = VatRate::factory()->create(['rate_percentage' => 0.19]);
+        $currency = Currency::factory()->create();
+
+        $order = Order::factory()->create([
+            'client_id' => $this->dbClient->getKey(),
+            'language_id' => $this->defaultLanguage->getKey(),
+            'order_type_id' => $this->orderType->getKey(),
+            'currency_id' => $currency->getKey(),
+            'contact_id' => $contact->getKey(),
+            'address_invoice_id' => Address::factory()
+                ->create([
+                    'client_id' => $this->dbClient->getKey(),
+                    'contact_id' => $contact->getKey(),
+                ])
+                ->getKey(),
+            'price_list_id' => PriceList::factory()->create()->getKey(),
+            'payment_type_id' => PaymentType::factory()->create()->getKey(),
+            'is_locked' => false,
+            'invoice_number' => null,
+        ]);
+
+        $orderPosition = OrderPosition::factory()->create([
+            'order_id' => $order->getKey(),
+            'client_id' => $this->dbClient->getKey(),
+            'vat_rate_id' => $vatRate->getKey(),
+            'credit_account_id' => $creditAccount->getKey(),
+            'post_on_credit_account' => CreditAccountPostingEnum::Debit,
+            'credit_amount' => 150.00,
+            'amount' => 1,
+            'unit_net_price' => 150.00,
+            'unit_gross_price' => 178.50,
+            'total_net_price' => 150.00,
+            'total_gross_price' => 178.50,
+            'total_base_net_price' => 150.00,
+            'total_base_gross_price' => 178.50,
+            'vat_price' => 28.50,
+            'vat_rate_percentage' => 0.19,
+            'is_alternative' => false,
+            'is_free_text' => false,
+        ]);
+
+        $order->calculatePrices()->save();
+
+        $this->assertNotNull($orderPosition->credit_account_id);
+        $this->assertEquals($creditAccount->id, $orderPosition->credit_account_id);
+        $this->assertEquals(CreditAccountPostingEnum::Debit, $orderPosition->post_on_credit_account);
+        $this->assertEquals('150.00', $orderPosition->credit_amount);
+
+        $this->assertTrue($creditAccount->is_credit_account);
+        $this->assertEquals($contact->getKey(), $creditAccount->contact_id);
+
+        $initialBalance = $creditAccount->balance;
+
+        $component = Livewire::test(OrderView::class, ['id' => $order->getKey()]);
+        $componentId = strtolower($component->id());
+
+        $component
+            ->assertSet('order.invoice_number', null)
+            ->call('openCreateDocumentsModal')
+            ->assertExecutesJs("\$modalOpen('create-documents-$componentId')")
+            ->set([
+                'selectedPrintLayouts' => [
+                    'download' => ['invoice'],
+                ],
+            ])
+            ->call('createDocuments')
+            ->assertStatus(200)
+            ->assertHasNoErrors()
+            ->assertNotSet('order.invoice_number', null);
+
+        $creditAccount->refresh();
+
+        $this->assertEquals(bcsub($initialBalance, '150.00', 2), $creditAccount->balance);
     }
 
     public function test_recalculate_order_totals(): void
