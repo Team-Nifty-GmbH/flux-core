@@ -15,7 +15,7 @@ abstract class RadialBarChart extends Chart
 
     public function render(): View|Factory
     {
-        return view('flux::livewire.support.widgets.charts.radial-bar-chart');
+        return view('flux::livewire.support.widgets.charts.chart');
     }
 
     public function getPlotOptions(): array
@@ -41,12 +41,12 @@ abstract class RadialBarChart extends Chart
     {
         $options = parent::getOptions();
 
-        if (isset($options['series'])) {
+        if (data_get($options, 'series')) {
             $max = $this->max ?? max($options['series']);
 
             if ($max > 0) {
                 $options['series'] = array_map(
-                    fn ($value) => ($value / $max) * 100,
+                    fn ($value) => bcmul(bcdiv($value, $max, 10), 100, 2),
                     $options['series']
                 );
             }
