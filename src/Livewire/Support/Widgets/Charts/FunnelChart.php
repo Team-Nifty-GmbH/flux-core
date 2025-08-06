@@ -49,7 +49,7 @@ abstract class FunnelChart extends Chart
     {
         return <<<'JS'
             return opts.w.config.xaxis.categories[opts.dataPointIndex] + ': ' + val;
-    JS;
+        JS;
     }
 
     public function placeholder(): View|Factory
