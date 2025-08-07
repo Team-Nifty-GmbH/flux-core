@@ -24,7 +24,7 @@ class OrderTransaction extends FluxPivot
     protected static function booted(): void
     {
         static::saved(function (OrderTransaction $orderTransaction): void {
-            $originalOrderId = $orderTransaction->getRawOriginal('order_id');
+            $originalOrderId = data_get($orderTransaction->getPrevious(), 'order_id', $orderTransaction->order_id);
             if (
                 $originalOrderId
                 && $originalOrderId !== $orderTransaction->order_id
