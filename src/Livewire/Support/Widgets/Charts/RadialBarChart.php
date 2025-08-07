@@ -46,7 +46,7 @@ abstract class RadialBarChart extends Chart
 
             if ($max > 0) {
                 $options['series'] = array_map(
-                    fn ($value) => bcmul(bcdiv($value, $max, 10), 100, 2),
+                    fn ($value) => bcmul(bcdiv($value, $max), 100, 2),
                     $options['series']
                 );
             }
