@@ -10,6 +10,7 @@ use FluxErp\Support\Calculation\Rounding;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasParentChildRelations;
+use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
 use Illuminate\Database\Eloquent\Builder;
@@ -19,7 +20,7 @@ use Illuminate\Support\Str;
 
 class WorkTime extends FluxModel implements Calendarable, Targetable
 {
-    use Filterable, HasPackageFactory, HasParentChildRelations, HasUuid, SoftDeletes;
+    use Filterable, HasPackageFactory, HasParentChildRelations, HasUserModification, HasUuid, SoftDeletes;
 
     public static function aggregateColumns(string $type): array
     {
