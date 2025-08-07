@@ -20,6 +20,7 @@ use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Throwable;
 
 class EditMail extends Component
 {
@@ -339,14 +340,16 @@ class EditMail extends Component
                     ->validate()
                     ->execute();
 
-                if ($result['success']) {
+                if (data_get($result, 'success')) {
                     $successCount++;
                 } else {
                     $failedCount++;
 
                     if ($single) {
                         exception_to_notifications(
-                            exception: new Exception($result['error'] ?? $result['message']),
+                            exception: new Exception(
+                                data_get($result, 'error') ?? data_get($result, 'message')
+                            ),
                             component: $this,
                             description: data_get($data, 'subject')
                         );
@@ -354,7 +357,7 @@ class EditMail extends Component
                         return false;
                     }
                 }
-            } catch (Exception $e) {
+            } catch (Throwable $e) {
                 $failedCount++;
                 exception_to_notifications(
                     exception: $e,

@@ -13,16 +13,6 @@ class SendMailRuleset extends FluxRuleset
     public function rules(): array
     {
         return [
-            'to' => 'required|array',
-            'to.*' => 'email',
-            'cc' => 'nullable|array',
-            'cc.*' => 'email',
-            'bcc' => 'nullable|array',
-            'bcc.*' => 'email',
-            'subject' => 'nullable|string|max:255',
-            'html_body' => 'nullable|string',
-            'text_body' => 'nullable|string',
-            'attachments' => 'nullable|array',
             'mail_account_id' => [
                 'nullable',
                 'integer',
@@ -38,9 +28,19 @@ class SendMailRuleset extends FluxRuleset
                 'integer',
                 app(ModelExists::class, ['model' => EmailTemplate::class]),
             ],
+            'to' => 'required|array',
+            'to.*' => 'email',
+            'cc' => 'nullable|array',
+            'cc.*' => 'email',
+            'bcc' => 'nullable|array',
+            'bcc.*' => 'email',
+            'subject' => 'nullable|string|max:255',
+            'text_body' => 'nullable|string',
+            'html_body' => 'nullable|string',
+            'attachments' => 'nullable|array',
             'blade_parameters' => 'nullable',
             'blade_parameters_serialized' => 'nullable|boolean',
-            'queue' => 'nullable|boolean',
+            'queue' => 'boolean',
         ];
     }
 }

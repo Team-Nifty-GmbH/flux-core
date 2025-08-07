@@ -1,19 +1,18 @@
 <?php
 
-namespace Tests\Unit\Actions\MailMessage;
+namespace FluxErp\Tests\Unit\Action\MailMessage;
 
 use Exception;
 use FluxErp\Actions\MailMessage\SendMail;
 use FluxErp\Mail\GenericMail;
+use FluxErp\Models\Client;
 use FluxErp\Models\EmailTemplate;
+use FluxErp\Models\MailAccount;
 use FluxErp\Tests\TestCase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 
 class SendMailTest extends TestCase
 {
-    use RefreshDatabase;
-
     public function test_handle_mail_failure(): void
     {
         Mail::shouldReceive('to')->andReturnSelf();
@@ -21,10 +20,17 @@ class SendMailTest extends TestCase
         Mail::shouldReceive('bcc')->andReturnSelf();
         Mail::shouldReceive('send')->andThrow(new Exception('Mail server error'));
 
+        $mailAccount = MailAccount::factory()->create();
+        $client = Client::factory()->create();
+
         $action = SendMail::make([
+            'mail_account_id' => $mailAccount->id,
+            'client_id' => $client->id,
             'to' => ['test@example.com'],
             'subject' => 'Test Subject',
+            'text_body' => 'Test Text Body',
             'html_body' => '<p>Test Body</p>',
+            'queue' => false,
         ]);
 
         $result = $action->validate()->execute();
@@ -71,12 +77,19 @@ class SendMailTest extends TestCase
     {
         Mail::fake();
 
+        $mailAccount = MailAccount::factory()->create();
+        $client = Client::factory()->create();
+
         $action = SendMail::make([
+            'mail_account_id' => $mailAccount->id,
+            'client_id' => $client->id,
             'to' => 'single@example.com',
             'cc' => 'cc@example.com',
             'bcc' => 'bcc@example.com',
             'subject' => 'Test Subject',
+            'text_body' => 'Test Text Body',
             'html_body' => '<p>Test Body</p>',
+            'queue' => false,
         ]);
 
         $result = $action->validate()->execute();
@@ -119,10 +132,17 @@ class SendMailTest extends TestCase
     {
         Mail::fake();
 
+        $mailAccount = MailAccount::factory()->create();
+        $client = Client::factory()->create();
+
         $action = SendMail::make([
+            'mail_account_id' => $mailAccount->id,
+            'client_id' => $client->id,
             'to' => ['test@example.com'],
             'subject' => 'Queued Test',
+            'text_body' => 'Queued Test Text Body',
             'html_body' => '<p>Queued Test Body</p>',
+            'blade_parameters_serialized' => false,
             'queue' => true,
         ]);
 
@@ -133,18 +153,74 @@ class SendMailTest extends TestCase
         Mail::assertQueued(GenericMail::class);
     }
 
+    public function test_send_mail_with_all_validated_keys(): void
+    {
+        Mail::fake();
+
+        $mailAccount = MailAccount::factory()->create();
+        $client = Client::factory()->create();
+        $template = EmailTemplate::factory()->create([
+            'subject' => 'Template Subject',
+            'html_body' => '<p>Template HTML Body</p>',
+            'text_body' => 'Template Text Body',
+        ]);
+
+        $action = SendMail::make([
+            'mail_account_id' => $mailAccount->id,
+            'client_id' => $client->id,
+            'template_id' => $template->id,
+            'to' => ['test@example.com', 'test2@example.com'],
+            'cc' => ['cc1@example.com', 'cc2@example.com'],
+            'bcc' => ['bcc1@example.com', 'bcc2@example.com'],
+            'subject' => 'Override Subject',
+            'text_body' => 'Override Text Body',
+            'html_body' => '<p>Override HTML Body</p>',
+            'attachments' => [
+                ['path' => '/tmp/test1.pdf', 'name' => 'test1.pdf'],
+                ['path' => '/tmp/test2.pdf', 'name' => 'test2.pdf'],
+            ],
+            'blade_parameters' => ['name' => 'John Doe', 'company' => 'Test Company'],
+            'blade_parameters_serialized' => false,
+            'queue' => true,
+        ]);
+
+        $result = $action->validate()->execute();
+
+        $this->assertTrue($result['success']);
+        $this->assertEquals(__('Email(s) sent successfully!'), $result['message']);
+
+        Mail::assertQueued(GenericMail::class, function ($mail) {
+            return $mail->hasTo('test@example.com')
+                && $mail->hasTo('test2@example.com')
+                && $mail->hasCc('cc1@example.com')
+                && $mail->hasCc('cc2@example.com')
+                && $mail->hasBcc('bcc1@example.com')
+                && $mail->hasBcc('bcc2@example.com');
+        });
+    }
+
     public function test_send_mail_with_attachments(): void
     {
         Mail::fake();
 
+        $mailAccount = MailAccount::factory()->create();
+        $client = Client::factory()->create();
+
         $action = SendMail::make([
+            'mail_account_id' => $mailAccount->id,
+            'client_id' => $client->id,
             'to' => ['test@example.com'],
+            'cc' => ['cc@example.com'],
+            'bcc' => ['bcc@example.com'],
             'subject' => 'Mail with Attachments',
+            'text_body' => 'See attached files',
             'html_body' => '<p>See attached files</p>',
             'attachments' => [
                 ['path' => '/tmp/test.pdf', 'name' => 'test.pdf'],
                 ['id' => 123],
             ],
+            'blade_parameters_serialized' => false,
+            'queue' => false,
         ]);
 
         $result = $action->validate()->execute();
@@ -158,6 +234,8 @@ class SendMailTest extends TestCase
     {
         Mail::fake();
 
+        $mailAccount = MailAccount::factory()->create();
+        $client = Client::factory()->create();
         $template = EmailTemplate::factory()->create([
             'subject' => 'Hello {{ $name }}',
             'html_body' => '<p>Hello {{ $name }}, welcome!</p>',
@@ -165,11 +243,17 @@ class SendMailTest extends TestCase
         ]);
 
         $action = SendMail::make([
+            'mail_account_id' => $mailAccount->id,
+            'client_id' => $client->id,
             'to' => ['test@example.com'],
+            'cc' => ['cc@example.com'],
+            'bcc' => ['bcc@example.com'],
             'template_id' => $template->id,
             'blade_parameters' => [
                 'name' => 'John Doe',
             ],
+            'blade_parameters_serialized' => false,
+            'queue' => false,
         ]);
 
         $result = $action->validate()->execute();
@@ -183,12 +267,22 @@ class SendMailTest extends TestCase
     {
         Mail::fake();
 
+        $mailAccount = MailAccount::factory()->create();
+        $client = Client::factory()->create();
+
         $action = SendMail::make([
+            'mail_account_id' => $mailAccount->id,
+            'client_id' => $client->id,
             'to' => ['test@example.com'],
             'cc' => ['cc@example.com'],
             'bcc' => ['bcc@example.com'],
             'subject' => 'Test Subject',
+            'text_body' => 'Test Text Body',
             'html_body' => '<p>Test HTML Body</p>',
+            'attachments' => [],
+            'blade_parameters' => [],
+            'blade_parameters_serialized' => false,
+            'queue' => false,
         ]);
 
         $result = $action->validate()->execute();
@@ -232,10 +326,22 @@ class SendMailTest extends TestCase
     {
         Mail::fake();
 
+        $mailAccount = MailAccount::factory()->create();
+        $client = Client::factory()->create();
+
         $action = SendMail::make([
+            'mail_account_id' => $mailAccount->id,
+            'client_id' => $client->id,
             'to' => ['test@example.com'],
+            'cc' => [],
+            'bcc' => [],
             'subject' => 'Test Subject',
+            'text_body' => 'Test Text Body',
             'html_body' => '<p>Test HTML Body</p>',
+            'attachments' => [],
+            'blade_parameters' => [],
+            'blade_parameters_serialized' => false,
+            'queue' => false,
         ]);
 
         $result = $action->validate()->execute();

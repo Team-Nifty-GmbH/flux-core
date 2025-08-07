@@ -2,7 +2,6 @@
 
 namespace FluxErp\Actions\MailMessage;
 
-use Exception;
 use FluxErp\Actions\DispatchableFluxAction;
 use FluxErp\Mail\GenericMail;
 use FluxErp\Models\Communication;
@@ -11,11 +10,15 @@ use FluxErp\Rulesets\MailMessage\SendMailRuleset;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Validator;
 use Laravel\SerializableClosure\SerializableClosure;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Throwable;
 
 class SendMail extends DispatchableFluxAction
 {
+    protected mixed $compiledBladeParameters = null;
+
     public static function models(): array
     {
         return [Communication::class];
@@ -28,12 +31,7 @@ class SendMail extends DispatchableFluxAction
 
     public function performAction(): array
     {
-        $bladeParameters = $this->getData('blade_parameters');
-        if ($this->getData('blade_parameters_serialized') && is_string($bladeParameters)) {
-            $bladeParameters = unserialize($bladeParameters);
-        }
-
-        $mail = GenericMail::make($this->data, $bladeParameters);
+        $mail = GenericMail::make($this->data, $this->compiledBladeParameters);
 
         try {
             $message = Mail::to($this->getData('to'))
@@ -50,7 +48,7 @@ class SendMail extends DispatchableFluxAction
                 'success' => true,
                 'message' => __('Email(s) sent successfully!'),
             ];
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return [
                 'success' => false,
                 'message' => __('Failed to send email!'),
@@ -72,21 +70,17 @@ class SendMail extends DispatchableFluxAction
         $renderedTextBody = html_entity_decode($template->text_body ?? '');
 
         if ($templateData) {
-            try {
-                $renderedSubject = Blade::render($renderedSubject, $templateData);
-                $renderedHtmlBody = Blade::render($renderedHtmlBody, $templateData);
-                $renderedTextBody = Blade::render($renderedTextBody, $templateData);
-            } catch (Exception $e) {
-                throw new Exception(__('Template rendering failed: ') . $e->getMessage());
-            }
+            $renderedSubject = Blade::render($renderedSubject, $templateData);
+            $renderedHtmlBody = Blade::render($renderedHtmlBody, $templateData);
+            $renderedTextBody = Blade::render($renderedTextBody, $templateData);
         }
 
         $this->data['subject'] = $this->getData('subject') ?: $renderedSubject;
         $this->data['html_body'] = $this->getData('html_body') ?: $renderedHtmlBody;
         $this->data['text_body'] = $this->getData('text_body') ?: $renderedTextBody;
         $this->data['to'] = $this->getData('to') ?: ($template->to ?? []);
-        $this->data['cc'] = array_merge($this->getData('cc') ?? [], $template->cc ?? []);
-        $this->data['bcc'] = array_merge($this->getData('bcc') ?? [], $template->bcc ?? []);
+        $this->data['cc'] = array_unique(array_merge($this->getData('cc') ?? [], $template->cc ?? []));
+        $this->data['bcc'] = array_unique(array_merge($this->getData('bcc') ?? [], $template->bcc ?? []));
 
         $templateAttachments = $template->getMedia()
             ->map(fn (Media $media) => [
@@ -106,11 +100,27 @@ class SendMail extends DispatchableFluxAction
         $this->data['to'] = Arr::wrap($this->getData('to') ?? []);
         $this->data['cc'] = Arr::wrap($this->getData('cc') ?? []);
         $this->data['bcc'] = Arr::wrap($this->getData('bcc') ?? []);
+    }
+
+    protected function validateData(): void
+    {
+        Validator::validate(
+            $this->getData(),
+            Arr::only(
+                $this->getRules(),
+                [
+                    'template_id',
+                    'blade_parameters',
+                    'blade_parameters_serialized',
+                ]
+            )
+        );
 
         $bladeParameters = data_get($this->data, 'blade_parameters');
         if (data_get($this->data, 'blade_parameters_serialized') && is_string($bladeParameters)) {
             $bladeParameters = unserialize($bladeParameters);
         }
+        $this->compiledBladeParameters = $bladeParameters;
 
         $templateId = data_get($this->data, 'template_id');
         if ($templateId) {
@@ -122,5 +132,7 @@ class SendMail extends DispatchableFluxAction
                 $this->applyTemplate($template, $bladeParameters);
             }
         }
+
+        parent::validateData();
     }
 }
