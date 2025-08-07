@@ -452,7 +452,7 @@ Route::prefix('api')
                     ->defaults('model', ContactOption::class);
                 Route::post('/contact-options', CreateContactOption::class);
                 Route::put('/contact-options', UpdateContactOption::class);
-                Route::delete('/contact-options', DeleteContactOption::class);
+                Route::delete('/contact-options/{id}', DeleteContactOption::class);
 
                 // Industries
                 Route::get('/industries/{id}', [BaseController::class, 'show'])
