@@ -45,6 +45,8 @@ class FluxSeeder extends Seeder
 
         $this->call(WorkTimeTypeTableSeeder::class);
         $this->call(WorkTimeTableSeeder::class);
+        
+        $this->call(HrSeeder::class);
 
         $this->call(ContactBankConnectionTableSeeder::class);
         $this->call(SepaMandateTableSeeder::class);

@@ -6,6 +6,7 @@ use Exception;
 use FluxErp\Mail\MagicLoginLink;
 use FluxErp\Models\Pivots\PrinterUser;
 use FluxErp\Models\Pivots\TargetUser;
+use FluxErp\Models\Pivots\VacationBlackoutUser;
 use FluxErp\Traits\CacheModelQueries;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasCalendars;
@@ -262,6 +263,32 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
     public function workTimes(): HasMany
     {
         return $this->hasMany(WorkTime::class);
+    }
+
+    public function workTimeModel(): BelongsTo
+    {
+        return $this->belongsTo(WorkTimeModel::class);
+    }
+
+    public function location(): BelongsTo
+    {
+        return $this->belongsTo(Location::class);
+    }
+
+    public function supervisor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'supervisor_id');
+    }
+
+    public function subordinates(): HasMany
+    {
+        return $this->hasMany(User::class, 'supervisor_id');
+    }
+
+    public function vacationBlackouts(): BelongsToMany
+    {
+        return $this->belongsToMany(VacationBlackout::class, 'vacation_blackout_user')
+            ->using(VacationBlackoutUser::class);
     }
 
     protected function password(): Attribute

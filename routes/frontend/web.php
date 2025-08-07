@@ -29,6 +29,10 @@ use FluxErp\Livewire\DataTables\PurchaseInvoiceList;
 use FluxErp\Livewire\DataTables\TicketList;
 use FluxErp\Livewire\DataTables\WorkTimeList;
 use FluxErp\Livewire\Features\Calendar\Calendar;
+use FluxErp\Livewire\HumanResources\Calendar as HumanResourcesCalendar;
+use FluxErp\Livewire\HumanResources\HrDashboard;
+use FluxErp\Livewire\HumanResources\HrReports;
+use FluxErp\Livewire\HumanResources\AbsenceRequests;
 use FluxErp\Livewire\InstallWizard;
 use FluxErp\Livewire\Lead\Lead;
 use FluxErp\Livewire\Lead\LeadList;
@@ -56,12 +60,14 @@ use FluxErp\Livewire\Settings\CustomerPortal;
 use FluxErp\Livewire\Settings\DiscountGroups;
 use FluxErp\Livewire\Settings\EmailTemplates;
 use FluxErp\Livewire\Settings\FailedJobs;
+use FluxErp\Livewire\Settings\Holidays;
 use FluxErp\Livewire\Settings\Industries;
 use FluxErp\Livewire\Settings\LanguageLines;
 use FluxErp\Livewire\Settings\Languages;
 use FluxErp\Livewire\Settings\LeadLossReasons;
 use FluxErp\Livewire\Settings\LeadStates;
 use FluxErp\Livewire\Settings\LedgerAccounts;
+use FluxErp\Livewire\Settings\Locations;
 use FluxErp\Livewire\Settings\Logs;
 use FluxErp\Livewire\Settings\MailAccounts;
 use FluxErp\Livewire\Settings\Notifications;
@@ -89,8 +95,14 @@ use FluxErp\Livewire\Settings\Tokens;
 use FluxErp\Livewire\Settings\Units;
 use FluxErp\Livewire\Settings\UserEdit;
 use FluxErp\Livewire\Settings\Users;
+use FluxErp\Livewire\Settings\VacationBlackouts;
+use FluxErp\Livewire\Settings\VacationCarryoverRules;
 use FluxErp\Livewire\Settings\VatRates;
 use FluxErp\Livewire\Settings\Warehouses;
+use FluxErp\Livewire\AttendanceOverview;
+use FluxErp\Livewire\Settings\AbsenceTypes;
+use FluxErp\Livewire\Settings\HrUserSettings;
+use FluxErp\Livewire\Settings\WorkTimeModels;
 use FluxErp\Livewire\Settings\WorkTimeTypes;
 use FluxErp\Livewire\Task\Task;
 use FluxErp\Livewire\Task\TaskList;
@@ -201,6 +213,15 @@ Route::middleware('web')
                         Route::get('/{id}', Product::class)->where('id', '[0-9]+')->name('id');
                     });
 
+                Route::name('human-resources.')->prefix('human-resources')
+                    ->group(function (): void {
+                        Route::get('/dashboard', HrDashboard::class)->name('dashboard');
+                        Route::get('/absence-requests', AbsenceRequests::class)->name('absence-requests');
+                        Route::get('/attendance-overview', AttendanceOverview::class)->name('attendance-overview');
+                        Route::get('/calendar', HumanResourcesCalendar::class)->name('calendar');
+                        Route::get('/reports', HrReports::class)->name('reports');
+                    });
+
                 Route::name('accounting.')->prefix('accounting')
                     ->group(function (): void {
                         Route::get('/work-times', WorkTimeList::class)->name('work-times');
@@ -267,6 +288,13 @@ Route::middleware('web')
                         Route::get('/vat-rates', VatRates::class)->name('vat-rates');
                         Route::get('/warehouses', Warehouses::class)->name('warehouses');
                         Route::get('/work-time-types', WorkTimeTypes::class)->name('work-time-types');
+                        Route::get('/work-time-models', WorkTimeModels::class)->name('work-time-models');
+                        Route::get('/absence-types', AbsenceTypes::class)->name('absence-types');
+                        Route::get('/hr-user-settings', HrUserSettings::class)->name('hr-user-settings');
+                        Route::get('/holidays', Holidays::class)->name('holidays');
+                        Route::get('/locations', Locations::class)->name('locations');
+                        Route::get('/vacation-carryover-rules', VacationCarryoverRules::class)->name('vacation-carryover-rules');
+                        Route::get('/vacation-blackouts', VacationBlackouts::class)->name('vacation-blackouts');
                     });
 
                 Route::get('/media', MediaGrid::class)

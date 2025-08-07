@@ -36,6 +36,7 @@ use FluxErp\Models\FormBuilderFieldResponse;
 use FluxErp\Models\FormBuilderForm;
 use FluxErp\Models\FormBuilderResponse;
 use FluxErp\Models\FormBuilderSection;
+use FluxErp\Models\Holiday;
 use FluxErp\Models\Industry;
 use FluxErp\Models\JobBatch;
 use FluxErp\Models\Language;
@@ -44,6 +45,7 @@ use FluxErp\Models\Lead;
 use FluxErp\Models\LeadLossReason;
 use FluxErp\Models\LeadState;
 use FluxErp\Models\LedgerAccount;
+use FluxErp\Models\Location;
 use FluxErp\Models\Lock;
 use FluxErp\Models\Log;
 use FluxErp\Models\MailAccount;
@@ -74,6 +76,8 @@ use FluxErp\Models\Pivots\ProductBundleProduct;
 use FluxErp\Models\Pivots\ProductCrossSellingProduct;
 use FluxErp\Models\Pivots\ProductProductOption;
 use FluxErp\Models\Pivots\QueueMonitorable;
+use FluxErp\Models\Pivots\VacationBlackoutRole;
+use FluxErp\Models\Pivots\VacationBlackoutUser;
 use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Printer;
@@ -106,10 +110,15 @@ use FluxErp\Models\Token;
 use FluxErp\Models\Transaction;
 use FluxErp\Models\Unit;
 use FluxErp\Models\User;
+use FluxErp\Models\VacationBlackout;
+use FluxErp\Models\VacationCarryoverRule;
 use FluxErp\Models\VatRate;
 use FluxErp\Models\Warehouse;
 use FluxErp\Models\Widget;
 use FluxErp\Models\WorkTime;
+use FluxErp\Models\AbsenceType;
+use FluxErp\Models\WorkTimeModel;
+use FluxErp\Models\WorkTimeModelSchedule;
 use FluxErp\Models\WorkTimeType;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
@@ -153,6 +162,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'form_builder_form' => FormBuilderForm::class,
             'form_builder_response' => FormBuilderResponse::class,
             'form_builder_section' => FormBuilderSection::class,
+            'holiday' => Holiday::class,
             'industry' => Industry::class,
             'job_batch' => JobBatch::class,
             'language' => Language::class,
@@ -161,6 +171,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'lead_loss_reason' => LeadLossReason::class,
             'lead_state' => LeadState::class,
             'ledger_account' => LedgerAccount::class,
+            'location' => Location::class,
             'lock' => Lock::class,
             'log' => Log::class,
             'mail_account' => MailAccount::class,
@@ -210,10 +221,15 @@ class MorphMapServiceProvider extends ServiceProvider
             'transaction' => Transaction::class,
             'unit' => Unit::class,
             'user' => User::class,
+            'vacation_blackout' => VacationBlackout::class,
+            'vacation_carryover_rule' => VacationCarryoverRule::class,
             'vat_rate' => VatRate::class,
             'warehouse' => Warehouse::class,
             'widget' => Widget::class,
             'work_time' => WorkTime::class,
+            'absence_type' => AbsenceType::class,
+            'work_time_model' => WorkTimeModel::class,
+            'work_time_model_schedule' => WorkTimeModelSchedule::class,
             'work_time_type' => WorkTimeType::class,
 
             'address_address_type_order' => AddressAddressTypeOrder::class,
@@ -230,6 +246,8 @@ class MorphMapServiceProvider extends ServiceProvider
             'product_cross_selling_product' => ProductCrossSellingProduct::class,
             'product_product_option' => ProductProductOption::class,
             'queue_monitorable' => QueueMonitorable::class,
+            'vacation_blackout_role' => VacationBlackoutRole::class,
+            'vacation_blackout_user' => VacationBlackoutUser::class,
         ]);
     }
 }

@@ -257,11 +257,25 @@ class FluxServiceProvider extends ServiceProvider
             }
         );
 
+        Menu::group(
+            path: 'human-resources',
+            icon: 'users',
+            label: 'Human Resources',
+            closure: function (): void {
+                Menu::register(route: 'human-resources.dashboard');
+                Menu::register(route: 'human-resources.absence-requests');
+                Menu::register(route: 'human-resources.attendance-overview', icon: 'user-group');
+                Menu::register(route: 'human-resources.calendar');
+                Menu::register(route: 'human-resources.reports');
+            }
+        );
+
         Menu::register(route: 'mail', icon: 'envelope');
         Menu::register(route: 'calendars', icon: 'calendar');
 
         Menu::register(route: 'media-grid', icon: 'photo', label: 'media');
         Menu::register(route: 'settings', icon: 'cog', label: 'settings');
+
 
         Menu::group(
             path: 'settings',
@@ -290,6 +304,15 @@ class FluxServiceProvider extends ServiceProvider
                 Menu::register(route: 'settings.discount-groups');
                 Menu::register(route: 'settings.languages');
                 Menu::register(route: 'settings.ledger-accounts');
+
+                Menu::register(route: 'settings.work-time-models');
+                Menu::register(route: 'settings.absence-types');
+                Menu::register(route: 'settings.vacation-carryover-rules');
+                Menu::register(route: 'settings.vacation-blackouts');
+                Menu::register(route: 'settings.holidays');
+                Menu::register(route: 'settings.locations');
+                Menu::register(route: 'settings.hr-user-settings');
+
                 Menu::register(route: 'settings.logs');
                 Menu::register(route: 'settings.activity-logs');
                 Menu::register(route: 'settings.notifications');
