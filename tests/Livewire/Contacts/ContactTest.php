@@ -21,10 +21,14 @@ class ContactTest extends TestCase
             'client_id' => $dbClient->id,
         ]);
 
-        Address::factory()->create([
+        $address = Address::factory()->create([
             'client_id' => $dbClient->id,
             'contact_id' => $this->contact->id,
             'is_main_address' => true,
+        ]);
+
+        $this->contact->update([
+            'main_address_id' => $address->id,
         ]);
     }
 
