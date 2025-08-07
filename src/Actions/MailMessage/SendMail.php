@@ -11,14 +11,13 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 use Laravel\SerializableClosure\SerializableClosure;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Throwable;
 
 class SendMail extends DispatchableFluxAction
 {
-    protected mixed $compiledBladeParameters = null;
-
     public static function models(): array
     {
         return [Communication::class];
@@ -31,7 +30,7 @@ class SendMail extends DispatchableFluxAction
 
     public function performAction(): array
     {
-        $mail = GenericMail::make($this->data, $this->compiledBladeParameters);
+        $mail = GenericMail::make($this->data, $this->getData('blade_parameters'));
 
         try {
             $message = Mail::to($this->getData('to'))
@@ -59,8 +58,8 @@ class SendMail extends DispatchableFluxAction
 
     protected function applyTemplate(
         EmailTemplate $template,
-        array|SerializableClosure|null $bladeParameters
     ): void {
+        $bladeParameters = $this->getData('blade_parameters');
         $templateData = $bladeParameters instanceof SerializableClosure
             ? $bladeParameters->getClosure()()
             : $bladeParameters ?? [];
@@ -116,20 +115,30 @@ class SendMail extends DispatchableFluxAction
             )
         );
 
-        $bladeParameters = data_get($this->data, 'blade_parameters');
-        if (data_get($this->data, 'blade_parameters_serialized') && is_string($bladeParameters)) {
+        $bladeParameters = $this->getData('blade_parameters');
+        if ($this->getData('blade_parameters_serialized') && is_string($bladeParameters)) {
             $bladeParameters = unserialize($bladeParameters);
         }
-        $this->compiledBladeParameters = $bladeParameters;
 
-        $templateId = data_get($this->data, 'template_id');
-        if ($templateId) {
+        if (! $bladeParameters instanceof SerializableClosure
+            && ! is_array($bladeParameters)
+            && ! is_null($bladeParameters)
+        ) {
+            throw ValidationException::withMessages([
+                'blade_parameters' => [__('The blade parameters must be null, an array or a serialized closure.')],
+            ])
+                ->errorBag('sendMail');
+        }
+
+        $this->data['blade_parameters'] = $bladeParameters;
+
+        if ($this->getData('template_id')) {
             $template = resolve_static(EmailTemplate::class, 'query')
-                ->whereKey($templateId)
+                ->whereKey($this->getData('template_id'))
                 ->first();
 
             if ($template) {
-                $this->applyTemplate($template, $bladeParameters);
+                $this->applyTemplate($template);
             }
         }
 

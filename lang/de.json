@@ -1808,6 +1808,7 @@
     "Text Html": "HTML",
     "Texts": "Texte",
     "Thank you for your order!": "Vielen Dank für Ihre Bestellung!",
+    "The blade parameters must be null, an array or a serialized closure.": "Die Blade-Parameter müssen null, ein Array oder ein serialisiertes Closure sein.",
     "The contact has a delivery lock": "Der Kontakt hat eine Lieferungssperre",
     "The credit line of the contact is exceeded": "Die Kreditlinie des Kontakts wurde überschritten",
     "The given columns must be unique.": "Jede Spalte darf nur einmal angegeben werden.",
