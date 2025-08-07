@@ -3,8 +3,8 @@
 namespace FluxErp\Livewire;
 
 use Exception;
+use FluxErp\Actions\MailMessage\SendMail;
 use FluxErp\Livewire\Forms\CommunicationForm;
-use FluxErp\Mail\GenericMail;
 use FluxErp\Models\EmailTemplate;
 use FluxErp\Models\Media;
 use FluxErp\Traits\Livewire\Actions;
@@ -15,12 +15,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Facades\Mail;
 use Laravel\SerializableClosure\SerializableClosure;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Throwable;
 
 class EditMail extends Component
 {
@@ -295,6 +295,7 @@ class EditMail extends Component
     public function send(): bool
     {
         $editedMailMessage = $this->mailMessage->toArray();
+
         if (! $this->mailMessages && ! $this->sessionKey) {
             $this->mailMessages = [$this->mailMessage];
         } else {
@@ -302,87 +303,92 @@ class EditMail extends Component
         }
 
         $single = count($this->mailMessages) === 1;
-        if (! $single) {
-            unset($editedMailMessage['to']);
-        }
-
-        $templateAttachments = [];
-        if (
-            $this->selectedTemplateId
-            && $template = resolve_static(EmailTemplate::class, 'query')
-                ->whereKey($this->selectedTemplateId)
-                ->first()
-        ) {
-            $templateAttachments = $template->getMedia()
-                ->map(
-                    fn (\Spatie\MediaLibrary\MediaCollections\Models\Media $media) => [
-                        'id' => $media->getKey(),
-                        'name' => $media->file_name,
-                    ]
-                )
-                ->toArray();
-        }
-
-        $bcc = $this->mailMessage->bcc;
-        $cc = $this->mailMessage->cc;
-        $exceptions = 0;
+        $successCount = 0;
+        $failedCount = 0;
 
         foreach ($this->mailMessages as $mailMessage) {
-            $bladeParameters = $this->getBladeParameters($mailMessage);
-
-            if (! $mailMessage instanceof CommunicationForm) {
-                $this->mailMessage->reset();
-
-                $originalAttachments = data_get($mailMessage, 'attachments') ?? [];
-                $mergedAttachments = array_merge($originalAttachments, $templateAttachments);
-
-                $this->mailMessage->fill(array_merge(
-                    $mailMessage,
-                    array_filter($editedMailMessage),
-                    [
-                        'bcc' => $bcc,
-                        'attachments' => $mergedAttachments,
-                    ]
-                ));
-            }
-
-            $mail = GenericMail::make($this->mailMessage, $bladeParameters);
             try {
-                $message = Mail::to($this->mailMessage->to)
-                    ->cc($cc)
-                    ->bcc($bcc);
+                $data = is_array($mailMessage)
+                    ? $mailMessage
+                    : $mailMessage->toArray();
 
-                if ($single) {
-                    $message->send($mail);
+                if (! $single) {
+                    $editedWithoutTo = $editedMailMessage;
+                    unset($editedWithoutTo['to']);
+                    $data = array_merge($data, array_filter($editedWithoutTo));
                 } else {
-                    $message->queue($mail);
+                    $data = array_merge($data, array_filter($editedMailMessage));
                 }
-            } catch (Exception $e) {
+
+                $data['template_id'] = $this->selectedTemplateId;
+
+                $bladeParams = data_get($mailMessage, 'blade_parameters');
+                if (data_get($mailMessage, 'blade_parameters_serialized') && is_string($bladeParams)) {
+                    $bladeParams = unserialize($bladeParams);
+                }
+
+                if ($bladeParams instanceof SerializableClosure) {
+                    $data['blade_parameters'] = serialize($bladeParams);
+                    $data['blade_parameters_serialized'] = true;
+                } elseif (! is_null($bladeParams)) {
+                    $data['blade_parameters'] = $bladeParams;
+                }
+
+                $data['queue'] = ! $single;
+
+                $result = SendMail::make($data)
+                    ->validate()
+                    ->execute();
+
+                if (data_get($result, 'success')) {
+                    $successCount++;
+                } else {
+                    $failedCount++;
+
+                    if ($single) {
+                        exception_to_notifications(
+                            exception: new Exception(
+                                data_get($result, 'error') ?? data_get($result, 'message')
+                            ),
+                            component: $this,
+                            description: data_get($data, 'subject')
+                        );
+
+                        return false;
+                    }
+                }
+            } catch (Throwable $e) {
+                $failedCount++;
                 exception_to_notifications(
                     exception: $e,
                     component: $this,
-                    description: $this->mailMessage->subject
+                    description: data_get($mailMessage, 'subject')
                 );
 
-                if ($this->multiple) {
-                    $exceptions++;
-
-                    continue;
+                if ($single) {
+                    return false;
                 }
-
-                return false;
             }
         }
 
-        if ($exceptions === 0) {
-            $this->notification()->success(__('Email(s) sent successfully!'))->send();
+        if ($failedCount === 0) {
+            $this->notification()
+                ->success(__('Email(s) sent successfully!'))
+                ->send();
+        } elseif ($successCount === 0) {
+            $this->notification()
+                ->error(__('Failed to send emails!'))
+                ->send();
+        } else {
+            $this->notification()
+                ->warning(__(':success email(s) sent, :failed failed', [
+                    'success' => $successCount,
+                    'failed' => $failedCount,
+                ]))
+                ->send();
         }
 
-        if (count($this->mailMessages) === $exceptions) {
-            $this->notification()->error(__('Failed to send emails!'))->send();
-        }
-
-        return true;
+        return $failedCount === 0;
     }
 
     #[Renderless]
