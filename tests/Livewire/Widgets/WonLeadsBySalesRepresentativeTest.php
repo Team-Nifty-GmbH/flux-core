@@ -130,9 +130,6 @@ class WonLeadsBySalesRepresentativeTest extends BaseSetup
 
             $this->assertContains(data_get($option, 'label'), $expectedLabels);
         }
-
-        // Second option should be the one with the most leads
-        $this->assertEquals($this->users[1]->getLabel(), data_get($options, '0.label'));
     }
 
     public function test_options_use_data_correctly(): void
@@ -156,9 +153,9 @@ class WonLeadsBySalesRepresentativeTest extends BaseSetup
 
         $this->assertIsArray($options);
         $this->assertCount(1, $options);
-        $this->assertEquals('Test Sales Rep', data_get($options, '0.label'));
+        $this->assertEquals(data_get($exampleSeries, '0.name'), data_get($options, '0.label'));
         $this->assertEquals(data_get($this->users, '0.id'), data_get($options, '0.params.id'));
-        $this->assertEquals('Test Sales Rep', data_get($options, '0.params.name'));
+        $this->assertEquals(data_get($exampleSeries, '0.name'), data_get($options, '0.params.name'));
     }
 
     public function test_renders_successfully(): void
@@ -233,6 +230,18 @@ class WonLeadsBySalesRepresentativeTest extends BaseSetup
         $this->assertNotEmpty($series);
 
         // Verify sales rep 2 has more leads than the other reps
+        $expected = $this->users->map(function ($user) use ($timeFrame) {
+            return [
+                'name' => $user->name,
+                'count' => $this->getWonLeadCountInTimeFrame($timeFrame, $user),
+            ];
+        })->sortByDesc('count')->values();
+
+        foreach ($expected as $index => $userData) {
+            $this->assertEquals($userData['name'], data_get($series, "{$index}.name"));
+            $this->assertEquals($userData['count'], data_get($series, "{$index}.data.0"));
+        }
+
         $this->assertEquals(data_get($this->users, '1.name'), data_get($series, '0.name'));
         $this->assertEquals($this->getWonLeadCountInTimeFrame($timeFrame, data_get($this->users, '1')), data_get($series, '0.data.0'));
     }

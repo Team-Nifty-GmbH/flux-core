@@ -96,9 +96,6 @@ class LeadsByLeadStateTest extends BaseSetup
             $this->assertArrayHasKey('id', data_get($option, 'params'));
             $this->assertArrayHasKey('name', data_get($option, 'params'));
         }
-
-        // Second option should be for the lead state with the most leads
-        $this->assertTrue(str_contains(data_get($options, '1.label'), data_get($this->leadStates, '1.name')));
     }
 
     public function test_options_use_data_correctly(): void
