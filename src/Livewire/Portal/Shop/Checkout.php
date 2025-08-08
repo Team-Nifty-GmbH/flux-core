@@ -82,8 +82,10 @@ class Checkout extends Cart
             ])->validate()->execute();
         }
 
-        $this->notification()->success('Order placed successfully!')->send();
-        event(new PortalOrderCreated($order));
+        $this->notification()
+            ->success('Order placed successfully!')
+            ->send();
+        event(PortalOrderCreated::make($order));
 
         if (auth('address')->check()) {
             Mail::to(auth('address')->user())->queue(OrderConfirmation::make($order->refresh()));

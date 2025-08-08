@@ -3,11 +3,13 @@
 namespace FluxErp\Actions\Task;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Events\Task\TaskAssignedEvent;
 use FluxErp\Models\Tag;
 use FluxErp\Models\Task;
 use FluxErp\Rulesets\Task\UpdateTaskRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 
 class UpdateTask extends FluxAction
 {
@@ -31,11 +33,24 @@ class UpdateTask extends FluxAction
         $orderPositions = Arr::pull($this->data, 'order_positions');
         $tags = Arr::pull($this->data, 'tags');
 
-        $task->fill($this->data);
-        $task->save();
-
         if (! is_null($users)) {
-            $task->users()->sync($users);
+            $result = $task->users()->sync($users);
+
+            event(TaskAssignedEvent::make($task)
+                ->subscribeChannel(collect(data_get($result, 'attached'))
+                    ->when(
+                        $this->getData('responsible_user_id') !== $task->responsible_user_id,
+                        fn (Collection $users) => $users->add($this->getData('responsible_user_id'))
+                    )
+                )
+                ->unsubscribeChannel(collect(data_get($result, 'detached'))
+                    ->when(
+                        $this->getData('responsible_user_id') !== $task->responsible_user_id
+                        && ! is_null($task->responsible_user_id),
+                        fn (Collection $users) => $users->add($task->responsible_user_id)
+                    )
+                )
+            );
         }
 
         if (! is_null($orderPositions)) {
@@ -50,6 +65,9 @@ class UpdateTask extends FluxAction
         if (! is_null($tags)) {
             $task->syncTags(resolve_static(Tag::class, 'query')->whereIntegerInRaw('id', $tags)->get());
         }
+
+        $task->fill($this->data);
+        $task->save();
 
         return $task->withoutRelations()->fresh();
     }

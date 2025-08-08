@@ -6,6 +6,7 @@ use FluxErp\Casts\Money;
 use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Traits\Categorizable;
 use FluxErp\Traits\Commentable;
+use FluxErp\Traits\HasNotificationSubscriptions;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasParentChildRelations;
 use FluxErp\Traits\HasTags;
@@ -23,8 +24,8 @@ use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 
 class Transaction extends FluxModel implements InteractsWithDataTables
 {
-    use Categorizable, Commentable, HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasTags,
-        HasUserModification, HasUuid, LogsActivity, Searchable, SoftDeletes;
+    use Categorizable, Commentable, HasFrontendAttributes, HasNotificationSubscriptions, HasPackageFactory,
+        HasParentChildRelations, HasTags, HasUserModification, HasUuid, LogsActivity, Searchable, SoftDeletes;
 
     protected static function booted(): void
     {

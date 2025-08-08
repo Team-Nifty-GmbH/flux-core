@@ -1,3 +1,4 @@
+@use(\Illuminate\Support\Str)
 <div
     class="p-10"
     x-data="{
@@ -78,7 +79,9 @@
         @foreach ($notificationSettings as $notificationName => $notification)
             <tr>
                 <td>
-                    <div>{{ $notificationName }}</div>
+                    <div>
+                        {{ __( Str::of(class_basename($notificationName))->before('Notification')->headline()->toString(),) }}
+                    </div>
                 </td>
                 @foreach ($notification as $channel => $channelSettings)
                     <td>

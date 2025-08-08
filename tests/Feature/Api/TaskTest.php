@@ -8,11 +8,13 @@ use FluxErp\Models\Permission;
 use FluxErp\Models\Project;
 use FluxErp\Models\Task;
 use FluxErp\Models\User;
+use FluxErp\Notifications\Task\TaskAssignedNotification;
 use FluxErp\States\Task\Done;
 use FluxErp\States\Task\Open;
 use FluxErp\Tests\Feature\BaseSetup;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
@@ -127,8 +129,12 @@ class TaskTest extends BaseSetup
 
     public function test_create_task(): void
     {
+        Notification::fake();
+        config(['queue.default' => 'sync']);
+
         $users = User::factory()->count(3)->create([
             'language_id' => $this->user->language_id,
+            'is_active' => true,
         ]);
 
         $task = [
@@ -176,6 +182,23 @@ class TaskTest extends BaseSetup
         $this->assertTrue($this->user->is($dbTask->getCreatedBy()));
         $this->assertTrue($this->user->is($dbTask->getUpdatedBy()));
         $this->assertEquals($task['users'], $dbTask->users()->pluck('users.id')->toArray());
+
+        Notification::assertSentTo(
+            User::query()
+                ->whereKeyNot($this->user->getKey())
+                ->whereIntegerInRaw(
+                    'id',
+                    array_filter(
+                        array_merge(
+                            data_get($task, 'users'),
+                            [data_get($task, 'responsible_user_id')]
+                        )
+                    )
+                )
+                ->get(),
+            TaskAssignedNotification::class
+        );
+        Notification::assertNothingSentTo($this->user);
 
         foreach ($this->additionalColumns as $additionalColumn) {
             $this->assertEquals($task[$additionalColumn->name], $responseTask->{$additionalColumn->name});

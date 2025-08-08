@@ -2,47 +2,68 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Traits\HasNotificationSubscriptions;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasParentChildRelations;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\InteractsWithMedia;
 use FluxErp\Traits\LogsActivity;
+use FluxErp\Traits\Notifiable;
 use FluxErp\Traits\SoftDeletes;
-use Illuminate\Broadcasting\Channel;
-use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Spatie\MediaLibrary\HasMedia;
 
 class Comment extends FluxModel implements HasMedia
 {
-    use HasPackageFactory, HasParentChildRelations, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity,
+    use HasNotificationSubscriptions, HasPackageFactory, HasParentChildRelations, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity,
         SoftDeletes;
 
     protected $appends = [
         'user',
     ];
 
+    protected $guarded = [
+        'id',
+    ];
+
     protected $hidden = [
         'model_type',
     ];
+
+    public static function getGenericChannelEvents(): array
+    {
+        return [];
+    }
 
     public static function restoring($callback): void
     {
         static::registerModelEvent('restoring', $callback);
     }
 
-    /**
-     * Get the channels that model events should broadcast on.
-     *
-     * @param  string  $event
-     */
-    public function broadcastOn($event): array|Channel
+    protected static function booted(): void
     {
-        return new PrivateChannel(
-            str_replace('\\', '.', $this->model_type) . '.' . $this->model_id
-        );
+        static::saving(function (Comment $comment): void {
+            if ($comment->isDirty('comment')) {
+                preg_match_all('/data-id="([^:]+:\d+)"/', $comment->comment, $matches);
+                collect(data_get($matches, 1, []))
+                    ->map(fn (string $mention) => morph_to($mention))
+                    ->filter() // filter null values if morph was not possible
+                    ->filter(function (Model $notifiable) {
+                        return in_array(Notifiable::class, class_uses_recursive($notifiable));
+                    })
+                    ->each(function (Model $notifiable) use ($comment): void {
+                        $notifiable->subscribeNotificationChannel($comment->broadcastChannel());
+                    });
+            }
+        });
+    }
+
+    public function broadcastChannel(): string
+    {
+        return str_replace('\\', '.', morphed_model($this->model_type)) . '.' . $this->model_id;
     }
 
     public function broadcastWith(): array

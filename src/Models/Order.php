@@ -29,6 +29,7 @@ use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasFrontendAttributes;
+use FluxErp\Traits\HasNotificationSubscriptions;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasParentChildRelations;
 use FluxErp\Traits\HasRelatedModel;
@@ -67,8 +68,9 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 class Order extends FluxModel implements HasMedia, InteractsWithDataTables, OffersPrinting, Targetable
 {
     use CascadeSoftDeletes, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasClientAssignment,
-        HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasRelatedModel, HasSerialNumberRange,
-        HasStates, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable;
+        HasFrontendAttributes, HasNotificationSubscriptions, HasPackageFactory, HasParentChildRelations,
+        HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification, HasUuid, InteractsWithMedia,
+        LogsActivity, Printable;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }
@@ -372,6 +374,11 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
     public function agent(): BelongsTo
     {
         return $this->belongsTo(User::class, 'agent_id');
+    }
+
+    public function approvalUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approval_user_id');
     }
 
     public function calculateBalance(): static

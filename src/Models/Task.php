@@ -8,6 +8,7 @@ use FluxErp\Casts\Money;
 use FluxErp\Casts\TimeDuration;
 use FluxErp\Contracts\Calendarable;
 use FluxErp\Contracts\Targetable;
+use FluxErp\Models\Pivots\TaskUser;
 use FluxErp\States\Task\TaskState;
 use FluxErp\Support\Scout\ScoutCustomize;
 use FluxErp\Traits\Categorizable;
@@ -15,6 +16,7 @@ use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasFrontendAttributes;
+use FluxErp\Traits\HasNotificationSubscriptions;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasTags;
 use FluxErp\Traits\HasUserModification;
@@ -37,7 +39,7 @@ use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDataTables, Targetable
 {
     use Categorizable, Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes,
-        HasPackageFactory, HasStates, HasTags, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity,
+        HasNotificationSubscriptions, HasPackageFactory, HasStates, HasTags, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity,
         SoftDeletes, Trackable;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
@@ -257,6 +259,6 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
 
     public function users(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'task_user');
+        return $this->belongsToMany(User::class, 'task_user')->using(TaskUser::class);
     }
 }

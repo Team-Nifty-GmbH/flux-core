@@ -11,6 +11,7 @@ use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasClientAssignment;
+use FluxErp\Traits\HasNotificationSubscriptions;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasParentChildRelations;
 use FluxErp\Traits\HasSerialNumberRange;
@@ -32,9 +33,9 @@ use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 
 class Project extends FluxModel implements Calendarable, HasMedia, InteractsWithDataTables
 {
-    use Commentable, Filterable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes, HasPackageFactory,
-        HasParentChildRelations, HasSerialNumberRange, HasStates, HasTags, HasUserModification, HasUuid,
-        InteractsWithMedia, LogsActivity, SoftDeletes;
+    use Commentable, Filterable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes,
+        HasNotificationSubscriptions, HasPackageFactory, HasParentChildRelations, HasSerialNumberRange, HasStates,
+        HasTags, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, SoftDeletes;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }
