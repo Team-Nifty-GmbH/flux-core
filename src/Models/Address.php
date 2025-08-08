@@ -171,7 +171,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
 
             $contactUpdates = [];
             $addressesUpdates = [];
-            if ($address->wasChanged('contact_id') && ! $address->wasChanged($address->getKeyName())) {
+            if ($address->wasChanged('contact_id')) {
                 $previousContactId = data_get($address->getPrevious(), 'contact_id');
                 if (! $oldContactHasAddresses = resolve_static(Address::class, 'query')
                     ->where('contact_id', $previousContactId)
@@ -238,7 +238,9 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                 }
             }
 
-            if ($address->wasChanged('is_main_address') && $address->is_main_address) {
+            if (($address->wasRecentlyCreated || $address->wasChanged('is_main_address'))
+                && $address->is_main_address
+            ) {
                 $contactUpdates += [
                     'main_address_id' => $address->id,
                 ];
@@ -248,7 +250,9 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                 ];
             }
 
-            if ($address->wasChanged('is_invoice_address') && $address->is_invoice_address) {
+            if (($address->wasRecentlyCreated || $address->wasChanged('is_invoice_address'))
+                && $address->is_invoice_address
+            ) {
                 $contactUpdates += [
                     'invoice_address_id' => $address->id,
                 ];
@@ -258,7 +262,9 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
                 ];
             }
 
-            if ($address->wasChanged('is_delivery_address') && $address->is_delivery_address) {
+            if (($address->wasRecentlyCreated || $address->wasChanged('is_delivery_address'))
+                && $address->is_delivery_address
+            ) {
                 $contactUpdates += [
                     'delivery_address_id' => $address->id,
                 ];

@@ -26,14 +26,10 @@ class ContactsTest extends BaseSetup
             'payment_type_id' => $paymentType->id,
         ]);
 
-        $address = Address::factory()->create([
+        Address::factory()->create([
             'client_id' => $this->dbClient->getKey(),
             'contact_id' => $this->contact->id,
             'is_main_address' => true,
-        ]);
-
-        $this->contact->update([
-            'main_address_id' => $address->id,
         ]);
     }
 
