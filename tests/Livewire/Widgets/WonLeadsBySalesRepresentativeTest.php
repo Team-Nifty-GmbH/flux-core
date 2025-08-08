@@ -229,21 +229,19 @@ class WonLeadsBySalesRepresentativeTest extends BaseSetup
         $this->assertIsArray($series);
         $this->assertNotEmpty($series);
 
-        // Verify sales rep 2 has more leads than the other reps
         $expected = $this->users->map(function ($user) use ($timeFrame) {
             return [
                 'name' => $user->name,
                 'count' => $this->getWonLeadCountInTimeFrame($timeFrame, $user),
             ];
-        })->sortByDesc('count')->values();
+        })
+            ->sortByDesc('count')
+            ->values();
 
         foreach ($expected as $index => $userData) {
             $this->assertEquals($userData['name'], data_get($series, "{$index}.name"));
             $this->assertEquals($userData['count'], data_get($series, "{$index}.data.0"));
         }
-
-        $this->assertEquals(data_get($this->users, '1.name'), data_get($series, '0.name'));
-        $this->assertEquals($this->getWonLeadCountInTimeFrame($timeFrame, data_get($this->users, '1')), data_get($series, '0.data.0'));
     }
 
     private function getWonLeadCountInTimeFrame(TimeFrameEnum $timeFrame, User $user): int
