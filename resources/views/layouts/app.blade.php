@@ -53,9 +53,13 @@
 
         @auth('web')
             <script>
-                document.addEventListener('livewire:navigated', () => {
-                    Echo.join('presence_channel');
-                }, { once: true });
+                document.addEventListener(
+                    'livewire:navigated',
+                    () => {
+                        Echo.join('presence_channel');
+                    },
+                    { once: true },
+                );
             </script>
             @persist('mail')
                 <div id="mail">
