@@ -53,9 +53,9 @@
 
         @auth('web')
             <script>
-                document.addEventListener('DOMContentLoaded', () => {
+                document.addEventListener('livewire:navigated', () => {
                     Echo.join('presence_channel');
-                });
+                }, { once: true });
             </script>
             @persist('mail')
                 <div id="mail">
