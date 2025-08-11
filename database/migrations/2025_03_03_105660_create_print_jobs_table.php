@@ -10,9 +10,9 @@ return new class() extends Migration
     {
         Schema::create('print_jobs', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('media_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('printer_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('media_id')->constrained('media')->cascadeOnDelete();
+            $table->foreignId('printer_id')->nullable()->constrained('printers')->nullOnDelete();
+            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->unsignedInteger('quantity')->default(1);
             $table->string('size');
             $table->boolean('is_completed')->default(false);
