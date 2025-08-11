@@ -259,7 +259,7 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         $revenue = data_get($this->attributes, 'expected_revenue');
 
         $this->attributes['weighted_revenue'] = ($prob !== null && $revenue !== null)
-            ? bcmul($prob, $revenue, 2)
+            ? bcmul($prob, $revenue)
             : null;
     }
 }
