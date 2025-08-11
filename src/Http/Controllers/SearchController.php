@@ -150,9 +150,13 @@ class SearchController extends Controller
 
         if ($request->has('whereHas')) {
             $whereHas = $request->get('whereHas');
-            if (is_array($whereHas) && array_is_list($whereHas)) {
-                foreach ($whereHas as $relation) {
-                    $query->whereHas($relation);
+            if (is_array($whereHas)) {
+                foreach ($whereHas as $relation => $conditions) {
+                    $query->whereHas($relation, function (Builder $q) use ($conditions): void {
+                        foreach ($conditions as $condition) {
+                            $q->where(...$condition);
+                        }
+                    });
                 }
             } else {
                 $query->whereHas($whereHas);
