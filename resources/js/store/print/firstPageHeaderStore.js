@@ -37,6 +37,18 @@ export default function () {
         get selectedElementId() {
             return this._selectedElement.id;
         },
+        get selectedElementPos() {
+            if (
+                this._selectedElement.x !== null &&
+                this._selectedElement.y !== null
+            ) {
+                return {
+                    x: this._selectedElement.x,
+                    y: this._selectedElement.y,
+                };
+            }
+            return { x: 0, y: 0 };
+        },
         onMouseDownFirstPageHeader(e) {
             this.isFirstPageHeaderClicked = true;
             this.startPointFirstPageHeaderVertical = e.clientY;
@@ -134,7 +146,7 @@ export default function () {
                 this.observer.disconnect();
             }
 
-            // if client is not chaged - Livewire will not remove the cloned elements
+            // if client is not changed - Livewire will not remove the cloned elements
             if (!isClientChange) {
                 this.visibleElements.forEach((item) => {
                     this.firsPageHeader.removeChild(item.element);
@@ -159,7 +171,7 @@ export default function () {
                 // height will be from the previous state
 
                 // IN OTHER STORES WE DON'T NEED nextTick, SINCE THERE FIRST THE  CLIENT RELATED DATA IS FETCHED
-                // HENCE REST OF THE CODE IS EXECUTED ON THE NEXT EVENT LOOP CYCLE - WHERE DOME IS SYNCED
+                // HENCE REST OF THE CODE IS EXECUTED ON THE NEXT EVENT LOOP CYCLE - WHERE DOM IS SYNCED
                 await nextTick();
 
                 // element order is important - since they are relatively ordered to each other
@@ -311,6 +323,7 @@ export default function () {
                     const index = children.findIndex((el) => el.id === item.id);
                     if (index !== -1) {
                         const child = children[index];
+                        // TODO: batch all init calls - in separate for each loop, after json is parsed  - performance reasons
                         this.visibleElements.push(
                             new PrintElement(child, this).init({
                                 x: item.x * this.pxPerCm,

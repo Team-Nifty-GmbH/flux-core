@@ -1,6 +1,10 @@
 <div
-
-{{--    x-init="firstPageHeaderStore.register($wire, $refs)"--}}
+    x-on:mouseup.window="firstPageHeaderStore.onMouseUp()"
+    x-on:mousemove.window="
+        firstPageHeaderStore.selectedElementId !== null
+            ? firstPageHeaderStore.onMouseMove($event)
+            : null
+    "
     class="relative w-full box-border">
     <div
         x-on:mouseup.window="firstPageHeaderStore.onMouseUpFirstPageHeader($event)"
@@ -42,14 +46,30 @@
         </div>
     </div>
     {{-- UI - first page header - height related --}}
+    {{-- UI position of a selected element --}}
+    <div x-cloak x-show="firstPageHeaderStore.selectedElementId !== null"
+         :style="{'transform': `translate(${firstPageHeaderStore.selectedElementPos.x -50}px,${firstPageHeaderStore.selectedElementPos.y}px)` }"
+         class="absolute left-0 top-0 z-[100] rounded shadow p-2 bg-gray-100">
+        <div x-text="`${roundToOneDecimal(firstPageHeaderStore.selectedElementPos.x / firstPageHeaderStore.pxPerCm)}cm`"></div>
+    </div>
+    <div x-cloak x-show="firstPageHeaderStore.selectedElementId !== null"
+         :style="{'transform': `translate(${firstPageHeaderStore.selectedElementPos.x}px,${firstPageHeaderStore.selectedElementPos.y - 40}px)` }"
+         class="absolute left-0 top-0 z-[100] rounded shadow p-2 bg-gray-100">
+        <div x-text="`${roundToOneDecimal(firstPageHeaderStore.selectedElementPos.y / firstPageHeaderStore.pyPerCm)}cm`"></div>
+    </div>
+    {{-- UI position of a selected element --}}
     <template
         id="{{ $client->id }}"
         x-ref="first-page-header-client-name"
     >
             <div
+                draggable="false"
                 id="first-page-header-client-name"
                 data-type="container"
-                class="absolute left-0 top-0 text-5xl font-semibold select-none">
+                class="absolute left-0 top-0 text-5xl font-semibold select-none"
+                :class="{'bg-gray-300' : firstPageHeaderStore.selectedElementId === 'first-page-header-client-name'}"
+                x-on:mousedown="printStore.editFirstPageHeader ?  firstPageHeaderStore.onMouseDown($event, 'first-page-header-client-name') : null"
+            >
                 {{ $client->name }}
             </div>
     </template>
@@ -60,7 +80,11 @@
         <div
             id="first-page-header-postal-address-one-line"
             data-type="container"
-            class="absolute left-0 top-0 text-2xs w-fit select-none">
+            draggable="false"
+            class="absolute left-0 top-0 text-2xs w-fit select-none"
+            :class="{'bg-gray-300' : firstPageHeaderStore.selectedElementId === 'first-page-header-postal-address-one-line'}"
+            x-on:mousedown="printStore.editFirstPageHeader ?  firstPageHeaderStore.onMouseDown($event, 'first-page-header-postal-address-one-line') : null"
+        >
             <div>
                 {{ $client->postal_address_one_line }}
             </div>
@@ -74,7 +98,11 @@
         <address
             id="first-page-header-address"
             data-type="container"
-            class="absolute left-0 top-0 text-xs not-italic select-none">
+            draggable="false"
+            class="absolute left-0 top-0 text-xs not-italic select-none"
+            :class="{'bg-gray-300' : firstPageHeaderStore.selectedElementId === 'first-page-header-address'}"
+            x-on:mousedown="printStore.editFirstPageHeader ?  firstPageHeaderStore.onMouseDown($event, 'first-page-header-address') : null"
+        >
             <div class="font-semibold">
                 {{ $address->company ?? '' }}
             </div>
@@ -104,7 +132,11 @@
         <h1
             id="first-page-header-subject"
             data-type="container"
-            class="absolute left-0 top-0 text-xl font-semibold select-none">
+            draggable="false"
+            class="absolute left-0 top-0 text-xl font-semibold select-none"
+            :class="{'bg-gray-300' : firstPageHeaderStore.selectedElementId === 'first-page-header-subject'}"
+            x-on:mousedown="printStore.editFirstPageHeader ?  firstPageHeaderStore.onMouseDown($event, 'first-page-header-subject') : null"
+        >
             {{ $subject ?? '' }}
         </h1>
     </template>
@@ -115,7 +147,11 @@
         <table
             id="first-page-header-right-block"
             data-type="container"
-            class="absolute left-0 top-0 w-[7cm] select-none">
+            draggable="false"
+            class="absolute left-0 top-0 w-[7cm] select-none"
+            :class="{'bg-gray-300' : firstPageHeaderStore.selectedElementId === 'first-page-header-right-block'}"
+            x-on:mousedown="printStore.editFirstPageHeader ?  firstPageHeaderStore.onMouseDown($event, 'first-page-header-right-block') : null"
+        >
             <tbody class="align-text-top text-xs leading-none">
                 <tr class="leading-none">
                     <td class="text-left font-semibold">
