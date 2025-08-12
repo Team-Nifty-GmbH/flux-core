@@ -21,6 +21,7 @@ class UpdateTargetRuleset extends FluxRuleset
                 app(ModelExists::class, ['model' => Target::class])
                     ->whereNull('parent_id'),
             ],
+            'name' => 'sometimes|string|max:255',
             'target_value' => [
                 'sometimes',
                 'required',

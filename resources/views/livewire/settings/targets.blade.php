@@ -1,6 +1,11 @@
 <x-modal :id="$target->modalName()">
     <div class="flex flex-col gap-4">
         <x-spinner />
+        <x-input
+            wire:model="target.name"
+            :label="__('Target Name')"
+            required
+        />
         <x-date :label="__('Start')" wire:model="target.start_date" />
         <x-date :label="__('End')" wire:model="target.end_date" />
         <x-select.styled
