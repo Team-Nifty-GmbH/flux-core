@@ -14,7 +14,9 @@ use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 use ReflectionFunction;
@@ -50,7 +52,11 @@ class Profile extends Component
         foreach (Event::getFacadeRoot()->getRawListeners() as $event => $listeners) {
             foreach (Event::getFacadeRoot()->getListeners($event) as $listener) {
                 /** @var Closure $listener */
-                $notificationClass = data_get((new ReflectionFunction($listener))->getStaticVariables(), 'listener.0');
+                $notificationClass = data_get(
+                    (new ReflectionFunction($listener))->getStaticVariables(),
+                    'listener.0'
+                );
+
                 if (is_subclass_of($notificationClass, SubscribableNotification::class)) {
                     $this->notifications[] = $notificationClass;
                 }
@@ -62,9 +68,9 @@ class Profile extends Component
             ->notificationSettings()
             ->select([
                 'id',
-                'is_active',
                 'notification_type',
                 'channel',
+                'is_active',
             ])
             ->get()
             ->groupBy('notification_type')
@@ -72,10 +78,14 @@ class Profile extends Component
             ->toArray() ?? [];
 
         foreach ($notificationSettings as $notificationSetting) {
+            if (is_null($notificationSetting)) {
+                continue;
+            }
+
             foreach ($this->notificationChannels as $key => $channel) {
-                $channelDriver = $channel['driver'] ?? false;
-                $disabled = ($channel['method'] ?? false)
-                    && ! method_exists($notificationSetting ?? false, $channel['method']);
+                $channelDriver = data_get($channel, 'driver') ?? false;
+                $disabled = (data_get($channel, 'method') ?? false)
+                    && ! method_exists($notificationSetting, data_get($channel, 'method'));
 
                 $userSetting = data_get($userNotificationSettings, $notificationSetting . '.' . $channelDriver);
 
@@ -93,6 +103,11 @@ class Profile extends Component
                     ];
             }
         }
+
+        $this->notificationChannels = Arr::mapWithKeys(
+            $this->notificationChannels,
+            fn ($channel, $key) => [__(Str::headline($key)) => $channel]
+        );
     }
 
     public function render(): View|Factory|Application

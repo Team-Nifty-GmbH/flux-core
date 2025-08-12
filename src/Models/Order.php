@@ -7,6 +7,7 @@ use FluxErp\Actions\OrderTransaction\CreateOrderTransaction;
 use FluxErp\Actions\Transaction\CreateTransaction;
 use FluxErp\Casts\Money;
 use FluxErp\Casts\Percentage;
+use FluxErp\Contracts\IsSubscribable;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Contracts\Targetable;
 use FluxErp\Enums\OrderTypeEnum;
@@ -29,7 +30,6 @@ use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasClientAssignment;
 use FluxErp\Traits\HasFrontendAttributes;
-use FluxErp\Traits\HasNotificationSubscriptions;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasParentChildRelations;
 use FluxErp\Traits\HasRelatedModel;
@@ -65,12 +65,11 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\ModelStates\HasStates;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
-class Order extends FluxModel implements HasMedia, InteractsWithDataTables, OffersPrinting, Targetable
+class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSubscribable, OffersPrinting, Targetable
 {
     use CascadeSoftDeletes, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasClientAssignment,
-        HasFrontendAttributes, HasNotificationSubscriptions, HasPackageFactory, HasParentChildRelations,
-        HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification, HasUuid, InteractsWithMedia,
-        LogsActivity, Printable;
+        HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasRelatedModel, HasSerialNumberRange,
+        HasStates, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, Printable;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }

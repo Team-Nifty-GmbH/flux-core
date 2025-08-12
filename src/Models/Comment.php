@@ -2,7 +2,7 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Traits\HasNotificationSubscriptions;
+use FluxErp\Contracts\IsSubscribable;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasParentChildRelations;
 use FluxErp\Traits\HasUserModification;
@@ -16,17 +16,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Spatie\MediaLibrary\HasMedia;
 
-class Comment extends FluxModel implements HasMedia
+class Comment extends FluxModel implements HasMedia, IsSubscribable
 {
-    use HasNotificationSubscriptions, HasPackageFactory, HasParentChildRelations, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity,
+    use HasPackageFactory, HasParentChildRelations, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity,
         SoftDeletes;
 
     protected $appends = [
         'user',
-    ];
-
-    protected $guarded = [
-        'id',
     ];
 
     protected $hidden = [
@@ -50,12 +46,15 @@ class Comment extends FluxModel implements HasMedia
                 preg_match_all('/data-id="([^:]+:\d+)"/', $comment->comment, $matches);
                 collect(data_get($matches, 1, []))
                     ->map(fn (string $mention) => morph_to($mention))
-                    ->filter() // filter null values if morph was not possible
-                    ->filter(function (Model $notifiable) {
-                        return in_array(Notifiable::class, class_uses_recursive($notifiable));
+                    ->filter(function (?Model $notifiable) {
+                        return ! is_null($notifiable)
+                            && in_array(Notifiable::class, class_uses_recursive($notifiable));
                     })
                     ->each(function (Model $notifiable) use ($comment): void {
-                        $notifiable->subscribeNotificationChannel($comment->broadcastChannel());
+                        $notifiable->subscribeNotificationChannel(
+                            channel: $comment->broadcastChannel(),
+                            event: 'eloquent.created: ' . $comment->getMorphClass()
+                        );
                     });
             }
         });
@@ -63,7 +62,7 @@ class Comment extends FluxModel implements HasMedia
 
     public function broadcastChannel(): string
     {
-        return str_replace('\\', '.', morphed_model($this->model_type)) . '.' . $this->model_id;
+        return $this->model_type . '.' . $this->model_id . '.' . $this->getMorphClass();
     }
 
     public function broadcastWith(): array

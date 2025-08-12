@@ -2,18 +2,21 @@
 
 namespace FluxErp\Support\Event;
 
+use BadMethodCallException;
 use FluxErp\Models\User;
 use FluxErp\Traits\Makeable;
+use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Events\ShouldDispatchAfterCommit;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 
-class SubscribableEvent implements ShouldDispatchAfterCommit
+abstract class SubscribableEvent implements ShouldDispatchAfterCommit
 {
-    use Makeable;
+    use Dispatchable, InteractsWithSockets, Makeable;
 
     protected ?Collection $subscribers = null;
 
@@ -24,6 +27,11 @@ class SubscribableEvent implements ShouldDispatchAfterCommit
         return collect(get_object_vars($this))
             ->first(fn ($property) => is_object($property) && method_exists($property, 'broadcastChannel'))
             ?->broadcastChannel();
+    }
+
+    public function eventName(): string
+    {
+        return static::class;
     }
 
     public function getSubscribers(): ?Collection
@@ -50,9 +58,9 @@ class SubscribableEvent implements ShouldDispatchAfterCommit
             ->filter()
             ->each(function (Model $subscriber): void {
                 try {
-                    $subscriber->subscribeNotificationChannel($this->broadcastChannel());
+                    $subscriber->subscribeNotificationChannel($this->broadcastChannel(), $this->eventName());
                     $this->subscribers->push($subscriber);
-                } catch (UnauthorizedException|ValidationException) {
+                } catch (BadMethodCallException|UnauthorizedException|ValidationException) {
                 }
             });
 
@@ -73,9 +81,9 @@ class SubscribableEvent implements ShouldDispatchAfterCommit
             ->filter()
             ->each(function (Model $subscriber): void {
                 try {
-                    $subscriber->unsubscribeNotificationChannel($this->broadcastChannel());
+                    $subscriber->unsubscribeNotificationChannel($this->broadcastChannel(), $this->eventName());
                     $this->unsubscribers->push($subscriber);
-                } catch (UnauthorizedException|ValidationException) {
+                } catch (BadMethodCallException|UnauthorizedException|ValidationException) {
                 }
             });
 

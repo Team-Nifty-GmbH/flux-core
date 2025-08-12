@@ -4,6 +4,7 @@ namespace FluxErp\Models;
 
 use Exception;
 use FluxErp\Casts\Money;
+use FluxErp\Contracts\IsSubscribable;
 use FluxErp\States\Ticket\TicketState;
 use FluxErp\Support\Scout\ScoutCustomize;
 use FluxErp\Traits\Commentable;
@@ -11,7 +12,6 @@ use FluxErp\Traits\Communicatable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasFrontendAttributes;
-use FluxErp\Traits\HasNotificationSubscriptions;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasRelatedModel;
 use FluxErp\Traits\HasSerialNumberRange;
@@ -30,11 +30,11 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\ModelStates\HasStates;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
-class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables
+class Ticket extends FluxModel implements HasMedia, InteractsWithDataTables, IsSubscribable
 {
-    use Commentable, Communicatable, Filterable, HasAdditionalColumns, HasFrontendAttributes,
-        HasNotificationSubscriptions, HasPackageFactory, HasRelatedModel, HasSerialNumberRange, HasStates,
-        HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, SoftDeletes, Trackable;
+    use Commentable, Communicatable, Filterable, HasAdditionalColumns, HasFrontendAttributes, HasPackageFactory,
+        HasRelatedModel, HasSerialNumberRange, HasStates, HasUserModification, HasUuid, InteractsWithMedia,
+        LogsActivity, SoftDeletes, Trackable;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }

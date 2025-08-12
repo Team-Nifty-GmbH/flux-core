@@ -37,15 +37,25 @@ class UpdateEventSubscription extends FluxAction
     {
         parent::validateData();
 
-        $this->data['subscribable_id'] ??= Auth::id();
-        $this->data['subscribable_type'] ??= Auth::user()->getMorphClass();
+        $channel = $this->getData('channel');
+        $event = $this->getData('event');
+        if ($channel xor $event) {
+            $eventSubscription = resolve_static(EventSubscription::class, 'query')
+                ->whereKey($this->getData('id'))
+                ->first();
 
-        if (resolve_static(EventSubscription::class, 'query')
-            ->whereKeyNot($this->getData('id'))
-            ->where('channel', $this->getData('channel'))
-            ->where('subscribable_type', $this->getData('subscribable_type'))
-            ->where('subscribable_id', $this->getData('subscribable_id'))
-            ->exists()
+            $channel ??= $eventSubscription->channel;
+            $event ??= $eventSubscription->event;
+        }
+
+        if (($channel || $event)
+            && resolve_static(EventSubscription::class, 'query')
+                ->whereKeyNot($this->getData('id'))
+                ->where('channel', $channel)
+                ->where('event', $event)
+                ->where('subscribable_type', Auth::user()->getMorphClass())
+                ->where('subscribable_id', Auth::id())
+                ->exists()
         ) {
             throw ValidationException::withMessages([
                 'subscription' => [__('Already subscribed')],

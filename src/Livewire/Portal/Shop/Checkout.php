@@ -3,7 +3,7 @@
 namespace FluxErp\Livewire\Portal\Shop;
 
 use FluxErp\Actions\Comment\CreateComment;
-use FluxErp\Events\PortalOrderCreated;
+use FluxErp\Events\Portal\OrderCreated;
 use FluxErp\Livewire\Forms\AddressForm;
 use FluxErp\Mail\Order\OrderConfirmation;
 use FluxErp\Models\Address;
@@ -79,16 +79,20 @@ class Checkout extends Cart
                 'model_type' => morph_alias(Order::class),
                 'model_id' => $order->id,
                 'comment' => $comment,
-            ])->validate()->execute();
+            ])
+                ->validate()
+                ->execute();
         }
 
         $this->notification()
             ->success('Order placed successfully!')
             ->send();
-        event(PortalOrderCreated::make($order));
+
+        event(OrderCreated::make($order));
 
         if (auth('address')->check()) {
-            Mail::to(auth('address')->user())->queue(OrderConfirmation::make($order->refresh()));
+            Mail::to(auth('address')->user())
+                ->queue(OrderConfirmation::make($order->refresh()));
         }
 
         $this->redirect(route('portal.checkout-finish'), true);

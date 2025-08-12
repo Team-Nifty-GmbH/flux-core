@@ -16,13 +16,13 @@ class TicketAssignedNotification extends SubscribableNotification implements Sho
     public function subscribe(): array
     {
         return [
-            TicketAssignedEvent::class => 'sendNotification',
+            resolve_static(TicketAssignedEvent::class, 'class') => 'sendNotification',
         ];
     }
 
     protected function getDescription(): ?string
     {
-        return $this->model->name;
+        return $this->model->getLabel();
     }
 
     protected function getModelFromEvent(object $event): ?Model

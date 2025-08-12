@@ -51,7 +51,8 @@ class UpdateOrder extends FluxAction
             $this->data['address_delivery_id'] = $this->data['address_delivery']['id'];
         }
 
-        if ($this->getData('approval_user_id') !== $order->approval_user_id) {
+        $approvalUserId = $this->getData('approval_user_id', $order->approval_user_id);
+        if ($approvalUserId !== $order->approval_user_id) {
             $order->approvalUser?->unsubscribeNotificationChannel($order->broadcastChannel());
         }
 
@@ -71,7 +72,9 @@ class UpdateOrder extends FluxAction
             $order->users()->sync($users);
         }
 
-        if ($order->approval_user_id) {
+        if ($order->approval_user_id
+            && $approvalUserId !== $order->approval_user_id
+        ) {
             $order->approvalUser()->first()->subscribeNotificationChannel($order->broadcastChannel());
 
             event(OrderApprovalRequestEvent::make($order));

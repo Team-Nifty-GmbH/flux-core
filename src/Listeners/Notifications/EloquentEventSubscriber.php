@@ -3,10 +3,11 @@
 namespace FluxErp\Listeners\Notifications;
 
 use FluxErp\Actions\EventSubscription\CreateEventSubscription;
-use FluxErp\Traits\HasNotificationSubscriptions;
+use FluxErp\Contracts\IsSubscribable;
 use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 
-class NotificationEloquentEventSubscriber
+class EloquentEventSubscriber
 {
     public function subscribe($events): array
     {
@@ -22,27 +23,33 @@ class NotificationEloquentEventSubscriber
     {
         $model = data_get($model, 0);
         if (
-            ! in_array(HasNotificationSubscriptions::class, class_uses_recursive($model))
+            ! $model instanceof IsSubscribable
             || ! auth()->check()
             || ! method_exists(auth()->user(), 'eventSubscriptions')
         ) {
             return;
         }
 
-        if (auth()->user()
+        if (auth()
+            ->user()
             ->eventSubscriptions()
             ->where('channel', $model->broadcastChannel())
+            ->where('event', $event)
+            ->where('is_notifiable', true)
             ->doesntExist()
         ) {
             try {
                 CreateEventSubscription::make([
+                    'channel' => $model->broadcastChannel(),
+                    'event' => $event,
                     'subscribable_id' => auth()->id(),
                     'subscribable_type' => auth()->user()->getMorphClass(),
-                    'channel' => $model->broadcastChannel(),
+                    'is_broadcast' => false,
+                    'is_notifiable' => true,
                 ])
                     ->validate()
                     ->execute();
-            } catch (ValidationException) {
+            } catch (UnauthorizedException|ValidationException) {
             }
         }
     }

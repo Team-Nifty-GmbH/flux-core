@@ -11,7 +11,7 @@ class OrderApprovalRequestNotification extends SubscribableNotification
     public function subscribe(): array
     {
         return [
-            OrderApprovalRequestEvent::class => 'sendNotification',
+            resolve_static(OrderApprovalRequestEvent::class, 'class') => 'sendNotification',
         ];
     }
 

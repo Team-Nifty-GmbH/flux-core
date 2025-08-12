@@ -1,12 +1,12 @@
 <?php
 
-namespace FluxErp\Events\Order;
+namespace FluxErp\Events\Portal;
 
 use FluxErp\Models\Order;
 use FluxErp\Support\Event\SubscribableEvent;
 use Illuminate\Queue\SerializesModels;
 
-class OrderApprovalRequestEvent extends SubscribableEvent
+class OrderCreated extends SubscribableEvent
 {
     use SerializesModels;
 

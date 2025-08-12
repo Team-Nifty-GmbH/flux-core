@@ -9,8 +9,8 @@ use FluxErp\Models\NotificationSetting;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Notifications\Notifiable as BaseNotifiable;
 use Illuminate\Notifications\Notification;
-use Illuminate\Validation\UnauthorizedException;
 use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 
 trait Notifiable
 {
@@ -55,14 +55,20 @@ trait Notifiable
         return $this->morphMany(NotificationSetting::class, 'notifiable');
     }
 
-    public function subscribeNotificationChannel(string $channel): ?EventSubscription
+    public function subscribeNotificationChannel(string $channel, string $event = '*'): ?EventSubscription
     {
-        if ($this->eventSubscriptions()->where('channel', $channel)->exists()) {
+        if ($this->eventSubscriptions()
+            ->where('channel', $channel)
+            ->where('event', $event)
+            ->where('is_notifiable', true)
+            ->exists()
+        ) {
             return null;
         }
 
         return CreateEventSubscription::make([
             'channel' => $channel,
+            'event' => $event,
             'subscribable_id' => $this->getKey(),
             'subscribable_type' => $this->getMorphClass(),
             'is_broadcast' => false,
@@ -72,15 +78,19 @@ trait Notifiable
             ->execute();
     }
 
-    public function unsubscribeNotificationChannel(string $channel): bool
+    public function unsubscribeNotificationChannel(string $channel, string $event = '*'): bool
     {
         try {
             return DeleteEventSubscription::make([
-                'id' => $this->eventSubscriptions()->where('channel', $channel)->value('id'),
+                'id' => $this->eventSubscriptions()
+                    ->where('channel', $channel)
+                    ->where('event', $event)
+                    ->where('is_notifiable', true)
+                    ->value('id'),
             ])
                 ->validate()
                 ->execute();
-        } catch (ValidationException|UnauthorizedException) {
+        } catch (UnauthorizedException|ValidationException) {
             return false;
         }
     }

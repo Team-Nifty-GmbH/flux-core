@@ -35,11 +35,12 @@ class CreateTask extends FluxAction
             $task->users()->attach($users);
 
             event(TaskAssignedEvent::make($task)
-                ->subscribeChannel(collect($users)
-                    ->when(
-                        $this->getData('responsible_user_id'),
-                        fn (Collection $users) => $users->add($this->getData('responsible_user_id'))
-                    )
+                ->subscribeChannel(
+                    collect($users)
+                        ->when(
+                            $this->getData('responsible_user_id'),
+                            fn (Collection $users) => $users->add($this->getData('responsible_user_id'))
+                        )
                 )
             );
         }

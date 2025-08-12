@@ -14,13 +14,13 @@ class TaskUpdatedNotification extends SubscribableNotification implements Should
     public function subscribe(): array
     {
         return [
-            'eloquent.updated: ' . resolve_static(Task::class, 'class') => 'sendNotification',
+            'eloquent.updated: ' . morph_alias(Task::class) => 'sendNotification',
         ];
     }
 
     protected function getDescription(): ?string
     {
-        return $this->model->name;
+        return $this->model->getLabel();
     }
 
     protected function getNotificationIcon(): ?string

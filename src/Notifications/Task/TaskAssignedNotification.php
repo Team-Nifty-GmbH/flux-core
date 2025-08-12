@@ -16,13 +16,13 @@ class TaskAssignedNotification extends SubscribableNotification implements Shoul
     public function subscribe(): array
     {
         return [
-            TaskAssignedEvent::class => 'sendNotification',
+            resolve_static(TaskAssignedEvent::class, 'class') => 'sendNotification',
         ];
     }
 
     protected function getDescription(): ?string
     {
-        return $this->model->name;
+        return $this->model->getLabel();
     }
 
     protected function getModelFromEvent(object $event): ?Model

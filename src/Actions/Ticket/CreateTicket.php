@@ -68,18 +68,14 @@ class CreateTicket extends FluxAction
             $ticket->authenticatable->subscribeNotificationChannel($ticket->broadcastChannel());
         }
 
-        if (is_array($users)) {
+        if ($users) {
             if ($ticket->authenticatable->getMorphClass() === morph_alias(User::class)) {
                 $users = array_filter($users, fn (int $user) => $user !== $ticket->authenticatable_id);
             }
 
             $ticket->users()->attach($users);
             event(TicketAssignedEvent::make($ticket)
-                ->subscribeChannel(collect($users))
-                ->subscribeChannel(
-                    [$ticket->authenticatable_id],
-                    morphed_model($ticket->authenticatable->getMorphClass())
-                )
+                ->subscribeChannel($users)
             );
         }
 

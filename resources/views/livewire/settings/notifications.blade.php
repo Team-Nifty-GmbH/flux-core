@@ -1,12 +1,4 @@
-<div
-    class="py-6"
-    x-data="{
-        notifications: $wire.entangle('notifications', true),
-        notificationChannels: $wire.entangle('notificationChannels', true),
-        notificationSettings: $wire.entangle('notificationSettings'),
-        notification: $wire.entangle('notification'),
-    }"
->
+<div class="py-6">
     <x-modal
         id="edit-notification-settings-modal"
         wire="detailModal"
@@ -15,7 +7,7 @@
         <x-slot name="title">
             {{ __('Notification Settings') }}
         </x-slot>
-        <template x-for="(notificationChannel, name) in notification">
+        <template x-for="(notificationChannel, name) in $wire.notification">
             <div
                 class="space-y-2 pb-6"
                 x-bind:hidden="notificationChannel.name === 'database'"
@@ -34,7 +26,7 @@
                             <x-button.circle
                                 2xs
                                 color="red"
-                                label="-"
+                                text="-"
                                 x-on:click.prevent="_.pull(notificationChannel.channel_value, channelValue)"
                             ></x-button.circle>
                         </div>
@@ -49,7 +41,7 @@
                 <x-button.circle
                     2xs
                     color="emerald"
-                    label="+"
+                    text="+"
                     x-on:click="notificationChannel.channel_value.push(null)"
                 />
             </div>
@@ -80,7 +72,7 @@
             <x-slot name="header">
                 <th class="col-span-2">{{ __('Notification') }}</th>
             </x-slot>
-            <template x-for="(notification, key) in notificationSettings">
+            <template x-for="(notification, key) in $wire.notificationSettings">
                 <x-flux::table.row>
                     <td>
                         <div x-text="$wire.translate(key)"></div>

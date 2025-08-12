@@ -7,6 +7,7 @@ use FluxErp\Actions\Task\UpdateTask;
 use FluxErp\Casts\Money;
 use FluxErp\Casts\TimeDuration;
 use FluxErp\Contracts\Calendarable;
+use FluxErp\Contracts\IsSubscribable;
 use FluxErp\Contracts\Targetable;
 use FluxErp\Models\Pivots\TaskUser;
 use FluxErp\States\Task\TaskState;
@@ -16,7 +17,6 @@ use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasAdditionalColumns;
 use FluxErp\Traits\HasFrontendAttributes;
-use FluxErp\Traits\HasNotificationSubscriptions;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasTags;
 use FluxErp\Traits\HasUserModification;
@@ -36,11 +36,10 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media as MediaLibraryMedia;
 use Spatie\ModelStates\HasStates;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
-class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDataTables, Targetable
+class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDataTables, IsSubscribable, Targetable
 {
-    use Categorizable, Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes,
-        HasNotificationSubscriptions, HasPackageFactory, HasStates, HasTags, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity,
-        SoftDeletes, Trackable;
+    use Categorizable, Commentable, Filterable, HasAdditionalColumns, HasFrontendAttributes, HasPackageFactory,
+        HasStates, HasTags, HasUserModification, HasUuid, InteractsWithMedia, LogsActivity, SoftDeletes, Trackable;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }

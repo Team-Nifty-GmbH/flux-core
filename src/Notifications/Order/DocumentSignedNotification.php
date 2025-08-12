@@ -17,7 +17,7 @@ class DocumentSignedNotification extends SubscribableNotification implements Sho
     public function subscribe(): array
     {
         return [
-            DocumentSignedEvent::class => 'sendNotification',
+            resolve_static(DocumentSignedEvent::class, 'class') => 'sendNotification',
         ];
     }
 

@@ -8,18 +8,17 @@ use FluxErp\Listeners\BroadcastEventSubscriber;
 use FluxErp\Listeners\CacheKeyWrittenListener;
 use FluxErp\Listeners\MailMessage\CreateMailExecutedSubscriber;
 use FluxErp\Listeners\MessageSendingEventSubscriber;
-use FluxErp\Listeners\Notifications\NotificationEloquentEventSubscriber;
+use FluxErp\Listeners\Notifications\EloquentEventSubscriber;
 use FluxErp\Listeners\Order\OrderInvoiceAddedSubscriber;
 use FluxErp\Listeners\Order\OrderStockSubscriber;
 use FluxErp\Listeners\SnapshotEventSubscriber;
 use FluxErp\Listeners\Ticket\CommentCreatedListener;
-use FluxErp\Listeners\Ticket\TicketCreatedNotificationListener;
 use FluxErp\Listeners\WebhookEventSubscriber;
-use FluxErp\Models\Comment;
 use FluxErp\Notifications\Comment\CommentCreatedNotification;
 use FluxErp\Notifications\Order\DocumentSignedNotification;
 use FluxErp\Notifications\Order\OrderApprovalRequestNotification;
 use FluxErp\Notifications\Task\TaskAssignedNotification;
+use FluxErp\Notifications\Task\TaskCreatedNotification;
 use FluxErp\Notifications\Task\TaskUpdatedNotification;
 use FluxErp\Notifications\Ticket\TicketAssignedNotification;
 use FluxErp\Notifications\Ticket\TicketCreatedNotification;
@@ -48,20 +47,17 @@ class EventServiceProvider extends ServiceProvider
         Logout::class => [
             LogoutListener::class,
         ],
-        'eloquent.created: ' . Comment::class => [
+        'eloquent.created: comment' => [
             CommentCreatedListener::class,
         ],
         KeyWritten::class => [
             CacheKeyWrittenListener::class,
         ],
-        TicketCreatedNotification::class => [
-            TicketCreatedNotificationListener::class,
-        ],
     ];
 
     protected $subscribe = [
         BroadcastEventSubscriber::class,
-        NotificationEloquentEventSubscriber::class,
+        EloquentEventSubscriber::class,
         SnapshotEventSubscriber::class,
         WebhookEventSubscriber::class,
         OrderStockSubscriber::class,
@@ -70,10 +66,12 @@ class EventServiceProvider extends ServiceProvider
         CreateMailExecutedSubscriber::class,
         CommentCreatedNotification::class,
         DocumentSignedNotification::class,
-        TaskAssignedNotification::class,
-        TaskUpdatedNotification::class,
         OrderApprovalRequestNotification::class,
+        TaskAssignedNotification::class,
+        TaskCreatedNotification::class,
+        TaskUpdatedNotification::class,
         TicketAssignedNotification::class,
+        TicketCreatedNotification::class,
         TicketUpdatedNotification::class,
     ];
 

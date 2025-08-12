@@ -79,7 +79,9 @@ abstract class SubscribableNotification extends Notification implements HasToast
 
     public function toWebPush(object $notifiable): ?WebPushMessage
     {
-        if (! method_exists($notifiable, 'pushSubscriptions') || ! $notifiable->pushSubscriptions()->exists()) {
+        if (! method_exists($notifiable, 'pushSubscriptions')
+            || ! $notifiable->pushSubscriptions()->exists()
+        ) {
             return null;
         }
 
@@ -126,6 +128,14 @@ abstract class SubscribableNotification extends Notification implements HasToast
         return null;
     }
 
+    protected function getEventNames(): array
+    {
+        return array_merge(
+            array_keys($this->subscribe()),
+            ['*']
+        );
+    }
+
     protected function getModelFromEvent(object $event): ?Model
     {
         return $event instanceof Model
@@ -147,6 +157,7 @@ abstract class SubscribableNotification extends Notification implements HasToast
                     ->orWhere('subscribable_id', '!=', auth()->id());
             })
             ->where('channel', $this->getChannelFromEvent($event))
+            ->whereIn('event', $this->getEventNames())
             ->whereHas('subscribable', fn (Builder $query) => $query->where('is_active', true))
             ->get()
             ->map(fn (EventSubscription $subscription) => $subscription->subscribable)

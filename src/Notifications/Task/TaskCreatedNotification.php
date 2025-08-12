@@ -1,20 +1,20 @@
 <?php
 
-namespace FluxErp\Notifications\Ticket;
+namespace FluxErp\Notifications\Task;
 
-use FluxErp\Models\Ticket;
+use FluxErp\Models\Task;
 use FluxErp\Support\Notification\SubscribableNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-class TicketUpdatedNotification extends SubscribableNotification implements ShouldQueue
+class TaskCreatedNotification extends SubscribableNotification implements ShouldQueue
 {
     use Queueable;
 
     public function subscribe(): array
     {
         return [
-            'eloquent.updated: ' . morph_alias(Ticket::class) => 'sendNotification',
+            'eloquent.created: ' . morph_alias(Task::class) => 'sendNotification',
         ];
     }
 
@@ -25,15 +25,15 @@ class TicketUpdatedNotification extends SubscribableNotification implements Shou
 
     protected function getNotificationIcon(): ?string
     {
-        return 'support';
+        return 'clipboard-list';
     }
 
     protected function getTitle(): string
     {
         return __(
-            ':username updated a ticket',
+            ':username created a task',
             [
-                'username' => $this->model->getUpdatedBy()?->getLabel() ?? __('Unknown'),
+                'username' => $this->model->getCreatedBy()?->getLabel() ?? __('Unknown'),
             ],
         );
     }

@@ -9,7 +9,6 @@ use FluxErp\Models\Task;
 use FluxErp\Rulesets\Task\UpdateTaskRuleset;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
 
 class UpdateTask extends FluxAction
 {
@@ -33,25 +32,15 @@ class UpdateTask extends FluxAction
         $orderPositions = Arr::pull($this->data, 'order_positions');
         $tags = Arr::pull($this->data, 'tags');
 
-        if (! is_null($users)) {
-            $result = $task->users()->sync($users);
-
-            event(TaskAssignedEvent::make($task)
-                ->subscribeChannel(collect(data_get($result, 'attached'))
-                    ->when(
-                        $this->getData('responsible_user_id') !== $task->responsible_user_id,
-                        fn (Collection $users) => $users->add($this->getData('responsible_user_id'))
-                    )
-                )
-                ->unsubscribeChannel(collect(data_get($result, 'detached'))
-                    ->when(
-                        $this->getData('responsible_user_id') !== $task->responsible_user_id
-                        && ! is_null($task->responsible_user_id),
-                        fn (Collection $users) => $users->add($task->responsible_user_id)
-                    )
-                )
-            );
+        $subscribers = [];
+        $unsubscribers = [];
+        if ($this->getData('responsible_user_id', $task->responsible_user_id) !== $task->responsible_user_id) {
+            $subscribers[] = $this->getData('responsible_user_id');
+            $unsubscribers[] = $task->responsible_user_id;
         }
+
+        $task->fill($this->data);
+        $task->save();
 
         if (! is_null($orderPositions)) {
             $task->orderPositions()->sync(
@@ -63,11 +52,27 @@ class UpdateTask extends FluxAction
         }
 
         if (! is_null($tags)) {
-            $task->syncTags(resolve_static(Tag::class, 'query')->whereIntegerInRaw('id', $tags)->get());
+            $task->syncTags(resolve_static(Tag::class, 'query')
+                ->whereIntegerInRaw('id', $tags)
+                ->get()
+            );
         }
 
-        $task->fill($this->data);
-        $task->save();
+        if (! is_null($users)) {
+            $result = $task->users()->sync($users);
+
+            $subscribers = array_merge($subscribers, data_get($result, 'attached') ?? []);
+            $unsubscribers = array_merge($unsubscribers, data_get($result, 'detached') ?? []);
+        }
+
+        $subscribers = array_filter(array_unique($subscribers));
+        $unsubscribers = array_filter(array_unique($unsubscribers));
+        if ($subscribers || $unsubscribers) {
+            event(TaskAssignedEvent::make($task)
+                ->subscribeChannel($subscribers)
+                ->unsubscribeChannel($unsubscribers)
+            );
+        }
 
         return $task->withoutRelations()->fresh();
     }

@@ -48,8 +48,8 @@ class UpdateTicket extends FluxAction
             $result = $ticket->users()->sync($users);
 
             event(TicketAssignedEvent::make($ticket)
-                ->subscribeChannel(collect(data_get($result, 'attached')))
-                ->unsubscribeChannel(collect(data_get($result, 'detached')))
+                ->subscribeChannel(data_get($result, 'attached') ?? [])
+                ->unsubscribeChannel(data_get($result, 'detached') ?? [])
             );
         }
 

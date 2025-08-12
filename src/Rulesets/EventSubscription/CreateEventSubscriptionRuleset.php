@@ -6,6 +6,7 @@ use FluxErp\Models\EventSubscription;
 use FluxErp\Rules\MorphClassExists;
 use FluxErp\Rules\MorphExists;
 use FluxErp\Rulesets\FluxRuleset;
+use FluxErp\Traits\Notifiable;
 
 class CreateEventSubscriptionRuleset extends FluxRuleset
 {
@@ -15,10 +16,11 @@ class CreateEventSubscriptionRuleset extends FluxRuleset
     {
         return [
             'channel' => 'required|string',
+            'event' => 'required|string',
             'subscribable_type' => [
                 'required',
                 'string',
-                app(MorphClassExists::class),
+                app(MorphClassExists::class, ['uses' => [Notifiable::class]]),
             ],
             'subscribable_id' => [
                 'required',

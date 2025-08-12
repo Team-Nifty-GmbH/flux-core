@@ -24,7 +24,7 @@ class UpdateNotificationSettingRuleset extends FluxRuleset
             ],
             'channel_value' => 'present|array',
             'is_active' => 'required|boolean',
-            'is_anonymous' => 'sometimes|required|boolean|declined',
+            'is_anonymous' => 'sometimes|required|boolean|accepted',
         ];
     }
 }

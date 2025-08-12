@@ -40,6 +40,7 @@ class CreateEventSubscription extends FluxAction
 
         if (resolve_static(EventSubscription::class, 'query')
             ->where('channel', $this->getData('channel'))
+            ->where('event', $this->getData('event'))
             ->where('subscribable_type', $this->getData('subscribable_type'))
             ->where('subscribable_id', $this->getData('subscribable_id'))
             ->exists()

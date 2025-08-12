@@ -30,7 +30,7 @@ class CommentCreatedNotification extends SubscribableNotification implements Sho
     public function subscribe(): array
     {
         return [
-            'eloquent.created: ' . resolve_static(Comment::class, 'class') => 'sendNotification',
+            'eloquent.created: ' . morph_alias(Comment::class) => 'sendNotification',
         ];
     }
 
@@ -54,7 +54,7 @@ class CommentCreatedNotification extends SubscribableNotification implements Sho
     public function via(object $notifiable): array
     {
         if ($this->model->is_internal
-            && ! is_a($notifiable, resolve_static(User::class, 'class'), true)
+            && ! $notifiable instanceof User
         ) {
             return [];
         }
