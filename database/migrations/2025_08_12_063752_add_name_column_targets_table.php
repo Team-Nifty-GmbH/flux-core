@@ -9,7 +9,7 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::table('targets', function (Blueprint $table): void {
-            $table->string('name')->after('parent_id');
+            $table->string('name')->nullable()->after('parent_id');
         });
     }
 
