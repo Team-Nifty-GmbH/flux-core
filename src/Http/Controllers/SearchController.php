@@ -159,6 +159,14 @@ class SearchController extends Controller
             }
         }
 
+        if ($request->has('whereRelation')) {
+            $query->whereRelation(...$request->get('whereRelation'));
+        }
+
+        if ($request->has('whereDoesntHaveRelation')) {
+            $query->whereDoesntHaveRelation(...$request->get('whereDoesntHaveRelation'));
+        }
+
         $result = $query->latest()->get();
 
         if ($request->has('appends')) {

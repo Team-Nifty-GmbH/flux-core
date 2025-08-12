@@ -9,7 +9,7 @@
         <x-input
             x-bind:readonly="!edit"
             wire:model="task.name"
-            label="{{ __('Name') }}"
+            :label="__('Name')"
         />
         @section('task.model')
         <x-link
