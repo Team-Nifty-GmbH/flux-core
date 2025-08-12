@@ -36,10 +36,12 @@ class TargetProgresses extends RadialBarChart
     {
         $this->calculateChart();
         $this->updateData();
+        $this->resetData();
     }
 
     public function calculateChart(): void
     {
+        $this->max = 100;
         $this->start = $this->getStart()->toDateString();
         $this->end = $this->getEnd()->toDateString();
 
@@ -48,21 +50,8 @@ class TargetProgresses extends RadialBarChart
             ->first();
 
         if ($target) {
-            $modelClass = morphed_model($target->model_type);
-
-            $query = $modelClass::query()
-                ->whereBetween($target->timeframe_column, [$target->start_date, $target->end_date]);
-
-            $currentValue = $query->{$target->aggregate_type}($target->aggregate_column);
-
-            $this->series = [];
-            $this->labels = [];
-
-            $progress = $target->target_value > 0 ? bcmul(($currentValue / $target->target_value), 100) : 0;
-            $this->series[] = bcround($progress, 2);
+            $this->series[] = bcround($this->calculateProgress($target), 2);
             $this->labels[] = $target->uuid;
-
-            $this->max = 100;
         }
     }
 
@@ -70,5 +59,21 @@ class TargetProgresses extends RadialBarChart
     {
         $this->skipRender();
         $this->calculateByTimeFrame();
+    }
+
+    private function calculateProgress(Target $target): string
+    {
+        return $target && $target->target_value > 0
+            ? bcmul(
+                bcdiv($target->calculateCurrentValue(auth()->id()), $target->target_value),
+                100
+            )
+            : 0;
+    }
+
+    private function resetData(): void
+    {
+        $this->series = [];
+        $this->labels = [];
     }
 }
