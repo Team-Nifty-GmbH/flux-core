@@ -29,6 +29,7 @@ class CreateTargetRuleset extends FluxRuleset
                 'string',
                 app(MorphClassExists::class, ['implements' => Targetable::class]),
             ],
+            'name' => 'required|string|max:255',
             'timeframe_column' => 'required|string',
             'aggregate_type' => 'required|string',
             'aggregate_column' => 'required|string',

@@ -24,6 +24,8 @@ class TargetForm extends FluxForm
 
     public ?string $model_type = null;
 
+    public ?string $name = null;
+
     public ?string $owner_column = null;
 
     public ?int $parent_id = null;
