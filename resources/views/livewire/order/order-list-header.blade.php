@@ -169,7 +169,7 @@
                         <x-select.styled
                             :label="__('Credit Account')"
                             wire:model.number="orderPosition.credit_account_id"
-                            select="label:bank_name|value:id|description:balance"
+                            select="label:label|value:id|description:description"
                             unfiltered
                             :request="[
                                 'url' => route('search', \FluxErp\Models\ContactBankConnection::class),
@@ -180,6 +180,10 @@
                                             'contact_id',
                                             '=',
                                             $order->contact_id,
+                                        ],
+                                        [
+                                            'is_credit_account',
+                                            true,
                                         ],
                                     ],
                                 ],

@@ -106,7 +106,40 @@ class CreateOrderFromPurchaseInvoice extends FluxAction
         ) {
             throw ValidationException::withMessages([
                 'iban' => ['iban' => __('validation.required', ['attribute' => 'IBAN'])],
-            ])->errorBag('createOrderFromPurchaseInvoice');
+            ])
+                ->errorBag('createOrderFromPurchaseInvoice');
+        }
+
+        /** @var PurchaseInvoice $purchaseInvoice */
+        $purchaseInvoice = resolve_static(PurchaseInvoice::class, 'query')
+            ->whereKey($this->getData('id'))
+            ->with([
+                'purchaseInvoicePositions:id,purchase_invoice_id,vat_rate_id,total_price',
+            ])
+            ->first([
+                'id',
+                'is_net',
+            ]);
+
+        if (
+            bccomp(
+                $this->getData('total_gross_price'),
+                $totalPositionGross = bcround($purchaseInvoice->calculateTotalGrossPrice(), 2),
+                2
+            ) !== 0
+        ) {
+            throw ValidationException::withMessages([
+                'total_gross_price' => [
+                    __(
+                        'The total gross :total-gross must match the sum of all position total prices :pos-total.',
+                        [
+                            'total-gross' => $this->getData('total_gross_price'),
+                            'pos-total' => $totalPositionGross,
+                        ]
+                    ),
+                ],
+            ])
+                ->errorBag('createOrderFromPurchaseInvoice');
         }
     }
 }

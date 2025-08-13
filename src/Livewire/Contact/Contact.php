@@ -189,11 +189,6 @@ class Contact extends Component
             ->getAvatarUrl();
     }
 
-    protected function getHtmlBody(OffersPrinting $item): string
-    {
-        return '';
-    }
-
     protected function getPrintLayouts(): array
     {
         return app(ContactModel::class)->resolvePrintViews();

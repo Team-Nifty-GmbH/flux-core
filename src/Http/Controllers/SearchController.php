@@ -98,11 +98,11 @@ class SearchController extends Controller
         }
 
         if ($request->has('whereNull')) {
-            $query->whereNull($request->get('whereNull'));
+            $query->whereNull(...$request->get('whereNull'));
         }
 
         if ($request->has('whereNotNull')) {
-            $query->whereNotNull($request->get('whereNotNull'));
+            $query->whereNotNull(...$request->get('whereNotNull'));
         }
 
         if ($request->has('whereBetween')) {
@@ -138,11 +138,33 @@ class SearchController extends Controller
         }
 
         if ($request->has('whereDoesntHave')) {
-            $query->whereDoesntHave($request->get('whereDoesntHave'));
+            $whereDoesntHave = $request->get('whereDoesntHave');
+            if (is_array($whereDoesntHave) && array_is_list($whereDoesntHave)) {
+                foreach ($whereDoesntHave as $relation) {
+                    $query->whereDoesntHave($relation);
+                }
+            } else {
+                $query->whereDoesntHave($whereDoesntHave);
+            }
         }
 
         if ($request->has('whereHas')) {
-            $query->whereHas($request->get('whereHas'));
+            $whereHas = $request->get('whereHas');
+            if (is_array($whereHas) && array_is_list($whereHas)) {
+                foreach ($whereHas as $relation) {
+                    $query->whereHas($relation);
+                }
+            } else {
+                $query->whereHas($whereHas);
+            }
+        }
+
+        if ($request->has('whereRelation')) {
+            $query->whereRelation(...$request->get('whereRelation'));
+        }
+
+        if ($request->has('whereDoesntHaveRelation')) {
+            $query->whereDoesntHaveRelation(...$request->get('whereDoesntHaveRelation'));
         }
 
         $result = $query->latest()->get();

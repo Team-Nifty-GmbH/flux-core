@@ -198,93 +198,6 @@
             />
         </x-slot>
     </x-modal>
-    <x-modal id="create-child-order" size="7xl">
-        <div class="grid grid-cols-2 gap-1.5">
-            <div id="replicate-order-order-type">
-                <x-select.styled
-                    :label="__('Order Type')"
-                    wire:model="replicateOrder.order_type_id"
-                    required
-                    select="label:name|value:id"
-                    unfiltered
-                    :request="[
-                        'url' => route('search', \FluxErp\Models\OrderType::class),
-                        'method' => 'POST',
-                        'params' => [
-                            'searchFields' => [
-                                'name',
-                            ],
-                            'select' => [
-                                'name',
-                                'id',
-                            ],
-                            'where' => [
-                                [
-                                    'is_active',
-                                    '=',
-                                    true,
-                                ],
-                            ],
-                            'whereIn' => [
-                                [
-                                    'id',
-                                    '',
-                                ],
-                            ],
-                        ],
-                    ]"
-                />
-            </div>
-            <div class="overflow-auto">
-                <template
-                    x-for="(position, index) in $wire.replicateOrder.order_positions"
-                >
-                    <x-flux::list-item :item="[]">
-                        <x-slot:value>
-                            <span x-text="position.name"></span>
-                        </x-slot>
-                        <x-slot:sub-value>
-                            <div class="flex flex-col">
-                                <span x-html="position.description"></span>
-                            </div>
-                        </x-slot>
-                        <x-slot:actions>
-                            <x-number
-                                x-model.number="position.amount"
-                                min="0"
-                            />
-                            <x-button
-                                color="red"
-                                icon="trash"
-                                x-on:click="$wire.replicateOrder.order_positions.splice(index, 1); $wire.recalculateReplicateOrderPositions();"
-                            />
-                        </x-slot>
-                    </x-flux::list-item>
-                </template>
-            </div>
-        </div>
-        <div class="pt-4">
-            <livewire:order.replicate-order-position-list
-                :order-id="$order->id"
-                lazy
-            />
-        </div>
-        <x-slot:footer>
-            <x-button
-                color="secondary"
-                light
-                :text="__('Cancel')"
-                x-on:click="$modalClose('create-child-order')"
-            />
-            <x-button
-                x-cloak
-                x-show="$wire.replicateOrder.order_positions?.length"
-                color="indigo"
-                :text="__('Save')"
-                wire:click="saveReplicate()"
-            />
-        </x-slot>
-    </x-modal>
     <x-modal
         id="edit-discount"
         x-on:open="$focusOn('discount-name')"
@@ -893,7 +806,7 @@
                             <div
                                 x-cloak
                                 x-show="
-                                    $wire.order.total_net_price !==
+                                    ($wire.order.subtotal_net_price ?? $wire.order.total_net_price) !==
                                         ($wire.order.total_base_net_price ?? '0.0000000000')
                                 "
                             >
@@ -1012,6 +925,38 @@
                                 <div>
                                     <span
                                         x-html="formatters.coloredMoney(($wire.order.total_discount_flat ?? 0) * -1)"
+                                    ></span>
+                                </div>
+                            </div>
+                            <div
+                                class="flex justify-between p-2.5"
+                                x-cloak
+                                x-show="$wire.order.subtotal_net_price > 0"
+                            >
+                                <div>
+                                    {{ __('Subtotal net') }}
+                                </div>
+                                <div>
+                                    <span
+                                        x-html="formatters.coloredMoney($wire.order.subtotal_net_price)"
+                                    ></span>
+                                </div>
+                            </div>
+                            <div
+                                class="flex justify-between p-2.5 opacity-50"
+                                x-cloak
+                                x-show="$wire.order.subtotal_net_price > 0"
+                            >
+                                <div>
+                                    {{ __('Split Orders net') }}
+                                </div>
+                                <div>
+                                    <span
+                                        x-html="
+                                            formatters.coloredMoney(
+                                                $wire.order.total_net_price - $wire.order.subtotal_net_price,
+                                            )
+                                        "
                                     ></span>
                                 </div>
                             </div>

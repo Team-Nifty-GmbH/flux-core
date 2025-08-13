@@ -62,6 +62,11 @@
         />
         <x-input
             x-bind:readonly="!edit"
+            label="{{ __('Customs Tariff Number') }}"
+            wire:model="product.customs_tariff_number"
+        />
+        <x-input
+            x-bind:readonly="!edit"
             label="{{ __('Manufacturer product number') }}"
             wire:model="product.manufacturer_product_number"
         />
@@ -434,7 +439,7 @@
             <x-select.styled
                 :label="__('Contact')"
                 select="label:label|value:contact_id"
-                x-on:select="$wire.addSupplier($event.detail.select.value); clear();"
+                x-on:select="$wire.addSupplier($event.detail.select.contact_id); clear();"
                 unfiltered
                 :request="[
                     'url' => route('search', \FluxErp\Models\Address::class),

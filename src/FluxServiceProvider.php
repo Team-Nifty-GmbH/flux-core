@@ -279,6 +279,7 @@ class FluxServiceProvider extends ServiceProvider
                 Menu::register(route: 'settings.targets');
                 Menu::register(route: 'settings.lead-loss-reasons');
                 Menu::register(route: 'settings.lead-states');
+                Menu::register(route: 'settings.email-templates');
                 Menu::register(route: 'settings.tokens');
                 Menu::register(route: 'settings.product-option-groups');
                 Menu::register(route: 'settings.product-properties');

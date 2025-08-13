@@ -107,6 +107,7 @@ class UpdateContactRuleset extends FluxRuleset
             'discount_percent' => 'sometimes|numeric|nullable',
             'credit_line' => 'sometimes|numeric|nullable',
             'vat_id' => 'sometimes|string|max:255|nullable',
+            'customs_identifier' => 'sometimes|string|max:255|nullable',
             'vendor_customer_number' => 'sometimes|string|max:255|nullable',
             'header' => 'string|nullable',
             'footer' => 'string|nullable',

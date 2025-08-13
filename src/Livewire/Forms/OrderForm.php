@@ -57,6 +57,8 @@ class OrderForm extends FluxForm
 
     public ?array $currency = null;
 
+    public ?int $currency_id = null;
+
     public ?string $delivery_state = null;
 
     public array $discounts = [];
@@ -139,6 +141,12 @@ class OrderForm extends FluxForm
     public ?int $responsible_user_id = null;
 
     public ?string $state = null;
+
+    public ?string $subtotal_gross_price = null;
+
+    public ?string $subtotal_net_price = null;
+
+    public ?array $subtotal_vats = null;
 
     public ?string $system_delivery_date = null;
 

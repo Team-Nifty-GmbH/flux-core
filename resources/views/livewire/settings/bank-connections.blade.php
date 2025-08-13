@@ -1,5 +1,5 @@
 <x-modal id="bank-connection-modal" class="flex flex-col gap-4">
-    <div class="flex flex-col gap-1.5">
+    <div class="flex flex-col gap-4">
         <x-input wire:model="bankConnection.name" :label="__('Name')" />
         <x-select.styled
             :label="__('Currency')"
@@ -34,12 +34,14 @@
             :min="0"
             step="1"
         />
-        <div class="mt-2">
-            <x-toggle
-                wire:model="bankConnection.is_active"
-                :label="__('Active')"
-            />
-        </div>
+        <x-toggle
+            wire:model="bankConnection.is_active"
+            :label="__('Active')"
+        />
+        <x-toggle
+            wire:model="bankConnection.is_virtual"
+            :label="__('Is Virtual')"
+        />
     </div>
     <x-slot:footer>
         <x-button

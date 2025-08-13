@@ -2,12 +2,14 @@
 
 namespace FluxErp\Rulesets\SepaMandate;
 
+use FluxErp\Enums\SepaMandateTypeEnum;
 use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\ContactBankConnection;
 use FluxErp\Models\SepaMandate;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
+use Illuminate\Validation\Rule;
 
 class CreateSepaMandateRuleset extends FluxRuleset
 {
@@ -31,6 +33,10 @@ class CreateSepaMandateRuleset extends FluxRuleset
                 'nullable',
                 'integer',
                 app(ModelExists::class, ['model' => ContactBankConnection::class]),
+            ],
+            'sepa_mandate_type_enum' => [
+                'required',
+                Rule::enum(SepaMandateTypeEnum::class),
             ],
             'signed_date' => 'sometimes|date|nullable',
         ];

@@ -343,23 +343,9 @@ class Addresses extends Component
 
         if ($isNew) {
             $this->addressId = $this->address->id;
-            $this->addresses[] = $this->address
-                ->getActionResult()
-                ->only([
-                    'id',
-                    'contact_id',
-                    'company',
-                    'firstname',
-                    'lastname',
-                    'zip',
-                    'city',
-                    'street',
-                    'is_active',
-                    'is_main_address',
-                    'is_invoice_address',
-                    'is_delivery_address',
-                ]);
         }
+
+        $this->loadAddresses();
 
         $this->edit = false;
     }

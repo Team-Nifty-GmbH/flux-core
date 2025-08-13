@@ -11,6 +11,8 @@ abstract class CircleChart extends Chart
         'type' => 'pie',
     ];
 
+    public bool $showDonutOptions = true;
+
     public bool $showTotals = true;
 
     public function render(): View|Factory

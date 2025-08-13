@@ -2,23 +2,23 @@
 
 namespace FluxErp\Livewire\Project;
 
-use FluxErp\Actions\Task\DeleteTask;
 use FluxErp\Htmlables\TabButton;
 use FluxErp\Livewire\DataTables\TaskList as BaseTaskList;
 use FluxErp\Livewire\Forms\TaskForm;
 use FluxErp\Models\Task;
+use FluxErp\Support\Livewire\Attributes\DataTableForm;
 use FluxErp\Traits\Livewire\Actions;
+use FluxErp\Traits\Livewire\DataTableHasFormEdit;
 use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
-use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
-use Spatie\Permission\Exceptions\UnauthorizedException;
-use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class ProjectTaskList extends BaseTaskList
 {
-    use Actions, WithTabs;
+    use Actions, DataTableHasFormEdit, WithTabs {
+        DataTableHasFormEdit::edit as editForm;
+    }
 
     public array $availableStates = [];
 
@@ -26,6 +26,7 @@ class ProjectTaskList extends BaseTaskList
 
     public ?int $projectId;
 
+    #[DataTableForm]
     public TaskForm $task;
 
     public string $taskTab = 'task.general';
@@ -53,44 +54,18 @@ class ProjectTaskList extends BaseTaskList
     }
 
     #[Renderless]
-    protected function getTableActions(): array
+    public function edit(string|int|null $id = null): void
     {
-        return [
-            DataTableButton::make()
-                ->text(__('New'))
-                ->color('indigo')
-                ->attributes([
-                    'x-on:click' => '$wire.edit()',
-                ]),
-        ];
-    }
+        $task = resolve_static(Task::class, 'query')
+            ->where('project_id', $this->projectId)
+            ->when($id, fn (Builder $query) => $query->whereKey($id))
+            ->firstOrFail();
 
-    #[Renderless]
-    public function delete(): bool
-    {
-        try {
-            DeleteTask::make($this->task->toArray())
-                ->checkPermission()
-                ->validate()
-                ->execute();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
-    }
-
-    #[Renderless]
-    public function edit(Task $task): void
-    {
         $this->reset('taskTab');
         $task->project_id = $this->projectId;
-        $this->task->reset();
-        $this->task->fill($task);
+
+        $this->editForm($id);
+
         $this->task->users = $task->users()->pluck('users.id')->toArray();
         $this->task->additionalColumns = array_intersect_key(
             $task->toArray(),
@@ -99,10 +74,6 @@ class ProjectTaskList extends BaseTaskList
                 null
             )
         );
-
-        $this->js(<<<'JS'
-            $modalOpen('task-form-modal');
-        JS);
     }
 
     #[Renderless]
@@ -126,22 +97,6 @@ class ProjectTaskList extends BaseTaskList
                     'x-bind:disabled' => '! $wire.task.id',
                 ]),
         ];
-    }
-
-    #[Renderless]
-    public function save(): bool
-    {
-        try {
-            $this->task->save();
-        } catch (ValidationException|UnauthorizedException $e) {
-            exception_to_notifications($e, $this);
-
-            return false;
-        }
-
-        $this->loadData();
-
-        return true;
     }
 
     public function updatedTaskTab(): void

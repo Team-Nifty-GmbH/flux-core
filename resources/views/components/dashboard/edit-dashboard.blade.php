@@ -1,4 +1,44 @@
 @use('FluxErp\Enums\TimeFrameEnum')
+<div class="flex items-center gap-4">
+    @if (in_array(\FluxErp\Traits\Livewire\Dashboard\SupportsGrouping::class, class_uses_recursive($this)) && $canEdit)
+        <template x-for="group in allGroups">
+            <div class="relative">
+                <x-button
+                    wire:loading.attr="disabled"
+                    class="!text-secondary-600 !dark:text-secondary-400 border-b-2 border-b-transparent focus:!ring-0 focus:!ring-offset-0"
+                    flat
+                    x-bind:class="{'!border-b-primary-600 !rounded-b-none': (group === null && $wire.group === null) || (group !== null && group === $wire.group)}"
+                    x-on:click="$wire.set('group', group)"
+                >
+                    <x-slot:text>
+                        <span x-text="group ?? '{{ __('Default') }}'"></span>
+                    </x-slot>
+                </x-button>
+                <x-button.circle
+                    x-show="editGrid && group !== null"
+                    x-cloak
+                    icon="x-mark"
+                    wire:loading.attr="disabled"
+                    wire:flux-confirm.type.error="{{ __('wire:confirm.delete', ['model' => __('Group')]) }}"
+                    wire:click="deleteGroup(group)"
+                    class="absolute -right-1 -top-1 h-4 w-4 cursor-pointer bg-red-500 text-white hover:bg-red-600"
+                    xs
+                />
+            </div>
+        </template>
+
+        <x-button.circle
+            x-show="editGrid"
+            x-cloak
+            wire:loading.attr="disabled"
+            x-on:click="$modalOpen('create-group-modal')"
+            class="h-6 w-6 cursor-pointer bg-green-500 text-white hover:bg-green-600"
+            size="sm"
+        >
+            <x-icon name="plus" class="h-4 w-4" />
+        </x-button.circle>
+    @endif
+</div>
 <div class="flex flex-col gap-2 md:flex-row">
     @if ($hasTimeSelector)
         <div
@@ -59,7 +99,7 @@
                     color="red"
                     loading
                     wire:flux-confirm.type.error="{{ __('wire:confirm.cancel.dashboard-edit') }}"
-                    wire:click="resetWidgets().then(() => {reInit().disable(); isLoading = false; editGridMode(false);})"
+                    wire:click="resetWidgets().then(onPostReset.bind($data))"
                     class="flex-shrink-0"
                     :text="__('Cancel')"
                 />
@@ -67,3 +107,34 @@
         </div>
     @endif
 </div>
+
+<x-modal
+    id="create-group-modal"
+    :title="__('Create New Group')"
+    x-on:open="$focusOn('new-group-name')"
+>
+    <x-input
+        id="new-group-name"
+        x-model="newGroupName"
+        :text="__('Group Name')"
+    />
+
+    <x-slot:footer>
+        <x-button
+            color="secondary"
+            x-on:click="$modalClose('create-group-modal')"
+            :text="__('Cancel')"
+        />
+        <x-button
+            x-on:click="
+                if (newGroupName.trim()) {
+                    addNewGroup(newGroupName.trim());
+                    $wire.set('group', newGroupName.trim());
+                    newGroupName = '';
+                    $modalClose('create-group-modal');
+                }
+            "
+            :text="__('Save')"
+        />
+    </x-slot>
+</x-modal>
