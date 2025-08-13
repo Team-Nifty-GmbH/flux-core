@@ -127,7 +127,17 @@
                     </div>
                 </template>
             @endforeach
-
+            <template
+                id="{{ uniqid() }}"
+                x-ref="additional-img"
+            >
+                <img
+                    data-type=""
+                    draggable="false"
+                    class="absolute left-0 top-0 max-h-[1.7cm] select-none"
+                    src=""
+                     />
+            </template>
             <div class="clear-both"></div>
         </div>
     </div>

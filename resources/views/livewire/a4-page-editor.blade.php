@@ -21,6 +21,11 @@
             <x-flux::print.available-elements.order.first-page-header :client="$client"/>
             <x-flux::print.available-elements.header :client="$client"/>
             <x-flux::print.available-elements.footer :client="$client"/>
+{{--        TODO: move to each component - STORE LOGIC TO BASE STORE--}}
+            <div x-cloak x-show="printStore.editFooter">
+                <div class="mb-4 mt-4 w-full border-t border-gray-300"></div>
+                <div class="pb-4 text-lg text-gray-600">Additional images</div>
+            </div>
         @endif
     </div>
     @if ($this->availableClients)

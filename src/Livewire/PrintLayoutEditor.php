@@ -4,6 +4,7 @@ namespace FluxErp\Livewire;
 
 use FluxErp\Livewire\Forms\PrintLayoutForm;
 use FluxErp\Models\Client;
+use FluxErp\Models\Media;
 use FluxErp\Models\PrintLayout;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
@@ -12,6 +13,7 @@ use Illuminate\Support\Fluent;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
+use Livewire\Attributes\Validate;
 use Livewire\Component;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 
@@ -31,6 +33,9 @@ class PrintLayoutEditor extends Component
 
     #[Url]
     public string $name;
+
+    #[Validate('image')]
+    public Media $media;
 
     public ?int $selectedClientId = null;
 
@@ -147,6 +152,16 @@ class PrintLayoutEditor extends Component
                 ]);
             }
         }
+    }
+
+    #[Renderless]
+    public function addImage() {
+
+    }
+
+    #[Renderless]
+    public function deleteImage(string $imgField) {
+
     }
 
     #[Renderless]

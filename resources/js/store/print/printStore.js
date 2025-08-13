@@ -239,6 +239,7 @@ export default function ($headerStore, $firstPageHeaderStore, $footerStore) {
                 marginRight: this._marginRight,
             };
         },
+        async uploadImg() {},
         async submit($wire) {
             const margins = this.prepareToSubmit();
             const header = $headerStore.prepareToSubmit();
