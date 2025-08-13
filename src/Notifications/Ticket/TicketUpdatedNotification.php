@@ -14,7 +14,7 @@ class TicketUpdatedNotification extends SubscribableNotification implements Shou
     public function subscribe(): array
     {
         return [
-            'eloquent.updated: ' . morph_alias(Ticket::class) => 'sendNotification',
+            'eloquent.updated: ' . resolve_static(Ticket::class, 'class') => 'sendNotification',
         ];
     }
 

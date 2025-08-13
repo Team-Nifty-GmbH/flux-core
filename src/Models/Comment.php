@@ -53,7 +53,7 @@ class Comment extends FluxModel implements HasMedia, IsSubscribable
                     ->each(function (Model $notifiable) use ($comment): void {
                         $notifiable->subscribeNotificationChannel(
                             channel: $comment->broadcastChannel(),
-                            event: 'eloquent.created: ' . $comment->getMorphClass()
+                            event: 'eloquent.created: ' . resolve_static(get_class($comment), 'class')
                         );
                     });
             }

@@ -4,14 +4,13 @@ namespace FluxErp\Actions\Comment;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Comment;
-use FluxErp\Models\EventSubscription;
 use FluxErp\Rulesets\Comment\CreateCommentRuleset;
 
 class CreateComment extends FluxAction
 {
     public static function models(): array
     {
-        return [Comment::class, EventSubscription::class];
+        return [Comment::class];
     }
 
     protected function getRulesets(): string|array
@@ -24,7 +23,7 @@ class CreateComment extends FluxAction
         $comment = app(Comment::class, ['attributes' => $this->data]);
         $comment->save();
 
-        return $comment->fresh();
+        return $comment->refresh();
     }
 
     protected function prepareForValidation(): void

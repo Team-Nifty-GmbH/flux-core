@@ -30,7 +30,7 @@ class CommentCreatedNotification extends SubscribableNotification implements Sho
     public function subscribe(): array
     {
         return [
-            'eloquent.created: ' . morph_alias(Comment::class) => 'sendNotification',
+            'eloquent.created: ' . resolve_static(Comment::class, 'class') => 'sendNotification',
         ];
     }
 

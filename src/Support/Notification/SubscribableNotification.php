@@ -5,6 +5,7 @@ namespace FluxErp\Support\Notification;
 use Exception;
 use FluxErp\Contracts\HasToastNotification;
 use FluxErp\Models\EventSubscription;
+use FluxErp\Models\NotificationSetting;
 use FluxErp\Models\User;
 use FluxErp\Notifications\Notification;
 use FluxErp\Support\Notification\ToastNotification\NotificationAction;
@@ -12,8 +13,10 @@ use FluxErp\Support\Notification\ToastNotification\ToastNotification;
 use FluxErp\Traits\Notifiable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Notification as NotificationFacade;
 use NotificationChannels\WebPush\WebPushMessage;
 
 abstract class SubscribableNotification extends Notification implements HasToastNotification
@@ -49,6 +52,11 @@ abstract class SubscribableNotification extends Notification implements HasToast
             ->each(function (object $notifiable): void {
                 $notifiable->notify($this);
             });
+
+        if ($anonymousSubscriptions = $this->getAnonymousSubscriptions()) {
+            NotificationFacade::routes($anonymousSubscriptions)
+                ->notify($this);
+        }
     }
 
     public function toArray(object $notifiable): array
@@ -66,12 +74,12 @@ abstract class SubscribableNotification extends Notification implements HasToast
         return ToastNotification::make()
             ->notifiable($notifiable)
             ->title($this->getTitle())
-            ->icon($this->getNotificationIcon())
+            ->image($this->getNotificationIcon())
             ->when(
                 auth()->user()
                 && method_exists(auth()->user(), 'getAvatarUrl')
                 && auth()->user()->getAvatarUrl(),
-                fn (ToastNotification $toast) => $toast->img(auth()->user()->getAvatarUrl())
+                fn (ToastNotification $toast) => $toast->image(auth()->user()->getAvatarUrl())
             )
             ->description($this->getDescription())
             ->accept($this->getAcceptAction($notifiable));
@@ -90,7 +98,9 @@ abstract class SubscribableNotification extends Notification implements HasToast
 
     public function via(object $notifiable): array
     {
-        if (! in_array(get_class($notifiable), static::sendsTo())) {
+        if (! $notifiable instanceof AnonymousNotifiable
+            && ! in_array(get_class($notifiable), static::sendsTo())
+        ) {
             return [];
         }
 
@@ -114,6 +124,18 @@ abstract class SubscribableNotification extends Notification implements HasToast
                         )
                     )
             );
+    }
+
+    protected function getAnonymousSubscriptions(): array
+    {
+        return resolve_static(NotificationSetting::class, 'query')
+            ->whereNull('notifiable_type')
+            ->whereNull('notifiable_id')
+            ->where('notification_type', static::class)
+            ->where('is_active', true)
+            ->pluck('channel_value', 'channel')
+            ->filter()
+            ->toArray();
     }
 
     protected function getChannelFromEvent(object $event): string

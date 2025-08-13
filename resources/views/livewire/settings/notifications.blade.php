@@ -72,7 +72,9 @@
             <x-slot name="header">
                 <th class="col-span-2">{{ __('Notification') }}</th>
             </x-slot>
-            <template x-for="(notification, key) in $wire.notificationSettings">
+            <template
+                x-for="(notification, key) in $wire.notificationSettings"
+            >
                 <x-flux::table.row>
                     <td>
                         <div x-text="$wire.translate(key)"></div>

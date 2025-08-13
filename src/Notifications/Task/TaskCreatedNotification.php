@@ -14,7 +14,7 @@ class TaskCreatedNotification extends SubscribableNotification implements Should
     public function subscribe(): array
     {
         return [
-            'eloquent.created: ' . morph_alias(Task::class) => 'sendNotification',
+            'eloquent.created: ' . resolve_static(Task::class, 'class') => 'sendNotification',
         ];
     }
 
