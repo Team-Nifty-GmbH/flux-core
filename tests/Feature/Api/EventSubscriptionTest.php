@@ -33,13 +33,7 @@ class EventSubscriptionTest extends BaseSetup
         $this->comments = Comment::factory()->count(3)->create([
             'model_type' => morph_alias(Ticket::class),
             'model_id' => $this->tickets[0]->id,
-            'comment' => '<p>
-                <span class="mention" data-type="mention" data-id="'
-                    . $this->user->getMorphClass() . ':' . $this->user->getKey()
-                    . '" data-label="' . $this->user->getLabel()
-                    . '" data-mention-suggestion-char="@">@' . $this->user->getLabel() . '
-                </span>  Please do something!
-            </p>',
+            'comment' => 'User Comment from a Test!',
         ]);
 
         $this->eventSubscriptions = EventSubscription::factory()->count(3)->create([
@@ -169,7 +163,7 @@ class EventSubscriptionTest extends BaseSetup
 
         $this->assertTrue(
             in_array(
-                $this->tickets[0]->getMorphClass() . '.' . $this->tickets[0]->getKey(),
+                'eloquent.created: ' . Comment::class,
                 json_decode($response->getContent())->data
             )
         );

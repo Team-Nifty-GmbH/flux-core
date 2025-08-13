@@ -14,6 +14,7 @@ use FluxErp\Listeners\Order\OrderStockSubscriber;
 use FluxErp\Listeners\SnapshotEventSubscriber;
 use FluxErp\Listeners\Ticket\CommentCreatedListener;
 use FluxErp\Listeners\WebhookEventSubscriber;
+use FluxErp\Models\Comment;
 use FluxErp\Notifications\Comment\CommentCreatedNotification;
 use FluxErp\Notifications\Order\DocumentSignedNotification;
 use FluxErp\Notifications\Order\OrderApprovalRequestNotification;
@@ -47,9 +48,6 @@ class EventServiceProvider extends ServiceProvider
         Logout::class => [
             LogoutListener::class,
         ],
-        'eloquent.created: comment' => [
-            CommentCreatedListener::class,
-        ],
         KeyWritten::class => [
             CacheKeyWrittenListener::class,
         ],
@@ -80,6 +78,11 @@ class EventServiceProvider extends ServiceProvider
         Event::listen(JobQueued::class, function (JobQueued $event): void {
             QueueMonitorManager::handle($event);
         });
+
+        Event::listen(
+            'eloquent.created: ' . resolve_static(Comment::class, 'class'),
+            resolve_static(CommentCreatedListener::class, 'class')
+        );
 
         /** @var QueueManager $manager */
         $manager = app(QueueManager::class);
