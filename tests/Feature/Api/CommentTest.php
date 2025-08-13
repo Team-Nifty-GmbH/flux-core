@@ -121,6 +121,8 @@ class CommentTest extends BaseSetup
     public function test_create_comment_sends_notification(): void
     {
         Notification::fake();
+        config(['queue.default' => 'sync']);
+
         $user = new User([
             'language_id' => $this->user->language_id,
             'email' => 'notification_user@example.com',
@@ -130,26 +132,26 @@ class CommentTest extends BaseSetup
         ]);
         $user->save();
 
-        $contact = Contact::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-        ]);
-        $address = Address::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-            'contact_id' => $contact->id,
-            'is_main_address' => true,
-        ]);
+        $address = Address::factory()
+            ->for(Contact::factory()->create(['client_id' => $this->dbClient->getKey()]))
+            ->create([
+                'client_id' => $this->dbClient->getKey(),
+                'is_main_address' => true,
+            ]);
 
         $ticket = Ticket::factory()->create([
             'authenticatable_type' => morph_alias(Address::class),
             'authenticatable_id' => $address->id,
         ]);
+        $address->subscribeNotificationChannel($ticket->broadcastChannel());
 
         $comment = [
             'model_id' => $ticket->id,
             'model_type' => morph_alias(Ticket::class),
             'comment' => 'test comment <span class="mention" data-type="mention" data-id="user:'
                 . $user->id . '">@firstname_notification_user lastname</span>',
-            'is_internal' => false,
+            'is_active' => true,
+            'is_internal' => true,
         ];
 
         $this->user->givePermissionTo($this->permissions['create']);
@@ -159,15 +161,49 @@ class CommentTest extends BaseSetup
         $response->assertStatus(201);
 
         $this->assertDatabaseHas('event_subscriptions', [
-            'event' => 'eloquent.created: ' . Comment::class,
-            'model_type' => morph_alias(Ticket::class),
-            'model_id' => $ticket->id,
+            'channel' => $ticket->broadcastChannel(),
             'subscribable_type' => morph_alias(User::class),
             'subscribable_id' => $user->id,
         ]);
 
         Notification::assertSentTo($user, CommentCreatedNotification::class);
+        Notification::assertNothingSentTo($address);
         Notification::assertNothingSentTo($this->user);
+    }
+
+    public function test_create_comment_sends_notification_to_address(): void
+    {
+        Notification::fake();
+        config(['queue.default' => 'sync']);
+
+        $address = Address::factory()
+            ->for(Contact::factory()->create(['client_id' => $this->dbClient->id]))
+            ->create([
+                'client_id' => $this->dbClient->id,
+                'is_active' => true,
+                'is_main_address' => true,
+            ]);
+
+        $ticket = Ticket::factory()->create([
+            'authenticatable_type' => morph_alias(Address::class),
+            'authenticatable_id' => $address->id,
+        ]);
+        $address->subscribeNotificationChannel($ticket->broadcastChannel());
+
+        $this->user->givePermissionTo($this->permissions['create']);
+        Sanctum::actingAs($this->user, ['user']);
+
+        $response = $this
+            ->actingAs($this->user)
+            ->post('/api/comments', [
+                'model_id' => $ticket->id,
+                'model_type' => morph_alias(Ticket::class),
+                'comment' => 'test comment',
+                'is_internal' => false,
+            ]);
+        $response->assertStatus(201);
+
+        Notification::assertSentTo($address, CommentCreatedNotification::class);
     }
 
     public function test_create_comment_validation_fails(): void

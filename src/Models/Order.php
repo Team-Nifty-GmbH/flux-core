@@ -7,6 +7,7 @@ use FluxErp\Actions\OrderTransaction\CreateOrderTransaction;
 use FluxErp\Actions\Transaction\CreateTransaction;
 use FluxErp\Casts\Money;
 use FluxErp\Casts\Percentage;
+use FluxErp\Contracts\IsSubscribable;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Contracts\Targetable;
 use FluxErp\Enums\OrderTypeEnum;
@@ -64,7 +65,7 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\ModelStates\HasStates;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
-class Order extends FluxModel implements HasMedia, InteractsWithDataTables, OffersPrinting, Targetable
+class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSubscribable, OffersPrinting, Targetable
 {
     use CascadeSoftDeletes, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasClientAssignment,
         HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasRelatedModel, HasSerialNumberRange,
@@ -372,6 +373,11 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
     public function agent(): BelongsTo
     {
         return $this->belongsTo(User::class, 'agent_id');
+    }
+
+    public function approvalUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approval_user_id');
     }
 
     public function calculateBalance(): static
