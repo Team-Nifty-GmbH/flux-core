@@ -44,8 +44,7 @@ return new class() extends Migration
     {
         DB::table('event_subscriptions')
             ->update([
-                'channel' => DB::raw("CONCAT(model_type, '.', model_id, '.comment')"),
-                'event' => 'eloquent.created: comment',
+                'channel' => DB::raw("CONCAT(model_type, '.', model_id)"),
             ]);
     }
 

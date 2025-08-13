@@ -62,7 +62,7 @@ class Comment extends FluxModel implements HasMedia, IsSubscribable
 
     public function broadcastChannel(): string
     {
-        return $this->model_type . '.' . $this->model_id . '.' . $this->getMorphClass();
+        return $this->model_type . '.' . $this->model_id;
     }
 
     public function broadcastWith(): array

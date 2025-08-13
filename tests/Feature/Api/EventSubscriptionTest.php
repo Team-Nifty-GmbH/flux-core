@@ -37,9 +37,10 @@ class EventSubscriptionTest extends BaseSetup
         ]);
 
         $this->eventSubscriptions = EventSubscription::factory()->count(3)->create([
+            'channel' => $this->user->broadcastChannel(),
+            'event' => '*',
             'subscribable_type' => $this->user->getMorphClass(),
             'subscribable_id' => $this->user->id,
-            'channel' => $this->user->broadcastChannel(),
         ]);
 
         $this->permissions = [
@@ -68,9 +69,10 @@ class EventSubscriptionTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $subscription = [
+            'channel' => $comment->broadcastChannel(),
+            'event' => '*',
             'subscribable_type' => $this->user->getMorphClass(),
             'subscribable_id' => $this->user->id,
-            'channel' => $comment->broadcastChannel(),
             'is_broadcast' => true,
             'is_notifiable' => false,
         ];
@@ -96,9 +98,10 @@ class EventSubscriptionTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $subscription = [
+            'channel' => $this->user->broadcastChannel(),
+            'event' => '*',
             'subscribable_type' => $this->user->getMorphClass(),
             'subscribable_id' => $this->user->id,
-            'channel' => $this->user->broadcastChannel(),
             'is_broadcast' => true,
             'is_notifiable' => false,
         ];
@@ -116,9 +119,10 @@ class EventSubscriptionTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $subscription = [
+            'channel' => Str::random(),
+            'event' => '*',
             'subscribable_type' => $this->user->getMorphClass(),
             'subscribable_id' => $this->user->id,
-            'channel' => Str::random(),
         ];
 
         $response = $this->actingAs($this->user)->post('/api/event-subscriptions', $subscription);
@@ -157,7 +161,12 @@ class EventSubscriptionTest extends BaseSetup
         $response = $this->actingAs($this->user)->get('/api/events');
         $response->assertStatus(200);
 
-        $this->assertTrue(in_array('eloquent.created: FluxErp\Models\Comment', json_decode($response->getContent())->data));
+        $this->assertTrue(
+            in_array(
+                $this->tickets[0]->getMorphClass() . '.' . $this->tickets[0]->getKey(),
+                json_decode($response->getContent())->data
+            )
+        );
     }
 
     public function test_get_user_subscriptions(): void
@@ -171,12 +180,15 @@ class EventSubscriptionTest extends BaseSetup
         $dbUserSubscriptions = json_decode($response->getContent())->data;
         $this->assertNotEmpty($dbUserSubscriptions);
         $this->assertEquals($this->eventSubscriptions[0]->id, $dbUserSubscriptions[0]->id);
+        $this->assertEquals($this->eventSubscriptions[0]->channel, $dbUserSubscriptions[0]->channel);
+        $this->assertEquals($this->eventSubscriptions[0]->event, $dbUserSubscriptions[0]->event);
         $this->assertEquals(
             $this->eventSubscriptions[0]->subscribable_type,
             $dbUserSubscriptions[0]->subscribable_type
         );
         $this->assertEquals($this->eventSubscriptions[0]->subscribable_id, $dbUserSubscriptions[0]->subscribable_id);
-        $this->assertEquals($this->eventSubscriptions[0]->channel, $dbUserSubscriptions[0]->channel);
+        $this->assertEquals($this->eventSubscriptions[0]->is_broadcast, $dbUserSubscriptions[0]->is_broadcast);
+        $this->assertEquals($this->eventSubscriptions[0]->is_notifiable, $dbUserSubscriptions[0]->is_notifiable);
     }
 
     public function test_update_event_subscription(): void
@@ -186,9 +198,9 @@ class EventSubscriptionTest extends BaseSetup
 
         $subscription = [
             'id' => $this->eventSubscriptions[0]->id,
+            'channel' => $this->comments[2]->broadcastChannel(),
             'subscribable_type' => $this->user->getMorphClass(),
             'subscribable_id' => $this->user->id,
-            'channel' => $this->comments[2]->broadcastChannel(),
             'is_broadcast' => true,
             'is_notifiable' => false,
         ];
@@ -202,9 +214,9 @@ class EventSubscriptionTest extends BaseSetup
             ->first();
 
         $this->assertEquals($subscription['id'], $dbEventSubscription->id);
+        $this->assertEquals($subscription['channel'], $dbEventSubscription->channel);
         $this->assertEquals($subscription['subscribable_type'], $dbEventSubscription->subscribable_type);
         $this->assertEquals($subscription['subscribable_id'], $dbEventSubscription->subscribable_id);
-        $this->assertEquals($subscription['channel'], $dbEventSubscription->channel);
         $this->assertEquals($subscription['is_broadcast'], $dbEventSubscription->is_broadcast);
         $this->assertEquals($subscription['is_notifiable'], $dbEventSubscription->is_notifiable);
     }
@@ -232,9 +244,9 @@ class EventSubscriptionTest extends BaseSetup
         Sanctum::actingAs($this->user, ['user']);
 
         $subscription = [
+            'channel' => class_basename('eloquent.created: FluxErp\Models\Comment'),
             'subscribable_type' => $this->user->getMorphClass(),
             'subscribable_id' => $this->user->id,
-            'channel' => class_basename('eloquent.created: FluxErp\Models\Comment'),
             'is_broadcast' => true,
             'is_notifiable' => false,
         ];
