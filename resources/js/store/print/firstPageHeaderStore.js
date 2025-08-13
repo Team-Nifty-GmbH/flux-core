@@ -213,6 +213,42 @@ export default function () {
                 });
             }
         },
+        toggleElement($ref, id) {
+            if (this.firsPageHeader === null) {
+                throw new Error(`Footer Elelement not initialized`);
+            }
+
+            const index = this.visibleElements.findIndex(
+                (item) => item.id === id,
+            );
+            if (index !== -1) {
+                // delete element
+                // remove the observer for the element
+                this.observer.unobserve(this.visibleElements[index].element);
+                this.firsPageHeader.removeChild(
+                    this.visibleElements[index].element,
+                );
+                this.visibleElements.splice(index, 1);
+            } else {
+                // add an element
+                this.firsPageHeader.appendChild(
+                    $ref[id].content.cloneNode(true),
+                );
+
+                const element = Array.from(this.firsPageHeader.children)
+                    .filter((item) => item.id === id)
+                    .pop();
+
+                if (element) {
+                    this.visibleElements.push(new PrintElement(element, this));
+                    this.observer.observe(element);
+                } else {
+                    throw new Error(
+                        `Element with id ${id} not found in footer`,
+                    );
+                }
+            }
+        },
         prepareToSubmit() {
             return {
                 height: this._firstPageHeaderHeight,

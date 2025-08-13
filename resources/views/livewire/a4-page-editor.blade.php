@@ -18,7 +18,7 @@
                 :options="$availableClients"
             />
             <div class="mb-4 mt-4 w-full border-t border-gray-300"></div>
-            <x-flux::print.available-elements.order.first-page-header :client="$client" :model="$model"/>
+            <x-flux::print.available-elements.order.first-page-header :client="$client"/>
             <x-flux::print.available-elements.header :client="$client"/>
             <x-flux::print.available-elements.footer :client="$client"/>
         @endif

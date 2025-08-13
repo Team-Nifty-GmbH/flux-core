@@ -63,9 +63,9 @@
         x-ref="first-page-header-client-name"
     >
             <div
-                draggable="false"
                 id="first-page-header-client-name"
                 data-type="container"
+                draggable="false"
                 class="absolute left-0 top-0 text-5xl font-semibold select-none"
                 :class="{'bg-gray-300' : firstPageHeaderStore.selectedElementId === 'first-page-header-client-name'}"
                 x-on:mousedown="printStore.editFirstPageHeader ?  firstPageHeaderStore.onMouseDown($event, 'first-page-header-client-name') : null"
