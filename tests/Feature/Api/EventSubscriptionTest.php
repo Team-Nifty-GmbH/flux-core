@@ -33,7 +33,12 @@ class EventSubscriptionTest extends BaseSetup
         $this->comments = Comment::factory()->count(3)->create([
             'model_type' => morph_alias(Ticket::class),
             'model_id' => $this->tickets[0]->id,
-            'comment' => 'User Comment from a Test!',
+            'comment' => '<p>
+                <span class="mention" data-type="mention" data-id="user:"' . $this->user->getKey()
+                    . ' data-label="' . $this->user->getLabel()
+                    . '" data-mention-suggestion-char="@">@' . $this->user->getLabel() . '
+                </span>  Please do something!
+            </p>',
         ]);
 
         $this->eventSubscriptions = EventSubscription::factory()->count(3)->create([
