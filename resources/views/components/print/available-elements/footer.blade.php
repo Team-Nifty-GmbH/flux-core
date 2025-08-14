@@ -71,5 +71,42 @@
             </div>
         </div>
     @endif
+    <div class="mb-4 mt-4 w-full border-t border-gray-300"></div>
+    <div class="pb-4 text-lg text-gray-600">Additional Photos</div>
+    {{-- submited images--}}
+    {{-- not submitef --}}
+    <div
+        :class="{'pb-4': footerStore.temporaryVisibleMedia.length > 0 }"
+        class="flex flex-col gap-4">
+    <template x-for="(image, index) in footerStore.temporaryVisibleMedia" :key="index">
+        <div class="flex items-center justify-between">
+            <img
+                class="max-h-[1.7cm] select-none"
+               x-bind:src=image.src
+            />
+            <x-button.circle
+                icon="trash"
+            />
+        </div>
+    </template>
+    </div>
+    <label>
+        <input
+            x-ref="footerImageInput"
+            type="file"
+            accept="image/*"
+            class="hidden"
+            x-on:change="
+                footerStore.addToTemporaryMedia(
+                    $event,
+                    $refs
+                )"
+        />
+        <x-button
+            color="primary"
+            text="Add Image"
+            x-on:click="$refs.footerImageInput.click()"
+        />
+    </label>
 </div>
 

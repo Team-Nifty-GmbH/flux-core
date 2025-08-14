@@ -155,7 +155,7 @@ class PrintLayoutEditor extends Component
     }
 
     #[Renderless]
-    public function addImage() {
+    public function saveImage() {
 
     }
 

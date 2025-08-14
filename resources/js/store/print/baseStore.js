@@ -13,6 +13,7 @@ export default function () {
             startY: null,
         },
         visibleElements: [],
+        temporaryVisibleMedia: [],
         elementsOutOfView: [],
         _component: null,
         onInit(pxPerCm, pyPerCm) {
@@ -28,20 +29,44 @@ export default function () {
                 this.pxPerCm = 37.79527559055118; // 1 cm in pixels, based on 96 DPI
             }
         },
-        _selectElement(e, id) {
-            const index = this.visibleElements.findIndex(
-                (item) => item.id === id,
-            );
-            if (index !== -1) {
-                this._selectedElement.id = id;
-                this._selectedElement.ref = this.visibleElements[index];
-                const { x, y } = this.visibleElements[index].position;
-                this._selectedElement.x = x;
-                this._selectedElement.y = y;
-                this._selectedElement.startX = e.clientX;
-                this._selectedElement.startY = e.clientY;
+        _selectElement(e, id, source) {
+            if (source === 'element') {
+                const index = this.visibleElements.findIndex(
+                    (item) => item.id === id,
+                );
+                if (index !== -1) {
+                    this._selectedElement.id = id;
+                    this._selectedElement.ref = this.visibleElements[index];
+                    const { x, y } = this.visibleElements[index].position;
+                    this._selectedElement.x = x;
+                    this._selectedElement.y = y;
+                    this._selectedElement.startX = e.clientX;
+                    this._selectedElement.startY = e.clientY;
+                } else {
+                    throw new Error(`Element with id ${id} not found`);
+                }
+            } else if (source === 'temporary') {
+                const index = this.temporaryVisibleMedia.findIndex(
+                    (item) => item.id === id,
+                );
+                if (index !== -1) {
+                    this._selectedElement.id = id;
+                    this._selectedElement.ref =
+                        this.temporaryVisibleMedia[index];
+                    const { x, y } = this.temporaryVisibleMedia[index].position;
+                    this._selectedElement.x = x;
+                    this._selectedElement.y = y;
+                    this._selectedElement.startX = e.clientX;
+                    this._selectedElement.startY = e.clientY;
+                } else {
+                    throw new Error(
+                        `Temporary element with id ${id} not found`,
+                    );
+                }
             } else {
-                throw new Error(`Element with id ${id} not found`);
+                throw new Error(
+                    `Invalid source: ${source} - eather 'element' or 'temporary'`,
+                );
             }
         },
         onMouseMove(e) {
@@ -74,8 +99,11 @@ export default function () {
             this._selectedElement.startX = null;
             this._selectedElement.startY = null;
         },
-        onMouseDown(e, id) {
-            this._selectElement(e, id);
+        onMouseDown(e, id, source = 'elements') {
+            // source can be 'existing' or 'temporary' - temporary means that the element has uuid as an id
+            // generated on front end - after submitting the form, the id will be replaced with the id from the backend
+            // and the element will become an existing element
+            this._selectElement(e, id, source);
         },
         repositionOnMouseUp() {
             if (this.elementsOutOfView.length > 0) {

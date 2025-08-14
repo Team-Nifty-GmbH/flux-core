@@ -49,6 +49,9 @@ export default function ($headerStore, $firstPageHeaderStore, $footerStore) {
         get loading() {
             return this._loading;
         },
+        set loading(value) {
+            this._loading = value;
+        },
         get component() {
             if (this._component === null) {
                 throw new Error('Component not initialized');
@@ -239,7 +242,6 @@ export default function ($headerStore, $firstPageHeaderStore, $footerStore) {
                 marginRight: this._marginRight,
             };
         },
-        async uploadImg() {},
         async submit($wire) {
             const margins = this.prepareToSubmit();
             const header = $headerStore.prepareToSubmit();

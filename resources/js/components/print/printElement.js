@@ -13,6 +13,18 @@ export default class PrintElement {
         return this.element.id;
     }
 
+    set id(value) {
+        if (typeof value !== 'string') {
+            throw new Error('ID must be a string');
+        }
+
+        // if (this.element.id !== undefined) {
+        //     throw new Error('ID is already set and cannot be changed');
+        // }
+
+        this.element.id = value;
+    }
+
     get size() {
         // since the size of an element doesent cange, we can cache it
         if (this._elementSize !== null && this.typeOfElement !== 'img') {

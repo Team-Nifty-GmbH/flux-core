@@ -1,27 +1,16 @@
+import baseStore from './baseStore.js';
 import {
     intersectionHandlerFactory,
     roundToOneDecimal,
     STEP,
 } from '../../components/utils/print/utils.js';
+import getBase64 from '../../components/utils/get-base-64.js';
 import PrintElement from '../../components/print/printElement.js';
+import TemporaryMediaElement from '../../components/print/temporaryMediaElement.js';
 
 export default function () {
     return {
-        pxPerCm: 0,
-        pyPerCm: 0,
-        observer: null,
-        _selectedElement: {
-            id: null,
-            // x and y are just for UI purposes
-            x: null,
-            y: null,
-            ref: null,
-            startX: null,
-            startY: null,
-        },
-        visibleElements: [],
-        elementsOutOfView: [],
-        _component: null,
+        ...baseStore(),
         footer: null,
         _footerHeight: 1.7,
         _minFooterHeight: 1.7,
@@ -29,19 +18,6 @@ export default function () {
         isFooterClicked: false,
         isImgResizeClicked: false,
         startPointFooterVertical: null,
-        onInit(pxPerCm, pyPerCm) {
-            if (typeof pyPerCm === 'number' && pyPerCm > 0) {
-                this.pyPerCm = pyPerCm;
-            } else {
-                this.pyPerCm = 37.79527559055118; // 1cm in pixels, based on 96 DPI
-            }
-
-            if (typeof pxPerCm === 'number' && pxPerCm > 0) {
-                this.pxPerCm = pxPerCm;
-            } else {
-                this.pxPerCm = 37.79527559055118; // 1cm in pixels, based on 96 DPI
-            }
-        },
         get component() {
             if (this._component === null) {
                 throw new Error('Component not initialized');
@@ -59,15 +35,6 @@ export default function () {
                 this.startPointFooterVertical = null;
 
                 this.repositionOnMouseUp();
-            }
-        },
-        repositionOnMouseUp() {
-            if (this.elementsOutOfView.length > 0) {
-                this.visibleElements
-                    .filter((item) => this.elementsOutOfView.includes(item.id))
-                    .forEach((element) => {
-                        element.positionBackInBound();
-                    });
             }
         },
         onMouseMoveFooter(e) {
@@ -119,9 +86,6 @@ export default function () {
         get selectedElementId() {
             return this._selectedElement.id;
         },
-        onMouseDown(e, id) {
-            this._selectElement(e, id);
-        },
         toggleElement($ref, id) {
             if (this.footer === null) {
                 throw new Error(`Footer Elelement not initialized`);
@@ -152,37 +116,6 @@ export default function () {
                         `Element with id ${id} not found in footer`,
                     );
                 }
-            }
-        },
-        // this method runs every time when mouse is released - hence no need to duplicate clean logic in onMouseUpResize
-        onMouseUp() {
-            if (
-                this._selectedElement.id !== null &&
-                this._selectedElement.ref !== null &&
-                this.elementsOutOfView.includes(this._selectedElement.id)
-            ) {
-                this._selectedElement.ref.positionBackInBound();
-            }
-            this._selectedElement.id = null;
-            this._selectedElement.ref = null;
-            this._selectedElement.x = null;
-            this._selectedElement.y = null;
-            this._selectedElement.startX = null;
-            this._selectedElement.startY = null;
-        },
-        onMouseMove(e) {
-            if (this._selectedElement.ref) {
-                const { x, y } = this._selectedElement.ref.position;
-                const deltaX = e.clientX - this._selectedElement.startX;
-                const deltaY = e.clientY - this._selectedElement.startY;
-                this._selectedElement.ref.position = {
-                    x: x + deltaX,
-                    y: y + deltaY,
-                };
-                this._selectedElement.startX = e.clientX;
-                this._selectedElement.startY = e.clientY;
-            } else {
-                throw new Error(`Element not selected`);
             }
         },
         onMouseDownResize(e, id) {
@@ -319,22 +252,6 @@ export default function () {
                 }
             });
         },
-        _selectElement(e, id) {
-            const index = this.visibleElements.findIndex(
-                (item) => item.id === id,
-            );
-            if (index !== -1) {
-                this._selectedElement.id = id;
-                this._selectedElement.ref = this.visibleElements[index];
-                const { x, y } = this.visibleElements[index].position;
-                this._selectedElement.x = x;
-                this._selectedElement.y = y;
-                this._selectedElement.startX = e.clientX;
-                this._selectedElement.startY = e.clientY;
-            } else {
-                throw new Error(`Element with id ${id} not found`);
-            }
-        },
         _adjustedMinFooterHeight() {
             // for now only logo is resized - if in future other elements will be resized, this method should be updated
             // to search for the heihest element and return its height
@@ -414,6 +331,40 @@ export default function () {
                 this.visibleElements.forEach((e) => {
                     this.observer.observe(e.element);
                 });
+            }
+        },
+        async addToTemporaryMedia(event, $refs) {
+            const file = event.target.files[0];
+            if (file !== undefined && this.footer) {
+                const base64 = await getBase64(file);
+                const cloneMediaElement =
+                    $refs['footer-additional-img']?.content.cloneNode(true);
+                if (cloneMediaElement) {
+                    this.footer.appendChild(cloneMediaElement);
+                    const children = Array.from(this.footer.children);
+                    const index = children.findIndex(
+                        (item) => item.id === 'footer-img-placeholder',
+                    );
+                    if (index !== -1 && this.observer) {
+                        const element = children[index];
+                        this.temporaryVisibleMedia.push(
+                            new TemporaryMediaElement(
+                                element,
+                                this,
+                                base64,
+                            ).init('start'),
+                        );
+                        this.observer.observe(element);
+                    } else {
+                        throw new Error(
+                            'Footer additional image placeholder not found',
+                        );
+                    }
+                } else {
+                    throw new Error(
+                        'Footer additional image template not found',
+                    );
+                }
             }
         },
         prepareToSubmit() {

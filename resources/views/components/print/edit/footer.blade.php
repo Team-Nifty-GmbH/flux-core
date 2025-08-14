@@ -129,10 +129,12 @@
             @endforeach
             <template
                 id="{{ uniqid() }}"
-                x-ref="additional-img"
+                x-ref="footer-additional-img"
             >
                 <img
-                    data-type=""
+                    id="footer-img-placeholder"
+                    x-on:mousedown="printStore.editFooter ?  footerStore.onMouseDown($event,$event.target.id) : null"
+                    data-type="img"
                     draggable="false"
                     class="absolute left-0 top-0 max-h-[1.7cm] select-none"
                     src=""
