@@ -118,10 +118,10 @@ export default function () {
                 }
             }
         },
-        onMouseDownResize(e, id) {
-            if (!this.isImgResizeClicked && id === 'footer-logo') {
+        onMouseDownResize(e, id, source = 'element') {
+            if (!this.isImgResizeClicked) {
                 this.isImgResizeClicked = true;
-                this._selectElement(e, id);
+                this._selectElement(e, id, source);
             }
         },
         onMouseUpResize() {
@@ -253,17 +253,33 @@ export default function () {
             });
         },
         _adjustedMinFooterHeight() {
-            // for now only logo is resized - if in future other elements will be resized, this method should be updated
-            // to search for the heihest element and return its height
+            // taking in account logo height, additional media (temp and saved) height, and free-text fields
+            const resizableElementHeights = [];
             const indexOfLogo = this.visibleElements.findIndex(
                 (item) => item.id === 'footer-logo',
             );
+            // logo height
             if (indexOfLogo !== -1) {
                 const element = this.visibleElements[indexOfLogo];
-                return roundToOneDecimal((element.height || 0) / this.pyPerCm);
+                resizableElementHeights.push(
+                    roundToOneDecimal((element.height || 0) / this.pyPerCm),
+                );
             } else {
-                return 0;
+                resizableElementHeights.push(0);
             }
+
+            // temp media height
+            const tempVisibleMedia = this.temporaryVisibleMedia.map((item) => {
+                return roundToOneDecimal((item.height || 0) / this.pyPerCm);
+            });
+
+            if (tempVisibleMedia.length > 0) {
+                resizableElementHeights.push(...tempVisibleMedia);
+            } else {
+                resizableElementHeights.push(0);
+            }
+
+            return Math.max(...resizableElementHeights);
         },
         async reload($refs, isClientChange = true) {
             if (this.observer) {
@@ -275,10 +291,14 @@ export default function () {
                 this.visibleElements.forEach((item) => {
                     this.footer.removeChild(item.element);
                 });
+                this.temporaryVisibleMedia.forEach((item) => {
+                    this.footer.removeChild(item.element);
+                });
             }
 
             this.visibleElements = [];
             this.elementsOutOfView = [];
+            this.temporaryVisibleMedia = [];
 
             const footerJson = await this.component.get('form.footer');
 
@@ -365,6 +385,24 @@ export default function () {
                         'Footer additional image template not found',
                     );
                 }
+            }
+            // clear the input field - to allow the same file to be selected again
+            event.target.value = '';
+        },
+        deleteTemporaryMedia(id) {
+            const index = this.temporaryVisibleMedia.findIndex(
+                (item) => item.id === id,
+            );
+            if (index !== -1) {
+                this.observer.unobserve(
+                    this.temporaryVisibleMedia[index].element,
+                );
+                this.footer.removeChild(
+                    this.temporaryVisibleMedia[index].element,
+                );
+                this.temporaryVisibleMedia.splice(index, 1);
+            } else {
+                throw new Error(`Temporary media with id ${id} not found`);
             }
         },
         prepareToSubmit() {

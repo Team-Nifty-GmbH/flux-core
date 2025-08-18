@@ -85,6 +85,7 @@
                x-bind:src=image.src
             />
             <x-button.circle
+                x-on:click="footerStore.deleteTemporaryMedia(image.id)"
                 icon="trash"
             />
         </div>

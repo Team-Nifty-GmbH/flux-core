@@ -4,15 +4,24 @@ import PrintElement from './printElement.js';
 export default class TemporaryMediaElement extends PrintElement {
     constructor(element, $store, base64) {
         super(element, $store);
+        this.imgElement = null;
         this.id = `media-${uuidv4()}`;
         this.url = base64 || '';
     }
 
     set url(value) {
-        this.element.src = value;
+        if (this.imgElement === null) {
+            this.imgElement = this.element.querySelector('img');
+        }
+
+        this.imgElement.src = value;
     }
 
     get src() {
-        return this.element.src;
+        if (this.imgElement === null) {
+            this.imgElement = this.element.querySelector('img');
+        }
+
+        return this.imgElement.src;
     }
 }

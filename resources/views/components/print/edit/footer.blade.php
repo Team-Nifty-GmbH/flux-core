@@ -131,14 +131,27 @@
                 id="{{ uniqid() }}"
                 x-ref="footer-additional-img"
             >
-                <img
+                <div
                     id="footer-img-placeholder"
-                    x-on:mousedown="printStore.editFooter ?  footerStore.onMouseDown($event,$event.target.id) : null"
+                    x-on:mousedown="printStore.editFooter ?  footerStore.onMouseDown($event,$el.id,'temporary') : null"
                     data-type="img"
                     draggable="false"
-                    class="absolute left-0 top-0 max-h-[1.7cm] select-none"
+                    class="absolute left-0 top-0 select-none h-[1.7cm]"
+                    :class="{'bg-gray-300' : !footerStore.isImgResizeClicked && footerStore.selectedElementId === $el.id}"
+                >
+                    <div
+                        draggable="false"
+                        x-cloak x-show="printStore.editFooter" class="relative w-full">
+                        <x-icon
+                            x-on:mousedown.stop="footerStore.onMouseDownResize($event, $el.parentElement.parentElement.id,'temporary')"
+                            name="arrows-pointing-out" class="absolute cursor-pointer right-0 top-0 h-4 w-4 rounded-full"></x-icon>
+                    </div>
+                <img
+                    draggable="false"
+                    class="max-h-full w-full"
                     src=""
                      />
+                </div>
             </template>
             <div class="clear-both"></div>
         </div>

@@ -99,7 +99,7 @@ export default function () {
             this._selectedElement.startX = null;
             this._selectedElement.startY = null;
         },
-        onMouseDown(e, id, source = 'elements') {
+        onMouseDown(e, id, source = 'element') {
             // source can be 'existing' or 'temporary' - temporary means that the element has uuid as an id
             // generated on front end - after submitting the form, the id will be replaced with the id from the backend
             // and the element will become an existing element
@@ -108,6 +108,12 @@ export default function () {
         repositionOnMouseUp() {
             if (this.elementsOutOfView.length > 0) {
                 this.visibleElements
+                    .filter((item) => this.elementsOutOfView.includes(item.id))
+                    .forEach((element) => {
+                        element.positionBackInBound();
+                    });
+
+                this.temporaryVisibleMedia
                     .filter((item) => this.elementsOutOfView.includes(item.id))
                     .forEach((element) => {
                         element.positionBackInBound();
