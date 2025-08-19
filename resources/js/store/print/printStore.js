@@ -242,11 +242,12 @@ export default function ($headerStore, $firstPageHeaderStore, $footerStore) {
                 marginRight: this._marginRight,
             };
         },
-        async submit($wire) {
+        async submit($wire, $refs) {
+            this._loading = true;
             const margins = this.prepareToSubmit();
             const header = $headerStore.prepareToSubmit();
             const firstPageHeader = $firstPageHeaderStore.prepareToSubmit();
-            const footer = $footerStore.prepareToSubmit();
+            const footer = await $footerStore.prepareToSubmit();
             await Promise.all([
                 $wire.set('form.footer', footer, false),
                 $wire.set('form.header', header, false),
@@ -261,6 +262,8 @@ export default function ($headerStore, $firstPageHeaderStore, $footerStore) {
                 this.editHeader = false;
                 this.editFirstPageHeader = false;
             }
+            console.log('COMPLETED');
+            this._loading = false;
         },
     };
 }

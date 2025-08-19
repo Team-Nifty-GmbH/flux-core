@@ -2,26 +2,59 @@ import { v4 as uuidv4 } from 'uuid';
 import PrintElement from './printElement.js';
 
 export default class TemporaryMediaElement extends PrintElement {
-    constructor(element, $store, base64) {
+    constructor(element, $store, file) {
         super(element, $store);
-        this.imgElement = null;
+        this._imgFile = file;
+        this._imgElement = null;
+        // used in action to refer to file name on backend - before submiting it to db
+        this._temporaryFileName = null;
         this.id = `media-${uuidv4()}`;
-        this.url = base64 || '';
+        this.url = file;
     }
 
-    set url(value) {
-        if (this.imgElement === null) {
-            this.imgElement = this.element.querySelector('img');
+    set url(file) {
+        if (this._imgElement === null) {
+            this._imgElement = this.element.querySelector('img');
         }
 
-        this.imgElement.src = value;
+        this._imgElement.src = URL.createObjectURL(file);
     }
 
     get src() {
-        if (this.imgElement === null) {
-            this.imgElement = this.element.querySelector('img');
+        if (this._imgElement === null) {
+            this._imgElement = this.element.querySelector('img');
         }
 
-        return this.imgElement.src;
+        return this._imgElement.src;
+    }
+
+    get temporaryFileName() {
+        if (this._temporaryFileName === null) {
+            throw new Error('Temporary file name is not set');
+        }
+        return this._temporaryFileName;
+    }
+
+    upload($component) {
+        const $this = this;
+        if (this._imgFile !== null) {
+            return new Promise(async (resolve, reject) => {
+                await $component.upload(
+                    'form.temporaryMedia',
+                    $this._imgFile,
+                    (tempFileName) => {
+                        $this._temporaryFileName = tempFileName;
+                        console.log('succesfull upload', tempFileName);
+                        // TODO: validate on demand
+                        resolve();
+                    },
+                    (error) => {
+                        reject(error);
+                    },
+                );
+            });
+        } else {
+            throw new Error('Image file is not initialized');
+        }
     }
 }

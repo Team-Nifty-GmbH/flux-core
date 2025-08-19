@@ -24,6 +24,9 @@ class UpdatePrintLayout extends FluxAction
         $printLayout = resolve_static(PrintLayout::class, 'query')
             ->whereKey($this->getData('id'))
             ->firstOrFail();
+        dd($this->getData());
+
+        // upload temporay images to Media
         $printLayout->fill($this->getData());
         $printLayout->save();
 

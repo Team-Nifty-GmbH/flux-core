@@ -4,7 +4,6 @@ import {
     roundToOneDecimal,
     STEP,
 } from '../../components/utils/print/utils.js';
-import getBase64 from '../../components/utils/get-base-64.js';
 import PrintElement from '../../components/print/printElement.js';
 import TemporaryMediaElement from '../../components/print/temporaryMediaElement.js';
 
@@ -356,7 +355,6 @@ export default function () {
         async addToTemporaryMedia(event, $refs) {
             const file = event.target.files[0];
             if (file !== undefined && this.footer) {
-                const base64 = await getBase64(file);
                 const cloneMediaElement =
                     $refs['footer-additional-img']?.content.cloneNode(true);
                 if (cloneMediaElement) {
@@ -368,11 +366,9 @@ export default function () {
                     if (index !== -1 && this.observer) {
                         const element = children[index];
                         this.temporaryVisibleMedia.push(
-                            new TemporaryMediaElement(
-                                element,
-                                this,
-                                base64,
-                            ).init('start'),
+                            new TemporaryMediaElement(element, this, file).init(
+                                'start',
+                            ),
                         );
                         this.observer.observe(element);
                     } else {
@@ -405,25 +401,70 @@ export default function () {
                 throw new Error(`Temporary media with id ${id} not found`);
             }
         },
-        prepareToSubmit() {
-            return {
-                height: this._footerHeight,
-                elements: this.visibleElements.map((item) => {
-                    return {
-                        id: item.id,
-                        x: roundToOneDecimal(item.position.x / this.pxPerCm),
-                        y: roundToOneDecimal(item.position.y / this.pyPerCm),
-                        width:
-                            item.width !== null
-                                ? roundToOneDecimal(item.width / this.pxPerCm)
-                                : null,
-                        height:
-                            item.height !== null
-                                ? roundToOneDecimal(item.height / this.pyPerCm)
-                                : null,
-                    };
-                }),
-            };
+        async prepareToSubmit() {
+            try {
+                if (this.temporaryVisibleMedia.length > 0) {
+                    for (const item of this.temporaryVisibleMedia) {
+                        await item.upload(this.component);
+                    }
+                }
+                return {
+                    height: this._footerHeight,
+                    elements: this.visibleElements.map((item) => {
+                        return {
+                            id: item.id,
+                            x: roundToOneDecimal(
+                                item.position.x / this.pxPerCm,
+                            ),
+                            y: roundToOneDecimal(
+                                item.position.y / this.pyPerCm,
+                            ),
+                            width:
+                                item.width !== null
+                                    ? roundToOneDecimal(
+                                          item.width / this.pxPerCm,
+                                      )
+                                    : null,
+                            height:
+                                item.height !== null
+                                    ? roundToOneDecimal(
+                                          item.height / this.pyPerCm,
+                                      )
+                                    : null,
+                        };
+                    }),
+                    temporaryMedia:
+                        this.temporaryVisibleMedia.length > 0
+                            ? this.temporaryVisibleMedia.map((item) => {
+                                  return {
+                                      name: item.temporaryFileName,
+                                      x: roundToOneDecimal(
+                                          item.position.x / this.pxPerCm,
+                                      ),
+                                      y: roundToOneDecimal(
+                                          item.position.y / this.pyPerCm,
+                                      ),
+                                      width:
+                                          item.width !== null
+                                              ? roundToOneDecimal(
+                                                    item.width / this.pxPerCm,
+                                                )
+                                              : null,
+                                      height:
+                                          item.height !== null
+                                              ? roundToOneDecimal(
+                                                    item.height / this.pyPerCm,
+                                                )
+                                              : null,
+                                  };
+                              })
+                            : null,
+                };
+            } catch (e) {
+                throw new Error(
+                    'Error preparing footer for submission: ' + e.message,
+                );
+            }
         },
     };
 }

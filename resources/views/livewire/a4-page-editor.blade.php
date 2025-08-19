@@ -59,13 +59,14 @@
             x-show="printStore.anyEdit"
             class="flex h-full flex-col justify-end"
         >
-            <div class="flex items-center justify-between">
+            <div
+                class="flex items-center justify-between">
                 <x-button
                     x-bind:disabled="printStore.loading"
                     x-on:click="printStore.closeEditor($refs)" text="Cancel" />
                 <x-button
                     x-bind:disabled="printStore.loading"
-                    x-on:click="printStore.submit($wire)" text="Submit" />
+                    x-on:click="printStore.submit($wire,$refs)" text="Submit" />
             </div>
         </div>
     </div>

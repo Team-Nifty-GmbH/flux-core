@@ -6,6 +6,8 @@ use FluxErp\Livewire\Forms\PrintLayoutForm;
 use FluxErp\Models\Client;
 use FluxErp\Models\Media;
 use FluxErp\Models\PrintLayout;
+use FluxErp\Traits\Livewire\Actions;
+use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -20,6 +22,8 @@ use Spatie\Permission\Exceptions\UnauthorizedException;
 class PrintLayoutEditor extends Component
 {
 
+    use Actions,WithFileUploads;
+
     public array $availableClients = [];
 
     public Client $client;
@@ -33,9 +37,6 @@ class PrintLayoutEditor extends Component
 
     #[Url]
     public string $name;
-
-    #[Validate('image')]
-    public Media $media;
 
     public ?int $selectedClientId = null;
 
@@ -152,16 +153,6 @@ class PrintLayoutEditor extends Component
                 ]);
             }
         }
-    }
-
-    #[Renderless]
-    public function saveImage() {
-
-    }
-
-    #[Renderless]
-    public function deleteImage(string $imgField) {
-
     }
 
     #[Renderless]
