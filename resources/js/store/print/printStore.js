@@ -20,7 +20,7 @@ export default function ($headerStore, $firstPageHeaderStore, $footerStore) {
             this._loading = false;
         },
         editMargin: false,
-        editFooter: true,
+        editFooter: false,
         editHeader: false,
         editFirstPageHeader: false,
         async selectClient(e, $wire, $refs) {
