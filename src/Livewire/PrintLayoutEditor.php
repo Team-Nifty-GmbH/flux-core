@@ -15,7 +15,6 @@ use Illuminate\Support\Fluent;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
-use Livewire\Attributes\Validate;
 use Livewire\Component;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 
@@ -82,7 +81,6 @@ class PrintLayoutEditor extends Component
             $this->client = resolve_static(Client::class, 'query')
                 ->whereKey(reset($this->availableClients)['id'])
                 ->first();
-
             $this->selectedClientId = $this->client->id;
 
             $layout = PrintLayout::query()

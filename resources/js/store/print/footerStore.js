@@ -6,6 +6,7 @@ import {
 } from '../../components/utils/print/utils.js';
 import PrintElement from '../../components/print/printElement.js';
 import TemporaryMediaElement from '../../components/print/temporaryMediaElement.js';
+import MediaElement from '../../components/print/mediaElement.js';
 
 export default function () {
     return {
@@ -222,10 +223,15 @@ export default function () {
                 this.visibleElements.forEach((e) => {
                     this.observer.observe(e.element);
                 });
+
+                this.visibleMedia.forEach((e) => {
+                    this.observer.observe(e.element);
+                });
             }
         },
         _mapFooter($refs, json) {
             this._footerHeight = json.height ?? 1.7;
+            console.log(json);
             json.elements?.forEach((item) => {
                 const element =
                     $refs[item.id] && $refs[item.id].content.cloneNode(true);
@@ -237,6 +243,37 @@ export default function () {
                         const child = children[index];
                         this.visibleElements.push(
                             new PrintElement(child, this).init({
+                                x: item.x * this.pxPerCm,
+                                y: item.y * this.pyPerCm,
+                                ...(item.width && {
+                                    width: item.width * this.pxPerCm,
+                                }),
+                                ...(item.height && {
+                                    height: item.height * this.pyPerCm,
+                                }),
+                            }),
+                        );
+                    }
+                }
+            });
+
+            json.media?.forEach((item) => {
+                const element = $refs['footer-media']?.content.cloneNode(true);
+                if (element) {
+                    this.footer.appendChild(element);
+                    const children = Array.from(this.footer.children);
+                    const index = children.findIndex(
+                        (el) => el.id === 'footer-media',
+                    );
+                    if (index !== -1) {
+                        const child = children[index];
+                        this.visibleMedia.push(
+                            new MediaElement(
+                                child,
+                                this,
+                                item.id,
+                                item.src,
+                            ).init({
                                 x: item.x * this.pxPerCm,
                                 y: item.y * this.pyPerCm,
                                 ...(item.width && {
@@ -278,6 +315,14 @@ export default function () {
                 resizableElementHeights.push(0);
             }
 
+            // media
+            const visibleMedia = this.visibleMedia.map((item) => {
+                return roundToOneDecimal((item.height || 0) / this.pyPerCm);
+            });
+            visibleMedia.length > 0
+                ? resizableElementHeights.push(...visibleMedia)
+                : resizableElementHeights.push(0);
+
             return Math.max(...resizableElementHeights);
         },
         async reload($refs, isClientChange = true) {
@@ -293,11 +338,15 @@ export default function () {
                 this.temporaryVisibleMedia.forEach((item) => {
                     this.footer.removeChild(item.element);
                 });
+                this.visibleMedia.forEach((item) => {
+                    this.footer.removeChild(item.element);
+                });
             }
 
             this.visibleElements = [];
             this.elementsOutOfView = [];
             this.temporaryVisibleMedia = [];
+            this.visibleMedia = [];
 
             const footerJson = await this.component.get('form.footer');
 
@@ -348,6 +397,10 @@ export default function () {
                     },
                 );
                 this.visibleElements.forEach((e) => {
+                    this.observer.observe(e.element);
+                });
+
+                this.visibleMedia.forEach((e) => {
                     this.observer.observe(e.element);
                 });
             }
@@ -401,6 +454,7 @@ export default function () {
                 throw new Error(`Temporary media with id ${id} not found`);
             }
         },
+        deleteMedia(id) {},
         async prepareToSubmit() {
             try {
                 if (this.temporaryVisibleMedia.length > 0) {
@@ -413,6 +467,30 @@ export default function () {
                     elements: this.visibleElements.map((item) => {
                         return {
                             id: item.id,
+                            x: roundToOneDecimal(
+                                item.position.x / this.pxPerCm,
+                            ),
+                            y: roundToOneDecimal(
+                                item.position.y / this.pyPerCm,
+                            ),
+                            width:
+                                item.width !== null
+                                    ? roundToOneDecimal(
+                                          item.width / this.pxPerCm,
+                                      )
+                                    : null,
+                            height:
+                                item.height !== null
+                                    ? roundToOneDecimal(
+                                          item.height / this.pyPerCm,
+                                      )
+                                    : null,
+                        };
+                    }),
+                    media: this.visibleMedia.map((item) => {
+                        return {
+                            id: item.mediaId,
+                            src: item.src,
                             x: roundToOneDecimal(
                                 item.position.x / this.pxPerCm,
                             ),

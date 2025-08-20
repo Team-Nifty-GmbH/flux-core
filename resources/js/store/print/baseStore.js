@@ -14,6 +14,7 @@ export default function () {
         },
         visibleElements: [],
         temporaryVisibleMedia: [],
+        visibleMedia: [],
         elementsOutOfView: [],
         _component: null,
         onInit(pxPerCm, pyPerCm) {
@@ -62,6 +63,21 @@ export default function () {
                     throw new Error(
                         `Temporary element with id ${id} not found`,
                     );
+                }
+            } else if (source === 'media') {
+                const index = this.visibleMedia.findIndex(
+                    (item) => item.id === id,
+                );
+                if (index !== -1) {
+                    this._selectedElement.id = id;
+                    this._selectedElement.ref = this.visibleMedia[index];
+                    const { x, y } = this.visibleMedia[index].position;
+                    this._selectedElement.x = x;
+                    this._selectedElement.y = y;
+                    this._selectedElement.startX = e.clientX;
+                    this._selectedElement.startY = e.clientY;
+                } else {
+                    throw new Error(`Media element with id ${id} not found`);
                 }
             } else {
                 throw new Error(
@@ -114,6 +130,12 @@ export default function () {
                     });
 
                 this.temporaryVisibleMedia
+                    .filter((item) => this.elementsOutOfView.includes(item.id))
+                    .forEach((element) => {
+                        element.positionBackInBound();
+                    });
+
+                this.visibleMedia
                     .filter((item) => this.elementsOutOfView.includes(item.id))
                     .forEach((element) => {
                         element.positionBackInBound();

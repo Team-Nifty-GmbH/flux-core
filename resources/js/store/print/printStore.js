@@ -20,7 +20,7 @@ export default function ($headerStore, $firstPageHeaderStore, $footerStore) {
             this._loading = false;
         },
         editMargin: false,
-        editFooter: false,
+        editFooter: true,
         editHeader: false,
         editFirstPageHeader: false,
         async selectClient(e, $wire, $refs) {
@@ -261,8 +261,16 @@ export default function ($headerStore, $firstPageHeaderStore, $footerStore) {
                 this.editFooter = false;
                 this.editHeader = false;
                 this.editFirstPageHeader = false;
+                // due to nature of a file upload - it is not renderlless - Livewire will drive the re-render
+                // all the elements will disappear - hence stores need to be reloaded
+                if ($footerStore.temporaryVisibleMedia.length > 0) {
+                    // reload
+                    await this.reload();
+                    await $footerStore.reload($refs);
+                    await $headerStore.reload($refs);
+                    await $firstPageHeaderStore.reload($refs);
+                }
             }
-            console.log('COMPLETED');
             this._loading = false;
         },
     };

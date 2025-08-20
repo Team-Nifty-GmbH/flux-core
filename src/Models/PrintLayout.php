@@ -2,10 +2,14 @@
 
 namespace FluxErp\Models;
 
+use FluxErp\Traits\HasUserModification;
+use FluxErp\Traits\InteractsWithMedia;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\MediaLibrary\HasMedia;
 
-class PrintLayout extends FluxModel
+class PrintLayout extends FluxModel implements HasMedia
 {
+    use HasUserModification, InteractsWithMedia;
     public function casts(): array
     {
         return [
