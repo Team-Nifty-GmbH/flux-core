@@ -3,7 +3,7 @@
         <x-spinner />
         <x-input
             wire:model="target.name"
-            :label="__('Target Name')"
+            :label="__('Title')"
             required
         />
         <x-date :label="__('Start')" wire:model="target.start_date" />
