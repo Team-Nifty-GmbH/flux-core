@@ -200,6 +200,25 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         });
     }
 
+    public function setExpectedGrossProfitAttribute(float $value): void
+    {
+        $this->attributes['expected_gross_profit'] = $value;
+        $this->recalculateWeightedGrossProfit();
+    }
+
+    public function setExpectedRevenueAttribute(float $value): void
+    {
+        $this->attributes['expected_revenue'] = $value;
+        $this->recalculateWeightedRevenue();
+    }
+
+    public function setProbabilityPercentageAttribute(float $value): void
+    {
+        $this->attributes['probability_percentage'] = $value;
+        $this->recalculateWeightedRevenue();
+        $this->recalculateWeightedGrossProfit();
+    }
+
     public function toCalendarEvent(?array $info = null): array
     {
         return [
@@ -222,5 +241,29 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    protected function recalculateWeightedGrossProfit(): void
+    {
+        if (! is_null($this->probability_percentage) && ! is_null($this->expected_gross_profit)) {
+            $this->weighted_gross_profit = bcmul(
+                $this->probability_percentage,
+                $this->expected_gross_profit
+            );
+        } else {
+            $this->weighted_gross_profit = null;
+        }
+    }
+
+    protected function recalculateWeightedRevenue(): void
+    {
+        if (! is_null($this->probability_percentage) && ! is_null($this->expected_revenue)) {
+            $this->weighted_revenue = bcmul(
+                $this->probability_percentage,
+                $this->expected_revenue
+            );
+        } else {
+            $this->weighted_revenue = null;
+        }
     }
 }
