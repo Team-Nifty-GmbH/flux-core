@@ -256,11 +256,6 @@ class OrderPosition extends FluxModel implements InteractsWithDataTables, Sortab
         return $this->belongsTo(OrderPosition::class, 'origin_position_id');
     }
 
-    public function price(): BelongsTo
-    {
-        return $this->belongsTo(Price::class);
-    }
-
     public function priceList(): BelongsTo
     {
         return $this->belongsTo(PriceList::class);
