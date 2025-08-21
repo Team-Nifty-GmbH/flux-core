@@ -245,21 +245,25 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
 
     protected function recalculateWeightedGrossProfit(): void
     {
-        $prob = data_get($this->attributes, 'probability_percentage');
-        $revenue = data_get($this->attributes, 'expected_gross_profit');
-
-        $this->attributes['weighted_gross_profit'] = ($prob !== null && $revenue !== null)
-            ? bcmul($prob, $revenue)
-            : null;
+        if (! is_null($this->probability_percentage) && ! is_null($this->expected_gross_profit)) {
+            $this->weighted_gross_profit = bcmul(
+                $this->probability_percentage,
+                $this->expected_gross_profit
+            );
+        } else {
+            $this->weighted_gross_profit = null;
+        }
     }
 
     protected function recalculateWeightedRevenue(): void
     {
-        $prob = data_get($this->attributes, 'probability_percentage');
-        $revenue = data_get($this->attributes, 'expected_revenue');
-
-        $this->attributes['weighted_revenue'] = ($prob !== null && $revenue !== null)
-            ? bcmul($prob, $revenue)
-            : null;
+        if (! is_null($this->probability_percentage) && ! is_null($this->expected_revenue)) {
+            $this->weighted_revenue = bcmul(
+                $this->probability_percentage,
+                $this->expected_revenue
+            );
+        } else {
+            $this->weighted_revenue = null;
+        }
     }
 }
