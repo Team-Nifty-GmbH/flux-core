@@ -20,6 +20,7 @@ class CreateTargetRuleset extends FluxRuleset
             'uuid' => 'nullable|string|uuid|unique:targets,uuid',
             'target_value' => [
                 'required',
+                'gt:0',
                 app(Numeric::class),
             ],
             'start_date' => 'required|date',
