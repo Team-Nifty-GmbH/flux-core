@@ -42,7 +42,7 @@ class TargetForm extends FluxForm
 
     public array $user_shares = [];
 
-    public ?array $users = [];
+    public array $users = [];
 
     public function fill($values): void
     {
@@ -65,7 +65,7 @@ class TargetForm extends FluxForm
                 }
 
                 if ($alloc !== null) {
-                    if ($abs === null && $targetValue > 0) {
+                    if ($targetValue > 0) {
                         $abs = bcround($alloc * $targetValue, 2);
                     }
                 }

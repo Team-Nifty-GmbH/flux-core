@@ -47,7 +47,9 @@
             :request="[
                 'url' => route('search', \FluxErp\Models\User::class),
                 'method' => 'POST',
-                'params' => ['with' => 'media'],
+                'params' => [
+                    'with' => 'media'
+                ],
             ]"
         />
 

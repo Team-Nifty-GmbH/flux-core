@@ -136,8 +136,8 @@ class UpdateTarget extends FluxAction
                     ]);
                 }
 
-                if ($hasAbs && $targetValue > 0) {
-                    if (abs($sumAbs - $targetValue) > $targetValue) {
+                if ($hasAbs) {
+                    if (abs($sumAbs - $targetValue) > 0) {
                         $errors['user_shares'] = array_merge($errors['user_shares'] ?? [], [
                             __('Absolute shares must sum to the target value'),
                         ]);

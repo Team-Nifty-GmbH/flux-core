@@ -25,6 +25,7 @@ class UpdateTargetRuleset extends FluxRuleset
             'target_value' => [
                 'sometimes',
                 'required',
+                'gt:0',
                 app(Numeric::class),
             ],
             'start_date' => 'required|date',
