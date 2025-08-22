@@ -10,9 +10,9 @@ use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Validation\UnauthorizedException;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class Profile extends Component
 {

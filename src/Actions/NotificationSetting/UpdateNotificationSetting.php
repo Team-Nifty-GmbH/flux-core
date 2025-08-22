@@ -23,30 +23,29 @@ class UpdateNotificationSetting extends FluxAction
             UpdateUserNotificationSettingRuleset::class;
     }
 
-    protected function boot(array $data): void
-    {
-        parent::boot($data);
-        $this->setData(array_merge(['is_anonymous' => false], $this->data));
-    }
-
     public function performAction(): Model
     {
         $notificationSetting = resolve_static(NotificationSetting::class, 'query')
             ->firstOrNew([
-                'notifiable_type' => ! $this->data['is_anonymous'] ? Auth::user()->getMorphClass() : null,
-                'notifiable_id' => ! $this->data['is_anonymous'] ? Auth::id() : null,
-                'notification_type' => $this->data['notification_type'],
-                'channel' => config('notifications.channels.' . $this->data['channel'] . '.driver'),
+                'notifiable_type' => ! $this->getData('is_anonymous') ? Auth::user()->getMorphClass() : null,
+                'notifiable_id' => ! $this->getData('is_anonymous') ? Auth::id() : null,
+                'notification_type' => $this->getData('notification_type'),
+                'channel' => config('notifications.channels.' . $this->getData('channel') . '.driver'),
             ]);
 
-        $notificationSetting->is_active = $this->data['is_active'];
+        $notificationSetting->is_active = $this->getData('is_active');
 
-        if ($this->data['is_anonymous']) {
-            $notificationSetting->channel_value = $this->data['channel_value'];
+        if ($this->getData('is_anonymous')) {
+            $notificationSetting->channel_value = $this->getData('channel_value');
         }
 
         $notificationSetting->save();
 
         return $notificationSetting->fresh();
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->data['is_anonymous'] ??= false;
     }
 }

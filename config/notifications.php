@@ -3,23 +3,6 @@
 return [
     /*
     |--------------------------------------------------------------------------
-    | Model Notifications
-    |--------------------------------------------------------------------------
-    |
-    | This array contains all the models that can trigger a specific notification.
-    */
-
-    'model_notifications' => [
-        resolve_static(FluxErp\Models\Comment::class, 'class') => [
-            'created' => FluxErp\Notifications\Comment\CommentCreatedNotification::class,
-        ],
-        resolve_static(FluxErp\Models\Ticket::class, 'class') => [
-            'created' => FluxErp\Notifications\Ticket\TicketCreatedNotification::class,
-        ],
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
     | Channels
     |--------------------------------------------------------------------------
     |

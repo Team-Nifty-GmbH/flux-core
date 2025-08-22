@@ -10,9 +10,9 @@ use FluxErp\Livewire\Forms\LanguageLineForm;
 use FluxErp\Models\Language;
 use FluxErp\Models\LanguageLine;
 use FluxErp\Traits\Livewire\Actions;
-use Illuminate\Validation\UnauthorizedException;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class LanguageLines extends LanguageLineList

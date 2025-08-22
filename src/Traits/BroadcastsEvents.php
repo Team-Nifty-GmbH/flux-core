@@ -46,7 +46,7 @@ trait BroadcastsEvents
 
     public function broadcastChannel(): string
     {
-        return parent::broadcastChannel();
+        return $this->getMorphClass() . '.' . $this->getKey();
     }
 
     public function broadcastEvent(string $event, $channels = null, bool $toEveryone = false): ?PendingBroadcast

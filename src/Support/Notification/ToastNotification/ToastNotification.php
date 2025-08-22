@@ -231,7 +231,10 @@ class ToastNotification extends Toast implements Arrayable
     public function toMail(): MailMessage
     {
         $mailMessage = (new MailMessage())
-            ->greeting(__('Hello') . ' ' . $this->notifiable?->name)
+            ->greeting(trim(
+                __('Hello')
+                . (property_exists($this->notifiable, 'name') ? ' ' . $this->notifiable->name : '')
+            ))
             ->subject($this->title ?? '')
             ->line(new HtmlString($this->description));
 
