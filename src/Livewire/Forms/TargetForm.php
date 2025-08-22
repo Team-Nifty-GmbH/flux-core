@@ -22,6 +22,8 @@ class TargetForm extends FluxForm
     #[Locked]
     public ?int $id = null;
 
+    public bool $is_group_target = false;
+
     public ?string $model_type = null;
 
     public ?string $name = null;
@@ -38,15 +40,49 @@ class TargetForm extends FluxForm
 
     public ?string $timeframe_column = null;
 
-    public ?array $users = null;
+    public array $user_shares = [];
+
+    public ?array $users = [];
 
     public function fill($values): void
     {
         if ($values instanceof Target) {
-            $values->loadMissing('users:id');
+            $model = $values->loadMissing('users');
 
-            $values = $values->toArray();
-            $values['users'] = array_column($values['users'] ?? [], 'id');
+            $userShares = [];
+            $targetValue = ($model->target_value ?? 0);
+
+            foreach ($model->users as $user) {
+                $pivot = $user->pivot ?? null;
+
+                $alloc = null;
+                $abs = null;
+
+                if ($pivot) {
+                    if (isset($pivot->target_allocation)) {
+                        $alloc = is_null($pivot->target_allocation) ? null : $pivot->target_allocation;
+                    }
+                }
+
+                if ($alloc !== null) {
+                    if ($abs === null && $targetValue > 0) {
+                        $abs = bcround($alloc * $targetValue, 2);
+                    }
+                }
+
+                $userShares[$user->id] = [
+                    'relative' => bcround(bcmul($alloc, 100), 2),
+                    'absolute' => $abs,
+                ];
+            }
+
+            $arr = $model->toArray();
+            $arr['users'] = $model->users->pluck('id')->all();
+            $arr['user_shares'] = $userShares;
+
+            parent::fill($arr);
+
+            return;
         }
 
         parent::fill($values);
