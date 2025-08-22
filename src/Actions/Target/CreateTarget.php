@@ -22,16 +22,29 @@ class CreateTarget extends FluxAction
 
     public function performAction(): Target
     {
-        $users = Arr::pull($this->data, 'users');
+        $users = Arr::pull($this->data, 'users', []);
+        $userShares = Arr::pull($this->data, 'user_shares', []);
+        $targetValue = data_get($this->data, 'target_value');
 
         $target = app(Target::class, ['attributes' => $this->getData()]);
         $target->save();
 
         if ($users) {
-            $target->users()->attach($users);
+            $pivotData = [];
+            foreach ($users as $id) {
+                $abs = data_get($userShares, $id . '.absolute');
+                $rel = data_get($userShares, $id . '.relative');
+                $pivotData[$id] = [
+                    'target_allocation' => is_null($rel)
+                    ? bcdiv($abs, $targetValue)
+                    : bcdiv($rel, 100),
+                ];
+            }
 
-            foreach ($target->children()->get('id') as $child) {
-                $child->users()->attach($users);
+            $target->users()->attach($pivotData);
+
+            foreach ($target->children()->get() as $child) {
+                $child->users()->attach($pivotData);
             }
         }
 
@@ -69,6 +82,60 @@ class CreateTarget extends FluxAction
 
         if (! in_array($this->getData('owner_column'), $modelClass::ownerColumns())) {
             $errors['owner_column'] = ['Owner column is not valid for the given model type.'];
+        }
+
+        $isGroup = $this->getData('is_group_target');
+        $users = $this->getData('users', []);
+        $shares = $this->getData('user_shares', []);
+        $targetValue = $this->getData('target_value', 0);
+
+        if ($isGroup && ! empty($users)) {
+            $sumRel = 0.0;
+            $sumAbs = 0.0;
+            $hasRel = false;
+            $hasAbs = false;
+
+            foreach ($users as $uid) {
+                $rel = data_get($shares, "$uid.relative");
+                $abs = data_get($shares, "$uid.absolute");
+
+                if (! is_null($rel)) {
+                    $hasRel = true;
+                    $sumRel += $rel;
+                }
+                if (! is_null($abs)) {
+                    $hasAbs = true;
+                    $sumAbs += $abs;
+                }
+            }
+
+            if ($hasRel) {
+                if (abs($sumRel - 100) > 0) {
+                    $errors['user_shares'] = [__('Relative shares must sum to 100 %')];
+                }
+            }
+
+            if ($hasRel && $hasAbs) {
+                $errors['user_shares'] = array_merge($errors['user_shares'] ?? [], [
+                    __('Relative and absolute shares are mutually exclusive'),
+                ]);
+            }
+
+            if ($hasAbs && $targetValue > 0) {
+                if (abs($sumAbs - $targetValue) > $targetValue) {
+                    $errors['user_shares'] = array_merge($errors['user_shares'] ?? [], [
+                        __('Absolute shares must sum to the target value'),
+                    ]);
+                }
+            }
+
+            foreach ($users as $uid) {
+                $rel = data_get($shares, "$uid.relative");
+                $abs = data_get($shares, "$uid.absolute");
+                if (is_null($rel) && is_null($abs)) {
+                    $errors["user_shares.$uid"] = ['Provide relative or absolute share for each selected user'];
+                }
+            }
         }
 
         if ($errors) {

@@ -35,6 +35,8 @@ class Targets extends TargetList
     #[Locked]
     public array $timeframeColumns = [];
 
+    public array $users = [];
+
     protected ?string $includeBefore = 'flux::livewire.settings.targets';
 
     public function edit(string|int|null $id = null): void
@@ -87,6 +89,23 @@ class Targets extends TargetList
             $this->target->timeframe_column = data_get($this->timeframeColumns, '0.value');
             $this->target->aggregate_type = data_get($this->aggregateTypes, '0.value');
             $this->target->owner_column = data_get($this->ownerColumns, '0.value');
+        }
+
+        $this->forceRender();
+    }
+
+    public function updateUsers(): void
+    {
+        $ids = array_map('intval', $this->target->users ?? []);
+        $asSet = array_fill_keys($ids, true);
+
+        $this->target->user_shares = array_intersect_key($this->target->user_shares ?? [], $asSet);
+
+        foreach ($ids as $id) {
+            $this->target->user_shares[$id] = array_merge(
+                ['relative' => null, 'absolute' => null],
+                $this->target->user_shares[$id] ?? []
+            );
         }
 
         $this->forceRender();

@@ -71,6 +71,8 @@ class Target extends FluxModel
 
     public function users(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'target_user')->using(TargetUser::class);
+        return $this->belongsToMany(User::class, 'target_user')
+            ->withPivot(['target_allocation'])
+            ->using(TargetUser::class);
     }
 }
