@@ -29,6 +29,7 @@
         size="7xl"
         id="edit-mail"
         x-on:close="$wire.clear()"
+        persistent
     >
         <div class="flex flex-col gap-2">
 
