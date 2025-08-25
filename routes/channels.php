@@ -49,8 +49,8 @@ Broadcast::channel('job-batch.{id}', function () {
 
 Broadcast::channel('action.*', fn () => true);
 
-Broadcast::channel('presence_channel', function (FluxErp\Models\User $user) {
+Broadcast::channel('presence', function (FluxErp\Models\User $user) {
     return [
-        'id' => $user->id,
+        'id' => $user->getKey(),
     ];
 });
