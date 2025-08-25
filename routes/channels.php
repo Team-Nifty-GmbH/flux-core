@@ -1,5 +1,6 @@
 <?php
 
+use FluxErp\Models\User;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\BroadcastsEvents;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -49,7 +50,7 @@ Broadcast::channel('job-batch.{id}', function () {
 
 Broadcast::channel('action.*', fn () => true);
 
-Broadcast::channel('presence', function (FluxErp\Models\User $user) {
+Broadcast::channel('presence', function (User $user) {
     return [
         'id' => $user->getKey(),
     ];
