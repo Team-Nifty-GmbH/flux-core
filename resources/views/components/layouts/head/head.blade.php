@@ -28,20 +28,17 @@
 @stack('meta')
 <tallstackui:script />
 {{ \FluxErp\Facades\Asset::toHtml() }}
-@push('scripts')
-    @auth('web')
-        <script>
-            document.addEventListener(
-                'livewire:navigated',
-                () => {
-                    Echo.join('presence');
-                },
-                { once: true },
-            );
-        </script>
-    @endauth
-@endpush
+@auth('web')
+    <script>
+        document.addEventListener(
+            'livewire:navigated',
+            () => {
+                Echo.join('presence');
+            },
+            { once: true },
+        );
+    </script>
+@endauth
 
 @stack('scripts')
-
 {{ $slot }}
