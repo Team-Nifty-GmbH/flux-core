@@ -40,4 +40,5 @@
         );
     </script>
 @endauth
+
 {{ $slot }}
