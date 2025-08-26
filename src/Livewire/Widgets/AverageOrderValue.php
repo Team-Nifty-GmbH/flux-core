@@ -140,7 +140,11 @@ class AverageOrderValue extends LineChart implements HasWidgetOptions
                 val = val.split('->')[0];
             }
 
-            return new Date(val).toLocaleDateString(document.documentElement.lang) + (name ? ' (' + name + ')' : '')
+            if (/^\d{4}$/.test(val)) {  // Value with 4 digits is a year
+                return val + (name ? ' (' + name + ')' : '');
+            }
+
+            return new Date(val).toLocaleDateString(document.documentElement.lang) + (name ? ' (' + name + ')' : '');
         JS;
     }
 
