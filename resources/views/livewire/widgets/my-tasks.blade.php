@@ -3,7 +3,7 @@
         <h2
             class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400"
         >
-            {{ __('My Tasks') }}
+            {{ $this->getLabel() }}
         </h2>
     </div>
     <div class="flex-1 overflow-auto">
