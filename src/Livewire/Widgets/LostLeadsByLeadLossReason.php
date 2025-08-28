@@ -45,7 +45,7 @@ class LostLeadsByLeadLossReason extends CircleChart implements HasWidgetOptions
     {
         $this->data = resolve_static(Lead::class, 'query')
             ->whereNotNull('lead_loss_reason_id')
-            ->whereHas('leadLossReason', fn (Builder $q) => $q->where('is_active', true))
+            ->whereHas('leadLossReason', fn (Builder $query) => $query->where('is_active', true))
             ->whereBetween(
                 'created_at',
                 [
