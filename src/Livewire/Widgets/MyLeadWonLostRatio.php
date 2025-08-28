@@ -5,14 +5,14 @@ namespace FluxErp\Livewire\Widgets;
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
 
-class MyLeadWonLostRatio extends CompanyWideLeadWonLostRatio
+class MyLeadWonLostRatio extends OverallLeadWonLostRatio
 {
     public ?int $userId = null;
 
     public function mount(): void
     {
         parent::mount();
-        $this->userId = $this->userId ?? auth()->id();
+        $this->userId = auth()->id();
     }
 
     protected function getBaseFilter(string $start, string $end): Closure
@@ -21,8 +21,8 @@ class MyLeadWonLostRatio extends CompanyWideLeadWonLostRatio
 
         return function (Builder $query) use ($userId, $start, $end) {
             return $query
-                ->where('user_id', $userId)
                 ->whereNotNull('lead_state_id')
+                ->where('user_id', $userId)
                 ->whereBetween('created_at', [$start, $end]);
         };
     }

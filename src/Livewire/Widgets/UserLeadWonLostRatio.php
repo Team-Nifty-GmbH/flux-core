@@ -4,21 +4,20 @@ namespace FluxErp\Livewire\Widgets;
 
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Livewire\Attributes\Renderless;
 
-class EmployeeLeadWonLostRatio extends MyLeadWonLostRatio
+class UserLeadWonLostRatio extends MyLeadWonLostRatio
 {
     public bool $showDonutOptions = false;
 
-    public ?int $userId = null;
-
     public function render(): View|Factory
     {
-        return view('flux::livewire.widgets.employee-lead-won-lost-ratio');
+        return view('flux::livewire.widgets.user-lead-won-lost-ratio');
     }
 
+    #[Renderless]
     public function updatedUserId(): void
     {
-        $this->skipRender();
         $this->calculateByTimeFrame();
     }
 }
