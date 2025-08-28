@@ -129,6 +129,9 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
             ) {
                 $lead->probability_percentage = $probability;
             }
+
+            $lead->recalculateWeightedGrossProfit();
+            $lead->recalculateWeightedRevenue();
         });
     }
 
@@ -187,6 +190,26 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
         return $this->belongsTo(LeadState::class);
     }
 
+    public function recalculateWeightedGrossProfit(): void
+    {
+        if (! is_null($this->probability_percentage) && ! is_null($this->expected_gross_profit)) {
+            $this->weighted_gross_profit = bcmul(
+                $this->probability_percentage,
+                $this->expected_gross_profit
+            );
+        }
+    }
+
+    public function recalculateWeightedRevenue(): void
+    {
+        if (! is_null($this->probability_percentage) && ! is_null($this->expected_revenue)) {
+            $this->weighted_revenue = bcmul(
+                $this->probability_percentage,
+                $this->expected_revenue
+            );
+        }
+    }
+
     public function scopeInTimeframe(
         Builder $builder,
         Carbon|string|null $start,
@@ -198,25 +221,6 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
                 ->where('end', '>=', $start)
                 ->orWhereBetween('created_at', [$start, $end]);
         });
-    }
-
-    public function setExpectedGrossProfitAttribute(float $value): void
-    {
-        $this->attributes['expected_gross_profit'] = $value;
-        $this->recalculateWeightedGrossProfit();
-    }
-
-    public function setExpectedRevenueAttribute(float $value): void
-    {
-        $this->attributes['expected_revenue'] = $value;
-        $this->recalculateWeightedRevenue();
-    }
-
-    public function setProbabilityPercentageAttribute(float $value): void
-    {
-        $this->attributes['probability_percentage'] = $value;
-        $this->recalculateWeightedRevenue();
-        $this->recalculateWeightedGrossProfit();
     }
 
     public function toCalendarEvent(?array $info = null): array
@@ -241,29 +245,5 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
-    }
-
-    protected function recalculateWeightedGrossProfit(): void
-    {
-        if (! is_null($this->probability_percentage) && ! is_null($this->expected_gross_profit)) {
-            $this->weighted_gross_profit = bcmul(
-                $this->probability_percentage,
-                $this->expected_gross_profit
-            );
-        } else {
-            $this->weighted_gross_profit = null;
-        }
-    }
-
-    protected function recalculateWeightedRevenue(): void
-    {
-        if (! is_null($this->probability_percentage) && ! is_null($this->expected_revenue)) {
-            $this->weighted_revenue = bcmul(
-                $this->probability_percentage,
-                $this->expected_revenue
-            );
-        } else {
-            $this->weighted_revenue = null;
-        }
     }
 }
