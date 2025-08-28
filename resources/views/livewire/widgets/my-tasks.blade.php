@@ -15,6 +15,20 @@
                 <x-slot:sub-value>
                     <div>
                         <div>{{ $task->project?->name }}</div>
+                        @if ($task->model && method_exists($task->model, 'getUrl') && method_exists($task->model, 'getLabel'))
+                            <div>
+                                <x-link
+                                    sm
+                                    icon="link"
+                                    :href="$task->model->getUrl()"
+                                    wire:navigate
+                                >
+                                    {{ class_basename($task->model) }}:
+                                    {{ $task->model->getLabel() }}
+                                </x-link>
+                            </div>
+                        @endif
+
                         @if ($task->due_date)
                             <x-badge
                                 :color="($diff = $task->due_date->diffInDays(now(), false)) > 0
