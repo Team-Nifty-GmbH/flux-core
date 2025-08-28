@@ -53,10 +53,15 @@ class ExpectedRevenueByLeadState extends BarChart implements HasWidgetOptions
     public function calculateChart(): void
     {
         $this->series = resolve_static(Lead::class, 'query')
-            ->whereNotNull('weighted_revenue')
             ->whereNotNull('lead_state_id')
+            ->whereHas('leadState', function (Builder $query): void {
+                $query
+                    ->where('is_won', false)
+                    ->where('is_lost', false);
+            })
             ->where('probability_percentage', '<', 1)
             ->where('probability_percentage', '>', 0)
+            ->whereNotNull('weighted_revenue')
             ->whereBetween(
                 'created_at',
                 [
@@ -64,11 +69,6 @@ class ExpectedRevenueByLeadState extends BarChart implements HasWidgetOptions
                     $this->getEnd()->toDateTimeString(),
                 ]
             )
-            ->whereHas('leadState', function (Builder $query): void {
-                $query
-                    ->where('is_won', false)
-                    ->where('is_lost', false);
-            })
             ->groupBy('lead_state_id')
             ->with('leadState:id,name,color')
             ->selectRaw('lead_state_id, SUM(weighted_revenue) as total_revenue')
@@ -111,18 +111,17 @@ class ExpectedRevenueByLeadState extends BarChart implements HasWidgetOptions
         SessionFilter::make(
             Livewire::new(resolve_static(LeadList::class, 'class'))->getCacheKey(),
             fn (Builder $query) => $query
-                ->whereNotNull('weighted_revenue')
-                ->whereNotNull('lead_state_id')
                 ->where('lead_state_id', data_get($params, 'id'))
-                ->where('probability_percentage', '<', 1)
-                ->where('probability_percentage', '>', 0)
-                ->whereBetween('end', [$start, $end])
                 ->whereHas(
                     'leadState',
                     fn (Builder $query) => $query
                         ->where('is_won', false)
                         ->where('is_lost', false)
-                ),
+                )
+                ->where('probability_percentage', '<', 1)
+                ->where('probability_percentage', '>', 0)
+                ->whereNotNull('weighted_revenue')
+                ->whereBetween('created_at', [$start, $end]),
             __('Leads with state :lead-state', ['lead-state' => data_get($params, 'name')]) . ' ' .
             __('between :start and :end', ['start' => $start, 'end' => $end]),
         )
