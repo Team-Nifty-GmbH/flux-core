@@ -47,7 +47,7 @@ class MyOverdueLeads extends Component implements HasWidgetOptions
                     ->with(['address:id,name', 'leadState:id,name,color'])
                     ->whereIntegerInRaw('lead_state_id', $endStates)
                     ->where('end', '<', now())
-                    ->orderByRaw('ISNULL(end), end ASC')
+                    ->orderBy('end', 'ASC')
                     ->orderByDesc('probability_percentage')
                     ->orderByDesc('score')
                     ->get(),
@@ -77,10 +77,10 @@ class MyOverdueLeads extends Component implements HasWidgetOptions
 
         SessionFilter::make(
             Livewire::new(resolve_static(LeadList::class, 'class'))->getCacheKey(),
-            fn (Builder $query) => $query->where('user_id', auth()->id())
-                ->whereIntegerInRaw('lead_state_id', $endStates)
+            fn (Builder $query) => $query->whereIntegerInRaw('lead_state_id', $endStates)
+                ->where('user_id', auth()->id())
                 ->where('end', '<', now())
-                ->orderByRaw('ISNULL(end), end ASC')
+                ->orderBy('end', 'ASC')
                 ->orderByDesc('probability_percentage')
                 ->orderByDesc('score'),
             __(static::getLabel()),
