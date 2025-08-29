@@ -3,8 +3,8 @@
 namespace FluxErp\Rulesets\VacationCarryoverRule;
 
 use FluxErp\Models\VacationCarryoverRule;
-use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rulesets\FluxRuleset;
 
 class DeleteVacationCarryoverRuleRuleset extends FluxRuleset
 {
@@ -14,7 +14,7 @@ class DeleteVacationCarryoverRuleRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(VacationCarryoverRule::class),
+                app(ModelExists::class, ['model' => VacationCarryoverRule::class]),
             ],
         ];
     }

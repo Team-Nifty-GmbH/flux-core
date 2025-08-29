@@ -27,16 +27,16 @@ class UpdateVacationBlackout extends FluxAction
         $data = $this->getData();
         $roleIds = data_get($data, 'role_ids');
         $userIds = data_get($data, 'user_ids');
-        
+
         unset($data['role_ids'], $data['user_ids']);
-        
+
         $vacationBlackout->fill($data);
         $vacationBlackout->save();
-        
+
         if (! is_null($roleIds)) {
             $vacationBlackout->roles()->sync($roleIds);
         }
-        
+
         if (! is_null($userIds)) {
             $vacationBlackout->users()->sync($userIds);
         }

@@ -3,8 +3,8 @@
 namespace FluxErp\Rulesets\VacationBlackout;
 
 use FluxErp\Models\VacationBlackout;
-use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rulesets\FluxRuleset;
 
 class DeleteVacationBlackoutRuleset extends FluxRuleset
 {
@@ -14,7 +14,7 @@ class DeleteVacationBlackoutRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(VacationBlackout::class),
+                app(ModelExists::class, ['model' => VacationBlackout::class]),
             ],
         ];
     }

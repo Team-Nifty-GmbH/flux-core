@@ -1,19 +1,35 @@
 <div>
     <x-modal :id="$holidayForm->modalName()" size="2xl">
         <x-slot:title>
-            <span x-text="$wire.holidayForm.id ? '{{ __('Edit Holiday') }}' : '{{ __('Create Holiday') }}'"></span>
+            {{ $holidayForm->id ? __('Edit Holiday') : __('Create Holiday') }}
         </x-slot:title>
         
         <div class="flex flex-col gap-4">
+            @if(resolve_static(\FluxErp\Models\Client::class, 'query')->count() > 1)
+                <x-select.styled
+                    wire:model="holidayForm.client_id"
+                    :label="__('Client')"
+                    select="label:name|value:id"
+                    unfiltered
+                    :request="[
+                        'url' => route('search', \FluxErp\Models\Client::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'searchFields' => ['name', 'client_code']
+                        ]
+                    ]"
+                />
+            @endif
+            
             <x-input wire:model="holidayForm.name" :label="__('Name')" required />
             
-            <x-checkbox 
+            <x-toggle 
                 wire:model.live="holidayForm.is_recurring" 
                 :label="__('Recurring Holiday')" 
                 :hint="__('Check for holidays that repeat every year')"
             />
             
-            <div x-show="!$wire.holidayForm.is_recurring">
+            <div x-show="!$wire.holidayForm.is_recurring" x-cloak>
                 <x-date 
                     wire:model="holidayForm.date" 
                     :label="__('Date')" 
@@ -21,7 +37,7 @@
                 />
             </div>
             
-            <div class="grid grid-cols-2 gap-4" x-show="$wire.holidayForm.is_recurring">
+            <div class="grid grid-cols-2 gap-4" x-show="$wire.holidayForm.is_recurring" x-cloak>
                 <x-input 
                     wire:model="holidayForm.month" 
                     type="number" 
@@ -45,7 +61,13 @@
                 wire:model="holidayForm.location_id"
                 :label="__('Location')"
                 select="label:name|value:id"
-                :request="['url' => route('search', \FluxErp\Models\Location::class), 'method' => 'POST']"
+                :request="[
+                    'url' => route('search', \FluxErp\Models\Location::class),
+                    'method' => 'POST',
+                    'params' => [
+                        'searchFields' => ['name']
+                    ]
+                ]"
                 unfiltered
                 :hint="__('Leave empty for all locations')"
             />
@@ -81,7 +103,7 @@
                 required
             />
             
-            <x-checkbox 
+            <x-toggle 
                 wire:model="holidayForm.is_active" 
                 :label="__('Is Active')" 
             />
@@ -89,17 +111,16 @@
         
         <x-slot:footer>
             <x-button
-                color="secondary"
-                light
-                flat
                 :text="__('Cancel')"
+                color="secondary"
+                flat
                 x-on:click="$modalClose('{{ $holidayForm->modalName() }}')"
             />
             <x-button
-                color="indigo"
                 :text="__('Save')"
-                x-on:click="$wire.save().then((success) => { if(success) $modalClose('{{ $holidayForm->modalName() }}')})"
+                color="primary"
+                wire:click="save"
             />
-        </x-slot>
+        </x-slot:footer>
     </x-modal>
 </div>

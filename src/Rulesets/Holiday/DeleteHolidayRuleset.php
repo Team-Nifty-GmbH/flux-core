@@ -3,8 +3,8 @@
 namespace FluxErp\Rulesets\Holiday;
 
 use FluxErp\Models\Holiday;
-use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rulesets\FluxRuleset;
 
 class DeleteHolidayRuleset extends FluxRuleset
 {
@@ -14,7 +14,7 @@ class DeleteHolidayRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Holiday::class),
+                app(ModelExists::class, ['model' => Holiday::class]),
             ],
         ];
     }

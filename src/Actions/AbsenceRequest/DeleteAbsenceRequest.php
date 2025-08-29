@@ -8,14 +8,14 @@ use FluxErp\Rulesets\AbsenceRequest\DeleteAbsenceRequestRuleset;
 
 class DeleteAbsenceRequest extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return DeleteAbsenceRequestRuleset::class;
-    }
-
     public static function models(): array
     {
         return [AbsenceRequest::class];
+    }
+
+    protected function getRulesets(): string|array
+    {
+        return DeleteAbsenceRequestRuleset::class;
     }
 
     public function performAction(): ?bool

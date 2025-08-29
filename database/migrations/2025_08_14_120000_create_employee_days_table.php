@@ -1,0 +1,49 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class() extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('employee_days', function (Blueprint $table): void {
+            $table->id();
+            $table->char('uuid', 36);
+
+            $table->foreignId('employee_id')
+                ->constrained()
+                ->cascadeOnDelete();
+
+            $table->date('date');
+            $table->decimal('target_hours')->default(0);
+            $table->decimal('actual_hours')->default(0);
+            $table->decimal('break_minutes')->default(0);
+            $table->decimal('vacation_hours_used')->default(0);
+            $table->decimal('vacation_days_used')->default(0);
+            $table->decimal('sick_hours_used')->default(0);
+            $table->decimal('sick_days_used')->default(0);
+            $table->decimal('plus_minus_overtime_hours')->default(0);
+            $table->decimal('plus_minus_absence_hours')->default(0);
+
+            $table->boolean('is_work_day')->default(false);
+            $table->boolean('is_holiday')->default(false);
+
+            $table->timestamp('created_at')->nullable();
+            $table->string('created_by')->nullable();
+            $table->timestamp('updated_at')->nullable();
+            $table->string('updated_by')->nullable();
+            $table->timestamp('deleted_at')->nullable();
+            $table->string('deleted_by')->nullable();
+
+            $table->unique(['employee_id', 'date']);
+            $table->index(['employee_id', 'date']);
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('employee_days');
+    }
+};

@@ -136,7 +136,7 @@ class UpdateProduct extends FluxAction
             $this->data['bundle_type_enum'] = null;
         }
 
-        $this->rules['cover_media_id'][] = (new ModelExists(Media::class))
+        $this->rules['cover_media_id'][] = (app(ModelExists::class, ['model' => Media::class]))
             ->where('model_type', app(Product::class)->getMorphClass())
             ->where('model_id', $this->data['id'] ?? null);
         $this->rules['product_number'] = [

@@ -104,7 +104,7 @@ trait Categorizable
             [
                 '*' => [
                     'integer',
-                    new ModelExists(Category::class),
+                    app(ModelExists::class, ['model' => Category::class]),
                 ],
             ],
             [

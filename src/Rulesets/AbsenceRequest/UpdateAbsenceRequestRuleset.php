@@ -2,9 +2,8 @@
 
 namespace FluxErp\Rulesets\AbsenceRequest;
 
-use FluxErp\Models\User;
 use FluxErp\Models\AbsenceRequest;
-use FluxErp\Models\AbsenceType;
+use FluxErp\Models\Employee;
 use FluxErp\Rules\ModelExists;
 use FluxErp\Rulesets\FluxRuleset;
 
@@ -16,30 +15,19 @@ class UpdateAbsenceRequestRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(AbsenceRequest::class),
-            ],
-            'user_id' => [
-                'nullable',
-                'integer',
-                new ModelExists(User::class),
-            ],
-            'absence_type_id' => [
-                'nullable',
-                'integer',
-                new ModelExists(AbsenceType::class),
+                app(ModelExists::class, ['model' => AbsenceRequest::class]),
             ],
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
-            'start_half_day' => 'nullable|in:full,morning,afternoon',
-            'end_half_day' => 'nullable|in:full,morning,afternoon',
-            'substitute_user_id' => [
+            'sick_note_issued_date' => 'nullable|date',
+            'substitute_employee_id' => [
                 'nullable',
                 'integer',
-                new ModelExists(User::class),
+                app(ModelExists::class, ['model' => Employee::class]),
             ],
+            'substitute_note' => 'nullable|string|max:500',
             'reason' => 'nullable|string|max:500',
             'is_emergency' => 'boolean',
-            'status' => 'nullable|in:draft,pending,approved,rejected,cancelled',
         ];
     }
 }

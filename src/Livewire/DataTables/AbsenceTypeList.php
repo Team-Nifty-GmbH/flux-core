@@ -8,9 +8,12 @@ class AbsenceTypeList extends BaseDataTable
 {
     public array $enabledCols = [
         'name',
+        'code',
         'color',
         'employee_can_create',
-        'counts_as_work_day',
+        'affects_vacation',
+        'affects_overtime',
+        'affects_sick',
         'is_active',
     ];
 

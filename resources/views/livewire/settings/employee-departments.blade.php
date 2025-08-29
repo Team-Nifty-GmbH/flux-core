@@ -1,0 +1,110 @@
+<div>
+    <x-modal :id="$employeeDepartmentForm->modalName()" size="2xl">
+        <x-slot:title>
+            {{ $employeeDepartmentForm->id ? __('Edit Department') : __('Create Department') }}
+        </x-slot:title>
+
+        <div class="flex flex-col gap-4">
+            @if(resolve_static(\FluxErp\Models\Client::class, 'query')->count() > 1)
+                <x-select.styled
+                    wire:model="employeeDepartmentForm.client_id"
+                    :label="__('Client')"
+                    select="label:name|value:id"
+                    unfiltered
+                    :request="[
+                        'url' => route('search', \FluxErp\Models\Client::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'searchFields' => ['name', 'client_code']
+                        ]
+                    ]"
+                />
+            @endif
+
+            <x-input wire:model="employeeDepartmentForm.name" :label="__('Name')" required />
+
+            <x-input
+                wire:model="employeeDepartmentForm.code"
+                :label="__('Code')"
+                :hint="__('Unique department code')"
+            />
+
+            <x-textarea
+                wire:model="employeeDepartmentForm.description"
+                :label="__('Description')"
+                rows="3"
+            />
+
+            <x-select.styled
+                wire:model="employeeDepartmentForm.parent_id"
+                :label="__('Parent Department')"
+                select="label:name|value:id"
+                :request="[
+                    'url' => route('search', \FluxErp\Models\EmployeeDepartment::class),
+                    'method' => 'POST',
+                    'params' => [
+                        'searchFields' => ['name', 'code'],
+                        'where' => [
+                            ['id', '!=', $employeeDepartmentForm->id]
+                        ]
+                    ]
+                ]"
+                unfiltered
+                :clearable="true"
+            />
+
+            <x-select.styled
+                wire:model="employeeDepartmentForm.location_id"
+                :label="__('Location')"
+                select="label:name|value:id"
+                :request="[
+                    'url' => route('search', \FluxErp\Models\Location::class),
+                    'method' => 'POST',
+                    'params' => [
+                        'searchFields' => ['name']
+                    ]
+                ]"
+                unfiltered
+                :clearable="true"
+            />
+
+            <x-select.styled
+                wire:model="employeeDepartmentForm.manager_employee_id"
+                :label="__('Department Manager')"
+                select="label:name|value:id"
+                :request="[
+                    'url' => route('search', \FluxErp\Models\Employee::class),
+                    'method' => 'POST',
+                    'params' => [
+                        'searchFields' => ['name', 'email']
+                    ]
+                ]"
+                unfiltered
+                :clearable="true"
+            />
+
+            <x-toggle
+                wire:model="employeeDepartmentForm.is_active"
+                :label="__('Is Active')"
+            />
+        </div>
+
+        <x-slot:footer>
+            <x-button
+                :text="__('Cancel')"
+                color="secondary"
+                flat
+                x-on:click="$modalClose('{{ $employeeDepartmentForm->modalName() }}')"
+            />
+            <x-button
+                :text="__('Save')"
+                color="primary"
+                wire:click="save().then((success) => {
+                    if (success) {
+                        $modalClose('{{ $employeeDepartmentForm->modalName() }}');
+                    }
+                })"
+            />
+        </x-slot:footer>
+    </x-modal>
+</div>

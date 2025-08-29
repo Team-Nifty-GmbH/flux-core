@@ -5,8 +5,9 @@ namespace FluxErp\Rulesets\Location;
 use FluxErp\Models\Client;
 use FluxErp\Models\Country;
 use FluxErp\Models\CountryRegion;
-use FluxErp\Rulesets\FluxRuleset;
+use FluxErp\Models\Holiday;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rulesets\FluxRuleset;
 
 class CreateLocationRuleset extends FluxRuleset
 {
@@ -21,20 +22,25 @@ class CreateLocationRuleset extends FluxRuleset
             'country_id' => [
                 'nullable',
                 'integer',
-                new ModelExists(Country::class),
+                app(ModelExists::class, ['model' => Country::class]),
             ],
             'country_region_id' => [
                 'nullable',
                 'integer',
-                new ModelExists(CountryRegion::class),
+                app(ModelExists::class, ['model' => CountryRegion::class]),
             ],
             'latitude' => 'nullable|numeric|min:-90|max:90',
             'longitude' => 'nullable|numeric|min:-180|max:180',
             'is_active' => 'boolean',
+            'holiday_ids' => 'nullable|array',
+            'holiday_ids.*' => [
+                'integer',
+                app(ModelExists::class, ['model' => Holiday::class]),
+            ],
             'client_id' => [
                 'required',
                 'integer',
-                new ModelExists(Client::class),
+                app(ModelExists::class, ['model' => Client::class]),
             ],
         ];
     }

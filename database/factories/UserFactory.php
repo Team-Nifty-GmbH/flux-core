@@ -19,7 +19,6 @@ class UserFactory extends Factory
             'password' => 'password',
             'user_code' => $this->faker->unique()->userName(),
             'is_active' => $this->faker->boolean(75),
-            'language_id' => 1,
         ];
     }
 }

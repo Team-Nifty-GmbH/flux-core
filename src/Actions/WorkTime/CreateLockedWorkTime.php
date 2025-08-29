@@ -21,15 +21,14 @@ class CreateLockedWorkTime extends CreateWorkTime
         $workTime->paused_time_ms ??= 0;
         $workTime->is_billable ??= $workTime->workTimeType?->is_billable ?? false;
 
-        if ($workTime->ended_at) {
-            $workTime->total_time_ms = bcsub(
-                $workTime->ended_at->diffInMilliseconds($workTime->started_at),
-                $workTime->paused_time_ms
-            );
-        } else {
+        // If no ended_at is provided, the entry cannot be locked
+        if (! $workTime->ended_at) {
             $workTime->is_locked = false;
+        } else {
+            $workTime->is_locked = true;
         }
 
+        // total_time_ms will be calculated automatically in the model's saving event
         $workTime->save();
 
         return $workTime->fresh();

@@ -3,32 +3,39 @@
 namespace FluxErp\Actions\AbsenceRequest;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Enums\AbsenceRequestStatusEnum;
 use FluxErp\Models\AbsenceRequest;
-use FluxErp\Rulesets\AbsenceRequest\RejectAbsenceRequestRuleset;
-use Illuminate\Support\Facades\Auth;
+use FluxErp\Rulesets\AbsenceRequest\ChangeAbsenceRequestStatusRuleset;
+use Illuminate\Support\Arr;
 
 class RejectAbsenceRequest extends FluxAction
 {
-    protected function getRulesets(): string|array
-    {
-        return RejectAbsenceRequestRuleset::class;
-    }
-
     public static function models(): array
     {
         return [AbsenceRequest::class];
     }
 
+    protected function getRulesets(): string|array
+    {
+        return ChangeAbsenceRequestStatusRuleset::class;
+    }
+
     public function performAction(): AbsenceRequest
     {
         $absenceRequest = resolve_static(AbsenceRequest::class, 'query')
-            ->whereKey($this->data['id'])
+            ->whereKey($this->getData('id'))
             ->first();
 
-        $absenceRequest->reject(
-            Auth::user(),
-            $this->data['rejection_reason']
-        );
+        $data = $this->getData();
+        $absenceRequest->statusChangeComment = Arr::pull($data, 'comment');
+
+        $absenceRequest->fill(array_merge(
+            $data,
+            [
+                'status' => AbsenceRequestStatusEnum::Rejected,
+            ]
+        ));
+        $absenceRequest->save();
 
         return $absenceRequest->fresh();
     }

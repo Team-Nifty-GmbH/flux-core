@@ -1,10 +1,26 @@
 <div>
     <x-modal :id="$vacationBlackoutForm->modalName()" size="2xl">
         <x-slot:title>
-            <span x-text="$wire.vacationBlackoutForm.id ? '{{ __('Edit Vacation Blackout') }}' : '{{ __('Create Vacation Blackout') }}'"></span>
+            {{ $vacationBlackoutForm->id ? __('Edit Vacation Blackout') : __('Create Vacation Blackout') }}
         </x-slot:title>
         
         <div class="flex flex-col gap-4">
+            @if(resolve_static(\FluxErp\Models\Client::class, 'query')->count() > 1)
+                <x-select.styled
+                    wire:model="vacationBlackoutForm.client_id"
+                    :label="__('Client')"
+                    select="label:name|value:id"
+                    unfiltered
+                    :request="[
+                        'url' => route('search', \FluxErp\Models\Client::class),
+                        'method' => 'POST',
+                        'params' => [
+                            'searchFields' => ['name', 'client_code']
+                        ]
+                    ]"
+                />
+            @endif
+            
             <x-input 
                 wire:model="vacationBlackoutForm.name" 
                 :label="__('Name')" 
@@ -37,22 +53,34 @@
                 :placeholder="__('Select Roles')"
                 multiple
                 select="label:name|value:id"
-                :request="['url' => route('search', \FluxErp\Models\Role::class), 'method' => 'POST']"
+                :request="[
+                    'url' => route('search', \FluxErp\Models\Role::class),
+                    'method' => 'POST',
+                    'params' => [
+                        'searchFields' => ['name']
+                    ]
+                ]"
                 unfiltered
             />
             
             <x-select.styled
-                wire:model="vacationBlackoutForm.user_ids"
-                :label="__('Applies to Users')"
-                :placeholder="__('Select Users')"
-                :hint="__('Leave empty to apply to all users with selected roles')"
+                wire:model="vacationBlackoutForm.employee_ids"
+                :label="__('Applies to Employees')"
+                :placeholder="__('Select Employees')"
+                :hint="__('Leave empty to apply to all employees with selected roles')"
                 multiple
                 select="label:name|value:id"
-                :request="['url' => route('search', \FluxErp\Models\User::class), 'method' => 'POST']"
+                :request="[
+                    'url' => route('search', \FluxErp\Models\Employee::class),
+                    'method' => 'POST',
+                    'params' => [
+                        'searchFields' => ['name', 'email']
+                    ]
+                ]"
                 unfiltered
             />
             
-            <x-checkbox 
+            <x-toggle 
                 wire:model="vacationBlackoutForm.is_active" 
                 :label="__('Is Active')" 
             />
@@ -60,17 +88,16 @@
         
         <x-slot:footer>
             <x-button
-                color="secondary"
-                light
-                flat
                 :text="__('Cancel')"
+                color="secondary"
+                flat
                 x-on:click="$modalClose('{{ $vacationBlackoutForm->modalName() }}')"
             />
             <x-button
-                color="indigo"
                 :text="__('Save')"
-                x-on:click="$wire.save().then((success) => { if(success) $modalClose('{{ $vacationBlackoutForm->modalName() }}')})"
+                color="primary"
+                wire:click="save"
             />
-        </x-slot>
+        </x-slot:footer>
     </x-modal>
 </div>

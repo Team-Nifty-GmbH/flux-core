@@ -12,31 +12,46 @@ use Livewire\Attributes\Locked;
 class HolidayForm extends FluxForm
 {
     use SupportsAutoRender;
-    
-    #[Locked]
-    public ?int $id = null;
-
-    public ?string $name = null;
 
     public ?string $date = null;
 
-    public ?int $month = null;
-
     public ?int $day = null;
 
-    public bool $is_recurring = false;
+    public ?string $effective_from = null;
 
-    public ?int $effective_from = null;
+    public ?string $effective_until = null;
 
-    public ?int $effective_until = null;
-
-    public string $day_part = 'full';
+    #[Locked]
+    public ?int $id = null;
 
     public bool $is_active = true;
 
+    public bool $is_half_day = false;
+
+    public bool $is_recurring = false;
+
     public ?int $location_id = null;
 
-    public ?int $client_id = null;
+    public ?int $month = null;
+
+    public ?string $name = null;
+
+    protected static function getModel(): string
+    {
+        return Holiday::class;
+    }
+
+    public function updatedDate(): void
+    {
+        if ($this->date) {
+            $dateObj = \Carbon\Carbon::parse($this->date);
+            $this->month = $dateObj->month;
+            $this->day = $dateObj->day;
+            if (! $this->effective_from) {
+                $this->effective_from = $this->date;
+            }
+        }
+    }
 
     protected function getActions(): array
     {
@@ -45,10 +60,5 @@ class HolidayForm extends FluxForm
             'update' => UpdateHoliday::class,
             'delete' => DeleteHoliday::class,
         ];
-    }
-
-    protected static function getModel(): string
-    {
-        return Holiday::class;
     }
 }

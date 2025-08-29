@@ -36,7 +36,7 @@ class CreateCategory extends FluxAction
                 'parent_id' => [
                     'integer',
                     'nullable',
-                    (new ModelExists(Category::class))
+                    (app(ModelExists::class, ['model' => Category::class]))
                         ->where('model_type', $this->data['model_type'] ?? null),
                 ],
             ]

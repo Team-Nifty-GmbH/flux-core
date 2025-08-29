@@ -5,6 +5,7 @@ namespace FluxErp\Actions\Holiday;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Holiday;
 use FluxErp\Rulesets\Holiday\UpdateHolidayRuleset;
+use Illuminate\Support\Arr;
 
 class UpdateHoliday extends FluxAction
 {
@@ -24,8 +25,15 @@ class UpdateHoliday extends FluxAction
             ->whereKey($this->getData('id'))
             ->first();
 
-        $holiday->fill($this->getData());
+        $data = $this->getData();
+        $locationIds = Arr::pull($data, 'location_ids');
+
+        $holiday->fill($data);
         $holiday->save();
+
+        if (is_array($locationIds)) {
+            $holiday->locations()->sync($locationIds);
+        }
 
         return $holiday->fresh();
     }

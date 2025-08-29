@@ -160,12 +160,12 @@ class CreateOrder extends FluxAction
                 'order_type_id' => [
                     'required',
                     'integer',
-                    (new ModelExists(OrderType::class))->where('client_id', $this->data['client_id']),
+                    (app(ModelExists::class, ['model' => OrderType::class]))->where('client_id', $this->data['client_id']),
                 ],
                 'payment_type_id' => [
                     'required',
                     'integer',
-                    (new ModelExists(PaymentType::class))
+                    (app(ModelExists::class, ['model' => PaymentType::class]))
                         ->whereRelation('clients', 'id', $this->data['client_id']),
                 ],
             ]

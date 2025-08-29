@@ -12,30 +12,36 @@ use Livewire\Attributes\Locked;
 class LocationForm extends FluxForm
 {
     use SupportsAutoRender;
-    #[Locked]
-    public ?int $id = null;
-
-    public ?string $name = null;
-
-    public ?string $street = null;
-
-    public ?string $house_number = null;
-
-    public ?string $zip = null;
 
     public ?string $city = null;
+
+    public ?int $client_id = null;
 
     public ?int $country_id = null;
 
     public ?int $country_region_id = null;
 
+    public ?string $house_number = null;
+
+    #[Locked]
+    public ?int $id = null;
+
+    public bool $is_active = true;
+
     public ?float $latitude = null;
 
     public ?float $longitude = null;
 
-    public bool $is_active = true;
+    public ?string $name = null;
 
-    public ?int $client_id = null;
+    public ?string $street = null;
+
+    public ?string $zip = null;
+
+    protected static function getModel(): string
+    {
+        return Location::class;
+    }
 
     protected function getActions(): array
     {
@@ -44,10 +50,5 @@ class LocationForm extends FluxForm
             'update' => UpdateLocation::class,
             'delete' => DeleteLocation::class,
         ];
-    }
-
-    protected static function getModel(): string
-    {
-        return Location::class;
     }
 }

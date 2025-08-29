@@ -2,37 +2,80 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Enums\OrderTypeEnum;
-use FluxErp\States\AbsenceRequest\AbsenceRequestState;
-use FluxErp\Traits\Approvable;
-use FluxErp\Traits\HasClientAssignment;
+use Carbon\Carbon;
+use FluxErp\Actions\EmployeeDay\CloseEmployeeDay;
+use FluxErp\Enums\AbsenceRequestStatusEnum;
+use FluxErp\Models\Pivots\AbsenceRequestEmployeeDay;
+use FluxErp\Traits\Commentable;
 use FluxErp\Traits\HasPackageFactory;
 use FluxErp\Traits\HasUserModification;
 use FluxErp\Traits\HasUuid;
+use FluxErp\Traits\InteractsWithMedia;
+use FluxErp\Traits\LogsActivity;
 use FluxErp\Traits\SoftDeletes;
 use FluxErp\Traits\Trackable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\ModelStates\HasStates;
+use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
-class AbsenceRequest extends FluxModel
+class AbsenceRequest extends FluxModel implements HasMedia, InteractsWithDataTables
 {
-    use HasClientAssignment, HasPackageFactory, HasUserModification, HasUuid, SoftDeletes, Trackable;
+    use Commentable, HasPackageFactory, HasStates, HasUserModification, HasUuid,
+        InteractsWithMedia, LogsActivity, SoftDeletes, Trackable;
 
-    protected $casts = [
-        'start_date' => 'date',
-        'end_date' => 'date',
-        'days_requested' => 'decimal:2',
-        'approved_at' => 'datetime',
-        'is_emergency' => 'boolean',
-    ];
+    public ?string $statusChangeComment = null;
 
-    protected $attributes = [
-        'status' => 'draft',
-    ];
-
-    public function user(): BelongsTo
+    protected static function booted(): void
     {
-        return $this->belongsTo(User::class);
+        static::saving(function (AbsenceRequest $absenceRequest): void {
+            if ($absenceRequest->isDirty(['start_date', 'end_date', 'employee_id'])) {
+                $absenceRequest->days_requested = $absenceRequest->start_date
+                    ->diffInDays($absenceRequest->end_date, absolute: true) + 1;
+                $absenceRequest->work_hours_affected = $absenceRequest->calculateWorkHoursAffected();
+                $absenceRequest->work_days_affected = $absenceRequest->calculateWorkDaysAffected();
+            }
+        });
+
+        static::saved(function (AbsenceRequest $absenceRequest): void {
+            if (! $absenceRequest->wasChanged('status')) {
+                return;
+            }
+
+            activity()
+                ->performedOn($absenceRequest)
+                ->causedBy(auth()->user())
+                ->event($absenceRequest->status->value)
+                ->useLog('absence_request_state_changes')
+                ->log($absenceRequest->statusChangeComment ?? '');
+
+            $absenceRequest->statusChangeComment = null;
+
+            foreach ($absenceRequest->employeeDays()->get(['id', 'employee_id', 'date']) as $day) {
+                CloseEmployeeDay::make([
+                    'employee_id' => $absenceRequest->employee_id,
+                    'date' => $day->date,
+                ])
+                    ->validate()
+                    ->execute();
+            }
+        });
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'start_date' => 'date',
+            'end_date' => 'date',
+            'sick_note_issued_date' => 'date',
+            'approved_at' => 'datetime',
+            'is_emergency' => 'boolean',
+            'status' => AbsenceRequestStatusEnum::class,
+        ];
     }
 
     public function absenceType(): BelongsTo
@@ -40,148 +83,136 @@ class AbsenceRequest extends FluxModel
         return $this->belongsTo(AbsenceType::class);
     }
 
-    public function substituteUser(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'substitute_user_id');
-    }
-
     public function approvedBy(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'approved_by');
+        return $this->belongsTo(User::class, 'approved_by_id');
+    }
+
+    public function calculateWorkDaysAffected(?Carbon $date = null): string|float
+    {
+        $deductionRate = $this->absenceType->percentage_deduction ?? 1;
+        $totalDays = 0;
+        $current = ($date ?? $this->start_date)->copy();
+
+        while ($current <= ($date ?? $this->end_date)) {
+            if ($this->employee->isWorkDay($current)) {
+                // Apply the deduction rate to get the actual days affected
+                $totalDays = bcadd(
+                    $totalDays,
+                    bcmul(1, $deductionRate)
+                );
+            }
+
+            $current->addDay();
+        }
+
+        return $totalDays;
+    }
+
+    public function calculateWorkHoursAffected(?Carbon $date = null): string|int|float
+    {
+        $deductionRate = $this->absenceType->percentage_deduction ?? 1;
+        $totalHours = 0;
+        $current = ($date ?? $this->start_date)->copy();
+
+        while ($current <= ($date ?? $this->end_date)) {
+            if ($this->employee->isWorkDay($current)) {
+                $dailyHours = $this->employee->getWorkTimeModel($current)->getDailyWorkHours($current);
+                $totalHours = bcadd(
+                    $totalHours,
+                    bcmul($dailyHours, $deductionRate)
+                );
+            }
+
+            $current->addDay();
+        }
+
+        return $totalHours;
+    }
+
+    public function employee(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class);
+    }
+
+    public function employeeDays(): BelongsToMany
+    {
+        return $this->belongsToMany(EmployeeDay::class)
+            ->using(AbsenceRequestEmployeeDay::class);
+    }
+
+    public function failsAbsencePolicies(): ?array
+    {
+        return $this->absenceType
+            ->absencePolicies
+            ->map(fn (AbsencePolicy $policy) => $policy->validateRequest($this))
+            ->toArray();
+    }
+
+    public function getAvatarUrl(): ?string
+    {
+        return route('avatar', [
+            'text' => Str::of($this->absenceType->name)
+                ->replaceMatches('/[^A-Z]/', '')
+                ->trim()
+                ->limit(2, '')
+                ->toString(),
+            'color' => Str::after($this->absenceType->color, '#'),
+        ]);
+    }
+
+    public function getDescription(): ?string
+    {
+        return Str::limit($this->reason, 50);
+    }
+
+    public function getLabel(): ?string
+    {
+        return $this->absenceType->name
+            . ' - '
+            . $this->employee->name
+            . ' (' . $this->start_date->format('Y-m-d')
+            . ' to ' . $this->end_date->format('Y-m-d')
+            . ')';
+    }
+
+    public function getUrl(): ?string
+    {
+        return route('human-resources.absence-requests.show', $this->id);
+    }
+
+    public function isInBlackoutPeriod(): bool
+    {
+        return resolve_static(VacationBlackout::class, 'query')
+            ->where('is_active', true)
+            ->where(function (Builder $query): void {
+                $query->whereBetween('start_date', [$this->start_date, $this->end_date])
+                    ->orWhereBetween('end_date', [$this->start_date, $this->end_date])
+                    ->orWhere(function (Builder $query): void {
+                        $query->where('start_date', '<=', $this->start_date)
+                            ->where('end_date', '>=', $this->end_date);
+                    });
+            })
+            ->exists();
+    }
+
+    public function rejectedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'rejected_by_id');
+    }
+
+    public function substitute(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class, 'substitute_employee_id');
+    }
+
+    public function substituteEmployee(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class, 'substitute_employee_id');
     }
 
     public function workTimes(): HasMany
     {
         return $this->hasMany(WorkTime::class, 'vacation_request_id');
-    }
-
-    public function calculateDays(): float
-    {
-        $days = 0;
-        $current = $this->start_date->copy();
-        
-        while ($current <= $this->end_date) {
-            if ($current->isWeekday()) {
-                if ($current->isSameDay($this->start_date) && $this->start_half_day !== 'full') {
-                    $days += 0.5;
-                } elseif ($current->isSameDay($this->end_date) && $this->end_half_day !== 'full') {
-                    $days += 0.5;
-                } else {
-                    $days += 1;
-                }
-            }
-            $current->addDay();
-        }
-        
-        return $days;
-    }
-
-    public function canApprove(User $user = null): bool
-    {
-        $user = $user ?? auth()->user();
-        
-        if ($this->status !== 'pending') {
-            return false;
-        }
-        
-        if ($user->id === $this->user_id) {
-            return false;
-        }
-        
-        return $user->hasPermissionTo('vacation-request.approve') 
-            || $user->id === $this->user->supervisor_id;
-    }
-
-    public function approve(User $approver, ?string $note = null): bool
-    {
-        if (! $this->canApprove($approver)) {
-            return false;
-        }
-        
-        $this->status = 'approved';
-        $this->approved_by = $approver->id;
-        $this->approved_at = now();
-        $this->approval_note = $note;
-        
-        return $this->save();
-    }
-
-    public function reject(User $approver, string $reason): bool
-    {
-        if (! $this->canApprove($approver)) {
-            return false;
-        }
-        
-        $this->status = 'rejected';
-        $this->approved_by = $approver->id;
-        $this->approved_at = now();
-        $this->rejection_reason = $reason;
-        
-        return $this->save();
-    }
-
-    public function submit(): bool
-    {
-        if ($this->status !== 'draft') {
-            return false;
-        }
-        
-        $this->status = 'pending';
-        $this->days_requested = $this->calculateDays();
-        
-        return $this->save();
-    }
-
-    public function cancel(): bool
-    {
-        if (! in_array($this->status, ['draft', 'pending'])) {
-            return false;
-        }
-        
-        $this->status = 'cancelled';
-        
-        return $this->save();
-    }
-
-    public function hasConflicts(): bool
-    {
-        return resolve_static(AbsenceRequest::class, 'query')
-            ->where('user_id', $this->user_id)
-            ->where('id', '!=', $this->id)
-            ->whereIn('status', ['pending', 'approved'])
-            ->where(function ($query) {
-                $query->whereBetween('start_date', [$this->start_date, $this->end_date])
-                    ->orWhereBetween('end_date', [$this->start_date, $this->end_date])
-                    ->orWhere(function ($q) {
-                        $q->where('start_date', '<=', $this->start_date)
-                            ->where('end_date', '>=', $this->end_date);
-                    });
-            })
-            ->exists();
-    }
-
-    public function isInBlackoutPeriod(): bool
-    {
-        $user = $this->user;
-        
-        return resolve_static(VacationBlackout::class, 'query')
-            ->where('is_active', true)
-            ->where('client_id', $this->client_id)
-            ->where(function ($query) {
-                $query->whereBetween('start_date', [$this->start_date, $this->end_date])
-                    ->orWhereBetween('end_date', [$this->start_date, $this->end_date])
-                    ->orWhere(function ($q) {
-                        $q->where('start_date', '<=', $this->start_date)
-                            ->where('end_date', '>=', $this->end_date);
-                    });
-            })
-            ->where(function ($query) use ($user) {
-                $query->whereHas('users', function ($q) use ($user) {
-                    $q->where('user_id', $user->id);
-                })->orWhereHas('roles', function ($q) use ($user) {
-                    $q->whereIn('role_id', $user->roles->pluck('id'));
-                });
-            })
-            ->exists();
     }
 }

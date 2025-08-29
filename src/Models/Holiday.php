@@ -2,28 +2,33 @@
 
 namespace FluxErp\Models;
 
-use FluxErp\Traits\HasClientAssignment;
+use FluxErp\Models\Pivots\HolidayLocation;
 use FluxErp\Traits\HasPackageFactory;
-use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\HasUserModification;
+use FluxErp\Traits\HasUuid;
 use FluxErp\Traits\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Holiday extends FluxModel
 {
-    use HasClientAssignment, HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
+    use HasPackageFactory, HasUserModification, HasUuid, SoftDeletes;
 
-    protected $casts = [
-        'date' => 'date',
-        'month' => 'integer',
-        'day' => 'integer',
-        'is_recurring' => 'boolean',
-        'effective_from' => 'integer',
-        'effective_until' => 'integer',
-        'is_active' => 'boolean',
-    ];
-    
-    public function location()
+    protected function casts(): array
     {
-        return $this->belongsTo(Location::class);
+        return [
+            'date' => 'date',
+            'month' => 'integer',
+            'day' => 'integer',
+            'is_recurring' => 'boolean',
+            'effective_from' => 'integer',
+            'effective_until' => 'integer',
+            'is_active' => 'boolean',
+        ];
+    }
+
+    public function locations(): BelongsToMany
+    {
+        return $this->belongsToMany(Location::class, 'holiday_location')
+            ->using(HolidayLocation::class);
     }
 }

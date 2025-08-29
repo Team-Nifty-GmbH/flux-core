@@ -2,9 +2,9 @@
 
 namespace FluxErp\Rulesets\Holiday;
 
-use FluxErp\Models\Client;
-use FluxErp\Rulesets\FluxRuleset;
+use FluxErp\Models\Location;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rulesets\FluxRuleset;
 
 class CreateHolidayRuleset extends FluxRuleset
 {
@@ -12,16 +12,19 @@ class CreateHolidayRuleset extends FluxRuleset
     {
         return [
             'name' => 'required|string|max:255',
-            'month' => 'required|integer|min:1|max:12',
-            'day' => 'required|integer|min:1|max:31',
-            'effective_from' => 'required|integer|min:2000|max:2100',
-            'effective_until' => 'nullable|integer|min:2000|max:2100|gte:effective_from',
-            'day_part' => 'required|in:full,first_half,second_half',
+            'date' => 'nullable|date',
+            'month' => 'nullable|integer|min:1|max:12',
+            'day' => 'nullable|integer|min:1|max:31',
+            'year' => 'nullable|integer|min:2000|max:2100',
+            'is_recurring' => 'boolean',
+            'is_half_day' => 'boolean',
+            'effective_from' => 'nullable|date',
+            'effective_until' => 'nullable|date|after_or_equal:effective_from',
             'is_active' => 'boolean',
-            'client_id' => [
-                'required',
+            'location_ids' => 'nullable|array',
+            'location_ids.*' => [
                 'integer',
-                new ModelExists(Client::class),
+                app(ModelExists::class, ['model' => Location::class]),
             ],
         ];
     }

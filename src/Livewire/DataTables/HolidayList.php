@@ -12,7 +12,6 @@ class HolidayList extends BaseDataTable
         'day',
         'effective_from',
         'effective_until',
-        'day_part',
         'is_active',
     ];
 

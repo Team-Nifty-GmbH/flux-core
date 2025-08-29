@@ -3,8 +3,10 @@
 namespace FluxErp\Actions\Location;
 
 use FluxErp\Actions\FluxAction;
+use FluxErp\Models\Client;
 use FluxErp\Models\Location;
 use FluxErp\Rulesets\Location\CreateLocationRuleset;
+use Illuminate\Support\Arr;
 
 class CreateLocation extends FluxAction
 {
@@ -20,9 +22,22 @@ class CreateLocation extends FluxAction
 
     public function performAction(): Location
     {
-        $location = app(Location::class, ['attributes' => $this->getData()]);
+        $data = $this->getData();
+        $holidayIds = Arr::pull($data, 'holiday_ids');
+
+        $location = app(Location::class, ['attributes' => $data]);
         $location->save();
 
+        // Sync holidays if provided
+        if (is_array($holidayIds)) {
+            $location->holidays()->sync($holidayIds);
+        }
+
         return $location->fresh();
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->data['client_id'] ??= resolve_static(Client::class, 'default')->getKey();
     }
 }

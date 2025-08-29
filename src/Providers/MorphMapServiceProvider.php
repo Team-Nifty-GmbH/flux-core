@@ -2,6 +2,9 @@
 
 namespace FluxErp\Providers;
 
+use FluxErp\Models\AbsencePolicy;
+use FluxErp\Models\AbsenceRequest;
+use FluxErp\Models\AbsenceType;
 use FluxErp\Models\Activity;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Address;
@@ -28,6 +31,10 @@ use FluxErp\Models\Currency;
 use FluxErp\Models\Discount;
 use FluxErp\Models\DiscountGroup;
 use FluxErp\Models\EmailTemplate;
+use FluxErp\Models\Employee;
+use FluxErp\Models\EmployeeBalanceAdjustment;
+use FluxErp\Models\EmployeeDay;
+use FluxErp\Models\EmployeeDepartment;
 use FluxErp\Models\EventSubscription;
 use FluxErp\Models\FailedJob;
 use FluxErp\Models\Favorite;
@@ -62,6 +69,7 @@ use FluxErp\Models\PaymentReminderText;
 use FluxErp\Models\PaymentRun;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
+use FluxErp\Models\Pivots\AbsencePolicyAbsenceType;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
 use FluxErp\Models\Pivots\CalendarEventInvite;
 use FluxErp\Models\Pivots\Categorizable;
@@ -69,6 +77,7 @@ use FluxErp\Models\Pivots\ClientProduct;
 use FluxErp\Models\Pivots\Communicatable;
 use FluxErp\Models\Pivots\ContactDiscount;
 use FluxErp\Models\Pivots\ContactDiscountGroup;
+use FluxErp\Models\Pivots\EmployeeWorkTimeModel;
 use FluxErp\Models\Pivots\JobBatchable;
 use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Models\Pivots\PrinterUser;
@@ -76,8 +85,6 @@ use FluxErp\Models\Pivots\ProductBundleProduct;
 use FluxErp\Models\Pivots\ProductCrossSellingProduct;
 use FluxErp\Models\Pivots\ProductProductOption;
 use FluxErp\Models\Pivots\QueueMonitorable;
-use FluxErp\Models\Pivots\VacationBlackoutRole;
-use FluxErp\Models\Pivots\VacationBlackoutUser;
 use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Printer;
@@ -116,7 +123,6 @@ use FluxErp\Models\VatRate;
 use FluxErp\Models\Warehouse;
 use FluxErp\Models\Widget;
 use FluxErp\Models\WorkTime;
-use FluxErp\Models\AbsenceType;
 use FluxErp\Models\WorkTimeModel;
 use FluxErp\Models\WorkTimeModelSchedule;
 use FluxErp\Models\WorkTimeType;
@@ -154,6 +160,8 @@ class MorphMapServiceProvider extends ServiceProvider
             'discount' => Discount::class,
             'discount_group' => DiscountGroup::class,
             'email_template' => EmailTemplate::class,
+            'employee' => Employee::class,
+            'employee_day' => EmployeeDay::class,
             'event_subscription' => EventSubscription::class,
             'failed_job' => FailedJob::class,
             'favorite' => Favorite::class,
@@ -221,15 +229,22 @@ class MorphMapServiceProvider extends ServiceProvider
             'transaction' => Transaction::class,
             'unit' => Unit::class,
             'user' => User::class,
+            'employee_balance_adjustment' => EmployeeBalanceAdjustment::class,
+            'employee_department' => EmployeeDepartment::class,
             'vacation_blackout' => VacationBlackout::class,
             'vacation_carryover_rule' => VacationCarryoverRule::class,
             'vat_rate' => VatRate::class,
             'warehouse' => Warehouse::class,
             'widget' => Widget::class,
             'work_time' => WorkTime::class,
+            'absence_request' => AbsenceRequest::class,
             'absence_type' => AbsenceType::class,
+            'absence_policy' => AbsencePolicy::class,
+            'absence_policy_absence_type' => AbsencePolicyAbsenceType::class,
+
             'work_time_model' => WorkTimeModel::class,
             'work_time_model_schedule' => WorkTimeModelSchedule::class,
+            'employee_work_time_model' => EmployeeWorkTimeModel::class,
             'work_time_type' => WorkTimeType::class,
 
             'address_address_type_order' => AddressAddressTypeOrder::class,
@@ -246,8 +261,6 @@ class MorphMapServiceProvider extends ServiceProvider
             'product_cross_selling_product' => ProductCrossSellingProduct::class,
             'product_product_option' => ProductProductOption::class,
             'queue_monitorable' => QueueMonitorable::class,
-            'vacation_blackout_role' => VacationBlackoutRole::class,
-            'vacation_blackout_user' => VacationBlackoutUser::class,
         ]);
     }
 }

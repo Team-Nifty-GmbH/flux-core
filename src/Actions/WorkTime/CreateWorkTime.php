@@ -33,6 +33,6 @@ class CreateWorkTime extends FluxAction
 
     protected function prepareForValidation(): void
     {
-        $this->data['user_id'] = auth()->user()->id;
+        $this->data['user_id'] = auth()->id();
     }
 }

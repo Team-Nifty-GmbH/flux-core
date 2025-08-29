@@ -12,25 +12,30 @@ use Livewire\Attributes\Locked;
 class VacationBlackoutForm extends FluxForm
 {
     use SupportsAutoRender;
-    
-    #[Locked]
-    public ?int $id = null;
 
-    public ?string $name = null;
-
-    public ?string $start_date = null;
-
-    public ?string $end_date = null;
+    public ?int $client_id = null;
 
     public ?string $description = null;
 
+    public ?string $end_date = null;
+
+    #[Locked]
+    public ?int $id = null;
+
     public bool $is_active = true;
+
+    public ?string $name = null;
 
     public array $role_ids = [];
 
+    public ?string $start_date = null;
+
     public array $user_ids = [];
 
-    public ?int $client_id = null;
+    protected static function getModel(): string
+    {
+        return VacationBlackout::class;
+    }
 
     protected function getActions(): array
     {
@@ -39,10 +44,5 @@ class VacationBlackoutForm extends FluxForm
             'update' => UpdateVacationBlackout::class,
             'delete' => DeleteVacationBlackout::class,
         ];
-    }
-
-    protected static function getModel(): string
-    {
-        return VacationBlackout::class;
     }
 }

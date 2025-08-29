@@ -1,127 +1,107 @@
-<x-modal id="edit-absence-request-modal" width="3xl">
-    <x-slot:title>
-        {{ __('Absence Request') }}
-    </x-slot:title>
-    
+<x-modal :id="$absenceRequestForm->modalName()" persistent size="3xl">
+    <x-slot:title>{{ __('Absence Request') }}</x-slot:title>
+
     <div class="flex flex-col gap-4">
         <div class="grid grid-cols-2 gap-4">
-            <x-select.styled
-                wire:model="absenceRequestForm.user_id"
-                :label="__('Employee')"
-                select="label:name|value:id"
-                :request="['url' => route('search', \FluxErp\Models\User::class), 'method' => 'POST']"
-                unfiltered
-                required
-            />
-            
+            @if($this->canChooseEmployee())
+                <x-select.styled
+                    wire:model="absenceRequestForm.employee_id"
+                    :label="__('Employee')"
+                    select="label:label|value:id"
+                    :request="[
+                        'url' => route('search', \FluxErp\Models\Employee::class),
+                        'method' => 'POST',
+                    ]"
+                    unfiltered
+                    required
+                />
+            @endif
+
             <x-select.styled
                 wire:model="absenceRequestForm.absence_type_id"
                 :label="__('Absence Type')"
-                select="label:name|value:id"
-                :request="['url' => route('search', \FluxErp\Models\AbsenceType::class), 'method' => 'POST']"
+                select="value:id"
+                :request="[
+                    'url' => route('search', \FluxErp\Models\AbsenceType::class),
+                    'method' => 'POST',
+                    'params' => [
+                        'whereIn' => ! $this->canChooseEmployee() && ! \FluxErp\Actions\AbsenceRequest\ApproveAbsenceRequest::canPerformAction(false)
+                            ? [
+                                [
+                                    'employee_can_create',
+                                    [
+                                        \FluxErp\Enums\AbsenceRequestCreationTypeEnum::Yes->value,
+                                        \FluxErp\Enums\AbsenceRequestCreationTypeEnum::Approval_required->value,
+                                    ]
+                                ]
+                            ]
+                            : [],
+                    ],
+                ]"
                 unfiltered
                 required
             />
         </div>
-        
+
         <div class="grid grid-cols-2 gap-4">
-            <x-date 
-                wire:model="absenceRequestForm.start_date" 
-                :label="__('Start Date')" 
+            <x-date
+                wire:model="absenceRequestForm.start_date"
+                :label="__('Start Date')"
                 required
             />
-            
-            <x-date 
-                wire:model="absenceRequestForm.end_date" 
-                :label="__('End Date')" 
+
+            <x-date
+                wire:model="absenceRequestForm.end_date"
+                :label="__('End Date')"
                 required
             />
         </div>
-        
-        <div class="grid grid-cols-2 gap-4">
-            <x-select.styled
-                wire:model="absenceRequestForm.start_half_day"
-                :label="__('Start Half Day')"
-                :options="[
-                    ['value' => 'full', 'label' => __('Full Day')],
-                    ['value' => 'first_half', 'label' => __('Morning')],
-                    ['value' => 'second_half', 'label' => __('Afternoon')]
-                ]"
-                select="label:label|value:value"
-            />
-            
-            <x-select.styled
-                wire:model="absenceRequestForm.end_half_day"
-                :label="__('End Half Day')"
-                :options="[
-                    ['value' => 'full', 'label' => __('Full Day')],
-                    ['value' => 'first_half', 'label' => __('Morning')],
-                    ['value' => 'second_half', 'label' => __('Afternoon')]
-                ]"
-                select="label:label|value:value"
-            />
-        </div>
-        
-        <x-input 
-            wire:model="absenceRequestForm.days_requested" 
-            :label="__('Days Requested')" 
-            type="number"
-            step="0.5"
+
+        <x-date
+            wire:model="absenceRequestForm.sick_note_issued_date"
+            :label="__('Sick Note Issued Date')"
+            :hint="__('Date when the sick note was issued by the doctor')"
         />
-        
-        <x-textarea 
-            wire:model="absenceRequestForm.reason" 
-            :label="__('Reason')" 
+
+        <x-textarea
+            wire:model="absenceRequestForm.reason"
+            :label="__('Reason')"
             rows="3"
         />
-        
+
         <x-select.styled
-            wire:model="absenceRequestForm.substitute_user_id"
+            wire:model="absenceRequestForm.substitute_employee_id"
             :label="__('Substitute')"
-            select="label:name|value:id"
-            :request="['url' => route('search', \FluxErp\Models\User::class), 'method' => 'POST']"
+            select="label:label|value:id"
+            :request="[
+                'url' => route('search', \FluxErp\Models\Employee::class),
+                'method' => 'POST',
+            ]"
             unfiltered
         />
-        
-        <x-textarea 
-            wire:model="absenceRequestForm.substitute_note" 
-            :label="__('Note for Substitute')" 
+
+        <x-textarea
+            wire:model="absenceRequestForm.substitute_note"
+            :label="__('Note for Substitute')"
             rows="2"
         />
-        
-        <div class="grid grid-cols-2 gap-4">
+
+        <x-toggle
+            wire:model="absenceRequestForm.is_emergency"
+            :label="__('Emergency Request')"
+        />
+
+        @if($this->canChooseEmployee())
             <x-select.styled
                 wire:model="absenceRequestForm.status"
                 :label="__('Status')"
-                :options="[
-                    ['value' => 'draft', 'label' => __('Draft')],
-                    ['value' => 'pending', 'label' => __('Pending')],
-                    ['value' => 'approved', 'label' => __('Approved')],
-                    ['value' => 'rejected', 'label' => __('Rejected')],
-                    ['value' => 'cancelled', 'label' => __('Cancelled')]
-                ]"
-                select="label:label|value:value"
+                :options="\FluxErp\Enums\AbsenceRequestStatusEnum::valuesLocalized()"
             />
-            
-            <x-checkbox 
-                wire:model="absenceRequestForm.is_emergency" 
-                :label="__('Emergency Request')" 
-            />
-        </div>
+        @endif
     </div>
-    
+
     <x-slot:footer>
-        <x-button
-            color="secondary"
-            light
-            flat
-            :text="__('Cancel')"
-            x-on:click="$modalClose('edit-absence-request-modal')"
-        />
-        <x-button
-            color="indigo"
-            :text="__('Save')"
-            wire:click="save().then((success) => { if(success) $modalClose('edit-absence-request-modal')})"
-        />
-    </x-slot>
+        <x-button :text="__('Cancel')" color="secondary" flat x-on:click="$modalClose('{{ $absenceRequestForm->modalName() }}')" />
+        <x-button :text="__('Save')" color="primary" wire:click="save().then((success) => { if(success) $modalClose('{{ $absenceRequestForm->modalName() }}')})" />
+    </x-slot:footer>
 </x-modal>

@@ -5,6 +5,7 @@ namespace FluxErp\Actions\Holiday;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Holiday;
 use FluxErp\Rulesets\Holiday\CreateHolidayRuleset;
+use Illuminate\Support\Arr;
 
 class CreateHoliday extends FluxAction
 {
@@ -20,8 +21,15 @@ class CreateHoliday extends FluxAction
 
     public function performAction(): Holiday
     {
-        $holiday = app(Holiday::class, ['attributes' => $this->getData()]);
+        $data = $this->getData();
+        $locationIds = Arr::pull($data, 'location_ids');
+
+        $holiday = app(Holiday::class, ['attributes' => $data]);
         $holiday->save();
+
+        if ($locationIds) {
+            $holiday->locations()->sync($locationIds);
+        }
 
         return $holiday->fresh();
     }

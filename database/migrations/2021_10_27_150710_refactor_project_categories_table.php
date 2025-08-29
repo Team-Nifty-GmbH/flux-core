@@ -27,11 +27,19 @@ class RefactorProjectCategoriesTable extends Migration
 
     private function renameCategoriesTableToProjectCategories(): void
     {
-        DB::statement('RENAME TABLE categories TO project_categories');
+        if (DB::getDriverName() === 'sqlite') {
+            Schema::rename('categories', 'project_categories');
+        } else {
+            DB::statement('RENAME TABLE categories TO project_categories');
+        }
     }
 
     private function renameProjectCategoriesTableToCategories(): void
     {
-        DB::statement('RENAME TABLE project_categories TO categories');
+        if (DB::getDriverName() === 'sqlite') {
+            Schema::rename('project_categories', 'categories');
+        } else {
+            DB::statement('RENAME TABLE project_categories TO categories');
+        }
     }
 }

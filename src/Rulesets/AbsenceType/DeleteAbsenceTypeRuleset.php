@@ -3,8 +3,8 @@
 namespace FluxErp\Rulesets\AbsenceType;
 
 use FluxErp\Models\AbsenceType;
-use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rulesets\FluxRuleset;
 
 class DeleteAbsenceTypeRuleset extends FluxRuleset
 {
@@ -14,7 +14,7 @@ class DeleteAbsenceTypeRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(AbsenceType::class),
+                app(ModelExists::class, ['model' => AbsenceType::class]),
             ],
         ];
     }

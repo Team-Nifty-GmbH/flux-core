@@ -2,10 +2,13 @@
 
 namespace FluxErp\Rulesets\AbsenceType;
 
-use FluxErp\Models\Client;
+use FluxErp\Enums\AbsenceRequestCreationTypeEnum;
+use FluxErp\Models\AbsencePolicy;
 use FluxErp\Models\AbsenceType;
-use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rules\Numeric;
+use FluxErp\Rulesets\FluxRuleset;
+use Illuminate\Validation\Rule;
 
 class UpdateAbsenceTypeRuleset extends FluxRuleset
 {
@@ -15,24 +18,29 @@ class UpdateAbsenceTypeRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(AbsenceType::class),
+                app(ModelExists::class, ['model' => AbsenceType::class]),
             ],
             'name' => 'sometimes|required|string|max:255',
-            'color' => 'sometimes|required|string|regex:/^#[0-9A-Fa-f]{6}$/',
-            'is_active' => 'boolean',
-            'can_select_substitute' => 'boolean',
-            'must_select_substitute' => 'boolean',
-            'requires_proof' => 'boolean',
-            'requires_reason' => 'boolean',
-            'employee_can_create' => 'sometimes|required|in:yes,no,approval_required',
-            'counts_as_work_day' => 'boolean',
-            'counts_as_target_hours' => 'boolean',
-            'requires_work_day' => 'boolean',
-            'client_id' => [
+            'code' => 'sometimes|required|string|max:50|unique:absence_types,code',
+            'color' => 'sometimes|required|hex_color',
+            'percentage_deduction' => [
                 'sometimes',
+                'nullable',
+                app(Numeric::class, ['min' => 0, 'max' => 1]),
+            ],
+            'affects_sick' => 'boolean',
+            'affects_vacation' => 'boolean',
+            'affects_overtime' => 'boolean',
+            'is_active' => 'boolean',
+            'employee_can_create' => [
                 'required',
+                Rule::enum(AbsenceRequestCreationTypeEnum::class),
+            ],
+            'absence_policies' => 'nullable|array',
+            'absence_policies.*' => [
+                'nullable',
                 'integer',
-                new ModelExists(Client::class),
+                app(ModelExists::class, ['model' => AbsencePolicy::class]),
             ],
         ];
     }

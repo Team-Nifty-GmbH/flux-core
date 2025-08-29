@@ -6,7 +6,10 @@
     x-data="workTime($wire, '{{ route('search', '') }}')"
     x-init.once="load()"
 >
-    <x-modal id="work-time-modal" persistent x-on:close="$wire.resetWorkTime()">
+    <x-modal :id="'work-time-modal'" persistent x-on:close="$wire.resetWorkTime()">
+        <x-slot:title>
+            {{ __('Work Time') }}
+        </x-slot:title>
         <div class="flex flex-col gap-1.5">
             <x-select.styled
                 :label="__('Work Time Type')"
@@ -82,25 +85,18 @@
         </div>
         <x-slot:footer>
             <x-button
-                color="secondary"
-                light
-                flat
                 :text="__('Cancel')"
+                color="secondary"
+                flat
                 x-on:click="$modalClose('work-time-modal')"
             />
             <x-button
-                color="indigo"
-                :text="__('Start')"
+                x-bind:text="$wire.workTime.id ? '{{ __('Save') }}' : '{{ __('Start') }}'"
+                color="primary"
                 loading
                 x-on:click="$wire.save().then((success) => { if (success) $modalClose('work-time-modal'); })"
-            >
-                <x-slot:label>
-                    <span
-                        x-text="$wire.workTime.id ? '{{ __('Save') }}' : '{{ __('Start') }}'"
-                    ></span>
-                </x-slot>
-            </x-button>
-        </x-slot>
+            />
+        </x-slot:footer>
     </x-modal>
     <x-button
         rounded
@@ -130,7 +126,6 @@
                     <div>{{ __('Active Work Times') }}</div>
                     <x-button.circle
                         color="secondary"
-                        light
                         sm
                         x-on:click="open = false"
                         icon="x-mark"

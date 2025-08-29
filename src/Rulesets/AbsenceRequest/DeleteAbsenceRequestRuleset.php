@@ -14,7 +14,7 @@ class DeleteAbsenceRequestRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(AbsenceRequest::class),
+                app(ModelExists::class, ['model' => AbsenceRequest::class]),
             ],
         ];
     }

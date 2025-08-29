@@ -11,21 +11,22 @@ return new class() extends Migration
         Schema::create('vacation_blackouts', function (Blueprint $table): void {
             $table->id();
             $table->char('uuid', 36);
+
             $table->string('name');
+            $table->text('description')->nullable();
             $table->date('start_date');
             $table->date('end_date');
-            $table->text('description')->nullable();
+
             $table->boolean('is_active')->default(true);
-            $table->foreignId('client_id')->constrained()->cascadeOnDelete();
+
             $table->timestamp('created_at')->nullable();
             $table->string('created_by')->nullable();
             $table->timestamp('updated_at')->nullable();
             $table->string('updated_by')->nullable();
             $table->timestamp('deleted_at')->nullable();
             $table->string('deleted_by')->nullable();
-            
-            $table->unique(['uuid']);
-            $table->index(['client_id', 'start_date', 'end_date']);
+
+            $table->index(['start_date', 'end_date']);
         });
     }
 

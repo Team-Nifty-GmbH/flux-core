@@ -12,34 +12,62 @@ use Livewire\Attributes\Locked;
 class AbsenceTypeForm extends FluxForm
 {
     use SupportsAutoRender;
-    #[Locked]
-    public ?int $id = null;
 
-    public ?string $name = null;
+    public ?array $absence_policies = null;
+
+    public bool $affects_overtime = false;
+
+    public bool $affects_sick = false;
+
+    public bool $affects_vacation = false;
+
+    public ?string $code = null;
 
     public ?string $color = '#000000';
 
-    public bool $is_active = true;
-
-    public bool $can_select_substitute = false;
-
-    public bool $must_select_substitute = false;
-
-    public bool $requires_proof = false;
-
-    public bool $requires_reason = false;
-
     public string $employee_can_create = 'yes';
 
-    public bool $counts_as_work_day = true;
+    #[Locked]
+    public ?int $id = null;
 
-    public bool $counts_as_target_hours = true;
+    public bool $is_active = true;
 
-    public bool $requires_work_day = false;
+    public bool $is_auto_approved = false;
 
-    public bool $is_vacation = false;
+    public ?string $name = null;
 
-    public ?int $client_id = null;
+    public ?float $percentage_deduction = 100.00;
+
+    public function fill($values): void
+    {
+        if ($values instanceof AbsenceType) {
+            $values->loadMissing('absencePolicies:id');
+            $values = array_merge(
+                $values->toArray(),
+                [
+                    'absence_policies' => $values->absencePolicies->pluck('id')->toArray(),
+                ]
+            );
+        }
+
+        parent::fill($values);
+
+        // Convert from decimal (0-1) to percentage (0-100) for display
+        $this->percentage_deduction = ! is_null($this->percentage_deduction)
+            ? bcmul($this->percentage_deduction, 100)
+            : null;
+    }
+
+    public function toActionData(): array
+    {
+        $data = parent::toActionData();
+        // Convert from percentage (0-100) to decimal (0-1) for storage
+        $data['percentage_deduction'] = ! is_null($this->percentage_deduction)
+            ? bcdiv($this->percentage_deduction, 100)
+            : null;
+
+        return $data;
+    }
 
     protected function getActions(): array
     {
@@ -48,10 +76,5 @@ class AbsenceTypeForm extends FluxForm
             'update' => UpdateAbsenceType::class,
             'delete' => DeleteAbsenceType::class,
         ];
-    }
-
-    protected static function getModel(): string
-    {
-        return AbsenceType::class;
     }
 }

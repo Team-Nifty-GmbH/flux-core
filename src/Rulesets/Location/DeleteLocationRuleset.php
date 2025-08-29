@@ -3,8 +3,8 @@
 namespace FluxErp\Rulesets\Location;
 
 use FluxErp\Models\Location;
-use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rulesets\FluxRuleset;
 
 class DeleteLocationRuleset extends FluxRuleset
 {
@@ -14,7 +14,7 @@ class DeleteLocationRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(Location::class),
+                app(ModelExists::class, ['model' => Location::class]),
             ],
         ];
     }

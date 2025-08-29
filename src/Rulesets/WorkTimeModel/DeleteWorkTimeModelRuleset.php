@@ -3,8 +3,8 @@
 namespace FluxErp\Rulesets\WorkTimeModel;
 
 use FluxErp\Models\WorkTimeModel;
-use FluxErp\Rulesets\FluxRuleset;
 use FluxErp\Rules\ModelExists;
+use FluxErp\Rulesets\FluxRuleset;
 
 class DeleteWorkTimeModelRuleset extends FluxRuleset
 {
@@ -14,7 +14,7 @@ class DeleteWorkTimeModelRuleset extends FluxRuleset
             'id' => [
                 'required',
                 'integer',
-                new ModelExists(WorkTimeModel::class),
+                app(ModelExists::class, ['model' => WorkTimeModel::class]),
             ],
         ];
     }

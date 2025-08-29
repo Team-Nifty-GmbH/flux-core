@@ -4,10 +4,10 @@ namespace FluxErp\Livewire\Settings;
 
 use FluxErp\Livewire\DataTables\WorkTimeModelList;
 use FluxErp\Livewire\Forms\WorkTimeModelForm;
-use FluxErp\Models\WorkTimeModel;
 use FluxErp\Support\Livewire\Attributes\DataTableForm;
 use FluxErp\Traits\Livewire\DataTableHasFormEdit;
 use Livewire\Attributes\Renderless;
+use TeamNiftyGmbH\DataTable\Htmlables\DataTableButton;
 
 class WorkTimeModels extends WorkTimeModelList
 {
@@ -18,24 +18,18 @@ class WorkTimeModels extends WorkTimeModelList
 
     protected ?string $includeBefore = 'flux::livewire.settings.work-time-models';
 
-
     #[Renderless]
-    public function edit(string|int|null $id = null): void
+    public function editSchedule($id): void
     {
-        $this->workTimeModelForm->reset();
+        $this->redirectRoute('settings.work-time-model', ['id' => $id], navigate: true);
+    }
 
-        if ($id) {
-            $model = WorkTimeModel::with('schedules')
-                ->whereKey($id)
-                ->firstOrFail();
-            $this->workTimeModelForm->fill($model);
-        } else {
-            $this->workTimeModelForm->initializeDefaultSchedules();
-        }
-
-        $modalName = $this->modalName();
-        $this->js(<<<JS
-            \$modalOpen('$modalName');
-        JS);
+    protected function getRowActionEditButton(): DataTableButton
+    {
+        return DataTableButton::make()
+            ->text(__('Edit'))
+            ->icon('pencil')
+            ->color('primary')
+            ->wireClick('editSchedule(record.id)');
     }
 }

@@ -5,6 +5,7 @@ namespace FluxErp\Actions\Location;
 use FluxErp\Actions\FluxAction;
 use FluxErp\Models\Location;
 use FluxErp\Rulesets\Location\UpdateLocationRuleset;
+use Illuminate\Support\Arr;
 
 class UpdateLocation extends FluxAction
 {
@@ -24,8 +25,16 @@ class UpdateLocation extends FluxAction
             ->whereKey($this->getData('id'))
             ->first();
 
-        $location->fill($this->getData());
+        $data = $this->getData();
+        $holidayIds = Arr::pull($data, 'holiday_ids');
+
+        $location->fill($data);
         $location->save();
+
+        // Sync holidays if provided
+        if (is_array($holidayIds)) {
+            $location->holidays()->sync($holidayIds);
+        }
 
         return $location->fresh();
     }

@@ -23,16 +23,16 @@ class CreateVacationBlackout extends FluxAction
         $data = $this->getData();
         $roleIds = data_get($data, 'role_ids', []);
         $userIds = data_get($data, 'user_ids', []);
-        
+
         unset($data['role_ids'], $data['user_ids']);
-        
+
         $vacationBlackout = app(VacationBlackout::class, ['attributes' => $data]);
         $vacationBlackout->save();
-        
+
         if ($roleIds) {
             $vacationBlackout->roles()->sync($roleIds);
         }
-        
+
         if ($userIds) {
             $vacationBlackout->users()->sync($userIds);
         }

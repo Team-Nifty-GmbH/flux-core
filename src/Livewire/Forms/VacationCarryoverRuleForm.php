@@ -12,23 +12,24 @@ use Livewire\Attributes\Locked;
 class VacationCarryoverRuleForm extends FluxForm
 {
     use SupportsAutoRender;
-    
+
+    public ?int $client_id = null;
+
+    public ?int $expires_after_months = null;
+
     #[Locked]
     public ?int $id = null;
 
-    public ?int $effective_year = null;
-
-    public ?int $cutoff_month = null;
-
-    public ?int $cutoff_day = null;
-
-    public ?int $max_carryover_days = null;
-
-    public ?string $expiry_date = null;
-
     public bool $is_active = true;
 
-    public ?int $client_id = null;
+    public ?int $max_days = null;
+
+    public ?string $name = null;
+
+    protected static function getModel(): string
+    {
+        return VacationCarryoverRule::class;
+    }
 
     protected function getActions(): array
     {
@@ -37,10 +38,5 @@ class VacationCarryoverRuleForm extends FluxForm
             'update' => UpdateVacationCarryoverRule::class,
             'delete' => DeleteVacationCarryoverRule::class,
         ];
-    }
-
-    protected static function getModel(): string
-    {
-        return VacationCarryoverRule::class;
     }
 }
