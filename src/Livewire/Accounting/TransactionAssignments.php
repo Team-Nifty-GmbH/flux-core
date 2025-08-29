@@ -15,12 +15,12 @@ use FluxErp\Traits\Livewire\Actions;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Validation\UnauthorizedException;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class TransactionAssignments extends Component
 {
@@ -109,7 +109,7 @@ class TransactionAssignments extends Component
                     ])
                         ->validate()
                         ->execute();
-                } catch (ValidationException|\Spatie\Permission\Exceptions\UnauthorizedException $e) {
+                } catch (ValidationException|UnauthorizedException $e) {
                     exception_to_notifications($e, $this);
                 }
             });

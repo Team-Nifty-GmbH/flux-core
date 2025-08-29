@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use FluxErp\Actions\Project\UpdateProject;
 use FluxErp\Casts\TimeDuration;
 use FluxErp\Contracts\Calendarable;
+use FluxErp\Contracts\IsSubscribable;
 use FluxErp\States\Project\ProjectState;
 use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
@@ -30,7 +31,7 @@ use Spatie\ModelStates\HasStates;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 use TeamNiftyGmbH\DataTable\Traits\HasFrontendAttributes;
 
-class Project extends FluxModel implements Calendarable, HasMedia, InteractsWithDataTables
+class Project extends FluxModel implements Calendarable, HasMedia, InteractsWithDataTables, IsSubscribable
 {
     use Commentable, Filterable, HasAdditionalColumns, HasClientAssignment, HasFrontendAttributes, HasPackageFactory,
         HasParentChildRelations, HasSerialNumberRange, HasStates, HasTags, HasUserModification, HasUuid,
