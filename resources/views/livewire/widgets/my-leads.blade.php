@@ -5,7 +5,7 @@
         <h2
             class="truncate text-lg font-semibold text-gray-700 dark:text-gray-400"
         >
-            {{ __('My Leads') }}
+            {{ $this->getLabel() }}
         </h2>
         @section('options')
         <div class="flex-none">
