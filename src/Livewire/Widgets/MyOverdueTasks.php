@@ -44,7 +44,7 @@ class MyOverdueTasks extends Component
                     ->with('project:id,name')
                     ->whereNotIn('state', $endStates)
                     ->where('due_date', '<', now())
-                    ->orderBy('due_date, ASC')
+                    ->orderBy('due_date', 'ASC')
                     ->get(),
             ]
         );
