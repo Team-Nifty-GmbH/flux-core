@@ -23,7 +23,7 @@
                                     :href="$task->model->getUrl()"
                                     wire:navigate
                                 >
-                                    {{ class_basename($task->model) }}:
+                                    {{__(Str::headline(morph_alias(get_class($task->model))))}}:
                                     {{ $task->model->getLabel() }}
                                 </x-link>
                             </div>
