@@ -43,8 +43,12 @@ class OverallLeadWonLostRatio extends CircleChart implements HasWidgetOptions
                 $this->getStart()->toDateTimeString(),
                 $this->getEnd()->toDateTimeString()
             ))
-            ->whereHas('leadState', fn (Builder $query) => $query->where('is_won', true)
-                ->orWhere('is_lost', true))
+            ->whereHas(
+                'leadState',
+                fn (Builder $query) => $query
+                    ->where('is_won', true)
+                    ->orWhere('is_lost', true)
+            )
             ->with('leadState:id,is_won')
             ->get()
             ->groupBy(fn ($lead) => $lead->leadState->is_won ? __('Won Leads') : __('Lost Leads'))
@@ -78,7 +82,7 @@ class OverallLeadWonLostRatio extends CircleChart implements HasWidgetOptions
     public function redirectLostLeads(): void
     {
         $this->redirectWithFilter(
-            fn (Builder $query) => $query->whereHas('leadState', fn ($sq) => $sq->where('is_lost', true)),
+            fn (Builder $query) => $query->whereRelation('leadState', 'is_lost', true),
             __('Lost leads')
         );
     }
@@ -87,7 +91,7 @@ class OverallLeadWonLostRatio extends CircleChart implements HasWidgetOptions
     public function redirectWonLeads(): void
     {
         $this->redirectWithFilter(
-            fn (Builder $query) => $query->whereHas('leadState', fn ($sq) => $sq->where('is_won', true)),
+            fn (Builder $query) => $query->whereRelation('leadState', 'is_won', true),
             __('Won leads')
         );
     }
