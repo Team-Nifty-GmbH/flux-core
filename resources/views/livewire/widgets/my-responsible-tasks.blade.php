@@ -16,7 +16,7 @@
                     {!! $task->state->badge() !!}
                 </x-slot>
                 <x-slot:sub-value>
-                    <div class="mt-1 flex flex-col">
+                    <div class="mt-1 flex flex-col gap-1">
                         <div>
                             @if ($task->model && method_exists($task->model, 'getUrl') && method_exists($task->model, 'getLabel'))
                                 <x-link
