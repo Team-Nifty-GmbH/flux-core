@@ -25,7 +25,7 @@
                                     :href="$task->model->getUrl()"
                                     wire:navigate
                                 >
-                                    {{__(Str::headline($task->model->getMorphClass()))}}:
+                                    {{ __(Str::headline($task->model->getMorphClass())) }}:
                                     {{ $task->model->getLabel() }}
                                 </x-link>
                             @endif
