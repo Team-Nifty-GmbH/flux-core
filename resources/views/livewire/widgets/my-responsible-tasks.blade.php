@@ -16,22 +16,39 @@
                     {!! $task->state->badge() !!}
                 </x-slot>
                 <x-slot:sub-value>
-                    @if ($task->due_date)
-                        <x-badge
-                            :color="$task->due_date->diffInDays(now(), false) > 0
-                                ? 'red'
-                                : ($task->due_date->diffInDays(now(), false) === 0 ? 'amber' : 'emerald')
-                            "
-                            :text="__('Due At') . ' ' . $task->due_date->locale(app()->getLocale())->isoFormat('L')"
-                        />
-                    @endif
+                    <div class="mt-1 flex flex-col gap-1">
+                        <div>
+                            @if ($task->model && method_exists($task->model, 'getUrl') && method_exists($task->model, 'getLabel'))
+                                <x-link
+                                    sm
+                                    icon="link"
+                                    :href="$task->model->getUrl()"
+                                    wire:navigate
+                                >
+                                    {{ __(Str::headline($task->model->getMorphClass())) }}:
+                                    {{ $task->model->getLabel() }}
+                                </x-link>
+                            @endif
+                        </div>
+                        <div class="flex flex-wrap">
+                            @if ($task->due_date)
+                                <x-badge
+                                    :color="$task->due_date->diffInDays(now(), false) > 0
+                                        ? 'red'
+                                        : ($task->due_date->diffInDays(now(), false) === 0 ? 'amber' : 'emerald')
+                                    "
+                                    :text="__('Due At') . ' ' . $task->due_date->locale(app()->getLocale())->isoFormat('L')"
+                                />
+                            @endif
 
-                    @foreach ($task->users as $user)
-                        <x-badge
-                            :color="$user->id === auth()->id() ? 'indigo' : 'gray'"
-                            :text="$user->name"
-                        />
-                    @endforeach
+                            @foreach ($task->users as $user)
+                                <x-badge
+                                    :color="$user->id === auth()->id() ? 'indigo' : 'gray'"
+                                    :text="$user->name"
+                                />
+                            @endforeach
+                        </div>
+                    </div>
                 </x-slot>
                 <x-slot:actions>
                     <x-button
