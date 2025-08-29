@@ -130,8 +130,13 @@ class Lead extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
                 $lead->probability_percentage = $probability;
             }
 
-            $lead->recalculateWeightedGrossProfit();
-            $lead->recalculateWeightedRevenue();
+            if ($lead->isDirty('probability_percentage') || $lead->isDirty('expected_gross_profit')) {
+                $lead->recalculateWeightedGrossProfit();
+            }
+
+            if ($lead->isDirty('probability_percentage') || $lead->isDirty('expected_revenue')) {
+                $lead->recalculateWeightedRevenue();
+            }
         });
     }
 
