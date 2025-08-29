@@ -11,17 +11,17 @@ use FluxErp\Models\Order;
 use FluxErp\Support\Metrics\Charts\Line;
 use FluxErp\Support\Metrics\Trend;
 use FluxErp\Support\Metrics\Value;
+use FluxErp\Traits\HasTemporalXAxisFormatter;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use FluxErp\Traits\MoneyChartFormattingTrait;
 use Illuminate\Database\Eloquent\Builder;
-use Livewire\Attributes\Js;
 use Livewire\Attributes\Renderless;
 use Livewire\Livewire;
 use TeamNiftyGmbH\DataTable\Helpers\SessionFilter;
 
 class AverageOrderValue extends LineChart implements HasWidgetOptions
 {
-    use IsTimeFrameAwareWidget, MoneyChartFormattingTrait;
+    use HasTemporalXAxisFormatter, IsTimeFrameAwareWidget, MoneyChartFormattingTrait;
 
     public static function dashboardComponent(): array|string
     {
@@ -128,24 +128,6 @@ class AverageOrderValue extends LineChart implements HasWidgetOptions
     public function showTitle(): bool
     {
         return true;
-    }
-
-    #[Js]
-    public function xAxisFormatter(): string
-    {
-        return <<<'JS'
-            let name;
-            if (typeof val === 'string' && val.includes('->')) {
-                name = val.split('->')[1];
-                val = val.split('->')[0];
-            }
-
-            if (/^\d{4}$/.test(val)) {  // Value with 4 digits is a year
-                return val + (name ? ' (' + name + ')' : '');
-            }
-
-            return new Date(val).toLocaleDateString(document.documentElement.lang) + (name ? ' (' + name + ')' : '');
-        JS;
     }
 
     protected function getListeners(): array
