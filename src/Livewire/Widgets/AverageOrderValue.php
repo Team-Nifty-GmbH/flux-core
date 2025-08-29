@@ -11,7 +11,7 @@ use FluxErp\Models\Order;
 use FluxErp\Support\Metrics\Charts\Line;
 use FluxErp\Support\Metrics\Trend;
 use FluxErp\Support\Metrics\Value;
-use FluxErp\Traits\HasTemporalXAxisFormatter;
+use FluxErp\Traits\Livewire\HasTemporalXAxisFormatter;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use FluxErp\Traits\MoneyChartFormattingTrait;
 use Illuminate\Database\Eloquent\Builder;

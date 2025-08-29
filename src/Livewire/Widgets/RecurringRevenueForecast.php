@@ -8,7 +8,7 @@ use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\Order\OrderList;
 use FluxErp\Livewire\Support\Widgets\Charts\BarChart;
 use FluxErp\Models\Pivots\OrderSchedule;
-use FluxErp\Traits\HasTemporalXAxisFormatter;
+use FluxErp\Traits\Livewire\HasTemporalXAxisFormatter;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use FluxErp\Traits\MoneyChartFormattingTrait;
 use FluxErp\Traits\Widgetable;

@@ -2,7 +2,7 @@
 
 namespace FluxErp\Traits\Livewire;
 
-use Livewire\Attributes\Js;
+use FluxErp\Traits\Js;
 
 trait HasTemporalXAxisFormatter
 {

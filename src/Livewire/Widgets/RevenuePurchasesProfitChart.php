@@ -9,7 +9,7 @@ use FluxErp\Livewire\Support\Widgets\Charts\LineChart;
 use FluxErp\Models\Order;
 use FluxErp\Support\Metrics\Charts\Line;
 use FluxErp\Support\Metrics\Results\Result;
-use FluxErp\Traits\HasTemporalXAxisFormatter;
+use FluxErp\Traits\Livewire\HasTemporalXAxisFormatter;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use FluxErp\Traits\MoneyChartFormattingTrait;
 use Illuminate\Database\Eloquent\Builder;
