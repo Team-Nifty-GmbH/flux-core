@@ -9,18 +9,18 @@ use FluxErp\Livewire\Support\Widgets\Charts\LineChart;
 use FluxErp\Models\Order;
 use FluxErp\Support\Metrics\Charts\Line;
 use FluxErp\Support\Metrics\Results\Result;
+use FluxErp\Traits\Livewire\HasTemporalXAxisFormatter;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use FluxErp\Traits\MoneyChartFormattingTrait;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
-use Livewire\Attributes\Js;
 use Livewire\Attributes\Renderless;
 use Livewire\Livewire;
 use TeamNiftyGmbH\DataTable\Helpers\SessionFilter;
 
 class RevenuePurchasesProfitChart extends LineChart implements HasWidgetOptions
 {
-    use IsTimeFrameAwareWidget, MoneyChartFormattingTrait;
+    use HasTemporalXAxisFormatter, IsTimeFrameAwareWidget, MoneyChartFormattingTrait;
 
     public static function dashboardComponent(): array|string
     {
@@ -152,20 +152,6 @@ class RevenuePurchasesProfitChart extends LineChart implements HasWidgetOptions
         )->store();
 
         $this->redirectRoute('orders.orders', navigate: true);
-    }
-
-    #[Js]
-    public function xAxisFormatter(): string
-    {
-        return <<<'JS'
-            let name;
-            if (typeof val === 'string' && val.includes('->')) {
-                name = val.split('->')[1];
-                val = val.split('->')[0];
-            }
-
-            return new Date(val).toLocaleDateString(document.documentElement.lang) + (name ? ' (' + name + ')' : '')
-        JS;
     }
 
     protected function getListeners(): array
