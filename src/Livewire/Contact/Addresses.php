@@ -15,7 +15,6 @@ use FluxErp\Traits\Livewire\WithTabs;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Modelable;
@@ -344,32 +343,9 @@ class Addresses extends Component
 
         if ($isNew) {
             $this->addressId = $this->address->id;
-            $this->addresses[] = $this->address
-                ->getActionResult()
-                ->only([
-                    'id',
-                    'contact_id',
-                    'is_active',
-                    'is_main_address',
-                    'is_invoice_address',
-                    'is_delivery_address',
-                    'postal_address',
-                ]);
-        } else {
-            $currentAddresses = Arr::keyBy($this->addresses, 'id');
-            $currentAddresses[$this->addressId] = $this->address
-                ->getActionResult()
-                ->only([
-                    'id',
-                    'contact_id',
-                    'is_active',
-                    'is_main_address',
-                    'is_invoice_address',
-                    'is_delivery_address',
-                    'postal_address',
-                ]);
-            $this->addresses = array_values($currentAddresses);
         }
+
+        $this->loadAddresses();
 
         $this->edit = false;
     }

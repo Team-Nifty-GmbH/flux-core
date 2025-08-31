@@ -178,10 +178,10 @@ class TabButton implements Htmlable
         return $this;
     }
 
-    public function toHtml(): ?string
+    public function toHtml(): string
     {
         if (! $this->shouldRender || ! $this->userHasTabPermission(false)) {
-            return null;
+            return '';
         }
 
         $this->text = is_null($this->text) ? '' : $this->text;

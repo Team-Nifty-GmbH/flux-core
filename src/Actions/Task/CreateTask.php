@@ -58,7 +58,7 @@ class CreateTask extends FluxAction
             $task->attachTags(resolve_static(Tag::class, 'query')->whereIntegerInRaw('id', $tags)->get());
         }
 
-        return $task->fresh();
+        return $task->refresh();
     }
 
     protected function prepareForValidation(): void

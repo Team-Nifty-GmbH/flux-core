@@ -60,6 +60,7 @@ class Targets extends TargetList
             /** @var Targetable $model */
             $model = morphed_model($this->target->model_type);
             $this->aggregateColumns = map_values_to_options($model::aggregateColumns($aggregateType));
+            $this->target->aggregate_column = data_get($this->aggregateColumns, '0.value');
         } else {
             $this->aggregateColumns = [];
         }
@@ -82,6 +83,10 @@ class Targets extends TargetList
             $this->timeframeColumns = map_values_to_options($model::timeframeColumns());
             $this->aggregateTypes = map_values_to_options($model::aggregateTypes());
             $this->ownerColumns = map_values_to_options($model::ownerColumns());
+
+            $this->target->timeframe_column = data_get($this->timeframeColumns, '0.value');
+            $this->target->aggregate_type = data_get($this->aggregateTypes, '0.value');
+            $this->target->owner_column = data_get($this->ownerColumns, '0.value');
         }
 
         $this->forceRender();
