@@ -10,7 +10,6 @@ use FluxErp\Models\AbsenceRequest;
 use FluxErp\Models\Employee;
 use FluxErp\Models\EmployeeDay;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
-use FluxErp\Traits\Widgetable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Number;
 use Livewire\Attributes\Locked;
@@ -19,7 +18,6 @@ use Livewire\Attributes\Renderless;
 class AttendanceOverview extends CircleChart
 {
     use IsTimeFrameAwareWidget;
-    use Widgetable;
 
     public ?array $chart = [
         'type' => 'donut',

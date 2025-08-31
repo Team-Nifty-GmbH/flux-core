@@ -7,13 +7,14 @@ use FluxErp\Livewire\Support\Widgets\Charts\LineChart;
 use FluxErp\Models\Employee;
 use FluxErp\Models\EmployeeDay;
 use FluxErp\Support\Metrics\Charts\Line;
+use FluxErp\Traits\Livewire\HasTemporalXAxisFormatter;
 use FluxErp\Traits\Livewire\IsTimeFrameAwareWidget;
 use Livewire\Attributes\Js;
 use Livewire\Attributes\Locked;
 
 class WorkTimeOverview extends LineChart
 {
-    use IsTimeFrameAwareWidget;
+    use HasTemporalXAxisFormatter, IsTimeFrameAwareWidget;
 
     public ?array $chart = [
         'type' => 'line',
