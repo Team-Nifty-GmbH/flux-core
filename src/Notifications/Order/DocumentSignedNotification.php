@@ -39,6 +39,11 @@ class DocumentSignedNotification extends SubscribableNotification implements Sho
         return $event->signature;
     }
 
+    protected function getNotificationIcon(): ?string
+    {
+        return 'clipboard-list';
+    }
+
     protected function getTitle(): string
     {
         return __(

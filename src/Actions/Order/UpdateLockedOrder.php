@@ -3,7 +3,6 @@
 namespace FluxErp\Actions\Order;
 
 use FluxErp\Actions\FluxAction;
-use FluxErp\Events\Order\OrderApprovalRequestEvent;
 use FluxErp\Models\Order;
 use FluxErp\Rulesets\Order\UpdateLockedOrderRuleset;
 use Illuminate\Database\Eloquent\Model;
@@ -54,14 +53,6 @@ class UpdateLockedOrder extends FluxAction
 
         if (! is_null($users)) {
             $order->users()->sync($users);
-        }
-
-        if ($order->approval_user_id
-            && $approvalUserId !== $order->approval_user_id
-        ) {
-            $order->approvalUser()->first()->subscribeNotificationChannel($order->broadcastChannel());
-
-            event(OrderApprovalRequestEvent::make($order));
         }
 
         return $order->withoutRelations()->fresh();

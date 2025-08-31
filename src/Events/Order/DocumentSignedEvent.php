@@ -11,4 +11,9 @@ class DocumentSignedEvent extends SubscribableEvent
     use SerializesModels;
 
     public function __construct(public Media $signature) {}
+
+    public function broadcastChannel(): ?string
+    {
+        return $this->signature->model->broadcastChannel();
+    }
 }

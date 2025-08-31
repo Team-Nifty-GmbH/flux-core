@@ -12,9 +12,9 @@
         },
     }"
     x-init.once="
-        window.Echo.private('{{ auth()->user()->broadcastChannel() }}').notification(
+        window.Echo.private('{{ auth()->user()->receivesBroadcastNotificationsOn() }}').notification(
             (notification) => {
-                $wire.sendNotify(notification)
+                $wire.sendNotify(notification);
             },
         )
     "

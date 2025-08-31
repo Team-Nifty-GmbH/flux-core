@@ -124,7 +124,7 @@ class ToastNotification extends Toast implements Arrayable
         return $this;
     }
 
-    public function image(string $image): static
+    public function image(?string $image = null): static
     {
         $this->data['image'] = $image;
 

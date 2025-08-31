@@ -11,6 +11,7 @@ use FluxErp\Contracts\IsSubscribable;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Contracts\Targetable;
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Events\Order\OrderApprovalRequestEvent;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
 use FluxErp\Models\Pivots\OrderSchedule;
 use FluxErp\Models\Pivots\OrderTransaction;
@@ -288,6 +289,19 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
         static::saved(function (Order $order): void {
             if ($order->wasChanged('is_locked')) {
                 $order->broadcastEvent('locked');
+            }
+
+            if (($order->wasChanged('approval_user_id') || $order->wasRecentlyCreated) && $order->approval_user_id) {
+                $order->approvalUser?->subscribeNotificationChannel($order->broadcastChannel());
+
+                event(OrderApprovalRequestEvent::make($order));
+            }
+
+            if (
+                ($order->wasChanged('responsible_user_id') || $order->wasRecentlyCreated)
+                && $order->responsible_user_id
+            ) {
+                $order->responsibleUser?->subscribeNotificationChannel($order->broadcastChannel());
             }
         });
 

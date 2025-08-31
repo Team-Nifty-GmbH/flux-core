@@ -55,6 +55,11 @@ trait Notifiable
         return $this->morphMany(NotificationSetting::class, 'notifiable');
     }
 
+    public function receivesBroadcastNotificationsOn(): string
+    {
+        return $this->getMorphClass() . '.' . $this->getKey();
+    }
+
     public function subscribeNotificationChannel(string $channel, string $event = '*'): ?EventSubscription
     {
         if ($this->eventSubscriptions()
