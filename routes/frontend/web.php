@@ -7,6 +7,7 @@ use FluxErp\Http\Controllers\CalendarSearchController;
 use FluxErp\Http\Controllers\SearchController;
 use FluxErp\Http\Middleware\NoAuth;
 use FluxErp\Http\Middleware\TrackVisits;
+use FluxErp\Livewire\AbsenceRequest\AbsenceRequest;
 use FluxErp\Livewire\Accounting\DirectDebit;
 use FluxErp\Livewire\Accounting\MoneyTransfer;
 use FluxErp\Livewire\Accounting\PaymentReminder;
@@ -27,13 +28,23 @@ use FluxErp\Livewire\DataTables\OrderPositionList;
 use FluxErp\Livewire\DataTables\PaymentRunList;
 use FluxErp\Livewire\DataTables\PurchaseInvoiceList;
 use FluxErp\Livewire\DataTables\TicketList;
-use FluxErp\Livewire\DataTables\WorkTimeList;
+use FluxErp\Livewire\Employee\Employee;
+use FluxErp\Livewire\EmployeeDay\EmployeeDay;
 use FluxErp\Livewire\Features\Calendar\Calendar;
+use FluxErp\Livewire\HumanResources\AbsenceRequests;
+use FluxErp\Livewire\HumanResources\AttendanceOverview;
+use FluxErp\Livewire\HumanResources\Dashboard as HrDashboard;
+use FluxErp\Livewire\HumanResources\EmployeeDays;
+use FluxErp\Livewire\HumanResources\Employees;
+use FluxErp\Livewire\HumanResources\WorkTimes;
 use FluxErp\Livewire\InstallWizard;
 use FluxErp\Livewire\Lead\Lead;
 use FluxErp\Livewire\Lead\LeadList;
 use FluxErp\Livewire\Mail\Mail;
 use FluxErp\Livewire\Media\Media as MediaGrid;
+use FluxErp\Livewire\MyEmployeeProfile\MyAbsenceRequest;
+use FluxErp\Livewire\MyEmployeeProfile\MyEmployeeDay;
+use FluxErp\Livewire\MyEmployeeProfile\MyEmployeeProfile;
 use FluxErp\Livewire\Order\CreateChildOrder;
 use FluxErp\Livewire\Order\Order;
 use FluxErp\Livewire\Order\OrderList;
@@ -44,6 +55,8 @@ use FluxErp\Livewire\Product\SerialNumber\SerialNumber;
 use FluxErp\Livewire\Product\SerialNumber\SerialNumberList;
 use FluxErp\Livewire\Project\Project;
 use FluxErp\Livewire\Project\ProjectList;
+use FluxErp\Livewire\Settings\AbsencePolicies;
+use FluxErp\Livewire\Settings\AbsenceTypes;
 use FluxErp\Livewire\Settings\ActivityLogs;
 use FluxErp\Livewire\Settings\AdditionalColumns;
 use FluxErp\Livewire\Settings\AddressTypes;
@@ -55,13 +68,16 @@ use FluxErp\Livewire\Settings\Currencies;
 use FluxErp\Livewire\Settings\CustomerPortal;
 use FluxErp\Livewire\Settings\DiscountGroups;
 use FluxErp\Livewire\Settings\EmailTemplates;
+use FluxErp\Livewire\Settings\EmployeeDepartments;
 use FluxErp\Livewire\Settings\FailedJobs;
+use FluxErp\Livewire\Settings\Holidays;
 use FluxErp\Livewire\Settings\Industries;
 use FluxErp\Livewire\Settings\LanguageLines;
 use FluxErp\Livewire\Settings\Languages;
 use FluxErp\Livewire\Settings\LeadLossReasons;
 use FluxErp\Livewire\Settings\LeadStates;
 use FluxErp\Livewire\Settings\LedgerAccounts;
+use FluxErp\Livewire\Settings\Locations;
 use FluxErp\Livewire\Settings\Logs;
 use FluxErp\Livewire\Settings\MailAccounts;
 use FluxErp\Livewire\Settings\Notifications;
@@ -89,8 +105,13 @@ use FluxErp\Livewire\Settings\Tokens;
 use FluxErp\Livewire\Settings\Units;
 use FluxErp\Livewire\Settings\UserEdit;
 use FluxErp\Livewire\Settings\Users;
+use FluxErp\Livewire\Settings\VacationBlackouts;
+use FluxErp\Livewire\Settings\VacationCarryoverRules;
 use FluxErp\Livewire\Settings\VatRates;
 use FluxErp\Livewire\Settings\Warehouses;
+use FluxErp\Livewire\Settings\WorkTimeModel;
+use FluxErp\Livewire\Settings\WorkTimeModelCreate;
+use FluxErp\Livewire\Settings\WorkTimeModels;
 use FluxErp\Livewire\Settings\WorkTimeTypes;
 use FluxErp\Livewire\Task\Task;
 use FluxErp\Livewire\Task\TaskList;
@@ -201,9 +222,31 @@ Route::middleware('web')
                         Route::get('/{id}', Product::class)->where('id', '[0-9]+')->name('id');
                     });
 
+                Route::name('human-resources.')->prefix('human-resources')
+                    ->group(function (): void {
+                        Route::get('/dashboard', HrDashboard::class)->name('dashboard');
+                        Route::get('/work-times', WorkTimes::class)->name('work-times');
+                        Route::get('/employees', Employees::class)->name('employees');
+                        Route::get('/employees/{id}', Employee::class)->name('employees.id');
+                        Route::get('/my-employee-profile', MyEmployeeProfile::class)
+                            ->name('my-employee-profile');
+                        Route::get('/my-employee-profile/employee-day/{id}', MyEmployeeDay::class)
+                            ->name('my-employee-profile.my-employee-day');
+                        Route::get('/my-employee-profile/absence-request/{id}', MyAbsenceRequest::class)
+                            ->name('my-employee-profile.my-absence-request');
+                        Route::get('/employee-days', EmployeeDays::class)->name('employee-days');
+                        Route::get('/employee-days/{id}', EmployeeDay::class)
+                            ->name('employee-days.show');
+                        Route::get('/absence-requests', AbsenceRequests::class)
+                            ->name('absence-requests');
+                        Route::get('/absence-requests/{id}', AbsenceRequest::class)
+                            ->name('absence-requests.show');
+                        Route::get('/attendance-overview', AttendanceOverview::class)
+                            ->name('attendance-overview');
+                    });
+
                 Route::name('accounting.')->prefix('accounting')
                     ->group(function (): void {
-                        Route::get('/work-times', WorkTimeList::class)->name('work-times');
                         Route::get('/commissions', CommissionList::class)->name('commissions');
                         Route::get('/payment-reminders', PaymentReminder::class)->name('payment-reminders');
                         Route::get('/purchase-invoices', PurchaseInvoiceList::class)->name('purchase-invoices');
@@ -267,6 +310,17 @@ Route::middleware('web')
                         Route::get('/vat-rates', VatRates::class)->name('vat-rates');
                         Route::get('/warehouses', Warehouses::class)->name('warehouses');
                         Route::get('/work-time-types', WorkTimeTypes::class)->name('work-time-types');
+
+                        Route::get('/work-time-models', WorkTimeModels::class)->name('work-time-models');
+                        Route::get('/work-time-model/create', WorkTimeModelCreate::class)->name('work-time-model.create');
+                        Route::get('/work-time-model/{id}', WorkTimeModel::class)->name('work-time-model');
+                        Route::get('/absence-types', AbsenceTypes::class)->name('absence-types');
+                        Route::get('/holidays', Holidays::class)->name('holidays');
+                        Route::get('/locations', Locations::class)->name('locations');
+                        Route::get('/vacation-carryover-rules', VacationCarryoverRules::class)->name('vacation-carryover-rules');
+                        Route::get('/vacation-blackouts', VacationBlackouts::class)->name('vacation-blackouts');
+                        Route::get('/employee-departments', EmployeeDepartments::class)->name('employee-departments');
+                        Route::get('/absence-policies', AbsencePolicies::class)->name('absence-policies');
                     });
 
                 Route::get('/media', MediaGrid::class)

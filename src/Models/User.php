@@ -7,6 +7,7 @@ use FluxErp\Mail\MagicLoginLink;
 use FluxErp\Models\Pivots\PrinterUser;
 use FluxErp\Models\Pivots\TargetUser;
 use FluxErp\Traits\CacheModelQueries;
+use FluxErp\Traits\Commentable;
 use FluxErp\Traits\Filterable;
 use FluxErp\Traits\HasCalendars;
 use FluxErp\Traits\HasCalendarUserSettings;
@@ -27,6 +28,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
@@ -42,9 +44,9 @@ use TeamNiftyGmbH\DataTable\Traits\HasDatatableUserSettings;
 
 class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia, InteractsWithDataTables
 {
-    use CacheModelQueries, Filterable, HasCalendars, HasCalendarUserSettings, HasCart, HasDatatableUserSettings,
-        HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasPushSubscriptions, HasRoles,
-        HasUserModification, HasUuid, HasWidgets, InteractsWithMedia, MonitorsQueue, Notifiable, SoftDeletes;
+    use CacheModelQueries, Commentable, Filterable, HasCalendars, HasCalendarUserSettings, HasCart,
+        HasDatatableUserSettings, HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasPushSubscriptions,
+        HasRoles, HasUserModification, HasUuid, HasWidgets, InteractsWithMedia, MonitorsQueue, Notifiable, SoftDeletes;
     use Searchable {
         Searchable::scoutIndexSettings as baseScoutIndexSettings;
     }
@@ -105,6 +107,11 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
         ];
     }
 
+    public function absenceRequests(): HasMany
+    {
+        return $this->hasMany(AbsenceRequest::class);
+    }
+
     public function activities(): MorphMany
     {
         return $this->morphMany(Activity::class, 'causer');
@@ -133,6 +140,11 @@ class User extends FluxAuthenticatable implements HasLocalePreference, HasMedia,
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class);
+    }
+
+    public function employee(): HasOne
+    {
+        return $this->hasOne(Employee::class);
     }
 
     public function favorites(): MorphMany

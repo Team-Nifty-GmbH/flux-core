@@ -235,7 +235,6 @@ class FluxServiceProvider extends ServiceProvider
             icon: 'banknotes',
             label: 'Accounting',
             closure: function (): void {
-                Menu::register(route: 'accounting.work-times');
                 Menu::register(route: 'accounting.commissions');
                 Menu::register(route: 'accounting.payment-reminders');
                 Menu::register(route: 'accounting.purchase-invoices');
@@ -254,6 +253,21 @@ class FluxServiceProvider extends ServiceProvider
             closure: function (): void {
                 Menu::register(route: 'products.products');
                 Menu::register(route: 'products.serial-numbers');
+            }
+        );
+
+        Menu::group(
+            path: 'human-resources',
+            icon: 'users',
+            label: 'Human Resources',
+            closure: function (): void {
+                Menu::register(route: 'human-resources.my-employee-profile');
+                Menu::register(route: 'human-resources.dashboard');
+                Menu::register(route: 'human-resources.attendance-overview');
+                Menu::register(route: 'human-resources.employees');
+                Menu::register(route: 'human-resources.employee-days');
+                Menu::register(route: 'human-resources.work-times');
+                Menu::register(route: 'human-resources.absence-requests');
             }
         );
 
@@ -313,6 +327,16 @@ class FluxServiceProvider extends ServiceProvider
                 Menu::register(route: 'settings.queue-monitor');
                 Menu::register(route: 'settings.failed-jobs');
                 Menu::register(route: 'settings.plugins');
+
+                Menu::register(route: 'settings.work-time-models');
+                Menu::register(route: 'settings.absence-types');
+                Menu::register(route: 'settings.vacation-carryover-rules');
+                Menu::register(route: 'settings.vacation-blackouts');
+                Menu::register(route: 'settings.holidays');
+                Menu::register(route: 'settings.locations');
+                Menu::register(route: 'settings.employee-departments');
+                Menu::register(route: 'settings.salary-components');
+                Menu::register(route: 'settings.absence-policies');
             }
         );
     }

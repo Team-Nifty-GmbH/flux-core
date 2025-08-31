@@ -2,6 +2,9 @@
 
 namespace FluxErp\Providers;
 
+use FluxErp\Models\AbsencePolicy;
+use FluxErp\Models\AbsenceRequest;
+use FluxErp\Models\AbsenceType;
 use FluxErp\Models\Activity;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Address;
@@ -28,6 +31,10 @@ use FluxErp\Models\Currency;
 use FluxErp\Models\Discount;
 use FluxErp\Models\DiscountGroup;
 use FluxErp\Models\EmailTemplate;
+use FluxErp\Models\Employee;
+use FluxErp\Models\EmployeeBalanceAdjustment;
+use FluxErp\Models\EmployeeDay;
+use FluxErp\Models\EmployeeDepartment;
 use FluxErp\Models\EventSubscription;
 use FluxErp\Models\FailedJob;
 use FluxErp\Models\Favorite;
@@ -36,6 +43,7 @@ use FluxErp\Models\FormBuilderFieldResponse;
 use FluxErp\Models\FormBuilderForm;
 use FluxErp\Models\FormBuilderResponse;
 use FluxErp\Models\FormBuilderSection;
+use FluxErp\Models\Holiday;
 use FluxErp\Models\Industry;
 use FluxErp\Models\JobBatch;
 use FluxErp\Models\Language;
@@ -44,6 +52,7 @@ use FluxErp\Models\Lead;
 use FluxErp\Models\LeadLossReason;
 use FluxErp\Models\LeadState;
 use FluxErp\Models\LedgerAccount;
+use FluxErp\Models\Location;
 use FluxErp\Models\Lock;
 use FluxErp\Models\Log;
 use FluxErp\Models\MailAccount;
@@ -60,6 +69,8 @@ use FluxErp\Models\PaymentReminderText;
 use FluxErp\Models\PaymentRun;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
+use FluxErp\Models\Pivots\AbsencePolicyAbsenceType;
+use FluxErp\Models\Pivots\AbsenceRequestEmployeeDay;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
 use FluxErp\Models\Pivots\CalendarEventInvite;
 use FluxErp\Models\Pivots\Categorizable;
@@ -67,6 +78,8 @@ use FluxErp\Models\Pivots\ClientProduct;
 use FluxErp\Models\Pivots\Communicatable;
 use FluxErp\Models\Pivots\ContactDiscount;
 use FluxErp\Models\Pivots\ContactDiscountGroup;
+use FluxErp\Models\Pivots\EmployeeWorkTimeModel;
+use FluxErp\Models\Pivots\HolidayLocation;
 use FluxErp\Models\Pivots\JobBatchable;
 use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Models\Pivots\PrinterUser;
@@ -74,6 +87,9 @@ use FluxErp\Models\Pivots\ProductBundleProduct;
 use FluxErp\Models\Pivots\ProductCrossSellingProduct;
 use FluxErp\Models\Pivots\ProductProductOption;
 use FluxErp\Models\Pivots\QueueMonitorable;
+use FluxErp\Models\Pivots\VacationBlackoutEmployee;
+use FluxErp\Models\Pivots\VacationBlackoutEmployeeDepartment;
+use FluxErp\Models\Pivots\VacationBlackoutLocation;
 use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Printer;
@@ -106,10 +122,14 @@ use FluxErp\Models\Token;
 use FluxErp\Models\Transaction;
 use FluxErp\Models\Unit;
 use FluxErp\Models\User;
+use FluxErp\Models\VacationBlackout;
+use FluxErp\Models\VacationCarryOverRule;
 use FluxErp\Models\VatRate;
 use FluxErp\Models\Warehouse;
 use FluxErp\Models\Widget;
 use FluxErp\Models\WorkTime;
+use FluxErp\Models\WorkTimeModel;
+use FluxErp\Models\WorkTimeModelSchedule;
 use FluxErp\Models\WorkTimeType;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
@@ -145,6 +165,8 @@ class MorphMapServiceProvider extends ServiceProvider
             'discount' => Discount::class,
             'discount_group' => DiscountGroup::class,
             'email_template' => EmailTemplate::class,
+            'employee' => Employee::class,
+            'employee_day' => EmployeeDay::class,
             'event_subscription' => EventSubscription::class,
             'failed_job' => FailedJob::class,
             'favorite' => Favorite::class,
@@ -153,6 +175,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'form_builder_form' => FormBuilderForm::class,
             'form_builder_response' => FormBuilderResponse::class,
             'form_builder_section' => FormBuilderSection::class,
+            'holiday' => Holiday::class,
             'industry' => Industry::class,
             'job_batch' => JobBatch::class,
             'language' => Language::class,
@@ -161,6 +184,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'lead_loss_reason' => LeadLossReason::class,
             'lead_state' => LeadState::class,
             'ledger_account' => LedgerAccount::class,
+            'location' => Location::class,
             'lock' => Lock::class,
             'log' => Log::class,
             'mail_account' => MailAccount::class,
@@ -210,12 +234,25 @@ class MorphMapServiceProvider extends ServiceProvider
             'transaction' => Transaction::class,
             'unit' => Unit::class,
             'user' => User::class,
+            'employee_balance_adjustment' => EmployeeBalanceAdjustment::class,
+            'employee_department' => EmployeeDepartment::class,
+            'vacation_blackout' => VacationBlackout::class,
+            'vacation_carryover_rule' => VacationCarryOverRule::class,
             'vat_rate' => VatRate::class,
             'warehouse' => Warehouse::class,
             'widget' => Widget::class,
             'work_time' => WorkTime::class,
+            'absence_request' => AbsenceRequest::class,
+            'absence_type' => AbsenceType::class,
+            'absence_policy' => AbsencePolicy::class,
+            'absence_policy_absence_type' => AbsencePolicyAbsenceType::class,
+
+            'work_time_model' => WorkTimeModel::class,
+            'work_time_model_schedule' => WorkTimeModelSchedule::class,
+            'employee_work_time_model' => EmployeeWorkTimeModel::class,
             'work_time_type' => WorkTimeType::class,
 
+            'absence_request_employee_day' => AbsenceRequestEmployeeDay::class,
             'address_address_type_order' => AddressAddressTypeOrder::class,
             'calendar_event_invitee' => CalendarEventInvite::class,
             'categorizable' => Categorizable::class,
@@ -223,6 +260,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'communicatable' => Communicatable::class,
             'contact_discount' => ContactDiscount::class,
             'contact_discount_group' => ContactDiscountGroup::class,
+            'holiday_location' => HolidayLocation::class,
             'job_batchable' => JobBatchable::class,
             'order_transaction' => OrderTransaction::class,
             'printer_user' => PrinterUser::class,
@@ -230,6 +268,9 @@ class MorphMapServiceProvider extends ServiceProvider
             'product_cross_selling_product' => ProductCrossSellingProduct::class,
             'product_product_option' => ProductProductOption::class,
             'queue_monitorable' => QueueMonitorable::class,
+            'vacation_blackout_employee_department' => VacationBlackoutEmployeeDepartment::class,
+            'vacation_blackout_employee' => VacationBlackoutEmployee::class,
+            'vacation_blackout_location' => VacationBlackoutLocation::class,
         ]);
     }
 }
