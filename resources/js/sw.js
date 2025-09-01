@@ -1,3 +1,13 @@
+self.addEventListener('install', function(event) {
+    console.log('[Service Worker] Install event, build:', BUILD_TIME);
+    self.skipWaiting();
+});
+
+self.addEventListener('activate', function(event) {
+    console.log('[Service Worker] Activate event, build:', BUILD_TIME);
+    event.waitUntil(clients.claim());
+});
+
 self.addEventListener('push', function (e) {
     if (!(self.Notification && self.Notification.permission === 'granted')) {
         return;
