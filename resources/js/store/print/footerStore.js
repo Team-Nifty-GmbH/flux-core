@@ -231,7 +231,6 @@ export default function () {
         },
         _mapFooter($refs, json) {
             this._footerHeight = json.height ?? 1.7;
-            console.log(json);
             json.elements?.forEach((item) => {
                 const element =
                     $refs[item.id] && $refs[item.id].content.cloneNode(true);

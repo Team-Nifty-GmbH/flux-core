@@ -93,4 +93,55 @@
             />
         </div>
     </template>
+    <template
+        id="{{ uniqid() }}"
+        x-ref="header-additional-img"
+    >
+        <div
+            id="header-img-placeholder"
+            x-on:mousedown="printStore.editHeader ?  headerStore.onMouseDown($event,$el.id,'temporary') : null"
+            data-type="img"
+            draggable="false"
+            class="absolute left-0 top-0 select-none h-[1.7cm]"
+            :class="{'bg-gray-300' : !headerStore.isImgResizeClicked && headerStore.selectedElementId === $el.id}"
+        >
+            <div
+                draggable="false"
+                x-cloak x-show="printStore.editHeader" class="relative w-full">
+                <x-icon
+                    x-on:mousedown.stop="headerStore.onMouseDownResize($event, $el.parentElement.parentElement.id,'temporary')"
+                    name="arrows-pointing-out" class="absolute cursor-pointer right-0 top-0 h-4 w-4 rounded-full"></x-icon>
+            </div>
+            <img
+                draggable="false"
+                class="max-h-full w-full"
+                src=""
+            />
+        </div>
+    </template>
+    <template
+        id="{{ uniqid() }}"
+        x-ref="header-media">
+        <div
+            id="header-media"
+            x-on:mousedown="printStore.editHeader ?  headerStore.onMouseDown($event,$el.id,'media') : null"
+            data-type="img"
+            draggable="false"
+            class="absolute left-0 top-0 select-none h-[1.7cm]"
+            :class="{'bg-gray-300' : !headerStore.isImgResizeClicked && headerStore.selectedElementId === $el.id}"
+        >
+            <div
+                draggable="false"
+                x-cloak x-show="printStore.editHeader" class="relative w-full">
+                <x-icon
+                    x-on:mousedown.stop="headerStore.onMouseDownResize($event, $el.parentElement.parentElement.id,'media')"
+                    name="arrows-pointing-out" class="absolute cursor-pointer right-0 top-0 h-4 w-4 rounded-full"></x-icon>
+            </div>
+            <img
+                draggable="false"
+                class="max-h-full w-full"
+                src=""
+            />
+        </div>
+    </template>
 </header>

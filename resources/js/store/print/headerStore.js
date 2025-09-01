@@ -5,6 +5,8 @@ import {
     roundToOneDecimal,
     STEP,
 } from '../../components/utils/print/utils.js';
+import MediaElement from '../../components/print/mediaElement.js';
+import TemporaryMediaElement from '../../components/print/temporaryMediaElement.js';
 
 // spread operator ignores prototype chain - getters and setters will not be copied
 export default function () {
@@ -134,7 +136,7 @@ export default function () {
         },
         toggleElement($ref, id) {
             if (this.header === null) {
-                throw new Error(`Footer Elelement not initialized`);
+                throw new Error(`Header Elelement not initialized`);
             }
 
             const index = this.visibleElements.findIndex(
@@ -159,15 +161,15 @@ export default function () {
                     this.observer.observe(element);
                 } else {
                     throw new Error(
-                        `Element with id ${id} not found in footer`,
+                        `Element with id ${id} not found in header`,
                     );
                 }
             }
         },
-        onMouseDownResize(e, id) {
-            if (!this.isImgResizeClicked && id === 'header-logo') {
+        onMouseDownResize(e, id, source = 'element') {
+            if (!this.isImgResizeClicked) {
                 this.isImgResizeClicked = true;
-                this._selectElement(e, id);
+                this._selectElement(e, id, source);
             }
         },
         onMouseUpResize() {
@@ -215,17 +217,40 @@ export default function () {
             }
         },
         _adjustedMinHeaderHeight() {
-            // for now only logo is resized - if in future other elements will be resized, this method should be updated
-            // to search for the heihest element and return its height
+            // taking in account logo height, additional media (temp and saved) height, and free-text fields
+            const resizableElementHeights = [];
             const indexOfLogo = this.visibleElements.findIndex(
                 (item) => item.id === 'header-logo',
             );
             if (indexOfLogo !== -1) {
                 const element = this.visibleElements[indexOfLogo];
-                return roundToOneDecimal((element.height || 0) / this.pyPerCm);
+                resizableElementHeights.push(
+                    roundToOneDecimal((element.height || 0) / this.pyPerCm),
+                );
             } else {
-                return 0;
+                resizableElementHeights.push(0);
             }
+
+            // temp media height
+            const tempVisibleMedia = this.temporaryVisibleMedia.map((item) => {
+                return roundToOneDecimal((item.height || 0) / this.pyPerCm);
+            });
+
+            if (tempVisibleMedia.length > 0) {
+                resizableElementHeights.push(...tempVisibleMedia);
+            } else {
+                resizableElementHeights.push(0);
+            }
+
+            // media
+            const visibleMedia = this.visibleMedia.map((item) => {
+                return roundToOneDecimal((item.height || 0) / this.pyPerCm);
+            });
+            visibleMedia.length > 0
+                ? resizableElementHeights.push(...visibleMedia)
+                : resizableElementHeights.push(0);
+
+            return Math.max(...resizableElementHeights);
         },
         async reload($refs, isClientChange = true) {
             if (this.observer) {
@@ -237,10 +262,19 @@ export default function () {
                 this.visibleElements.forEach((item) => {
                     this.header.removeChild(item.element);
                 });
+
+                this.temporaryVisibleMedia.forEach((item) => {
+                    this.header.removeChild(item.element);
+                });
+                this.visibleMedia.forEach((item) => {
+                    this.header.removeChild(item.element);
+                });
             }
 
             this.visibleElements = [];
             this.elementsOutOfView = [];
+            this.temporaryVisibleMedia = [];
+            this.visibleMedia = [];
 
             const headerJson = await this.component.get('form.header');
 
@@ -285,6 +319,10 @@ export default function () {
                 this.visibleElements.forEach((e) => {
                     this.observer.observe(e.element);
                 });
+
+                this.visibleMedia.forEach((e) => {
+                    this.observer.observe(e.element);
+                });
             }
         },
         _mapHeader($refs, json) {
@@ -313,26 +351,185 @@ export default function () {
                     }
                 }
             });
+
+            json.media?.forEach((item) => {
+                const element = $refs['header-media']?.content.cloneNode(true);
+                if (element) {
+                    this.header.appendChild(element);
+                    const children = Array.from(this.header.children);
+                    const index = children.findIndex(
+                        (el) => el.id === 'header-media',
+                    );
+                    if (index !== -1) {
+                        const child = children[index];
+                        this.visibleMedia.push(
+                            new MediaElement(
+                                child,
+                                this,
+                                item.id,
+                                item.src,
+                            ).init({
+                                x: item.x * this.pxPerCm,
+                                y: item.y * this.pyPerCm,
+                                ...(item.width && {
+                                    width: item.width * this.pxPerCm,
+                                }),
+                                ...(item.height && {
+                                    height: item.height * this.pyPerCm,
+                                }),
+                            }),
+                        );
+                    }
+                }
+            });
         },
-        prepareToSubmit() {
-            return {
-                height: this._headerHeight,
-                elements: this.visibleElements.map((item) => {
-                    return {
-                        id: item.id,
-                        x: roundToOneDecimal(item.position.x / this.pxPerCm),
-                        y: roundToOneDecimal(item.position.y / this.pyPerCm),
-                        width:
-                            item.width !== null
-                                ? roundToOneDecimal(item.width / this.pxPerCm)
-                                : null,
-                        height:
-                            item.height !== null
-                                ? roundToOneDecimal(item.height / this.pyPerCm)
-                                : null,
-                    };
-                }),
-            };
+        async addToTemporaryMedia(event, $refs) {
+            const file = event.target.files[0];
+            if (file !== undefined && this.header) {
+                const cloneMediaElement =
+                    $refs['header-additional-img']?.content.cloneNode(true);
+                if (cloneMediaElement) {
+                    this.header.appendChild(cloneMediaElement);
+                    const children = Array.from(this.header.children);
+                    const index = children.findIndex(
+                        (item) => item.id === 'header-img-placeholder',
+                    );
+                    if (index !== -1 && this.observer) {
+                        const element = children[index];
+                        this.temporaryVisibleMedia.push(
+                            new TemporaryMediaElement(element, this, file).init(
+                                'start',
+                            ),
+                        );
+                        this.observer.observe(element);
+                    } else {
+                        throw new Error(
+                            'Header additional image placeholder not found',
+                        );
+                    }
+                } else {
+                    throw new Error(
+                        'Header additional image template not found',
+                    );
+                }
+            }
+            // clear the input field - to allow the same file to be selected again
+            event.target.value = '';
+        },
+        deleteTemporaryMedia(id) {
+            const index = this.temporaryVisibleMedia.findIndex(
+                (item) => item.id === id,
+            );
+            if (index !== -1) {
+                this.observer.unobserve(
+                    this.temporaryVisibleMedia[index].element,
+                );
+                this.header.removeChild(
+                    this.temporaryVisibleMedia[index].element,
+                );
+                this.temporaryVisibleMedia.splice(index, 1);
+            } else {
+                throw new Error(`Temporary media with id ${id} not found`);
+            }
+        },
+        deleteMedia(id) {
+            const index = this.visibleMedia.findIndex((item) => item.id === id);
+            if (index !== -1) {
+                this.observer.unobserve(this.visibleMedia[index].element);
+                this.header.removeChild(this.visibleMedia[index].element);
+                this.visibleMedia.splice(index, 1);
+            } else {
+                throw new Error(`Media with id ${id} not found`);
+            }
+        },
+        async prepareToSubmit() {
+            try {
+                if (this.temporaryVisibleMedia.length > 0) {
+                    for (const item of this.temporaryVisibleMedia) {
+                        await item.upload(this.component);
+                    }
+                }
+                return {
+                    height: this._headerHeight,
+                    elements: this.visibleElements.map((item) => {
+                        return {
+                            id: item.id,
+                            x: roundToOneDecimal(
+                                item.position.x / this.pxPerCm,
+                            ),
+                            y: roundToOneDecimal(
+                                item.position.y / this.pyPerCm,
+                            ),
+                            width:
+                                item.width !== null
+                                    ? roundToOneDecimal(
+                                          item.width / this.pxPerCm,
+                                      )
+                                    : null,
+                            height:
+                                item.height !== null
+                                    ? roundToOneDecimal(
+                                          item.height / this.pyPerCm,
+                                      )
+                                    : null,
+                        };
+                    }),
+                    media: this.visibleMedia.map((item) => {
+                        return {
+                            id: item.mediaId,
+                            src: item.src,
+                            x: roundToOneDecimal(
+                                item.position.x / this.pxPerCm,
+                            ),
+                            y: roundToOneDecimal(
+                                item.position.y / this.pyPerCm,
+                            ),
+                            width:
+                                item.width !== null
+                                    ? roundToOneDecimal(
+                                          item.width / this.pxPerCm,
+                                      )
+                                    : null,
+                            height:
+                                item.height !== null
+                                    ? roundToOneDecimal(
+                                          item.height / this.pyPerCm,
+                                      )
+                                    : null,
+                        };
+                    }),
+                    temporaryMedia:
+                        this.temporaryVisibleMedia.length > 0
+                            ? this.temporaryVisibleMedia.map((item) => {
+                                  return {
+                                      name: item.temporaryFileName,
+                                      x: roundToOneDecimal(
+                                          item.position.x / this.pxPerCm,
+                                      ),
+                                      y: roundToOneDecimal(
+                                          item.position.y / this.pyPerCm,
+                                      ),
+                                      width:
+                                          item.width !== null
+                                              ? roundToOneDecimal(
+                                                    item.width / this.pxPerCm,
+                                                )
+                                              : null,
+                                      height:
+                                          item.height !== null
+                                              ? roundToOneDecimal(
+                                                    item.height / this.pyPerCm,
+                                                )
+                                              : null,
+                                  };
+                              })
+                            : null,
+                };
+            } catch (e) {
+                throw new Error(
+                    'Error preparing header for submission: ' + e.message,
+                );
+            }
         },
     };
 }

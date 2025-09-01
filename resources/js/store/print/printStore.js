@@ -20,8 +20,8 @@ export default function ($headerStore, $firstPageHeaderStore, $footerStore) {
             this._loading = false;
         },
         editMargin: false,
-        editFooter: true,
-        editHeader: false,
+        editFooter: false,
+        editHeader: true,
         editFirstPageHeader: false,
         async selectClient(e, $wire, $refs) {
             this._loading = true;
@@ -245,7 +245,7 @@ export default function ($headerStore, $firstPageHeaderStore, $footerStore) {
         async submit($wire, $refs) {
             this._loading = true;
             const margins = this.prepareToSubmit();
-            const header = $headerStore.prepareToSubmit();
+            const header = await $headerStore.prepareToSubmit();
             const firstPageHeader = $firstPageHeaderStore.prepareToSubmit();
             const footer = await $footerStore.prepareToSubmit();
             await Promise.all([
@@ -263,7 +263,10 @@ export default function ($headerStore, $firstPageHeaderStore, $footerStore) {
                 this.editFirstPageHeader = false;
                 // due to nature of a file upload - it is not renderlless - Livewire will drive the re-render
                 // all the elements will disappear - hence stores need to be reloaded
-                if ($footerStore.temporaryVisibleMedia.length > 0) {
+                if (
+                    $footerStore.temporaryVisibleMedia.length > 0 ||
+                    $headerStore.temporaryVisibleMedia.length > 0
+                ) {
                     // reload
                     await this.reload();
                     await $footerStore.reload($refs);
