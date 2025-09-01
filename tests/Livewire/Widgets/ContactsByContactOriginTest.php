@@ -6,6 +6,7 @@ use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Livewire\Widgets\ContactsByContactOrigin;
 use FluxErp\Models\Contact;
 use FluxErp\Models\RecordOrigin;
+use Illuminate\Support\Collection;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
@@ -102,8 +103,8 @@ test('timeframe this month', function (): void {
             $this->recordOrigins[0]->name,
         ])
         ->assertSet('series', [
-            getContactsCountInTimeFrame($timeFrame, $this->recordOrigins[1]),
-            getContactsCountInTimeFrame($timeFrame, $this->recordOrigins[0]),
+            getContactsCountInTimeFrame($this->contacts, $timeFrame, $this->recordOrigins[1]),
+            getContactsCountInTimeFrame($this->contacts, $timeFrame, $this->recordOrigins[0]),
         ])
         ->assertStatus(200)
         ->assertHasNoErrors();
@@ -120,8 +121,8 @@ test('timeframe this quarter', function (): void {
             $this->recordOrigins[0]->name,
         ])
         ->assertSet('series', [
-            getContactsCountInTimeFrame($timeFrame, $this->recordOrigins[1]),
-            getContactsCountInTimeFrame($timeFrame, $this->recordOrigins[0]),
+            getContactsCountInTimeFrame($this->contacts, $timeFrame, $this->recordOrigins[1]),
+            getContactsCountInTimeFrame($this->contacts, $timeFrame, $this->recordOrigins[0]),
         ])
         ->assertStatus(200)
         ->assertHasNoErrors();
@@ -138,8 +139,8 @@ test('timeframe this week', function (): void {
             $this->recordOrigins[0]->name,
         ])
         ->assertSet('series', [
-            getContactsCountInTimeFrame($timeFrame, $this->recordOrigins[1]),
-            getContactsCountInTimeFrame($timeFrame, $this->recordOrigins[0]),
+            getContactsCountInTimeFrame($this->contacts, $timeFrame, $this->recordOrigins[1]),
+            getContactsCountInTimeFrame($this->contacts, $timeFrame, $this->recordOrigins[0]),
         ])
         ->assertStatus(200)
         ->assertHasNoErrors();
@@ -156,8 +157,8 @@ test('timeframe this year', function (): void {
             $this->recordOrigins[0]->name,
         ])
         ->assertSet('series', [
-            getContactsCountInTimeFrame($timeFrame, $this->recordOrigins[1]),
-            getContactsCountInTimeFrame($timeFrame, $this->recordOrigins[0]),
+            getContactsCountInTimeFrame($this->contacts, $timeFrame, $this->recordOrigins[1]),
+            getContactsCountInTimeFrame($this->contacts, $timeFrame, $this->recordOrigins[0]),
         ])
         ->assertStatus(200)
         ->assertHasNoErrors();
@@ -174,16 +175,16 @@ test('timeframe today', function (): void {
             $this->recordOrigins[0]->name,
         ])
         ->assertSet('series', [
-            getContactsCountInTimeFrame($timeFrame, $this->recordOrigins[1]),
-            getContactsCountInTimeFrame($timeFrame, $this->recordOrigins[0]),
+            getContactsCountInTimeFrame($this->contacts, $timeFrame, $this->recordOrigins[1]),
+            getContactsCountInTimeFrame($this->contacts, $timeFrame, $this->recordOrigins[0]),
         ])
         ->assertStatus(200)
         ->assertHasNoErrors();
 });
 
-function getContactsCountInTimeFrame(TimeFrameEnum $timeFrame, RecordOrigin $recordOrigin): int
+function getContactsCountInTimeFrame(Collection $contacts, TimeFrameEnum $timeFrame, RecordOrigin $recordOrigin): int
 {
-    return $this->contacts
+    return $contacts
         ->filter(
             fn (Contact $contact) => $contact->created_at->between(...$timeFrame->getRange())
                 && $contact->recordOrigin()

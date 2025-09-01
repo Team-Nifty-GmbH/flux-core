@@ -5,6 +5,7 @@ use Carbon\Carbon;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\Widgets\Outstanding;
 use FluxErp\Models\Address;
+use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Language;
@@ -56,12 +57,12 @@ test('calculate sum payment state all time relations in time', function (): void
         ],
     ]);
 
-    $orders = createData($paymentProps);
+    $orders = createData($paymentProps, $this->dbClient, $this->currency);
 
     Livewire::test(Outstanding::class)
         ->call('calculateSum')
-        ->assertSet('sum', createSumString($orders))
-        ->assertSet('subValue', createSubString($orders))
+        ->assertSet('sum', createSumString($orders, $this->currency->symbol))
+        ->assertSet('subValue', createSubString($orders, $this->orderTypeIds, $this->currency->symbol))
         ->assertHasNoErrors()
         ->assertStatus(200);
 });
@@ -82,12 +83,12 @@ test('calculate sum payment state all time relations over due', function (): voi
         ],
     ]);
 
-    $orders = createData($paymentProps);
+    $orders = createData($paymentProps, $this->dbClient, $this->currency);
 
     Livewire::test(Outstanding::class)
         ->call('calculateSum')
-        ->assertSet('sum', createSumString($orders))
-        ->assertSet('subValue', createSubString($orders))
+        ->assertSet('sum', createSumString($orders, $this->currency->symbol))
+        ->assertSet('subValue', createSubString($orders, $this->orderTypeIds, $this->currency->symbol))
         ->assertHasNoErrors()
         ->assertStatus(200);
 });
@@ -104,12 +105,12 @@ test('calculate sum payment state open time relations all', function (): void {
         ],
     ]);
 
-    $orders = createData($paymentProps);
+    $orders = createData($paymentProps, $this->dbClient, $this->currency);
 
     Livewire::test(Outstanding::class)
         ->call('calculateSum')
-        ->assertSet('sum', createSumString($orders))
-        ->assertSet('subValue', createSubString($orders))
+        ->assertSet('sum', createSumString($orders, $this->currency->symbol))
+        ->assertSet('subValue', createSubString($orders, $this->orderTypeIds, $this->currency->symbol))
         ->assertHasNoErrors()
         ->assertStatus(200);
 });
@@ -126,12 +127,12 @@ test('calculate sum payment state paid time relations all', function (): void {
         ],
     ]);
 
-    $orders = createData($paymentProps);
+    $orders = createData($paymentProps, $this->dbClient, $this->currency);
 
     Livewire::test(Outstanding::class)
         ->call('calculateSum')
-        ->assertSet('sum', createSumString($orders))
-        ->assertSet('subValue', createSubString($orders))
+        ->assertSet('sum', createSumString($orders, $this->currency->symbol))
+        ->assertSet('subValue', createSubString($orders, $this->orderTypeIds, $this->currency->symbol))
         ->assertHasNoErrors()
         ->assertStatus(200);
 });
@@ -148,12 +149,12 @@ test('calculate sum payment state partial paid time relations all', function ():
         ],
     ]);
 
-    $orders = createData($paymentProps);
+    $orders = createData($paymentProps, $this->dbClient, $this->currency);
 
     Livewire::test(Outstanding::class)
         ->call('calculateSum')
-        ->assertSet('sum', createSumString($orders))
-        ->assertSet('subValue', createSubString($orders))
+        ->assertSet('sum', createSumString($orders, $this->currency->symbol))
+        ->assertSet('subValue', createSubString($orders, $this->orderTypeIds, $this->currency->symbol))
         ->assertHasNoErrors()
         ->assertStatus(200);
 });
@@ -163,8 +164,8 @@ test('calculate table empty', function (): void {
 
     Livewire::test(Outstanding::class)
         ->call('calculateSum')
-        ->assertSet('sum', createSumString($orders))
-        ->assertSet('subValue', createSubString($orders))
+        ->assertSet('sum', createSumString($orders, $this->currency->symbol))
+        ->assertSet('subValue', createSubString($orders, $this->orderTypeIds, $this->currency->symbol))
         ->assertHasNoErrors()
         ->assertStatus(200);
 });
@@ -186,22 +187,22 @@ test('redirect to over due', function (): void {
 });
 
 test('renders successfully', function (): void {
-    createData(collect());
+    createData(collect(), $this->dbClient, $this->currency);
 
     Livewire::test(Outstanding::class)
         ->assertStatus(200);
 });
 
-function createData(Collection $paymentProps): Collection
+function createData(Collection $paymentProps, Client $client, Currency $currency): Collection
 {
     $orders = collect();
 
     $contact = Contact::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'client_id' => $client->getKey(),
     ]);
 
     $address = Address::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'client_id' => $client->getKey(),
         'contact_id' => $contact->id,
     ]);
 
@@ -210,12 +211,12 @@ function createData(Collection $paymentProps): Collection
     $language = Language::factory()->create();
 
     $orderType = OrderType::factory()->create([
-        'client_id' => $this->dbClient->getKey(),
+        'client_id' => $client->getKey(),
         'order_type_enum' => OrderTypeEnum::Order,
     ]);
 
     $paymentType = PaymentType::factory()
-        ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+        ->hasAttached(factory: $client, relationship: 'clients')
         ->create([
             'is_default' => false,
             'is_direct_debit' => true,
@@ -230,14 +231,14 @@ function createData(Collection $paymentProps): Collection
         $orders->push(
             Order::factory()->create(
                 [
-                    'client_id' => $this->dbClient->getKey(),
+                    'client_id' => $client->getKey(),
                     'language_id' => $language->id,
                     'invoice_date' => $invoice->id,
                     'invoice_number' => $invoice->invoice_number,
                     'order_type_id' => $orderType->id,
                     'payment_type_id' => $paymentType->id,
                     'price_list_id' => $priceList->id,
-                    'currency_id' => $this->currency->id,
+                    'currency_id' => $currency->id,
                     'address_invoice_id' => $address->id,
                     'address_delivery_id' => $address->id,
                     'is_locked' => false,
@@ -252,7 +253,7 @@ function createData(Collection $paymentProps): Collection
     return $orders;
 }
 
-function createSubString(Collection $orders): string
+function createSubString(Collection $orders, array $orderTypeIds, string $currencySymbol): string
 {
     return '<span class="text-red-600">'
     . Number::abbreviate(
@@ -264,15 +265,15 @@ function createSubString(Collection $orders): string
             ->where('payment_reminder_next_date', '<=', now()->endOfDay()->toDate())
             ->where(
                 'order_type_id',
-                $this->orderTypeIds
+                $orderTypeIds
             )
             ->sum('balance'),
         2)
-    . ' ' . $this->currency->symbol . ' ' . __('Overdue')
+    . ' ' . $currencySymbol . ' ' . __('Overdue')
     . '</span>';
 }
 
-function createSumString(Collection $orders): string
+function createSumString(Collection $orders, string $currencySymbol): string
 {
     return Number::abbreviate(
         $orders
@@ -281,5 +282,5 @@ function createSumString(Collection $orders): string
             ->where('payment_state', '!=', Paid::$name)
             ->sum('balance'),
         2
-    ) . ' ' . $this->currency->symbol;
+    ) . ' ' . $currencySymbol;
 }

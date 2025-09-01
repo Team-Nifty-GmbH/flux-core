@@ -6,6 +6,7 @@ use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Livewire\Widgets\LeadsByLeadState;
 use FluxErp\Models\Lead;
 use FluxErp\Models\LeadState;
+use Illuminate\Support\Collection;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
@@ -140,26 +141,26 @@ test('timeframe in the future', function (): void {
 });
 
 test('timeframe this month', function (): void {
-    assertLeadStateTimeframeResults(TimeFrameEnum::ThisMonth);
+    assertLeadStateTimeframeResults($this->leadStates, $this->leads, TimeFrameEnum::ThisMonth);
 });
 
 test('timeframe this quarter', function (): void {
-    assertLeadStateTimeframeResults(TimeFrameEnum::ThisQuarter);
+    assertLeadStateTimeframeResults($this->leadStates, $this->leads, TimeFrameEnum::ThisQuarter);
 });
 
 test('timeframe this week', function (): void {
-    assertLeadStateTimeframeResults(TimeFrameEnum::ThisWeek);
+    assertLeadStateTimeframeResults($this->leadStates, $this->leads, TimeFrameEnum::ThisWeek);
 });
 
 test('timeframe this year', function (): void {
-    assertLeadStateTimeframeResults(TimeFrameEnum::ThisYear);
+    assertLeadStateTimeframeResults($this->leadStates, $this->leads, TimeFrameEnum::ThisYear);
 });
 
 test('timeframe today', function (): void {
-    assertLeadStateTimeframeResults(TimeFrameEnum::Today);
+    assertLeadStateTimeframeResults($this->leadStates, $this->leads, TimeFrameEnum::Today);
 });
 
-function assertLeadStateTimeframeResults(TimeFrameEnum $timeFrame): void
+function assertLeadStateTimeframeResults(Collection $leadStates, Collection $leads, TimeFrameEnum $timeFrame): void
 {
     $test = Livewire::test(LeadsByLeadState::class)
         ->set('timeFrame', $timeFrame)
@@ -178,8 +179,8 @@ function assertLeadStateTimeframeResults(TimeFrameEnum $timeFrame): void
     expect($labels)->not->toBeEmpty();
     expect($data)->not->toBeEmpty();
 
-    foreach ($this->leadStates as $leadState) {
-        $expectedCount = getLeadStateLeadsCountInTimeFrame($timeFrame, $leadState);
+    foreach ($leadStates as $leadState) {
+        $expectedCount = getLeadStateLeadsCountInTimeFrame($leads, $timeFrame, $leadState);
         $index = array_search($leadState->name, $labels);
 
         if ($index !== false && $expectedCount > 0) {
@@ -188,8 +189,8 @@ function assertLeadStateTimeframeResults(TimeFrameEnum $timeFrame): void
     }
 
     // Verify counts match expected values
-    foreach ($this->leadStates as $leadState) {
-        $expectedCount = getLeadStateLeadsCountInTimeFrame($timeFrame, $leadState);
+    foreach ($leadStates as $leadState) {
+        $expectedCount = getLeadStateLeadsCountInTimeFrame($leads, $timeFrame, $leadState);
         $index = array_search($leadState->name, $labels);
 
         if ($index !== false && $expectedCount > 0) {
@@ -198,9 +199,9 @@ function assertLeadStateTimeframeResults(TimeFrameEnum $timeFrame): void
     }
 }
 
-function getLeadStateLeadsCountInTimeFrame(TimeFrameEnum $timeFrame, LeadState $leadState): int
+function getLeadStateLeadsCountInTimeFrame(Collection $leads, TimeFrameEnum $timeFrame, LeadState $leadState): int
 {
-    return $this->leads
+    return $leads
         ->filter(
             fn (Lead $lead) => $lead->lead_state_id === $leadState->id
                 && $lead->created_at->between(...$timeFrame->getRange())

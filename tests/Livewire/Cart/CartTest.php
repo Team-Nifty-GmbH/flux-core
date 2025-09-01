@@ -25,7 +25,7 @@ beforeEach(function (): void {
 });
 
 test('can delete cart items', function (): void {
-    $cart = createFilledCartFactory()
+    $cart = createFilledCartFactory($this->vatRate)
         ->create([
             'authenticatable_type' => $this->user->getMorphClass(),
             'authenticatable_id' => $this->user->id,
@@ -43,7 +43,7 @@ test('can delete cart items', function (): void {
 });
 
 test('can load watchlist', function (): void {
-    $watchList = createFilledCartFactory()
+    $watchList = createFilledCartFactory($this->vatRate)
         ->create([
             'authenticatable_type' => $this->user->getMorphClass(),
             'authenticatable_id' => $this->user->id,
@@ -62,7 +62,7 @@ test('can load watchlist', function (): void {
 });
 
 test('can save cart to watchlist', function (): void {
-    createFilledCartFactory()
+    createFilledCartFactory($this->vatRate)
         ->create([
             'authenticatable_type' => $this->user->getMorphClass(),
             'authenticatable_id' => $this->user->id,
@@ -95,15 +95,15 @@ test('renders successfully', function (): void {
         ->assertStatus(200);
 });
 
-function createFilledCartFactory(): CartFactory
+function createFilledCartFactory(VatRate $vatRate): CartFactory
 {
     return CartModel::factory()
         ->has(
             CartItem::factory()
                 ->count(3)
-                ->set('vat_rate_id', $this->vatRate->id)
-                ->afterCreating(function (CartItem $cartItem): void {
-                    $cartItem->product_id = Product::factory(['vat_rate_id' => $this->vatRate->id])
+                ->set('vat_rate_id', $vatRate->id)
+                ->afterCreating(function (CartItem $cartItem) use ($vatRate): void {
+                    $cartItem->product_id = Product::factory(['vat_rate_id' => $vatRate->id])
                         ->has(Price::factory()->set('price_list_id', PriceList::default()->id))
                         ->create()
                         ->id;

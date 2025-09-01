@@ -8,6 +8,7 @@ use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Lead;
 use FluxErp\Models\PriceList;
+use Illuminate\Support\Collection;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
@@ -150,26 +151,26 @@ test('timeframe in the future', function (): void {
 });
 
 test('timeframe this month', function (): void {
-    assertReferralSourceTimeframeResults(TimeFrameEnum::ThisMonth);
+    assertReferralSourceTimeframeResults($this->addresses, $this->leads, TimeFrameEnum::ThisMonth);
 });
 
 test('timeframe this quarter', function (): void {
-    assertReferralSourceTimeframeResults(TimeFrameEnum::ThisQuarter);
+    assertReferralSourceTimeframeResults($this->addresses, $this->leads, TimeFrameEnum::ThisQuarter);
 });
 
 test('timeframe this week', function (): void {
-    assertReferralSourceTimeframeResults(TimeFrameEnum::ThisWeek);
+    assertReferralSourceTimeframeResults($this->addresses, $this->leads, TimeFrameEnum::ThisWeek);
 });
 
 test('timeframe this year', function (): void {
-    assertReferralSourceTimeframeResults(TimeFrameEnum::ThisYear);
+    assertReferralSourceTimeframeResults($this->addresses, $this->leads, TimeFrameEnum::ThisYear);
 });
 
 test('timeframe today', function (): void {
-    assertReferralSourceTimeframeResults(TimeFrameEnum::Today);
+    assertReferralSourceTimeframeResults($this->addresses, $this->leads, TimeFrameEnum::Today);
 });
 
-function assertReferralSourceTimeframeResults(TimeFrameEnum $timeFrame): void
+function assertReferralSourceTimeframeResults(Collection $addresses, Collection $leads, TimeFrameEnum $timeFrame): void
 {
     $test = Livewire::test(LeadsByReferralSource::class)
         ->set('timeFrame', $timeFrame)
@@ -185,8 +186,8 @@ function assertReferralSourceTimeframeResults(TimeFrameEnum $timeFrame): void
     expect($labels)->toBeArray();
     expect($data)->toBeArray();
 
-    foreach ($this->addresses as $address) {
-        $expectedCount = getReferralSourceLeadsCountInTimeFrame($timeFrame, $address);
+    foreach ($addresses as $address) {
+        $expectedCount = getReferralSourceLeadsCountInTimeFrame($leads, $timeFrame, $address);
 
         if ($expectedCount > 0) {
             $addressLabel = $address->getLabel();
@@ -199,9 +200,9 @@ function assertReferralSourceTimeframeResults(TimeFrameEnum $timeFrame): void
     }
 }
 
-function getReferralSourceLeadsCountInTimeFrame(TimeFrameEnum $timeFrame, Address $address): int
+function getReferralSourceLeadsCountInTimeFrame(Collection $leads, TimeFrameEnum $timeFrame, Address $address): int
 {
-    return $this->leads
+    return $leads
         ->filter(
             fn (Lead $lead) => $lead->recommended_by_address_id === $address->id
                 && $lead->created_at->between(...$timeFrame->getRange())

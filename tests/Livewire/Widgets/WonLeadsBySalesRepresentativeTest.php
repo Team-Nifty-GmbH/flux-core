@@ -8,6 +8,7 @@ use FluxErp\Models\Language;
 use FluxErp\Models\Lead;
 use FluxErp\Models\LeadState;
 use FluxErp\Models\User;
+use Illuminate\Support\Collection;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
@@ -172,26 +173,26 @@ test('timeframe in the future', function (): void {
 });
 
 test('timeframe this month', function (): void {
-    assertTimeframeResults(TimeFrameEnum::ThisMonth);
+    assertTimeframeResults($this->users, $this->leads, TimeFrameEnum::ThisMonth);
 });
 
 test('timeframe this quarter', function (): void {
-    assertTimeframeResults(TimeFrameEnum::ThisQuarter);
+    assertTimeframeResults($this->users, $this->leads, TimeFrameEnum::ThisQuarter);
 });
 
 test('timeframe this week', function (): void {
-    assertTimeframeResults(TimeFrameEnum::ThisWeek);
+    assertTimeframeResults($this->users, $this->leads, TimeFrameEnum::ThisWeek);
 });
 
 test('timeframe this year', function (): void {
-    assertTimeframeResults(TimeFrameEnum::ThisYear);
+    assertTimeframeResults($this->users, $this->leads, TimeFrameEnum::ThisYear);
 });
 
 test('timeframe today', function (): void {
-    assertTimeframeResults(TimeFrameEnum::Today);
+    assertTimeframeResults($this->users, $this->leads, TimeFrameEnum::Today);
 });
 
-function assertTimeframeResults(TimeFrameEnum $timeFrame): void
+function assertTimeframeResults(Collection $users, Collection $leads, TimeFrameEnum $timeFrame): void
 {
     $test = Livewire::test(WonLeadsBySalesRepresentative::class)
         ->set('timeFrame', $timeFrame)
@@ -203,10 +204,10 @@ function assertTimeframeResults(TimeFrameEnum $timeFrame): void
     expect($series)->toBeArray();
     expect($series)->not->toBeEmpty();
 
-    $expected = $this->users->map(function ($user) use ($timeFrame) {
+    $expected = $users->map(function ($user) use ($timeFrame, $leads) {
         return [
             'name' => $user->name,
-            'count' => getWonLeadCountInTimeFrame($timeFrame, $user),
+            'count' => getWonLeadCountInTimeFrame($leads, $timeFrame, $user),
         ];
     })
         ->sortByDesc('count')
@@ -218,9 +219,9 @@ function assertTimeframeResults(TimeFrameEnum $timeFrame): void
     }
 }
 
-function getWonLeadCountInTimeFrame(TimeFrameEnum $timeFrame, User $user): int
+function getWonLeadCountInTimeFrame(Collection $leads, TimeFrameEnum $timeFrame, User $user): int
 {
-    return $this->leads
+    return $leads
         ->filter(
             fn (Lead $lead) => $lead->user_id === $user->id
                 && $lead->leadState->is_won === true
