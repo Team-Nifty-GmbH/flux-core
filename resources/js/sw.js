@@ -4,7 +4,6 @@ self.addEventListener('push', function (e) {
     }
 
     if (!e.data) {
-        console.log('Push event but no data');
         return;
     }
 
@@ -37,37 +36,49 @@ self.addEventListener('push', function (e) {
 self.addEventListener('notificationclick', function (e) {
     e.notification.close();
 
-    let targetUrl = null;
+    let targetPath = null;
     let actionToUse = e.action;
 
     if (
         !actionToUse &&
         e.notification.actions &&
-        e.notification.actions.length === 1
+        e.notification.actions.length > 0
     ) {
         actionToUse = e.notification.actions[0].action;
     }
 
-    if (
-        actionToUse &&
-        (actionToUse.startsWith('http') || actionToUse.startsWith('/'))
-    ) {
-        targetUrl = actionToUse;
+    if (actionToUse) {
+        if (
+            actionToUse.startsWith('http://') ||
+            actionToUse.startsWith('https://')
+        ) {
+            targetPath = actionToUse;
+        } else if (actionToUse.startsWith('/')) {
+            targetPath = actionToUse;
+        }
     } else if (e.notification.data && e.notification.data.url) {
-        targetUrl = e.notification.data.url;
+        targetPath = e.notification.data.url;
     }
 
-    if (
-        targetUrl &&
-        !targetUrl.startsWith('http://') &&
-        !targetUrl.startsWith('https://')
-    ) {
-        if (targetUrl.startsWith('/')) {
-            targetUrl = self.location.origin + targetUrl;
-        } else {
-            targetUrl = self.location.origin + '/' + targetUrl;
-        }
+    if (!targetPath) {
+        targetPath = '/';
     }
+
+    let targetUrl;
+    try {
+        if (
+            targetPath.startsWith('http://') ||
+            targetPath.startsWith('https://')
+        ) {
+            targetUrl = new URL(targetPath);
+        } else {
+            targetUrl = new URL(targetPath, self.location.origin);
+        }
+    } catch (error) {
+        targetUrl = new URL('/', self.location.origin);
+    }
+
+    const finalUrl = targetUrl.href;
 
     e.waitUntil(
         clients.matchAll({ type: 'window' }).then(function (clientList) {
@@ -77,15 +88,19 @@ self.addEventListener('notificationclick', function (e) {
                     'focus' in client
                 ) {
                     return client.focus().then(() => {
-                        if (targetUrl) {
-                            return client.navigate(targetUrl);
+                        const targetIsRoot =
+                            finalUrl === self.location.origin + '/';
+                        const alreadyOnTarget = client.url === finalUrl;
+
+                        if (!targetIsRoot && !alreadyOnTarget) {
+                            return client.navigate(finalUrl);
                         }
                     });
                 }
             }
 
             if (clients.openWindow) {
-                return clients.openWindow(targetUrl);
+                return clients.openWindow(finalUrl);
             }
         }),
     );

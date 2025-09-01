@@ -1,14 +1,10 @@
-@use(\Illuminate\Support\Str)
 <div
     class="p-10"
     x-data="{
-        notifications: $wire.entangle('notifications', true),
-        notificationChannels: $wire.entangle('notificationChannels', true),
-        notificationSettings: $wire.entangle('notificationSettings'),
         webPushSupport: {},
         async checkSupport() {
-            if (typeof window.checkWebPushSupport === 'function') {
-                const support = await window.checkWebPushSupport()
+            if (window.WebPush) {
+                const support = await window.WebPush.checkWebPushSupport()
                 support.allSupported =
                     support.serviceWorker &&
                     support.pushManager &&
@@ -100,7 +96,7 @@
                             <x-button
                                 :text="__('Activate')"
                                 color="primary"
-                                x-on:click="initSW().then(() => checkSupport()).catch(err => console.error(err))"
+                                x-on:click="WebPush.initSW().then(() => checkSupport()).catch(err => console.error(err))"
                                 icon="bell"
                             />
                         </div>
@@ -117,7 +113,7 @@
                                 :text="__('Reactivate')"
                                 color="secondary"
                                 size="sm"
-                                x-on:click="initSW(true).then(() => checkSupport()).catch(err => console.error(err))"
+                                x-on:click="WebPush.initSW(true).then(() => checkSupport()).catch(err => console.error(err))"
                                 icon="arrow-path"
                             />
                         </div>
@@ -349,8 +345,8 @@
                                 x-data="{ isCurrentBrowser: false }"
                                 x-init="
                                             $nextTick(async () => {
-                                                if (window.checkCurrentSubscription) {
-                                                    isCurrentBrowser = await window.checkCurrentSubscription(subscription.endpoint);
+                                                if (window.WebPush) {
+                                                    isCurrentBrowser = await window.WebPush.checkCurrentSubscription(subscription.endpoint);
                                                 }
                                             })
                                         "
@@ -451,7 +447,7 @@
         <x-slot:header>
             <th>{{ __('Notification') }}</th>
             <template
-                x-for="(notificationChannel, name) in notificationChannels"
+                x-for="(notificationChannel, name) in $wire.notificationChannels"
             >
                 <th class="text-left">
                     <div x-text="name" />
