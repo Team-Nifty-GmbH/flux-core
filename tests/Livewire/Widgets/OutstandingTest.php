@@ -3,6 +3,7 @@
 uses(FluxErp\Tests\Livewire\BaseSetup::class);
 use Carbon\Carbon;
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Livewire\Widgets\Outstanding;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
@@ -57,7 +58,7 @@ test('calculate sum payment state all time relations in time', function (): void
 
     $orders = createData($paymentProps);
 
-    Livewire::test($this->livewireComponent)
+    Livewire::test(Outstanding::class)
         ->call('calculateSum')
         ->assertSet('sum', createSumString($orders))
         ->assertSet('subValue', createSubString($orders))
@@ -83,7 +84,7 @@ test('calculate sum payment state all time relations over due', function (): voi
 
     $orders = createData($paymentProps);
 
-    Livewire::test($this->livewireComponent)
+    Livewire::test(Outstanding::class)
         ->call('calculateSum')
         ->assertSet('sum', createSumString($orders))
         ->assertSet('subValue', createSubString($orders))
@@ -105,7 +106,7 @@ test('calculate sum payment state open time relations all', function (): void {
 
     $orders = createData($paymentProps);
 
-    Livewire::test($this->livewireComponent)
+    Livewire::test(Outstanding::class)
         ->call('calculateSum')
         ->assertSet('sum', createSumString($orders))
         ->assertSet('subValue', createSubString($orders))
@@ -127,7 +128,7 @@ test('calculate sum payment state paid time relations all', function (): void {
 
     $orders = createData($paymentProps);
 
-    Livewire::test($this->livewireComponent)
+    Livewire::test(Outstanding::class)
         ->call('calculateSum')
         ->assertSet('sum', createSumString($orders))
         ->assertSet('subValue', createSubString($orders))
@@ -149,7 +150,7 @@ test('calculate sum payment state partial paid time relations all', function ():
 
     $orders = createData($paymentProps);
 
-    Livewire::test($this->livewireComponent)
+    Livewire::test(Outstanding::class)
         ->call('calculateSum')
         ->assertSet('sum', createSumString($orders))
         ->assertSet('subValue', createSubString($orders))
@@ -160,7 +161,7 @@ test('calculate sum payment state partial paid time relations all', function ():
 test('calculate table empty', function (): void {
     $orders = collect();
 
-    Livewire::test($this->livewireComponent)
+    Livewire::test(Outstanding::class)
         ->call('calculateSum')
         ->assertSet('sum', createSumString($orders))
         ->assertSet('subValue', createSubString($orders))
@@ -169,7 +170,7 @@ test('calculate table empty', function (): void {
 });
 
 test('redirect to orders', function (): void {
-    Livewire::test($this->livewireComponent)
+    Livewire::test(Outstanding::class)
         ->call('show')
         ->assertRedirect(route('orders.orders'))
         ->assertHasNoErrors()
@@ -177,7 +178,7 @@ test('redirect to orders', function (): void {
 });
 
 test('redirect to over due', function (): void {
-    Livewire::test($this->livewireComponent)
+    Livewire::test(Outstanding::class)
         ->call('showOverdue')
         ->assertRedirect(route('accounting.payment-reminders'))
         ->assertHasNoErrors()
@@ -187,7 +188,7 @@ test('redirect to over due', function (): void {
 test('renders successfully', function (): void {
     createData(collect());
 
-    Livewire::test($this->livewireComponent)
+    Livewire::test(Outstanding::class)
         ->assertStatus(200);
 });
 

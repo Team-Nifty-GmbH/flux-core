@@ -2,9 +2,10 @@
 
 uses(FluxErp\Tests\TestCase::class);
 use Livewire\Livewire;
+use FluxErp\Livewire\Settings\System;
 
 test('renders successfully', function (): void {
     Livewire::withoutLazyLoading()
-        ->test($this->livewireComponent)
+        ->test(System::class)
         ->assertStatus(200);
 });

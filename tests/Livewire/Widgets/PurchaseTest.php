@@ -1,6 +1,7 @@
 <?php
 
 uses(FluxErp\Tests\TestCase::class);
+use FluxErp\Livewire\Widgets\Purchase;
 use FluxErp\Models\Currency;
 use Livewire\Livewire;
 
@@ -9,6 +10,6 @@ beforeEach(function (): void {
 });
 
 test('renders successfully', function (): void {
-    Livewire::test($this->livewireComponent)
+    Livewire::test(Purchase::class)
         ->assertStatus(200);
 });

@@ -60,7 +60,7 @@ test('can create project from order', function (): void {
 
     /** @var Testable $component */
     $component = Livewire::withoutLazyLoading()
-        ->test($this->livewireComponent, ['order' => $this->order])
+        ->test(OrderProject::class, ['order' => $this->order])
         ->set('existingProject', false)
         ->assertSet('form.id', null)
         ->assertSet('form.order_id', $this->order->id)
@@ -96,7 +96,7 @@ test('create tasks for existing project', function (): void {
     $currentProjectCount = Project::query()->count();
 
     $component = Livewire::withoutLazyLoading()
-        ->test($this->livewireComponent, ['order' => $this->order])
+        ->test(OrderProject::class, ['order' => $this->order])
         ->set('existingProject', true)
         ->assertSet('projectId', null)
         ->assertSet('form.order_id', $this->order->id)

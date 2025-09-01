@@ -1,9 +1,10 @@
 <?php
 
 uses(FluxErp\Tests\TestCase::class);
+use FluxErp\Livewire\Project\Comments;
 use Livewire\Livewire;
 
 test('renders successfully', function (): void {
-    Livewire::test($this->livewireComponent)
+    Livewire::test(Comments::class)
         ->assertStatus(200);
 });

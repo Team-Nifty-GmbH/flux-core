@@ -1,6 +1,7 @@
 <?php
 
 uses(FluxErp\Tests\Livewire\BaseSetup::class);
+use FluxErp\Livewire\Lead\LeadList;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Lead;
@@ -21,7 +22,7 @@ test('lead list', function (): void {
 
     $leadState = LeadState::factory()->create();
 
-    Livewire::test($this->livewireComponent)
+    Livewire::test(LeadList::class)
         ->datatableEdit($lead, 'sales.lead.id')
         ->datatableDelete($lead, $this)
         ->datatableCreate(
@@ -34,6 +35,6 @@ test('lead list', function (): void {
 });
 
 test('renders successfully', function (): void {
-    Livewire::test($this->livewireComponent)
+    Livewire::test(LeadList::class)
         ->assertStatus(200);
 });

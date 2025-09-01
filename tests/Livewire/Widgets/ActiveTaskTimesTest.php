@@ -1,6 +1,7 @@
 <?php
 
 uses(FluxErp\Tests\Livewire\BaseSetup::class);
+use FluxErp\Livewire\Widgets\ActiveTaskTimes;
 use FluxErp\Models\WorkTime;
 use Livewire\Livewire;
 
@@ -14,7 +15,7 @@ beforeEach(function (): void {
 });
 
 test('renders successfully', function (): void {
-    Livewire::test($this->livewireComponent)
+    Livewire::test(ActiveTaskTimes::class)
         ->assertStatus(200)
         ->assertCount('items', 1);
 });

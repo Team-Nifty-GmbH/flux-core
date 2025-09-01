@@ -4,6 +4,7 @@ uses(FluxErp\Tests\Livewire\BaseSetup::class);
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Livewire\Widgets\TotalUnassignedBillableHours;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
@@ -108,14 +109,14 @@ beforeEach(function (): void {
 });
 
 test('calculates correct sum of unassigned billable hours', function (): void {
-    Livewire::test($this->livewireComponent)
+    Livewire::test(TotalUnassignedBillableHours::class)
         ->assertSet('sum', calculateDisplayedTime($this->workTime->total_time_ms))
         ->assertHasNoErrors()
         ->assertStatus(200);
 });
 
 test('renders successfully', function (): void {
-    Livewire::test($this->livewireComponent)
+    Livewire::test(TotalUnassignedBillableHours::class)
         ->assertStatus(200);
 });
 
