@@ -1,49 +1,39 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Lead;
-
-use FluxErp\Livewire\Lead\LeadList;
+uses(FluxErp\Tests\Livewire\BaseSetup::class);
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Lead;
 use FluxErp\Models\LeadState;
-use FluxErp\Tests\Livewire\BaseSetup;
 use Livewire\Livewire;
 
-class LeadListTest extends BaseSetup
-{
-    protected string $livewireComponent = LeadList::class;
+test('lead list', function (): void {
+    $lead = Lead::factory()->create();
 
-    public function test_lead_list(): void
-    {
-        $lead = Lead::factory()->create();
+    $contact = Contact::factory()->create([
+        'client_id' => $this->dbClient->getKey(),
+    ]);
 
-        $contact = Contact::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-        ]);
+    $address = Address::factory()->create([
+        'contact_id' => $contact->id,
+        'client_id' => $this->dbClient->getKey(),
+    ]);
 
-        $address = Address::factory()->create([
-            'contact_id' => $contact->id,
-            'client_id' => $this->dbClient->getKey(),
-        ]);
+    $leadState = LeadState::factory()->create();
 
-        $leadState = LeadState::factory()->create();
+    Livewire::test($this->livewireComponent)
+        ->datatableEdit($lead, 'sales.lead.id')
+        ->datatableDelete($lead, $this)
+        ->datatableCreate(
+            'leadForm',
+            Lead::factory()->make([
+                'address_id' => $address->id,
+                'lead_state_id' => $leadState->id,
+            ])
+                ->toArray());
+});
 
-        Livewire::test($this->livewireComponent)
-            ->datatableEdit($lead, 'sales.lead.id')
-            ->datatableDelete($lead, $this)
-            ->datatableCreate(
-                'leadForm',
-                Lead::factory()->make([
-                    'address_id' => $address->id,
-                    'lead_state_id' => $leadState->id,
-                ])
-                    ->toArray());
-    }
-
-    public function test_renders_successfully(): void
-    {
-        Livewire::test($this->livewireComponent)
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test($this->livewireComponent)
+        ->assertStatus(200);
+});

@@ -1,53 +1,36 @@
 <?php
 
-namespace FluxErp\Tests\Feature\Customization;
-
+uses(FluxErp\Tests\TestCase::class);
 use FluxErp\Models\Language;
 use FluxErp\Models\User;
-use FluxErp\Tests\TestCase;
-use FluxErp\Traits\HasParentMorphClass;
 
-class ModelTest extends TestCase
-{
-    public function test_model_customization(): void
+test('model customization', function (): void {
+    $class = new class() extends Language
     {
-        $class = new class() extends Language
-        {
-            use HasParentMorphClass;
+        use FluxErp\Traits\HasParentMorphClass;
+    };
+    $this->app->bind(Language::class, get_class($class));
 
-            protected $table = 'languages';
-        };
+    $language = Language::factory()
+        ->create();
 
-        $this->app->bind(Language::class, get_class($class));
+    expect(resolve_static(Language::class, 'query')
+        ->whereKey($language->id)
+        ->first())->toBeInstanceOf(get_class($class));
+});
 
-        $language = Language::factory()
-            ->create();
-
-        $this->assertInstanceOf(
-            get_class($class),
-            resolve_static(Language::class, 'query')
-                ->whereKey($language->id)
-                ->first()
-        );
-    }
-
-    public function test_model_relation(): void
+test('model relation', function (): void {
+    $class = new class() extends Language
     {
-        $class = new class() extends Language
-        {
-            use HasParentMorphClass;
+        use FluxErp\Traits\HasParentMorphClass;
+    };
+    $this->app->bind(Language::class, get_class($class));
 
-            protected $table = 'languages';
-        };
+    $language = Language::factory()
+        ->create();
 
-        $this->app->bind(Language::class, get_class($class));
+    $user = User::factory()
+        ->create(['language_id' => $language->id]);
 
-        $language = Language::factory()
-            ->create();
-
-        $user = User::factory()
-            ->create(['language_id' => $language->id]);
-
-        $this->assertInstanceOf(get_class($class), $user->language);
-    }
-}
+    expect($user->language)->toBeInstanceOf(get_class($class));
+});

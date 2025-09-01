@@ -1,36 +1,27 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Contacts;
-
+uses(FluxErp\Tests\TestCase::class);
 use FluxErp\Livewire\Contact\Contact as ContactView;
 use FluxErp\Models\Address;
 use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
-use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
-class ContactTest extends TestCase
-{
-    protected function setUp(): void
-    {
-        parent::setUp();
+beforeEach(function (): void {
+    $dbClient = Client::factory()->create();
 
-        $dbClient = Client::factory()->create();
+    $this->contact = Contact::factory()->create([
+        'client_id' => $dbClient->id,
+    ]);
 
-        $this->contact = Contact::factory()->create([
-            'client_id' => $dbClient->id,
-        ]);
+    Address::factory()->create([
+        'client_id' => $dbClient->id,
+        'contact_id' => $this->contact->id,
+        'is_main_address' => true,
+    ]);
+});
 
-        Address::factory()->create([
-            'client_id' => $dbClient->id,
-            'contact_id' => $this->contact->id,
-            'is_main_address' => true,
-        ]);
-    }
-
-    public function test_renders_successfully(): void
-    {
-        Livewire::test(ContactView::class, ['id' => $this->contact->id])
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test(ContactView::class, ['id' => $this->contact->id])
+        ->assertStatus(200);
+});

@@ -1,26 +1,17 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Contact;
-
+uses(FluxErp\Tests\Livewire\BaseSetup::class);
 use FluxErp\Livewire\Contact\WorkTimes;
 use FluxErp\Models\Contact;
-use FluxErp\Tests\Livewire\BaseSetup;
 use Livewire\Livewire;
 
-class WorkTimesTest extends BaseSetup
-{
-    protected function setUp(): void
-    {
-        parent::setUp();
+beforeEach(function (): void {
+    $this->contact = Contact::factory()->create([
+        'client_id' => $this->dbClient->getKey(),
+    ]);
+});
 
-        $this->contact = Contact::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-        ]);
-    }
-
-    public function test_renders_successfully(): void
-    {
-        Livewire::test(WorkTimes::class, ['contactId' => $this->contact->id])
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test(WorkTimes::class, ['contactId' => $this->contact->id])
+        ->assertStatus(200);
+});

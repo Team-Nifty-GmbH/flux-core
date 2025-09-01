@@ -1,31 +1,24 @@
 <?php
 
-namespace FluxErp\Tests\Feature\Web;
-
+uses(FluxErp\Tests\Feature\Web\BaseSetup::class);
 use FluxErp\Models\Permission;
 
-class SettingsTranslationsTest extends BaseSetup
-{
-    public function test_settings_translations_no_user(): void
-    {
-        $this->get('/settings/translations')
-            ->assertStatus(302)
-            ->assertRedirect(route('login'));
-    }
+test('settings translations no user', function (): void {
+    $this->get('/settings/translations')
+        ->assertStatus(302)
+        ->assertRedirect(route('login'));
+});
 
-    public function test_settings_translations_page(): void
-    {
-        $this->user->givePermissionTo(Permission::findOrCreate('settings.translations.get', 'web'));
+test('settings translations page', function (): void {
+    $this->user->givePermissionTo(Permission::findOrCreate('settings.translations.get', 'web'));
 
-        $this->actingAs($this->user, 'web')->get('/settings/translations')
-            ->assertStatus(200);
-    }
+    $this->actingAs($this->user, 'web')->get('/settings/translations')
+        ->assertStatus(200);
+});
 
-    public function test_settings_translations_without_permission(): void
-    {
-        Permission::findOrCreate('settings.translations.get', 'web');
+test('settings translations without permission', function (): void {
+    Permission::findOrCreate('settings.translations.get', 'web');
 
-        $this->actingAs($this->user, 'web')->get('/settings/translations')
-            ->assertStatus(403);
-    }
-}
+    $this->actingAs($this->user, 'web')->get('/settings/translations')
+        ->assertStatus(403);
+});

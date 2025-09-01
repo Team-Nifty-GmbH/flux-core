@@ -1,90 +1,74 @@
 <?php
 
-namespace FluxErp\Tests\Feature\Web;
-
+uses(FluxErp\Tests\Feature\Web\BaseSetup::class);
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Ticket;
 
-class TicketsTest extends BaseSetup
-{
-    private Ticket $ticket;
+beforeEach(function (): void {
+    $dbContact = Contact::factory()->create([
+        'client_id' => $this->dbClient->getKey(),
+    ]);
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+    $address = Address::factory()->create([
+        'client_id' => $dbContact->client_id,
+        'language_id' => $this->user->language_id,
+        'contact_id' => $dbContact->id,
+        'is_main_address' => true,
+    ]);
 
-        $dbContact = Contact::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-        ]);
+    $this->ticket = Ticket::factory()->create([
+        'authenticatable_type' => morph_alias(Address::class),
+        'authenticatable_id' => $address->id,
+    ]);
+});
 
-        $address = Address::factory()->create([
-            'client_id' => $dbContact->client_id,
-            'language_id' => $this->user->language_id,
-            'contact_id' => $dbContact->id,
-            'is_main_address' => true,
-        ]);
+test('tickets id no user', function (): void {
+    $this->get('/tickets/' . $this->ticket->id)
+        ->assertStatus(302)
+        ->assertRedirect(route('login'));
+});
 
-        $this->ticket = Ticket::factory()->create([
-            'authenticatable_type' => morph_alias(Address::class),
-            'authenticatable_id' => $address->id,
-        ]);
-    }
+test('tickets id page', function (): void {
+    $this->user->givePermissionTo(Permission::findOrCreate('tickets.{id}.get', 'web'));
 
-    public function test_tickets_id_no_user(): void
-    {
-        $this->get('/tickets/' . $this->ticket->id)
-            ->assertStatus(302)
-            ->assertRedirect(route('login'));
-    }
+    $this->actingAs($this->user, 'web')->get('/tickets/' . $this->ticket->id)
+        ->assertStatus(200);
+});
 
-    public function test_tickets_id_page(): void
-    {
-        $this->user->givePermissionTo(Permission::findOrCreate('tickets.{id}.get', 'web'));
+test('tickets id ticket not found', function (): void {
+    $this->ticket->delete();
 
-        $this->actingAs($this->user, 'web')->get('/tickets/' . $this->ticket->id)
-            ->assertStatus(200);
-    }
+    $this->user->givePermissionTo(Permission::findOrCreate('tickets.{id}.get', 'web'));
 
-    public function test_tickets_id_ticket_not_found(): void
-    {
-        $this->ticket->delete();
+    $this->actingAs($this->user, 'web')->get('/tickets/' . $this->ticket->id)
+        ->assertStatus(404);
+});
 
-        $this->user->givePermissionTo(Permission::findOrCreate('tickets.{id}.get', 'web'));
+test('tickets id without permission', function (): void {
+    Permission::findOrCreate('tickets.{id}.get', 'web');
 
-        $this->actingAs($this->user, 'web')->get('/tickets/' . $this->ticket->id)
-            ->assertStatus(404);
-    }
+    $this->actingAs($this->user, 'web')->get('/tickets/' . $this->ticket->id)
+        ->assertStatus(403);
+});
 
-    public function test_tickets_id_without_permission(): void
-    {
-        Permission::findOrCreate('tickets.{id}.get', 'web');
+test('tickets no user', function (): void {
+    $this->get('/tickets')
+        ->assertStatus(302)
+        ->assertRedirect(route('login'));
+});
 
-        $this->actingAs($this->user, 'web')->get('/tickets/' . $this->ticket->id)
-            ->assertStatus(403);
-    }
+test('tickets page', function (): void {
+    $this->user->givePermissionTo(Permission::findOrCreate('tickets.get', 'web'));
 
-    public function test_tickets_no_user(): void
-    {
-        $this->get('/tickets')
-            ->assertStatus(302)
-            ->assertRedirect(route('login'));
-    }
+    $this->actingAs($this->user, 'web')->get('/tickets')
+        ->assertStatus(200);
+});
 
-    public function test_tickets_page(): void
-    {
-        $this->user->givePermissionTo(Permission::findOrCreate('tickets.get', 'web'));
+test('tickets without permission', function (): void {
+    Permission::findOrCreate('tickets.get', 'web');
 
-        $this->actingAs($this->user, 'web')->get('/tickets')
-            ->assertStatus(200);
-    }
-
-    public function test_tickets_without_permission(): void
-    {
-        Permission::findOrCreate('tickets.get', 'web');
-
-        $this->actingAs($this->user, 'web')->get('/tickets')
-            ->assertStatus(403);
-    }
-}
+    $this->actingAs($this->user, 'web')->get('/tickets')
+        ->assertStatus(403);
+});

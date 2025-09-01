@@ -1,26 +1,17 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Widgets;
-
+uses(FluxErp\Tests\TestCase::class);
 use FluxErp\Livewire\Widgets\Revenue;
 use FluxErp\Models\Currency;
-use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
-class RevenueTest extends TestCase
-{
-    protected function setUp(): void
-    {
-        parent::setUp();
+beforeEach(function (): void {
+    Currency::factory()->create([
+        'is_default' => true,
+    ]);
+});
 
-        Currency::factory()->create([
-            'is_default' => true,
-        ]);
-    }
-
-    public function test_renders_successfully(): void
-    {
-        Livewire::test(Revenue::class)
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test(Revenue::class)
+        ->assertStatus(200);
+});

@@ -1,18 +1,9 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\DataTables;
-
-use FluxErp\Livewire\DataTables\LeadStateList;
-use FluxErp\Tests\TestCase;
+uses(FluxErp\Tests\TestCase::class);
 use Livewire\Livewire;
 
-class LeadStateListTest extends TestCase
-{
-    protected string $livewireComponent = LeadStateList::class;
-
-    public function test_renders_successfully(): void
-    {
-        Livewire::test($this->livewireComponent)
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test($this->livewireComponent)
+        ->assertStatus(200);
+});

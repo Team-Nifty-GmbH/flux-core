@@ -1,186 +1,162 @@
 <?php
 
-namespace FluxErp\Tests\Feature\Api;
-
+uses(FluxErp\Tests\Feature\BaseSetup::class);
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Warehouse;
-use FluxErp\Tests\Feature\BaseSetup;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
-class WarehouseTest extends BaseSetup
-{
-    private Collection $addresses;
+beforeEach(function (): void {
+    $dbContact = Contact::factory()->create([
+        'client_id' => $this->dbClient->getKey(),
+    ]);
 
-    private array $permissions;
+    $this->addresses = Address::factory()->count(3)->create([
+        'contact_id' => $dbContact->id,
+        'client_id' => $this->dbClient->getKey(),
+        'is_main_address' => false,
+    ]);
 
-    private Collection $warehouses;
+    $this->warehouses = Warehouse::factory()->count(3)->create([
+        'address_id' => $this->addresses[0]->id,
+    ]);
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+    $this->permissions = [
+        'show' => Permission::findOrCreate('api.warehouses.{id}.get'),
+        'index' => Permission::findOrCreate('api.warehouses.get'),
+        'create' => Permission::findOrCreate('api.warehouses.post'),
+        'update' => Permission::findOrCreate('api.warehouses.put'),
+        'delete' => Permission::findOrCreate('api.warehouses.{id}.delete'),
+    ];
+});
 
-        $dbContact = Contact::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-        ]);
+test('create warehouse', function (): void {
+    $warehouse = [
+        'name' => Str::random(),
+        'address_id' => $this->addresses[0]->id,
+    ];
 
-        $this->addresses = Address::factory()->count(3)->create([
-            'contact_id' => $dbContact->id,
-            'client_id' => $this->dbClient->getKey(),
-            'is_main_address' => false,
-        ]);
+    $this->user->givePermissionTo($this->permissions['create']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $this->warehouses = Warehouse::factory()->count(3)->create([
-            'address_id' => $this->addresses[0]->id,
-        ]);
+    $response = $this->actingAs($this->user)->post('/api/warehouses', $warehouse);
+    $response->assertStatus(201);
 
-        $this->permissions = [
-            'show' => Permission::findOrCreate('api.warehouses.{id}.get'),
-            'index' => Permission::findOrCreate('api.warehouses.get'),
-            'create' => Permission::findOrCreate('api.warehouses.post'),
-            'update' => Permission::findOrCreate('api.warehouses.put'),
-            'delete' => Permission::findOrCreate('api.warehouses.{id}.delete'),
-        ];
-    }
+    $responseWarehouse = json_decode($response->getContent())->data;
+    $dbWarehouse = Warehouse::query()
+        ->whereKey($responseWarehouse->id)
+        ->first();
 
-    public function test_create_warehouse(): void
-    {
-        $warehouse = [
-            'name' => Str::random(),
-            'address_id' => $this->addresses[0]->id,
-        ];
+    expect($dbWarehouse->name)->toEqual($warehouse['name']);
+    expect($dbWarehouse->address_id)->toEqual($warehouse['address_id']);
+});
 
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
+test('create warehouse validation fails', function (): void {
+    $warehouse = [
+        'address_id' => $this->addresses[0]->id,
+    ];
 
-        $response = $this->actingAs($this->user)->post('/api/warehouses', $warehouse);
-        $response->assertStatus(201);
+    $this->user->givePermissionTo($this->permissions['create']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $responseWarehouse = json_decode($response->getContent())->data;
-        $dbWarehouse = Warehouse::query()
-            ->whereKey($responseWarehouse->id)
-            ->first();
+    $response = $this->actingAs($this->user)->post('/api/warehouses', $warehouse);
+    $response->assertStatus(422);
+});
 
-        $this->assertEquals($warehouse['name'], $dbWarehouse->name);
-        $this->assertEquals($warehouse['address_id'], $dbWarehouse->address_id);
-    }
+test('delete warehouse', function (): void {
+    $this->user->givePermissionTo($this->permissions['delete']);
+    Sanctum::actingAs($this->user, ['user']);
 
-    public function test_create_warehouse_validation_fails(): void
-    {
-        $warehouse = [
-            'address_id' => $this->addresses[0]->id,
-        ];
+    $response = $this->actingAs($this->user)->delete('/api/warehouses/' . $this->warehouses[0]->id);
+    $response->assertStatus(204);
 
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
+    expect(Warehouse::query()->whereKey($this->warehouses[0]->id)->exists())->toBeFalse();
+});
 
-        $response = $this->actingAs($this->user)->post('/api/warehouses', $warehouse);
-        $response->assertStatus(422);
-    }
+test('delete warehouse warehouse not found', function (): void {
+    $this->user->givePermissionTo($this->permissions['delete']);
+    Sanctum::actingAs($this->user, ['user']);
 
-    public function test_delete_warehouse(): void
-    {
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
+    $response = $this->actingAs($this->user)->delete('/api/warehouses/' . ++$this->warehouses[2]->id);
+    $response->assertStatus(404);
+});
 
-        $response = $this->actingAs($this->user)->delete('/api/warehouses/' . $this->warehouses[0]->id);
-        $response->assertStatus(204);
+test('get warehouse', function (): void {
+    $this->user->givePermissionTo($this->permissions['show']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $this->assertFalse(Warehouse::query()->whereKey($this->warehouses[0]->id)->exists());
-    }
+    $response = $this->actingAs($this->user)->get('/api/warehouses/' . $this->warehouses[0]->id);
+    $response->assertStatus(200);
 
-    public function test_delete_warehouse_warehouse_not_found(): void
-    {
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
+    $warehouse = json_decode($response->getContent())->data;
 
-        $response = $this->actingAs($this->user)->delete('/api/warehouses/' . ++$this->warehouses[2]->id);
-        $response->assertStatus(404);
-    }
+    expect($warehouse->id)->toEqual($this->warehouses[0]->id);
+    expect($warehouse->address_id)->toEqual($this->warehouses[0]->address_id);
+    expect($warehouse->name)->toEqual($this->warehouses[0]->name);
+});
 
-    public function test_get_warehouse(): void
-    {
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
+test('get warehouse warehouse not found', function (): void {
+    $this->user->givePermissionTo($this->permissions['show']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/warehouses/' . $this->warehouses[0]->id);
-        $response->assertStatus(200);
+    $response = $this->actingAs($this->user)->get('/api/warehouses/' . $this->warehouses[2]->id + 10000);
+    $response->assertStatus(404);
+});
 
-        $warehouse = json_decode($response->getContent())->data;
+test('get warehouses', function (): void {
+    $this->user->givePermissionTo($this->permissions['index']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $this->assertEquals($this->warehouses[0]->id, $warehouse->id);
-        $this->assertEquals($this->warehouses[0]->address_id, $warehouse->address_id);
-        $this->assertEquals($this->warehouses[0]->name, $warehouse->name);
-    }
+    $response = $this->actingAs($this->user)->get('/api/warehouses');
+    $response->assertStatus(200);
 
-    public function test_get_warehouse_warehouse_not_found(): void
-    {
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
+    $warehouses = json_decode($response->getContent())->data;
 
-        $response = $this->actingAs($this->user)->get('/api/warehouses/' . $this->warehouses[2]->id + 10000);
-        $response->assertStatus(404);
-    }
+    expect($warehouses->data[0]->id)->toEqual($this->warehouses[0]->id);
+    expect($warehouses->data[0]->address_id)->toEqual($this->warehouses[0]->address_id);
+    expect($warehouses->data[0]->name)->toEqual($this->warehouses[0]->name);
+    expect($warehouses->data[1]->id)->toEqual($this->warehouses[1]->id);
+    expect($warehouses->data[1]->address_id)->toEqual($this->warehouses[1]->address_id);
+    expect($warehouses->data[1]->name)->toEqual($this->warehouses[1]->name);
+    expect($warehouses->data[2]->id)->toEqual($this->warehouses[2]->id);
+    expect($warehouses->data[2]->address_id)->toEqual($this->warehouses[2]->address_id);
+    expect($warehouses->data[2]->name)->toEqual($this->warehouses[2]->name);
+});
 
-    public function test_get_warehouses(): void
-    {
-        $this->user->givePermissionTo($this->permissions['index']);
-        Sanctum::actingAs($this->user, ['user']);
+test('update warehouse', function (): void {
+    $warehouse = [
+        'id' => $this->warehouses[0]->id,
+        'name' => Str::random(),
+        'address_id' => $this->addresses[0]->id,
+    ];
 
-        $response = $this->actingAs($this->user)->get('/api/warehouses');
-        $response->assertStatus(200);
+    $this->user->givePermissionTo($this->permissions['update']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $warehouses = json_decode($response->getContent())->data;
+    $response = $this->actingAs($this->user)->put('/api/warehouses', $warehouse);
+    $response->assertStatus(200);
 
-        $this->assertEquals($this->warehouses[0]->id, $warehouses->data[0]->id);
-        $this->assertEquals($this->warehouses[0]->address_id, $warehouses->data[0]->address_id);
-        $this->assertEquals($this->warehouses[0]->name, $warehouses->data[0]->name);
-        $this->assertEquals($this->warehouses[1]->id, $warehouses->data[1]->id);
-        $this->assertEquals($this->warehouses[1]->address_id, $warehouses->data[1]->address_id);
-        $this->assertEquals($this->warehouses[1]->name, $warehouses->data[1]->name);
-        $this->assertEquals($this->warehouses[2]->id, $warehouses->data[2]->id);
-        $this->assertEquals($this->warehouses[2]->address_id, $warehouses->data[2]->address_id);
-        $this->assertEquals($this->warehouses[2]->name, $warehouses->data[2]->name);
-    }
+    $responseWarehouse = json_decode($response->getContent())->data;
+    $dbWarehouse = Warehouse::query()
+        ->whereKey($responseWarehouse->id)
+        ->first();
 
-    public function test_update_warehouse(): void
-    {
-        $warehouse = [
-            'id' => $this->warehouses[0]->id,
-            'name' => Str::random(),
-            'address_id' => $this->addresses[0]->id,
-        ];
+    expect($dbWarehouse->id)->toEqual($warehouse['id']);
+    expect($dbWarehouse->name)->toEqual($warehouse['name']);
+    expect($dbWarehouse->address_id)->toEqual($warehouse['address_id']);
+});
 
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
+test('update warehouse validation fails', function (): void {
+    $warehouse = [
+        'name' => Str::random(),
+        'address_id' => $this->addresses[0]->id,
+    ];
 
-        $response = $this->actingAs($this->user)->put('/api/warehouses', $warehouse);
-        $response->assertStatus(200);
+    $this->user->givePermissionTo($this->permissions['update']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $responseWarehouse = json_decode($response->getContent())->data;
-        $dbWarehouse = Warehouse::query()
-            ->whereKey($responseWarehouse->id)
-            ->first();
-
-        $this->assertEquals($warehouse['id'], $dbWarehouse->id);
-        $this->assertEquals($warehouse['name'], $dbWarehouse->name);
-        $this->assertEquals($warehouse['address_id'], $dbWarehouse->address_id);
-    }
-
-    public function test_update_warehouse_validation_fails(): void
-    {
-        $warehouse = [
-            'name' => Str::random(),
-            'address_id' => $this->addresses[0]->id,
-        ];
-
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->put('/api/warehouses', $warehouse);
-        $response->assertStatus(422);
-    }
-}
+    $response = $this->actingAs($this->user)->put('/api/warehouses', $warehouse);
+    $response->assertStatus(422);
+});

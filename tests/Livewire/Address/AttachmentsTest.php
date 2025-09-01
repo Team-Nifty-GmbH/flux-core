@@ -1,18 +1,9 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Address;
-
-use FluxErp\Livewire\Address\Attachments;
-use FluxErp\Tests\TestCase;
+uses(FluxErp\Tests\TestCase::class);
 use Livewire\Livewire;
 
-class AttachmentsTest extends TestCase
-{
-    protected string $livewireComponent = Attachments::class;
-
-    public function test_renders_successfully(): void
-    {
-        Livewire::test($this->livewireComponent)
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test($this->livewireComponent)
+        ->assertStatus(200);
+});

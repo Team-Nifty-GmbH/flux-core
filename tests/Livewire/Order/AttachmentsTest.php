@@ -1,16 +1,10 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Order;
-
+uses(FluxErp\Tests\TestCase::class);
 use FluxErp\Livewire\Order\Attachments;
-use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
-class AttachmentsTest extends TestCase
-{
-    public function test_renders_successfully(): void
-    {
-        Livewire::test(Attachments::class, ['orderId' => 1])
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test(Attachments::class, ['orderId' => 1])
+        ->assertStatus(200);
+});

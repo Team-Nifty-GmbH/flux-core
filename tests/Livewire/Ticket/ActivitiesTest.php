@@ -1,29 +1,18 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Ticket;
-
+uses(FluxErp\Tests\Livewire\BaseSetup::class);
 use FluxErp\Livewire\Ticket\Activities;
 use FluxErp\Models\Ticket;
-use FluxErp\Tests\Livewire\BaseSetup;
 use Livewire\Livewire;
 
-class ActivitiesTest extends BaseSetup
-{
-    private Ticket $ticket;
+beforeEach(function (): void {
+    $this->ticket = Ticket::factory()->create([
+        'authenticatable_id' => $this->user->id,
+        'authenticatable_type' => $this->user->getMorphClass(),
+    ]);
+});
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->ticket = Ticket::factory()->create([
-            'authenticatable_id' => $this->user->id,
-            'authenticatable_type' => $this->user->getMorphClass(),
-        ]);
-    }
-
-    public function test_renders_successfully(): void
-    {
-        Livewire::test(Activities::class, ['modelId' => $this->ticket->id])
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test(Activities::class, ['modelId' => $this->ticket->id])
+        ->assertStatus(200);
+});

@@ -1,7 +1,6 @@
 <?php
 
-namespace FluxErp\Tests\Feature\Web;
-
+uses(FluxErp\Tests\Feature\Web\BaseSetup::class);
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
@@ -14,78 +13,69 @@ use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
 use FluxErp\Models\PriceList;
 
-class OrderPositionsTest extends BaseSetup
-{
-    protected function setUp(): void
-    {
-        parent::setUp();
+beforeEach(function (): void {
+    $contact = Contact::factory()->create([
+        'client_id' => $this->dbClient->getKey(),
+    ]);
 
-        $contact = Contact::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
+    $address = Address::factory()->create([
+        'client_id' => $this->dbClient->getKey(),
+        'contact_id' => $contact->id,
+    ]);
+
+    $priceList = PriceList::factory()->create();
+
+    $currency = Currency::factory()->create([
+        'is_default' => true,
+    ]);
+
+    $language = Language::factory()->create();
+
+    $orderType = OrderType::factory()->create([
+        'client_id' => $this->dbClient->getKey(),
+        'order_type_enum' => OrderTypeEnum::Order,
+    ]);
+
+    $paymentType = PaymentType::factory()
+        ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+        ->create([
+            'is_default' => false,
         ]);
 
-        $address = Address::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-            'contact_id' => $contact->id,
-        ]);
+    $order = Order::factory()->create([
+        'client_id' => $this->dbClient->getKey(),
+        'language_id' => $language->id,
+        'order_type_id' => $orderType->id,
+        'payment_type_id' => $paymentType->id,
+        'price_list_id' => $priceList->id,
+        'currency_id' => $currency->id,
+        'address_invoice_id' => $address->id,
+        'address_delivery_id' => $address->id,
+        'is_locked' => false,
+    ]);
 
-        $priceList = PriceList::factory()->create();
+    OrderPosition::factory()->create([
+        'client_id' => $this->dbClient->getKey(),
+        'order_id' => $order->id,
+    ]);
+});
 
-        $currency = Currency::factory()->create([
-            'is_default' => true,
-        ]);
+test('order positions no user', function (): void {
+    $this->get('/orders/order-positions/list')
+        ->assertStatus(302)
+        ->assertRedirect(route('login'));
+});
 
-        $language = Language::factory()->create();
+test('order positions page', function (): void {
+    $this->user->givePermissionTo(Permission::findOrCreate('orders.order-positions.list.get', 'web'));
 
-        $orderType = OrderType::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-            'order_type_enum' => OrderTypeEnum::Order,
-        ]);
+    $this->actingAs($this->user, 'web')->get('/orders/order-positions/list')
+        ->assertStatus(200);
+});
 
-        $paymentType = PaymentType::factory()
-            ->hasAttached(factory: $this->dbClient, relationship: 'clients')
-            ->create([
-                'is_default' => false,
-            ]);
+test('order positions without permission', function (): void {
+    Permission::findOrCreate('orders.order-positions.list.get', 'web');
 
-        $order = Order::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-            'language_id' => $language->id,
-            'order_type_id' => $orderType->id,
-            'payment_type_id' => $paymentType->id,
-            'price_list_id' => $priceList->id,
-            'currency_id' => $currency->id,
-            'address_invoice_id' => $address->id,
-            'address_delivery_id' => $address->id,
-            'is_locked' => false,
-        ]);
-
-        OrderPosition::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-            'order_id' => $order->id,
-        ]);
-    }
-
-    public function test_order_positions_no_user(): void
-    {
-        $this->get('/orders/order-positions/list')
-            ->assertStatus(302)
-            ->assertRedirect(route('login'));
-    }
-
-    public function test_order_positions_page(): void
-    {
-        $this->user->givePermissionTo(Permission::findOrCreate('orders.order-positions.list.get', 'web'));
-
-        $this->actingAs($this->user, 'web')->get('/orders/order-positions/list')
-            ->assertStatus(200);
-    }
-
-    public function test_order_positions_without_permission(): void
-    {
-        Permission::findOrCreate('orders.order-positions.list.get', 'web');
-
-        $this->actingAs($this->user, 'web')->get('/orders/order-positions/list')
-            ->assertStatus(403);
-    }
-}
+    $this->actingAs($this->user, 'web')->get('/orders/order-positions/list')
+        ->assertStatus(403);
+});

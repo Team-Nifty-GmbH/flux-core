@@ -1,16 +1,10 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Contact;
-
+uses(FluxErp\Tests\TestCase::class);
 use FluxErp\Livewire\Contact\Orders;
-use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
-class OrdersTest extends TestCase
-{
-    public function test_renders_successfully(): void
-    {
-        Livewire::test(Orders::class)
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test(Orders::class)
+        ->assertStatus(200);
+});

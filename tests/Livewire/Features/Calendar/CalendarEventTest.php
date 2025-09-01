@@ -1,18 +1,9 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Features\Calendar;
-
-use FluxErp\Livewire\Features\Calendar\CalendarEvent;
-use FluxErp\Tests\TestCase;
+uses(FluxErp\Tests\TestCase::class);
 use Livewire\Livewire;
 
-class CalendarEventTest extends TestCase
-{
-    protected string $livewireComponent = CalendarEvent::class;
-
-    public function test_renders_successfully(): void
-    {
-        Livewire::test($this->livewireComponent)
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test($this->livewireComponent)
+        ->assertStatus(200);
+});

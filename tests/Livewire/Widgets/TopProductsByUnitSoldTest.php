@@ -1,18 +1,9 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Widgets;
-
-use FluxErp\Livewire\Widgets\TopProductsByUnitSold;
-use FluxErp\Tests\TestCase;
+uses(FluxErp\Tests\TestCase::class);
 use Livewire\Livewire;
 
-class TopProductsByUnitSoldTest extends TestCase
-{
-    protected string $livewireComponent = TopProductsByUnitSold::class;
-
-    public function test_renders_successfully(): void
-    {
-        Livewire::test($this->livewireComponent)
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test($this->livewireComponent)
+        ->assertStatus(200);
+});

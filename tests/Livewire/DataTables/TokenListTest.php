@@ -1,18 +1,9 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\DataTables;
-
-use FluxErp\Livewire\DataTables\TokenList;
-use FluxErp\Tests\TestCase;
+uses(FluxErp\Tests\TestCase::class);
 use Livewire\Livewire;
 
-class TokenListTest extends TestCase
-{
-    protected string $livewireComponent = TokenList::class;
-
-    public function test_renders_successfully(): void
-    {
-        Livewire::test($this->livewireComponent)
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test($this->livewireComponent)
+        ->assertStatus(200);
+});

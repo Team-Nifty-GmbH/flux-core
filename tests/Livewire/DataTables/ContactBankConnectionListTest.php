@@ -1,16 +1,10 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\DataTables;
-
+uses(FluxErp\Tests\TestCase::class);
 use FluxErp\Livewire\DataTables\ContactBankConnectionList;
-use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
-class ContactBankConnectionListTest extends TestCase
-{
-    public function test_renders_successfully(): void
-    {
-        Livewire::test(ContactBankConnectionList::class)
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test(ContactBankConnectionList::class)
+        ->assertStatus(200);
+});

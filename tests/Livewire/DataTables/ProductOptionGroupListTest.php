@@ -1,16 +1,10 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\DataTables;
-
+uses(FluxErp\Tests\TestCase::class);
 use FluxErp\Livewire\DataTables\ProductOptionGroupList;
-use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
-class ProductOptionGroupListTest extends TestCase
-{
-    public function test_renders_successfully(): void
-    {
-        Livewire::test(ProductOptionGroupList::class)
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test(ProductOptionGroupList::class)
+        ->assertStatus(200);
+});

@@ -1,18 +1,9 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Widgets;
-
-use FluxErp\Livewire\Widgets\PurchaseInvoiceApproval;
-use FluxErp\Tests\TestCase;
+uses(FluxErp\Tests\TestCase::class);
 use Livewire\Livewire;
 
-class PurchaseInvoiceApprovalTest extends TestCase
-{
-    protected string $livewireComponent = PurchaseInvoiceApproval::class;
-
-    public function test_renders_successfully(): void
-    {
-        Livewire::test($this->livewireComponent)
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test($this->livewireComponent)
+        ->assertStatus(200);
+});

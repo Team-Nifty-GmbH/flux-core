@@ -1,16 +1,10 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\DataTables;
-
+uses(FluxErp\Tests\TestCase::class);
 use FluxErp\Livewire\DataTables\ScheduleList;
-use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
-class ScheduleListTest extends TestCase
-{
-    public function test_renders_successfully(): void
-    {
-        Livewire::test(ScheduleList::class)
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test(ScheduleList::class)
+        ->assertStatus(200);
+});

@@ -1,16 +1,10 @@
 <?php
 
-namespace FluxErp\Tests\Livewire;
-
+uses(FluxErp\Tests\TestCase::class);
 use FluxErp\Livewire\ToggleDarkMode;
-use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
-class ToggleDarkModeTest extends TestCase
-{
-    public function test_renders_successfully(): void
-    {
-        Livewire::test(ToggleDarkMode::class)
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test(ToggleDarkMode::class)
+        ->assertStatus(200);
+});

@@ -1,16 +1,10 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Settings;
-
+uses(FluxErp\Tests\TestCase::class);
 use FluxErp\Livewire\Settings\ActivityLogs;
-use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
-class ActivityLogsTest extends TestCase
-{
-    public function test_renders_successfully(): void
-    {
-        Livewire::test(ActivityLogs::class)
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test(ActivityLogs::class)
+        ->assertStatus(200);
+});

@@ -1,32 +1,21 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Project;
-
+uses(FluxErp\Tests\TestCase::class);
 use FluxErp\Livewire\Project\ProjectTaskList;
 use FluxErp\Models\Client;
 use FluxErp\Models\Project;
-use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
-class ProjectTaskListTest extends TestCase
-{
-    private Project $project;
+beforeEach(function (): void {
+    $client = Client::factory()->create([
+        'is_default' => true,
+    ]);
+    $this->project = Project::factory()->create([
+        'client_id' => $client->id,
+    ]);
+});
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $client = Client::factory()->create([
-            'is_default' => true,
-        ]);
-        $this->project = Project::factory()->create([
-            'client_id' => $client->id,
-        ]);
-    }
-
-    public function test_renders_successfully(): void
-    {
-        Livewire::test(ProjectTaskList::class, ['projectId' => $this->project->id])
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test(ProjectTaskList::class, ['projectId' => $this->project->id])
+        ->assertStatus(200);
+});

@@ -1,16 +1,10 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\DataTables;
-
+uses(FluxErp\Tests\TestCase::class);
 use FluxErp\Livewire\DataTables\PaymentReminderList;
-use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
-class PaymentReminderListTest extends TestCase
-{
-    public function test_renders_successfully(): void
-    {
-        Livewire::test(PaymentReminderList::class)
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test(PaymentReminderList::class)
+        ->assertStatus(200);
+});

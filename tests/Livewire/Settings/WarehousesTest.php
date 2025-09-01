@@ -1,16 +1,10 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Settings;
-
+uses(FluxErp\Tests\TestCase::class);
 use FluxErp\Livewire\Settings\Warehouses;
-use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
-class WarehousesTest extends TestCase
-{
-    public function test_renders_successfully(): void
-    {
-        Livewire::test(Warehouses::class)
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test(Warehouses::class)
+        ->assertStatus(200);
+});

@@ -1,60 +1,44 @@
 <?php
 
-namespace FluxErp\Tests\Feature\Web;
-
+uses(FluxErp\Tests\Feature\Web\BaseSetup::class);
 use FluxErp\Models\Permission;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-class MediaTest extends BaseSetup
-{
-    private string $filename;
+beforeEach(function (): void {
+    $file = UploadedFile::fake()->image('TestFile.png');
 
-    private Media $media;
+    $this->media = $this->user->addMedia($file)
+        ->usingFileName($this->filename = Str::random() . '.png')
+        ->toMediaCollection();
+});
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+test('download media', function (): void {
+    $this->user->givePermissionTo(Permission::findOrCreate('media.{media}.{filename}.get', 'web'));
 
-        $file = UploadedFile::fake()->image('TestFile.png');
+    $this->actingAs($this->user, 'web')->get('/media/' . $this->media->id . '/' . $this->filename)
+        ->assertStatus(200)
+        ->assertDownload();
+});
 
-        $this->media = $this->user->addMedia($file)
-            ->usingFileName($this->filename = Str::random() . '.png')
-            ->toMediaCollection();
-    }
+test('download media media not found', function (): void {
+    $this->media->delete();
 
-    public function test_download_media(): void
-    {
-        $this->user->givePermissionTo(Permission::findOrCreate('media.{media}.{filename}.get', 'web'));
+    $this->user->givePermissionTo(Permission::findOrCreate('media.{media}.{filename}.get', 'web'));
 
-        $this->actingAs($this->user, 'web')->get('/media/' . $this->media->id . '/' . $this->filename)
-            ->assertStatus(200)
-            ->assertDownload();
-    }
+    $this->actingAs($this->user, 'web')->get('/media/' . $this->media->id . '/' . $this->filename)
+        ->assertStatus(404);
+});
 
-    public function test_download_media_media_not_found(): void
-    {
-        $this->media->delete();
+test('download media no user', function (): void {
+    $this->get('/media/' . $this->media->id . '/' . $this->filename)
+        ->assertStatus(302)
+        ->assertRedirect(route('login'));
+});
 
-        $this->user->givePermissionTo(Permission::findOrCreate('media.{media}.{filename}.get', 'web'));
+test('download media without permission', function (): void {
+    Permission::findOrCreate('media.{media}.{filename}.get', 'web');
 
-        $this->actingAs($this->user, 'web')->get('/media/' . $this->media->id . '/' . $this->filename)
-            ->assertStatus(404);
-    }
-
-    public function test_download_media_no_user(): void
-    {
-        $this->get('/media/' . $this->media->id . '/' . $this->filename)
-            ->assertStatus(302)
-            ->assertRedirect(route('login'));
-    }
-
-    public function test_download_media_without_permission(): void
-    {
-        Permission::findOrCreate('media.{media}.{filename}.get', 'web');
-
-        $this->actingAs($this->user, 'web')->get('/media/' . $this->media->id . '/' . $this->filename)
-            ->assertStatus(403);
-    }
-}
+    $this->actingAs($this->user, 'web')->get('/media/' . $this->media->id . '/' . $this->filename)
+        ->assertStatus(403);
+});

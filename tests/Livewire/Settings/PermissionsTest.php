@@ -1,16 +1,10 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Settings;
-
+uses(FluxErp\Tests\TestCase::class);
 use FluxErp\Livewire\Settings\Permissions;
-use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
-class PermissionsTest extends TestCase
-{
-    public function test_renders_successfully(): void
-    {
-        Livewire::test(Permissions::class)
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test(Permissions::class)
+        ->assertStatus(200);
+});

@@ -1,76 +1,60 @@
 <?php
 
-namespace FluxErp\Tests\Feature\Web;
-
+uses(FluxErp\Tests\Feature\Web\BaseSetup::class);
 use FluxErp\Models\Permission;
 use FluxErp\Models\Project;
 
-class ProjectsTest extends BaseSetup
-{
-    private Project $project;
+beforeEach(function (): void {
+    $this->project = Project::factory()->create([
+        'client_id' => $this->dbClient->getKey(),
+    ]);
+});
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+test('projects id no user', function (): void {
+    $this->get('/projects/' . $this->project->id)
+        ->assertStatus(302)
+        ->assertRedirect(route('login'));
+});
 
-        $this->project = Project::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-        ]);
-    }
+test('projects id page', function (): void {
+    $this->user->givePermissionTo(Permission::findOrCreate('projects.{id}.get', 'web'));
 
-    public function test_projects_id_no_user(): void
-    {
-        $this->get('/projects/' . $this->project->id)
-            ->assertStatus(302)
-            ->assertRedirect(route('login'));
-    }
+    $this->actingAs($this->user, 'web')->get('/projects/' . $this->project->id)
+        ->assertStatus(200);
+});
 
-    public function test_projects_id_page(): void
-    {
-        $this->user->givePermissionTo(Permission::findOrCreate('projects.{id}.get', 'web'));
+test('projects id project not found', function (): void {
+    $this->project->delete();
 
-        $this->actingAs($this->user, 'web')->get('/projects/' . $this->project->id)
-            ->assertStatus(200);
-    }
+    $this->user->givePermissionTo(Permission::findOrCreate('projects.{id}.get', 'web'));
 
-    public function test_projects_id_project_not_found(): void
-    {
-        $this->project->delete();
+    $this->actingAs($this->user, 'web')->get('/projects/' . $this->project->id)
+        ->assertStatus(404);
+});
 
-        $this->user->givePermissionTo(Permission::findOrCreate('projects.{id}.get', 'web'));
+test('projects id without permission', function (): void {
+    Permission::findOrCreate('projects.{id}.get', 'web');
 
-        $this->actingAs($this->user, 'web')->get('/projects/' . $this->project->id)
-            ->assertStatus(404);
-    }
+    $this->actingAs($this->user, 'web')->get('/projects/' . $this->project->id)
+        ->assertStatus(403);
+});
 
-    public function test_projects_id_without_permission(): void
-    {
-        Permission::findOrCreate('projects.{id}.get', 'web');
+test('projects list no user', function (): void {
+    $this->get('/projects')
+        ->assertStatus(302)
+        ->assertRedirect(route('login'));
+});
 
-        $this->actingAs($this->user, 'web')->get('/projects/' . $this->project->id)
-            ->assertStatus(403);
-    }
+test('projects list page', function (): void {
+    $this->user->givePermissionTo(Permission::findOrCreate('projects.get', 'web'));
 
-    public function test_projects_list_no_user(): void
-    {
-        $this->get('/projects')
-            ->assertStatus(302)
-            ->assertRedirect(route('login'));
-    }
+    $this->actingAs($this->user, 'web')->get('/projects')
+        ->assertStatus(200);
+});
 
-    public function test_projects_list_page(): void
-    {
-        $this->user->givePermissionTo(Permission::findOrCreate('projects.get', 'web'));
+test('projects list without permission', function (): void {
+    Permission::findOrCreate('projects.get', 'web');
 
-        $this->actingAs($this->user, 'web')->get('/projects')
-            ->assertStatus(200);
-    }
-
-    public function test_projects_list_without_permission(): void
-    {
-        Permission::findOrCreate('projects.get', 'web');
-
-        $this->actingAs($this->user, 'web')->get('/projects')
-            ->assertStatus(403);
-    }
-}
+    $this->actingAs($this->user, 'web')->get('/projects')
+        ->assertStatus(403);
+});

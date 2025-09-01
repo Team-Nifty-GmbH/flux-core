@@ -1,16 +1,10 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\DataTables;
-
+uses(FluxErp\Tests\Livewire\BaseSetup::class);
 use FluxErp\Livewire\DataTables\ProjectList;
-use FluxErp\Tests\Livewire\BaseSetup;
 use Livewire\Livewire;
 
-class ProjectListTest extends BaseSetup
-{
-    public function test_renders_successfully(): void
-    {
-        Livewire::test(ProjectList::class)
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test(ProjectList::class)
+        ->assertStatus(200);
+});

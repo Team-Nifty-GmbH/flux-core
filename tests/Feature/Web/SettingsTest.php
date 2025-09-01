@@ -1,23 +1,17 @@
 <?php
 
-namespace FluxErp\Tests\Feature\Web;
-
+uses(FluxErp\Tests\Feature\Web\BaseSetup::class);
 use FluxErp\Models\Permission;
 
-class SettingsTest extends BaseSetup
-{
-    public function test_settings_no_user(): void
-    {
-        $this->get('/settings/clients')
-            ->assertStatus(302)
-            ->assertRedirect(route('login'));
-    }
+test('settings no user', function (): void {
+    $this->get('/settings/clients')
+        ->assertStatus(302)
+        ->assertRedirect(route('login'));
+});
 
-    public function test_settings_without_permission(): void
-    {
-        Permission::findOrCreate('settings.clients.get', 'web');
+test('settings without permission', function (): void {
+    Permission::findOrCreate('settings.clients.get', 'web');
 
-        $this->actingAs($this->user, guard: 'web')->get('/settings/clients')
-            ->assertStatus(403);
-    }
-}
+    $this->actingAs($this->user, guard: 'web')->get('/settings/clients')
+        ->assertStatus(403);
+});

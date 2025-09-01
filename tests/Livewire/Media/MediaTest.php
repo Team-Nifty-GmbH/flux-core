@@ -1,16 +1,10 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Media;
-
+uses(FluxErp\Tests\TestCase::class);
 use FluxErp\Livewire\Media\Media;
-use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
-class MediaTest extends TestCase
-{
-    public function test_renders_successfully(): void
-    {
-        Livewire::test(Media::class)
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test(Media::class)
+        ->assertStatus(200);
+});

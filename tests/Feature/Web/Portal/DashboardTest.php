@@ -1,19 +1,13 @@
 <?php
 
-namespace FluxErp\Tests\Feature\Web\Portal;
+uses(FluxErp\Tests\Feature\Web\Portal\PortalSetup::class);
+test('portal dashboard no user', function (): void {
+    $this->get(route('portal.dashboard'))
+        ->assertStatus(302)
+        ->assertRedirect($this->portalDomain . '/login');
+});
 
-class DashboardTest extends PortalSetup
-{
-    public function test_portal_dashboard_no_user(): void
-    {
-        $this->get(route('portal.dashboard'))
-            ->assertStatus(302)
-            ->assertRedirect($this->portalDomain . '/login');
-    }
-
-    public function test_portal_dashboard_page(): void
-    {
-        $this->actingAs($this->user, 'address')->get(route('portal.dashboard'))
-            ->assertStatus(200);
-    }
-}
+test('portal dashboard page', function (): void {
+    $this->actingAs($this->user, 'address')->get(route('portal.dashboard'))
+        ->assertStatus(200);
+});

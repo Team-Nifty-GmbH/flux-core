@@ -1,16 +1,10 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Widgets;
-
+uses(FluxErp\Tests\TestCase::class);
 use FluxErp\Livewire\Widgets\SearchBar;
-use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
-class SearchBarTest extends TestCase
-{
-    public function test_renders_successfully(): void
-    {
-        Livewire::test(SearchBar::class)
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test(SearchBar::class)
+        ->assertStatus(200);
+});

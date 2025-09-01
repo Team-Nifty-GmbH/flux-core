@@ -1,18 +1,9 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Product;
-
-use FluxErp\Livewire\Product\ProductPropertyGroupList;
-use FluxErp\Tests\TestCase;
+uses(FluxErp\Tests\TestCase::class);
 use Livewire\Livewire;
 
-class ProductPropertyGroupListTest extends TestCase
-{
-    protected string $livewireComponent = ProductPropertyGroupList::class;
-
-    public function test_renders_successfully(): void
-    {
-        Livewire::test($this->livewireComponent)
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test($this->livewireComponent)
+        ->assertStatus(200);
+});

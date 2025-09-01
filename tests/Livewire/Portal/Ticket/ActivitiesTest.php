@@ -1,16 +1,10 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Portal\Ticket;
-
+uses(FluxErp\Tests\TestCase::class);
 use FluxErp\Livewire\Portal\Ticket\Activities;
-use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
-class ActivitiesTest extends TestCase
-{
-    public function test_renders_successfully(): void
-    {
-        Livewire::test(Activities::class)
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test(Activities::class)
+        ->assertStatus(200);
+});

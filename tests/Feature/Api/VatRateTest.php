@@ -1,169 +1,146 @@
 <?php
 
-namespace FluxErp\Tests\Feature\Api;
-
+uses(FluxErp\Tests\Feature\BaseSetup::class);
 use FluxErp\Models\Permission;
 use FluxErp\Models\VatRate;
-use FluxErp\Tests\Feature\BaseSetup;
-use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
-class VatRateTest extends BaseSetup
-{
-    use WithFaker;
+uses(Illuminate\Foundation\Testing\WithFaker::class);
 
-    private array $permissions;
+beforeEach(function (): void {
+    $this->vatRates = VatRate::factory()->count(3)->create();
 
-    private Collection $vatRates;
+    $this->permissions = [
+        'show' => Permission::findOrCreate('api.vat-rates.{id}.get'),
+        'index' => Permission::findOrCreate('api.vat-rates.get'),
+        'create' => Permission::findOrCreate('api.vat-rates.post'),
+        'update' => Permission::findOrCreate('api.vat-rates.put'),
+        'delete' => Permission::findOrCreate('api.vat-rates.{id}.delete'),
+    ];
+});
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+test('create vat rate', function (): void {
+    $vatRate = [
+        'name' => Str::random(),
+        'rate_percentage' => $this->faker->randomFloat(2, 0.01, 0.99),
+    ];
 
-        $this->vatRates = VatRate::factory()->count(3)->create();
+    $this->user->givePermissionTo($this->permissions['create']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $this->permissions = [
-            'show' => Permission::findOrCreate('api.vat-rates.{id}.get'),
-            'index' => Permission::findOrCreate('api.vat-rates.get'),
-            'create' => Permission::findOrCreate('api.vat-rates.post'),
-            'update' => Permission::findOrCreate('api.vat-rates.put'),
-            'delete' => Permission::findOrCreate('api.vat-rates.{id}.delete'),
-        ];
-    }
+    $response = $this->actingAs($this->user)->post('/api/vat-rates', $vatRate);
+    $response->assertStatus(201);
 
-    public function test_create_vat_rate(): void
-    {
-        $vatRate = [
-            'name' => Str::random(),
-            'rate_percentage' => $this->faker->randomFloat(2, 0.01, 0.99),
-        ];
+    $responseVatRate = json_decode($response->getContent())->data;
 
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
+    $dbVatRate = VatRate::query()
+        ->whereKey($responseVatRate->id)
+        ->first();
 
-        $response = $this->actingAs($this->user)->post('/api/vat-rates', $vatRate);
-        $response->assertStatus(201);
+    expect($dbVatRate->name)->toEqual($vatRate['name']);
+    expect($dbVatRate->rate_percentage)->toEqual($vatRate['rate_percentage']);
+});
 
-        $responseVatRate = json_decode($response->getContent())->data;
+test('create vat rate validation fails', function (): void {
+    $vatRate = [
+        'rate_percentage' => $this->faker->randomFloat(2, 0.01, 0.99),
+    ];
 
-        $dbVatRate = VatRate::query()
-            ->whereKey($responseVatRate->id)
-            ->first();
+    $this->user->givePermissionTo($this->permissions['create']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $this->assertEquals($vatRate['name'], $dbVatRate->name);
-        $this->assertEquals($vatRate['rate_percentage'], $dbVatRate->rate_percentage);
-    }
+    $response = $this->actingAs($this->user)->post('/api/vat-rates', $vatRate);
+    $response->assertStatus(422);
+});
 
-    public function test_create_vat_rate_validation_fails(): void
-    {
-        $vatRate = [
-            'rate_percentage' => $this->faker->randomFloat(2, 0.01, 0.99),
-        ];
+test('delete vat rate', function (): void {
+    $this->user->givePermissionTo($this->permissions['delete']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
+    $response = $this->actingAs($this->user)->delete('/api/vat-rates/' . $this->vatRates[0]->id);
 
-        $response = $this->actingAs($this->user)->post('/api/vat-rates', $vatRate);
-        $response->assertStatus(422);
-    }
+    $response->assertStatus(204);
+    expect(VatRate::query()->whereKey($this->vatRates[0]->id)->exists())->toBeFalse();
+});
 
-    public function test_delete_vat_rate(): void
-    {
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
+test('delete vat rate vat rate not found', function (): void {
+    $this->user->givePermissionTo($this->permissions['delete']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->delete('/api/vat-rates/' . $this->vatRates[0]->id);
+    $response = $this->actingAs($this->user)->delete('/api/vat-rates/' . ++$this->vatRates[2]->id);
+    $response->assertStatus(404);
+});
 
-        $response->assertStatus(204);
-        $this->assertFalse(VatRate::query()->whereKey($this->vatRates[0]->id)->exists());
-    }
+test('get vat rate', function (): void {
+    $this->user->givePermissionTo($this->permissions['show']);
+    Sanctum::actingAs($this->user, ['user']);
 
-    public function test_delete_vat_rate_vat_rate_not_found(): void
-    {
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
+    $response = $this->actingAs($this->user)->get('/api/vat-rates/' . $this->vatRates[0]->id);
+    $response->assertStatus(200);
 
-        $response = $this->actingAs($this->user)->delete('/api/vat-rates/' . ++$this->vatRates[2]->id);
-        $response->assertStatus(404);
-    }
+    $vatRate = json_decode($response->getContent())->data;
 
-    public function test_get_vat_rate(): void
-    {
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
+    expect($vatRate->id)->toEqual($this->vatRates[0]->id);
+    expect($vatRate->name)->toEqual($this->vatRates[0]->name);
+    expect($vatRate->rate_percentage)->toEqual($this->vatRates[0]->rate_percentage);
+});
 
-        $response = $this->actingAs($this->user)->get('/api/vat-rates/' . $this->vatRates[0]->id);
-        $response->assertStatus(200);
+test('get vat rate vat rate not found', function (): void {
+    $this->user->givePermissionTo($this->permissions['show']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $vatRate = json_decode($response->getContent())->data;
+    $response = $this->actingAs($this->user)->get('/api/vat-rates/' . $this->vatRates[2]->id + 10000);
+    $response->assertStatus(404);
+});
 
-        $this->assertEquals($this->vatRates[0]->id, $vatRate->id);
-        $this->assertEquals($this->vatRates[0]->name, $vatRate->name);
-        $this->assertEquals($this->vatRates[0]->rate_percentage, $vatRate->rate_percentage);
-    }
+test('get vat rates', function (): void {
+    $this->user->givePermissionTo($this->permissions['index']);
+    Sanctum::actingAs($this->user, ['user']);
 
-    public function test_get_vat_rate_vat_rate_not_found(): void
-    {
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
+    $response = $this->actingAs($this->user)->get('/api/vat-rates');
+    $response->assertStatus(200);
 
-        $response = $this->actingAs($this->user)->get('/api/vat-rates/' . $this->vatRates[2]->id + 10000);
-        $response->assertStatus(404);
-    }
+    $vatRates = json_decode($response->getContent())->data;
 
-    public function test_get_vat_rates(): void
-    {
-        $this->user->givePermissionTo($this->permissions['index']);
-        Sanctum::actingAs($this->user, ['user']);
+    expect($vatRates->data[0]->id)->toEqual($this->vatRates[0]->id);
+    expect($vatRates->data[0]->name)->toEqual($this->vatRates[0]->name);
+    expect($vatRates->data[0]->rate_percentage)->toEqual($this->vatRates[0]->rate_percentage);
+});
 
-        $response = $this->actingAs($this->user)->get('/api/vat-rates');
-        $response->assertStatus(200);
+test('update vat rate', function (): void {
+    $vatRate = [
+        'id' => $this->vatRates[0]->id,
+        'name' => Str::random(),
+        'rate_percentage' => $this->faker->randomFloat(2, 0.01, 0.99),
+    ];
 
-        $vatRates = json_decode($response->getContent())->data;
+    $this->user->givePermissionTo($this->permissions['update']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $this->assertEquals($this->vatRates[0]->id, $vatRates->data[0]->id);
-        $this->assertEquals($this->vatRates[0]->name, $vatRates->data[0]->name);
-        $this->assertEquals($this->vatRates[0]->rate_percentage, $vatRates->data[0]->rate_percentage);
-    }
+    $response = $this->actingAs($this->user)->put('/api/vat-rates', $vatRate);
+    $response->assertStatus(200);
 
-    public function test_update_vat_rate(): void
-    {
-        $vatRate = [
-            'id' => $this->vatRates[0]->id,
-            'name' => Str::random(),
-            'rate_percentage' => $this->faker->randomFloat(2, 0.01, 0.99),
-        ];
+    $responseVatRate = json_decode($response->getContent())->data;
 
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
+    $dbVatRate = VatRate::query()
+        ->whereKey($responseVatRate->id)
+        ->first();
 
-        $response = $this->actingAs($this->user)->put('/api/vat-rates', $vatRate);
-        $response->assertStatus(200);
+    expect($dbVatRate->id)->toEqual($vatRate['id']);
+    expect($dbVatRate->name)->toEqual($vatRate['name']);
+    expect($dbVatRate->rate_percentage)->toEqual($vatRate['rate_percentage']);
+});
 
-        $responseVatRate = json_decode($response->getContent())->data;
+test('update vat rate validation fails', function (): void {
+    $vatRate = [
+        'name' => Str::random(),
+        'rate_percentage' => $this->faker->randomFloat(2, 0.01, 0.99),
+    ];
 
-        $dbVatRate = VatRate::query()
-            ->whereKey($responseVatRate->id)
-            ->first();
+    $this->user->givePermissionTo($this->permissions['update']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $this->assertEquals($vatRate['id'], $dbVatRate->id);
-        $this->assertEquals($vatRate['name'], $dbVatRate->name);
-        $this->assertEquals($vatRate['rate_percentage'], $dbVatRate->rate_percentage);
-    }
-
-    public function test_update_vat_rate_validation_fails(): void
-    {
-        $vatRate = [
-            'name' => Str::random(),
-            'rate_percentage' => $this->faker->randomFloat(2, 0.01, 0.99),
-        ];
-
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->actingAs($this->user)->put('/api/vat-rates', $vatRate);
-        $response->assertStatus(422);
-    }
-}
+    $response = $this->actingAs($this->user)->put('/api/vat-rates', $vatRate);
+    $response->assertStatus(422);
+});

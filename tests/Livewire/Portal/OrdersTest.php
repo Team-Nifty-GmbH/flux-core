@@ -1,16 +1,10 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Portal;
-
+uses(FluxErp\Tests\Livewire\BaseSetup::class);
 use FluxErp\Livewire\Portal\Orders;
-use FluxErp\Tests\Livewire\BaseSetup;
 use Livewire\Livewire;
 
-class OrdersTest extends BaseSetup
-{
-    public function test_renders_successfully(): void
-    {
-        Livewire::test(Orders::class)
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test(Orders::class)
+        ->assertStatus(200);
+});

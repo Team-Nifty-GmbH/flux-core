@@ -1,7 +1,6 @@
 <?php
 
-namespace FluxErp\Tests\Browser\Portal;
-
+uses(FluxErp\Tests\Browser\Portal\PortalDuskTestCase::class);
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
@@ -11,122 +10,110 @@ use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
-use Illuminate\Foundation\Testing\DatabaseTruncation;
-use Illuminate\Support\Collection;
 use Laravel\Dusk\Browser;
 
-class OrdersTest extends PortalDuskTestCase
-{
-    use DatabaseTruncation;
+uses(Illuminate\Foundation\Testing\DatabaseTruncation::class);
 
-    public Collection $orders;
+beforeEach(function (): void {
+    $priceList = PriceList::factory()->create([
+        'is_net' => false,
+    ]);
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+    $contacts = Contact::factory()->count(2)->create([
+        'price_list_id' => $priceList->id,
+        'client_id' => $this->dbClient->getKey(),
+    ]);
 
-        $priceList = PriceList::factory()->create([
-            'is_net' => false,
-        ]);
+    $currency = Currency::factory()->create();
+    Currency::query()->first()->update(['is_default' => true]);
 
-        $contacts = Contact::factory()->count(2)->create([
-            'price_list_id' => $priceList->id,
-            'client_id' => $this->dbClient->getKey(),
-        ]);
+    $language = Language::factory()->create();
 
-        $currency = Currency::factory()->create();
-        Currency::query()->first()->update(['is_default' => true]);
+    $orderType = OrderType::factory()->create([
+        'client_id' => $this->dbClient->getKey(),
+        'order_type_enum' => OrderTypeEnum::Order,
+    ]);
 
-        $language = Language::factory()->create();
+    $paymentType = PaymentType::factory()
+        ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+        ->create();
 
-        $orderType = OrderType::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-            'order_type_enum' => OrderTypeEnum::Order,
-        ]);
+    $addresses = Address::factory()->count(2)->create([
+        'client_id' => $this->dbClient->getKey(),
+        'contact_id' => $contacts->random()->id,
+    ]);
 
-        $paymentType = PaymentType::factory()
-            ->hasAttached(factory: $this->dbClient, relationship: 'clients')
-            ->create();
+    Order::factory()->count(3)->create([
+        'client_id' => $this->dbClient->getKey(),
+        'language_id' => $language->id,
+        'order_type_id' => $orderType->id,
+        'payment_type_id' => $paymentType->id,
+        'price_list_id' => $priceList->id,
+        'currency_id' => $currency->id,
+        'contact_id' => $contacts->random()->id,
+        'address_invoice_id' => $addresses->random()->id,
+        'address_delivery_id' => $addresses->random()->id,
+        'is_locked' => true,
+    ]);
 
-        $addresses = Address::factory()->count(2)->create([
-            'client_id' => $this->dbClient->getKey(),
-            'contact_id' => $contacts->random()->id,
-        ]);
+    $this->orders = Order::factory()->count(3)->create([
+        'client_id' => $this->dbClient->getKey(),
+        'language_id' => $language->id,
+        'order_type_id' => $orderType->id,
+        'payment_type_id' => $paymentType->id,
+        'price_list_id' => $priceList->id,
+        'currency_id' => $currency->id,
+        'contact_id' => $this->user->contact_id,
+        'address_invoice_id' => $this->user->id,
+        'address_delivery_id' => $this->user->id,
+        'is_locked' => true,
+    ]);
+});
 
-        Order::factory()->count(3)->create([
-            'client_id' => $this->dbClient->getKey(),
-            'language_id' => $language->id,
-            'order_type_id' => $orderType->id,
-            'payment_type_id' => $paymentType->id,
-            'price_list_id' => $priceList->id,
-            'currency_id' => $currency->id,
-            'contact_id' => $contacts->random()->id,
-            'address_invoice_id' => $addresses->random()->id,
-            'address_delivery_id' => $addresses->random()->id,
-            'is_locked' => true,
-        ]);
+test('can see order details', function (): void {
+    $this->browse(function (Browser $browser): void {
+        $this->openMenu();
+        $browser
+            ->click('nav [href="/orders"]')
+            ->waitForRoute('portal.orders');
 
-        $this->orders = Order::factory()->count(3)->create([
-            'client_id' => $this->dbClient->getKey(),
-            'language_id' => $language->id,
-            'order_type_id' => $orderType->id,
-            'payment_type_id' => $paymentType->id,
-            'price_list_id' => $priceList->id,
-            'currency_id' => $currency->id,
-            'contact_id' => $this->user->contact_id,
-            'address_invoice_id' => $this->user->id,
-            'address_delivery_id' => $this->user->id,
-            'is_locked' => true,
-        ]);
-    }
+        $browser->waitFor('[tall-datatable] tbody [data-id]');
 
-    public function test_can_see_order_details(): void
-    {
-        $this->browse(function (Browser $browser): void {
-            $this->openMenu();
-            $browser
-                ->click('nav [href="/orders"]')
-                ->waitForRoute('portal.orders');
+        $rows = $browser->elements('[tall-datatable] tbody [data-id]');
 
-            $browser->waitFor('[tall-datatable] tbody [data-id]');
+        $rows[0]->click();
 
-            $rows = $browser->elements('[tall-datatable] tbody [data-id]');
+        $browser->waitForRoute('portal.orders.id', ['id' => $this->orders[2]->id])
+            ->assertRouteIs('portal.orders.id', ['id' => $this->orders[2]->id]);
+    });
+});
 
-            $rows[0]->click();
+test('can see orders', function (): void {
+    $this->browse(function (Browser $browser): void {
+        $browser->visit($this->baseUrl())->type('email', $this->user->email)
+            ->type('password', $this->password)
+            ->press('Login')
+            ->waitForReload()
+            ->assertRouteIs('portal.dashboard');
+        $this->openMenu();
 
-            $browser->waitForRoute('portal.orders.id', ['id' => $this->orders[2]->id])
-                ->assertRouteIs('portal.orders.id', ['id' => $this->orders[2]->id]);
-        });
-    }
+        $browser->click('nav [href="/orders"]')
+            ->waitForRoute('portal.orders')
+            ->assertRouteIs('portal.orders')
+            ->waitForText('My orders')
+            ->waitForText('Order Number')
+            ->waitForText('Order Type -> Name')
+            ->waitForText('Commission')
+            ->waitForText('Payment State')
+            ->assertSee('Order Number')
+            ->assertSee('Order Type -> Name')
+            ->assertSee('Commission')
+            ->assertSee('Payment State')
+            ->assertScript('document.body.innerText.includes("Total Net Price") || document.body.innerText.includes("Total Gross Price")')
+            ->assertScript('!(document.body.innerText.includes("Total Net Price") && document.body.innerText.includes("Total Gross Price"))');
 
-    public function test_can_see_orders(): void
-    {
-        $this->browse(function (Browser $browser): void {
-            $browser->visit($this->baseUrl())->type('email', $this->user->email)
-                ->type('password', $this->password)
-                ->press('Login')
-                ->waitForReload()
-                ->assertRouteIs('portal.dashboard');
-            $this->openMenu();
+        $rows = $browser->elements('[tall-datatable] tbody [data-id]');
 
-            $browser->click('nav [href="/orders"]')
-                ->waitForRoute('portal.orders')
-                ->assertRouteIs('portal.orders')
-                ->waitForText('My orders')
-                ->waitForText('Order Number')
-                ->waitForText('Order Type -> Name')
-                ->waitForText('Commission')
-                ->waitForText('Payment State')
-                ->assertSee('Order Number')
-                ->assertSee('Order Type -> Name')
-                ->assertSee('Commission')
-                ->assertSee('Payment State')
-                ->assertScript('document.body.innerText.includes("Total Net Price") || document.body.innerText.includes("Total Gross Price")')
-                ->assertScript('!(document.body.innerText.includes("Total Net Price") && document.body.innerText.includes("Total Gross Price"))');
-
-            $rows = $browser->elements('[tall-datatable] tbody [data-id]');
-
-            $this->assertCount(3, $rows);
-        });
-    }
-}
+        expect($rows)->toHaveCount(3);
+    });
+});

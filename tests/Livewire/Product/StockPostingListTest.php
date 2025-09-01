@@ -1,31 +1,20 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Product;
-
+uses(FluxErp\Tests\TestCase::class);
 use FluxErp\Livewire\Product\StockPostingList;
 use FluxErp\Models\Client;
 use FluxErp\Models\Product;
-use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
-class StockPostingListTest extends TestCase
-{
-    private Product $product;
+beforeEach(function (): void {
+    $dbClient = Client::factory()->create();
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+    $this->product = Product::factory()
+        ->hasAttached(factory: $dbClient, relationship: 'clients')
+        ->create();
+});
 
-        $dbClient = Client::factory()->create();
-
-        $this->product = Product::factory()
-            ->hasAttached(factory: $dbClient, relationship: 'clients')
-            ->create();
-    }
-
-    public function test_renders_successfully(): void
-    {
-        Livewire::test(StockPostingList::class, ['productId' => $this->product->id])
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test(StockPostingList::class, ['productId' => $this->product->id])
+        ->assertStatus(200);
+});

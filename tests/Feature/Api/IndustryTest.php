@@ -1,228 +1,204 @@
 <?php
 
-namespace FluxErp\Tests\Feature\Api;
-
+uses(FluxErp\Tests\Feature\BaseSetup::class);
 use FluxErp\Models\Client;
 use FluxErp\Models\Industry;
 use FluxErp\Models\Permission;
-use FluxErp\Tests\Feature\BaseSetup;
-use Illuminate\Support\Collection;
 use Laravel\Sanctum\Sanctum;
 
-class IndustryTest extends BaseSetup
-{
-    private Collection $industries;
+beforeEach(function (): void {
+    $dbClient = Client::factory()->create();
 
-    private array $permissions;
+    $this->industries = Industry::factory()->count(3)->create();
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+    $this->user->clients()->attach($dbClient->id);
 
-        $dbClient = Client::factory()->create();
+    $this->permissions = [
+        'show' => Permission::findOrCreate('api.industries.{id}.get'),
+        'index' => Permission::findOrCreate('api.industries.get'),
+        'create' => Permission::findOrCreate('api.industries.post'),
+        'update' => Permission::findOrCreate('api.industries.put'),
+        'delete' => Permission::findOrCreate('api.industries.{id}.delete'),
+    ];
+});
 
-        $this->industries = Industry::factory()->count(3)->create();
+test('create industry', function (): void {
+    $industry = [
+        'name' => 'Technology',
+    ];
 
-        $this->user->clients()->attach($dbClient->id);
+    $this->user->givePermissionTo($this->permissions['create']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $this->permissions = [
-            'show' => Permission::findOrCreate('api.industries.{id}.get'),
-            'index' => Permission::findOrCreate('api.industries.get'),
-            'create' => Permission::findOrCreate('api.industries.post'),
-            'update' => Permission::findOrCreate('api.industries.put'),
-            'delete' => Permission::findOrCreate('api.industries.{id}.delete'),
-        ];
+    $response = $this->post('/api/industries', $industry);
+    $response->assertStatus(201);
+
+    $responseIndustry = json_decode($response->getContent())->data;
+    $dbIndustry = Industry::query()
+        ->whereKey($responseIndustry->id)
+        ->first();
+
+    expect($dbIndustry)->not->toBeEmpty();
+    expect($dbIndustry->name)->toEqual($industry['name']);
+});
+
+test('create industry validation fails', function (): void {
+    $industry = [
+        'name' => '',
+    ];
+
+    $this->user->givePermissionTo($this->permissions['create']);
+    Sanctum::actingAs($this->user, ['user']);
+
+    $response = $this->post('/api/industries', $industry);
+    $response->assertStatus(422);
+
+    $response->assertJsonValidationErrors([
+        'name',
+    ]);
+});
+
+test('create industry with auto order', function (): void {
+    $industry = [
+        'name' => 'Healthcare',
+    ];
+
+    $this->user->givePermissionTo($this->permissions['create']);
+    Sanctum::actingAs($this->user, ['user']);
+
+    $response = $this->post('/api/industries', $industry);
+    $response->assertStatus(201);
+
+    $responseIndustry = json_decode($response->getContent())->data;
+    $dbIndustry = Industry::query()
+        ->whereKey($responseIndustry->id)
+        ->first();
+
+    expect($dbIndustry)->not->toBeEmpty();
+    expect($dbIndustry->name)->toEqual($industry['name']);
+    expect($dbIndustry->order_column)->toBeInt();
+});
+
+test('delete industry', function (): void {
+    $this->user->givePermissionTo($this->permissions['delete']);
+    Sanctum::actingAs($this->user, ['user']);
+
+    $response = $this->delete('/api/industries/' . $this->industries[0]->id);
+    $response->assertStatus(204);
+
+    $industry = $this->industries[0]->fresh();
+    expect($industry)->toBeNull();
+});
+
+test('delete industry not found', function (): void {
+    $this->user->givePermissionTo($this->permissions['delete']);
+    Sanctum::actingAs($this->user, ['user']);
+
+    $response = $this->delete('/api/industries/' . (Industry::max('id') + 1));
+    $response->assertStatus(404);
+});
+
+test('get industries', function (): void {
+    $this->user->givePermissionTo($this->permissions['index']);
+    Sanctum::actingAs($this->user, ['user']);
+
+    $response = $this->get('/api/industries');
+    $response->assertStatus(200);
+
+    $json = json_decode($response->getContent());
+    $jsonIndustries = collect($json->data->data);
+
+    expect(count($jsonIndustries))->toBeGreaterThanOrEqual(3);
+
+    foreach ($this->industries as $industry) {
+        $jsonIndustries->contains(function ($jsonIndustry) use ($industry) {
+            return $jsonIndustry->id === $industry->id &&
+                $jsonIndustry->name === $industry->name;
+        });
     }
+});
 
-    public function test_create_industry(): void
-    {
-        $industry = [
-            'name' => 'Technology',
-        ];
+test('get industry', function (): void {
+    $this->user->givePermissionTo($this->permissions['show']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
+    $response = $this->get('/api/industries/' . $this->industries[0]->id);
+    $response->assertStatus(200);
 
-        $response = $this->post('/api/industries', $industry);
-        $response->assertStatus(201);
+    $json = json_decode($response->getContent());
+    $jsonIndustry = $json->data;
 
-        $responseIndustry = json_decode($response->getContent())->data;
-        $dbIndustry = Industry::query()
-            ->whereKey($responseIndustry->id)
-            ->first();
+    expect($jsonIndustry)->not->toBeEmpty();
+    expect($jsonIndustry->id)->toEqual($this->industries[0]->id);
+    expect($jsonIndustry->name)->toEqual($this->industries[0]->name);
+});
 
-        $this->assertNotEmpty($dbIndustry);
-        $this->assertEquals($industry['name'], $dbIndustry->name);
-    }
+test('get industry not found', function (): void {
+    $this->user->givePermissionTo($this->permissions['show']);
+    Sanctum::actingAs($this->user, ['user']);
 
-    public function test_create_industry_validation_fails(): void
-    {
-        $industry = [
-            'name' => '',
-        ];
+    $response = $this->get('/api/industries/' . (Industry::max('id') + 1));
+    $response->assertStatus(404);
+});
 
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
+test('update industry', function (): void {
+    $industry = [
+        'id' => $this->industries[0]->id,
+        'name' => 'Updated Industry Name',
+    ];
 
-        $response = $this->post('/api/industries', $industry);
-        $response->assertStatus(422);
+    $this->user->givePermissionTo($this->permissions['update']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $response->assertJsonValidationErrors([
-            'name',
-        ]);
-    }
+    $response = $this->put('/api/industries', $industry);
+    $response->assertStatus(200);
 
-    public function test_create_industry_with_auto_order(): void
-    {
-        $industry = [
-            'name' => 'Healthcare',
-        ];
+    $responseIndustry = json_decode($response->getContent())->data;
+    $dbIndustry = Industry::query()
+        ->whereKey($responseIndustry->id)
+        ->first();
 
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
+    expect($dbIndustry)->not->toBeEmpty();
+    expect($dbIndustry->id)->toEqual($industry['id']);
+    expect($dbIndustry->name)->toEqual($industry['name']);
+});
 
-        $response = $this->post('/api/industries', $industry);
-        $response->assertStatus(201);
+test('update industry maximum', function (): void {
+    $industry = [
+        'id' => $this->industries[1]->id,
+        'name' => 'Fully Updated Industry',
+    ];
 
-        $responseIndustry = json_decode($response->getContent())->data;
-        $dbIndustry = Industry::query()
-            ->whereKey($responseIndustry->id)
-            ->first();
+    $this->user->givePermissionTo($this->permissions['update']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $this->assertNotEmpty($dbIndustry);
-        $this->assertEquals($industry['name'], $dbIndustry->name);
-        $this->assertIsInt($dbIndustry->order_column);
-    }
+    $response = $this->put('/api/industries', $industry);
+    $response->assertStatus(200);
 
-    public function test_delete_industry(): void
-    {
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
+    $responseIndustry = json_decode($response->getContent())->data;
+    $dbIndustry = Industry::query()
+        ->whereKey($responseIndustry->id)
+        ->first();
 
-        $response = $this->delete('/api/industries/' . $this->industries[0]->id);
-        $response->assertStatus(204);
+    expect($dbIndustry)->not->toBeEmpty();
+    expect($dbIndustry->id)->toEqual($industry['id']);
+    expect($dbIndustry->name)->toEqual($industry['name']);
+    expect($dbIndustry->order_column)->toBeInt();
+});
 
-        $industry = $this->industries[0]->fresh();
-        $this->assertNull($industry);
-    }
+test('update industry validation fails', function (): void {
+    $industry = [
+        'id' => $this->industries[0]->id,
+        'name' => '',
+    ];
 
-    public function test_delete_industry_not_found(): void
-    {
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
+    $this->user->givePermissionTo($this->permissions['update']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->delete('/api/industries/' . (Industry::max('id') + 1));
-        $response->assertStatus(404);
-    }
+    $response = $this->put('/api/industries', $industry);
+    $response->assertStatus(422);
 
-    public function test_get_industries(): void
-    {
-        $this->user->givePermissionTo($this->permissions['index']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->get('/api/industries');
-        $response->assertStatus(200);
-
-        $json = json_decode($response->getContent());
-        $jsonIndustries = collect($json->data->data);
-
-        $this->assertGreaterThanOrEqual(3, count($jsonIndustries));
-
-        foreach ($this->industries as $industry) {
-            $jsonIndustries->contains(function ($jsonIndustry) use ($industry) {
-                return $jsonIndustry->id === $industry->id &&
-                    $jsonIndustry->name === $industry->name;
-            });
-        }
-    }
-
-    public function test_get_industry(): void
-    {
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->get('/api/industries/' . $this->industries[0]->id);
-        $response->assertStatus(200);
-
-        $json = json_decode($response->getContent());
-        $jsonIndustry = $json->data;
-
-        $this->assertNotEmpty($jsonIndustry);
-        $this->assertEquals($this->industries[0]->id, $jsonIndustry->id);
-        $this->assertEquals($this->industries[0]->name, $jsonIndustry->name);
-    }
-
-    public function test_get_industry_not_found(): void
-    {
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->get('/api/industries/' . (Industry::max('id') + 1));
-        $response->assertStatus(404);
-    }
-
-    public function test_update_industry(): void
-    {
-        $industry = [
-            'id' => $this->industries[0]->id,
-            'name' => 'Updated Industry Name',
-        ];
-
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->put('/api/industries', $industry);
-        $response->assertStatus(200);
-
-        $responseIndustry = json_decode($response->getContent())->data;
-        $dbIndustry = Industry::query()
-            ->whereKey($responseIndustry->id)
-            ->first();
-
-        $this->assertNotEmpty($dbIndustry);
-        $this->assertEquals($industry['id'], $dbIndustry->id);
-        $this->assertEquals($industry['name'], $dbIndustry->name);
-    }
-
-    public function test_update_industry_maximum(): void
-    {
-        $industry = [
-            'id' => $this->industries[1]->id,
-            'name' => 'Fully Updated Industry',
-        ];
-
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->put('/api/industries', $industry);
-        $response->assertStatus(200);
-
-        $responseIndustry = json_decode($response->getContent())->data;
-        $dbIndustry = Industry::query()
-            ->whereKey($responseIndustry->id)
-            ->first();
-
-        $this->assertNotEmpty($dbIndustry);
-        $this->assertEquals($industry['id'], $dbIndustry->id);
-        $this->assertEquals($industry['name'], $dbIndustry->name);
-        $this->assertIsInt($dbIndustry->order_column);
-    }
-
-    public function test_update_industry_validation_fails(): void
-    {
-        $industry = [
-            'id' => $this->industries[0]->id,
-            'name' => '',
-        ];
-
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
-
-        $response = $this->put('/api/industries', $industry);
-        $response->assertStatus(422);
-
-        $response->assertJsonValidationErrors([
-            'name',
-        ]);
-    }
-}
+    $response->assertJsonValidationErrors([
+        'name',
+    ]);
+});

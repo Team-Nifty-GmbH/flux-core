@@ -1,18 +1,9 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Settings;
-
-use FluxErp\Livewire\Settings\PrintJobs;
-use FluxErp\Tests\TestCase;
+uses(FluxErp\Tests\TestCase::class);
 use Livewire\Livewire;
 
-class PrintJobsTest extends TestCase
-{
-    protected string $livewireComponent = PrintJobs::class;
-
-    public function test_renders_successfully(): void
-    {
-        Livewire::test($this->livewireComponent)
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test($this->livewireComponent)
+        ->assertStatus(200);
+});

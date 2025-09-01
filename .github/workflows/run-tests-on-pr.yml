@@ -108,6 +108,9 @@ jobs:
       - name: Prettier
         run: npx prettier . --check
 
+      - name: Install Playwright
+        run: npx playwright install
+
       - name: Clear Orchestra Testbench Cache
         run: ./vendor/bin/testbench view:clear
 

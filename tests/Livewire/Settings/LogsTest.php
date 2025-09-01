@@ -1,16 +1,10 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Settings;
-
+uses(FluxErp\Tests\Livewire\BaseSetup::class);
 use FluxErp\Livewire\Settings\Logs;
-use FluxErp\Tests\Livewire\BaseSetup;
 use Livewire\Livewire;
 
-class LogsTest extends BaseSetup
-{
-    public function test_renders_successfully(): void
-    {
-        Livewire::test(Logs::class)
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test(Logs::class)
+        ->assertStatus(200);
+});

@@ -1,33 +1,21 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Project;
-
+uses(FluxErp\Tests\Livewire\BaseSetup::class);
 use FluxErp\Livewire\Project\Project as ProjectView;
 use FluxErp\Models\Project;
-use FluxErp\Tests\Livewire\BaseSetup;
 use Livewire\Livewire;
 
-class ProjectTest extends BaseSetup
-{
-    private Project $project;
+beforeEach(function (): void {
+    $this->project = Project::factory()->create([
+        'client_id' => $this->dbClient->getKey(),
+    ]);
+});
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+test('renders successfully', function (): void {
+    Livewire::test(ProjectView::class, ['id' => $this->project->id])
+        ->assertStatus(200);
+});
 
-        $this->project = Project::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-        ]);
-    }
-
-    public function test_renders_successfully(): void
-    {
-        Livewire::test(ProjectView::class, ['id' => $this->project->id])
-            ->assertStatus(200);
-    }
-
-    public function test_switch_tabs(): void
-    {
-        Livewire::test(ProjectView::class, ['id' => $this->project->id])->cycleTabs();
-    }
-}
+test('switch tabs', function (): void {
+    Livewire::test(ProjectView::class, ['id' => $this->project->id])->cycleTabs();
+});

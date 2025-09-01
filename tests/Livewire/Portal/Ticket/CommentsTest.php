@@ -1,29 +1,18 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Portal\Ticket;
-
+uses(FluxErp\Tests\Livewire\BaseSetup::class);
 use FluxErp\Livewire\Portal\Ticket\Comments;
 use FluxErp\Models\Ticket;
-use FluxErp\Tests\Livewire\BaseSetup;
 use Livewire\Livewire;
 
-class CommentsTest extends BaseSetup
-{
-    private Ticket $ticket;
+beforeEach(function (): void {
+    $this->ticket = Ticket::factory()->create([
+        'authenticatable_type' => $this->address->getMorphClass(),
+        'authenticatable_id' => $this->address->id,
+    ]);
+});
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->ticket = Ticket::factory()->create([
-            'authenticatable_type' => $this->address->getMorphClass(),
-            'authenticatable_id' => $this->address->id,
-        ]);
-    }
-
-    public function test_renders_successfully(): void
-    {
-        Livewire::test(Comments::class, ['modelId' => $this->ticket->id])
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test(Comments::class, ['modelId' => $this->ticket->id])
+        ->assertStatus(200);
+});

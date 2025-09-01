@@ -1,16 +1,10 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Features;
-
+uses(FluxErp\Tests\TestCase::class);
 use FluxErp\Livewire\Features\CreateTaskModal;
-use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
-class CreateTaskModalTest extends TestCase
-{
-    public function test_renders_successfully(): void
-    {
-        Livewire::test(CreateTaskModal::class)
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test(CreateTaskModal::class)
+        ->assertStatus(200);
+});

@@ -1,78 +1,62 @@
 <?php
 
-namespace FluxErp\Tests\Feature\Web;
-
+uses(FluxErp\Tests\Feature\Web\BaseSetup::class);
 use FluxErp\Models\Permission;
 use FluxErp\Models\SerialNumber;
 
-class ProductsSerialNumbersTest extends BaseSetup
-{
-    private SerialNumber $serialNumber;
+beforeEach(function (): void {
+    $this->serialNumber = SerialNumber::factory()->create();
+});
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+test('products id serial numbers no user', function (): void {
+    $this->get('/products/serial-numbers/' . $this->serialNumber->id)
+        ->assertStatus(302)
+        ->assertRedirect(route('login'));
+});
 
-        $this->serialNumber = SerialNumber::factory()->create();
-    }
+test('products id serial numbers page', function (): void {
+    $this->user->givePermissionTo(
+        Permission::findOrCreate('products.serial-numbers.{id?}.get', 'web')
+    );
 
-    public function test_products_id_serial_numbers_no_user(): void
-    {
-        $this->get('/products/serial-numbers/' . $this->serialNumber->id)
-            ->assertStatus(302)
-            ->assertRedirect(route('login'));
-    }
+    $this->actingAs($this->user, 'web')->get('/products/serial-numbers/' . $this->serialNumber->id)
+        ->assertStatus(200);
+});
 
-    public function test_products_id_serial_numbers_page(): void
-    {
-        $this->user->givePermissionTo(
-            Permission::findOrCreate('products.serial-numbers.{id?}.get', 'web')
-        );
+test('products id serial numbers serial number not found', function (): void {
+    $this->serialNumber->delete();
 
-        $this->actingAs($this->user, 'web')->get('/products/serial-numbers/' . $this->serialNumber->id)
-            ->assertStatus(200);
-    }
+    $this->user->givePermissionTo(
+        Permission::findOrCreate('products.serial-numbers.{id?}.get', 'web')
+    );
 
-    public function test_products_id_serial_numbers_serial_number_not_found(): void
-    {
-        $this->serialNumber->delete();
+    $this->actingAs($this->user, 'web')->get('/products/serial-numbers/' . $this->serialNumber->id)
+        ->assertStatus(404);
+});
 
-        $this->user->givePermissionTo(
-            Permission::findOrCreate('products.serial-numbers.{id?}.get', 'web')
-        );
+test('products id serial numbers without permission', function (): void {
+    Permission::findOrCreate('products.serial-numbers.{id?}.get', 'web');
 
-        $this->actingAs($this->user, 'web')->get('/products/serial-numbers/' . $this->serialNumber->id)
-            ->assertStatus(404);
-    }
+    $this->actingAs($this->user, 'web')->get('/products/serial-numbers/' . $this->serialNumber->id)
+        ->assertStatus(403);
+});
 
-    public function test_products_id_serial_numbers_without_permission(): void
-    {
-        Permission::findOrCreate('products.serial-numbers.{id?}.get', 'web');
+test('products serial numbers no user', function (): void {
+    $this->get('/products/serial-numbers')
+        ->assertStatus(302)
+        ->assertRedirect(route('login'));
+});
 
-        $this->actingAs($this->user, 'web')->get('/products/serial-numbers/' . $this->serialNumber->id)
-            ->assertStatus(403);
-    }
+test('products serial numbers page', function (): void {
+    $this->user->givePermissionTo(Permission::findOrCreate('products.serial-numbers.get', 'web'));
 
-    public function test_products_serial_numbers_no_user(): void
-    {
-        $this->get('/products/serial-numbers')
-            ->assertStatus(302)
-            ->assertRedirect(route('login'));
-    }
+    $this->actingAs($this->user, 'web')->get('/products/serial-numbers')
+        ->assertStatus(200);
+});
 
-    public function test_products_serial_numbers_page(): void
-    {
-        $this->user->givePermissionTo(Permission::findOrCreate('products.serial-numbers.get', 'web'));
+test('products serial numbers without permission', function (): void {
+    Permission::findOrCreate('products.serial-numbers.get', 'web');
 
-        $this->actingAs($this->user, 'web')->get('/products/serial-numbers')
-            ->assertStatus(200);
-    }
-
-    public function test_products_serial_numbers_without_permission(): void
-    {
-        Permission::findOrCreate('products.serial-numbers.get', 'web');
-
-        $this->actingAs($this->user, 'web')->get('/products/serial-numbers')
-            ->assertStatus(403);
-    }
-}
+    $this->actingAs($this->user, 'web')->get('/products/serial-numbers')
+        ->assertStatus(403);
+});

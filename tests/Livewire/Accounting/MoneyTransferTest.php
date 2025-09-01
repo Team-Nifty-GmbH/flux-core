@@ -1,16 +1,10 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Accounting;
-
+uses(FluxErp\Tests\TestCase::class);
 use FluxErp\Livewire\Accounting\MoneyTransfer;
-use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
-class MoneyTransferTest extends TestCase
-{
-    public function test_renders_successfully(): void
-    {
-        Livewire::test(MoneyTransfer::class)
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test(MoneyTransfer::class)
+        ->assertStatus(200);
+});

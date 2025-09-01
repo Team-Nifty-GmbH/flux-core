@@ -1,26 +1,19 @@
 <?php
 
-namespace FluxErp\Tests\Feature\Web;
+uses(FluxErp\Tests\Feature\Web\BaseSetup::class);
+test('login as authenticated user', function (): void {
+    $this->actingAs($this->user, 'web')->get('/login')
+        ->assertStatus(302)
+        ->assertRedirect();
+});
 
-class LoginTest extends BaseSetup
-{
-    public function test_login_as_authenticated_user(): void
-    {
-        $this->actingAs($this->user, 'web')->get('/login')
-            ->assertStatus(302)
-            ->assertRedirect();
-    }
+test('login no path', function (): void {
+    $this->get('/')
+        ->assertStatus(302)
+        ->assertRedirect(route('login'));
+});
 
-    public function test_login_no_path(): void
-    {
-        $this->get('/')
-            ->assertStatus(302)
-            ->assertRedirect(route('login'));
-    }
-
-    public function test_login_page(): void
-    {
-        $this->get('/login')
-            ->assertStatus(200);
-    }
-}
+test('login page', function (): void {
+    $this->get('/login')
+        ->assertStatus(200);
+});

@@ -1,7 +1,6 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\Portal\DataTables;
-
+uses(FluxErp\Tests\Livewire\BaseSetup::class);
 use FluxErp\Database\Seeders\OrderPositionTableSeeder;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\Portal\DataTables\OrderPositionList;
@@ -14,63 +13,53 @@ use FluxErp\Models\OrderType;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
-use FluxErp\Tests\Livewire\BaseSetup;
 use Livewire\Livewire;
 
-class OrderPositionListTest extends BaseSetup
-{
-    private Order $order;
+beforeEach(function (): void {
+    $contact = Contact::factory()->create([
+        'client_id' => $this->dbClient->getKey(),
+    ]);
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+    $address = Address::factory()->create([
+        'client_id' => $this->dbClient->getKey(),
+        'contact_id' => $contact->id,
+    ]);
 
-        $contact = Contact::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-        ]);
+    $currency = Currency::factory()->create();
 
-        $address = Address::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-            'contact_id' => $contact->id,
-        ]);
+    $language = Language::factory()->create();
 
-        $currency = Currency::factory()->create();
+    $orderType = OrderType::factory()->create([
+        'client_id' => $this->dbClient->getKey(),
+        'order_type_enum' => OrderTypeEnum::Order,
+    ]);
 
-        $language = Language::factory()->create();
+    $paymentType = PaymentType::factory()
+        ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+        ->create();
 
-        $orderType = OrderType::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-            'order_type_enum' => OrderTypeEnum::Order,
-        ]);
+    $priceList = PriceList::factory()->create();
 
-        $paymentType = PaymentType::factory()
-            ->hasAttached(factory: $this->dbClient, relationship: 'clients')
-            ->create();
+    $this->order = Order::factory()->create([
+        'client_id' => $this->dbClient->getKey(),
+        'language_id' => $language->id,
+        'order_type_id' => $orderType->id,
+        'payment_type_id' => $paymentType->id,
+        'price_list_id' => $priceList->id,
+        'currency_id' => $currency->id,
+        'address_invoice_id' => $address->id,
+        'address_delivery_id' => $address->id,
+        'is_locked' => false,
+    ]);
 
-        $priceList = PriceList::factory()->create();
+    Product::factory()
+        ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+        ->create();
 
-        $this->order = Order::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-            'language_id' => $language->id,
-            'order_type_id' => $orderType->id,
-            'payment_type_id' => $paymentType->id,
-            'price_list_id' => $priceList->id,
-            'currency_id' => $currency->id,
-            'address_invoice_id' => $address->id,
-            'address_delivery_id' => $address->id,
-            'is_locked' => false,
-        ]);
+    (new OrderPositionTableSeeder())->run();
+});
 
-        Product::factory()
-            ->hasAttached(factory: $this->dbClient, relationship: 'clients')
-            ->create();
-
-        (new OrderPositionTableSeeder())->run();
-    }
-
-    public function test_renders_successfully(): void
-    {
-        Livewire::test(OrderPositionList::class, ['orderId' => $this->order->id])
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test(OrderPositionList::class, ['orderId' => $this->order->id])
+        ->assertStatus(200);
+});
