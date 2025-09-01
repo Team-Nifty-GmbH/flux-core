@@ -75,7 +75,10 @@ test('delete media media not found', function (): void {
 test('download media', function (): void {
     $media = createMedia([
         'disk' => 'public',
-    ]);
+    ],
+        $this->task,
+        $this->file
+    );
     $modelType = $this->task->getMorphClass();
     $queryParams = '?model_type=' . $modelType . '&model_id=' . $this->task->getKey();
 
@@ -106,7 +109,10 @@ test('download media model type not found', function (): void {
 test('download media private media', function (): void {
     $media = createMedia([
         'disk' => 'local',
-    ]);
+    ],
+        $this->task,
+        $this->file
+    );
 
     $this->user->givePermissionTo($this->permissions['download']);
     Sanctum::actingAs($this->user, ['user']);
@@ -124,7 +130,10 @@ test('download media public route', function (): void {
     createMedia([
         'file_name' => $fileName,
         'disk' => 'public',
-    ]);
+    ],
+        $this->task,
+        $this->file
+    );
     $queryParams = $fileName . '?model_type=' . $this->task->getMorphClass() . '&model_id=' . $this->task->getKey();
 
     $download = $this->get('/api/media/' . $queryParams);
@@ -148,7 +157,10 @@ test('download media public route with format parameters', function (): void {
         'disk' => 'public',
         'file_name' => $fileName,
         'name' => $fileName,
-    ]);
+    ],
+        $this->task,
+        $this->file
+    );
     $queryParams = $fileName . '?model_type=' . $this->task->getMorphClass() . '&model_id=' . $this->task->getKey();
 
     $download = $this->get('/api/media/' . $queryParams . '&as=url');
@@ -172,7 +184,10 @@ test('download media public route with model parameters', function (): void {
         'disk' => 'public',
         'file_name' => $fileName,
         'name' => $fileName,
-    ]);
+    ],
+        $this->task,
+        $this->file
+    );
     $queryParams = $fileName . '?model_type=' . $this->task->getMorphClass() . '&model_id=' . $this->task->getKey();
 
     $download = $this->get('/api/media/' . $queryParams);
@@ -185,7 +200,10 @@ test('download media thumbnail not generated', function (): void {
     $media = createMedia([
         'disk' => 'public',
         'generated_conversions' => [],
-    ]);
+    ],
+        $this->task,
+        $this->file
+    );
     $queryParams = '?model_type=' . $this->task->getMorphClass()
         . '&model_id=' . $this->task->getKey()
         . '&conversion=thumb';
@@ -198,7 +216,10 @@ test('download media thumbnail not generated', function (): void {
 test('download media unauthenticated private media', function (): void {
     $media = createMedia([
         'disk' => 'local',
-    ]);
+    ],
+        $this->task,
+        $this->file
+    );
     $queryParams = '?model_type=' . $this->task->getMorphClass() . '&model_id=' . $this->task->getKey();
 
     $download = $this->get('/api/media/' . $media->file_name . $queryParams);
@@ -216,7 +237,10 @@ test('download media validation fails', function (): void {
         'disk' => 'local',
         'file_name' => $fileName,
         'name' => $fileName,
-    ]);
+    ],
+        $this->task,
+        $this->file
+    );
     $queryParams = $fileName
         . '?model_type=' . $this->task->getMorphClass()
         . '&model_id=' . $this->task->getKey()
@@ -231,7 +255,10 @@ test('download media with categories', function (): void {
     $media = createMedia([
         'disk' => 'public',
         'custom_properties' => ['categories' => []],
-    ]);
+    ],
+        $this->task,
+        $this->file
+    );
     $queryParams = '?model_type=' . $this->task->getMorphClass() . '&model_id=' . $this->task->getKey();
 
     $download = $this->get('/api/media/' . $media->file_name . $queryParams);
@@ -245,7 +272,7 @@ test('download multiple media', function (): void {
     $mediaIds = [];
 
     for ($i = 0; $i < 2; $i++) {
-        $media = createMedia();
+        $media = createMedia([], $this->task, $this->file);
         $mediaIds[] = $media->getKey();
     }
 
@@ -262,12 +289,18 @@ test('download multiple media', function (): void {
 test('download multiple media mix public private', function (): void {
     $publicMedia = createMedia([
         'disk' => 'public',
-    ]);
+    ],
+        $this->task,
+        $this->file
+    );
 
     $privateMedia = createMedia([
         'disk' => 'local',
         'conversions_disk' => 'local',
-    ]);
+    ],
+        $this->task,
+        $this->file
+    );
 
     $this->user->givePermissionTo($this->permissions['download-multiple']);
     Sanctum::actingAs($this->user, ['user']);
@@ -283,7 +316,10 @@ test('download multiple media private permissions', function (): void {
     $media = createMedia([
         'disk' => 'local',
         'conversions_disk' => 'local',
-    ]);
+    ],
+        $this->task,
+        $this->file
+    );
 
     $response = $this->get('/api/media/download-multiple?ids[]=' . $media->getKey());
     $response->assertStatus(302);
@@ -322,7 +358,7 @@ test('download multiple media with custom filename', function (): void {
     $mediaIds = [];
 
     for ($i = 0; $i < 2; $i++) {
-        $media = createMedia();
+        $media = createMedia([], $this->task, $this->file);
         $mediaIds[] = $media->getKey();
     }
 
@@ -350,7 +386,10 @@ test('download private media media not found', function (): void {
 test('download private media thumbnail not generated', function (): void {
     $media = createMedia([
         'generated_conversions' => [],
-    ]);
+    ],
+        $this->task,
+        $this->file
+    );
 
     $this->user->givePermissionTo($this->permissions['download']);
     Sanctum::actingAs($this->user, ['user']);
@@ -592,15 +631,15 @@ test('upload media validation fails', function (): void {
     $response->assertJsonValidationErrors(['disk']);
 });
 
-function createMedia(array $attributes = []): Media
+function createMedia(array $attributes, Task $task, Illuminate\Http\Testing\File $file): Media
 {
     /** @var Media $media */
     $media = Media::factory()
         ->create(
             array_merge(
                 [
-                    'model_type' => $this->task->getMorphClass(),
-                    'model_id' => $this->task->getKey(),
+                    'model_type' => $task->getMorphClass(),
+                    'model_id' => $task->getKey(),
                 ],
                 $attributes
             )
@@ -608,7 +647,7 @@ function createMedia(array $attributes = []): Media
 
     Storage::fake($media->disk);
     Storage::disk($media->disk)->makeDirectory(dirname($media->getPathRelativeToRoot()));
-    Storage::disk($media->disk)->put($media->getPathRelativeToRoot(), $this->file->getContent());
+    Storage::disk($media->disk)->put($media->getPathRelativeToRoot(), $file);
 
     return $media;
 }
