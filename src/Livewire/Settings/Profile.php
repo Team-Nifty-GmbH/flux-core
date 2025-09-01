@@ -4,15 +4,18 @@ namespace FluxErp\Livewire\Settings;
 
 use Exception;
 use FluxErp\Actions\NotificationSetting\UpdateNotificationSetting;
-use FluxErp\Actions\User\UpdateUser;
+use FluxErp\Livewire\Forms\UserForm;
 use FluxErp\Models\Language;
 use FluxErp\Models\User;
+use FluxErp\Notifications\WebPushTestNotification;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\On;
+use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 
@@ -32,11 +35,15 @@ class Profile extends Component
 
     public array $notificationSettings = [];
 
-    public array $user = [];
+    public array $pushSubscriptions = [];
+
+    public UserForm $user;
+
+    public array $webPushSupport = [];
 
     public function mount(): void
     {
-        $this->user = auth()->user()->toArray();
+        $this->user->fill(auth()->user());
         $this->avatar = auth()->user()->getFirstMediaUrl('avatar');
         $this->languages = app(Language::class)->all(['id', 'name'])->toArray();
 
@@ -81,11 +88,44 @@ class Profile extends Component
                     ];
             }
         }
+
+        $this->loadPushSubscriptions();
+        $this->checkWebPushSupport();
     }
 
     public function render(): View|Factory|Application
     {
         return view('flux::livewire.settings.profile');
+    }
+
+    public function checkWebPushSupport(): void
+    {
+        $vapidSubject = config('webpush.vapid.subject');
+        $validVapidSubject = ! blank($vapidSubject) &&
+            (str_starts_with($vapidSubject, 'mailto:') || str_starts_with($vapidSubject, 'https://'));
+
+        $this->webPushSupport = [
+            'https' => request()->secure() || request()->getHost() === 'localhost',
+            'vapidKey' => ! blank(config('webpush.vapid.public_key')),
+            'vapidSubject' => $validVapidSubject,
+            'isSafari' => str_contains(request()->header('User-Agent', ''), 'Safari') &&
+                         ! str_contains(request()->header('User-Agent', ''), 'Chrome'),
+        ];
+    }
+
+    #[Renderless]
+    public function deletePushSubscription(int $id): void
+    {
+        try {
+            auth()->user()->pushSubscriptions()->whereKey($id)->delete();
+            $this->loadPushSubscriptions();
+
+            $this->notification()
+                ->success(__('Push subscription deleted'))
+                ->send();
+        } catch (Exception $e) {
+            exception_to_notifications($e, $this);
+        }
     }
 
     public function getRules(): array
@@ -95,19 +135,56 @@ class Profile extends Component
         ];
     }
 
+    #[Renderless]
+    public function loadPushSubscriptions(): void
+    {
+        $this->pushSubscriptions = auth()->user()
+            ->pushSubscriptions()
+            ->select(['id', 'endpoint', 'created_at'])
+            ->get()
+            ->map(function ($subscription) {
+                return [
+                    'id' => $subscription->id,
+                    'endpoint' => $subscription->endpoint,
+                    'browser' => $this->detectBrowserFromEndpoint($subscription->endpoint),
+                    'created_at' => $subscription->created_at->format('Y-m-d H:i'),
+                ];
+            })
+            ->toArray();
+    }
+
+    #[On('push-error')]
+    #[Renderless]
+    public function onPushError(string $message): void
+    {
+        $this->notification()
+            ->error($message)
+            ->send();
+    }
+
+    #[On('push-subscription-updated')]
+    #[Renderless]
+    public function onPushSubscriptionUpdated(): void
+    {
+        $this->loadPushSubscriptions();
+        $this->notification()
+            ->success(__('Web Push activated successfully'))
+            ->send();
+    }
+
     public function save(): void
     {
         $this->validate();
 
         try {
-            UpdateUser::make($this->user)
-                ->checkPermission()
-                ->validate()
-                ->execute();
-            $this->notification()->success(__(':model saved', ['model' => __('My Profile')]))->send();
+            $this->user->save();
         } catch (ValidationException|UnauthorizedException $e) {
             exception_to_notifications($e, $this);
+
+            return;
         }
+
+        $this->notification()->success(__(':model saved', ['model' => __('My Profile')]))->send();
 
         $dirtyNotifications = [];
         foreach ($this->dirtyNotifications as $key) {
@@ -134,6 +211,27 @@ class Profile extends Component
         $this->skipRender();
     }
 
+    public function sendTestNotification(): void
+    {
+        try {
+            if (! auth()->user()->pushSubscriptions()->exists()) {
+                $this->notification()
+                    ->error(__('No active push subscriptions found. Please activate Web Push first.'))
+                    ->send();
+
+                return;
+            }
+
+            auth()->user()->notify(new WebPushTestNotification());
+
+            $this->notification()
+                ->success(__('Test notification sent! Check your browser notifications.'))
+                ->send();
+        } catch (Exception $e) {
+            exception_to_notifications($e, $this);
+        }
+    }
+
     public function updatedAvatar(): void
     {
         $this->collection = 'avatar';
@@ -155,5 +253,18 @@ class Profile extends Component
     public function updatingNotificationSettings($value, $key): void
     {
         $this->dirtyNotifications[] = $key;
+    }
+
+    protected function detectBrowserFromEndpoint(string $endpoint): string
+    {
+        if (str_contains($endpoint, 'googleapis.com')) {
+            return __('Chrome/Edge');
+        } elseif (str_contains($endpoint, 'mozilla.com')) {
+            return __('Firefox');
+        } elseif (str_contains($endpoint, 'apple.com')) {
+            return __('Safari');
+        }
+
+        return __('Unknown');
     }
 }

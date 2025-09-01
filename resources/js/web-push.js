@@ -1,30 +1,139 @@
-const swReady = navigator.serviceWorker.ready;
+window.checkCurrentSubscription = async function (endpoint) {
+    try {
+        if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+            return false;
+        }
 
-document.addEventListener('DOMContentLoaded', function () {
-    initSW();
-});
+        const registration = await navigator.serviceWorker.getRegistration();
+        if (!registration) {
+            return false;
+        }
 
-window.initSW = function initSW() {
-    if ((!'serviceWorker') in navigator) {
-        return;
+        const subscription = await registration.pushManager.getSubscription();
+        if (!subscription) {
+            return false;
+        }
+
+        return subscription.endpoint === endpoint;
+    } catch (error) {
+        console.error('Error checking current subscription:', error);
+        return false;
+    }
+};
+
+window.checkWebPushSupport = async function () {
+    const support = {
+        serviceWorker: 'serviceWorker' in navigator,
+        pushManager: 'PushManager' in window,
+        notification: 'Notification' in window,
+        https:
+            window.location.protocol === 'https:' ||
+            window.location.hostname === 'localhost' ||
+            window.location.hostname === '127.0.0.1',
+        currentBrowserSubscribed: false,
+    };
+
+    support.allSupported =
+        support.serviceWorker &&
+        support.pushManager &&
+        support.notification &&
+        support.https;
+
+    if (support.serviceWorker && support.pushManager) {
+        try {
+            const registration =
+                await navigator.serviceWorker.getRegistration();
+            if (registration) {
+                const subscription =
+                    await registration.pushManager.getSubscription();
+                support.currentBrowserSubscribed = subscription !== null;
+            }
+        } catch (err) {
+            console.log('Could not check subscription status:', err);
+        }
     }
 
-    if ((!'PushManager') in window) {
-        return;
+    return support;
+};
+
+window.initSW = async function initSW(forceResubscribe = false) {
+    const support = await window.checkWebPushSupport();
+
+    if (!support.https) {
+        const message = 'Web Push requires HTTPS connection (or localhost)';
+        if (window.Livewire) {
+            window.Livewire.dispatch('push-error', { message });
+        }
+        return Promise.reject(message);
     }
 
-    let url = '/pwa-service-worker';
-    navigator.serviceWorker.register(url).then((registration) => {
-        initPush();
-    });
+    if (!support.serviceWorker) {
+        const message = 'Service Workers are not supported in this browser';
+        if (window.Livewire) {
+            window.Livewire.dispatch('push-error', { message });
+        }
+        return Promise.reject(message);
+    }
+
+    if (!support.pushManager) {
+        const message = 'Push notifications are not supported in this browser';
+        if (window.Livewire) {
+            window.Livewire.dispatch('push-error', { message });
+        }
+        return Promise.reject(message);
+    }
+
+    if (!support.notification) {
+        const message = 'Notifications are not supported in this browser';
+        if (window.Livewire) {
+            window.Livewire.dispatch('push-error', { message });
+        }
+        return Promise.reject(message);
+    }
+
+    let registration = await navigator.serviceWorker.getRegistration();
+
+    if (!registration) {
+        let url = '/pwa-service-worker';
+        try {
+            registration = await navigator.serviceWorker.register(url);
+        } catch (error) {
+            console.error('Service Worker registration failed:', error);
+            const message =
+                'Failed to register Service Worker. Please check your browser settings.';
+            if (window.Livewire) {
+                window.Livewire.dispatch('push-error', { message });
+            }
+            throw error;
+        }
+    }
+
+    const existingSubscription =
+        await registration.pushManager.getSubscription();
+    if (existingSubscription && !forceResubscribe) {
+        if (window.Livewire) {
+            window.Livewire.dispatch('push-subscription-updated');
+        }
+        return existingSubscription;
+    }
+
+    if (existingSubscription && forceResubscribe) {
+        try {
+            await existingSubscription.unsubscribe();
+        } catch (error) {
+            console.error('Error unsubscribing:', error);
+        }
+    }
+
+    return initPush();
 };
 
 function initPush() {
-    if (!swReady) {
-        return;
+    if (!navigator.serviceWorker.ready) {
+        return Promise.reject('Service Worker not ready');
     }
 
-    new Promise(function (resolve, reject) {
+    return new Promise(function (resolve, reject) {
         const permissionResult = Notification.requestPermission(
             function (result) {
                 resolve(result);
@@ -35,10 +144,22 @@ function initPush() {
             permissionResult.then(resolve, reject);
         }
     }).then((permissionResult) => {
-        if (permissionResult !== 'granted') {
-            return;
+        if (permissionResult === 'denied') {
+            const message =
+                'Notification permission was denied. Please enable notifications in your browser settings.';
+            if (window.Livewire) {
+                window.Livewire.dispatch('push-error', { message });
+            }
+            return Promise.reject(message);
         }
-        subscribeUser();
+        if (permissionResult !== 'granted') {
+            const message = 'Notification permission was not granted';
+            if (window.Livewire) {
+                window.Livewire.dispatch('push-error', { message });
+            }
+            return Promise.reject(message);
+        }
+        return subscribeUser();
     });
 }
 
@@ -46,7 +167,7 @@ function initPush() {
  * Subscribe the user to push
  */
 function subscribeUser() {
-    swReady
+    return navigator.serviceWorker.ready
         .then((registration) => {
             const subscribeOptions = {
                 userVisibleOnly: true,
@@ -59,10 +180,16 @@ function subscribeUser() {
             return registration.pushManager.subscribe(subscribeOptions);
         })
         .then((pushSubscription) => {
-            storePushSubscription(pushSubscription);
+            return storePushSubscription(pushSubscription);
         })
         .catch((err) => {
-            console.log('Failed to subscribe the user: ', err);
+            console.error('Failed to subscribe the user: ', err);
+            const message =
+                'Failed to subscribe to push notifications. Please try again.';
+            if (window.Livewire) {
+                window.Livewire.dispatch('push-error', { message });
+            }
+            throw err;
         });
 }
 
@@ -75,7 +202,7 @@ function storePushSubscription(pushSubscription) {
         .querySelector('meta[name=csrf-token]')
         .getAttribute('content');
 
-    fetch('/push-subscription', {
+    return fetch('/push-subscription', {
         method: 'POST',
         body: JSON.stringify(pushSubscription),
         headers: {
@@ -83,9 +210,20 @@ function storePushSubscription(pushSubscription) {
             'Content-Type': 'application/json',
             'X-CSRF-Token': token,
         },
-    }).then((res) => {
-        return res.json();
-    });
+    })
+        .then((res) => {
+            return res.json();
+        })
+        .then((data) => {
+            if (window.Livewire) {
+                window.Livewire.dispatch('push-subscription-updated');
+            }
+            return data;
+        })
+        .catch((error) => {
+            console.error('Failed to store push subscription:', error);
+            throw error;
+        });
 }
 
 /**

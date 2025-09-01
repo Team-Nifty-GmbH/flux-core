@@ -73,6 +73,10 @@ class ViewServiceProvider extends ServiceProvider
                     'team-nifty-gmbh/flux-erp'
                 ),
                 static::getRealPackageAssetPath(
+                    'resources/js/web-push.js',
+                    'team-nifty-gmbh/flux-erp'
+                ),
+                static::getRealPackageAssetPath(
                     'resources/js/tall-datatables.js',
                     'team-nifty-gmbh/tall-datatables'
                 ),
