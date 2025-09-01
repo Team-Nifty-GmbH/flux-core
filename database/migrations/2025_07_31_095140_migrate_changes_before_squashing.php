@@ -163,12 +163,9 @@ return new class() extends Migration
 
         Schema::table('event_subscriptions', function (Blueprint $table): void {
             $table->dropIndex('event_notifications_event_index');
-            $table->dropIndex('event_notifications_model_id_index');
-            $table->dropIndex('event_notifications_model_type_index');
             $table->dropIndex('event_subscriptions_subscribable_id_subscribable_type_index');
 
             $table->index('event');
-            $table->index(['model_type', 'model_id']);
             $table->index(['subscribable_type', 'subscribable_id']);
         });
 
@@ -591,12 +588,9 @@ return new class() extends Migration
 
         Schema::table('event_subscriptions', function (Blueprint $table): void {
             $table->dropIndex('event_subscriptions_event_index');
-            $table->dropIndex('event_subscriptions_model_type_model_id_index');
             $table->dropIndex('event_subscriptions_subscribable_type_subscribable_id_index');
 
             $table->index('event', 'event_notifications_event_index');
-            $table->index('model_id', 'event_notifications_model_id_index');
-            $table->index('model_type', 'event_notifications_model_type_index');
             $table->index(['subscribable_id', 'subscribable_type']);
         });
 
