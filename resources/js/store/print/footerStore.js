@@ -454,7 +454,16 @@ export default function () {
                 throw new Error(`Temporary media with id ${id} not found`);
             }
         },
-        deleteMedia(id) {},
+        deleteMedia(id) {
+            const index = this.visibleMedia.findIndex((item) => item.id === id);
+            if (index !== -1) {
+                this.observer.unobserve(this.visibleMedia[index].element);
+                this.footer.removeChild(this.visibleMedia[index].element);
+                this.visibleMedia.splice(index, 1);
+            } else {
+                throw new Error(`Media with id ${id} not found`);
+            }
+        },
         async prepareToSubmit() {
             try {
                 if (this.temporaryVisibleMedia.length > 0) {

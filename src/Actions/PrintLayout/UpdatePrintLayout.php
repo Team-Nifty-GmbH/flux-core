@@ -4,6 +4,7 @@ namespace FluxErp\Actions\PrintLayout;
 
 use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\Media\UploadMedia;
+use FluxErp\Actions\Media\DeleteMedia;
 use FluxErp\Models\PrintLayout;
 use FluxErp\Rulesets\PrintLayout\UpdatePrintLayoutRuleset;
 
@@ -34,7 +35,22 @@ class UpdatePrintLayout extends FluxAction
         $firstPageHeader = $this->getData('first_page_header');
 
         // footer
+        $snapshotDBFooterMedia = $printLayout->footer['media'] ?? [];
         $footer = $this->getData('footer');
+        // delete media that are removed from footer on front-end (sync with db)
+        $mediaFooterToDelete = array_diff(
+            array_column($snapshotDBFooterMedia,'id'),
+            array_column($footer['media'] ?? [], 'id'));
+        if($mediaFooterToDelete) {
+            foreach ($mediaFooterToDelete as $mediaId) {
+                DeleteMedia::make([
+                    'id' => $mediaId,
+                ])->checkPermission()
+                    ->validate()
+                    ->execute();
+            }
+        }
+
         if($footer['temporaryMedia']) {
             foreach ($footer['temporaryMedia'] as $imagePosition) {
                 $index = array_search($imagePosition['name'], array_map(fn ($item) => $item->getFilename(), $temporaryMedia));

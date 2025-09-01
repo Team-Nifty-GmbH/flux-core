@@ -44,7 +44,6 @@ export default class TemporaryMediaElement extends PrintElement {
                     $this._imgFile,
                     (tempFileName) => {
                         $this._temporaryFileName = tempFileName;
-                        console.log('succesfull upload', tempFileName);
                         // TODO: validate on demand
                         resolve();
                     },

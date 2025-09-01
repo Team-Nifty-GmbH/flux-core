@@ -82,10 +82,12 @@
                     class="max-h-[1.7cm] select-none"
                     x-bind:src=image.src
                 />
+                @canAction(\FluxErp\Actions\Media\DeleteMedia::class)
                 <x-button.circle
                     x-on:click="footerStore.deleteMedia(image.id)"
                     icon="trash"
                 />
+                @endcanAction
             </div>
         </template>
         {{-- not submited --}}
