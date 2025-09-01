@@ -45,4 +45,6 @@ test('can export data', function (): void {
     );
 });
 
-class ClientDataTableTest extends BaseDataTable {}
+class ClientDataTableTest extends BaseDataTable {
+    protected string $model = \FluxErp\Models\Client::class;
+}
