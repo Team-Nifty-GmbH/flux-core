@@ -454,22 +454,22 @@
                 </th>
             </template>
         </x-slot>
-        @foreach ($notificationSettings as $notificationName => $notification)
+        <template x-for="(notification, notificationName) in $wire.notificationSettings">
             <tr>
                 <td class="text-center">
-                    <div>
-                        {{ __( Str::of(class_basename($notificationName))->before('Notification')->headline()->toString(),) }}
-                    </div>
+                    <div x-text="$wire.notifications[notificationName]" />
                 </td>
-                @foreach ($notification as $channel => $channelSettings)
+                <template
+                    x-for="(channelSettings, channel) in notification"
+                >
                     <td>
                         <x-checkbox
-                            wire:model.live="notificationSettings.{{ $notificationName }}.{{ $channel }}.is_active"
+                            x-model="$wire.notificationSettings[notificationName][channel].is_active"
                         />
                     </td>
-                @endforeach
+                </template>
             </tr>
-        @endforeach
+        </template>
     </x-flux::table>
     @show
 

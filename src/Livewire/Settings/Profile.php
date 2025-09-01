@@ -8,8 +8,8 @@ use FluxErp\Actions\NotificationSetting\UpdateNotificationSetting;
 use FluxErp\Livewire\Forms\UserForm;
 use FluxErp\Models\Language;
 use FluxErp\Models\User;
-use FluxErp\Support\Notification\SubscribableNotification;
 use FluxErp\Notifications\WebPushTestNotification;
+use FluxErp\Support\Notification\SubscribableNotification;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Contracts\Foundation\Application;
@@ -33,8 +33,6 @@ class Profile extends Component
 
     public array $dirtyNotifications = [];
 
-    public array $languages = [];
-
     public array $notificationChannels = [];
 
     public array $notifications = [];
@@ -50,10 +48,8 @@ class Profile extends Component
     public function mount(): void
     {
         $this->user->fill(auth()->user());
+
         $this->avatar = auth()->user()->getFirstMediaUrl('avatar');
-        $this->languages = resolve_static(Language::class, 'query')
-            ->get(['id', 'name'])
-            ->toArray();
 
         $this->notificationChannels = config('notifications.channels');
         foreach (Event::getFacadeRoot()->getRawListeners() as $event => $listeners) {
@@ -113,7 +109,19 @@ class Profile extends Component
 
         $this->notificationChannels = Arr::mapWithKeys(
             $this->notificationChannels,
-            fn ($channel, $key) => [__(Str::headline($key)) => $channel]
+            fn (array $channel, string $key) => [__(Str::headline($key)) => $channel]
+        );
+
+        $this->notifications = Arr::mapWithKeys(
+            $this->notifications,
+            fn (string $notification) => [
+                $notification => __(
+                    Str::of(class_basename($notification))
+                        ->before('Notification')
+                        ->headline()
+                        ->toString()
+                ),
+            ]
         );
 
         $this->loadPushSubscriptions();
@@ -122,7 +130,14 @@ class Profile extends Component
 
     public function render(): View|Factory|Application
     {
-        return view('flux::livewire.settings.profile');
+        return view(
+            'flux::livewire.settings.profile',
+            [
+                'languages' => resolve_static(Language::class, 'query')
+                    ->get(['id', 'name'])
+                    ->toArray(),
+            ]
+        );
     }
 
     public function checkWebPushSupport(): void
