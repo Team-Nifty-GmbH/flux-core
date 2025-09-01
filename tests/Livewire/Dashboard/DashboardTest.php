@@ -14,16 +14,16 @@ beforeEach(function (): void {
     {
         use FluxErp\Traits\Widgetable;
 
+        public static function dashboardComponent(): string
+        {
+            return Dashboard::class;
+        }
+
         public function render(): string
         {
             return <<<'blade'
                     <div id="sample-component">Hello from sample component</div>
                 blade;
-        }
-
-        public static function dashboardComponent(): string
-        {
-            return Dashboard::class;
         }
 
         public function getLabel(): string
@@ -35,16 +35,16 @@ beforeEach(function (): void {
     {
         use FluxErp\Traits\Widgetable;
 
+        public static function dashboardComponent(): string
+        {
+            return Dashboard::class;
+        }
+
         public function render(): string
         {
             return <<<'blade'
                     <div id="sample-component-2">Hello from sample component 2</div>
                 blade;
-        }
-
-        public static function dashboardComponent(): string
-        {
-            return Dashboard::class;
         }
 
         public function getLabel(): string
