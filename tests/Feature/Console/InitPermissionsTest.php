@@ -41,21 +41,21 @@ test('init permissions', function (): void {
     {
         use FluxErp\Traits\Widgetable;
 
+        public static function dashboardComponent(): string
+        {
+            return Dashboard::class;
+        }
+
+        public static function getLabel(): string
+        {
+            return 'Custom Widget';
+        }
+
         public function render()
         {
             return <<<'blade'
                     <div id="custom-widget">Hello from custom widget</div>
                 blade;
-        }
-
-        public function dashboardComponent(): string
-        {
-            return Dashboard::class;
-        }
-
-        public function getLabel(): string
-        {
-            return 'Custom Widget';
         }
     });
     Widget::register('custom-widget-that-never-exists', 'custom-widget-that-never-exists');

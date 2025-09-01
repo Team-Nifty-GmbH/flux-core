@@ -1,6 +1,6 @@
 <?php
 
-uses(FluxErp\Tests\Livewire\BaseSetup::class);
+uses(FluxErp\Tests\Livewire\PortalBaseSetup::class);
 use FluxErp\Database\Seeders\OrderPositionTableSeeder;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\Portal\DataTables\OrderPositionList;

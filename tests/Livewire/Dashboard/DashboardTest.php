@@ -19,16 +19,16 @@ beforeEach(function (): void {
             return Dashboard::class;
         }
 
+        public static function getLabel(): string
+        {
+            return 'Sample Component';
+        }
+
         public function render(): string
         {
             return <<<'blade'
                     <div id="sample-component">Hello from sample component</div>
                 blade;
-        }
-
-        public function getLabel(): string
-        {
-            return 'Sample Component';
         }
     };
     $this->components[] = new class() extends Component
@@ -40,16 +40,16 @@ beforeEach(function (): void {
             return Dashboard::class;
         }
 
+        public static function getLabel(): string
+        {
+            return 'Sample Component 2';
+        }
+
         public function render(): string
         {
             return <<<'blade'
                     <div id="sample-component-2">Hello from sample component 2</div>
                 blade;
-        }
-
-        public function getLabel(): string
-        {
-            return 'Sample Component 2';
         }
     };
     Widget::query()->create([

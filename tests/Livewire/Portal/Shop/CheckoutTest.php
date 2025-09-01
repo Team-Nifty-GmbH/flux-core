@@ -1,6 +1,6 @@
 <?php
 
-uses(FluxErp\Tests\Livewire\BaseSetup::class);
+uses(FluxErp\Tests\Livewire\PortalBaseSetup::class);
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\Portal\Shop\Checkout;
 use FluxErp\Mail\Order\OrderConfirmation;
