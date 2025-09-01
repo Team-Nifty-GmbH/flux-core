@@ -113,7 +113,7 @@ window.WebPush = (function () {
                 throw error;
             }
         } else {
-            registration.update().catch(err => {
+            registration.update().catch((err) => {
                 console.log('Service worker update check failed:', err);
             });
         }
