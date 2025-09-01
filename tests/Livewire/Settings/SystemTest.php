@@ -1,8 +1,8 @@
 <?php
 
 uses(FluxErp\Tests\TestCase::class);
-use Livewire\Livewire;
 use FluxErp\Livewire\Settings\System;
+use Livewire\Livewire;
 
 test('renders successfully', function (): void {
     Livewire::withoutLazyLoading()
