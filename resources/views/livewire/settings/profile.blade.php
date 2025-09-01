@@ -1,11 +1,5 @@
-<div
-    class="p-10"
-    x-data="{
-        notifications: $wire.entangle('notifications', true),
-        notificationChannels: $wire.entangle('notificationChannels', true),
-        notificationSettings: $wire.entangle('notificationSettings'),
-    }"
->
+@use(\Illuminate\Support\Str)
+<div class="p-10">
     @section('profile')
     @section('profile.form')
     <form class="space-y-5">
@@ -68,7 +62,7 @@
         <x-slot:header>
             <th>{{ __('Notification') }}</th>
             <template
-                x-for="(notificationChannel, name) in notificationChannels"
+                x-for="(notificationChannel, name) in $wire.notificationChannels"
             >
                 <th class="text-left">
                     <div x-text="name" />
@@ -77,8 +71,10 @@
         </x-slot>
         @foreach ($notificationSettings as $notificationName => $notification)
             <tr>
-                <td>
-                    <div>{{ $notificationName }}</div>
+                <td class="text-center">
+                    <div>
+                        {{ __( Str::of(class_basename($notificationName))->before('Notification')->headline()->toString(),) }}
+                    </div>
                 </td>
                 @foreach ($notification as $channel => $channelSettings)
                     <td>
