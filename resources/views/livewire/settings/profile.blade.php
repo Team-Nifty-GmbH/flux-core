@@ -3,8 +3,8 @@
     x-data="{
         webPushSupport: {},
         async checkSupport() {
-            if (window.WebPush) {
-                const support = await window.WebPush.checkWebPushSupport()
+            if (window.webPush) {
+                const support = await window.webPush.checkWebPushSupport()
                 support.allSupported =
                     support.serviceWorker &&
                     support.pushManager &&
@@ -96,7 +96,7 @@
                             <x-button
                                 :text="__('Activate')"
                                 color="primary"
-                                x-on:click="WebPush.initSW().then(() => checkSupport()).catch(err => console.error(err))"
+                                x-on:click="WebPush.initSW().then(() => checkSupport()).catch(error => console.error(error))"
                                 icon="bell"
                             />
                         </div>
@@ -113,7 +113,7 @@
                                 :text="__('Reactivate')"
                                 color="secondary"
                                 size="sm"
-                                x-on:click="WebPush.initSW(true).then(() => checkSupport()).catch(err => console.error(err))"
+                                x-on:click="WebPush.initSW(true).then(() => checkSupport()).catch(error => console.error(error))"
                                 icon="arrow-path"
                             />
                         </div>
@@ -217,7 +217,7 @@
                                         : 'text-gray-500 dark:text-gray-400'
                                 "
                             >
-                                {{ __('Notifications API support') }}
+                                {{ __('Notification API support') }}
                             </span>
                         </div>
 
@@ -344,28 +344,19 @@
                             <x-table.row
                                 x-data="{ isCurrentBrowser: false }"
                                 x-init="
-                                            $nextTick(async () => {
-                                                if (window.WebPush) {
-                                                    isCurrentBrowser = await window.WebPush.checkCurrentSubscription(subscription.endpoint);
-                                                }
-                                            })
-                                        "
+                                    $nextTick(async () => {
+                                        if (window.webPush) {
+                                            isCurrentBrowser = await window.webPush.checkCurrentSubscription(subscription.endpoint);
+                                        }
+                                    })
+                                "
                             >
                                 <td>
                                     <div class="flex items-center">
-                                        <svg
-                                            class="mr-2 h-5 w-5 text-gray-400"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                                            />
-                                        </svg>
+                                        <x-icon
+                                            name="computer-desktop"
+                                            class="mr-2 size-8"
+                                        />
                                         <span
                                             x-text="subscription.browser"
                                         ></span>
@@ -454,14 +445,14 @@
                 </th>
             </template>
         </x-slot>
-        <template x-for="(notification, notificationName) in $wire.notificationSettings">
+        <template
+            x-for="(notification, notificationName) in $wire.notificationSettings"
+        >
             <tr>
                 <td class="text-center">
                     <div x-text="$wire.notifications[notificationName]" />
                 </td>
-                <template
-                    x-for="(channelSettings, channel) in notification"
-                >
+                <template x-for="(channelSettings, channel) in notification">
                     <td>
                         <x-checkbox
                             x-model="$wire.notificationSettings[notificationName][channel].is_active"

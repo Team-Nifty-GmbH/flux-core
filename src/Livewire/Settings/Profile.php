@@ -61,7 +61,12 @@ class Profile extends Component
                 );
 
                 if (is_subclass_of($notificationClass, SubscribableNotification::class)) {
-                    $this->notifications[] = $notificationClass;
+                    $this->notifications[$notificationClass] = __(
+                        Str::of(class_basename($notificationClass))
+                            ->before('Notification')
+                            ->headline()
+                            ->toString()
+                    );
                 }
             }
         }
@@ -80,7 +85,7 @@ class Profile extends Component
             ->map(fn ($items) => $items->keyBy('channel'))
             ->toArray() ?? [];
 
-        foreach ($notificationSettings as $notificationSetting) {
+        foreach ($notificationSettings as $notificationSetting => $name) {
             if (is_null($notificationSetting)) {
                 continue;
             }
@@ -112,18 +117,6 @@ class Profile extends Component
             fn (array $channel, string $key) => [__(Str::headline($key)) => $channel]
         );
 
-        $this->notifications = Arr::mapWithKeys(
-            $this->notifications,
-            fn (string $notification) => [
-                $notification => __(
-                    Str::of(class_basename($notification))
-                        ->before('Notification')
-                        ->headline()
-                        ->toString()
-                ),
-            ]
-        );
-
         $this->loadPushSubscriptions();
         $this->checkWebPushSupport();
     }
@@ -143,15 +136,15 @@ class Profile extends Component
     public function checkWebPushSupport(): void
     {
         $vapidSubject = config('webpush.vapid.subject');
-        $validVapidSubject = ! blank($vapidSubject) &&
-            (str_starts_with($vapidSubject, 'mailto:') || str_starts_with($vapidSubject, 'https://'));
+        $validVapidSubject = ! blank($vapidSubject)
+            && (str_starts_with($vapidSubject, 'mailto:') || str_starts_with($vapidSubject, 'https://'));
 
         $this->webPushSupport = [
             'https' => request()->secure() || request()->getHost() === 'localhost',
             'vapidKey' => ! blank(config('webpush.vapid.public_key')),
             'vapidSubject' => $validVapidSubject,
-            'isSafari' => str_contains(request()->header('User-Agent', ''), 'Safari') &&
-                         ! str_contains(request()->header('User-Agent', ''), 'Chrome'),
+            'isSafari' => str_contains(request()->header('User-Agent', ''), 'Safari')
+                && ! str_contains(request()->header('User-Agent', ''), 'Chrome'),
         ];
     }
 
@@ -159,7 +152,11 @@ class Profile extends Component
     public function deletePushSubscription(int $id): void
     {
         try {
-            auth()->user()->pushSubscriptions()->whereKey($id)->delete();
+            auth()
+                ->user()
+                ->pushSubscriptions()
+                ->whereKey($id)
+                ->delete();
             $this->loadPushSubscriptions();
 
             $this->notification()
@@ -226,7 +223,9 @@ class Profile extends Component
             return;
         }
 
-        $this->notification()->success(__(':model saved', ['model' => __('My Profile')]))->send();
+        $this->notification()
+            ->success(__(':model saved', ['model' => __('My Profile')]))
+            ->send();
 
         $dirtyNotifications = [];
         foreach ($this->dirtyNotifications as $key) {
@@ -299,14 +298,11 @@ class Profile extends Component
 
     protected function detectBrowserFromEndpoint(string $endpoint): string
     {
-        if (str_contains($endpoint, 'googleapis.com')) {
-            return __('Chrome/Edge');
-        } elseif (str_contains($endpoint, 'mozilla.com')) {
-            return __('Firefox');
-        } elseif (str_contains($endpoint, 'apple.com')) {
-            return __('Safari');
-        }
-
-        return __('Unknown');
+        return match (true) {
+            str_contains($endpoint, 'googleapis.com') => __('Chrome/Edge'),
+            str_contains($endpoint, 'mozilla.com') => __('Firefox'),
+            str_contains($endpoint, 'apple.com') => __('Safari'),
+            default => __('Unknown'),
+        };
     }
 }

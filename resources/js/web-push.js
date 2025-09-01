@@ -1,4 +1,4 @@
-window.WebPush = (function () {
+window.webPush = (function () {
     'use strict';
 
     async function checkCurrentSubscription(endpoint) {
@@ -9,12 +9,14 @@ window.WebPush = (function () {
 
             const registration =
                 await navigator.serviceWorker.getRegistration();
+
             if (!registration) {
                 return false;
             }
 
             const subscription =
                 await registration.pushManager.getSubscription();
+
             if (!subscription) {
                 return false;
             }
@@ -48,13 +50,14 @@ window.WebPush = (function () {
             try {
                 const registration =
                     await navigator.serviceWorker.getRegistration();
+
                 if (registration) {
                     const subscription =
                         await registration.pushManager.getSubscription();
                     support.currentBrowserSubscribed = subscription !== null;
                 }
-            } catch (err) {
-                console.log('Could not check subscription status:', err);
+            } catch (error) {
+                console.log('Could not check subscription status:', error);
             }
         }
 
@@ -66,9 +69,11 @@ window.WebPush = (function () {
 
         if (!support.https) {
             const message = 'Web Push requires HTTPS connection (or localhost)';
+
             if (window.Livewire) {
                 window.Livewire.dispatch('push-error', { message });
             }
+
             return Promise.reject(message);
         }
 
@@ -83,17 +88,21 @@ window.WebPush = (function () {
         if (!support.pushManager) {
             const message =
                 'Push notifications are not supported in this browser';
+
             if (window.Livewire) {
                 window.Livewire.dispatch('push-error', { message });
             }
+
             return Promise.reject(message);
         }
 
         if (!support.notification) {
             const message = 'Notifications are not supported in this browser';
+
             if (window.Livewire) {
                 window.Livewire.dispatch('push-error', { message });
             }
+
             return Promise.reject(message);
         }
 
@@ -107,14 +116,16 @@ window.WebPush = (function () {
                 console.error('Service Worker registration failed:', error);
                 const message =
                     'Failed to register Service Worker. Please check your browser settings.';
+
                 if (window.Livewire) {
                     window.Livewire.dispatch('push-error', { message });
                 }
+
                 throw error;
             }
         } else {
-            registration.update().catch((err) => {
-                console.log('Service worker update check failed:', err);
+            registration.update().catch((error) => {
+                console.log('Service worker update check failed:', error);
             });
         }
 
@@ -124,6 +135,7 @@ window.WebPush = (function () {
             if (window.Livewire) {
                 window.Livewire.dispatch('push-subscription-updated');
             }
+
             return existingSubscription;
         }
 
@@ -155,18 +167,24 @@ window.WebPush = (function () {
             if (permissionResult === 'denied') {
                 const message =
                     'Notification permission was denied. Please enable notifications in your browser settings.';
+
                 if (window.Livewire) {
                     window.Livewire.dispatch('push-error', { message });
                 }
+
                 return Promise.reject(message);
             }
+
             if (permissionResult !== 'granted') {
                 const message = 'Notification permission was not granted';
+
                 if (window.Livewire) {
                     window.Livewire.dispatch('push-error', { message });
                 }
+
                 return Promise.reject(message);
             }
+
             return subscribeUser();
         });
     }
@@ -187,14 +205,16 @@ window.WebPush = (function () {
             .then((pushSubscription) => {
                 return storePushSubscription(pushSubscription);
             })
-            .catch((err) => {
-                console.error('Failed to subscribe the user: ', err);
+            .catch((error) => {
+                console.error('Failed to subscribe the user: ', error);
                 const message =
                     'Failed to subscribe to push notifications. Please try again.';
+
                 if (window.Livewire) {
                     window.Livewire.dispatch('push-error', { message });
                 }
-                throw err;
+
+                throw error;
             });
     }
 
@@ -215,8 +235,8 @@ window.WebPush = (function () {
                 'X-CSRF-Token': token,
             },
         })
-            .then((res) => {
-                return res.json();
+            .then((response) => {
+                return response.json();
             })
             .then((data) => {
                 if (window.Livewire) {
