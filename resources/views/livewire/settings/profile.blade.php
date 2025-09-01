@@ -456,8 +456,10 @@
         </x-slot>
         @foreach ($notificationSettings as $notificationName => $notification)
             <tr>
-                <td>
-                    <div>{{ $notificationName }}</div>
+                <td class="text-center">
+                    <div>
+                        {{ __( Str::of(class_basename($notificationName))->before('Notification')->headline()->toString(),) }}
+                    </div>
                 </td>
                 @foreach ($notification as $channel => $channelSettings)
                     <td>

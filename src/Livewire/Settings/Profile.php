@@ -2,21 +2,27 @@
 
 namespace FluxErp\Livewire\Settings;
 
+use Closure;
 use Exception;
 use FluxErp\Actions\NotificationSetting\UpdateNotificationSetting;
 use FluxErp\Livewire\Forms\UserForm;
 use FluxErp\Models\Language;
 use FluxErp\Models\User;
+use FluxErp\Support\Notification\SubscribableNotification;
 use FluxErp\Notifications\WebPushTestNotification;
 use FluxErp\Traits\Livewire\Actions;
 use FluxErp\Traits\Livewire\WithFileUploads;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
+use ReflectionFunction;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 
 class Profile extends Component
@@ -45,34 +51,50 @@ class Profile extends Component
     {
         $this->user->fill(auth()->user());
         $this->avatar = auth()->user()->getFirstMediaUrl('avatar');
-        $this->languages = app(Language::class)->all(['id', 'name'])->toArray();
+        $this->languages = resolve_static(Language::class, 'query')
+            ->get(['id', 'name'])
+            ->toArray();
 
         $this->notificationChannels = config('notifications.channels');
-        $this->notifications = config('notifications.model_notifications');
+        foreach (Event::getFacadeRoot()->getRawListeners() as $event => $listeners) {
+            foreach (Event::getFacadeRoot()->getListeners($event) as $listener) {
+                /** @var Closure $listener */
+                $notificationClass = data_get(
+                    (new ReflectionFunction($listener))->getStaticVariables(),
+                    'listener.0'
+                );
 
-        $notificationSettings = data_get($this->notifications, '*.*');
+                if (is_subclass_of($notificationClass, SubscribableNotification::class)) {
+                    $this->notifications[] = $notificationClass;
+                }
+            }
+        }
+
+        $notificationSettings = $this->notifications;
         $userNotificationSettings = auth()->user()
             ->notificationSettings()
             ->select([
                 'id',
-                'is_active',
                 'notification_type',
                 'channel',
+                'is_active',
             ])
             ->get()
             ->groupBy('notification_type')
             ->map(fn ($items) => $items->keyBy('channel'))
-            ->toArray();
+            ->toArray() ?? [];
 
         foreach ($notificationSettings as $notificationSetting) {
-            foreach ($this->notificationChannels as $key => $channel) {
-                $channelDriver = $channel['driver'] ?? false;
-                $disabled = ($channel['method'] ?? false)
-                    && ! method_exists($notificationSetting ?? false, $channel['method']);
+            if (is_null($notificationSetting)) {
+                continue;
+            }
 
-                $userSetting = data_get(
-                    $userNotificationSettings,
-                    $notificationSetting . '.' . $channelDriver);
+            foreach ($this->notificationChannels as $key => $channel) {
+                $channelDriver = data_get($channel, 'driver') ?? false;
+                $disabled = (data_get($channel, 'method') ?? false)
+                    && ! method_exists($notificationSetting, data_get($channel, 'method'));
+
+                $userSetting = data_get($userNotificationSettings, $notificationSetting . '.' . $channelDriver);
 
                 $this->notificationSettings[$notificationSetting][$key] =
                     [
@@ -88,6 +110,11 @@ class Profile extends Component
                     ];
             }
         }
+
+        $this->notificationChannels = Arr::mapWithKeys(
+            $this->notificationChannels,
+            fn ($channel, $key) => [__(Str::headline($key)) => $channel]
+        );
 
         $this->loadPushSubscriptions();
         $this->checkWebPushSupport();

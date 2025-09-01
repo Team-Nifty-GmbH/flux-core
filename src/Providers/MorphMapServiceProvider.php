@@ -61,19 +61,26 @@ use FluxErp\Models\PaymentRun;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
+use FluxErp\Models\Pivots\Calendarable;
 use FluxErp\Models\Pivots\CalendarEventInvite;
 use FluxErp\Models\Pivots\Categorizable;
+use FluxErp\Models\Pivots\ClientPaymentType;
 use FluxErp\Models\Pivots\ClientProduct;
 use FluxErp\Models\Pivots\Communicatable;
 use FluxErp\Models\Pivots\ContactDiscount;
 use FluxErp\Models\Pivots\ContactDiscountGroup;
+use FluxErp\Models\Pivots\ContactIndustry;
+use FluxErp\Models\Pivots\Inviteable;
 use FluxErp\Models\Pivots\JobBatchable;
+use FluxErp\Models\Pivots\OrderSchedule;
 use FluxErp\Models\Pivots\OrderTransaction;
 use FluxErp\Models\Pivots\PrinterUser;
 use FluxErp\Models\Pivots\ProductBundleProduct;
 use FluxErp\Models\Pivots\ProductCrossSellingProduct;
 use FluxErp\Models\Pivots\ProductProductOption;
 use FluxErp\Models\Pivots\QueueMonitorable;
+use FluxErp\Models\Pivots\TargetUser;
+use FluxErp\Models\Pivots\TaskUser;
 use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Printer;
@@ -219,19 +226,26 @@ class MorphMapServiceProvider extends ServiceProvider
             'work_time_type' => WorkTimeType::class,
 
             'address_address_type_order' => AddressAddressTypeOrder::class,
+            'calendarable' => Calendarable::class,
             'calendar_event_invitee' => CalendarEventInvite::class,
             'categorizable' => Categorizable::class,
+            'client_payment_type' => ClientPaymentType::class,
             'client_product' => ClientProduct::class,
             'communicatable' => Communicatable::class,
             'contact_discount' => ContactDiscount::class,
             'contact_discount_group' => ContactDiscountGroup::class,
+            'contact_industry' => ContactIndustry::class,
+            'invitable' => Inviteable::class,
             'job_batchable' => JobBatchable::class,
+            'order_schedule' => OrderSchedule::class,
             'order_transaction' => OrderTransaction::class,
             'printer_user' => PrinterUser::class,
             'product_bundle_product' => ProductBundleProduct::class,
             'product_cross_selling_product' => ProductCrossSellingProduct::class,
             'product_product_option' => ProductProductOption::class,
             'queue_monitorable' => QueueMonitorable::class,
+            'target_user' => TargetUser::class,
+            'task_user' => TaskUser::class,
         ]);
     }
 }
