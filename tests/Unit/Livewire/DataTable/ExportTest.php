@@ -1,6 +1,6 @@
 <?php
 
-uses(FluxErp\Tests\TestCase::class);
+uses(FluxErp\Tests\Livewire\BaseSetup::class);
 use FluxErp\Jobs\ExportDataTableJob;
 use FluxErp\Livewire\DataTables\BaseDataTable;
 use FluxErp\Notifications\ExportReady;
