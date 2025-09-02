@@ -88,6 +88,10 @@ export default function () {
                 this.visibleElements.forEach((e) => {
                     this.observer.observe(e.element);
                 });
+
+                this.visibleMedia.forEach((e) => {
+                    this.observer.observe(e.element);
+                });
             }
         },
         onMouseDownHeader(e) {

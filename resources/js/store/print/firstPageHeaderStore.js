@@ -146,6 +146,10 @@ export default function () {
                 this.visibleElements.forEach((e) => {
                     this.observer.observe(e.element);
                 });
+
+                this.visibleMedia.forEach((e) => {
+                    this.observer.observe(e.element);
+                });
             }
         },
         async reload($refs, isClientChange = true) {
@@ -448,6 +452,38 @@ export default function () {
                         // TODO: batch all init calls - in separate for each loop, after json is parsed  - performance reasons
                         this.visibleElements.push(
                             new PrintElement(child, this).init({
+                                x: item.x * this.pxPerCm,
+                                y: item.y * this.pyPerCm,
+                                ...(item.width && {
+                                    width: item.width * this.pxPerCm,
+                                }),
+                                ...(item.height && {
+                                    height: item.height * this.pyPerCm,
+                                }),
+                            }),
+                        );
+                    }
+                }
+            });
+
+            json.media?.forEach((item) => {
+                const element =
+                    $refs['first-page-header-media']?.content.cloneNode(true);
+                if (element) {
+                    this.firsPageHeader.appendChild(element);
+                    const children = Array.from(this.firsPageHeader.children);
+                    const index = children.findIndex(
+                        (el) => el.id === 'first-page-header-media',
+                    );
+                    if (index !== -1) {
+                        const child = children[index];
+                        this.visibleMedia.push(
+                            new MediaElement(
+                                child,
+                                this,
+                                item.id,
+                                item.src,
+                            ).init({
                                 x: item.x * this.pxPerCm,
                                 y: item.y * this.pyPerCm,
                                 ...(item.width && {

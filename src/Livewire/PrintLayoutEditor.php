@@ -94,7 +94,6 @@ class PrintLayoutEditor extends Component
                 $this->form->fill([
                     'client_id' => $this->selectedClientId,
                     'name' => 'flux::printing.' . $this->layoutModel . '.' . $this->name,
-                    // TODO: need to map the model type to the correct morph alias
                     'model_type' => $this->layoutModel,
                 ]);
             }

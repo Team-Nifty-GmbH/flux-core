@@ -22,7 +22,7 @@ export default function ($headerStore, $firstPageHeaderStore, $footerStore) {
         editMargin: false,
         editFooter: false,
         editHeader: false,
-        editFirstPageHeader: true,
+        editFirstPageHeader: false,
         async selectClient(e, $wire, $refs) {
             this._loading = true;
             await $wire.selectClient(e.target.value);
@@ -266,7 +266,8 @@ export default function ($headerStore, $firstPageHeaderStore, $footerStore) {
                 // all the elements will disappear - hence stores need to be reloaded
                 if (
                     $footerStore.temporaryVisibleMedia.length > 0 ||
-                    $headerStore.temporaryVisibleMedia.length > 0
+                    $headerStore.temporaryVisibleMedia.length > 0 ||
+                    $firstPageHeaderStore.temporaryVisibleMedia.length > 0
                 ) {
                     // reload
                     await this.reload();
