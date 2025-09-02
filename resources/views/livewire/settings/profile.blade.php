@@ -96,7 +96,7 @@
                             <x-button
                                 :text="__('Activate')"
                                 color="primary"
-                                x-on:click="WebPush.initSW().then(() => checkSupport()).catch(error => console.error(error))"
+                                x-on:click="webPush.initSW().then(() => checkSupport()).catch(error => console.error(error))"
                                 icon="bell"
                             />
                         </div>
@@ -113,7 +113,7 @@
                                 :text="__('Reactivate')"
                                 color="secondary"
                                 size="sm"
-                                x-on:click="WebPush.initSW(true).then(() => checkSupport()).catch(error => console.error(error))"
+                                x-on:click="webPush.initSW(true).then(() => checkSupport()).catch(error => console.error(error))"
                                 icon="arrow-path"
                             />
                         </div>
