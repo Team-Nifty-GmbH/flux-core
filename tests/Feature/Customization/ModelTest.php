@@ -8,6 +8,8 @@ test('model customization', function (): void {
     $class = new class() extends Language
     {
         use FluxErp\Traits\HasParentMorphClass;
+
+        protected $table = 'languages';
     };
     $this->app->bind(Language::class, get_class($class));
 
