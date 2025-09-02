@@ -21,8 +21,8 @@ export default function ($headerStore, $firstPageHeaderStore, $footerStore) {
         },
         editMargin: false,
         editFooter: false,
-        editHeader: true,
-        editFirstPageHeader: false,
+        editHeader: false,
+        editFirstPageHeader: true,
         async selectClient(e, $wire, $refs) {
             this._loading = true;
             await $wire.selectClient(e.target.value);
@@ -246,7 +246,8 @@ export default function ($headerStore, $firstPageHeaderStore, $footerStore) {
             this._loading = true;
             const margins = this.prepareToSubmit();
             const header = await $headerStore.prepareToSubmit();
-            const firstPageHeader = $firstPageHeaderStore.prepareToSubmit();
+            const firstPageHeader =
+                await $firstPageHeaderStore.prepareToSubmit();
             const footer = await $footerStore.prepareToSubmit();
             await Promise.all([
                 $wire.set('form.footer', footer, false),

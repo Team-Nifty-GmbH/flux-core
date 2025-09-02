@@ -1,7 +1,7 @@
 <div
     x-on:mouseup.window="firstPageHeaderStore.onMouseUp()"
     x-on:mousemove.window="
-        firstPageHeaderStore.selectedElementId !== null
+        firstPageHeaderStore.selectedElementId !== null && !firstPageHeaderStore.isImgResizeClicked
             ? firstPageHeaderStore.onMouseMove($event)
             : null
     "
@@ -17,6 +17,10 @@
         class="h-[7cm] box-border"
         :style="`height: ${firstPageHeaderStore.height};`"
     >
+        <div
+            x-on:mouseup.window="firstPageHeaderStore.onMouseUpResize($event)"
+            x-on:mousemove.window="firstPageHeaderStore.isImgResizeClicked ? firstPageHeaderStore.onMouseMoveResize($event) : false"
+            class="w-0 h-0"></div>
 
     </div>
     {{-- UI - first page header - height related --}}
@@ -47,12 +51,12 @@
     </div>
     {{-- UI - first page header - height related --}}
     {{-- UI position of a selected element --}}
-    <div x-cloak x-show="firstPageHeaderStore.selectedElementId !== null"
+    <div x-cloak x-show="firstPageHeaderStore.selectedElementId !== null && !firstPageHeaderStore.isImgResizeClicked"
          :style="{'transform': `translate(${firstPageHeaderStore.selectedElementPos.x -50}px,${firstPageHeaderStore.selectedElementPos.y}px)` }"
          class="absolute left-0 top-0 z-[100] rounded shadow p-2 bg-gray-100">
         <div x-text="`${roundToOneDecimal(firstPageHeaderStore.selectedElementPos.x / firstPageHeaderStore.pxPerCm)}cm`"></div>
     </div>
-    <div x-cloak x-show="firstPageHeaderStore.selectedElementId !== null"
+    <div x-cloak x-show="firstPageHeaderStore.selectedElementId !== null && !firstPageHeaderStore.isImgResizeClicked"
          :style="{'transform': `translate(${firstPageHeaderStore.selectedElementPos.x}px,${firstPageHeaderStore.selectedElementPos.y - 40}px)` }"
          class="absolute left-0 top-0 z-[100] rounded shadow p-2 bg-gray-100">
         <div x-text="`${roundToOneDecimal(firstPageHeaderStore.selectedElementPos.y / firstPageHeaderStore.pyPerCm)}cm`"></div>
@@ -189,5 +193,56 @@
                 @endif
             </tbody>
         </table>
+    </template>
+    <template
+        id="{{ uniqid() }}"
+        x-ref="first-page-header-additional-img"
+    >
+        <div
+            id="first-page-header-img-placeholder"
+            x-on:mousedown="printStore.editFirstPageHeader ?  firstPageHeaderStore.onMouseDown($event,$el.id,'temporary') : null"
+            data-type="img"
+            draggable="false"
+            class="absolute left-0 top-0 select-none h-[1.7cm]"
+            :class="{'bg-gray-300' : !firstPageHeaderStore.isImgResizeClicked && firstPageHeaderStore.selectedElementId === $el.id}"
+        >
+            <div
+                draggable="false"
+                x-cloak x-show="printStore.editFirstPageHeader" class="relative w-full">
+                <x-icon
+                    x-on:mousedown.stop="firstPageHeaderStore.onMouseDownResize($event, $el.parentElement.parentElement.id,'temporary')"
+                    name="arrows-pointing-out" class="absolute cursor-pointer right-0 top-0 h-4 w-4 rounded-full"></x-icon>
+            </div>
+            <img
+                draggable="false"
+                class="max-h-full w-full"
+                src=""
+            />
+        </div>
+    </template>
+    <template
+        id="{{ uniqid() }}"
+        x-ref="first-page-header-media">
+        <div
+            id="first-page-header-media"
+            x-on:mousedown="printStore.editFirstPageHeader ?  firstPageHeaderStore.onMouseDown($event,$el.id,'media') : null"
+            data-type="img"
+            draggable="false"
+            class="absolute left-0 top-0 select-none h-[1.7cm]"
+            :class="{'bg-gray-300' : !firstPageHeaderStore.isImgResizeClicked && firstPageHeaderStore.selectedElementId === $el.id}"
+        >
+            <div
+                draggable="false"
+                x-cloak x-show="printStore.editFirstPageHeader" class="relative w-full">
+                <x-icon
+                    x-on:mousedown.stop="firstPageHeaderStore.onMouseDownResize($event, $el.parentElement.parentElement.id,'media')"
+                    name="arrows-pointing-out" class="absolute cursor-pointer right-0 top-0 h-4 w-4 rounded-full"></x-icon>
+            </div>
+            <img
+                draggable="false"
+                class="max-h-full w-full"
+                src=""
+            />
+        </div>
     </template>
 </div>

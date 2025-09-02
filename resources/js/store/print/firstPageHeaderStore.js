@@ -6,6 +6,8 @@ import {
     STEP,
 } from '../../components/utils/print/utils.js';
 import PrintElement from '../../components/print/printElement.js';
+import MediaElement from '../../components/print/mediaElement.js';
+import TemporaryMediaElement from '../../components/print/temporaryMediaElement.js';
 
 export default function () {
     return {
@@ -15,6 +17,7 @@ export default function () {
         _maxFirstPageHeaderHeight: 12,
         _firstPageHeaderHeight: 7,
         isFirstPageHeaderClicked: false,
+        isImgResizeClicked: false,
         startPointFirstPageHeaderVertical: null,
         get component() {
             if (this._component === null) {
@@ -71,7 +74,11 @@ export default function () {
                     );
                     // take in the account the resized logo size
                     if (
-                        newHeight >= this._minFirstPageHeaderHeight &&
+                        newHeight >=
+                            Math.max(
+                                this._adjustedMinFirstPageHeaderHeight(),
+                                this._minFirstPageHeaderHeight,
+                            ) &&
                         newHeight <= this._maxFirstPageHeaderHeight
                     ) {
                         this._firstPageHeaderHeight = newHeight;
@@ -151,10 +158,19 @@ export default function () {
                 this.visibleElements.forEach((item) => {
                     this.firsPageHeader.removeChild(item.element);
                 });
+
+                this.temporaryVisibleMedia.forEach((item) => {
+                    this.firsPageHeader.removeChild(item.element);
+                });
+                this.visibleMedia.forEach((item) => {
+                    this.firsPageHeader.removeChild(item.element);
+                });
             }
 
             this.visibleElements = [];
             this.elementsOutOfView = [];
+            this.temporaryVisibleMedia = [];
+            this.visibleMedia = [];
 
             const firstPageHeader = await this.component.get(
                 'form.first_page_header',
@@ -211,6 +227,10 @@ export default function () {
                 this.visibleElements.forEach((e) => {
                     this.observer.observe(e.element);
                 });
+
+                this.visibleMedia.forEach((e) => {
+                    this.observer.observe(e.element);
+                });
             }
         },
         toggleElement($ref, id) {
@@ -249,26 +269,92 @@ export default function () {
                 }
             }
         },
-        prepareToSubmit() {
-            return {
-                height: this._firstPageHeaderHeight,
-                elements: this.visibleElements.map((item) => {
-                    const { x, y } = item.position;
-                    return {
-                        id: item.id,
-                        x: roundToOneDecimal(x / this.pxPerCm),
-                        y: roundToOneDecimal(y / this.pyPerCm),
-                        width:
-                            item.width !== null
-                                ? roundToOneDecimal(item.width / this.pxPerCm)
-                                : null,
-                        height:
-                            item.height !== null
-                                ? roundToOneDecimal(item.height / this.pyPerCm)
-                                : null,
-                    };
-                }),
-            };
+        async prepareToSubmit() {
+            try {
+                if (this.temporaryVisibleMedia.length > 0) {
+                    for (const item of this.temporaryVisibleMedia) {
+                        await item.upload(this.component);
+                    }
+                }
+                return {
+                    height: this._firstPageHeaderHeight,
+                    elements: this.visibleElements.map((item) => {
+                        const { x, y } = item.position;
+                        return {
+                            id: item.id,
+                            x: roundToOneDecimal(x / this.pxPerCm),
+                            y: roundToOneDecimal(y / this.pyPerCm),
+                            width:
+                                item.width !== null
+                                    ? roundToOneDecimal(
+                                          item.width / this.pxPerCm,
+                                      )
+                                    : null,
+                            height:
+                                item.height !== null
+                                    ? roundToOneDecimal(
+                                          item.height / this.pyPerCm,
+                                      )
+                                    : null,
+                        };
+                    }),
+                    media: this.visibleMedia.map((item) => {
+                        return {
+                            id: item.mediaId,
+                            src: item.src,
+                            x: roundToOneDecimal(
+                                item.position.x / this.pxPerCm,
+                            ),
+                            y: roundToOneDecimal(
+                                item.position.y / this.pyPerCm,
+                            ),
+                            width:
+                                item.width !== null
+                                    ? roundToOneDecimal(
+                                          item.width / this.pxPerCm,
+                                      )
+                                    : null,
+                            height:
+                                item.height !== null
+                                    ? roundToOneDecimal(
+                                          item.height / this.pyPerCm,
+                                      )
+                                    : null,
+                        };
+                    }),
+                    temporaryMedia:
+                        this.temporaryVisibleMedia.length > 0
+                            ? this.temporaryVisibleMedia.map((item) => {
+                                  return {
+                                      name: item.temporaryFileName,
+                                      x: roundToOneDecimal(
+                                          item.position.x / this.pxPerCm,
+                                      ),
+                                      y: roundToOneDecimal(
+                                          item.position.y / this.pyPerCm,
+                                      ),
+                                      width:
+                                          item.width !== null
+                                              ? roundToOneDecimal(
+                                                    item.width / this.pxPerCm,
+                                                )
+                                              : null,
+                                      height:
+                                          item.height !== null
+                                              ? roundToOneDecimal(
+                                                    item.height / this.pyPerCm,
+                                                )
+                                              : null,
+                                  };
+                              })
+                            : null,
+                };
+            } catch (e) {
+                throw new Error(
+                    'Error preparing first-page-header for submission: ' +
+                        e.message,
+                );
+            }
         },
         _initOnEmptyJson(elementIds, parentWidth) {
             elementIds.forEach((id) => {
@@ -375,6 +461,145 @@ export default function () {
                     }
                 }
             });
+        },
+        onMouseDownResize(e, id, source = 'element') {
+            if (!this.isImgResizeClicked) {
+                this.isImgResizeClicked = true;
+                this._selectElement(e, id, source);
+            }
+        },
+        onMouseUpResize() {
+            if (this.isImgResizeClicked) {
+                this.isImgResizeClicked = false;
+            }
+        },
+        onMouseMoveResize(e) {
+            if (this._selectedElement.ref !== null) {
+                const deltaY = e.clientY - this._selectedElement.startY;
+                // resize between min and max height
+                if (deltaY > 0) {
+                    const maxHeight =
+                        this._firstPageHeaderHeight * this.pyPerCm;
+                    const startHeight =
+                        this._selectedElement.ref.height ??
+                        this._selectedElement.ref.size.height;
+                    const newHeight = startHeight + 1;
+                    if (newHeight < maxHeight) {
+                        const newWidth =
+                            (this._selectedElement.ref.width ??
+                                this._selectedElement.ref.size.width) *
+                            (newHeight / startHeight);
+
+                        this._selectedElement.ref.height = newHeight;
+                        this._selectedElement.ref.width = newWidth;
+                    }
+                } else if (deltaY < 0) {
+                    const minHeight = this.pyPerCm;
+                    const startHeight =
+                        this._selectedElement.ref.height ??
+                        this._selectedElement.ref.size.height;
+                    const newHeight = startHeight - 1;
+                    if (newHeight > minHeight) {
+                        const newWidth =
+                            (this._selectedElement.ref.width ??
+                                this._selectedElement.ref.size.width) *
+                            (newHeight / startHeight);
+                        this._selectedElement.ref.height = newHeight;
+                        this._selectedElement.ref.width = newWidth;
+                    }
+                }
+
+                this._selectedElement.startY = e.clientY;
+            }
+        },
+        _adjustedMinFirstPageHeaderHeight() {
+            // taking in account logo height, additional media (temp and saved) height, and free-text fields
+            const resizableElementHeights = [];
+
+            // temp media height
+            const tempVisibleMedia = this.temporaryVisibleMedia.map((item) => {
+                return roundToOneDecimal((item.height || 0) / this.pyPerCm);
+            });
+
+            if (tempVisibleMedia.length > 0) {
+                resizableElementHeights.push(...tempVisibleMedia);
+            } else {
+                resizableElementHeights.push(0);
+            }
+
+            // media
+            const visibleMedia = this.visibleMedia.map((item) => {
+                return roundToOneDecimal((item.height || 0) / this.pyPerCm);
+            });
+            visibleMedia.length > 0
+                ? resizableElementHeights.push(...visibleMedia)
+                : resizableElementHeights.push(0);
+
+            return Math.max(...resizableElementHeights);
+        },
+        async addToTemporaryMedia(event, $refs) {
+            const file = event.target.files[0];
+            if (file !== undefined && this.firsPageHeader) {
+                const cloneMediaElement =
+                    $refs[
+                        'first-page-header-additional-img'
+                    ]?.content.cloneNode(true);
+                if (cloneMediaElement) {
+                    this.firsPageHeader.appendChild(cloneMediaElement);
+                    const children = Array.from(this.firsPageHeader.children);
+                    const index = children.findIndex(
+                        (item) =>
+                            item.id === 'first-page-header-img-placeholder',
+                    );
+                    if (index !== -1 && this.observer) {
+                        const element = children[index];
+                        this.temporaryVisibleMedia.push(
+                            new TemporaryMediaElement(element, this, file).init(
+                                'start',
+                            ),
+                        );
+                        this.observer.observe(element);
+                    } else {
+                        throw new Error(
+                            'Header additional image placeholder not found',
+                        );
+                    }
+                } else {
+                    throw new Error(
+                        'Header additional image template not found',
+                    );
+                }
+            }
+            // clear the input field - to allow the same file to be selected again
+            event.target.value = '';
+        },
+        deleteTemporaryMedia(id) {
+            const index = this.temporaryVisibleMedia.findIndex(
+                (item) => item.id === id,
+            );
+            if (index !== -1) {
+                this.observer.unobserve(
+                    this.temporaryVisibleMedia[index].element,
+                );
+                this.firsPageHeader.removeChild(
+                    this.temporaryVisibleMedia[index].element,
+                );
+                this.temporaryVisibleMedia.splice(index, 1);
+            } else {
+                throw new Error(`Temporary media with id ${id} not found`);
+            }
+        },
+        deleteMedia(id) {
+            const index = this.visibleMedia.findIndex((item) => item.id === id);
+            if (index !== -1) {
+                this.observer.unobserve(this.visibleMedia[index].element);
+                this.firsPageHeader.removeChild(
+                    this.visibleMedia[index].element,
+                );
+                this.visibleMedia.splice(index, 1);
+            } else {
+                throw new Error(`Media with id ${id} not found`);
+            }
         },
     };
 }
