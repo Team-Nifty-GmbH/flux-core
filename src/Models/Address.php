@@ -303,8 +303,7 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
             $addressUpdates = [];
 
             $mainAddressId = $address->contact()
-                ->pluck('main_address_id')
-                ->first();
+                ->value('main_address_id');
             $mainAddress = resolve_static(Address::class, 'query')
                 ->where('contact_id', $address->contact_id)
                 ->orderByRaw('id = ' . ($mainAddressId ?? 0) . ' DESC')
