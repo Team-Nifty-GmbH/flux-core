@@ -27,7 +27,7 @@ use TallStackUi\TallStackUiServiceProvider;
 use TeamNiftyGmbH\DataTable\DataTableServiceProvider;
 use function Orchestra\Testbench\package_path;
 
-abstract class BrowserTestCase extends \FluxErp\Tests\TestCase
+abstract class BrowserTestCase extends TestCase
 {
     protected static string $guard = 'web';
 
@@ -71,21 +71,21 @@ abstract class BrowserTestCase extends \FluxErp\Tests\TestCase
         if (file_exists($testbenchConfigPath)) {
             // Read the stub file
             $stubContent = file_get_contents(__DIR__ . '/../stubs/tailwind/tailwind.config.mjs');
-            
+
             // Replace the relative path placeholder for Testbench environment
             $configContent = str_replace(
                 '{{ relative_path }}',
                 '../../../..',
                 $stubContent
             );
-            
+
             // Add additional content paths for Testbench
             $configContent = str_replace(
                 '].concat(dataTablesConfig.content, fluxConfig.content),',
                 ',\n        \'../../../../resources/**/*.blade.php\',\n        \'../../../../resources/**/*.js\',\n        \'../../../../src/**/*.php\',\n    ].concat(dataTablesConfig.content, fluxConfig.content),',
                 $configContent
             );
-            
+
             file_put_contents($testbenchConfigPath, $configContent);
         }
 
