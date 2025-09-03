@@ -2,8 +2,6 @@
 
 namespace FluxErp\Database\Factories;
 
-use FluxErp\Models\Client;
-use FluxErp\Models\Order;
 use FluxErp\Models\OrderPosition;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -37,9 +35,6 @@ class OrderPositionFactory extends Factory
             'is_net' => fake()->boolean(90),
             'is_free_text' => fake()->boolean(15),
             'is_alternative' => fake()->boolean(15),
-
-            'order_id' => Order::factory(),
-            'client_id' => Client::factory(),
         ];
     }
 }

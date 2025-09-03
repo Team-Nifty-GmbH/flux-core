@@ -92,7 +92,7 @@
         "test-browser": "@testbench --parallel --testsuite Browser",
         "test-feature": "@testbench --parallel --testsuite Feature",
         "test-livewire": "@testbench --parallel --testsuite Livewire",
-        "test-unit": "@testbench --testsuite Unit",
+        "test-unit": "@testbench --parallel --testsuite Unit",
         "test-coverage": "XDEBUG_MODE=coverage @testbench --parallel --coverage-html ./reports",
         "format": "vendor/bin/pint",
         "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",

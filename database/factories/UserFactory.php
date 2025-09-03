@@ -2,7 +2,6 @@
 
 namespace FluxErp\Database\Factories;
 
-use FluxErp\Models\Language;
 use FluxErp\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -20,8 +19,6 @@ class UserFactory extends Factory
             'password' => 'password',
             'user_code' => fake()->unique()->userName(),
             'is_active' => fake()->boolean(75),
-
-            'language_id' => Language::factory(),
         ];
     }
 }

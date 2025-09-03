@@ -4,8 +4,6 @@ namespace FluxErp\Database\Factories;
 
 use FluxErp\Enums\SalutationEnum;
 use FluxErp\Models\Address;
-use FluxErp\Models\Client;
-use FluxErp\Models\Contact;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class AddressFactory extends Factory
@@ -36,9 +34,6 @@ class AddressFactory extends Factory
             'is_active' => fake()->boolean(90),
             'is_main_address' => fake()->boolean,
             'can_login' => fake()->boolean(80),
-
-            'client_id' => Client::factory(),
-            'contact_id' => Contact::factory(),
         ];
     }
 }

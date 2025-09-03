@@ -2,11 +2,7 @@
 
 namespace FluxErp\Database\Factories;
 
-use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
-use FluxErp\Models\Currency;
-use FluxErp\Models\PaymentType;
-use FluxErp\Models\PriceList;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ContactFactory extends Factory
@@ -30,15 +26,6 @@ class ContactFactory extends Factory
                 fake()->randomFloat(nbMaxDecimals: 2, min: 100, max: 10000) : null,
             'has_delivery_lock' => fake()->boolean,
             'has_sensitive_reminder' => fake()->boolean,
-
-            'client_id' => Client::factory(),
-            'currency_id' => Currency::factory(),
-            'payment_type_id' => fn (array $attributes) => PaymentType::factory()
-                ->hasAttached(
-                    Client::query()->whereKey(data_get($attributes, 'client_id'))->first(),
-                    relationship: 'clients'
-                ),
-            'price_list_id' => PriceList::factory(),
         ];
     }
 }
