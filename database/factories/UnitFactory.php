@@ -12,8 +12,8 @@ class UnitFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->randomElement(['Kilograms', 'Centimeters', 'Litres']),
-            'abbreviation' => $this->faker->randomElement(['kg', 'cm', 'l']),
+            'name' => fake()->randomElement(['Kilograms', 'Centimeters', 'Litres']),
+            'abbreviation' => fake()->randomElement(['kg', 'cm', 'l']),
         ];
     }
 }

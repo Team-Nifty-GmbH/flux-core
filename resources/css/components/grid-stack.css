@@ -3,7 +3,7 @@
 }
 
 .grid-stack-item-content {
-    @apply dark:bg-secondary-800 col-span-full m-0 flex place-content-center rounded-lg bg-white shadow-md dark:text-gray-50;
+    @apply dark:bg-slate-800 col-span-full m-0 flex place-content-center rounded-lg bg-white shadow-md dark:text-gray-50;
 }
 
 .grid-stack > .grid-stack-item > .grid-stack-item-content {

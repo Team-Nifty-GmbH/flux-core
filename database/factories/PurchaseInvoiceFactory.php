@@ -13,10 +13,10 @@ class PurchaseInvoiceFactory extends Factory
     public function definition(): array
     {
         return [
-            'invoice_date' => $this->faker->date(),
+            'invoice_date' => fake()->date(),
             'invoice_number' => Str::uuid()->toString(),
             'hash' => md5(Str::uuid()->toString()),
-            'is_net' => $this->faker->boolean(80),
+            'is_net' => fake()->boolean(80),
         ];
     }
 }

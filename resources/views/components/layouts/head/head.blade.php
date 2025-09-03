@@ -29,11 +29,13 @@
 <tallstackui:script />
 {{ \FluxErp\Facades\Asset::toHtml() }}
 @auth('web')
-    <script>
+    <script type="module">
         document.addEventListener(
             'livewire:navigated',
             () => {
-                Echo.join('presence');
+                if (window.Echo && window.Echo.join) {
+                    window.Echo.join('presence');
+                }
             },
             { once: true },
         );

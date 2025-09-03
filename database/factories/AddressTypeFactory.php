@@ -12,9 +12,9 @@ class AddressTypeFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->name,
-            'is_locked' => $this->faker->boolean(),
-            'is_unique' => $this->faker->boolean(),
+            'name' => fake()->name,
+            'is_locked' => fake()->boolean(),
+            'is_unique' => fake()->boolean(),
         ];
     }
 }

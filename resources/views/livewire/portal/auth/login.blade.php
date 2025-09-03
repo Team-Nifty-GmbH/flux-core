@@ -7,6 +7,7 @@
     <x-modal id="password-reset">
         <x-card :header="__('Reset password')">
             <x-input
+                id="reset-email"
                 wire:model="email"
                 :label="__('Email')"
                 name="reset-email"
@@ -80,7 +81,7 @@
                             />
                             <x-password
                                 wire:model="password"
-                                :text="__('Password')"
+                                :label="__('Password')"
                                 id="password"
                                 name="password"
                             />

@@ -12,7 +12,7 @@ class OrderTransactionFactory extends Factory
     public function definition(): array
     {
         return [
-            'amount' => $this->faker->randomFloat(2, 0, 10000),
+            'amount' => fake()->randomFloat(2, 0, 10000),
         ];
     }
 }

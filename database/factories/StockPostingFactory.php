@@ -12,10 +12,10 @@ class StockPostingFactory extends Factory
     public function definition(): array
     {
         return [
-            'stock' => $this->faker->numberBetween(1, 1000) / 10,
-            'purchase_price' => $this->faker->numberBetween(1, 1000) / 10,
-            'posting' => $this->faker->numberBetween(-500, 500),
-            'description' => $this->faker->word,
+            'stock' => fake()->numberBetween(1, 1000) / 10,
+            'purchase_price' => fake()->numberBetween(1, 1000) / 10,
+            'posting' => fake()->numberBetween(-500, 500),
+            'description' => fake()->word,
         ];
     }
 }

@@ -12,7 +12,7 @@ class CommissionRateFactory extends Factory
     public function definition(): array
     {
         return [
-            'commission_rate' => $this->faker->randomFloat(min: 0.001, max: 0.9999),
+            'commission_rate' => fake()->randomFloat(min: 0.001, max: 0.9999),
         ];
     }
 }
