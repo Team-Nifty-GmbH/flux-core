@@ -80,7 +80,7 @@
             "@php ./vendor/bin/testbench package:discover --ansi"
         ],
         "analyse": "vendor/bin/phpstan analyse",
-        "testbench": "./vendor/bin/pest",
+        "testbench": "./vendor/bin/testbench package:test",
         "test": [
             "@clear",
             "@prepare",
@@ -89,9 +89,9 @@
             "@test-feature",
             "@test-livewire"
         ],
-        "test-browser": "@testbench --testsuite Browser",
-        "test-feature": "@testbench --testsuite Feature",
-        "test-livewire": "@testbench --testsuite Livewire",
+        "test-browser": "@testbench --parallel --testsuite Browser",
+        "test-feature": "@testbench --parallel --testsuite Feature",
+        "test-livewire": "@testbench --parallel --testsuite Livewire",
         "test-unit": "@testbench --testsuite Unit",
         "test-coverage": "XDEBUG_MODE=coverage @testbench --parallel --coverage-html ./reports",
         "format": "vendor/bin/pint",
