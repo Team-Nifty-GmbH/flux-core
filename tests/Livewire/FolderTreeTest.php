@@ -1,6 +1,8 @@
 <?php
 
-uses(FluxErp\Tests\TestCase::class);
+namespace FluxErp\Tests\Livewire;
+
+uses(\FluxErp\Tests\TestCase::class);
 use FluxErp\Livewire\Support\FolderTree;
 use Livewire\Livewire;
 

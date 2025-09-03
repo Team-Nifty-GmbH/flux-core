@@ -18,10 +18,13 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
 window.Pusher = Pusher;
 
-const broadcaster = document.head.querySelector('meta[name="ws-broadcaster"]')?.content || 'reverb';
+const broadcaster =
+    document.head.querySelector('meta[name="ws-broadcaster"]')?.content ||
+    'reverb';
 const key = document.head.querySelector('meta[name="ws-key"]')?.content;
 
-const effectiveBroadcaster = (broadcaster === 'log' || !key) ? 'null' : broadcaster;
+const effectiveBroadcaster =
+    broadcaster === 'log' || !key ? 'null' : broadcaster;
 
 window.Echo = new Echo({
     broadcaster: effectiveBroadcaster,

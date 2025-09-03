@@ -114,7 +114,7 @@
             </div>
             <div class="flex flex-col gap-1.5">
                 <h3
-                    class="text-md text-secondary-700 dark:text-secondary-400 mt-4 whitespace-normal font-medium"
+                    class="text-md mt-4 whitespace-normal font-medium text-secondary-700 dark:text-secondary-400"
                 >
                     {{ __('Additional Columns') }}
                 </h3>

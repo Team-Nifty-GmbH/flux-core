@@ -7,11 +7,11 @@
 }
 
 .fc-day {
-    @apply dark:bg-slate-800 bg-white text-gray-800;
+    @apply bg-white text-gray-800 dark:bg-slate-800;
 }
 
 .fc-day.fc-day-other {
-    @apply dark:bg-slate-700 bg-gray-50 text-gray-500;
+    @apply bg-gray-50 text-gray-500 dark:bg-slate-700;
 }
 
 .fc-daygrid-day-top {
