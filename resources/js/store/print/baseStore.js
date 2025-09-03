@@ -12,9 +12,12 @@ export default function () {
             startX: null,
             startY: null,
         },
+        isImgResizeClicked: false,
         visibleElements: [],
         temporaryVisibleMedia: [],
         visibleMedia: [],
+        temporarySnippetBoxes: [],
+        visibleSnippets: [],
         elementsOutOfView: [],
         _component: null,
         onInit(pxPerCm, pyPerCm) {
@@ -119,6 +122,17 @@ export default function () {
             // source can be 'container','temporary-media','media','temporary-snippet' and 'snippet'
             // -> with this one addresses appropriate array
             this._selectElement(e, id, source);
+        },
+        onMouseDownScale(e, id, source = 'container') {
+            if (!this.isImgResizeClicked) {
+                this.isImgResizeClicked = true;
+                this._selectElement(e, id, source);
+            }
+        },
+        onMouseUpScale() {
+            if (this.isImgResizeClicked) {
+                this.isImgResizeClicked = false;
+            }
         },
         repositionOnMouseUp() {
             if (this.elementsOutOfView.length > 0) {

@@ -46,8 +46,8 @@
         class="header-content relative h-full w-full">
     </div>
     <div
-        x-on:mouseup.window="headerStore.onMouseUpResize($event)"
-        x-on:mousemove.window="headerStore.isImgResizeClicked ? headerStore.onMouseMoveResize($event) : null"
+        x-on:mouseup.window="headerStore.onMouseUpScale($event)"
+        x-on:mousemove.window="headerStore.isImgResizeClicked ? headerStore.onMouseMoveScale($event) : null"
     ></div>
     <template
         id="{{ $client->id }}"
@@ -82,7 +82,7 @@
                 draggable="false"
                 x-cloak x-show="printStore.editHeader" class="relative w-full">
                 <x-icon
-                    x-on:mousedown.stop="headerStore.onMouseDownResize($event, 'header-logo')"
+                    x-on:mousedown.stop="headerStore.onMouseDownScale($event, 'header-logo')"
                     name="arrows-pointing-out" class="absolute cursor-pointer right-0 top-0 h-4 w-4 rounded-full"></x-icon>
             </div>
             <img
@@ -109,7 +109,7 @@
                 draggable="false"
                 x-cloak x-show="printStore.editHeader" class="relative w-full">
                 <x-icon
-                    x-on:mousedown.stop="headerStore.onMouseDownResize($event, $el.parentElement.parentElement.id,'temporary')"
+                    x-on:mousedown.stop="headerStore.onMouseDownScale($event, $el.parentElement.parentElement.id,'temporary')"
                     name="arrows-pointing-out" class="absolute cursor-pointer right-0 top-0 h-4 w-4 rounded-full"></x-icon>
             </div>
             <img
@@ -134,7 +134,7 @@
                 draggable="false"
                 x-cloak x-show="printStore.editHeader" class="relative w-full">
                 <x-icon
-                    x-on:mousedown.stop="headerStore.onMouseDownResize($event, $el.parentElement.parentElement.id,'media')"
+                    x-on:mousedown.stop="headerStore.onMouseDownScale($event, $el.parentElement.parentElement.id,'media')"
                     name="arrows-pointing-out" class="absolute cursor-pointer right-0 top-0 h-4 w-4 rounded-full"></x-icon>
             </div>
             <img

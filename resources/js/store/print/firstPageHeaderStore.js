@@ -17,7 +17,6 @@ export default function () {
         _maxFirstPageHeaderHeight: 12,
         _firstPageHeaderHeight: 7,
         isFirstPageHeaderClicked: false,
-        isImgResizeClicked: false,
         startPointFirstPageHeaderVertical: null,
         get component() {
             if (this._component === null) {
@@ -95,6 +94,47 @@ export default function () {
                 this.startPointFirstPageHeaderVertical = null;
 
                 this.repositionOnMouseUp();
+            }
+        },
+        onMouseMoveScale(e) {
+            if (this._selectedElement.ref !== null) {
+                const deltaY = e.clientY - this._selectedElement.startY;
+                // resize between min and max height
+                if (deltaY > 0) {
+                    const maxHeight =
+                        this._firstPageHeaderHeight * this.pyPerCm;
+                    const startHeight =
+                        this._selectedElement.ref.height ??
+                        this._selectedElement.ref.size.height;
+                    const newHeight = startHeight + 1;
+                    if (newHeight < maxHeight) {
+                        const newWidth =
+                            (this._selectedElement.ref.width ??
+                                this._selectedElement.ref.size.width) *
+                            (newHeight / startHeight);
+
+                        this._selectedElement.ref.height = newHeight;
+                        this._selectedElement.ref.width = newWidth;
+                    }
+                } else if (deltaY < 0) {
+                    const minHeight = this.pyPerCm;
+                    const startHeight =
+                        this._selectedElement.ref.height ??
+                        this._selectedElement.ref.size.height;
+                    const newHeight = startHeight - 1;
+                    if (newHeight > minHeight) {
+                        const newWidth =
+                            (this._selectedElement.ref.width ??
+                                this._selectedElement.ref.size.width) *
+                            (newHeight / startHeight);
+                        this._selectedElement.ref.height = newHeight;
+                        this._selectedElement.ref.width = newWidth;
+                    }
+                }
+
+                this._selectedElement.startY = e.clientY;
+            } else {
+                throw new Error(`Element not selected`);
             }
         },
         async register($wire, $refs) {
@@ -497,56 +537,6 @@ export default function () {
                     }
                 }
             });
-        },
-        onMouseDownResize(e, id, source = 'element') {
-            if (!this.isImgResizeClicked) {
-                this.isImgResizeClicked = true;
-                this._selectElement(e, id, source);
-            }
-        },
-        onMouseUpResize() {
-            if (this.isImgResizeClicked) {
-                this.isImgResizeClicked = false;
-            }
-        },
-        onMouseMoveResize(e) {
-            if (this._selectedElement.ref !== null) {
-                const deltaY = e.clientY - this._selectedElement.startY;
-                // resize between min and max height
-                if (deltaY > 0) {
-                    const maxHeight =
-                        this._firstPageHeaderHeight * this.pyPerCm;
-                    const startHeight =
-                        this._selectedElement.ref.height ??
-                        this._selectedElement.ref.size.height;
-                    const newHeight = startHeight + 1;
-                    if (newHeight < maxHeight) {
-                        const newWidth =
-                            (this._selectedElement.ref.width ??
-                                this._selectedElement.ref.size.width) *
-                            (newHeight / startHeight);
-
-                        this._selectedElement.ref.height = newHeight;
-                        this._selectedElement.ref.width = newWidth;
-                    }
-                } else if (deltaY < 0) {
-                    const minHeight = this.pyPerCm;
-                    const startHeight =
-                        this._selectedElement.ref.height ??
-                        this._selectedElement.ref.size.height;
-                    const newHeight = startHeight - 1;
-                    if (newHeight > minHeight) {
-                        const newWidth =
-                            (this._selectedElement.ref.width ??
-                                this._selectedElement.ref.size.width) *
-                            (newHeight / startHeight);
-                        this._selectedElement.ref.height = newHeight;
-                        this._selectedElement.ref.width = newWidth;
-                    }
-                }
-
-                this._selectedElement.startY = e.clientY;
-            }
         },
         _adjustedMinFirstPageHeaderHeight() {
             // taking in account logo height, additional media (temp and saved) height, and free-text fields

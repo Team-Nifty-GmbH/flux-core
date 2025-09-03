@@ -42,8 +42,8 @@
         x-on:mousemove.window="footerStore.isFooterClicked ? footerStore.onMouseMoveFooter($event) : false"
     >
         <div
-            x-on:mouseup.window="footerStore.onMouseUpResize($event)"
-            x-on:mousemove.window="footerStore.isImgResizeClicked ? footerStore.onMouseMoveResize($event) : false"
+            x-on:mouseup.window="footerStore.onMouseUpScale($event)"
+            x-on:mousemove.window="footerStore.isImgResizeClicked ? footerStore.onMouseMoveScale($event) : false"
             class="border-semi-black w-full border-t">
             <template
                 id="{{ $client->id }}"
@@ -93,7 +93,7 @@
                         draggable="false"
                         x-cloak x-show="printStore.editFooter" class="relative w-full">
                         <x-icon
-                            x-on:mousedown.stop="footerStore.onMouseDownResize($event, 'footer-logo')"
+                            x-on:mousedown.stop="footerStore.onMouseDownScale($event, 'footer-logo')"
                             name="arrows-pointing-out" class="absolute cursor-pointer right-0 top-0 h-4 w-4 rounded-full"></x-icon>
                     </div>
                     <img
@@ -143,12 +143,12 @@
                         draggable="false"
                         x-cloak x-show="printStore.editFooter" class="relative w-full">
                         <x-icon
-                            x-on:mousedown.stop="footerStore.onMouseDownResize($event, $el.parentElement.parentElement.id,'temporary')"
+                            x-on:mousedown.stop="footerStore.onMouseDownScale($event, $el.parentElement.parentElement.id,'temporary')"
                             name="arrows-pointing-out" class="absolute cursor-pointer right-0 top-0 h-4 w-4 rounded-full"></x-icon>
                     </div>
                 <img
                     draggable="false"
-                    class="max-h-full w-full"
+                    class="max-h-full h-full w-full"
                     src=""
                      />
                 </div>
@@ -168,14 +168,24 @@
                         draggable="false"
                         x-cloak x-show="printStore.editFooter" class="relative w-full">
                         <x-icon
-                            x-on:mousedown.stop="footerStore.onMouseDownResize($event, $el.parentElement.parentElement.id,'media')"
+                            x-on:mousedown.stop="footerStore.onMouseDownScale($event, $el.parentElement.parentElement.id,'media')"
                             name="arrows-pointing-out" class="absolute cursor-pointer right-0 top-0 h-4 w-4 rounded-full"></x-icon>
                     </div>
                     <img
                         draggable="false"
-                        class="max-h-full w-full"
+                        class="max-h-full h-full w-full"
                         src=""
                     />
+                </div>
+            </template>
+            <template
+                id="{{ uniqid() }}"
+                x-ref="footer-additional-snippet"
+            >
+                <div
+                    id="footer-snippet-placeholder"
+                    class="w-[10cm] h-[1.7cm] border bg-gray-300 ">
+
                 </div>
             </template>
             <div class="clear-both"></div>

@@ -18,8 +18,8 @@
         :style="`height: ${firstPageHeaderStore.height};`"
     >
         <div
-            x-on:mouseup.window="firstPageHeaderStore.onMouseUpResize($event)"
-            x-on:mousemove.window="firstPageHeaderStore.isImgResizeClicked ? firstPageHeaderStore.onMouseMoveResize($event) : false"
+            x-on:mouseup.window="firstPageHeaderStore.onMouseUpScale($event)"
+            x-on:mousemove.window="firstPageHeaderStore.isImgResizeClicked ? firstPageHeaderStore.onMouseMoveScale($event) : false"
             class="w-0 h-0"></div>
 
     </div>
@@ -210,7 +210,7 @@
                 draggable="false"
                 x-cloak x-show="printStore.editFirstPageHeader" class="relative w-full">
                 <x-icon
-                    x-on:mousedown.stop="firstPageHeaderStore.onMouseDownResize($event, $el.parentElement.parentElement.id,'temporary')"
+                    x-on:mousedown.stop="firstPageHeaderStore.onMouseDownScale($event, $el.parentElement.parentElement.id,'temporary')"
                     name="arrows-pointing-out" class="absolute cursor-pointer right-0 top-0 h-4 w-4 rounded-full"></x-icon>
             </div>
             <img
@@ -235,7 +235,7 @@
                 draggable="false"
                 x-cloak x-show="printStore.editFirstPageHeader" class="relative w-full">
                 <x-icon
-                    x-on:mousedown.stop="firstPageHeaderStore.onMouseDownResize($event, $el.parentElement.parentElement.id,'media')"
+                    x-on:mousedown.stop="firstPageHeaderStore.onMouseDownScale($event, $el.parentElement.parentElement.id,'media')"
                     name="arrows-pointing-out" class="absolute cursor-pointer right-0 top-0 h-4 w-4 rounded-full"></x-icon>
             </div>
             <img

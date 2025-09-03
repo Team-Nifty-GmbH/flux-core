@@ -17,7 +17,6 @@ export default function () {
         _minHeaderHeight: 1.7,
         _maxHeaderHeight: 5,
         isHeaderClicked: false,
-        isImgResizeClicked: false,
         startPointHeaderVertical: null,
         get headerHeight() {
             return `${this._headerHeight}cm`;
@@ -138,50 +137,7 @@ export default function () {
                 this.repositionOnMouseUp();
             }
         },
-        toggleElement($ref, id) {
-            if (this.header === null) {
-                throw new Error(`Header Elelement not initialized`);
-            }
-
-            const index = this.visibleElements.findIndex(
-                (item) => item.id === id,
-            );
-            if (index !== -1) {
-                // delete element
-                // remove the observer for the element
-                this.observer.unobserve(this.visibleElements[index].element);
-                this.header.removeChild(this.visibleElements[index].element);
-                this.visibleElements.splice(index, 1);
-            } else {
-                // add an element
-                this.header.appendChild($ref[id].content.cloneNode(true));
-
-                const element = Array.from(this.header.children)
-                    .filter((item) => item.id === id)
-                    .pop();
-
-                if (element) {
-                    this.visibleElements.push(new PrintElement(element, this));
-                    this.observer.observe(element);
-                } else {
-                    throw new Error(
-                        `Element with id ${id} not found in header`,
-                    );
-                }
-            }
-        },
-        onMouseDownResize(e, id, source = 'element') {
-            if (!this.isImgResizeClicked) {
-                this.isImgResizeClicked = true;
-                this._selectElement(e, id, source);
-            }
-        },
-        onMouseUpResize() {
-            if (this.isImgResizeClicked) {
-                this.isImgResizeClicked = false;
-            }
-        },
-        onMouseMoveResize(e) {
+        onMouseMoveScale(e) {
             if (this._selectedElement.ref !== null) {
                 const deltaY = e.clientY - this._selectedElement.startY;
                 // resize between min and max height
@@ -218,6 +174,40 @@ export default function () {
                 }
 
                 this._selectedElement.startY = e.clientY;
+            } else {
+                throw new Error(`Element not selected`);
+            }
+        },
+        toggleElement($ref, id) {
+            if (this.header === null) {
+                throw new Error(`Header Elelement not initialized`);
+            }
+
+            const index = this.visibleElements.findIndex(
+                (item) => item.id === id,
+            );
+            if (index !== -1) {
+                // delete element
+                // remove the observer for the element
+                this.observer.unobserve(this.visibleElements[index].element);
+                this.header.removeChild(this.visibleElements[index].element);
+                this.visibleElements.splice(index, 1);
+            } else {
+                // add an element
+                this.header.appendChild($ref[id].content.cloneNode(true));
+
+                const element = Array.from(this.header.children)
+                    .filter((item) => item.id === id)
+                    .pop();
+
+                if (element) {
+                    this.visibleElements.push(new PrintElement(element, this));
+                    this.observer.observe(element);
+                } else {
+                    throw new Error(
+                        `Element with id ${id} not found in header`,
+                    );
+                }
             }
         },
         _adjustedMinHeaderHeight() {

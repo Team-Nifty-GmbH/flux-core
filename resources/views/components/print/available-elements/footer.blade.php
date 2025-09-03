@@ -122,5 +122,12 @@
             x-on:click="$refs.footerImageInput.click()"
         />
     </label>
+    <div class="mb-4 mt-4 w-full border-t border-gray-300"></div>
+    <div class="pb-4 text-lg text-gray-600">Additional Snippet</div>
+    <x-button
+        color="primary"
+        text="Add Snippet"
+        x-on:click="footerStore.addToTemporarySnippet($refs)"
+    />
 </div>
 

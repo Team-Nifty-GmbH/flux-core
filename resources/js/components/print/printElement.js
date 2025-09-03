@@ -5,6 +5,7 @@ export default class PrintElement {
         this.store = $store;
         // cash the size to avoid recalculating it multiple times (bad performance)
         this._elementSize = null;
+        // only for resizable elements - otherwise leave at null
         this._height = null;
         this._width = null;
     }
