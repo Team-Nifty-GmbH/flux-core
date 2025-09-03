@@ -75,7 +75,7 @@
         <div
             id="header-logo"
             draggable="false"
-            data-type="img"
+            data-type="resizable"
             x-on:mousedown="printStore.editHeader ?  headerStore.onMouseDown($event, 'header-logo') : null"
             class="absolute left-0 top-0 h-[1.7cm] select-none"
             :class="{'bg-gray-300' : !headerStore.isImgResizeClicked && headerStore.selectedElementId === 'header-logo'}"

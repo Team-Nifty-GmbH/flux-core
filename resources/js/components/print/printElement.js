@@ -18,16 +18,16 @@ export default class PrintElement {
             throw new Error('ID must be a string');
         }
 
-        // if (this.element.id !== undefined) {
-        //     throw new Error('ID is already set and cannot be changed');
-        // }
+        if (this.element.id !== undefined) {
+            throw new Error('ID is already set and cannot be changed');
+        }
 
         this.element.id = value;
     }
 
     get size() {
         // since the size of an element doesent cange, we can cache it
-        if (this._elementSize !== null && this.typeOfElement !== 'img') {
+        if (this._elementSize !== null && this.typeOfElement !== 'resizable') {
             return this._elementSize;
         } else {
             const { width, height } = this.element.getBoundingClientRect();
@@ -121,8 +121,8 @@ export default class PrintElement {
     }
 
     set height(value) {
-        if (this.typeOfElement !== 'img') {
-            throw new Error('Height can only be set for img elements');
+        if (this.typeOfElement !== 'resizable') {
+            throw new Error('Height can only be set for resizable elements');
         }
         if (typeof value !== 'number') {
             throw new Error('Height must be a number');
@@ -133,8 +133,8 @@ export default class PrintElement {
     }
 
     set width(value) {
-        if (this.typeOfElement !== 'img') {
-            throw new Error('Width can only be set for img elements');
+        if (this.typeOfElement !== 'resizable') {
+            throw new Error('Width can only be set for resizable elements');
         }
         if (typeof value !== 'number') {
             throw new Error('Width must be a number');

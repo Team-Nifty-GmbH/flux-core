@@ -201,7 +201,7 @@
         <div
             id="first-page-header-img-placeholder"
             x-on:mousedown="printStore.editFirstPageHeader ?  firstPageHeaderStore.onMouseDown($event,$el.id,'temporary') : null"
-            data-type="img"
+            data-type="resizable"
             draggable="false"
             class="absolute left-0 top-0 select-none h-[1.7cm]"
             :class="{'bg-gray-300' : !firstPageHeaderStore.isImgResizeClicked && firstPageHeaderStore.selectedElementId === $el.id}"
@@ -226,7 +226,7 @@
         <div
             id="first-page-header-media"
             x-on:mousedown="printStore.editFirstPageHeader ?  firstPageHeaderStore.onMouseDown($event,$el.id,'media') : null"
-            data-type="img"
+            data-type="resizable"
             draggable="false"
             class="absolute left-0 top-0 select-none h-[1.7cm]"
             :class="{'bg-gray-300' : !firstPageHeaderStore.isImgResizeClicked && firstPageHeaderStore.selectedElementId === $el.id}"

@@ -84,7 +84,7 @@
                 <div
                     id="footer-logo"
                     draggable="false"
-                    data-type="img"
+                    data-type="resizable"
                     x-on:mousedown="printStore.editFooter ?  footerStore.onMouseDown($event, 'footer-logo') : null"
                     class="absolute left-0 top-0 h-[1.7cm] select-none"
                     :class="{'bg-gray-300' : !footerStore.isImgResizeClicked && footerStore.selectedElementId === 'footer-logo'}"
@@ -134,7 +134,7 @@
                 <div
                     id="footer-img-placeholder"
                     x-on:mousedown="printStore.editFooter ?  footerStore.onMouseDown($event,$el.id,'temporary') : null"
-                    data-type="img"
+                    data-type="resizable"
                     draggable="false"
                     class="absolute left-0 top-0 select-none h-[1.7cm]"
                     :class="{'bg-gray-300' : !footerStore.isImgResizeClicked && footerStore.selectedElementId === $el.id}"
@@ -159,7 +159,7 @@
                 <div
                     id="footer-media"
                     x-on:mousedown="printStore.editFooter ?  footerStore.onMouseDown($event,$el.id,'media') : null"
-                    data-type="img"
+                    data-type="resizable"
                     draggable="false"
                     class="absolute left-0 top-0 select-none h-[1.7cm]"
                     :class="{'bg-gray-300' : !footerStore.isImgResizeClicked && footerStore.selectedElementId === $el.id}"

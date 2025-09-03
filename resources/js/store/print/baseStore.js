@@ -31,7 +31,7 @@ export default function () {
             }
         },
         _selectElement(e, id, source) {
-            if (source === 'element') {
+            if (source === 'container') {
                 const index = this.visibleElements.findIndex(
                     (item) => item.id === id,
                 );
@@ -115,10 +115,9 @@ export default function () {
             this._selectedElement.startX = null;
             this._selectedElement.startY = null;
         },
-        onMouseDown(e, id, source = 'element') {
-            // source can be 'existing' or 'temporary' - temporary means that the element has uuid as an id
-            // generated on front end - after submitting the form, the id will be replaced with the id from the backend
-            // and the element will become an existing element
+        onMouseDown(e, id, source = 'container') {
+            // source can be 'container','temporary-media','media','temporary-snippet' and 'snippet'
+            // -> with this one addresses appropriate array
             this._selectElement(e, id, source);
         },
         repositionOnMouseUp() {

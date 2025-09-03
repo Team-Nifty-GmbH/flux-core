@@ -73,7 +73,7 @@
         <div
             id="header-logo"
             draggable="false"
-            data-type="img"
+            data-type="resizable"
             x-on:mousedown="printStore.editHeader ?  headerStore.onMouseDown($event, 'header-logo') : null"
             class="absolute left-0 top-0 h-[1.7cm] select-none"
             :class="{'bg-gray-300' : !headerStore.isImgResizeClicked && headerStore.selectedElementId === 'header-logo'}"
@@ -100,7 +100,7 @@
         <div
             id="header-img-placeholder"
             x-on:mousedown="printStore.editHeader ?  headerStore.onMouseDown($event,$el.id,'temporary') : null"
-            data-type="img"
+            data-type="resizable"
             draggable="false"
             class="absolute left-0 top-0 select-none h-[1.7cm]"
             :class="{'bg-gray-300' : !headerStore.isImgResizeClicked && headerStore.selectedElementId === $el.id}"
@@ -125,7 +125,7 @@
         <div
             id="header-media"
             x-on:mousedown="printStore.editHeader ?  headerStore.onMouseDown($event,$el.id,'media') : null"
-            data-type="img"
+            data-type="resizable"
             draggable="false"
             class="absolute left-0 top-0 select-none h-[1.7cm]"
             :class="{'bg-gray-300' : !headerStore.isImgResizeClicked && headerStore.selectedElementId === $el.id}"

@@ -9,6 +9,18 @@ export default class MediaElement extends PrintElement {
         this.url = src;
     }
 
+    get id() {
+        return this.element.id;
+    }
+
+    set id(value) {
+        if (typeof value !== 'string') {
+            throw new Error('ID must be a string');
+        }
+
+        this.element.id = value;
+    }
+
     set url(value) {
         if (this._imgElement === null) {
             this._imgElement = this.element.querySelector('img');

@@ -12,6 +12,18 @@ export default class TemporaryMediaElement extends PrintElement {
         this.url = file;
     }
 
+    set id(value) {
+        if (typeof value !== 'string') {
+            throw new Error('ID must be a string');
+        }
+
+        this.element.id = value;
+    }
+
+    get id() {
+        return this.element.id;
+    }
+
     set url(file) {
         if (this._imgElement === null) {
             this._imgElement = this.element.querySelector('img');
