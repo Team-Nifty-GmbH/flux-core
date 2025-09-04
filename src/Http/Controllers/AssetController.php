@@ -136,6 +136,8 @@ class AssetController extends Controller
                 ),
                 'build'
             )
-        )->header('Content-Type', 'application/javascript');
+        )
+            ->header('Content-Type', 'application/javascript')
+            ->header('Cache-Control', 'max-age=3600');
     }
 }

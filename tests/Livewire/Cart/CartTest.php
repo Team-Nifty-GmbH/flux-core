@@ -1,6 +1,6 @@
 <?php
 
-namespace FluxErp\Tests\Livewire;
+namespace FluxErp\Tests\Livewire\Cart;
 
 use FluxErp\Database\Factories\CartFactory;
 use FluxErp\Livewire\Cart\Cart;
@@ -11,6 +11,7 @@ use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
 use FluxErp\Models\VatRate;
+use FluxErp\Tests\Livewire\BaseSetup;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 

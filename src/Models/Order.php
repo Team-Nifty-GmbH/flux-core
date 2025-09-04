@@ -7,9 +7,11 @@ use FluxErp\Actions\OrderTransaction\CreateOrderTransaction;
 use FluxErp\Actions\Transaction\CreateTransaction;
 use FluxErp\Casts\Money;
 use FluxErp\Casts\Percentage;
+use FluxErp\Contracts\IsSubscribable;
 use FluxErp\Contracts\OffersPrinting;
 use FluxErp\Contracts\Targetable;
 use FluxErp\Enums\OrderTypeEnum;
+use FluxErp\Events\Order\OrderApprovalRequestEvent;
 use FluxErp\Models\Pivots\AddressAddressTypeOrder;
 use FluxErp\Models\Pivots\OrderSchedule;
 use FluxErp\Models\Pivots\OrderTransaction;
@@ -64,7 +66,7 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\ModelStates\HasStates;
 use TeamNiftyGmbH\DataTable\Contracts\InteractsWithDataTables;
 
-class Order extends FluxModel implements HasMedia, InteractsWithDataTables, OffersPrinting, Targetable
+class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSubscribable, OffersPrinting, Targetable
 {
     use CascadeSoftDeletes, Commentable, Communicatable, Filterable, HasAdditionalColumns, HasClientAssignment,
         HasFrontendAttributes, HasPackageFactory, HasParentChildRelations, HasRelatedModel, HasSerialNumberRange,
@@ -288,6 +290,19 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
             if ($order->wasChanged('is_locked')) {
                 $order->broadcastEvent('locked');
             }
+
+            if (($order->wasChanged('approval_user_id') || $order->wasRecentlyCreated) && $order->approval_user_id) {
+                $order->approvalUser?->subscribeNotificationChannel($order->broadcastChannel());
+
+                event(OrderApprovalRequestEvent::make($order));
+            }
+
+            if (
+                ($order->wasChanged('responsible_user_id') || $order->wasRecentlyCreated)
+                && $order->responsible_user_id
+            ) {
+                $order->responsibleUser?->subscribeNotificationChannel($order->broadcastChannel());
+            }
         });
 
         static::deleted(function (Order $order): void {
@@ -368,6 +383,11 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
         return $this->belongsTo(User::class, 'agent_id');
     }
 
+    public function approvalUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approval_user_id');
+    }
+
     public function calculateBalance(): static
     {
         $this->balance = bcround(
@@ -414,13 +434,10 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
 
     public function calculateMargin(): static
     {
-        $this->total_purchase_price = $this->orderPositions()
-            ->where('is_alternative', false)
-            ->sum('purchase_price');
-
         $this->margin = Rounding::round(
-            bcsub($this->total_net_price, $this->total_purchase_price, 9),
-            2
+            $this->orderPositions()
+                ->where('is_alternative', false)
+                ->sum('margin')
         );
 
         $variableCosts = 0;

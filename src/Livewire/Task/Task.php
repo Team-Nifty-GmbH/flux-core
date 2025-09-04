@@ -2,7 +2,6 @@
 
 namespace FluxErp\Livewire\Task;
 
-use Exception;
 use FluxErp\Actions\Tag\CreateTag;
 use FluxErp\Actions\Task\DeleteTask;
 use FluxErp\Actions\Task\ReplicateTask;
@@ -108,7 +107,7 @@ class Task extends Component
                 ->execute();
 
             $this->redirectRoute('tasks', navigate: true);
-        } catch (Exception $e) {
+        } catch (UnauthorizedException|ValidationException $e) {
             exception_to_notifications($e, $this);
         }
     }
@@ -174,13 +173,15 @@ class Task extends Component
     {
         try {
             $this->task->save();
-        } catch (Exception $e) {
+        } catch (UnauthorizedException|ValidationException $e) {
             exception_to_notifications($e, $this);
 
             return false;
         }
 
-        $this->notification()->success(__(':model saved', ['model' => __('Task')]))->send();
+        $this->notification()
+            ->success(__(':model saved', ['model' => __('Task')]))
+            ->send();
         $this->skipRender();
 
         return true;

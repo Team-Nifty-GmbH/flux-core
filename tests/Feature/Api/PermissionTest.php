@@ -113,7 +113,7 @@ class PermissionTest extends BaseSetup
             $this->assertEquals($permission->name, collect($this->permissions)
                 ->where('name', $permission->name)
                 ->first()
-                ->name
+                ?->name
             );
         }
     }

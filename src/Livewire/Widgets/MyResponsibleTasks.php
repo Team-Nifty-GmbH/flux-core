@@ -38,6 +38,7 @@ class MyResponsibleTasks extends Component
                 'tasks' => auth()
                     ->user()
                     ->tasksResponsible()
+                    ->with('model')
                     ->whereNotIn('state', $endStates)
                     ->orderByDesc('priority')
                     ->with('users:id,name')

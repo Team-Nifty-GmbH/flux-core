@@ -19,7 +19,7 @@ class ViewServiceProvider extends ServiceProvider
         $path = ltrim($path, '/');
         $relativePath = ltrim(
             substr(
-                realpath(InstalledVersions::getInstallPath($packageName)),
+                str_replace(DIRECTORY_SEPARATOR, '/', realpath(InstalledVersions::getInstallPath($packageName))),
                 strlen(realpath(array_keys(ClassLoader::getRegisteredLoaders())[0] . '/../'))
             ) . '/',
             '/'
@@ -70,6 +70,10 @@ class ViewServiceProvider extends ServiceProvider
                 ),
                 static::getRealPackageAssetPath(
                     'resources/js/sw.js',
+                    'team-nifty-gmbh/flux-erp'
+                ),
+                static::getRealPackageAssetPath(
+                    'resources/js/web-push.js',
                     'team-nifty-gmbh/flux-erp'
                 ),
                 static::getRealPackageAssetPath(

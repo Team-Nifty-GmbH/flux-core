@@ -301,12 +301,15 @@ class Address extends FluxAuthenticatable implements Calendarable, HasLocalePref
 
             $contactUpdates = [];
             $addressUpdates = [];
+
+            $mainAddressId = $address->contact()
+                ->value('main_address_id');
             $mainAddress = resolve_static(Address::class, 'query')
                 ->where('contact_id', $address->contact_id)
-                ->orderByDesc('is_main_address')
+                ->orderByRaw('id = ' . ($mainAddressId ?? 0) . ' DESC')
                 ->first(['id', 'is_main_address', 'is_invoice_address', 'is_delivery_address']);
 
-            if (! $mainAddress->is_main_address) {
+            if ($mainAddress->getKey() !== $mainAddressId) {
                 $contactUpdates += [
                     'main_address_id' => $mainAddress->id,
                 ];
