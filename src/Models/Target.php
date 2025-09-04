@@ -14,24 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Target extends FluxModel
 {
-    use HasParentChildRelations, HasUserModification, HasUuid, LogsActivity, SoftDeletes;
-    use Searchable {
-        Searchable::scoutIndexSettings as baseScoutIndexSettings;
-    }
-
-    public static function scoutIndexSettings(): ?array
-    {
-        return static::baseScoutIndexSettings() ?? [
-            'filterableAttributes' => [
-                'model_type',
-                'start_date',
-                'end_date',
-                'timeframe_column',
-                'priority',
-            ],
-            'sortableAttributes' => ['*'],
-        ];
-    }
+    use HasParentChildRelations, HasUserModification, HasUuid, LogsActivity, Searchable, SoftDeletes;
 
     protected static function booted(): void
     {
