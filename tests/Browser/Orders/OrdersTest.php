@@ -2,21 +2,28 @@
 
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Address;
+use FluxErp\Models\Contact;
 use FluxErp\Models\Order;
 use FluxErp\Models\OrderType;
 use Illuminate\Support\Str;
 
 test('can create new order', function (): void {
     $orderType = OrderType::factory()
-        ->recycle($this->dbClient)
         ->create([
+            'client_id' => $this->dbClient->getKey(),
             'order_type_enum' => OrderTypeEnum::Order,
             'is_hidden' => false,
         ]);
 
     $address = Address::factory()
-        ->recycle($this->dbClient)
+        ->for(
+            Contact::factory()
+                ->state([
+                    'client_id' => $this->dbClient->getKey(),
+                ])
+        )
         ->create([
+            'client_id' => $this->dbClient->getKey(),
             'company' => 'Test Company ' . uniqid(),
             'firstname' => 'Firstname',
             'lastname' => 'Lastname',

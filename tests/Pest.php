@@ -1,6 +1,10 @@
 <?php
 
 use FluxErp\Models\Client;
+use FluxErp\Models\Currency;
+use FluxErp\Models\Language;
+use FluxErp\Models\PaymentType;
+use FluxErp\Models\PriceList;
 use FluxErp\Models\User;
 use Illuminate\Support\Facades\Route;
 use Pest\Browser\Api\ArrayablePendingAwaitablePage;
@@ -21,21 +25,42 @@ uses(FluxErp\Tests\BrowserTestCase::class)->in('Browser');
 | Automatically setup required data and login for all browser tests
 */
 
-uses()->beforeEach(function (): void {
-    if (! $this->dbClient = Client::default()) {
-        $this->dbClient = Client::factory()->create([
+uses()
+    ->beforeEach(function (): void {
+        PriceList::default() ?? PriceList::factory()->create([
             'is_default' => true,
         ]);
-    }
 
-    $user = User::factory()->create([
-        'is_active' => true,
-    ]);
+        $client = Client::default() ?? Client::factory()->create([
+            'is_default' => true,
+        ]);
 
-    $this->actingAs($user);
+        $language = Language::default() ?? Language::factory()->create([
+            'is_default' => true,
+        ]);
 
-    $this->user = $user;
-})->in('Browser');
+        PaymentType::default() ?? PaymentType::factory()
+            ->hasAttached($client, relationship: 'clients')
+            ->create([
+                'is_active' => true,
+                'is_default' => true,
+                'is_sales' => true,
+            ]);
+
+        Currency::default() ?? Currency::factory()->create([
+            'is_default' => true,
+        ]);
+
+        $this->user = User::factory()->create([
+            'is_active' => true,
+            'language_id' => $language->getKey(),
+        ]);
+
+        $this->actingAs($this->user);
+
+        $this->dbClient = $client;
+    })
+    ->in('Browser');
 
 /*
 |--------------------------------------------------------------------------

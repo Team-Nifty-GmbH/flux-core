@@ -40,7 +40,7 @@
         <env name="SESSION_DRIVER" value="array"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="SCOUT_DRIVER" value="collection"/>
-        <env name="BROADCAST_CONNECTION" value="log"/>
+        <env name="BROADCAST_CONNECTION" value="null"/>
     </php>
     <source>
         <include>
