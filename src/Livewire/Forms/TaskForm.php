@@ -26,6 +26,8 @@ class TaskForm extends FluxForm
 
     public ?string $due_date = null;
 
+    public ?string $due_time = null;
+
     #[Locked]
     public ?int $id = null;
 
@@ -49,6 +51,8 @@ class TaskForm extends FluxForm
 
     public ?string $start_date = null;
 
+    public ?string $start_time = null;
+
     public string $state = 'open';
 
     public array $tags = [];
@@ -70,8 +74,17 @@ class TaskForm extends FluxForm
 
         $values['start_date'] = ! is_null($values['start_date'] ?? null) ?
             Carbon::parse($values['start_date'])->toDateString() : null;
+
         $values['due_date'] = ! is_null($values['due_date'] ?? null) ?
             Carbon::parse($values['due_date'])->toDateString() : null;
+
+        $values['start_time'] = ! is_null($values['start_time'] ?? null)
+            ? Carbon::parse($values['start_time'])->format('H:i')
+            : null;
+
+        $values['due_time'] = ! is_null($values['due_time'] ?? null)
+            ? Carbon::parse($values['due_time'])->format('H:i')
+            : null;
 
         parent::fill($values);
     }

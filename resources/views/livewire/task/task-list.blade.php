@@ -37,16 +37,30 @@
                     ]"
                 />
                 <div class="flex justify-between gap-x-4">
-                    <x-input
-                        type="date"
-                        wire:model="task.start_date"
-                        label="{{ __('Start Date') }}"
-                    />
-                    <x-input
-                        type="date"
-                        wire:model="task.due_date"
-                        label="{{ __('Due Date') }}"
-                    />
+                    <div class="flex flex-col gap-y-2">
+                        <x-date
+                            :without-time="true"
+                            wire:model="task.start_date"
+                            label="{{ __('Start Date') }}"
+                        />
+                        <x-time
+                            :label="__('Start Time')"
+                            format="24"
+                            wire:model="task.start_time"
+                        />
+                    </div>
+                    <div class="flex flex-col gap-y-2">
+                        <x-date
+                            :without-time="true"
+                            wire:model="task.due_date"
+                            label="{{ __('Due Date') }}"
+                        />
+                        <x-time
+                            :label="__('Due Time')"
+                            format="24"
+                            wire:model="task.due_time"
+                        />
+                    </div>
                 </div>
                 <x-flux::state
                     class="w-full"

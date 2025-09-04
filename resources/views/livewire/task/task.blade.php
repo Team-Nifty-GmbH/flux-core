@@ -53,16 +53,30 @@
                 ]"
             />
             <div class="flex justify-between">
-                <x-date
-                    :without-time="true"
-                    wire:model="replica.start_date"
-                    label="{{ __('Start Date') }}"
-                />
-                <x-date
-                    :without-time="true"
-                    wire:model="replica.due_date"
-                    label="{{ __('Due Date') }}"
-                />
+                <div>
+                    <x-date
+                        :without-time="true"
+                        wire:model="replica.start_date"
+                        label="{{ __('Start Date') }}"
+                    />
+                    <x-time
+                        :label="__('Start Time')"
+                        format="24"
+                        wire:model="replica.start_time"
+                    />
+                </div>
+                <div>
+                    <x-date
+                        :without-time="true"
+                        wire:model="replica.due_date"
+                        label="{{ __('Due Date') }}"
+                    />
+                    <x-time
+                        :label="__('Due Time')"
+                        format="24"
+                        wire:model="replica.due_time"
+                    />
+                </div>
             </div>
             <x-number
                 :label="__('Priority')"

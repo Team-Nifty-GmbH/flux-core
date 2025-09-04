@@ -64,6 +64,8 @@ class CreateTaskRuleset extends FluxRuleset
             'description' => 'string|nullable',
             'start_date' => 'date|nullable',
             'due_date' => 'date|nullable|after_or_equal:start_date',
+            'start_time' => 'nullable|date_format:H:i',
+            'due_time' => 'nullable|date_format:H:i',
             'priority' => 'integer|nullable|min:0',
             'state' => [
                 'string',
