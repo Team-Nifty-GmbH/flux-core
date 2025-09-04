@@ -414,13 +414,10 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, Offe
 
     public function calculateMargin(): static
     {
-        $this->total_purchase_price = $this->orderPositions()
-            ->where('is_alternative', false)
-            ->sum('purchase_price');
-
         $this->margin = Rounding::round(
-            bcsub($this->total_net_price, $this->total_purchase_price, 9),
-            2
+            $this->orderPositions()
+                ->where('is_alternative', false)
+                ->sum('margin')
         );
 
         $variableCosts = 0;
