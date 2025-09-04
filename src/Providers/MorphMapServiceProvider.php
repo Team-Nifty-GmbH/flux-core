@@ -94,6 +94,7 @@ use FluxErp\Models\ProductPropertyGroup;
 use FluxErp\Models\Project;
 use FluxErp\Models\PurchaseInvoice;
 use FluxErp\Models\PurchaseInvoicePosition;
+use FluxErp\Models\PushSubscription;
 use FluxErp\Models\QueueMonitor;
 use FluxErp\Models\RecordOrigin;
 use FluxErp\Models\Role;
@@ -198,6 +199,7 @@ class MorphMapServiceProvider extends ServiceProvider
             'project' => Project::class,
             'purchase_invoice' => PurchaseInvoice::class,
             'purchase_invoice_position' => PurchaseInvoicePosition::class,
+            'push_subscription' => PushSubscription::class,
             'queue_monitor' => QueueMonitor::class,
             'record_origin' => RecordOrigin::class,
             'role' => Role::class,
