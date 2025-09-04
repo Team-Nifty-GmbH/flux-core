@@ -119,7 +119,7 @@
                                 {{ $summaryItem->name }}
                             </td>
                             <td class="float-right text-right">
-                                {{ Number::currency($summaryItem->total_net_price) }}
+                                {{ Number::currency($summaryItem->total_net_price ?? 0) }}
                             </td>
                         </tr>
                     @endforeach
