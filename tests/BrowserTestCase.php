@@ -2,7 +2,6 @@
 
 namespace FluxErp\Tests;
 
-use Dotenv\Dotenv;
 use FluxErp\Console\Commands\InstallAssets;
 use FluxErp\FluxServiceProvider;
 use FluxErp\Providers\BindingServiceProvider;
@@ -35,30 +34,7 @@ abstract class BrowserTestCase extends TestCase
 
     public Model $user;
 
-    protected static function deleteDirectory(string $dir): bool
-    {
-        if (! file_exists($dir)) {
-            return true;
-        }
-
-        if (! is_dir($dir)) {
-            return unlink($dir);
-        }
-
-        foreach (scandir($dir) as $item) {
-            if ($item === '.' || $item === '..') {
-                continue;
-            }
-
-            if (! static::deleteDirectory($dir . DIRECTORY_SEPARATOR . $item)) {
-                return false;
-            }
-        }
-
-        return rmdir($dir);
-    }
-
-    protected static function installAssets(): void
+    public static function installAssets(): void
     {
         static::deleteDirectory(__DIR__ . '/../public/build/assets/');
 
@@ -66,20 +42,16 @@ abstract class BrowserTestCase extends TestCase
             unlink($manifest);
         }
 
-        // Copy and adjust Tailwind config for Testbench
         $testbenchConfigPath = __DIR__ . '/../vendor/orchestra/testbench-core/laravel/tailwind.config.mjs';
         if (file_exists($testbenchConfigPath)) {
-            // Read the stub file
             $stubContent = file_get_contents(__DIR__ . '/../stubs/tailwind/tailwind.config.mjs');
 
-            // Replace the relative path placeholder for Testbench environment
             $configContent = str_replace(
                 '{{ relative_path }}',
                 '../../../..',
                 $stubContent
             );
 
-            // Add additional content paths for Testbench
             $configContent = str_replace(
                 '].concat(dataTablesConfig.content, fluxConfig.content),',
                 ',\n        \'../../../../resources/**/*.blade.php\',\n        \'../../../../resources/**/*.js\',\n        \'../../../../src/**/*.php\',\n    ].concat(dataTablesConfig.content, fluxConfig.content),',
@@ -110,20 +82,31 @@ abstract class BrowserTestCase extends TestCase
         }
     }
 
-    public static function setUpBeforeClass(): void
+    protected static function deleteDirectory(string $dir): bool
     {
-        static::installAssets();
+        if (! file_exists($dir)) {
+            return true;
+        }
 
-        parent::setUpBeforeClass();
+        if (! is_dir($dir)) {
+            return unlink($dir);
+        }
+
+        foreach (scandir($dir) as $item) {
+            if ($item === '.' || $item === '..') {
+                continue;
+            }
+
+            if (! static::deleteDirectory($dir . DIRECTORY_SEPARATOR . $item)) {
+                return false;
+            }
+        }
+
+        return rmdir($dir);
     }
 
     protected function setUp(): void
     {
-        if (file_exists(__DIR__ . '/../../../.env')) {
-            $dotenv = Dotenv::createImmutable(__DIR__ . '/../../..');
-            $dotenv->load();
-        }
-
         $_ENV['APP_DEBUG'] = 'true';
         $_SERVER['APP_DEBUG'] = 'true';
         putenv('APP_DEBUG=true');

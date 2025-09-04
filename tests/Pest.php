@@ -6,6 +6,7 @@ use FluxErp\Models\Language;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\User;
+use FluxErp\Tests\BrowserTestCase;
 use Illuminate\Support\Facades\Route;
 use Pest\Browser\Api\ArrayablePendingAwaitablePage;
 use Pest\Browser\Api\PendingAwaitablePage;
@@ -16,7 +17,7 @@ use Pest\Browser\Api\PendingAwaitablePage;
 |--------------------------------------------------------------------------
 */
 
-uses(FluxErp\Tests\BrowserTestCase::class)->in('Browser');
+uses(BrowserTestCase::class)->in('Browser');
 
 /*
 |--------------------------------------------------------------------------
@@ -26,6 +27,9 @@ uses(FluxErp\Tests\BrowserTestCase::class)->in('Browser');
 */
 
 uses()
+    ->beforeAll(function (): void {
+        BrowserTestCase::installAssets();
+    })
     ->beforeEach(function (): void {
         PriceList::default() ?? PriceList::factory()->create([
             'is_default' => true,
