@@ -86,7 +86,7 @@
         <div class="flex flex-col gap-4">
             @if (auth()->user()?->contact?->priceList?->is_net)
                 <x-input
-                    :text="__('Desired delivery date')"
+                    :label="__('Desired delivery date')"
                     wire:model="delivery_date"
                 />
                 <x-input :label="__('Commission')" wire:model="commission" />

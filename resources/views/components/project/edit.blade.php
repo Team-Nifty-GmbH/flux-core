@@ -90,7 +90,6 @@
             </div>
             <div x-bind:class="! edit && 'pointer-events-none'">
                 <x-select.styled
-                    :label="__('Contact')"
                     x-bind:readonly="!edit"
                     wire:model="project.contact_id"
                     select="label:label|value:contact_id"
@@ -114,12 +113,22 @@
                             'with' => 'contact.media',
                         ],
                     ]"
-                />
+                >
+                    <x-slot:label>
+                        <x-link
+                            icon="link"
+                            :text="__('Contact')"
+                            href="#"
+                            class="pointer-events-auto"
+                            wire:navigate
+                            x-bind:href="$wire.project.contact_id ? '{{ route('contacts.id?', ':id') }}'.replace(':id', $wire.project.contact_id) : '#'"
+                        />
+                    </x-slot>
+                </x-select.styled>
             </div>
             <div x-bind:class="! edit && 'pointer-events-none'">
                 <x-select.styled
                     x-bind:readonly="!edit"
-                    :label="__('Order')"
                     wire:model="project.order_id"
                     select="label:label|value:id"
                     unfiltered
@@ -127,7 +136,18 @@
                         'url' => route('search', \FluxErp\Models\Order::class),
                         'method' => 'POST',
                     ]"
-                />
+                >
+                    <x-slot:label>
+                        <x-link
+                            icon="link"
+                            :text="__('Order')"
+                            href="#"
+                            class="pointer-events-auto"
+                            wire:navigate
+                            x-bind:href="$wire.project.order_id ? '{{ route('orders.id', ':id') }}'.replace(':id', $wire.project.order_id) : '#'"
+                        />
+                    </x-slot>
+                </x-select.styled>
             </div>
             @show
             @section('budget')

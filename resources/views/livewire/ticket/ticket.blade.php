@@ -77,7 +77,7 @@
                     <div class="space-y-5 dark:text-gray-50">
                         <x-card class="space-y-4">
                             <x-input
-                                :text="__('Title')"
+                                :label="__('Title')"
                                 wire:model="ticket.title"
                             />
                             <x-flux::editor
