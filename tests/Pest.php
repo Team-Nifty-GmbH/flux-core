@@ -88,6 +88,9 @@ pest()
 
 pest()
     ->extend(FluxErp\Tests\TestCase::class)
+    ->in('Livewire', 'Feature', 'Unit');
+
+pest()
     ->beforeEach(function (): void {
         $this->withoutVite();
     })
