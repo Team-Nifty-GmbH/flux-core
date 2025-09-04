@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use Carbon\Carbon;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Client;
@@ -55,7 +54,7 @@ test('create contact', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/contacts', $contact);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseContact = json_decode($response->getContent())->data;
     $dbContact = Contact::query()
@@ -105,7 +104,7 @@ test('create contact maximum', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/contacts', $contact);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseContact = json_decode($response->getContent())->data;
     $dbContact = Contact::query()
@@ -115,7 +114,7 @@ test('create contact maximum', function (): void {
     expect($dbContact)->not->toBeEmpty();
     expect($dbContact->client_id)->toEqual($contact['client_id']);
     expect($dbContact->payment_type_id)->toEqual($contact['payment_type_id']);
-    expect($dbContact->price_list_id)->toEqual($contact['price_list_id']);
+    expect($dbContact->price_list_id)->toEqual(PriceList::default()->getKey());
     expect($dbContact->customer_number)->toEqual($contact['customer_number']);
     expect($dbContact->creditor_number)->toEqual($contact['creditor_number']);
     expect($dbContact->payment_target_days)->toEqual($contact['payment_target_days']);
@@ -141,7 +140,7 @@ test('create contact validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/contacts', $contact);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('delete contact', function (): void {
@@ -154,7 +153,7 @@ test('delete contact', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/contacts/' . $this->contacts[2]->id);
-    $response->assertStatus(204);
+    $response->assertNoContent();
 
     $contact = $this->contacts[2]->fresh();
     expect($contact->deleted_at)->not->toBeNull();
@@ -166,7 +165,7 @@ test('delete contact contact not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/contacts/' . ++$this->contacts[2]->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get contact', function (): void {
@@ -174,7 +173,7 @@ test('get contact', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/contacts/' . $this->contacts[0]->id);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     $jsonContact = $json->data;
@@ -205,7 +204,7 @@ test('get contact contact not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/contacts/' . ++$this->contacts[2]->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get contacts', function (): void {
@@ -213,7 +212,7 @@ test('get contacts', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/contacts');
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     $jsonContacts = collect($json->data->data);
@@ -255,7 +254,7 @@ test('update contact', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/contacts', $contact);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseContact = json_decode($response->getContent())->data;
     $dbContact = Contact::query()
@@ -278,7 +277,7 @@ test('update contact customer number already exists', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/contacts', $contact);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 
     $responseContact = json_decode($response->getContent());
     expect(property_exists($responseContact->errors, 'customer_number'))->toBeTrue();
@@ -307,7 +306,7 @@ test('update contact maximum', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/contacts', $contact);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseContact = json_decode($response->getContent())->data;
     $dbContact = Contact::query()
@@ -354,7 +353,7 @@ test('update contact multi status client payment type not exists', function (): 
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/contacts', $contacts);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 
     $responses = json_decode($response->getContent())->data->items;
     expect($responses[0]->id)->toEqual($contacts[0]['id']);
@@ -377,7 +376,7 @@ test('update contact validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/contacts', $contact);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 
     $responseContact = json_decode($response->getContent());
     expect($responseContact->status)->toEqual(422);

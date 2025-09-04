@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Livewire\PortalBaseSetup::class);
 use FluxErp\Database\Seeders\OrderPositionTableSeeder;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\Portal\DataTables\OrderPositionList;
@@ -61,5 +60,5 @@ beforeEach(function (): void {
 
 test('renders successfully', function (): void {
     Livewire::test(OrderPositionList::class, ['orderId' => $this->order->id])
-        ->assertStatus(200);
+        ->assertOk();
 });

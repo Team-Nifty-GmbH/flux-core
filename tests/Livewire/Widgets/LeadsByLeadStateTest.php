@@ -110,7 +110,7 @@ test('options use data correctly', function (): void {
 
 test('renders successfully', function (): void {
     Livewire::test(LeadsByLeadState::class)
-        ->assertStatus(200);
+        ->assertOk();
 });
 
 test('show method redirects correctly', function (): void {
@@ -135,7 +135,7 @@ test('timeframe in the future', function (): void {
         ->set('end', $end)
         ->call('calculateChart')
         ->assertSet('series', [])
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors();
 });
 
@@ -164,7 +164,7 @@ function assertLeadStateTimeframeResults(Collection $leadStates, Collection $lea
     $test = Livewire::test(LeadsByLeadState::class)
         ->set('timeFrame', $timeFrame)
         ->call('calculateChart')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors();
 
     $series = $test->get('series');

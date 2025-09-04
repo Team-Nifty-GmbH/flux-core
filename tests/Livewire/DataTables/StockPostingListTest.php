@@ -1,10 +1,9 @@
 <?php
 
-uses(FluxErp\Tests\TestCase::class);
 use FluxErp\Livewire\DataTables\StockPostingList;
 use Livewire\Livewire;
 
 test('renders successfully', function (): void {
     Livewire::test(StockPostingList::class)
-        ->assertStatus(200);
+        ->assertOk();
 });

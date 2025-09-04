@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use FluxErp\Models\Permission;
 use FluxErp\Models\Role;
 use Illuminate\Support\Str;
@@ -35,7 +34,7 @@ test('assign role user', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/roles/users/assign', $roleUsers);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     expect($this->user->fresh()->hasRole($role->name))->toBeTrue();
 });
@@ -53,7 +52,7 @@ test('create role', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/roles', $role);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseRole = json_decode($response->getContent())->data;
 
@@ -74,7 +73,7 @@ test('create roles validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/roles', $role);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('delete role', function (): void {
@@ -84,7 +83,7 @@ test('delete role', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/roles/' . $role->id);
-    $response->assertStatus(204);
+    $response->assertNoContent();
 });
 
 test('delete role role not found', function (): void {
@@ -92,7 +91,7 @@ test('delete role role not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/roles/' . Role::query()->max('id') + 100);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('delete role super admin', function (): void {
@@ -110,7 +109,7 @@ test('get roles', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/roles');
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $roles = json_decode($response->getContent())->data->data;
 
@@ -124,7 +123,7 @@ test('get user roles', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/roles/user/' . $this->user->id);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $roles = json_decode($response->getContent())->data;
 
@@ -138,7 +137,7 @@ test('get user roles user not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/roles/user/' . ++$this->user->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('give role permission', function (): void {
@@ -155,7 +154,7 @@ test('give role permission', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/roles/give', $rolePermissions);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     expect($role->hasPermissionTo($this->permissions['test']))->toBeTrue();
 });
@@ -174,7 +173,7 @@ test('revoke role permission', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/roles/revoke', $rolePermissions);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     expect($role->hasPermissionTo($this->permissions['test']))->toBeFalse();
 });
@@ -191,7 +190,7 @@ test('revoke role permission validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/roles/revoke', $rolePermissions);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('revoke role user', function (): void {
@@ -208,7 +207,7 @@ test('revoke role user', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/roles/users/revoke', $roleUsers);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     expect($this->user->fresh()->hasRole($role->name))->toBeFalse();
 });
@@ -225,5 +224,5 @@ test('revoke role user validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/roles/users/revoke', $roleUsers);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });

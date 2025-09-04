@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use Carbon\Carbon;
 use FluxErp\Enums\SepaMandateTypeEnum;
 use FluxErp\Models\Client;
@@ -68,7 +67,7 @@ test('create sepa mandate', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/sepa-mandates', $sepaMandate);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseSepaMandate = json_decode($response->getContent())->data;
     $dbSepaMandate = SepaMandate::query()
@@ -98,7 +97,7 @@ test('create sepa mandate client contact not exists', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/sepa-mandates', $sepaMandate);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('create sepa mandate contact bank connection not exists', function (): void {
@@ -114,7 +113,7 @@ test('create sepa mandate contact bank connection not exists', function (): void
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/sepa-mandates', $sepaMandate);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('create sepa mandate maximum', function (): void {
@@ -130,7 +129,7 @@ test('create sepa mandate maximum', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/sepa-mandates', $sepaMandate);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseSepaMandate = json_decode($response->getContent())->data;
     $dbSepaMandate = SepaMandate::query()
@@ -158,7 +157,7 @@ test('create sepa mandate validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/sepa-mandates', $sepaMandate);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
     $response->assertJsonValidationErrorFor('contact_id');
     $response->assertJsonValidationErrorFor('contact_bank_connection_id');
     $response->assertJsonValidationErrorFor('sepa_mandate_type_enum');
@@ -169,7 +168,7 @@ test('delete sepa mandate', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/sepa-mandates/' . $this->sepaMandates[2]->id);
-    $response->assertStatus(204);
+    $response->assertNoContent();
 
     $sepaMandate = $this->sepaMandates[2]->fresh();
     expect($sepaMandate->deleted_at)->not->toBeNull();
@@ -181,7 +180,7 @@ test('delete sepa mandate sepa mandate not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/sepa-mandates/' . ++$this->sepaMandates[2]->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get sepa mandate', function (): void {
@@ -189,7 +188,7 @@ test('get sepa mandate', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/sepa-mandates/' . $this->sepaMandates[0]->id);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     $jsonSepaMandate = $json->data;
@@ -217,7 +216,7 @@ test('get sepa mandate sepa mandate not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/sepa-mandates/' . ++$this->sepaMandates[2]->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get sepa mandates', function (): void {
@@ -225,7 +224,7 @@ test('get sepa mandates', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/sepa-mandates');
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     $jsonSepaMandates = collect($json->data->data);
@@ -258,7 +257,7 @@ test('update sepa mandate', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/sepa-mandates', $sepaMandate);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseSepaMandate = json_decode($response->getContent())->data;
     $dbSepaMandate = SepaMandate::query()
@@ -282,7 +281,7 @@ test('update sepa mandate maximum', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/sepa-mandates', $sepaMandate);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseSepaMandate = json_decode($response->getContent())->data;
     $dbSepaMandate = SepaMandate::query()
@@ -314,7 +313,7 @@ test('update sepa mandate multi status contact bank connection not exists', func
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/sepa-mandates', $sepaMandates);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 
     $responses = json_decode($response->getContent())->data->items;
     expect($responses[0]->id)->toEqual($sepaMandates[0]['id']);
@@ -335,7 +334,7 @@ test('update sepa mandate validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/sepa-mandates', $sepaMandate);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 
     $responseSepaMandate = json_decode($response->getContent());
     expect($responseSepaMandate->status)->toEqual(422);

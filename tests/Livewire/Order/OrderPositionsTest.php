@@ -131,7 +131,7 @@ test('add order position successfully', function (): void {
         ->set('orderPosition.unit_price', $testUnitPrice)
         ->set('orderPosition.vat_rate_id', $this->vatRate->id)
         ->call('addOrderPosition')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertReturned(true);
 
@@ -163,7 +163,7 @@ test('add order position with product', function (): void {
         ->set('orderPosition.amount', 1)
         ->call('changedProductId', $this->product)
         ->call('addOrderPosition')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertReturned(true);
 
@@ -184,7 +184,7 @@ test('add products from array', function (): void {
 
     Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
         ->call('addProducts', $products)
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors();
 
     expect($this->order->orderPositions()->count())->toEqual($orderPositionCount + 2);
@@ -195,7 +195,7 @@ test('can show related columns', function (): void {
 
     $component->set('enabledCols', array_merge($component->get('enabledCols'), ['order.uuid']))
         ->call('loadData')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors();
 
     expect($component->get('enabledCols'))->toContain('order.uuid');
@@ -207,7 +207,7 @@ test('changed product id fills position data', function (): void {
     Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
         ->set('orderPosition.product_id', $this->product->id)
         ->call('changedProductId', $this->product)
-        ->assertStatus(200)
+        ->assertOk()
         ->assertSet('orderPosition.name', $this->product->name)
         ->assertSet('orderPosition.product_number', $this->product->product_number)
         ->assertSet('orderPosition.description', $this->product->description)
@@ -224,7 +224,7 @@ test('create tasks from selected positions', function (): void {
     Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
         ->set('selected', [$orderPosition->id])
         ->call('createTasks', $project->id)
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors();
 
     $this->assertDatabaseHas('tasks', [
@@ -253,7 +253,7 @@ test('create tasks prevents duplicates', function (): void {
     Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
         ->set('selected', [$orderPosition->id])
         ->call('createTasks', $project->id)
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors();
 
     expect(Task::count())->toEqual($initialTaskCount);
@@ -265,7 +265,7 @@ test('delete order position', function (): void {
     Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
         ->call('editOrderPosition', $orderPosition)
         ->call('deleteOrderPosition')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertReturned(true);
 
@@ -283,7 +283,7 @@ test('delete selected order positions', function (): void {
     Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
         ->set('selected', $selectedIds)
         ->call('deleteSelectedOrderPositions')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertSet('selected', []);
 
@@ -300,7 +300,7 @@ test('discount selected positions', function (): void {
         ->set('selected', [$orderPosition->id])
         ->set('discount', $discountPercentage)
         ->call('discountSelectedPositions')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertSet('discount', null);
 
@@ -313,7 +313,7 @@ test('edit new order position', function (): void {
 
     Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
         ->call('editOrderPosition', new OrderPosition())
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertSet('orderPosition.vat_rate_id', $defaultVatRate->id)
         ->assertExecutesJs("\$modalOpen('edit-order-position');");
@@ -324,7 +324,7 @@ test('edit order position', function (): void {
 
     Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
         ->call('editOrderPosition', $orderPosition)
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertSet('orderPosition.id', $orderPosition->id)
         ->assertSet('orderPosition.name', $orderPosition->name)
@@ -434,7 +434,7 @@ test('move position', function (): void {
 
     Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
         ->call('movePosition', $orderPosition, 2)
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors();
 
     $updatedPosition = $orderPosition->refresh();
@@ -452,7 +452,7 @@ test('move position with parent', function (): void {
 
     Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
         ->call('movePosition', $orderPosition, 1, $parentPosition->id)
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors();
 
     $updatedPosition = $orderPosition->refresh();
@@ -470,7 +470,7 @@ test('quick add order position', function (): void {
         ->assertSet('orderPosition.name', $this->product->name)
         ->assertSet('orderPosition.product_number', $this->product->product_number)
         ->call('quickAdd')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertReturned(true);
 
@@ -495,13 +495,13 @@ test('recalculate order positions', function (): void {
     Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
         ->set('selected', [$orderPosition->id])
         ->call('recalculateOrderPositions')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors();
 });
 
 test('renders successfully', function (): void {
     Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
-        ->assertStatus(200)
+        ->assertOk()
         ->assertSet('orderPositionsView', 'table')
         ->assertSet('perPage', 100)
         ->assertSet('isSelectable', true)
@@ -520,7 +520,7 @@ test('replicate selected positions', function (): void {
     Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
         ->set('selected', [$orderPosition->id])
         ->call('replicateSelected')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertSet('selected', []);
 
@@ -539,14 +539,14 @@ test('reset order position', function (): void {
         ->call('editOrderPosition', $orderPosition)
         ->assertSet('orderPosition.id', $orderPosition->id)
         ->call('resetOrderPosition')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertSet('orderPosition.id', null);
 });
 
 test('show product', function (): void {
     Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
         ->call('showProduct', $this->product)
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertExecutesJs("\$openDetailModal('{$this->product->getUrl()}');");
 });
@@ -555,7 +555,7 @@ test('switch view same view returns early', function (): void {
     Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
         ->assertSet('orderPositionsView', 'table')
         ->call('switchView', 'table')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertSet('orderPositionsView', 'table');
 });
 
@@ -563,7 +563,7 @@ test('switch view to list', function (): void {
     Livewire::test(OrderPositions::class, ['order' => $this->orderForm])
         ->assertSet('orderPositionsView', 'table')
         ->call('switchView', 'list')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertSet('orderPositionsView', 'list')
         ->assertSet('data', []);
 });
@@ -573,7 +573,7 @@ test('switch view to table', function (): void {
         ->call('switchView', 'list')
         ->assertSet('orderPositionsView', 'list')
         ->call('switchView', 'table')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertSet('orderPositionsView', 'table');
 
     expect($component->get('data'))->not->toBeEmpty();

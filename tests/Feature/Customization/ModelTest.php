@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\TestCase::class);
 use FluxErp\Models\Language;
 use FluxErp\Models\User;
 

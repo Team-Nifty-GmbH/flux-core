@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use Carbon\Carbon;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
@@ -34,7 +33,7 @@ test('create language', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/languages', $language);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseLanguage = json_decode($response->getContent())->data;
     $dbLanguage = Language::query()
@@ -60,7 +59,7 @@ test('create language language code exists', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/languages', $language);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('create language validation fails', function (): void {
@@ -74,7 +73,7 @@ test('create language validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/languages', $language);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('delete language', function (): void {
@@ -82,7 +81,7 @@ test('delete language', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/languages/' . $this->languages[1]->id);
-    $response->assertStatus(204);
+    $response->assertNoContent();
 
     $language = $this->languages[1]->fresh();
     expect($language->deleted_at)->not->toBeNull();
@@ -94,7 +93,7 @@ test('delete language language not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/languages/' . ++$this->languages[1]->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('delete language language referenced by address', function (): void {
@@ -138,7 +137,7 @@ test('get language', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/languages/' . $this->languages[0]->id);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     $jsonLanguage = $json->data;
@@ -158,7 +157,7 @@ test('get language language not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/languages/' . ++$this->languages[1]->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get languages', function (): void {
@@ -166,7 +165,7 @@ test('get languages', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/languages');
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     $jsonLanguages = collect($json->data->data);
@@ -197,7 +196,7 @@ test('update language', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/languages', $language);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseLanguage = json_decode($response->getContent())->data;
     $dbLanguage = Language::query()
@@ -220,7 +219,7 @@ test('update language language code exists', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/languages', $language);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
     expect(json_decode($response->getContent())->status)->toEqual(422);
     expect(property_exists(json_decode($response->getContent())->errors, 'language_code'))->toBeTrue();
 });
@@ -237,7 +236,7 @@ test('update language maximum', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/languages', $language);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseLanguage = json_decode($response->getContent())->data;
     $dbLanguage = Language::query()
@@ -262,5 +261,5 @@ test('update language validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/languages', $language);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });

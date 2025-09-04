@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use Carbon\Carbon;
 use FluxErp\Models\Contact;
 use FluxErp\Models\ContactBankConnection;
@@ -41,7 +40,7 @@ test('create contact bank connection', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/contact-bank-connections', $bankConnection);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseBankConnection = json_decode($response->getContent())->data;
     $dbBankConnection = ContactBankConnection::query()
@@ -71,7 +70,7 @@ test('create contact bank connection maximum', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/contact-bank-connections', $bankConnection);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseBankConnection = json_decode($response->getContent())->data;
     $dbBankConnection = ContactBankConnection::query()
@@ -98,7 +97,7 @@ test('create contact bank connection validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/contact-bank-connections', $bankConnection);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('delete contact bank connection', function (): void {
@@ -107,7 +106,7 @@ test('delete contact bank connection', function (): void {
 
     $response = $this->actingAs($this->user)
         ->delete('/api/contact-bank-connections/' . $this->contactBankConnections[1]->id);
-    $response->assertStatus(204);
+    $response->assertNoContent();
 
     $bankConnection = $this->contactBankConnections[1]->fresh();
     expect($bankConnection->deleted_at)->not->toBeNull();
@@ -120,7 +119,7 @@ test('delete contact bank connection bank connection not found', function (): vo
 
     $response = $this->actingAs($this->user)
         ->delete('/api/contact-bank-connections/' . ++$this->contactBankConnections[2]->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get contact bank connection', function (): void {
@@ -129,7 +128,7 @@ test('get contact bank connection', function (): void {
 
     $response = $this->actingAs($this->user)
         ->get('/api/contact-bank-connections/' . $this->contactBankConnections[0]->id);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     $jsonContactBankConnection = $json->data;
@@ -151,7 +150,7 @@ test('get contact bank connection contact bank connection not found', function (
 
     $response = $this->actingAs($this->user)
         ->get('/api/contact-bank-connections/' . ++$this->contactBankConnections[2]->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get contact bank connections', function (): void {
@@ -159,7 +158,7 @@ test('get contact bank connections', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/contact-bank-connections');
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     $jsonContactBankConnections = collect($json->data->data);
@@ -190,7 +189,7 @@ test('update contact bank connection', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/contact-bank-connections', $bankConnection);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseBankConnection = json_decode($response->getContent())->data;
     $dbBankConnection = ContactBankConnection::query()
@@ -217,7 +216,7 @@ test('update contact bank connection maximum', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/contact-bank-connections', $bankConnection);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseBankConnection = json_decode($response->getContent())->data;
     $dbBankConnection = ContactBankConnection::query()
@@ -244,7 +243,7 @@ test('update contact bank connection multi status validation fails', function ()
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/contact-bank-connections', $bankConnection);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 
     $responseBankConnection = json_decode($response->getContent());
     expect($responseBankConnection->status)->toEqual(422);

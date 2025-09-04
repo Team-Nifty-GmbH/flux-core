@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\Web\BaseSetup::class);
 use FluxErp\Models\Category;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Permission;
@@ -23,8 +22,10 @@ beforeEach(function (): void {
 });
 
 test('products id no user', function (): void {
+    $this->actingAsGuest();
+
     $this->get('/products/' . $this->product->id)
-        ->assertStatus(302)
+        ->assertFound()
         ->assertRedirect(route('login'));
 });
 
@@ -34,7 +35,7 @@ test('products id page', function (): void {
     $this->user->givePermissionTo(Permission::findOrCreate('products.{id}.get', 'web'));
 
     $this->actingAs($this->user, 'web')->get('/products/' . $this->product->id)
-        ->assertStatus(200);
+        ->assertOk();
 });
 
 test('products id product not found', function (): void {
@@ -43,19 +44,21 @@ test('products id product not found', function (): void {
     $this->user->givePermissionTo(Permission::findOrCreate('products.{id}.get', 'web'));
 
     $this->actingAs($this->user, 'web')->get('/products/' . $this->product->id)
-        ->assertStatus(404);
+        ->assertNotFound();
 });
 
 test('products id without permission', function (): void {
     Permission::findOrCreate('products.{id}.get', 'web');
 
     $this->actingAs($this->user, 'web')->get('/products/' . $this->product->id)
-        ->assertStatus(403);
+        ->assertForbidden();
 });
 
 test('products list no user', function (): void {
+    $this->actingAsGuest();
+
     $this->get('/products/list')
-        ->assertStatus(302)
+        ->assertFound()
         ->assertRedirect(route('login'));
 });
 
@@ -63,19 +66,21 @@ test('products list page', function (): void {
     $this->user->givePermissionTo(Permission::findOrCreate('products.list.get', 'web'));
 
     $this->actingAs($this->user, 'web')->get('/products/list')
-        ->assertStatus(200);
+        ->assertOk();
 });
 
 test('products list without permission', function (): void {
     Permission::findOrCreate('products.list.get', 'web');
 
     $this->actingAs($this->user, 'web')->get('/products/list')
-        ->assertStatus(403);
+        ->assertForbidden();
 });
 
 test('products no user', function (): void {
+    $this->actingAsGuest();
+
     $this->get('/products/list')
-        ->assertStatus(302)
+        ->assertFound()
         ->assertRedirect(route('login'));
 });
 
@@ -83,5 +88,5 @@ test('products without permission', function (): void {
     Permission::findOrCreate('products.list.get', 'web');
 
     $this->actingAs($this->user, 'web')->get('/products/list')
-        ->assertStatus(403);
+        ->assertForbidden();
 });

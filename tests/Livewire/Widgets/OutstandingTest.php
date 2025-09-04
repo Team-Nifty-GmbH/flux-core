@@ -63,7 +63,7 @@ test('calculate sum payment state all time relations in time', function (): void
         ->assertSet('sum', createSumString($orders, $this->currency->symbol))
         ->assertSet('subValue', createSubString($orders, $this->orderTypeIds, $this->currency->symbol))
         ->assertHasNoErrors()
-        ->assertStatus(200);
+        ->assertOk();
 });
 
 test('calculate sum payment state all time relations over due', function (): void {
@@ -89,7 +89,7 @@ test('calculate sum payment state all time relations over due', function (): voi
         ->assertSet('sum', createSumString($orders, $this->currency->symbol))
         ->assertSet('subValue', createSubString($orders, $this->orderTypeIds, $this->currency->symbol))
         ->assertHasNoErrors()
-        ->assertStatus(200);
+        ->assertOk();
 });
 
 test('calculate sum payment state open time relations all', function (): void {
@@ -111,7 +111,7 @@ test('calculate sum payment state open time relations all', function (): void {
         ->assertSet('sum', createSumString($orders, $this->currency->symbol))
         ->assertSet('subValue', createSubString($orders, $this->orderTypeIds, $this->currency->symbol))
         ->assertHasNoErrors()
-        ->assertStatus(200);
+        ->assertOk();
 });
 
 test('calculate sum payment state paid time relations all', function (): void {
@@ -133,7 +133,7 @@ test('calculate sum payment state paid time relations all', function (): void {
         ->assertSet('sum', createSumString($orders, $this->currency->symbol))
         ->assertSet('subValue', createSubString($orders, $this->orderTypeIds, $this->currency->symbol))
         ->assertHasNoErrors()
-        ->assertStatus(200);
+        ->assertOk();
 });
 
 test('calculate sum payment state partial paid time relations all', function (): void {
@@ -155,7 +155,7 @@ test('calculate sum payment state partial paid time relations all', function ():
         ->assertSet('sum', createSumString($orders, $this->currency->symbol))
         ->assertSet('subValue', createSubString($orders, $this->orderTypeIds, $this->currency->symbol))
         ->assertHasNoErrors()
-        ->assertStatus(200);
+        ->assertOk();
 });
 
 test('calculate table empty', function (): void {
@@ -166,7 +166,7 @@ test('calculate table empty', function (): void {
         ->assertSet('sum', createSumString($orders, $this->currency->symbol))
         ->assertSet('subValue', createSubString($orders, $this->orderTypeIds, $this->currency->symbol))
         ->assertHasNoErrors()
-        ->assertStatus(200);
+        ->assertOk();
 });
 
 test('redirect to orders', function (): void {
@@ -174,7 +174,7 @@ test('redirect to orders', function (): void {
         ->call('show')
         ->assertRedirect(route('orders.orders'))
         ->assertHasNoErrors()
-        ->assertStatus(200);
+        ->assertOk();
 });
 
 test('redirect to over due', function (): void {
@@ -182,14 +182,14 @@ test('redirect to over due', function (): void {
         ->call('showOverdue')
         ->assertRedirect(route('accounting.payment-reminders'))
         ->assertHasNoErrors()
-        ->assertStatus(200);
+        ->assertOk();
 });
 
 test('renders successfully', function (): void {
     createData(collect(), $this->dbClient, $this->currency);
 
     Livewire::test(Outstanding::class)
-        ->assertStatus(200);
+        ->assertOk();
 });
 
 function createData(Collection $paymentProps, Client $client, Currency $currency): Collection

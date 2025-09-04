@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Livewire\PortalBaseSetup::class);
 use FluxErp\Livewire\Portal\Auth\ResetPassword;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
@@ -28,6 +27,7 @@ test('can reset password', function (): void {
         ->first();
 
     $token = app(PasswordBroker::class)->createToken($baseAddress);
+    $this->actingAsGuest('address');
 
     Livewire::test(ResetPassword::class)
         ->set('email', $baseAddress->email)
@@ -52,5 +52,5 @@ test('can reset password', function (): void {
 
 test('renders successfully', function (): void {
     Livewire::test(ResetPassword::class)
-        ->assertStatus(200);
+        ->assertOk();
 });

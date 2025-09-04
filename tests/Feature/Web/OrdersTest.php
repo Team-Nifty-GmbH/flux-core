@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\Web\BaseSetup::class);
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
@@ -55,8 +54,10 @@ beforeEach(function (): void {
 });
 
 test('orders id no user', function (): void {
+    $this->actingAsGuest();
+
     $this->get('/orders/' . $this->order->id)
-        ->assertStatus(302)
+        ->assertFound()
         ->assertRedirect(route('login'));
 });
 
@@ -66,26 +67,28 @@ test('orders id order not found', function (): void {
     $this->user->givePermissionTo(Permission::findOrCreate('orders.{id}.get', 'web'));
 
     $this->actingAs($this->user, 'web')->get('/orders/' . $this->order->id)
-        ->assertStatus(404);
+        ->assertNotFound();
 });
 
 test('orders id page', function (): void {
     $this->user->givePermissionTo(Permission::findOrCreate('orders.{id}.get', 'web'));
 
     $this->actingAs($this->user, 'web')->get('/orders/' . $this->order->id)
-        ->assertStatus(200);
+        ->assertOk();
 });
 
 test('orders id without permission', function (): void {
     Permission::findOrCreate('orders.{id}.get', 'web');
 
     $this->actingAs($this->user, 'web')->get('/orders/' . $this->order->id)
-        ->assertStatus(403);
+        ->assertForbidden();
 });
 
 test('orders no user', function (): void {
+    $this->actingAsGuest();
+
     $this->get('/orders/list')
-        ->assertStatus(302)
+        ->assertFound()
         ->assertRedirect(route('login'));
 });
 
@@ -93,12 +96,12 @@ test('orders page', function (): void {
     $this->user->givePermissionTo(Permission::findOrCreate('orders.list.get', 'web'));
 
     $this->actingAs($this->user, 'web')->get('/orders/list')
-        ->assertStatus(200);
+        ->assertOk();
 });
 
 test('orders without permission', function (): void {
     Permission::findOrCreate('orders.list.get', 'web');
 
     $this->actingAs($this->user, 'web')->get('/orders/list')
-        ->assertStatus(403);
+        ->assertForbidden();
 });

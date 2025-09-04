@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\TestCase::class);
 use FluxErp\Livewire\Auth\Login;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Models\Language;
@@ -25,7 +24,9 @@ test('redirect to dashboard as authenticated user', function (): void {
 });
 
 test('renders successfully', function (): void {
+    $this->actingAsGuest();
+
     Livewire::test(Login::class)
-        ->assertStatus(200)
+        ->assertOk()
         ->assertNoRedirect();
 });

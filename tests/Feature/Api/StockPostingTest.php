@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Permission;
@@ -56,7 +55,7 @@ test('create stock posting', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/stock-postings', $stockPosting);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseStockPosting = json_decode($response->getContent())->data;
 
@@ -101,7 +100,7 @@ test('create stock posting empty stock', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/stock-postings', $stockPosting);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseStockPosting = json_decode($response->getContent())->data;
 
@@ -127,7 +126,7 @@ test('create stock posting validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/stock-postings', $stockPosting);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('delete stock posting', function (): void {
@@ -135,7 +134,7 @@ test('delete stock posting', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/stock-postings/' . $this->stockPostings[0]->id);
-    $response->assertStatus(204);
+    $response->assertNoContent();
 
     expect(StockPosting::query()->whereKey($this->stockPostings[0]->id)->exists())->toBeFalse();
 });
@@ -145,7 +144,7 @@ test('delete stock posting stock posting not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/stock-postings/' . ++$this->stockPostings[2]->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get stock posting', function (): void {
@@ -153,7 +152,7 @@ test('get stock posting', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/stock-postings/' . $this->stockPostings[0]->id);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $stockPosting = json_decode($response->getContent())->data;
 
@@ -170,7 +169,7 @@ test('get stock posting stock posting not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/stock-postings/' . $this->stockPostings[2]->id + 10000);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get stock postings', function (): void {
@@ -178,7 +177,7 @@ test('get stock postings', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/stock-postings');
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $stockPostings = json_decode($response->getContent())->data->data;
 

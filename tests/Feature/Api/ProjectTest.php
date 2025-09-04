@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use Carbon\Carbon;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\AdditionalColumn;
@@ -95,7 +94,7 @@ test('create project', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/projects', $project);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseProject = json_decode($response->getContent())->data;
     $dbProject = Project::query()
@@ -129,7 +128,7 @@ test('create project contact not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/projects', $project);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('create project order not found', function (): void {
@@ -143,7 +142,7 @@ test('create project order not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/projects', $project);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('create project parent project not found', function (): void {
@@ -157,7 +156,7 @@ test('create project parent project not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/projects', $project);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
     $response->assertJsonValidationErrorFor('parent_id');
 });
 
@@ -172,7 +171,7 @@ test('create project responsible user not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/projects', $project);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
     $response->assertJsonValidationErrorFor('responsible_user_id');
 });
 
@@ -195,7 +194,7 @@ test('create project validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/projects', $project);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('delete project', function (): void {
@@ -207,7 +206,7 @@ test('delete project', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/projects/' . $this->projects[1]->id);
-    $response->assertStatus(204);
+    $response->assertNoContent();
 
     $project = $this->projects[1]->fresh();
     expect($project->deleted_at)->not->toBeNull();
@@ -230,7 +229,7 @@ test('delete project project not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/projects/' . ++$this->projects[1]->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('finish project', function (): void {
@@ -247,7 +246,7 @@ test('finish project', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/projects/finish', $project);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseProject = json_decode($response->getContent())->data;
     $dbProject = Project::query()
@@ -268,7 +267,7 @@ test('finish project project not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/projects/finish', $project);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('finish project validation fails', function (): void {
@@ -281,7 +280,7 @@ test('finish project validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/projects/finish', $project);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('get project', function (): void {
@@ -291,7 +290,7 @@ test('get project', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/projects/' . $this->projects[0]->id);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     $project = $json->data;
@@ -320,7 +319,7 @@ test('get project project not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/projects/' . ++$this->projects[1]->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get projects', function (): void {
@@ -328,7 +327,7 @@ test('get projects', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/projects');
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     expect(property_exists($json, 'templates'))->toBeFalse();
@@ -365,7 +364,7 @@ test('reopen project', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/projects/finish', $project);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseProject = json_decode($response->getContent())->data;
     $dbProject = Project::query()
@@ -393,7 +392,7 @@ test('update project', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/projects', $project);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseProject = json_decode($response->getContent())->data;
     $dbProject = (object) Project::query()
@@ -425,7 +424,7 @@ test('update project contact not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/projects', $project);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
     $response->assertJsonValidationErrorFor('contact_id');
 });
 
@@ -439,7 +438,7 @@ test('update project order not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/projects', $project);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
     $response->assertJsonValidationErrorFor('order_id');
 });
 
@@ -453,7 +452,7 @@ test('update project project not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/projects', $project);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('update project responsible user not found', function (): void {
@@ -466,7 +465,7 @@ test('update project responsible user not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/projects', $project);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
     $response->assertJsonValidationErrorFor('responsible_user_id');
 });
 
@@ -480,7 +479,7 @@ test('update project validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/projects', $project);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('update project with additional column', function (): void {
@@ -510,7 +509,7 @@ test('update project with additional column', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/projects', $project);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseProject = json_decode($response->getContent())->data;
     $dbProject = Project::query()

@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use FluxErp\Models\Permission;
 use FluxErp\Models\Product;
 use FluxErp\Models\SerialNumber;
@@ -51,7 +50,7 @@ test('create serial number range', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/serial-number-ranges', $serialNumberRange);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseSerialNumberRange = json_decode($response->getContent())->data;
 
@@ -78,7 +77,7 @@ test('create serial number range validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/serial-number-ranges', $serialNumberRange);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('delete serial number range', function (): void {
@@ -87,7 +86,7 @@ test('delete serial number range', function (): void {
 
     $response = $this->actingAs($this->user)
         ->delete('/api/serial-number-ranges/' . $this->serialNumberRanges[0]->id);
-    $response->assertStatus(204);
+    $response->assertNoContent();
 
     expect(SerialNumberRange::query()->whereKey($this->serialNumberRanges[0]->id)->exists())->toBeFalse();
 });
@@ -98,7 +97,7 @@ test('delete serial number range serial number range not found', function (): vo
 
     $response = $this->actingAs($this->user)
         ->delete('/api/serial-number-ranges/' . ++$this->serialNumberRanges[2]->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get serial number range', function (): void {
@@ -106,7 +105,7 @@ test('get serial number range', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/serial-number-ranges/' . $this->serialNumberRanges[0]->id);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $serialNumberRange = json_decode($response->getContent())->data;
 
@@ -125,7 +124,7 @@ test('get serial number range serial number range not found', function (): void 
 
     $response = $this->actingAs($this->user)
         ->get('/api/serial-number-ranges/' . $this->serialNumberRanges[2]->id + 10000);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get serial number ranges', function (): void {
@@ -133,7 +132,7 @@ test('get serial number ranges', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/serial-number-ranges');
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $serialNumberRanges = json_decode($response->getContent())->data->data;
 
@@ -158,7 +157,7 @@ test('update serial number range', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/serial-number-ranges', $serialNumberRange);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseSerialNumberRange = json_decode($response->getContent())->data;
 
@@ -203,5 +202,5 @@ test('update serial number range validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/serial-number-ranges', $serialNumberRange);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });

@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\Web\BaseSetup::class);
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
@@ -61,8 +60,10 @@ beforeEach(function (): void {
 });
 
 test('order positions no user', function (): void {
+    $this->actingAsGuest();
+
     $this->get('/orders/order-positions/list')
-        ->assertStatus(302)
+        ->assertFound()
         ->assertRedirect(route('login'));
 });
 
@@ -70,12 +71,12 @@ test('order positions page', function (): void {
     $this->user->givePermissionTo(Permission::findOrCreate('orders.order-positions.list.get', 'web'));
 
     $this->actingAs($this->user, 'web')->get('/orders/order-positions/list')
-        ->assertStatus(200);
+        ->assertOk();
 });
 
 test('order positions without permission', function (): void {
     Permission::findOrCreate('orders.order-positions.list.get', 'web');
 
     $this->actingAs($this->user, 'web')->get('/orders/order-positions/list')
-        ->assertStatus(403);
+        ->assertForbidden();
 });

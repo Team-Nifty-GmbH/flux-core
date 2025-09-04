@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\TestCase::class);
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\Order\SignatureLinkGenerator;
 use FluxErp\Models\Address;
@@ -59,5 +58,5 @@ beforeEach(function (): void {
 test('renders successfully', function (): void {
     Livewire::withoutLazyLoading()
         ->test(SignatureLinkGenerator::class, ['modelType' => Order::class, 'modelId' => $this->order->id])
-        ->assertStatus(200);
+        ->assertOk();
 });

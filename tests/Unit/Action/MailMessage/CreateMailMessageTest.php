@@ -1,11 +1,9 @@
 <?php
 
-uses(FluxErp\Tests\TestCase::class);
 use FluxErp\Actions\FluxAction;
 use FluxErp\Actions\MailMessage\CreateMailMessage;
 use FluxErp\Listeners\MailMessage\CreateMailExecutedSubscriber;
 use FluxErp\Models\Address;
-use FluxErp\Models\Client;
 use FluxErp\Models\Contact;
 use FluxErp\Models\MailAccount;
 use FluxErp\Models\MailFolder;
@@ -16,13 +14,11 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Str;
 
 beforeEach(function (): void {
-    $dbClient = Client::factory()->create(['is_default' => true]);
-
     $this->address = Contact::factory()
-        ->has(Address::factory()->for($dbClient))
+        ->has(Address::factory()->for($this->dbClient))
         ->for(PriceList::factory())
-        ->for(PaymentType::factory()->hasAttached($dbClient))
-        ->for($dbClient)
+        ->for(PaymentType::factory()->hasAttached($this->dbClient))
+        ->for($this->dbClient)
         ->create()
         ->addresses()
         ->first();

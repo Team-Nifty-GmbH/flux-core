@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use FluxErp\Models\Comment;
 use FluxErp\Models\EventSubscription;
 use FluxErp\Models\Permission;
@@ -61,7 +60,7 @@ test('create event subscription', function (): void {
     ];
 
     $response = $this->actingAs($this->user)->post('/api/event-subscriptions', $subscription);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $eventSubscription = json_decode($response->getContent())->data;
     $dbEventSubscription = EventSubscription::query()
@@ -92,7 +91,7 @@ test('create event subscription already subscribed', function (): void {
     $eventSubscription->save();
 
     $response = $this->actingAs($this->user)->post('/api/event-subscriptions', $subscription);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('create event subscription validation fails', function (): void {
@@ -107,7 +106,7 @@ test('create event subscription validation fails', function (): void {
     ];
 
     $response = $this->actingAs($this->user)->post('/api/event-subscriptions', $subscription);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('delete event subscription', function (): void {
@@ -117,7 +116,7 @@ test('delete event subscription', function (): void {
     $response = $this->actingAs($this->user)
         ->delete('/api/event-subscriptions/' . $this->eventSubscriptions[0]->id);
 
-    $response->assertStatus(204);
+    $response->assertNoContent();
 
     expect(EventSubscription::query()->whereKey($this->eventSubscriptions[0]->id)->exists())->toBeFalse();
 });
@@ -129,7 +128,7 @@ test('delete event subscription event subscription not found', function (): void
     $response = $this->actingAs($this->user)
         ->delete('/api/event-subscriptions/' . ++$this->eventSubscriptions[2]->id);
 
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get events', function (): void {
@@ -137,7 +136,7 @@ test('get events', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/events');
-    $response->assertStatus(200);
+    $response->assertOk();
 
     expect(in_array(
         'eloquent.created: ' . Comment::class,
@@ -147,10 +146,11 @@ test('get events', function (): void {
 
 test('get user subscriptions', function (): void {
     $this->user->givePermissionTo($this->permissions['getUserSubscriptions']);
+    $this->user->eventSubscriptions()->whereKeyNot($this->eventSubscriptions->pluck('id'))->delete();
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/event-subscriptions/user');
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $dbUserSubscriptions = json_decode($response->getContent())->data;
     expect($dbUserSubscriptions)->not->toBeEmpty();
@@ -177,7 +177,7 @@ test('update event subscription', function (): void {
     ];
 
     $response = $this->actingAs($this->user)->put('/api/event-subscriptions', $subscription);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $eventSubscription = json_decode($response->getContent())->data;
     $dbEventSubscription = EventSubscription::query()
@@ -205,7 +205,7 @@ test('update event subscription event subscription not found', function (): void
     ];
 
     $response = $this->actingAs($this->user)->put('/api/event-subscriptions', $subscription);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('update event subscription validation fails', function (): void {
@@ -221,5 +221,5 @@ test('update event subscription validation fails', function (): void {
     ];
 
     $response = $this->actingAs($this->user)->put('/api/event-subscriptions', $subscription);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });

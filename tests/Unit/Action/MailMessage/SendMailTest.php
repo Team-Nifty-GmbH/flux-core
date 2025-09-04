@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\TestCase::class);
 use FluxErp\Actions\MailMessage\SendMail;
 use FluxErp\Mail\GenericMail;
 use FluxErp\Models\Client;

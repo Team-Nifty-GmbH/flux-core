@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\TestCase::class);
 use FluxErp\Livewire\Product\ProductList;
 use FluxErp\Models\Product;
 use Livewire\Livewire;
@@ -17,5 +16,5 @@ test('can add products to cart', function (): void {
 
 test('renders successfully', function (): void {
     Livewire::test(ProductList::class)
-        ->assertStatus(200);
+        ->assertOk();
 });

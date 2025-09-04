@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use FluxErp\Enums\PropertyTypeEnum;
 use FluxErp\Models\Client;
 use FluxErp\Models\Permission;
@@ -40,7 +39,7 @@ test('create product property', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/product-properties', $productProperty);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseProductProperty = json_decode($response->getContent())->data;
 
@@ -61,7 +60,7 @@ test('create product property validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/product-properties', $productProperty);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('delete product property', function (): void {
@@ -70,7 +69,7 @@ test('delete product property', function (): void {
 
     $response = $this->actingAs($this->user)
         ->delete('/api/product-properties/' . $this->productProperties[0]->id);
-    $response->assertStatus(204);
+    $response->assertNoContent();
 
     expect(ProductProperty::query()->whereKey($this->productProperties[0]->id)->exists())->toBeFalse();
 });
@@ -90,7 +89,7 @@ test('delete product property product property not found', function (): void {
 
     $response = $this->actingAs($this->user)
         ->delete('/api/product-properties/' . ++$this->productProperties[2]->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get product properties', function (): void {
@@ -98,7 +97,7 @@ test('get product properties', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/product-properties');
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $productProperties = json_decode($response->getContent())->data->data;
 
@@ -111,7 +110,7 @@ test('get product property', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/product-properties/' . $this->productProperties[0]->id);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $productProperty = json_decode($response->getContent())->data;
 
@@ -125,7 +124,7 @@ test('get product property product property not found', function (): void {
 
     $response = $this->actingAs($this->user)
         ->get('/api/product-properties/' . $this->productProperties[2]->id + 10000);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('update product property', function (): void {
@@ -138,7 +137,7 @@ test('update product property', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/product-properties', $productProperty);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseProductProperty = json_decode($response->getContent())->data;
 
@@ -160,5 +159,5 @@ test('update product property validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/product-properties', $productProperty);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });

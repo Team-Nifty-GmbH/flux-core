@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use Carbon\Carbon;
 use FluxErp\Models\Country;
 use FluxErp\Models\CountryRegion;
@@ -41,7 +40,7 @@ test('create country region', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/country-regions', $countryRegion);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseCountryRegion = json_decode($response->getContent())->data;
     $dbCountryRegion = CountryRegion::query()
@@ -65,7 +64,7 @@ test('create country region validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/country-regions', $countryRegion);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('delete country region', function (): void {
@@ -73,7 +72,7 @@ test('delete country region', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/country-regions/' . $this->countryRegions[1]->id);
-    $response->assertStatus(204);
+    $response->assertNoContent();
 
     $countryRegion = $this->countryRegions[1]->fresh();
     expect($countryRegion->deleted_at)->not->toBeNull();
@@ -85,7 +84,7 @@ test('delete country region country region not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/country-regions/' . ++$this->countryRegions[1]->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get country region', function (): void {
@@ -93,7 +92,7 @@ test('get country region', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/country-regions/' . $this->countryRegions[0]->id);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     $jsonCountryRegion = $json->data;
@@ -112,7 +111,7 @@ test('get country region country region not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/country-regions/' . ++$this->countryRegions[1]->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get country regions', function (): void {
@@ -120,7 +119,7 @@ test('get country regions', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/country-regions');
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     $jsonCountryRegions = collect($json->data->data);
@@ -150,7 +149,7 @@ test('update country region', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/country-regions', $countryRegion);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseCountryRegion = json_decode($response->getContent())->data;
     $dbCountryRegion = CountryRegion::query()
@@ -174,7 +173,7 @@ test('update country region maximum', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/country-regions', $countryRegion);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseCountryRegion = json_decode($response->getContent())->data;
     $dbCountryRegion = CountryRegion::query()
@@ -198,5 +197,5 @@ test('update country region validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/country-regions', $countryRegions);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });

@@ -24,14 +24,14 @@ test('can open work time modal on start', function (): void {
     Livewire::test(WorkTime::class)
         ->call('toggleWorkDay', true)
         ->call('start', $data)
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertSet('workTime.name', $data['name'])
         ->assertSet('workTime.description', $data['description'])
         ->assertSet('workTime.trackable_type', $data['trackable_type'])
         ->assertSet('workTime.trackable_id', $data['trackable_id'])
         ->call('save')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertCount('activeWorkTimes', 1);
 });
@@ -45,13 +45,13 @@ test('cant create billable task time without contact', function (): void {
         ->assertSet('activeWorkTimes', [])
         ->assertSet('dailyWorkTime.id', null)
         ->call('toggleWorkDay', true)
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->set('workTime.work_time_type_id', $workTimeType->getKey())
         ->set('workTime.is_billable', true)
         ->set('workTime.name', Str::uuid())
         ->call('save')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasErrors(['contact_id'])
         ->assertCount('activeWorkTimes', 0);
 });
@@ -61,13 +61,13 @@ test('create task time', function (): void {
         ->assertSet('activeWorkTimes', [])
         ->assertSet('dailyWorkTime.id', null)
         ->call('toggleWorkDay', true)
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->set('workTime', [
             'name' => $workTimeName = Str::uuid(),
         ])
         ->call('save')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertCount('activeWorkTimes', 1);
 
@@ -88,7 +88,7 @@ test('create task time', function (): void {
 
     $this->travel(1)->hour();
     $component->call('pause', $dbTaskTime->getKey())
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertCount('activeWorkTimes', 1);
 
@@ -101,7 +101,7 @@ test('create task time', function (): void {
 
     $this->travel(1)->hour();
     $component->call('continue', $dbTaskTime->getKey())
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertCount('activeWorkTimes', 1);
 
@@ -116,7 +116,7 @@ test('create task time', function (): void {
     $this->travel(1)->hour();
 
     $component->call('stop', $dbTaskTime->getKey())
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertCount('activeWorkTimes', 0);
 
@@ -146,14 +146,14 @@ test('pause daily work time', function (): void {
 
     $this->travel(4)->hours();
     $component = Livewire::test(WorkTime::class)
-        ->assertStatus(200)
+        ->assertOk()
         ->assertSet('dailyWorkTime.id', $workTime->getKey())
         ->assertSet('dailyWorkTime.user_id', $this->user->getKey())
         ->assertSet('dailyWorkTime.started_at', $startedAt->toISOString())
         ->assertSet('dailyWorkTime.ended_at', null)
         ->assertSet('dailyWorkTime.is_daily_work_time', true)
         ->call('togglePauseWorkDay', true)
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertNotSet('dailyWorkTimePause.id', null)
         ->assertSet('dailyWorkTimePause.user_id', $this->user->getKey())
@@ -168,7 +168,7 @@ test('pause daily work time', function (): void {
     $this->travel(1)->hour();
     $pauseEndedAt = now()->toDateTimeString();
     $component->call('togglePauseWorkDay', false)
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertSet('dailyWorkTimePause.id', null);
 
@@ -190,13 +190,13 @@ test('pause daily work time', function (): void {
 
 test('renders successfully', function (): void {
     Livewire::test(WorkTime::class)
-        ->assertStatus(200);
+        ->assertOk();
 });
 
 test('toggle daily work time', function (): void {
     $component = Livewire::test(WorkTime::class)
         ->call('toggleWorkDay', true)
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertNotSet('dailyWorkTime.id', null)
         ->assertSet('dailyWorkTime.user_id', $this->user->getKey())
@@ -219,7 +219,7 @@ test('toggle daily work time', function (): void {
 
     $this->travel(8)->hours();
     $component->call('toggleWorkDay', false)
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertSet('dailyWorkTime.id', null)
         ->assertSet('dailyWorkTime.started_at', null)

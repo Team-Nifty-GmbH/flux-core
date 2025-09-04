@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use FluxErp\Models\Permission;
 use FluxErp\Models\Product;
 use FluxErp\Models\ProductOption;
@@ -33,7 +32,7 @@ test('create product option group', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/product-option-groups', $productOptionGroup);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseProductOptionGroup = json_decode($response->getContent())->data;
 
@@ -53,7 +52,7 @@ test('create product option group validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/product-option-groups', $productOptionGroup);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('delete product option group', function (): void {
@@ -62,7 +61,7 @@ test('delete product option group', function (): void {
 
     $response = $this->actingAs($this->user)
         ->delete('/api/product-option-groups/' . $this->productOptionGroups[0]->id);
-    $response->assertStatus(204);
+    $response->assertNoContent();
 
     expect(ProductOptionGroup::query()->whereKey($this->productOptionGroups[0]->id)->exists())->toBeFalse();
 });
@@ -88,7 +87,7 @@ test('delete product option group product option group not found', function (): 
 
     $response = $this->actingAs($this->user)
         ->delete('/api/product-option-groups/' . ++$this->productOptionGroups[2]->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get product option group', function (): void {
@@ -97,7 +96,7 @@ test('get product option group', function (): void {
 
     $response = $this->actingAs($this->user)->get('/api/product-option-groups/'
         . $this->productOptionGroups[0]->id);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $productOptionGroup = json_decode($response->getContent())->data;
 
@@ -111,7 +110,7 @@ test('get product option group product option group not found', function (): voi
 
     $response = $this->actingAs($this->user)->get('/api/product-option-groups/'
         . $this->productOptionGroups[2]->id + 100);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get product option groups', function (): void {
@@ -119,7 +118,7 @@ test('get product option groups', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/product-option-groups');
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $productOptionGroups = json_decode($response->getContent())->data;
 
@@ -137,7 +136,7 @@ test('update product option group', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/product-option-groups', $productOptionGroup);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseProductOptionGroup = json_decode($response->getContent())->data;
 
@@ -158,5 +157,5 @@ test('update product option group validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/product-option-groups', $productOptionGroup);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });

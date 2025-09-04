@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Livewire\PortalBaseSetup::class);
 use FluxErp\Livewire\Portal\Auth\Login;
 use FluxErp\Mail\MagicLoginLink;
 use Illuminate\Support\Facades\Mail;
@@ -12,8 +11,10 @@ beforeEach(function (): void {
 
 test('login link', function (): void {
     Mail::fake();
+    $this->actingAsGuest('address');
 
     Livewire::test(Login::class)
+        ->assertOk()
         ->set('email', $this->address->email)
         ->set('password')
         ->call('login')
@@ -26,7 +27,10 @@ test('login link', function (): void {
 });
 
 test('login successful', function (): void {
+    $this->actingAsGuest('address');
+
     Livewire::test(Login::class)
+        ->assertOk()
         ->set('email', $this->address->email)
         ->set('password', 'password')
         ->call('login')
@@ -36,7 +40,10 @@ test('login successful', function (): void {
 });
 
 test('login wrong password', function (): void {
+    $this->actingAsGuest('address');
+
     Livewire::test(Login::class)
+        ->assertOk()
         ->set('email', 'noexistingmail@example.com')
         ->set('password', 'wrongpassword')
         ->call('login')
@@ -47,6 +54,8 @@ test('login wrong password', function (): void {
 });
 
 test('renders successfully', function (): void {
+    $this->actingAsGuest('address');
+
     Livewire::test(Login::class)
-        ->assertStatus(200);
+        ->assertOk();
 });

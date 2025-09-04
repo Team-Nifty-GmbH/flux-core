@@ -5,5 +5,5 @@ use Livewire\Livewire;
 
 test('renders successfully', function (): void {
     Livewire::test(CommissionRates::class, ['userId' => $this->user->id])
-        ->assertStatus(200);
+        ->assertOk();
 });

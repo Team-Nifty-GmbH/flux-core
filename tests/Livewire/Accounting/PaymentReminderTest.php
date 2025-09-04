@@ -57,7 +57,7 @@ test('mark selected as paid', function (): void {
         ->assertCount('data.data', 3)
         ->set('selected', [$orders[0]->id, $orders[1]->id])
         ->call('markAsPaid')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertCount('data.data', 1);
 
@@ -67,5 +67,5 @@ test('mark selected as paid', function (): void {
 
 test('renders successfully', function (): void {
     Livewire::test(PaymentReminder::class)
-        ->assertStatus(200);
+        ->assertOk();
 });

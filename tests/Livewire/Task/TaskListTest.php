@@ -17,7 +17,7 @@ test('create new task', function (): void {
         ->set('task.priority', 1)
         ->call('save')
         ->assertHasNoErrors()
-        ->assertStatus(200)
+        ->assertOk()
         ->assertReturned(true);
 
     $this->assertDatabaseHas('tasks', [
@@ -36,5 +36,5 @@ test('create new task', function (): void {
 
 test('renders successfully', function (): void {
     Livewire::test(TaskList::class)
-        ->assertStatus(200);
+        ->assertOk();
 });

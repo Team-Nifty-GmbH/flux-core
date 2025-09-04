@@ -63,7 +63,7 @@ beforeEach(function (): void {
 test('renders successfully', function (): void {
     Livewire::withoutLazyLoading()
         ->test(Comments::class, ['modelId' => $this->order->id])
-        ->assertStatus(200)
+        ->assertOk()
         ->call('loadComments')
         ->assertReturned(function (array $comments): true {
             expect(data_get($comments, 'data'))->toHaveCount(3);

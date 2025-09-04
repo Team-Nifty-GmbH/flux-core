@@ -35,7 +35,7 @@ test('can save address', function (): void {
         ->set('address.street', $street = Str::uuid())
         ->set('edit', true)
         ->call('save')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertSet('address.street', $street)
         ->assertSet('edit', false);
@@ -57,7 +57,7 @@ test('can update password', function (): void {
         ->set('address.password', $password = Hash::make(Str::random()))
         ->set('edit', true)
         ->call('save')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertSet('address.password', $password)
         ->assertSet('edit', false);
@@ -73,7 +73,7 @@ test('can update password', function (): void {
 
 test('renders successfully', function (): void {
     Livewire::test(Addresses::class)
-        ->assertStatus(200);
+        ->assertOk();
 });
 
 test('replicate address', function (): void {
@@ -88,11 +88,11 @@ test('replicate address', function (): void {
         ->assertNotSet('address.permissions', null)
         ->assertCount('address.permissions', 1)
         ->call('replicate')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->set('address.lastname', $lastname = Str::uuid())
         ->call('save')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors();
 
     expect($component->get('address.id'))->toBeGreaterThan($this->addressForm->id);

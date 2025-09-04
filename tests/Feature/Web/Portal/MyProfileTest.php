@@ -1,24 +1,25 @@
 <?php
 
-uses(FluxErp\Tests\Feature\Web\Portal\PortalSetup::class);
 use FluxErp\Models\Permission;
 
 test('portal my profile no user', function (): void {
+    $this->actingAsGuest();
+
     $this->get(route('portal.my-profile'))
-        ->assertStatus(302)
-        ->assertRedirect($this->portalDomain . '/login');
+        ->assertFound()
+        ->assertRedirect(config('flux.portal_domain') . '/login');
 });
 
 test('portal my profile page', function (): void {
-    $this->user->givePermissionTo(Permission::findOrCreate('my-profile.get', 'address'));
+    $this->address->givePermissionTo(Permission::findOrCreate('my-profile.get', 'address'));
 
-    $this->actingAs($this->user, 'address')->get(route('portal.my-profile'))
-        ->assertStatus(200);
+    $this->actingAs($this->address, 'address')->get(route('portal.my-profile'))
+        ->assertOk();
 });
 
 test('portal my profile without permission', function (): void {
     Permission::findOrCreate('my-profile.get', 'address');
 
-    $this->actingAs($this->user, 'address')->get(route('portal.my-profile'))
-        ->assertStatus(403);
+    $this->actingAs($this->address, 'address')->get(route('portal.my-profile'))
+        ->assertForbidden();
 });

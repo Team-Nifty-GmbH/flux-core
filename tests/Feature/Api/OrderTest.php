@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Address;
@@ -97,7 +96,7 @@ test('create order', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/orders', $order);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseOrder = json_decode($response->getContent())->data;
     $dbOrder = Order::query()
@@ -136,7 +135,7 @@ test('create order validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/orders', $order);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('create order with address delivery', function (): void {
@@ -165,7 +164,7 @@ test('create order with address delivery', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/orders', $order);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseOrder = json_decode($response->getContent())->data;
     $dbOrder = Order::query()
@@ -216,7 +215,7 @@ test('create order with address delivery validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/orders', $order);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 
     $response->assertJsonValidationErrorFor('address_delivery.company');
 });
@@ -226,7 +225,7 @@ test('delete order', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/orders/' . $this->orders[0]->id);
-    $response->assertStatus(204);
+    $response->assertNoContent();
 
     expect(Order::query()->whereKey($this->orders[0]->id)->exists())->toBeFalse();
 });
@@ -247,7 +246,7 @@ test('delete order order not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/orders/' . ++$this->orders[2]->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get order', function (): void {
@@ -255,7 +254,7 @@ test('get order', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/orders/' . $this->orders[0]->id);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $order = json_decode($response->getContent())->data;
 
@@ -272,7 +271,7 @@ test('get order order not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/orders/' . $this->orders[2]->id + 10000);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get orders', function (): void {
@@ -280,7 +279,7 @@ test('get orders', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/orders');
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $orders = json_decode($response->getContent())->data;
 
@@ -312,7 +311,7 @@ test('update order', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/orders', $order);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseOrder = json_decode($response->getContent())->data;
     $dbOrder = Order::query()
@@ -344,7 +343,7 @@ test('update order address delivery', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/orders', $order);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseOrder = json_decode($response->getContent())->data;
     $dbOrder = Order::query()
@@ -380,7 +379,7 @@ test('update order address delivery validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/orders', $order);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 
     $response->assertJsonValidationErrorFor('address_delivery.zip');
 });
@@ -405,7 +404,7 @@ test('update order validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/orders', $order);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('update order with additional columns', function (): void {
@@ -433,7 +432,7 @@ test('update order with additional columns', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/orders', $order);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseOrder = json_decode($response->getContent())->data;
     $dbOrder = Order::query()

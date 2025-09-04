@@ -4,7 +4,6 @@ use FluxErp\Database\Factories\CartFactory;
 use FluxErp\Livewire\Cart\Cart;
 use FluxErp\Models\Cart as CartModel;
 use FluxErp\Models\CartItem;
-use FluxErp\Models\Currency;
 use FluxErp\Models\Price;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\Product;
@@ -12,19 +11,8 @@ use FluxErp\Models\VatRate;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 
-beforeEach(function (): void {
-    PriceList::factory()->create([
-        'is_default' => true,
-    ]);
-    Currency::factory()->create([
-        'is_default' => true,
-    ]);
-
-    $this->vatRate = VatRate::factory()->create();
-});
-
 test('can delete cart items', function (): void {
-    $cart = createFilledCartFactory($this->vatRate)
+    $cart = createFilledCartFactory()
         ->create([
             'authenticatable_type' => $this->user->getMorphClass(),
             'authenticatable_id' => $this->user->id,
@@ -42,7 +30,7 @@ test('can delete cart items', function (): void {
 });
 
 test('can load watchlist', function (): void {
-    $watchList = createFilledCartFactory($this->vatRate)
+    $watchList = createFilledCartFactory()
         ->create([
             'authenticatable_type' => $this->user->getMorphClass(),
             'authenticatable_id' => $this->user->id,
@@ -55,13 +43,13 @@ test('can load watchlist', function (): void {
         ->test(Cart::class)
         ->set('loadWatchlist', $watchList->id)
         ->assertSet('loadWatchlist', null)
-        ->assertStatus(200)
+        ->assertOk()
         ->assertCount('cart.cartItems', 3)
         ->assertToastNotification(type: 'success');
 });
 
 test('can save cart to watchlist', function (): void {
-    createFilledCartFactory($this->vatRate)
+    createFilledCartFactory()
         ->create([
             'authenticatable_type' => $this->user->getMorphClass(),
             'authenticatable_id' => $this->user->id,
@@ -91,18 +79,18 @@ test('can save cart to watchlist', function (): void {
 test('renders successfully', function (): void {
     Livewire::withoutLazyLoading()
         ->test(Cart::class)
-        ->assertStatus(200);
+        ->assertOk();
 });
 
-function createFilledCartFactory(VatRate $vatRate): CartFactory
+function createFilledCartFactory(): CartFactory
 {
     return CartModel::factory()
         ->has(
             CartItem::factory()
                 ->count(3)
-                ->set('vat_rate_id', $vatRate->id)
-                ->afterCreating(function (CartItem $cartItem) use ($vatRate): void {
-                    $cartItem->product_id = Product::factory(['vat_rate_id' => $vatRate->id])
+                ->set('vat_rate_id', VatRate::default()->getKey())
+                ->afterCreating(function (CartItem $cartItem): void {
+                    $cartItem->product_id = Product::factory(['vat_rate_id' => VatRate::default()->getKey()])
                         ->has(Price::factory()->set('price_list_id', PriceList::default()->id))
                         ->create()
                         ->id;

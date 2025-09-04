@@ -74,7 +74,7 @@ test('can create project from order', function (): void {
     $component
         ->assertDispatchedTo('order.order-positions', 'create-tasks', $component->get('form.id'))
         ->assertReturned(true)
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors();
 
     $this->assertDatabaseHas('projects', [
@@ -106,7 +106,7 @@ test('create tasks for existing project', function (): void {
         ->assertSet('form.name', $this->order->getLabel())
         ->call('save')
         ->assertReturned(false)
-        ->assertStatus(200)
+        ->assertOk()
         ->assertToastNotification(type: 'error')
         ->assertHasErrors(['projectId']);
 
@@ -114,7 +114,7 @@ test('create tasks for existing project', function (): void {
         ->set('projectId', $projects->first()->id)
         ->call('save')
         ->assertReturned(true)
-        ->assertStatus(200)
+        ->assertOk()
         ->assertDispatchedTo('order.order-positions', 'create-tasks', $component->get('form.id'));
 
     expect(Project::query()->count())->toEqual($currentProjectCount);
@@ -123,7 +123,7 @@ test('create tasks for existing project', function (): void {
 test('renders successfully', function (): void {
     Livewire::withoutLazyLoading()
         ->test(OrderProject::class, ['order' => $this->order])
-        ->assertStatus(200)
+        ->assertOk()
         ->assertSet('form.order_id', $this->order->id)
         ->assertSet('form.client_id', $this->order->client_id)
         ->assertSet('form.contact_id', $this->order->contact_id)

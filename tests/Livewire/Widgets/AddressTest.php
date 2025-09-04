@@ -18,5 +18,5 @@ beforeEach(function (): void {
 
 test('renders successfully', function (): void {
     Livewire::test(AddressView::class, ['modelId' => $this->address->id])
-        ->assertStatus(200);
+        ->assertOk();
 });

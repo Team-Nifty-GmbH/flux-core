@@ -129,7 +129,7 @@ test('calculate chart returns right numbers timeframe today', function (): void 
             ),
         ])
         ->assertHasNoErrors()
-        ->assertStatus(200);
+        ->assertOk();
 });
 
 test('calculate chart returns right numbers timeframe yesterday', function (): void {
@@ -150,7 +150,7 @@ test('calculate chart returns right numbers timeframe yesterday', function (): v
             ),
         ])
         ->assertHasNoErrors()
-        ->assertStatus(200);
+        ->assertOk();
 });
 
 test('net orders get successfully ignored', function (): void {
@@ -192,10 +192,10 @@ test('net orders get successfully ignored', function (): void {
             ),
         ])
         ->assertHasNoErrors()
-        ->assertStatus(200);
+        ->assertOk();
 });
 
 test('renders successfully', function (): void {
     Livewire::test(AmountByLedgerAccount::class)
-        ->assertStatus(200);
+        ->assertOk();
 });

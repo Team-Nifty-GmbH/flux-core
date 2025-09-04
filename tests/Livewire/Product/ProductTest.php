@@ -35,7 +35,7 @@ beforeEach(function (): void {
 test('delete product', function (): void {
     Livewire::test(Product::class, ['id' => $this->product->id])
         ->call('delete')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertReturned(true)
         ->assertRedirect(route('products.products'));
@@ -47,7 +47,7 @@ test('get price lists', function (): void {
     $component = Livewire::test(Product::class, ['id' => $this->product->id]);
 
     $component->call('getPriceLists')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors();
 
     expect($component->get('priceLists'))->not->toBeEmpty();
@@ -68,7 +68,7 @@ test('get product cross sellings', function (): void {
     $component = Livewire::test(Product::class, ['id' => $this->product->id]);
 
     $component->call('getProductCrossSellings')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors();
 
     expect($component->get('productCrossSellings'))->not->toBeEmpty();
@@ -94,7 +94,7 @@ test('localize changes language', function (): void {
     Livewire::test(Product::class, ['id' => $this->product->id])
         ->set('languageId', $newLanguage->id)
         ->call('localize')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors();
 
     expect(Session::get('selectedLanguageId'))->toEqual($newLanguage->id);
@@ -117,7 +117,7 @@ test('mount with invalid id fails', function (): void {
 
 test('renders successfully', function (): void {
     $component = Livewire::test(Product::class, ['id' => $this->product->id])
-        ->assertStatus(200)
+        ->assertOk()
         ->assertSet('tab', 'product.general')
         ->assertSet('languageId', $this->language->id);
 
@@ -133,7 +133,7 @@ test('reset product', function (): void {
 
     // Reset should restore original values
     $component->call('resetProduct')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertSet('product.name', $this->product->name)
         ->assertSet('product.description', $this->product->description);
 });
@@ -143,7 +143,7 @@ test('save product successfully', function (): void {
         ->set('product.name', 'Updated Product Name')
         ->set('product.description', 'Updated description')
         ->call('save')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertReturned(true);
 
@@ -156,7 +156,7 @@ test('save product validation fails', function (): void {
     Livewire::test(Product::class, ['id' => $this->product->id])
         ->set('product.name', '') // Required field
         ->call('save')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasErrors()
         ->assertReturned(false);
 });
@@ -173,7 +173,7 @@ test('save product with prices', function (): void {
 
         $component->set('priceLists', $priceLists)
             ->call('save')
-            ->assertStatus(200)
+            ->assertOk()
             ->assertHasNoErrors()
             ->assertReturned(true);
 
@@ -197,7 +197,7 @@ test('session language persistence', function (): void {
 test('show product properties modal', function (): void {
     Livewire::test(Product::class, ['id' => $this->product->id])
         ->call('showProductPropertiesModal')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertExecutesJs("\$modalOpen('edit-product-properties-modal');");
 });

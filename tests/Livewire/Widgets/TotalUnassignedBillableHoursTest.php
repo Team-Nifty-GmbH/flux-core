@@ -111,12 +111,12 @@ test('calculates correct sum of unassigned billable hours', function (): void {
     Livewire::test(TotalUnassignedBillableHours::class)
         ->assertSet('sum', calculateDisplayedTime($this->workTime->total_time_ms))
         ->assertHasNoErrors()
-        ->assertStatus(200);
+        ->assertOk();
 });
 
 test('renders successfully', function (): void {
     Livewire::test(TotalUnassignedBillableHours::class)
-        ->assertStatus(200);
+        ->assertOk();
 });
 
 function calculateDisplayedTime(int $ms): string

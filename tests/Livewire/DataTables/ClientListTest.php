@@ -5,5 +5,5 @@ use Livewire\Livewire;
 
 test('renders successfully', function (): void {
     Livewire::test(ClientList::class)
-        ->assertStatus(200);
+        ->assertOk();
 });

@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Address;
 use FluxErp\Models\Client;
@@ -53,7 +52,7 @@ test('delete media', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $delete = $this->actingAs($this->user)->delete('/api/media/' . $this->media->getKey());
-    $delete->assertStatus(204);
+    $delete->assertNoContent();
 
     expect(DB::table('media')->where('id', $this->media->getKey())->exists())->toBeFalse();
     expect(DB::table('activity_log')
@@ -69,7 +68,7 @@ test('delete media media not found', function (): void {
 
     $nonExistentId = $this->media->getKey() + 1;
     $delete = $this->actingAs($this->user)->delete('/api/media/' . $nonExistentId);
-    $delete->assertStatus(404);
+    $delete->assertNotFound();
 });
 
 test('download media', function (): void {
@@ -84,7 +83,7 @@ test('download media', function (): void {
 
     $download = $this->get('/api/media/' . $media->file_name . $queryParams);
 
-    $download->assertStatus(200);
+    $download->assertOk();
 });
 
 test('download media file not found', function (): void {
@@ -93,7 +92,7 @@ test('download media file not found', function (): void {
 
     $download = $this->get('/api/media/' . Str::random() . $this->media->file_name . $queryParams);
 
-    $download->assertStatus(404);
+    $download->assertNotFound();
 });
 
 test('download media model type not found', function (): void {
@@ -103,7 +102,7 @@ test('download media model type not found', function (): void {
 
     $response = $this->actingAs($this->user)->get('/api/media/filename' . $queryParams);
 
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('download media private media', function (): void {
@@ -119,7 +118,7 @@ test('download media private media', function (): void {
 
     $download = $this->actingAs($this->user)->get('/api/media/private/' . $media->getKey());
 
-    $download->assertStatus(200);
+    $download->assertOk();
     $download->assertHeader('Content-Type', 'image/png');
     $download->assertDownload($media->file_name);
 });
@@ -138,7 +137,7 @@ test('download media public route', function (): void {
 
     $download = $this->get('/api/media/' . $queryParams);
 
-    $download->assertStatus(200);
+    $download->assertOk();
     $download->assertHeader('Content-Type', 'image/png');
     $download->assertDownload($fileName);
 });
@@ -147,7 +146,7 @@ test('download media public route file not found', function (): void {
     $queryParams = '?model_type=' . $this->task->getMorphClass() . '&model_id=' . $this->task->getKey();
 
     $download = $this->get('/api/media/' . Str::random() . '.png' . $queryParams);
-    $download->assertStatus(404);
+    $download->assertNotFound();
 });
 
 test('download media public route with format parameters', function (): void {
@@ -164,14 +163,14 @@ test('download media public route with format parameters', function (): void {
     $queryParams = $fileName . '?model_type=' . $this->task->getMorphClass() . '&model_id=' . $this->task->getKey();
 
     $download = $this->get('/api/media/' . $queryParams . '&as=url');
-    $download->assertStatus(200);
+    $download->assertOk();
     $responseData = json_decode($download->getContent(), true);
     expect($responseData)->toHaveKey('data');
     $this->assertStringContainsString('/storage/', $responseData['data']);
 
     $download = $this->get('/api/media/' . $queryParams . '&as=path');
 
-    $download->assertStatus(200);
+    $download->assertOk();
     $responseData = json_decode($download->getContent(), true);
     expect($responseData)->toHaveKey('data');
     $this->assertStringContainsString('storage', $responseData['data']);
@@ -191,7 +190,7 @@ test('download media public route with model parameters', function (): void {
     $queryParams = $fileName . '?model_type=' . $this->task->getMorphClass() . '&model_id=' . $this->task->getKey();
 
     $download = $this->get('/api/media/' . $queryParams);
-    $download->assertStatus(200);
+    $download->assertOk();
     $download->assertHeader('Content-Type', 'image/png');
     $download->assertDownload($fileName);
 });
@@ -210,7 +209,7 @@ test('download media thumbnail not generated', function (): void {
 
     $download = $this->get('/api/media/' . $media->file_name . $queryParams);
 
-    $download->assertStatus(404);
+    $download->assertNotFound();
 });
 
 test('download media unauthenticated private media', function (): void {
@@ -222,9 +221,10 @@ test('download media unauthenticated private media', function (): void {
     );
     $queryParams = '?model_type=' . $this->task->getMorphClass() . '&model_id=' . $this->task->getKey();
 
+    $this->actingAsGuest();
     $download = $this->get('/api/media/' . $media->file_name . $queryParams);
 
-    $download->assertStatus(403);
+    $download->assertForbidden();
 });
 
 test('download media validation fails', function (): void {
@@ -248,7 +248,7 @@ test('download media validation fails', function (): void {
 
     $response = $this->actingAs($this->user)->get('/api/media/' . $queryParams);
 
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('download media with categories', function (): void {
@@ -264,7 +264,7 @@ test('download media with categories', function (): void {
 
     $download = $this->get('/api/media/' . $media->file_name . $queryParams);
 
-    $download->assertStatus(200);
+    $download->assertOk();
     $download->assertHeader('Content-Type', 'image/png');
     $download->assertDownload($media->file_name);
 });
@@ -283,7 +283,7 @@ test('download multiple media', function (): void {
 
     $response = $this->actingAs($this->user)->get('/api/media/download-multiple' . $queryParams);
 
-    $response->assertStatus(200);
+    $response->assertOk();
     $response->assertHeader('Content-Type', 'application/octet-stream');
 });
 
@@ -309,7 +309,7 @@ test('download multiple media mix public private', function (): void {
 
     $response = $this->actingAs($this->user)->get('/api/media/download-multiple' . $queryParams);
 
-    $response->assertStatus(200);
+    $response->assertOk();
     $response->assertHeader('Content-Type', 'application/octet-stream');
 });
 
@@ -322,8 +322,9 @@ test('download multiple media private permissions', function (): void {
         $this->testFile
     );
 
+    $this->actingAsGuest();
     $response = $this->get('/api/media/download-multiple?ids[]=' . $media->getKey());
-    $response->assertStatus(302);
+    $response->assertFound();
     $response->assertRedirect('/login');
 
     $this->user->givePermissionTo($this->permissions['download-multiple']);
@@ -331,7 +332,7 @@ test('download multiple media private permissions', function (): void {
 
     $response = $this->actingAs($this->user)->get('/api/media/download-multiple?ids[]=' . $media->getKey());
 
-    $response->assertStatus(200);
+    $response->assertOk();
     $response->assertHeader('Content-Type', 'application/octet-stream');
 });
 
@@ -341,7 +342,7 @@ test('download multiple media validation fails no ids', function (): void {
 
     $response = $this->actingAs($this->user)->get('/api/media/download-multiple');
 
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('download multiple media validation fails nonexistent ids', function (): void {
@@ -352,7 +353,7 @@ test('download multiple media validation fails nonexistent ids', function (): vo
 
     $response = $this->actingAs($this->user)->get('/api/media/download-multiple?ids[]=' . $nonExistentId);
 
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('download multiple media with custom filename', function (): void {
@@ -370,7 +371,7 @@ test('download multiple media with custom filename', function (): void {
     $queryParams = '?file_name=' . $customFileName . '&ids[]=' . implode('&ids[]=', $mediaIds);
     $response = $this->actingAs($this->user)->get('/api/media/download-multiple' . $queryParams);
 
-    $response->assertStatus(200);
+    $response->assertOk();
     $response->assertHeader('Content-Type', 'application/octet-stream');
     $response->assertHeader('Content-Disposition', 'attachment; filename="' . $customFileName . '.zip"');
 });
@@ -381,7 +382,7 @@ test('download private media media not found', function (): void {
 
     $nonExistentId = $this->media->getKey() + 1;
     $download = $this->get('/api/media/private/' . $nonExistentId);
-    $download->assertStatus(404);
+    $download->assertNotFound();
 });
 
 test('download private media thumbnail not generated', function (): void {
@@ -397,7 +398,7 @@ test('download private media thumbnail not generated', function (): void {
 
     $queryParams = '?conversion=thumb';
     $download = $this->get('/api/media/private/' . $media->getKey() . $queryParams);
-    $download->assertStatus(404);
+    $download->assertNotFound();
 });
 
 test('replace media', function (): void {
@@ -409,7 +410,7 @@ test('replace media', function (): void {
     $replace = $this->actingAs($this->user)->post('/api/media/' . $this->media->getKey(), [
         'media' => $file,
     ]);
-    $replace->assertStatus(200);
+    $replace->assertOk();
 });
 
 test('replace media invalid file', function (): void {
@@ -419,7 +420,7 @@ test('replace media invalid file', function (): void {
     $replace = $this->actingAs($this->user)->post('/api/media/' . $this->media->getKey(), [
         'media' => false,
     ]);
-    $replace->assertStatus(422);
+    $replace->assertUnprocessable();
 });
 
 test('replace media media not found', function (): void {
@@ -429,7 +430,7 @@ test('replace media media not found', function (): void {
     $nonExistentId = $this->media->getKey() + 1;
 
     $replace = $this->actingAs($this->user)->post('/api/media/' . $nonExistentId, ['media' => $this->testFile]);
-    $replace->assertStatus(422);
+    $replace->assertUnprocessable();
 });
 
 test('replace media validation fails', function (): void {
@@ -439,7 +440,7 @@ test('replace media validation fails', function (): void {
     $replace = $this->actingAs($this->user)->post('/api/media/' . $this->media->getKey(), [
         'media' => true,
     ]);
-    $replace->assertStatus(422);
+    $replace->assertUnprocessable();
 });
 
 test('update media', function (): void {
@@ -452,7 +453,7 @@ test('update media', function (): void {
     ];
 
     $update = $this->actingAs($this->user)->put('/api/media/', $data);
-    $update->assertStatus(200);
+    $update->assertOk();
 });
 
 test('update media validation fails', function (): void {
@@ -466,7 +467,7 @@ test('update media validation fails', function (): void {
     ];
 
     $update = $this->actingAs($this->user)->put('/api/media/', $data);
-    $update->assertStatus(422);
+    $update->assertUnprocessable();
 });
 
 test('upload media collection read only', function (): void {
@@ -514,7 +515,7 @@ test('upload media collection read only', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/media', $media);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 
     $response->assertJsonValidationErrorFor('collection_name');
 });
@@ -530,7 +531,7 @@ test('upload media invalid file', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/media', $media);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('upload media model type not found', function (): void {
@@ -544,7 +545,7 @@ test('upload media model type not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/media', $media);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('upload media not allowed model type', function (): void {
@@ -558,7 +559,7 @@ test('upload media not allowed model type', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/media', $media);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('upload media public media', function (): void {
@@ -574,7 +575,7 @@ test('upload media public media', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/media', $media);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $uploadedMedia = $this->task->getMedia('files');
     expect($uploadedMedia)->not->toBeEmpty();
@@ -593,7 +594,7 @@ test('upload media task not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/media', $media);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('upload media to task', function (): void {
@@ -608,7 +609,7 @@ test('upload media to task', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/media', $media);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $uploadedMedia = $this->task->getMedia('files');
     expect($uploadedMedia)->not->toBeEmpty();
@@ -627,7 +628,7 @@ test('upload media validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/media', $media);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 
     $response->assertJsonValidationErrors(['disk']);
 });

@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use Carbon\Carbon;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Permission;
@@ -83,7 +82,7 @@ test('bulk update tasks with additional columns', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/tasks', $tasks);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseTasks = collect(json_decode($response->getContent())->data->items);
     expect(count($responseTasks))->toEqual(2);
@@ -142,7 +141,7 @@ test('create task', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/tasks', $task);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseTask = json_decode($response->getContent())->data;
     $dbTask = Task::query()
@@ -204,7 +203,7 @@ test('create task project not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/tasks', $task);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('create task user not found', function (): void {
@@ -223,7 +222,7 @@ test('create task user not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/tasks', $task);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('create task validation fails', function (): void {
@@ -236,7 +235,7 @@ test('create task validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/tasks', $task);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('delete task', function (): void {
@@ -248,7 +247,7 @@ test('delete task', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/tasks/' . $this->tasks[1]->id);
-    $response->assertStatus(204);
+    $response->assertNoContent();
 
     $task = $this->tasks[1]->fresh();
     expect($task->deleted_at)->not->toBeNull();
@@ -260,7 +259,7 @@ test('delete task task not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/tasks/' . ++$this->tasks[2]->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('finish task', function (): void {
@@ -277,7 +276,7 @@ test('finish task', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/tasks/finish', $task);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseTask = json_decode($response->getContent())->data;
     $dbTask = Task::query()
@@ -298,7 +297,7 @@ test('finish task task not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/tasks/finish', $task);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('finish task validation fails', function (): void {
@@ -311,7 +310,7 @@ test('finish task validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/tasks/finish', $task);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('get task', function (): void {
@@ -321,7 +320,7 @@ test('get task', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/tasks/' . $this->tasks[0]->id);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     $task = $json->data;
@@ -348,7 +347,7 @@ test('get task task not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/tasks/' . ++$this->tasks[2]->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get tasks', function (): void {
@@ -356,7 +355,7 @@ test('get tasks', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/tasks');
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     $tasks = $json->data->data;
@@ -405,7 +404,7 @@ test('update task', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/tasks', $task);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseTask = json_decode($response->getContent())->data;
     $dbTask = Task::query()
@@ -452,7 +451,7 @@ test('update task task not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/tasks', $task);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('update task user not found', function (): void {
@@ -474,7 +473,7 @@ test('update task user not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/tasks', $task);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('update task validation fails', function (): void {
@@ -490,7 +489,7 @@ test('update task validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/tasks', $task);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('update task with project id', function (): void {
@@ -517,7 +516,7 @@ test('update task with project id', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/tasks', $task);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseTask = json_decode($response->getContent())->data;
     $dbTask = Task::query()

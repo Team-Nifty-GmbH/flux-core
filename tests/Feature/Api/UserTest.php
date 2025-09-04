@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use Carbon\Carbon;
 use FluxErp\Models\Language;
 use FluxErp\Models\Permission;
@@ -38,7 +37,7 @@ test('create user', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/users', $user);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $json = json_decode($response->getContent());
     $responseUser = $json->data;
@@ -69,7 +68,7 @@ test('create user validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/users', $payload);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('create user without language', function (): void {
@@ -85,7 +84,7 @@ test('create user without language', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/users', $user);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseUser = json_decode($response->getContent())->data;
     $dbUser = User::query()
@@ -111,7 +110,7 @@ test('delete user', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/users/' . $this->users[0]->id);
-    $response->assertStatus(204);
+    $response->assertNoContent();
 
     $dbUser = User::query()->withTrashed()->whereKey($this->users[0]->id)->first();
     expect($dbUser->deleted_at)->not->toBeNull();
@@ -122,7 +121,7 @@ test('delete user self', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/users/' . $this->user->id);
-    $response->assertStatus(403);
+    $response->assertForbidden();
 
     $dbUser = User::query()->whereKey($this->users[0]->id)->first();
     expect($dbUser)->not->toBeNull();
@@ -133,7 +132,7 @@ test('delete user user not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/users/' . $this->users[1]->id + 1);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get user', function (): void {
@@ -141,7 +140,7 @@ test('get user', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/users/' . $this->users[0]->id);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     $jsonUser = $json->data;
@@ -165,7 +164,7 @@ test('get user user not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/users/' . ++$this->users[1]->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get users', function (): void {
@@ -173,7 +172,7 @@ test('get users', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/users');
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     $jsonUsers = collect($json->data->data);
@@ -209,7 +208,7 @@ test('update user', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/users', $user);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     $responseUser = $json->data;
@@ -239,7 +238,7 @@ test('update user is active', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/users', $user);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     $responseUser = $json->data;
@@ -268,5 +267,5 @@ test('update user validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/users', $user);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });

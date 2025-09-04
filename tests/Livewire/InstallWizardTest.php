@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\TestCase::class);
 use FluxErp\Livewire\Auth\Login;
 use FluxErp\Livewire\InstallWizard;
 use Illuminate\Support\Facades\Config;
@@ -11,7 +10,7 @@ test('forbidden when done', function (): void {
     Config::set('flux.install_done', true);
 
     Livewire::test(InstallWizard::class)
-        ->assertStatus(403);
+        ->assertForbidden();
 });
 
 test('install wizard', function (): void {
@@ -21,7 +20,7 @@ test('install wizard', function (): void {
 
     $component = Livewire::withoutLazyLoading()
         ->test(InstallWizard::class)
-        ->assertStatus(200)
+        ->assertOk()
         ->call('testDatabaseConnection')
         ->assertHasNoErrors()
         ->assertSet('databaseConnectionSuccessful', true)
@@ -45,7 +44,7 @@ test('install wizard', function (): void {
         ->set('languageForm.name', Str::uuid())
         ->set('languageForm.language_code', Str::uuid())
         ->call('continue')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertSet('step', 2);
 
@@ -54,7 +53,7 @@ test('install wizard', function (): void {
         ->set('currencyForm.iso', Str::uuid())
         ->set('currencyForm.symbol', Str::uuid())
         ->call('continue')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertSet('step', 3);
 
@@ -69,7 +68,7 @@ test('install wizard', function (): void {
         ->set('clientForm.email', Str::uuid() . '@example.com')
         ->set('clientForm.website', Str::uuid())
         ->call('continue')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertSet('step', 4);
 
@@ -81,7 +80,7 @@ test('install wizard', function (): void {
         ->assertSet('vatRates.0.name', $vatRateName)
         ->assertSet('vatRates.0.rate_percentage', bcdiv($vatRatePercentage, 100))
         ->call('continue')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertSet('step', 5);
 
@@ -92,7 +91,7 @@ test('install wizard', function (): void {
         ->set('paymentTypeForm.payment_reminder_days_2', 3)
         ->set('paymentTypeForm.payment_reminder_days_3', 4)
         ->call('continue')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertSet('step', 6);
 
@@ -104,7 +103,7 @@ test('install wizard', function (): void {
         ->set('userForm.password', 'Password123!')
         ->set('userForm.password_confirmation', 'Password123!')
         ->call('continue')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertSet('step', 7);
 
@@ -167,5 +166,5 @@ test('renders successfully', function (): void {
 
     Livewire::withoutLazyLoading()
         ->test(InstallWizard::class)
-        ->assertStatus(200);
+        ->assertOk();
 });

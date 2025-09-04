@@ -12,11 +12,10 @@ test('renders successfully', function (): void {
     $address = Address::factory()->create([
         'contact_id' => $contact->id,
         'client_id' => $this->dbClient->getKey(),
-        'language_id' => $this->user->language_id,
         'can_login' => false,
         'is_active' => true,
     ]);
 
     Livewire::test(Tasks::class, ['modelId' => $address->id])
-        ->assertStatus(200);
+        ->assertOk();
 });

@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use Carbon\Carbon;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
@@ -31,7 +30,7 @@ test('create payment type', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/payment-types', $paymentType);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responsePaymentType = json_decode($response->getContent())->data;
     $dbPaymentType = PaymentType::query()
@@ -71,7 +70,7 @@ test('create payment type maximum', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/payment-types', $paymentType);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responsePaymentType = json_decode($response->getContent())->data;
     $dbPaymentType = PaymentType::query()
@@ -103,7 +102,7 @@ test('create payment type validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/payment-types', $paymentType);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('delete payment type', function (): void {
@@ -111,7 +110,7 @@ test('delete payment type', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/payment-types/' . $this->paymentTypes[1]->id);
-    $response->assertStatus(204);
+    $response->assertNoContent();
 
     $paymentType = $this->paymentTypes[1]->fresh();
     expect($paymentType->deleted_at)->not->toBeNull();
@@ -123,7 +122,7 @@ test('delete payment type payment type not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/payment-types/' . ++$this->paymentTypes[1]->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get payment type', function (): void {
@@ -131,7 +130,7 @@ test('get payment type', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/payment-types/' . $this->paymentTypes[0]->id);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     $jsonPaymentType = $json->data;
@@ -157,7 +156,7 @@ test('get payment type include not allowed', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/payment-types/' . $this->paymentTypes[1]->id . '?include=test');
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('get payment type payment type not found', function (): void {
@@ -165,7 +164,7 @@ test('get payment type payment type not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/payment-types/' . ++$this->paymentTypes[1]->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get payment types', function (): void {
@@ -173,7 +172,7 @@ test('get payment types', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/payment-types');
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     $jsonPaymentTypes = collect($json->data->data);
@@ -212,7 +211,7 @@ test('update payment type', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/payment-types', $paymentType);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responsePaymentType = json_decode($response->getContent())->data;
     $dbPaymentType = PaymentType::query()
@@ -251,7 +250,7 @@ test('update payment type maximum', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/payment-types', $paymentType);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responsePaymentType = json_decode($response->getContent())->data;
     $dbPaymentType = PaymentType::query()
@@ -283,5 +282,5 @@ test('update payment type validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/payment-types', $paymentType);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });

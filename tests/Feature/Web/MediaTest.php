@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\Web\BaseSetup::class);
 use FluxErp\Models\Permission;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
@@ -17,7 +16,7 @@ test('download media', function (): void {
     $this->user->givePermissionTo(Permission::findOrCreate('media.{media}.{filename}.get', 'web'));
 
     $this->actingAs($this->user, 'web')->get('/media/' . $this->media->id . '/' . $this->filename)
-        ->assertStatus(200)
+        ->assertOk()
         ->assertDownload();
 });
 
@@ -27,12 +26,14 @@ test('download media media not found', function (): void {
     $this->user->givePermissionTo(Permission::findOrCreate('media.{media}.{filename}.get', 'web'));
 
     $this->actingAs($this->user, 'web')->get('/media/' . $this->media->id . '/' . $this->filename)
-        ->assertStatus(404);
+        ->assertNotFound();
 });
 
 test('download media no user', function (): void {
+    $this->actingAsGuest();
+
     $this->get('/media/' . $this->media->id . '/' . $this->filename)
-        ->assertStatus(302)
+        ->assertFound()
         ->assertRedirect(route('login'));
 });
 
@@ -40,5 +41,5 @@ test('download media without permission', function (): void {
     Permission::findOrCreate('media.{media}.{filename}.get', 'web');
 
     $this->actingAs($this->user, 'web')->get('/media/' . $this->media->id . '/' . $this->filename)
-        ->assertStatus(403);
+        ->assertForbidden();
 });

@@ -14,7 +14,7 @@ beforeEach(function (): void {
 
 test('renders successfully', function (): void {
     Livewire::test(TicketView::class, ['id' => $this->ticket->id])
-        ->assertStatus(200);
+        ->assertOk();
 });
 
 test('switch tabs', function (): void {

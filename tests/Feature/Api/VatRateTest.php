@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use FluxErp\Models\Permission;
 use FluxErp\Models\VatRate;
 use Illuminate\Support\Str;
@@ -30,7 +29,7 @@ test('create vat rate', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/vat-rates', $vatRate);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseVatRate = json_decode($response->getContent())->data;
 
@@ -51,7 +50,7 @@ test('create vat rate validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/vat-rates', $vatRate);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('delete vat rate', function (): void {
@@ -60,7 +59,7 @@ test('delete vat rate', function (): void {
 
     $response = $this->actingAs($this->user)->delete('/api/vat-rates/' . $this->vatRates[0]->id);
 
-    $response->assertStatus(204);
+    $response->assertNoContent();
     expect(VatRate::query()->whereKey($this->vatRates[0]->id)->exists())->toBeFalse();
 });
 
@@ -69,7 +68,7 @@ test('delete vat rate vat rate not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/vat-rates/' . ++$this->vatRates[2]->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get vat rate', function (): void {
@@ -77,7 +76,7 @@ test('get vat rate', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/vat-rates/' . $this->vatRates[0]->id);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $vatRate = json_decode($response->getContent())->data;
 
@@ -91,7 +90,7 @@ test('get vat rate vat rate not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/vat-rates/' . $this->vatRates[2]->id + 10000);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get vat rates', function (): void {
@@ -99,13 +98,13 @@ test('get vat rates', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/vat-rates');
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $vatRates = json_decode($response->getContent())->data;
 
-    expect($vatRates->data[0]->id)->toEqual($this->vatRates[0]->id);
-    expect($vatRates->data[0]->name)->toEqual($this->vatRates[0]->name);
-    expect($vatRates->data[0]->rate_percentage)->toEqual($this->vatRates[0]->rate_percentage);
+    expect($vatRates->data[1]->id)->toEqual($this->vatRates[0]->id);
+    expect($vatRates->data[1]->name)->toEqual($this->vatRates[0]->name);
+    expect($vatRates->data[1]->rate_percentage)->toEqual($this->vatRates[0]->rate_percentage);
 });
 
 test('update vat rate', function (): void {
@@ -119,7 +118,7 @@ test('update vat rate', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/vat-rates', $vatRate);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseVatRate = json_decode($response->getContent())->data;
 
@@ -142,5 +141,5 @@ test('update vat rate validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/vat-rates', $vatRate);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });

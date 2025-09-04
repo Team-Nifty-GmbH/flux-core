@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use FluxErp\Enums\BundleTypeEnum;
 use FluxErp\Models\Client;
 use FluxErp\Models\Permission;
@@ -59,7 +58,7 @@ test('create product', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/products', $product);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseProduct = json_decode($response->getContent())->data;
 
@@ -150,7 +149,7 @@ test('create product maximum', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/products', $product);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseProduct = json_decode($response->getContent())->data;
 
@@ -208,7 +207,7 @@ test('create product validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/products', $product);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('delete product', function (): void {
@@ -216,7 +215,7 @@ test('delete product', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/products/' . $this->products[0]->id);
-    $response->assertStatus(204);
+    $response->assertNoContent();
 
     expect(Product::query()->whereKey($this->products[0]->id)->exists())->toBeFalse();
 });
@@ -237,7 +236,7 @@ test('delete product product not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/products/' . ++$this->products[2]->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get product', function (): void {
@@ -245,7 +244,7 @@ test('get product', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/products/' . $this->products[0]->id);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $product = json_decode($response->getContent())->data;
 
@@ -261,7 +260,7 @@ test('get product product not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/products/' . $this->products[2]->id + 10000);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get products', function (): void {
@@ -269,7 +268,7 @@ test('get products', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/products');
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $products = json_decode($response->getContent())->data;
 
@@ -322,7 +321,7 @@ test('update product', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/products', $product);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseProduct = json_decode($response->getContent())->data;
     $dbProduct = Product::query()
@@ -379,7 +378,7 @@ test('update products', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/products', $products);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responses = json_decode($response->getContent())->data->items;
 

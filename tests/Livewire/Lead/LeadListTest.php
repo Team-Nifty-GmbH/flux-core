@@ -35,5 +35,5 @@ test('lead list', function (): void {
 
 test('renders successfully', function (): void {
     Livewire::test(LeadList::class)
-        ->assertStatus(200);
+        ->assertOk();
 });

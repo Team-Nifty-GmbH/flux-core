@@ -12,5 +12,5 @@ test('renders successfully', function (): void {
     ]);
 
     Livewire::test(OrderListByOrderType::class, ['orderType' => $orderType->id])
-        ->assertStatus(200);
+        ->assertOk();
 });

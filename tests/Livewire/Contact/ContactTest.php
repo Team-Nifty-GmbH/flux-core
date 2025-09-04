@@ -1,22 +1,17 @@
 <?php
 
-uses(FluxErp\Tests\TestCase::class);
 use FluxErp\Livewire\Contact\Contact;
 use FluxErp\Models\Address;
-use FluxErp\Models\Client;
 use FluxErp\Models\Contact as ContactModel;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
-    $client = Client::factory()->create([
-        'is_default' => true,
-    ]);
     $this->contact = ContactModel::factory()->create([
-        'client_id' => $client->id,
+        'client_id' => $this->dbClient->id,
     ]);
 
     Address::factory()->create([
-        'client_id' => $client->id,
+        'client_id' => $this->dbClient->id,
         'contact_id' => $this->contact->id,
         'is_main_address' => true,
         'is_invoice_address' => true,
@@ -33,7 +28,7 @@ test('can delete contact', function (): void {
 
 test('renders successfully', function (): void {
     Livewire::test(Contact::class, ['id' => $this->contact->id])
-        ->assertStatus(200);
+        ->assertOk();
 });
 
 test('switch tabs', function (): void {

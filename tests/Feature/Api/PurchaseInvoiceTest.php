@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use Carbon\Carbon;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Address;
@@ -140,7 +139,7 @@ test('create purchase invoice maximum', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/purchase-invoices', $purchaseInvoice);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responsePurchaseInvoice = json_decode($response->getContent())->data;
     $dbPurchaseInvoice = PurchaseInvoice::query()
@@ -182,7 +181,7 @@ test('create purchase invoice minimum', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/purchase-invoices', $purchaseInvoice);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responsePurchaseInvoice = json_decode($response->getContent())->data;
     $dbPurchaseInvoice = PurchaseInvoice::query()
@@ -215,7 +214,7 @@ test('create purchase invoice validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/purchase-invoices', $purchaseInvoice);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 
     $response->assertJsonValidationErrors([
         'media',
@@ -244,7 +243,7 @@ test('create purchase invoice validation fails positions', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/purchase-invoices', $purchaseInvoice);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 
     $response->assertJsonMissingValidationErrors([
         'media',
@@ -263,7 +262,7 @@ test('delete purchase invoice', function (): void {
 
     $response = $this->actingAs($this->user)
         ->delete('/api/purchase-invoices/' . $this->purchaseInvoices[1]->id);
-    $response->assertStatus(204);
+    $response->assertNoContent();
 
     $purchaseInvoice = $this->purchaseInvoices[1]->fresh();
     expect($purchaseInvoice->deleted_at)->not->toBeNull();
@@ -276,7 +275,7 @@ test('delete purchase invoice purchase invoice not found', function (): void {
 
     $response = $this->actingAs($this->user)
         ->delete('/api/purchase-invoices/' . ++$this->purchaseInvoices[2]->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('finish purchase invoice', function (): void {
@@ -292,7 +291,7 @@ test('finish purchase invoice', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/purchase-invoices/finish', $purchaseInvoice);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseOrder = json_decode($response->getContent())->data;
 
@@ -331,7 +330,7 @@ test('finish purchase invoice validation fails', function (): void {
 
     $response = $this->actingAs($this->user)->post('/api/purchase-invoices/finish', $purchaseInvoice);
 
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 
     $response->assertJsonValidationErrors([
         'client_id',
@@ -348,7 +347,7 @@ test('get purchase invoice', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/purchase-invoices/' . $this->purchaseInvoices[0]->id);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $purchaseInvoice = json_decode($response->getContent())->data;
     expect($purchaseInvoice)->not->toBeEmpty();
@@ -373,7 +372,7 @@ test('get purchase invoice purchase invoice not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/purchase-invoices/' . ++$this->purchaseInvoices[2]->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get purchase invoices', function (): void {
@@ -381,7 +380,7 @@ test('get purchase invoices', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/purchase-invoices');
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $purchaseInvoices = json_decode($response->getContent())->data->data;
 
@@ -431,7 +430,7 @@ test('update purchase invoice', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/purchase-invoices', $purchaseInvoice);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responsePurchaseInvoice = json_decode($response->getContent())->data;
     $dbPurchaseInvoice = PurchaseInvoice::query()
@@ -468,7 +467,7 @@ test('update purchase invoice validation fails invoice number', function (): voi
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/purchase-invoices', $purchaseInvoice);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 
     $response->assertJsonValidationErrors([
         'invoice_number',

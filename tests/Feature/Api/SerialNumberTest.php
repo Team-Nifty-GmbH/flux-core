@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Product;
@@ -59,7 +58,7 @@ test('create serial number', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/serial-numbers', $serialNumber);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseSerialNumber = json_decode($response->getContent())->data;
 
@@ -84,7 +83,7 @@ test('create serial number from supplier serial number', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/serial-numbers', $serialNumber);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseSerialNumber = json_decode($response->getContent())->data;
 
@@ -109,7 +108,7 @@ test('create serial number validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/serial-numbers', $serialNumber);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('delete serial number', function (): void {
@@ -117,7 +116,7 @@ test('delete serial number', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/serial-numbers/' . $this->serialNumbers[0]->id);
-    $response->assertStatus(204);
+    $response->assertNoContent();
 
     expect(SerialNumber::query()->whereKey($this->serialNumbers[0]->id)->exists())->toBeFalse();
 });
@@ -127,7 +126,7 @@ test('delete serial number serial number not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/serial-numbers/' . ++$this->serialNumbers[2]->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get serial number', function (): void {
@@ -135,7 +134,7 @@ test('get serial number', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/serial-numbers/' . $this->serialNumbers[0]->id);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $serialNumber = json_decode($response->getContent())->data;
 
@@ -150,7 +149,7 @@ test('get serial number serial number not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/serial-numbers/' . $this->serialNumbers[2]->id + 10000);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get serial numbers', function (): void {
@@ -158,7 +157,7 @@ test('get serial numbers', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/serial-numbers');
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $serialNumbers = json_decode($response->getContent())->data->data;
 
@@ -178,7 +177,7 @@ test('update serial number', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/serial-numbers', $serialNumber);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseSerialNumber = json_decode($response->getContent())->data;
 
@@ -203,7 +202,7 @@ test('update serial number validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/serial-numbers', $serialNumber);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('update serial number with additional columns', function (): void {
@@ -220,7 +219,7 @@ test('update serial number with additional columns', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/serial-numbers', $serialNumber);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseSerialNumber = json_decode($response->getContent())->data;
 

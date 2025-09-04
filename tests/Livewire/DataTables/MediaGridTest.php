@@ -5,5 +5,5 @@ use Livewire\Livewire;
 
 test('renders successfully', function (): void {
     Livewire::test(MediaGrid::class)
-        ->assertStatus(200);
+        ->assertOk();
 });

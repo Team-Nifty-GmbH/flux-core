@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use Carbon\Carbon;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\OrderType;
@@ -34,7 +33,7 @@ test('create order type', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/order-types', $orderType);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseOrderType = json_decode($response->getContent())->data;
     $dbOrderType = OrderType::query()
@@ -66,7 +65,7 @@ test('create order type maximum', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/order-types', $orderType);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseOrderType = json_decode($response->getContent())->data;
     $dbOrderType = OrderType::query()
@@ -95,7 +94,7 @@ test('create order type validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/order-types', $orderType);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('delete order type', function (): void {
@@ -103,7 +102,7 @@ test('delete order type', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/order-types/' . $this->orderTypes[1]->id);
-    $response->assertStatus(204);
+    $response->assertNoContent();
 
     $orderType = $this->orderTypes[1]->fresh();
     expect($orderType->deleted_at)->not->toBeNull();
@@ -115,7 +114,7 @@ test('delete order type order type not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/order-types/' . ++$this->orderTypes[1]->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get order type', function (): void {
@@ -123,7 +122,7 @@ test('get order type', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/order-types/' . $this->orderTypes[0]->id);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     $jsonOrderType = $json->data;
@@ -145,7 +144,7 @@ test('get order type order type not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/order-types/' . ++$this->orderTypes[1]->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get order types', function (): void {
@@ -153,7 +152,7 @@ test('get order types', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/order-types');
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     $jsonOrderTypes = collect($json->data->data);
@@ -186,7 +185,7 @@ test('update order type', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/order-types', $orderType);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseOrderType = json_decode($response->getContent())->data;
     $dbOrderType = OrderType::query()
@@ -216,7 +215,7 @@ test('update order type maximum', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/order-types', $orderType);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseOrderType = json_decode($response->getContent())->data;
     $dbOrderType = OrderType::query()
@@ -244,5 +243,5 @@ test('update order type validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/order-types', $orderType);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });

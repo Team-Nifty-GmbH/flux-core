@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use Carbon\Carbon;
 use FluxErp\Models\Address;
 use FluxErp\Models\Client;
@@ -79,7 +78,7 @@ test('create address', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->post('/api/addresses', $address);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseAddress = json_decode($response->getContent())->data;
     $dbAddress = Address::query()
@@ -141,7 +140,7 @@ test('create address maximum', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/addresses', $address);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseAddress = json_decode($response->getContent())->data;
     $dbAddress = Address::query()
@@ -185,7 +184,7 @@ test('create address validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/addresses', $address);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 
     $response->assertJsonValidationErrors([
         'contact_id',
@@ -198,7 +197,7 @@ test('delete address', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/addresses/' . $this->addresses[2]->id);
-    $response->assertStatus(204);
+    $response->assertNoContent();
 
     $address = $this->addresses[2]->fresh();
     expect($address->deleted_at)->not->toBeNull();
@@ -210,7 +209,7 @@ test('delete address address not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/addresses/' . ++$this->addresses[3]->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get address', function (): void {
@@ -218,7 +217,7 @@ test('get address', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/addresses/' . $this->addresses[0]->id);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     $jsonAddress = $json->data;
@@ -255,7 +254,7 @@ test('get address address not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/addresses/' . ++$this->addresses[3]->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get addresses', function (): void {
@@ -263,7 +262,7 @@ test('get addresses', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/addresses');
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     $jsonAddresses = collect($json->data->data);
@@ -311,7 +310,7 @@ test('update address', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/addresses', $address);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseAddress = json_decode($response->getContent())->data;
     $dbAddress = Address::query()
@@ -338,7 +337,7 @@ test('update address delete tokens', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/addresses', $address);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseAddress = json_decode($response->getContent())->data;
 
@@ -381,7 +380,7 @@ test('update address maximum', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/addresses', $address);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseAddress = json_decode($response->getContent())->data;
     $dbAddress = Address::query()
@@ -437,7 +436,7 @@ test('update address multi status validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/addresses', $address);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 
     $responses = json_decode($response->getContent())->data->items;
     expect($responses[0]->id)->toEqual($address[0]['id']);

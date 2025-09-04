@@ -1,21 +1,18 @@
 <?php
 
-uses(FluxErp\Tests\TestCase::class);
 use FluxErp\Livewire\Product\Activities;
 use FluxErp\Models\Product;
 use Livewire\Livewire;
 
-beforeEach(function (): void {
-    $this->product = Product::factory()->create();
-});
-
 test('renders successfully', function (): void {
+    $product = Product::factory()->create();
+
     Livewire::test(
         Activities::class,
         [
-            'modelId' => $this->product->id,
-            'modelType' => $this->product->getMorphClass(),
+            'modelId' => $product->id,
+            'modelType' => $product->getMorphClass(),
         ]
     )
-        ->assertStatus(200);
+        ->assertOk();
 });

@@ -20,7 +20,7 @@ beforeEach(function (): void {
 
 test('renders successfully', function (): void {
     Livewire::test(Birthdays::class)
-        ->assertStatus(200)
+        ->assertOk()
         ->assertCount('items', 1)
         ->assertSet('items.0.label', $this->address->name)
         ->assertSet('items.0.subLabel', $this->address->date_of_birth->isoFormat('L') . ' (30)');

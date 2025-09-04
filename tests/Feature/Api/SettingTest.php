@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use FluxErp\Models\Permission;
 use FluxErp\Models\Setting;
 use FluxErp\Models\User;
@@ -44,7 +43,7 @@ test('get settings', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/settings');
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseData = json_decode($response->getContent(), true)['data']['data'];
     $count = count($responseData);
@@ -67,7 +66,7 @@ test('get user settings', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/user/settings');
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseData = json_decode($response->getContent())->data;
     expect(count($responseData))->toEqual(1);
@@ -91,7 +90,7 @@ test('update setting', function (): void {
         'id' => $this->settings->id,
         'settings' => $settings,
     ]);
-    $response->assertStatus(200);
+    $response->assertOk();
     $setting = Setting::query()
         ->where('key', $this->settings->key)
         ->first();
@@ -113,7 +112,7 @@ test('update setting setting not found', function (): void {
         'settings' => ['Value'],
     ]);
 
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('update setting validation error', function (): void {
@@ -127,5 +126,5 @@ test('update setting validation error', function (): void {
         'settings' => $settings,
     ]);
 
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });

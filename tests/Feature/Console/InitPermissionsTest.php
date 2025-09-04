@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use FluxErp\Facades\Action;
 use FluxErp\Facades\Widget;
 use FluxErp\Htmlables\TabButton;

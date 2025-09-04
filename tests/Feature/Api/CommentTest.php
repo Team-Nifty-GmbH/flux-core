@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use FluxErp\Models\Address;
 use FluxErp\Models\Comment;
 use FluxErp\Models\Contact;
@@ -19,6 +18,7 @@ beforeEach(function (): void {
         'authenticatable_type' => morph_alias(User::class),
         'authenticatable_id' => $this->user->id,
     ]);
+    $this->actingAsGuest();
     $this->comment = Comment::factory()->create([
         'model_type' => morph_alias(Ticket::class),
         'model_id' => $this->ticket->id,
@@ -45,7 +45,7 @@ test('create comment', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/comments', $comment);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $userComment = json_decode($response->getContent())->data;
     $dbComment = Comment::query()
@@ -70,7 +70,7 @@ test('create comment model class not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/comments', $comment);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('create comment model instance not found', function (): void {
@@ -84,7 +84,7 @@ test('create comment model instance not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/comments', $comment);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('create comment not commentable', function (): void {
@@ -98,7 +98,7 @@ test('create comment not commentable', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/comments', $comment);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('create comment sends notification', function (): void {
@@ -140,7 +140,7 @@ test('create comment sends notification', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/comments', $comment);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $this->assertDatabaseHas('event_subscriptions', [
         'channel' => $ticket->broadcastChannel(),
@@ -182,7 +182,7 @@ test('create comment sends notification to address', function (): void {
             'comment' => 'test comment',
             'is_internal' => false,
         ]);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     Notification::assertSentTo($address, CommentCreatedNotification::class);
 });
@@ -197,7 +197,7 @@ test('create comment validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/comments', $comment);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('create comment with parent', function (): void {
@@ -212,7 +212,7 @@ test('create comment with parent', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/comments', $comment);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $userComment = json_decode($response->getContent())->data;
     $dbComment = Comment::query()->whereKey($userComment->id)->first();
@@ -236,7 +236,7 @@ test('create comment with parent not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/comments', $comment);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('delete comment', function (): void {
@@ -250,7 +250,7 @@ test('delete comment', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/comments/' . $this->comment->id);
-    $response->assertStatus(204);
+    $response->assertNoContent();
 
     $dbComment = $this->comment->fresh();
     expect($dbComment->deleted_at)->not->toBeNull();
@@ -262,15 +262,11 @@ test('delete comment as super admin', function (): void {
         'language_id' => $this->user->language_id,
     ]);
 
-    $activity = $this->comment->activities()->where('event', 'created')->first();
-    $activity->causer()->associate($user);
-    $activity->save();
-
     $this->user->assignRole('Super Admin');
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/comments/' . $this->comment->id);
-    $response->assertStatus(204);
+    $response->assertNoContent();
 
     $dbComment = $this->comment->fresh();
     expect($this->user->is($dbComment->getCreatedBy()))->toBeFalse();
@@ -283,7 +279,7 @@ test('delete comment comment not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/comments/' . $this->comment->id + 1);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('delete comment different user', function (): void {
@@ -291,7 +287,7 @@ test('delete comment different user', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/comments/' . $this->comment->id);
-    $response->assertStatus(403);
+    $response->assertForbidden();
 
     $dbComment = Comment::query()->whereKey($this->comment->id)->first();
     expect($dbComment)->not->toBeNull();
@@ -302,7 +298,7 @@ test('get comments model instance not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/user/comments/' . ++$this->user->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get comments route not found', function (): void {
@@ -310,7 +306,7 @@ test('get comments route not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/notExistingTestModel/comments/' . $this->user->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get ticket comments', function (): void {
@@ -324,7 +320,7 @@ test('get ticket comments', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/ticket/comments/' . $this->ticket->id);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     expect(property_exists($json, 'templates'))->toBeFalse();
@@ -345,7 +341,7 @@ test('update comment', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/comments', $comment);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $dbComment = Comment::query()->whereKey($this->comment->id)->first();
 

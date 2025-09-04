@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use Carbon\Carbon;
 use FluxErp\Models\Client;
 use FluxErp\Models\Permission;
@@ -22,7 +21,7 @@ test('get client', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/clients/' . $this->clients[0]->id);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     $client = $json->data;
@@ -48,7 +47,7 @@ test('get client client not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/clients/' . ++$this->clients->last()->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get clients', function (): void {
@@ -56,7 +55,7 @@ test('get clients', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/clients');
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     $jsonClients = collect($json->data->data);

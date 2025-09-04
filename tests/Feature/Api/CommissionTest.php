@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Address;
 use FluxErp\Models\Client;
@@ -154,7 +153,7 @@ test('create commission', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->post('/api/commissions', $commission);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseCommission = json_decode($response->getContent())->data;
     $dbCommission = Commission::query()
@@ -181,7 +180,7 @@ test('create commission validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->post('/api/commissions', $commission);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 
     $response->assertJsonValidationErrors([
         'user_id',
@@ -194,7 +193,7 @@ test('delete commission', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->delete('/api/commissions/' . $this->commissions[0]->id);
-    $response->assertStatus(204);
+    $response->assertNoContent();
 
     $commission = $this->commissions[0]->fresh();
     expect($commission->deleted_at)->not->toBeNull();
@@ -206,7 +205,7 @@ test('delete commission not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->delete('/api/commissions/' . (Commission::max('id') + 1));
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get commission', function (): void {
@@ -214,7 +213,7 @@ test('get commission', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->get('/api/commissions/' . $this->commissions[0]->id);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     $jsonCommission = $json->data;
@@ -233,7 +232,7 @@ test('get commission not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->get('/api/commissions/' . (Commission::max('id') + 1));
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get commissions', function (): void {
@@ -241,7 +240,7 @@ test('get commissions', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->get('/api/commissions');
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     $jsonCommissions = collect($json->data->data);
@@ -270,7 +269,7 @@ test('update commission', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->put('/api/commissions', $commission);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseCommission = json_decode($response->getContent())->data;
     $dbCommission = Commission::query()
@@ -293,7 +292,7 @@ test('update commission maximum', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->put('/api/commissions', $commission);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseCommission = json_decode($response->getContent())->data;
     $dbCommission = Commission::query()

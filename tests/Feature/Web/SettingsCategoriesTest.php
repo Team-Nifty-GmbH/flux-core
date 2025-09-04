@@ -1,11 +1,12 @@
 <?php
 
-uses(FluxErp\Tests\Feature\Web\BaseSetup::class);
 use FluxErp\Models\Permission;
 
 test('settings categories no user', function (): void {
+    $this->actingAsGuest();
+
     $this->get('/settings/categories')
-        ->assertStatus(302)
+        ->assertFound()
         ->assertRedirect(route('login'));
 });
 
@@ -15,12 +16,12 @@ test('settings categories page', function (): void {
     );
 
     $this->actingAs($this->user, 'web')->get('/settings/categories')
-        ->assertStatus(200);
+        ->assertOk();
 });
 
 test('settings categories without permission', function (): void {
     Permission::findOrCreate('settings.categories.get', 'web');
 
     $this->actingAs($this->user, 'web')->get('/settings/categories')
-        ->assertStatus(403);
+        ->assertForbidden();
 });

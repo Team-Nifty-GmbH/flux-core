@@ -5,5 +5,5 @@ use Livewire\Livewire;
 
 test('renders successfully', function (): void {
     Livewire::test(AdditionalColumns::class)
-        ->assertStatus(200);
+        ->assertOk();
 });

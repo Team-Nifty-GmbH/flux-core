@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\Web\BaseSetup::class);
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Permission;
@@ -25,8 +24,10 @@ beforeEach(function (): void {
 });
 
 test('tickets id no user', function (): void {
+    $this->actingAsGuest();
+
     $this->get('/tickets/' . $this->ticket->id)
-        ->assertStatus(302)
+        ->assertFound()
         ->assertRedirect(route('login'));
 });
 
@@ -34,7 +35,7 @@ test('tickets id page', function (): void {
     $this->user->givePermissionTo(Permission::findOrCreate('tickets.{id}.get', 'web'));
 
     $this->actingAs($this->user, 'web')->get('/tickets/' . $this->ticket->id)
-        ->assertStatus(200);
+        ->assertOk();
 });
 
 test('tickets id ticket not found', function (): void {
@@ -43,19 +44,21 @@ test('tickets id ticket not found', function (): void {
     $this->user->givePermissionTo(Permission::findOrCreate('tickets.{id}.get', 'web'));
 
     $this->actingAs($this->user, 'web')->get('/tickets/' . $this->ticket->id)
-        ->assertStatus(404);
+        ->assertNotFound();
 });
 
 test('tickets id without permission', function (): void {
     Permission::findOrCreate('tickets.{id}.get', 'web');
 
     $this->actingAs($this->user, 'web')->get('/tickets/' . $this->ticket->id)
-        ->assertStatus(403);
+        ->assertForbidden();
 });
 
 test('tickets no user', function (): void {
+    $this->actingAsGuest();
+
     $this->get('/tickets')
-        ->assertStatus(302)
+        ->assertFound()
         ->assertRedirect(route('login'));
 });
 
@@ -63,12 +66,12 @@ test('tickets page', function (): void {
     $this->user->givePermissionTo(Permission::findOrCreate('tickets.get', 'web'));
 
     $this->actingAs($this->user, 'web')->get('/tickets')
-        ->assertStatus(200);
+        ->assertOk();
 });
 
 test('tickets without permission', function (): void {
     Permission::findOrCreate('tickets.get', 'web');
 
     $this->actingAs($this->user, 'web')->get('/tickets')
-        ->assertStatus(403);
+        ->assertForbidden();
 });

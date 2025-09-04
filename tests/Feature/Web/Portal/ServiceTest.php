@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\Web\Portal\PortalSetup::class);
 use FluxErp\Models\Permission;
 use FluxErp\Models\Product;
 use FluxErp\Models\SerialNumber;
@@ -8,9 +7,11 @@ use FluxErp\Models\StockPosting;
 use FluxErp\Models\Warehouse;
 
 test('portal service no user', function (): void {
+    $this->actingAsGuest();
+
     $this->get(route('portal.service', ['serialNumberId' => null]))
-        ->assertStatus(302)
-        ->assertRedirect($this->portalDomain . '/login');
+        ->assertFound()
+        ->assertRedirect(config('flux.portal_domain') . '/login');
 });
 
 test('portal service page', function (): void {
@@ -27,30 +28,30 @@ test('portal service page', function (): void {
         'posting' => 1,
     ]);
 
-    $serialNumber->addresses()->attach($this->user->id);
+    $serialNumber->addresses()->attach($this->address->id);
 
-    $this->user->givePermissionTo(
+    $this->address->givePermissionTo(
         Permission::findOrCreate('service.{serialnumberid?}.get', 'address')
     );
 
-    $this->actingAs($this->user, 'address')->get(
+    $this->actingAs($this->address, 'address')->get(
         route('portal.service', ['serialNumberId' => $serialNumber->id])
     )
-        ->assertStatus(200);
+        ->assertOk();
 });
 
 test('portal service page without serial number', function (): void {
-    $this->user->givePermissionTo(
+    $this->address->givePermissionTo(
         Permission::findOrCreate('service.{serialnumberid?}.get', 'address')
     );
 
-    $this->actingAs($this->user, 'address')->get(route('portal.service', ['serialNumberId' => null]))
-        ->assertStatus(200);
+    $this->actingAs($this->address, 'address')->get(route('portal.service', ['serialNumberId' => null]))
+        ->assertOk();
 });
 
 test('portal service without permission', function (): void {
     Permission::findOrCreate('service.{serialnumberid?}.get', 'address');
 
-    $this->actingAs($this->user, 'address')->get(route('portal.service', ['serialNumberId' => null]))
-        ->assertStatus(403);
+    $this->actingAs($this->address, 'address')->get(route('portal.service', ['serialNumberId' => null]))
+        ->assertForbidden();
 });

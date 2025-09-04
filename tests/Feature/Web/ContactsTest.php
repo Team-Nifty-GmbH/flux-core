@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\Web\BaseSetup::class);
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\PaymentType;
@@ -31,12 +30,14 @@ test('contacts id contact not found', function (): void {
     $this->user->givePermissionTo(Permission::findOrCreate('contacts.{id?}.get', 'web'));
 
     $this->actingAs($this->user, 'web')->get('/contacts/' . $this->contact->id)
-        ->assertStatus(404);
+        ->assertNotFound();
 });
 
 test('contacts id no user', function (): void {
+    $this->actingAsGuest();
+
     $this->get('/contacts/contacts/' . $this->contact->id)
-        ->assertStatus(302)
+        ->assertFound()
         ->assertRedirect(route('login'));
 });
 
@@ -44,26 +45,28 @@ test('contacts id page', function (): void {
     $this->user->givePermissionTo(Permission::findOrCreate('contacts.{id?}.get', 'web'));
 
     $this->actingAs($this->user, 'web')->get('/contacts/contacts/' . $this->contact->id)
-        ->assertStatus(200);
+        ->assertOk();
 });
 
 test('contacts id page without id', function (): void {
     $this->user->givePermissionTo(Permission::findOrCreate('contacts.{id?}.get', 'web'));
 
     $this->actingAs($this->user, 'web')->get('/contacts/contacts/0')
-        ->assertStatus(404);
+        ->assertNotFound();
 });
 
 test('contacts id without permission', function (): void {
     Permission::findOrCreate('contacts.{id?}.get', 'web');
 
     $this->actingAs($this->user, 'web')->get('/contacts/contacts/' . $this->contact->id)
-        ->assertStatus(403);
+        ->assertForbidden();
 });
 
 test('contacts no user', function (): void {
+    $this->actingAsGuest();
+
     $this->get('/contacts/contacts')
-        ->assertStatus(302)
+        ->assertFound()
         ->assertRedirect(route('login'));
 });
 
@@ -71,12 +74,12 @@ test('contacts page', function (): void {
     $this->user->givePermissionTo(Permission::findOrCreate('contacts.get', 'web'));
 
     $this->actingAs($this->user, 'web')->get('/contacts/contacts')
-        ->assertStatus(200);
+        ->assertOk();
 });
 
 test('contacts without permission', function (): void {
     Permission::findOrCreate('contacts.get', 'web');
 
     $this->actingAs($this->user, 'web')->get('/contacts/contacts')
-        ->assertStatus(403);
+        ->assertForbidden();
 });

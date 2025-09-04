@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use Carbon\Carbon;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Category;
@@ -44,7 +43,7 @@ test('create additional column model not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/additional-columns', $additionalColumn);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('create additional column name model combination already exists', function (): void {
@@ -58,7 +57,7 @@ test('create additional column name model combination already exists', function 
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/additional-columns', $additionalColumn);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('create additional column validation fails', function (): void {
@@ -72,7 +71,7 @@ test('create additional column validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/additional-columns', $additionalColumn);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('create additional column values no list', function (): void {
@@ -86,7 +85,7 @@ test('create additional column values no list', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/additional-columns', $additionalColumn);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('delete additional column', function (): void {
@@ -94,7 +93,7 @@ test('delete additional column', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/additional-columns/' . $this->additionalColumns[2]->id);
-    $response->assertStatus(204);
+    $response->assertNoContent();
 
     expect($this->additionalColumns[2]->fresh())->toBeEmpty();
 });
@@ -108,7 +107,7 @@ test('get additional column additional column not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/additional-columns/' . $additionalColumn->id + 1);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get additional columns', function (): void {
@@ -116,7 +115,7 @@ test('get additional columns', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/additional-columns');
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $jsonAdditionalColumns = collect(json_decode($response->getContent())->data->data);
     foreach ($this->additionalColumns as $additionalColumn) {
@@ -140,7 +139,7 @@ test('get additional columns by model', function (): void {
 
     $queryParams = '?filter[model_type]=user';
     $response = $this->actingAs($this->user)->get('/api/additional-columns' . $queryParams);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $jsonAdditionalColumns = collect(json_decode($response->getContent())->data->data);
 
@@ -180,7 +179,7 @@ test('get additional columns model not found', function (): void {
 
     $queryParams = '?filter[model_type]=zywx' . Str::random();
     $response = $this->actingAs($this->user)->get('/api/additional-columns' . $queryParams);
-    $response->assertStatus(200);
+    $response->assertOk();
     expect(json_decode($response->getContent())->data->data)->toBeEmpty();
 });
 
@@ -195,7 +194,7 @@ test('update additional column', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/additional-columns', $additionalColumn);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $jsonAdditionalColumn = json_decode($response->getContent())->data;
     $dbAdditionalColumn = $this->additionalColumns[0]->fresh();
@@ -222,7 +221,7 @@ test('update additional column model has values exists', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/additional-columns', $additionalColumn);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('update additional column validation fails', function (): void {
@@ -236,7 +235,7 @@ test('update additional column validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/additional-columns', $additionalColumn);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('update additional column values no list', function (): void {
@@ -249,5 +248,5 @@ test('update additional column values no list', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/additional-columns', $additionalColumn);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });

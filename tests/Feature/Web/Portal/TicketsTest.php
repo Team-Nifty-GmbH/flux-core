@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\Web\Portal\PortalSetup::class);
 use FluxErp\Models\Address;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Ticket;
@@ -8,55 +7,59 @@ use FluxErp\Models\Ticket;
 beforeEach(function (): void {
     $this->ticket = Ticket::factory()->create([
         'authenticatable_type' => morph_alias(Address::class),
-        'authenticatable_id' => $this->user->id,
+        'authenticatable_id' => $this->address->id,
     ]);
 });
 
 test('portal tickets id no user', function (): void {
+    $this->actingAsGuest();
+
     $this->get(route('portal.tickets.id', ['id' => $this->ticket->id]))
-        ->assertStatus(302)
-        ->assertRedirect($this->portalDomain . '/login');
+        ->assertFound()
+        ->assertRedirect(config('flux.portal_domain') . '/login');
 });
 
 test('portal tickets id page', function (): void {
-    $this->user->givePermissionTo(Permission::findOrCreate('tickets.{id}.get', 'address'));
+    $this->address->givePermissionTo(Permission::findOrCreate('tickets.{id}.get', 'address'));
 
-    $this->actingAs($this->user, 'address')->get(route('portal.tickets.id', ['id' => $this->ticket->id]))
-        ->assertStatus(200);
+    $this->actingAs($this->address, 'address')->get(route('portal.tickets.id', ['id' => $this->ticket->id]))
+        ->assertOk();
 });
 
 test('portal tickets id ticket not found', function (): void {
     $this->ticket->delete();
 
-    $this->user->givePermissionTo(Permission::findOrCreate('tickets.{id}.get', 'address'));
+    $this->address->givePermissionTo(Permission::findOrCreate('tickets.{id}.get', 'address'));
 
-    $this->actingAs($this->user, 'address')->get(route('portal.tickets.id', ['id' => $this->ticket->id]))
-        ->assertStatus(404);
+    $this->actingAs($this->address, 'address')->get(route('portal.tickets.id', ['id' => $this->ticket->id]))
+        ->assertNotFound();
 });
 
 test('portal tickets id without permission', function (): void {
     Permission::findOrCreate('tickets.{id}.get', 'address');
 
-    $this->actingAs($this->user, 'address')->get(route('portal.tickets.id', ['id' => $this->ticket->id]))
-        ->assertStatus(403);
+    $this->actingAs($this->address, 'address')->get(route('portal.tickets.id', ['id' => $this->ticket->id]))
+        ->assertForbidden();
 });
 
 test('portal tickets no user', function (): void {
+    $this->actingAsGuest();
+
     $this->get(route('portal.tickets'))
-        ->assertStatus(302)
-        ->assertRedirect($this->portalDomain . '/login');
+        ->assertFound()
+        ->assertRedirect(config('flux.portal_domain') . '/login');
 });
 
 test('portal tickets page', function (): void {
-    $this->user->givePermissionTo(Permission::findOrCreate('tickets.get', 'address'));
+    $this->address->givePermissionTo(Permission::findOrCreate('tickets.get', 'address'));
 
-    $this->actingAs($this->user, 'address')->get(route('portal.tickets'))
-        ->assertStatus(200);
+    $this->actingAs($this->address, 'address')->get(route('portal.tickets'))
+        ->assertOk();
 });
 
 test('portal tickets without permission', function (): void {
     Permission::findOrCreate('tickets.get', 'address');
 
-    $this->actingAs($this->user, 'address')->get(route('portal.tickets'))
-        ->assertStatus(403);
+    $this->actingAs($this->address, 'address')->get(route('portal.tickets'))
+        ->assertForbidden();
 });

@@ -1,10 +1,9 @@
 <?php
 
-uses(FluxErp\Tests\TestCase::class);
 use FluxErp\Livewire\Widgets\SearchBar;
 use Livewire\Livewire;
 
 test('renders successfully', function (): void {
     Livewire::test(SearchBar::class)
-        ->assertStatus(200);
+        ->assertOk();
 });

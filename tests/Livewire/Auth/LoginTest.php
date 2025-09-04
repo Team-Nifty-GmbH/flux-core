@@ -6,13 +6,14 @@ use Illuminate\Support\Facades\Mail;
 use Livewire\Livewire;
 
 beforeEach(function (): void {
-    app('auth')->logout();
+    $this->actingAsGuest();
 });
 
 test('login link', function (): void {
     Mail::fake();
 
     Livewire::test(Login::class)
+        ->assertOk()
         ->set('email', $this->user->email)
         ->call('login')
         ->assertNoRedirect()
@@ -25,6 +26,7 @@ test('login link', function (): void {
 
 test('login successful', function (): void {
     Livewire::test(Login::class)
+        ->assertOk()
         ->set('email', $this->user->email)
         ->set('password', 'password')
         ->call('login')
@@ -35,6 +37,7 @@ test('login successful', function (): void {
 
 test('login wrong password', function (): void {
     Livewire::test(Login::class)
+        ->assertOk()
         ->set('email', 'noexistingmail@example.com')
         ->set('password', 'wrongpassword')
         ->call('login')
@@ -46,5 +49,5 @@ test('login wrong password', function (): void {
 
 test('renders successfully', function (): void {
     Livewire::test(Login::class)
-        ->assertStatus(200);
+        ->assertOk();
 });

@@ -1,7 +1,7 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use Carbon\Carbon;
+use FluxErp\FluxServiceProvider;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Address;
 use FluxErp\Models\Category;
@@ -9,7 +9,6 @@ use FluxErp\Models\Contact;
 use FluxErp\Models\Permission;
 use FluxErp\Models\Project;
 use FluxErp\Models\Task;
-use FluxErp\Services\CategoryService;
 use Laravel\Sanctum\Sanctum;
 
 beforeEach(function (): void {
@@ -48,7 +47,7 @@ test('create category', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/categories', $category);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $projectCategory = json_decode($response->getContent())->data;
     $dbCategory = Category::query()
@@ -75,20 +74,20 @@ test('create category additional column validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/categories', $category);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('create category model not found', function (): void {
     $category = [
         'name' => 'Random Category Name',
-        'model_type' => CategoryService::class,
+        'model_type' => FluxServiceProvider::class,
     ];
 
     $this->user->givePermissionTo($this->permissions['create']);
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/categories', $category);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('create category parent category not found', function (): void {
@@ -107,7 +106,7 @@ test('create category parent category not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/categories', $category);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('create category second validation fails', function (): void {
@@ -121,7 +120,7 @@ test('create category second validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/categories', $category);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('create category validation fails', function (): void {
@@ -139,7 +138,7 @@ test('create category validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/categories', $category);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('create category with additional column', function (): void {
@@ -163,7 +162,7 @@ test('create category with additional column', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/categories', $category);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $projectCategory = json_decode($response->getContent())->data;
     $dbCategory = Category::query()
@@ -201,7 +200,7 @@ test('create category with additional column predefined values', function (): vo
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/categories', $category);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $projectCategory = json_decode($response->getContent())->data;
     $dbCategory = Category::query()
@@ -233,7 +232,7 @@ test('create category with parent', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/categories', $category);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $projectCategory = json_decode($response->getContent())->data;
     $dbCategory = Category::query()
@@ -250,7 +249,7 @@ test('delete category', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/categories/' . $this->categories[1]->id);
-    $response->assertStatus(204);
+    $response->assertNoContent();
 
     expect(Category::query()->whereKey($this->categories[1]->id)->exists())->toBeFalse();
 });
@@ -296,7 +295,7 @@ test('delete category category not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/categories/' . ++$this->categories[1]->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get categories', function (): void {
@@ -304,7 +303,7 @@ test('get categories', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/categories');
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     expect(property_exists($json, 'templates'))->toBeFalse();
@@ -324,7 +323,7 @@ test('get category', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/categories/' . $this->categories[0]->id);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     $category = $json->data;
@@ -342,7 +341,7 @@ test('get category category not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/project-categories/' . ++$this->categories[1]->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('update category', function (): void {
@@ -363,7 +362,7 @@ test('update category', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/categories', $category);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $projectCategory = json_decode($response->getContent())->data;
     $dbCategory = Category::query()
@@ -392,7 +391,7 @@ test('update category category not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/categories', $category);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('update category cycle detected', function (): void {
@@ -412,7 +411,7 @@ test('update category cycle detected', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/categories', $category);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
     expect(property_exists(json_decode($response->getContent())->errors, 'parent_id'))->toBeTrue();
 });
 
@@ -433,7 +432,7 @@ test('update category parent category not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/categories', $category);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('update category parent model type not found', function (): void {
@@ -455,7 +454,7 @@ test('update category parent model type not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/categories', $category);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('update category validation fails', function (): void {
@@ -476,7 +475,7 @@ test('update category validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/categories', $category);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('update category with additional column', function (): void {
@@ -504,7 +503,7 @@ test('update category with additional column', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/categories', $category);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $projectCategory = json_decode($response->getContent())->data;
     $dbCategory = Category::query()

@@ -2,7 +2,6 @@
 
 namespace FluxErp\Tests\Unit\Livewire\DataTable;
 
-uses(\FluxErp\Tests\Livewire\BaseSetup::class);
 use FluxErp\Jobs\ExportDataTableJob;
 use FluxErp\Livewire\DataTables\BaseDataTable;
 use FluxErp\Notifications\ExportReady;
@@ -18,7 +17,7 @@ test('can export data', function (): void {
     Storage::fake(config('filesystems.default'));
 
     Livewire::test(ClientDataTableTest::class)
-        ->assertStatus(200)
+        ->assertOk()
         ->call('export')
         ->assertToastNotification(type: 'success');
 
@@ -39,7 +38,7 @@ test('can export data', function (): void {
             expect($downloadUrl = invade($toast->accept)->url)->toBe(route('private-storage', ['path' => $invaded->filePath]));
 
             $this->get($downloadUrl)
-                ->assertStatus(200)
+                ->assertOk()
                 ->assertDownload(pathinfo($invaded->filePath, PATHINFO_BASENAME));
 
             return true;

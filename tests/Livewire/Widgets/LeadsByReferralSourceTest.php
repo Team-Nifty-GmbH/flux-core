@@ -120,7 +120,7 @@ test('options use data correctly', function (): void {
 
 test('renders successfully', function (): void {
     Livewire::test(LeadsByReferralSource::class)
-        ->assertStatus(200);
+        ->assertOk();
 });
 
 test('show method redirects correctly', function (): void {
@@ -145,7 +145,7 @@ test('timeframe in the future', function (): void {
         ->set('end', $end)
         ->call('calculateChart')
         ->assertSet('series', [])
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors();
 });
 
@@ -174,7 +174,7 @@ function assertReferralSourceTimeframeResults(Collection $addresses, Collection 
     $test = Livewire::test(LeadsByReferralSource::class)
         ->set('timeFrame', $timeFrame)
         ->call('calculateChart')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors();
 
     $series = $test->get('series');

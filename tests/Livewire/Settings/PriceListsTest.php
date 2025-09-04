@@ -12,12 +12,12 @@ beforeEach(function (): void {
 
 test('can create price list', function (): void {
     Livewire::test(PriceLists::class)
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->set('priceList.name', $name = Str::uuid())
         ->set('priceList.price_list_code', Str::uuid())
         ->call('save')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors();
 
     $this->assertDatabaseHas('price_lists', [
@@ -34,7 +34,7 @@ test('can update price list', function (): void {
     $form->fill($child);
 
     Livewire::test(PriceLists::class, ['priceList' => $form])
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->set('priceList.name', 'New Name')
         ->set(
@@ -45,7 +45,7 @@ test('can update price list', function (): void {
             ]
         )
         ->call('save')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors();
 
     $dbPriceList = $child->refresh();
@@ -57,5 +57,5 @@ test('can update price list', function (): void {
 
 test('renders successfully', function (): void {
     Livewire::test(PriceLists::class)
-        ->assertStatus(200);
+        ->assertOk();
 });

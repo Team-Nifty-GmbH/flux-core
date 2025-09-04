@@ -10,7 +10,7 @@ beforeEach(function (): void {
 
 test('renders successfully', function (): void {
     Livewire::test(TaskView::class, ['id' => $this->task->id])
-        ->assertStatus(200);
+        ->assertOk();
 });
 
 test('switch tabs', function (): void {

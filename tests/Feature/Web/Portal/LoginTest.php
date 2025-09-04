@@ -1,19 +1,20 @@
 <?php
 
-uses(FluxErp\Tests\Feature\Web\Portal\PortalSetup::class);
 test('login as authenticated user', function (): void {
-    $this->actingAs($this->user, 'address')->get($this->portalDomain . '/login')
-        ->assertStatus(302)
+    $this->actingAs($this->address, 'address')->get(config('flux.portal_domain') . '/login')
+        ->assertFound()
         ->assertRedirect(route('portal.dashboard'));
 });
 
 test('login no path', function (): void {
-    $this->get($this->portalDomain . '/')
-        ->assertStatus(302)
-        ->assertRedirect($this->portalDomain . '/login');
+    $this->actingAsGuest();
+    $this->get(config('flux.portal_domain') . '/')
+        ->assertFound()
+        ->assertRedirect(config('flux.portal_domain') . '/login');
 });
 
 test('login page', function (): void {
-    $this->get($this->portalDomain . '/login')
-        ->assertStatus(200);
+    $this->actingAsGuest();
+    $this->get(config('flux.portal_domain') . '/login')
+        ->assertOk();
 });

@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use FluxErp\Models\Permission;
 use FluxErp\Models\Unit;
 use Illuminate\Support\Str;
@@ -28,7 +27,7 @@ test('create unit', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/units', $unit);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseUnit = json_decode($response->getContent())->data;
 
@@ -49,7 +48,7 @@ test('create unit validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/units', $unit);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('delete unit', function (): void {
@@ -57,7 +56,7 @@ test('delete unit', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/units/' . $this->unit->id);
-    $response->assertStatus(204);
+    $response->assertNoContent();
 
     expect(Unit::query()->whereKey($this->unit->id)->exists())->toBeFalse();
 });
@@ -67,7 +66,7 @@ test('delete unit unit not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/units/' . ++$this->unit->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get unit', function (): void {
@@ -75,7 +74,7 @@ test('get unit', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/units/' . $this->unit->id);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $unit = json_decode($response->getContent())->data;
 
@@ -89,7 +88,7 @@ test('get unit unit not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/units/' . $this->unit->id + 10000);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get units', function (): void {
@@ -97,7 +96,7 @@ test('get units', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/units');
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $units = json_decode($response->getContent())->data;
 

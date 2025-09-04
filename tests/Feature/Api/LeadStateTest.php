@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use FluxErp\Models\Client;
 use FluxErp\Models\LeadState;
 use FluxErp\Models\Permission;
@@ -40,7 +39,7 @@ test('create lead state', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->post('/api/lead-states', $leadState);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseLeadState = json_decode($response->getContent())->data;
     $dbLeadState = LeadState::query()
@@ -70,7 +69,7 @@ test('create lead state maximum', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->post('/api/lead-states', $leadState);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseLeadState = json_decode($response->getContent())->data;
     $dbLeadState = LeadState::query()
@@ -95,7 +94,7 @@ test('create lead state validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->post('/api/lead-states', $leadState);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 
     $response->assertJsonValidationErrors([
         'name',
@@ -107,7 +106,7 @@ test('delete lead state', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->delete('/api/lead-states/' . $this->leadStates[0]->id);
-    $response->assertStatus(204);
+    $response->assertNoContent();
 
     $leadState = $this->leadStates[0]->fresh();
     expect($leadState->deleted_at)->not->toBeNull();
@@ -119,7 +118,7 @@ test('delete lead state not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->delete('/api/lead-states/' . (LeadState::max('id') + 1));
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get lead state', function (): void {
@@ -127,7 +126,7 @@ test('get lead state', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->get('/api/lead-states/' . $this->leadStates[0]->id);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     $jsonLeadState = $json->data;
@@ -147,7 +146,7 @@ test('get lead state not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->get('/api/lead-states/' . (LeadState::max('id') + 1));
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get lead states', function (): void {
@@ -155,7 +154,7 @@ test('get lead states', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->get('/api/lead-states');
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     $jsonLeadStates = collect($json->data->data);
@@ -208,7 +207,7 @@ test('update lead state', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->put('/api/lead-states', $leadState);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseLeadState = json_decode($response->getContent())->data;
     $dbLeadState = LeadState::query()
@@ -236,7 +235,7 @@ test('update lead state maximum', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->put('/api/lead-states', $leadState);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseLeadState = json_decode($response->getContent())->data;
     $dbLeadState = LeadState::query()
@@ -263,7 +262,7 @@ test('update lead state validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->put('/api/lead-states', $leadState);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 
     $response->assertJsonValidationErrors([
         'name',

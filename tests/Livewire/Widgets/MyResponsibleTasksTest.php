@@ -6,5 +6,5 @@ use Livewire\Livewire;
 test('renders successfully', function (): void {
     Livewire::actingAs($this->user)
         ->test(MyResponsibleTasks::class)
-        ->assertStatus(200);
+        ->assertOk();
 });

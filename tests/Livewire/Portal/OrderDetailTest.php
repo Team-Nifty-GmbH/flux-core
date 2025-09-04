@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Livewire\PortalBaseSetup::class);
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\Portal\OrderDetail;
 use FluxErp\Models\Address;
@@ -81,16 +80,18 @@ beforeEach(function (): void {
                 ->orWhere('is_imported', true)
             );
     });
+
+    $this->be($this->address, 'address');
 });
 
 test('dont render order from other address', function (): void {
     Livewire::test(OrderDetail::class, ['id' => $this->orders[1]->id])
-        ->assertStatus(404);
+        ->assertNotFound();
 });
 
 test('renders successfully', function (): void {
     Livewire::test(OrderDetail::class, ['id' => $this->orders[0]->id])
-        ->assertStatus(200);
+        ->assertOk();
 });
 
 test('select order position', function (): void {

@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use Carbon\Carbon;
 use FluxErp\Models\Country;
 use FluxErp\Models\Currency;
@@ -32,7 +31,7 @@ test('create currency', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/currencies', $currency);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseCurrency = json_decode($response->getContent())->data;
     $dbCurrency = Currency::query()
@@ -59,7 +58,7 @@ test('create currency iso exists', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/currencies', $currency);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('create currency validation fails', function (): void {
@@ -73,7 +72,7 @@ test('create currency validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/currencies', $currency);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('delete currency', function (): void {
@@ -81,7 +80,7 @@ test('delete currency', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/currencies/' . $this->currencies[1]->id);
-    $response->assertStatus(204);
+    $response->assertNoContent();
 
     $currency = $this->currencies[1]->fresh();
     expect($currency->deleted_at)->not->toBeNull();
@@ -93,7 +92,7 @@ test('delete currency currency not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/currencies/' . ++$this->currencies[1]->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('delete currency currency referenced by country', function (): void {
@@ -115,7 +114,7 @@ test('get currencies', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/currencies');
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     $jsonCurrencies = collect($json->data->data);
@@ -142,7 +141,7 @@ test('get currency', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/currencies/' . $this->currencies[0]->id);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     $jsonCurrency = $json->data;
@@ -163,7 +162,7 @@ test('get currency currency not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/currencies/' . ++$this->currencies[1]->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('update currency', function (): void {
@@ -176,7 +175,7 @@ test('update currency', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/currencies', $currency);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseCurrency = json_decode($response->getContent())->data;
     $dbCurrency = Currency::query()
@@ -199,7 +198,7 @@ test('update currency iso exists', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/currencies', $currency);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
     expect(json_decode($response->getContent())->status)->toEqual(422);
     expect(property_exists(json_decode($response->getContent())->errors, 'iso'))->toBeTrue();
 });
@@ -217,7 +216,7 @@ test('update currency maximum', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/currencies', $currency);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseCurrency = json_decode($response->getContent())->data;
     $dbCurrency = Currency::query()
@@ -243,5 +242,5 @@ test('update currency validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/currencies', $currency);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });

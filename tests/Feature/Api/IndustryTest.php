@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use FluxErp\Models\Client;
 use FluxErp\Models\Industry;
 use FluxErp\Models\Permission;
@@ -31,7 +30,7 @@ test('create industry', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->post('/api/industries', $industry);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseIndustry = json_decode($response->getContent())->data;
     $dbIndustry = Industry::query()
@@ -51,7 +50,7 @@ test('create industry validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->post('/api/industries', $industry);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 
     $response->assertJsonValidationErrors([
         'name',
@@ -67,7 +66,7 @@ test('create industry with auto order', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->post('/api/industries', $industry);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseIndustry = json_decode($response->getContent())->data;
     $dbIndustry = Industry::query()
@@ -84,7 +83,7 @@ test('delete industry', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->delete('/api/industries/' . $this->industries[0]->id);
-    $response->assertStatus(204);
+    $response->assertNoContent();
 
     $industry = $this->industries[0]->fresh();
     expect($industry)->toBeNull();
@@ -95,7 +94,7 @@ test('delete industry not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->delete('/api/industries/' . (Industry::max('id') + 1));
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get industries', function (): void {
@@ -103,7 +102,7 @@ test('get industries', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->get('/api/industries');
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     $jsonIndustries = collect($json->data->data);
@@ -123,7 +122,7 @@ test('get industry', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->get('/api/industries/' . $this->industries[0]->id);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     $jsonIndustry = $json->data;
@@ -138,7 +137,7 @@ test('get industry not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->get('/api/industries/' . (Industry::max('id') + 1));
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('update industry', function (): void {
@@ -151,7 +150,7 @@ test('update industry', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->put('/api/industries', $industry);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseIndustry = json_decode($response->getContent())->data;
     $dbIndustry = Industry::query()
@@ -173,7 +172,7 @@ test('update industry maximum', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->put('/api/industries', $industry);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseIndustry = json_decode($response->getContent())->data;
     $dbIndustry = Industry::query()
@@ -196,7 +195,7 @@ test('update industry validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->put('/api/industries', $industry);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 
     $response->assertJsonValidationErrors([
         'name',

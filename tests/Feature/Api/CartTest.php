@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use FluxErp\Models\Address;
 use FluxErp\Models\Cart;
 use FluxErp\Models\CartItem;
@@ -87,7 +86,7 @@ test('create cart', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->post('/api/carts', $cart);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseCart = json_decode($response->getContent())->data;
     $dbCart = Cart::query()
@@ -120,7 +119,7 @@ test('create cart validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->post('/api/carts', $cart);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 
     $response->assertJsonValidationErrors([
         'authenticatable_type',
@@ -142,7 +141,7 @@ test('create cart with price list', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->post('/api/carts', $cart);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseCart = json_decode($response->getContent())->data;
     $dbCart = Cart::query()
@@ -171,7 +170,7 @@ test('delete cart', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->delete('/api/carts/' . $this->carts[0]->id);
-    $response->assertStatus(204);
+    $response->assertNoContent();
 
     $cart = $this->carts[0]->fresh();
     expect($cart->deleted_at)->not->toBeNull();
@@ -182,7 +181,7 @@ test('delete cart not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->delete('/api/carts/' . (Cart::max('id') + 1));
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get cart', function (): void {
@@ -190,7 +189,7 @@ test('get cart', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->get('/api/carts/' . $this->carts[0]->id);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     $jsonCart = $json->data;
@@ -207,7 +206,7 @@ test('get cart not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->get('/api/carts/' . (Cart::max('id') + 1));
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get carts', function (): void {
@@ -215,7 +214,7 @@ test('get carts', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->get('/api/carts');
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     $jsonCarts = collect($json->data->data);
@@ -242,7 +241,7 @@ test('update cart', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->put('/api/carts', $cart);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseCart = json_decode($response->getContent())->data;
     $dbCart = Cart::query()

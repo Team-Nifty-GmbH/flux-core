@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\TestCase::class);
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\Features\SignaturePublicLink;
 use FluxErp\Models\Address;
@@ -70,7 +69,7 @@ test('renders successfully', function (): void {
             'printView' => array_keys($this->order->resolvePrintViews())[0],
         ]
     )
-        ->assertStatus(200)
+        ->assertOk()
         ->assertSet('uuid', $this->order->uuid)
         ->assertSet('model', $this->order->getMorphClass())
         ->assertSet('printView', array_keys($this->order->resolvePrintViews())[0])

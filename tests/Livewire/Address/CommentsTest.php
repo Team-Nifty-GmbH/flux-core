@@ -17,7 +17,6 @@ beforeEach(function (): void {
 });
 
 test('renders successfully', function (): void {
-    Livewire::actingAs($this->user)
-        ->test(Comments::class, ['modelId' => $this->address->id])
-        ->assertStatus(200);
+    Livewire::test(Comments::class, ['modelId' => $this->address->id])
+        ->assertOk();
 });

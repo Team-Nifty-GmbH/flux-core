@@ -1,23 +1,15 @@
 <?php
 
-uses(FluxErp\Tests\TestCase::class);
 use FluxErp\Livewire\Portal\Shop\ProductDetail;
-use FluxErp\Models\Currency;
 use FluxErp\Models\Product;
 use FluxErp\Models\ProductCrossSelling;
 use Livewire\Livewire;
-
-beforeEach(function (): void {
-    Currency::factory()->create([
-        'is_default' => true,
-    ]);
-});
 
 test('renders successfully', function (): void {
     $product = Product::factory()->create();
 
     Livewire::test(ProductDetail::class, ['product' => $product])
-        ->assertStatus(200)
+        ->assertOk()
         ->assertSet('productForm.id', $product->id)
         ->assertSet('productForm.parent_id', $product->parent_id)
         ->assertSet('productForm.product_number', $product->product_number)
@@ -51,7 +43,7 @@ test('shows bundle products', function (): void {
         ->create();
 
     Livewire::test(ProductDetail::class, ['product' => $product])
-        ->assertStatus(200)
+        ->assertOk()
         ->assertSet('productForm.id', $product->id)
         ->assertSet('productForm.parent_id', $product->parent_id)
         ->assertSet('productForm.product_number', $product->product_number)
@@ -93,7 +85,7 @@ test('shows cross selling products', function (): void {
 
     Livewire::withoutLazyLoading()
         ->test(ProductDetail::class, ['product' => $product])
-        ->assertStatus(200)
+        ->assertOk()
         ->assertSet('productForm.id', $product->id)
         ->assertSet('productForm.parent_id', $product->parent_id)
         ->assertSet('productForm.product_number', $product->product_number)

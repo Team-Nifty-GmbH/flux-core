@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use FluxErp\Enums\CommunicationTypeEnum;
 use FluxErp\Models\Address;
 use FluxErp\Models\Client;
@@ -118,7 +117,7 @@ test('create communication', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->post('/api/communications', $communication);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseCommunication = json_decode($response->getContent())->data;
     $dbCommunication = Communication::query()
@@ -154,7 +153,7 @@ test('create communication maximum', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->post('/api/communications', $communication);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseCommunication = json_decode($response->getContent())->data;
     $dbCommunication = Communication::query()
@@ -182,7 +181,7 @@ test('create communication validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->post('/api/communications', $communication);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 
     $response->assertJsonValidationErrors([
         'communication_type_enum',
@@ -194,7 +193,7 @@ test('delete communication', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->delete('/api/communications/' . $this->communications[0]->id);
-    $response->assertStatus(204);
+    $response->assertNoContent();
 
     $communication = $this->communications[0]->fresh();
     expect($communication->deleted_at)->not->toBeNull();
@@ -206,7 +205,7 @@ test('delete communication not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->delete('/api/communications/' . (Communication::max('id') + 1));
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get communication', function (): void {
@@ -214,7 +213,7 @@ test('get communication', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->get('/api/communications/' . $this->communications[0]->id);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     $jsonCommunication = $json->data;
@@ -232,7 +231,7 @@ test('get communication not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->get('/api/communications/' . (Communication::max('id') + 1));
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get communications', function (): void {
@@ -240,7 +239,7 @@ test('get communications', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->get('/api/communications');
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     $jsonCommunications = collect($json->data->data);
@@ -268,7 +267,7 @@ test('update communication', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->put('/api/communications', $communication);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseCommunication = json_decode($response->getContent())->data;
     $dbCommunication = Communication::query()
@@ -299,7 +298,7 @@ test('update communication maximum', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->put('/api/communications', $communication);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseCommunication = json_decode($response->getContent())->data;
     $dbCommunication = Communication::query()

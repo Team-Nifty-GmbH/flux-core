@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use FluxErp\Actions\Printing;
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Address;

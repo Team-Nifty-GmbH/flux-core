@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\TestCase::class);
 use FluxErp\Livewire\Contact\Accounting;
 use FluxErp\Livewire\Forms\ContactForm;
 use FluxErp\Models\Client;
@@ -9,7 +8,7 @@ use Livewire\Livewire;
 
 test('renders successfully', function (): void {
     Livewire::test(Accounting::class)
-        ->assertStatus(200);
+        ->assertOk();
 });
 
 test('switch tabs', function (): void {

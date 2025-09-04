@@ -98,12 +98,12 @@ test('address update events', function (): void {
 
     Livewire::test(OrderView::class, ['id' => $this->order->id])
         ->set('order.address_delivery_id', $newAddress->id)
-        ->assertStatus(200)
+        ->assertOk()
         ->assertSet('order.address_delivery_id', $newAddress->id);
 
     Livewire::test(OrderView::class, ['id' => $this->order->id])
         ->set('order.address_invoice_id', $newAddress->id)
-        ->assertStatus(200)
+        ->assertOk()
         ->assertSet('order.address_invoice_id', $newAddress->id)
         ->assertSet('order.contact_id', $newAddress->contact_id)
         ->assertSet('order.client_id', $newAddress->client_id);
@@ -115,14 +115,14 @@ test('create and manage discount', function (): void {
     $component = Livewire::test(OrderView::class, ['id' => $this->order->id])
         ->assertSet('order.discounts', [])
         ->call('editDiscount')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertSee('edit-discount')
         ->assertSet('discount.is_percentage', true)
         ->set('discount.name', $discountName)
         ->set('discount.discount', 10)
         ->call('saveDiscount')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertReturned(true)
         ->assertNotSet('order.discounts', []);
@@ -140,17 +140,17 @@ test('create and manage discount', function (): void {
 
     $component
         ->call('editDiscount', $discount)
-        ->assertStatus(200)
+        ->assertOk()
         ->assertSet('discount.id', $discount->id)
         ->assertSet('discount.name', $discountName)
         ->set('discount.discount', 15)
         ->call('saveDiscount')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertReturned(true);
 
     $component
         ->call('deleteDiscount', $discount)
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors();
 
     $this->assertSoftDeleted('discounts', ['id' => $discount->id]);
@@ -177,7 +177,7 @@ test('create documents', function (): void {
             ],
         ])
         ->call('createDocuments')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertNotSet('order.invoice_number', null);
 
@@ -198,7 +198,7 @@ test('create documents with delivery lock fails', function (): void {
             ],
         ])
         ->call('createDocuments')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertReturned(null)
         ->assertHasErrors(['has_contact_delivery_lock', 'balance'])
         ->assertSet('order.invoice_number', null);
@@ -211,7 +211,7 @@ test('delete locked order fails', function (): void {
 
     Livewire::test(OrderView::class, ['id' => $this->order->id])
         ->call('delete')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertNoRedirect()
         ->assertHasErrors(['is_locked']);
 });
@@ -219,7 +219,7 @@ test('delete locked order fails', function (): void {
 test('delete order successful', function (): void {
     Livewire::test(OrderView::class, ['id' => $this->order->id])
         ->call('delete')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertRedirectToRoute('orders.orders');
 
@@ -246,7 +246,7 @@ test('fetch contact data', function (): void {
     Livewire::test(OrderView::class, ['id' => $this->order->id])
         ->set('order.contact_id', $newContact->id)
         ->call('fetchContactData')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertSet('order.client_id', $newContact->client_id)
         ->assertSet('order.address_invoice_id', $newContact->invoice_address_id)
         ->assertSet('order.address_delivery_id', $newContact->delivery_address_id);
@@ -324,7 +324,7 @@ test('mount initializes order data', function (): void {
 test('order confirmation toggle', function (): void {
     Livewire::test(OrderView::class, ['id' => $this->order->id])
         ->set('order.is_confirmed', true)
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors();
 
     expect($this->order->refresh()->is_confirmed)->toBeTrue();
@@ -428,7 +428,7 @@ test('order position with credit account', function (): void {
             ],
         ])
         ->call('createDocuments')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertNotSet('order.invoice_number', null);
 
@@ -535,7 +535,7 @@ test('order position with credit account debit', function (): void {
             ],
         ])
         ->call('createDocuments')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertNotSet('order.invoice_number', null);
 
@@ -547,7 +547,7 @@ test('order position with credit account debit', function (): void {
 test('recalculate order totals', function (): void {
     Livewire::test(OrderView::class, ['id' => $this->order->id])
         ->call('recalculateOrderTotals')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertNotSet('order.total_net_price', 0)
         ->assertNotSet('order.total_gross_price', 0);
 });
@@ -585,13 +585,13 @@ test('renders subscription order view', function (): void {
     $this->order->update(['order_type_id' => $subscriptionOrderType->id]);
 
     Livewire::test(OrderView::class, ['id' => $this->order->id])
-        ->assertStatus(200)
+        ->assertOk()
         ->assertViewIs('flux::livewire.order.subscription');
 });
 
 test('renders successfully', function (): void {
     Livewire::test(OrderView::class, ['id' => $this->order->id])
-        ->assertStatus(200)
+        ->assertOk()
         ->assertViewIs('flux::livewire.order.order')
         ->assertSet('order.id', $this->order->id)
         ->assertSet('tab', 'order.order-positions');
@@ -612,7 +612,7 @@ test('reorder discount', function (): void {
 
     Livewire::test(OrderView::class, ['id' => $this->order->id])
         ->call('reOrderDiscount', $discount1, 1) // Move to position 2
-        ->assertStatus(200)
+        ->assertOk()
         ->assertReturned(true);
 
     expect($discount1->refresh()->order_column)->toEqual(2);
@@ -634,11 +634,11 @@ test('replicate order', function (): void {
 
     $component = Livewire::test(OrderView::class, ['id' => $this->order->id])
         ->call('replicate')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertExecutesJs("\$modalOpen('replicate-order')")
         ->call('saveReplicate')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors();
 
     $replicatedOrder = Order::query()->whereKey($component->get('replicateOrder.id'))->first();
@@ -664,7 +664,7 @@ test('save locked order uses update locked action', function (): void {
         ->set('order.commission', $newCommission)
         ->set('order.invoice_number', 'SHOULD-NOT-CHANGE')
         ->call('save')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertReturned(true);
 
@@ -679,7 +679,7 @@ test('save order updates successfully', function (): void {
     Livewire::test(OrderView::class, ['id' => $this->order->id])
         ->set('order.commission', $newCommission)
         ->call('save')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertReturned(true);
 
@@ -692,7 +692,7 @@ test('save states', function (): void {
         ->set('order.payment_state', Paid::class)
         ->set('order.delivery_state', Delivered::class)
         ->call('saveStates')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors();
 });
 
@@ -721,7 +721,7 @@ test('subscription schedule functionality', function (): void {
         ->assertSet('schedule.id', null)
         ->call('saveSchedule')
         ->assertReturned(true)
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertNotSet('schedule.id', null);
 
@@ -755,7 +755,7 @@ test('toggle lock functionality', function (): void {
     Livewire::test(OrderView::class, ['id' => $this->order->id])
         ->assertSet('order.is_locked', false)
         ->call('toggleLock')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertSet('order.is_locked', true);
 

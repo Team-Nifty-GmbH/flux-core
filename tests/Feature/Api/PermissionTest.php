@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use FluxErp\Models\Permission;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
@@ -27,7 +26,7 @@ test('create permission', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/permissions', $permission);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responsePermission = json_decode($response->getContent())->data;
     $dbPermission = Permission::query()
@@ -47,7 +46,7 @@ test('create permission validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/permissions', $permission);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('delete permission', function (): void {
@@ -57,7 +56,7 @@ test('delete permission', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/permissions/' . $permission->id);
-    $response->assertStatus(204);
+    $response->assertNoContent();
 
     expect(Permission::query()->whereKey($permission->id)->exists())->toBeFalse();
 });
@@ -82,7 +81,7 @@ test('delete permission permission not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/permissions/' . ++$permission->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get permissions', function (): void {
@@ -90,7 +89,7 @@ test('get permissions', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/permissions');
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $permissions = json_decode($response->getContent())->data;
 
@@ -107,12 +106,15 @@ test('get user permissions', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/permissions/user/' . $this->user->id);
-    $response->assertStatus(200);
+    $response->assertOk();
 
-    $permissions = json_decode($response->getContent())->data;
+    $permissions = data_get(json_decode($response->getContent(), true), 'data');
+    $permissions = Permission::query()
+        ->whereKey(array_column($permissions, 'id'))
+        ->get();
 
     foreach ($permissions as $permission) {
-        expect($this->user->hasPermissionTo($permission->name))->toBeTrue();
+        expect($this->user->hasPermissionTo($permission))->toBeTrue();
     }
 });
 
@@ -121,7 +123,7 @@ test('get user permissions user not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/permissions/user/' . ++$this->user->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('give user permission', function (): void {
@@ -137,7 +139,7 @@ test('give user permission', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/permissions/give', $permission);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $this->user = $this->user->fresh();
 
@@ -160,7 +162,7 @@ test('revoke user permission', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/permissions/revoke', $permission);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $permissions = json_decode($response->getContent())->data;
 
@@ -181,5 +183,5 @@ test('revoke user permission validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/permissions/revoke', $permission);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });

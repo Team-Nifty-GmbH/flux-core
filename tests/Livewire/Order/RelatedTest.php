@@ -69,5 +69,5 @@ test('renders successfully', function (): void {
     $form->fill($this->order);
 
     Livewire::test(Related::class, ['order' => $form])
-        ->assertStatus(200);
+        ->assertOk();
 });

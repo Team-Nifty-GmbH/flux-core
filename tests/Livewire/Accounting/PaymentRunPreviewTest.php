@@ -203,7 +203,7 @@ test('displays orders in table', function (): void {
     expect($order1Data['invoice_number'])->toEqual('INV-001');
     expect($order2Data['invoice_number'])->toEqual('INV-002');
 
-    $component->assertStatus(200);
+    $component->assertOk();
 });
 
 test('handles empty order ids', function (): void {
@@ -264,7 +264,7 @@ test('renders successfully', function (): void {
     ]);
 
     Livewire::test(PaymentRunPreview::class)
-        ->assertStatus(200);
+        ->assertOk();
 });
 
 test('renders successfully with minimal session data', function (): void {
@@ -275,7 +275,7 @@ test('renders successfully with minimal session data', function (): void {
 
     $component = Livewire::test(PaymentRunPreview::class);
 
-    $component->assertStatus(200);
+    $component->assertOk();
     expect($component->get('orders'))->toBeEmpty();
 });
 

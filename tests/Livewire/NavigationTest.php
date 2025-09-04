@@ -4,17 +4,12 @@ use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Facades\Menu;
 use FluxErp\Livewire\Navigation;
 use FluxErp\Models\OrderType;
-use FluxErp\Models\PriceList;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 
-beforeEach(function (): void {
-    PriceList::factory()->create(['is_default' => true]);
-});
-
 test('renders successfully', function (): void {
     Livewire::test(Navigation::class)
-        ->assertStatus(200);
+        ->assertOk();
 });
 
 test('shows order types', function (): void {

@@ -19,6 +19,6 @@ test('renders successfully', function (): void {
         ]);
 
     Livewire::test(MyLeads::class)
-        ->assertStatus(200)
+        ->assertOk()
         ->assertSee($lead->name);
 });

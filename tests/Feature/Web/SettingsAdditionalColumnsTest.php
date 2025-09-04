@@ -1,11 +1,12 @@
 <?php
 
-uses(FluxErp\Tests\Feature\Web\BaseSetup::class);
 use FluxErp\Models\Permission;
 
 test('settings additional columns no user', function (): void {
+    $this->actingAsGuest();
+
     $this->get('/settings/additional-columns')
-        ->assertStatus(302)
+        ->assertFound()
         ->assertRedirect(route('login'));
 });
 
@@ -15,12 +16,12 @@ test('settings additional columns page', function (): void {
     );
 
     $this->actingAs($this->user, 'web')->get('/settings/additional-columns')
-        ->assertStatus(200);
+        ->assertOk();
 });
 
 test('settings additional columns without permission', function (): void {
     Permission::findOrCreate('settings.additional-columns.get', 'web');
 
     $this->actingAs($this->user, 'web')->get('/settings/additional-columns')
-        ->assertStatus(403);
+        ->assertForbidden();
 });

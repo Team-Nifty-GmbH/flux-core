@@ -21,7 +21,7 @@ test('renders successfully', function (): void {
     $tickets->get(1)->save();
 
     Livewire::test(MyTickets::class)
-        ->assertStatus(200)
+        ->assertOk()
         ->assertSee($tickets->get(0)->title)
         ->assertDontSee($tickets->get(1)->title)
         ->assertDontSee($tickets->get(2)->title);

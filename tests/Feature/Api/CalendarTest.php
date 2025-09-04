@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use Carbon\Carbon;
 use FluxErp\Models\Calendar;
 use FluxErp\Models\Permission;
@@ -32,7 +31,7 @@ test('create calendar', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/calendars', $calendar);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseCalendar = json_decode($response->getContent())->data;
     $dbCalendar = Calendar::query()
@@ -57,7 +56,7 @@ test('create calendar validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/calendars', $calendar);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('delete calendar', function (): void {
@@ -65,7 +64,7 @@ test('delete calendar', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/calendars/' . $this->calendars[2]->id);
-    $response->assertStatus(204);
+    $response->assertNoContent();
 
     expect(Calendar::query()->whereKey($this->calendars[2]->id)->exists())->toBeFalse();
 });
@@ -75,7 +74,7 @@ test('delete calendar calendar not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/calendars/' . ++$this->calendars[2]->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get calendar', function (): void {
@@ -83,7 +82,7 @@ test('get calendar', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/calendars/' . $this->calendars[0]->id);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $jsonCalendar = json_decode($response->getContent())->data;
 
@@ -101,7 +100,7 @@ test('get calendars', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/calendars');
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     $jsonCalendars = collect($json->data->data);
@@ -131,7 +130,7 @@ test('update calendar', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/calendars', $calendar);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseCalendar = json_decode($response->getContent())->data;
     $dbCalendar = Calendar::query()
@@ -158,7 +157,7 @@ test('update calendar calendar not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/calendars', $calendar);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('update calendar validation fails', function (): void {
@@ -172,5 +171,5 @@ test('update calendar validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/calendars', $calendar);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });

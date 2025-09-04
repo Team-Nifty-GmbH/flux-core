@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
 use FluxErp\Models\Permission;
@@ -42,7 +41,7 @@ test('create warehouse', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/warehouses', $warehouse);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseWarehouse = json_decode($response->getContent())->data;
     $dbWarehouse = Warehouse::query()
@@ -62,7 +61,7 @@ test('create warehouse validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/warehouses', $warehouse);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('delete warehouse', function (): void {
@@ -70,7 +69,7 @@ test('delete warehouse', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/warehouses/' . $this->warehouses[0]->id);
-    $response->assertStatus(204);
+    $response->assertNoContent();
 
     expect(Warehouse::query()->whereKey($this->warehouses[0]->id)->exists())->toBeFalse();
 });
@@ -80,7 +79,7 @@ test('delete warehouse warehouse not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/warehouses/' . ++$this->warehouses[2]->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get warehouse', function (): void {
@@ -88,7 +87,7 @@ test('get warehouse', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/warehouses/' . $this->warehouses[0]->id);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $warehouse = json_decode($response->getContent())->data;
 
@@ -102,7 +101,7 @@ test('get warehouse warehouse not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/warehouses/' . $this->warehouses[2]->id + 10000);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('get warehouses', function (): void {
@@ -110,7 +109,7 @@ test('get warehouses', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/warehouses');
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $warehouses = json_decode($response->getContent())->data;
 
@@ -136,7 +135,7 @@ test('update warehouse', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/warehouses', $warehouse);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseWarehouse = json_decode($response->getContent())->data;
     $dbWarehouse = Warehouse::query()
@@ -158,5 +157,5 @@ test('update warehouse validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/warehouses', $warehouse);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });

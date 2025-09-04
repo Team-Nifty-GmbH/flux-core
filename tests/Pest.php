@@ -1,24 +1,48 @@
 <?php
 
+use FluxErp\Models\Address;
 use FluxErp\Models\Client;
+use FluxErp\Models\Contact;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Language;
 use FluxErp\Models\PaymentType;
 use FluxErp\Models\PriceList;
 use FluxErp\Models\User;
+use FluxErp\Models\VatRate;
 use FluxErp\Tests\BrowserTestCase;
 use Illuminate\Support\Facades\Route;
 use Pest\Browser\Api\ArrayablePendingAwaitablePage;
 use Pest\Browser\Api\PendingAwaitablePage;
 
-uses(FluxErp\Tests\Livewire\BaseSetup::class)
-    ->in('Livewire');
-
-uses(BrowserTestCase::class)
-    ->beforeAll(function (): void {
-        BrowserTestCase::installAssets();
-    })
+pest()
     ->beforeEach(function (): void {
+        $this->dbClient = Client::default() ?? Client::factory()->create([
+            'is_default' => true,
+        ]);
+        $this->defaultLanguage = Language::default() ?? Language::factory()->create([
+            'is_default' => true,
+        ]);
+
+        $this->contact = Contact::factory()->create([
+            'client_id' => $this->dbClient->getKey(),
+        ]);
+        $this->address = Address::factory()->create([
+            'contact_id' => $this->contact->getKey(),
+            'client_id' => $this->dbClient->getKey(),
+            'language_id' => $this->defaultLanguage->getKey(),
+            'can_login' => true,
+            'is_active' => true,
+        ]);
+
+        $this->actingAsGuest('web');
+        $this->be($this->address, 'address');
+    })
+    ->group('Livewire/Portal')
+    ->in('Livewire/Portal', 'Feature/Web/Portal');
+
+pest()
+    ->beforeEach(function (): void {
+        /** @var $this FluxErp\Tests\TestCase */
         config([
             'app.debug' => true,
         ]);
@@ -27,16 +51,20 @@ uses(BrowserTestCase::class)
             'is_default' => true,
         ]);
 
-        $client = Client::default() ?? Client::factory()->create([
+        $this->dbClient = Client::default() ?? Client::factory()->create([
             'is_default' => true,
         ]);
 
-        $language = Language::default() ?? Language::factory()->create([
+        $this->defaultLanguage = Language::default() ?? Language::factory()->create([
+            'is_default' => true,
+        ]);
+
+        VatRate::default() ?? VatRate::factory()->create([
             'is_default' => true,
         ]);
 
         PaymentType::default() ?? PaymentType::factory()
-            ->hasAttached($client, relationship: 'clients')
+            ->hasAttached($this->dbClient, relationship: 'clients')
             ->create([
                 'is_active' => true,
                 'is_default' => true,
@@ -47,14 +75,36 @@ uses(BrowserTestCase::class)
             'is_default' => true,
         ]);
 
-        $this->user = User::factory()->create([
-            'is_active' => true,
-            'language_id' => $language->getKey(),
-        ]);
+        $this->user = User::factory()
+            ->create([
+                'is_active' => true,
+                'language_id' => $this->defaultLanguage->getKey(),
+            ]);
 
-        $this->actingAs($this->user);
+        if (! auth()->user()) {
+            $this->be($this->user, 'web');
+        }
+    });
 
-        $this->dbClient = $client;
+pest()
+    ->extend(FluxErp\Tests\TestCase::class)
+    ->beforeEach(function (): void {
+        $this->withoutVite();
+    })
+    ->in('Livewire');
+
+pest()
+    ->extend(FluxErp\Tests\TestCase::class)
+    ->in('Unit');
+
+pest()
+    ->extend(FluxErp\Tests\TestCase::class)
+    ->in('Feature');
+
+pest()
+    ->extend(BrowserTestCase::class)
+    ->beforeAll(function (): void {
+        BrowserTestCase::installAssets();
     })
     ->in('Browser');
 

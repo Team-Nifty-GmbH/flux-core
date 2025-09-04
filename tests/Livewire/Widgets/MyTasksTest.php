@@ -21,5 +21,5 @@ test('can open work time modal', function (): void {
 test('renders successfully', function (): void {
     Livewire::actingAs($this->user)
         ->test(MyTasks::class)
-        ->assertStatus(200);
+        ->assertOk();
 });

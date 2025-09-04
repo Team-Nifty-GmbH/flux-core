@@ -12,7 +12,7 @@ beforeEach(function (): void {
 
 test('renders successfully', function (): void {
     Livewire::test(ProjectView::class, ['id' => $this->project->id])
-        ->assertStatus(200);
+        ->assertOk();
 });
 
 test('switch tabs', function (): void {

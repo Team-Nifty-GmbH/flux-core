@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\Web\Portal\PortalSetup::class);
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Language;
@@ -41,75 +40,79 @@ beforeEach(function (): void {
         'payment_type_id' => $paymentType->id,
         'price_list_id' => $priceList->id,
         'currency_id' => $currency->id,
-        'address_invoice_id' => $this->user->id,
-        'address_delivery_id' => $this->user->id,
+        'address_invoice_id' => $this->address->id,
+        'address_delivery_id' => $this->address->id,
         'is_locked' => true,
     ]);
 });
 
 test('portal orders id no user', function (): void {
+    $this->actingAsGuest();
+
     $this->get(route('portal.orders.id', ['id' => $this->order->id]))
-        ->assertStatus(302)
-        ->assertRedirect($this->portalDomain . '/login');
+        ->assertFound()
+        ->assertRedirect(config('flux.portal_domain') . '/login');
 });
 
 test('portal orders id order not contact id', function (): void {
     $this->order->update(['contact_id' => null]);
 
-    $this->user->givePermissionTo(Permission::findOrCreate('orders.{id}.get', 'address'));
+    $this->address->givePermissionTo(Permission::findOrCreate('orders.{id}.get', 'address'));
 
-    $this->actingAs($this->user, 'address')->get(route('portal.orders.id', ['id' => $this->order->id]))
-        ->assertStatus(404);
+    $this->actingAs($this->address, 'address')->get(route('portal.orders.id', ['id' => $this->order->id]))
+        ->assertNotFound();
 });
 
 test('portal orders id order not found', function (): void {
     $this->order->delete();
 
-    $this->user->givePermissionTo(Permission::findOrCreate('orders.{id}.get', 'address'));
+    $this->address->givePermissionTo(Permission::findOrCreate('orders.{id}.get', 'address'));
 
-    $this->actingAs($this->user, 'address')->get(route('portal.orders.id', ['id' => $this->order->id]))
-        ->assertStatus(404);
+    $this->actingAs($this->address, 'address')->get(route('portal.orders.id', ['id' => $this->order->id]))
+        ->assertNotFound();
 });
 
 test('portal orders id order not locked', function (): void {
     $this->order->update(['is_locked' => false, 'is_imported' => false]);
 
-    $this->user->givePermissionTo(Permission::findOrCreate('orders.{id}.get', 'address'));
+    $this->address->givePermissionTo(Permission::findOrCreate('orders.{id}.get', 'address'));
 
-    $this->actingAs($this->user, 'address')->get(route('portal.orders.id', ['id' => $this->order->id]))
-        ->assertStatus(404);
+    $this->actingAs($this->address, 'address')->get(route('portal.orders.id', ['id' => $this->order->id]))
+        ->assertNotFound();
 });
 
 test('portal orders id page', function (): void {
-    $this->user->givePermissionTo(Permission::findOrCreate('orders.{id}.get', 'address'));
+    $this->address->givePermissionTo(Permission::findOrCreate('orders.{id}.get', 'address'));
 
-    $this->actingAs($this->user, 'address')->get(route('portal.orders.id', ['id' => $this->order->id]))
-        ->assertStatus(200);
+    $this->actingAs($this->address, 'address')->get(route('portal.orders.id', ['id' => $this->order->id]))
+        ->assertOk();
 });
 
 test('portal orders id without permission', function (): void {
     Permission::findOrCreate('orders.{id}.get', 'address');
 
-    $this->actingAs($this->user, 'address')->get(route('portal.orders.id', ['id' => $this->order->id]))
-        ->assertStatus(403);
+    $this->actingAs($this->address, 'address')->get(route('portal.orders.id', ['id' => $this->order->id]))
+        ->assertForbidden();
 });
 
 test('portal orders no user', function (): void {
+    $this->actingAsGuest();
+
     $this->get(route('portal.orders'))
-        ->assertStatus(302)
-        ->assertRedirect($this->portalDomain . '/login');
+        ->assertFound()
+        ->assertRedirect(config('flux.portal_domain') . '/login');
 });
 
 test('portal orders page', function (): void {
-    $this->user->givePermissionTo(Permission::findOrCreate('orders.get', 'address'));
+    $this->address->givePermissionTo(Permission::findOrCreate('orders.get', 'address'));
 
-    $this->actingAs($this->user, 'address')->get(route('portal.orders'))
-        ->assertStatus(200);
+    $this->actingAs($this->address, 'address')->get(route('portal.orders'))
+        ->assertOk();
 });
 
 test('portal orders without permission', function (): void {
     Permission::findOrCreate('orders.get', 'address');
 
-    $this->actingAs($this->user, 'address')->get(route('portal.orders'))
-        ->assertStatus(403);
+    $this->actingAs($this->address, 'address')->get(route('portal.orders'))
+        ->assertForbidden();
 });

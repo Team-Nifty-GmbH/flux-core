@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\Web\BaseSetup::class);
 use FluxErp\Models\BankConnection;
 use FluxErp\Models\Currency;
 use FluxErp\Models\Permission;
@@ -20,8 +19,10 @@ beforeEach(function (): void {
 });
 
 test('transactions no user', function (): void {
+    $this->actingAsGuest();
+
     $this->get('/accounting/transactions')
-        ->assertStatus(302)
+        ->assertFound()
         ->assertRedirect(route('login'));
 });
 
@@ -29,12 +30,12 @@ test('transactions page', function (): void {
     $this->user->givePermissionTo(Permission::findOrCreate('accounting.transactions.get', 'web'));
 
     $this->actingAs($this->user, 'web')->get('/accounting/transactions')
-        ->assertStatus(200);
+        ->assertOk();
 });
 
 test('transactions without permission', function (): void {
     Permission::findOrCreate('accounting.transactions.get', 'web');
 
     $this->actingAs($this->user, 'web')->get('/accounting/transactions')
-        ->assertStatus(403);
+        ->assertForbidden();
 });

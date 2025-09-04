@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\TestCase::class);
 use FluxErp\Livewire\Settings\AdditionalColumnEdit;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\TicketType;
@@ -16,7 +15,7 @@ test('create additional column', function (): void {
         ->set('additionalColumn.label', 'Test label')
         ->set('additionalColumn.model_type', 'order')
         ->call('save')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertDispatched('closeModal')
         ->assertToastNotification(type: 'success');
@@ -38,7 +37,7 @@ test('edit additional column', function (): void {
         ->set('additionalColumn.name', 'Test 2');
 
     $component->call('save')
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertDispatched('closeModal', $component->get('additionalColumn')->toArray())
         ->assertToastNotification(type: 'success');
@@ -46,5 +45,5 @@ test('edit additional column', function (): void {
 
 test('renders successfully', function (): void {
     Livewire::test(AdditionalColumnEdit::class)
-        ->assertStatus(200);
+        ->assertOk();
 });

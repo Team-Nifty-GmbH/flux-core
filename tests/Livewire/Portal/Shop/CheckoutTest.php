@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Livewire\PortalBaseSetup::class);
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\Portal\Shop\Checkout;
 use FluxErp\Mail\Order\OrderConfirmation;
@@ -119,5 +118,5 @@ test('cant create order without legal accepted', function (): void {
 test('renders successfully', function (): void {
     Livewire::actingAs($this->address)
         ->test(Checkout::class)
-        ->assertStatus(200);
+        ->assertOk();
 });

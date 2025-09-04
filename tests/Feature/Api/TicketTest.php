@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
@@ -55,7 +54,7 @@ test('attach user assignment', function (): void {
         'ticket_id' => $this->tickets[2]->id,
         'user_id' => $this->user->id,
     ]);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $ticket = Ticket::query()
         ->whereKey($this->tickets[2]->id)
@@ -73,7 +72,7 @@ test('attach user assignment validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/tickets/toggle', $ticket);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('create ticket', function (): void {
@@ -88,7 +87,7 @@ test('create ticket', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/tickets', $ticket);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseTicket = json_decode($response->getContent())->data;
 
@@ -112,7 +111,7 @@ test('create ticket validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/tickets', $ticket);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('delete ticket', function (): void {
@@ -120,7 +119,7 @@ test('delete ticket', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/tickets/' . $this->tickets[0]->id);
-    $response->assertStatus(204);
+    $response->assertNoContent();
 
     expect(Ticket::query()->whereKey($this->tickets[0]->id)->exists())->toBeFalse();
 });
@@ -130,7 +129,7 @@ test('delete ticket not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/tickets/' . ++$this->tickets[4]->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('detach user assignment', function (): void {
@@ -141,7 +140,7 @@ test('detach user assignment', function (): void {
         'ticket_id' => $this->tickets[1]->id,
         'user_id' => $this->user->id,
     ]);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $ticket = Ticket::query()
         ->whereKey($this->tickets[2]->id)
@@ -155,7 +154,7 @@ test('get ticket', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/tickets/' . $this->tickets[0]->id);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $ticket = json_decode($response->getContent())->data;
 
@@ -174,7 +173,7 @@ test('get tickets', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/tickets');
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $tickets = json_decode($response->getContent())->data->data;
 
@@ -205,7 +204,7 @@ test('update ticket', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/tickets', $ticket);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseTicket = json_decode($response->getContent())->data;
 
@@ -237,7 +236,7 @@ test('update ticket validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/tickets', $ticket);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('update ticket with additional columns', function (): void {
@@ -260,7 +259,7 @@ test('update ticket with additional columns', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/tickets', $ticket);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseTicket = json_decode($response->getContent())->data;
 

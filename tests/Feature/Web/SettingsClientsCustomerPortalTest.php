@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\Web\BaseSetup::class);
 use FluxErp\Models\Permission;
 
 test('settings clients customer portal client not found', function (): void {
@@ -13,12 +12,14 @@ test('settings clients customer portal client not found', function (): void {
     $this->actingAs($this->user, 'web')->get(
         '/settings/clients/' . $this->dbClient->getKey() . '/customer-portal'
     )
-        ->assertStatus(404);
+        ->assertNotFound();
 });
 
 test('settings clients customer portal no user', function (): void {
+    $this->actingAsGuest();
+
     $this->get('/settings/clients/' . $this->dbClient->getKey() . '/customer-portal')
-        ->assertStatus(302)
+        ->assertFound()
         ->assertRedirect(route('login'));
 });
 
@@ -30,7 +31,7 @@ test('settings clients customer portal page', function (): void {
     $this->actingAs($this->user, 'web')->get(
         '/settings/clients/' . $this->dbClient->getKey() . '/customer-portal'
     )
-        ->assertStatus(200);
+        ->assertOk();
 });
 
 test('settings clients customer portal without permission', function (): void {
@@ -39,5 +40,5 @@ test('settings clients customer portal without permission', function (): void {
     $this->actingAs($this->user, 'web')->get(
         '/settings/clients/' . $this->dbClient->getKey() . '/customer-portal'
     )
-        ->assertStatus(403);
+        ->assertForbidden();
 });

@@ -72,7 +72,7 @@ beforeEach(function (): void {
 
 test('renders successfully', function (): void {
     Livewire::test(ContactsByContactOrigin::class)
-        ->assertStatus(200);
+        ->assertOk();
 });
 
 test('timeframe in the future', function (): void {
@@ -87,7 +87,7 @@ test('timeframe in the future', function (): void {
         ->call('calculateChart')
         ->assertSet('labels', [])
         ->assertSet('series', [])
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors();
 });
 
@@ -105,7 +105,7 @@ test('timeframe this month', function (): void {
             getContactsCountInTimeFrame($this->contacts, $timeFrame, $this->recordOrigins[1]),
             getContactsCountInTimeFrame($this->contacts, $timeFrame, $this->recordOrigins[0]),
         ])
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors();
 });
 
@@ -123,7 +123,7 @@ test('timeframe this quarter', function (): void {
             getContactsCountInTimeFrame($this->contacts, $timeFrame, $this->recordOrigins[1]),
             getContactsCountInTimeFrame($this->contacts, $timeFrame, $this->recordOrigins[0]),
         ])
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors();
 });
 
@@ -141,7 +141,7 @@ test('timeframe this week', function (): void {
             getContactsCountInTimeFrame($this->contacts, $timeFrame, $this->recordOrigins[1]),
             getContactsCountInTimeFrame($this->contacts, $timeFrame, $this->recordOrigins[0]),
         ])
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors();
 });
 
@@ -159,7 +159,7 @@ test('timeframe this year', function (): void {
             getContactsCountInTimeFrame($this->contacts, $timeFrame, $this->recordOrigins[1]),
             getContactsCountInTimeFrame($this->contacts, $timeFrame, $this->recordOrigins[0]),
         ])
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors();
 });
 
@@ -177,7 +177,7 @@ test('timeframe today', function (): void {
             getContactsCountInTimeFrame($this->contacts, $timeFrame, $this->recordOrigins[1]),
             getContactsCountInTimeFrame($this->contacts, $timeFrame, $this->recordOrigins[0]),
         ])
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors();
 });
 

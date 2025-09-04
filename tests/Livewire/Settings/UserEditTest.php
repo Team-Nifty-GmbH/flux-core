@@ -15,7 +15,7 @@ test('can save user', function (): void {
     /** @var Testable $component */
     $component = Livewire::actingAs($this->user)
         ->test(UserEdit::class, ['user' => $user])
-        ->assertStatus(200)
+        ->assertOk()
         ->assertHasNoErrors()
         ->assertSet('isSuperAdmin', false)
         ->assertSet('userForm.id', $user->id)
@@ -48,5 +48,5 @@ test('can save user', function (): void {
 test('renders successfully', function (): void {
     Livewire::actingAs($this->user)
         ->test(UserEdit::class, ['user' => $this->user])
-        ->assertStatus(200);
+        ->assertOk();
 });

@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use Carbon\Carbon;
 use FluxErp\Models\Address;
 use FluxErp\Models\Client;
@@ -41,7 +40,7 @@ test('create country', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/countries', $country);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseCountry = json_decode($response->getContent())->data;
     $dbCountry = Country::query()
@@ -69,7 +68,7 @@ test('create country iso alpha2 exists', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/countries', $country);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('create country maximum', function (): void {
@@ -89,7 +88,7 @@ test('create country maximum', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/countries', $country);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $responseCountry = json_decode($response->getContent())->data;
     $dbCountry = Country::query()
@@ -122,7 +121,7 @@ test('create country validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/countries', $country);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('delete country', function (): void {
@@ -130,7 +129,7 @@ test('delete country', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/countries/' . $this->countries[1]->id);
-    $response->assertStatus(204);
+    $response->assertNoContent();
 
     $country = $this->countries[1]->fresh();
     expect($country->deleted_at)->not->toBeNull();
@@ -142,7 +141,7 @@ test('delete country country not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/countries/' . ++$this->countries[1]->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('delete country country referenced by address', function (): void {
@@ -182,7 +181,7 @@ test('get countries', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/countries');
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     $jsonCountries = collect($json->data->data);
@@ -214,7 +213,7 @@ test('get country', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/countries/' . $this->countries[0]->id);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $json = json_decode($response->getContent());
     $jsonCountry = $json->data;
@@ -240,7 +239,7 @@ test('get country country not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->get('/api/countries/' . ++$this->countries[1]->id);
-    $response->assertStatus(404);
+    $response->assertNotFound();
 });
 
 test('update country', function (): void {
@@ -253,7 +252,7 @@ test('update country', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/countries', $country);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseCountry = json_decode($response->getContent())->data;
     $dbCountry = Country::query()
@@ -275,7 +274,7 @@ test('update country iso alpha2 exists', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/countries', $country);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
     expect(json_decode($response->getContent())->status)->toEqual(422);
     expect(property_exists(json_decode($response->getContent())->errors, 'iso_alpha2'))->toBeTrue();
 });
@@ -298,7 +297,7 @@ test('update country maximum', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/countries', $country);
-    $response->assertStatus(200);
+    $response->assertOk();
 
     $responseCountry = json_decode($response->getContent())->data;
     $dbCountry = Country::query()
@@ -329,5 +328,5 @@ test('update country validation fails', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/countries', $country);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });

@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Feature\BaseSetup::class);
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Category;
 use FluxErp\Models\Permission;
@@ -43,7 +42,7 @@ test('create value list', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->post('/api/value-lists', $valueList);
-    $response->assertStatus(201);
+    $response->assertCreated();
 
     $jsonValueList = json_decode($response->getContent())->data;
     $dbValueList = AdditionalColumn::query()
@@ -76,7 +75,7 @@ test('delete value list value list not found', function (): void {
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->delete('/api/value-lists/' . $valueList->id);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });
 
 test('update value list name model combination already exists', function (): void {
@@ -89,5 +88,5 @@ test('update value list name model combination already exists', function (): voi
     Sanctum::actingAs($this->user, ['user']);
 
     $response = $this->actingAs($this->user)->put('/api/value-lists', $valueList);
-    $response->assertStatus(422);
+    $response->assertUnprocessable();
 });

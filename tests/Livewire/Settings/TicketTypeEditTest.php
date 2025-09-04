@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\TestCase::class);
 use FluxErp\Livewire\Settings\TicketTypeEdit;
 use FluxErp\Models\TicketType;
 use Illuminate\Support\Str;
@@ -58,5 +57,5 @@ test('edit ticket type', function (): void {
 
 test('renders successfully', function (): void {
     Livewire::test(TicketTypeEdit::class)
-        ->assertStatus(200);
+        ->assertOk();
 });

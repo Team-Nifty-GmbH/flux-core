@@ -54,5 +54,5 @@ beforeEach(function (): void {
 
 test('renders successfully', function (): void {
     Livewire::test(Accounting::class, ['orderId' => $this->order->id])
-        ->assertStatus(200);
+        ->assertOk();
 });
