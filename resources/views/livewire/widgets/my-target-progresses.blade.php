@@ -10,22 +10,17 @@
                 'url' => route('search', \FluxErp\Models\Target::class),
                 'method' => 'POST',
                 'params' => [
-                    'where' => [
-                        [
-                            'parent_id',
-                            '=',
-                            null,
-                        ],
+                    'whereNull' => [
+                        'parent_id',
                     ],
-                    'whereHas' => [
-                        'users' => [
-                            ['user_id', '=', $this->userId],
-                        ],
+                    'whereRelation' => [
+                        'users',
+                        'user_id',
+                        '=',
+                        $this->userId
                     ],
                     'whereBetween' => [
-                        'start_date', [$this->start, $this->end]
-                    ],
-                    'whereBetween' => [
+                        'start_date', [$this->start, $this->end],
                         'end_date', [$this->start, $this->end]
                     ],
                 ],

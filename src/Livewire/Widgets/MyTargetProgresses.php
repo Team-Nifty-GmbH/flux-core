@@ -32,8 +32,8 @@ class MyTargetProgresses extends RadialBarChart
 
     public function mount(): void
     {
-        $this->userId = $this->userId ?? auth()->id();
-        $this->chart['id'] = $this->chart['id'] ?? ('apx-' . $this->getId());
+        $this->userId = auth()->id();
+        $this->chart['id'] = data_get($this->chart, 'id', 'apx-' . $this->getId());
 
         parent::mount();
     }
@@ -46,11 +46,11 @@ class MyTargetProgresses extends RadialBarChart
     #[Renderless]
     public function calculateByTimeFrame(): void
     {
+        $this->resetData();
         $this->calculateChart();
         $this->updateData();
-        $this->resetData();
         // When not skipping rerender, we need to force apex charts to reflow
-        $chartId = $this->chart['id'];
+        $chartId = data_get($this->chart, 'id');
         $this->js("requestAnimationFrame(() => { if (window.ApexCharts) { ApexCharts.exec('{$chartId}',
          'updateOptions', {}, false, true); } })");
     }
@@ -62,7 +62,7 @@ class MyTargetProgresses extends RadialBarChart
         $this->end = $this->getEnd()->toDateString();
 
         $target = resolve_static(Target::class, 'query')
-            ->where('id', $this->targetId)
+            ->whereKey($this->targetId)
             ->first();
 
         if ($target) {
@@ -71,22 +71,23 @@ class MyTargetProgresses extends RadialBarChart
         }
     }
 
+    #[Renderless]
     public function updatedTargetId(): void
     {
         $this->calculateByTimeFrame();
     }
 
-    private function calculateProgress(Target $target): string
+    protected function calculateProgress(Target $target): string
     {
-        return $target && $target->target_value > 0 && $this->userId
+        return $target && $this->userId
             ? bcmul(
-                bcdiv($target->calculateCurrentValue($this->userId), $target->target_value),
+                bcdiv($target->calculateCurrentValue($this->userId), abs($target->target_value)),
                 100
             )
             : 0;
     }
 
-    private function resetData(): void
+    protected function resetData(): void
     {
         $this->series = [];
         $this->labels = [];

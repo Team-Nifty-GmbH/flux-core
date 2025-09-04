@@ -11,11 +11,12 @@
                 'method' => 'POST',
                 'params' => [
                     'with' => 'media',
-                    'whereHas' => [
-                        'targets' => [
-                            ['id', '=', $this->targetId],
-                        ],
-                    ],
+                    'whereRelation' => [
+                        'targets',
+                         'id',
+                         '=',
+                         $this->targetId
+                     ]
                 ],
             ]"
         />

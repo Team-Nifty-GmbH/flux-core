@@ -106,7 +106,18 @@ class SearchController extends Controller
         }
 
         if ($request->has('whereBetween')) {
-            $query->whereBetween(...$request->get('whereBetween'));
+            $pairs = $request->get('whereBetween');
+
+            if (is_array($pairs)) {
+                for ($i = 0; $i < count($pairs); $i += 2) {
+                    $column = $pairs[$i] ?? null;
+                    $range = $pairs[$i + 1] ?? null;
+
+                    if (is_string($column) && is_array($range) && count($range) === 2) {
+                        $query->whereBetween($column, $range);
+                    }
+                }
+            }
         }
 
         if ($request->has('whereNotBetween')) {
@@ -150,13 +161,9 @@ class SearchController extends Controller
 
         if ($request->has('whereHas')) {
             $whereHas = $request->get('whereHas');
-            if (is_array($whereHas)) {
-                foreach ($whereHas as $relation => $conditions) {
-                    $query->whereHas($relation, function (Builder $q) use ($conditions): void {
-                        foreach ($conditions as $condition) {
-                            $q->where(...$condition);
-                        }
-                    });
+            if (is_array($whereHas) && array_is_list($whereHas)) {
+                foreach ($whereHas as $relation) {
+                    $query->whereHas($relation);
                 }
             } else {
                 $query->whereHas($whereHas);
