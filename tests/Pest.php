@@ -88,21 +88,10 @@ pest()
 
 pest()
     ->extend(FluxErp\Tests\TestCase::class)
-    ->in('Livewire', 'Feature', 'Unit');
-
-pest()
     ->beforeEach(function (): void {
         $this->withoutVite();
     })
     ->in('Livewire', 'Feature', 'Unit');
-
-pest()
-    ->extend(FluxErp\Tests\TestCase::class)
-    ->in('Unit');
-
-pest()
-    ->extend(FluxErp\Tests\TestCase::class)
-    ->in('Feature');
 
 pest()
     ->extend(BrowserTestCase::class)
