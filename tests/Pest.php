@@ -31,6 +31,10 @@ uses()
         BrowserTestCase::installAssets();
     })
     ->beforeEach(function (): void {
+        config([
+            'app.debug' => true,
+        ]);
+
         PriceList::default() ?? PriceList::factory()->create([
             'is_default' => true,
         ]);

@@ -9,7 +9,6 @@ use FluxErp\Providers\MorphMapServiceProvider;
 use FluxErp\Providers\SanctumServiceProvider;
 use FluxErp\Providers\ViewServiceProvider;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 use Laravel\Scout\ScoutServiceProvider;
 use Livewire\LivewireServiceProvider;
 use NotificationChannels\WebPush\WebPushServiceProvider;
@@ -24,6 +23,7 @@ use Spatie\TranslationLoader\TranslationServiceProvider;
 use Symfony\Component\Process\Process;
 use TallStackUi\TallStackUiServiceProvider;
 use TeamNiftyGmbH\DataTable\DataTableServiceProvider;
+use Throwable;
 use function Orchestra\Testbench\package_path;
 
 abstract class BrowserTestCase extends TestCase
@@ -107,19 +107,13 @@ abstract class BrowserTestCase extends TestCase
 
     protected function setUp(): void
     {
-        $_ENV['APP_DEBUG'] = 'true';
-        $_SERVER['APP_DEBUG'] = 'true';
-        putenv('APP_DEBUG=true');
-
         parent::setUp();
 
-        if (! file_exists(public_path('build'))) {
-            symlink(package_path('public/build'), public_path('build'));
-        }
-
-        $database = config('database.connections.mysql.database');
-        if (! DB::select("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '$database'")) {
-            DB::statement('CREATE DATABASE ' . $database);
+        try {
+            if (! file_exists(public_path('build'))) {
+                symlink(package_path('public/build'), public_path('build'));
+            }
+        } catch (Throwable) {
         }
 
         $this->app->make(PermissionRegistrar::class)->forgetCachedPermissions();

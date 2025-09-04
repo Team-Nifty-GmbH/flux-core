@@ -27,8 +27,39 @@
 />
 @stack('meta')
 <tallstackui:script />
-{{ \FluxErp\Facades\Asset::toHtml() }}
+@vite([
+    \FluxErp\Providers\ViewServiceProvider::getRealPackageAssetPath(
+        'resources/css/app.css',
+        'team-nifty-gmbh/flux-erp',
+    ),
+    \FluxErp\Providers\ViewServiceProvider::getRealPackageAssetPath(
+        'resources/js/app.js',
+        'team-nifty-gmbh/flux-erp',
+    ),
+    \FluxErp\Providers\ViewServiceProvider::getRealPackageAssetPath(
+        'resources/js/apex-charts.js',
+        'team-nifty-gmbh/flux-erp',
+    ),
+    \FluxErp\Providers\ViewServiceProvider::getRealPackageAssetPath(
+        'resources/js/alpine.js',
+        'team-nifty-gmbh/flux-erp',
+    ),
+    \FluxErp\Providers\ViewServiceProvider::getRealPackageAssetPath(
+        'resources/js/sw.js',
+        'team-nifty-gmbh/flux-erp',
+    ),
+    \FluxErp\Providers\ViewServiceProvider::getRealPackageAssetPath(
+        'resources/js/tall-datatables.js',
+        'team-nifty-gmbh/tall-datatables',
+    ),
+])
 @auth('web')
+    @vite([
+        \FluxErp\Providers\ViewServiceProvider::getRealPackageAssetPath(
+            'resources/js/web-push.js',
+            'team-nifty-gmbh/flux-erp',
+        ),
+    ])
     <script type="module">
         document.addEventListener(
             'livewire:navigated',
