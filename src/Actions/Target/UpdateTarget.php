@@ -24,7 +24,7 @@ class UpdateTarget extends FluxAction
     public function performAction(): Model
     {
         $users = Arr::pull($this->data, 'users');
-        $userShares = Arr::pull($this->data, 'user_shares', []);
+        $userShares = Arr::pull($this->data, 'user_shares');
         $targetValue = data_get($this->data, 'target_value');
 
         $target = resolve_static(Target::class, 'query')
@@ -40,7 +40,7 @@ class UpdateTarget extends FluxAction
                 $abs = data_get($userShares, $id . '.absolute');
                 $rel = data_get($userShares, $id . '.relative');
                 $pivotData[$id] = [
-                    'target_allocation' => is_null($rel)
+                    'target_share' => is_null($rel)
                         ? bcdiv($abs, $targetValue)
                         : bcdiv($rel, 100),
                 ];
@@ -102,11 +102,8 @@ class UpdateTarget extends FluxAction
             $isGroup = $this->getData('is_group_target');
             $users = $this->getData('users', []);
             $shares = $this->getData('user_shares', []);
-            $targetValue = $this->getData('target_value', 0);
 
             if ($isGroup && ! empty($users)) {
-                $sumRel = 0.0;
-                $sumAbs = 0.0;
                 $hasRel = false;
                 $hasAbs = false;
 
@@ -116,17 +113,9 @@ class UpdateTarget extends FluxAction
 
                     if (! is_null($rel)) {
                         $hasRel = true;
-                        $sumRel += $rel;
                     }
                     if (! is_null($abs)) {
                         $hasAbs = true;
-                        $sumAbs += $abs;
-                    }
-                }
-
-                if ($hasRel) {
-                    if (abs($sumRel - 100) > 0) {
-                        $errors['user_shares'] = [__('Relative shares must sum to 100 %')];
                     }
                 }
 
@@ -134,14 +123,6 @@ class UpdateTarget extends FluxAction
                     $errors['user_shares'] = array_merge($errors['user_shares'] ?? [], [
                         __('Relative and absolute shares are mutually exclusive'),
                     ]);
-                }
-
-                if ($hasAbs) {
-                    if (abs($sumAbs - $targetValue) > 0) {
-                        $errors['user_shares'] = array_merge($errors['user_shares'] ?? [], [
-                            __('Absolute shares must sum to the target value'),
-                        ]);
-                    }
                 }
 
                 foreach ($users as $uid) {

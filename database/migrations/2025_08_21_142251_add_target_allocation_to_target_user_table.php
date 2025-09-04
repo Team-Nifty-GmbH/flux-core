@@ -9,14 +9,15 @@ return new class() extends Migration
     public function up(): void
     {
         Schema::table('target_user', function (Blueprint $table): void {
-            $table->decimal('target_allocation', 15, 4)->nullable()->after('user_id');
+            $table->decimal('target_share', 40, 10)->nullable()->after('parent_id');
+            $table->boolean('target_share_is_percentage')->default(true)->after('priority');
         });
     }
 
     public function down(): void
     {
         Schema::table('target_user', function (Blueprint $table): void {
-            $table->dropColumn('target_allocation');
+            $table->dropColumn('target_share');
         });
     }
 };
