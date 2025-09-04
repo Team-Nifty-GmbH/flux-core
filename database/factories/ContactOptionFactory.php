@@ -11,15 +11,15 @@ class ContactOptionFactory extends Factory
 
     public function definition(): array
     {
-        $type = $this->faker->randomElement(['phone', 'email', 'website']);
+        $type = fake()->randomElement(['phone', 'email', 'website']);
 
         return [
             'type' => $type,
-            'label' => $this->faker->jobTitle(),
+            'label' => fake()->jobTitle(),
             'value' => match ($type) {
-                'email' => $this->faker->email(),
-                'phone' => $this->faker->phoneNumber(),
-                'website' => $this->faker->url(),
+                'email' => fake()->email(),
+                'phone' => fake()->phoneNumber(),
+                'website' => fake()->url(),
             },
         ];
     }

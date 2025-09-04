@@ -14,7 +14,7 @@ class LanguageFactory extends Factory
     {
         $i = 0;
         while (Language::query()
-            ->where('language_code', $languageCode = $this->faker->unique()->languageCode())
+            ->where('language_code', $languageCode = fake()->unique()->languageCode())
             ->exists() && $i < 100) {
             $i++;
         }
@@ -24,8 +24,8 @@ class LanguageFactory extends Factory
         }
 
         return [
-            'name' => $this->faker->country(),
-            'iso_name' => $this->faker->country(),
+            'name' => fake()->country(),
+            'iso_name' => fake()->country(),
             'language_code' => $languageCode,
         ];
     }

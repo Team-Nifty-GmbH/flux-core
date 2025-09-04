@@ -15,7 +15,7 @@
                 gs-y="{{ $widget['order_row'] }}"
             >
                 <div
-                    class="grid-stack-item-content dark:bg-secondary-600 h-full w-full animate-pulse bg-gray-100"
+                    class="grid-stack-item-content h-full w-full animate-pulse bg-gray-100 dark:bg-secondary-600"
                 ></div>
             </div>
         @endforeach

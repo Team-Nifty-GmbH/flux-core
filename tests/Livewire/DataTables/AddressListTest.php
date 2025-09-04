@@ -1,16 +1,9 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\DataTables;
-
 use FluxErp\Livewire\DataTables\AddressList;
-use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
-class AddressListTest extends TestCase
-{
-    public function test_renders_successfully(): void
-    {
-        Livewire::test(AddressList::class)
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test(AddressList::class)
+        ->assertOk();
+});

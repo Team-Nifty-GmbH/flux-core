@@ -4,7 +4,6 @@ namespace FluxErp\Providers;
 
 use Composer\Autoload\ClassLoader;
 use Composer\InstalledVersions;
-use FluxErp\Facades\Asset;
 use FluxErp\View\Layouts\App;
 use FluxErp\View\Layouts\Printing;
 use Illuminate\Support\Facades\Blade;
@@ -32,65 +31,11 @@ class ViewServiceProvider extends ServiceProvider
     {
         Vite::useAggressivePrefetching();
 
-        if (
-            (! $this->app->runningInConsole() || $this->app->runningUnitTests())
-            && file_exists(public_path('build/manifest.json'))
-        ) {
-            // get the real path for the flux package root folder
-            $this->bootAssets();
-        }
-
         $this->customizeTallstackUi();
 
         $this->registerViews();
 
         $this->bootBladeDirectives();
-    }
-
-    protected function bootAssets(): void
-    {
-        Asset::vite(
-            public_path('build'),
-            [
-                static::getRealPackageAssetPath(
-                    'resources/css/app.css',
-                    'team-nifty-gmbh/flux-erp'
-                ),
-                static::getRealPackageAssetPath(
-                    'resources/js/app.js',
-                    'team-nifty-gmbh/flux-erp'
-                ),
-                static::getRealPackageAssetPath(
-                    'resources/js/apex-charts.js',
-                    'team-nifty-gmbh/flux-erp'
-                ),
-                static::getRealPackageAssetPath(
-                    'resources/js/alpine.js',
-                    'team-nifty-gmbh/flux-erp'
-                ),
-                static::getRealPackageAssetPath(
-                    'resources/js/sw.js',
-                    'team-nifty-gmbh/flux-erp'
-                ),
-                static::getRealPackageAssetPath(
-                    'resources/js/web-push.js',
-                    'team-nifty-gmbh/flux-erp'
-                ),
-                static::getRealPackageAssetPath(
-                    'resources/js/tall-datatables.js',
-                    'team-nifty-gmbh/tall-datatables'
-                ),
-            ]
-        );
-
-        if (auth()->guard('web')->check()) {
-            Asset::vite(public_path('build'), [
-                static::getRealPackageAssetPath(
-                    'resources/js/web-push.js',
-                    'team-nifty-gmbh/flux-erp'
-                ),
-            ]);
-        }
     }
 
     protected function bootBladeDirectives(): void

@@ -12,7 +12,7 @@ class ProductPropertyFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->randomElement(['dimension_height', 'dimension_width', 'dimension_length', 'weight_grams']),
+            'name' => fake()->randomElement(['dimension_height', 'dimension_width', 'dimension_length', 'weight_grams']),
         ];
     }
 }

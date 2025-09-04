@@ -13,9 +13,9 @@ class PriceListFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->jobTitle(),
+            'name' => fake()->jobTitle(),
             'price_list_code' => Str::uuid()->toString(),
-            'is_net' => $this->faker->boolean(),
+            'is_net' => fake()->boolean(),
         ];
     }
 }

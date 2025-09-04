@@ -11,7 +11,7 @@
     </div>
     <div class="space-y-6 sm:space-y-5">
         <div
-            class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-5"
+            class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-5 dark:border-secondary-700"
         >
             <label
                 for="{{ md5('address.can_login') }}"
@@ -28,7 +28,7 @@
             </div>
         </div>
         <div
-            class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-5"
+            class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-5 dark:border-secondary-700"
         >
             <label
                 for="{{ md5('address.email') }}"
@@ -44,7 +44,7 @@
             </div>
         </div>
         <div
-            class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-5"
+            class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-5 dark:border-secondary-700"
         >
             <label
                 for="{{ md5('password') }}"
@@ -60,7 +60,7 @@
             </div>
         </div>
         <div
-            class="dark:border-secondary-700 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-5"
+            class="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-5 dark:border-secondary-700"
         >
             <label
                 for="{{ md5('permissions') }}"

@@ -1,7 +1,5 @@
 <?php
 
-namespace FluxErp\Tests\Feature\Web;
-
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
@@ -13,108 +11,97 @@ use FluxErp\Models\PaymentType;
 use FluxErp\Models\Permission;
 use FluxErp\Models\PriceList;
 
-class OrdersTest extends BaseSetup
-{
-    private Order $order;
+beforeEach(function (): void {
+    $contact = Contact::factory()->create([
+        'client_id' => $this->dbClient->getKey(),
+    ]);
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+    $address = Address::factory()->create([
+        'client_id' => $this->dbClient->getKey(),
+        'contact_id' => $contact->id,
+    ]);
 
-        $contact = Contact::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
+    $priceList = PriceList::factory()->create();
+
+    $currency = Currency::factory()->create([
+        'is_default' => true,
+    ]);
+
+    $language = Language::factory()->create();
+
+    $orderType = OrderType::factory()->create([
+        'client_id' => $this->dbClient->getKey(),
+        'order_type_enum' => OrderTypeEnum::Order,
+    ]);
+
+    $paymentType = PaymentType::factory()
+        ->hasAttached(factory: $this->dbClient, relationship: 'clients')
+        ->create([
+            'is_default' => false,
         ]);
 
-        $address = Address::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-            'contact_id' => $contact->id,
-        ]);
+    $this->order = Order::factory()->create([
+        'client_id' => $this->dbClient->getKey(),
+        'language_id' => $language->id,
+        'order_type_id' => $orderType->id,
+        'payment_type_id' => $paymentType->id,
+        'price_list_id' => $priceList->id,
+        'currency_id' => $currency->id,
+        'address_invoice_id' => $address->id,
+        'address_delivery_id' => $address->id,
+        'is_locked' => false,
+    ]);
+});
 
-        $priceList = PriceList::factory()->create();
+test('orders id no user', function (): void {
+    $this->actingAsGuest();
 
-        $currency = Currency::factory()->create([
-            'is_default' => true,
-        ]);
+    $this->get('/orders/' . $this->order->id)
+        ->assertFound()
+        ->assertRedirect(route('login'));
+});
 
-        $language = Language::factory()->create();
+test('orders id order not found', function (): void {
+    $this->order->delete();
 
-        $orderType = OrderType::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-            'order_type_enum' => OrderTypeEnum::Order,
-        ]);
+    $this->user->givePermissionTo(Permission::findOrCreate('orders.{id}.get', 'web'));
 
-        $paymentType = PaymentType::factory()
-            ->hasAttached(factory: $this->dbClient, relationship: 'clients')
-            ->create([
-                'is_default' => false,
-            ]);
+    $this->actingAs($this->user, 'web')->get('/orders/' . $this->order->id)
+        ->assertNotFound();
+});
 
-        $this->order = Order::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-            'language_id' => $language->id,
-            'order_type_id' => $orderType->id,
-            'payment_type_id' => $paymentType->id,
-            'price_list_id' => $priceList->id,
-            'currency_id' => $currency->id,
-            'address_invoice_id' => $address->id,
-            'address_delivery_id' => $address->id,
-            'is_locked' => false,
-        ]);
-    }
+test('orders id page', function (): void {
+    $this->user->givePermissionTo(Permission::findOrCreate('orders.{id}.get', 'web'));
 
-    public function test_orders_id_no_user(): void
-    {
-        $this->get('/orders/' . $this->order->id)
-            ->assertStatus(302)
-            ->assertRedirect(route('login'));
-    }
+    $this->actingAs($this->user, 'web')->get('/orders/' . $this->order->id)
+        ->assertOk();
+});
 
-    public function test_orders_id_order_not_found(): void
-    {
-        $this->order->delete();
+test('orders id without permission', function (): void {
+    Permission::findOrCreate('orders.{id}.get', 'web');
 
-        $this->user->givePermissionTo(Permission::findOrCreate('orders.{id}.get', 'web'));
+    $this->actingAs($this->user, 'web')->get('/orders/' . $this->order->id)
+        ->assertForbidden();
+});
 
-        $this->actingAs($this->user, 'web')->get('/orders/' . $this->order->id)
-            ->assertStatus(404);
-    }
+test('orders no user', function (): void {
+    $this->actingAsGuest();
 
-    public function test_orders_id_page(): void
-    {
-        $this->user->givePermissionTo(Permission::findOrCreate('orders.{id}.get', 'web'));
+    $this->get('/orders/list')
+        ->assertFound()
+        ->assertRedirect(route('login'));
+});
 
-        $this->actingAs($this->user, 'web')->get('/orders/' . $this->order->id)
-            ->assertStatus(200);
-    }
+test('orders page', function (): void {
+    $this->user->givePermissionTo(Permission::findOrCreate('orders.list.get', 'web'));
 
-    public function test_orders_id_without_permission(): void
-    {
-        Permission::findOrCreate('orders.{id}.get', 'web');
+    $this->actingAs($this->user, 'web')->get('/orders/list')
+        ->assertOk();
+});
 
-        $this->actingAs($this->user, 'web')->get('/orders/' . $this->order->id)
-            ->assertStatus(403);
-    }
+test('orders without permission', function (): void {
+    Permission::findOrCreate('orders.list.get', 'web');
 
-    public function test_orders_no_user(): void
-    {
-        $this->get('/orders/list')
-            ->assertStatus(302)
-            ->assertRedirect(route('login'));
-    }
-
-    public function test_orders_page(): void
-    {
-        $this->user->givePermissionTo(Permission::findOrCreate('orders.list.get', 'web'));
-
-        $this->actingAs($this->user, 'web')->get('/orders/list')
-            ->assertStatus(200);
-    }
-
-    public function test_orders_without_permission(): void
-    {
-        Permission::findOrCreate('orders.list.get', 'web');
-
-        $this->actingAs($this->user, 'web')->get('/orders/list')
-            ->assertStatus(403);
-    }
-}
+    $this->actingAs($this->user, 'web')->get('/orders/list')
+        ->assertForbidden();
+});

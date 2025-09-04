@@ -1,16 +1,9 @@
 <?php
 
-namespace FluxErp\Tests\Livewire\DataTables;
-
 use FluxErp\Livewire\DataTables\VatRateList;
-use FluxErp\Tests\TestCase;
 use Livewire\Livewire;
 
-class VatRateListTest extends TestCase
-{
-    public function test_renders_successfully(): void
-    {
-        Livewire::test(VatRateList::class)
-            ->assertStatus(200);
-    }
-}
+test('renders successfully', function (): void {
+    Livewire::test(VatRateList::class)
+        ->assertOk();
+});

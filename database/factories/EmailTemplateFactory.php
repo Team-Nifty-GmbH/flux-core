@@ -12,23 +12,23 @@ class EmailTemplateFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->sentence(3),
+            'name' => fake()->sentence(3),
             'to' => $this->generateEmailArray(),
-            'cc' => $this->faker->boolean(30) ? $this->generateEmailArray() : null,
-            'bcc' => $this->faker->boolean(10) ? $this->generateEmailArray() : null,
-            'subject' => $this->faker->sentence(),
-            'html_body' => '<p>' . $this->faker->paragraph() . '</p><p>' . $this->faker->paragraph() . '</p>',
-            'text_body' => $this->faker->paragraph() . "\n\n" . $this->faker->paragraph(),
+            'cc' => fake()->boolean(30) ? $this->generateEmailArray() : null,
+            'bcc' => fake()->boolean(10) ? $this->generateEmailArray() : null,
+            'subject' => fake()->sentence(),
+            'html_body' => '<p>' . fake()->paragraph() . '</p><p>' . fake()->paragraph() . '</p>',
+            'text_body' => fake()->paragraph() . "\n\n" . fake()->paragraph(),
         ];
     }
 
     private function generateEmailArray(): array
     {
-        $count = $this->faker->numberBetween(1, 4);
+        $count = fake()->numberBetween(1, 4);
         $emails = [];
 
         for ($i = 0; $i < $count; $i++) {
-            $emails[] = $this->faker->email();
+            $emails[] = fake()->email();
         }
 
         return $emails;

@@ -1,7 +1,5 @@
 <?php
 
-namespace FluxErp\Tests\Feature\Api;
-
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;
@@ -10,295 +8,269 @@ use FluxErp\Models\Permission;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\User;
 use FluxErp\Notifications\Ticket\TicketAssignedNotification;
-use FluxErp\Tests\Feature\BaseSetup;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
-class TicketTest extends BaseSetup
-{
-    private Address $address;
+beforeEach(function (): void {
+    $dbContact = Contact::factory()->create([
+        'client_id' => $this->dbClient->getKey(),
+    ]);
 
-    private array $permissions;
-
-    private Collection $tickets;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $dbContact = Contact::factory()->create([
-            'client_id' => $this->dbClient->getKey(),
-        ]);
-
-        $language = Language::query()->where('language_code', config('app.locale'))->first();
-        if (! $language) {
-            $language = Language::factory()->create(['language_code' => config('app.locale')]);
-        }
-
-        $this->address = Address::factory()->create([
-            'is_main_address' => true,
-            'client_id' => $dbContact->client_id,
-            'contact_id' => $dbContact->id,
-            'language_id' => $language->id,
-        ]);
-
-        $this->tickets = Ticket::factory()->count(5)->create([
-            'authenticatable_type' => morph_alias(Address::class),
-            'authenticatable_id' => $this->address->id,
-        ]);
-
-        $this->tickets[1]->users()->attach($this->user->id);
-
-        $this->permissions = [
-            'show' => Permission::findOrCreate('api.tickets.{id}.get'),
-            'index' => Permission::findOrCreate('api.tickets.get'),
-            'create' => Permission::findOrCreate('api.tickets.post'),
-            'update' => Permission::findOrCreate('api.tickets.put'),
-            'delete' => Permission::findOrCreate('api.tickets.{id}.delete'),
-            'toggle' => Permission::findOrCreate('api.tickets.toggle.post'),
-        ];
+    $language = Language::query()->where('language_code', config('app.locale'))->first();
+    if (! $language) {
+        $language = Language::factory()->create(['language_code' => config('app.locale')]);
     }
 
-    public function test_attach_user_assignment(): void
-    {
-        $this->user->givePermissionTo($this->permissions['toggle']);
-        Sanctum::actingAs($this->user, ['user']);
+    $this->address = Address::factory()->create([
+        'is_main_address' => true,
+        'client_id' => $dbContact->client_id,
+        'contact_id' => $dbContact->id,
+        'language_id' => $language->id,
+    ]);
 
-        $response = $this->actingAs($this->user)->post('/api/tickets/toggle', [
-            'ticket_id' => $this->tickets[2]->id,
-            'user_id' => $this->user->id,
-        ]);
-        $response->assertStatus(200);
+    $this->tickets = Ticket::factory()->count(5)->create([
+        'authenticatable_type' => morph_alias(Address::class),
+        'authenticatable_id' => $this->address->id,
+    ]);
 
-        $ticket = Ticket::query()
-            ->whereKey($this->tickets[2]->id)
-            ->first();
+    $this->tickets[1]->users()->attach($this->user->id);
 
-        $this->assertTrue($ticket->users()->where('users.id', $this->user->id)->exists());
-    }
+    $this->permissions = [
+        'show' => Permission::findOrCreate('api.tickets.{id}.get'),
+        'index' => Permission::findOrCreate('api.tickets.get'),
+        'create' => Permission::findOrCreate('api.tickets.post'),
+        'update' => Permission::findOrCreate('api.tickets.put'),
+        'delete' => Permission::findOrCreate('api.tickets.{id}.delete'),
+        'toggle' => Permission::findOrCreate('api.tickets.toggle.post'),
+    ];
+});
 
-    public function test_attach_user_assignment_validation_fails(): void
-    {
-        $ticket = [
-            'user_id' => $this->user->id,
-        ];
+test('attach user assignment', function (): void {
+    $this->user->givePermissionTo($this->permissions['toggle']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $this->user->givePermissionTo($this->permissions['toggle']);
-        Sanctum::actingAs($this->user, ['user']);
+    $response = $this->actingAs($this->user)->post('/api/tickets/toggle', [
+        'ticket_id' => $this->tickets[2]->id,
+        'user_id' => $this->user->id,
+    ]);
+    $response->assertOk();
 
-        $response = $this->actingAs($this->user)->post('/api/tickets/toggle', $ticket);
-        $response->assertStatus(422);
-    }
+    $ticket = Ticket::query()
+        ->whereKey($this->tickets[2]->id)
+        ->first();
 
-    public function test_create_ticket(): void
-    {
-        $ticket = [
-            'authenticatable_id' => $this->address->id,
-            'authenticatable_type' => morph_alias(Address::class),
-            'title' => 'Title Test',
-            'description' => 'Description Test',
-        ];
+    expect($ticket->users()->where('users.id', $this->user->id)->exists())->toBeTrue();
+});
 
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
+test('attach user assignment validation fails', function (): void {
+    $ticket = [
+        'user_id' => $this->user->id,
+    ];
 
-        $response = $this->actingAs($this->user)->post('/api/tickets', $ticket);
-        $response->assertStatus(201);
+    $this->user->givePermissionTo($this->permissions['toggle']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $responseTicket = json_decode($response->getContent())->data;
+    $response = $this->actingAs($this->user)->post('/api/tickets/toggle', $ticket);
+    $response->assertUnprocessable();
+});
 
-        $dbTicket = Ticket::query()
-            ->whereKey($responseTicket->id)
-            ->first();
+test('create ticket', function (): void {
+    $ticket = [
+        'authenticatable_id' => $this->address->id,
+        'authenticatable_type' => morph_alias(Address::class),
+        'title' => 'Title Test',
+        'description' => 'Description Test',
+    ];
 
-        $this->assertEquals($ticket['authenticatable_type'], $dbTicket->authenticatable_type);
-        $this->assertEquals($ticket['authenticatable_id'], $dbTicket->authenticatable_id);
-        $this->assertEquals($ticket['title'], $dbTicket->title);
-        $this->assertEquals($ticket['description'], $dbTicket->description);
-    }
+    $this->user->givePermissionTo($this->permissions['create']);
+    Sanctum::actingAs($this->user, ['user']);
 
-    public function test_create_ticket_validation_fails(): void
-    {
-        $ticket = [
-            'title' => Str::random(),
-            'description' => Str::random(),
-        ];
+    $response = $this->actingAs($this->user)->post('/api/tickets', $ticket);
+    $response->assertCreated();
 
-        $this->user->givePermissionTo($this->permissions['create']);
-        Sanctum::actingAs($this->user, ['user']);
+    $responseTicket = json_decode($response->getContent())->data;
 
-        $response = $this->actingAs($this->user)->post('/api/tickets', $ticket);
-        $response->assertStatus(422);
-    }
+    $dbTicket = Ticket::query()
+        ->whereKey($responseTicket->id)
+        ->first();
 
-    public function test_delete_ticket(): void
-    {
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
+    expect($dbTicket->authenticatable_type)->toEqual($ticket['authenticatable_type']);
+    expect($dbTicket->authenticatable_id)->toEqual($ticket['authenticatable_id']);
+    expect($dbTicket->title)->toEqual($ticket['title']);
+    expect($dbTicket->description)->toEqual($ticket['description']);
+});
 
-        $response = $this->actingAs($this->user)->delete('/api/tickets/' . $this->tickets[0]->id);
-        $response->assertStatus(204);
+test('create ticket validation fails', function (): void {
+    $ticket = [
+        'title' => Str::random(),
+        'description' => Str::random(),
+    ];
 
-        $this->assertFalse(Ticket::query()->whereKey($this->tickets[0]->id)->exists());
-    }
+    $this->user->givePermissionTo($this->permissions['create']);
+    Sanctum::actingAs($this->user, ['user']);
 
-    public function test_delete_ticket_not_found(): void
-    {
-        $this->user->givePermissionTo($this->permissions['delete']);
-        Sanctum::actingAs($this->user, ['user']);
+    $response = $this->actingAs($this->user)->post('/api/tickets', $ticket);
+    $response->assertUnprocessable();
+});
 
-        $response = $this->actingAs($this->user)->delete('/api/tickets/' . ++$this->tickets[4]->id);
-        $response->assertStatus(404);
-    }
+test('delete ticket', function (): void {
+    $this->user->givePermissionTo($this->permissions['delete']);
+    Sanctum::actingAs($this->user, ['user']);
 
-    public function test_detach_user_assignment(): void
-    {
-        $this->user->givePermissionTo($this->permissions['toggle']);
-        Sanctum::actingAs($this->user, ['user']);
+    $response = $this->actingAs($this->user)->delete('/api/tickets/' . $this->tickets[0]->id);
+    $response->assertNoContent();
 
-        $response = $this->actingAs($this->user)->post('/api/tickets/toggle', [
-            'ticket_id' => $this->tickets[1]->id,
-            'user_id' => $this->user->id,
-        ]);
-        $response->assertStatus(200);
+    expect(Ticket::query()->whereKey($this->tickets[0]->id)->exists())->toBeFalse();
+});
 
-        $ticket = Ticket::query()
-            ->whereKey($this->tickets[2]->id)
-            ->first();
+test('delete ticket not found', function (): void {
+    $this->user->givePermissionTo($this->permissions['delete']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $this->assertFalse($ticket->users()->where('users.id', $this->user->id)->exists());
-    }
+    $response = $this->actingAs($this->user)->delete('/api/tickets/' . ++$this->tickets[4]->id);
+    $response->assertNotFound();
+});
 
-    public function test_get_ticket(): void
-    {
-        $this->user->givePermissionTo($this->permissions['show']);
-        Sanctum::actingAs($this->user, ['user']);
+test('detach user assignment', function (): void {
+    $this->user->givePermissionTo($this->permissions['toggle']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/tickets/' . $this->tickets[0]->id);
-        $response->assertStatus(200);
+    $response = $this->actingAs($this->user)->post('/api/tickets/toggle', [
+        'ticket_id' => $this->tickets[1]->id,
+        'user_id' => $this->user->id,
+    ]);
+    $response->assertOk();
 
-        $ticket = json_decode($response->getContent())->data;
+    $ticket = Ticket::query()
+        ->whereKey($this->tickets[2]->id)
+        ->first();
 
-        $this->assertEquals($this->tickets[0]->id, $ticket->id);
-        $this->assertEquals($this->tickets[0]->authenticatable_type, $ticket->authenticatable_type);
-        $this->assertEquals($this->tickets[0]->authenticatable_id, $ticket->authenticatable_id);
-        $this->assertEquals($this->tickets[0]->model_type, $ticket->model_type);
-        $this->assertEquals($this->tickets[0]->model_id, $ticket->model_id);
-        $this->assertEquals($this->tickets[0]->ticket_type_id, $ticket->ticket_type_id);
-        $this->assertEquals($this->tickets[0]->title, $ticket->title);
-        $this->assertEquals($this->tickets[0]->description, $ticket->description);
-    }
+    expect($ticket->users()->where('users.id', $this->user->id)->exists())->toBeFalse();
+});
 
-    public function test_get_tickets(): void
-    {
-        $this->user->givePermissionTo($this->permissions['index']);
-        Sanctum::actingAs($this->user, ['user']);
+test('get ticket', function (): void {
+    $this->user->givePermissionTo($this->permissions['show']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $response = $this->actingAs($this->user)->get('/api/tickets');
-        $response->assertStatus(200);
+    $response = $this->actingAs($this->user)->get('/api/tickets/' . $this->tickets[0]->id);
+    $response->assertOk();
 
-        $tickets = json_decode($response->getContent())->data->data;
+    $ticket = json_decode($response->getContent())->data;
 
-        $this->assertEquals($this->tickets->count(), count($tickets));
-        // Todo Assert created Ticket instances
-    }
+    expect($ticket->id)->toEqual($this->tickets[0]->id);
+    expect($ticket->authenticatable_type)->toEqual($this->tickets[0]->authenticatable_type);
+    expect($ticket->authenticatable_id)->toEqual($this->tickets[0]->authenticatable_id);
+    expect($ticket->model_type)->toEqual($this->tickets[0]->model_type);
+    expect($ticket->model_id)->toEqual($this->tickets[0]->model_id);
+    expect($ticket->ticket_type_id)->toEqual($this->tickets[0]->ticket_type_id);
+    expect($ticket->title)->toEqual($this->tickets[0]->title);
+    expect($ticket->description)->toEqual($this->tickets[0]->description);
+});
 
-    public function test_update_ticket(): void
-    {
-        Notification::fake();
-        config(['queue.default' => 'sync']);
+test('get tickets', function (): void {
+    $this->user->givePermissionTo($this->permissions['index']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $users = User::factory()->count(3)->create([
-            'language_id' => $this->user->language_id,
-            'is_active' => true,
-        ]);
-        $this->tickets[2]->users()->attach($users->last()->id);
+    $response = $this->actingAs($this->user)->get('/api/tickets');
+    $response->assertOk();
 
-        $ticket = [
-            'id' => $this->tickets[2]->id,
-            'authenticatable_type' => morph_alias(Address::class),
-            'authenticatable_id' => $this->address->id,
-            'title' => 'Title Update Test',
-            'description' => 'Description Update Test',
-            'users' => $users->take(2)->pluck('id')->toArray(),
-        ];
+    $tickets = json_decode($response->getContent())->data->data;
 
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
+    expect(count($tickets))->toEqual($this->tickets->count());
+    // Todo Assert created Ticket instances
+});
 
-        $response = $this->actingAs($this->user)->put('/api/tickets', $ticket);
-        $response->assertStatus(200);
+test('update ticket', function (): void {
+    Notification::fake();
+    config(['queue.default' => 'sync']);
 
-        $responseTicket = json_decode($response->getContent())->data;
+    $users = User::factory()->count(3)->create([
+        'language_id' => $this->user->language_id,
+        'is_active' => true,
+    ]);
+    $this->tickets[2]->users()->attach($users->last()->id);
 
-        $dbTicket = Ticket::query()
-            ->whereKey($responseTicket->id)
-            ->first();
+    $ticket = [
+        'id' => $this->tickets[2]->id,
+        'authenticatable_type' => morph_alias(Address::class),
+        'authenticatable_id' => $this->address->id,
+        'title' => 'Title Update Test',
+        'description' => 'Description Update Test',
+        'users' => $users->take(2)->pluck('id')->toArray(),
+    ];
 
-        $this->assertEquals($ticket['id'], $dbTicket->id);
-        $this->assertEquals($ticket['authenticatable_type'], $dbTicket->authenticatable_type);
-        $this->assertEquals($ticket['authenticatable_id'], $dbTicket->authenticatable_id);
-        $this->assertEquals($ticket['title'], $dbTicket->title);
-        $this->assertEquals($ticket['description'], $dbTicket->description);
-        $this->assertEquals($ticket['users'], $dbTicket->users()->pluck('users.id')->toArray());
+    $this->user->givePermissionTo($this->permissions['update']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        Notification::assertSentTo($users->take(2), TicketAssignedNotification::class);
-        Notification::assertNothingSentTo($this->user);
-        Notification::assertNotSentTo($users->last(), TicketAssignedNotification::class);
-    }
+    $response = $this->actingAs($this->user)->put('/api/tickets', $ticket);
+    $response->assertOk();
 
-    public function test_update_ticket_validation_fails(): void
-    {
-        $ticket = [
-            'address_id' => $this->address->id,
-            'state' => 'waiting_for_customer',
-            'title' => Str::random(),
-            'description' => Str::random(),
-        ];
+    $responseTicket = json_decode($response->getContent())->data;
 
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
+    $dbTicket = Ticket::query()
+        ->whereKey($responseTicket->id)
+        ->first();
 
-        $response = $this->actingAs($this->user)->put('/api/tickets', $ticket);
-        $response->assertStatus(422);
-    }
+    expect($dbTicket->id)->toEqual($ticket['id']);
+    expect($dbTicket->authenticatable_type)->toEqual($ticket['authenticatable_type']);
+    expect($dbTicket->authenticatable_id)->toEqual($ticket['authenticatable_id']);
+    expect($dbTicket->title)->toEqual($ticket['title']);
+    expect($dbTicket->description)->toEqual($ticket['description']);
+    expect($dbTicket->users()->pluck('users.id')->toArray())->toEqual($ticket['users']);
 
-    public function test_update_ticket_with_additional_columns(): void
-    {
-        $additionalColumn = AdditionalColumn::factory()->create([
-            'model_type' => Ticket::class,
-        ]);
+    Notification::assertSentTo($users->take(2), TicketAssignedNotification::class);
+    Notification::assertNothingSentTo($this->user);
+    Notification::assertNotSentTo($users->last(), TicketAssignedNotification::class);
+});
 
-        $this->tickets[0]->saveMeta($additionalColumn->name, 'Original Value');
+test('update ticket validation fails', function (): void {
+    $ticket = [
+        'address_id' => $this->address->id,
+        'state' => 'waiting_for_customer',
+        'title' => Str::random(),
+        'description' => Str::random(),
+    ];
 
-        $ticket = [
-            'id' => $this->tickets[0]->id,
-            'authenticatable_id' => $this->address->id,
-            'authenticatable_type' => morph_alias(Address::class),
-            'state' => 'waiting_for_customer',
-            'title' => Str::random(),
-            'description' => Str::random(),
-        ];
+    $this->user->givePermissionTo($this->permissions['update']);
+    Sanctum::actingAs($this->user, ['user']);
 
-        $this->user->givePermissionTo($this->permissions['update']);
-        Sanctum::actingAs($this->user, ['user']);
+    $response = $this->actingAs($this->user)->put('/api/tickets', $ticket);
+    $response->assertUnprocessable();
+});
 
-        $response = $this->actingAs($this->user)->put('/api/tickets', $ticket);
-        $response->assertStatus(200);
+test('update ticket with additional columns', function (): void {
+    $additionalColumn = AdditionalColumn::factory()->create([
+        'model_type' => Ticket::class,
+    ]);
 
-        $responseTicket = json_decode($response->getContent())->data;
+    $this->tickets[0]->saveMeta($additionalColumn->name, 'Original Value');
 
-        $dbTicket = Ticket::query()
-            ->whereKey($responseTicket->id)
-            ->first();
+    $ticket = [
+        'id' => $this->tickets[0]->id,
+        'authenticatable_id' => $this->address->id,
+        'authenticatable_type' => morph_alias(Address::class),
+        'state' => 'waiting_for_customer',
+        'title' => Str::random(),
+        'description' => Str::random(),
+    ];
 
-        $this->assertEquals($ticket['id'], $dbTicket->id);
-        $this->assertEquals($ticket['authenticatable_id'], $dbTicket->authenticatable_id);
-        $this->assertEquals($ticket['authenticatable_type'], $dbTicket->authenticatable_type);
-        $this->assertEquals($ticket['state'], $dbTicket->state);
-        $this->assertEquals($ticket['title'], $dbTicket->title);
-        $this->assertEquals($ticket['description'], $dbTicket->description);
-    }
-}
+    $this->user->givePermissionTo($this->permissions['update']);
+    Sanctum::actingAs($this->user, ['user']);
+
+    $response = $this->actingAs($this->user)->put('/api/tickets', $ticket);
+    $response->assertOk();
+
+    $responseTicket = json_decode($response->getContent())->data;
+
+    $dbTicket = Ticket::query()
+        ->whereKey($responseTicket->id)
+        ->first();
+
+    expect($dbTicket->id)->toEqual($ticket['id']);
+    expect($dbTicket->authenticatable_id)->toEqual($ticket['authenticatable_id']);
+    expect($dbTicket->authenticatable_type)->toEqual($ticket['authenticatable_type']);
+    expect($dbTicket->state)->toEqual($ticket['state']);
+    expect($dbTicket->title)->toEqual($ticket['title']);
+    expect($dbTicket->description)->toEqual($ticket['description']);
+});

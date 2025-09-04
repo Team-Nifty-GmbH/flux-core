@@ -1,31 +1,25 @@
 <?php
 
-namespace FluxErp\Tests\Feature\Web;
-
 use FluxErp\Models\Permission;
 
-class SettingsCurrenciesTest extends BaseSetup
-{
-    public function test_settings_currencies_no_user(): void
-    {
-        $this->get('/settings/currencies')
-            ->assertStatus(302)
-            ->assertRedirect(route('login'));
-    }
+test('settings currencies no user', function (): void {
+    $this->actingAsGuest();
 
-    public function test_settings_currencies_page(): void
-    {
-        $this->user->givePermissionTo(Permission::findOrCreate('settings.currencies.get', 'web'));
+    $this->get('/settings/currencies')
+        ->assertFound()
+        ->assertRedirect(route('login'));
+});
 
-        $this->actingAs($this->user, 'web')->get('/settings/currencies')
-            ->assertStatus(200);
-    }
+test('settings currencies page', function (): void {
+    $this->user->givePermissionTo(Permission::findOrCreate('settings.currencies.get', 'web'));
 
-    public function test_settings_currencies_without_permission(): void
-    {
-        Permission::findOrCreate('settings.currencies.get', 'web');
+    $this->actingAs($this->user, 'web')->get('/settings/currencies')
+        ->assertOk();
+});
 
-        $this->actingAs($this->user, 'web')->get('/settings/currencies')
-            ->assertStatus(403);
-    }
-}
+test('settings currencies without permission', function (): void {
+    Permission::findOrCreate('settings.currencies.get', 'web');
+
+    $this->actingAs($this->user, 'web')->get('/settings/currencies')
+        ->assertForbidden();
+});
