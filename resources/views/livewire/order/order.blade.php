@@ -207,7 +207,7 @@
         <div class="flex flex-col gap-1.5">
             <x-input
                 wire:model="discount.name"
-                :text="__('Name')"
+                :label="__('Name')"
                 id="discount-name"
             />
             <div x-cloak x-show="$wire.discount.is_percentage">
@@ -1043,7 +1043,7 @@
                                 wire:model="order.invoice_date"
                                 :without-time="true"
                                 :disabled="true"
-                                :text="__('Invoice Date')"
+                                :label="__('Invoice Date')"
                             />
                             <x-date
                                 wire:model="order.system_delivery_date"

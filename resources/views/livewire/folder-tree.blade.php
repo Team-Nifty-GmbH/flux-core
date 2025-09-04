@@ -188,7 +188,7 @@
                                     <x-input
                                         class="flex-1"
                                         x-bind:disabled="selected?.is_static"
-                                        :text="__('Name')"
+                                        :label="__('Name')"
                                         x-model="selection.name"
                                     />
                                 </div>
