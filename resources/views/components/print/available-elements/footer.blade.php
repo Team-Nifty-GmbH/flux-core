@@ -124,6 +124,19 @@
     </label>
     <div class="mb-4 mt-4 w-full border-t border-gray-300"></div>
     <div class="pb-4 text-lg text-gray-600">Additional Snippet</div>
+    <div class="flex flex-col gap-4"
+         :class="{'pb-4': footerStore.temporarySnippetBoxes.length > 0 || footerStore.visibleSnippetBoxes.length > 0 }"
+    >
+    <template x-for="(snippet, index) in footerStore.temporarySnippetBoxes" :key="index">
+        <div class="flex items-center justify-between">
+            <div>Box</div>
+            <x-button.circle
+                x-on:click="footerStore.deleteTemporarySnippet(snippet.id)"
+                icon="trash"
+            />
+        </div>
+    </template>
+    </div>
     <x-button
         color="primary"
         text="Add Snippet"

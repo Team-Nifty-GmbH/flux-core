@@ -13,9 +13,9 @@ export default function () {
     return {
         ...baseStore(),
         footer: null,
-        _footerHeight: 1.7,
-        _minFooterHeight: 1.7,
-        _maxFooterHeight: 5,
+        _footerHeight: 1.7, // cm
+        _minFooterHeight: 1.7, // cm
+        _maxFooterHeight: 5, // cm
         isFooterClicked: false,
         startPointFooterVertical: null,
         get component() {
@@ -106,7 +106,66 @@ export default function () {
 
                 this._selectedElement.startY = e.clientY;
             } else {
-                throw new Error(`Element not selected`);
+                throw new Error(`Element not selected - scale`);
+            }
+        },
+        onMouseMoveResize(e) {
+            if (this._selectedElement.ref !== null) {
+                const deltaX = e.clientX - this._selectedElement.startX;
+                const deltaY = e.clientY - this._selectedElement.startY;
+                const { startHeight, startWidth } =
+                    this._startSizeOfSelectedElement();
+                if (deltaX >= 0 && deltaY >= 0) {
+                    // TODO: this.footer.offsetWidth cache it in a variable - and restore on margin change
+                    const maxWidth = this.footer.offsetWidth;
+                    const maxHeight = this._footerHeight * this.pyPerCm;
+                    const newHeight = startHeight + deltaY;
+                    const newWidth = startWidth + deltaX;
+                    if (newHeight < maxHeight && newWidth < maxWidth) {
+                        this._selectedElement.ref.height = newHeight;
+                        this._selectedElement.ref.width = newWidth;
+                        this._selectedElement.height = newHeight;
+                        this._selectedElement.width = newWidth;
+                    }
+                } else if (deltaX >= 0 && deltaY <= 0) {
+                    const maxWidth = this.footer.offsetWidth;
+                    const minHeight = this.pyPerCm;
+                    const newHeight = startHeight + deltaY;
+                    const newWidth = startWidth + deltaX;
+                    if (newHeight > minHeight && newWidth < maxWidth) {
+                        this._selectedElement.ref.height = newHeight;
+                        this._selectedElement.ref.width = newWidth;
+                        this._selectedElement.height = newHeight;
+                        this._selectedElement.width = newWidth;
+                    }
+                } else if (deltaX <= 0 && deltaY >= 0) {
+                    const minWidth = 3 * this.pxPerCm;
+                    const maxHeight = this._footerHeight * this.pyPerCm;
+                    const newHeight = startHeight + deltaY;
+                    const newWidth = startWidth + deltaX;
+                    if (newHeight < maxHeight && newWidth > minWidth) {
+                        this._selectedElement.ref.height = newHeight;
+                        this._selectedElement.ref.width = newWidth;
+                        this._selectedElement.height = newHeight;
+                        this._selectedElement.width = newWidth;
+                    }
+                } else if (deltaX <= 0 && deltaY <= 0) {
+                    const minWidth = 3 * this.pxPerCm;
+                    const minHeight = this.pyPerCm;
+                    const newHeight = startHeight + deltaY;
+                    const newWidth = startWidth + deltaX;
+                    if (newHeight > minHeight && newWidth > minWidth) {
+                        this._selectedElement.ref.height = newHeight;
+                        this._selectedElement.ref.width = newWidth;
+                        this._selectedElement.height = newHeight;
+                        this._selectedElement.width = newWidth;
+                    }
+                }
+
+                this._selectedElement.startX = e.clientX;
+                this._selectedElement.startY = e.clientY;
+            } else {
+                throw new Error(`Element not selected - resize`);
             }
         },
         get footerHeight() {
@@ -124,8 +183,26 @@ export default function () {
             }
             return { x: 0, y: 0 };
         },
+        get selectedElementSize() {
+            // x and y are values on store - since reactive
+            // observe changes on x and y of selected element to retrieve the size
+            if (
+                this._selectedElement.width === null ||
+                this._selectedElement.height === null
+            ) {
+                return { width: 0, height: 0 };
+            }
+
+            return {
+                width: this._selectedElement.width,
+                height: this._selectedElement.height,
+            };
+        },
         get selectedElementId() {
             return this._selectedElement.id;
+        },
+        get isResizeOrScaleActive() {
+            return this.isImgResizeClicked || this.isSnippetResizeClicked;
         },
         toggleElement($ref, id) {
             if (this.footer === null) {
@@ -331,12 +408,22 @@ export default function () {
                 this.visibleMedia.forEach((item) => {
                     this.footer.removeChild(item.element);
                 });
+
+                this.temporarySnippetBoxes.forEach((item) => {
+                    this.footer.removeChild(item.element);
+                });
+
+                this.visibleSnippetBoxes.forEach((item) => {
+                    this.footer.removeChild(item.element);
+                });
             }
 
             this.visibleElements = [];
             this.elementsOutOfView = [];
             this.temporaryVisibleMedia = [];
             this.visibleMedia = [];
+            this.temporarySnippetBoxes = [];
+            this.visibleSnippetBoxes = [];
 
             const footerJson = await this.component.get('form.footer');
 
@@ -480,6 +567,19 @@ export default function () {
                 this.visibleMedia.splice(index, 1);
             } else {
                 throw new Error(`Media with id ${id} not found`);
+            }
+        },
+        deleteTemporarySnippet(id) {
+            const index = this.temporarySnippetBoxes.findIndex(
+                (item) => item.id === id,
+            );
+            if (index !== -1) {
+                const obj = this.temporarySnippetBoxes[index];
+                this.observer.unobserve(obj.element);
+                this.footer.removeChild(obj.element);
+                this.temporarySnippetBoxes.splice(index, 1);
+            } else {
+                throw new Error(`Temporary snippet with id ${id} not found`);
             }
         },
         async prepareToSubmit() {

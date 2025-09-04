@@ -27,7 +27,7 @@ export default class PrintElement {
     }
 
     get size() {
-        // since the size of an element doesent cange, we can cache it
+        // since the size of an element doesent change, we can cache it
         if (this._elementSize !== null && this.typeOfElement !== 'resizable') {
             return this._elementSize;
         } else {

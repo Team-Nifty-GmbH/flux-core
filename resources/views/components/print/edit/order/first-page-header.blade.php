@@ -18,7 +18,6 @@
         :style="`height: ${firstPageHeaderStore.height};`"
     >
         <div
-            x-on:mouseup.window="firstPageHeaderStore.onMouseUpScale($event)"
             x-on:mousemove.window="firstPageHeaderStore.isImgResizeClicked ? firstPageHeaderStore.onMouseMoveScale($event) : false"
             class="w-0 h-0"></div>
 

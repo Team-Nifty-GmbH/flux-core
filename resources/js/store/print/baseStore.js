@@ -8,18 +8,36 @@ export default function () {
             // x and y are just for UI purposes
             x: null,
             y: null,
+            // width and height are just for UI purposes - snippet case resize
+            width: null,
+            height: null,
             ref: null,
             startX: null,
             startY: null,
         },
         isImgResizeClicked: false,
+        isSnippetResizeClicked: false,
         visibleElements: [],
         temporaryVisibleMedia: [],
         visibleMedia: [],
         temporarySnippetBoxes: [],
-        visibleSnippets: [],
+        visibleSnippetBoxes: [],
         elementsOutOfView: [],
         _component: null,
+        _startSizeOfSelectedElement() {
+            if (this._selectedElement.id === null) {
+                throw new Error('element is not selected');
+            }
+
+            return {
+                startHeight:
+                    this._selectedElement.ref.height ??
+                    this._selectedElement.ref.size.height,
+                startWidth:
+                    this._selectedElement.ref.width ??
+                    this._selectedElement.ref.size.width,
+            };
+        },
         onInit(pxPerCm, pyPerCm) {
             if (typeof pyPerCm === 'number' && pyPerCm > 0) {
                 this.pyPerCm = pyPerCm;
@@ -82,6 +100,27 @@ export default function () {
                 } else {
                     throw new Error(`Media element with id ${id} not found`);
                 }
+            } else if (source === 'temporary-snippet') {
+                const index = this.temporarySnippetBoxes.findIndex(
+                    (item) => item.id === id,
+                );
+                if (index !== -1) {
+                    const element = this.temporarySnippetBoxes[index];
+                    this._selectedElement.id = id;
+                    this._selectedElement.ref = element;
+                    const { x, y } = element.position;
+                    this._selectedElement.x = x;
+                    this._selectedElement.y = y;
+                    this._selectedElement.startX = e.clientX;
+                    this._selectedElement.startY = e.clientY;
+                    // only for snippet resize
+                    this._selectedElement.width = element.width;
+                    this._selectedElement.height = element.height;
+                } else {
+                    throw new Error(
+                        `Temporary element with id ${id} not found`,
+                    );
+                }
             } else {
                 throw new Error(
                     `Invalid source: ${source} - eather 'element' or 'temporary'`,
@@ -117,6 +156,22 @@ export default function () {
             this._selectedElement.y = null;
             this._selectedElement.startX = null;
             this._selectedElement.startY = null;
+            if (this._selectedElement.width !== null) {
+                this._selectedElement.width = null;
+            }
+
+            if (this._selectedElement.height !== null) {
+                this._selectedElement.height = null;
+            }
+
+            // in case resizing was active, disable it
+            if (this.isSnippetResizeClicked) {
+                this.isSnippetResizeClicked = false;
+            }
+
+            if (this.isImgResizeClicked) {
+                this.isImgResizeClicked = false;
+            }
         },
         onMouseDown(e, id, source = 'container') {
             // source can be 'container','temporary-media','media','temporary-snippet' and 'snippet'
@@ -129,6 +184,13 @@ export default function () {
                 this._selectElement(e, id, source);
             }
         },
+        onMouseDownResize(e, id, source) {
+            if (!this.isSnippetResizeClicked) {
+                this.isSnippetResizeClicked = true;
+                this._selectElement(e, id, source);
+            }
+        },
+        // TODO: move to moseUp
         onMouseUpScale() {
             if (this.isImgResizeClicked) {
                 this.isImgResizeClicked = false;

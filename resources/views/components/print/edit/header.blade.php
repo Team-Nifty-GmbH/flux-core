@@ -46,7 +46,6 @@
         class="header-content relative h-full w-full">
     </div>
     <div
-        x-on:mouseup.window="headerStore.onMouseUpScale($event)"
         x-on:mousemove.window="headerStore.isImgResizeClicked ? headerStore.onMouseMoveScale($event) : null"
     ></div>
     <template

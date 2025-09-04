@@ -2,7 +2,7 @@
     class="relative w-full bg-white text-center"
     x-on:mouseup.window="footerStore.onMouseUp()"
     x-on:mousemove.window="
-        footerStore.selectedElementId !== null && !footerStore.isImgResizeClicked
+        footerStore.selectedElementId !== null && !footerStore.isResizeOrScaleActive
             ? footerStore.onMouseMove($event)
             : null
     "
@@ -23,27 +23,41 @@
     </div>
     {{-- UI  footer height related --}}
     {{-- UI position of a selected element --}}
-    <div x-cloak x-show="!footerStore.isImgResizeClicked && footerStore.selectedElementId !== null"
+    <div x-cloak x-show="!footerStore.isResizeOrScaleActive && footerStore.selectedElementId !== null"
          :style="{'transform': `translate(${footerStore.selectedElementPos.x -50}px,${footerStore.selectedElementPos.y}px)` }"
          class="absolute left-0 top-0 z-[100] rounded shadow p-2 bg-gray-100">
         <div x-text="`${roundToOneDecimal(footerStore.selectedElementPos.x / footerStore.pxPerCm)}cm`"></div>
     </div>
-    <div x-cloak x-show="!footerStore.isImgResizeClicked && footerStore.selectedElementId !== null"
+    <div x-cloak x-show="!footerStore.isResizeOrScaleActive && footerStore.selectedElementId !== null"
          :style="{'transform': `translate(${footerStore.selectedElementPos.x}px,${footerStore.selectedElementPos.y - 40}px)` }"
          class="absolute left-0 top-0 z-[100] rounded shadow p-2 bg-gray-100">
         <div x-text="`${roundToOneDecimal(footerStore.selectedElementPos.y / footerStore.pyPerCm)}cm`"></div>
     </div>
     {{-- UI position of a selected element --}}
+    {{-- UI size of a snippet --}}
+    <div x-cloak x-show="footerStore.isSnippetResizeClicked && footerStore.selectedElementId !== null"
+         :style="{'transform': `translate(${footerStore.selectedElementPos.x -50}px,${footerStore.selectedElementPos.y}px)` }"
+         class="absolute left-0 top-0 z-[100] rounded shadow p-2 bg-gray-100">
+        <div x-text="`h:${roundToOneDecimal(footerStore.selectedElementSize.height / footerStore.pxPerCm)}cm`"></div>
+    </div>
+    <div x-cloak x-show="footerStore.isSnippetResizeClicked && footerStore.selectedElementId !== null"
+         :style="{'transform': `translate(${footerStore.selectedElementPos.x}px,${footerStore.selectedElementPos.y - 40}px)` }"
+         class="absolute left-0 top-0 z-[100] rounded shadow p-2 bg-gray-100">
+        <div x-text="`w: ${roundToOneDecimal(footerStore.selectedElementSize.width / footerStore.pyPerCm)}cm`"></div>
+    </div>
+    {{-- UI size of a snippet --}}
+    {{-- UI snippet box name --}}
+
+    {{-- UI snippet box name --}}
     <div
         x-ref="footer"
         class="footer-content relative h-full text-2xs leading-3"
         :style="`height: ${footerStore.footerHeight};`"
         x-on:mouseup.window="footerStore.onMouseUpFooter($event)"
-        x-on:mousemove.window="footerStore.isFooterClicked ? footerStore.onMouseMoveFooter($event) : false"
+        x-on:mousemove.window="footerStore.isFooterClicked ? footerStore.onMouseMoveFooter($event) : null"
     >
         <div
-            x-on:mouseup.window="footerStore.onMouseUpScale($event)"
-            x-on:mousemove.window="footerStore.isImgResizeClicked ? footerStore.onMouseMoveScale($event) : false"
+            x-on:mousemove.window="footerStore.isImgResizeClicked ? footerStore.onMouseMoveScale($event) : footerStore.isSnippetResizeClicked ? footerStore.onMouseMoveResize($event) : null"
             class="border-semi-black w-full border-t">
             <template
                 id="{{ $client->id }}"
@@ -87,7 +101,7 @@
                     data-type="resizable"
                     x-on:mousedown="printStore.editFooter ?  footerStore.onMouseDown($event, 'footer-logo') : null"
                     class="absolute left-0 top-0 h-[1.7cm] select-none"
-                    :class="{'bg-gray-300' : !footerStore.isImgResizeClicked && footerStore.selectedElementId === 'footer-logo'}"
+                    :class="{'bg-gray-300' : !footerStore.isResizeOrScaleActive && footerStore.selectedElementId === 'footer-logo'}"
                 >
                     <div
                         draggable="false"
@@ -137,7 +151,7 @@
                     data-type="resizable"
                     draggable="false"
                     class="absolute left-0 top-0 select-none h-[1.7cm]"
-                    :class="{'bg-gray-300' : !footerStore.isImgResizeClicked && footerStore.selectedElementId === $el.id}"
+                    :class="{'bg-gray-300' : !footerStore.isResizeOrScaleActive && footerStore.selectedElementId === $el.id}"
                 >
                     <div
                         draggable="false"
@@ -162,7 +176,7 @@
                     data-type="resizable"
                     draggable="false"
                     class="absolute left-0 top-0 select-none h-[1.7cm]"
-                    :class="{'bg-gray-300' : !footerStore.isImgResizeClicked && footerStore.selectedElementId === $el.id}"
+                    :class="{'bg-gray-300' : !footerStore.isResizeOrScaleActive && footerStore.selectedElementId === $el.id}"
                 >
                     <div
                         draggable="false"
@@ -183,9 +197,24 @@
                 x-ref="footer-additional-snippet"
             >
                 <div
+                    x-on:mousedown="printStore.editFooter ?  footerStore.onMouseDown($event,$el.id,'temporary-snippet') : null"
                     id="footer-snippet-placeholder"
-                    class="w-[10cm] h-[1.7cm] border bg-gray-300 ">
-
+                    data-type="resizable"
+                    draggable="false"
+                    class="absolute w-[10cm] h-[1.7cm] border"
+                    :class="{
+                    'border-primary-200': footerStore.isSnippetResizeClicked,
+                    'bg-gray-100' : !footerStore.isResizeOrScaleActive && footerStore.selectedElementId === $el.id
+                    }"
+                >
+                    <div
+                        draggable="false"
+                        x-cloak x-show="printStore.editFooter" class="relative w-full h-full">
+                        <x-icon
+                            dragable="false"
+                            x-on:mousedown.stop="footerStore.onMouseDownResize($event, $el.parentElement.parentElement.id,'temporary-snippet')"
+                            name="arrows-pointing-out" class="absolute cursor-pointer right-0 bottom-0 h-4 w-4 rounded-full"></x-icon>
+                    </div>
                 </div>
             </template>
             <div class="clear-both"></div>
