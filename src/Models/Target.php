@@ -72,7 +72,7 @@ class Target extends FluxModel
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'target_user')
-            ->withPivot(['target_allocation'])
+            ->withPivot(['target_share'])
             ->using(TargetUser::class);
     }
 }

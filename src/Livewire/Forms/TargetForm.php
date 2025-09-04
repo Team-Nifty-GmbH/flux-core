@@ -59,9 +59,7 @@ class TargetForm extends FluxForm
                 $abs = null;
 
                 if ($pivot) {
-                    if (isset($pivot->target_allocation)) {
-                        $alloc = is_null($pivot->target_allocation) ? null : $pivot->target_allocation;
-                    }
+                    $alloc = is_null($pivot->target_share) ? null : $pivot->target_share;
                 }
 
                 if ($alloc !== null) {
