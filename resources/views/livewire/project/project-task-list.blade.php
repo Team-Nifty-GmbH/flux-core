@@ -4,6 +4,7 @@
 }">
     <div id="new-task-modal">
         <x-modal
+            size="5xl"
             id="task-form-modal"
             x-on:close="$wire.set('taskTab', 'task.general')"
         >
