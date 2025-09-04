@@ -8,6 +8,7 @@ use FluxErp\Providers\BindingServiceProvider;
 use FluxErp\Providers\MorphMapServiceProvider;
 use FluxErp\Providers\SanctumServiceProvider;
 use FluxErp\Providers\ViewServiceProvider;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Scout\ScoutServiceProvider;
 use Livewire\LivewireServiceProvider;
 use NotificationChannels\WebPush\WebPushServiceProvider;
@@ -27,6 +28,10 @@ use function Orchestra\Testbench\package_path;
 
 abstract class BrowserTestCase extends TestCase
 {
+    use RefreshDatabase;
+
+    private ?string $lastClickedTsSelect = null;
+
     public static function installAssets(): void
     {
         static::deleteDirectory(__DIR__ . '/../public/build/assets/');
@@ -144,5 +149,19 @@ abstract class BrowserTestCase extends TestCase
             WebPushServiceProvider::class,
             MorphMapServiceProvider::class,
         ]);
+    }
+
+    protected function tsSelect(string $wireModel): string
+    {
+        return $this->lastClickedTsSelect = '//div[contains(@x-data, "' . $wireModel . '")]//button[@x-ref="button"]';
+    }
+
+    protected function tsSelectOption(string $option): string
+    {
+        $base = '//li[@role="option"][contains(., "' . $option . '")]';
+
+        return ! $this->lastClickedTsSelect
+            ? $base
+            : $this->lastClickedTsSelect . '/../..//ul' . $base;
     }
 }

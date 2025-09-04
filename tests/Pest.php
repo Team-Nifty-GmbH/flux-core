@@ -37,7 +37,7 @@ pest()
         $this->actingAsGuest('web');
         $this->be($this->address, 'address');
     })
-    ->group('Livewire/Portal')
+    ->group('portal')
     ->in('Livewire/Portal', 'Feature/Web/Portal');
 
 pest()

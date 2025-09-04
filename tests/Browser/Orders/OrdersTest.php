@@ -38,12 +38,12 @@ test('can create new order', function (): void {
         ->assertSee('New order')
         ->click('New order')
         ->assertSee('Order type')
-        ->click('//div[contains(@x-data, "order.order_type_id")]//button[@x-ref="button"]')
+        ->click($this->tsSelect('order.order_type_id'))
         ->assertSee($orderType->name)
-        ->click('//li[@role="option"][contains(., "' . $orderType->name . '")]')
-        ->click('//div[contains(@x-data, "order.contact_id")]//button[@x-ref="button"]')
+        ->click($this->tsSelectOption($orderType->name))
+        ->click($this->tsSelect('order.contact_id'))
         ->assertSee($address->name)
-        ->click('//li[@role="option"][contains(., "' . $address->name . '")]')
+        ->click($this->tsSelectOption($address->name))
         ->click('Save')
         ->assertSee('Order positions');
 
