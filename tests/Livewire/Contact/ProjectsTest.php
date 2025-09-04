@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Livewire\BaseSetup::class);
 use FluxErp\Livewire\Contact\Projects;
 use FluxErp\Models\Contact;
 use Livewire\Livewire;

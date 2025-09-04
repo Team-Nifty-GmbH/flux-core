@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Livewire\BaseSetup::class);
 use FluxErp\Livewire\Settings\Countries;
 use Livewire\Livewire;
 

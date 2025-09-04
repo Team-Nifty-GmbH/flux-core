@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Livewire\BaseSetup::class);
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Enums\PaymentRunTypeEnum;
 use FluxErp\Livewire\Accounting\PaymentRunPreview;

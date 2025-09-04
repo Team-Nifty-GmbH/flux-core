@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Livewire\BaseSetup::class);
 use FluxErp\Livewire\Product\Product;
 use FluxErp\Models\Language;
 use FluxErp\Models\Price;

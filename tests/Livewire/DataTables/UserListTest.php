@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Livewire\BaseSetup::class);
 use FluxErp\Livewire\DataTables\UserList;
 use Livewire\Livewire;
 

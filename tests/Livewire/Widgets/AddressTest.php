@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Livewire\BaseSetup::class);
 use FluxErp\Livewire\Widgets\Address as AddressView;
 use FluxErp\Models\Address;
 use FluxErp\Models\Contact;

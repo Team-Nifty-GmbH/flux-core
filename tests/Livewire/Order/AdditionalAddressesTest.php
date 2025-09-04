@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Livewire\BaseSetup::class);
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\Order\AdditionalAddresses;
 use FluxErp\Models\Address;

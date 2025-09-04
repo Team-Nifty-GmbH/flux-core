@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Livewire\BaseSetup::class);
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use FluxErp\Enums\OrderTypeEnum;

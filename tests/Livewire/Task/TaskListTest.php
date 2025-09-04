@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Livewire\BaseSetup::class);
 use FluxErp\Livewire\Task\TaskList;
 use FluxErp\Models\Task;
 use Illuminate\Support\Str;

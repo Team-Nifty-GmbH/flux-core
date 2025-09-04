@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Livewire\BaseSetup::class);
 use FluxErp\Enums\OrderTypeEnum;
 use FluxErp\Livewire\Forms\OrderForm;
 use FluxErp\Livewire\Order\Related;

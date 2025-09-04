@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Livewire\BaseSetup::class);
 use FluxErp\Livewire\Contact\Addresses;
 use FluxErp\Livewire\Forms\AddressForm;
 use FluxErp\Livewire\Forms\ContactForm;

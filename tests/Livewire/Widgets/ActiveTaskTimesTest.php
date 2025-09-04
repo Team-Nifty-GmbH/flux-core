@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Livewire\BaseSetup::class);
 use FluxErp\Livewire\Widgets\ActiveTaskTimes;
 use FluxErp\Models\WorkTime;
 use Livewire\Livewire;

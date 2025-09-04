@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Livewire\BaseSetup::class);
 use FluxErp\Livewire\Ticket\Ticket as TicketView;
 use FluxErp\Models\Ticket;
 use FluxErp\Models\User;

@@ -11,22 +11,10 @@ use Illuminate\Support\Facades\Route;
 use Pest\Browser\Api\ArrayablePendingAwaitablePage;
 use Pest\Browser\Api\PendingAwaitablePage;
 
-/*
-|--------------------------------------------------------------------------
-| Test Case
-|--------------------------------------------------------------------------
-*/
+uses(FluxErp\Tests\Livewire\BaseSetup::class)
+    ->in('Livewire');
 
-uses(BrowserTestCase::class)->in('Browser');
-
-/*
-|--------------------------------------------------------------------------
-| Browser Test Setup
-|--------------------------------------------------------------------------
-| Automatically setup required data and login for all browser tests
-*/
-
-uses()
+uses(BrowserTestCase::class)
     ->beforeAll(function (): void {
         BrowserTestCase::installAssets();
     })

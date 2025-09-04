@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Livewire\BaseSetup::class);
 use FluxErp\Livewire\Settings\TicketTypes;
 use FluxErp\Models\AdditionalColumn;
 use FluxErp\Models\TicketType;

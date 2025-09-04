@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Livewire\BaseSetup::class);
 use FluxErp\Database\Factories\CartFactory;
 use FluxErp\Livewire\Cart\Cart;
 use FluxErp\Models\Cart as CartModel;

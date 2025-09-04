@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Livewire\BaseSetup::class);
 use Carbon\Carbon;
 use FluxErp\Enums\TimeFrameEnum;
 use FluxErp\Livewire\Widgets\LeadsByReferralSource;

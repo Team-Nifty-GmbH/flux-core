@@ -8,7 +8,6 @@ use FluxErp\Providers\BindingServiceProvider;
 use FluxErp\Providers\MorphMapServiceProvider;
 use FluxErp\Providers\SanctumServiceProvider;
 use FluxErp\Providers\ViewServiceProvider;
-use Illuminate\Database\Eloquent\Model;
 use Laravel\Scout\ScoutServiceProvider;
 use Livewire\LivewireServiceProvider;
 use NotificationChannels\WebPush\WebPushServiceProvider;
@@ -28,12 +27,6 @@ use function Orchestra\Testbench\package_path;
 
 abstract class BrowserTestCase extends TestCase
 {
-    protected static string $guard = 'web';
-
-    public string $password = '#Password123';
-
-    public Model $user;
-
     public static function installAssets(): void
     {
         static::deleteDirectory(__DIR__ . '/../public/build/assets/');

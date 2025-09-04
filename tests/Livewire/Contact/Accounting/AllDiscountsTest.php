@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Livewire\BaseSetup::class);
 use FluxErp\Livewire\Contact\Accounting\AllDiscounts;
 use Livewire\Livewire;
 

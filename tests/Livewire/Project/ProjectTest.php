@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Livewire\BaseSetup::class);
 use FluxErp\Livewire\Project\Project as ProjectView;
 use FluxErp\Models\Project;
 use Livewire\Livewire;

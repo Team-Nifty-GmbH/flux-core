@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Livewire\BaseSetup::class);
 use FluxErp\Livewire\Auth\Login;
 use FluxErp\Mail\MagicLoginLink;
 use Illuminate\Support\Facades\Mail;

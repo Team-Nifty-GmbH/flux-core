@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Livewire\BaseSetup::class);
 use FluxErp\Livewire\Settings\UserEdit;
 use FluxErp\Models\Language;
 use FluxErp\Models\User;

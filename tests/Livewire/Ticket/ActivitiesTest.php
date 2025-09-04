@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Livewire\BaseSetup::class);
 use FluxErp\Livewire\Ticket\Activities;
 use FluxErp\Models\Ticket;
 use Livewire\Livewire;

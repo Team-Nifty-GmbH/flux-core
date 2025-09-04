@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Livewire\BaseSetup::class);
 use FluxErp\Livewire\Widgets\MyResponsibleTasks;
 use Livewire\Livewire;
 

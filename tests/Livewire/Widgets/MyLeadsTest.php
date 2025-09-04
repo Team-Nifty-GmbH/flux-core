@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Livewire\BaseSetup::class);
 use FluxErp\Livewire\Widgets\MyLeads;
 use FluxErp\Models\Lead;
 use FluxErp\Models\LeadState;

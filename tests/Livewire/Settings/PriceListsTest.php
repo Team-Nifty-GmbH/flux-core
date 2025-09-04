@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Livewire\BaseSetup::class);
 use FluxErp\Livewire\Forms\PriceListForm;
 use FluxErp\Livewire\Settings\PriceLists;
 use FluxErp\Models\PriceList;

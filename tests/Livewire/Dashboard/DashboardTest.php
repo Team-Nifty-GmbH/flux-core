@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Livewire\BaseSetup::class);
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Models\Permission;
 use FluxErp\Models\User;

@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Livewire\BaseSetup::class);
 use FluxErp\Livewire\Task\Task as TaskView;
 use FluxErp\Models\Task;
 use Livewire\Livewire;

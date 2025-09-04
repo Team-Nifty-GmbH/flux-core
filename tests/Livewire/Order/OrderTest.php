@@ -1,6 +1,5 @@
 <?php
 
-uses(FluxErp\Tests\Livewire\BaseSetup::class);
 use FluxErp\Actions\ContactBankConnection\CalculateContactBankConnectionBalance;
 use FluxErp\Enums\CreditAccountPostingEnum;
 use FluxErp\Enums\OrderTypeEnum;
