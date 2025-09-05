@@ -43,15 +43,58 @@
                     <x-flux::table.cell
                         x-html="window.formatters.coloredMoney(order.total_gross_price)"
                     ></x-flux::table.cell>
-                    <x-flux::table.cell
-                        x-html="window.formatters.coloredMoney(order.balance)"
-                    ></x-flux::table.cell>
                     <x-flux::table.cell>
-                        <x-number
-                            x-model="order.amount"
-                            step="0.01"
-                            class="w-24"
-                        />
+                        <div>
+                            <span
+                                x-html="window.formatters.coloredMoney(order.balance)"
+                            ></span>
+                            <div
+                                x-show="order.balance_due_discount"
+                                class="text-xs text-gray-500"
+                            >
+                                <span
+                                    x-html="window.formatters.coloredMoney(order.balance_due_discount)"
+                                ></span>
+                                <span
+                                    x-show="order.payment_discount_target_date"
+                                >
+                                    (
+                                    <span
+                                        x-text="
+                                            window.formatters.percentage(order.payment_discount_percent) +
+                                                ' {{ __('until') }} ' +
+                                                window.formatters.date(order.payment_discount_target_date)
+                                        "
+                                    ></span>
+                                    )
+                                </span>
+                            </div>
+                        </div>
+                    </x-flux::table.cell>
+                    <x-flux::table.cell>
+                        <div class="space-y-2">
+                            <x-number
+                                x-model="order.amount"
+                                step="0.01"
+                                class="w-24"
+                            />
+                            <div class="flex flex-col gap-1">
+                                <x-button
+                                    x-show="order.balance_due_discount && order.payment_discount_percent && parseFloat(order.amount) !== Math.abs(parseFloat(order.balance_due_discount))"
+                                    wire:click="applyDiscount(order.id)"
+                                    xs
+                                    color="primary"
+                                    :text="__('Apply Discount Amount')"
+                                />
+                                <x-button
+                                    x-show="parseFloat(order.amount) !== Math.abs(parseFloat(order.balance))"
+                                    wire:click="applyFullBalance(order.id)"
+                                    xs
+                                    color="secondary"
+                                    :text="__('Apply Balance Amount')"
+                                />
+                            </div>
+                        </div>
                     </x-flux::table.cell>
                     <x-flux::table.cell>
                         <x-button

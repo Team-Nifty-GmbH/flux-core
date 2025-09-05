@@ -60,9 +60,12 @@ class PaymentRunPreview extends Component
                 'address_name' => $order->addressInvoice?->name,
                 'total_gross_price' => $order->total_gross_price,
                 'balance' => $order->balance,
+                'balance_due_discount' => $order->balance_due_discount,
+                'payment_discount_target_date' => $order->payment_discount_target_date?->format('Y-m-d'),
+                'payment_discount_percent' => $order->payment_discount_percent,
                 'currency_iso' => $order->currency?->iso
                     ?? resolve_static(Currency::class, 'default')->iso,
-                'amount' => bcabs(bcround($order->balance, 2)),
+                'amount' => $this->calculateAmount($order),
                 'multiplier' => bccomp($order->balance, 0),
                 'type' => $order->contactBankConnection?->sepaMandates->last()?->sepa_mandate_type_enum ?? null,
             ])
@@ -72,6 +75,30 @@ class PaymentRunPreview extends Component
     public function render(): View
     {
         return view('flux::livewire.accounting.payment-run-preview');
+    }
+
+    #[Renderless]
+    public function applyDiscount(int $orderId): void
+    {
+        if (! data_get($this->orders, $orderId)
+            || ! data_get($this->orders[$orderId], 'balance_due_discount')
+            || ! data_get($this->orders[$orderId], 'payment_discount_percent')) {
+            return;
+        }
+
+        data_set($this->orders[$orderId], 'amount', bcabs(bcround($this->orders[$orderId]['balance_due_discount'], 2)));
+        data_set($this->orders[$orderId], 'uses_discount', true);
+    }
+
+    #[Renderless]
+    public function applyFullBalance(int $orderId): void
+    {
+        if (! data_get($this->orders, $orderId)) {
+            return;
+        }
+
+        data_set($this->orders[$orderId], 'amount', bcabs(bcround($this->orders[$orderId]['balance'], 2)));
+        data_set($this->orders[$orderId], 'uses_discount', false);
     }
 
     #[Renderless]
@@ -141,5 +168,19 @@ class PaymentRunPreview extends Component
         if (! $this->orders) {
             $this->redirectRoute('accounting.money-transfer', navigate: true);
         }
+    }
+
+    protected function calculateAmount(Order $order)
+    {
+        $amount = $order->balance;
+
+        if ($order->payment_discount_target_date
+            && $order->payment_discount_target_date->greaterThanOrEqualTo(now()->endOfDay())
+            && $order->balance_due_discount
+        ) {
+            $amount = $order->balance_due_discount;
+        }
+
+        return bcabs(bcround($amount, 2));
     }
 }

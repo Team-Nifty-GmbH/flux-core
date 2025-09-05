@@ -148,6 +148,45 @@
                     </div>
                 </div>
                 @show
+                @section('payment-terms')
+                <div class="flex w-full gap-1.5">
+                    <div
+                        class="flex-1"
+                        x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'"
+                    >
+                        <x-date
+                            x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
+                            without-time
+                            wire:model="purchaseInvoiceForm.payment_target_date"
+                            :label="__('Payment Target Date')"
+                        />
+                    </div>
+                    <div
+                        class="flex-1"
+                        x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'"
+                    >
+                        <x-date
+                            x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
+                            without-time
+                            wire:model="purchaseInvoiceForm.payment_discount_target_date"
+                            :label="__('Payment Discount Target Date')"
+                        />
+                    </div>
+                    <div
+                        class="flex-1"
+                        x-bind:class="$wire.purchaseInvoiceForm.order_id && 'pointer-events-none'"
+                    >
+                        <x-number
+                            x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
+                            wire:model="purchaseInvoiceForm.payment_discount_percent"
+                            step="0.01"
+                            min="0"
+                            max="100"
+                            :label="__('Payment Discount Percent')"
+                        />
+                    </div>
+                </div>
+                @show
                 @section('invoice-data')
                 <div class="flex w-full gap-1.5">
                     <x-input

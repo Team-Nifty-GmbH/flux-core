@@ -1010,6 +1010,30 @@
                                     ></span>
                                 </div>
                             </div>
+                            <div
+                                x-cloak
+                                x-show="$wire.order.balance_due_discount"
+                                class="flex justify-between bg-gray-50 p-2.5 opacity-50 dark:bg-secondary-700"
+                            >
+                                <div>
+                                    {{ __('Balance Due Discount') }}
+                                    <span
+                                        x-show="$wire.order.payment_discount_target_date"
+                                        class="text-xs text-gray-500 dark:text-gray-400"
+                                    >
+                                        ({{ __('until') }}
+                                        <span
+                                            x-text="window.formatters.date($wire.order.payment_discount_target_date)"
+                                        ></span>
+                                        )
+                                    </span>
+                                </div>
+                                <div>
+                                    <span
+                                        x-html="formatters.coloredMoney($wire.order.balance_due_discount ?? 0)"
+                                    ></span>
+                                </div>
+                            </div>
                             @section('content.right.summary.profit')
                             <hr />
                             <div class="flex justify-between p-2.5">
