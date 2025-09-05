@@ -62,15 +62,8 @@ beforeEach(function (): void {
         'price_list_id' => $this->priceList->id,
     ]);
 
-    $currency = Currency::factory()->create([
-        'name' => 'Euro',
-        'iso' => 'EUR',
-        'symbol' => '€',
-        'is_default' => true,
-    ]);
-
     $this->order = Order::factory()->create([
-        'currency_id' => $currency->id,
+        'currency_id' => Currency::default()->getKey(),
         'client_id' => $this->dbClient->getKey(),
         'language_id' => $language->id,
         'order_type_id' => $this->orderType->id,
