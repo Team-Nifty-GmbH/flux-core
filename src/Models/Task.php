@@ -133,18 +133,18 @@ class Task extends FluxModel implements Calendarable, HasMedia, InteractsWithDat
                 $task->progress = 1;
             }
 
-            if ($task->start_date && $task->start_time) {
-                $task->start_timestamp = $task->start_date
-                    ->copy()
-                    ->setTimeFromTimeString($task->start_time);
+            if ($task->start_date) {
+                $task->start_timestamp = $task->start_time
+                    ? $task->start_date->copy()->setTimeFromTimeString($task->start_time)
+                    : $task->start_date->copy()->startOfDay();
             } else {
                 $task->start_timestamp = null;
             }
 
-            if ($task->due_date && $task->due_time) {
-                $task->due_timestamp = $task->due_date
-                    ->copy()
-                    ->setTimeFromTimeString($task->due_time);
+            if ($task->due_date) {
+                $task->due_timestamp = $task->due_time
+                    ? $task->due_date->copy()->setTimeFromTimeString($task->due_time)
+                    : $task->due_date->copy()->endOfDay();
             } else {
                 $task->due_timestamp = null;
             }

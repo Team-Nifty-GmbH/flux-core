@@ -78,13 +78,15 @@ class TaskForm extends FluxForm
         $values['due_date'] = ! is_null($values['due_date'] ?? null) ?
             Carbon::parse($values['due_date'])->toDateString() : null;
 
-        $values['start_time'] = ! is_null($values['start_time'] ?? null)
-            ? Carbon::parse($values['start_time'])->format('H:i')
-            : null;
+        $values['start_time'] = ! is_null($values['due_date'] ?? null) ?
+            Carbon::createFromFormat('H:i:s', $values['start_time'], 'UTC')
+                ->setTimezone(auth()->user()->timezone)
+                ->format('H:i') : null;
 
-        $values['due_time'] = ! is_null($values['due_time'] ?? null)
-            ? Carbon::parse($values['due_time'])->format('H:i')
-            : null;
+        $values['due_time'] = ! is_null($values['due_date'] ?? null) ?
+            Carbon::createFromFormat('H:i:s', $values['due_time'], 'UTC')
+                ->setTimezone(auth()->user()->timezone)
+                ->format('H:i') : null;
 
         parent::fill($values);
     }
@@ -102,6 +104,18 @@ class TaskForm extends FluxForm
     {
         if (! is_null($this->time_budget) && preg_match('/[0-9]*/', $this->time_budget)) {
             $this->time_budget = $this->time_budget . ':00';
+        }
+
+        if (! is_null($this->start_time)) {
+            $this->start_time = Carbon::createFromFormat('H:i', $this->start_time, auth()->user()->timezone)
+                ->utc()
+                ->format('H:i');
+        }
+
+        if (! is_null($this->due_time)) {
+            $this->due_time = Carbon::createFromFormat('H:i', $this->due_time, auth()->user()->timezone)
+                ->utc()
+                ->format('H:i');
         }
 
         if (is_null($data)) {
