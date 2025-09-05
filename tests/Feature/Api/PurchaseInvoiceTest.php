@@ -402,7 +402,7 @@ it('can list purchase invoices', function (): void {
 
     expect($purchaseInvoices)
         ->not->toBeEmpty()
-        ->toHaveCount(greaterThanOrEqual(3));
+        ->and(count($purchaseInvoices))->toBeGreaterThanOrEqual(3);
 
     expect($purchaseInvoices[0])->toHaveProperty('id');
 
