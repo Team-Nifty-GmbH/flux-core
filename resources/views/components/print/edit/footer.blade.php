@@ -197,7 +197,9 @@
                 x-ref="footer-additional-snippet"
             >
                 <div
-                    x-on:mousedown="printStore.editFooter ?  footerStore.onMouseDown($event,$el.id,'temporary-snippet') : null"
+                    x-data="snippetEditor(footerStore,$el.id)"
+                    x-init="onInit"
+                    x-on:mousedown="printStore.editFooter && footerStore.snippetIdEdited === null ? footerStore.onMouseDown($event,$el.id,'temporary-snippet') : null"
                     id="footer-snippet-placeholder"
                     data-type="resizable"
                     draggable="false"
@@ -211,6 +213,22 @@
                         draggable="false"
                         x-cloak x-show="printStore.editFooter" class="relative w-full h-full">
                         <x-icon
+                            x-cloak
+                            x-show="footerStore.snippetIdEdited === null"
+                            dragable="false"
+                            x-on:mousedown="toggleEditor()"
+                            name="pencil" class="absolute cursor-pointer right-0 top-0 h-4 w-4 rounded-full"></x-icon>
+                        <template x-if="footerStore.snippetIdEdited === elementObj.id">
+                            <x-flux::editor
+                                class="absolute top-0 left-0 w-full p-0 text-left"
+                                x-modelable="content"
+                                x-model="text"
+                                :tooltip-dropdown="true"
+                                :transparent="true" />
+                        </template>
+                        <x-icon
+                            x-cloak
+                            x-show="footerStore.snippetIdEdited === null"
                             dragable="false"
                             x-on:mousedown.stop="footerStore.onMouseDownResize($event, $el.parentElement.parentElement.id,'temporary-snippet')"
                             name="arrows-pointing-out" class="absolute cursor-pointer right-0 bottom-0 h-4 w-4 rounded-full"></x-icon>

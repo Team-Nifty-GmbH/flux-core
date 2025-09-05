@@ -22,6 +22,7 @@ export function intersectionHandlerFactory($store) {
     };
 }
 
+// TODO: maybe to change to requestAnimationFrame?
 export function nextTick() {
     return Promise.resolve();
 }

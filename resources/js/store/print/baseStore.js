@@ -15,6 +15,7 @@ export default function () {
             startX: null,
             startY: null,
         },
+        snippetIdEdited: null,
         isImgResizeClicked: false,
         isSnippetResizeClicked: false,
         visibleElements: [],
@@ -26,7 +27,9 @@ export default function () {
         _component: null,
         _startSizeOfSelectedElement() {
             if (this._selectedElement.id === null) {
-                throw new Error('element is not selected');
+                throw new Error(
+                    'Element not selected - component _startSizeOfSelectedElement',
+                );
             }
 
             return {
@@ -37,6 +40,9 @@ export default function () {
                     this._selectedElement.ref.width ??
                     this._selectedElement.ref.size.width,
             };
+        },
+        setSnippetIdEdited(id) {
+            this.snippetIdEdited = id;
         },
         onInit(pxPerCm, pyPerCm) {
             if (typeof pyPerCm === 'number' && pyPerCm > 0) {
