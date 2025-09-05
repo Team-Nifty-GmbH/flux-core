@@ -11,10 +11,10 @@ return new class() extends Migration
         Schema::create('contact_industry', function (Blueprint $table): void {
             $table->id('pivot_id');
             $table->foreignId('contact_id')
-                ->constrained()
+                ->constrained('contacts')
                 ->cascadeOnDelete();
             $table->foreignId('industry_id')
-                ->constrained()
+                ->constrained('industries')
                 ->cascadeOnDelete();
         });
     }
