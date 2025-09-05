@@ -45,6 +45,8 @@ class PurchaseInvoice extends FluxModel implements HasMedia, HasMediaForeignKey
     {
         return [
             'invoice_date' => 'date',
+            'payment_target_date' => 'date',
+            'payment_discount_target_date' => 'date',
             'is_net' => 'boolean',
             'total_gross_price' => 'decimal:2',
         ];

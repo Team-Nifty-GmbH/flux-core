@@ -1,11 +1,14 @@
 <div
     class="flex flex-col gap-4"
     x-data="{
-        baseDate(daysToAdd) {
-            let result = $wire.$parent.order.invoice_date
-                ? new Date($wire.$parent.order.invoice_date)
-                : new Date()
-            result.setDate(result.getDate() + daysToAdd)
+        calculateReminderDate(days) {
+            if (! $wire.$parent.order.payment_target_date) {
+                return ''
+            }
+
+            let result = new Date($wire.$parent.order.payment_target_date)
+            result.setDate(result.getDate() + days)
+
             return '(' + window.formatters.date(result) + ')'
         },
     }"
@@ -19,7 +22,9 @@
                 >
                     <span>{{ __('Payment target') }}</span>
                     <span
-                        x-text="baseDate($wire.$parent.order.payment_target)"
+                        x-show="$wire.$parent.order.payment_target_date"
+                        x-text="'(' + window.formatters.date($wire.$parent.order.payment_target_date) + ')'"
+                        class="text-xs"
                     ></span>
                 </div>
                 <x-number
@@ -34,7 +39,13 @@
                 >
                     <span>{{ __('Payment Discount Target') }}</span>
                     <span
-                        x-text="baseDate($wire.$parent.order.payment_discount_target)"
+                        x-show="$wire.$parent.order.payment_discount_target_date"
+                        x-text="
+                            '(' +
+                                window.formatters.date($wire.$parent.order.payment_discount_target_date) +
+                                ')'
+                        "
+                        class="text-xs"
                     ></span>
                 </div>
                 <x-number
@@ -47,7 +58,7 @@
                 <div
                     class="block text-sm font-medium text-gray-700 dark:text-gray-400"
                 >
-                    <span>{{ __('Payment Discount Percentage') }}</span>
+                    <span>{{ __('Payment Discount Percent') }}</span>
                 </div>
                 <x-number
                     step="0.01"
@@ -61,12 +72,7 @@
                 >
                     <span>{{ __('Payment Reminder Days 1') }}</span>
                     <span
-                        x-text="
-                            baseDate(
-                                $wire.$parent.order.payment_reminder_days_1 +
-                                    $wire.$parent.order.payment_target,
-                            )
-                        "
+                        x-text="calculateReminderDate($wire.$parent.order.payment_reminder_days_1)"
                     ></span>
                 </div>
                 <x-number
@@ -82,13 +88,12 @@
                     <span>{{ __('Payment Reminder Days 2') }}</span>
                     <span
                         x-text="
-                            baseDate(
-                                $wire.$parent.order.payment_reminder_days_2 +
-                                    $wire.$parent.order.payment_target +
-                                    $wire.$parent.order.payment_reminder_days_1,
+                            calculateReminderDate(
+                                $wire.$parent.order.payment_reminder_days_1 +
+                                    $wire.$parent.order.payment_reminder_days_2,
                             )
                         "
-                    />
+                    ></span>
                 </div>
                 <x-number
                     step="1"
@@ -103,14 +108,13 @@
                     <span>{{ __('Payment Reminder Days 3') }}</span>
                     <span
                         x-text="
-                            baseDate(
-                                $wire.$parent.order.payment_reminder_days_2 +
-                                    $wire.$parent.order.payment_target +
-                                    $wire.$parent.order.payment_reminder_days_1 +
-                                    $wire.$parent.order.payment_reminder_days_2,
+                            calculateReminderDate(
+                                $wire.$parent.order.payment_reminder_days_1 +
+                                    $wire.$parent.order.payment_reminder_days_2 +
+                                    $wire.$parent.order.payment_reminder_days_3,
                             )
                         "
-                    />
+                    ></span>
                 </div>
                 <x-number
                     step="1"

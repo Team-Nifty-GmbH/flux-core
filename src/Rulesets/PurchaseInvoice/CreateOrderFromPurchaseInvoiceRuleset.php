@@ -80,6 +80,12 @@ class CreateOrderFromPurchaseInvoiceRuleset extends FluxRuleset
             ],
             'invoice_number' => 'required|string|max:255',
             'invoice_date' => 'required|date',
+            'payment_target_date' => 'nullable|date',
+            'payment_discount_target_date' => 'nullable|date',
+            'payment_discount_percent' => [
+                'nullable',
+                app(Numeric::class, ['min' => 0, 'max' => 1]),
+            ],
             'total_gross_price' => [
                 'required',
                 app(Numeric::class, ['min' => 0]),
