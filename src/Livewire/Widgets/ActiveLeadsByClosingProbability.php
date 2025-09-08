@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use FluxErp\Enums\ChartColorEnum;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\Support\Widgets\Charts\BarChart;
 use FluxErp\Models\Lead;
@@ -69,7 +70,7 @@ class ActiveLeadsByClosingProbability extends BarChart
 
         $this->series = [
             [
-                'color' => '#2E93fA',
+                'color' => ChartColorEnum::Blue->value,
                 'data' => [],
             ],
         ];
