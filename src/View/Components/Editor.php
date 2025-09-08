@@ -151,6 +151,7 @@ class Editor extends Component
         public bool $tooltipDropdown = false,
         public bool $transparent = false,
         public ?int $defaultFontSize = null,
+        public bool $fullHeight = false,
         public array $availableFontSizes = [
             12,
             14,

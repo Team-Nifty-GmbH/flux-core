@@ -3,10 +3,13 @@
 ])
 
 <div>
-    <div class="mb-1">
+    <div @if(!$tooltipDropdown) class="mb-1" @endif>
         <x-label :text="$label ?? ''" />
     </div>
     <div
+        @if($fullHeight)
+        class="h-full"
+        @endif
         @if ($attributes->has("x-modelable"))
             x-modelable="{{ $attributes->get("x-modelable") }}"
         @else
@@ -32,7 +35,7 @@
                     }}
                 @endif
             )"
-        x-init="initTextArea('{{ $id }}',$refs['editor-{{ $id }}'], @json($transparent), @json($tooltipDropdown), @json($defaultFontSize))"
+        x-init="initTextArea('{{ $id }}',$refs['editor-{{ $id }}'], @json($transparent), @json($tooltipDropdown), @json($defaultFontSize), @json($fullHeight))"
         {{ $attributes->whereDoesntStartWith("wire:model") }}
         wire:ignore
     >

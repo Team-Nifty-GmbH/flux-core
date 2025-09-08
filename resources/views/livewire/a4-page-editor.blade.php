@@ -59,7 +59,10 @@
             x-show="printStore.anyEdit"
             class="flex h-full flex-col justify-end"
         >
+            <x-flux::print.controll-panel.footer />
             <div
+                x-cloak
+                x-show="!printStore.anyEdiorOpen"
                 class="flex items-center justify-between">
                 <x-button
                     x-bind:disabled="printStore.loading"

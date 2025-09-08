@@ -87,6 +87,13 @@ export default function ($headerStore, $firstPageHeaderStore, $footerStore) {
                 this.editFirstPageHeader
             );
         },
+        get anyEdiorOpen() {
+            return (
+                $headerStore.snippetEditorXData !== null ||
+                $firstPageHeaderStore.snippetEditorXData !== null ||
+                $footerStore.snippetEditorXData !== null
+            );
+        },
         // TODO: rename to onMouseDownMargin
         onMouseDown(e, side) {
             switch (side) {

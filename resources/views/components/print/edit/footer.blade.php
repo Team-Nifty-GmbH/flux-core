@@ -47,7 +47,13 @@
     </div>
     {{-- UI size of a snippet --}}
     {{-- UI snippet box name --}}
-
+    <template x-for="(box,index) in footerStore.snippetNames" :key="`${box.ref.id}-${index}`">
+        <div
+            :style="{'transform': `translate(${box.ref.position.x}px,${box.ref.position.y - 15}px)` }"
+            class="absolute left-0 top-0">
+            <div class="text-gray-400 text-[12px]" x-text="box.name"></div>
+        </div>
+    </template>
     {{-- UI snippet box name --}}
     <div
         x-ref="footer"
@@ -199,7 +205,7 @@
                 <div
                     x-data="snippetEditor(footerStore,$el.id)"
                     x-init="onInit"
-                    x-on:mousedown="printStore.editFooter && footerStore.snippetIdEdited === null ? footerStore.onMouseDown($event,$el.id,'temporary-snippet') : null"
+                    x-on:mousedown="printStore.editFooter && footerStore.snippetEditorXData === null ? footerStore.onMouseDown($event,$el.id,'temporary-snippet') : null"
                     id="footer-snippet-placeholder"
                     data-type="resizable"
                     draggable="false"
@@ -214,21 +220,29 @@
                         x-cloak x-show="printStore.editFooter" class="relative w-full h-full">
                         <x-icon
                             x-cloak
-                            x-show="footerStore.snippetIdEdited === null"
+                            x-show="footerStore.snippetEditorXData === null"
                             dragable="false"
                             x-on:mousedown="toggleEditor()"
-                            name="pencil" class="absolute cursor-pointer right-0 top-0 h-4 w-4 rounded-full"></x-icon>
-                        <template x-if="footerStore.snippetIdEdited === elementObj.id">
+                            name="pencil" class="absolute cursor-pointer right-0 top-0 h-4 w-4 rounded-full text-left"></x-icon>
+                        <template x-if="footerStore.snippetEditorXData?.elementObj.id === elementObj.id">
                             <x-flux::editor
-                                class="absolute top-0 left-0 w-full p-0 text-left"
+                                x-editable="footerStore.snippetEditorXData?.elementObj.id === elementObj.id"
+                                class="absolute top-0 left-0 w-full p-0"
                                 x-modelable="content"
                                 x-model="text"
+                                :full-height="true"
                                 :tooltip-dropdown="true"
                                 :transparent="true" />
                         </template>
+                        <div
+                            x-cloak
+                            x-show="footerStore.snippetEditorXData === null"
+                            class="text-left text-[12px] p-1"
+                            x-html="text">
+                        </div>
                         <x-icon
                             x-cloak
-                            x-show="footerStore.snippetIdEdited === null"
+                            x-show="footerStore.snippetEditorXData === null"
                             dragable="false"
                             x-on:mousedown.stop="footerStore.onMouseDownResize($event, $el.parentElement.parentElement.id,'temporary-snippet')"
                             name="arrows-pointing-out" class="absolute cursor-pointer right-0 bottom-0 h-4 w-4 rounded-full"></x-icon>

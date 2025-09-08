@@ -84,6 +84,7 @@
                 />
                 @canAction(\FluxErp\Actions\Media\DeleteMedia::class)
                 <x-button.circle
+                    x-bind:disabled="footerStore.snippetEditorXData !== null"
                     x-on:click="footerStore.deleteMedia(image.id)"
                     icon="trash"
                 />
@@ -98,6 +99,7 @@
                x-bind:src=image.src
             />
             <x-button.circle
+                x-bind:disabled="footerStore.snippetEditorXData !== null"
                 x-on:click="footerStore.deleteTemporaryMedia(image.id)"
                 icon="trash"
             />
@@ -127,11 +129,12 @@
     <div class="flex flex-col gap-4"
          :class="{'pb-4': footerStore.temporarySnippetBoxes.length > 0 || footerStore.visibleSnippetBoxes.length > 0 }"
     >
-    <template x-for="(snippet, index) in footerStore.temporarySnippetBoxes" :key="index">
+    <template x-for="(snippet, index) in footerStore.snippetNames" :key="index">
         <div class="flex items-center justify-between">
-            <div>Box</div>
+            <div class="text-gray-400 text-[12px]" x-text="snippet.name"></div>
             <x-button.circle
-                x-on:click="footerStore.deleteTemporarySnippet(snippet.id)"
+                x-bind:disabled="footerStore.snippetEditorXData !== null"
+                x-on:click="footerStore.deleteTemporarySnippet(snippet.ref.id)"
                 icon="trash"
             />
         </div>

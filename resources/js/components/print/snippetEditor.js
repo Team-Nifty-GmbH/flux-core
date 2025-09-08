@@ -13,7 +13,13 @@ export default function ($store, id) {
             }
         },
         toggleEditor() {
-            $store.setSnippetIdEdited(id);
+            $store.setSnippetEditorXDataRef(this);
+        },
+        saveText() {
+            this.elementObj.content = this.text;
+        },
+        resetContent() {
+            this.text = this.elementObj.content;
         },
     };
 }

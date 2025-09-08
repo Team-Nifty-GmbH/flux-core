@@ -15,7 +15,7 @@ export default function () {
             startX: null,
             startY: null,
         },
-        snippetIdEdited: null,
+        snippetEditorXData: null,
         isImgResizeClicked: false,
         isSnippetResizeClicked: false,
         visibleElements: [],
@@ -41,8 +41,8 @@ export default function () {
                     this._selectedElement.ref.size.width,
             };
         },
-        setSnippetIdEdited(id) {
-            this.snippetIdEdited = id;
+        setSnippetEditorXDataRef(ref) {
+            this.snippetEditorXData = ref;
         },
         onInit(pxPerCm, pyPerCm) {
             if (typeof pyPerCm === 'number' && pyPerCm > 0) {
@@ -222,6 +222,22 @@ export default function () {
                         element.positionBackInBound();
                     });
             }
+        },
+        saveText() {
+            if (this.snippetEditorXData !== null) {
+                this.snippetEditorXData.saveText();
+                this.snippetEditorXData = null;
+            } else {
+                throw new Error('No snippet editor reference found');
+            }
+        },
+        cancelEditor() {
+            if (this.snippetEditorXData !== null) {
+                this.snippetEditorXData.resetContent();
+            } else {
+                throw new Error('No snippet editor reference found');
+            }
+            this.snippetEditorXData = null;
         },
     };
 }

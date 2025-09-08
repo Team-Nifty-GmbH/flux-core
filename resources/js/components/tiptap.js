@@ -30,6 +30,7 @@ export default function (
                 isTransparent,
                 showTooltipDropdown,
                 initFontSize,
+                fullHeight,
             ) {
                 const popUp = this.$refs[`popWindow-${id}`];
                 const controlPanel = this.$refs[`controlPanel-${id}`];
@@ -70,7 +71,7 @@ export default function (
                             class: `${isTransparent ? 'bg-transparent' : 'dark:bg-secondary-800'} ${showTooltipDropdown ? 'rounded-md' : 'rounded-b-md'} \
                                 prose prose-sm dark:prose-invert max-w-full content-editable-placeholder dark:text-gray-50 placeholder-secondary-400 dark:placeholder-secondary-500 \
                                 border-secondary-300 focus:ring-primary-500 focus:border-primary-500 dark:border-secondary-600 form-input block \
-                                min-h-[85px] w-full border p-3 shadow-sm transition duration-100 ease-in-out focus:outline-none sm:text-sm`,
+                                ${fullHeight ? 'h-full' : 'min-h-[85px]'} w-full border p-3 shadow-sm transition duration-100 ease-in-out focus:outline-none sm:text-sm`,
                             style: `${initFontSize !== null ? `font-size:${initFontSize}px` : ''}`,
                         },
                     },

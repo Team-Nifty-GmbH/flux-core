@@ -204,6 +204,16 @@ export default function () {
         get isResizeOrScaleActive() {
             return this.isImgResizeClicked || this.isSnippetResizeClicked;
         },
+        get snippetNames() {
+            // TODO: add also saved snippet boxes - update index on last saved snippet box id
+            const temporaryNames = this.temporarySnippetBoxes.map(
+                (item, index) => {
+                    return { name: `box-${index + 1}`, ref: item };
+                },
+            );
+
+            return temporaryNames;
+        },
         toggleElement($ref, id) {
             if (this.footer === null) {
                 throw new Error(`Footer Elelement not initialized`);
