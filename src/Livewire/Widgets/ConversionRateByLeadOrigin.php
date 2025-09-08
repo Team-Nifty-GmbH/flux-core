@@ -2,6 +2,7 @@
 
 namespace FluxErp\Livewire\Widgets;
 
+use FluxErp\Enums\ChartColorEnum;
 use FluxErp\Livewire\Dashboard\Dashboard;
 use FluxErp\Livewire\Support\Widgets\Charts\BarChart;
 use FluxErp\Models\Lead;
@@ -50,15 +51,6 @@ class ConversionRateByLeadOrigin extends BarChart
     #[Renderless]
     public function calculateChart(): void
     {
-        // Default colors of apexcharts
-        $colors = [
-            '#2E93fA',
-            '#66DA26',
-            '#546E7A',
-            '#E91E63',
-            '#FF9800',
-        ];
-
         $start = $this->getStart()->toDateString();
         $end = $this->getEnd()->toDateString();
 
@@ -95,10 +87,9 @@ class ConversionRateByLeadOrigin extends BarChart
             ->limit(10)
             ->get();
 
-        $i = 0;
         $this->series = $LeadsWithWonOrLostLeadState
-            ->map(function (Model $LeadWithWonOrLostLeadState) use (&$i, $colors, $LeadsWithWonLeadState): array {
-                $conversionRate = round((float) bcdiv(
+            ->map(function (Model $LeadWithWonOrLostLeadState) use ($LeadsWithWonLeadState): array {
+                $conversionRate = round(bcdiv(
                     $LeadsWithWonLeadState->find($LeadWithWonOrLostLeadState->getKey())?->total ?? 0,
                     $LeadWithWonOrLostLeadState->total,
                     3
@@ -107,7 +98,7 @@ class ConversionRateByLeadOrigin extends BarChart
                 return [
                     'id' => $LeadWithWonOrLostLeadState->getKey(),
                     'name' => $LeadWithWonOrLostLeadState->name,
-                    'color' => $colors[$i++ % count($colors)],
+                    'color' => ChartColorEnum::forKey($LeadWithWonOrLostLeadState->getKey())->value,
                     'data' => [$conversionRate],
                 ];
             })
