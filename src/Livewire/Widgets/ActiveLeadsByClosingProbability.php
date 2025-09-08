@@ -79,7 +79,10 @@ class ActiveLeadsByClosingProbability extends BarChart
 
         foreach ($bins as $lower => $leadsInBin) {
             $upper = $lower + $granularity;
-            $label = "{$lower}%–{$upper}%";
+            $label = __(':lower%–:upper%', [
+                'lower' => $lower,
+                'upper' => $upper,
+            ]);
 
             $this->series[0]['data'][] = $leadsInBin->count();
             $this->xaxis['categories'][] = $label;
