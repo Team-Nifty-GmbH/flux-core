@@ -31,6 +31,8 @@ class PrintLayoutForm extends FluxForm
 
     public array $temporaryMedia = [];
 
+    public array $temporary_snippets = [];
+
 
     public function fill($values): void
     {

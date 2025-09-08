@@ -599,6 +599,40 @@ export default function () {
                         await item.upload(this.component);
                     }
                 }
+                if (this.temporarySnippetBoxes.length > 0) {
+                    const footerSnippets = this.temporarySnippetBoxes.map(
+                        (item) => {
+                            return {
+                                text: item.content,
+                                x: roundToOneDecimal(
+                                    item.position.x / this.pxPerCm,
+                                ),
+                                y: roundToOneDecimal(
+                                    item.position.y / this.pyPerCm,
+                                ),
+                                width:
+                                    item.width !== null
+                                        ? roundToOneDecimal(
+                                              item.width / this.pxPerCm,
+                                          )
+                                        : null,
+                                height:
+                                    item.height !== null
+                                        ? roundToOneDecimal(
+                                              item.height / this.pyPerCm,
+                                          )
+                                        : null,
+                            };
+                        },
+                    );
+                    console.log(footerSnippets);
+                    await this.component.set(
+                        'form.temporary_snippets',
+                        { footer: footerSnippets },
+                        false,
+                    );
+                }
+
                 return {
                     height: this._footerHeight,
                     elements: this.visibleElements.map((item) => {

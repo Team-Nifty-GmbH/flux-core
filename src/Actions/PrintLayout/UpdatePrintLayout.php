@@ -29,6 +29,8 @@ class UpdatePrintLayout extends FluxAction
 
         $temporaryMedia = $this->getData('temporaryMedia', []);
 
+        dd($this->getData('temporary_snippets.footer', []));
+
         // header
         $header = $this->getData('header');
         $snapshotDBHeaderMedia = $printLayout->header['media'] ?? [];

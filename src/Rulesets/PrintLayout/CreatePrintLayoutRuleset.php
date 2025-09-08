@@ -51,6 +51,7 @@ class CreatePrintLayoutRuleset extends FluxRuleset
             'footer' => 'nullable|array',
             'first_page_header' => 'nullable|array',
             'temporaryMedia' => 'array',
+            'temporary_snippets' => 'array',
         ];
     }
 }
