@@ -15,7 +15,6 @@ enum ChartColorEnum: string
 
     public static function forKey(string|int $key): self
     {
-
         return self::forIndex(abs(crc32((string) $key)));
     }
 

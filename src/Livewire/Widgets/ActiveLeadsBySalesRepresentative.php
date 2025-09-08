@@ -75,13 +75,12 @@ class ActiveLeadsBySalesRepresentative extends BarChart implements HasWidgetOpti
             ->orderByDesc('total')
             ->get();
 
-        $i = 0;
         $this->series = $leadCounts
-            ->map(function (User $user) use (&$i): array {
+            ->map(function (User $user): array {
                 return [
                     'id' => $user->getKey(),
                     'name' => $user->getLabel(),
-                    'color' => $user->color ?: ChartColorEnum::forIndex($i++)->hex(),
+                    'color' => $user->color ?: ChartColorEnum::forKey($user->getKey())->value,
                     'data' => [$user->total],
                 ];
             })
