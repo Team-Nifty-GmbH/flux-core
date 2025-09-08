@@ -102,7 +102,7 @@ beforeEach(function (): void {
     ];
 });
 
-it('can create purchase invoice with all fields', function (): void {
+test('can create purchase invoice with all fields', function (): void {
     $ledgerAccount = LedgerAccount::factory()->create([
         'client_id' => $this->dbClient->getKey(),
     ]);
@@ -182,7 +182,7 @@ it('can create purchase invoice with all fields', function (): void {
     expect(bcround($position->total_price, 2))->toEqual(bcround($purchaseInvoice['purchase_invoice_positions'][0]['total_price'], 2));
 });
 
-it('can create purchase invoice with minimum fields', function (): void {
+test('can create purchase invoice with minimum fields', function (): void {
     $this->user->givePermissionTo($this->permissions['create']);
     Sanctum::actingAs($this->user, ['user']);
 
@@ -213,7 +213,7 @@ it('can create purchase invoice with minimum fields', function (): void {
     expect($dbPurchaseInvoice->getUpdatedBy()->is($this->user))->toBeTrue();
 });
 
-it('validates required fields on creation', function (): void {
+test('validates required fields on creation', function (): void {
     $this->user->givePermissionTo($this->permissions['create']);
     Sanctum::actingAs($this->user, ['user']);
 
@@ -231,7 +231,7 @@ it('validates required fields on creation', function (): void {
         ]);
 });
 
-it('validates position fields', function (): void {
+test('validates position fields', function (): void {
     $this->user->givePermissionTo($this->permissions['create']);
     Sanctum::actingAs($this->user, ['user']);
 
@@ -255,7 +255,7 @@ it('validates position fields', function (): void {
         ]);
 });
 
-it('can delete purchase invoice', function (): void {
+test('can delete purchase invoice', function (): void {
     $this->user->givePermissionTo($this->permissions['delete']);
     Sanctum::actingAs($this->user, ['user']);
 
@@ -270,7 +270,7 @@ it('can delete purchase invoice', function (): void {
     expect($purchaseInvoice->getDeletedBy()->is($this->user))->toBeTrue();
 });
 
-it('returns 404 when deleting non-existent purchase invoice', function (): void {
+test('returns 404 when deleting non-existent purchase invoice', function (): void {
     $this->user->givePermissionTo($this->permissions['delete']);
     Sanctum::actingAs($this->user, ['user']);
 
@@ -280,7 +280,7 @@ it('returns 404 when deleting non-existent purchase invoice', function (): void 
     $response->assertNotFound();
 });
 
-it('converts purchase invoice to order with payment fields', function (): void {
+test('converts purchase invoice to order with payment fields', function (): void {
     ContactBankConnection::factory()->create([
         'contact_id' => $this->purchaseInvoices[0]->contact_id,
     ]);
@@ -324,7 +324,7 @@ it('converts purchase invoice to order with payment fields', function (): void {
     expect($dbOrder->payment_discount_target_date->toDateString())->toEqual($dbPurchaseInvoice->payment_discount_target_date->toDateString());
 });
 
-it('validates required fields when finishing purchase invoice', function (): void {
+test('validates required fields when finishing purchase invoice', function (): void {
     $this->purchaseInvoices[1]->update([
         'client_id' => null,
         'contact_id' => null,
@@ -348,7 +348,7 @@ it('validates required fields when finishing purchase invoice', function (): voi
         ]);
 });
 
-it('can get single purchase invoice', function (): void {
+test('can get single purchase invoice', function (): void {
     $this->purchaseInvoices[0]->refresh();
 
     $this->user->givePermissionTo($this->permissions['show']);
@@ -381,7 +381,7 @@ it('can get single purchase invoice', function (): void {
         ->toEqual(Carbon::parse($this->purchaseInvoices[0]->updated_at));
 });
 
-it('returns 404 when getting non-existent purchase invoice', function (): void {
+test('returns 404 when getting non-existent purchase invoice', function (): void {
     $this->user->givePermissionTo($this->permissions['show']);
     Sanctum::actingAs($this->user, ['user']);
 
@@ -390,7 +390,7 @@ it('returns 404 when getting non-existent purchase invoice', function (): void {
     $response->assertNotFound();
 });
 
-it('can list purchase invoices', function (): void {
+test('can list purchase invoices', function (): void {
     $this->user->givePermissionTo($this->permissions['index']);
     Sanctum::actingAs($this->user, ['user']);
 
@@ -433,7 +433,7 @@ it('can list purchase invoices', function (): void {
         ->toEqual(Carbon::parse($referencePurchaseInvoice->updated_at));
 });
 
-it('can update purchase invoice', function (): void {
+test('can update purchase invoice', function (): void {
     $purchaseInvoice = [
         'id' => $this->purchaseInvoices[0]->id,
         'contact_id' => $this->contacts->random()->id,
@@ -481,7 +481,7 @@ it('can update purchase invoice', function (): void {
     expect($dbPurchaseInvoice->getUpdatedBy()->is($this->user))->toBeTrue();
 });
 
-it('validates unique invoice number on update', function (): void {
+test('validates unique invoice number on update', function (): void {
     $this->user->givePermissionTo($this->permissions['update']);
     Sanctum::actingAs($this->user, ['user']);
 

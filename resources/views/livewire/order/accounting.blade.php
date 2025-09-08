@@ -6,10 +6,15 @@
                 return ''
             }
 
-            let result = new Date($wire.$parent.order.payment_target_date)
-            result.setDate(result.getDate() + days)
-
-            return '(' + window.formatters.date(result) + ')'
+            return (
+                '(' +
+                window.formatters.date(
+                    dayjs($wire.$parent.order.payment_target_date)
+                        .add(days, 'day')
+                        .toDate(),
+                ) +
+                ')'
+            )
         },
     }"
 >

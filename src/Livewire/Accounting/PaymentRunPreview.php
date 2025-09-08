@@ -78,27 +78,46 @@ class PaymentRunPreview extends Component
     }
 
     #[Renderless]
-    public function applyDiscount(int $orderId): void
-    {
-        if (! data_get($this->orders, $orderId)
-            || ! data_get($this->orders[$orderId], 'balance_due_discount')
-            || ! data_get($this->orders[$orderId], 'payment_discount_percent')) {
-            return;
-        }
-
-        data_set($this->orders[$orderId], 'amount', bcabs(bcround($this->orders[$orderId]['balance_due_discount'], 2)));
-        data_set($this->orders[$orderId], 'uses_discount', true);
-    }
-
-    #[Renderless]
-    public function applyFullBalance(int $orderId): void
+    public function applyBalance(int $orderId): void
     {
         if (! data_get($this->orders, $orderId)) {
             return;
         }
 
-        data_set($this->orders[$orderId], 'amount', bcabs(bcround($this->orders[$orderId]['balance'], 2)));
+        data_set(
+            $this->orders[$orderId],
+            'amount',
+            bcabs(
+                bcround(
+                    data_get($this->orders, $orderId . '.balance') ?? 0,
+                    2
+                )
+            )
+        );
         data_set($this->orders[$orderId], 'uses_discount', false);
+    }
+
+    #[Renderless]
+    public function applyDiscount(int $orderId): void
+    {
+        if (! data_get($this->orders, $orderId)
+            || ! data_get($this->orders, $orderId . '.balance_due_discount')
+            || ! data_get($this->orders, $orderId . '.payment_discount_percent')
+        ) {
+            return;
+        }
+
+        data_set(
+            $this->orders[$orderId],
+            'amount',
+            bcabs(
+                bcround(
+                    data_get($this->orders, $orderId . '.balance_due_discount'),
+                    2
+                )
+            )
+        );
+        data_set($this->orders[$orderId], 'uses_discount', true);
     }
 
     #[Renderless]
@@ -170,7 +189,7 @@ class PaymentRunPreview extends Component
         }
     }
 
-    protected function calculateAmount(Order $order)
+    protected function calculateAmount(Order $order): string
     {
         $amount = $order->balance;
 

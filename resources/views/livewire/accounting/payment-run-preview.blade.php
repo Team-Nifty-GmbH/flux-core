@@ -88,7 +88,7 @@
                                 />
                                 <x-button
                                     x-show="parseFloat(order.amount) !== Math.abs(parseFloat(order.balance))"
-                                    wire:click="applyFullBalance(order.id)"
+                                    wire:click="applyBalance(order.id)"
                                     xs
                                     color="secondary"
                                     :text="__('Apply Balance Amount')"

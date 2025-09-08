@@ -156,7 +156,6 @@
                     >
                         <x-date
                             x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
-                            without-time
                             wire:model="purchaseInvoiceForm.payment_target_date"
                             :label="__('Payment Target Date')"
                         />
@@ -167,7 +166,6 @@
                     >
                         <x-date
                             x-bind:readonly="$wire.purchaseInvoiceForm.order_id"
-                            without-time
                             wire:model="purchaseInvoiceForm.payment_discount_target_date"
                             :label="__('Payment Discount Target Date')"
                         />

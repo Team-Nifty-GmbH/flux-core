@@ -213,13 +213,13 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
             }
 
             if ($order->isDirty('invoice_date') || $order->isDirty('payment_target')) {
-                $order->payment_target_date = ($order->invoice_date && $order->payment_target)
+                $order->payment_target_date = ($order->invoice_date && ! is_null($order->payment_target))
                     ? $order->invoice_date->copy()->addDays($order->payment_target)
                     : null;
             }
 
             if ($order->isDirty('invoice_date') || $order->isDirty('payment_discount_target')) {
-                $order->payment_discount_target_date = ($order->invoice_date && $order->payment_discount_target)
+                $order->payment_discount_target_date = ($order->invoice_date && ! is_null($order->payment_discount_target))
                     ? $order->invoice_date->copy()->addDays($order->payment_discount_target)
                     : null;
             }
@@ -426,8 +426,10 @@ class Order extends FluxModel implements HasMedia, InteractsWithDataTables, IsSu
             && ! is_null($this->payment_discount_percent)
             && bccomp($this->payment_discount_percent, 0) > 0
         ) {
-            $discountAmount = bcmul($this->balance, $this->payment_discount_percent);
-            $this->balance_due_discount = bcsub($this->balance, $discountAmount);
+            $discountAmount = bcmul(bcabs($this->balance), $this->payment_discount_percent);
+            $this->balance_due_discount = bccomp($this->balance, 0) >= 0
+                ? bcsub($this->balance, $discountAmount)
+                : bcadd($this->balance, $discountAmount);
         } else {
             $this->balance_due_discount = null;
         }
